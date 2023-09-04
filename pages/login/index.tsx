@@ -1,10 +1,13 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { makeStyles } from '@codegouvfr/react-dsfr/tss';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 
 export default function Login() {
+	const { classes, cx } = useStyles();
+
 	return (
 		<div className={fr.cx('fr-container')}>
 			<Breadcrumb
@@ -17,6 +20,7 @@ export default function Login() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<Alert
+						className={fr.cx('fr-mb-16v')}
 						closable
 						description={
 							<>
@@ -35,17 +39,27 @@ export default function Login() {
 						title="Nouvel hébergement"
 					/>
 					<div
-						className={fr.cx(
-							'fr-grid-row',
-							'fr-grid-row--center',
-							'fr-py-16v',
-							'fr-my-16v'
+						className={cx(
+							classes.loginContainer,
+							fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--center',
+								'fr-py-16v',
+								'fr-mb-16v'
+							)
 						)}
 						style={{
 							backgroundColor: fr.colors.decisions.background.alt.grey.default
 						}}
 					>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-col-md-8',
+								'fr-px-4v',
+								'fr-px-md-0'
+							)}
+						>
 							<h4>Connexion</h4>
 							<h5>Se connecter avec son compte</h5>
 							<Input
@@ -76,3 +90,13 @@ export default function Login() {
 		</div>
 	);
 }
+
+const useStyles = makeStyles()(theme => ({
+	loginContainer: {
+		backgroundColor: theme.decisions.background.alt.grey.default,
+		[fr.breakpoints.down('md')]: {
+			marginLeft: `-${fr.spacing('4v')}`,
+			marginRight: `-${fr.spacing('4v')}`
+		}
+	}
+}));
