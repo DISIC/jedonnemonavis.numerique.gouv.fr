@@ -1,4 +1,4 @@
-import { PrismaClient, Procedure, ProcedureHeader, User } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 import { users } from './seeds/users';
 
 const prisma = new PrismaClient();
@@ -21,7 +21,7 @@ async function main() {
 	});
 
 	Promise.all(promises).then(responses => {
-		let log: { [key: string]: ProcedureHeader | Procedure | User } = {};
+		let log: { [key: string]: User } = {};
 		responses.forEach(r => {
 			if ('email' in r) log[`user ${r.email}`] = r;
 		});
