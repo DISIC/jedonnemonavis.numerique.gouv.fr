@@ -1,9 +1,9 @@
-import { fr } from "@codegouvfr/react-dsfr";
+import { fr } from '@codegouvfr/react-dsfr';
 
 export default function Home() {
-  return (
-    <div className={fr.cx("fr-container")}>
-      <p>Test</p>
-    </div>
-  );
+	return (
+		<div className={fr.cx('fr-container')}>
+			<p>Test</p>
+		</div>
+	);
 }
