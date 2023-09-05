@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
+import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
@@ -21,7 +22,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				target: '_self'
 			},
 			text: 'Connexion / Inscription'
-		}
+		},
+		headerFooterDisplayItem
 	];
 
 	return (
