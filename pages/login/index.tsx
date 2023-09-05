@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { makeStyles } from '@codegouvfr/react-dsfr/tss';
+import { tss } from 'tss-react/dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Input } from '@codegouvfr/react-dsfr/Input';
@@ -48,9 +48,6 @@ export default function Login() {
 								'fr-mb-16v'
 							)
 						)}
-						style={{
-							backgroundColor: fr.colors.decisions.background.alt.grey.default
-						}}
 					>
 						<div
 							className={fr.cx(
@@ -91,12 +88,15 @@ export default function Login() {
 	);
 }
 
-const useStyles = makeStyles()(theme => ({
-	loginContainer: {
-		backgroundColor: theme.decisions.background.alt.grey.default,
-		[fr.breakpoints.down('md')]: {
-			marginLeft: `-${fr.spacing('4v')}`,
-			marginRight: `-${fr.spacing('4v')}`
+const useStyles = tss
+	.withName(Login.name)
+	.withParams()
+	.create(() => ({
+		loginContainer: {
+			backgroundColor: fr.colors.decisions.background.alt.grey.default,
+			[fr.breakpoints.down('md')]: {
+				marginLeft: `-${fr.spacing('4v')}`,
+				marginRight: `-${fr.spacing('4v')}`
+			}
 		}
-	}
-}));
+	}));

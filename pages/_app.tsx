@@ -3,6 +3,8 @@ import { createNextDsfrIntegrationApi } from '@codegouvfr/react-dsfr/next-pagesd
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
+import { CacheProvider } from '@emotion/react';
+import createCache from '@emotion/cache';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -34,7 +36,15 @@ function App({ Component, pageProps }: AppProps) {
 		return <PublicLayout>{children}</PublicLayout>;
 	};
 
-	return getLayout(<Component {...pageProps} />);
+	const cache = createCache({
+		key: 'custom'
+	});
+
+	return getLayout(
+		<CacheProvider value={cache}>
+			<Component {...pageProps} />
+		</CacheProvider>
+	);
 }
 
 export default withDsfr(App);
