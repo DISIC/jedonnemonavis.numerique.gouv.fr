@@ -2,8 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Button } from '@codegouvfr/react-dsfr/Button';
+import { LoginForm } from '@/components/global/LoginForm';
 
 export default function Login() {
 	const { classes, cx } = useStyles();
@@ -57,29 +56,7 @@ export default function Login() {
 								'fr-px-md-0'
 							)}
 						>
-							<h4>Connexion</h4>
-							<h5>Se connecter avec son compte</h5>
-							<Input
-								hintText="Format attendu : nom@domaine.fr"
-								label="Adresse email"
-								state="default"
-								stateRelatedMessage="Text de validation / d'explication de l'erreur"
-							/>
-							<Button
-								style={{ width: '100%', justifyContent: 'center' }}
-								onClick={function noRefCheck() {}}
-							>
-								Continuer
-							</Button>
-							<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-							<h5>Vous n&apos;avez pas de compte ?</h5>
-							<Button
-								style={{ width: '100%', justifyContent: 'center' }}
-								onClick={function noRefCheck() {}}
-								priority="secondary"
-							>
-								Créer un compte
-							</Button>
+							<LoginForm />
 						</div>
 					</div>
 				</div>
