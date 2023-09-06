@@ -12,12 +12,14 @@ type FormCredentials = {
 };
 
 type FormErrors = {
+	emailEmpty: boolean;
 	emailFormat: boolean;
 	emailNotFound: boolean;
 	userInactive: boolean;
 };
 
 const defaultErrors = {
+	emailEmpty: false,
 	emailFormat: false,
 	emailNotFound: false,
 	userInactive: false
@@ -41,6 +43,7 @@ export const LoginForm = () => {
 	};
 
 	const getEmailErrorMessage = (): string => {
+		if (errors.emailEmpty) return 'Saisissez une adresse email.';
 		if (errors.emailFormat) return "Format de l'email incorrect.";
 		if (errors.emailNotFound)
 			return 'Aucun compte connu avec cette adresse e-mail.';
@@ -50,6 +53,11 @@ export const LoginForm = () => {
 	};
 
 	const checkEmail = () => {
+		if (!credentials.email) {
+			setErrors({ ...errors, emailEmpty: true });
+			return;
+		}
+
 		if (!isValidEmail(credentials.email)) {
 			setErrors({ ...errors, emailFormat: true });
 			return;
@@ -57,7 +65,6 @@ export const LoginForm = () => {
 
 		fetch(`/api/auth/check-email?email=${credentials.email}`)
 			.then(res => {
-				console.log('res : ', res);
 				switch (res.status) {
 					case 404:
 						setErrors({ ...errors, emailNotFound: true });
@@ -74,7 +81,7 @@ export const LoginForm = () => {
 				}
 			})
 			.catch(e => {
-				console.log('e : ', e);
+				console.error('error : ', e);
 			});
 	};
 
@@ -85,6 +92,7 @@ export const LoginForm = () => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
+					checkEmail();
 				}}
 			>
 				<Input
@@ -99,11 +107,7 @@ export const LoginForm = () => {
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={getEmailErrorMessage()}
 				/>
-				<Button
-					type="submit"
-					className={cx(classes.button)}
-					onClick={checkEmail}
-				>
+				<Button type="submit" className={cx(classes.button)}>
 					Continuer
 				</Button>
 			</form>
