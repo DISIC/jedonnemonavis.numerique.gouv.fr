@@ -71,7 +71,8 @@ const useStyles = tss
 		blueBlock: {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 			width: '70%',
-			height: '100%',
+			height: '90%',
+			transform: imagePosition === 'left' ? 'skewY(-5deg)' : 'skewY(5deg)',
 			zIndex: -1,
 			position: 'absolute',
 			left: imagePosition === 'left' ? '30%' : '0',
@@ -96,7 +97,7 @@ const useStyles = tss
 			justifyContent: 'center'
 		},
 		iconContainer: {
-			marginBottom: '1.5rem',
+			...fr.spacing('margin', { bottom: '3w' }),
 			width: '3rem',
 			height: '3rem',
 			borderRadius: '50%',
