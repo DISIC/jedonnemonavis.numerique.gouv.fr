@@ -1,10 +1,12 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import Link from 'next/link';
-import { useState } from 'react';
 import { isValidEmail } from '@/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { signIn } from 'next-auth/react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 type FormCredentials = {
 	email: string;
@@ -31,8 +33,12 @@ export const LoginForm = () => {
 		password: ''
 	});
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
+	const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
+	const [showPassword, setShowPassword] = useState<boolean>(false);
 
-	const { classes, cx } = useStyles();
+	const passwordRef = useRef<HTMLInputElement | null>(null);
+
+	const { classes, cx } = useStyles({ passwordIncorrect });
 
 	const resetErrors = () => {
 		setErrors(defaultErrors);
@@ -76,7 +82,7 @@ export const LoginForm = () => {
 						// USER FROM OBSERVATOIRE FIRST LOGIN. GO TO OTP TUNNEL
 						break;
 					case 200:
-						// USER OK. GO TO PASSWORD
+						setShowPassword(true);
 						break;
 				}
 			})
@@ -85,6 +91,20 @@ export const LoginForm = () => {
 			});
 	};
 
+	const login = (): void => {
+		signIn('credentials', { ...credentials, redirect: false }).then(res => {
+			if (res?.error) {
+				if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
+			} else {
+				console.log('OK');
+			}
+		});
+	};
+
+	useEffect(() => {
+		if (showPassword) passwordRef?.current?.focus();
+	}, [showPassword]);
+
 	return (
 		<div>
 			<h4>Connexion</h4>
@@ -92,7 +112,8 @@ export const LoginForm = () => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
-					checkEmail();
+					if (showPassword) login();
+					else checkEmail();
 				}}
 			>
 				<Input
@@ -101,14 +122,34 @@ export const LoginForm = () => {
 					nativeInputProps={{
 						onChange: e => {
 							setCredentials({ ...credentials, email: e.target.value });
+							setShowPassword(false);
 							resetErrors();
 						}
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={getEmailErrorMessage()}
 				/>
+				{showPassword && (
+					<PasswordInput
+						label="Mot de passe"
+						className={cx(classes.password)}
+						nativeInputProps={{
+							ref: passwordRef,
+							onChange: e => {
+								setCredentials({ ...credentials, password: e.target.value });
+								setPasswordIncorrect(false);
+							}
+						}}
+						messages={
+							passwordIncorrect
+								? [{ message: 'Mot de passe incorrect.', severity: 'error' }]
+								: []
+						}
+						messagesHint=""
+					/>
+				)}
 				<Button type="submit" className={cx(classes.button)}>
-					Continuer
+					{showPassword ? 'Confirmer' : 'Continuer'}
 				</Button>
 			</form>
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
@@ -125,10 +166,13 @@ export const LoginForm = () => {
 
 const useStyles = tss
 	.withName(LoginForm.name)
-	.withParams()
-	.create(() => ({
+	.withParams<{ passwordIncorrect: boolean }>()
+	.create(({ passwordIncorrect }) => ({
 		button: {
 			width: '100%',
 			justifyContent: 'center'
+		},
+		password: {
+			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0
 		}
 	}));

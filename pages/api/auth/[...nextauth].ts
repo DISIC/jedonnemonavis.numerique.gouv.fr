@@ -9,9 +9,9 @@ const prisma = new PrismaClient();
 const options = {
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
-		signIn: '/administration/login',
-		signOut: '/administration/login',
-		error: '/administration/login' // Error code passed in query string as ?error=
+		signIn: '/login',
+		signOut: '/login',
+		error: '/login' // Error code passed in query string as ?error=
 	},
 	providers: [
 		CredentialsProvider({
