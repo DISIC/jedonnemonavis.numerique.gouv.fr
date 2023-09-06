@@ -5,6 +5,7 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -28,6 +29,8 @@ const defaultErrors = {
 };
 
 export const LoginForm = () => {
+	const router = useRouter();
+
 	const [credentials, setCredentials] = useState<FormCredentials>({
 		email: '',
 		password: ''
@@ -79,7 +82,7 @@ export const LoginForm = () => {
 						setErrors({ ...errors, userInactive: true });
 						break;
 					case 206:
-						// USER FROM OBSERVATOIRE FIRST LOGIN. GO TO OTP TUNNEL
+						router.push('login/otp');
 						break;
 					case 200:
 						setShowPassword(true);
@@ -96,7 +99,7 @@ export const LoginForm = () => {
 			if (res?.error) {
 				if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
 			} else {
-				console.log('OK');
+				alert('Connecté !');
 			}
 		});
 	};
@@ -124,7 +127,8 @@ export const LoginForm = () => {
 							setCredentials({ ...credentials, email: e.target.value });
 							setShowPassword(false);
 							resetErrors();
-						}
+						},
+						name: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={getEmailErrorMessage()}
