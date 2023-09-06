@@ -3,14 +3,14 @@ import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
 import HomeStepper from '@/components/home/HomeStepper';
 import HomeFeatureDisplay from '@/components/home/HomeFeatureDisplay';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement } from 'react';
 
 interface Feature {
 	icon: ReactElement<any, any>;
 	title: string;
 	description: string;
 	image: string;
-	imagePosition?: string;
+	imagePosition: 'left' | 'right';
 }
 
 export default function Home() {
@@ -76,21 +76,28 @@ export default function Home() {
 						)}
 					>
 						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-							<h1 className={cx(classes.headerTitle)}>
-								Comment suivre la satisfaction de vos usagers ?
-							</h1>
-							<p>
-								Avec l’outil Je donne mon avis, suivez-vous en temps réel la
-								satisfaction des usagers de vos services publics numériques.
-							</p>
+							<div className={cx(classes.titleContainer)}>
+								<h1 className={cx(classes.headerTitle)}>
+									Comment suivre la satisfaction de vos usagers ?
+								</h1>
+								<p>
+									Avec l’outil Je donne mon avis, suivez-vous en temps réel la
+									satisfaction des usagers de vos services publics numériques.
+								</p>
+							</div>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
+								classes.image
+							)}
+						>
 							<Image
 								className={cx(classes.headerImage)}
 								src={'/assets/header_home.png'}
 								alt=""
-								width={223}
-								height={456}
+								width={351}
+								height={584}
 							/>
 						</div>
 					</div>
@@ -106,16 +113,23 @@ const useStyles = tss
 	.withName(Home.name)
 	.withParams()
 	.create(() => ({
+		titleContainer: {
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'center',
+			height: '100%'
+		},
 		headerTitle: {
-			fontSize: '2.5rem',
-			lineHeight: '3.5rem',
-			fontWeight: 700,
-			color: '#000091',
+			color: fr.colors.decisions.text.title.blueFrance.default,
 			marginBottom: '1.5rem',
 			[fr.breakpoints.down('md')]: {
 				fontSize: '2rem',
 				lineHeight: '2.5rem'
 			}
+		},
+		image: {
+			display: 'flex',
+			justifyContent: 'flex-end'
 		},
 		headerImage: {
 			[fr.breakpoints.down('md')]: {

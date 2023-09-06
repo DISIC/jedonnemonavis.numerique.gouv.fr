@@ -1,6 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
-import { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import { tss } from 'tss-react';
 
 interface HFDProps {
@@ -8,7 +8,7 @@ interface HFDProps {
 	title: string;
 	description: string;
 	image: string;
-	imagePosition?: string;
+	imagePosition: 'left' | 'right';
 }
 
 const HomeFeatureDisplay = (props: HFDProps) => {
@@ -21,22 +21,11 @@ const HomeFeatureDisplay = (props: HFDProps) => {
 			<div className={cx(classes.blueBlock)} />
 			<section className={cx(classes.container, fr.cx('fr-container'))}>
 				<div
-					className={fr.cx(
-						'fr-grid-row',
-						'fr-grid-row--gutters',
-						'fr-grid-row--center'
+					className={cx(
+						fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--center'),
+						classes.grid
 					)}
 				>
-					{props.imagePosition === 'left' && (
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-6'),
-								classes.imageContainer
-							)}
-						>
-							<Image src={props.image} alt="" width={448} height={316} />
-						</div>
-					)}
 					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 						<div className={cx(classes.textContainer)}>
 							<div className={cx(classes.iconContainer)}>{props.icon}</div>
@@ -44,16 +33,14 @@ const HomeFeatureDisplay = (props: HFDProps) => {
 							<p>{props.description}</p>
 						</div>
 					</div>
-					{props.imagePosition === 'right' && (
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-6'),
-								classes.imageContainer
-							)}
-						>
-							<Image src={props.image} alt="" width={448} height={316} />
-						</div>
-					)}
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-6'),
+							classes.imageContainer
+						)}
+					>
+						<Image src={props.image} alt="" width={448} height={316} />
+					</div>
 				</div>
 			</section>
 		</div>
@@ -68,10 +55,12 @@ const useStyles = tss
 			position: 'relative'
 		},
 		container: {
-			marginTop: '4rem',
-			marginBottom: '4rem',
-			paddingTop: '4rem',
-			paddingBottom: '4rem',
+			...fr.spacing('margin', {
+				topBottom: '16v'
+			}),
+			...fr.spacing('padding', {
+				topBottom: '16v'
+			}),
 			h2: {
 				color: fr.colors.decisions.text.title.blueFrance.default
 			},
@@ -85,11 +74,20 @@ const useStyles = tss
 			height: '100%',
 			zIndex: -1,
 			position: 'absolute',
-			left: imagePosition === 'left' ? '30%' : '0'
+			left: imagePosition === 'left' ? '30%' : '0',
+			[fr.breakpoints.down('md')]: {
+				left: imagePosition === 'left' ? 100 : '0'
+			}
+		},
+		grid: {
+			flexDirection: imagePosition === 'left' ? 'row-reverse' : 'initial'
 		},
 		imageContainer: {
+			display: 'flex',
+			justifyContent: imagePosition === 'left' ? 'flex-start' : 'flex-end',
 			[fr.breakpoints.down('md')]: {
-				display: 'none'
+				justifyContent: 'center',
+				flexDirection: 'column'
 			}
 		},
 		textContainer: {
