@@ -1,10 +1,19 @@
 import { OTPForm } from '@/components/auth/OTPForm';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export default function OTP() {
+	const router = useRouter();
+	const { email } = router.query;
+
 	const { classes, cx } = useStyles();
+
+	useEffect(() => {
+		if (!email) router.push('/login');
+	}, [email]);
 
 	return (
 		<div className={fr.cx('fr-container')}>
@@ -50,7 +59,7 @@ export default function OTP() {
 								'fr-px-md-0'
 							)}
 						>
-							<OTPForm />
+							<OTPForm email={email as string} />
 						</div>
 					</div>
 				</div>

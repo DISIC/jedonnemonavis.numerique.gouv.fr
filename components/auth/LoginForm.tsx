@@ -82,7 +82,10 @@ export const LoginForm = () => {
 						setErrors({ ...errors, userInactive: true });
 						break;
 					case 206:
-						router.push('login/otp');
+						router.push({
+							pathname: 'login/otp',
+							query: { email: credentials.email }
+						});
 						break;
 					case 200:
 						setShowPassword(true);

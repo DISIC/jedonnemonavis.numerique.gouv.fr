@@ -3,9 +3,47 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
+export async function deleteUserOTP(id: string) {
+	await prisma.userOTP.delete({
+		where: {
+			id
+		}
+	});
+}
+
+export async function getUserOTP(email: string, otp: string) {
+	const userOTP = await prisma.userOTP.findUnique({
+		where: {
+			code: otp,
+			user: {
+				email: email
+			}
+		}
+	});
+	return userOTP;
+}
+
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	res.status(200).send;
+	const { otp, email } = req.query;
+
+	if (!otp || !email)
+		res.status(400).json({ message: 'Missing params in query (otp, email)' });
+
+	if (req.method === 'GET') {
+		const userOTP = await getUserOTP(email as string, otp as string);
+
+		if (!userOTP) res.status(404).json({ message: 'Invalid OTP' });
+		else {
+			const now = new Date();
+			if (now.getTime() > userOTP.expiration_date.getTime()) {
+				deleteUserOTP(userOTP.id);
+				res.status(400).json({ message: 'Expired OTP' });
+			} else {
+				res.status(200).json({ data: { id: userOTP.id } });
+			}
+		}
+	}
 }
