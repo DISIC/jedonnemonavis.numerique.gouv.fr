@@ -190,7 +190,7 @@ export default function Home() {
 			/>
 			<HomeQuestions questions={questions} />
 			<HomeActionButton
-				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-bous !"}
+				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-nous !"}
 				buttonStyle="secondary"
 				buttonText="Contacter notre équipe"
 			/>
