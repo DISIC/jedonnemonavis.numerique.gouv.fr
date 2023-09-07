@@ -1,5 +1,5 @@
 import { sendMail } from '@/utils/mailer';
-import { generateOTP, getOTPEmailHtml } from '@/utils/tools';
+import { generateRandomString, getOTPEmailHtml } from '@/utils/tools';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -22,7 +22,7 @@ export async function createOTP(user: User) {
 		}
 	});
 
-	const code = generateOTP();
+	const code = generateRandomString();
 	await prisma.userOTP.create({
 		data: {
 			user_id: user.id,
@@ -46,7 +46,8 @@ export default async function handler(
 ) {
 	const { email } = req.query;
 
-	if (!email) res.status(400).json({ message: 'Missing email in query' });
+	if (!email)
+		return res.status(400).json({ message: 'Missing email in query' });
 
 	if (req.method === 'GET') {
 		const user = await getUser(email as string);
@@ -54,11 +55,13 @@ export default async function handler(
 		if (!user) res.status(404).json({ message: 'User not found' });
 		else if (user.observatoire_account && !user.active) {
 			createOTP(user);
-			res.status(206).json({ message: 'User from observatoire not active' });
+			return res
+				.status(206)
+				.json({ message: 'User from observatoire not active' });
 		} else if (!user.active)
-			res.status(423).json({ message: "User isn't active" });
-		else res.status(200).json({ message: 'User found' });
+			return res.status(423).json({ message: "User isn't active" });
+		else return res.status(200).json({ message: 'User found' });
 	} else {
-		res.status(400).json({ message: 'Unsupported method' });
+		return res.status(400).json({ message: 'Unsupported method' });
 	}
 }

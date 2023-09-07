@@ -18,6 +18,7 @@ export default function Login() {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+					<h2 className={fr.cx('fr-mb-12v')}>Connexion</h2>
 					<Alert
 						className={fr.cx('fr-mb-16v')}
 						closable

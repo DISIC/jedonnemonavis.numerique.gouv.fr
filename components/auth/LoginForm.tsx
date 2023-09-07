@@ -163,7 +163,7 @@ export const LoginForm = () => {
 			<h5>Vous n&apos;avez pas de compte ?</h5>
 			<Link
 				className={cx(classes.button, fr.cx('fr-btn', 'fr-btn--secondary'))}
-				href="/signup"
+				href="/register"
 			>
 				Créer un compte
 			</Link>

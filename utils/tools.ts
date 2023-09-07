@@ -3,7 +3,7 @@ export function isValidEmail(email: string): boolean {
 	return emailRegex.test(email);
 }
 
-export function generateOTP(length: number = 8): string {
+export function generateRandomString(length: number = 8): string {
 	const characters =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	let otp = '';
@@ -48,6 +48,50 @@ export function getOTPEmailHtml(code: string) {
 					<p>
 						Ce code est valable pour les 15 prochaines minutes. Si vous n'avez pas demandé ce
 						code, veuillez ignorer cet e-mail.
+					</p>
+
+					<p>
+						Merci,<br/>
+						L'équipe je donne mon avis
+					</p>
+				</div>
+			</body>
+		</html>
+	`;
+}
+
+export function getRegisterEmailHtml(token: string) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/register/validate?${new URLSearchParams({ token })}`;
+
+	return `
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+					}
+					.container {
+						max-width: 600px;
+						margin: 0 auto;
+						padding: 20px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<p>Bonjour,</p>
+
+					<p>
+						Vous venez de créer un compte "Je donne mon avis". Afin de valider votre compte, veuillez cliquer sur le lien ci-dessous.
+					</p>
+
+					<a href="${link}" target="_blank">${link}</a>
+
+					<p>
+						Cette étape est obligatoire pour pouvoir vous connecter à votre compte. Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.
 					</p>
 
 					<p>

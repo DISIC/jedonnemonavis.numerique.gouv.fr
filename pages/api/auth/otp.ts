@@ -30,19 +30,21 @@ export default async function handler(
 	const { otp, email } = req.query;
 
 	if (!otp || !email)
-		res.status(400).json({ message: 'Missing params in query (otp, email)' });
+		return res
+			.status(400)
+			.json({ message: 'Missing params in query (otp, email)' });
 
 	if (req.method === 'GET') {
 		const userOTP = await getUserOTP(email as string, otp as string);
 
-		if (!userOTP) res.status(404).json({ message: 'Invalid OTP' });
+		if (!userOTP) return res.status(404).json({ message: 'Invalid OTP' });
 		else {
 			const now = new Date();
 			if (now.getTime() > userOTP.expiration_date.getTime()) {
 				deleteUserOTP(userOTP.id);
-				res.status(400).json({ message: 'Expired OTP' });
+				return res.status(400).json({ message: 'Expired OTP' });
 			} else {
-				res.status(200).json({ data: { id: userOTP.id } });
+				return res.status(200).json({ data: { id: userOTP.id } });
 			}
 		}
 	}
