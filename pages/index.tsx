@@ -7,6 +7,7 @@ import { ReactElement } from 'react';
 import HomePills from '@/components/home/HomePills';
 import HomeReferences from '@/components/home/HomeReferences';
 import HomeActionButton from '@/components/home/HomeActionButton';
+import HomeQuestions from '@/components/home/HomeQuestions';
 
 interface Feature {
 	icon: ReactElement<any, any>;
@@ -26,6 +27,11 @@ export interface Reference {
 	author: string;
 	job_title: string;
 	description: string;
+}
+
+export interface Question {
+	question: string;
+	answer: string;
 }
 
 export default function Home() {
@@ -99,6 +105,27 @@ export default function Home() {
 		}
 	];
 
+	const questions: Question[] = [
+		{
+			question: 'Comment installer le bouton Je donne mon avis ?',
+			answer:
+				'Il vous suffit de copier-coller une portion de code HTML dans votre site web. Vous pouvez ensuite le personnaliser à votre guise.'
+		},
+		{
+			question: 'Est-ce que l’outil Je donne mon avis est gratuit ?',
+			answer:
+				'Oui, l’outil Je donne mon avis est gratuit pour toutes les administrations publiques.'
+		},
+		{
+			question: 'Est-ce que l’outil Je donne mon avis est conforme au RGAA ?',
+			answer: 'Oui, l’outil Je donne mon avis est conforme au RGAA.'
+		},
+		{
+			question: 'Est-ce que l’outil Je donne mon avis est conforme au RGPD ?',
+			answer: 'Oui, l’outil Je donne mon avis est conforme au RGPD.'
+		}
+	];
+
 	const displayHomeFeature = () => {
 		return features.map((feature, index) => (
 			<HomeFeatureDisplay
@@ -156,7 +183,17 @@ export default function Home() {
 			{displayHomeFeature()}
 			<HomePills pills={pills} />
 			<HomeReferences references={references} />
-			<HomeActionButton />
+			<HomeActionButton
+				title={'Prêt à recueillir les avis des usagers ?'}
+				buttonStyle="primary"
+				buttonText="Commencer"
+			/>
+			<HomeQuestions questions={questions} />
+			<HomeActionButton
+				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-bous !"}
+				buttonStyle="secondary"
+				buttonText="Contacter notre équipe"
+			/>
 		</div>
 	);
 }

@@ -1,16 +1,23 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { text } from 'stream/consumers';
 import { tss } from 'tss-react/dsfr';
 
-const HomeActionButton = () => {
+interface HomeActionButtonProps {
+	title: string;
+	buttonText: string;
+	buttonStyle: 'primary' | 'secondary' | 'tertiary';
+}
+
+const HomeActionButton = (props: HomeActionButtonProps) => {
 	const { cx, classes } = useStyles();
 
 	return (
 		<section className={fr.cx('fr-container', 'fr-py-16v')}>
 			<div className={cx(classes.container)}>
-				<h2>Prêt à recueillir les avis des usagers</h2>
-				<Button className={fr.cx('fr-my-2v')}>Commencer</Button>
+				<h2>{props.title}</h2>
+				<Button className={cx(fr.cx('fr-my-2v'))} priority={props.buttonStyle}>
+					{props.buttonText}
+				</Button>
 			</div>
 		</section>
 	);
