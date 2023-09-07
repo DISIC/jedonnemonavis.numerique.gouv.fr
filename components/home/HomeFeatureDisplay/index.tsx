@@ -39,7 +39,13 @@ const HomeFeatureDisplay = (props: HFDProps) => {
 							classes.imageContainer
 						)}
 					>
-						<Image src={props.image} alt="" width={448} height={316} />
+						<Image
+							src={props.image}
+							alt=""
+							width={448}
+							height={316}
+							style={{ maxWidth: '100%' }}
+						/>
 					</div>
 				</div>
 			</section>
@@ -66,6 +72,11 @@ const useStyles = tss
 			},
 			i: {
 				color: fr.colors.decisions.text.title.blueFrance.default
+			},
+			[fr.breakpoints.down('md')]: {
+				...fr.spacing('margin', {
+					topBottom: '1v'
+				})
 			}
 		},
 		blueBlock: {
@@ -77,6 +88,7 @@ const useStyles = tss
 			position: 'absolute',
 			left: imagePosition === 'left' ? '30%' : '0',
 			[fr.breakpoints.down('md')]: {
+				display: 'none',
 				left: imagePosition === 'left' ? 100 : '0'
 			}
 		},

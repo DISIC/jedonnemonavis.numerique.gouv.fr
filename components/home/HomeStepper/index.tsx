@@ -68,9 +68,9 @@ const useStyles = tss
 		container: {
 			h2: {
 				color: fr.colors.decisions.text.title.blueFrance.default,
-				marginBottom: '3rem',
+				...fr.spacing('margin', { bottom: '6w' }),
 				[fr.breakpoints.down('md')]: {
-					marginBottom: '2rem'
+					...fr.spacing('margin', { bottom: '3w' })
 				}
 			}
 		},
@@ -83,7 +83,7 @@ const useStyles = tss
 			justifyContent: 'center',
 			alignItems: 'center',
 			[fr.breakpoints.down('md')]: {
-				marginBottom: '2rem'
+				...fr.spacing('margin', { bottom: '3w' })
 			}
 		},
 		numberContainer: {
@@ -91,7 +91,7 @@ const useStyles = tss
 			borderRadius: '50%',
 			width: '5rem',
 			height: '5rem',
-			marginBottom: '1.5rem',
+			...fr.spacing('margin', { bottom: '2w' }),
 			textAlign: 'center'
 		},
 		number: {

@@ -4,6 +4,9 @@ import Image from 'next/image';
 import HomeStepper from '@/components/home/HomeStepper';
 import HomeFeatureDisplay from '@/components/home/HomeFeatureDisplay';
 import { ReactElement } from 'react';
+import HomePills from '@/components/home/HomePills';
+import HomeReferences from '@/components/home/HomeReferences';
+import HomeActionButton from '@/components/home/HomeActionButton';
 
 interface Feature {
 	icon: ReactElement<any, any>;
@@ -11,6 +14,18 @@ interface Feature {
 	description: string;
 	image: string;
 	imagePosition: 'left' | 'right';
+}
+
+export interface Pill {
+	title: string;
+	description: string;
+}
+
+export interface Reference {
+	image_path: string;
+	author: string;
+	job_title: string;
+	description: string;
 }
 
 export default function Home() {
@@ -51,6 +66,39 @@ export default function Home() {
 		}
 	];
 
+	const pills: Pill[] = [
+		{
+			title: 'Gratuit',
+			description: 'Gratuit, concu pour les administrations publiques'
+		},
+		{
+			title: 'RGAA',
+			description: 'Accessible à toutes et tous, conforme au RGAA'
+		},
+		{
+			title: 'RGPD',
+			description: 'Respectueux de la vie privée, conforme au RGPD'
+		}
+	];
+
+	const references: Reference[] = [
+		{
+			image_path: '/assets/temoignage_1.jpeg',
+			description:
+				'« Le bouton je donne mon avis, que nous avons installé pour récolter les avis des usagers de la démarche de paiement des impôt en ligne, nous a fournis les pistes pour augmenter le taux de satisfaction de 20% en un an ! »',
+			author: 'Fabienne D.',
+			job_title: 'Responsable projet à la DGFIP'
+		},
+		{
+			image_path: '/assets/temoignage_2.jpeg',
+			description:
+				'« Cela nous a pris moins de 2h pour configurer et installer le bouton Je donne mon avis. Le code est extrèment simple et la procédure bien indiquée. »',
+			author: 'Mathilde P.',
+			job_title:
+				'Directrice technique au ministère des Solidarité et de la Santé'
+		}
+	];
+
 	const displayHomeFeature = () => {
 		return features.map((feature, index) => (
 			<HomeFeatureDisplay
@@ -67,6 +115,7 @@ export default function Home() {
 	return (
 		<div>
 			<section>
+				<div className={cx(classes.blueContainer)} />
 				<div className={fr.cx('fr-container')}>
 					<div
 						className={fr.cx(
@@ -105,6 +154,9 @@ export default function Home() {
 			</section>
 			<HomeStepper />
 			{displayHomeFeature()}
+			<HomePills pills={pills} />
+			<HomeReferences references={references} />
+			<HomeActionButton />
 		</div>
 	);
 }
@@ -118,6 +170,14 @@ const useStyles = tss
 			flexDirection: 'column',
 			justifyContent: 'center',
 			height: '100%'
+		},
+		blueContainer: {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			width: '100%',
+			height: '100%',
+			transform: 'translateY(-50%) skewY(-4deg)',
+			zIndex: -1,
+			position: 'absolute'
 		},
 		headerTitle: {
 			color: fr.colors.decisions.text.title.blueFrance.default,
