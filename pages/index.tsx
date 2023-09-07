@@ -2,41 +2,17 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
 import HomeStepper from '@/components/home/HomeStepper';
-import HomeFeatureDisplay from '@/components/home/HomeFeatureDisplay';
+import HomeFeatureDisplay, {
+	Feature
+} from '@/components/home/HomeFeatureDisplay';
 import { ReactElement } from 'react';
-import HomePills from '@/components/home/HomePills';
-import HomeReferences from '@/components/home/HomeReferences';
+import HomePills, { Pill } from '@/components/home/HomePills';
+import HomeReferences, { Reference } from '@/components/home/HomeReferences';
 import HomeActionButton from '@/components/home/HomeActionButton';
-import HomeQuestions from '@/components/home/HomeQuestions';
-
-interface Feature {
-	icon: ReactElement<any, any>;
-	title: string;
-	description: string;
-	image: string;
-	imagePosition: 'left' | 'right';
-}
-
-export interface Pill {
-	title: string;
-	description: string;
-}
-
-export interface Reference {
-	image_path: string;
-	author: string;
-	job_title: string;
-	description: string;
-}
-
-export interface Question {
-	question: string;
-	answer: string;
-}
+import HomeQuestions, { Question } from '@/components/home/HomeQuestions';
+import HomeHeader from '@/components/home/HomeHeader';
 
 export default function Home() {
-	const { classes, cx } = useStyles();
-
 	const features: Feature[] = [
 		{
 			icon: <i className={fr.cx('ri-award-line')} />,
@@ -141,44 +117,7 @@ export default function Home() {
 
 	return (
 		<div>
-			<section>
-				<div className={cx(classes.blueContainer)} />
-				<div className={fr.cx('fr-container')}>
-					<div
-						className={fr.cx(
-							'fr-py-16v',
-							'fr-grid-row',
-							'fr-grid-row--gutters'
-						)}
-					>
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-							<div className={cx(classes.titleContainer)}>
-								<h1 className={cx(classes.headerTitle)}>
-									Comment suivre la satisfaction de vos usagers ?
-								</h1>
-								<p>
-									Avec l’outil Je donne mon avis, suivez-vous en temps réel la
-									satisfaction des usagers de vos services publics numériques.
-								</p>
-							</div>
-						</div>
-						<div
-							className={cx(
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
-								classes.image
-							)}
-						>
-							<Image
-								className={cx(classes.headerImage)}
-								src={'/assets/header_home.png'}
-								alt=""
-								width={351}
-								height={584}
-							/>
-						</div>
-					</div>
-				</div>
-			</section>
+			<HomeHeader />
 			<HomeStepper />
 			{displayHomeFeature()}
 			<HomePills pills={pills} />
@@ -197,40 +136,3 @@ export default function Home() {
 		</div>
 	);
 }
-
-const useStyles = tss
-	.withName(Home.name)
-	.withParams()
-	.create(() => ({
-		titleContainer: {
-			display: 'flex',
-			flexDirection: 'column',
-			justifyContent: 'center',
-			height: '100%'
-		},
-		blueContainer: {
-			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-			width: '100%',
-			height: '100%',
-			transform: 'translateY(-50%) skewY(-4deg)',
-			zIndex: -1,
-			position: 'absolute'
-		},
-		headerTitle: {
-			color: fr.colors.decisions.text.title.blueFrance.default,
-			marginBottom: '1.5rem',
-			[fr.breakpoints.down('md')]: {
-				fontSize: '2rem',
-				lineHeight: '2.5rem'
-			}
-		},
-		image: {
-			display: 'flex',
-			justifyContent: 'flex-end'
-		},
-		headerImage: {
-			[fr.breakpoints.down('md')]: {
-				display: 'none'
-			}
-		}
-	}));

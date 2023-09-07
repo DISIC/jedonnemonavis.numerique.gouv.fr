@@ -1,7 +1,13 @@
-import { Reference } from '@/pages';
 import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
+
+export interface Reference {
+	image_path: string;
+	author: string;
+	job_title: string;
+	description: string;
+}
 
 interface HomeReferencesProps {
 	references: Reference[];
@@ -61,7 +67,7 @@ const useStyles = tss.withName(HomeReferences.name).create(() => ({
 	imageContainer: {
 		display: 'flex',
 		justifyContent: 'center',
-		borderRight: '1px solid #e5e5e5',
+		borderRight: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`,
 		paddingRight: 0
 	},
 	image: {

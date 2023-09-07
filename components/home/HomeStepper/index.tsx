@@ -76,7 +76,7 @@ const useStyles = tss
 		},
 		card: {
 			...fr.spacing('padding', { top: '3w', bottom: '3w', rightLeft: '3w' }),
-			borderBottom: '4px solid #000091',
+			borderBottom: `4px solid ${fr.colors.decisions.background.flat.blueFrance.default}`,
 			backgroundColor: fr.colors.decisions.background.alt.grey.default,
 			display: 'flex',
 			flexDirection: 'column',
@@ -87,7 +87,8 @@ const useStyles = tss
 			}
 		},
 		numberContainer: {
-			backgroundColor: '#FFF',
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
+
 			borderRadius: '50%',
 			width: '5rem',
 			height: '5rem',
@@ -95,7 +96,8 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		number: {
-			color: '#000091',
+			color: fr.colors.decisions.background.flat.blueFrance.default,
+
 			fontSize: '4rem',
 			lineHeight: '4.5rem',
 			fontWeight: 700,

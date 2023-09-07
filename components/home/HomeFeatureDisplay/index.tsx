@@ -3,7 +3,7 @@ import Image from 'next/image';
 import React, { ReactElement, ReactNode } from 'react';
 import { tss } from 'tss-react';
 
-interface HFDProps {
+export interface Feature {
 	icon: ReactElement<any, any>;
 	title: string;
 	description: string;
@@ -11,7 +11,7 @@ interface HFDProps {
 	imagePosition: 'left' | 'right';
 }
 
-const HomeFeatureDisplay = (props: HFDProps) => {
+const HomeFeatureDisplay = (props: Feature) => {
 	const { classes, cx } = useStyles({
 		imagePosition: props.imagePosition as string
 	});

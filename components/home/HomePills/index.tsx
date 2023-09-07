@@ -1,9 +1,13 @@
-import { Pill } from '@/pages';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 
 interface HomePillsProps {
 	pills: Pill[];
+}
+
+export interface Pill {
+	title: string;
+	description: string;
 }
 
 const HomePills = (props: HomePillsProps) => {
@@ -67,7 +71,7 @@ const useStyles = tss
 			top: '0',
 			right: '0',
 			transform: 'translate(-50%, -50%)',
-			color: '#FFF',
+			color: fr.colors.decisions.background.default.grey.default,
 			backgroundColor:
 				fr.colors.decisions.background.actionHigh.success.default,
 			borderRadius: '50%',

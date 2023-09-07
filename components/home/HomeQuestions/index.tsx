@@ -1,10 +1,14 @@
-import { Question } from '@/pages';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 
 interface HomeQuestionProps {
 	questions: Question[];
+}
+
+export interface Question {
+	question: string;
+	answer: string;
 }
 
 const HomeQuestions = (props: HomeQuestionProps) => {
