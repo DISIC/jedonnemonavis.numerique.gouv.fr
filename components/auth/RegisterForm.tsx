@@ -205,8 +205,8 @@ export const RegisterForm = (props: Props) => {
 					<p>
 						Votre compte a été créé avec succès. <br />
 						<br />
-						Un e-mail contenant un lien de validation vous sera envoyé. Veuillez
-						également vérifier votre dossier de spams.
+						Vous allez recevoir un email contenant un lien de validation dans
+						les prochaines minutes.
 					</p>
 				) : (
 					<p>

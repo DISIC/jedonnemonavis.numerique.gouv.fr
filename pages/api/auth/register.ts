@@ -11,6 +11,14 @@ export async function userExists(email: string) {
 	return !!tmpUser;
 }
 
+export async function activateUser(user: User) {
+	const updatedUser = await prisma.user.update({
+		where: { id: user.id },
+		data: { active: true }
+	});
+	return { ...updatedUser, password: 'Nice try!' };
+}
+
 export async function registerUser(user: Omit<User, 'id'>) {
 	const newUser = await prisma.user.create({ data: user });
 	return { ...newUser, password: 'Nice try!' };
