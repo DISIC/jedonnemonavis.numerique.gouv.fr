@@ -10,14 +10,6 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		{
 			iconId: 'fr-icon-account-line',
 			linkProps: {
-				href: '',
-				target: '_blank'
-			},
-			text: "L'Observatoire"
-		},
-		{
-			iconId: 'fr-icon-account-line',
-			linkProps: {
 				href: '/login',
 				target: '_self'
 			},
@@ -33,7 +25,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				<meta name="description" content="Je donne mon avis" />
 			</Head>
 			<Header
-				brandTop={<>Je donne mon avis</>}
+				brandTop={<>REPUBLIQUE FRANCAISE</>}
 				homeLinkProps={{
 					href: '/',
 					title: 'Accueil'
