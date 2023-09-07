@@ -32,30 +32,41 @@ const HomeStepper = () => {
 
 	return (
 		<section className={cx(fr.cx('fr-container'), classes.container)}>
-			<h2>Commencez à receuillir des avis en 4 étapes simples :</h2>
-			<div
-				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--center')
-				)}
-			>
-				{steps.map(step => (
-					<div key={step.number} className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<div
-							className={cx(
-								classes.card,
-								fr.cx('fr-card', 'fr-card--grey', 'fr-card--no-border')
-							)}
-						>
-							<div className={cx(classes.numberContainer)}>
-								<p className={cx(classes.number)}>{step.number}</p>
+			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
+				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
+					<h2>Commencez à receuillir des avis en 4 étapes simples :</h2>
+					<div
+						className={cx(
+							fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--center'
+							)
+						)}
+					>
+						{steps.map(step => (
+							<div
+								key={step.number}
+								className={fr.cx('fr-col-12', 'fr-col-md-3')}
+							>
+								<div
+									className={cx(
+										classes.card,
+										fr.cx('fr-card', 'fr-card--grey', 'fr-card--no-border')
+									)}
+								>
+									<div className={cx(classes.numberContainer)}>
+										<p className={cx(classes.number)}>{step.number}</p>
+									</div>
+									<div className={cx(classes.title)}>{step.title}</div>
+								</div>
 							</div>
-							<div className={cx(classes.title)}>{step.title}</div>
-						</div>
+						))}
 					</div>
-				))}
-			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-				<Button className={fr.cx('fr-my-5w')}>Commencer</Button>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+						<Button className={fr.cx('fr-my-5w')}>Commencer</Button>
+					</div>
+				</div>
 			</div>
 		</section>
 	);

@@ -26,7 +26,7 @@ const HomeFeatureDisplay = (props: Feature) => {
 						classes.grid
 					)}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
 						<div className={cx(classes.textContainer)}>
 							<div className={cx(classes.iconContainer)}>{props.icon}</div>
 							<h2>{props.title}</h2>
@@ -58,12 +58,12 @@ const useStyles = tss
 	.withParams<{ imagePosition: string }>()
 	.create(({ imagePosition }) => ({
 		outerContainer: {
-			position: 'relative'
+			position: 'relative',
+			...fr.spacing('margin', {
+				topBottom: '32v'
+			})
 		},
 		container: {
-			...fr.spacing('margin', {
-				topBottom: '16v'
-			}),
 			...fr.spacing('padding', {
 				topBottom: '16v'
 			}),

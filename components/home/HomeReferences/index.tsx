@@ -18,42 +18,52 @@ const HomeReferences = (props: HomeReferencesProps) => {
 
 	return (
 		<section className={cx(fr.cx('fr-container'), classes.root)}>
-			<h2>Elles recommandent</h2>
-			{props.references.map((reference, index) => (
-				<div
-					key={index}
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-6w')}
-				>
-					<div
-						className={cx(
-							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'),
-							classes.imageContainer
-						)}
-					>
-						<Image
-							src={reference.image_path}
-							alt={reference.author}
-							width={180}
-							height={180}
-							className={cx(classes.image)}
-						/>
-					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}>
-						<div className={cx(classes.textContainer)}>
-							<i className={cx(fr.cx('fr-icon-quote-line'), classes.icon)} />
-							<h6>{reference.description}</h6>
-							<div>
-								<p className={cx(classes.underInfos, classes.bold)}>
-									{reference.author}
-								</p>
-								<p className={cx(classes.underInfos, classes.italic)}>
-									{reference.job_title}
-								</p>
+			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
+				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
+					<h2>Elles recommandent</h2>
+					{props.references.map((reference, index) => (
+						<div
+							key={index}
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-pb-6w'
+							)}
+						>
+							<div
+								className={cx(
+									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'),
+									classes.imageContainer
+								)}
+							>
+								<Image
+									src={reference.image_path}
+									alt={reference.author}
+									width={180}
+									height={180}
+									className={cx(classes.image)}
+								/>
+							</div>
+							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}>
+								<div className={cx(classes.textContainer)}>
+									<i
+										className={cx(fr.cx('fr-icon-quote-line'), classes.icon)}
+									/>
+									<h6>{reference.description}</h6>
+									<div>
+										<p className={cx(classes.underInfos, classes.bold)}>
+											{reference.author}
+										</p>
+										<p className={cx(classes.underInfos, classes.italic)}>
+											{reference.job_title}
+										</p>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					))}
 				</div>
-			))}
+			</div>
 		</section>
 	);
 };

@@ -10,9 +10,14 @@ const HomeHeader = () => {
 			<div className={cx(classes.blueContainer)} />
 			<div className={fr.cx('fr-container')}>
 				<div
-					className={fr.cx('fr-py-16v', 'fr-grid-row', 'fr-grid-row--gutters')}
+					className={fr.cx(
+						'fr-py-16v',
+						'fr-grid-row',
+						'fr-grid-row--center',
+						'fr-grid-row--gutters'
+					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<div className={cx(classes.titleContainer)}>
 							<h1 className={cx(classes.headerTitle)}>
 								Comment suivre la satisfaction de vos usagers ?
@@ -25,7 +30,7 @@ const HomeHeader = () => {
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),
 							classes.image
 						)}
 					>

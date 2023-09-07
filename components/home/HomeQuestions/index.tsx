@@ -16,19 +16,23 @@ const HomeQuestions = (props: HomeQuestionProps) => {
 
 	return (
 		<section className={cx(fr.cx('fr-container'), classes.root)}>
-			<h2>Foire aux questions</h2>
-			<div className={fr.cx('fr-accordions-group')}>
-				{props.questions.map((question, index) => {
-					return (
-						<Accordion
-							key={question.question + index}
-							label={question.question}
-							className={cx(classes.accordion)}
-						>
-							{question.answer}
-						</Accordion>
-					);
-				})}
+			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
+				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
+					<h2>Foire aux questions</h2>
+					<div className={fr.cx('fr-accordions-group')}>
+						{props.questions.map((question, index) => {
+							return (
+								<Accordion
+									key={question.question + index}
+									label={question.question}
+									className={cx(classes.accordion)}
+								>
+									{question.answer}
+								</Accordion>
+							);
+						})}
+					</div>
+				</div>
 			</div>
 		</section>
 	);

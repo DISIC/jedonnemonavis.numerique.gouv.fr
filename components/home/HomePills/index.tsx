@@ -20,7 +20,8 @@ const HomePills = (props: HomePillsProps) => {
 					'fr-grid-row',
 					'fr-grid-row--gutters',
 					'fr-grid-row--center',
-					'fr-py-12w'
+					'fr-py-12w',
+					'fr-px-10v'
 				)}
 			>
 				{props.pills.map((pill, index) => (
