@@ -1,10 +1,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
+import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
 
 interface HomeActionButtonProps {
 	title: string;
 	buttonText: string;
+	buttonLink: string;
 	buttonStyle: 'primary' | 'secondary' | 'tertiary';
 }
 
@@ -15,9 +16,18 @@ const HomeActionButton = (props: HomeActionButtonProps) => {
 		<section className={fr.cx('fr-container', 'fr-py-16v')}>
 			<div className={cx(classes.container)}>
 				<h2>{props.title}</h2>
-				<Button className={cx(fr.cx('fr-my-2v'))} priority={props.buttonStyle}>
+				<Link
+					href={props.buttonLink}
+					className={cx(
+						fr.cx(
+							'fr-my-2v',
+							'fr-btn',
+							props.buttonStyle !== 'primary' && `fr-btn--${props.buttonStyle}`
+						)
+					)}
+				>
 					{props.buttonText}
-				</Button>
+				</Link>
 			</div>
 		</section>
 	);

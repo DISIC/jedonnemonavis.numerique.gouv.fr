@@ -126,12 +126,14 @@ export default function Home() {
 				title={'Prêt à recueillir les avis des usagers ?'}
 				buttonStyle="primary"
 				buttonText="Commencer"
+				buttonLink="/login"
 			/>
 			<HomeQuestions questions={questions} />
 			<HomeActionButton
 				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-nous !"}
 				buttonStyle="secondary"
 				buttonText="Contacter notre équipe"
+				buttonLink="/login"
 			/>
 		</div>
 	);

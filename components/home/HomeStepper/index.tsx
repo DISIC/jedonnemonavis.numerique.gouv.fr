@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Link from 'next/link';
 import { tss } from 'tss-react';
 
 interface Step {
@@ -64,7 +65,9 @@ const HomeStepper = () => {
 						))}
 					</div>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-						<Button className={fr.cx('fr-my-5w')}>Commencer</Button>
+						<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
+							Commencer
+						</Link>
 					</div>
 				</div>
 			</div>
