@@ -34,3 +34,8 @@ model UserValidationToken {
   user_id String @db.ObjectId
   token   String @unique
 }
+
+model WhiteListedDomain {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  domain String @unique
+}
