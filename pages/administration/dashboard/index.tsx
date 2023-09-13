@@ -7,7 +7,57 @@ import { Select } from '@codegouvfr/react-dsfr/Select';
 const DashBoard = () => {
 	const products: Product[] = [
 		{
-			title: 'Titre du produit',
+			title: '1000 premiers jours',
+			owner: 'Nom de l’entité de rattachement',
+			indicators: [
+				{
+					title: 'Satisfaction Usagers',
+					value: 6,
+					color: 'new',
+					appreciation: 'Moyen'
+				},
+				{
+					title: 'Compréhension du langage',
+					value: 8.5,
+					color: 'success',
+					appreciation: 'Très bien'
+				},
+				{
+					title: 'Aide joignable et efficace',
+					value: 3,
+					color: 'error',
+					appreciation: 'Pas bien'
+				}
+			],
+			nbReviews: 12
+		},
+		{
+			title: 'Impots.gouv.fr',
+			owner: 'Nom de l’entité de rattachement',
+			indicators: [
+				{
+					title: 'Satisfaction Usagers',
+					value: 6,
+					color: 'new',
+					appreciation: 'Moyen'
+				},
+				{
+					title: 'Compréhension du langage',
+					value: 8.5,
+					color: 'success',
+					appreciation: 'Très bien'
+				},
+				{
+					title: 'Aide joignable et efficace',
+					value: 3,
+					color: 'error',
+					appreciation: 'Pas bien'
+				}
+			],
+			nbReviews: 12
+		},
+		{
+			title: 'Mon compte formation',
 			owner: 'Nom de l’entité de rattachement',
 			indicators: [
 				{
