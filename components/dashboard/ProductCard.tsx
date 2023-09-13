@@ -29,16 +29,23 @@ const ProductCard = ({ product }: { product: Product }) => {
 			<div className={fr.cx('fr-card__body')}>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					{product.indicators.map((indicator, index) => (
-						<div className={fr.cx('fr-col', 'fr-col-3')} key={index}>
-							<p>{indicator.title}</p>
+						<div
+							className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+							key={index}
+						>
+							<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+								{indicator.title}
+							</p>
 							<Badge noIcon severity={indicator.color}>
 								{indicator.appreciation} {indicator.value} / 10
 							</Badge>
 						</div>
 					))}
 					{product.nbReviews && (
-						<div className={fr.cx('fr-col', 'fr-col-3')}>
-							<p>Nouveaux avis (depuis 08/08/23)</p>
+						<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
+							<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+								Nouveaux avis (depuis 08/08/23)
+							</p>
 							<Badge noIcon severity="info">
 								{product.nbReviews}
 							</Badge>
