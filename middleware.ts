@@ -18,12 +18,14 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.redirect(new URL('/login', request.url));
 	}
 
-	if (request.nextUrl.pathname === '/administration') {
-		return NextResponse.redirect(new URL('/login', request.url));
+	if (request.nextUrl.pathname.startsWith('') && !!token) {
+		return NextResponse.redirect(
+			new URL('/administration/dashboard', request.url)
+		);
 	}
 }
 
 // See "Matching Paths" below to learn more
 export const config = {
-	matcher: '/administration/:path*'
+	matcher: ['/']
 };
