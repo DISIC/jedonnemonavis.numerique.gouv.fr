@@ -90,7 +90,8 @@ const useStyles = tss.withName(HomeReferences.name).create(() => ({
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
-		height: '100%'
+		height: '100%',
+		...fr.spacing('padding', { left: '4v' })
 	},
 	underInfos: {
 		marginBottom: 0

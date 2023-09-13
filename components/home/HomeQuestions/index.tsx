@@ -25,7 +25,7 @@ const HomeQuestions = (props: HomeQuestionProps) => {
 								<Accordion
 									key={question.question + index}
 									label={question.question}
-									className={cx(classes.accordion)}
+									className={cx(classes.accordion, 'fr-accordion__item')}
 								>
 									{question.answer}
 								</Accordion>

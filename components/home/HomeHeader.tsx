@@ -17,7 +17,14 @@ const HomeHeader = () => {
 						'fr-grid-row--gutters'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div
+						className={fr.cx(
+							'fr-col',
+							'fr-col-12',
+							'fr-col-md-6',
+							'fr-col-offset-md-1'
+						)}
+					>
 						<div className={cx(classes.titleContainer)}>
 							<h1 className={cx(classes.headerTitle)}>
 								Comment suivre la satisfaction de vos usagers ?
@@ -61,7 +68,7 @@ const useStyles = tss.withName('HomeHeader').create(() => ({
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 		width: '100%',
 		height: '100%',
-		transform: 'translateY(-50%) skewY(-4deg)',
+		transform: 'translateY(-47%) skewY(-4deg)',
 		zIndex: -1,
 		position: 'absolute'
 	},
