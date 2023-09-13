@@ -14,21 +14,22 @@ const DashBoard = () => {
 					title: 'Satisfaction Usagers',
 					value: 6,
 					color: 'new',
-					appreciation: 'average'
+					appreciation: 'Moyen'
 				},
 				{
 					title: 'Compréhension du langage',
 					value: 8.5,
 					color: 'success',
-					appreciation: 'excellent'
+					appreciation: 'Très bien'
 				},
 				{
 					title: 'Aide joignable et efficace',
 					value: 3,
 					color: 'error',
-					appreciation: 'bad'
+					appreciation: 'Pas bien'
 				}
-			]
+			],
+			nbReviews: 12
 		}
 	];
 
