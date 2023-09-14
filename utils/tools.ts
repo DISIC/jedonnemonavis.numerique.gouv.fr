@@ -13,6 +13,18 @@ export function generateRandomString(length: number = 8): string {
 	return otp;
 }
 
+export function extractDomainFromEmail(email: string): string | null {
+	const regex = /@([A-Za-z0-9.-]+)$/;
+
+	const match = email.match(regex);
+
+	if (match && match.length > 1) {
+		return match[1];
+	} else {
+		return null;
+	}
+}
+
 export function getOTPEmailHtml(code: string) {
 	return `
 		<!DOCTYPE html>

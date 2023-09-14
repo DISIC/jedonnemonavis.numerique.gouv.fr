@@ -1,13 +1,15 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, User, WhiteListedDomain } from '@prisma/client';
 import { users } from './seeds/users';
+import { whiteListedDomains } from './seeds/white-listed-domains';
 
 const prisma = new PrismaClient();
 
 async function main() {
-	const promises: Promise<User>[] = [];
+	const promisesUsers: Promise<User>[] = [];
+	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
 
 	users.forEach(user => {
-		promises.push(
+		promisesUsers.push(
 			prisma.user.upsert({
 				where: {
 					email: user.email
@@ -20,10 +22,25 @@ async function main() {
 		);
 	});
 
-	Promise.all(promises).then(responses => {
-		let log: { [key: string]: User } = {};
-		responses.forEach(r => {
-			if ('email' in r) log[`user ${r.email}`] = r;
+	whiteListedDomains.forEach(wld => {
+		promisesWLDs.push(
+			prisma.whiteListedDomain.upsert({
+				where: {
+					domain: wld.domain
+				},
+				update: {},
+				create: {
+					...wld
+				}
+			})
+		);
+	});
+
+	Promise.all([...promisesUsers, ...promisesWLDs]).then(responses => {
+		let log: { [key: string]: string } = {};
+		responses.forEach((r, i) => {
+			if ('email' in r) log[`${i}] user added`] = r.email;
+			if ('domain' in r) log[`${i}] domain added : `] = r.domain;
 		});
 		console.log(log);
 	});

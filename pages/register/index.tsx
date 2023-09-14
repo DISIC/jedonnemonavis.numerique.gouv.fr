@@ -16,7 +16,7 @@ type UserPresetInfos = {
 export default function Register() {
 	const router = useRouter();
 
-	const { otp_id, registered } = router.query;
+	const { otp_id, registered, request } = router.query;
 
 	const { classes, cx } = useStyles();
 
@@ -46,7 +46,7 @@ export default function Register() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h2 className={fr.cx('fr-mb-12v')}>Création de compte</h2>
-					{!registered && !otp_id && (
+					{!registered && !otp_id && !request && (
 						<Alert
 							className={fr.cx('fr-mb-16v')}
 							closable
@@ -67,6 +67,24 @@ export default function Register() {
 							onClose={function noRefCheck() {}}
 							severity="info"
 							title="Nouvel hébergement"
+						/>
+					)}
+					{!!request && (
+						<Alert
+							className={fr.cx('fr-mb-16v')}
+							closable
+							description={
+								<>
+									L’outil JDMA est réservé aux établissements publics. Votre
+									adresse e-mail n’est pas reconnue comme une adresse
+									d’administration publique. Si vous pensez qu’il s’agit d’une
+									erreur, merci de nous décrire votre situation. Nous
+									reviendrons vers vous sous 48 heures.
+								</>
+							}
+							onClose={function noRefCheck() {}}
+							severity="info"
+							title=""
 						/>
 					)}
 					<div

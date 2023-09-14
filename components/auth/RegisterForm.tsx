@@ -11,13 +11,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { RegisterValidationMessage } from './RegisterConfirmMessage';
+import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
 
 type Props = {
 	userPresetInfos?: UserInfos;
 	otp_id?: string;
 };
 
-type UserInfos = {
+export type UserInfos = {
 	firstName?: string;
 	lastName?: string;
 	email?: string;
@@ -27,7 +29,11 @@ type UserInfos = {
 type FormErrors = {
 	firstName: { required: boolean };
 	lastName: { required: boolean };
-	email: { required: boolean; format: boolean; conflict: boolean };
+	email: {
+		required: boolean;
+		format: boolean;
+		conflict: boolean;
+	};
 	password: { required: boolean; format: boolean };
 };
 
@@ -63,10 +69,9 @@ export const RegisterForm = (props: Props) => {
 	};
 
 	const [userInfos, setUserInfos] = useState<UserInfos>({});
+	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
-	const [registered, setRegistered] = useState<
-		'classic' | 'from_otp' | undefined
-	>();
+	const [registered, setRegistered] = useState<RegisterValidationMessage>();
 
 	const { classes, cx } = useStyles({ errors });
 
@@ -183,6 +188,10 @@ export const RegisterForm = (props: Props) => {
 			else if (res.status === 409) {
 				errors.email.conflict = true;
 				setErrors({ ...errors });
+			} else if (res.status === 401) {
+				router.query.request = 'whitelist';
+				router.push(router);
+				setUserNotWhiteListed(true);
 			}
 		});
 	};
@@ -197,30 +206,12 @@ export const RegisterForm = (props: Props) => {
 			setUserInfos(userPresetInfos);
 	}, [userPresetInfos]);
 
+	if (userNotWhiteListed) {
+		return <RegisterNotWhiteListed userInfos={userInfos} />;
+	}
+
 	if (registered) {
-		return (
-			<div>
-				<h5>Se créer un compte</h5>
-				{registered === 'classic' ? (
-					<p>
-						Votre compte a été créé avec succès. <br />
-						<br />
-						Vous allez recevoir un email contenant un lien de validation dans
-						les prochaines minutes.
-					</p>
-				) : (
-					<p>
-						Votre ancien compte de l&apos;observatoire a été configuré avec
-						succès. <br />
-						<br />
-						<Link className={fr.cx('fr-link')} href="/login">
-							Connectez-vous dès maintenant
-						</Link>{' '}
-						pour gérer vos boutons Je donne mon avis dans ce nouvel espace.
-					</p>
-				)}
-			</div>
-		);
+		return <RegisterValidationMessage mode={registered} />;
 	}
 
 	return (

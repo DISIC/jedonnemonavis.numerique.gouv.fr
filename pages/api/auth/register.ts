@@ -1,10 +1,24 @@
 import { sendMail } from '@/utils/mailer';
-import { generateRandomString, getRegisterEmailHtml } from '@/utils/tools';
+import {
+	extractDomainFromEmail,
+	generateRandomString,
+	getRegisterEmailHtml
+} from '@/utils/tools';
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
+
+export async function checkUserDomain(email: string) {
+	const domain = extractDomainFromEmail(email);
+	if (!domain) return false;
+
+	const domainWhiteListed = await prisma.whiteListedDomain.findFirst({
+		where: { domain }
+	});
+	return !!domainWhiteListed;
+}
 
 export async function userExists(email: string) {
 	const tmpUser = await prisma.user.findFirst({ where: { email } });
@@ -94,6 +108,11 @@ export default async function handler(
 			const hasConflict = await userExists(email);
 
 			if (hasConflict) return res.status(409).send('User already exists');
+
+			const isWhiteListed = await checkUserDomain(email);
+
+			if (!isWhiteListed)
+				return res.status(401).send('User email domain not whitelisted');
 
 			const user = await registerUser({
 				firstName,
