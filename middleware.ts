@@ -10,15 +10,12 @@ export async function middleware(request: NextRequest) {
 		secret: process.env.JWT_SECRET
 	});
 
-	if (request.nextUrl.pathname.startsWith('/login') && !!token) {
-		return NextResponse.redirect(
-			new URL('/administration/dashboard', request.url)
-		);
-	} else if (request.nextUrl.pathname.startsWith('/administration') && !token) {
+	if (request.nextUrl.pathname.startsWith('/administration') && !token) {
 		return NextResponse.redirect(new URL('/login', request.url));
-	}
-
-	if (request.nextUrl.pathname.startsWith('') && !!token) {
+	} else if (
+		!request.nextUrl.pathname.startsWith('/administration') &&
+		!!token
+	) {
 		return NextResponse.redirect(
 			new URL('/administration/dashboard', request.url)
 		);

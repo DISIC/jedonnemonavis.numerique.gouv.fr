@@ -14,19 +14,19 @@ const DashBoard = () => {
 					title: 'Satisfaction Usagers',
 					value: 6,
 					color: 'new',
-					appreciation: 'Moyen'
+					appreciation: 'average'
 				},
 				{
 					title: 'Compréhension du langage',
-					value: 8.5,
+					value: 10,
 					color: 'success',
-					appreciation: 'Très bien'
+					appreciation: 'good'
 				},
 				{
 					title: 'Aide joignable et efficace',
-					value: 3,
+					value: 9,
 					color: 'error',
-					appreciation: 'Pas bien'
+					appreciation: 'bad'
 				}
 			],
 			nbReviews: 12
@@ -37,21 +37,21 @@ const DashBoard = () => {
 			indicators: [
 				{
 					title: 'Satisfaction Usagers',
-					value: 6,
+					value: 7,
 					color: 'new',
-					appreciation: 'Moyen'
+					appreciation: 'average'
 				},
 				{
 					title: 'Compréhension du langage',
-					value: 8.5,
+					value: 9,
 					color: 'success',
-					appreciation: 'Très bien'
+					appreciation: 'good'
 				},
 				{
 					title: 'Aide joignable et efficace',
 					value: 3,
 					color: 'error',
-					appreciation: 'Pas bien'
+					appreciation: 'bad'
 				}
 			],
 			nbReviews: 12
@@ -62,21 +62,21 @@ const DashBoard = () => {
 			indicators: [
 				{
 					title: 'Satisfaction Usagers',
-					value: 6,
+					value: 5,
 					color: 'new',
-					appreciation: 'Moyen'
+					appreciation: 'average'
 				},
 				{
 					title: 'Compréhension du langage',
-					value: 8.5,
+					value: 9.5,
 					color: 'success',
-					appreciation: 'Très bien'
+					appreciation: 'good'
 				},
 				{
 					title: 'Aide joignable et efficace',
-					value: 3,
+					value: 1,
 					color: 'error',
-					appreciation: 'Pas bien'
+					appreciation: 'bad'
 				}
 			],
 			nbReviews: 12
@@ -117,9 +117,9 @@ const DashBoard = () => {
 							name: 'my-select'
 						}}
 					>
+						<option value="3">Nom</option>
 						<option value="1">Date de création</option>
 						<option value="2">Date de mise à jour</option>
-						<option value="3">Nom</option>
 					</Select>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-7', 'fr-col--bottom')}>

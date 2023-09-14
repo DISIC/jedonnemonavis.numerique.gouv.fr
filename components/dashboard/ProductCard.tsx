@@ -12,10 +12,21 @@ interface Indicator {
 	title: string;
 	value: number;
 	color: 'new' | 'success' | 'error';
-	appreciation: 'Pas bien' | 'Moyen' | 'Très bien';
+	appreciation: 'bad' | 'average' | 'good';
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
+	const diplayAppreciation = (appreciation: string) => {
+		switch (appreciation) {
+			case 'bad':
+				return 'Pas bien';
+			case 'average':
+				return 'Moyen';
+			case 'good':
+				return 'Très bien';
+		}
+	};
+
 	return (
 		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -36,8 +47,13 @@ const ProductCard = ({ product }: { product: Product }) => {
 							<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 								{indicator.title}
 							</p>
-							<Badge noIcon severity={indicator.color}>
-								{indicator.appreciation} {indicator.value} / 10
+							<Badge
+								noIcon
+								severity={indicator.color}
+								className={fr.cx('fr-text--sm')}
+							>
+								{diplayAppreciation(indicator.appreciation)} {indicator.value} /
+								10
 							</Badge>
 						</div>
 					))}
