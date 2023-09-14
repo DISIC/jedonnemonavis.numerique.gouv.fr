@@ -29,7 +29,7 @@ const HomeHeader = () => {
 							<h1 className={cx(classes.headerTitle)}>
 								Comment suivre la satisfaction de vos usagers ?
 							</h1>
-							<p>
+							<p className={cx(classes.description)}>
 								Avec l’outil Je donne mon avis, suivez-vous en temps réel la
 								satisfaction des usagers de vos services publics numériques.
 							</p>
@@ -79,6 +79,10 @@ const useStyles = tss.withName('HomeHeader').create(() => ({
 			fontSize: '2rem',
 			lineHeight: '2.5rem'
 		}
+	},
+	description: {
+		fontSize: '1.375rem',
+		lineHeight: '2.25rem'
 	},
 	image: {
 		display: 'flex',
