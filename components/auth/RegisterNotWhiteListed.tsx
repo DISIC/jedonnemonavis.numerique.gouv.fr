@@ -10,10 +10,14 @@ type Props = {
 
 export const RegisterNotWhiteListed = (props: Props) => {
 	const { userInfos } = props;
-	
+
 	const { classes, cx } = useStyles();
 
 	const [reason, setReason] = useState<string | undefined>();
+
+	const validateRequest = () => {
+		// create user & user request
+	};
 
 	return (
 		<div>
