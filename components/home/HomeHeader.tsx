@@ -17,12 +17,19 @@ const HomeHeader = () => {
 						'fr-grid-row--gutters'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div
+						className={fr.cx(
+							'fr-col',
+							'fr-col-12',
+							'fr-col-md-6',
+							'fr-col-offset-md-1'
+						)}
+					>
 						<div className={cx(classes.titleContainer)}>
 							<h1 className={cx(classes.headerTitle)}>
 								Comment suivre la satisfaction de vos usagers ?
 							</h1>
-							<p>
+							<p className={cx(classes.description)}>
 								Avec l’outil Je donne mon avis, suivez-vous en temps réel la
 								satisfaction des usagers de vos services publics numériques.
 							</p>
@@ -61,7 +68,7 @@ const useStyles = tss.withName('HomeHeader').create(() => ({
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 		width: '100%',
 		height: '100%',
-		transform: 'translateY(-50%) skewY(-4deg)',
+		transform: 'translateY(-47%) skewY(-4deg)',
 		zIndex: -1,
 		position: 'absolute'
 	},
@@ -72,6 +79,10 @@ const useStyles = tss.withName('HomeHeader').create(() => ({
 			fontSize: '2rem',
 			lineHeight: '2.5rem'
 		}
+	},
+	description: {
+		fontSize: '1.375rem',
+		lineHeight: '2.25rem'
 	},
 	image: {
 		display: 'flex',
