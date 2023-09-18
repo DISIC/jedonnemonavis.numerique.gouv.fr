@@ -13,6 +13,15 @@ export function generateRandomString(length: number = 8): string {
 	return otp;
 }
 
+export function getRandomObjectFromArray<T>(array: T[]): T | undefined {
+	if (array.length === 0) {
+		return undefined; // Return undefined for an empty array
+	}
+
+	const randomIndex = Math.floor(Math.random() * array.length);
+	return array[randomIndex];
+}
+
 export function getOTPEmailHtml(code: string) {
 	return `
 		<!DOCTYPE html>
@@ -39,7 +48,7 @@ export function getOTPEmailHtml(code: string) {
 					<p>Bonjour,</p>
 
 					<p>
-						Vous vous connectez pour la première fois à "Je donne mon avis" avec votre ancien compte observatoire. 
+						Vous vous connectez pour la première fois à "Je donne mon avis" avec votre ancien compte observatoire.
 						Afin de confirmer votre identité et de définir un nouveau mot de passe, veuillez utiliser le mot de passe temporaire suivant :
 					</p>
 

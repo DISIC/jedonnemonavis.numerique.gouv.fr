@@ -34,3 +34,16 @@ model UserValidationToken {
   user_id String @db.ObjectId
   token   String @unique
 }
+
+model Owner {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  title    String @unique
+  owner    Owner? @relation(fields: [owner_id], references: [id])
+  owner_id String @db.ObjectId
+}
