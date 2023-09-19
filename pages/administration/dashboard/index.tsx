@@ -1,87 +1,31 @@
-import ProductCard, { Product } from '@/components/dashboard/ProductCard';
+import ProductCard from '@/components/dashboard/ProductCard';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
+import { Owner, Product } from '@prisma/client';
+import React from 'react';
 
 const DashBoard = () => {
-	const products: Product[] = [
-		{
-			title: '1000 premiers jours',
-			owner: 'Nom de l’entité de rattachement',
-			indicators: [
-				{
-					title: 'Satisfaction Usagers',
-					value: 6,
-					color: 'new',
-					appreciation: 'average'
-				},
-				{
-					title: 'Compréhension du langage',
-					value: 10,
-					color: 'success',
-					appreciation: 'good'
-				},
-				{
-					title: 'Aide joignable et efficace',
-					value: 9,
-					color: 'error',
-					appreciation: 'bad'
-				}
-			],
-			nbReviews: 12
-		},
-		{
-			title: 'Impots.gouv.fr',
-			owner: 'Nom de l’entité de rattachement',
-			indicators: [
-				{
-					title: 'Satisfaction Usagers',
-					value: 7,
-					color: 'new',
-					appreciation: 'average'
-				},
-				{
-					title: 'Compréhension du langage',
-					value: 9,
-					color: 'success',
-					appreciation: 'good'
-				},
-				{
-					title: 'Aide joignable et efficace',
-					value: 3,
-					color: 'error',
-					appreciation: 'bad'
-				}
-			],
-			nbReviews: 12
-		},
-		{
-			title: 'Mon compte formation',
-			owner: 'Nom de l’entité de rattachement',
-			indicators: [
-				{
-					title: 'Satisfaction Usagers',
-					value: 5,
-					color: 'new',
-					appreciation: 'average'
-				},
-				{
-					title: 'Compréhension du langage',
-					value: 9.5,
-					color: 'success',
-					appreciation: 'good'
-				},
-				{
-					title: 'Aide joignable et efficace',
-					value: 1,
-					color: 'error',
-					appreciation: 'bad'
-				}
-			],
-			nbReviews: 12
-		}
-	];
+	const [products, setProducts] = React.useState<Product[]>([]);
+	const [owners, setOwners] = React.useState<Owner[]>([]);
+
+	const retrieveProducts = async () => {
+		const res = await fetch('/api/prisma/products');
+		const data = await res.json();
+		setProducts(data);
+	};
+
+	const retrieveOwners = async () => {
+		const res = await fetch('/api/prisma/owners');
+		const data = await res.json();
+		setOwners(data);
+	};
+
+	React.useEffect(() => {
+		retrieveProducts();
+		retrieveOwners();
+	}, []);
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-py-6w')}>
@@ -127,7 +71,11 @@ const DashBoard = () => {
 				</div>
 			</div>
 			{products.map((product, index) => (
-				<ProductCard product={product} key={index} />
+				<ProductCard
+					product={product}
+					owner={owners.find(owner => product.owner_id === owner.id) as Owner}
+					key={index}
+				/>
 			))}
 		</div>
 	);

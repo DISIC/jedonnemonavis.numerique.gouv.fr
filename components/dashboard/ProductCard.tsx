@@ -1,12 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
-
-export interface Product {
-	title: string;
-	owner: string;
-	indicators: Indicator[];
-	nbReviews?: number;
-}
+import { Owner, Product } from '@prisma/client';
 
 interface Indicator {
 	title: string;
@@ -15,7 +9,13 @@ interface Indicator {
 	appreciation: 'bad' | 'average' | 'good';
 }
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({
+	product,
+	owner
+}: {
+	product: Product;
+	owner: Owner;
+}) => {
 	const diplayAppreciation = (appreciation: string) => {
 		switch (appreciation) {
 			case 'bad':
@@ -34,11 +34,11 @@ const ProductCard = ({ product }: { product: Product }) => {
 					<p className={fr.cx('fr-card__title')}>{product.title}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-					<p>{product.owner}</p>
+					<p>{owner.name}</p>
 				</div>
 			</div>
-			<div className={fr.cx('fr-card__body')}>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+			<div>
+				{/* <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					{product.indicators.map((indicator, index) => (
 						<div
 							className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
@@ -67,7 +67,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 							</Badge>
 						</div>
 					)}
-				</div>
+				</div> */}
 			</div>
 		</div>
 	);
