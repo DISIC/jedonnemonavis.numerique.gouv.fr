@@ -5,6 +5,7 @@ import { ReactNode } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -14,6 +15,7 @@ declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 
 const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	defaultColorScheme: 'light',
+	doPersistDarkModePreferenceWithCookie: true,
 	Link,
 	preloadFonts: [
 		//"Marianne-Light",
@@ -41,9 +43,11 @@ function App({ Component, pageProps }: AppProps) {
 	});
 
 	return getLayout(
-		<CacheProvider value={cache}>
-			<Component {...pageProps} />
-		</CacheProvider>
+		<MuiDsfrThemeProvider>
+			<CacheProvider value={cache}>
+				<Component {...pageProps} />
+			</CacheProvider>
+		</MuiDsfrThemeProvider>
 	);
 }
 

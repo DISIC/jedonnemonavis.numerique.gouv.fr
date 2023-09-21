@@ -35,15 +35,17 @@ model UserValidationToken {
   token   String @unique
 }
 
-model Owner {
+model Entity {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   name     String    @unique
   products Product[]
 }
 
 model Product {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  title    String @unique
-  owner    Owner? @relation(fields: [owner_id], references: [id])
-  owner_id String @db.ObjectId
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String   @unique
+  entity     Entity?  @relation(fields: [entity_id], references: [id])
+  entity_id  String   @db.ObjectId
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

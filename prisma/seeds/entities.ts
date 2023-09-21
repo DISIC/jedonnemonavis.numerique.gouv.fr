@@ -1,4 +1,4 @@
-export const owners = [
+export const entities = [
 	{
 		name: "Ministère du Travail, du Plein emploi et de l'Insertion"
 	},

@@ -1,13 +1,13 @@
-import { Owner, PrismaClient, Product, User } from '@prisma/client';
+import { Entity, PrismaClient, Product, User } from '@prisma/client';
 import { users } from './seeds/users';
 import { products } from './seeds/products';
-import { owners } from './seeds/owner';
+import { entities } from './seeds/entities';
 import { getRandomObjectFromArray } from '../utils/tools';
 
 const prisma = new PrismaClient();
 
 async function main() {
-	const promises: Promise<User | Product | Owner>[] = [];
+	const promises: Promise<User | Product | Entity>[] = [];
 
 	users.forEach(user => {
 		promises.push(
@@ -24,7 +24,7 @@ async function main() {
 	});
 
 	products.forEach(product => {
-		const randomOwner = getRandomObjectFromArray(owners);
+		const randomEntity = getRandomObjectFromArray(entities);
 		promises.push(
 			prisma.product.upsert({
 				where: {
@@ -33,9 +33,9 @@ async function main() {
 				update: {},
 				create: {
 					...product,
-					owner: {
+					entity: {
 						create: {
-							...(randomOwner as Owner)
+							...(randomEntity as Entity)
 						}
 					}
 				}
@@ -43,22 +43,22 @@ async function main() {
 		);
 	});
 
-	owners.forEach(owner => {
-		promises.push(
-			prisma.owner.upsert({
-				where: {
-					name: owner.name
-				},
-				update: {},
-				create: {
-					...owner
-				}
-			})
-		);
-	});
+	// entities.forEach(entity => {
+	// 	promises.push(
+	// 		prisma.entity.upsert({
+	// 			where: {
+	// 				name: entity.name
+	// 			},
+	// 			update: {},
+	// 			create: {
+	// 				...entity
+	// 			}
+	// 		})
+	// 	);
+	// });
 
 	Promise.all(promises).then(responses => {
-		let log: { [key: string]: User | Product | Owner } = {};
+		let log: { [key: string]: User | Product | Entity } = {};
 		responses.forEach(r => {
 			if ('email' in r) log[`user ${r.email}`] = r;
 			if ('title' in r) log[`product ${r.title}`] = r;

@@ -4,13 +4,27 @@ import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function getProducts() {
+export async function getProducts(sort?: string) {
+	console.log('sort', sort);
+	let orderBy: any = [
+		{
+			title: 'asc'
+		}
+	];
+
+	if (sort) {
+		const values = sort.split(':');
+		if (values.length === 2) {
+			orderBy = [
+				{
+					[values[0]]: values[1]
+				}
+			];
+		}
+	}
+
 	const products = await prisma.product.findMany({
-		orderBy: [
-			{
-				title: 'asc'
-			}
-		]
+		orderBy
 	});
 	return products;
 }
@@ -68,7 +82,7 @@ export default async function handler(
 			const product = await getProduct(id.toString());
 			res.status(200).json(product);
 		} else {
-			const products = await getProducts();
+			const products = await getProducts(req.query.sort?.toString());
 			res.status(200).json(products);
 		}
 	} else if (req.method === 'POST') {

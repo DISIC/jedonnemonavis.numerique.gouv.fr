@@ -1,6 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
-import { Owner, Product } from '@prisma/client';
+import { Entity, Product } from '@prisma/client';
 
 interface Indicator {
 	title: string;
@@ -11,10 +11,10 @@ interface Indicator {
 
 const ProductCard = ({
 	product,
-	owner
+	entity
 }: {
 	product: Product;
-	owner: Owner;
+	entity: Entity;
 }) => {
 	const diplayAppreciation = (appreciation: string) => {
 		switch (appreciation) {
@@ -34,7 +34,7 @@ const ProductCard = ({
 					<p className={fr.cx('fr-card__title')}>{product.title}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-					<p>{owner.name}</p>
+					<p>{entity?.name}</p>
 				</div>
 			</div>
 			<div>
