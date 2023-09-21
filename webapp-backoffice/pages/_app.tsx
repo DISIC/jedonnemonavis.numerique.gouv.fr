@@ -37,12 +37,12 @@ function App({ Component, pageProps }: AppProps) {
 	};
 
 	const cache = createCache({
-		key: 'custom'
+		key: 'cache-backoffice'
 	});
 
-	return getLayout(
+	return (
 		<CacheProvider value={cache}>
-			<Component {...pageProps} />
+			{getLayout(<Component {...pageProps} />)}
 		</CacheProvider>
 	);
 }

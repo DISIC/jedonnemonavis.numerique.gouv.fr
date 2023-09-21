@@ -4,8 +4,12 @@ import { ReactNode } from 'react';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
+import { fr } from '@codegouvfr/react-dsfr';
+import { tss } from 'tss-react/dsfr';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
+	const { classes, cx } = useStyles();
+
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		{
 			iconId: 'fr-icon-account-line',
@@ -42,3 +46,12 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		</>
 	);
 }
+
+const useStyles = tss
+	.withName(PublicLayout.name)
+	.withParams()
+	.create(() => ({
+		logo: {
+			maxHeight: fr.spacing('11v')
+		}
+	}));
