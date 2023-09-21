@@ -8,19 +8,25 @@ import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity, Product } from '@prisma/client';
 import React from 'react';
+import { useDebounce } from 'usehooks-ts';
 
 const DashBoard = () => {
 	const [products, setProducts] = React.useState<Product[]>([]);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
-	const [filter, setFilter] = React.useState<string>('name');
-
-	console.log('filter', filter);
+	const [filter, setFilter] = React.useState<string>('title');
+	const [search, setSearch] = React.useState<string>('');
+	const debouncedSearch = useDebounce(search, 500);
 
 	const retrieveProducts = React.useCallback(async () => {
-		const res = await fetch('/api/prisma/products?sort=' + filter + ':asc');
+		const res = await fetch(
+			'/api/prisma/products?sort=' +
+				filter +
+				':asc' +
+				(search !== '' ? '&search=' + debouncedSearch : '')
+		);
 		const data = await res.json();
 		setProducts(data);
-	}, [filter]);
+	}, [filter, debouncedSearch]);
 
 	const retrieveOwners = async () => {
 		const res = await fetch('/api/prisma/entities');
@@ -84,7 +90,22 @@ const DashBoard = () => {
 						</Select>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-7', 'fr-col--bottom')}>
-						<SearchBar label="Rechercher un produit" />
+						<SearchBar
+							label="Rechercher un produit"
+							onButtonClick={text => {
+								setSearch(text);
+							}}
+							renderInput={({ className, id, placeholder, type }) => (
+								<input
+									className={className}
+									id={id}
+									placeholder={placeholder}
+									type={type}
+									value={search}
+									onChange={event => setSearch(event.target.value)}
+								/>
+							)}
+						/>
 					</div>
 				</div>
 				{products.map((product, index) => (
@@ -96,6 +117,13 @@ const DashBoard = () => {
 						key={index}
 					/>
 				))}
+				{products.length === 0 && (
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+							<p>Aucun produit trouvé</p>
+						</div>
+					</div>
+				)}
 			</div>
 		</>
 	);
