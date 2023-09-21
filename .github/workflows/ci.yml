@@ -33,7 +33,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
+      - name: Build webapp-backoffice
         run: |
+          cd webapp-backoffice
+          npm install
+          npm run build
+
+      - name: Build webapp-form
+        run: |
+          cd webapp-form
           npm install
           npm run build
