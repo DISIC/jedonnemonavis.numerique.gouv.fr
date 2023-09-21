@@ -1,3 +1,4 @@
+import { FormFirstBlock } from '@/components/form/layouts/FormFirstBlock';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 
@@ -16,10 +17,11 @@ export default function JDMAForm() {
 					<div className={fr.cx('fr-col-8')}>
 						<div className={cx(classes.formSection)}>
 							<h1>Je donne mon avis</h1>
-							<h2 className={fr.cx('fr-mt-14v')}>
+							<h2 className={fr.cx('fr-mt-14v', 'fr-mb-10v')}>
 								Démarche :{' '}
 								<span className={classes.productTitle}>{product.title}</span>
 							</h2>
+							<FormFirstBlock />
 						</div>
 					</div>
 				</div>
