@@ -49,7 +49,7 @@ export const FormSecondBlock = (props: Props) => {
 			>
 				<div className={cx(classes.field)}>
 					<SmileyInput
-						label="Était-ce facile à utiliser"
+						label="Était-ce facile à utiliser ?"
 						name="easy"
 						onChange={value => {
 							setTmpOpinion({ ...tmpOpinion, easy: value });
@@ -245,6 +245,12 @@ export const FormSecondBlock = (props: Props) => {
 				<div className={cx(classes.field)}>
 					<Input
 						label="Souhaitez-vous nous en dire davantage ?"
+						nativeTextAreaProps={{
+							onChange: (e: ChangeEvent<HTMLTextAreaElement>) => {
+								setTmpOpinion({ ...tmpOpinion, verbatim: e.target.value });
+							},
+							value: tmpOpinion.verbatim
+						}}
 						hintText={
 							<>
 								Ne communiquez aucune information personnelle ici.
