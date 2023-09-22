@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 export type Feeling = 'good' | 'bad' | 'medium';
 
 export type Opinion = {
@@ -14,3 +16,51 @@ export type Opinion = {
 export type Product = {
 	title: string;
 };
+
+export type FormField =
+	| {
+			kind: 'smiley';
+			name: keyof Opinion;
+			label: string;
+			hint?: ReactNode;
+			condition?: {
+				name: keyof Opinion;
+				value: string;
+			};
+	  }
+	| {
+			kind: 'input-text';
+			name: keyof Opinion;
+			label: string;
+			hint?: ReactNode;
+			condition?: {
+				name: keyof Opinion;
+				value: string;
+			};
+	  }
+	| {
+			kind: 'input-textarea';
+			name: keyof Opinion;
+			label: string;
+			hint?: ReactNode;
+			condition?: {
+				name: keyof Opinion;
+				value: string;
+			};
+	  }
+	| {
+			kind: 'checkbox';
+			name: keyof Opinion;
+			label: string;
+			condition?: {
+				name: keyof Opinion;
+				value: string;
+			};
+			options: {
+				label: string;
+				value: string;
+				name?: string;
+				hint?: string;
+				explanation?: boolean;
+			}[];
+	  };

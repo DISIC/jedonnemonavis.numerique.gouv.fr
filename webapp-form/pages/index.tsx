@@ -37,9 +37,10 @@ export default function JDMAForm() {
 								/>
 							) : (
 								<FormFirstBlock
+									opinion={opinion}
 									product={product}
-									onSubmit={satisfaction => {
-										setOpinion({ ...opinion, satisfaction });
+									onSubmit={tmpOpinion => {
+										setOpinion({ ...tmpOpinion });
 									}}
 								/>
 							)}

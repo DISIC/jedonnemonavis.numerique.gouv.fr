@@ -1,17 +1,23 @@
-import { useState } from 'react';
-import { SmileyInput } from '../elements/SmileyInput';
-import { Button } from '@codegouvfr/react-dsfr/Button';
+import { firstSection } from '@/utils/form';
+import { FormField, Opinion, Product } from '@/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Feeling, Product } from '@/utils/types';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { Field } from '../elements/Field';
+import { SmileyInput } from '../elements/SmileyInput';
 
 type Props = {
 	product: Product;
-	onSubmit: (satisfaction: Feeling) => void;
+	opinion: Opinion;
+	onSubmit: (opinion: Opinion) => void;
 };
 
 export const FormFirstBlock = (props: Props) => {
-	const { onSubmit, product } = props;
-	const [satisfaction, setSatisfaction] = useState<Feeling | null>();
+	const { onSubmit, product, opinion } = props;
+	const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
+
+	const { classes, cx } = useStyles();
 
 	return (
 		<div>
@@ -23,19 +29,20 @@ export const FormFirstBlock = (props: Props) => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
-					if (!!satisfaction) onSubmit(satisfaction);
+					onSubmit(tmpOpinion);
 				}}
 			>
-				<SmileyInput
-					label="Comment s'est passée cette démarche pour vous ?"
-					hint="Ce champ est obligatoire"
-					name="satisfaction"
-					onChange={value => {
-						setSatisfaction(value);
-					}}
-				/>
+				{firstSection.map((field: FormField) => (
+					<div key={field.name} className={cx(classes.field)}>
+						<Field
+							field={field}
+							opinion={tmpOpinion}
+							setOpinion={setTmpOpinion}
+						/>
+					</div>
+				))}
 				<div className={fr.cx('fr-mt-16v')}>
-					<Button type="submit" disabled={!satisfaction}>
+					<Button type="submit" disabled={!tmpOpinion.satisfaction}>
 						Valider
 					</Button>
 				</div>
@@ -43,3 +50,12 @@ export const FormFirstBlock = (props: Props) => {
 		</div>
 	);
 };
+
+const useStyles = tss
+	.withName(SmileyInput.name)
+	.withParams()
+	.create(() => ({
+		field: {
+			marginBottom: fr.spacing('14v')
+		}
+	}));
