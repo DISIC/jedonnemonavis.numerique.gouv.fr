@@ -1,3 +1,33 @@
 .fr-label {
 	font-size: 1.25rem;
 }
+
+.fr-input-group .fr-label {
+	font-weight: bold;
+}
+.fr-input-group .fr-label .fr-hint-text {
+	font-weight: normal;
+}
+
+.fr-fieldset {
+	margin: 0;
+}
+
+.fr-fieldset .fr-fieldset__legend {
+	padding: 0;
+	margin: 0 0 1.5rem 0;
+	font-size: 1.25rem;
+	font-weight: bold !important;
+}
+
+.fr-fieldset .fr-fieldset__content {
+	margin-left: 0;
+}
+
+.fr-fieldset .fr-checkbox-group .fr-label {
+	font-size: 1rem;
+}
+
+textarea.fr-input {
+	min-height: 7rem;
+}

@@ -2,15 +2,24 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { Feeling } from '@/utils/types';
 
 type Props = {
 	label: string;
 	name: string;
 	hint?: string;
-	onChange: (smileySelected: string) => void;
+	onChange: (smileySelected: Feeling) => void;
 };
 
-const smileys = [
+type Smiley = {
+	label: string;
+	value: Feeling;
+	alt: string;
+	img: string;
+	imgSelected: string;
+};
+
+const smileys: Smiley[] = [
 	{
 		label: 'Pas bien',
 		value: 'bad',
@@ -38,7 +47,7 @@ export const SmileyInput = (props: Props) => {
 	const { classes, cx } = useStyles({ nbItems: smileys.length });
 	const { label, name, hint, onChange } = props;
 
-	const [smileySelected, setSmileySelected] = useState<string | undefined>(
+	const [smileySelected, setSmileySelected] = useState<Feeling | undefined>(
 		undefined
 	);
 
@@ -48,22 +57,19 @@ export const SmileyInput = (props: Props) => {
 
 	return (
 		<div>
-			<label className={fr.cx('fr-label')}>
-				<span className={fr.cx('fr-text--bold')}>{label}</span>
-				{hint && (
-					<span className={fr.cx('fr-hint-text', 'fr-mt-2v')}>{hint}</span>
-				)}
-			</label>
 			<div className={cx(classes.smileysContainer)}>
 				<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
-					<legend className={fr.cx('fr-sr-only')}>
-						Renseignez votre ressentit:
+					<legend className={fr.cx('fr-fieldset__legend')}>
+						{label}
+						{hint && (
+							<span className={fr.cx('fr-hint-text', 'fr-mt-2v')}>{hint}</span>
+						)}
 					</legend>
 					<ul>
 						{smileys.map(smiley => (
 							<li key={smiley.value}>
 								<input
-									id={`radio-${smiley.value}`}
+									id={`radio-${name}-${smiley.value}`}
 									className={fr.cx('fr-sr-only')}
 									type="radio"
 									name={name}
@@ -72,7 +78,7 @@ export const SmileyInput = (props: Props) => {
 									}}
 								/>
 								<label
-									htmlFor={`radio-${smiley.value}`}
+									htmlFor={`radio-${name}-${smiley.value}`}
 									className={cx(classes.smileyInput)}
 								>
 									<Image
@@ -127,10 +133,6 @@ const useStyles = tss
 			}
 		},
 		fieldset: {
-			...fr.spacing('margin', {
-				rightLeft: 0
-			}),
-			padding: 0,
 			ul: {
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),

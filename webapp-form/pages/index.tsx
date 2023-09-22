@@ -1,13 +1,27 @@
 import { FormFirstBlock } from '@/components/form/layouts/FormFirstBlock';
+import { FormSecondBlock } from '@/components/form/layouts/FormSecondBlock';
+import { Opinion, Product } from '@/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export default function JDMAForm() {
 	const { classes, cx } = useStyles();
 
-	const product = {
+	const product: Product = {
 		title: '1000J BLUES - AUTO DEPISTAGE DE LA DEPRESSION POST PARTUM'
 	};
+
+	const [opinion, setOpinion] = useState<Opinion>({
+		satisfaction: undefined,
+		comprehension: undefined,
+		easy: undefined,
+		difficulties: [],
+		difficulties_verbatim: undefined,
+		help: [],
+		help_verbatim: undefined,
+		verbatim: undefined
+	});
 
 	return (
 		<div>
@@ -16,12 +30,19 @@ export default function JDMAForm() {
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-8')}>
 						<div className={cx(classes.formSection)}>
-							<h1>Je donne mon avis</h1>
-							<h2 className={fr.cx('fr-mt-14v', 'fr-mb-10v')}>
-								Démarche :{' '}
-								<span className={classes.productTitle}>{product.title}</span>
-							</h2>
-							<FormFirstBlock />
+							{opinion.satisfaction ? (
+								<FormSecondBlock
+									opinion={opinion}
+									onSubmit={result => setOpinion({ ...result })}
+								/>
+							) : (
+								<FormFirstBlock
+									product={product}
+									onSubmit={satisfaction => {
+										setOpinion({ ...opinion, satisfaction });
+									}}
+								/>
+							)}
 						</div>
 					</div>
 				</div>
@@ -48,8 +69,5 @@ const useStyles = tss
 				color: fr.colors.decisions.background.flat.blueFrance.default,
 				...fr.spacing('margin', { bottom: '8v' })
 			}
-		},
-		productTitle: {
-			fontWeight: 400
 		}
 	}));
