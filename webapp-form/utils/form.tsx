@@ -4,7 +4,7 @@ export const firstSection: FormField[] = [
 	{
 		name: 'satisfaction',
 		kind: 'smiley',
-		label: "Comment s'est passée cette démarche pour vous ?",
+		label: 'fields.satisfaction.label',
 		hint: 'Ce champ est obligatoire'
 	}
 ];
@@ -13,105 +13,98 @@ export const secondSection: FormField[] = [
 	{
 		name: 'easy',
 		kind: 'smiley',
-		label: 'Était-ce facile à utiliser ?'
+		label: 'fields.easy.label'
 	},
 	{
 		name: 'comprehension',
 		kind: 'smiley',
-		label: 'Le langage employé était-il facile à comprendre ?'
+		label: 'fields.comprehension.label'
 	},
 	{
 		name: 'difficulties',
 		kind: 'checkbox',
-		label: 'Avez-vous rencontré des difficultés ?',
+		label: 'fields.difficulties.label',
 		options: [
 			{
-				label: "Manque d'informations avant de commencer la démarche",
-				value: "Manque d'informations avant de commencer la démarche"
+				label: 'fields.difficulties.options.0.label',
+				value: 'fields.difficulties.options.0.label'
 			},
 			{
-				label: "La démarche n'a pas fonctionné",
-				value: "La démarche n'a pas fonctionné"
+				label: 'fields.difficulties.options.1.label',
+				value: 'fields.difficulties.options.1.label'
 			},
 			{
-				label: 'Difficulté à joindre les pièces justificatives',
-				value: 'Difficulté à joindre les pièces justificatives'
+				label: 'fields.difficulties.options.2.label',
+				value: 'fields.difficulties.options.2.label'
 			},
 			{
-				label: "Manque d'informations sur la suite, le délai...",
-				value: "Manque d'informations sur la suite, le délai..."
+				label: 'fields.difficulties.options.3.label',
+				value: 'fields.difficulties.options.3.label'
 			},
 			{
-				label: 'Autre',
-				value: 'Autre'
+				label: 'fields.difficulties.options.4.label',
+				value: 'fields.difficulties.options.4.label'
 			}
 		]
 	},
 	{
 		condition: {
 			name: 'difficulties',
-			value: 'Autre'
+			value: 'fields.difficulties.options.4.label'
 		},
 		name: 'difficulties_verbatim',
 		kind: 'input-text',
-		hint: 'Maximum 250 caractères.',
-		label: 'Pouvez-vous préciser quelle autre difficulté vous avez rencontré ?'
+		hint: 'fields.difficulties_verbatim.hint',
+		label: 'fields.difficulties_verbatim.label'
 	},
 	{
 		name: 'help',
 		kind: 'checkbox',
-		label: 'De quelle aide avez-vous eu besoin ?',
+		label: 'fields.help.label',
 		options: [
 			{
-				label: 'Aucune',
-				value: 'Aucune'
+				label: 'fields.help.options.0.label',
+				value: 'fields.help.options.0.label'
 			},
 			{
-				label: 'Un ou une proche',
-				hint: 'Famille, amis...',
-				value: 'Un ou une proche'
+				label: 'fields.help.options.1.label',
+				hint: 'fields.help.options.1.hint',
+				value: 'fields.help.options.1.label'
 			},
 			{
-				label: 'Une association',
-				value: 'Une association'
+				label: 'fields.help.options.2.label',
+				value: 'fields.help.options.2.label'
 			},
 			{
-				label: 'Un agent public',
-				hint: "Santé, enseignement, impôts, force de l'ordre, France services...",
-				value: 'Un agent public'
+				label: 'fields.help.options.3.label',
+				hint: 'fields.help.options.3.hint',
+				value: 'fields.help.options.3.label'
 			},
 			{
-				label: 'Internet',
-				hint: 'Site, forum...',
-				value: 'Internet'
+				label: 'fields.help.options.4.label',
+				hint: 'fields.help.options.4.hint',
+				value: 'fields.help.options.4.label'
 			},
 			{
-				label: 'Autre',
-				value: 'Autre'
+				label: 'fields.help.options.5.label',
+				value: 'fields.help.options.5.label'
 			}
 		]
 	},
 	{
 		condition: {
 			name: 'help',
-			value: 'Autre'
+			value: 'fields.help.options.5.label'
 		},
 		name: 'help_verbatim',
 		kind: 'input-text',
-		hint: 'Maximum 250 caractères.',
-		label: 'Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?'
+		hint: 'fields.help_verbatim.hint',
+		label: 'fields.help_verbatim.label'
 	},
 	{
 		name: 'verbatim',
 		kind: 'input-textarea',
-		hint: (
-			<>
-				Ne communiquez aucune information personnelle ici.
-				<br />
-				Ceci n’est pas un formulaire de contact. Si vous avez des questions sur
-				cette démarche, contactez le service concerné.
-			</>
-		),
-		label: 'Souhaitez-vous nous en dire davantage ?'
+		hint: 'fields.verbatim.hint',
+		label: 'fields.verbatim.label'
 	}
 ];

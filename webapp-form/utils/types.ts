@@ -32,7 +32,7 @@ export type FormField =
 			kind: 'input-text';
 			name: keyof Opinion;
 			label: string;
-			hint?: ReactNode;
+			hint?: string;
 			condition?: {
 				name: keyof Opinion;
 				value: string;
@@ -42,7 +42,7 @@ export type FormField =
 			kind: 'input-textarea';
 			name: keyof Opinion;
 			label: string;
-			hint?: ReactNode;
+			hint?: string;
 			condition?: {
 				name: keyof Opinion;
 				value: string;

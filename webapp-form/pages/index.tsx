@@ -4,12 +4,21 @@ import { Opinion, Product } from '@/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 
 export default function JDMAForm() {
 	const { classes, cx } = useStyles();
+	const router = useRouter();
 
 	const product: Product = {
 		title: '1000J BLUES - AUTO DEPISTAGE DE LA DEPRESSION POST PARTUM'
+	};
+
+	const onToggleLanguageClick = (newLocale: string) => {
+		const { pathname, asPath, query } = router;
+		router.push({ pathname, query }, asPath, { locale: newLocale });
 	};
 
 	const [opinion, setOpinion] = useState<Opinion>({
@@ -30,6 +39,20 @@ export default function JDMAForm() {
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-8')}>
 						<div className={cx(classes.formSection)}>
+							<button
+								onClick={() => {
+									onToggleLanguageClick('fr');
+								}}
+							>
+								fr
+							</button>
+							<button
+								onClick={() => {
+									onToggleLanguageClick('en');
+								}}
+							>
+								en
+							</button>
 							{opinion.satisfaction ? (
 								<FormSecondBlock
 									opinion={opinion}
@@ -72,3 +95,11 @@ const useStyles = tss
 			}
 		}
 	}));
+
+export async function getStaticProps({ locale }: { locale: any }) {
+	return {
+		props: {
+			...(await serverSideTranslations(locale ?? 'fr', ['common']))
+		}
+	};
+}

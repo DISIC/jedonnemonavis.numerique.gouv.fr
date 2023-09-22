@@ -6,6 +6,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import '../styles/global.css';
+import { appWithTranslation } from 'next-i18next';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -48,4 +49,4 @@ function App({ Component, pageProps }: AppProps) {
 	);
 }
 
-export default withDsfr(App);
+export default appWithTranslation(withDsfr(App));

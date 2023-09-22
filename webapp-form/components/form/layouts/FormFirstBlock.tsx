@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Field } from '../elements/Field';
 import { SmileyInput } from '../elements/SmileyInput';
+import { useTranslation } from 'next-i18next';
 
 type Props = {
 	product: Product;
@@ -16,14 +17,15 @@ type Props = {
 export const FormFirstBlock = (props: Props) => {
 	const { onSubmit, product, opinion } = props;
 	const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
+	const { t } = useTranslation('common');
 
 	const { classes, cx } = useStyles();
 
 	return (
 		<div>
-			<h1>Je donne mon avis</h1>
+			<h1>{t('first_block.title')}</h1>
 			<h2 className={fr.cx('fr-mt-14v', 'fr-mb-10v')}>
-				Démarche :{' '}
+				{t('first_block.product')} :{' '}
 				<span className={fr.cx('fr-text--regular')}>{product.title}</span>
 			</h2>
 			<form
