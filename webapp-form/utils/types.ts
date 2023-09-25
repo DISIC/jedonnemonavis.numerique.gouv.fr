@@ -22,7 +22,7 @@ export type FormField =
 			kind: 'smiley';
 			name: keyof Opinion;
 			label: string;
-			hint?: ReactNode;
+			hint?: string;
 			condition?: {
 				name: keyof Opinion;
 				value: string;

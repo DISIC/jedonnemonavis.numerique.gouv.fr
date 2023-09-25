@@ -5,7 +5,7 @@ export const firstSection: FormField[] = [
 		name: 'satisfaction',
 		kind: 'smiley',
 		label: 'fields.satisfaction.label',
-		hint: 'Ce champ est obligatoire'
+		hint: 'fields.satisfaction.hint'
 	}
 ];
 

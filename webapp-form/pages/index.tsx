@@ -47,7 +47,7 @@ export default function JDMAForm() {
 					<h1>{t('first_block.title')}</h1>
 				)}
 			</div>
-			<div className={fr.cx('fr-container--fluid', 'fr-container-md')}>
+			<div className={fr.cx('fr-container--fluid', 'fr-container')}>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
 						<div className={cx(classes.formSection)}>
