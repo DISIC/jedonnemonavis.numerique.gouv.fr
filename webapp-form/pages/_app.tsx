@@ -5,7 +5,7 @@ import { ReactNode } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
-import '../styles/global.css';
+import '@/styles/global.css';
 import { appWithTranslation } from 'next-i18next';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
