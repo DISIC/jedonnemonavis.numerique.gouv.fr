@@ -12,6 +12,8 @@ export default function JDMAForm() {
 	const { classes, cx } = useStyles();
 	const router = useRouter();
 
+	const { t } = useTranslation('common');
+
 	const product: Product = {
 		title: '1000J BLUES - AUTO DEPISTAGE DE LA DEPRESSION POST PARTUM'
 	};
@@ -34,10 +36,20 @@ export default function JDMAForm() {
 
 	return (
 		<div>
-			<div className={classes.blueSection}></div>
-			<div className={fr.cx('fr-container')}>
+			<div className={classes.blueSection}>
+				{opinion.satisfaction ? (
+					<h1>
+						{t('second_block.title')}
+						<br />
+						{t('second_block.subtitle')}
+					</h1>
+				) : (
+					<h1>{t('first_block.title')}</h1>
+				)}
+			</div>
+			<div className={fr.cx('fr-container--fluid', 'fr-container')}>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-					<div className={fr.cx('fr-col-8')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
 						<div className={cx(classes.formSection)}>
 							<button
 								onClick={() => {
@@ -81,17 +93,32 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		blueSection: {
-			height: `${blueSectionPxHeight}px`,
-			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			...fr.spacing('padding', { topBottom: '6v', rightLeft: '10v' }),
+			h1: {
+				textAlign: 'center',
+				fontSize: '2.5rem',
+				margin: 0,
+				color: fr.colors.decisions.background.flat.blueFrance.default,
+				[fr.breakpoints.up('md')]: {
+					display: 'none'
+				}
+			},
+			[fr.breakpoints.up('md')]: {
+				height: `${blueSectionPxHeight}px`
+			}
 		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
-			transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-			...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' }),
+			...fr.spacing('padding', { topBottom: '4v', rightLeft: '4v' }),
 			h1: {
 				textAlign: 'center',
 				color: fr.colors.decisions.background.flat.blueFrance.default,
 				...fr.spacing('margin', { bottom: '8v' })
+			},
+			[fr.breakpoints.up('md')]: {
+				transform: `translateY(-${blueSectionPxHeight / 2}px)`,
+				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' })
 			}
 		}
 	}));

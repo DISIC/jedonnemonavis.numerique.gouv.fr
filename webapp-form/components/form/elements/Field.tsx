@@ -54,6 +54,7 @@ export const Field = (props: Props) => {
 			return (
 				<SmileyInput
 					label={t(field.label)}
+					hint={field.hint ? t(field.hint) : undefined}
 					name={field.name}
 					onChange={value => {
 						setOpinion({ ...opinion, [field.name]: value });

@@ -9,7 +9,8 @@
 	},
 	"fields": {
 		"satisfaction": {
-			"label": "Comment s'est passée cette démarche pour vous ?"
+			"label": "Comment s'est passée cette démarche pour vous ?",
+			"hint": "Ce champ est obligatoire."
 		},
 		"easy": {
 			"label": "Était-ce facile à utiliser ?"

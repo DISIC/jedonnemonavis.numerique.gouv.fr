@@ -118,26 +118,42 @@ const useStyles = tss
 			}
 		},
 		smileyInput: {
-			width: '8rem',
+			width: '100%',
 			border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-			padding: fr.spacing('1v'),
+			padding: fr.spacing('3v'),
 			display: 'flex',
-			flexDirection: 'column',
 			alignItems: 'center',
 			cursor: 'pointer',
 			img: {
-				marginTop: fr.spacing('2v')
+				marginRight: fr.spacing('2v')
 			},
 			['&:hover']: {
 				borderColor: fr.colors.decisions.background.alt.grey.active
+			},
+			[fr.breakpoints.up('md')]: {
+				flexDirection: 'column',
+				width: '8rem',
+				padding: fr.spacing('1v'),
+				img: {
+					marginTop: fr.spacing('2v'),
+					marginRight: 0
+				}
 			}
 		},
 		fieldset: {
+			width: '100%',
 			ul: {
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
-				columns: nbItems
+				width: '100%'
+			},
+			[fr.breakpoints.up('md')]: {
+				width: 'initial',
+				ul: {
+					width: 'initial',
+					columns: nbItems
+				}
 			}
 		}
 	}));

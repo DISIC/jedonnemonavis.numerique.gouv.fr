@@ -23,8 +23,8 @@ export const FormFirstBlock = (props: Props) => {
 
 	return (
 		<div>
-			<h1>{t('first_block.title')}</h1>
-			<h2 className={fr.cx('fr-mt-14v', 'fr-mb-10v')}>
+			<h1 className={cx(classes.title)}>{t('first_block.title')}</h1>
+			<h2 className={fr.cx('fr-mt-4v', 'fr-mt-md-14v', 'fr-mb-10v')}>
 				{t('first_block.product')} :{' '}
 				<span className={fr.cx('fr-text--regular')}>{product.title}</span>
 			</h2>
@@ -57,6 +57,11 @@ const useStyles = tss
 	.withName(SmileyInput.name)
 	.withParams()
 	.create(() => ({
+		title: {
+			[fr.breakpoints.down('md')]: {
+				display: 'none'
+			}
+		},
 		field: {
 			marginBottom: fr.spacing('14v')
 		}
