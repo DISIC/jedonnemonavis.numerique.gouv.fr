@@ -102,7 +102,7 @@ export const LoginForm = () => {
 			if (res?.error) {
 				if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
 			} else {
-				alert('Connecté !');
+				router.push('/administration/dashboard');
 			}
 		});
 	};
