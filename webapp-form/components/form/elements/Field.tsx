@@ -1,9 +1,8 @@
 import { FormField, Opinion } from '@/utils/types';
-import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { useTranslation } from 'next-i18next';
 import { ChangeEvent, SetStateAction } from 'react';
-import { tss } from 'tss-react/dsfr';
 import { SmileyInput } from '../elements/SmileyInput';
 
 type Props = {
@@ -14,7 +13,8 @@ type Props = {
 
 export const Field = (props: Props) => {
 	const { field, opinion, setOpinion } = props;
-	const { classes, cx } = useStyles();
+
+	const { t } = useTranslation('common');
 
 	const onChangeCheckbox = (
 		key: 'difficulties' | 'help',
@@ -38,13 +38,13 @@ export const Field = (props: Props) => {
 		// Si le champ de la source de condition est un Array et qu'il contient la valeur cible
 		if (
 			Array.isArray(opinion[field.condition.name]) &&
-			!opinion[field.condition.name]?.includes(field.condition.value)
+			!opinion[field.condition.name]?.includes(t(field.condition.value))
 		)
 			return;
 		// Si le champ de la source de condition n'est pas un Array et que la valeur n'est pas égale
 		else if (
 			!Array.isArray(opinion[field.condition.name]) &&
-			opinion[field.condition.name] !== field.condition.value
+			opinion[field.condition.name] !== t(field.condition.value)
 		)
 			return;
 	}
@@ -53,7 +53,7 @@ export const Field = (props: Props) => {
 		case 'smiley':
 			return (
 				<SmileyInput
-					label={field.label}
+					label={t(field.label)}
 					name={field.name}
 					onChange={value => {
 						setOpinion({ ...opinion, [field.name]: value });
@@ -64,12 +64,12 @@ export const Field = (props: Props) => {
 			return (
 				<>
 					<Checkbox
-						legend={field.label}
+						legend={t(field.label)}
 						options={field.options.map((opt, index) => ({
-							label: opt.label,
+							label: t(opt.label),
 							nativeInputProps: {
 								name: opt.name || `${field.name}-${index}`,
-								value: opt.value,
+								value: t(opt.value),
 								onChange: e => {
 									onChangeCheckbox(field.name as 'difficulties' | 'help', e);
 								}
@@ -81,8 +81,8 @@ export const Field = (props: Props) => {
 		case 'input-textarea':
 			return (
 				<Input
-					hintText={field.hint}
-					label={field.label}
+					hintText={field.hint ? t(field.hint) : undefined}
+					label={t(field.label)}
 					state="default"
 					stateRelatedMessage="Text de validation / d'explication de l'erreur"
 					nativeTextAreaProps={{
@@ -100,8 +100,8 @@ export const Field = (props: Props) => {
 		case 'input-text':
 			return (
 				<Input
-					hintText={field.hint}
-					label={field.label}
+					hintText={field.hint ? t(field.hint) : undefined}
+					label={t(field.label)}
 					state="default"
 					stateRelatedMessage="Text de validation / d'explication de l'erreur"
 					nativeInputProps={{
@@ -117,12 +117,3 @@ export const Field = (props: Props) => {
 			);
 	}
 };
-
-const useStyles = tss
-	.withName(Field.name)
-	.withParams()
-	.create(() => ({
-		field: {
-			marginBottom: fr.spacing('14v')
-		}
-	}));

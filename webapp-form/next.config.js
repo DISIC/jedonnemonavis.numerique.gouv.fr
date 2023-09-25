@@ -1,4 +1,6 @@
 /** @type {import('next').NextConfig} */
+const { i18n } = require('./next-i18next.config');
+
 const nextConfig = {
 	reactStrictMode: true,
 	swcMinify: true,
@@ -16,7 +18,8 @@ const nextConfig = {
 	transpilePackages: [
 		'@codegouvfr/react-dsfr',
 		'tss-react' // This is for MUI or if you use htts://tss-react.dev
-	]
+	],
+	i18n
 };
 
 module.exports = nextConfig;
