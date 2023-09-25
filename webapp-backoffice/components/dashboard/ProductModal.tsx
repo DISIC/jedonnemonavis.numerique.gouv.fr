@@ -79,7 +79,7 @@ const ProductModal = (modal: CustomProps) => {
 							className={cx(classes.autocomplete)}
 							id={id}
 							value={search}
-							onChange={(event, value) => setSearch(value)}
+							// onChange={(event, value) => setSearch(value)}
 							renderInput={params => (
 								<div ref={params.InputProps.ref}>
 									<input
