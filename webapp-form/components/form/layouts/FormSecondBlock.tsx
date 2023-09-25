@@ -22,7 +22,7 @@ export const FormSecondBlock = (props: Props) => {
 
 	return (
 		<div>
-			<h1 className={cx(classes.title)}>
+			<h1 className={cx(classes.title, fr.cx('fr-mb-14v'))}>
 				{t('second_block.title')}
 				<br />
 				{t('second_block.subtitle')}
