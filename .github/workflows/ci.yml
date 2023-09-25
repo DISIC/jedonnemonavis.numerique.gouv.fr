@@ -18,7 +18,7 @@ jobs:
   #     - run: npm run build
   #     - run: lhci autorun
 
-  build:
+  build-webapp-backoffice:
     runs-on: ubuntu-latest
 
     strategy:
@@ -33,7 +33,29 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build
+      - name: Build webapp-backoffice
         run: |
+          cd webapp-backoffice
+          npm install
+          npm run build
+
+  build-webapp-form:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build webapp-form
+        run: |
+          cd webapp-form
           npm install
           npm run build

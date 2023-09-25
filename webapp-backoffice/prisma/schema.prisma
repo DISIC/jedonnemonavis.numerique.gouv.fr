@@ -1,0 +1,70 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RequestMode {
+  whitelist
+  superuser
+}
+
+// Next auth
+model User {
+  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
+  firstName            String?
+  lastName             String?
+  active               Boolean               @default(false)
+  observatoire_account Boolean               @default(false)
+  email                String                @unique
+  password             String
+  UserOTPs             UserOTP[]
+  UserValidationTokens UserValidationToken[]
+  UserRequests         UserRequest[]
+}
+
+model UserRequest {
+  id      String      @id @default(auto()) @map("_id") @db.ObjectId
+  user    User        @relation(fields: [user_id], references: [id])
+  user_id String      @db.ObjectId
+  reason  String
+  mode    RequestMode
+}
+
+model UserOTP {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  user            User     @relation(fields: [user_id], references: [id])
+  user_id         String   @db.ObjectId
+  code            String   @unique
+  expiration_date DateTime
+}
+
+model UserValidationToken {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String @db.ObjectId
+  token   String @unique
+}
+
+model Entity {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String    @unique
+  products Product[]
+}
+
+model Product {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String   @unique
+  entity     Entity?  @relation(fields: [entity_id], references: [id])
+  entity_id  String   @db.ObjectId
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model WhiteListedDomain {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  domain String @unique
+}
