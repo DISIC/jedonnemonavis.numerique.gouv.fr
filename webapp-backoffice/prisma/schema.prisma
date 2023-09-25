@@ -65,13 +65,15 @@ model Button {
 }
 
 model Product {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  title      String   @unique
-  entity     Entity?  @relation(fields: [entity_id], references: [id])
-  entity_id  String   @db.ObjectId
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  buttons    Button[]
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String   @unique
+  entity      Entity?  @relation(fields: [entity_id], references: [id])
+  entity_id   String   @db.ObjectId
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  buttons     Button[]
+  isEssential Boolean?
+  urls        String[]
 }
 
 model WhiteListedDomain {

@@ -10,6 +10,11 @@ import { Entity, Product } from '@prisma/client';
 import React from 'react';
 import { useDebounce } from 'usehooks-ts';
 
+const modal = createModal({
+	id: 'product-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoard = () => {
 	const [products, setProducts] = React.useState<Product[]>([]);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
@@ -39,16 +44,17 @@ const DashBoard = () => {
 		retrieveOwners();
 	}, [retrieveProducts]);
 
-	const modal = createModal({
-		id: 'product-modal',
-		isOpenedByDefault: false
-	});
-
 	const isOpen = useIsModalOpen(modal);
+
+	React.useEffect(() => {
+		if (!isOpen) {
+			retrieveProducts();
+		}
+	}, [isOpen]);
 
 	return (
 		<>
-			{/* <ProductModal {...modal} isOpen={isOpen} /> */}
+			<ProductModal modal={modal} isOpen={isOpen} />
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -60,7 +66,9 @@ const DashBoard = () => {
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
-							onClick={() => modal.open()}
+							type="button"
+							// onClick={() => modal.open()}
+							nativeButtonProps={modal.buttonProps}
 						>
 							Ajouter un nouveau produit
 						</Button>

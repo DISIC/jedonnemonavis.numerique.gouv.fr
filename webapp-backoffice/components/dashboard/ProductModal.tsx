@@ -9,10 +9,10 @@ import { useDebounce } from 'usehooks-ts';
 
 import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Entity } from '@prisma/client';
-import { Autocomplete } from '@mui/material';
+import { Entity, Product } from '@prisma/client';
+import Autocomplete from '@mui/material/Autocomplete';
 
-interface CustomProps {
+interface CustomModalProps {
 	buttonProps: {
 		id: string;
 		'aria-controls': string;
@@ -23,24 +23,67 @@ interface CustomProps {
 	open: () => void;
 	isOpenedByDefault: boolean;
 	id: string;
-	isOpen: boolean;
 }
 
-const ProductModal = (modal: CustomProps) => {
+interface Props {
+	isOpen: boolean;
+	modal: CustomModalProps;
+}
+
+const ProductModal = (props: Props) => {
+	const { modal, isOpen } = props;
 	const { cx, classes } = useStyles();
 	const [search, setSearch] = React.useState<string>('');
-	const debouncedSearch = useDebounce(search, 1500);
+	const debouncedSearch = useDebounce(search, 500);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
+	const [product, setProduct] = React.useState<Omit<Product, 'id'>>();
+	const [urlInputs, setUrlInputs] = React.useState<any[]>([
+		<Input
+			id="product-url"
+			label="URL"
+			nativeInputProps={{
+				name: 'url',
+				onChange: event => {
+					setUrls([...urls, event.target.value]);
+				}
+			}}
+		/>
+	]);
+	const [urls, setUrls] = React.useState<string[]>([]);
+	const debouncedUrls = useDebounce(urls, 1500);
 
-	const retrieveOwners = async (query: string) => {
+	const retrieveEntities = async (query: string) => {
 		const res = await fetch(`/api/prisma/entities?name=${query}`);
 		const data = await res.json();
 		setEntities(data);
 	};
 
 	React.useEffect(() => {
-		retrieveOwners(debouncedSearch);
+		isOpen && retrieveEntities(debouncedSearch);
 	}, [debouncedSearch]);
+
+	React.useEffect(() => {
+		if (urls.length > 0) {
+			setProduct({
+				...product,
+				urls: urls,
+				entity_id: entities[0].id
+			} as Omit<Product, 'id'>);
+		}
+	}, [urls]);
+
+	const saveProduct = async () => {
+		if (!product) return;
+
+		fetch('/api/prisma/products', {
+			method: 'POST',
+			body: JSON.stringify(product)
+		})
+			.then(res => res.json())
+			.finally(() => {
+				modal.close();
+			});
+	};
 
 	return (
 		<modal.Component
@@ -54,11 +97,16 @@ const ProductModal = (modal: CustomProps) => {
 			size="large"
 			buttons={[
 				{
-					onClick: () => modal.close(),
+					onClick: () => {
+						setUrlInputs([<Input id="product-url" label="URL" />]);
+						modal.close();
+					},
 					children: 'Annuler'
 				},
 				{
-					onClick: () => console.log('produit créé'),
+					onClick: () => {
+						saveProduct();
+					},
 					children: 'Ajouter ce produit'
 				}
 			]}
@@ -68,7 +116,18 @@ const ProductModal = (modal: CustomProps) => {
 				<span className={cx(classes.asterisk)}>*</span> sont obligatoires
 			</p>
 			<form id="product-form">
-				<Input id="product-name" label="Nom du produit" />
+				<Input
+					id="product-name"
+					label="Nom du produit"
+					nativeInputProps={{
+						name: 'title',
+						onChange: event =>
+							setProduct({
+								...product,
+								title: event.target.value
+							} as Omit<Product, 'id'>)
+					}}
+				/>
 				<SearchBar
 					className={fr.cx('fr-mb-3v')}
 					id="entity-search"
@@ -79,12 +138,12 @@ const ProductModal = (modal: CustomProps) => {
 							className={cx(classes.autocomplete)}
 							id={id}
 							value={search}
-							// onChange={(event, value) => setSearch(value)}
 							renderInput={params => (
 								<div ref={params.InputProps.ref}>
 									<input
 										id="freeSolo"
 										{...params.inputProps}
+										onChange={event => setSearch(event.target.value)}
 										className={cx(params.inputProps.className, className)}
 										placeholder={placeholder}
 										type={type}
@@ -99,7 +158,6 @@ const ProductModal = (modal: CustomProps) => {
 				/>
 
 				<Checkbox
-					id="essential"
 					className={fr.cx('fr-mt-3w')}
 					options={[
 						{
@@ -107,22 +165,55 @@ const ProductModal = (modal: CustomProps) => {
 							hintText:
 								'Cocher cette case si ce produit fait parti des démarches suivies sur le site Vos démarches essentielles',
 							nativeInputProps: {
-								id: 'essential',
 								name: 'essential',
-								value: 'essential'
+								onChange: event => {
+									setProduct({
+										...product,
+										isEssential: event.target.checked
+									} as Omit<Product, 'id'>);
+								}
 							}
 						}
 					]}
 				/>
-				<Input id="product-url" label="URL" />
+
+				{urlInputs.map((input, index) => {
+					return input;
+				})}
 				<Button
 					priority="secondary"
 					iconId="fr-icon-add-circle-line"
 					iconPosition="left"
+					type="button"
+					onClick={() => {
+						setUrlInputs([
+							...urlInputs,
+							<Input
+								id="product-url"
+								hideLabel={true}
+								label="url"
+								nativeInputProps={{
+									name: 'url',
+									onChange: event => {
+										setUrls([...urls, event.target.value]);
+									}
+								}}
+							/>
+						]);
+					}}
 				>
 					Ajouter un URL
 				</Button>
-				<Input id="product-volume" label="Volumétrie par an" />
+				<Input
+					className={fr.cx('fr-mt-3w')}
+					id="product-volume"
+					label="Volumétrie par an"
+					nativeInputProps={{
+						inputMode: 'numeric',
+						pattern: '[0-9]*',
+						type: 'number'
+					}}
+				/>
 			</form>
 		</modal.Component>
 	);
