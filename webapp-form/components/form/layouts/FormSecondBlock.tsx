@@ -22,7 +22,7 @@ export const FormSecondBlock = (props: Props) => {
 
 	return (
 		<div>
-			<h1 className={fr.cx('fr-mb-14v')}>
+			<h1 className={cx(classes.title)}>
 				{t('second_block.title')}
 				<br />
 				{t('second_block.subtitle')}
@@ -54,6 +54,11 @@ const useStyles = tss
 	.withName(SmileyInput.name)
 	.withParams()
 	.create(() => ({
+		title: {
+			[fr.breakpoints.down('md')]: {
+				display: 'none'
+			}
+		},
 		field: {
 			marginBottom: fr.spacing('14v')
 		}
