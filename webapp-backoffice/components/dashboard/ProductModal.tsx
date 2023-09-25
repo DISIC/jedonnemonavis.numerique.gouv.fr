@@ -117,7 +117,7 @@ const ProductModal = (modal: CustomProps) => {
 				<Input id="product-url" label="URL" />
 				<Button
 					priority="secondary"
-					iconId="fr-fi-plus-line"
+					iconId="fr-icon-add-circle-line"
 					iconPosition="left"
 				>
 					Ajouter un URL
