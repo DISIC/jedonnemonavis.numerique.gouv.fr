@@ -143,27 +143,32 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{products.map((product, index) => (
-					<ProductCard
-						product={product}
-						entity={
-							entities.find(entity => product.entity_id === entity.id) as Entity
-						}
-						key={index}
-					/>
-				))}
-				{products.length === 0 && (
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-5', 'fr-py-10v'),
-								classes.textContainer
-							)}
-						>
-							<p>Aucun produit trouvé</p>
+				<div className={cx(classes.productsContainer)}>
+					{products.map((product, index) => (
+						<ProductCard
+							product={product}
+							entity={
+								entities.find(
+									entity => product.entity_id === entity.id
+								) as Entity
+							}
+							key={index}
+						/>
+					))}
+					{products.length === 0 && (
+						<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
+									classes.textContainer
+								)}
+								role="status"
+							>
+								<p>Aucun produit trouvé</p>
+							</div>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 		</>
 	);
@@ -188,8 +193,15 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 			}
 		}
 	},
+	productsContainer: {
+		minHeight: '20rem'
+	},
 	textContainer: {
-		textAlign: 'center'
+		textAlign: 'center',
+		p: {
+			margin: 0,
+			fontWeight: 'bold'
+		}
 	},
 	searchForm: {
 		'.fr-search-bar': {
