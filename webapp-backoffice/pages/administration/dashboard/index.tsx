@@ -26,11 +26,7 @@ const DashBoard = () => {
 
 	const retrieveProducts = React.useCallback(async () => {
 		const res = await fetch(
-			'/api/prisma/products?sort=' +
-				filter +
-				':desc' +
-				'&search=' +
-				validatedSearch
+			'/api/prisma/products?sort=' + filter + '&search=' + validatedSearch
 		);
 		const data = await res.json();
 		setProducts(data);
@@ -105,9 +101,10 @@ const DashBoard = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="title">Nom</option>
-							<option value="created_at">Date de création</option>
-							<option value="updated_at">Date de mise à jour</option>
+							<option value="title:asc">Nom A à Z</option>
+							<option value="entity.name:asc">Ministère A à Z</option>
+							<option value="created_at:desc">Date de création</option>
+							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
