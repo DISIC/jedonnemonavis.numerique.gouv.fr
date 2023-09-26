@@ -25,7 +25,6 @@ const DashBoard = () => {
 	const { cx, classes } = useStyles();
 
 	const retrieveProducts = React.useCallback(async () => {
-		console.log('RETRIEVE');
 		const res = await fetch(
 			'/api/prisma/products?sort=' +
 				filter +
