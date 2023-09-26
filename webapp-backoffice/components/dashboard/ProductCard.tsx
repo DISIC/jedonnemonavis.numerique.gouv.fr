@@ -1,6 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import { Entity, Product } from '@prisma/client';
+import Link from 'next/link';
 
 interface Indicator {
 	title: string;
@@ -52,7 +53,12 @@ const ProductCard = ({
 		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-					<p className={fr.cx('fr-card__title')}>{product.title}</p>
+					<Link
+						href={`/administration/dashboard/product/${product.id}`}
+						className={fr.cx('fr-card__title')}
+					>
+						{product.title}
+					</Link>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 					<p>{entity?.name}</p>
