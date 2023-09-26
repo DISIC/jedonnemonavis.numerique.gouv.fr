@@ -10,6 +10,7 @@ export async function getProducts(sort?: string, search?: string) {
 			title: 'asc'
 		}
 	];
+	let include: any = {};
 
 	let where: any = {
 		title: {
@@ -29,11 +30,24 @@ export async function getProducts(sort?: string, search?: string) {
 	if (sort) {
 		const values = sort.split(':');
 		if (values.length === 2) {
-			orderBy = [
-				{
-					[values[0]]: values[1]
+			if (values[0].includes('.')) {
+				const subValues = values[0].split('.');
+				if (subValues.length === 2) {
+					orderBy = [
+						{
+							[subValues[0]]: {
+								[subValues[1]]: values[1]
+							}
+						}
+					];
 				}
-			];
+			} else {
+				orderBy = [
+					{
+						[values[0]]: values[1]
+					}
+				];
+			}
 		}
 	}
 
