@@ -5,13 +5,10 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity, Product } from '@prisma/client';
-import assert from 'assert';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { useDebounce } from 'usehooks-ts';
 
 const modal = createModal({
 	id: 'product-modal',
@@ -23,21 +20,22 @@ const DashBoard = () => {
 	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [filter, setFilter] = React.useState<string>('title');
 	const [search, setSearch] = React.useState<string>('');
-	const [inputElement, setInputElement] =
-		React.useState<HTMLInputElement | null>(null);
+	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
 	const { cx, classes } = useStyles();
 
-	const retrieveProducts = React.useCallback(
-		async (search: string) => {
-			const res = await fetch(
-				'/api/prisma/products?sort=' + filter + ':desc' + '&search=' + search
-			);
-			const data = await res.json();
-			setProducts(data);
-		},
-		[filter]
-	);
+	const retrieveProducts = React.useCallback(async () => {
+		console.log('RETRIEVE');
+		const res = await fetch(
+			'/api/prisma/products?sort=' +
+				filter +
+				':desc' +
+				'&search=' +
+				validatedSearch
+		);
+		const data = await res.json();
+		setProducts(data);
+	}, [filter, validatedSearch]);
 
 	const retrieveOwners = async () => {
 		const res = await fetch('/api/prisma/entities');
@@ -46,9 +44,12 @@ const DashBoard = () => {
 	};
 
 	React.useEffect(() => {
-		retrieveProducts('');
 		retrieveOwners();
-	}, [retrieveProducts]);
+	}, []);
+
+	React.useEffect(() => {
+		retrieveProducts();
+	}, [validatedSearch, filter]);
 
 	const isOpen = useIsModalOpen(modal);
 
@@ -58,8 +59,9 @@ const DashBoard = () => {
 				modal={modal}
 				isOpen={isOpen}
 				onProductCreated={() => {
+					setSearch('');
 					if (filter === 'created_at') {
-						retrieveProducts('');
+						setValidatedSearch('');
 					} else {
 						setFilter('created_at');
 					}
@@ -114,7 +116,7 @@ const DashBoard = () => {
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
 								e.preventDefault();
-								retrieveProducts(search);
+								setValidatedSearch(search);
 							}}
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
@@ -127,7 +129,7 @@ const DashBoard = () => {
 										value: search,
 										onChange: event => {
 											if (!event.target.value) {
-												retrieveProducts('');
+												setValidatedSearch('');
 											}
 											setSearch(event.target.value);
 										}
