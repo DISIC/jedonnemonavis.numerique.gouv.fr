@@ -20,7 +20,8 @@ export async function getProducts(sort?: string, search?: string) {
 	if (search) {
 		where = {
 			title: {
-				contains: search
+				contains: search,
+				mode: 'insensitive'
 			}
 		};
 	}

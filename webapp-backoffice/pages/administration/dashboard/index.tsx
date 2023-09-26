@@ -2,12 +2,15 @@ import ProductCard from '@/components/dashboard/ProductCard';
 import ProductModal from '@/components/dashboard/ProductModal';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity, Product } from '@prisma/client';
+import assert from 'assert';
 import React from 'react';
+import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 
 const modal = createModal({
@@ -20,18 +23,21 @@ const DashBoard = () => {
 	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [filter, setFilter] = React.useState<string>('title');
 	const [search, setSearch] = React.useState<string>('');
-	const debouncedSearch = useDebounce(search, 500);
+	const [inputElement, setInputElement] =
+		React.useState<HTMLInputElement | null>(null);
 
-	const retrieveProducts = React.useCallback(async () => {
-		const res = await fetch(
-			'/api/prisma/products?sort=' +
-				filter +
-				':asc' +
-				(search !== '' ? '&search=' + debouncedSearch : '')
-		);
-		const data = await res.json();
-		setProducts(data);
-	}, [filter, debouncedSearch]);
+	const { cx, classes } = useStyles();
+
+	const retrieveProducts = React.useCallback(
+		async (search: string) => {
+			const res = await fetch(
+				'/api/prisma/products?sort=' + filter + ':desc' + '&search=' + search
+			);
+			const data = await res.json();
+			setProducts(data);
+		},
+		[filter]
+	);
 
 	const retrieveOwners = async () => {
 		const res = await fetch('/api/prisma/entities');
@@ -40,40 +46,46 @@ const DashBoard = () => {
 	};
 
 	React.useEffect(() => {
-		retrieveProducts();
+		retrieveProducts('');
 		retrieveOwners();
 	}, [retrieveProducts]);
 
 	const isOpen = useIsModalOpen(modal);
 
-	React.useEffect(() => {
-		if (!isOpen) {
-			retrieveProducts();
-		}
-	}, [isOpen]);
-
 	return (
 		<>
-			<ProductModal modal={modal} isOpen={isOpen} />
+			<ProductModal
+				modal={modal}
+				isOpen={isOpen}
+				onProductCreated={() => {
+					if (filter === 'created_at') {
+						retrieveProducts('');
+					} else {
+						setFilter('created_at');
+					}
+				}}
+			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
 						<h2>Mes produits numériques</h2>
 					</div>
-					<div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-7'),
+							classes.buttonContainer
+						)}
+					>
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							// onClick={() => modal.open()}
 							nativeButtonProps={modal.buttonProps}
 						>
 							Ajouter un nouveau produit
 						</Button>
-					</div>
-					<div className={fr.cx('fr-col-6', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"
 							iconId="fr-icon-edit-line"
@@ -84,7 +96,7 @@ const DashBoard = () => {
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 						<Select
 							label="Trier Par"
 							nativeSelectProps={{
@@ -97,23 +109,40 @@ const DashBoard = () => {
 							<option value="updated_at">Date de mise à jour</option>
 						</Select>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-7', 'fr-col--bottom')}>
-						<SearchBar
-							label="Rechercher un produit"
-							onButtonClick={text => {
-								setSearch(text);
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+						<form
+							className={cx(classes.searchForm)}
+							onSubmit={e => {
+								e.preventDefault();
+								retrieveProducts(search);
 							}}
-							renderInput={({ className, id, placeholder, type }) => (
-								<input
-									className={className}
-									id={id}
-									placeholder={placeholder}
-									type={type}
-									value={search}
-									onChange={event => setSearch(event.target.value)}
+						>
+							<div role="search" className={fr.cx('fr-search-bar')}>
+								<Input
+									label="Rechercher un produit"
+									hideLabel
+									nativeInputProps={{
+										placeholder: 'Rechercher un produit',
+										type: 'search',
+										value: search,
+										onChange: event => {
+											if (!event.target.value) {
+												retrieveProducts('');
+											}
+											setSearch(event.target.value);
+										}
+									}}
 								/>
-							)}
-						/>
+								<Button
+									priority="primary"
+									type="submit"
+									iconId="ri-search-2-line"
+									iconPosition="left"
+								>
+									Rechercher
+								</Button>
+							</div>
+						</form>
 					</div>
 				</div>
 				{products.map((product, index) => (
@@ -127,7 +156,12 @@ const DashBoard = () => {
 				))}
 				{products.length === 0 && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+						<div
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-5', 'fr-py-10v'),
+								classes.textContainer
+							)}
+						>
 							<p>Aucun produit trouvé</p>
 						</div>
 					</div>
@@ -136,5 +170,37 @@ const DashBoard = () => {
 		</>
 	);
 };
+
+const useStyles = tss.withName(ProductModal.name).create(() => ({
+	buttonContainer: {
+		[fr.breakpoints.up('md')]: {
+			display: 'flex',
+			alignSelf: 'flex-end',
+			justifyContent: 'flex-end',
+			'.fr-btn': {
+				justifySelf: 'flex-end',
+				'&:first-child': {
+					marginRight: '1rem'
+				}
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			'.fr-btn:first-child': {
+				marginBottom: '1rem'
+			}
+		}
+	},
+	textContainer: {
+		textAlign: 'center'
+	},
+	searchForm: {
+		'.fr-search-bar': {
+			'.fr-input-group': {
+				width: '100%',
+				marginBottom: 0
+			}
+		}
+	}
+}));
 
 export default DashBoard;
