@@ -64,6 +64,7 @@ model Product {
   updated_at  DateTime @updatedAt
   isEssential Boolean?
   urls       String[]
+
 }
 
 model WhiteListedDomain {
