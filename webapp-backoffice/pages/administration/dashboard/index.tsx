@@ -2,31 +2,35 @@ import ProductCard from '@/components/dashboard/ProductCard';
 import ProductModal from '@/components/dashboard/ProductModal';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity, Product } from '@prisma/client';
 import React from 'react';
-import { useDebounce } from 'usehooks-ts';
+import { tss } from 'tss-react/dsfr';
+
+const modal = createModal({
+	id: 'product-modal',
+	isOpenedByDefault: false
+});
 
 const DashBoard = () => {
 	const [products, setProducts] = React.useState<Product[]>([]);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [filter, setFilter] = React.useState<string>('title');
 	const [search, setSearch] = React.useState<string>('');
-	const debouncedSearch = useDebounce(search, 500);
+	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+
+	const { cx, classes } = useStyles();
 
 	const retrieveProducts = React.useCallback(async () => {
 		const res = await fetch(
-			'/api/prisma/products?sort=' +
-				filter +
-				':asc' +
-				(search !== '' ? '&search=' + debouncedSearch : '')
+			'/api/prisma/products?sort=' + filter + '&search=' + validatedSearch
 		);
 		const data = await res.json();
 		setProducts(data);
-	}, [filter, debouncedSearch]);
+	}, [filter, validatedSearch]);
 
 	const retrieveOwners = async () => {
 		const res = await fetch('/api/prisma/entities');
@@ -35,37 +39,50 @@ const DashBoard = () => {
 	};
 
 	React.useEffect(() => {
-		retrieveProducts();
 		retrieveOwners();
-	}, [retrieveProducts]);
+	}, []);
 
-	const modal = createModal({
-		id: 'product-modal',
-		isOpenedByDefault: false
-	});
+	React.useEffect(() => {
+		retrieveProducts();
+	}, [validatedSearch, filter]);
 
 	const isOpen = useIsModalOpen(modal);
 
 	return (
 		<>
-			{/* <ProductModal {...modal} isOpen={isOpen} /> */}
+			<ProductModal
+				modal={modal}
+				isOpen={isOpen}
+				onProductCreated={() => {
+					setSearch('');
+					if (filter === 'created_at') {
+						setValidatedSearch('');
+					} else {
+						setFilter('created_at');
+					}
+				}}
+			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
 						<h2>Mes produits numériques</h2>
 					</div>
-					<div className={fr.cx('fr-col-6', 'fr-col-md-3')}>
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-7'),
+							classes.buttonContainer
+						)}
+					>
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
-							onClick={() => modal.open()}
+							type="button"
+							nativeButtonProps={modal.buttonProps}
 						>
 							Ajouter un nouveau produit
 						</Button>
-					</div>
-					<div className={fr.cx('fr-col-6', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"
 							iconId="fr-icon-edit-line"
@@ -76,7 +93,7 @@ const DashBoard = () => {
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 						<Select
 							label="Trier Par"
 							nativeSelectProps={{
@@ -84,49 +101,116 @@ const DashBoard = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="title">Nom</option>
-							<option value="created_at">Date de création</option>
-							<option value="updated_at">Date de mise à jour</option>
+							<option value="title:asc">Nom A à Z</option>
+							<option value="entity.name:asc">Ministère A à Z</option>
+							<option value="created_at:desc">Date de création</option>
+							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-7', 'fr-col--bottom')}>
-						<SearchBar
-							label="Rechercher un produit"
-							onButtonClick={text => {
-								setSearch(text);
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+						<form
+							className={cx(classes.searchForm)}
+							onSubmit={e => {
+								e.preventDefault();
+								setValidatedSearch(search);
 							}}
-							renderInput={({ className, id, placeholder, type }) => (
-								<input
-									className={className}
-									id={id}
-									placeholder={placeholder}
-									type={type}
-									value={search}
-									onChange={event => setSearch(event.target.value)}
+						>
+							<div role="search" className={fr.cx('fr-search-bar')}>
+								<Input
+									label="Rechercher un produit"
+									hideLabel
+									nativeInputProps={{
+										placeholder: 'Rechercher un produit',
+										type: 'search',
+										value: search,
+										onChange: event => {
+											if (!event.target.value) {
+												setValidatedSearch('');
+											}
+											setSearch(event.target.value);
+										}
+									}}
 								/>
-							)}
-						/>
+								<Button
+									priority="primary"
+									type="submit"
+									iconId="ri-search-2-line"
+									iconPosition="left"
+								>
+									Rechercher
+								</Button>
+							</div>
+						</form>
 					</div>
 				</div>
-				{products.map((product, index) => (
-					<ProductCard
-						product={product}
-						entity={
-							entities.find(entity => product.entity_id === entity.id) as Entity
-						}
-						key={index}
-					/>
-				))}
-				{products.length === 0 && (
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-							<p>Aucun produit trouvé</p>
+				<div className={cx(classes.productsContainer)}>
+					{products.map((product, index) => (
+						<ProductCard
+							product={product}
+							entity={
+								entities.find(
+									entity => product.entity_id === entity.id
+								) as Entity
+							}
+							key={index}
+						/>
+					))}
+					{products.length === 0 && (
+						<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
+									classes.textContainer
+								)}
+								role="status"
+							>
+								<p>Aucun produit trouvé</p>
+							</div>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 		</>
 	);
 };
+
+const useStyles = tss.withName(ProductModal.name).create(() => ({
+	buttonContainer: {
+		[fr.breakpoints.up('md')]: {
+			display: 'flex',
+			alignSelf: 'flex-end',
+			justifyContent: 'flex-end',
+			'.fr-btn': {
+				justifySelf: 'flex-end',
+				'&:first-child': {
+					marginRight: '1rem'
+				}
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			'.fr-btn:first-child': {
+				marginBottom: '1rem'
+			}
+		}
+	},
+	productsContainer: {
+		minHeight: '20rem'
+	},
+	textContainer: {
+		textAlign: 'center',
+		p: {
+			margin: 0,
+			fontWeight: 'bold'
+		}
+	},
+	searchForm: {
+		'.fr-search-bar': {
+			'.fr-input-group': {
+				width: '100%',
+				marginBottom: 0
+			}
+		}
+	}
+}));
 
 export default DashBoard;

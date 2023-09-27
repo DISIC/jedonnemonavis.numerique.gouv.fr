@@ -20,7 +20,7 @@ const ProductCard = ({
 	const diplayAppreciation = (appreciation: string) => {
 		switch (appreciation) {
 			case 'bad':
-				return 'Pas bien';
+				return 'Mauvais';
 			case 'average':
 				return 'Moyen';
 			case 'good':
@@ -33,7 +33,7 @@ const ProductCard = ({
 			title: 'Accessibilité',
 			value: 2,
 			color: 'error',
-			appreciation: 'good'
+			appreciation: 'bad'
 		},
 		{
 			title: 'Sécurité',

@@ -6,6 +6,7 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
+import {createEmotionSsrAdvancedApproach} from 'tss-react/next'
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -31,6 +32,12 @@ const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	]
 });
 
+const {withAppEmotionCache, augmentDocumentWithEmotionCache} = createEmotionSsrAdvancedApproach({
+  key: "css",
+})
+
+export {augmentDocumentWithEmotionCache}
+
 export { dsfrDocumentApi };
 
 function App({ Component, pageProps }: AppProps) {
@@ -51,4 +58,4 @@ function App({ Component, pageProps }: AppProps) {
   )
 }
 
-export default withDsfr(App);
+export default withDsfr(withAppEmotionCache(App));
