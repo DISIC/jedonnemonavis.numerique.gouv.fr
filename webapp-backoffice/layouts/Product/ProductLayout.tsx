@@ -3,6 +3,7 @@ import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import { Product } from '@prisma/client';
 import Link from 'next/link';
 import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -19,6 +20,8 @@ interface MenuItems {
 
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
+
+	const { cx, classes } = useStyles();
 
 	const menuItems: MenuItems[] = [
 		{
@@ -70,7 +73,9 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 					}
 				]}
 			/>
-			<h1>{product.title}</h1>
+			<div className={cx(classes.title)}>
+				<h1>{product.title}</h1>
+			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 					<nav className={fr.cx('fr-sidemenu')}>
@@ -98,5 +103,11 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 		</div>
 	);
 };
+
+const useStyles = tss.create({
+	title: {
+		...fr.spacing('margin', { bottom: '6w' })
+	}
+});
 
 export default ProductLayout;

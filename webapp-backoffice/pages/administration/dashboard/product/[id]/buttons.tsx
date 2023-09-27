@@ -66,6 +66,7 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div>
 			</div>
+			<div></div>
 		</ProductLayout>
 	);
 };
