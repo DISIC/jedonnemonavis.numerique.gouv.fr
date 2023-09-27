@@ -73,7 +73,10 @@ model Product {
   updated_at  DateTime @updatedAt
   buttons     Button[]
   isEssential Boolean?
-  urls        String[]
+  urls       String[]
+    volume      Int?
+
+
 }
 
 model WhiteListedDomain {
