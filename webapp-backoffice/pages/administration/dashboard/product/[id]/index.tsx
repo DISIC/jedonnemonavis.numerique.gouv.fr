@@ -1,17 +1,8 @@
 import { GetServerSideProps, GetServerSidePropsContext } from 'next';
 import { PrismaClient, Product } from '@prisma/client';
 
-interface ProductPageProps {
-	product: Product;
-}
-
-const ProductPage = (props: ProductPageProps) => {
-	const { product } = props;
-	return (
-		<div>
-			<h1>{product.title}</h1>
-		</div>
-	);
+const ProductPage = () => {
+	return;
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {

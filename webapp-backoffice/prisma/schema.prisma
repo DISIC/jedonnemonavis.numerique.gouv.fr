@@ -55,6 +55,15 @@ model Entity {
   products Product[]
 }
 
+model Button {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  title      String   @unique
+  product    Product? @relation(fields: [product_id], references: [id])
+  product_id String   @db.ObjectId
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
 model Product {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
   title      String   @unique
@@ -62,6 +71,7 @@ model Product {
   entity_id  String   @db.ObjectId
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  buttons    Button[]
 }
 
 model WhiteListedDomain {

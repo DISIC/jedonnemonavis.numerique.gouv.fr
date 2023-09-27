@@ -54,7 +54,7 @@ const ProductCard = ({
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 					<Link
-						href={`/administration/dashboard/product/${product.id}`}
+						href={`/administration/dashboard/product/${product.id}/stats`}
 						className={fr.cx('fr-card__title')}
 					>
 						{product.title}
