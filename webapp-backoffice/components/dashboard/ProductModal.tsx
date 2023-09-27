@@ -48,7 +48,8 @@ const defaultProduct = {
 	title: '',
 	entity_id: '',
 	isEssential: false,
-	urls: ['']
+	urls: [''],
+	volume: null
 };
 
 const ProductModal = (props: Props) => {
@@ -298,16 +299,25 @@ const ProductModal = (props: Props) => {
 						Ajouter un URL
 					</Button>
 				</div>
-				<Input
-					className={fr.cx('fr-mt-3w')}
-					id="product-volume"
-					label="Volumétrie par an"
-					nativeInputProps={{
-						inputMode: 'numeric',
-						pattern: '[0-9]*',
-						type: 'number'
-					}}
-				/>
+				<div className={fr.cx('fr-input-group')}>
+					<Input
+						className={fr.cx('fr-mt-3w')}
+						id="product-volume"
+						label="Volumétrie par an"
+						nativeInputProps={{
+							inputMode: 'numeric',
+							pattern: '[0-9]*',
+							type: 'number',
+							value: product.volume ? product.volume : undefined,
+							onChange: event => {
+								setProduct({
+									...product,
+									volume: parseInt(event.target.value)
+								});
+							}
+						}}
+					/>
+				</div>
 			</form>
 		</modal.Component>
 	);

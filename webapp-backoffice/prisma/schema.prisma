@@ -63,8 +63,8 @@ model Product {
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
   isEssential Boolean?
-  urls       String[]
-
+  urls        String[]
+  volume      Int?
 }
 
 model WhiteListedDomain {
