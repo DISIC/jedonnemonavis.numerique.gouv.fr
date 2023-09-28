@@ -19,7 +19,7 @@ const ProductButtonsPage = (props: Props) => {
 	const { product } = props;
 
 	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
-	const [page, setPage] = React.useState(1);
+	const [currentPage, setCurrentPage] = React.useState(1);
 
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
@@ -32,6 +32,10 @@ const ProductButtonsPage = (props: Props) => {
 	React.useEffect(() => {
 		retrieveButtons();
 	}, [retrieveButtons]);
+
+	const handlePageChange = (pageNumber: number) => {
+		setCurrentPage(pageNumber);
+	};
 
 	const { cx, classes } = useStyles();
 
@@ -91,20 +95,23 @@ const ProductButtonsPage = (props: Props) => {
 					<ProductButtonCard key={index} button={button} />
 				))}
 			</div>
-			<Pagination
-				showFirstLast
-				count={10}
-				defaultPage={page}
-				getPageLinkProps={pageNumber => ({
-					onClick: event => {
-						event.preventDefault();
-						setPage(pageNumber);
-					},
-					href: '#',
-					key: `pagination-link-${pageNumber}`
-				})}
-				className={fr.cx('fr-mt-1w')}
-			/>
+			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+				<Pagination
+					showFirstLast
+					count={5}
+					defaultPage={currentPage}
+					getPageLinkProps={pageNumber => ({
+						onClick: event => {
+							event.preventDefault();
+							handlePageChange(pageNumber);
+						},
+						href: '#',
+						classes: { link: fr.cx('fr-pagination__link') },
+						key: `pagination-link-${pageNumber}`
+					})}
+					className={fr.cx('fr-mt-1w')}
+				/>
+			</div>
 		</ProductLayout>
 	);
 };

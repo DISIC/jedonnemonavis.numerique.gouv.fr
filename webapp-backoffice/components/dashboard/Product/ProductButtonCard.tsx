@@ -1,3 +1,4 @@
+import { formatDateToFrenchString } from '@/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Button as PrismaButtonType } from '@prisma/client';
@@ -17,7 +18,7 @@ const ProductButtonCard = (props: Props) => {
 					<p>{button.description}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<p>{button.created_at.toLocaleString()}</p>
+					<p>{formatDateToFrenchString(button.created_at.toString())}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 					<Button priority="secondary">Options</Button>
