@@ -1,10 +1,14 @@
-import { PrismaClient, Product } from '@prisma/client';
+import { PrismaClient, Button } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function getProducts(sort?: string, search?: string) {
+export async function getButtons(
+	sort?: string,
+	search?: string,
+	product_id?: string
+) {
 	let orderBy: any = [
 		{
 			title: 'asc'
@@ -16,6 +20,12 @@ export async function getProducts(sort?: string, search?: string) {
 			contains: ''
 		}
 	};
+
+	if (product_id) {
+		where = {
+			product_id: product_id
+		};
+	}
 
 	if (search) {
 		where = {
@@ -50,52 +60,46 @@ export async function getProducts(sort?: string, search?: string) {
 		}
 	}
 
-	const products = await prisma.product.findMany({
+	const buttons = await prisma.button.findMany({
 		orderBy,
-		where,
-		include: {
-			buttons: true
-		}
+		where
 	});
-	return products;
+	return buttons;
 }
 
-export async function getProduct(id: string) {
-	const product = await prisma.product.findUnique({
+export async function getButton(id: string) {
+	const button = await prisma.button.findUnique({
 		where: {
 			id: id
-		},
-		include: {
-			buttons: true
 		}
 	});
-	return product;
+	return button;
 }
 
-export async function createProduct(data: Omit<Product, 'id'>) {
-	const product = await prisma.product.create({
+export async function createButton(data: Omit<Button, 'id'>) {
+	const button = await prisma.button.create({
 		data: data
 	});
-	return product;
+	return button;
 }
 
-export async function updateProduct(id: string, data: Partial<Product>) {
-	const product = await prisma.product.update({
+export async function updateButton(id: string, data: Partial<Button>) {
+	const button = await prisma.button.update({
 		where: {
 			id: id
 		},
 		data: data
 	});
-	return product;
+	return button;
 }
 
-export async function deleteProduct(id: string) {
-	const product = await prisma.product.delete({
+export async function deleteButton(id: string) {
+	const button = await prisma.button.delete({
 		where: {
 			id: id
 		}
 	});
-	return product;
+	return button;
 }
 
 export default async function handler(
@@ -111,28 +115,32 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, search } = req.query;
+		const { id, sort, search, product_id } = req.query;
 		if (id) {
-			const product = await getProduct(id.toString());
-			res.status(200).json(product);
+			const button = await getButton(id.toString());
+			res.status(200).json(button);
 		} else {
-			const products = await getProducts(sort as string, search as string);
-			res.status(200).json(products);
+			const buttons = await getButtons(
+				sort as string,
+				search as string,
+				product_id as string
+			);
+			res.status(200).json(buttons);
 		}
 	} else if (req.method === 'POST') {
 		const data = JSON.parse(req.body);
-		const product = await createProduct(data);
-		res.status(201).json(product);
+		const button = await createButton(data);
+		res.status(201).json(button);
 	} else if (req.method === 'PUT') {
 		const { id } = req.query;
 
 		const data = req.body;
-		const product = await updateProduct(id as string, data);
-		res.status(200).json(product);
+		const button = await updateButton(id as string, data);
+		res.status(200).json(button);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
-		const product = await deleteProduct(id as string);
-		res.status(200).json(product);
+		const button = await deleteButton(id as string);
+		res.status(200).json(button);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });
 	}

@@ -72,10 +72,10 @@ model Product {
   entity_id   String   @db.ObjectId
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  buttons     Button[]
   isEssential Boolean?
   urls        String[]
   volume      Int?
+  buttons     Button[]
 }
 
 model WhiteListedDomain {

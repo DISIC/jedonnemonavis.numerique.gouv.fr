@@ -9,21 +9,23 @@ interface Props {
 const ProductButtonCard = (props: Props) => {
 	const { button } = props;
 
-	<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
-		<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-			<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-				<p>{button.title}</p>
-				<p>{button.description}</p>
-			</div>
-			<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-				<p>{button.created_at.toLocaleString()}</p>
-			</div>
-			<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
-				<Button priority="secondary">Options</Button>
-				<Button>Installer</Button>
+	return (
+		<div className={fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w')}>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<p>{button.title}</p>
+					<p>{button.description}</p>
+				</div>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+					<p>{button.created_at.toLocaleString()}</p>
+				</div>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
+					<Button priority="secondary">Options</Button>
+					<Button>Installer</Button>
+				</div>
 			</div>
 		</div>
-	</div>;
+	);
 };
 
 export default ProductButtonCard;

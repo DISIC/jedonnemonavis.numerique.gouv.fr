@@ -45,6 +45,18 @@ async function main() {
 						create: {
 							...(randomEntity as Entity)
 						}
+					},
+					buttons: {
+						create: [
+							{
+								title: 'Button 1',
+								description: 'Description 1'
+							},
+							{
+								title: 'Button 2',
+								description: 'Description 2'
+							}
+						]
 					}
 				}
 			})
