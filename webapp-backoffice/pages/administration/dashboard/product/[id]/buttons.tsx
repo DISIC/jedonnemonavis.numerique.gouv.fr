@@ -20,6 +20,7 @@ const ProductButtonsPage = (props: Props) => {
 
 	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
 	const [currentPage, setCurrentPage] = React.useState(1);
+	const [numberPerPage, setNumberPerPage] = React.useState(10);
 
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
@@ -27,6 +28,7 @@ const ProductButtonsPage = (props: Props) => {
 		);
 		const data = await response.json();
 		setButtons(data);
+		setNumberPerPage(data.length);
 	}, []);
 
 	React.useEffect(() => {
@@ -45,7 +47,7 @@ const ProductButtonsPage = (props: Props) => {
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>
 				</div>
-				<div className={fr.cx('fr-col-4')}>
+				<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 					<Button
 						priority="secondary"
 						iconPosition="right"
@@ -59,7 +61,7 @@ const ProductButtonsPage = (props: Props) => {
 				<div className={fr.cx('fr-col-4')}>
 					<p>
 						Boutons de <span className={cx(classes.boldText)}>1</span> à{' '}
-						<span className={cx(classes.boldText)}>10</span> sur{' '}
+						<span className={cx(classes.boldText)}>{numberPerPage}</span> sur{' '}
 						<span className={cx(classes.boldText)}>{buttons.length}</span>
 					</p>
 				</div>
@@ -121,6 +123,9 @@ export default ProductButtonsPage;
 const useStyles = tss.create({
 	boldText: {
 		fontWeight: 'bold'
+	},
+	buttonRight: {
+		textAlign: 'right'
 	}
 });
 

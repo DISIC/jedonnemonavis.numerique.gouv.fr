@@ -14,15 +14,15 @@ const ProductButtonCard = (props: Props) => {
 		<div className={fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w')}>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-					<p>{button.title}</p>
-					<p>{button.description}</p>
+					<p className={fr.cx('fr-mb-0')}>{button.title}</p>
+					<p className={fr.cx('fr-mb-0')}>{button.description}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<p>{formatDateToFrenchString(button.created_at.toString())}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 					<Button priority="secondary">Options</Button>
-					<Button>Installer</Button>
+					<Button className={fr.cx('fr-ml-4w')}>Installer</Button>
 				</div>
 			</div>
 		</div>
