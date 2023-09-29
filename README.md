@@ -39,7 +39,6 @@ Afin que l'application puisse envoyer des e-mails, veuillez configurer le servic
 | NODEMAILER_USER     | Identifiants utilisateur pour accéder au service de messagerie. |
 | NODEMAILER_PASSWORD | Mot de passe associé à l'utilisateur du service de messagerie.  |
 | NODEMAILER_FROM     | Adresse e-mail utilisée comme adresse de l'expéditeur.          |
-| NODEMAILER_BASEURL  | URL de base du service de messagerie.                           |
 
 Installez les dépendances nécessaires :
 
