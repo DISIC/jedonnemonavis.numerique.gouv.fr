@@ -6,20 +6,32 @@ import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
+import { signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { classes, cx } = useStyles();
+	const { pathname } = useRouter();
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
-		{
-			iconId: 'fr-icon-account-line',
-			linkProps: {
-				href: '/login',
-				target: '_self'
-			},
-			text: 'Connexion / Inscription'
-		},
-		headerFooterDisplayItem
+		!pathname.startsWith('/administration')
+			? {
+					iconId: 'fr-icon-account-line',
+					linkProps: {
+						href: '/login',
+						target: '_self'
+					},
+					text: 'Connexion / Inscription'
+			  }
+			: {
+					iconId: 'ri-logout-circle-line',
+					buttonProps: {
+						onClick: () => {
+							signOut();
+						}
+					},
+					text: 'Déconnexion'
+			  }
 	];
 
 	return (
@@ -42,7 +54,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			<main id="main" role="main">
 				{children}
 			</main>
-			<Footer accessibility="non compliant" />
+			<Footer
+				accessibility="non compliant"
+				bottomItems={[headerFooterDisplayItem]}
+			/>
 		</>
 	);
 }

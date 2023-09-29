@@ -6,7 +6,8 @@ import PublicLayout from '@/layouts/PublicLayout';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
-import {createEmotionSsrAdvancedApproach} from 'tss-react/next'
+import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
+import { SessionProvider } from 'next-auth/react';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -32,11 +33,12 @@ const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	]
 });
 
-const {withAppEmotionCache, augmentDocumentWithEmotionCache} = createEmotionSsrAdvancedApproach({
-  key: "css",
-})
+const { withAppEmotionCache, augmentDocumentWithEmotionCache } =
+	createEmotionSsrAdvancedApproach({
+		key: 'css'
+	});
 
-export {augmentDocumentWithEmotionCache}
+export { augmentDocumentWithEmotionCache };
 
 export { dsfrDocumentApi };
 
@@ -49,13 +51,15 @@ function App({ Component, pageProps }: AppProps) {
 		key: 'cache-backoffice'
 	});
 
-	return(
+	return (
 		<MuiDsfrThemeProvider>
-			<CacheProvider value={cache}>
-				{getLayout(<Component {...pageProps} />)}
-			</CacheProvider>
+			<SessionProvider session={pageProps.session}>
+				<CacheProvider value={cache}>
+					{getLayout(<Component {...pageProps} />)}
+				</CacheProvider>{' '}
+			</SessionProvider>
 		</MuiDsfrThemeProvider>
-  )
+	);
 }
 
 export default withDsfr(withAppEmotionCache(App));

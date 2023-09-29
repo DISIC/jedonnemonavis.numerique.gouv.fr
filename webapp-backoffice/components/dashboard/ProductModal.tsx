@@ -250,7 +250,7 @@ const ProductModal = (props: Props) => {
 				<div className={fr.cx('fr-input-group')}>
 					<label className={fr.cx('fr-label')}>URL(s)</label>
 					{product.urls.map((url, index) => (
-						<div className={cx(classes.flexContainer)}>
+						<div key={index} className={cx(classes.flexContainer)}>
 							<Input
 								className={cx(classes.autocomplete)}
 								id={`product-url-${index + 1}`}

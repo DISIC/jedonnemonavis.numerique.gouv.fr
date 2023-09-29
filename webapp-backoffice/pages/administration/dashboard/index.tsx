@@ -182,13 +182,13 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 			justifyContent: 'flex-end',
 			'.fr-btn': {
 				justifySelf: 'flex-end',
-				'&:first-child': {
+				'&:first-of-type': {
 					marginRight: '1rem'
 				}
 			}
 		},
 		[fr.breakpoints.down('md')]: {
-			'.fr-btn:first-child': {
+			'.fr-btn:first-of-type': {
 				marginBottom: '1rem'
 			}
 		}
