@@ -6,8 +6,9 @@ import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { Divider } from '@mui/material';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
+import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -37,6 +38,8 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				return 'Code source';
+			case 'create':
+				return 'Créer un bouton';
 			case 'edit':
 				return 'Modifier un bouton';
 			case 'delete':
@@ -143,9 +146,54 @@ const ButtonModal = (props: Props) => {
 						</Accordion>
 					</div>
 				);
+			case 'create':
+				return (
+					<div>
+						<Input id="button-title" label="Nom du bouton" />
+						<Input
+							id="button-description"
+							label="Description du bouton"
+							textArea
+						/>
+						<Checkbox
+							options={[
+								{
+									hintText:
+										'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
+									label: 'Bouton de test',
+									nativeInputProps: {
+										name: 'checkboxes-1',
+										value: 'value1'
+									}
+								}
+							]}
+						/>
+					</div>
+				);
 
 			default:
 				return <div></div>;
+		}
+	};
+
+	const displayModalButtons = (): ButtonProps[] | undefined => {
+		switch (modalType) {
+			case 'install':
+				break;
+			case 'create':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: modal.close
+					},
+					{
+						children: 'Créer',
+						onClick: modal.close
+					}
+				];
+			default:
+				return;
 		}
 	};
 
@@ -160,6 +208,7 @@ const ButtonModal = (props: Props) => {
 				'fr-grid-row--gutters',
 				'fr-my-0'
 			)}
+			buttons={displayModalButtons()}
 		>
 			{displayModalContent()}
 		</modal.Component>

@@ -2,34 +2,32 @@ import { formatDateToFrenchString } from '@/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Button as PrismaButtonType } from '@prisma/client';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import React from 'react';
-import ButtonModal from './ButtonModal';
+
+interface ButtonModalProps {
+	buttonProps: {
+		id: string;
+		'aria-controls': string;
+		'data-fr-opened': boolean;
+	};
+	Component: (props: ModalProps) => JSX.Element;
+	close: () => void;
+	open: () => void;
+	isOpenedByDefault: boolean;
+	id: string;
+}
 
 interface Props {
 	button: PrismaButtonType;
+	onButtonClick: (modalType: string) => void;
 }
 
-const modal = createModal({
-	id: 'button-modal',
-	isOpenedByDefault: false
-});
-
 const ProductButtonCard = (props: Props) => {
-	const { button } = props;
-	const [modalType, setModalType] = React.useState<string>('');
-
-	const isModalOpen = useIsModalOpen(modal);
-
-	const handleModalOpening = (modalType: string) => {
-		setModalType(modalType);
-		modal.open();
-	};
+	const { button, onButtonClick } = props;
 
 	return (
 		<>
-			<ButtonModal modal={modal} isOpen={isModalOpen} modalType={modalType} />
 			<div className={fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w')}>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
@@ -43,7 +41,7 @@ const ProductButtonCard = (props: Props) => {
 						<Button priority="secondary">Options</Button>
 						<Button
 							className={fr.cx('fr-ml-4w')}
-							onClick={() => handleModalOpening('install')}
+							onClick={() => onButtonClick('install')}
 						>
 							Installer
 						</Button>

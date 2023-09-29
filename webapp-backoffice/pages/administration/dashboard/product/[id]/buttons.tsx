@@ -10,10 +10,18 @@ import { ProductWithButtons } from '@/pages/api/prisma/products/type';
 import { Pagination } from '../../../../../components/ui/Pagination';
 
 import React from 'react';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
 
 interface Props {
 	product: ProductWithButtons;
 }
+
+const modal = createModal({
+	id: 'button-modal',
+	isOpenedByDefault: false
+});
 
 const ProductButtonsPage = (props: Props) => {
 	const { product } = props;
@@ -21,6 +29,7 @@ const ProductButtonsPage = (props: Props) => {
 	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [modalType, setModalType] = React.useState<string>('');
 
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
@@ -39,10 +48,18 @@ const ProductButtonsPage = (props: Props) => {
 		setCurrentPage(pageNumber);
 	};
 
+	const isModalOpen = useIsModalOpen(modal);
+
+	const handleModalOpening = (modalType: string) => {
+		setModalType(modalType);
+		modal.open();
+	};
+
 	const { cx, classes } = useStyles();
 
 	return (
 		<ProductLayout product={product}>
+			<ButtonModal modal={modal} isOpen={isModalOpen} modalType={modalType} />
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>
@@ -52,6 +69,7 @@ const ProductButtonsPage = (props: Props) => {
 						priority="secondary"
 						iconPosition="right"
 						iconId="ri-add-box-line"
+						onClick={() => handleModalOpening('create')}
 					>
 						Créer un bouton
 					</Button>
@@ -94,7 +112,11 @@ const ProductButtonsPage = (props: Props) => {
 			</div>
 			<div>
 				{buttons?.map((button, index) => (
-					<ProductButtonCard key={index} button={button} />
+					<ProductButtonCard
+						key={index}
+						button={button}
+						onButtonClick={handleModalOpening}
+					/>
 				))}
 			</div>
 			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
