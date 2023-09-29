@@ -30,6 +30,17 @@ Copiez le fichier .env.example :
 cp .env.example .env
 ```
 
+Afin que l'application puisse envoyer des e-mails, veuillez configurer le service de messagerie dans votre fichier .env :
+
+| Variable            | Description                                                     |
+| ------------------- | --------------------------------------------------------------- |
+| NODEMAILER_HOST     | Adresse hôte du service de messagerie.                          |
+| NODEMAILER_PORT     | Numéro de port du service de messagerie.                        |
+| NODEMAILER_USER     | Identifiants utilisateur pour accéder au service de messagerie. |
+| NODEMAILER_PASSWORD | Mot de passe associé à l'utilisateur du service de messagerie.  |
+| NODEMAILER_FROM     | Adresse e-mail utilisée comme adresse de l'expéditeur.          |
+| NODEMAILER_BASEURL  | URL de base du service de messagerie.                           |
+
 Installez les dépendances nécessaires :
 
 ```bash
