@@ -1,79 +1,85 @@
 {
-	"first_block": {
-		"title": "Je donne mon avis",
-		"product": "Démarche"
-	},
-	"second_block": {
-		"title": "Merci !",
-		"subtitle": "Pouvez-vous nous en dire plus ?"
-	},
-	"fields": {
-		"satisfaction": {
-			"label": "Comment s'est passée cette démarche pour vous ?",
-			"hint": "Ce champ est obligatoire."
-		},
-		"easy": {
-			"label": "Était-ce facile à utiliser ?"
-		},
-		"comprehension": {
-			"label": "Le langage employé était-il facile à comprendre ?"
-		},
-		"difficulties": {
-			"label": "Avez-vous rencontré des difficultés ?",
-			"options": [
-				{
-					"label": "Manque d'informations avant de commencer la démarche"
-				},
-				{
-					"label": "La démarche n'a pas fonctionné"
-				},
-				{
-					"label": "Difficulté à joindre les pièces justificatives"
-				},
-				{
-					"label": "Manque d'informations sur la suite, le délai..."
-				},
-				{
-					"label": "Autre"
-				}
-			]
-		},
-		"difficulties_verbatim": {
-			"label": "Pouvez-vous préciser quelle autre difficulté vous avez rencontré ?",
-			"hint": "Maximum 250 caractères."
-		},
-		"help": {
-			"label": "De quelle aide avez-vous eu besoin ?",
-			"options": [
-				{
-					"label": "Aucune"
-				},
-				{
-					"label": "Un ou une proche",
-					"hint": "Famille, amis..."
-				},
-				{
-					"label": "Une association"
-				},
-				{
-					"label": "Un agent public",
-					"hint": "Santé, enseignement, impôts, force de l'ordre, France services..."
-				},
-				{
-					"label": "Internet",
-					"hint": "Site, forum..."
-				}, {
-					"label": "Autre"
-				}
-			]
-		},
-		"help_verbatim": {
-			"label": "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?",
-			"hint": "Maximum 250 caractères."
-		},
-		"verbatim": {
-			"label": "Souhaitez-vous nous en dire davantage ?",
-			"hint": "Ne communiquez aucune information personnelle ici. Ceci n'est pas un formulaire de contact. Si vous avez des questions sur cette démarche, contactez le service concerné."
-		}
-	}
+  "first_block": {
+    "title": "Je donne mon avis",
+    "product": "Démarche"
+  },
+  "second_block": {
+    "title": "Merci !",
+    "subtitle": "Pouvez-vous nous en dire plus ?"
+  },
+  "smileys": {
+    "good": "Très bien",
+    "medium": "Moyen",
+    "bad": "Pas bien"
+  },
+  "fields": {
+    "satisfaction": {
+      "label": "Comment s'est passée cette démarche pour vous ?",
+      "hint": "Ce champ est obligatoire."
+    },
+    "easy": {
+      "label": "Était-ce facile à utiliser ?"
+    },
+    "comprehension": {
+      "label": "Le langage employé était-il facile à comprendre ?"
+    },
+    "difficulties": {
+      "label": "Avez-vous rencontré des difficultés ?",
+      "options": [
+        {
+          "label": "Manque d'informations avant de commencer la démarche"
+        },
+        {
+          "label": "La démarche n'a pas fonctionné"
+        },
+        {
+          "label": "Difficulté à joindre les pièces justificatives"
+        },
+        {
+          "label": "Manque d'informations sur la suite, le délai..."
+        },
+        {
+          "label": "Autre"
+        }
+      ]
+    },
+    "difficulties_verbatim": {
+      "label": "Pouvez-vous préciser quelle autre difficulté vous avez rencontré ?",
+      "hint": "Maximum 250 caractères."
+    },
+    "help": {
+      "label": "De quelle aide avez-vous eu besoin ?",
+      "options": [
+        {
+          "label": "Aucune"
+        },
+        {
+          "label": "Un ou une proche",
+          "hint": "Famille, amis..."
+        },
+        {
+          "label": "Une association"
+        },
+        {
+          "label": "Un agent public",
+          "hint": "Santé, enseignement, impôts, force de l'ordre, France services..."
+        },
+        {
+          "label": "Internet",
+          "hint": "Site, forum..."
+        },
+        {
+          "label": "Autre"
+        }
+      ]
+    },
+    "help_verbatim": {
+      "label": "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?",
+      "hint": "Maximum 250 caractères."
+    },
+    "verbatim": {
+      "label": "Souhaitez-vous nous en dire davantage ?",
+      "hint": "Ne communiquez aucune information personnelle ici. Ceci n'est pas un formulaire de contact. Si vous avez des questions sur cette démarche, contactez le service concerné."
+    }
+  }
 }

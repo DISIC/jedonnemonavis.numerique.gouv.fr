@@ -41,7 +41,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				<meta name="description" content="Je donne mon avis" />
 			</Head>
 			<Header
-				brandTop={<>REPUBLIQUE FRANCAISE</>}
+				brandTop={
+					<>
+						REPUBLIQUE <br /> FRANCAISE
+					</>
+				}
 				homeLinkProps={{
 					href: '/',
 					title: 'Accueil'
