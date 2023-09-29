@@ -59,7 +59,7 @@ yarn dev
 ```
 
 Voici les informations des utilisateurs prêts à être utilisés en développement grâce aux données de test :
-| Email | Compte Activé | Ancien Compte Observatoire | Mot de Passe |
+| Email | Compte activé | Ancien compte observatoire | Mot de passe |
 |---------------------|---------------|---------------------------|--------------|
 | user1@example.com | Non | Non | jdma |
 | user2@example.com | Non | Oui | jdma |
