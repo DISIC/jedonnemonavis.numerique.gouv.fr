@@ -61,7 +61,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 		}
 	];
 	return (
-		<div className={fr.cx('fr-container')}>
+		<div className={cx(fr.cx('fr-container'), classes.container)}>
 			<Breadcrumb
 				currentPageLabel={product.title}
 				segments={[
@@ -107,6 +107,9 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 const useStyles = tss.create({
 	title: {
 		...fr.spacing('margin', { bottom: '6w' })
+	},
+	container: {
+		height: '100%'
 	}
 });
 

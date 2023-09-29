@@ -5,7 +5,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import ProductButtonCard from '@/components/dashboard/Product/ProductButtonCard';
+import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
 import { ProductWithButtons } from '@/pages/api/prisma/products/type';
 import { Pagination } from '../../../../../components/ui/Pagination';
 

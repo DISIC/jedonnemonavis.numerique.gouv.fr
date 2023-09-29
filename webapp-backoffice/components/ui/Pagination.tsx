@@ -121,40 +121,60 @@ export const Pagination = memo(
 				<ul className={cx(fr.cx('fr-pagination__list'), classes.list)}>
 					{showFirstLast && (
 						<li>
-							<Link
-								{...(count > 0 && defaultPage > 1
-									? getPageLinkProps(1)
-									: { href: '#' })}
-								className={cx(
-									fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
-									classes.link,
-									getPageLinkProps(1).className
-								)}
-								aria-disabled={count > 0 && defaultPage > 1 ? true : undefined}
-								role="link"
-							>
-								Première page
-							</Link>
+							{count > 0 && defaultPage > 1 ? (
+								<Link
+									{...getPageLinkProps(1)}
+									className={cx(
+										fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
+										classes.link,
+										getPageLinkProps(1).className
+									)}
+									aria-disabled={true}
+									role="link"
+								>
+									Première page
+								</Link>
+							) : (
+								<a
+									className={cx(
+										fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
+										classes.link
+									)}
+									role="link"
+								>
+									Première page
+								</a>
+							)}
 						</li>
 					)}
 					<li>
-						<Link
-							className={cx(
-								fr.cx(
-									'fr-pagination__link',
-									'fr-pagination__link--prev',
-									'fr-pagination__link--lg-label'
-								),
-								classes.link
-							)}
-							{...(defaultPage > 1
-								? getPageLinkProps(defaultPage - 1)
-								: { href: '#' })}
-							aria-disabled={defaultPage <= 1 ? true : undefined}
-							role="link"
-						>
-							page précédente
-						</Link>
+						{defaultPage > 1 ? (
+							<Link
+								className={cx(
+									fr.cx(
+										'fr-pagination__link',
+										'fr-pagination__link--prev',
+										'fr-pagination__link--lg-label'
+									),
+									classes.link
+								)}
+								{...getPageLinkProps(defaultPage - 1)}
+								aria-disabled={true}
+								role="link"
+							>
+								page précédente
+							</Link>
+						) : (
+							<a
+								className={cx(
+									fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
+									classes.link
+								)}
+								role="link"
+							>
+								page précédente
+							</a>
+						)}
 					</li>
 					{parts.map(part => (
 						<li key={part.number}>
