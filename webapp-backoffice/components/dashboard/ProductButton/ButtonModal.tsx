@@ -176,7 +176,10 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const displayModalButtons = (): ButtonProps[] | undefined => {
+	const displayModalButtons = ():
+		| ModalProps.ActionAreaButtonProps
+		| [ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]]
+		| undefined => {
 		switch (modalType) {
 			case 'install':
 				break;
@@ -192,9 +195,9 @@ const ButtonModal = (props: Props) => {
 						onClick: modal.close
 					}
 				];
-			default:
-				return;
 		}
+
+		return;
 	};
 
 	return (
