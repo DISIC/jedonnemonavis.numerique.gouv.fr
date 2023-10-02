@@ -2,22 +2,20 @@ import { FormFirstBlock } from "@/components/form/layouts/FormFirstBlock";
 import { FormSecondBlock } from "@/components/form/layouts/FormSecondBlock";
 import { Opinion, Product } from "@/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
+import { useTranslation } from "next-i18next";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useTranslation } from "next-i18next";
-import { useRouter } from "next/router";
-import { GetStaticPaths } from "next/types";
 
-export default function JDMAForm() {
+type JDMAFormProps = {
+  product: Product;
+};
+
+export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
-  const router = useRouter();
 
   const { t } = useTranslation("common");
-
-  const product: Product = {
-    title: "1000J BLUES - AUTO DEPISTAGE DE LA DEPRESSION POST PARTUM",
-  };
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
@@ -69,11 +67,40 @@ export default function JDMAForm() {
   );
 }
 
-export const getStaticPaths: GetStaticPaths<{ slug: string }> = async () => {
-  return {
-    paths: [], //indicates that no page needs be created at build time
-    fallback: "blocking", //indicates the type of fallback
-  };
+export const getServerSideProps: GetServerSideProps<{
+  product: Product;
+}> = async ({ params, locale }) => {
+  if (!params?.id) {
+    return {
+      notFound: true,
+    };
+  }
+
+  const productId = params.id as string;
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_WEBAPP_URL}/api/prisma/products?id=${productId}`
+  );
+
+  if (response.ok) {
+    const product = await response.json();
+    if (!product) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return {
+      props: {
+        product,
+        ...(await serverSideTranslations(locale ?? "fr", ["common"])),
+      },
+    };
+  } else {
+    return {
+      notFound: true,
+    };
+  }
 };
 
 const blueSectionPxHeight = 200;
@@ -111,11 +138,3 @@ const useStyles = tss
       },
     },
   }));
-
-export async function getStaticProps({ locale }: { locale: any }) {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale ?? "fr", ["common"])),
-    },
-  };
-}

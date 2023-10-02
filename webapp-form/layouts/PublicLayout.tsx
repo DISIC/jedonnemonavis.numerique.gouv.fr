@@ -64,7 +64,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             iconId: "fr-icon-translate-2",
             text: (
               <LanguageSelector
-                lang={i18n?.language || window.localStorage.i18nextLng}
+                lang={(i18n?.language || "fr") as Language}
                 setLang={onToggleLanguageClick}
               />
             ),
