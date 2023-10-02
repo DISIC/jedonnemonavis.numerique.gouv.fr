@@ -41,7 +41,12 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           <h1>{t("first_block.title")}</h1>
         )}
       </div>
-      <div className={fr.cx("fr-container--fluid", "fr-container")}>
+      <div
+        className={cx(
+          classes.mainContainer,
+          fr.cx("fr-container--fluid", "fr-container")
+        )}
+      >
         <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
           <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
             <div className={cx(classes.formSection)}>
@@ -108,6 +113,9 @@ const useStyles = tss
   .withName(JDMAForm.name)
   .withParams()
   .create(() => ({
+    mainContainer: {
+      overflow: "inherit",
+    },
     blueSection: {
       backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
       ...fr.spacing("padding", { topBottom: "6v", rightLeft: "10v" }),
