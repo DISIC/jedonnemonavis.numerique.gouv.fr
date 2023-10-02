@@ -1,11 +1,13 @@
 {
   "first_block": {
     "title": "I give my opinion",
-    "product": "Procedure"
+    "product": "Procedure",
+    "validate": "Validate"
   },
   "second_block": {
     "title": "Thank you!",
-    "subtitle": "Can you tell us more?"
+    "subtitle": "Can you tell us more?",
+    "validate": "Validate my feedback"
   },
   "smileys": {
     "good": "Very good",

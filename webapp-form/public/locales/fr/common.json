@@ -1,11 +1,13 @@
 {
   "first_block": {
     "title": "Je donne mon avis",
-    "product": "Démarche"
+    "product": "Démarche",
+    "validate": "Valider"
   },
   "second_block": {
     "title": "Merci !",
-    "subtitle": "Pouvez-vous nous en dire plus ?"
+    "subtitle": "Pouvez-vous nous en dire plus ?",
+    "validate": "Valider mon avis"
   },
   "smileys": {
     "good": "Très bien",
