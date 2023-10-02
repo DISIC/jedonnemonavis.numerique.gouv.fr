@@ -10,6 +10,7 @@ export async function getProducts(sort?: string, search?: string) {
 			title: 'asc'
 		}
 	];
+	let include: any = {};
 
 	let where: any = {
 		title: {

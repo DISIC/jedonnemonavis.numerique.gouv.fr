@@ -1,17 +1,16 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { tss } from 'tss-react/dsfr';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
+import { tss } from 'tss-react/dsfr';
 
 import { useDebounce } from 'usehooks-ts';
 
-import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Entity, Product } from '@prisma/client';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Popper, TextField } from '@mui/material';
+import { Entity, Product } from '@prisma/client';
+import React from 'react';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -250,7 +249,7 @@ const ProductModal = (props: Props) => {
 				<div className={fr.cx('fr-input-group')}>
 					<label className={fr.cx('fr-label')}>URL(s)</label>
 					{product.urls.map((url, index) => (
-						<div className={cx(classes.flexContainer)}>
+						<div key={index} className={cx(classes.flexContainer)}>
 							<Input
 								className={cx(classes.autocomplete)}
 								id={`product-url-${index + 1}`}

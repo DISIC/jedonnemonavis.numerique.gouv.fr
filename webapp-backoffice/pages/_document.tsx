@@ -5,7 +5,7 @@ import { augmentDocumentWithEmotionCache } from './_app';
 const { getColorSchemeHtmlAttributes, augmentDocumentForDsfr } =
 	dsfrDocumentApi;
 
-export default function Document(props: DocumentProps) {
+const Document = (props: DocumentProps) => {
 	return (
 		<Html {...getColorSchemeHtmlAttributes(props)}>
 			<Head />
@@ -15,6 +15,8 @@ export default function Document(props: DocumentProps) {
 			</body>
 		</Html>
 	);
-}
+};
 augmentDocumentWithEmotionCache(Document);
 augmentDocumentForDsfr(Document);
+
+export default Document;
