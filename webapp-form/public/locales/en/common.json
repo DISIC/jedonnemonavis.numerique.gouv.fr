@@ -1,79 +1,87 @@
 {
-	"first_block": {
-		"title": "I give my opinion",
-		"product": "Procedure"
-	},
-	"second_block": {
-		"title": "Thank you!",
-		"subtitle": "Can you tell us more?"
-	},
-	"fields": {
-		"satisfaction": {
-			"label": "How did this procedure go for you ?"
-		},
-		"easy": {
-			"label": "Was it easy to use ?"
-		},
-		"comprehension": {
-			"label": "Was the language used easy to understand ?"
-		},
-		"difficulties": {
-			"label": "Did you encounter any difficulties ?",
-			"options": [
-				{
-					"label": "Lack of information before starting the procedure"
-				},
-				{
-					"label": "The procedure did not work"
-				},
-				{
-					"label": "Difficulty in submitting supporting documents"
-				},
-				{
-					"label": "Lack of information about the next steps, timelines..."
-				},
-				{
-					"label": "Other"
-				}
-			]
-		},
-		"difficulties_verbatim": {
-			"label": "Can you specify what other difficulty you encountered ?",
-			"hint": "Maximum 250 characters."
-		},
-		"help": {
-			"label": "What kind of help did you need ?",
-			"options": [
-				{
-					"label": "None"
-				},
-				{
-					"label": "A family member or friend",
-					"hint": "Family, friends..."
-				},
-				{
-					"label": "An organization"
-				},
-				{
-					"label": "A government agent",
-					"hint": "Health, education, taxes, law enforcement, France services..."
-				},
-				{
-					"label": "Internet",
-					"hint": "Website, forum..."
-				},
-				{
-					"label": "Other"
-				}
-			]
-		},
-		"help_verbatim": {
-			"label": "Can you specify what other help you needed ?",
-			"hint": "Maximum 250 characters."
-		},
-		"verbatim": {
-			"label": "Would you like to tell us more ?",
-			"hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this procedure, please contact the relevant service."
-		}
-	}
+  "first_block": {
+    "title": "I give my opinion",
+    "product": "Procedure",
+    "validate": "Validate"
+  },
+  "second_block": {
+    "title": "Thank you!",
+    "subtitle": "Can you tell us more?",
+    "validate": "Validate my feedback"
+  },
+  "smileys": {
+    "good": "Very good",
+    "medium": "Average",
+    "bad": "Not good"
+  },
+  "fields": {
+    "satisfaction": {
+      "label": "How did this procedure go for you ?",
+      "hint": "This field is required."
+    },
+    "easy": {
+      "label": "Was it easy to use ?"
+    },
+    "comprehension": {
+      "label": "Was the language used easy to understand ?"
+    },
+    "difficulties": {
+      "label": "Did you encounter any difficulties ?",
+      "options": [
+        {
+          "label": "Lack of information before starting the procedure"
+        },
+        {
+          "label": "The procedure did not work"
+        },
+        {
+          "label": "Difficulty in submitting supporting documents"
+        },
+        {
+          "label": "Lack of information about the next steps, timelines..."
+        },
+        {
+          "label": "Other"
+        }
+      ]
+    },
+    "difficulties_verbatim": {
+      "label": "Can you specify what other difficulty you encountered ?",
+      "hint": "Maximum 250 characters."
+    },
+    "help": {
+      "label": "What kind of help did you need ?",
+      "options": [
+        {
+          "label": "None"
+        },
+        {
+          "label": "A family member or friend",
+          "hint": "Family, friends..."
+        },
+        {
+          "label": "An organization"
+        },
+        {
+          "label": "A government agent",
+          "hint": "Health, education, taxes, law enforcement, France services..."
+        },
+        {
+          "label": "Internet",
+          "hint": "Website, forum..."
+        },
+        {
+          "label": "Other"
+        }
+      ]
+    },
+    "help_verbatim": {
+      "label": "Can you specify what other help you needed ?",
+      "hint": "Maximum 250 characters."
+    },
+    "verbatim": {
+      "label": "Would you like to tell us more ?",
+      "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this procedure, please contact the relevant service."
+    }
+  }
 }
