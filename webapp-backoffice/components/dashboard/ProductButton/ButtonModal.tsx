@@ -9,7 +9,6 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
-import Select from '@codegouvfr/react-dsfr/Select';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -29,15 +28,35 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: string;
 	button?: PrismaButtonType | null;
-	setCurrentButton: React.Dispatch<
-		React.SetStateAction<PrismaButtonType | null>
-	>;
+	onButtonCreatedOrUpdated: () => void;
+	product_id: string;
 }
+
+const defaultButton = {
+	title: '',
+	description: '',
+	product_id: '',
+	isTest: false
+};
+
+export type ButtonCreationPayload = Omit<
+	PrismaButtonType,
+	'id' | 'created_at' | 'updated_at'
+>;
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, isOpen, modalType, button, setCurrentButton } = props;
+	const { modal, isOpen, modalType, button, onButtonCreatedOrUpdated } = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
+	const [currentButton, setCurrentButton] = React.useState<
+		ButtonCreationPayload | PrismaButtonType
+	>(defaultButton);
+
+	React.useEffect(() => {
+		if (button) {
+			setCurrentButton(button);
+		}
+	}, [button]);
 
 	const displayModalTitle = (): string => {
 		switch (modalType) {
@@ -53,6 +72,25 @@ const ButtonModal = (props: Props) => {
 			// 	return 'Fusionner avec un autre bouton';
 			default:
 				return '';
+		}
+	};
+
+	const handleButtonCreateOrEdit = () => {
+		currentButton.product_id = props.product_id;
+		if ('id' in currentButton) {
+			fetch(`/api/prisma/buttons?id=${currentButton.id}`, {
+				method: 'PUT',
+				body: JSON.stringify(currentButton)
+			}).finally(() => {
+				onButtonCreatedOrUpdated();
+			});
+		} else {
+			fetch(`/api/prisma/buttons`, {
+				method: 'POST',
+				body: JSON.stringify(currentButton)
+			}).finally(() => {
+				onButtonCreatedOrUpdated();
+			});
 		}
 	};
 
@@ -154,21 +192,35 @@ const ButtonModal = (props: Props) => {
 					</div>
 				);
 			case 'create':
+			case 'edit':
 				return (
 					<div>
 						<Input
-							id="button-title"
+							id="button-create-title"
 							label="Nom du bouton"
 							nativeInputProps={{
+								value: currentButton.title || '',
 								onChange: e => {
-									console.log(e.target.value);
+									setCurrentButton({
+										...currentButton,
+										title: e.target.value
+									});
 								}
 							}}
 						/>
 						<Input
-							id="button-description"
+							id="button-create-description"
 							label="Description du bouton"
 							textArea
+							nativeTextAreaProps={{
+								value: currentButton.description || '',
+								onChange: e => {
+									setCurrentButton({
+										...currentButton,
+										description: e.target.value
+									});
+								}
+							}}
 						/>
 						<Checkbox
 							options={[
@@ -178,7 +230,13 @@ const ButtonModal = (props: Props) => {
 									label: 'Bouton de test',
 									nativeInputProps: {
 										name: 'checkboxes-1',
-										value: 'value1'
+										value: 'isTest',
+										onChange: e => {
+											setCurrentButton({
+												...currentButton,
+												isTest: e.target.checked
+											});
+										}
 									}
 								}
 							]}
@@ -190,18 +248,28 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<Input
-							id="button-title"
+							id="button-edit-title"
 							label="Nom du bouton"
 							nativeInputProps={{
-								value: button?.title
+								onChange: e => {
+									setCurrentButton({
+										...currentButton,
+										title: e.target.value
+									});
+								}
 							}}
 						/>
 						<Input
-							id="button-description"
+							id="button-edit-description"
 							label="Description du bouton"
 							textArea
 							nativeTextAreaProps={{
-								value: button?.description || ''
+								onChange: e => {
+									setCurrentButton({
+										...currentButton,
+										description: e.target.value
+									});
+								}
 							}}
 						/>
 						<Checkbox
@@ -212,7 +280,14 @@ const ButtonModal = (props: Props) => {
 									label: 'Bouton de test',
 									nativeInputProps: {
 										name: 'checkboxes-1',
-										value: 'value1'
+										value: 'isTest',
+										checked: button?.isTest || false,
+										onChange: e => {
+											setCurrentButton({
+												...currentButton,
+												isTest: e.target.checked
+											});
+										}
 									}
 								}
 							]}
@@ -260,7 +335,7 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Créer',
-						onClick: modal.close
+						onClick: handleButtonCreateOrEdit
 					}
 				];
 			case 'edit':
@@ -272,7 +347,7 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Modifier',
-						onClick: modal.close
+						onClick: handleButtonCreateOrEdit
 					}
 				];
 			// case 'archive':
