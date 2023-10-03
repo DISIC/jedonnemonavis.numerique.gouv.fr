@@ -1,4 +1,5 @@
 import {
+	Button,
 	Entity,
 	PrismaClient,
 	Product,
@@ -10,6 +11,7 @@ import { products } from './seeds/products';
 import { whiteListedDomains } from './seeds/white-listed-domains';
 import { entities } from './seeds/entities';
 import { getRandomObjectFromArray } from '../utils/tools';
+import { buttons } from './seeds/buttons';
 
 const prisma = new PrismaClient();
 
@@ -45,6 +47,9 @@ async function main() {
 						create: {
 							...(randomEntity as Entity)
 						}
+					},
+					buttons: {
+						create: buttons as Button[]
 					}
 				}
 			})

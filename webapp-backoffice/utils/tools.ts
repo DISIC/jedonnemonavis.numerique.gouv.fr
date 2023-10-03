@@ -13,6 +13,28 @@ export function generateRandomString(length: number = 8): string {
 	return otp;
 }
 
+export function formatDateToFrenchString(tmpDate: string) {
+	const date = new Date(tmpDate);
+
+	if (!(date instanceof Date)) {
+		throw new Error('Input is not a valid Date object');
+	}
+
+	const formatter = new Intl.DateTimeFormat('fr-FR', {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric'
+	});
+
+	return formatter.format(date);
+}
+
+export function getNbPages(count: number, numberPerPage: number) {
+	return count % numberPerPage === 0
+		? count / numberPerPage
+		: Math.trunc(count / numberPerPage) + 1;
+}
+
 export function getRandomObjectFromArray<T>(array: T[]): T | undefined {
 	if (array.length === 0) {
 		return undefined; // Return undefined for an empty array

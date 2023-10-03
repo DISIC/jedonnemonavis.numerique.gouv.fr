@@ -53,7 +53,10 @@ export async function getProducts(sort?: string, search?: string) {
 
 	const products = await prisma.product.findMany({
 		orderBy,
-		where
+		where,
+		include: {
+			buttons: true
+		}
 	});
 	return products;
 }
@@ -62,6 +65,9 @@ export async function getProduct(id: string) {
 	const product = await prisma.product.findUnique({
 		where: {
 			id: id
+		},
+		include: {
+			buttons: true
 		}
 	});
 	return product;
