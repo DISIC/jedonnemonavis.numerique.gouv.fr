@@ -55,6 +55,8 @@ const ButtonModal = (props: Props) => {
 	React.useEffect(() => {
 		if (button) {
 			setCurrentButton(button);
+		} else {
+			setCurrentButton(defaultButton);
 		}
 	}, [button]);
 
