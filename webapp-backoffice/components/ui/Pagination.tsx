@@ -167,7 +167,11 @@ export const Pagination = memo(
 						) : (
 							<a
 								className={cx(
-									fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
+									fr.cx(
+										'fr-pagination__link',
+										'fr-pagination__link--prev',
+										'fr-pagination__link--lg-label'
+									),
 									classes.link
 								)}
 								role="link"
@@ -195,38 +199,63 @@ export const Pagination = memo(
 						</li>
 					))}
 					<li>
-						<Link
-							className={cx(
-								fr.cx(
-									'fr-pagination__link',
-									'fr-pagination__link--next',
-									'fr-pagination__link--lg-label'
-								),
-								classes.link
-							)}
-							{...(defaultPage < count
-								? getPageLinkProps(defaultPage + 1)
-								: { href: '#' })}
-							aria-disabled={defaultPage < count ? true : undefined}
-							role="link"
-						>
-							page suivante
-						</Link>
+						{defaultPage < count ? (
+							<Link
+								className={cx(
+									fr.cx(
+										'fr-pagination__link',
+										'fr-pagination__link--next',
+										'fr-pagination__link--lg-label'
+									),
+									classes.link
+								)}
+								{...getPageLinkProps(defaultPage + 1)}
+								role="link"
+							>
+								page suivante
+							</Link>
+						) : (
+							<a
+								className={cx(
+									fr.cx(
+										'fr-pagination__link',
+										'fr-pagination__link--next',
+										'fr-pagination__link--lg-label'
+									),
+									classes.link
+								)}
+								aria-disabled={true}
+								role="link"
+							>
+								page suivante
+							</a>
+						)}
 					</li>
 					{showFirstLast && (
 						<li>
-							<Link
-								className={cx(
-									fr.cx('fr-pagination__link', 'fr-pagination__link--last'),
-									classes.link
-								)}
-								{...(defaultPage < count
-									? getPageLinkProps(count)
-									: { href: '#' })}
-								aria-disabled={defaultPage < count ? true : undefined}
-							>
-								Dernière page
-							</Link>
+							{defaultPage < count ? (
+								<Link
+									className={cx(
+										fr.cx('fr-pagination__link', 'fr-pagination__link--last'),
+										classes.link
+									)}
+									{...getPageLinkProps(count)}
+									aria-disabled={true}
+									role="link"
+								>
+									Dernière page
+								</Link>
+							) : (
+								<a
+									className={cx(
+										fr.cx('fr-pagination__link', 'fr-pagination__link--last'),
+										classes.link
+									)}
+									role="link"
+								>
+									Dernière page
+								</a>
+							)}
 						</li>
 					)}
 				</ul>

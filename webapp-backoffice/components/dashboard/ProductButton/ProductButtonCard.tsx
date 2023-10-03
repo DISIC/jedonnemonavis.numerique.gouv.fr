@@ -2,22 +2,8 @@ import { formatDateToFrenchString } from '@/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Button as PrismaButtonType } from '@prisma/client';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
-
-interface ButtonModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	button: PrismaButtonType;
@@ -71,7 +57,7 @@ const ProductButtonCard = (props: Props) => {
 							<MenuItem onClick={() => onButtonClick('edit', button)}>
 								Modifier le bouton
 							</MenuItem>
-							<MenuItem onClick={() => onButtonClick('merge')}>
+							{/* <MenuItem onClick={() => onButtonClick('merge')}>
 								Fusionner avec un autre bouton
 							</MenuItem>
 							<MenuItem
@@ -81,7 +67,7 @@ const ProductButtonCard = (props: Props) => {
 								}}
 							>
 								Archiver bouton
-							</MenuItem>
+							</MenuItem> */}
 						</Menu>
 						<Button
 							className={fr.cx('fr-ml-3w')}

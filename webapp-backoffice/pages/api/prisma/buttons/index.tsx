@@ -5,6 +5,8 @@ import { getToken } from 'next-auth/jwt';
 const prisma = new PrismaClient();
 
 export async function getButtons(
+	numberPerPage: number,
+	page: number,
 	sort?: string,
 	search?: string,
 	product_id?: string
@@ -62,9 +64,14 @@ export async function getButtons(
 
 	const buttons = await prisma.button.findMany({
 		orderBy,
-		where
+		where,
+		take: numberPerPage,
+		skip: numberPerPage * (page - 1)
 	});
-	return buttons;
+
+	const count = await prisma.button.count({ where });
+
+	return { data: buttons, count: count };
 }
 
 export async function getButton(id: string) {
@@ -115,33 +122,40 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, search, product_id } = req.query;
+		const { id, sort, search, product_id, numberPerPage, page } = req.query;
 		if (id) {
 			const button = await getButton(id.toString());
-			res.status(200).json(button);
+			return res.status(200).json(button);
 		} else {
+			if (!numberPerPage || !page) {
+				return res
+					.status(400)
+					.json({ message: 'Missing numberPerPage or page' });
+			}
 			const buttons = await getButtons(
+				parseInt(numberPerPage as string, 10) as number,
+				parseInt(page as string, 10) as number,
 				sort as string,
 				search as string,
 				product_id as string
 			);
-			res.status(200).json(buttons);
+			return res.status(200).json(buttons);
 		}
 	} else if (req.method === 'POST') {
 		const data = JSON.parse(req.body);
 		const button = await createButton(data);
-		res.status(201).json(button);
+		return res.status(201).json(button);
 	} else if (req.method === 'PUT') {
 		const { id } = req.query;
 
 		const data = req.body;
 		const button = await updateButton(id as string, data);
-		res.status(200).json(button);
+		return res.status(200).json(button);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
 		const button = await deleteButton(id as string);
-		res.status(200).json(button);
+		return res.status(200).json(button);
 	} else {
-		res.status(400).json({ message: 'Unsupported method' });
+		return res.status(400).json({ message: 'Unsupported method' });
 	}
 }

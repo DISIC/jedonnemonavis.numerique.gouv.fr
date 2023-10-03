@@ -29,6 +29,12 @@ export function formatDateToFrenchString(tmpDate: string) {
 	return formatter.format(date);
 }
 
+export function getNbPages(count: number, numberPerPage: number) {
+	return count % numberPerPage === 0
+		? count / numberPerPage
+		: Math.trunc(count / numberPerPage) + 1;
+}
+
 export function getRandomObjectFromArray<T>(array: T[]): T | undefined {
 	if (array.length === 0) {
 		return undefined; // Return undefined for an empty array

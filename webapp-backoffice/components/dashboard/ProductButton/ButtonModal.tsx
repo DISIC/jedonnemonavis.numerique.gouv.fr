@@ -29,11 +29,14 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: string;
 	button?: PrismaButtonType | null;
+	setCurrentButton: React.Dispatch<
+		React.SetStateAction<PrismaButtonType | null>
+	>;
 }
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, isOpen, modalType, button } = props;
+	const { modal, isOpen, modalType, button, setCurrentButton } = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 
 	const displayModalTitle = (): string => {
@@ -44,10 +47,10 @@ const ButtonModal = (props: Props) => {
 				return 'Créer un bouton';
 			case 'edit':
 				return 'Modifier un bouton';
-			case 'archive':
-				return 'Archiver un bouton';
-			case 'merge':
-				return 'Fusionner avec un autre bouton';
+			// case 'archive':
+			// 	return 'Archiver un bouton';
+			// case 'merge':
+			// 	return 'Fusionner avec un autre bouton';
 			default:
 				return '';
 		}
@@ -153,7 +156,15 @@ const ButtonModal = (props: Props) => {
 			case 'create':
 				return (
 					<div>
-						<Input id="button-title" label="Nom du bouton" />
+						<Input
+							id="button-title"
+							label="Nom du bouton"
+							nativeInputProps={{
+								onChange: e => {
+									console.log(e.target.value);
+								}
+							}}
+						/>
 						<Input
 							id="button-description"
 							label="Description du bouton"
@@ -208,26 +219,26 @@ const ButtonModal = (props: Props) => {
 						/>
 					</div>
 				);
-			case 'archive':
-				return (
-					<div>
-						<p>
-							Vous êtes sur le point d'archiver le bouton{' '}
-							<span className={cx(classes.boldText)}>{button?.title}</span>.
-							<br />
-						</p>
-					</div>
-				);
-			case 'merge':
-				return (
-					<div>
-						<p>Instructions ...</p>
-						<Select label="Fusionner avec" nativeSelectProps={{}}>
-							<option value="">Bouton 1</option>
-							<option value="">Bouton 2</option>
-						</Select>
-					</div>
-				);
+			// case 'archive':
+			// 	return (
+			// 		<div>
+			// 			<p>
+			// 				Vous êtes sur le point d'archiver le bouton{' '}
+			// 				<span className={cx(classes.boldText)}>{button?.title}</span>.
+			// 				<br />
+			// 			</p>
+			// 		</div>
+			// 	);
+			// case 'merge':
+			// 	return (
+			// 		<div>
+			// 			<p>Instructions ...</p>
+			// 			<Select label="Fusionner avec" nativeSelectProps={{}}>
+			// 				<option value="">Bouton 1</option>
+			// 				<option value="">Bouton 2</option>
+			// 			</Select>
+			// 		</div>
+			// 	);
 			default:
 				return <div></div>;
 		}
@@ -264,30 +275,30 @@ const ButtonModal = (props: Props) => {
 						onClick: modal.close
 					}
 				];
-			case 'archive':
-				return [
-					{
-						children: 'Annuler',
-						priority: 'secondary',
-						onClick: modal.close
-					},
-					{
-						children: 'Oui',
-						onClick: modal.close
-					}
-				];
-			case 'merge':
-				return [
-					{
-						children: 'Annuler',
-						priority: 'secondary',
-						onClick: modal.close
-					},
-					{
-						children: 'Fusionner les boutons',
-						onClick: modal.close
-					}
-				];
+			// case 'archive':
+			// 	return [
+			// 		{
+			// 			children: 'Annuler',
+			// 			priority: 'secondary',
+			// 			onClick: modal.close
+			// 		},
+			// 		{
+			// 			children: 'Oui',
+			// 			onClick: modal.close
+			// 		}
+			// 	];
+			// case 'merge':
+			// 	return [
+			// 		{
+			// 			children: 'Annuler',
+			// 			priority: 'secondary',
+			// 			onClick: modal.close
+			// 		},
+			// 		{
+			// 			children: 'Fusionner les boutons',
+			// 			onClick: modal.close
+			// 		}
+			// 	];
 		}
 
 		return;

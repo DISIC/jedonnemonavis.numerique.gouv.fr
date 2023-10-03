@@ -25,8 +25,6 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 	const router = useRouter();
 
-	console.log(router.pathname);
-
 	const { cx, classes } = useStyles();
 
 	const menuItems: MenuItems[] = [
@@ -92,7 +90,12 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+			<div
+				className={cx(
+					fr.cx('fr-grid-row', 'fr-grid-row--center'),
+					classes.children
+				)}
+			>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 					<SideMenu
 						align="left"
@@ -112,6 +115,9 @@ const useStyles = tss.create({
 	},
 	container: {
 		height: '100%'
+	},
+	children: {
+		minHeight: '40rem'
 	}
 });
 

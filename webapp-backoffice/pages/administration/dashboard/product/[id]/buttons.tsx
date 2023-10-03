@@ -13,6 +13,7 @@ import React from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
+import { getNbPages } from '@/utils/tools';
 
 interface Props {
 	product: ProductWithButtons;
@@ -29,18 +30,21 @@ const ProductButtonsPage = (props: Props) => {
 	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [count, setCount] = React.useState(0);
 	const [modalType, setModalType] = React.useState<string>('');
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
 
+	const [testFilter, setTestFilter] = React.useState<boolean>(false);
+
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
-			`/api/prisma/buttons?product_id=${product.id}`
+			`/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`
 		);
-		const data = await response.json();
-		setButtons(data);
-		setNumberPerPage(data.length);
-	}, []);
+		const res = await response.json();
+		setButtons(res.data);
+		setCount(res.count);
+	}, [numberPerPage, currentPage]);
 
 	React.useEffect(() => {
 		retrieveButtons();
@@ -62,6 +66,8 @@ const ProductButtonsPage = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
+	const nbPages = getNbPages(count, numberPerPage);
+
 	return (
 		<ProductLayout product={product}>
 			<ButtonModal
@@ -69,6 +75,7 @@ const ProductButtonsPage = (props: Props) => {
 				isOpen={isModalOpen}
 				modalType={modalType}
 				button={currentButton}
+				setCurrentButton={setCurrentButton}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
@@ -86,13 +93,21 @@ const ProductButtonsPage = (props: Props) => {
 				</div>
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-4')}>
-					<p>
-						Boutons de <span className={cx(classes.boldText)}>1</span> à{' '}
-						<span className={cx(classes.boldText)}>{numberPerPage}</span> sur{' '}
-						<span className={cx(classes.boldText)}>{buttons.length}</span>
-					</p>
-				</div>
+				{nbPages > 1 && (
+					<div className={fr.cx('fr-col-4')}>
+						<p>
+							Boutons de{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + 1}
+							</span>{' '}
+							à{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + buttons.length}
+							</span>{' '}
+							sur <span className={cx(classes.boldText)}>{count}</span>
+						</p>
+					</div>
+				)}
 				<div className={fr.cx('fr-col-4')}>
 					<Checkbox
 						options={[
@@ -100,13 +115,15 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
-									value: 'test'
+									onChange: () => {
+										setTestFilter(true);
+									}
 								}
 							}
 						]}
 					/>
 				</div>
-				<div className={fr.cx('fr-col-4')}>
+				{/* <div className={fr.cx('fr-col-4')}>
 					<Checkbox
 						options={[
 							{
@@ -118,7 +135,7 @@ const ProductButtonsPage = (props: Props) => {
 							}
 						]}
 					/>
-				</div>
+				</div> */}
 			</div>
 			<div>
 				{buttons?.map((button, index) => (
@@ -130,21 +147,23 @@ const ProductButtonsPage = (props: Props) => {
 				))}
 			</div>
 			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-				<Pagination
-					showFirstLast
-					count={5}
-					defaultPage={currentPage}
-					getPageLinkProps={pageNumber => ({
-						onClick: event => {
-							event.preventDefault();
-							handlePageChange(pageNumber);
-						},
-						href: '#',
-						classes: { link: fr.cx('fr-pagination__link') },
-						key: `pagination-link-${pageNumber}`
-					})}
-					className={fr.cx('fr-mt-1w')}
-				/>
+				{nbPages > 1 && (
+					<Pagination
+						showFirstLast
+						count={nbPages}
+						defaultPage={currentPage}
+						getPageLinkProps={pageNumber => ({
+							onClick: event => {
+								event.preventDefault();
+								handlePageChange(pageNumber);
+							},
+							href: '#',
+							classes: { link: fr.cx('fr-pagination__link') },
+							key: `pagination-link-${pageNumber}`
+						})}
+						className={fr.cx('fr-mt-1w')}
+					/>
+				)}
 			</div>
 		</ProductLayout>
 	);
