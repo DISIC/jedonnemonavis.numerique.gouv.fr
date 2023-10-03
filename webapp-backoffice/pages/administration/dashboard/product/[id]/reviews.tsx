@@ -11,7 +11,7 @@ const ProductReviewsPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
-			<div>Statistiques</div>
+			<div>Avis</div>
 		</ProductLayout>
 	);
 };

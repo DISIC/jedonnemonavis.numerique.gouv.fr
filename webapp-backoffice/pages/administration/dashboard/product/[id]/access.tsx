@@ -10,7 +10,7 @@ const AccessManagement = (props: Props) => {
 	const { product } = props;
 	return (
 		<ProductLayout product={product}>
-			<h1>Access Management</h1>
+			<div>Gérer les droits d'accès</div>
 		</ProductLayout>
 	);
 };

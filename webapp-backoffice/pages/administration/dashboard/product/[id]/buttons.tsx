@@ -30,6 +30,8 @@ const ProductButtonsPage = (props: Props) => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [modalType, setModalType] = React.useState<string>('');
+	const [currentButton, setCurrentButton] =
+		React.useState<PrismaButtonType | null>(null);
 
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
@@ -50,7 +52,10 @@ const ProductButtonsPage = (props: Props) => {
 
 	const isModalOpen = useIsModalOpen(modal);
 
-	const handleModalOpening = (modalType: string) => {
+	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
+		if (button) {
+			setCurrentButton(button);
+		}
 		setModalType(modalType);
 		modal.open();
 	};
@@ -59,7 +64,12 @@ const ProductButtonsPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
-			<ButtonModal modal={modal} isOpen={isModalOpen} modalType={modalType} />
+			<ButtonModal
+				modal={modal}
+				isOpen={isModalOpen}
+				modalType={modalType}
+				button={currentButton}
+			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>

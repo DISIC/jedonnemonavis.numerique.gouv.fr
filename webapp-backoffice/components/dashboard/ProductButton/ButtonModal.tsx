@@ -3,12 +3,13 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
+import { Button as PrismaButtonType } from '@prisma/client';
 
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
-import { ButtonProps } from '@codegouvfr/react-dsfr/Button';
+import Select from '@codegouvfr/react-dsfr/Select';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -27,11 +28,12 @@ interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
 	modalType: string;
+	button?: PrismaButtonType | null;
 }
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, isOpen, modalType } = props;
+	const { modal, isOpen, modalType, button } = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 
 	const displayModalTitle = (): string => {
@@ -42,8 +44,10 @@ const ButtonModal = (props: Props) => {
 				return 'Créer un bouton';
 			case 'edit':
 				return 'Modifier un bouton';
-			case 'delete':
-				return 'Supprimer un bouton';
+			case 'archive':
+				return 'Archiver un bouton';
+			case 'merge':
+				return 'Fusionner avec un autre bouton';
 			default:
 				return '';
 		}
@@ -171,6 +175,59 @@ const ButtonModal = (props: Props) => {
 					</div>
 				);
 
+			case 'edit':
+				return (
+					<div>
+						<Input
+							id="button-title"
+							label="Nom du bouton"
+							nativeInputProps={{
+								value: button?.title
+							}}
+						/>
+						<Input
+							id="button-description"
+							label="Description du bouton"
+							textArea
+							nativeTextAreaProps={{
+								value: button?.description || ''
+							}}
+						/>
+						<Checkbox
+							options={[
+								{
+									hintText:
+										'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
+									label: 'Bouton de test',
+									nativeInputProps: {
+										name: 'checkboxes-1',
+										value: 'value1'
+									}
+								}
+							]}
+						/>
+					</div>
+				);
+			case 'archive':
+				return (
+					<div>
+						<p>
+							Vous êtes sur le point d'archiver le bouton{' '}
+							<span className={cx(classes.boldText)}>{button?.title}</span>.
+							<br />
+						</p>
+					</div>
+				);
+			case 'merge':
+				return (
+					<div>
+						<p>Instructions ...</p>
+						<Select label="Fusionner avec" nativeSelectProps={{}}>
+							<option value="">Bouton 1</option>
+							<option value="">Bouton 2</option>
+						</Select>
+					</div>
+				);
 			default:
 				return <div></div>;
 		}
@@ -192,6 +249,42 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Créer',
+						onClick: modal.close
+					}
+				];
+			case 'edit':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: modal.close
+					},
+					{
+						children: 'Modifier',
+						onClick: modal.close
+					}
+				];
+			case 'archive':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: modal.close
+					},
+					{
+						children: 'Oui',
+						onClick: modal.close
+					}
+				];
+			case 'merge':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: modal.close
+					},
+					{
+						children: 'Fusionner les boutons',
 						onClick: modal.close
 					}
 				];
@@ -244,6 +337,9 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 				backgroundColor: '#FFF'
 			}
 		}
+	},
+	boldText: {
+		fontWeight: 'bold'
 	}
 }));
 

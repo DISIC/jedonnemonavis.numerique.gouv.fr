@@ -4,6 +4,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { Button as PrismaButtonType } from '@prisma/client';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import React from 'react';
+import { Menu, MenuItem } from '@mui/material';
 
 interface ButtonModalProps {
 	buttonProps: {
@@ -20,11 +21,19 @@ interface ButtonModalProps {
 
 interface Props {
 	button: PrismaButtonType;
-	onButtonClick: (modalType: string) => void;
+	onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
 }
 
 const ProductButtonCard = (props: Props) => {
 	const { button, onButtonClick } = props;
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	return (
 		<>
@@ -38,9 +47,44 @@ const ProductButtonCard = (props: Props) => {
 						<p>{formatDateToFrenchString(button.created_at.toString())}</p>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
-						<Button priority="secondary">Options</Button>
 						<Button
-							className={fr.cx('fr-ml-4w')}
+							id="button-options"
+							aria-controls={menuOpen ? 'option-menu' : undefined}
+							aria-haspopup="true"
+							aria-expanded={menuOpen ? 'true' : undefined}
+							priority="secondary"
+							onClick={handleClick}
+							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
+							iconPosition="right"
+						>
+							Options
+						</Button>
+						<Menu
+							id="option-menu"
+							open={menuOpen}
+							anchorEl={anchorEl}
+							onClose={handleClose}
+							MenuListProps={{
+								'aria-labelledby': 'button-options'
+							}}
+						>
+							<MenuItem onClick={() => onButtonClick('edit', button)}>
+								Modifier le bouton
+							</MenuItem>
+							<MenuItem onClick={() => onButtonClick('merge')}>
+								Fusionner avec un autre bouton
+							</MenuItem>
+							<MenuItem
+								onClick={() => onButtonClick('archive', button)}
+								style={{
+									color: fr.colors.decisions.background.flat.error.default
+								}}
+							>
+								Archiver bouton
+							</MenuItem>
+						</Menu>
+						<Button
+							className={fr.cx('fr-ml-3w')}
 							onClick={() => onButtonClick('install')}
 						>
 							Installer
