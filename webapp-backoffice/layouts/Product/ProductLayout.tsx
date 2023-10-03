@@ -1,9 +1,10 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import { Product } from '@prisma/client';
-import Link from 'next/link';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
+import { useRouter } from 'next/router';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -11,49 +12,64 @@ interface ProductLayoutProps {
 }
 
 interface MenuItems {
-	label: string;
+	text: string;
 	linkProps: {
 		href: string;
 		alt?: string;
 	};
+	isActive?: boolean;
 }
 
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
 
+	const router = useRouter();
+
+	console.log(router.pathname);
+
 	const { cx, classes } = useStyles();
 
 	const menuItems: MenuItems[] = [
 		{
-			label: 'Statistiques',
+			text: 'Statistiques',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/stats`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/stats`,
 				alt: 'Statistiques'
 			}
 		},
 		{
-			label: 'Avis',
+			text: 'Avis',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/reviews`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/reviews`,
 				alt: 'Avis'
 			}
 		},
 		{
-			label: 'Gérer mes boutons',
+			text: 'Gérer mes boutons',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/buttons`,
 				alt: 'Gérer mes boutons'
 			}
 		},
 		{
-			label: "Gérer les droits d'accès",
+			text: "Gérer les droits d'accès",
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/access`,
 				alt: "Gérer les droits d'accès"
 			}
 		},
 		{
-			label: 'Informations',
+			text: 'Informations',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/infos`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/infos`,
 				alt: 'Informations'
@@ -78,25 +94,11 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-					<nav className={fr.cx('fr-sidemenu')}>
-						<div className={fr.cx('fr-sidemenu__inner')}>
-							<ul className={fr.cx('fr-sidemenu__list')}>
-								{menuItems.map((item, index) => (
-									<li
-										className={fr.cx(
-											'fr-sidemenu__item',
-											'fr-sidemenu--sticky'
-										)}
-										key={index}
-									>
-										<Link className="fr-sidemenu__link" {...item.linkProps}>
-											{item.label}
-										</Link>
-									</li>
-								))}
-							</ul>
-						</div>
-					</nav>
+					<SideMenu
+						align="left"
+						items={menuItems}
+						burgerMenuButtonText="Menu"
+					/>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>{children}</div>
 			</div>
