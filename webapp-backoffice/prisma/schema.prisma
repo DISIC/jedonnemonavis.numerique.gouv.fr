@@ -12,6 +12,11 @@ enum RequestMode {
   superuser
 }
 
+enum RightAccessStatus {
+  carrier
+  removed
+}
+
 // Next auth
 model User {
   id                   String                @id @default(auto()) @map("_id") @db.ObjectId
@@ -24,6 +29,7 @@ model User {
   UserOTPs             UserOTP[]
   UserValidationTokens UserValidationToken[]
   UserRequests         UserRequest[]
+  UserProducts         UserProduct[]
 }
 
 model UserRequest {
@@ -76,6 +82,20 @@ model Product {
   urls        String[]
   volume      Int?
   buttons     Button[]
+  users       UserProduct[]
+}
+
+model UserProduct {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User?     @relation(fields: [user_email], references: [email])
+  user_email String
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id String   @db.ObjectId
+
+  status RightAccessStatus @default(carrier)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model WhiteListedDomain {

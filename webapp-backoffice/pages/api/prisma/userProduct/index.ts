@@ -4,28 +4,22 @@ import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function getProducts(sort?: string, search?: string) {
+export async function getUserProducts(
+	numberPerPage: number,
+	page: number,
+	product_id: string,
+	sort?: string
+) {
 	let orderBy: any = [
 		{
-			title: 'asc'
+			status: 'asc'
 		}
 	];
 	let include: any = {};
 
 	let where: any = {
-		title: {
-			contains: ''
-		}
+		product_id
 	};
-
-	if (search) {
-		where = {
-			title: {
-				contains: search,
-				mode: 'insensitive'
-			}
-		};
-	}
 
 	if (sort) {
 		const values = sort.split(':');
@@ -51,14 +45,17 @@ export async function getProducts(sort?: string, search?: string) {
 		}
 	}
 
-	const products = await prisma.product.findMany({
+	const userProducts = await prisma.userProduct.findMany({
 		orderBy,
 		where,
 		include: {
-			buttons: true
+			user: true
 		}
 	});
-	return products;
+
+	const count = await prisma.userProduct.count({ where });
+
+	return { data: userProducts, count };
 }
 
 export async function getProduct(id: string) {
@@ -123,13 +120,23 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, search } = req.query;
+		const { id, sort, product_id, numberPerPage, page } = req.query;
 		if (id) {
 			const product = await getProduct(id.toString());
 			res.status(200).json(product);
 		} else {
-			const products = await getProducts(sort as string, search as string);
-			res.status(200).json(products);
+			if (!numberPerPage || !page) {
+				return res
+					.status(400)
+					.json({ message: 'Missing numberPerPage or page' });
+			}
+			const userProducts = await getUserProducts(
+				parseInt(numberPerPage as string, 10) as number,
+				parseInt(page as string, 10) as number,
+				product_id as string,
+				sort as string
+			);
+			res.status(200).json(userProducts);
 		}
 	} else if (req.method === 'POST') {
 		const { userEmail } = req.query;

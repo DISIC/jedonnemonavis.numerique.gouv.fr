@@ -6,9 +6,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
-import { ProductWithButtons } from '@/pages/api/prisma/products/type';
 import { Pagination } from '../../../../../components/ui/Pagination';
-
 import React from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -16,7 +14,7 @@ import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
 import { getNbPages } from '@/utils/tools';
 
 interface Props {
-	product: ProductWithButtons;
+	product: Product;
 }
 
 const modal = createModal({

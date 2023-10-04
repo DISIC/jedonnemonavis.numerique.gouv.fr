@@ -11,6 +11,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Entity, Product } from '@prisma/client';
 import React from 'react';
+import { useSession } from 'next-auth/react';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -54,6 +55,7 @@ const defaultProduct = {
 const ProductModal = (props: Props) => {
 	const { modal, isOpen } = props;
 	const { cx, classes } = useStyles();
+	const { data: session } = useSession({ required: true });
 	const [search, setSearch] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
@@ -102,7 +104,7 @@ const ProductModal = (props: Props) => {
 			return;
 		}
 
-		fetch('/api/prisma/products', {
+		fetch(`/api/prisma/products?userEmail=${session?.user?.email}`, {
 			method: 'POST',
 			body: JSON.stringify(product)
 		})
