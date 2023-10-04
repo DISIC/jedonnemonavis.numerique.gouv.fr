@@ -101,9 +101,15 @@ const ProductButtonsPage = (props: Props) => {
 					</Button>
 				</div>
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--gutters',
+					'fr-grid-row--right'
+				)}
+			>
 				{buttons && nbPages > 1 && (
-					<div className={fr.cx('fr-col-4')}>
+					<div className={fr.cx('fr-col-8')}>
 						<p>
 							Boutons de{' '}
 							<span className={cx(classes.boldText)}>
@@ -126,6 +132,7 @@ const ProductButtonsPage = (props: Props) => {
 									name: 'test-buttons',
 									onChange: e => {
 										setTestFilter(e.currentTarget.checked);
+										setCurrentPage(1);
 									}
 								}
 							}

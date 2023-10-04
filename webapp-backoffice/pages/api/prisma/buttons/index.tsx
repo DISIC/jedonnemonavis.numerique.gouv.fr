@@ -14,7 +14,7 @@ export async function getButtons(
 ) {
 	let orderBy: any = [
 		{
-			title: 'asc'
+			created_at: 'desc'
 		}
 	];
 
