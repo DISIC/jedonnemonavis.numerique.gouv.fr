@@ -16,6 +16,7 @@ import ButtonModal, {
 	ButtonCreationPayload
 } from '@/components/dashboard/ProductButton/ButtonModal';
 import { getNbPages } from '@/utils/tools';
+import { Loader } from '@/components/ui/Loader';
 
 interface Props {
 	product: ProductWithButtons;
@@ -29,7 +30,7 @@ const modal = createModal({
 const ProductButtonsPage = (props: Props) => {
 	const { product } = props;
 
-	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
+	const [buttons, setButtons] = React.useState<PrismaButtonType[] | null>(null);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [count, setCount] = React.useState(0);
@@ -74,6 +75,13 @@ const ProductButtonsPage = (props: Props) => {
 	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(count, numberPerPage);
+
+	if (!buttons)
+		return (
+			<ProductLayout product={product}>
+				<Loader />
+			</ProductLayout>
+		);
 
 	return (
 		<ProductLayout product={product}>
@@ -184,7 +192,7 @@ const ProductButtonsPage = (props: Props) => {
 
 export default ProductButtonsPage;
 
-const useStyles = tss.create({
+const useStyles = tss.withName(ProductButtonsPage.name).create({
 	boldText: {
 		fontWeight: 'bold'
 	},
