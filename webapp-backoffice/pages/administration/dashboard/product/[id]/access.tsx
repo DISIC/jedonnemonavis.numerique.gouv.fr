@@ -102,17 +102,19 @@ const AccessManagement = (props: Props) => {
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<span className={fr.cx('fr-ml-0')}>
-						Porteur de{' '}
-						<span className={cx(classes.boldText)}>
-							{numberPerPage * (currentPage - 1) + 1}
-						</span>{' '}
-						à{' '}
-						<span className={cx(classes.boldText)}>
-							{numberPerPage * (currentPage - 1) + count}
-						</span>{' '}
-						de <span className={cx(classes.boldText)}>{count}</span>
-					</span>
+					{nbPages > 1 && (
+						<span className={fr.cx('fr-ml-0')}>
+							Porteur de{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + 1}
+							</span>{' '}
+							à{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + count}
+							</span>{' '}
+							de <span className={cx(classes.boldText)}>{count}</span>
+						</span>
+					)}
 				</div>
 				<div className={fr.cx('fr-col-4')}>
 					<Checkbox
