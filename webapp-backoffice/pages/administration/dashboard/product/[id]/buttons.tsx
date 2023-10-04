@@ -39,6 +39,8 @@ const ProductButtonsPage = (props: Props) => {
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
+	const { cx, classes } = useStyles();
+
 	const retrieveButtons = React.useCallback(async () => {
 		setIsLoading(true);
 		const url: string = `/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`;
@@ -69,8 +71,6 @@ const ProductButtonsPage = (props: Props) => {
 		retrieveButtons();
 		modal.close();
 	};
-
-	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(count, numberPerPage);
 
@@ -200,23 +200,25 @@ const ProductButtonsPage = (props: Props) => {
 
 export default ProductButtonsPage;
 
-const useStyles = tss.withName(ProductButtonsPage.name).create({
-	boldText: {
-		fontWeight: 'bold'
-	},
-	buttonRight: {
-		textAlign: 'right'
-	},
-	noResults: {
-		...fr.spacing('padding', {
-			topBottom: '10v'
-		}),
-		fontWeight: 'bold',
-		textAlign: 'center'
-	},
-	buttonsContainer: {
-		marginBottom: fr.spacing('16v')
-	}
-});
+const useStyles = tss
+	.withName(ProductButtonsPage.name)
+	.withParams()
+	.create({
+		boldText: {
+			fontWeight: 'bold'
+		},
+		buttonRight: {
+			textAlign: 'right'
+		},
+		noResults: {
+			paddingTop: fr.spacing('10v'),
+			paddingBottom: fr.spacing('10v'),
+			fontWeight: 'bold',
+			textAlign: 'center'
+		},
+		buttonsContainer: {
+			marginBottom: fr.spacing('16v')
+		}
+	});
 
 export { getServerSideProps };
