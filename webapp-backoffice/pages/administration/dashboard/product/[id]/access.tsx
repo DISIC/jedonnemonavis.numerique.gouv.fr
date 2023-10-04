@@ -7,6 +7,8 @@ import ProductAccessRightCard from '@/components/dashboard/ProductAccess/Product
 import React from 'react';
 import { Product } from '@prisma/client';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
+import { Pagination } from '@/components/ui/Pagination';
+import { getNbPages } from '@/utils/tools';
 
 interface Props {
 	product: Product;
@@ -23,7 +25,7 @@ const AccessManagement = (props: Props) => {
 	const [count, setCount] = React.useState(0);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [numberPerPage, _] = React.useState(10);
 
 	const retrieveButtons = React.useCallback(async () => {
 		const response = await fetch(
@@ -37,6 +39,12 @@ const AccessManagement = (props: Props) => {
 	React.useEffect(() => {
 		retrieveButtons();
 	}, [retrieveButtons]);
+
+	const handlePageChange = (pageNumber: number) => {
+		setCurrentPage(pageNumber);
+	};
+
+	const nbPages = getNbPages(count, numberPerPage);
 
 	return (
 		<ProductLayout product={product}>
@@ -74,6 +82,25 @@ const AccessManagement = (props: Props) => {
 				{userProducts?.map((userProduct, index) => (
 					<ProductAccessRightCard key={index} userProduct={userProduct} />
 				))}
+			</div>
+			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+				{nbPages > 1 && (
+					<Pagination
+						showFirstLast
+						count={nbPages}
+						defaultPage={currentPage}
+						getPageLinkProps={pageNumber => ({
+							onClick: event => {
+								event.preventDefault();
+								handlePageChange(pageNumber);
+							},
+							href: '#',
+							classes: { link: fr.cx('fr-pagination__link') },
+							key: `pagination-link-${pageNumber}`
+						})}
+						className={fr.cx('fr-mt-1w')}
+					/>
+				)}
 			</div>
 		</ProductLayout>
 	);

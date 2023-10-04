@@ -48,6 +48,8 @@ export async function getUserProducts(
 	const userProducts = await prisma.userProduct.findMany({
 		orderBy,
 		where,
+		take: numberPerPage,
+		skip: numberPerPage * (page - 1),
 		include: {
 			user: true
 		}
