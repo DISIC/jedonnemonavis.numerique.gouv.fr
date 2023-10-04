@@ -146,6 +146,11 @@ const ProductButtonsPage = (props: Props) => {
 				</div> */}
 			</div>
 			<div>
+				{!buttons.length && (
+					<div className={cx(classes.noResults)}>
+						<p role="status">Aucun bouton trouvé</p>
+					</div>
+				)}
 				{buttons?.map((button, index) => (
 					<ProductButtonCard
 						key={index}
@@ -185,6 +190,13 @@ const useStyles = tss.create({
 	},
 	buttonRight: {
 		textAlign: 'right'
+	},
+	noResults: {
+		...fr.spacing('padding', {
+			topBottom: '10v'
+		}),
+		fontWeight: 'bold',
+		textAlign: 'center'
 	}
 });
 
