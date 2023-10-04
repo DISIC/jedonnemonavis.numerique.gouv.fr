@@ -1,22 +1,20 @@
+import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
 import ProductLayout from '@/layouts/Product/ProductLayout';
-import { getServerSideProps } from '.';
-import { Button as PrismaButtonType, Product } from '@prisma/client';
+import { ProductWithButtons } from '@/pages/api/prisma/products/type';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
-import { ProductWithButtons } from '@/pages/api/prisma/products/type';
+import { Button as PrismaButtonType } from '@prisma/client';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
 
-import React from 'react';
+import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
+import { Loader } from '@/components/ui/Loader';
+import { getNbPages } from '@/utils/tools';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import ButtonModal, {
-	ButtonCreationPayload
-} from '@/components/dashboard/ProductButton/ButtonModal';
-import { getNbPages } from '@/utils/tools';
-import { Loader } from '@/components/ui/Loader';
+import React from 'react';
 
 interface Props {
 	product: ProductWithButtons;
