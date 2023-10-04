@@ -60,9 +60,7 @@ const ProductButtonsPage = (props: Props) => {
 	const isModalOpen = useIsModalOpen(modal);
 
 	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
-		if (button) {
-			setCurrentButton(button);
-		}
+		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		modal.open();
 	};
