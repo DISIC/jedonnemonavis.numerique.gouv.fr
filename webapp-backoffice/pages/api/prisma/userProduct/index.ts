@@ -8,8 +8,13 @@ export async function getUserProducts(
 	numberPerPage: number,
 	page: number,
 	product_id: string,
+	options: {
+		isRemoved?: boolean;
+	},
 	sort?: string
 ) {
+	let { isRemoved } = options;
+
 	let orderBy: any = [
 		{
 			status: 'asc'
@@ -18,7 +23,8 @@ export async function getUserProducts(
 	let include: any = {};
 
 	let where: any = {
-		product_id
+		product_id,
+		status: !isRemoved ? 'carrier' : undefined
 	};
 
 	if (sort) {
@@ -122,7 +128,7 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, product_id, numberPerPage, page } = req.query;
+		const { id, sort, product_id, isRemoved, numberPerPage, page } = req.query;
 		if (id) {
 			const product = await getProduct(id.toString());
 			res.status(200).json(product);
@@ -136,6 +142,7 @@ export default async function handler(
 				parseInt(numberPerPage as string, 10) as number,
 				parseInt(page as string, 10) as number,
 				product_id as string,
+				{ isRemoved: isRemoved === 'true' },
 				sort as string
 			);
 			res.status(200).json(userProducts);

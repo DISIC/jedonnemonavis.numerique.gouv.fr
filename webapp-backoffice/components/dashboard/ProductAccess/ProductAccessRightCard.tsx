@@ -4,6 +4,7 @@ import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import React from 'react';
 import { Menu } from '@mui/material';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	userProduct: UserProductUserWithUsers;
@@ -21,9 +22,16 @@ const ProductAccessCard = (props: Props) => {
 		setAnchorEl(null);
 	};
 
+	const { cx, classes } = useStyles();
+
 	return (
 		<>
-			<div className={fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w')}>
+			<div
+				className={cx(
+					fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'),
+					userProduct.status === 'removed' ? classes.cardStatusRemoved : ''
+				)}
+			>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
@@ -34,7 +42,7 @@ const ProductAccessCard = (props: Props) => {
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 						<span
 							className={fr.cx('fr-text--bold')}
-						>{`${userProduct.user.firstName} ${userProduct.user.lastName}`}</span>
+						>{`${userProduct.user?.firstName} ${userProduct.user?.lastName}`}</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<span>{userProduct.user_email}</span>
@@ -43,7 +51,12 @@ const ProductAccessCard = (props: Props) => {
 						<Badge
 							noIcon
 							severity={userProduct.status === 'carrier' ? 'success' : 'error'}
-							className={fr.cx('fr-px-2w')}
+							className={cx(
+								classes.badge,
+								userProduct.status === 'removed'
+									? classes.badgeStatusRemoved
+									: ''
+							)}
 						>
 							{userProduct.status === 'carrier' ? 'Porteur' : 'Retiré'}
 						</Badge>
@@ -91,5 +104,21 @@ const ProductAccessCard = (props: Props) => {
 		</>
 	);
 };
+
+const useStyles = tss.create({
+	cardStatusRemoved: {
+		backgroundColor: fr.colors.decisions.background.disabled.grey.default
+	},
+	badge: {
+		display: 'block',
+		width: '7.5rem',
+		textAlign: 'center'
+	},
+	badgeStatusRemoved: {
+		color: fr.colors.decisions.background.flat.purpleGlycine.default,
+		backgroundColor:
+			fr.colors.decisions.background.contrast.purpleGlycine.default
+	}
+});
 
 export default ProductAccessCard;

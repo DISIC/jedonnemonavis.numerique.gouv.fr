@@ -9,6 +9,7 @@ import { Product } from '@prisma/client';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
 import { Pagination } from '@/components/ui/Pagination';
 import { getNbPages } from '@/utils/tools';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 
 interface Props {
 	product: Product;
@@ -26,15 +27,18 @@ const AccessManagement = (props: Props) => {
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
+	const [carriersRemovedFilter, setCarriersRemovedFilter] =
+		React.useState(false);
 
 	const retrieveButtons = React.useCallback(async () => {
+		console.log(carriersRemovedFilter);
 		const response = await fetch(
-			`/api/prisma/userProduct?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}`
+			`/api/prisma/userProduct?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isRemoved=${carriersRemovedFilter}`
 		);
 		const res = await response.json();
 		setUserProducts(res.data);
 		setCount(res.count);
-	}, [numberPerPage, currentPage]);
+	}, [numberPerPage, currentPage, carriersRemovedFilter]);
 
 	React.useEffect(() => {
 		retrieveButtons();
@@ -63,21 +67,38 @@ const AccessManagement = (props: Props) => {
 					</Button>
 				</div>
 			</div>
-			{/* <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-4')}>
-					<p>
-						Boutons de{' '}
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-8')}>
+					<span className={fr.cx('fr-ml-0')}>
+						Porteur de{' '}
 						<span className={cx(classes.boldText)}>
 							{numberPerPage * (currentPage - 1) + 1}
 						</span>{' '}
 						à{' '}
 						<span className={cx(classes.boldText)}>
-							{numberPerPage * (currentPage - 1) + product.users.length}
+							{numberPerPage * (currentPage - 1) + count}
 						</span>{' '}
 						de <span className={cx(classes.boldText)}>{count}</span>
-					</p>
+					</span>
 				</div>
-			</div> */}
+				<div className={fr.cx('fr-col-4')}>
+					<Checkbox
+						className={fr.cx('fr-ml-auto')}
+						style={{ userSelect: 'none' }}
+						options={[
+							{
+								label: 'Afficher les porteur retirés',
+								nativeInputProps: {
+									name: 'carriers-removed',
+									onChange: () => {
+										setCarriersRemovedFilter(!carriersRemovedFilter);
+									}
+								}
+							}
+						]}
+					/>
+				</div>
+			</div>
 			<div>
 				{userProducts?.map((userProduct, index) => (
 					<ProductAccessRightCard key={index} userProduct={userProduct} />
