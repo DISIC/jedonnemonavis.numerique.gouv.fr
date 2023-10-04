@@ -172,25 +172,27 @@ const ProductButtonsPage = (props: Props) => {
 						))}
 					</>
 				)}
-			</div>
-			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-				{nbPages > 1 && (
-					<Pagination
-						showFirstLast
-						count={nbPages}
-						defaultPage={currentPage}
-						getPageLinkProps={pageNumber => ({
-							onClick: event => {
-								event.preventDefault();
-								handlePageChange(pageNumber);
-							},
-							href: '#',
-							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination-link-${pageNumber}`
-						})}
-						className={fr.cx('fr-mt-1w')}
-					/>
-				)}
+				<div
+					className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mt-6v')}
+				>
+					{nbPages > 1 && (
+						<Pagination
+							showFirstLast
+							count={nbPages}
+							defaultPage={currentPage}
+							getPageLinkProps={pageNumber => ({
+								onClick: event => {
+									event.preventDefault();
+									handlePageChange(pageNumber);
+								},
+								href: '#',
+								classes: { link: fr.cx('fr-pagination__link') },
+								key: `pagination-link-${pageNumber}`
+							})}
+							className={fr.cx('fr-mt-1w')}
+						/>
+					)}
+				</div>
 			</div>
 		</ProductLayout>
 	);
