@@ -110,6 +110,7 @@ const ButtonModal = (props: Props) => {
 				body: JSON.stringify(currentButton)
 			}).finally(() => {
 				modal.close();
+				resetErrors('title');
 				onButtonCreatedOrUpdated();
 			});
 		} else {
@@ -118,6 +119,7 @@ const ButtonModal = (props: Props) => {
 				body: JSON.stringify(currentButton)
 			}).finally(() => {
 				modal.close();
+				resetErrors('title');
 				onButtonCreatedOrUpdated();
 			});
 		}
@@ -368,7 +370,9 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: modal.close
+						onClick: () => {
+							resetErrors('title');
+						}
 					},
 					{
 						children: 'Créer',
@@ -381,7 +385,9 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: modal.close
+						onClick: () => {
+							resetErrors('title');
+						}
 					},
 					{
 						children: 'Modifier',
