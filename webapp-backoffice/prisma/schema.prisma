@@ -60,7 +60,7 @@ model Button {
   title       String   @unique
   description String?
   product     Product? @relation(fields: [product_id], references: [id])
-  isTest      Boolean?
+  isTest      Boolean? @default(false)
   product_id  String   @db.ObjectId
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt

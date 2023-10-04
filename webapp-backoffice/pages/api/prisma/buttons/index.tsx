@@ -9,7 +9,8 @@ export async function getButtons(
 	page: number,
 	sort?: string,
 	search?: string,
-	product_id?: string
+	product_id?: string,
+	testFilter?: boolean
 ) {
 	let orderBy: any = [
 		{
@@ -34,6 +35,22 @@ export async function getButtons(
 			title: {
 				contains: search,
 				mode: 'insensitive'
+			}
+		};
+	}
+
+	if (testFilter) {
+		where = {
+			...where,
+			isTest: {
+				equals: true
+			}
+		};
+	} else {
+		where = {
+			...where,
+			isTest: {
+				equals: false
 			}
 		};
 	}
@@ -123,7 +140,8 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, search, product_id, numberPerPage, page } = req.query;
+		const { id, sort, search, product_id, numberPerPage, page, testFilter } =
+			req.query;
 		if (id) {
 			const button = await getButton(id.toString());
 			return res.status(200).json(button);
@@ -138,7 +156,8 @@ export default async function handler(
 				parseInt(page as string, 10) as number,
 				sort as string,
 				search as string,
-				product_id as string
+				product_id as string,
+				testFilter === 'true'
 			);
 			return res.status(200).json(buttons);
 		}

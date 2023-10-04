@@ -40,13 +40,12 @@ const ProductButtonsPage = (props: Props) => {
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
 	const retrieveButtons = React.useCallback(async () => {
-		const response = await fetch(
-			`/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`
-		);
+		const url: string = `/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&testFilter=${testFilter}`;
+		const response = await fetch(url);
 		const res = await response.json();
 		setButtons(res.data);
 		setCount(res.count);
-	}, [numberPerPage, currentPage]);
+	}, [numberPerPage, currentPage, testFilter]);
 
 	React.useEffect(() => {
 		retrieveButtons();
@@ -123,8 +122,8 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
-									onChange: () => {
-										setTestFilter(true);
+									onChange: e => {
+										setTestFilter(e.target.checked);
 									}
 								}
 							}
