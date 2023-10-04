@@ -224,25 +224,27 @@ const ButtonModal = (props: Props) => {
 								}
 							}}
 						/>
-						<Checkbox
-							options={[
-								{
-									hintText:
-										'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
-									label: 'Bouton de test',
-									nativeInputProps: {
-										name: 'checkboxes-1',
-										value: 'isTest',
-										onChange: e => {
-											setCurrentButton({
-												...currentButton,
-												isTest: e.target.checked
-											});
+						{!('id' in currentButton) && (
+							<Checkbox
+								options={[
+									{
+										hintText:
+											'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
+										label: 'Bouton de test',
+										nativeInputProps: {
+											name: 'checkboxes-1',
+											value: 'isTest',
+											onChange: e => {
+												setCurrentButton({
+													...currentButton,
+													isTest: e.target.checked
+												});
+											}
 										}
 									}
-								}
-							]}
-						/>
+								]}
+							/>
+						)}
 					</div>
 				);
 
