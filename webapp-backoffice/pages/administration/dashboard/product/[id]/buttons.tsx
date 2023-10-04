@@ -151,7 +151,7 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div> */}
 			</div>
-			<div>
+			<div className={cx(classes.buttonsContainer)}>
 				{!buttons || isLoading ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
@@ -211,6 +211,9 @@ const useStyles = tss.withName(ProductButtonsPage.name).create({
 		}),
 		fontWeight: 'bold',
 		textAlign: 'center'
+	},
+	buttonsContainer: {
+		marginBottom: fr.spacing('16v')
 	}
 });
 
