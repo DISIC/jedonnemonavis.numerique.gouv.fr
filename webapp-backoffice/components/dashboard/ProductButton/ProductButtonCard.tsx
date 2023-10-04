@@ -116,6 +116,7 @@ const useStyles = tss
 		},
 		actionsContainer: {
 			display: 'flex',
+			flexWrap: 'wrap',
 			alignItems: 'center',
 			justifyContent: 'space-between',
 			paddingLeft: fr.spacing('11v')
