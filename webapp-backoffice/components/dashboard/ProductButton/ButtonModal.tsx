@@ -282,7 +282,6 @@ const ButtonModal = (props: Props) => {
 									label: 'Bouton de test',
 									nativeInputProps: {
 										name: 'checkboxes-1',
-										value: 'isTest',
 										checked: button?.isTest || false,
 										onChange: e => {
 											setCurrentButton({

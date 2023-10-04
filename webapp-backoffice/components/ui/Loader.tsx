@@ -15,7 +15,6 @@ export const Loader = () => {
 
 const useStyles = tss.withName(Loader.name).create({
 	loaderContainer: {
-		padding: fr.spacing('30v'),
 		display: 'flex',
 		justifyContent: 'center',
 		i: {

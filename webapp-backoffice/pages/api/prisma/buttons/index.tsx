@@ -35,8 +35,8 @@ export async function getButtons(
 		};
 	}
 
-	if (isTest) {
-		where.isTest = isTest;
+	if (!isTest) {
+		where.isTest = { equals: false };
 	}
 
 	if (sort) {

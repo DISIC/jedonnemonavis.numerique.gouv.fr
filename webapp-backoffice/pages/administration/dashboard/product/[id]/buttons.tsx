@@ -34,6 +34,7 @@ const ProductButtonsPage = (props: Props) => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [count, setCount] = React.useState(0);
+	const [isLoading, setIsLoading] = React.useState(false);
 	const [modalType, setModalType] = React.useState<string>('');
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
@@ -41,13 +42,14 @@ const ProductButtonsPage = (props: Props) => {
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
 	const retrieveButtons = React.useCallback(async () => {
-		const response = await fetch(
-			`/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`
-		);
+		setIsLoading(true);
+		const url: string = `/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`;
+		const response = await fetch(url);
 		const res = await response.json();
 		setButtons(res.data);
 		setCount(res.count);
-	}, [numberPerPage, currentPage]);
+		setIsLoading(false);
+	}, [numberPerPage, currentPage, testFilter]);
 
 	React.useEffect(() => {
 		retrieveButtons();
@@ -76,13 +78,6 @@ const ProductButtonsPage = (props: Props) => {
 
 	const nbPages = getNbPages(count, numberPerPage);
 
-	if (!buttons)
-		return (
-			<ProductLayout product={product}>
-				<Loader />
-			</ProductLayout>
-		);
-
 	return (
 		<ProductLayout product={product}>
 			<ButtonModal
@@ -109,7 +104,7 @@ const ProductButtonsPage = (props: Props) => {
 				</div>
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				{nbPages > 1 && (
+				{buttons && nbPages > 1 && (
 					<div className={fr.cx('fr-col-4')}>
 						<p>
 							Boutons de{' '}
@@ -131,8 +126,8 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
-									onChange: () => {
-										setTestFilter(true);
+									onChange: e => {
+										setTestFilter(e.currentTarget.checked);
 									}
 								}
 							}
@@ -154,18 +149,26 @@ const ProductButtonsPage = (props: Props) => {
 				</div> */}
 			</div>
 			<div>
-				{!buttons.length && (
-					<div className={cx(classes.noResults)}>
-						<p role="status">Aucun bouton trouvé</p>
+				{!buttons || isLoading ? (
+					<div className={fr.cx('fr-py-10v')}>
+						<Loader />
 					</div>
+				) : (
+					<>
+						{!buttons.length && (
+							<div className={cx(classes.noResults)}>
+								<p role="status">Aucun bouton trouvé</p>
+							</div>
+						)}
+						{buttons?.map((button, index) => (
+							<ProductButtonCard
+								key={index}
+								button={button}
+								onButtonClick={handleModalOpening}
+							/>
+						))}
+					</>
 				)}
-				{buttons?.map((button, index) => (
-					<ProductButtonCard
-						key={index}
-						button={button}
-						onButtonClick={handleModalOpening}
-					/>
-				))}
 			</div>
 			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 				{nbPages > 1 && (
