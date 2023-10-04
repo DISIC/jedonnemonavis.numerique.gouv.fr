@@ -2,17 +2,21 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import React from 'react';
-import { Menu } from '@mui/material';
+import { Menu, MenuItem } from '@mui/material';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
 import { tss } from 'tss-react/dsfr';
+import { UserProduct } from '@prisma/client';
 
 interface Props {
 	userProduct: UserProductUserWithUsers;
-	// onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
+	onButtonClick: (
+		modalType: 'remove' | 'resend-email',
+		button?: UserProduct
+	) => void;
 }
 
 const ProductAccessCard = (props: Props) => {
-	const { userProduct } = props;
+	const { userProduct, onButtonClick } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -40,9 +44,11 @@ const ProductAccessCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-						<span
-							className={fr.cx('fr-text--bold')}
-						>{`${userProduct.user?.firstName} ${userProduct.user?.lastName}`}</span>
+						<span className={fr.cx('fr-text--bold')}>
+							{userProduct.user
+								? `${userProduct.user?.firstName} ${userProduct.user?.lastName}`
+								: 'Inconnu'}
+						</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<span>{userProduct.user_email}</span>
@@ -50,7 +56,11 @@ const ProductAccessCard = (props: Props) => {
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 						<Badge
 							noIcon
-							severity={userProduct.status === 'carrier' ? 'success' : 'error'}
+							severity={
+								userProduct.user !== null && userProduct.status === 'carrier'
+									? 'success'
+									: 'info'
+							}
 							className={cx(
 								classes.badge,
 								userProduct.status === 'removed'
@@ -58,7 +68,11 @@ const ProductAccessCard = (props: Props) => {
 									: ''
 							)}
 						>
-							{userProduct.status === 'carrier' ? 'Porteur' : 'Retiré'}
+							{userProduct.user === null
+								? 'Invité'
+								: userProduct.status === 'carrier'
+								? 'Porteur'
+								: 'Retiré'}
 						</Badge>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
@@ -67,10 +81,13 @@ const ProductAccessCard = (props: Props) => {
 							aria-controls={menuOpen ? 'option-menu' : undefined}
 							aria-haspopup="true"
 							aria-expanded={menuOpen ? 'true' : undefined}
-							priority="secondary"
+							priority="tertiary"
+							className={menuOpen ? classes.buttonOptionsOpen : ''}
 							onClick={handleClick}
+							disabled={userProduct.status === 'removed'}
 							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
 							iconPosition="right"
+							size="small"
 						>
 							Options
 						</Button>
@@ -83,20 +100,14 @@ const ProductAccessCard = (props: Props) => {
 								'aria-labelledby': 'button-options'
 							}}
 						>
-							{/* <MenuItem onClick={() => onButtonClick('edit', button)}>
-								Modifier le bouton
-							</MenuItem> */}
-							{/* <MenuItem onClick={() => onButtonClick('merge')}>
-								Fusionner avec un autre bouton
+							{userProduct.user === null && (
+								<MenuItem onClick={() => onButtonClick('resend-email')}>
+									Renvoyer l'e-mail d'invitation
+								</MenuItem>
+							)}
+							<MenuItem onClick={() => onButtonClick('remove', userProduct)}>
+								Retirer son droit d'accès
 							</MenuItem>
-							<MenuItem
-								onClick={() => onButtonClick('archive', button)}
-								style={{
-									color: fr.colors.decisions.background.flat.error.default
-								}}
-							>
-								Archiver bouton
-							</MenuItem> */}
 						</Menu>
 					</div>
 				</div>
@@ -118,6 +129,9 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.background.flat.purpleGlycine.default,
 		backgroundColor:
 			fr.colors.decisions.background.contrast.purpleGlycine.default
+	},
+	buttonOptionsOpen: {
+		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default
 	}
 });
 

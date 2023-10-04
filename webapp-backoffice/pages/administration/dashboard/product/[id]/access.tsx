@@ -5,15 +5,21 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import ProductAccessRightCard from '@/components/dashboard/ProductAccess/ProductAccessRightCard';
 import React from 'react';
-import { Product } from '@prisma/client';
+import { Product, UserProduct } from '@prisma/client';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
 import { Pagination } from '@/components/ui/Pagination';
 import { getNbPages } from '@/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 
 interface Props {
 	product: Product;
 }
+
+const modal = createModal({
+	id: 'user-product-modal',
+	isOpenedByDefault: false
+});
 
 const AccessManagement = (props: Props) => {
 	const { cx, classes } = useStyles();
@@ -24,6 +30,13 @@ const AccessManagement = (props: Props) => {
 		UserProductUserWithUsers[]
 	>([]);
 	const [count, setCount] = React.useState(0);
+
+	const [currentUserProduct, setCurrentUserProduct] = React.useState<
+		UserProduct | undefined
+	>(undefined);
+	const [modalType, setModalType] = React.useState<
+		'add' | 'remove' | 'resend-email' | undefined
+	>(undefined);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -43,6 +56,17 @@ const AccessManagement = (props: Props) => {
 	React.useEffect(() => {
 		retrieveButtons();
 	}, [retrieveButtons]);
+
+	const handleModalOpening = (
+		modalType: 'add' | 'remove' | 'resend-email',
+		userProduct?: UserProduct
+	) => {
+		if (userProduct) {
+			setCurrentUserProduct(userProduct);
+		}
+		setModalType(modalType);
+		modal.open();
+	};
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
@@ -101,7 +125,11 @@ const AccessManagement = (props: Props) => {
 			</div>
 			<div>
 				{userProducts?.map((userProduct, index) => (
-					<ProductAccessRightCard key={index} userProduct={userProduct} />
+					<ProductAccessRightCard
+						key={index}
+						userProduct={userProduct}
+						onButtonClick={handleModalOpening}
+					/>
 				))}
 			</div>
 			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
