@@ -66,34 +66,35 @@ export async function getUserProducts(
 	return { data: userProducts, count };
 }
 
-export async function getProduct(id: string) {
-	const product = await prisma.product.findUnique({
+export async function getUserProduct(id: string) {
+	const userProduct = await prisma.userProduct.findUnique({
 		where: {
 			id: id
-		},
-		include: {
-			buttons: true
 		}
 	});
-	return product;
+	return userProduct;
 }
 
-export async function createProduct(
-	data: Omit<Product, 'id'>,
-	userEmail: string
-) {
-	const product = await prisma.product.create({
-		data: data
-	});
-
-	await prisma.userProduct.create({
-		data: {
+export async function createUserProduct(userEmail: string, productId: string) {
+	const checkIfUserProductExists = await prisma.userProduct.findFirst({
+		where: {
 			user_email: userEmail,
-			product_id: product.id
+			product_id: productId
 		}
 	});
 
-	return product;
+	if (checkIfUserProductExists) {
+		throw new Error('User product already exists');
+	}
+
+	const newUserProduct = await prisma.userProduct.create({
+		data: {
+			user_email: userEmail,
+			product_id: productId
+		}
+	});
+
+	return newUserProduct;
 }
 
 export async function updateProduct(id: string, data: Partial<Product>) {
@@ -130,7 +131,7 @@ export default async function handler(
 	if (req.method === 'GET') {
 		const { id, sort, product_id, isRemoved, numberPerPage, page } = req.query;
 		if (id) {
-			const product = await getProduct(id.toString());
+			const product = await getUserProduct(id.toString());
 			res.status(200).json(product);
 		} else {
 			if (!numberPerPage || !page) {
@@ -148,10 +149,17 @@ export default async function handler(
 			res.status(200).json(userProducts);
 		}
 	} else if (req.method === 'POST') {
-		const { userEmail } = req.query;
+		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
-		const product = await createProduct(data, userEmail as string);
-		res.status(201).json(product);
+		try {
+			const userProduct = await createUserProduct(
+				data.email as string,
+				product_id as string
+			);
+			res.status(201).json(userProduct);
+		} catch (error) {
+			res.status(409).json({ message: '' });
+		}
 	} else if (req.method === 'PUT') {
 		const { id } = req.query;
 

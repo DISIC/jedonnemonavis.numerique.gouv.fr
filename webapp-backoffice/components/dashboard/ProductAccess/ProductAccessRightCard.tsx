@@ -47,7 +47,7 @@ const ProductAccessCard = (props: Props) => {
 						<span className={fr.cx('fr-text--bold')}>
 							{userProduct.user
 								? `${userProduct.user?.firstName} ${userProduct.user?.lastName}`
-								: 'Inconnu'}
+								: '-'}
 						</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>

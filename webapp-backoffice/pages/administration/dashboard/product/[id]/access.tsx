@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import ProductAccessRightCard from '@/components/dashboard/ProductAccess/ProductAccessRightCard';
+import ProductAccessRightModal from '@/components/dashboard/ProductAccess/ProductAccessRightModal';
 import React from 'react';
 import { Product, UserProduct } from '@prisma/client';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
@@ -11,6 +12,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { getNbPages } from '@/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 interface Props {
 	product: Product;
@@ -35,27 +37,28 @@ const AccessManagement = (props: Props) => {
 		UserProduct | undefined
 	>(undefined);
 	const [modalType, setModalType] = React.useState<
-		'add' | 'remove' | 'resend-email' | undefined
-	>(undefined);
+		'add' | 'remove' | 'resend-email'
+	>('add');
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 	const [carriersRemovedFilter, setCarriersRemovedFilter] =
 		React.useState(false);
 
-	const retrieveButtons = React.useCallback(async () => {
-		console.log(carriersRemovedFilter);
+	const isModalOpen = useIsModalOpen(modal);
+
+	const retrieveUsersProducts = React.useCallback(async () => {
 		const response = await fetch(
 			`/api/prisma/userProduct?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isRemoved=${carriersRemovedFilter}`
 		);
 		const res = await response.json();
 		setUserProducts(res.data);
 		setCount(res.count);
-	}, [numberPerPage, currentPage, carriersRemovedFilter]);
+	}, [numberPerPage, currentPage, carriersRemovedFilter, isModalOpen]);
 
 	React.useEffect(() => {
-		retrieveButtons();
-	}, [retrieveButtons]);
+		retrieveUsersProducts();
+	}, [retrieveUsersProducts]);
 
 	const handleModalOpening = (
 		modalType: 'add' | 'remove' | 'resend-email',
@@ -76,6 +79,12 @@ const AccessManagement = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<ProductAccessRightModal
+				modal={modal}
+				isOpen={isModalOpen}
+				modalType={modalType}
+				productId={product.id}
+			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer les droits d'accès</h2>
@@ -85,7 +94,7 @@ const AccessManagement = (props: Props) => {
 						priority="secondary"
 						iconPosition="right"
 						iconId="ri-user-add-line"
-						onClick={() => console.log('test')}
+						onClick={() => handleModalOpening('add')}
 					>
 						Inviter un porteur
 					</Button>
@@ -132,7 +141,7 @@ const AccessManagement = (props: Props) => {
 					/>
 				))}
 			</div>
-			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mb-15w')}>
 				{nbPages > 1 && (
 					<Pagination
 						showFirstLast
