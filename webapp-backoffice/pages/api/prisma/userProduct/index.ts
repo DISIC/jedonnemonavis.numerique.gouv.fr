@@ -91,6 +91,9 @@ export async function createUserProduct(userEmail: string, productId: string) {
 		data: {
 			user_email: userEmail,
 			product_id: productId
+		},
+		include: {
+			user: true
 		}
 	});
 

@@ -13,6 +13,7 @@ import { getNbPages } from '@/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
@@ -33,9 +34,8 @@ const AccessManagement = (props: Props) => {
 	>([]);
 	const [count, setCount] = React.useState(0);
 
-	const [currentUserProduct, setCurrentUserProduct] = React.useState<
-		UserProduct | undefined
-	>(undefined);
+	const [currentUserProduct, setCurrentUserProduct] =
+		React.useState<UserProductUserWithUsers>();
 	const [modalType, setModalType] = React.useState<
 		'add' | 'remove' | 'resend-email'
 	>('add');
@@ -45,6 +45,7 @@ const AccessManagement = (props: Props) => {
 	const [carriersRemovedFilter, setCarriersRemovedFilter] =
 		React.useState(false);
 
+	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const isModalOpen = useIsModalOpen(modal);
 
 	const retrieveUsersProducts = React.useCallback(async () => {
@@ -65,10 +66,22 @@ const AccessManagement = (props: Props) => {
 		userProduct?: UserProduct
 	) => {
 		if (userProduct) {
-			setCurrentUserProduct(userProduct);
+			setCurrentUserProduct({ ...userProduct, user: null });
 		}
+		setIsModalSubmitted(false);
 		setModalType(modalType);
 		modal.open();
+	};
+
+	const getAlertTitle = () => {
+		switch (modalType) {
+			case 'add':
+				return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été ajouté comme porteur.`;
+			case 'resend-email':
+				return `Un e-mail d’invitation a été envoyé à ${currentUserProduct?.user_email}.`;
+			case 'remove':
+				return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
+		}
 	};
 
 	const handlePageChange = (pageNumber: number) => {
@@ -84,7 +97,22 @@ const AccessManagement = (props: Props) => {
 				isOpen={isModalOpen}
 				modalType={modalType}
 				productId={product.id}
+				setIsModalSubmitted={setIsModalSubmitted}
+				setCurrentUserProduct={setCurrentUserProduct}
 			/>
+			{isModalSubmitted && (
+				<Alert
+					closable
+					description=""
+					onClose={function noRefCheck() {
+						setIsModalSubmitted(false);
+					}}
+					severity={modalType === 'remove' ? 'info' : 'success'}
+					className={fr.cx('fr-mb-5w')}
+					small
+					title={getAlertTitle()}
+				/>
+			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer les droits d'accès</h2>

@@ -3,6 +3,8 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { UserProduct } from '@prisma/client';
+import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -22,11 +24,22 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: 'add' | 'remove' | 'resend-email';
 	productId: string;
+	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
+	setCurrentUserProduct: React.Dispatch<
+		React.SetStateAction<UserProductUserWithUsers | undefined>
+	>;
 }
 
 const ButtonModal = (props: Props) => {
 	const { cx } = useStyles();
-	const { modal, isOpen, modalType, productId } = props;
+	const {
+		modal,
+		isOpen,
+		modalType,
+		productId,
+		setIsModalSubmitted,
+		setCurrentUserProduct
+	} = props;
 
 	const [email, setEmail] = React.useState<string>('');
 	const [errorStatus, setErrorStatus] = React.useState<number>();
@@ -38,11 +51,17 @@ const ButtonModal = (props: Props) => {
 
 	async function handleModalSubmit(email?: string) {
 		if (modalType === 'add' && email !== undefined) {
-			const res = await fetch(`/api/prisma/userProduct?product_id=${productId}`, {
-				method: 'POST',
-				body: JSON.stringify({ email })
-			});
+			const res = await fetch(
+				`/api/prisma/userProduct?product_id=${productId}`,
+				{
+					method: 'POST',
+					body: JSON.stringify({ email })
+				}
+			);
 			if (res.ok) {
+				const data = await res.json();
+				setIsModalSubmitted(true);
+				setCurrentUserProduct(data);
 				modal.close();
 			} else {
 				setErrorStatus(res.status);
@@ -54,7 +73,7 @@ const ButtonModal = (props: Props) => {
 		// 		body: JSON.stringify({ status: 'removed' })
 		// 	});
 		// }
-	};
+	}
 
 	const displayModalTitle = (): string => {
 		switch (modalType) {
@@ -76,7 +95,11 @@ const ButtonModal = (props: Props) => {
 							id="button-code"
 							label="Adresse mail du porteur"
 							state={errorStatus ? 'error' : 'default'}
-							stateRelatedMessage={errorStatus == 409 ? "L'utilisateur avec cet email fait déjà partie de ce produit" : "Erreur serveur"}
+							stateRelatedMessage={
+								errorStatus == 409
+									? "L'utilisateur avec cet email fait déjà partie de ce produit"
+									: 'Erreur serveur'
+							}
 							nativeInputProps={{
 								value: email,
 								onChange: e => setEmail(e.target.value)
