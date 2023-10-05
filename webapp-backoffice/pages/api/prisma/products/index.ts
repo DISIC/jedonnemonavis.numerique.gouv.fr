@@ -54,6 +54,8 @@ export async function getProducts(sort?: string, search?: string) {
 	const products = await prisma.product.findMany({
 		orderBy,
 		where,
+		//TO REMOVE, HANDLE PAGINATION
+		take: 300,
 		include: {
 			buttons: true
 		}

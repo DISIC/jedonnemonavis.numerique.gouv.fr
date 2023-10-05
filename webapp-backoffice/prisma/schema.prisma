@@ -19,17 +19,18 @@ enum RightAccessStatus {
 
 // Next auth
 model User {
-  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
-  firstName            String?
-  lastName             String?
-  active               Boolean               @default(false)
-  observatoire_account Boolean               @default(false)
-  email                String                @unique
-  password             String
-  UserOTPs             UserOTP[]
-  UserValidationTokens UserValidationToken[]
-  UserRequests         UserRequest[]
-  UserProducts         UserProduct[]
+  id                    String                @id @default(auto()) @map("_id") @db.ObjectId
+  firstName             String?
+  lastName              String?
+  active                Boolean               @default(false)
+  observatoire_account  Boolean               @default(false)
+  observatoire_username String?
+  email                 String                @unique
+  password              String
+  UserOTPs              UserOTP[]
+  UserValidationTokens  UserValidationToken[]
+  UserRequests          UserRequest[]
+  UserProducts          UserProduct[]
 }
 
 model UserRequest {
@@ -65,6 +66,7 @@ model Button {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String   @unique
   description String?
+  isTest      Boolean? @default(false)
   product     Product? @relation(fields: [product_id], references: [id])
   product_id  String   @db.ObjectId
   created_at  DateTime @default(now())
@@ -72,17 +74,18 @@ model Button {
 }
 
 model Product {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  title       String        @unique
-  entity      Entity?       @relation(fields: [entity_id], references: [id])
-  entity_id   String        @db.ObjectId
-  created_at  DateTime      @default(now())
-  updated_at  DateTime      @updatedAt
-  isEssential Boolean?
-  urls        String[]
-  volume      Int?
-  buttons     Button[]
-  users       UserProduct[]
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  title           String        @unique
+  entity          Entity?       @relation(fields: [entity_id], references: [id])
+  entity_id       String        @db.ObjectId
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  isEssential     Boolean?      @default(false)
+  urls            String[]
+  volume          Int?
+  observatoire_id Int?
+  buttons         Button[]
+  users           UserProduct[]
 }
 
 model UserProduct {
