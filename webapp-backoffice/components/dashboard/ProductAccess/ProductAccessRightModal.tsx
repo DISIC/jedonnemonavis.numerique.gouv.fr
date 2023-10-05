@@ -25,6 +25,7 @@ interface Props {
 	modalType: 'add' | 'remove' | 'resend-email';
 	productId: string;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
+	currentUserProduct: UserProductUserWithUsers | undefined;
 	setCurrentUserProduct: React.Dispatch<
 		React.SetStateAction<UserProductUserWithUsers | undefined>
 	>;
@@ -37,6 +38,7 @@ const ButtonModal = (props: Props) => {
 		isOpen,
 		modalType,
 		productId,
+		currentUserProduct,
 		setIsModalSubmitted,
 		setCurrentUserProduct
 	} = props;
@@ -66,13 +68,20 @@ const ButtonModal = (props: Props) => {
 			} else {
 				setErrorStatus(res.status);
 			}
+		} else if (modalType === 'remove') {
+			if (currentUserProduct === undefined) return;
+			const res = await fetch(
+				`/api/prisma/userProduct/${currentUserProduct.id}`,
+				{
+					method: 'PUT',
+					body: JSON.stringify({ status: 'removed' })
+				}
+			);
+			if (res.ok) {
+				setIsModalSubmitted(true);
+				modal.close();
+			}
 		}
-		// else if (modalType === 'remove') {
-		// 	await fetch(`/api/prisma/userProduct/${currentUserProductId}`, {
-		// 		method: 'PUT',
-		// 		body: JSON.stringify({ status: 'removed' })
-		// 	});
-		// }
 	}
 
 	const displayModalTitle = (): string => {
@@ -107,6 +116,17 @@ const ButtonModal = (props: Props) => {
 						/>
 					</div>
 				);
+			case 'remove':
+				return (
+					<div className={fr.cx('fr-pt-4v')}>
+						<p>
+							Vous êtes sûr de vouloir retirer{' '}
+							{currentUserProduct?.user?.firstName}{' '}
+							{currentUserProduct?.user?.lastName} comme porteur ou porteuse de
+							ce produit numérique ?
+						</p>
+					</div>
+				);
 			default:
 				return <div></div>;
 		}
@@ -135,6 +155,18 @@ const ButtonModal = (props: Props) => {
 						onClick: () => handleModalSubmit(email)
 					}
 				];
+			case 'remove':
+				return [
+					...defaultButtons,
+					{
+						children: 'Retirer',
+						priority: 'primary',
+						doClosesModal: false,
+						onClick: () => handleModalSubmit()
+					}
+				];
+			default:
+				return [...defaultButtons];
 		}
 
 		return;

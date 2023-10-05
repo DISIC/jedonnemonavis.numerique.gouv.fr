@@ -5,18 +5,19 @@ import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
 import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
 import { tss } from 'tss-react/dsfr';
-import { UserProduct } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	userProduct: UserProductUserWithUsers;
 	onButtonClick: (
 		modalType: 'remove' | 'resend-email',
-		button?: UserProduct
+		userProduct?: UserProductUserWithUsers
 	) => void;
 }
 
 const ProductAccessCard = (props: Props) => {
 	const { userProduct, onButtonClick } = props;
+	const { data: session } = useSession({ required: true });
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -84,7 +85,10 @@ const ProductAccessCard = (props: Props) => {
 							priority="tertiary"
 							className={menuOpen ? classes.buttonOptionsOpen : ''}
 							onClick={handleClick}
-							disabled={userProduct.status === 'removed'}
+							disabled={
+								userProduct.status === 'removed' ||
+								userProduct.user_email === session?.user?.email
+							}
 							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
 							iconPosition="right"
 							size="small"

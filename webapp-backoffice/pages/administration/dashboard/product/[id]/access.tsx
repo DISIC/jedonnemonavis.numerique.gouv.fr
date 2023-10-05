@@ -63,10 +63,10 @@ const AccessManagement = (props: Props) => {
 
 	const handleModalOpening = (
 		modalType: 'add' | 'remove' | 'resend-email',
-		userProduct?: UserProduct
+		userProduct?: UserProductUserWithUsers
 	) => {
 		if (userProduct) {
-			setCurrentUserProduct({ ...userProduct, user: null });
+			setCurrentUserProduct(userProduct);
 		}
 		setIsModalSubmitted(false);
 		setModalType(modalType);
@@ -98,19 +98,19 @@ const AccessManagement = (props: Props) => {
 				modalType={modalType}
 				productId={product.id}
 				setIsModalSubmitted={setIsModalSubmitted}
+				currentUserProduct={currentUserProduct}
 				setCurrentUserProduct={setCurrentUserProduct}
 			/>
 			{isModalSubmitted && (
 				<Alert
 					closable
-					description=""
 					onClose={function noRefCheck() {
 						setIsModalSubmitted(false);
 					}}
 					severity={modalType === 'remove' ? 'info' : 'success'}
 					className={fr.cx('fr-mb-5w')}
 					small
-					title={getAlertTitle()}
+					description={getAlertTitle()}
 				/>
 			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
