@@ -11,7 +11,7 @@ import { products } from './seeds/products';
 import { whiteListedDomains } from './seeds/white-listed-domains';
 import { entities } from './seeds/entities';
 import { getRandomObjectFromArray } from '../utils/tools';
-import { buttons } from './seeds/buttons';
+import { createButtons } from './seeds/buttons';
 
 const prisma = new PrismaClient();
 
@@ -33,7 +33,15 @@ async function main() {
 		);
 	});
 
-	products.forEach(product => {
+	entities.forEach(entity => {
+		promises.push(
+			prisma.entity.create({
+				data: entity
+			})
+		);
+	});
+
+	products.forEach((product, index) => {
 		const randomEntity = getRandomObjectFromArray(entities);
 		promises.push(
 			prisma.product.upsert({
@@ -44,12 +52,22 @@ async function main() {
 				create: {
 					...product,
 					entity: {
-						create: {
-							...(randomEntity as Entity)
+						connectOrCreate: {
+							where: {
+								name: (randomEntity as Entity).name
+							},
+							create: {
+								...(randomEntity as Entity)
+							}
 						}
 					},
 					buttons: {
-						create: buttons as Button[]
+						create: createButtons(product.title) as Button[]
+					},
+					users: {
+						create: {
+							user_email: users.filter(u => u.active)[index % 2].email
+						}
 					}
 				}
 			})

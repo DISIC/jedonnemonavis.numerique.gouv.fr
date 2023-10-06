@@ -56,6 +56,12 @@ model UserValidationToken {
   token   String @unique
 }
 
+model UserInviteToken {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  user_email String
+  token   String @unique
+}
+
 model Entity {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
   name     String    @unique

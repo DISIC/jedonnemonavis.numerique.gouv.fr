@@ -11,16 +11,20 @@ type UserPresetInfos = {
 	firstName?: string;
 	lastName?: string;
 	email?: string;
+	inviteToken?: string;
 };
 
 export default function Register() {
 	const router = useRouter();
 
-	const { otp_id, registered, request } = router.query;
+	const { otp_id, email, inviteToken, registered, request } = router.query;
 
 	const { classes, cx } = useStyles();
 
-	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({});
+	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({
+		email: email as string,
+		inviteToken: inviteToken as string
+	});
 
 	useEffect(() => {
 		if (!!otp_id) {
@@ -64,7 +68,7 @@ export default function Register() {
 									</Link>
 								</>
 							}
-							onClose={function noRefCheck() {}}
+							onClose={function noRefCheck() { }}
 							severity="info"
 							title="Nouvel hébergement"
 						/>
@@ -82,7 +86,7 @@ export default function Register() {
 									reviendrons vers vous sous 48 heures.
 								</>
 							}
-							onClose={function noRefCheck() {}}
+							onClose={function noRefCheck() { }}
 							severity="info"
 							title=""
 						/>

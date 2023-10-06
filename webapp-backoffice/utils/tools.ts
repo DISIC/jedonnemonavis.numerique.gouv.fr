@@ -146,3 +146,43 @@ export function getRegisterEmailHtml(token: string) {
 		</html>
 	`;
 }
+
+export function getInviteEmailHtml(email: string, inviteToken: string) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/register?${new URLSearchParams({ email, inviteToken })}`;
+
+	return `
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+					}
+					.container {
+						max-width: 600px;
+						margin: 0 auto;
+						padding: 20px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<p>Bonjour,</p>
+
+					<p>
+						Quelqu'un vous a invité à rejoindre "Je donne mon avis". Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
+					</p>
+
+					<a href="${link}" target="_blank">${link}</a>
+
+					<p>
+						Merci,<br/>
+						L'équipe je donne mon avis
+					</p>
+				</div>
+			</body>
+		</html>
+	`;
+}

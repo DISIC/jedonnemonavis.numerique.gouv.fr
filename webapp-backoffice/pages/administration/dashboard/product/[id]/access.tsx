@@ -76,9 +76,13 @@ const AccessManagement = (props: Props) => {
 	const getAlertTitle = () => {
 		switch (modalType) {
 			case 'add':
-				return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été ajouté comme porteur.`;
+				if (currentUserProduct?.user === null) {
+					return `Un e-mail d’invitation a été envoyé à ${currentUserProduct?.user_email}.`;
+				} else {
+					return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été ajouté comme porteur.`;
+				}
 			case 'resend-email':
-				return `Un e-mail d’invitation a été envoyé à ${currentUserProduct?.user_email}.`;
+				return `Un e-mail d’invitation a été renvoyé à ${currentUserProduct?.user_email}.`;
 			case 'remove':
 				return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
 		}
@@ -155,6 +159,7 @@ const AccessManagement = (props: Props) => {
 									name: 'carriers-removed',
 									onChange: () => {
 										setCarriersRemovedFilter(!carriersRemovedFilter);
+										setCurrentPage(1);
 									}
 								}
 							}

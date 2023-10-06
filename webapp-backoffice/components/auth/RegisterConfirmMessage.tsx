@@ -5,10 +5,11 @@ export type RegisterValidationMessage = 'classic' | 'from_otp' | undefined;
 
 type Props = {
 	mode: RegisterValidationMessage;
+	isUserInvited: boolean;
 };
 
 export const RegisterValidationMessage = (props: Props) => {
-	const { mode } = props;
+	const { mode, isUserInvited } = props;
 
 	if (!mode) return;
 
@@ -19,8 +20,16 @@ export const RegisterValidationMessage = (props: Props) => {
 				<p>
 					Votre compte a été créé avec succès. <br />
 					<br />
-					Vous allez recevoir un email contenant un lien de validation dans les
-					prochaines minutes.
+					{!isUserInvited ? (
+						<>
+							Vous allez recevoir un email contenant un lien de validation dans les
+							prochaines minutes.
+						</>
+					) : (
+						<Link className={fr.cx('fr-link')} href="/login">
+							Connectez-vous dès maintenant
+						</Link>
+					)}
 				</p>
 			) : (
 				<p>
