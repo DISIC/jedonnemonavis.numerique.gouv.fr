@@ -142,7 +142,7 @@ const AccessManagement = (props: Props) => {
 							</span>{' '}
 							à{' '}
 							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + count}
+								{numberPerPage * (currentPage - 1) + accessRights.length}
 							</span>{' '}
 							de <span className={cx(classes.boldText)}>{count}</span>
 						</span>
@@ -189,7 +189,7 @@ const AccessManagement = (props: Props) => {
 							},
 							href: '#',
 							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination-link-${pageNumber}`
+							key: `pagination-link-access-right-${pageNumber}`
 						})}
 						className={fr.cx('fr-mt-1w')}
 					/>

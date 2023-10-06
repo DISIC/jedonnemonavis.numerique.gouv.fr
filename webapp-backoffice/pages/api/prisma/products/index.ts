@@ -4,7 +4,12 @@ import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function getProducts(sort?: string, search?: string) {
+export async function getProducts(
+	numberPerPage: number,
+	page: number,
+	sort?: string,
+	search?: string
+) {
 	let orderBy: any = [
 		{
 			title: 'asc'
@@ -54,13 +59,16 @@ export async function getProducts(sort?: string, search?: string) {
 	const products = await prisma.product.findMany({
 		orderBy,
 		where,
-		//TO REMOVE, HANDLE PAGINATION
-		take: 300,
+		take: numberPerPage,
+		skip: numberPerPage * (page - 1),
 		include: {
 			buttons: true
 		}
 	});
-	return products;
+
+	const count = await prisma.product.count({ where });
+
+	return { data: products, count };
 }
 
 export async function getProduct(id: number) {
@@ -125,12 +133,17 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, search } = req.query;
+		const { id, sort, search, page, numberPerPage } = req.query;
 		if (id) {
 			const product = await getProduct(parseInt(id as string));
 			res.status(200).json(product);
 		} else {
-			const products = await getProducts(sort as string, search as string);
+			const products = await getProducts(
+				parseInt(numberPerPage as string, 10) as number,
+				parseInt(page as string, 10) as number,
+				sort as string,
+				search as string
+			);
 			res.status(200).json(products);
 		}
 	} else if (req.method === 'POST') {
