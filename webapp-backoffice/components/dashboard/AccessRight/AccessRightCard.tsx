@@ -52,7 +52,9 @@ const ProductAccessCard = (props: Props) => {
 						</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-						<span>{accessRight.user_email}</span>
+						<span className={cx(classes.userEmail)}>
+							{accessRight.user_email}
+						</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 						<Badge
@@ -72,8 +74,8 @@ const ProductAccessCard = (props: Props) => {
 							{accessRight.user === null
 								? 'Invité'
 								: accessRight.status === 'carrier'
-									? 'Porteur'
-									: 'Retiré'}
+								? 'Porteur'
+								: 'Retiré'}
 						</Badge>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
@@ -136,6 +138,9 @@ const useStyles = tss.create({
 	},
 	buttonOptionsOpen: {
 		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default
+	},
+	userEmail: {
+		wordWrap: 'break-word'
 	}
 });
 
