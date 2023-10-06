@@ -91,11 +91,12 @@ export async function createButton(data: Omit<Button, 'id'>) {
 }
 
 export async function updateButton(id: number, data: Partial<Button>) {
+	const dataWithoutId = { ...data, id: undefined };
 	const button = await prisma.button.update({
 		where: {
 			id: id
 		},
-		data: data
+		data: dataWithoutId
 	});
 	return button;
 }
@@ -146,10 +147,9 @@ export default async function handler(
 		const button = await createButton(data);
 		return res.status(201).json(button);
 	} else if (req.method === 'PUT') {
-		const { id } = req.query;
-
 		const data = req.body;
-		const button = await updateButton(parseInt(id as string), data);
+		const { id } = req.query;
+		const button = await updateButton(parseInt(id as string), JSON.parse(data));
 		return res.status(200).json(button);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;

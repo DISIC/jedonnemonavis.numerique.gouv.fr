@@ -10,7 +10,9 @@ import { Pagination } from '../../../../../components/ui/Pagination';
 import React from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
+import ButtonModal, {
+	ButtonCreationPayload
+} from '@/components/dashboard/ProductButton/ButtonModal';
 import { getNbPages } from '@/utils/tools';
 
 interface Props {
@@ -62,6 +64,11 @@ const ProductButtonsPage = (props: Props) => {
 		modal.open();
 	};
 
+	const onButtonCreatedOrUpdated = () => {
+		retrieveButtons();
+		modal.close();
+	};
+
 	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(count, numberPerPage);
@@ -69,11 +76,12 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product}>
 			<ButtonModal
+				product_id={product.id}
 				modal={modal}
 				isOpen={isModalOpen}
 				modalType={modalType}
 				button={currentButton}
-				setCurrentButton={setCurrentButton}
+				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>

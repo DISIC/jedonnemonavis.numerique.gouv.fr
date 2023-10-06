@@ -54,7 +54,11 @@ const ProductButtonCard = (props: Props) => {
 								'aria-labelledby': 'button-options'
 							}}
 						>
-							<MenuItem onClick={() => onButtonClick('edit', button)}>
+							<MenuItem
+								onClick={() => {
+									onButtonClick('edit', button), handleClose();
+								}}
+							>
 								Modifier le bouton
 							</MenuItem>
 							{/* <MenuItem onClick={() => onButtonClick('merge')}>
