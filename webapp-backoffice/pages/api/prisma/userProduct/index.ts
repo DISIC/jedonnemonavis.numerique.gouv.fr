@@ -1,10 +1,22 @@
 import { sendMail } from '@/utils/mailer';
-import { getInviteEmailHtml } from '@/utils/tools';
+import { generateRandomString, getInviteEmailHtml } from '@/utils/tools';
 import { PrismaClient, Product } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
+
+export async function generateInviteToken(user_email: string) {
+	const token = generateRandomString(32);
+	await prisma.userInviteToken.create({
+		data: {
+			user_email,
+			token
+		}
+	});
+
+	return token;
+}
 
 export async function getUserProducts(
 	numberPerPage: number,
@@ -100,14 +112,17 @@ export async function createUserProduct(userEmail: string, productId: string) {
 	});
 
 	if (newUserProduct.user === null) {
-		sendMail(
+		const token = await generateInviteToken(userEmail);
+
+		await sendMail(
 			'Invitation à rejoindre "Je donne mon avis"',
-			newUserProduct.user_email,
-			getInviteEmailHtml(newUserProduct.user_email),
+			userEmail,
+			getInviteEmailHtml(userEmail, token),
 			`Cliquez sur ce lien pour créer votre compte : ${
 				process.env.NODEMAILER_BASEURL
-			}/register/validate?${new URLSearchParams({
-				email: newUserProduct.user_email
+			}/register?${new URLSearchParams({
+				email: userEmail,
+				inviteToken: token
 			})}`
 		);
 	}

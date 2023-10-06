@@ -81,7 +81,8 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	const { firstName, lastName, email, password, otp_id } = req.body;
+	const { firstName, lastName, email, password, otp_id, inviteToken } =
+		req.body;
 
 	if (!firstName || !lastName || !email || !password)
 		return res.status(400).send('Some fields are missing');
@@ -130,16 +131,37 @@ export default async function handler(
 					.status(500)
 					.send('Internal server error while creating user');
 
-			const token = await generateValidationToken(user);
+			if (!inviteToken) {
+				const token = await generateValidationToken(user);
 
-			await sendMail(
-				'Confirmez votre email',
-				user.email,
-				getRegisterEmailHtml(token),
-				`Cliquez sur ce lien pour valider votre compte : ${
-					process.env.NODEMAILER_BASEURL
-				}/register/validate?${new URLSearchParams({ token })}`
-			);
+				await sendMail(
+					'Confirmez votre email',
+					user.email,
+					getRegisterEmailHtml(token),
+					`Cliquez sur ce lien pour valider votre compte : ${
+						process.env.NODEMAILER_BASEURL
+					}/register/validate?${new URLSearchParams({ token })}`
+				);
+			} else {
+				const userInviteToken = await prisma.userInviteToken.findUnique({
+					where: {
+						token: inviteToken as string,
+						user_email: user.email
+					}
+				});
+
+				if (!userInviteToken) {
+					return res.status(404).send('Invite token not found for this user');
+				}
+
+				await prisma.userInviteToken.deleteMany({
+					where: {
+						user_email: user.email
+					}
+				});
+
+				await activateUser(user);
+			}
 
 			return res.status(200).json({ user });
 		}

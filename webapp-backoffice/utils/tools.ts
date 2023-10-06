@@ -147,10 +147,10 @@ export function getRegisterEmailHtml(token: string) {
 	`;
 }
 
-export function getInviteEmailHtml(email: string) {
+export function getInviteEmailHtml(email: string, inviteToken: string) {
 	const link = `${
 		process.env.NODEMAILER_BASEURL
-	}/register?${new URLSearchParams({ email })}`;
+	}/register?${new URLSearchParams({ email, inviteToken })}`;
 
 	return `
 		<!DOCTYPE html>
