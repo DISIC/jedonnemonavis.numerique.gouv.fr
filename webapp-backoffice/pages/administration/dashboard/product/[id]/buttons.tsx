@@ -66,8 +66,9 @@ const ProductButtonsPage = (props: Props) => {
 		modal.open();
 	};
 
-	const onButtonCreatedOrUpdated = () => {
-		retrieveButtons();
+	const onButtonCreatedOrUpdated = (isTest: boolean) => {
+		if (isTest) setTestFilter(true);
+		else retrieveButtons();
 		modal.close();
 	};
 
@@ -127,6 +128,7 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
+									checked: testFilter,
 									onChange: e => {
 										setTestFilter(e.currentTarget.checked);
 										setCurrentPage(1);
