@@ -1,3 +1,5 @@
+import { sendMail } from '@/utils/mailer';
+import { getInviteEmailHtml } from '@/utils/tools';
 import { PrismaClient, Product } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
@@ -96,6 +98,19 @@ export async function createUserProduct(userEmail: string, productId: string) {
 			user: true
 		}
 	});
+
+	if (newUserProduct.user === null) {
+		sendMail(
+			'Invitation à rejoindre "Je donne mon avis"',
+			newUserProduct.user_email,
+			getInviteEmailHtml(newUserProduct.user_email),
+			`Cliquez sur ce lien pour créer votre compte : ${
+				process.env.NODEMAILER_BASEURL
+			}/register/validate?${new URLSearchParams({
+				email: newUserProduct.user_email
+			})}`
+		);
+	}
 
 	return newUserProduct;
 }

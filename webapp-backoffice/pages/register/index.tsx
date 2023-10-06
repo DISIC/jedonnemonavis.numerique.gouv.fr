@@ -16,11 +16,13 @@ type UserPresetInfos = {
 export default function Register() {
 	const router = useRouter();
 
-	const { otp_id, registered, request } = router.query;
+	const { otp_id, email, registered, request } = router.query;
 
 	const { classes, cx } = useStyles();
 
-	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({});
+	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({
+		email: email as string
+	});
 
 	useEffect(() => {
 		if (!!otp_id) {

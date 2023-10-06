@@ -98,7 +98,8 @@ export default async function handler(
 					firstName,
 					lastName,
 					password: hashedPassword,
-					active: true
+					active: true,
+					observatoire_username: null
 				},
 				otp_id as string
 			);
@@ -120,7 +121,8 @@ export default async function handler(
 				email,
 				password: hashedPassword,
 				active: false,
-				observatoire_account: false
+				observatoire_account: false,
+				observatoire_username: null
 			});
 
 			if (!user)
