@@ -159,6 +159,7 @@ const AccessManagement = (props: Props) => {
 									name: 'carriers-removed',
 									onChange: () => {
 										setCarriersRemovedFilter(!carriersRemovedFilter);
+										setCurrentPage(1);
 									}
 								}
 							}
