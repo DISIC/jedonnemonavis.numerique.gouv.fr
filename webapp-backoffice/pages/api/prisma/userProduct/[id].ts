@@ -4,7 +4,7 @@ import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function updateUserProduct(id: string, data: Partial<Product>) {
+export async function updateUserProduct(id: number, data: Partial<Product>) {
 	const userProduct = await prisma.userProduct.update({
 		where: {
 			id: id
@@ -29,7 +29,7 @@ export default async function handler(
 	if (req.method === 'PUT') {
 		const { id } = req.query;
 		const data = JSON.parse(req.body);
-		const userProduct = await updateUserProduct(id as string, data);
+		const userProduct = await updateUserProduct(parseInt(id as string), data);
 		res.status(200).json(userProduct);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });

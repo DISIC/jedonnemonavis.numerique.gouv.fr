@@ -16,11 +16,12 @@ import { createButtons } from './seeds/buttons';
 const prisma = new PrismaClient();
 
 async function main() {
-	const promises: Promise<User | Product | Entity>[] = [];
+	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
+	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
 
 	users.forEach(user => {
-		promises.push(
+		promisesUsersAndEntities.push(
 			prisma.user.upsert({
 				where: {
 					email: user.email
@@ -34,7 +35,7 @@ async function main() {
 	});
 
 	entities.forEach(entity => {
-		promises.push(
+		promisesUsersAndEntities.push(
 			prisma.entity.create({
 				data: entity
 			})
@@ -43,7 +44,7 @@ async function main() {
 
 	products.forEach((product, index) => {
 		const randomEntity = getRandomObjectFromArray(entities);
-		promises.push(
+		promisesProducts.push(
 			prisma.product.upsert({
 				where: {
 					title: product.title
@@ -52,13 +53,8 @@ async function main() {
 				create: {
 					...product,
 					entity: {
-						connectOrCreate: {
-							where: {
-								name: (randomEntity as Entity).name
-							},
-							create: {
-								...(randomEntity as Entity)
-							}
+						connect: {
+							name: (randomEntity as Entity).name
 						}
 					},
 					buttons: {
@@ -88,7 +84,11 @@ async function main() {
 		);
 	});
 
-	Promise.all([...promises, ...promisesWLDs]).then(responses => {
+	Promise.all([
+		...promisesUsersAndEntities,
+		...promisesProducts,
+		...promisesWLDs
+	]).then(responses => {
 		let log: { [key: string]: User | Product | Entity | string } = {};
 		responses.forEach((r, i) => {
 			if ('email' in r) log[`${i}] user added`] = r.email;

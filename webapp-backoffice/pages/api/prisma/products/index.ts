@@ -63,7 +63,7 @@ export async function getProducts(sort?: string, search?: string) {
 	return products;
 }
 
-export async function getProduct(id: string) {
+export async function getProduct(id: number) {
 	const product = await prisma.product.findUnique({
 		where: {
 			id: id
@@ -93,7 +93,7 @@ export async function createProduct(
 	return product;
 }
 
-export async function updateProduct(id: string, data: Partial<Product>) {
+export async function updateProduct(id: number, data: Partial<Product>) {
 	const product = await prisma.product.update({
 		where: {
 			id: id
@@ -103,7 +103,7 @@ export async function updateProduct(id: string, data: Partial<Product>) {
 	return product;
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: number) {
 	const product = await prisma.product.delete({
 		where: {
 			id: id
@@ -127,7 +127,7 @@ export default async function handler(
 	if (req.method === 'GET') {
 		const { id, sort, search } = req.query;
 		if (id) {
-			const product = await getProduct(id.toString());
+			const product = await getProduct(parseInt(id as string));
 			res.status(200).json(product);
 		} else {
 			const products = await getProducts(sort as string, search as string);
@@ -142,11 +142,11 @@ export default async function handler(
 		const { id } = req.query;
 
 		const data = req.body;
-		const product = await updateProduct(id as string, data);
+		const product = await updateProduct(parseInt(id as string), data);
 		res.status(200).json(product);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
-		const product = await deleteProduct(id as string);
+		const product = await deleteProduct(parseInt(id as string));
 		res.status(200).json(product);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });

@@ -21,7 +21,7 @@ export async function getEntities(query: string) {
 	return entities;
 }
 
-export async function getEntity(id: string) {
+export async function getEntity(id: number) {
 	const entity = await prisma.entity.findUnique({
 		where: {
 			id: id
@@ -37,7 +37,7 @@ export async function createEntity(data: Omit<Entity, 'id'>) {
 	return entity;
 }
 
-export async function updateEntity(id: string, data: Partial<Entity>) {
+export async function updateEntity(id: number, data: Partial<Entity>) {
 	const entity = await prisma.entity.update({
 		where: {
 			id: id
@@ -47,7 +47,7 @@ export async function updateEntity(id: string, data: Partial<Entity>) {
 	return entity;
 }
 
-export async function deleteEntity(id: string) {
+export async function deleteEntity(id: number) {
 	const entity = await prisma.entity.delete({
 		where: {
 			id: id
@@ -71,7 +71,7 @@ export default async function handler(
 	if (req.method === 'GET') {
 		const { id, name } = req.query;
 		if (id) {
-			const entity = await getEntity(id.toString());
+			const entity = await getEntity(parseInt(id as string));
 			res.status(200).json(entity);
 		} else {
 			const entities = await getEntities(name as string);
@@ -85,11 +85,11 @@ export default async function handler(
 		const { id } = req.query;
 
 		const data = req.body;
-		const entity = await updateEntity(id as string, data);
+		const entity = await updateEntity(parseInt(id as string), data);
 		res.status(200).json(entity);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
-		const entity = await deleteEntity(id as string);
+		const entity = await deleteEntity(parseInt(id as string));
 		res.status(200).json(entity);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });

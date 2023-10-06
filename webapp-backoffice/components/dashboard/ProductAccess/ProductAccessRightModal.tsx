@@ -23,7 +23,7 @@ interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
 	modalType: 'add' | 'remove' | 'resend-email';
-	productId: string;
+	productId: number;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 	currentUserProduct: UserProductUserWithUsers | undefined;
 	setCurrentUserProduct: React.Dispatch<

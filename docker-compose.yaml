@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   setup:
@@ -6,7 +6,7 @@ services:
     container_name: setup
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-    user: '0'
+    user: "0"
     networks:
       - elastic
     command: >
@@ -49,7 +49,7 @@ services:
         echo "All done!";
       '
     healthcheck:
-      test: ['CMD-SHELL', '[ -f config/certs/elasticsearch/elasticsearch.crt ]']
+      test: ["CMD-SHELL", "[ -f config/certs/elasticsearch/elasticsearch.crt ]"]
       interval: 1s
       timeout: 5s
       retries: 120
@@ -92,8 +92,8 @@ services:
     healthcheck:
       test:
         [
-          'CMD-SHELL',
-          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'"
+          "CMD-SHELL",
+          "curl -s --cacert config/certs/ca/ca.crt https://localhost:9200 | grep -q 'missing authentication credentials'",
         ]
       interval: 10s
       timeout: 10s
@@ -123,15 +123,14 @@ services:
       - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
 
-  mongo:
-    build: ./mongodb_replica
+  postgres:
+    image: postgres:16
     environment:
-      MONGO_INITDB_ROOT_USERNAME: user
-      MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_REPLICA_HOST: localhost
-      MONGO_REPLICA_PORT: 27018
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: jdma
     ports:
-      - '27018:27018'
+      - "5433:5432"
 
 volumes:
   certs:

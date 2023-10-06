@@ -21,7 +21,7 @@ export async function generateInviteToken(user_email: string) {
 export async function getUserProducts(
 	numberPerPage: number,
 	page: number,
-	product_id: string,
+	product_id: number,
 	options: {
 		isRemoved?: boolean;
 	},
@@ -80,16 +80,7 @@ export async function getUserProducts(
 	return { data: userProducts, count };
 }
 
-export async function getUserProduct(id: string) {
-	const userProduct = await prisma.userProduct.findUnique({
-		where: {
-			id: id
-		}
-	});
-	return userProduct;
-}
-
-export async function createUserProduct(userEmail: string, productId: string) {
+export async function createUserProduct(userEmail: string, productId: number) {
 	const checkIfUserProductExists = await prisma.userProduct.findFirst({
 		where: {
 			user_email: userEmail,
@@ -130,25 +121,6 @@ export async function createUserProduct(userEmail: string, productId: string) {
 	return newUserProduct;
 }
 
-export async function updateProduct(id: string, data: Partial<Product>) {
-	const product = await prisma.product.update({
-		where: {
-			id: id
-		},
-		data: data
-	});
-	return product;
-}
-
-export async function deleteProduct(id: string) {
-	const product = await prisma.product.delete({
-		where: {
-			id: id
-		}
-	});
-	return product;
-}
-
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
@@ -162,47 +134,30 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { id, sort, product_id, isRemoved, numberPerPage, page } = req.query;
-		if (id) {
-			const product = await getUserProduct(id.toString());
-			res.status(200).json(product);
-		} else {
-			if (!numberPerPage || !page) {
-				return res
-					.status(400)
-					.json({ message: 'Missing numberPerPage or page' });
-			}
-			const userProducts = await getUserProducts(
-				parseInt(numberPerPage as string, 10) as number,
-				parseInt(page as string, 10) as number,
-				product_id as string,
-				{ isRemoved: isRemoved === 'true' },
-				sort as string
-			);
-			res.status(200).json(userProducts);
+		const { sort, product_id, isRemoved, numberPerPage, page } = req.query;
+		if (!numberPerPage || !page) {
+			return res.status(400).json({ message: 'Missing numberPerPage or page' });
 		}
+		const userProducts = await getUserProducts(
+			parseInt(numberPerPage as string, 10) as number,
+			parseInt(page as string, 10) as number,
+			parseInt(product_id as string),
+			{ isRemoved: isRemoved === 'true' },
+			sort as string
+		);
+		res.status(200).json(userProducts);
 	} else if (req.method === 'POST') {
 		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
 		try {
 			const userProduct = await createUserProduct(
 				data.email as string,
-				product_id as string
+				parseInt(product_id as string)
 			);
 			res.status(201).json(userProduct);
 		} catch (error) {
 			res.status(409).json({ message: '' });
 		}
-	} else if (req.method === 'PUT') {
-		const { id } = req.query;
-
-		const data = req.body;
-		const product = await updateProduct(id as string, data);
-		res.status(200).json(product);
-	} else if (req.method === 'DELETE') {
-		const { id } = req.query;
-		const product = await deleteProduct(id as string);
-		res.status(200).json(product);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });
 	}

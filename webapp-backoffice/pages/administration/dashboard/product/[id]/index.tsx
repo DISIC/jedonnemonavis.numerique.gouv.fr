@@ -10,7 +10,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
 		where: {
-			id: id?.toString()
+			id: parseInt(id as string)
 		}
 	});
 	return {

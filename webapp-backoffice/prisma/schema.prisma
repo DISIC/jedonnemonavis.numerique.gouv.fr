@@ -1,5 +1,5 @@
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -19,7 +19,7 @@ enum RightAccessStatus {
 
 // Next auth
 model User {
-  id                    String                @id @default(auto()) @map("_id") @db.ObjectId
+  id                    Int                   @id @default(autoincrement())
   firstName             String?
   lastName              String?
   active                Boolean               @default(false)
@@ -34,56 +34,56 @@ model User {
 }
 
 model UserRequest {
-  id      String      @id @default(auto()) @map("_id") @db.ObjectId
+  id      Int         @id @default(autoincrement())
   user    User        @relation(fields: [user_id], references: [id])
-  user_id String      @db.ObjectId
+  user_id Int         @unique
   reason  String
   mode    RequestMode
 }
 
 model UserOTP {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              Int      @id @default(autoincrement())
   user            User     @relation(fields: [user_id], references: [id])
-  user_id         String   @db.ObjectId
+  user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
 }
 
 model UserValidationToken {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  id      Int    @id @default(autoincrement())
   user    User   @relation(fields: [user_id], references: [id])
-  user_id String @db.ObjectId
+  user_id Int    @unique
   token   String @unique
 }
 
 model UserInviteToken {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  id         Int    @id @default(autoincrement())
   user_email String
-  token   String @unique
+  token      String @unique
 }
 
 model Entity {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  id       Int       @id @default(autoincrement())
   name     String    @unique
   products Product[]
 }
 
 model Button {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          Int      @id @default(autoincrement())
   title       String   @unique
   description String?
   isTest      Boolean? @default(false)
   product     Product? @relation(fields: [product_id], references: [id])
-  product_id  String   @db.ObjectId
+  product_id  Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 }
 
 model Product {
-  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  id              Int           @id @default(autoincrement())
   title           String        @unique
   entity          Entity?       @relation(fields: [entity_id], references: [id])
-  entity_id       String        @db.ObjectId
+  entity_id       Int
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
   isEssential     Boolean?      @default(false)
@@ -95,11 +95,11 @@ model Product {
 }
 
 model UserProduct {
-  id         String  @id @default(auto()) @map("_id") @db.ObjectId
+  id         Int    @id @default(autoincrement())
   user       User?   @relation(fields: [user_email], references: [email])
   user_email String
   product    Product @relation(fields: [product_id], references: [id])
-  product_id String  @db.ObjectId
+  product_id Int 
 
   status RightAccessStatus @default(carrier)
 
@@ -108,6 +108,6 @@ model UserProduct {
 }
 
 model WhiteListedDomain {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  id     Int    @id @default(autoincrement())
   domain String @unique
 }
