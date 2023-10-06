@@ -52,7 +52,7 @@ export async function generateValidationToken(user: User) {
 
 export async function registerUserFromOTP(
 	user: Omit<User, 'id' | 'email' | 'observatoire_account'>,
-	otp_id: string
+	otp_id: number
 ) {
 	const userOTP = await prisma.userOTP.findUnique({
 		where: {
@@ -102,7 +102,7 @@ export default async function handler(
 					active: true,
 					observatoire_username: null
 				},
-				otp_id as string
+				parseInt(otp_id as string)
 			);
 
 			return res.status(200).json({ user });

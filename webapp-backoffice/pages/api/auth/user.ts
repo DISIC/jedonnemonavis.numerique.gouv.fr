@@ -13,7 +13,7 @@ export async function getUser(email: string) {
 	return user;
 }
 
-export async function getUserInfosFromOTP(otp_id: string) {
+export async function getUserInfosFromOTP(otp_id: number) {
 	const userOTP = await prisma.userOTP.findUnique({
 		where: {
 			id: otp_id
@@ -38,7 +38,7 @@ export default async function handler(
 
 	if (req.method === 'GET') {
 		if (otp_id) {
-			const userInfos = await getUserInfosFromOTP(otp_id as string);
+			const userInfos = await getUserInfosFromOTP(parseInt(otp_id as string));
 
 			if (!userInfos) return res.status(404).send('User not found from OTP');
 

@@ -1,5 +1,3 @@
-import { ReactNode } from "react";
-
 export type Feeling = "good" | "bad" | "medium";
 
 export type Opinion = {
@@ -14,7 +12,7 @@ export type Opinion = {
 };
 
 export type Product = {
-  id: string;
+  id: number;
   title: string;
 };
 

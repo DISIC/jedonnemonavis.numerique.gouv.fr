@@ -3,7 +3,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
-export async function deleteUserOTP(id: string) {
+export async function deleteUserOTP(id: number) {
 	await prisma.userOTP.delete({
 		where: {
 			id
