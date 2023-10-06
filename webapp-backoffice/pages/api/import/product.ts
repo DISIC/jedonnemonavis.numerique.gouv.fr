@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function importProduct(data: ImportProduct) {
 	const product = await prisma.product.upsert({
 		where: {
-			title: data.title
+			observatoire_id: data.observatoire_id
 		},
 		update: {},
 		create: {
