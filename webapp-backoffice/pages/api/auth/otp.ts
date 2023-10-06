@@ -40,8 +40,8 @@ export default async function handler(
 		if (!userOTP) return res.status(404).json({ message: 'Invalid OTP' });
 		else {
 			const now = new Date();
+			deleteUserOTP(userOTP.id);
 			if (now.getTime() > userOTP.expiration_date.getTime()) {
-				deleteUserOTP(userOTP.id);
 				return res.status(400).json({ message: 'Expired OTP' });
 			} else {
 				return res.status(200).json({ data: { id: userOTP.id } });
