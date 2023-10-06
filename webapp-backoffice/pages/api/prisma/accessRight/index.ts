@@ -80,18 +80,19 @@ export async function getAccessRights(
 	return { data: accessRights, count };
 }
 
-export async function createAccessRight(userEmail: string, productId: number) {
-	const checkIfAccessRightExists = await prisma.accessRight.findFirst({
+export async function checkIfAccessRightExists(
+	userEmail: string,
+	productId: number
+) {
+	return await prisma.accessRight.findFirst({
 		where: {
 			user_email: userEmail,
 			product_id: productId
 		}
 	});
+}
 
-	if (checkIfAccessRightExists) {
-		throw new Error('User product already exists');
-	}
-
+export async function createAccessRight(userEmail: string, productId: number) {
 	const newAccessRight = await prisma.accessRight.create({
 		data: {
 			user_email: userEmail,
@@ -145,20 +146,25 @@ export default async function handler(
 			{ isRemoved: isRemoved === 'true' },
 			sort as string
 		);
-		res.status(200).json(accessRights);
+		return res.status(200).json(accessRights);
 	} else if (req.method === 'POST') {
 		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
-		try {
-			const accessRight = await createAccessRight(
-				data.email as string,
-				parseInt(product_id as string)
-			);
-			res.status(201).json(accessRight);
-		} catch (error) {
-			res.status(409).json({ message: '' });
-		}
+
+		const userAlreadyExists = checkIfAccessRightExists(
+			data.email as string,
+			parseInt(product_id as string)
+		);
+
+		if (!userAlreadyExists)
+			return res.status(409).json({ message: 'User already exists' });
+
+		const accessRight = await createAccessRight(
+			data.email as string,
+			parseInt(product_id as string)
+		);
+		return res.status(201).json(accessRight);
 	} else {
-		res.status(400).json({ message: 'Unsupported method' });
+		return res.status(400).json({ message: 'Unsupported method' });
 	}
 }
