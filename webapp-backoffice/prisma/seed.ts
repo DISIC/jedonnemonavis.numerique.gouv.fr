@@ -11,7 +11,7 @@ import { products } from './seeds/products';
 import { whiteListedDomains } from './seeds/white-listed-domains';
 import { entities } from './seeds/entities';
 import { getRandomObjectFromArray } from '../utils/tools';
-import { createButtons } from './seeds/buttons';
+import { buttons } from './seeds/buttons';
 
 const prisma = new PrismaClient();
 
@@ -45,12 +45,8 @@ async function main() {
 	products.forEach((product, index) => {
 		const randomEntity = getRandomObjectFromArray(entities);
 		promisesProducts.push(
-			prisma.product.upsert({
-				where: {
-					title: product.title
-				},
-				update: {},
-				create: {
+			prisma.product.create({
+				data: {
 					...product,
 					entity: {
 						connect: {
@@ -58,7 +54,10 @@ async function main() {
 						}
 					},
 					buttons: {
-						create: createButtons(product.title) as Button[]
+						create: buttons.map(b => ({
+							...b,
+							product_id: b.product_id
+						})) as Button[]
 					},
 					accessRights: {
 						create: {
