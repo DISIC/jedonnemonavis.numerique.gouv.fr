@@ -65,6 +65,7 @@ model UserInviteToken {
 model Entity {
   id       Int       @id @default(autoincrement())
   name     String    @unique
+  acronym  String
   products Product[]
 }
 
