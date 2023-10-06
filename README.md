@@ -2,7 +2,7 @@
 
 ## Developpement
 
-### Containers Elastic, Kibana et MongoDB
+### Containers Elastic, Kibana et Postgres
 
 Copiez le fichier `.env.example` en utilisant la commande suivante :
 
@@ -10,7 +10,7 @@ Copiez le fichier `.env.example` en utilisant la commande suivante :
 cp .env.example .env
 ```
 
-Démarrez les conteneurs Docker pour Elastic, Kibana et MongoDB avec la commande :
+Démarrez les conteneurs Docker pour Elastic, Kibana et Postgres avec la commande :
 
 ```bash
 docker compose up -d
@@ -46,7 +46,13 @@ Installez les dépendances nécessaires :
 yarn
 ```
 
-Effectuez un seeding de la base de données MongoDB :
+Initialisez la base de données Postgres :
+
+```bash
+npx prisma db migrate dev
+```
+
+Effectuez un seeding de la base de données Postgres :
 
 ```bash
 npx prisma db seed
