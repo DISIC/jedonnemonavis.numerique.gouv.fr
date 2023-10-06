@@ -49,6 +49,6 @@ export default async function handler(
 	if (req.method === 'POST') {
 		const data = JSON.parse(JSON.stringify(req.body));
 		const product = await importProduct(data);
-		res.status(201).json(product);
+		return res.status(201).json(product);
 	}
 }
