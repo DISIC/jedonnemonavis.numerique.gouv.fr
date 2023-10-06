@@ -7,6 +7,7 @@ const prisma = new PrismaClient();
 export async function getProducts(
 	numberPerPage: number,
 	page: number,
+	userEmail: string,
 	sort?: string,
 	search?: string
 ) {
@@ -20,6 +21,11 @@ export async function getProducts(
 	let where: any = {
 		title: {
 			contains: ''
+		},
+		accessRights: {
+			some: {
+				user_email: userEmail
+			}
 		}
 	};
 
@@ -124,14 +130,17 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
-		const token = await getToken({
-			req,
-			secret: process.env.JWT_SECRET
-		});
-		if (!token || (token.exp as number) > new Date().getTime())
-			return res.status(401).json({ msg: 'You shall not pass.' });
-	}
+	const currentUserToken = await getToken({
+		req,
+		secret: process.env.JWT_SECRET
+	});
+
+	if (
+		!currentUserToken ||
+		(currentUserToken.exp as number) > new Date().getTime()
+	)
+		return res.status(401).json({ msg: 'You shall not pass.' });
+
 	if (req.method === 'GET') {
 		const { id, sort, search, page, numberPerPage } = req.query;
 		if (id) {
@@ -141,6 +150,7 @@ export default async function handler(
 			const products = await getProducts(
 				parseInt(numberPerPage as string, 10) as number,
 				parseInt(page as string, 10) as number,
+				currentUserToken.email as string,
 				sort as string,
 				search as string
 			);

@@ -26,7 +26,7 @@ const DashBoard = () => {
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
 	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, _] = React.useState(2);
+	const [numberPerPage, _] = React.useState(10);
 
 	const { cx, classes } = useStyles();
 
