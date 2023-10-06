@@ -6,6 +6,7 @@ import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
+import '../utils/keyframes.css';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {

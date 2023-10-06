@@ -1,19 +1,19 @@
+import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
 import ProductLayout from '@/layouts/Product/ProductLayout';
-import { getServerSideProps } from '.';
-import { Button as PrismaButtonType, Product } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
+import { Button as PrismaButtonType, Product } from '@prisma/client';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
-import React from 'react';
+
+import ButtonModal from '@/components/dashboard/ProductButton/ButtonModal';
+import { Loader } from '@/components/ui/Loader';
+import { getNbPages } from '@/utils/tools';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import ButtonModal, {
-	ButtonCreationPayload
-} from '@/components/dashboard/ProductButton/ButtonModal';
-import { getNbPages } from '@/utils/tools';
+import React from 'react';
 
 interface Props {
 	product: Product;
@@ -27,24 +27,28 @@ const modal = createModal({
 const ProductButtonsPage = (props: Props) => {
 	const { product } = props;
 
-	const [buttons, setButtons] = React.useState<PrismaButtonType[]>([]);
+	const [buttons, setButtons] = React.useState<PrismaButtonType[] | null>(null);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [count, setCount] = React.useState(0);
+	const [isLoading, setIsLoading] = React.useState(false);
 	const [modalType, setModalType] = React.useState<string>('');
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
+	const { cx, classes } = useStyles();
+
 	const retrieveButtons = React.useCallback(async () => {
-		const response = await fetch(
-			`/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`
-		);
+		setIsLoading(true);
+		const url: string = `/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`;
+		const response = await fetch(url);
 		const res = await response.json();
 		setButtons(res.data);
 		setCount(res.count);
-	}, [numberPerPage, currentPage]);
+		setIsLoading(false);
+	}, [numberPerPage, currentPage, testFilter]);
 
 	React.useEffect(() => {
 		retrieveButtons();
@@ -57,9 +61,7 @@ const ProductButtonsPage = (props: Props) => {
 	const isModalOpen = useIsModalOpen(modal);
 
 	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
-		if (button) {
-			setCurrentButton(button);
-		}
+		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		modal.open();
 	};
@@ -68,8 +70,6 @@ const ProductButtonsPage = (props: Props) => {
 		retrieveButtons();
 		modal.close();
 	};
-
-	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(count, numberPerPage);
 
@@ -98,9 +98,15 @@ const ProductButtonsPage = (props: Props) => {
 					</Button>
 				</div>
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				{nbPages > 1 && (
-					<div className={fr.cx('fr-col-4')}>
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--gutters',
+					'fr-grid-row--right'
+				)}
+			>
+				{buttons && nbPages > 1 && (
+					<div className={fr.cx('fr-col-8')}>
 						<p>
 							Boutons de{' '}
 							<span className={cx(classes.boldText)}>
@@ -121,8 +127,9 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
-									onChange: () => {
-										setTestFilter(true);
+									onChange: e => {
+										setTestFilter(e.currentTarget.checked);
+										setCurrentPage(1);
 									}
 								}
 							}
@@ -143,33 +150,48 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div> */}
 			</div>
-			<div>
-				{buttons?.map((button, index) => (
-					<ProductButtonCard
-						key={index}
-						button={button}
-						onButtonClick={handleModalOpening}
-					/>
-				))}
-			</div>
-			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-				{nbPages > 1 && (
-					<Pagination
-						showFirstLast
-						count={nbPages}
-						defaultPage={currentPage}
-						getPageLinkProps={pageNumber => ({
-							onClick: event => {
-								event.preventDefault();
-								handlePageChange(pageNumber);
-							},
-							href: '#',
-							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination-link-${pageNumber}`
-						})}
-						className={fr.cx('fr-mt-1w')}
-					/>
+			<div className={cx(classes.buttonsContainer)}>
+				{!buttons || isLoading ? (
+					<div className={fr.cx('fr-py-10v')}>
+						<Loader />
+					</div>
+				) : (
+					<>
+						{!buttons.length && (
+							<div className={cx(classes.noResults)}>
+								<p role="status">Aucun bouton trouvé</p>
+							</div>
+						)}
+						{buttons?.map((button, index) => (
+							<ProductButtonCard
+								key={index}
+								button={button}
+								onButtonClick={handleModalOpening}
+							/>
+						))}
+					</>
 				)}
+				<div
+					className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mt-6v')}
+				>
+					{nbPages > 1 && (
+						<Pagination
+							showFirstLast
+							count={nbPages}
+							defaultPage={currentPage}
+							getPageLinkProps={pageNumber => ({
+								onClick: event => {
+									event.preventDefault();
+									handlePageChange(pageNumber);
+								},
+								href: '#',
+								classes: { link: fr.cx('fr-pagination__link') },
+								key: `pagination-link-${pageNumber}`
+							})}
+							className={fr.cx('fr-mt-1w')}
+						/>
+					)}
+				</div>
 			</div>
 		</ProductLayout>
 	);
@@ -177,13 +199,25 @@ const ProductButtonsPage = (props: Props) => {
 
 export default ProductButtonsPage;
 
-const useStyles = tss.create({
-	boldText: {
-		fontWeight: 'bold'
-	},
-	buttonRight: {
-		textAlign: 'right'
-	}
-});
+const useStyles = tss
+	.withName(ProductButtonsPage.name)
+	.withParams()
+	.create({
+		boldText: {
+			fontWeight: 'bold'
+		},
+		buttonRight: {
+			textAlign: 'right'
+		},
+		noResults: {
+			paddingTop: fr.spacing('10v'),
+			paddingBottom: fr.spacing('10v'),
+			fontWeight: 'bold',
+			textAlign: 'center'
+		},
+		buttonsContainer: {
+			marginBottom: fr.spacing('16v')
+		}
+	});
 
 export { getServerSideProps };

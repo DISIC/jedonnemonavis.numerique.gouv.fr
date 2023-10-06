@@ -29,14 +29,24 @@ interface Props {
 	modalType: string;
 	button?: PrismaButtonType | null;
 	onButtonCreatedOrUpdated: () => void;
-	product_id: string;
+	product_id: number;
 }
 
 const defaultButton = {
 	title: '',
 	description: '',
-	product_id: '',
+	product_id: -1,
 	isTest: false
+};
+
+type FormErrors = {
+	title: { required: boolean };
+};
+
+const defaultErrors = {
+	title: {
+		required: false
+	}
 };
 
 export type ButtonCreationPayload = Omit<
@@ -48,6 +58,7 @@ const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const { modal, isOpen, modalType, button, onButtonCreatedOrUpdated } = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
+	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = React.useState<
 		ButtonCreationPayload | PrismaButtonType
 	>(defaultButton);
@@ -59,6 +70,14 @@ const ButtonModal = (props: Props) => {
 			setCurrentButton(defaultButton);
 		}
 	}, [button]);
+
+	const hasErrors = (key: keyof FormErrors): boolean => {
+		return Object.values(errors[key]).some(value => value === true);
+	};
+
+	const resetErrors = (key: keyof FormErrors) => {
+		setErrors({ ...errors, [key]: { ...defaultErrors[key] } });
+	};
 
 	const displayModalTitle = (): string => {
 		switch (modalType) {
@@ -78,12 +97,20 @@ const ButtonModal = (props: Props) => {
 	};
 
 	const handleButtonCreateOrEdit = () => {
+		if (!currentButton.title) {
+			errors.title.required = true;
+			setErrors({ ...errors });
+			return;
+		}
+
 		currentButton.product_id = props.product_id;
 		if ('id' in currentButton) {
 			fetch(`/api/prisma/buttons?id=${currentButton.id}`, {
 				method: 'PUT',
 				body: JSON.stringify(currentButton)
 			}).finally(() => {
+				modal.close();
+				resetErrors('title');
 				onButtonCreatedOrUpdated();
 			});
 		} else {
@@ -91,6 +118,8 @@ const ButtonModal = (props: Props) => {
 				method: 'POST',
 				body: JSON.stringify(currentButton)
 			}).finally(() => {
+				modal.close();
+				resetErrors('title');
 				onButtonCreatedOrUpdated();
 			});
 		}
@@ -199,7 +228,11 @@ const ButtonModal = (props: Props) => {
 					<div>
 						<Input
 							id="button-create-title"
-							label="Nom du bouton"
+							label={
+								<p className={fr.cx('fr-mb-0')}>
+									Nom du bouton <span className={cx(classes.asterisk)}>*</span>
+								</p>
+							}
 							nativeInputProps={{
 								value: currentButton.title || '',
 								onChange: e => {
@@ -207,8 +240,11 @@ const ButtonModal = (props: Props) => {
 										...currentButton,
 										title: e.target.value
 									});
+									resetErrors('title');
 								}
 							}}
+							state={hasErrors('title') ? 'error' : 'default'}
+							stateRelatedMessage={'Veuillez compléter ce champ.'}
 						/>
 						<Input
 							id="button-create-description"
@@ -224,25 +260,27 @@ const ButtonModal = (props: Props) => {
 								}
 							}}
 						/>
-						<Checkbox
-							options={[
-								{
-									hintText:
-										'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
-									label: 'Bouton de test',
-									nativeInputProps: {
-										name: 'checkboxes-1',
-										value: 'isTest',
-										onChange: e => {
-											setCurrentButton({
-												...currentButton,
-												isTest: e.target.checked
-											});
+						{!('id' in currentButton) && (
+							<Checkbox
+								options={[
+									{
+										hintText:
+											'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
+										label: 'Bouton de test',
+										nativeInputProps: {
+											name: 'checkboxes-1',
+											value: 'isTest',
+											onChange: e => {
+												setCurrentButton({
+													...currentButton,
+													isTest: e.target.checked
+												});
+											}
 										}
 									}
-								}
-							]}
-						/>
+								]}
+							/>
+						)}
 					</div>
 				);
 
@@ -282,7 +320,6 @@ const ButtonModal = (props: Props) => {
 									label: 'Bouton de test',
 									nativeInputProps: {
 										name: 'checkboxes-1',
-										value: 'isTest',
 										checked: button?.isTest || false,
 										onChange: e => {
 											setCurrentButton({
@@ -333,11 +370,14 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: modal.close
+						onClick: () => {
+							resetErrors('title');
+						}
 					},
 					{
 						children: 'Créer',
-						onClick: handleButtonCreateOrEdit
+						onClick: handleButtonCreateOrEdit,
+						doClosesModal: false
 					}
 				];
 			case 'edit':
@@ -345,11 +385,14 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Annuler',
 						priority: 'secondary',
-						onClick: modal.close
+						onClick: () => {
+							resetErrors('title');
+						}
 					},
 					{
 						children: 'Modifier',
-						onClick: handleButtonCreateOrEdit
+						onClick: handleButtonCreateOrEdit,
+						doClosesModal: false
 					}
 				];
 			// case 'archive':
@@ -428,6 +471,9 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	},
 	boldText: {
 		fontWeight: 'bold'
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.default.error.default
 	}
 }));
 
