@@ -3,11 +3,11 @@ import { getServerSideProps } from '.';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
-import ProductAccessRightCard from '@/components/dashboard/ProductAccess/ProductAccessRightCard';
-import ProductAccessRightModal from '@/components/dashboard/ProductAccess/ProductAccessRightModal';
+import AccessRightCard from '@/components/dashboard/AccessRight/AccessRightCard';
+import AccessRightModal from '@/components/dashboard/AccessRight/AccessRightModal';
 import React from 'react';
-import { Product, UserProduct } from '@prisma/client';
-import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
+import { Product, AccessRight } from '@prisma/client';
+import { AccessRightUserWithUsers } from '@/pages/api/prisma/accessRight/type';
 import { Pagination } from '@/components/ui/Pagination';
 import { getNbPages } from '@/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
@@ -29,13 +29,13 @@ const AccessManagement = (props: Props) => {
 
 	const { product } = props;
 
-	const [userProducts, setUserProducts] = React.useState<
-		UserProductUserWithUsers[]
+	const [accessRights, setAccessRights] = React.useState<
+		AccessRightUserWithUsers[]
 	>([]);
 	const [count, setCount] = React.useState(0);
 
-	const [currentUserProduct, setCurrentUserProduct] =
-		React.useState<UserProductUserWithUsers>();
+	const [currentAccessRight, setCurrentAccessRight] =
+		React.useState<AccessRightUserWithUsers>();
 	const [modalType, setModalType] = React.useState<
 		'add' | 'remove' | 'resend-email'
 	>('add');
@@ -48,25 +48,25 @@ const AccessManagement = (props: Props) => {
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const isModalOpen = useIsModalOpen(modal);
 
-	const retrieveUsersProducts = React.useCallback(async () => {
+	const retrieveAccessRights = React.useCallback(async () => {
 		const response = await fetch(
-			`/api/prisma/userProduct?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isRemoved=${carriersRemovedFilter}`
+			`/api/prisma/accessRight?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isRemoved=${carriersRemovedFilter}`
 		);
 		const res = await response.json();
-		setUserProducts(res.data);
+		setAccessRights(res.data);
 		setCount(res.count);
 	}, [numberPerPage, currentPage, carriersRemovedFilter, isModalOpen]);
 
 	React.useEffect(() => {
-		retrieveUsersProducts();
-	}, [retrieveUsersProducts]);
+		retrieveAccessRights();
+	}, [retrieveAccessRights]);
 
 	const handleModalOpening = (
 		modalType: 'add' | 'remove' | 'resend-email',
-		userProduct?: UserProductUserWithUsers
+		accessRight?: AccessRightUserWithUsers
 	) => {
-		if (userProduct) {
-			setCurrentUserProduct(userProduct);
+		if (accessRight) {
+			setCurrentAccessRight(accessRight);
 		}
 		setIsModalSubmitted(false);
 		setModalType(modalType);
@@ -76,15 +76,15 @@ const AccessManagement = (props: Props) => {
 	const getAlertTitle = () => {
 		switch (modalType) {
 			case 'add':
-				if (currentUserProduct?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${currentUserProduct?.user_email}.`;
+				if (currentAccessRight?.user === null) {
+					return `Un e-mail d’invitation a été envoyé à ${currentAccessRight?.user_email}.`;
 				} else {
-					return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été ajouté comme porteur.`;
+					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été ajouté comme porteur.`;
 				}
 			case 'resend-email':
-				return `Un e-mail d’invitation a été renvoyé à ${currentUserProduct?.user_email}.`;
+				return `Un e-mail d’invitation a été renvoyé à ${currentAccessRight?.user_email}.`;
 			case 'remove':
-				return `${currentUserProduct?.user?.firstName} ${currentUserProduct?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
+				return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
 		}
 	};
 
@@ -96,14 +96,14 @@ const AccessManagement = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
-			<ProductAccessRightModal
+			<AccessRightModal
 				modal={modal}
 				isOpen={isModalOpen}
 				modalType={modalType}
 				productId={product.id}
 				setIsModalSubmitted={setIsModalSubmitted}
-				currentUserProduct={currentUserProduct}
-				setCurrentUserProduct={setCurrentUserProduct}
+				currentAccessRight={currentAccessRight}
+				setCurrentAccessRight={setCurrentAccessRight}
 			/>
 			{isModalSubmitted && (
 				<Alert
@@ -168,10 +168,10 @@ const AccessManagement = (props: Props) => {
 				</div>
 			</div>
 			<div>
-				{userProducts?.map((userProduct, index) => (
-					<ProductAccessRightCard
+				{accessRights?.map((accessRight, index) => (
+					<AccessRightCard
 						key={index}
-						userProduct={userProduct}
+						accessRight={accessRight}
 						onButtonClick={handleModalOpening}
 					/>
 				))}

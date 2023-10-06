@@ -30,7 +30,7 @@ model User {
   UserOTPs              UserOTP[]
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]
-  UserProducts          UserProduct[]
+  accessRights         AccessRight[]
 }
 
 model UserRequest {
@@ -91,15 +91,15 @@ model Product {
   volume          Int?
   observatoire_id Int?
   buttons         Button[]
-  users           UserProduct[]
+  accessRights   AccessRight[]
 }
 
-model UserProduct {
-  id         Int    @id @default(autoincrement())
+model AccessRight {
+  id         Int     @id @default(autoincrement())
   user       User?   @relation(fields: [user_email], references: [email])
   user_email String
   product    Product @relation(fields: [product_id], references: [id])
-  product_id Int 
+  product_id Int
 
   status RightAccessStatus @default(carrier)
 

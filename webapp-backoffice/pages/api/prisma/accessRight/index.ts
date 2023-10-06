@@ -18,7 +18,7 @@ export async function generateInviteToken(user_email: string) {
 	return token;
 }
 
-export async function getUserProducts(
+export async function getAccessRights(
 	numberPerPage: number,
 	page: number,
 	product_id: number,
@@ -65,7 +65,7 @@ export async function getUserProducts(
 		}
 	}
 
-	const userProducts = await prisma.userProduct.findMany({
+	const accessRights = await prisma.accessRight.findMany({
 		orderBy,
 		where,
 		take: numberPerPage,
@@ -75,24 +75,24 @@ export async function getUserProducts(
 		}
 	});
 
-	const count = await prisma.userProduct.count({ where });
+	const count = await prisma.accessRight.count({ where });
 
-	return { data: userProducts, count };
+	return { data: accessRights, count };
 }
 
-export async function createUserProduct(userEmail: string, productId: number) {
-	const checkIfUserProductExists = await prisma.userProduct.findFirst({
+export async function createAccessRight(userEmail: string, productId: number) {
+	const checkIfAccessRightExists = await prisma.accessRight.findFirst({
 		where: {
 			user_email: userEmail,
 			product_id: productId
 		}
 	});
 
-	if (checkIfUserProductExists) {
+	if (checkIfAccessRightExists) {
 		throw new Error('User product already exists');
 	}
 
-	const newUserProduct = await prisma.userProduct.create({
+	const newAccessRight = await prisma.accessRight.create({
 		data: {
 			user_email: userEmail,
 			product_id: productId
@@ -102,7 +102,7 @@ export async function createUserProduct(userEmail: string, productId: number) {
 		}
 	});
 
-	if (newUserProduct.user === null) {
+	if (newAccessRight.user === null) {
 		const token = await generateInviteToken(userEmail);
 
 		await sendMail(
@@ -118,7 +118,7 @@ export async function createUserProduct(userEmail: string, productId: number) {
 		);
 	}
 
-	return newUserProduct;
+	return newAccessRight;
 }
 
 export default async function handler(
@@ -138,23 +138,23 @@ export default async function handler(
 		if (!numberPerPage || !page) {
 			return res.status(400).json({ message: 'Missing numberPerPage or page' });
 		}
-		const userProducts = await getUserProducts(
+		const accessRights = await getAccessRights(
 			parseInt(numberPerPage as string, 10) as number,
 			parseInt(page as string, 10) as number,
 			parseInt(product_id as string),
 			{ isRemoved: isRemoved === 'true' },
 			sort as string
 		);
-		res.status(200).json(userProducts);
+		res.status(200).json(accessRights);
 	} else if (req.method === 'POST') {
 		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
 		try {
-			const userProduct = await createUserProduct(
+			const accessRight = await createAccessRight(
 				data.email as string,
 				parseInt(product_id as string)
 			);
-			res.status(201).json(userProduct);
+			res.status(201).json(accessRight);
 		} catch (error) {
 			res.status(409).json({ message: '' });
 		}

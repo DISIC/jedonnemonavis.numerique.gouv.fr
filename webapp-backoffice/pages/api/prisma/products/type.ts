@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 const ProductWithRelations = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
 		buttons: true,
-		users: {
+		accessRights: {
 			include: {
 				user: {
 					select: {

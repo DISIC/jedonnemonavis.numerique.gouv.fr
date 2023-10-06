@@ -3,8 +3,7 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { UserProduct } from '@prisma/client';
-import { UserProductUserWithUsers } from '@/pages/api/prisma/userProduct/type';
+import type { AccessRightUserWithUsers } from '@/pages/api/prisma/accessRight/type';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -25,9 +24,9 @@ interface Props {
 	modalType: 'add' | 'remove' | 'resend-email';
 	productId: number;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
-	currentUserProduct: UserProductUserWithUsers | undefined;
-	setCurrentUserProduct: React.Dispatch<
-		React.SetStateAction<UserProductUserWithUsers | undefined>
+	currentAccessRight: AccessRightUserWithUsers | undefined;
+	setCurrentAccessRight: React.Dispatch<
+		React.SetStateAction<AccessRightUserWithUsers | undefined>
 	>;
 }
 
@@ -38,9 +37,9 @@ const ButtonModal = (props: Props) => {
 		isOpen,
 		modalType,
 		productId,
-		currentUserProduct,
+		currentAccessRight,
 		setIsModalSubmitted,
-		setCurrentUserProduct
+		setCurrentAccessRight
 	} = props;
 
 	const [email, setEmail] = React.useState<string>('');
@@ -54,7 +53,7 @@ const ButtonModal = (props: Props) => {
 	async function handleModalSubmit(email?: string) {
 		if (modalType === 'add' && email !== undefined) {
 			const res = await fetch(
-				`/api/prisma/userProduct?product_id=${productId}`,
+				`/api/prisma/accessRight?product_id=${productId}`,
 				{
 					method: 'POST',
 					body: JSON.stringify({ email })
@@ -63,15 +62,15 @@ const ButtonModal = (props: Props) => {
 			if (res.ok) {
 				const data = await res.json();
 				setIsModalSubmitted(true);
-				setCurrentUserProduct(data);
+				setCurrentAccessRight(data);
 				modal.close();
 			} else {
 				setErrorStatus(res.status);
 			}
 		} else if (modalType === 'remove') {
-			if (currentUserProduct === undefined) return;
+			if (currentAccessRight === undefined) return;
 			const res = await fetch(
-				`/api/prisma/userProduct/${currentUserProduct.id}`,
+				`/api/prisma/accessRight/${currentAccessRight.id}`,
 				{
 					method: 'PUT',
 					body: JSON.stringify({ status: 'removed' })
@@ -121,8 +120,8 @@ const ButtonModal = (props: Props) => {
 					<div className={fr.cx('fr-pt-4v')}>
 						<p>
 							Vous êtes sûr de vouloir retirer{' '}
-							{currentUserProduct?.user?.firstName}{' '}
-							{currentUserProduct?.user?.lastName} comme porteur ou porteuse de
+							{currentAccessRight?.user?.firstName}{' '}
+							{currentAccessRight?.user?.lastName} comme porteur ou porteuse de
 							ce produit numérique ?
 						</p>
 					</div>

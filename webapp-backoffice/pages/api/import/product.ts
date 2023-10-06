@@ -21,7 +21,7 @@ export async function importProduct(data: ImportProduct) {
 					create: data.entity
 				}
 			},
-			users: {
+			accessRights: {
 				create: data.users.map(user => ({
 					status: 'carrier',
 					user: {

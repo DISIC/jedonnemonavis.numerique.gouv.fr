@@ -83,7 +83,7 @@ export async function createProduct(
 		data: data
 	});
 
-	await prisma.userProduct.create({
+	await prisma.accessRight.create({
 		data: {
 			user_email: userEmail,
 			product_id: product.id

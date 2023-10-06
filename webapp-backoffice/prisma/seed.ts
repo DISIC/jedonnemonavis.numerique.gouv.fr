@@ -60,7 +60,7 @@ async function main() {
 					buttons: {
 						create: createButtons(product.title) as Button[]
 					},
-					users: {
+					accessRights: {
 						create: {
 							user_email: users.filter(u => u.active)[index % 2].email
 						}
