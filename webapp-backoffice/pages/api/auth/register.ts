@@ -7,6 +7,7 @@ import {
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
+import { deleteUserOTP } from './otp';
 
 const prisma = new PrismaClient();
 
@@ -73,6 +74,8 @@ export async function registerUserFromOTP(
 			...user
 		}
 	});
+
+	await deleteUserOTP(otp_id);
 
 	return { ...user, password: 'Nice try!' };
 }
