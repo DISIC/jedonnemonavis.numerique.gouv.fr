@@ -30,7 +30,7 @@ model User {
   UserOTPs              UserOTP[]
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]
-  accessRights         AccessRight[]
+  accessRights          AccessRight[]
 }
 
 model UserRequest {
@@ -71,7 +71,7 @@ model Entity {
 
 model Button {
   id          Int      @id @default(autoincrement())
-  title       String   @unique
+  title       String
   description String?
   isTest      Boolean? @default(false)
   product     Product? @relation(fields: [product_id], references: [id])
@@ -82,7 +82,7 @@ model Button {
 
 model Product {
   id              Int           @id @default(autoincrement())
-  title           String        @unique
+  title           String
   entity          Entity?       @relation(fields: [entity_id], references: [id])
   entity_id       Int
   created_at      DateTime      @default(now())
@@ -90,9 +90,9 @@ model Product {
   isEssential     Boolean?      @default(false)
   urls            String[]
   volume          Int?
-  observatoire_id Int?
+  observatoire_id Int?          @unique
   buttons         Button[]
-  accessRights   AccessRight[]
+  accessRights    AccessRight[]
 }
 
 model AccessRight {
