@@ -37,8 +37,14 @@ async function main() {
 
 	entities.forEach(entity => {
 		promisesUsersAndEntities.push(
-			prisma.entity.create({
-				data: entity
+			prisma.entity.upsert({
+				where: {
+					name: entity.name
+				},
+				update: {
+					acronym: entity.acronym
+				},
+				create: entity
 			})
 		);
 	});
