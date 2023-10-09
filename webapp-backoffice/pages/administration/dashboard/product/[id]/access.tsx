@@ -61,15 +61,23 @@ const AccessManagement = (props: Props) => {
 		retrieveAccessRights();
 	}, [retrieveAccessRights]);
 
-	const handleModalOpening = (
+	const handleModalOpening = async (
 		modalType: 'add' | 'remove' | 'resend-email',
 		accessRight?: AccessRightUserWithUsers
 	) => {
 		if (accessRight) {
 			setCurrentAccessRight(accessRight);
 		}
-		setIsModalSubmitted(false);
+
 		setModalType(modalType);
+
+		if (modalType == 'resend-email') {
+			await fetch(`/api/prisma/accessRight/resend-email?user_email=${accessRight?.user_email_invite}`);
+			setIsModalSubmitted(true);
+			return
+		}
+
+		setIsModalSubmitted(false);
 		modal.open();
 	};
 
@@ -84,7 +92,7 @@ const AccessManagement = (props: Props) => {
 			case 'resend-email':
 				return `Un e-mail d’invitation a été renvoyé à ${currentAccessRight?.user_email ? currentAccessRight?.user_email : currentAccessRight?.user_email_invite}.`;
 			case 'remove':
-				return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
+				return `${currentAccessRight?.user !== null ? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}` : currentAccessRight.user_email_invite} a été retiré comme porteur ou porteuse de ce produit numérique.`;
 		}
 	};
 
@@ -189,7 +197,7 @@ const AccessManagement = (props: Props) => {
 							},
 							href: '#',
 							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination-link-access-right-${pageNumber}`
+							key: `pagination - link - access - right - ${pageNumber}`
 						})}
 						className={fr.cx('fr-mt-1w')}
 					/>

@@ -31,7 +31,7 @@ interface Props {
 }
 
 const ButtonModal = (props: Props) => {
-	const { cx } = useStyles();
+	const { cx, classes } = useStyles();
 	const {
 		modal,
 		isOpen,
@@ -113,6 +113,14 @@ const ButtonModal = (props: Props) => {
 								onChange: e => setEmail(e.target.value)
 							}}
 						/>
+						<div className={classes.infoWrapper}>
+							<i className={fr.cx('fr-info-text', 'fr-mt-0')}></i>
+							<p className={cx(fr.cx(), classes.infoText)}>
+								Si la personne a déjà un compte sur Je donne mon avis, elle va avoir accès
+								immédiatement à ce produit numérique. Si la personne n’a pas encore de compte, elle
+								reçoit un e-mail d’invitation à l’adresse saisie.
+							</p>
+						</div>
 					</div>
 				);
 			case 'remove':
@@ -190,6 +198,17 @@ const ButtonModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ButtonModal.name).create(() => ({}));
+const useStyles = tss.withName(ButtonModal.name).create(() => ({
+	infoWrapper: {
+		display: 'flex',
+		alignItems: 'start'
+	},
+	infoText: {
+		color: fr.colors.decisions.background.flat.info.default,
+		fontSize: '0.875rem',
+		lineHeight: '1.25rem',
+		marginBottom: 0
+	}
+}));
 
 export default ButtonModal;
