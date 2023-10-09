@@ -30,11 +30,9 @@ export async function getProducts(
 	};
 
 	if (search) {
-		where = {
-			title: {
-				contains: search,
-				mode: 'insensitive'
-			}
+		const searchQuery = search.split(' ').join(' | ');
+		where.title = {
+			search: searchQuery
 		};
 	}
 
