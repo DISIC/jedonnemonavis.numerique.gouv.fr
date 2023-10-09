@@ -16,7 +16,7 @@ import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
 
 type Props = {
 	userPresetInfos?: UserInfos;
-	otp_id?: string;
+	otp?: string;
 };
 
 export type UserInfos = {
@@ -47,7 +47,7 @@ const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
 const regexAtLeastOneNumber = /\d/;
 
 export const RegisterForm = (props: Props) => {
-	const { otp_id, userPresetInfos } = props;
+	const { otp, userPresetInfos } = props;
 
 	const router = useRouter();
 
@@ -118,8 +118,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -127,8 +127,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -136,8 +136,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		return messages;
@@ -177,7 +177,7 @@ export const RegisterForm = (props: Props) => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ ...userInfos, otp_id: otp_id as string })
+			body: JSON.stringify({ ...userInfos, otp: otp as string })
 		}).then(res => {
 			if (res.status === 200)
 				res.json().then(json => {
@@ -212,7 +212,12 @@ export const RegisterForm = (props: Props) => {
 	}
 
 	if (registered) {
-		return <RegisterValidationMessage mode={registered} isUserInvited={userInfos.inviteToken !== undefined} />;
+		return (
+			<RegisterValidationMessage
+				mode={registered}
+				isUserInvited={userInfos.inviteToken !== undefined}
+			/>
+		);
 	}
 
 	return (
@@ -236,7 +241,7 @@ export const RegisterForm = (props: Props) => {
 							</Link>
 						</>
 					}
-					onClose={function noRefCheck() { }}
+					onClose={function noRefCheck() {}}
 					severity="error"
 					title=""
 				/>
@@ -276,7 +281,7 @@ export const RegisterForm = (props: Props) => {
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
-					disabled={!!otp_id}
+					disabled={!!otp}
 					nativeInputProps={{
 						onChange: e => {
 							setUserInfos({ ...userInfos, email: e.target.value });
