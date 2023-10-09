@@ -60,7 +60,6 @@ export const Field = (props: Props) => {
     )
       return;
 
-    console.log();
     // Si le champ de la source de condition est un Array et qu'il contient la valeur cible
     if (
       Array.isArray(opinion[field.condition.name]) &&
@@ -124,7 +123,6 @@ export const Field = (props: Props) => {
                 checked: opinion[field.name] === opt.value,
                 value: opt.value,
                 onChange: e => {
-                  console.log(e.target.value);
                   setOpinion({
                     ...opinion,
                     [field.name]: e.target.value
