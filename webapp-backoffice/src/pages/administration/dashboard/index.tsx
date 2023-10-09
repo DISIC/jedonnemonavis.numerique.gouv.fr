@@ -29,13 +29,11 @@ const DashBoard = () => {
 
 	const { cx, classes } = useStyles();
 
-	const { data: productsCount } = trpc.product.count.useQuery(validatedSearch);
-
 	const {
-		data: products,
+		data: productsResult,
 		isLoading: isLoadingProducts,
 		isRefetching: isRefetchingProducts
-	} = trpc.product.getByPagination.useQuery(
+	} = trpc.product.getList.useQuery(
 		{
 			search: validatedSearch,
 			sort: filter,
@@ -43,20 +41,33 @@ const DashBoard = () => {
 			numberPerPage
 		},
 		{
-			initialData: []
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
+				}
+			}
 		}
 	);
 
-	const { data: entities, isLoading: isLoadingEntities } =
-		trpc.entity.getList.useQuery(undefined, {
-			initialData: []
-		});
+	const {
+		data: products,
+		metadata: { count: productsCount }
+	} = productsResult;
+
+	const { data: entitiesResult, isLoading: isLoadingEntities } =
+		trpc.entity.getList.useQuery(
+			{ numberPerPage: 1000 },
+			{ initialData: { data: [], metadata: { count: 0 } } }
+		);
+
+	const { data: entities } = entitiesResult;
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(productsCount || 0, numberPerPage);
+	const nbPages = getNbPages(productsCount, numberPerPage);
 
 	const isOpen = useIsModalOpen(modal);
 
@@ -155,7 +166,7 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{isLoadingProducts || isRefetchingProducts || isLoadingEntities ? (
+				{isLoadingProducts || isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -173,7 +184,9 @@ const DashBoard = () => {
 										{numberPerPage * (currentPage - 1) + products.length}
 									</span>{' '}
 									de{' '}
-									<span className={cx(classes.boldText)}>{productsCount}</span>
+									<span className={cx(classes.boldText)}>
+										{productsResult.metadata.count}
+									</span>
 								</span>
 							)}
 						</div>
@@ -182,17 +195,24 @@ const DashBoard = () => {
 								products.length === 0 ? classes.productsContainer : ''
 							)}
 						>
-							{products.map((product, index) => (
-								<ProductCard
-									product={product}
-									entity={
-										entities.find(
-											entity => product.entity_id === entity.id
-										) as Entity
-									}
-									key={index}
-								/>
-							))}
+							{isRefetchingProducts ? (
+								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+									<Loader />
+								</div>
+							) : (
+								products.map((product, index) => (
+									<ProductCard
+										product={product}
+										entity={
+											entities.find(
+												entity => product.entity_id === entity.id
+											) as Entity
+										}
+										key={index}
+									/>
+								))
+							)}
+
 							{products.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div

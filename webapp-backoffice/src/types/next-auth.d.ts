@@ -5,4 +5,11 @@ declare module 'next-auth' {
 	interface User extends UserModel {
 		id: number;
 	}
+	interface Session extends DefaultSession {
+		user: {
+			id: string;
+			// ...other properties
+			// role: UserRole;
+		} & DefaultSession['user'];
+	}
 }

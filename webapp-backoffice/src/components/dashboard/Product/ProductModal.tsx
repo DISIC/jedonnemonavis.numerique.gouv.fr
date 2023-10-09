@@ -12,6 +12,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { Entity, Product } from '@prisma/client';
 import React from 'react';
 import { useSession } from 'next-auth/react';
+import { trpc } from '@/src/utils/trpc';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -54,20 +55,24 @@ const defaultProduct = {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal, isOpen } = props;
+	const { modal } = props;
 	const { cx, classes } = useStyles();
 	const { data: session } = useSession({ required: true });
-	const [search, setSearch] = React.useState<string>('');
+	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
-	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [product, setProduct] = React.useState<CreationPayload>(defaultProduct);
 	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 
-	const retrieveEntities = async (query: string) => {
-		const res = await fetch(`/api/prisma/entities?name=${query}`);
-		const data = await res.json();
-		setEntities(data);
-	};
+	const { data: entitiesResult } = trpc.entity.getList.useQuery(
+		{ numberPerPage: 1000, search: debouncedSearch },
+		{
+			initialData: { data: [], metadata: { count: 0 } }
+		}
+	);
+
+	const { data: entities } = entitiesResult;
+
+	const saveProductTmp = trpc.product.create.useMutation({});
 
 	const formHasErrors = (tmpErrors?: FormErrors): boolean => {
 		return Object.values(tmpErrors || errors)
@@ -87,10 +92,6 @@ const ProductModal = (props: Props) => {
 		return;
 	};
 
-	React.useEffect(() => {
-		isOpen && retrieveEntities(debouncedSearch);
-	}, [isOpen, debouncedSearch]);
-
 	const saveProduct = async () => {
 		if (!product.title) {
 			errors.title.required = true;
@@ -105,16 +106,13 @@ const ProductModal = (props: Props) => {
 			return;
 		}
 
-		fetch(`/api/prisma/products?userEmail=${session?.user?.email}`, {
-			method: 'POST',
-			body: JSON.stringify(product)
-		})
-			.then(res => res.json())
-			.finally(() => {
-				props.onProductCreated();
-				setProduct(defaultProduct);
-				modal.close();
-			});
+		await saveProductTmp.mutateAsync({
+			...product
+		});
+
+		props.onProductCreated();
+		setProduct(defaultProduct);
+		modal.close();
 	};
 
 	return (

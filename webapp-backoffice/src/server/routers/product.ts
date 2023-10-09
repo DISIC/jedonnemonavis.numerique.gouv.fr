@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 
+const createProductPayload = z.object({
+	title: z.string(),
+	entity_id: z.number(),
+	isEssential: z.boolean().nullable(),
+	volume: z.number().nullable(),
+	urls: z.array(z.string()),
+	observatoire_id: z.number().optional()
+});
+
 export const productRouter = router({
 	getById: publicProcedure.input(z.number()).query(({ ctx, input }) => {
 		return ctx.prisma.product.findUnique({
@@ -10,36 +19,7 @@ export const productRouter = router({
 		});
 	}),
 
-	count: publicProcedure
-		.input(z.string().optional())
-		.query(async ({ ctx, input }) => {
-			const userEmail = ctx.session?.user?.email;
-
-			let where: any = {
-				title: {
-					contains: ''
-				},
-				accessRights: {
-					some: {
-						user_email: userEmail,
-						status: 'carrier'
-					}
-				}
-			};
-
-			if (input) {
-				const searchQuery = input.split(' ').join(' | ');
-				where.title = {
-					contains: searchQuery
-				};
-			}
-
-			const count = await ctx.prisma.product.count({ where });
-
-			return count;
-		}),
-
-	getByPagination: publicProcedure
+	getList: protectedProcedure
 		.input(
 			z.object({
 				numberPerPage: z.number().default(10),
@@ -111,6 +91,30 @@ export const productRouter = router({
 				}
 			});
 
-			return products;
+			const count = await ctx.prisma.product.count({ where });
+
+			return { data: products, metadata: { count } };
+		}),
+
+	create: protectedProcedure
+		.input(createProductPayload)
+		.mutation(async ({ ctx, input: productPayload }) => {
+			const userEmail = ctx.session?.user?.email;
+
+			const product = await ctx.prisma.product.create({
+				data: {
+					...productPayload,
+					accessRights: {
+						create: [
+							{
+								user_email: userEmail,
+								status: 'carrier'
+							}
+						]
+					}
+				}
+			});
+
+			return product;
 		})
 });
