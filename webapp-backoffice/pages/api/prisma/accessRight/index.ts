@@ -164,12 +164,12 @@ export default async function handler(
 		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
 
-		const accessRightAlreadyExists = checkIfAccessRightExists(
+		const accessRightAlreadyExists = await checkIfAccessRightExists(
 			data.email as string,
 			parseInt(product_id as string)
 		);
 
-		if (!accessRightAlreadyExists)
+		if (accessRightAlreadyExists !== null)
 			return res.status(409).json({ message: 'Access Right already exists' });
 
 		const user = await checkIfUserExists(data.email as string);
