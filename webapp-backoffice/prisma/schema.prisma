@@ -99,7 +99,8 @@ model Product {
 model AccessRight {
   id         Int     @id @default(autoincrement())
   user       User?   @relation(fields: [user_email], references: [email])
-  user_email String
+  user_email String?
+  user_email_invite String?
   product    Product @relation(fields: [product_id], references: [id])
   product_id Int
 
