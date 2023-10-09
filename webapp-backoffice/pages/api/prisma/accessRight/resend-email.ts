@@ -1,5 +1,5 @@
 import { sendMail } from '@/utils/mailer';
-import { generateRandomString, getInviteEmailHtml } from '@/utils/tools';
+import { generateRandomString, getUserInviteEmailHtml } from '@/utils/tools';
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
@@ -31,16 +31,24 @@ export default async function handler(
 			return res.status(401).json({ msg: 'You shall not pass.' });
 	}
 	if (req.method === 'GET') {
-		const { user_email } = req.query;
+		const { user_email, product_id } = req.query;
 
 		const userEmail = user_email as string;
+
+		const product = await prisma.product.findUnique({
+			where: {
+				id: parseInt(product_id as string)
+			}
+		});
+
+		if (!product) return res.status(404).json({ message: 'Product not found' });
 
 		const token = await generateInviteToken(userEmail);
 
 		await sendMail(
 			'Invitation à rejoindre "Je donne mon avis"',
 			userEmail,
-			getInviteEmailHtml(userEmail, token),
+			getUserInviteEmailHtml(userEmail, token, product.title),
 			`Cliquez sur ce lien pour créer votre compte : ${
 				process.env.NODEMAILER_BASEURL
 			}/register?${new URLSearchParams({

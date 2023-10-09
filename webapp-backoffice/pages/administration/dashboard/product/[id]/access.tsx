@@ -72,7 +72,7 @@ const AccessManagement = (props: Props) => {
 		setModalType(modalType);
 
 		if (modalType == 'resend-email') {
-			await fetch(`/api/prisma/accessRight/resend-email?user_email=${accessRight?.user_email_invite}`);
+			await fetch(`/api/prisma/accessRight/resend-email?user_email=${accessRight?.user_email_invite}&product_id=${product.id}`);
 			setIsModalSubmitted(true);
 			return
 		}

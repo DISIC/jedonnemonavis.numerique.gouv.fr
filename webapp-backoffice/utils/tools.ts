@@ -1,3 +1,5 @@
+import { Product, User } from '@prisma/client';
+
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 	return emailRegex.test(email);
@@ -147,7 +149,11 @@ export function getRegisterEmailHtml(token: string) {
 	`;
 }
 
-export function getInviteEmailHtml(email: string, inviteToken: string) {
+export function getUserInviteEmailHtml(
+	email: string,
+	inviteToken: string,
+	productTitle: string
+) {
 	const link = `${
 		process.env.NODEMAILER_BASEURL
 	}/register?${new URLSearchParams({ email, inviteToken })}`;
@@ -172,7 +178,49 @@ export function getInviteEmailHtml(email: string, inviteToken: string) {
 					<p>Bonjour,</p>
 
 					<p>
-						Quelqu'un vous a invité à rejoindre "Je donne mon avis". Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
+						Quelqu'un vous a invité à rejoindre "Je donne mon avis" en tant que porteur pour le produit "${productTitle}". Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
+					</p>
+
+					<a href="${link}" target="_blank">${link}</a>
+
+					<p>
+						Merci,<br/>
+						L'équipe je donne mon avis
+					</p>
+				</div>
+			</body>
+		</html>
+	`;
+}
+
+export function getInviteEmailHtml(contextUser: User, productTitle: string) {
+	const link = process.env.NODEMAILER_BASEURL;
+
+	return `
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+					}
+					.container {
+						max-width: 600px;
+						margin: 0 auto;
+						padding: 20px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<p>Bonjour,</p>
+
+					<p>
+						${contextUser.firstName} ${contextUser.lastName} vous a invité à rejoindre le produit numérique "${productTitle}" sur "Je donne mon avis".
+					</p>
+
+					<p>
+						Vous pouvez vous connecter à votre compte en cliquant sur le lien ci-dessous.
 					</p>
 
 					<a href="${link}" target="_blank">${link}</a>

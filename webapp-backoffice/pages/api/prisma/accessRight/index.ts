@@ -1,6 +1,10 @@
 import { sendMail } from '@/utils/mailer';
-import { generateRandomString, getInviteEmailHtml } from '@/utils/tools';
-import { PrismaClient, Product } from '@prisma/client';
+import {
+	generateRandomString,
+	getUserInviteEmailHtml,
+	getInviteEmailHtml
+} from '@/utils/tools';
+import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { getToken } from 'next-auth/jwt';
 
@@ -103,7 +107,8 @@ export async function checkIfUserExists(userEmail: string) {
 export async function createAccessRight(
 	userEmail: string,
 	productId: number,
-	userExists: boolean
+	userExists: boolean,
+	contextUser: User
 ) {
 	const newAccessRight = await prisma.accessRight.create({
 		data: {
@@ -112,7 +117,8 @@ export async function createAccessRight(
 			product_id: productId
 		},
 		include: {
-			user: true
+			user: true,
+			product: true
 		}
 	});
 
@@ -122,13 +128,20 @@ export async function createAccessRight(
 		await sendMail(
 			'Invitation à rejoindre "Je donne mon avis"',
 			userEmail,
-			getInviteEmailHtml(userEmail, token),
+			getUserInviteEmailHtml(userEmail, token, newAccessRight.product.title),
 			`Cliquez sur ce lien pour créer votre compte : ${
 				process.env.NODEMAILER_BASEURL
 			}/register?${new URLSearchParams({
 				email: userEmail,
 				inviteToken: token
 			})}`
+		);
+	} else {
+		await sendMail(
+			`Invitation à rejoindre le produit numérique "${newAccessRight.product.title}" sur "Je donne mon avis"`,
+			userEmail,
+			getInviteEmailHtml(contextUser, newAccessRight.product.title),
+			`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
 		);
 	}
 
@@ -139,14 +152,20 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
-		const token = await getToken({
-			req,
-			secret: process.env.JWT_SECRET
-		});
-		if (!token || (token.exp as number) > new Date().getTime())
-			return res.status(401).json({ msg: 'You shall not pass.' });
-	}
+	const token = await getToken({
+		req,
+		secret: process.env.JWT_SECRET
+	});
+
+	if (!token || (token.exp as number) > new Date().getTime())
+		return res.status(401).json({ msg: 'You shall not pass.' });
+
+	const contextUser = await prisma.user.findUnique({
+		where: {
+			email: token.email as string
+		}
+	});
+
 	if (req.method === 'GET') {
 		const { sort, product_id, isRemoved, numberPerPage, page } = req.query;
 		if (!numberPerPage || !page) {
@@ -177,7 +196,8 @@ export default async function handler(
 		const accessRight = await createAccessRight(
 			data.email as string,
 			parseInt(product_id as string),
-			user !== null
+			user !== null,
+			contextUser as User
 		);
 		return res.status(201).json(accessRight);
 	} else {

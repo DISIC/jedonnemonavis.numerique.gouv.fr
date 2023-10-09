@@ -34,7 +34,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const hasAccessRightToProduct = await prisma.accessRight.findFirst({
 		where: {
 			user_email: currentUserToken.email as string,
-			product_id: parseInt(id as string)
+			product_id: parseInt(id as string),
+			status: "carrier"
 		}
 	});
 

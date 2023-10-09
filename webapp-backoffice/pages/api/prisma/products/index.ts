@@ -24,7 +24,8 @@ export async function getProducts(
 		},
 		accessRights: {
 			some: {
-				user_email: userEmail
+				user_email: userEmail,
+				status: 'carrier'
 			}
 		}
 	};
