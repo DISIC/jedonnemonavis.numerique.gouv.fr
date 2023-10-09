@@ -7,7 +7,7 @@ import SuperJSON from 'superjson';
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
 	const prisma = new PrismaClient();
-	const session = await getSession({ req: opts.req });
+	const session = await getSession();
 
 	return {
 		prisma,

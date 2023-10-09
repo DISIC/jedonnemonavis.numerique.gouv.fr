@@ -31,18 +31,21 @@ const DashBoard = () => {
 
 	const { data: productsCount } = trpc.product.count.useQuery(validatedSearch);
 
-	const { data: products, isLoading: isLoadingProducts } =
-		trpc.product.getByPagination.useQuery(
-			{
-				search: validatedSearch,
-				sort: filter,
-				page: currentPage,
-				numberPerPage
-			},
-			{
-				initialData: []
-			}
-		);
+	const {
+		data: products,
+		isLoading: isLoadingProducts,
+		isRefetching: isRefetchingProducts
+	} = trpc.product.getByPagination.useQuery(
+		{
+			search: validatedSearch,
+			sort: filter,
+			page: currentPage,
+			numberPerPage
+		},
+		{
+			initialData: []
+		}
+	);
 
 	const { data: entities, isLoading: isLoadingEntities } =
 		trpc.entity.getList.useQuery(undefined, {
@@ -152,7 +155,7 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{isLoadingProducts && isLoadingEntities ? (
+				{isLoadingProducts || isRefetchingProducts || isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>

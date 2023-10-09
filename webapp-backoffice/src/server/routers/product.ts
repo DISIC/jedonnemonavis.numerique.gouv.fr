@@ -30,7 +30,7 @@ export const productRouter = router({
 			if (input) {
 				const searchQuery = input.split(' ').join(' | ');
 				where.title = {
-					search: searchQuery
+					contains: searchQuery
 				};
 			}
 
@@ -73,7 +73,7 @@ export const productRouter = router({
 			if (search) {
 				const searchQuery = search.split(' ').join(' | ');
 				where.title = {
-					search: searchQuery
+					contains: searchQuery
 				};
 			}
 
