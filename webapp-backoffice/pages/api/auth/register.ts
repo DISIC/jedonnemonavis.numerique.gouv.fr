@@ -74,11 +74,11 @@ export async function generateValidationToken(user: User) {
 
 export async function registerUserFromOTP(
 	user: Omit<User, 'id' | 'email' | 'observatoire_account'>,
-	otp_id: number
+	otp: string
 ) {
 	const userOTP = await prisma.userOTP.findUnique({
 		where: {
-			id: otp_id
+			code: otp
 		},
 		include: {
 			user: true
@@ -96,7 +96,7 @@ export async function registerUserFromOTP(
 		}
 	});
 
-	await deleteUserOTP(otp_id);
+	await deleteUserOTP(otp);
 
 	return { ...user, password: 'Nice try!' };
 }
@@ -105,8 +105,7 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	const { firstName, lastName, email, password, otp_id, inviteToken } =
-		req.body;
+	const { firstName, lastName, email, password, otp, inviteToken } = req.body;
 
 	if (!firstName || !lastName || !email || !password)
 		return res.status(400).send('Some fields are missing');
@@ -117,7 +116,7 @@ export default async function handler(
 			.update(password)
 			.digest('hex');
 
-		if (!!otp_id) {
+		if (!!otp) {
 			const user = await registerUserFromOTP(
 				{
 					firstName,
@@ -126,7 +125,7 @@ export default async function handler(
 					active: true,
 					observatoire_username: null
 				},
-				parseInt(otp_id as string)
+				otp as string
 			);
 
 			return res.status(200).json({ user });
