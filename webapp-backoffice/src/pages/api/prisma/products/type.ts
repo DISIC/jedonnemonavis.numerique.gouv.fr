@@ -1,21 +1,11 @@
 import { Prisma } from '@prisma/client';
 
-const ProductWithRelations = Prisma.validator<Prisma.ProductDefaultArgs>()({
+const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
-		buttons: true,
-		accessRights: {
-			include: {
-				user: {
-					select: {
-						firstName: true,
-						lastName: true
-					}
-				}
-			}
-		}
+		buttons: true
 	}
 });
 
-export type ProductWithRelations = Prisma.ProductGetPayload<
-	typeof ProductWithRelations
+export type ProductWithButtons = Prisma.ProductGetPayload<
+	typeof ProductWithButtons
 >;

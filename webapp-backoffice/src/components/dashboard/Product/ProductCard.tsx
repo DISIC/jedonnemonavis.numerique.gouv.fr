@@ -1,3 +1,4 @@
+import { ProductWithButtons } from '@/src/pages/api/prisma/products/type';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import { Entity, Product } from '@prisma/client';
@@ -14,7 +15,7 @@ const ProductCard = ({
 	product,
 	entity
 }: {
-	product: Product;
+	product: ProductWithButtons;
 	entity: Entity;
 }) => {
 	const diplayAppreciation = (appreciation: string) => {

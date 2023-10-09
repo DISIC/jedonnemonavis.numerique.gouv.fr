@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import { getSession } from 'next-auth/react';
+import SuperJSON from 'superjson';
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
@@ -16,7 +17,9 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 
 export type Context = inferAsyncReturnType<typeof createContext>;
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+	transformer: SuperJSON
+});
 
 // Auth middleware
 const isAuthed = t.middleware(({ next, ctx }) => {

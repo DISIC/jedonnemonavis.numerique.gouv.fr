@@ -20,10 +20,6 @@ const modal = createModal({
 });
 
 const DashBoard = () => {
-	const [products, setProducts] = React.useState<Product[] | null>(null);
-	const [isLoading, setIsLoading] = React.useState<boolean>(false);
-	const [count, setCount] = React.useState<number>(0);
-	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [filter, setFilter] = React.useState<string>('title');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
@@ -33,41 +29,31 @@ const DashBoard = () => {
 
 	const { cx, classes } = useStyles();
 
-	const retrieveProducts = React.useCallback(async () => {
-		setIsLoading(true);
-		const response = await fetch(
-			`/api/prisma/products?${new URLSearchParams({
-				sort: filter,
+	const { data: productsCount } = trpc.product.count.useQuery(validatedSearch);
+
+	const { data: products, isLoading: isLoadingProducts } =
+		trpc.product.getByPagination.useQuery(
+			{
 				search: validatedSearch,
-				page: currentPage.toString(),
-				numberPerPage: numberPerPage.toString()
-			})}`
+				sort: filter,
+				page: currentPage,
+				numberPerPage
+			},
+			{
+				initialData: []
+			}
 		);
-		const res = await response.json();
-		setProducts(res.data);
-		setCount(res.count);
-		setIsLoading(false);
-	}, [numberPerPage, currentPage, filter, validatedSearch]);
 
-	const retrieveOwners = async () => {
-		const res = await fetch('/api/prisma/entities');
-		const data = await res.json();
-		setEntities(data);
-	};
-
-	React.useEffect(() => {
-		retrieveOwners();
-	}, []);
-
-	React.useEffect(() => {
-		retrieveProducts();
-	}, [retrieveProducts, validatedSearch, filter]);
+	const { data: entities, isLoading: isLoadingEntities } =
+		trpc.entity.getList.useQuery(undefined, {
+			initialData: []
+		});
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(count, numberPerPage);
+	const nbPages = getNbPages(productsCount || 0, numberPerPage);
 
 	const isOpen = useIsModalOpen(modal);
 
@@ -166,7 +152,7 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{!products || isLoading ? (
+				{isLoadingProducts && isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -183,7 +169,8 @@ const DashBoard = () => {
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + products.length}
 									</span>{' '}
-									de <span className={cx(classes.boldText)}>{count}</span>
+									de{' '}
+									<span className={cx(classes.boldText)}>{productsCount}</span>
 								</span>
 							)}
 						</div>

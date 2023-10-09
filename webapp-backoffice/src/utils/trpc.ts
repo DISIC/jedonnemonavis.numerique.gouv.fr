@@ -1,12 +1,14 @@
 import { httpBatchLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
-import type { AppRouter } from '../server/routers/root';
+import type { AppRouter } from '../server/routers/_app';
+import SuperJSON from 'superjson';
 function getBaseUrl() {
 	return `http://localhost:3000`;
 }
 export const trpc = createTRPCNext<AppRouter>({
 	config(opts) {
 		return {
+			transformer: SuperJSON,
 			links: [
 				httpBatchLink({
 					/**
