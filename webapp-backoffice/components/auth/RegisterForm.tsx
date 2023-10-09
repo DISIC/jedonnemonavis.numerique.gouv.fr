@@ -118,8 +118,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
@@ -127,8 +127,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
@@ -136,8 +136,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		return messages;
@@ -241,7 +241,7 @@ export const RegisterForm = (props: Props) => {
 							</Link>
 						</>
 					}
-					onClose={function noRefCheck() {}}
+					onClose={function noRefCheck() { }}
 					severity="error"
 					title=""
 				/>
@@ -281,7 +281,7 @@ export const RegisterForm = (props: Props) => {
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
-					disabled={!!otp}
+					disabled={!!otp || (userInfos.email !== undefined && userInfos.inviteToken !== undefined)}
 					nativeInputProps={{
 						onChange: e => {
 							setUserInfos({ ...userInfos, email: e.target.value });
