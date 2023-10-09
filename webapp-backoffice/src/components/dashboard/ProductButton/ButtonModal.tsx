@@ -4,11 +4,11 @@ import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import { Button as PrismaButtonType } from '@prisma/client';
-
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
+import { trpc } from '@/src/utils/trpc';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -56,7 +56,7 @@ export type ButtonCreationPayload = Omit<
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, isOpen, modalType, button, onButtonCreatedOrUpdated } = props;
+	const { modal, modalType, button, onButtonCreatedOrUpdated } = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = React.useState<
@@ -70,6 +70,14 @@ const ButtonModal = (props: Props) => {
 			setCurrentButton(defaultButton);
 		}
 	}, [button]);
+
+	const createButton = trpc.button.create.useMutation({
+		onSuccess: result => handleModalClose(result.data)
+	});
+
+	const updateButton = trpc.button.update.useMutation({
+		onSuccess: result => handleModalClose(result.data)
+	});
 
 	const hasErrors = (key: keyof FormErrors): boolean => {
 		return Object.values(errors[key]).some(value => value === true);
@@ -96,6 +104,12 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
+	const handleModalClose = (createdOrUpdatedButton: ButtonCreationPayload) => {
+		resetErrors('title');
+		onButtonCreatedOrUpdated(!!createdOrUpdatedButton.isTest);
+		modal.close();
+	};
+
 	const handleButtonCreateOrEdit = () => {
 		if (!currentButton.title) {
 			errors.title.required = true;
@@ -104,34 +118,19 @@ const ButtonModal = (props: Props) => {
 		}
 
 		currentButton.product_id = props.product_id;
+
 		if ('id' in currentButton) {
-			fetch(`/api/prisma/buttons?id=${currentButton.id}`, {
-				method: 'PUT',
-				body: JSON.stringify(currentButton)
-			}).finally(() => {
-				modal.close();
-				resetErrors('title');
-				setCurrentButton(defaultButton);
-				onButtonCreatedOrUpdated(!!currentButton.isTest);
-			});
+			updateButton.mutate(currentButton);
 		} else {
-			fetch(`/api/prisma/buttons`, {
-				method: 'POST',
-				body: JSON.stringify(currentButton)
-			}).finally(() => {
-				modal.close();
-				resetErrors('title');
-				setCurrentButton(defaultButton);
-				onButtonCreatedOrUpdated(!!currentButton.isTest);
-			});
+			createButton.mutate(currentButton);
 		}
 	};
 
-	const buttonCode = `<a href="https://voxusagers.numerique.gouv.fr/Demarches/3119?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=372389f25377e55b5531c373cec246ac">
-
+	const buttonCode = `
+		<a href="https://voxusagers.numerique.gouv.fr/Demarches/3119?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=372389f25377e55b5531c373cec246ac">
       <img src="https://voxusagers.numerique.gouv.fr/static/bouton-${buttonColor}.svg" alt="Je donne mon avis" />
-
-</a>`;
+		</a>
+	`;
 
 	const displayModalContent = (): JSX.Element => {
 		switch (modalType) {

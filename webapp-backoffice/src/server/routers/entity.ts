@@ -1,10 +1,9 @@
-import { entities } from './../../../prisma/seeds/entities';
 import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
+import { router, protectedProcedure } from '@/src/server/trpc';
 import { Prisma } from '@prisma/client';
 
 export const entityRouter = router({
-	getList: publicProcedure
+	getList: protectedProcedure
 		.input(
 			z.object({
 				numberPerPage: z.number(),

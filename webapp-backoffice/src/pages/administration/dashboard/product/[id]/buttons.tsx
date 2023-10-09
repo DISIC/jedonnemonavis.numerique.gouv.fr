@@ -14,6 +14,7 @@ import { getNbPages } from '@/src/utils/tools';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import React from 'react';
+import { trpc } from '@/src/utils/trpc';
 
 interface Props {
 	product: Product;
@@ -27,11 +28,8 @@ const modal = createModal({
 const ProductButtonsPage = (props: Props) => {
 	const { product } = props;
 
-	const [buttons, setButtons] = React.useState<PrismaButtonType[] | null>(null);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
-	const [count, setCount] = React.useState(0);
-	const [isLoading, setIsLoading] = React.useState(false);
 	const [modalType, setModalType] = React.useState<string>('');
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
@@ -40,19 +38,30 @@ const ProductButtonsPage = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
-	const retrieveButtons = React.useCallback(async () => {
-		setIsLoading(true);
-		const url: string = `/api/prisma/buttons?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isTest=${testFilter}`;
-		const response = await fetch(url);
-		const res = await response.json();
-		setButtons(res.data);
-		setCount(res.count);
-		setIsLoading(false);
-	}, [numberPerPage, currentPage, testFilter]);
+	const {
+		data: buttonsResult,
+		isLoading: isLoadingButtons,
+		refetch: refetchButtons
+	} = trpc.button.getList.useQuery(
+		{
+			numberPerPage,
+			page: currentPage,
+			isTest: testFilter
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
+				}
+			}
+		}
+	);
 
-	React.useEffect(() => {
-		retrieveButtons();
-	}, [retrieveButtons]);
+	const {
+		data: buttons,
+		metadata: { count: buttonsCount }
+	} = buttonsResult;
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
@@ -68,11 +77,11 @@ const ProductButtonsPage = (props: Props) => {
 
 	const onButtonCreatedOrUpdated = (isTest: boolean) => {
 		if (isTest) setTestFilter(true);
-		else retrieveButtons();
+		refetchButtons();
 		modal.close();
 	};
 
-	const nbPages = getNbPages(count, numberPerPage);
+	const nbPages = getNbPages(buttonsCount, numberPerPage);
 
 	return (
 		<ProductLayout product={product}>
@@ -117,7 +126,7 @@ const ProductButtonsPage = (props: Props) => {
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + buttons.length}
 							</span>{' '}
-							sur <span className={cx(classes.boldText)}>{count}</span>
+							sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
 						</p>
 					</div>
 				)}
@@ -153,7 +162,7 @@ const ProductButtonsPage = (props: Props) => {
 				</div> */}
 			</div>
 			<div className={cx(classes.buttonsContainer)}>
-				{!buttons || isLoading ? (
+				{isLoadingButtons ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
 					</div>
