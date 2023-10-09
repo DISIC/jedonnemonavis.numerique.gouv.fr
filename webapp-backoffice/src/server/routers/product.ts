@@ -22,7 +22,7 @@ export const productRouter = router({
 	getList: protectedProcedure
 		.input(
 			z.object({
-				numberPerPage: z.number().default(10),
+				numberPerPage: z.number(),
 				page: z.number().default(1),
 				sort: z.string().optional(),
 				search: z.string().optional()

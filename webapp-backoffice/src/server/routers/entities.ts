@@ -7,7 +7,7 @@ export const entityRouter = router({
 	getList: publicProcedure
 		.input(
 			z.object({
-				numberPerPage: z.number().default(10),
+				numberPerPage: z.number(),
 				page: z.number().default(1),
 				search: z.string().optional()
 			})
