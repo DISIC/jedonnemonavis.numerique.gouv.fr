@@ -1,13 +1,13 @@
 {
   "first_block": {
     "title": "I give my opinion",
-    "product": "Procedure",
-    "validate": "Validate"
+    "product": "Process",
+    "validate": "Submit"
   },
   "second_block": {
     "title": "Thank you!",
     "subtitle": "Can you tell us more?",
-    "validate": "Validate my feedback"
+    "validate": "Submit my opinion"
   },
   "smileys": {
     "good": "Very good",
@@ -16,29 +16,57 @@
   },
   "fields": {
     "satisfaction": {
-      "label": "How did this procedure go for you ?",
-      "hint": "This field is required."
+      "label": "How did this process go for you?",
+      "hint": "This field is mandatory."
     },
     "easy": {
-      "label": "Was it easy to use ?"
-    },
-    "comprehension": {
-      "label": "Was the language used easy to understand ?"
-    },
-    "difficulties": {
-      "label": "Did you encounter any difficulties ?",
+      "label": "According to the following answers, what suits you best:",
       "options": [
         {
-          "label": "Lack of information before starting the procedure"
+          "label": "The process was easy to complete"
         },
         {
-          "label": "The procedure did not work"
+          "label": "The process was neither easy nor difficult to complete"
         },
         {
-          "label": "Difficulty in submitting supporting documents"
+          "label": "The process was difficult to complete"
+        }
+      ]
+    },
+    "comprehension": {
+      "label": "What did you think of the language used?",
+      "options": [
+        {
+          "label": "Unclear, difficult to understand"
         },
         {
-          "label": "Lack of information about the next steps, timelines..."
+          "label": "Neither easy nor difficult to understand"
+        },
+        {
+          "label": "Clear, easy to understand"
+        }
+      ]
+    },
+    "difficulties": {
+      "label": "Did you encounter any difficulties?",
+      "options": [
+        {
+          "label": "No, I did not encounter any difficulties"
+        },
+        {
+          "label": "Yes, I lacked information before starting the process"
+        },
+        {
+          "label": "Yes, the process did not work"
+        },
+        {
+          "label": "Yes, the site did not display well on mobile"
+        },
+        {
+          "label": "Yes, I had difficulty attaching documents"
+        },
+        {
+          "label": "Yes, there was a lack of information about the follow-up to my request or process (timeframe, etc.)"
         },
         {
           "label": "Other"
@@ -46,29 +74,60 @@
       ]
     },
     "difficulties_verbatim": {
-      "label": "Can you specify what other difficulty you encountered ?",
+      "label": "Can you specify what other difficulties you encountered?",
       "hint": "Maximum 250 characters."
     },
-    "help": {
-      "label": "What kind of help did you need ?",
+    "contact": {
+      "label": "Did you try to contact the process service for help?",
       "options": [
         {
-          "label": "None"
+          "label": "No, I did not need to contact them"
         },
         {
-          "label": "A family member or friend",
-          "hint": "Family, friends..."
+          "label": "Yes, but I did not find how to contact them"
         },
         {
-          "label": "An organization"
+          "label": "Yes, I contacted them but could not reach them"
         },
         {
-          "label": "A government agent",
-          "hint": "Health, education, taxes, law enforcement, France services..."
+          "label": "Yes, I contacted them and they responded to me"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "How was the interaction with the process service?"
+    },
+    "contact_channels": {
+      "label": "By what means did you try to contact the process service? (multiple answers possible)",
+      "options": [
+        {
+          "label": "Phone"
         },
         {
-          "label": "Internet",
-          "hint": "Website, forum..."
+          "label": "Email or messaging"
+        },
+        {
+          "label": "Agency or counter"
+        },
+        {
+          "label": "Other"
+        }
+      ]
+    },
+    "help": {
+      "label": "Did you need any other help to complete this process?",
+      "options": [
+        {
+          "label": "No, I completed it without assistance"
+        },
+        {
+          "label": "Yes, I searched the internet (site, forum)"
+        },
+        {
+          "label": "Yes, I asked for help from a family member or friend"
+        },
+        {
+          "label": "Yes, I asked for help from an association"
         },
         {
           "label": "Other"
@@ -76,12 +135,12 @@
       ]
     },
     "help_verbatim": {
-      "label": "Can you specify what other help you needed ?",
+      "label": "Can you specify what other help you needed?",
       "hint": "Maximum 250 characters."
     },
     "verbatim": {
-      "label": "Would you like to tell us more ?",
-      "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this procedure, please contact the relevant service."
+      "label": "Would you like to tell us more?",
+      "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this process, contact the relevant service."
     }
   }
 }
