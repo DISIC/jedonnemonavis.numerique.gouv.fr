@@ -7,7 +7,7 @@ const createProductPayload = z.object({
 	isEssential: z.boolean().nullable(),
 	volume: z.number().nullable(),
 	urls: z.array(z.string()),
-	observatoire_id: z.number().optional()
+	observatoire_id: z.number().nullable()
 });
 
 export const productRouter = router({
