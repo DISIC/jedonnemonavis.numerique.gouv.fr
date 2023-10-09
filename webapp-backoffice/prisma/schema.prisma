@@ -84,7 +84,7 @@ model Button {
 model Product {
   id              Int           @id @default(autoincrement())
   title           String
-  entity          Entity?       @relation(fields: [entity_id], references: [id])
+  entity          Entity       @relation(fields: [entity_id], references: [id])
   entity_id       Int
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
