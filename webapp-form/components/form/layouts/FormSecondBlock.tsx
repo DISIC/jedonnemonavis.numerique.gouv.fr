@@ -1,12 +1,12 @@
-import { secondSection } from "@/utils/form";
-import { FormField, Opinion } from "@/utils/types";
-import { fr } from "@codegouvfr/react-dsfr";
-import { Button } from "@codegouvfr/react-dsfr/Button";
-import { useState } from "react";
-import { tss } from "tss-react/dsfr";
-import { Field } from "../elements/Field";
-import { SmileyInput } from "../elements/SmileyInput";
-import { useTranslation } from "next-i18next";
+import { secondSection } from '@/utils/form';
+import { FormField, Opinion } from '@/utils/types';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { Field } from '../elements/Field';
+import { SmileyInput } from '../elements/SmileyInput';
+import { useTranslation } from 'next-i18next';
 
 type Props = {
   opinion: Opinion;
@@ -22,13 +22,13 @@ export const FormSecondBlock = (props: Props) => {
 
   return (
     <div>
-      <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
-        {t("second_block.title")}
+      <h1 className={cx(classes.title, fr.cx('fr-mb-14v'))}>
+        {t('second_block.title')}
         <br />
-        {t("second_block.subtitle")}
+        {t('second_block.subtitle')}
       </h1>
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           e.preventDefault();
           onSubmit(tmpOpinion);
         }}
@@ -42,8 +42,8 @@ export const FormSecondBlock = (props: Props) => {
             />
           </div>
         ))}
-        <div className={fr.cx("fr-mt-8v")}>
-          <Button type="submit">{t("second_block.validate")}</Button>
+        <div className={fr.cx('fr-mt-8v')}>
+          <Button type="submit">{t('second_block.validate')}</Button>
         </div>
       </form>
     </div>
@@ -55,11 +55,11 @@ const useStyles = tss
   .withParams()
   .create(() => ({
     title: {
-      [fr.breakpoints.down("md")]: {
-        display: "none",
-      },
+      [fr.breakpoints.down('md')]: {
+        display: 'none'
+      }
     },
     field: {
-      marginBottom: fr.spacing("14v"),
-    },
+      marginBottom: fr.spacing('14v')
+    }
   }));

@@ -1,0 +1,146 @@
+{
+  "first_block": {
+    "title": "Doy mi opinión",
+    "product": "Proceso",
+    "validate": "Enviar"
+  },
+  "second_block": {
+    "title": "¡Gracias!",
+    "subtitle": "¿Puede decirnos más?",
+    "validate": "Enviar mi opinión"
+  },
+  "smileys": {
+    "good": "Muy bien",
+    "medium": "Regular",
+    "bad": "No muy bien"
+  },
+  "fields": {
+    "satisfaction": {
+      "label": "¿Cómo fue este proceso para ti?",
+      "hint": "Este campo es obligatorio."
+    },
+    "easy": {
+      "label": "Según las siguientes respuestas, ¿qué se adapta mejor a ti?",
+      "options": [
+        {
+          "label": "El proceso fue fácil de completar"
+        },
+        {
+          "label": "El proceso ni fue fácil ni difícil de completar"
+        },
+        {
+          "label": "El proceso fue difícil de completar"
+        }
+      ]
+    },
+    "comprehension": {
+      "label": "¿Qué opinas del lenguaje utilizado?",
+      "options": [
+        {
+          "label": "Poco claro, difícil de entender"
+        },
+        {
+          "label": "Ni fácil ni difícil de entender"
+        },
+        {
+          "label": "Claro, fácil de entender"
+        }
+      ]
+    },
+    "difficulties": {
+      "label": "¿Encontraste alguna dificultad?",
+      "options": [
+        {
+          "label": "No, no tuve dificultades"
+        },
+        {
+          "label": "Sí, me faltaba información antes de comenzar el proceso"
+        },
+        {
+          "label": "Sí, el proceso no funcionó"
+        },
+        {
+          "label": "Sí, el sitio no se mostraba bien en el móvil"
+        },
+        {
+          "label": "Sí, tuve dificultades para adjuntar documentos"
+        },
+        {
+          "label": "Sí, faltaban información sobre el seguimiento de mi solicitud o proceso (plazo, etc.)"
+        },
+        {
+          "label": "Otro"
+        }
+      ]
+    },
+    "difficulties_verbatim": {
+      "label": "¿Puedes especificar qué otras dificultades encontraste?",
+      "hint": "Máximo 250 caracteres."
+    },
+    "contact": {
+      "label": "¿Intentaste contactar al servicio del proceso para obtener ayuda?",
+      "options": [
+        {
+          "label": "No, no necesité contactarlos"
+        },
+        {
+          "label": "Sí, pero no encontré cómo contactarlos"
+        },
+        {
+          "label": "Sí, los contacté pero no pude comunicarme con ellos"
+        },
+        {
+          "label": "Sí, los contacté y me respondieron"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "¿Cómo fue la interacción con el servicio del proceso?"
+    },
+    "contact_channels": {
+      "label": "¿Por qué medio intentaste contactar al servicio del proceso? (respuestas múltiples posibles)",
+      "options": [
+        {
+          "label": "Teléfono"
+        },
+        {
+          "label": "Correo electrónico o mensajería"
+        },
+        {
+          "label": "Agencia o mostrador"
+        },
+        {
+          "label": "Otro"
+        }
+      ]
+    },
+    "help": {
+      "label": "¿Necesitaste alguna otra ayuda para completar este proceso?",
+      "options": [
+        {
+          "label": "No, lo completé sin ayuda"
+        },
+        {
+          "label": "Sí, busqué en internet (sitio, foro)"
+        },
+        {
+          "label": "Sí, pedí ayuda a un familiar o amigo"
+        },
+        {
+          "label": "Sí, pedí ayuda a una asociación"
+        },
+        {
+          "label": "Otro"
+        }
+      ]
+    },
+    "help_verbatim": {
+      "label": "¿Puedes especificar qué otra ayuda necesitaste?",
+      "hint": "Máximo 250 caracteres."
+    },
+    "verbatim": {
+      "label": "¿Quieres contarnos más?",
+      "hint": "No proporciones información personal aquí. Esto no es un formulario de contacto. Si tienes preguntas sobre este proceso, contacta al servicio correspondiente."
+    }
+  }
+}

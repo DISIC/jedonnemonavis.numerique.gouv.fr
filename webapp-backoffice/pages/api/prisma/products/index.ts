@@ -129,6 +129,13 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
+	const { id } = req.query;
+
+	if (id) {
+		const product = await getProduct(parseInt(id as string));
+		return res.status(200).json(product);
+	}
+
 	const currentUserToken = await getToken({
 		req,
 		secret: process.env.JWT_SECRET
@@ -141,36 +148,31 @@ export default async function handler(
 		return res.status(401).json({ msg: 'You shall not pass.' });
 
 	if (req.method === 'GET') {
-		const { id, sort, search, page, numberPerPage } = req.query;
-		if (id) {
-			const product = await getProduct(parseInt(id as string));
-			res.status(200).json(product);
-		} else {
-			const products = await getProducts(
-				parseInt(numberPerPage as string, 10) as number,
-				parseInt(page as string, 10) as number,
-				currentUserToken.email as string,
-				sort as string,
-				search as string
-			);
-			res.status(200).json(products);
-		}
+		const { sort, search, page, numberPerPage } = req.query;
+		const products = await getProducts(
+			parseInt(numberPerPage as string, 10) as number,
+			parseInt(page as string, 10) as number,
+			currentUserToken.email as string,
+			sort as string,
+			search as string
+		);
+		return res.status(200).json(products);
 	} else if (req.method === 'POST') {
 		const { userEmail } = req.query;
 		const data = JSON.parse(req.body);
 		const product = await createProduct(data, userEmail as string);
-		res.status(201).json(product);
+		return res.status(201).json(product);
 	} else if (req.method === 'PUT') {
 		const { id } = req.query;
 
 		const data = req.body;
 		const product = await updateProduct(parseInt(id as string), data);
-		res.status(200).json(product);
+		return res.status(200).json(product);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
 		const product = await deleteProduct(parseInt(id as string));
-		res.status(200).json(product);
+		return res.status(200).json(product);
 	} else {
-		res.status(400).json({ message: 'Unsupported method' });
+		return res.status(400).json({ message: 'Unsupported method' });
 	}
 }
