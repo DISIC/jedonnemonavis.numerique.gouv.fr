@@ -3,10 +3,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const prisma = new PrismaClient();
 
-export async function deleteUserOTP(id: string) {
+export async function deleteUserOTP(otp: string) {
 	await prisma.userOTP.delete({
 		where: {
-			id
+			code: otp
 		}
 	});
 }
@@ -41,7 +41,7 @@ export default async function handler(
 		else {
 			const now = new Date();
 			if (now.getTime() > userOTP.expiration_date.getTime()) {
-				deleteUserOTP(userOTP.id);
+				deleteUserOTP(userOTP.code);
 				return res.status(400).json({ message: 'Expired OTP' });
 			} else {
 				return res.status(200).json({ data: { id: userOTP.id } });

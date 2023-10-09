@@ -1,5 +1,8 @@
 import ProductCard from '@/components/dashboard/Product/ProductCard';
 import ProductModal from '@/components/dashboard/Product/ProductModal';
+import { Loader } from '@/components/ui/Loader';
+import { Pagination } from '@/components/ui/Pagination';
+import { getNbPages } from '@/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -16,21 +19,34 @@ const modal = createModal({
 });
 
 const DashBoard = () => {
-	const [products, setProducts] = React.useState<Product[]>([]);
+	const [products, setProducts] = React.useState<Product[] | null>(null);
+	const [isLoading, setIsLoading] = React.useState<boolean>(false);
+	const [count, setCount] = React.useState<number>(0);
 	const [entities, setEntities] = React.useState<Entity[]>([]);
 	const [filter, setFilter] = React.useState<string>('title');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
+	const [currentPage, setCurrentPage] = React.useState(1);
+	const [numberPerPage, _] = React.useState(10);
+
 	const { cx, classes } = useStyles();
 
 	const retrieveProducts = React.useCallback(async () => {
-		const res = await fetch(
-			'/api/prisma/products?sort=' + filter + '&search=' + validatedSearch
+		setIsLoading(true);
+		const response = await fetch(
+			`/api/prisma/products?${new URLSearchParams({
+				sort: filter,
+				search: validatedSearch,
+				page: currentPage.toString(),
+				numberPerPage: numberPerPage.toString()
+			})}`
 		);
-		const data = await res.json();
-		setProducts(data);
-	}, [filter, validatedSearch]);
+		const res = await response.json();
+		setProducts(res.data);
+		setCount(res.count);
+		setIsLoading(false);
+	}, [numberPerPage, currentPage, filter, validatedSearch]);
 
 	const retrieveOwners = async () => {
 		const res = await fetch('/api/prisma/entities');
@@ -44,7 +60,13 @@ const DashBoard = () => {
 
 	React.useEffect(() => {
 		retrieveProducts();
-	}, [validatedSearch, filter]);
+	}, [retrieveProducts, validatedSearch, filter]);
+
+	const handlePageChange = (pageNumber: number) => {
+		setCurrentPage(pageNumber);
+	};
+
+	const nbPages = getNbPages(count, numberPerPage);
 
 	const isOpen = useIsModalOpen(modal);
 
@@ -143,32 +165,84 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				<div className={cx(classes.productsContainer)}>
-					{products.map((product, index) => (
-						<ProductCard
-							product={product}
-							entity={
-								entities.find(
-									entity => product.entity_id === entity.id
-								) as Entity
-							}
-							key={index}
-						/>
-					))}
-					{products.length === 0 && (
-						<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-							<div
-								className={cx(
-									fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-									classes.textContainer
-								)}
-								role="status"
-							>
-								<p>Aucun produit trouvé</p>
-							</div>
+				{!products || isLoading ? (
+					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+						<Loader />
+					</div>
+				) : (
+					<div>
+						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+							{nbPages > 1 && (
+								<span className={fr.cx('fr-ml-0')}>
+									Produits numériques de{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + 1}
+									</span>{' '}
+									à{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + products.length}
+									</span>{' '}
+									de <span className={cx(classes.boldText)}>{count}</span>
+								</span>
+							)}
 						</div>
-					)}
-				</div>
+						<div
+							className={cx(
+								products.length === 0 ? classes.productsContainer : ''
+							)}
+						>
+							{products.map((product, index) => (
+								<ProductCard
+									product={product}
+									entity={
+										entities.find(
+											entity => product.entity_id === entity.id
+										) as Entity
+									}
+									key={index}
+								/>
+							))}
+							{products.length === 0 && (
+								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+									<div
+										className={cx(
+											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
+											classes.textContainer
+										)}
+										role="status"
+									>
+										<p>Aucun produit trouvé</p>
+									</div>
+								</div>
+							)}
+						</div>
+						<div
+							className={fr.cx(
+								'fr-grid-row--center',
+								'fr-grid-row',
+								'fr-mb-15w'
+							)}
+						>
+							{nbPages > 1 && (
+								<Pagination
+									showFirstLast
+									count={nbPages}
+									defaultPage={currentPage}
+									getPageLinkProps={pageNumber => ({
+										onClick: event => {
+											event.preventDefault();
+											handlePageChange(pageNumber);
+										},
+										href: '#',
+										classes: { link: fr.cx('fr-pagination__link') },
+										key: `pagination-link-product-${pageNumber}`
+									})}
+									className={fr.cx('fr-mt-1w')}
+								/>
+							)}
+						</div>
+					</div>
+				)}
 			</div>
 		</>
 	);
@@ -210,6 +284,9 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 				marginBottom: 0
 			}
 		}
+	},
+	boldText: {
+		fontWeight: 'bold'
 	}
 }));
 

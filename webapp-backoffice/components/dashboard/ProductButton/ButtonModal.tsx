@@ -28,14 +28,14 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: string;
 	button?: PrismaButtonType | null;
-	onButtonCreatedOrUpdated: () => void;
-	product_id: string;
+	onButtonCreatedOrUpdated: (isTest: boolean) => void;
+	product_id: number;
 }
 
 const defaultButton = {
 	title: '',
 	description: '',
-	product_id: '',
+	product_id: -1,
 	isTest: false
 };
 
@@ -111,7 +111,8 @@ const ButtonModal = (props: Props) => {
 			}).finally(() => {
 				modal.close();
 				resetErrors('title');
-				onButtonCreatedOrUpdated();
+				setCurrentButton(defaultButton);
+				onButtonCreatedOrUpdated(!!currentButton.isTest);
 			});
 		} else {
 			fetch(`/api/prisma/buttons`, {
@@ -120,7 +121,8 @@ const ButtonModal = (props: Props) => {
 			}).finally(() => {
 				modal.close();
 				resetErrors('title');
-				onButtonCreatedOrUpdated();
+				setCurrentButton(defaultButton);
+				onButtonCreatedOrUpdated(!!currentButton.isTest);
 			});
 		}
 	};
@@ -371,6 +373,7 @@ const ButtonModal = (props: Props) => {
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
+							setCurrentButton(defaultButton);
 							resetErrors('title');
 						}
 					},
@@ -386,6 +389,7 @@ const ButtonModal = (props: Props) => {
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
+							setCurrentButton(defaultButton);
 							resetErrors('title');
 						}
 					},

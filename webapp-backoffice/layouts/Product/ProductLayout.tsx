@@ -1,10 +1,10 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
-import { Product } from '@prisma/client';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
+import { Product } from '@prisma/client';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;

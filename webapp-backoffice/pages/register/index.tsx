@@ -11,28 +11,32 @@ type UserPresetInfos = {
 	firstName?: string;
 	lastName?: string;
 	email?: string;
+	inviteToken?: string;
 };
 
 export default function Register() {
 	const router = useRouter();
 
-	const { otp_id, registered, request } = router.query;
+	const { otp, email, inviteToken, registered, request } = router.query;
 
 	const { classes, cx } = useStyles();
 
-	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({});
+	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({
+		email: email as string,
+		inviteToken: inviteToken as string
+	});
 
 	useEffect(() => {
-		if (!!otp_id) {
+		if (!!otp) {
 			fetch(
-				`/api/auth/user?${new URLSearchParams({ otp_id: otp_id as string })}`
+				`/api/auth/user?${new URLSearchParams({ otp: otp as string })}`
 			).then(res => {
 				res.json().then(json => {
 					setUserPresetInfos(json.user);
 				});
 			});
 		}
-	}, [otp_id]);
+	}, [otp]);
 
 	return (
 		<div className={fr.cx('fr-container')}>
@@ -46,7 +50,7 @@ export default function Register() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h2 className={fr.cx('fr-mb-12v')}>Création de compte</h2>
-					{!registered && !otp_id && !request && (
+					{!registered && !otp && !request && (
 						<Alert
 							className={fr.cx('fr-mb-16v')}
 							closable
@@ -108,7 +112,7 @@ export default function Register() {
 						>
 							<RegisterForm
 								userPresetInfos={userPresetInfos}
-								otp_id={otp_id as string | undefined}
+								otp={otp as string | undefined}
 							/>
 						</div>
 					</div>

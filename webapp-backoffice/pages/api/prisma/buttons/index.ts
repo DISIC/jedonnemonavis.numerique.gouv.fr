@@ -9,7 +9,7 @@ export async function getButtons(
 	page: number,
 	sort?: string,
 	search?: string,
-	product_id?: string,
+	product_id?: number,
 	isTest?: boolean
 ) {
 	let orderBy: any = [
@@ -75,7 +75,7 @@ export async function getButtons(
 	return { data: buttons, count: count };
 }
 
-export async function getButton(id: string) {
+export async function getButton(id: number) {
 	const button = await prisma.button.findUnique({
 		where: {
 			id: id
@@ -91,7 +91,7 @@ export async function createButton(data: Omit<Button, 'id'>) {
 	return button;
 }
 
-export async function updateButton(id: string, data: Partial<Button>) {
+export async function updateButton(id: number, data: Partial<Button>) {
 	const dataWithoutId = { ...data, id: undefined };
 	const button = await prisma.button.update({
 		where: {
@@ -102,7 +102,7 @@ export async function updateButton(id: string, data: Partial<Button>) {
 	return button;
 }
 
-export async function deleteButton(id: string) {
+export async function deleteButton(id: number) {
 	const button = await prisma.button.delete({
 		where: {
 			id: id
@@ -127,7 +127,7 @@ export default async function handler(
 		const { id, sort, search, product_id, isTest, numberPerPage, page } =
 			req.query;
 		if (id) {
-			const button = await getButton(id.toString());
+			const button = await getButton(parseInt(id as string));
 			return res.status(200).json(button);
 		} else {
 			if (!numberPerPage || !page) {
@@ -140,7 +140,7 @@ export default async function handler(
 				parseInt(page as string, 10) as number,
 				sort as string,
 				search as string,
-				product_id as string,
+				parseInt(product_id as string),
 				isTest === 'true'
 			);
 			return res.status(200).json(buttons);
@@ -152,11 +152,11 @@ export default async function handler(
 	} else if (req.method === 'PUT') {
 		const data = req.body;
 		const { id } = req.query;
-		const button = await updateButton(id as string, JSON.parse(data));
+		const button = await updateButton(parseInt(id as string), JSON.parse(data));
 		return res.status(200).json(button);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
-		const button = await deleteButton(id as string);
+		const button = await deleteButton(parseInt(id as string));
 		return res.status(200).json(button);
 	} else {
 		return res.status(400).json({ message: 'Unsupported method' });

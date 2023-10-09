@@ -56,7 +56,7 @@ export const OTPForm = (props: Props) => {
 						res.json().then(json => {
 							router.push({
 								pathname: '/register',
-								query: { otp_id: json.data.id }
+								query: { otp }
 							});
 						});
 						break;

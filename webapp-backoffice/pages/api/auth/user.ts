@@ -13,10 +13,10 @@ export async function getUser(email: string) {
 	return user;
 }
 
-export async function getUserInfosFromOTP(otp_id: string) {
+export async function getUserInfosFromOTP(otp: string) {
 	const userOTP = await prisma.userOTP.findUnique({
 		where: {
-			id: otp_id
+			code: otp
 		},
 		include: {
 			user: true
@@ -34,11 +34,11 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	const { otp_id } = req.query;
+	const { otp } = req.query;
 
 	if (req.method === 'GET') {
-		if (otp_id) {
-			const userInfos = await getUserInfosFromOTP(otp_id as string);
+		if (otp) {
+			const userInfos = await getUserInfosFromOTP(otp as string);
 
 			if (!userInfos) return res.status(404).send('User not found from OTP');
 

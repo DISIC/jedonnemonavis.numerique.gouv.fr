@@ -4,7 +4,13 @@ import { getToken } from 'next-auth/jwt';
 
 const prisma = new PrismaClient();
 
-export async function getProducts(sort?: string, search?: string) {
+export async function getProducts(
+	numberPerPage: number,
+	page: number,
+	userEmail: string,
+	sort?: string,
+	search?: string
+) {
 	let orderBy: any = [
 		{
 			title: 'asc'
@@ -15,15 +21,19 @@ export async function getProducts(sort?: string, search?: string) {
 	let where: any = {
 		title: {
 			contains: ''
+		},
+		accessRights: {
+			some: {
+				user_email: userEmail,
+				status: 'carrier'
+			}
 		}
 	};
 
 	if (search) {
-		where = {
-			title: {
-				contains: search,
-				mode: 'insensitive'
-			}
+		const searchQuery = search.split(' ').join(' | ');
+		where.title = {
+			search: searchQuery
 		};
 	}
 
@@ -54,14 +64,19 @@ export async function getProducts(sort?: string, search?: string) {
 	const products = await prisma.product.findMany({
 		orderBy,
 		where,
+		take: numberPerPage,
+		skip: numberPerPage * (page - 1),
 		include: {
 			buttons: true
 		}
 	});
-	return products;
+
+	const count = await prisma.product.count({ where });
+
+	return { data: products, count };
 }
 
-export async function getProduct(id: string) {
+export async function getProduct(id: number) {
 	const product = await prisma.product.findUnique({
 		where: {
 			id: id
@@ -73,14 +88,25 @@ export async function getProduct(id: string) {
 	return product;
 }
 
-export async function createProduct(data: Omit<Product, 'id'>) {
+export async function createProduct(
+	data: Omit<Product, 'id'>,
+	userEmail: string
+) {
 	const product = await prisma.product.create({
 		data: data
 	});
+
+	await prisma.accessRight.create({
+		data: {
+			user_email: userEmail,
+			product_id: product.id
+		}
+	});
+
 	return product;
 }
 
-export async function updateProduct(id: string, data: Partial<Product>) {
+export async function updateProduct(id: number, data: Partial<Product>) {
 	const product = await prisma.product.update({
 		where: {
 			id: id
@@ -90,7 +116,7 @@ export async function updateProduct(id: string, data: Partial<Product>) {
 	return product;
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: number) {
 	const product = await prisma.product.delete({
 		where: {
 			id: id
@@ -103,36 +129,46 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	if (['POST', 'PUT', 'DELETE'].includes(req.method || '')) {
-		const token = await getToken({
-			req,
-			secret: process.env.JWT_SECRET
-		});
-		if (!token || (token.exp as number) > new Date().getTime())
-			return res.status(401).json({ msg: 'You shall not pass.' });
-	}
+	const currentUserToken = await getToken({
+		req,
+		secret: process.env.JWT_SECRET
+	});
+
+	if (
+		!currentUserToken ||
+		(currentUserToken.exp as number) > new Date().getTime()
+	)
+		return res.status(401).json({ msg: 'You shall not pass.' });
+
 	if (req.method === 'GET') {
-		const { id, sort, search } = req.query;
+		const { id, sort, search, page, numberPerPage } = req.query;
 		if (id) {
-			const product = await getProduct(id.toString());
+			const product = await getProduct(parseInt(id as string));
 			res.status(200).json(product);
 		} else {
-			const products = await getProducts(sort as string, search as string);
+			const products = await getProducts(
+				parseInt(numberPerPage as string, 10) as number,
+				parseInt(page as string, 10) as number,
+				currentUserToken.email as string,
+				sort as string,
+				search as string
+			);
 			res.status(200).json(products);
 		}
 	} else if (req.method === 'POST') {
+		const { userEmail } = req.query;
 		const data = JSON.parse(req.body);
-		const product = await createProduct(data);
+		const product = await createProduct(data, userEmail as string);
 		res.status(201).json(product);
 	} else if (req.method === 'PUT') {
 		const { id } = req.query;
 
 		const data = req.body;
-		const product = await updateProduct(id as string, data);
+		const product = await updateProduct(parseInt(id as string), data);
 		res.status(200).json(product);
 	} else if (req.method === 'DELETE') {
 		const { id } = req.query;
-		const product = await deleteProduct(id as string);
+		const product = await deleteProduct(parseInt(id as string));
 		res.status(200).json(product);
 	} else {
 		res.status(400).json({ message: 'Unsupported method' });

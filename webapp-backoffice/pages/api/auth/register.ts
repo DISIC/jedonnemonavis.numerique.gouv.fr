@@ -7,6 +7,7 @@ import {
 import { PrismaClient, User } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
+import { deleteUserOTP } from './otp';
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,27 @@ export async function registerUser(user: Omit<User, 'id'>) {
 	return { ...newUser, password: 'Nice try!' };
 }
 
+export async function makeRelationFromUserInvite(user: User) {
+	const userInvites = await prisma.accessRight.findMany({
+		where: {
+			user_email_invite: user.email
+		}
+	});
+
+	if (userInvites.length > 0) {
+		await prisma.accessRight.updateMany({
+			where: {
+				id: {
+					in: userInvites.map(invite => invite.id)
+				}
+			},
+			data: {
+				user_email: user.email
+			}
+		});
+	}
+}
+
 export async function generateValidationToken(user: User) {
 	const token = generateRandomString(32);
 	await prisma.userValidationToken.create({
@@ -52,11 +74,11 @@ export async function generateValidationToken(user: User) {
 
 export async function registerUserFromOTP(
 	user: Omit<User, 'id' | 'email' | 'observatoire_account'>,
-	otp_id: string
+	otp: string
 ) {
 	const userOTP = await prisma.userOTP.findUnique({
 		where: {
-			id: otp_id
+			code: otp
 		},
 		include: {
 			user: true
@@ -74,6 +96,8 @@ export async function registerUserFromOTP(
 		}
 	});
 
+	await deleteUserOTP(otp);
+
 	return { ...user, password: 'Nice try!' };
 }
 
@@ -81,7 +105,7 @@ export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse
 ) {
-	const { firstName, lastName, email, password, otp_id } = req.body;
+	const { firstName, lastName, email, password, otp, inviteToken } = req.body;
 
 	if (!firstName || !lastName || !email || !password)
 		return res.status(400).send('Some fields are missing');
@@ -92,15 +116,16 @@ export default async function handler(
 			.update(password)
 			.digest('hex');
 
-		if (!!otp_id) {
+		if (!!otp) {
 			const user = await registerUserFromOTP(
 				{
 					firstName,
 					lastName,
 					password: hashedPassword,
-					active: true
+					active: true,
+					observatoire_username: null
 				},
-				otp_id as string
+				otp as string
 			);
 
 			return res.status(200).json({ user });
@@ -120,7 +145,8 @@ export default async function handler(
 				email,
 				password: hashedPassword,
 				active: false,
-				observatoire_account: false
+				observatoire_account: false,
+				observatoire_username: null
 			});
 
 			if (!user)
@@ -128,16 +154,39 @@ export default async function handler(
 					.status(500)
 					.send('Internal server error while creating user');
 
-			const token = await generateValidationToken(user);
+			await makeRelationFromUserInvite(user);
 
-			await sendMail(
-				'Confirmez votre email',
-				user.email,
-				getRegisterEmailHtml(token),
-				`Cliquez sur ce lien pour valider votre compte : ${
-					process.env.NODEMAILER_BASEURL
-				}/register/validate?${new URLSearchParams({ token })}`
-			);
+			if (!inviteToken) {
+				const token = await generateValidationToken(user);
+
+				await sendMail(
+					'Confirmez votre email',
+					user.email,
+					getRegisterEmailHtml(token),
+					`Cliquez sur ce lien pour valider votre compte : ${
+						process.env.NODEMAILER_BASEURL
+					}/register/validate?${new URLSearchParams({ token })}`
+				);
+			} else {
+				const userInviteToken = await prisma.userInviteToken.findUnique({
+					where: {
+						token: inviteToken as string,
+						user_email: user.email
+					}
+				});
+
+				if (!userInviteToken) {
+					return res.status(404).send('Invite token not found for this user');
+				}
+
+				await prisma.userInviteToken.deleteMany({
+					where: {
+						user_email: user.email
+					}
+				});
+
+				await activateUser(user);
+			}
 
 			return res.status(200).json({ user });
 		}

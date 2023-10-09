@@ -1,10 +1,9 @@
 import ProductButtonCard from '@/components/dashboard/ProductButton/ProductButtonCard';
 import ProductLayout from '@/layouts/Product/ProductLayout';
-import { ProductWithButtons } from '@/pages/api/prisma/products/type';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { Button as PrismaButtonType } from '@prisma/client';
+import { Button as PrismaButtonType, Product } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
@@ -17,7 +16,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import React from 'react';
 
 interface Props {
-	product: ProductWithButtons;
+	product: Product;
 }
 
 const modal = createModal({
@@ -67,8 +66,9 @@ const ProductButtonsPage = (props: Props) => {
 		modal.open();
 	};
 
-	const onButtonCreatedOrUpdated = () => {
-		retrieveButtons();
+	const onButtonCreatedOrUpdated = (isTest: boolean) => {
+		if (isTest) setTestFilter(true);
+		else retrieveButtons();
 		modal.close();
 	};
 
@@ -128,6 +128,7 @@ const ProductButtonsPage = (props: Props) => {
 								label: 'Afficher les boutons de test',
 								nativeInputProps: {
 									name: 'test-buttons',
+									checked: testFilter,
 									onChange: e => {
 										setTestFilter(e.currentTarget.checked);
 										setCurrentPage(1);

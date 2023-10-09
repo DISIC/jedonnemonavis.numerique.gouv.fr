@@ -1,10 +1,11 @@
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
+	previewFeatures = ["fullTextSearch"]
 }
 
 enum RequestMode {
@@ -12,74 +13,104 @@ enum RequestMode {
   superuser
 }
 
+enum RightAccessStatus {
+  carrier
+  removed
+}
+
 // Next auth
 model User {
-  id                   String                @id @default(auto()) @map("_id") @db.ObjectId
-  firstName            String?
-  lastName             String?
-  active               Boolean               @default(false)
-  observatoire_account Boolean               @default(false)
-  email                String                @unique
-  password             String
-  UserOTPs             UserOTP[]
-  UserValidationTokens UserValidationToken[]
-  UserRequests         UserRequest[]
+  id                    Int                   @id @default(autoincrement())
+  firstName             String?
+  lastName              String?
+  active                Boolean               @default(false)
+  observatoire_account  Boolean               @default(false)
+  observatoire_username String?
+  email                 String                @unique
+  password              String
+  UserOTPs              UserOTP[]
+  UserValidationTokens  UserValidationToken[]
+  UserRequests          UserRequest[]
+  accessRights          AccessRight[]
 }
 
 model UserRequest {
-  id      String      @id @default(auto()) @map("_id") @db.ObjectId
+  id      Int         @id @default(autoincrement())
   user    User        @relation(fields: [user_id], references: [id])
-  user_id String      @db.ObjectId
+  user_id Int         @unique
   reason  String
   mode    RequestMode
 }
 
 model UserOTP {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  id              Int      @id @default(autoincrement())
   user            User     @relation(fields: [user_id], references: [id])
-  user_id         String   @db.ObjectId
+  user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
 }
 
 model UserValidationToken {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  id      Int    @id @default(autoincrement())
   user    User   @relation(fields: [user_id], references: [id])
-  user_id String @db.ObjectId
+  user_id Int    @unique
   token   String @unique
 }
 
+model UserInviteToken {
+  id         Int    @id @default(autoincrement())
+  user_email String
+  token      String @unique
+}
+
 model Entity {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  id       Int       @id @default(autoincrement())
   name     String    @unique
+  acronym  String
   products Product[]
 }
 
 model Button {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String   @unique
+  id          Int      @id @default(autoincrement())
+  title       String
   description String?
-  product     Product? @relation(fields: [product_id], references: [id])
   isTest      Boolean? @default(false)
-  product_id  String   @db.ObjectId
+  product     Product? @relation(fields: [product_id], references: [id])
+  product_id  Int
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 }
 
 model Product {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String   @unique
-  entity      Entity?  @relation(fields: [entity_id], references: [id])
-  entity_id   String   @db.ObjectId
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  isEssential Boolean?
-  urls        String[]
-  volume      Int?
-  buttons     Button[]
+  id              Int           @id @default(autoincrement())
+  title           String
+  entity          Entity       @relation(fields: [entity_id], references: [id])
+  entity_id       Int
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  isEssential     Boolean?      @default(false)
+  urls            String[]
+  volume          Int?
+  observatoire_id Int?          @unique
+  buttons         Button[]
+  accessRights    AccessRight[]
+}
+
+model AccessRight {
+  id         Int     @id @default(autoincrement())
+  user       User?   @relation(fields: [user_email], references: [email])
+  user_email String?
+  user_email_invite String?
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id Int
+
+  status RightAccessStatus @default(carrier)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model WhiteListedDomain {
-  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  id     Int    @id @default(autoincrement())
   domain String @unique
 }

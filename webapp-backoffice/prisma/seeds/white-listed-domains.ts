@@ -433,7 +433,6 @@ export const whiteListedDomains = [
 	{ domain: 'inpi.fr' },
 	{ domain: 'pole-emploi.fr' },
 	{ domain: 'ac-cned.fr' },
-	{ domain: 'developpement-durable.gouv.fr' },
 	{ domain: 'ccmsa.msa.fr' },
 	{ domain: 'caissedesdepots.fr' },
 	{ domain: 'urssaf.fr' },

@@ -4,7 +4,7 @@ import { activateUser } from './register';
 
 const prisma = new PrismaClient();
 
-export async function deleteUserValidationToken(id: string) {
+export async function deleteUserValidationToken(id: number) {
 	await prisma.userValidationToken.delete({
 		where: {
 			id

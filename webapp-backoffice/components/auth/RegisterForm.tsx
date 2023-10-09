@@ -16,7 +16,7 @@ import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
 
 type Props = {
 	userPresetInfos?: UserInfos;
-	otp_id?: string;
+	otp?: string;
 };
 
 export type UserInfos = {
@@ -24,6 +24,7 @@ export type UserInfos = {
 	lastName?: string;
 	email?: string;
 	password?: string;
+	inviteToken?: string;
 };
 
 type FormErrors = {
@@ -46,7 +47,7 @@ const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
 const regexAtLeastOneNumber = /\d/;
 
 export const RegisterForm = (props: Props) => {
-	const { otp_id, userPresetInfos } = props;
+	const { otp, userPresetInfos } = props;
 
 	const router = useRouter();
 
@@ -176,7 +177,7 @@ export const RegisterForm = (props: Props) => {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ ...userInfos, otp_id: otp_id as string })
+			body: JSON.stringify({ ...userInfos, otp: otp as string })
 		}).then(res => {
 			if (res.status === 200)
 				res.json().then(json => {
@@ -211,7 +212,12 @@ export const RegisterForm = (props: Props) => {
 	}
 
 	if (registered) {
-		return <RegisterValidationMessage mode={registered} />;
+		return (
+			<RegisterValidationMessage
+				mode={registered}
+				isUserInvited={userInfos.inviteToken !== undefined}
+			/>
+		);
 	}
 
 	return (
@@ -275,7 +281,7 @@ export const RegisterForm = (props: Props) => {
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
-					disabled={!!otp_id}
+					disabled={!!otp}
 					nativeInputProps={{
 						onChange: e => {
 							setUserInfos({ ...userInfos, email: e.target.value });
