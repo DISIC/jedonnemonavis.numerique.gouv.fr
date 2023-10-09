@@ -1,10 +1,6 @@
-import { GetServerSideProps, GetServerSidePropsContext } from 'next';
-import { PrismaClient, Product } from '@prisma/client';
+import { GetServerSideProps } from 'next';
+import { PrismaClient } from '@prisma/client';
 import { getToken } from 'next-auth/jwt';
-
-const ProductPage = () => {
-	return;
-};
 
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
@@ -35,7 +31,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		where: {
 			user_email: currentUserToken.email as string,
 			product_id: parseInt(id as string),
-			status: "carrier"
+			status: 'carrier'
 		}
 	});
 
@@ -54,5 +50,3 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	};
 };
-
-export default ProductPage;

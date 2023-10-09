@@ -1486,6 +1486,15 @@
   dependencies:
     "@prisma/engines-version" "5.4.1-1.2f302df92bd8945e20ad4595a73def5b96afa54f"
 
+"@prisma/debug@5.4.2":
+  "integrity" "sha512-YRRi7beaX/sAQs0WQ/Y0LndfWynyodJKO0qF0Vj/KQ8aynmllpL7Hahdm4MVEy6eDPeoX7FWu/otkHRGKWmKSQ=="
+  "resolved" "https://registry.npmjs.org/@prisma/debug/-/debug-5.4.2.tgz"
+  "version" "5.4.2"
+  dependencies:
+    "@types/debug" "4.1.9"
+    "debug" "4.3.4"
+    "strip-ansi" "6.0.1"
+
 "@prisma/engines-version@5.4.1-1.2f302df92bd8945e20ad4595a73def5b96afa54f":
   "integrity" "sha512-+nUQM/y8C+1GG5Ioeqcu6itFslCfxvQSAUVSMC9XM2G2Fcq0F4Afnp6m0pXF6X6iUBWen7jZBPmM9Qlq4Nr3/A=="
   "resolved" "https://registry.npmjs.org/@prisma/engines-version/-/engines-version-5.4.1-1.2f302df92bd8945e20ad4595a73def5b96afa54f.tgz"
@@ -1495,6 +1504,16 @@
   "integrity" "sha512-vJTdY4la/5V3N7SFvWRmSMUh4mIQnyb/MNoDjzVbh9iLmEC+uEykj/1GPviVsorvfz7DbYSQC4RiwmlEpTEvGA=="
   "resolved" "https://registry.npmjs.org/@prisma/engines/-/engines-5.4.1.tgz"
   "version" "5.4.1"
+
+"@prisma/generator-helper@^5.1.1":
+  "integrity" "sha512-UC2W3ZUs87jbdEOCmsQfCyGeuLA0oosAKgS+0vTCoZWnKUPGvMNxMqNPL08rpXTc1vwUFvl09R76ZVC3Zm7PHw=="
+  "resolved" "https://registry.npmjs.org/@prisma/generator-helper/-/generator-helper-5.4.2.tgz"
+  "version" "5.4.2"
+  dependencies:
+    "@prisma/debug" "5.4.2"
+    "@types/cross-spawn" "6.0.3"
+    "cross-spawn" "7.0.3"
+    "kleur" "4.1.5"
 
 "@puppeteer/browsers@0.5.0":
   "integrity" "sha512-Uw6oB7VvmPRLE4iKsjuOh8zgDabhNX67dzo8U/BB0f9527qx+4eeUs+korU98OhG5C4ubg7ufBgVi63XYwS6TQ=="
@@ -1633,6 +1652,20 @@
   "resolved" "https://registry.npmjs.org/@tsconfig/node16/-/node16-1.0.4.tgz"
   "version" "1.0.4"
 
+"@types/cross-spawn@6.0.3":
+  "integrity" "sha512-BDAkU7WHHRHnvBf5z89lcvACsvkz/n7Tv+HyD/uW76O29HoH1Tk/W6iQrepaZVbisvlEek4ygwT8IW7ow9XLAA=="
+  "resolved" "https://registry.npmjs.org/@types/cross-spawn/-/cross-spawn-6.0.3.tgz"
+  "version" "6.0.3"
+  dependencies:
+    "@types/node" "*"
+
+"@types/debug@4.1.9":
+  "integrity" "sha512-8Hz50m2eoS56ldRlepxSBa6PWEVCtzUo/92HgLc2qTMnotJNIm7xP+UZhyWoYsyOdd5dxZ+NZLb24rsKyFs2ow=="
+  "resolved" "https://registry.npmjs.org/@types/debug/-/debug-4.1.9.tgz"
+  "version" "4.1.9"
+  dependencies:
+    "@types/ms" "*"
+
 "@types/geojson@^1.0.0", "@types/geojson@^7946.0.0 || ^1.0.0":
   "integrity" "sha512-Xqg/lIZMrUd0VRmSRbCAewtwGZiAk3mEUDvV4op1tGl+LvyPcb/MIOSxTl9z+9+J+R4/vpjiCAT4xeKzH9ji1w=="
   "resolved" "https://registry.npmjs.org/@types/geojson/-/geojson-1.0.6.tgz"
@@ -1642,6 +1675,11 @@
   "integrity" "sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ=="
   "resolved" "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz"
   "version" "0.0.29"
+
+"@types/ms@*":
+  "integrity" "sha512-xPSg0jm4mqgEkNhowKgZFBNtwoEwF6gJ4Dhww+GFpm3IgtNseHQZ5IqdNwnquZEoANxyDAKDRAdVo4Z72VvD/g=="
+  "resolved" "https://registry.npmjs.org/@types/ms/-/ms-0.7.32.tgz"
+  "version" "0.7.32"
 
 "@types/node@*", "@types/node@20.5.7":
   "integrity" "sha512-dP7f3LdZIysZnmvP3ANJYTSwg+wLLl8p7RqniVlV7j+oXSXAbt9h0WIBFmJy5inWZoX9wZN6eXx+YXd9Rh3RBA=="
@@ -2264,6 +2302,11 @@
   "resolved" "https://registry.npmjs.org/clsx/-/clsx-2.0.0.tgz"
   "version" "2.0.0"
 
+"code-block-writer@^12.0.0":
+  "integrity" "sha512-q4dMFMlXtKR3XNBHyMHt/3pwYNA69EDk00lloMOaaUMKPUXBw6lpXtbu3MMVG6/uOihGnRDOlkyqsONEUj60+w=="
+  "resolved" "https://registry.npmjs.org/code-block-writer/-/code-block-writer-12.0.0.tgz"
+  "version" "12.0.0"
+
 "color-convert@^1.9.0":
   "integrity" "sha512-QfAUtd+vFdAtFQcC8CCyYt1fYWxSqAiK2cSD6zDB8N3cpsEBAvRxp9zOGg6G/SHHJYAT88/az/IuDGALsNVbGg=="
   "resolved" "https://registry.npmjs.org/color-convert/-/color-convert-1.9.3.tgz"
@@ -2411,7 +2454,7 @@
   dependencies:
     "node-fetch" "2.6.7"
 
-"cross-spawn@^7.0.2", "cross-spawn@^7.0.3":
+"cross-spawn@^7.0.2", "cross-spawn@^7.0.3", "cross-spawn@7.0.3":
   "integrity" "sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w=="
   "resolved" "https://registry.npmjs.org/cross-spawn/-/cross-spawn-7.0.3.tgz"
   "version" "7.0.3"
@@ -3985,6 +4028,11 @@
   dependencies:
     "json-buffer" "3.0.1"
 
+"kleur@4.1.5":
+  "integrity" "sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ=="
+  "resolved" "https://registry.npmjs.org/kleur/-/kleur-4.1.5.tgz"
+  "version" "4.1.5"
+
 "language-subtag-registry@~0.3.2":
   "integrity" "sha512-tN0MCzyWnoz/4nHS6uxdlFWoUZT7ABptwKPQ52Ea7URk6vll88bWBVhodtnlfEuCcKWNGoc+uGbw1cwa9IKh/w=="
   "resolved" "https://registry.npmjs.org/language-subtag-registry/-/language-subtag-registry-0.3.22.tgz"
@@ -5387,7 +5435,7 @@
   dependencies:
     "ansi-regex" "^4.1.0"
 
-"strip-ansi@^6.0.0", "strip-ansi@^6.0.1":
+"strip-ansi@^6.0.0", "strip-ansi@^6.0.1", "strip-ansi@6.0.1":
   "integrity" "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="
   "resolved" "https://registry.npmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz"
   "version" "6.0.1"
@@ -6091,10 +6139,20 @@
   "resolved" "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz"
   "version" "0.1.0"
 
-"zod@^3.22.4":
-  "integrity" "sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg=="
-  "resolved" "https://registry.npmjs.org/zod/-/zod-3.22.4.tgz"
-  "version" "3.22.4"
+"zod-prisma-types@^2.7.9":
+  "integrity" "sha512-JgPN32d/Wm6/E61oHXek2jDT6VxBpKVPmLom7585SmdCyj+xb+OAg8O3G0BLU+gWNiC+Eyt3blo1S/8W9sIaxA=="
+  "resolved" "https://registry.npmjs.org/zod-prisma-types/-/zod-prisma-types-2.7.9.tgz"
+  "version" "2.7.9"
+  dependencies:
+    "@prisma/generator-helper" "^5.1.1"
+    "code-block-writer" "^12.0.0"
+    "lodash" "^4.17.21"
+    "zod" "^3.21.1"
+
+"zod@^3.21.1":
+  "integrity" "sha512-+dTu2m6gmCbO9Ahm4ZBDapx2O6ZY9QSPXst2WXjcznPMwf2YNpn3RevLx4KkZp1OPW/ouFcoBtBzFz/LeY69oA=="
+  "resolved" "https://registry.npmjs.org/zod/-/zod-3.21.1.tgz"
+  "version" "3.21.1"
 
 "zod@3.21.4":
   "integrity" "sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw=="

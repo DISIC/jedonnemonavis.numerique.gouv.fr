@@ -1,14 +1,6 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-
-const createProductPayload = z.object({
-	title: z.string(),
-	entity_id: z.number(),
-	isEssential: z.boolean().nullable(),
-	volume: z.number().nullable(),
-	urls: z.array(z.string()),
-	observatoire_id: z.number().nullable()
-});
+import { ProductUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 
 export const productRouter = router({
 	getById: publicProcedure.input(z.number()).query(({ ctx, input }) => {
@@ -97,7 +89,7 @@ export const productRouter = router({
 		}),
 
 	create: protectedProcedure
-		.input(createProductPayload)
+		.input(ProductUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
 
