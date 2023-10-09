@@ -107,7 +107,7 @@ const ProductAccessCard = (props: Props) => {
 							}}
 						>
 							{accessRight.user === null && (
-								<MenuItem onClick={() => onButtonClick('resend-email')}>
+								<MenuItem onClick={() => onButtonClick('resend-email', accessRight)}>
 									Renvoyer l'e-mail d'invitation
 								</MenuItem>
 							)}

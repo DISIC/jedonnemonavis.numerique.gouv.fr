@@ -68,8 +68,18 @@ const AccessManagement = (props: Props) => {
 		if (accessRight) {
 			setCurrentAccessRight(accessRight);
 		}
-		setIsModalSubmitted(false);
+
 		setModalType(modalType);
+
+		if (modalType == 'resend-email') {
+			const res = fetch(
+				`/api/prisma/accessRight/resend-email?user_email=${accessRight?.user_email_invite}`,
+			);
+			setIsModalSubmitted(true);
+			return
+		}
+
+		setIsModalSubmitted(false);
 		modal.open();
 	};
 
@@ -189,7 +199,7 @@ const AccessManagement = (props: Props) => {
 							},
 							href: '#',
 							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination-link-access-right-${pageNumber}`
+							key: `pagination - link - access - right - ${pageNumber}`
 						})}
 						className={fr.cx('fr-mt-1w')}
 					/>
