@@ -92,10 +92,23 @@ export async function checkIfAccessRightExists(
 	});
 }
 
-export async function createAccessRight(userEmail: string, productId: number) {
+export async function checkIfUserExists(userEmail: string) {
+	return await prisma.user.findFirst({
+		where: {
+			email: userEmail
+		}
+	});
+}
+
+export async function createAccessRight(
+	userEmail: string,
+	productId: number,
+	userExists: boolean
+) {
 	const newAccessRight = await prisma.accessRight.create({
 		data: {
-			user_email: userEmail,
+			user_email: userExists ? userEmail : null,
+			user_email_invite: !userExists ? userEmail : null,
 			product_id: productId
 		},
 		include: {
@@ -151,17 +164,20 @@ export default async function handler(
 		const { product_id } = req.query;
 		const data = JSON.parse(req.body);
 
-		const userAlreadyExists = checkIfAccessRightExists(
+		const accessRightAlreadyExists = checkIfAccessRightExists(
 			data.email as string,
 			parseInt(product_id as string)
 		);
 
-		if (!userAlreadyExists)
-			return res.status(409).json({ message: 'User already exists' });
+		if (!accessRightAlreadyExists)
+			return res.status(409).json({ message: 'Access Right already exists' });
+
+		const user = await checkIfUserExists(data.email as string);
 
 		const accessRight = await createAccessRight(
 			data.email as string,
-			parseInt(product_id as string)
+			parseInt(product_id as string),
+			user !== null
 		);
 		return res.status(201).json(accessRight);
 	} else {

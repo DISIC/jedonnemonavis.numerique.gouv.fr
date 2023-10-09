@@ -77,12 +77,12 @@ const AccessManagement = (props: Props) => {
 		switch (modalType) {
 			case 'add':
 				if (currentAccessRight?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${currentAccessRight?.user_email}.`;
+					return `Un e-mail d’invitation a été envoyé à ${currentAccessRight?.user_email ? currentAccessRight?.user_email : currentAccessRight?.user_email_invite}.`;
 				} else {
 					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été ajouté comme porteur.`;
 				}
 			case 'resend-email':
-				return `Un e-mail d’invitation a été renvoyé à ${currentAccessRight?.user_email}.`;
+				return `Un e-mail d’invitation a été renvoyé à ${currentAccessRight?.user_email ? currentAccessRight?.user_email : currentAccessRight?.user_email_invite}.`;
 			case 'remove':
 				return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été retiré comme porteur ou porteuse de ce produit numérique.`;
 		}

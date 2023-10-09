@@ -39,6 +39,27 @@ export async function registerUser(user: Omit<User, 'id'>) {
 	return { ...newUser, password: 'Nice try!' };
 }
 
+export async function makeRelationFromUserInvite(user: User) {
+	const userInvites = await prisma.accessRight.findMany({
+		where: {
+			user_email_invite: user.email
+		}
+	});
+
+	if (userInvites.length > 0) {
+		await prisma.accessRight.updateMany({
+			where: {
+				id: {
+					in: userInvites.map(invite => invite.id)
+				}
+			},
+			data: {
+				user_email: user.email
+			}
+		});
+	}
+}
+
 export async function generateValidationToken(user: User) {
 	const token = generateRandomString(32);
 	await prisma.userValidationToken.create({
@@ -133,6 +154,8 @@ export default async function handler(
 				return res
 					.status(500)
 					.send('Internal server error while creating user');
+
+			await makeRelationFromUserInvite(user);
 
 			if (!inviteToken) {
 				const token = await generateValidationToken(user);

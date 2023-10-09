@@ -53,7 +53,7 @@ const ProductAccessCard = (props: Props) => {
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<span className={cx(classes.userEmail)}>
-							{accessRight.user_email}
+							{accessRight?.user_email ? accessRight?.user_email : accessRight?.user_email_invite}
 						</span>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
@@ -74,8 +74,8 @@ const ProductAccessCard = (props: Props) => {
 							{accessRight.user === null
 								? 'Invité'
 								: accessRight.status === 'carrier'
-								? 'Porteur'
-								: 'Retiré'}
+									? 'Porteur'
+									: 'Retiré'}
 						</Badge>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
