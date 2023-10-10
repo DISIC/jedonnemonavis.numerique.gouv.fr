@@ -39,10 +39,6 @@ export default function Register() {
 		}
 	}, [validUser]);
 
-	// useEffect(() => {
-	// 	if (token) validateUser.mutate({ token: token as string });
-	// }, [token]);
-
 	const displayContent = () => {
 		if (!token) return <p>Votre lien est invalide</p>;
 

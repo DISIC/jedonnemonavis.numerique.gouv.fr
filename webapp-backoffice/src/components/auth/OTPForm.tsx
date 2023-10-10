@@ -1,3 +1,4 @@
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import {
 	PasswordInput,
@@ -37,35 +38,24 @@ export const OTPForm = (props: Props) => {
 		setErrors(defaultErrors);
 	};
 
-	const checkOTP = () => {
-		fetch(
-			`/api/auth/otp?${new URLSearchParams({
-				email,
-				otp
-			})}`
-		)
-			.then(res => {
-				switch (res.status) {
-					case 404:
-						setErrors({ ...errors, otpInvalid: true });
-						break;
-					case 400:
-						setErrors({ ...errors, otpExpired: true });
-						break;
-					case 200:
-						res.json().then(json => {
-							router.push({
-								pathname: '/register',
-								query: { otp }
-							});
-						});
-						break;
-				}
-			})
-			.catch(e => {
-				console.error('error : ', e);
+	const checkOTP = trpc.user.getOtp.useMutation({
+		onSuccess: () => {
+			router.push({
+				pathname: '/register',
+				query: { otp }
 			});
-	};
+		},
+		onError: error => {
+			switch (error.data?.httpStatus) {
+				case 404:
+					setErrors({ ...errors, otpInvalid: true });
+					break;
+				case 400:
+					setErrors({ ...errors, otpExpired: true });
+					break;
+			}
+		}
+	});
 
 	const getPasswordInputMessages = (): {
 		severity: PasswordInputProps.Severity;
@@ -95,7 +85,10 @@ export const OTPForm = (props: Props) => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
-					checkOTP();
+					checkOTP.mutate({
+						email,
+						otp
+					});
 				}}
 			>
 				<PasswordInput

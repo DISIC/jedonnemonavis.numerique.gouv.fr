@@ -153,10 +153,10 @@ export const userRouter = router({
 
 			newUser.password = hashedPassword;
 
-			if (!!otp) {
+			if (otp != undefined) {
 				const user = await registerUserFromOTP(
 					ctx.prisma,
-					{ ...newUser, observatoire_account: true },
+					{ ...newUser, active: true, observatoire_account: true },
 					otp as string
 				);
 
@@ -300,6 +300,104 @@ export const userRouter = router({
 				});
 			} else {
 				return { data: user, metadata: { statusCode: 200 } };
+			}
+		}),
+
+	me: publicProcedure
+		.input(z.object({ otp: z.string().optional() }))
+		.query(async ({ ctx, input }) => {
+			const { otp } = input;
+
+			if (otp) {
+				const userOTP = await ctx.prisma.userOTP.findUnique({
+					where: {
+						code: otp
+					},
+					include: {
+						user: {
+							select: {
+								firstName: true,
+								lastName: true,
+								email: true
+							}
+						}
+					}
+				});
+
+				if (!userOTP?.user)
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'User not found from OTP'
+					});
+
+				return { data: userOTP.user };
+			} else {
+				const session = ctx.session;
+
+				if (!session) {
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'Unauthorized'
+					});
+				}
+
+				if (!session.user) {
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'User not found from session'
+					});
+				}
+
+				const user = await ctx.prisma.user.findUnique({
+					where: {
+						email: session.user.email as string
+					}
+				});
+
+				if (!user)
+					throw new TRPCError({
+						code: 'NOT_FOUND',
+						message: 'User not found'
+					});
+
+				return { data: user };
+			}
+		}),
+
+	getOtp: publicProcedure
+		.input(z.object({ email: z.string(), otp: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { email, otp } = input;
+
+			const userOTP = await ctx.prisma.userOTP.findUnique({
+				where: {
+					code: otp,
+					user: {
+						email: email
+					}
+				}
+			});
+
+			if (!userOTP) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Invalid OTP'
+				});
+			} else {
+				const now = new Date();
+				if (now.getTime() > userOTP.expiration_date.getTime()) {
+					await ctx.prisma.userOTP.delete({
+						where: {
+							code: otp
+						}
+					});
+					throw new TRPCError({
+						code: 'BAD_REQUEST',
+						message: 'Expired OTP'
+					});
+				} else {
+					return { data: { id: userOTP.id } };
+				}
 			}
 		})
 });

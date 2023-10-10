@@ -1,4 +1,5 @@
 import { RegisterForm } from '@/src/components/auth/RegisterForm';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -26,17 +27,15 @@ export default function Register() {
 		inviteToken: inviteToken as string
 	});
 
+	const { data: getCurrentUser } = trpc.user.me.useQuery(
+		{ otp: otp as string },
+		{ enabled: !!otp }
+	);
+
 	useEffect(() => {
-		if (!!otp) {
-			fetch(
-				`/api/auth/user?${new URLSearchParams({ otp: otp as string })}`
-			).then(res => {
-				res.json().then(json => {
-					setUserPresetInfos(json.user);
-				});
-			});
-		}
-	}, [otp]);
+		if (getCurrentUser?.data)
+			setUserPresetInfos(getCurrentUser.data as UserPresetInfos);
+	}, [getCurrentUser?.data]);
 
 	return (
 		<div className={fr.cx('fr-container')}>
