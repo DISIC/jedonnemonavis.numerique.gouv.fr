@@ -9,3 +9,6 @@ services:
       POSTGRES_DB: jdma
     ports:
       - '5433:5432'
+
+networks:
+  jdma:
