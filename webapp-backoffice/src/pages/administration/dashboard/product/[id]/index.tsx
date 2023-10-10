@@ -2,6 +2,10 @@ import { GetServerSideProps } from 'next';
 import { PrismaClient } from '@prisma/client';
 import { getToken } from 'next-auth/jwt';
 
+const ProductPage = () => {
+	return;
+};
+
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
 	const prisma = new PrismaClient();
@@ -50,3 +54,5 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	};
 };
+
+export default ProductPage;
