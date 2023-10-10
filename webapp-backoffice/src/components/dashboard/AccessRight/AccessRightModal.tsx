@@ -4,6 +4,7 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import type { AccessRightUserWithUsers } from '@/src/pages/api/prisma/accessRight/type';
+import { trpc } from '@/src/utils/trpc';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -42,6 +43,8 @@ const ButtonModal = (props: Props) => {
 		setCurrentAccessRight
 	} = props;
 
+	const utils = trpc.useContext();
+
 	const [email, setEmail] = React.useState<string>('');
 	const [errorStatus, setErrorStatus] = React.useState<number>();
 
@@ -50,36 +53,38 @@ const ButtonModal = (props: Props) => {
 		setErrorStatus(undefined);
 	}, [isOpen]);
 
-	async function handleModalSubmit(email?: string) {
+	const createAccessRight = trpc.accessRight.create.useMutation({
+		onSuccess: result => {
+			utils.accessRight.getList.invalidate();
+			setCurrentAccessRight(result.data);
+			setIsModalSubmitted(true);
+			modal.close();
+		},
+		onError: error => {
+			setErrorStatus(error.data?.httpStatus);
+		}
+	});
+
+	const updateAccessRight = trpc.accessRight.update.useMutation({
+		onSuccess: () => {
+			utils.accessRight.getList.invalidate();
+			setIsModalSubmitted(true);
+			modal.close();
+		}
+	});
+
+	function handleModalSubmit(email?: string) {
 		if (modalType === 'add' && email !== undefined) {
-			const res = await fetch(
-				`/api/prisma/accessRight?product_id=${productId}`,
-				{
-					method: 'POST',
-					body: JSON.stringify({ email })
-				}
-			);
-			if (res.ok) {
-				const data = await res.json();
-				setIsModalSubmitted(true);
-				setCurrentAccessRight(data);
-				modal.close();
-			} else {
-				setErrorStatus(res.status);
-			}
+			createAccessRight.mutate({
+				product_id: productId,
+				user_email: email
+			});
 		} else if (modalType === 'remove') {
 			if (currentAccessRight === undefined) return;
-			const res = await fetch(
-				`/api/prisma/accessRight/${currentAccessRight.id}`,
-				{
-					method: 'PUT',
-					body: JSON.stringify({ status: 'removed' })
-				}
-			);
-			if (res.ok) {
-				setIsModalSubmitted(true);
-				modal.close();
-			}
+			updateAccessRight.mutate({
+				id: currentAccessRight.id,
+				status: 'removed'
+			});
 		}
 	}
 

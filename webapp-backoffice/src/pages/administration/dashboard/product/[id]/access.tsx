@@ -14,6 +14,7 @@ import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import { trpc } from '@/src/utils/trpc';
 
 interface Props {
 	product: Product;
@@ -29,11 +30,6 @@ const AccessManagement = (props: Props) => {
 
 	const { product } = props;
 
-	const [accessRights, setAccessRights] = React.useState<
-		AccessRightUserWithUsers[]
-	>([]);
-	const [count, setCount] = React.useState(0);
-
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightUserWithUsers>();
 	const [modalType, setModalType] = React.useState<
@@ -48,18 +44,28 @@ const AccessManagement = (props: Props) => {
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const isModalOpen = useIsModalOpen(modal);
 
-	const retrieveAccessRights = React.useCallback(async () => {
-		const response = await fetch(
-			`/api/prisma/accessRight?product_id=${product.id}&numberPerPage=${numberPerPage}&page=${currentPage}&isRemoved=${carriersRemovedFilter}`
+	const { data: accessRightsResult, isLoading: isLoadingAccessRights } =
+		trpc.accessRight.getList.useQuery(
+			{
+				product_id: product.id,
+				numberPerPage,
+				page: currentPage,
+				isRemoved: carriersRemovedFilter
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
 		);
-		const res = await response.json();
-		setAccessRights(res.data);
-		setCount(res.count);
-	}, [numberPerPage, currentPage, carriersRemovedFilter, isModalOpen]);
 
-	React.useEffect(() => {
-		retrieveAccessRights();
-	}, [retrieveAccessRights]);
+	const {
+		data: accessRights,
+		metadata: { count: accessRightsCount }
+	} = accessRightsResult;
 
 	const handleModalOpening = async (
 		modalType: 'add' | 'remove' | 'resend-email',
@@ -114,7 +120,7 @@ const AccessManagement = (props: Props) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(count, numberPerPage);
+	const nbPages = getNbPages(accessRightsCount, numberPerPage);
 
 	return (
 		<ProductLayout product={product}>
@@ -166,7 +172,8 @@ const AccessManagement = (props: Props) => {
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + accessRights.length}
 							</span>{' '}
-							de <span className={cx(classes.boldText)}>{count}</span>
+							de{' '}
+							<span className={cx(classes.boldText)}>{accessRightsCount}</span>
 						</span>
 					)}
 				</div>

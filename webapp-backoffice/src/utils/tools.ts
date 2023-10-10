@@ -1,4 +1,5 @@
 import { Product, User } from '@prisma/client';
+import { Session } from 'next-auth';
 
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -193,7 +194,10 @@ export function getUserInviteEmailHtml(
 	`;
 }
 
-export function getInviteEmailHtml(contextUser: User, productTitle: string) {
+export function getInviteEmailHtml(
+	contextUser: Session['user'],
+	productTitle: string
+) {
 	const link = process.env.NODEMAILER_BASEURL;
 
 	return `
@@ -216,7 +220,7 @@ export function getInviteEmailHtml(contextUser: User, productTitle: string) {
 					<p>Bonjour,</p>
 
 					<p>
-						${contextUser.firstName} ${contextUser.lastName} vous a invité à rejoindre le produit numérique "${productTitle}" sur "Je donne mon avis".
+						${contextUser.name} vous a invité à rejoindre le produit numérique "${productTitle}" sur "Je donne mon avis".
 					</p>
 
 					<p>
