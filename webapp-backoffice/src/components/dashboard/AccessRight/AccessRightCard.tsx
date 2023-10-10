@@ -82,7 +82,7 @@ const ProductAccessCard = (props: Props) => {
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 						<Button
-							id="button-options"
+							id="button-options-access-right"
 							aria-controls={menuOpen ? 'option-menu' : undefined}
 							aria-haspopup="true"
 							aria-expanded={menuOpen ? 'true' : undefined}
@@ -105,17 +105,25 @@ const ProductAccessCard = (props: Props) => {
 							anchorEl={anchorEl}
 							onClose={handleClose}
 							MenuListProps={{
-								'aria-labelledby': 'button-options'
+								'aria-labelledby': 'button-options-access-right'
 							}}
 						>
 							{accessRight.user === null && (
 								<MenuItem
-									onClick={() => onButtonClick('resend-email', accessRight)}
+									onClick={() => {
+										onButtonClick('resend-email', accessRight);
+										handleClose();
+									}}
 								>
 									Renvoyer l'e-mail d'invitation
 								</MenuItem>
 							)}
-							<MenuItem onClick={() => onButtonClick('remove', accessRight)}>
+							<MenuItem
+								onClick={() => {
+									onButtonClick('remove', accessRight);
+									handleClose();
+								}}
+							>
 								Retirer son droit d'accès
 							</MenuItem>
 						</Menu>

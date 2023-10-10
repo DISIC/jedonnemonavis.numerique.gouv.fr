@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { sendMail } from '@/src/utils/mailer';
 import {
@@ -9,6 +9,22 @@ import {
 	getUserInviteEmailHtml
 } from '@/src/utils/tools';
 import { AccessRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
+
+export const generateInviteToken = async (
+	prisma: PrismaClient,
+	userEmail: string
+) => {
+	const token = generateRandomString(32);
+
+	await prisma.userInviteToken.create({
+		data: {
+			user_email: userEmail,
+			token
+		}
+	});
+
+	return token;
+};
 
 export const accessRightRouter = router({
 	getList: protectedProcedure
@@ -85,14 +101,7 @@ export const accessRightRouter = router({
 			});
 
 			if (newAccessRight.user === null) {
-				const token = generateRandomString(32);
-
-				await ctx.prisma.userInviteToken.create({
-					data: {
-						user_email,
-						token
-					}
-				});
+				const token = await generateInviteToken(ctx.prisma, user_email);
 
 				await sendMail(
 					'Invitation à rejoindre "Je donne mon avis"',
@@ -119,6 +128,38 @@ export const accessRightRouter = router({
 			}
 
 			return { data: newAccessRight };
+		}),
+
+	resendEmail: protectedProcedure
+		.input(z.object({ product_id: z.number(), user_email: z.string().email() }))
+		.mutation(async ({ ctx, input }) => {
+			const { user_email, product_id } = input;
+
+			const product = await ctx.prisma.product.findUnique({
+				where: {
+					id: product_id
+				}
+			});
+
+			if (!product)
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Product not found'
+				});
+
+			const token = await generateInviteToken(ctx.prisma, user_email);
+
+			await sendMail(
+				'Invitation à rejoindre "Je donne mon avis"',
+				user_email,
+				getUserInviteEmailHtml(user_email, token, product.title),
+				`Cliquez sur ce lien pour créer votre compte : ${
+					process.env.NODEMAILER_BASEURL
+				}/register?${new URLSearchParams({
+					email: user_email,
+					inviteToken: token
+				})}`
+			);
 		}),
 
 	update: protectedProcedure

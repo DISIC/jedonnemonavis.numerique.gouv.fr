@@ -67,21 +67,23 @@ const AccessManagement = (props: Props) => {
 		metadata: { count: accessRightsCount }
 	} = accessRightsResult;
 
+	const resendEmailAccessRight = trpc.accessRight.resendEmail.useMutation({
+		onSuccess: () => setIsModalSubmitted(true)
+	});
+
 	const handleModalOpening = async (
 		modalType: 'add' | 'remove' | 'resend-email',
 		accessRight?: AccessRightWithUsers
 	) => {
-		if (accessRight) {
-			setCurrentAccessRight(accessRight);
-		}
+		if (accessRight) setCurrentAccessRight(accessRight);
 
 		setModalType(modalType);
 
 		if (modalType == 'resend-email') {
-			await fetch(
-				`/api/prisma/accessRight/resend-email?user_email=${accessRight?.user_email_invite}&product_id=${product.id}`
-			);
-			setIsModalSubmitted(true);
+			resendEmailAccessRight.mutate({
+				product_id: product.id,
+				user_email: accessRight?.user_email_invite as string
+			});
 			return;
 		}
 
