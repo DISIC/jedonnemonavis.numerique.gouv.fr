@@ -5,6 +5,11 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 
+// Metadata for protected procedures
+interface Meta {
+	authRequired: boolean;
+}
+
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
 	const prisma = new PrismaClient();
@@ -18,26 +23,34 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 
 export type Context = inferAsyncReturnType<typeof createContext>;
 
-const t = initTRPC.context<Context>().create({
-	transformer: SuperJSON,
-	errorFormatter({ shape, error }) {
-		return {
-			...shape,
-			data: {
-				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : error.cause,
-				cause: {
-					...error.cause
+const t = initTRPC
+	.context<Context>()
+	.meta<Meta>()
+	.create({
+		transformer: SuperJSON,
+		defaultMeta: {
+			authRequired: true
+		},
+		errorFormatter({ shape, error }) {
+			return {
+				...shape,
+				data: {
+					...shape.data,
+					zodError:
+						error.cause instanceof ZodError
+							? error.cause.flatten()
+							: error.cause,
+					cause: {
+						...error.cause
+					}
 				}
-			}
-		};
-	}
-});
+			};
+		}
+	});
 
 // Auth middleware
-const isAuthed = t.middleware(({ next, ctx }) => {
-	if (!ctx.session?.user?.email) {
+const isAuthed = t.middleware(({ next, meta, ctx }) => {
+	if (!ctx.session?.user?.email && (meta?.authRequired || true)) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED'
 		});

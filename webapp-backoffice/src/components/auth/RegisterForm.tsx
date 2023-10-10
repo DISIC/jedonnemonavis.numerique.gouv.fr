@@ -13,6 +13,8 @@ import { ReactNode, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
+import { trpc } from '@/src/utils/trpc';
+import { Prisma } from '@prisma/client';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -73,6 +75,27 @@ export const RegisterForm = (props: Props) => {
 	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [registered, setRegistered] = useState<RegisterValidationMessage>();
+
+	const registerUser = trpc.user.register.useMutation({
+		onSuccess: result => {
+			if (result.data) {
+				const registerMode = result.data.active ? 'from_otp' : 'classic';
+				router.query.registered = registerMode;
+				router.push(router);
+				setRegistered(registerMode);
+			}
+		},
+		onError: error => {
+			if (error.data?.httpStatus === 409) {
+				errors.email.conflict = true;
+				setErrors({ ...errors });
+			} else if (error.data?.httpStatus === 401) {
+				router.query.request = 'whitelist';
+				router.push(router);
+				setUserNotWhiteListed(true);
+			}
+		}
+	});
 
 	const { classes, cx } = useStyles({ errors });
 
@@ -172,28 +195,12 @@ export const RegisterForm = (props: Props) => {
 			return;
 		}
 
-		fetch('/api/auth/register?', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ ...userInfos, otp: otp as string })
-		}).then(res => {
-			if (res.status === 200)
-				res.json().then(json => {
-					const registerMode = json.user.active ? 'from_otp' : 'classic';
-					router.query.registered = registerMode;
-					router.push(router);
-					setRegistered(registerMode);
-				});
-			else if (res.status === 409) {
-				errors.email.conflict = true;
-				setErrors({ ...errors });
-			} else if (res.status === 401) {
-				router.query.request = 'whitelist';
-				router.push(router);
-				setUserNotWhiteListed(true);
-			}
+		const { inviteToken, ...userInfosWithoutInviteToken } = userInfos;
+
+		registerUser.mutate({
+			user: userInfosWithoutInviteToken as Prisma.UserCreateInput,
+			inviteToken,
+			otp
 		});
 	};
 
