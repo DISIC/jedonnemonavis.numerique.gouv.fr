@@ -7,7 +7,7 @@ import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightC
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import React from 'react';
 import { Product, AccessRight } from '@prisma/client';
-import { AccessRightUserWithUsers } from '@/src/pages/api/prisma/accessRight/type';
+import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
@@ -31,7 +31,7 @@ const AccessManagement = (props: Props) => {
 	const { product } = props;
 
 	const [currentAccessRight, setCurrentAccessRight] =
-		React.useState<AccessRightUserWithUsers>();
+		React.useState<AccessRightWithUsers>();
 	const [modalType, setModalType] = React.useState<
 		'add' | 'remove' | 'resend-email'
 	>('add');
@@ -69,7 +69,7 @@ const AccessManagement = (props: Props) => {
 
 	const handleModalOpening = async (
 		modalType: 'add' | 'remove' | 'resend-email',
-		accessRight?: AccessRightUserWithUsers
+		accessRight?: AccessRightWithUsers
 	) => {
 		if (accessRight) {
 			setCurrentAccessRight(accessRight);

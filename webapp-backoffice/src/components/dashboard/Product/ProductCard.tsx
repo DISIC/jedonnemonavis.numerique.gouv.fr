@@ -1,4 +1,4 @@
-import { ProductWithButtons } from '@/src/pages/api/prisma/products/type';
+import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import { Entity, Product } from '@prisma/client';

@@ -3,15 +3,15 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
-import type { AccessRightUserWithUsers } from '@/src/pages/api/prisma/accessRight/type';
+import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
 
 interface Props {
-	accessRight: AccessRightUserWithUsers;
+	accessRight: AccessRightWithUsers;
 	onButtonClick: (
 		modalType: 'remove' | 'resend-email',
-		accessRight?: AccessRightUserWithUsers
+		accessRight?: AccessRightWithUsers
 	) => void;
 }
 

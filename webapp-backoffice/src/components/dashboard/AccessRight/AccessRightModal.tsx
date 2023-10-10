@@ -3,7 +3,7 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import type { AccessRightUserWithUsers } from '@/src/pages/api/prisma/accessRight/type';
+import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 
 interface CustomModalProps {
@@ -25,9 +25,9 @@ interface Props {
 	modalType: 'add' | 'remove' | 'resend-email';
 	productId: number;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
-	currentAccessRight: AccessRightUserWithUsers | undefined;
+	currentAccessRight: AccessRightWithUsers | undefined;
 	setCurrentAccessRight: React.Dispatch<
-		React.SetStateAction<AccessRightUserWithUsers | undefined>
+		React.SetStateAction<AccessRightWithUsers | undefined>
 	>;
 }
 
