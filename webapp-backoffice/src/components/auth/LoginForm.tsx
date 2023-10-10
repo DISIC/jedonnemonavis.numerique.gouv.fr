@@ -1,4 +1,5 @@
 import { isValidEmail } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
@@ -43,6 +44,32 @@ export const LoginForm = () => {
 
 	const { classes, cx } = useStyles({ passwordIncorrect });
 
+	const checkEmailUser = trpc.user.checkEmail.useMutation({
+		onSuccess: result => {
+			switch (result.metadata.statusCode) {
+				case 206:
+					router.push({
+						pathname: 'login/otp',
+						query: { email: credentials.email }
+					});
+					break;
+				case 200:
+					setShowPassword(true);
+					break;
+			}
+		},
+		onError: error => {
+			switch (error.data?.httpStatus) {
+				case 404:
+					setErrors({ ...errors, emailNotFound: true });
+					break;
+				case 423:
+					setErrors({ ...errors, userInactive: true });
+					break;
+			}
+		}
+	});
+
 	const resetErrors = () => {
 		setErrors(defaultErrors);
 	};
@@ -72,29 +99,9 @@ export const LoginForm = () => {
 			return;
 		}
 
-		fetch(`/api/auth/check-email?email=${credentials.email}`)
-			.then(res => {
-				switch (res.status) {
-					case 404:
-						setErrors({ ...errors, emailNotFound: true });
-						break;
-					case 423:
-						setErrors({ ...errors, userInactive: true });
-						break;
-					case 206:
-						router.push({
-							pathname: 'login/otp',
-							query: { email: credentials.email }
-						});
-						break;
-					case 200:
-						setShowPassword(true);
-						break;
-				}
-			})
-			.catch(e => {
-				console.error('error : ', e);
-			});
+		checkEmailUser.mutate({
+			email: credentials.email
+		});
 	};
 
 	const login = (): void => {

@@ -7,9 +7,36 @@ import { TRPCError } from '@trpc/server';
 import {
 	extractDomainFromEmail,
 	generateRandomString,
+	getOTPEmailHtml,
 	getRegisterEmailHtml
 } from '@/src/utils/tools';
 import { sendMail } from '@/src/utils/mailer';
+
+export async function createOTP(prisma: PrismaClient, user: User) {
+	const now = new Date();
+	await prisma.userOTP.deleteMany({
+		where: {
+			user_id: user.id
+		}
+	});
+
+	const code = generateRandomString();
+	await prisma.userOTP.create({
+		data: {
+			user_id: user.id,
+			code,
+			//15mn validity
+			expiration_date: new Date(now.getTime() + 15 * 60 * 1000)
+		}
+	});
+
+	await sendMail(
+		'Votre mot de passe temporaire',
+		user.email,
+		getOTPEmailHtml(code),
+		`Votre mot de passe temporaire valable 15 minutes : ${code}`
+	);
+}
 
 export async function registerUserFromOTP(
 	prisma: PrismaClient,
@@ -209,6 +236,70 @@ export const userRouter = router({
 				}
 
 				return { data: createdUser };
+			}
+		}),
+
+	validate: publicProcedure
+		.input(z.object({ token: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const { token } = input;
+
+			const userValidationToken =
+				await ctx.prisma.userValidationToken.findUnique({
+					where: { token },
+					include: { user: true }
+				});
+
+			if (!userValidationToken) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Invalid token'
+				});
+			} else {
+				const updatedUser = await updateUser(
+					ctx.prisma,
+					userValidationToken.user.id,
+					{ ...userValidationToken.user, active: true }
+				);
+
+				await ctx.prisma.userValidationToken.delete({
+					where: {
+						id: userValidationToken.id
+					}
+				});
+
+				return { data: updatedUser };
+			}
+		}),
+
+	checkEmail: publicProcedure
+		.input(z.object({ email: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { email } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: {
+					email
+				}
+			});
+
+			if (!user) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User not found'
+				});
+			} else if (user.observatoire_account && !user.active) {
+				createOTP(ctx.prisma, user);
+
+				return { data: undefined, metadata: { statusCode: 206 } };
+			} else if (!user.active) {
+				// Code: 423
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: "User isn't active"
+				});
+			} else {
+				return { data: user, metadata: { statusCode: 200 } };
 			}
 		})
 });

@@ -1,3 +1,4 @@
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import { User } from '@prisma/client';
@@ -24,24 +25,23 @@ export default function Register() {
 	>();
 	const [userValidated, setUserValidated] = useState<User | undefined>();
 
-	const validateUser = () => {
-		fetch(
-			`/api/auth/validate?${new URLSearchParams({ token: token as string })}`
-		).then(res => {
-			if (res.status === 200) {
-				res.json().then(json => {
-					setValidationStatus('success');
-					setUserValidated(json.user);
-				});
-			} else {
-				setValidationStatus('error');
-			}
-		});
-	};
+	const { data: validUser } = trpc.user.validate.useQuery(
+		{ token: token as string },
+		{ enabled: !!token }
+	);
 
 	useEffect(() => {
-		if (token) validateUser();
-	}, [token]);
+		if (validUser?.data) {
+			setUserValidated(validUser.data);
+			setValidationStatus('success');
+		} else {
+			setValidationStatus('error');
+		}
+	}, [validUser]);
+
+	// useEffect(() => {
+	// 	if (token) validateUser.mutate({ token: token as string });
+	// }, [token]);
 
 	const displayContent = () => {
 		if (!token) return <p>Votre lien est invalide</p>;
