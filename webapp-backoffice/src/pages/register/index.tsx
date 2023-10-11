@@ -57,7 +57,8 @@ export default function Register() {
 								<>
 									Si vous avez déjà un compte sur
 									https://observatoire.numerique.gouv.fr/, vous pouvez
-									maintenant gérer vos démarches sur ce site.
+									maintenant gérer tous les avis récoltés sur vos boutons “Je
+									donne mon avis” sur ce site.
 									<br />
 									<br />{' '}
 									<b>Vous n’avez pas besoin de créer un nouveau compte.</b> Il
