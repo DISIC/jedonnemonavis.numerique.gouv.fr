@@ -5,6 +5,7 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
+import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -22,7 +23,7 @@ interface CustomModalProps {
 interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
-	modalType: 'add' | 'remove' | 'resend-email';
+	modalType: AccessRightModalType;
 	productId: number;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 	currentAccessRight: AccessRightWithUsers | undefined;
@@ -85,6 +86,12 @@ const ButtonModal = (props: Props) => {
 				id: currentAccessRight.id,
 				status: 'removed'
 			});
+		} else if (modalType === 'reintegrate') {
+			if (currentAccessRight === undefined) return;
+			updateAccessRight.mutate({
+				id: currentAccessRight.id,
+				status: 'carrier'
+			});
 		}
 	}
 
@@ -94,6 +101,8 @@ const ButtonModal = (props: Props) => {
 				return 'Inviter un porteur ou une porteuse';
 			case 'remove':
 				return 'Retirer un porteur ou une porteuse';
+			case 'reintegrate':
+				return 'Réintégrer un porteur ou une porteuse';
 			default:
 				return '';
 		}
@@ -140,6 +149,16 @@ const ButtonModal = (props: Props) => {
 						</p>
 					</div>
 				);
+			case 'reintegrate':
+				return (
+					<div className={fr.cx('fr-pt-4v')}>
+						<p>
+							Vous êtes sûr de vouloir rétablir l'accès à ce produit pour{' '}
+							{currentAccessRight?.user?.firstName}{' '}
+							{currentAccessRight?.user?.lastName} ?
+						</p>
+					</div>
+				);
 			default:
 				return <div></div>;
 		}
@@ -173,6 +192,16 @@ const ButtonModal = (props: Props) => {
 					...defaultButtons,
 					{
 						children: 'Retirer',
+						priority: 'primary',
+						doClosesModal: false,
+						onClick: () => handleModalSubmit()
+					}
+				];
+			case 'reintegrate':
+				return [
+					...defaultButtons,
+					{
+						children: "Rétablir l'accès",
 						priority: 'primary',
 						doClosesModal: false,
 						onClick: () => handleModalSubmit()
