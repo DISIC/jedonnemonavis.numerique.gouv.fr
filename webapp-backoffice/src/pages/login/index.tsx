@@ -26,7 +26,8 @@ export default function Login() {
 							<>
 								Si vous avez déjà un compte sur
 								https://observatoire.numerique.gouv.fr/, vous pouvez maintenant
-								gérer vos démarches sur ce site.
+								gérer tous les avis récoltés sur vos boutons “Je donne mon avis”
+								sur ce site.
 								<br />
 								<br /> Taper ci-dessous le même adresse e-mail que vous avez
 								utilisé sur l’Observatoire et nous vous enverrons un e-mail avec
