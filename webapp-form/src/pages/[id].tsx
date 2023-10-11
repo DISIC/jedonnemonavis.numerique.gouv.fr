@@ -91,7 +91,7 @@ export const getServerSideProps: GetServerSideProps<{
   );
 
   if (response.ok) {
-    const product = await response.json();
+    const { data: product } = (await response.json()) as { data: Product };
     if (!product) {
       return {
         notFound: true,
