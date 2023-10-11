@@ -76,11 +76,15 @@ export const accessRightRouter = router({
 				}
 			});
 
-			if (accessRightAlreadyExists !== null)
+			if (
+				accessRightAlreadyExists !== null &&
+				accessRightAlreadyExists.status === 'carrier'
+			) {
 				throw new TRPCError({
 					code: 'CONFLICT',
 					message: 'Access right already exists'
 				});
+			}
 
 			const userExists = await ctx.prisma.user.findUnique({
 				where: {
@@ -88,8 +92,14 @@ export const accessRightRouter = router({
 				}
 			});
 
-			const newAccessRight = await ctx.prisma.accessRight.create({
-				data: {
+			const newAccessRight = await ctx.prisma.accessRight.upsert({
+				where: {
+					id: accessRightAlreadyExists?.id || -1
+				},
+				update: {
+					status: 'carrier'
+				},
+				create: {
 					user_email: userExists ? user_email : null,
 					user_email_invite: !userExists ? user_email : null,
 					product_id
