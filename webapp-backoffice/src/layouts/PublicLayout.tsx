@@ -13,7 +13,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { classes, cx } = useStyles();
 	const { pathname } = useRouter();
 
-	const { data: session } = useSession({ required: true });
+	const { data: session } = useSession();
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!pathname.startsWith('/administration')
@@ -36,16 +36,18 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			  }
 	];
 
-	const navigationItems = [
-		{
+	const navigationItems = [];
+
+	if (session?.user !== undefined) {
+		navigationItems.push({
 			text: 'Démarches',
 			linkProps: {
 				href: '/administration/dashboard',
 				target: '_self'
 			},
 			isActive: pathname == '/administration/dashboard'
-		}
-	];
+		});
+	}
 
 	if (session?.user.role === 'admin') {
 		navigationItems.push({
