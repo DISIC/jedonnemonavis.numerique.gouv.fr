@@ -37,3 +37,7 @@ next-env.d.ts
 
 # specific project files
 certificates
+
+
+# prisma to zod generated types
+prisma/generated

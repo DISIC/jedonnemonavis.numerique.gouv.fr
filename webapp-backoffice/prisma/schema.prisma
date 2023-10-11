@@ -8,6 +8,13 @@ generator client {
 	previewFeatures = ["fullTextSearch"]
 }
 
+generator zod {
+  provider       = "zod-prisma-types"
+  addInputTypeValidation = false
+  addIncludeType = false
+  addSelectType = false
+}
+
 enum RequestMode {
   whitelist
   superuser

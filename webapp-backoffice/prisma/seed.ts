@@ -10,7 +10,7 @@ import { users } from './seeds/users';
 import { products } from './seeds/products';
 import { whiteListedDomains } from './seeds/white-listed-domains';
 import { entities } from './seeds/entities';
-import { getRandomObjectFromArray } from '../utils/tools';
+import { getRandomObjectFromArray } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { Domain } from 'domain';
 
