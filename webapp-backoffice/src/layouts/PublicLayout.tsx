@@ -13,6 +13,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { classes, cx } = useStyles();
 	const { pathname } = useRouter();
 
+	const { data: session } = useSession({ required: true });
+
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!pathname.startsWith('/administration')
 			? {
@@ -34,6 +36,28 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			  }
 	];
 
+	const navigationItems = [
+		{
+			text: 'Démarches',
+			linkProps: {
+				href: '/administration/dashboard',
+				target: '_self'
+			},
+			isActive: pathname == '/administration/dashboard'
+		}
+	];
+
+	if (session?.user.role === 'admin') {
+		navigationItems.push({
+			text: 'Utilisateurs',
+			linkProps: {
+				href: '/administration/dashboard/users',
+				target: '_self'
+			},
+			isActive: pathname == '/administration/dashboard/users'
+		});
+	}
+
 	return (
 		<>
 			<Head>
@@ -52,6 +76,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				}}
 				id="fr-header-public-header"
 				quickAccessItems={quickAccessItems}
+				navigation={navigationItems}
 				serviceTitle="Je donne mon avis"
 				serviceTagline="baseline - précisions sur l'organisation"
 			/>

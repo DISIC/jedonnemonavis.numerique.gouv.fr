@@ -1,5 +1,5 @@
-import ProductCard from '@/src/components/dashboard/Product/ProductCard';
-import ProductModal from '@/src/components/dashboard/Product/ProductModal';
+import UserCard from '@/src/components/dashboard/User/UserCard';
+// import UserModal from '@/src/components/dashboard/User/UserModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -10,18 +10,17 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
-import { Entity, Product } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const modal = createModal({
-	id: 'product-modal',
+	id: 'user-modal',
 	isOpenedByDefault: false
 });
 
-const DashBoard = () => {
-	const [filter, setFilter] = React.useState<string>('title');
+const DashBoardUsers = () => {
+	const [filter, setFilter] = React.useState<string>('email');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
@@ -33,10 +32,10 @@ const DashBoard = () => {
 	const { cx, classes } = useStyles();
 
 	const {
-		data: productsResult,
-		isLoading: isLoadingProducts,
-		isRefetching: isRefetchingProducts
-	} = trpc.product.getList.useQuery(
+		data: usersResult,
+		isLoading: isLoadingUsers,
+		isRefetching: isRefetchingUsers
+	} = trpc.user.getList.useQuery(
 		{
 			search: validatedSearch,
 			sort: filter,
@@ -54,32 +53,24 @@ const DashBoard = () => {
 	);
 
 	const {
-		data: products,
-		metadata: { count: productsCount }
-	} = productsResult;
-
-	const { data: entitiesResult, isLoading: isLoadingEntities } =
-		trpc.entity.getList.useQuery(
-			{ numberPerPage: 1000 },
-			{ initialData: { data: [], metadata: { count: 0 } } }
-		);
-
-	const { data: entities } = entitiesResult;
+		data: users,
+		metadata: { count: usersCount }
+	} = usersResult;
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(productsCount, numberPerPage);
+	const nbPages = getNbPages(usersCount, numberPerPage);
 
 	const isOpen = useIsModalOpen(modal);
 
 	return (
 		<>
-			<ProductModal
+			{/* <UserModal
 				modal={modal}
 				isOpen={isOpen}
-				onProductCreated={() => {
+				onUserCreated={() => {
 					setSearch('');
 					if (filter === 'created_at') {
 						setValidatedSearch('');
@@ -87,35 +78,29 @@ const DashBoard = () => {
 						setFilter('created_at');
 					}
 				}}
-			/>
+			/> */}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h2>
-							{session?.user?.role !== 'admin'
-								? 'Mes produits numériques'
-								: 'Produits numériques'}
-						</h2>
+						<h2>Utilisateurs</h2>
 					</div>
-					{session?.user?.role !== 'admin' && (
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-7'),
-								classes.buttonContainer
-							)}
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-7'),
+							classes.buttonContainer
+						)}
+					>
+						<Button
+							priority="secondary"
+							iconId="fr-icon-add-circle-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={modal.buttonProps}
 						>
-							<Button
-								priority="secondary"
-								iconId="fr-icon-add-circle-line"
-								iconPosition="right"
-								type="button"
-								nativeButtonProps={modal.buttonProps}
-							>
-								Ajouter un nouveau produit
-							</Button>
-						</div>
-					)}
+							Ajouter un nouvelle utilisateur
+						</Button>
+					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
@@ -126,8 +111,7 @@ const DashBoard = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="title:asc">Nom A à Z</option>
-							<option value="entity.name:asc">Ministère A à Z</option>
+							<option value="email:asc">Nom A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
@@ -142,10 +126,10 @@ const DashBoard = () => {
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
 								<Input
-									label="Rechercher un produit"
+									label="Rechercher un utilisateur"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher un produit',
+										placeholder: 'Rechercher un utilisateur',
 										type: 'search',
 										value: search,
 										onChange: event => {
@@ -168,7 +152,7 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{isLoadingProducts || isLoadingEntities ? (
+				{isLoadingUsers ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -183,39 +167,27 @@ const DashBoard = () => {
 									</span>{' '}
 									à{' '}
 									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + products.length}
+										{numberPerPage * (currentPage - 1) + users.length}
 									</span>{' '}
 									de{' '}
 									<span className={cx(classes.boldText)}>
-										{productsResult.metadata.count}
+										{usersResult.metadata.count}
 									</span>
 								</span>
 							)}
 						</div>
 						<div
-							className={cx(
-								products.length === 0 ? classes.productsContainer : ''
-							)}
+							className={cx(users.length === 0 ? classes.usersContainer : '')}
 						>
-							{isRefetchingProducts ? (
+							{isRefetchingUsers ? (
 								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 									<Loader />
 								</div>
 							) : (
-								products.map((product, index) => (
-									<ProductCard
-										product={product}
-										entity={
-											entities.find(
-												entity => product.entity_id === entity.id
-											) as Entity
-										}
-										key={index}
-									/>
-								))
+								users.map((user, index) => <UserCard user={user} key={index} />)
 							)}
 
-							{products.length === 0 && (
+							{users.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
 										className={cx(
@@ -248,7 +220,7 @@ const DashBoard = () => {
 										},
 										href: '#',
 										classes: { link: fr.cx('fr-pagination__link') },
-										key: `pagination-link-product-${pageNumber}`
+										key: `pagination-link-user-${pageNumber}`
 									})}
 									className={fr.cx('fr-mt-1w')}
 								/>
@@ -261,7 +233,7 @@ const DashBoard = () => {
 	);
 };
 
-const useStyles = tss.withName(ProductModal.name).create(() => ({
+const useStyles = tss.withName('dsdas').create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.up('md')]: {
 			display: 'flex',
@@ -280,7 +252,7 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 			}
 		}
 	},
-	productsContainer: {
+	usersContainer: {
 		minHeight: '20rem'
 	},
 	textContainer: {
@@ -303,4 +275,4 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	}
 }));
 
-export default DashBoard;
+export default DashBoardUsers;
