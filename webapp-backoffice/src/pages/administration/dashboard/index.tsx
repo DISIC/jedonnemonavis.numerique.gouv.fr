@@ -106,13 +106,6 @@ const DashBoard = () => {
 						>
 							Ajouter un nouveau produit
 						</Button>
-						<Button
-							priority="secondary"
-							iconId="fr-icon-edit-line"
-							iconPosition="right"
-						>
-							Modifier mes entités de rattachement
-						</Button>
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
