@@ -98,24 +98,22 @@ const DashBoard = () => {
 								: 'Produits numériques'}
 						</h2>
 					</div>
-					{session?.user?.role !== 'admin' && (
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-7'),
-								classes.buttonContainer
-							)}
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-7'),
+							classes.buttonContainer
+						)}
+					>
+						<Button
+							priority="secondary"
+							iconId="fr-icon-add-circle-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={modal.buttonProps}
 						>
-							<Button
-								priority="secondary"
-								iconId="fr-icon-add-circle-line"
-								iconPosition="right"
-								type="button"
-								nativeButtonProps={modal.buttonProps}
-							>
-								Ajouter un nouveau produit
-							</Button>
-						</div>
-					)}
+							Ajouter un nouveau produit
+						</Button>
+					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
