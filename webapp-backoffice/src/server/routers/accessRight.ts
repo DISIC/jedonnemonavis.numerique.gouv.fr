@@ -71,7 +71,7 @@ export const accessRightRouter = router({
 
 			const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({
 				where: {
-					user_email,
+					OR: [{ user_email }, { user_email_invite: user_email }],
 					product_id
 				}
 			});
