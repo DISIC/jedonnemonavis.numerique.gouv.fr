@@ -37,7 +37,7 @@ export const productRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const userEmail = ctx.session?.user?.email;
+			const contextUser = ctx.session.user;
 			const { numberPerPage, page, sort, search } = input;
 
 			let orderBy: any = [
@@ -50,12 +50,15 @@ export const productRouter = router({
 				title: {
 					contains: ''
 				},
-				accessRights: {
-					some: {
-						user_email: userEmail,
-						status: 'carrier'
-					}
-				}
+				accessRights:
+					contextUser.role !== 'admin'
+						? {
+								some: {
+									user_email: contextUser.email,
+									status: 'carrier'
+								}
+						  }
+						: {}
 			};
 
 			if (search) {

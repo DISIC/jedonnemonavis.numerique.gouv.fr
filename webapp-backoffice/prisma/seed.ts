@@ -69,7 +69,9 @@ async function main() {
 						},
 						accessRights: {
 							create: {
-								user_email: users.filter(u => u.active)[index % 2].email
+								user_email: users.filter(u => u.active && u?.role !== 'admin')[
+									index % 2
+								].email
 							}
 						}
 					}

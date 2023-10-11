@@ -1,5 +1,5 @@
 import NextAuth, { DefaultSession } from 'next-auth';
-import { User as UserModel } from '@prisma/client';
+import { User as UserModel, UserRole } from '@prisma/client';
 
 declare module 'next-auth' {
 	interface User extends UserModel {
@@ -8,8 +8,8 @@ declare module 'next-auth' {
 	interface Session extends DefaultSession {
 		user: {
 			id: string;
+			role: UserRole;
 			// ...other properties
-			// role: UserRole;
 		} & DefaultSession['user'];
 	}
 }

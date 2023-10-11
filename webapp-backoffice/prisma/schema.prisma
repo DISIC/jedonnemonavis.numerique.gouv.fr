@@ -15,6 +15,11 @@ generator zod {
   addSelectType = false
 }
 
+enum UserRole {
+  admin
+  user
+}
+
 enum RequestMode {
   whitelist
   superuser
@@ -35,6 +40,7 @@ model User {
   observatoire_username String?
   email                 String                @unique
   password              String
+  role                  UserRole              @default(user)
   UserOTPs              UserOTP[]
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]

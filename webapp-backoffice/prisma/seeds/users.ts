@@ -1,4 +1,6 @@
-export const users = [
+import { Prisma } from '@prisma/client';
+
+export const users: Prisma.UserCreateInput[] = [
 	{
 		firstName: 'user',
 		lastName: '1',
@@ -29,6 +31,15 @@ export const users = [
 		observatoire_account: false,
 		active: true,
 		email: 'user4@example.com',
+		password: '6fe77e050a06534bf96b58d48e2d9a591f1df6617c52caa880a7bd3e04be040f'
+	},
+	{
+		firstName: 'user',
+		lastName: 'admin',
+		role: 'admin',
+		observatoire_account: false,
+		active: true,
+		email: 'admin@example.com',
 		password: '6fe77e050a06534bf96b58d48e2d9a591f1df6617c52caa880a7bd3e04be040f'
 	}
 ];
