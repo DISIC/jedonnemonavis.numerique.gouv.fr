@@ -1,11 +1,11 @@
-import PublicLayout from "@/layouts/PublicLayout";
+import PublicLayout from "@/src/layouts/PublicLayout";
 import { createNextDsfrIntegrationApi } from "@codegouvfr/react-dsfr/next-pagesdir";
 import { appWithTranslation } from "next-i18next";
 import type { AppProps } from "next/app";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { createEmotionSsrAdvancedApproach } from "tss-react/next";
-import "@/styles/global.css";
+import "@/src/styles/global.css";
 
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {

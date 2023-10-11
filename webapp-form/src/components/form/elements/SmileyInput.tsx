@@ -2,7 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { Feeling } from '@/utils/types';
+import { Feeling } from '@/src/utils/types';
 import { useTranslation } from 'next-i18next';
 
 type Props = {

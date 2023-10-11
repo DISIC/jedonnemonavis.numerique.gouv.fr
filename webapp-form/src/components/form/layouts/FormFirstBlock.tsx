@@ -1,5 +1,5 @@
-import { firstSection } from "@/utils/form";
-import { FormField, Opinion, Product } from "@/utils/types";
+import { firstSection } from "@/src/utils/form";
+import { FormField, Opinion, Product } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useState } from "react";

@@ -1,15 +1,22 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-import { ProductUncheckedCreateInputSchema } from '@/prisma/generated/zod';
+import {
+	ProductUncheckedCreateInputSchema,
+	ProductSchema
+} from '@/prisma/generated/zod';
 
 export const productRouter = router({
-	getById: publicProcedure.input(z.number()).query(({ ctx, input }) => {
-		return ctx.prisma.product.findUnique({
-			where: {
-				id: input
-			}
-		});
-	}),
+	getById: publicProcedure
+		.meta({ openapi: { method: 'GET', path: '/product/{id}' } })
+		.input(z.object({ id: z.number() }))
+		.output(ProductSchema.nullable())
+		.query(async ({ ctx, input }) => {
+			return await ctx.prisma.product.findUnique({
+				where: {
+					id: input.id
+				}
+			});
+		}),
 
 	getList: protectedProcedure
 		.input(

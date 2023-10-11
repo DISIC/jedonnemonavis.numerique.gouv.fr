@@ -1,10 +1,10 @@
-import { CheckboxOption, FormField, Opinion } from '@/utils/types';
+import { CheckboxOption, FormField, Opinion } from '@/src/utils/types';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { useTranslation } from 'next-i18next';
 import { ChangeEvent, SetStateAction } from 'react';
-import { SmileyInput } from '../elements/SmileyInput';
+import { SmileyInput } from './SmileyInput';
 
 type Props = {
   field: FormField;

@@ -1,7 +1,7 @@
 import {
   Language,
   LanguageSelector,
-} from "@/components/global/LanguageSelector";
+} from "@/src/components/global/LanguageSelector";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Header } from "@codegouvfr/react-dsfr/Header";
