@@ -1,8 +1,8 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
-import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { LoginForm } from '@/src/components/auth/LoginForm';
+import { AlertObservatoire } from '@/src/components/ui/AlertObservatoire';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import { tss } from 'tss-react/dsfr';
 
 export default function Login() {
 	const { classes, cx } = useStyles();
@@ -19,26 +19,7 @@ export default function Login() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h2 className={fr.cx('fr-mb-12v')}>Connexion</h2>
-					<Alert
-						className={fr.cx('fr-mb-16v')}
-						closable
-						description={
-							<>
-								Si vous avez déjà un compte sur
-								https://observatoire.numerique.gouv.fr/, vous pouvez maintenant
-								gérer tous les avis récoltés sur vos boutons “Je donne mon avis”
-								sur ce site.
-								<br />
-								<br /> Taper ci-dessous le même adresse e-mail que vous avez
-								utilisé sur l’Observatoire et nous vous enverrons un e-mail avec
-								un mot de passe temporaire pour transférer votre compte sur ce
-								site.
-							</>
-						}
-						onClose={function noRefCheck() {}}
-						severity="info"
-						title="Nouvel hébergement"
-					/>
+					<AlertObservatoire />
 					<div
 						className={cx(
 							classes.formContainer,

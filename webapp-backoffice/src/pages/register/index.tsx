@@ -1,9 +1,9 @@
 import { RegisterForm } from '@/src/components/auth/RegisterForm';
+import { AlertObservatoire } from '@/src/components/ui/AlertObservatoire';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -49,30 +49,7 @@ export default function Register() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h2 className={fr.cx('fr-mb-12v')}>Création de compte</h2>
-					{!registered && !otp && !request && (
-						<Alert
-							className={fr.cx('fr-mb-16v')}
-							closable
-							description={
-								<>
-									Si vous avez déjà un compte sur
-									https://observatoire.numerique.gouv.fr/, vous pouvez
-									maintenant gérer tous les avis récoltés sur vos boutons “Je
-									donne mon avis” sur ce site.
-									<br />
-									<br />{' '}
-									<b>Vous n’avez pas besoin de créer un nouveau compte.</b> Il
-									suffit de verifier votre ancien compte{' '}
-									<Link className={fr.cx('fr-link')} href="/login">
-										sur la page de connexion.
-									</Link>
-								</>
-							}
-							onClose={function noRefCheck() {}}
-							severity="info"
-							title="Nouvel hébergement"
-						/>
-					)}
+					{!registered && !otp && !request && <AlertObservatoire />}
 					{!!request && (
 						<Alert
 							className={fr.cx('fr-mb-16v')}
