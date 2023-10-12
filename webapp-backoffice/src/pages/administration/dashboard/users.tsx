@@ -11,7 +11,6 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { User } from '@prisma/client';
-import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -30,13 +29,12 @@ const DashBoardUsers = () => {
 
 	const [currentUser, setCurrentUser] = React.useState<User>();
 
-	const { data: session } = useSession({ required: true });
-
 	const { cx, classes } = useStyles();
 
 	const {
 		data: usersResult,
 		isLoading: isLoadingUsers,
+		refetch: refetchUsers,
 		isRefetching: isRefetchingUsers
 	} = trpc.user.getList.useQuery(
 		{
@@ -75,7 +73,12 @@ const DashBoardUsers = () => {
 
 	return (
 		<>
-			<UserModal modal={modal} isOpen={isModalOpen} user={currentUser} />
+			<UserModal
+				modal={modal}
+				isOpen={isModalOpen}
+				user={currentUser}
+				refetchUsers={refetchUsers}
+			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>

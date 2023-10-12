@@ -10,6 +10,7 @@ import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
 import { trpc } from '@/src/utils/trpc';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import Select from '@codegouvfr/react-dsfr/Select';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -27,6 +28,7 @@ interface CustomModalProps {
 interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
+	refetchUsers: () => void;
 	user?: User;
 }
 
@@ -40,17 +42,25 @@ type FormValues = {
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, user, isOpen } = props;
+	const { modal, user, isOpen, refetchUsers } = props;
 
 	const {
 		control,
 		handleSubmit,
 		reset,
+		setError,
 		formState: { errors }
 	} = useForm<FormValues>();
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
-		console.log(data);
+		if (user) {
+			editUser.mutate({
+				id: user.id,
+				user: { ...data }
+			});
+		} else {
+			createUser.mutate(data);
+		}
 	};
 
 	const resetForm = () => {
@@ -64,21 +74,31 @@ const ButtonModal = (props: Props) => {
 	};
 
 	React.useEffect(() => {
-		console.log('user', isOpen);
 		if (user) {
-			reset(user as FormValues);
+			const userWithoutPassword = { ...user, password: '' };
+			reset(userWithoutPassword as FormValues);
 		} else {
 			resetForm();
 		}
 	}, [user, isOpen]);
 
-	// const createUser = trpc.user.create.useMutation({
-	// 	onSuccess: result => handleModalClose(result.data)
-	// });
+	const createUser = trpc.user.create.useMutation({
+		onSuccess: () => handleModalClose(),
+		onError: error => {
+			switch (error.data?.httpStatus) {
+				case 409:
+					setError('email', {
+						type: 'Conflict email',
+						message: 'Cet email est déjà utilisé'
+					});
+					break;
+			}
+		}
+	});
 
-	// const editUser = trpc.user.update.useMutation({
-	// 	onSuccess: result => handleModalClose(result.data)
-	// });
+	const editUser = trpc.user.update.useMutation({
+		onSuccess: () => handleModalClose()
+	});
 
 	const displayModalTitle = (): string => {
 		if (user) {
@@ -89,6 +109,7 @@ const ButtonModal = (props: Props) => {
 	};
 
 	const handleModalClose = () => {
+		refetchUsers();
 		modal.close();
 		resetForm();
 	};
@@ -145,6 +166,28 @@ const ButtonModal = (props: Props) => {
 								value
 							}}
 						/>
+					)}
+				/>
+				<Controller
+					control={control}
+					name="role"
+					rules={{ required: 'Ce champ est requis' }}
+					render={({ field: { onChange, value } }) => (
+						<Select
+							label="Rôle"
+							className={cx(classes.boldText)}
+							state={errors.role ? 'error' : 'default'}
+							stateRelatedMessage={errors.role?.message}
+							nativeSelectProps={{
+								onChange,
+								value
+							}}
+						>
+							<option value="user" defaultChecked>
+								Utilisateur
+							</option>
+							<option value="admin">Administrateur</option>
+						</Select>
 					)}
 				/>
 			</div>

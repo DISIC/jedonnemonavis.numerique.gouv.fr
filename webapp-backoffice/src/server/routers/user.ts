@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-import { UserCreateInputSchema } from '@/prisma/generated/zod';
+import {
+	UserCreateInputSchema,
+	UserUpdateInputSchema
+} from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
@@ -199,6 +202,51 @@ export const userRouter = router({
 			const count = await ctx.prisma.user.count({ where });
 
 			return { data: users, metadata: { count } };
+		}),
+
+	create: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(UserCreateInputSchema)
+		.mutation(async ({ ctx, input: newUser }) => {
+			const userExists = await ctx.prisma.user.findUnique({
+				where: {
+					email: newUser.email
+				}
+			});
+
+			if (userExists)
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'User with email already exists'
+				});
+
+			const hashedPassword = crypto
+				.createHash('sha256')
+				.update(newUser.password)
+				.digest('hex');
+
+			newUser.password = hashedPassword;
+
+			const createdUser = await ctx.prisma.user.create({
+				data: {
+					...newUser
+				}
+			});
+
+			return { data: createdUser };
+		}),
+
+	update: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
+		.mutation(async ({ ctx, input }) => {
+			const { id, user } = input;
+			const updatedUser = await ctx.prisma.user.update({
+				where: { id },
+				data: { ...user }
+			});
+
+			return { data: updatedUser };
 		}),
 
 	register: publicProcedure
