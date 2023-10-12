@@ -5,6 +5,7 @@ import {
 	ProductSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 
 export const productRouter = router({
 	getById: publicProcedure
@@ -33,23 +34,21 @@ export const productRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				sort: z.string().optional(),
-				search: z.string().optional()
+				search: z.string().optional(),
+				filterEntityId: z.number().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
 			const contextUser = ctx.session.user;
-			const { numberPerPage, page, sort, search } = input;
+			const { numberPerPage, page, sort, search, filterEntityId } = input;
 
-			let orderBy: any = [
+			let orderBy: Prisma.ProductOrderByWithAggregationInput[] = [
 				{
 					title: 'asc'
 				}
 			];
 
-			let where: any = {
-				title: {
-					contains: ''
-				},
+			let where: Prisma.ProductWhereInput = {
 				accessRights:
 					contextUser.role !== 'admin'
 						? {
@@ -65,6 +64,12 @@ export const productRouter = router({
 				const searchQuery = search.split(' ').join(' | ');
 				where.title = {
 					contains: searchQuery
+				};
+			}
+
+			if (filterEntityId) {
+				where.entity = {
+					id: filterEntityId
 				};
 			}
 

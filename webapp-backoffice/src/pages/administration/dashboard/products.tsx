@@ -9,7 +9,9 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import SearchBar from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
+import { Autocomplete } from '@mui/material';
 import { Entity, Product } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React from 'react';
@@ -22,6 +24,7 @@ const modal = createModal({
 
 const DashBoard = () => {
 	const [filter, setFilter] = React.useState<string>('title');
+	const [filterEntityId, setFilterEntityId] = React.useState<number>();
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
@@ -41,7 +44,8 @@ const DashBoard = () => {
 			search: validatedSearch,
 			sort: filter,
 			page: currentPage,
-			numberPerPage
+			numberPerPage,
+			filterEntityId
 		},
 		{
 			initialData: {
@@ -89,14 +93,13 @@ const DashBoard = () => {
 				}}
 			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
-				<h1>Tableau de bord</h1>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
+				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h2>
-							{session?.user?.role !== 'admin'
-								? 'Mes produits numériques'
-								: 'Produits numériques'}
-						</h2>
+						<h1 className={fr.cx('fr-mb-0')}>
+							{session?.user?.role !== 'admin' ? 'Mes démarches' : 'Démarches'}
+						</h1>
 					</div>
 					<div
 						className={cx(
@@ -129,6 +132,34 @@ const DashBoard = () => {
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
+					</div>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+						<Autocomplete
+							id="filter-entity"
+							disablePortal
+							sx={{ width: '100%' }}
+							options={entities.map((entity: Entity) => ({
+								label: entity.name,
+								value: entity.id
+							}))}
+							onChange={(_, option) => {
+								setFilterEntityId(option?.value);
+							}}
+							noOptionsText="Aucune organisation trouvée"
+							renderInput={params => (
+								<div ref={params.InputProps.ref}>
+									<label className="fr-label">
+										Filtrer par une organisation
+									</label>
+									<input
+										{...params.inputProps}
+										className={cx(params.inputProps.className, 'fr-input')}
+										placeholder="Sélectionner une option"
+										type="search"
+									/>
+								</div>
+							)}
+						/>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
 						<form

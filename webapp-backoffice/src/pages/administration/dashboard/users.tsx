@@ -80,10 +80,11 @@ const DashBoardUsers = () => {
 				refetchUsers={refetchUsers}
 			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
-				<h1>Tableau de bord</h1>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
+				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h2>Utilisateurs</h2>
+						<h1 className={fr.cx('fr-mb-0')}>Utilisateurs</h1>
 					</div>
 					<div
 						className={cx(
@@ -98,7 +99,7 @@ const DashBoardUsers = () => {
 							type="button"
 							onClick={() => handleModalOpening(undefined)}
 						>
-							Ajouter un nouvelle utilisateur
+							Ajouter un nouvel utilisateur
 						</Button>
 					</div>
 				</div>

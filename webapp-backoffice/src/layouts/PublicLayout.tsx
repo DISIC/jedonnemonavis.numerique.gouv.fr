@@ -8,6 +8,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { classes, cx } = useStyles();
@@ -38,28 +39,26 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
 	const navigationItems = [];
 
-	if (session?.user !== undefined) {
-		navigationItems.push({
-			text: 'Démarches',
-			linkProps: {
-				href: '/administration/dashboard',
-				target: '_self'
-			},
-			isActive:
-				pathname == '/administration/dashboard' ||
-				pathname.startsWith('/administration/dashboard/product')
-		});
-	}
-
 	if (session?.user.role === 'admin') {
-		navigationItems.push({
-			text: 'Utilisateurs',
-			linkProps: {
-				href: '/administration/dashboard/users',
-				target: '_self'
+		const adminNavigationItems = [
+			{
+				text: 'Démarches',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
 			},
-			isActive: pathname == '/administration/dashboard/users'
-		});
+			{
+				text: 'Utilisateurs',
+				linkProps: {
+					href: '/administration/dashboard/users',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/users'
+			}
+		];
+		navigationItems.push(...adminNavigationItems);
 	}
 
 	return (
