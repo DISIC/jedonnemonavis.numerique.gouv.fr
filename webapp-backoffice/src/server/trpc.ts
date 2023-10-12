@@ -5,6 +5,7 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { OpenApiMeta } from 'trpc-openapi';
+import { Session } from 'next-auth';
 
 // Metadata for protected procedures
 interface Meta {
@@ -76,7 +77,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 	return next({
 		ctx: {
 			// Infers the `session` as non-nullable
-			session: ctx.session
+			session: ctx.session as Session
 		}
 	});
 });
