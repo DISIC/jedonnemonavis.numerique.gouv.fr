@@ -1,5 +1,5 @@
 import UserCard from '@/src/components/dashboard/User/UserCard';
-// import UserModal from '@/src/components/dashboard/User/UserModal';
+import UserModal from '@/src/components/dashboard/User/UserModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -10,6 +10,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
+import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -26,6 +27,8 @@ const DashBoardUsers = () => {
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
+
+	const [currentUser, setCurrentUser] = React.useState<User>();
 
 	const { data: session } = useSession({ required: true });
 
@@ -63,22 +66,16 @@ const DashBoardUsers = () => {
 
 	const nbPages = getNbPages(usersCount, numberPerPage);
 
-	const isOpen = useIsModalOpen(modal);
+	const isModalOpen = useIsModalOpen(modal);
+
+	const handleModalOpening = async (user?: User) => {
+		setCurrentUser(user);
+		modal.open();
+	};
 
 	return (
 		<>
-			{/* <UserModal
-				modal={modal}
-				isOpen={isOpen}
-				onUserCreated={() => {
-					setSearch('');
-					if (filter === 'created_at') {
-						setValidatedSearch('');
-					} else {
-						setFilter('created_at');
-					}
-				}}
-			/> */}
+			<UserModal modal={modal} isOpen={isModalOpen} user={currentUser} />
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<h1>Tableau de bord</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -96,7 +93,7 @@ const DashBoardUsers = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={modal.buttonProps}
+							onClick={() => handleModalOpening(undefined)}
 						>
 							Ajouter un nouvelle utilisateur
 						</Button>
@@ -179,14 +176,41 @@ const DashBoardUsers = () => {
 						<div
 							className={cx(users.length === 0 ? classes.usersContainer : '')}
 						>
+							<div className={fr.cx('fr-mt-2v')}>
+								<div
+									className={cx(
+										fr.cx(
+											'fr-grid-row',
+											'fr-grid-row--gutters',
+											'fr-grid-row--middle'
+										),
+										classes.boldText
+									)}
+								>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+										<span>Utilisateur</span>
+									</div>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+										<span>Date de création</span>
+									</div>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+										<span>Observatoire</span>
+									</div>
+								</div>
+							</div>
 							{isRefetchingUsers ? (
 								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 									<Loader />
 								</div>
 							) : (
-								users.map((user, index) => <UserCard user={user} key={index} />)
+								users.map((user, index) => (
+									<UserCard
+										user={user}
+										key={index}
+										onButtonClick={handleModalOpening}
+									/>
+								))
 							)}
-
 							{users.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div

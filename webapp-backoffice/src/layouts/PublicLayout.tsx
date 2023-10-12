@@ -45,7 +45,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				href: '/administration/dashboard',
 				target: '_self'
 			},
-			isActive: pathname == '/administration/dashboard'
+			isActive:
+				pathname == '/administration/dashboard' ||
+				pathname.startsWith('/administration/dashboard/product')
 		});
 	}
 
