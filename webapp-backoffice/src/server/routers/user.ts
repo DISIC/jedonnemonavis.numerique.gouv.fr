@@ -149,22 +149,27 @@ export const userRouter = router({
 		.query(async ({ ctx, input }) => {
 			const { numberPerPage, page, sort, search } = input;
 
-			let orderBy: any = [
+			let orderBy: Prisma.UserOrderByWithAggregationInput[] = [
 				{
 					email: 'asc'
 				}
 			];
 
-			let where: any = {
-				email: {
-					contains: ''
-				}
-			};
+			let where: Prisma.UserWhereInput = {};
 
 			if (search) {
-				const searchQuery = search.split(' ').join(' | ');
-				where.email = {
-					contains: searchQuery
+				const [firstName, lastName] = search.split(' ');
+				where = {
+					OR: [
+						{
+							firstName: { contains: firstName },
+							lastName: { contains: lastName }
+						},
+						{
+							firstName: { contains: lastName },
+							lastName: { contains: firstName }
+						}
+					]
 				};
 			}
 
