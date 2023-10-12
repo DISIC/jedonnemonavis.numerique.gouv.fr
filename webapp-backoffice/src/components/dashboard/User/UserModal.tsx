@@ -54,9 +54,10 @@ const ButtonModal = (props: Props) => {
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
 		if (user) {
+			const { password, ...updateUser } = data;
 			editUser.mutate({
 				id: user.id,
-				user: { ...data }
+				user: { ...updateUser }
 			});
 		} else {
 			createUser.mutate(data);
@@ -66,24 +67,31 @@ const ButtonModal = (props: Props) => {
 	const resetForm = () => {
 		reset({
 			email: '',
+			password: '',
 			firstName: '',
 			lastName: '',
-			password: '',
 			role: 'user'
 		});
 	};
 
 	React.useEffect(() => {
 		if (user) {
-			const userWithoutPassword = { ...user, password: '' };
-			reset(userWithoutPassword as FormValues);
+			reset({
+				email: user.email,
+				firstName: user.firstName || '',
+				lastName: user.lastName || '',
+				role: user.role
+			});
 		} else {
 			resetForm();
 		}
 	}, [user, isOpen]);
 
 	const createUser = trpc.user.create.useMutation({
-		onSuccess: () => handleModalClose(),
+		onSuccess: () => {
+			refetchUsers();
+			handleModalClose();
+		},
 		onError: error => {
 			switch (error.data?.httpStatus) {
 				case 409:
@@ -97,7 +105,10 @@ const ButtonModal = (props: Props) => {
 	});
 
 	const editUser = trpc.user.update.useMutation({
-		onSuccess: () => handleModalClose()
+		onSuccess: () => {
+			refetchUsers();
+			handleModalClose();
+		}
 	});
 
 	const displayModalTitle = (): string => {
@@ -109,7 +120,6 @@ const ButtonModal = (props: Props) => {
 	};
 
 	const handleModalClose = () => {
-		refetchUsers();
 		modal.close();
 		resetForm();
 	};
@@ -117,79 +127,103 @@ const ButtonModal = (props: Props) => {
 	const displayModalContent = (): JSX.Element => {
 		return (
 			<div className={fr.cx('fr-container', 'fr-container--fluid')}>
-				<Controller
-					control={control}
-					name="email"
-					rules={{ required: 'Ce champ est requis' }}
-					render={({ field: { onChange, value } }) => (
-						<Input
-							label="Email"
-							className={cx(classes.boldText)}
-							state={errors.email ? 'error' : 'default'}
-							stateRelatedMessage={errors.email?.message}
-							nativeInputProps={{
-								onChange,
-								value
-							}}
+				<form onSubmit={handleSubmit(onSubmit)}>
+					<Controller
+						control={control}
+						name="email"
+						rules={{ required: 'Ce champ est requis' }}
+						disabled={!!user}
+						render={({ field: { onChange, value, disabled } }) => (
+							<Input
+								label="Email"
+								className={cx(classes.boldText)}
+								disabled={disabled}
+								state={errors.email ? 'error' : 'default'}
+								stateRelatedMessage={errors.email?.message}
+								nativeInputProps={{
+									onChange,
+									value
+								}}
+							/>
+						)}
+					/>
+					{!user && (
+						<Controller
+							control={control}
+							name="password"
+							rules={{ required: 'Ce champ est requis' }}
+							render={({ field: { onChange, value } }) => (
+								<Input
+									label="Mot de passe"
+									className={cx(classes.boldText)}
+									state={errors.password ? 'error' : 'default'}
+									stateRelatedMessage={errors.password?.message}
+									nativeInputProps={{
+										onChange,
+										value,
+										type: 'password'
+									}}
+								/>
+							)}
 						/>
 					)}
-				/>
-				<Controller
-					control={control}
-					name="firstName"
-					rules={{ required: 'Ce champ est requis' }}
-					render={({ field: { onChange, value } }) => (
-						<Input
-							label="Prénom"
-							className={cx(classes.boldText)}
-							state={errors.firstName ? 'error' : 'default'}
-							stateRelatedMessage={errors.firstName?.message}
-							nativeInputProps={{
-								onChange,
-								value
-							}}
-						/>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="lastName"
-					rules={{ required: 'Ce champ est requis' }}
-					render={({ field: { onChange, value } }) => (
-						<Input
-							label="Nom"
-							className={cx(classes.boldText)}
-							state={errors.lastName ? 'error' : 'default'}
-							stateRelatedMessage={errors.lastName?.message}
-							nativeInputProps={{
-								onChange,
-								value
-							}}
-						/>
-					)}
-				/>
-				<Controller
-					control={control}
-					name="role"
-					rules={{ required: 'Ce champ est requis' }}
-					render={({ field: { onChange, value } }) => (
-						<Select
-							label="Rôle"
-							className={cx(classes.boldText)}
-							state={errors.role ? 'error' : 'default'}
-							stateRelatedMessage={errors.role?.message}
-							nativeSelectProps={{
-								onChange,
-								value
-							}}
-						>
-							<option value="user" defaultChecked>
-								Utilisateur
-							</option>
-							<option value="admin">Administrateur</option>
-						</Select>
-					)}
-				/>
+					<Controller
+						control={control}
+						name="firstName"
+						rules={{ required: 'Ce champ est requis' }}
+						render={({ field: { onChange, value } }) => (
+							<Input
+								label="Prénom"
+								className={cx(classes.boldText)}
+								state={errors.firstName ? 'error' : 'default'}
+								stateRelatedMessage={errors.firstName?.message}
+								nativeInputProps={{
+									onChange,
+									value
+								}}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="lastName"
+						rules={{ required: 'Ce champ est requis' }}
+						render={({ field: { onChange, value } }) => (
+							<Input
+								label="Nom"
+								className={cx(classes.boldText)}
+								state={errors.lastName ? 'error' : 'default'}
+								stateRelatedMessage={errors.lastName?.message}
+								nativeInputProps={{
+									onChange,
+									value
+								}}
+							/>
+						)}
+					/>
+					<Controller
+						control={control}
+						name="role"
+						rules={{ required: 'Ce champ est requis' }}
+						render={({ field: { onChange, value } }) => (
+							<Select
+								label="Rôle"
+								className={cx(classes.boldText)}
+								state={errors.role ? 'error' : 'default'}
+								stateRelatedMessage={errors.role?.message}
+								nativeSelectProps={{
+									onChange,
+									value
+								}}
+							>
+								<option value="user" defaultChecked>
+									Utilisateur
+								</option>
+								<option value="admin">Administrateur</option>
+							</Select>
+						)}
+					/>
+				</form>
 			</div>
 		);
 	};
@@ -203,7 +237,7 @@ const ButtonModal = (props: Props) => {
 				children: 'Annuler',
 				priority: 'secondary',
 				doClosesModal: false,
-				onClick: handleModalClose
+				onClick: () => handleModalClose()
 			},
 			{
 				children: user ? 'Modifier' : 'Créer',
