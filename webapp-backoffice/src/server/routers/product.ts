@@ -35,12 +35,20 @@ export const productRouter = router({
 				page: z.number().default(1),
 				sort: z.string().optional(),
 				search: z.string().optional(),
-				filterEntityId: z.number().optional()
+				filterEntityId: z.number().optional(),
+				filterByUserFavorites: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
 			const contextUser = ctx.session.user;
-			const { numberPerPage, page, sort, search, filterEntityId } = input;
+			const {
+				numberPerPage,
+				page,
+				sort,
+				search,
+				filterEntityId,
+				filterByUserFavorites
+			} = input;
 
 			let orderBy: Prisma.ProductOrderByWithAggregationInput[] = [
 				{
@@ -70,6 +78,16 @@ export const productRouter = router({
 			if (filterEntityId) {
 				where.entity = {
 					id: filterEntityId
+				};
+			}
+
+			if (filterByUserFavorites) {
+				where = {
+					favorites: {
+						some: {
+							user_id: parseInt(contextUser.id)
+						}
+					}
 				};
 			}
 

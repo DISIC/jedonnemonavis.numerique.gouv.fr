@@ -6,13 +6,13 @@ import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import SearchBar from '@codegouvfr/react-dsfr/SearchBar';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Autocomplete } from '@mui/material';
-import { Entity, Product } from '@prisma/client';
+import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -25,6 +25,8 @@ const modal = createModal({
 const DashBoard = () => {
 	const [filter, setFilter] = React.useState<string>('title');
 	const [filterEntityId, setFilterEntityId] = React.useState<number>();
+	const [filterOnlyFavorites, setFilterOnlyFavorites] =
+		React.useState<boolean>(false);
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
@@ -45,7 +47,8 @@ const DashBoard = () => {
 			sort: filter,
 			page: currentPage,
 			numberPerPage,
-			filterEntityId
+			filterEntityId,
+			filterByUserFavorites: filterOnlyFavorites
 		},
 		{
 			initialData: {
@@ -70,17 +73,14 @@ const DashBoard = () => {
 
 	const { data: entities } = entitiesResult;
 
-	const {
-		data: favoritesResult,
-		refetch: refetchFavorites,
-		isLoading: isLoadingFavorites
-	} = trpc.favorite.getByUser.useQuery(
-		{ user_id: parseInt(session?.user?.id as string) },
-		{
-			initialData: { data: [] },
-			enabled: session !== null && session?.user?.id !== null
-		}
-	);
+	const { data: favoritesResult, isLoading: isLoadingFavorites } =
+		trpc.favorite.getByUser.useQuery(
+			{ user_id: parseInt(session?.user?.id as string) },
+			{
+				initialData: { data: [] },
+				enabled: session?.user?.id !== undefined
+			}
+		);
 
 	const { data: favorites } = favoritesResult;
 
@@ -210,6 +210,32 @@ const DashBoard = () => {
 							</div>
 						</form>
 					</div>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-mt-4w',
+							nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+							'fr-py-0'
+						)}
+					>
+						<Checkbox
+							className={fr.cx('fr-mb-0')}
+							style={{ userSelect: 'none' }}
+							options={[
+								{
+									label: 'Afficher uniquement mes favoris',
+									nativeInputProps: {
+										name: 'favorites-products',
+										checked: filterOnlyFavorites,
+										onChange: e => {
+											setFilterOnlyFavorites(e.currentTarget.checked);
+											setCurrentPage(1);
+										}
+									}
+								}
+							]}
+						/>
+					</div>
 				</div>
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -220,7 +246,7 @@ const DashBoard = () => {
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
 								<span className={fr.cx('fr-ml-0')}>
-									Produits numériques de{' '}
+									Démarches de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}
 									</span>{' '}
@@ -259,13 +285,12 @@ const DashBoard = () => {
 												favorite => favorite.product_id === product.id
 											)
 										}
-										refetchFavorites={refetchFavorites}
 										key={index}
 									/>
 								))
 							)}
 
-							{products.length === 0 && (
+							{products.length === 0 && !isRefetchingProducts && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
 										className={cx(

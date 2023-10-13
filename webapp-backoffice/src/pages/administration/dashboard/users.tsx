@@ -162,7 +162,7 @@ const DashBoardUsers = () => {
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
 								<span className={fr.cx('fr-ml-0')}>
-									Produits numériques de{' '}
+									Utilisateurs de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}
 									</span>{' '}

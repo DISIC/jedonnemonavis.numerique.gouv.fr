@@ -3,7 +3,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Entity, Product } from '@prisma/client';
+import { Entity } from '@prisma/client';
 import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
 
@@ -18,23 +18,28 @@ const ProductCard = ({
 	product,
 	userId,
 	entity,
-	isFavorite,
-	refetchFavorites
+	isFavorite
 }: {
 	product: ProductWithButtons;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
-	refetchFavorites: () => void;
 }) => {
+	const utils = trpc.useContext();
 	const { classes, cx } = useStyles();
 
 	const createFavorite = trpc.favorite.create.useMutation({
-		onSuccess: () => refetchFavorites()
+		onSuccess: result => {
+			utils.product.getList.invalidate({ filterByUserFavorites: true });
+			utils.favorite.getByUser.invalidate({ user_id: result.data.user_id });
+		}
 	});
 
 	const deleteFavorite = trpc.favorite.delete.useMutation({
-		onSuccess: () => refetchFavorites()
+		onSuccess: result => {
+			utils.product.getList.invalidate({ filterByUserFavorites: true });
+			utils.favorite.getByUser.invalidate({ user_id: result.data.user_id });
+		}
 	});
 
 	const diplayAppreciation = (appreciation: string) => {
