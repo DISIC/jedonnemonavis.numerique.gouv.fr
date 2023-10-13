@@ -70,6 +70,20 @@ const DashBoard = () => {
 
 	const { data: entities } = entitiesResult;
 
+	const {
+		data: favoritesResult,
+		refetch: refetchFavorites,
+		isLoading: isLoadingFavorites
+	} = trpc.favorite.getByUser.useQuery(
+		{ user_id: parseInt(session?.user?.id as string) },
+		{
+			initialData: { data: [] },
+			enabled: session !== null && session?.user?.id !== null
+		}
+	);
+
+	const { data: favorites } = favoritesResult;
+
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
@@ -197,7 +211,7 @@ const DashBoard = () => {
 						</form>
 					</div>
 				</div>
-				{isLoadingProducts || isLoadingEntities ? (
+				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -234,11 +248,18 @@ const DashBoard = () => {
 								products.map((product, index) => (
 									<ProductCard
 										product={product}
+										userId={parseInt(session?.user?.id as string)}
 										entity={
 											entities.find(
 												entity => product.entity_id === entity.id
 											) as Entity
 										}
+										isFavorite={
+											!!favorites.find(
+												favorite => favorite.product_id === product.id
+											)
+										}
+										refetchFavorites={refetchFavorites}
 										key={index}
 									/>
 								))

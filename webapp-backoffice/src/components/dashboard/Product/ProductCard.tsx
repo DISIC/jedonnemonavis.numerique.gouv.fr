@@ -1,8 +1,11 @@
 import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { Entity, Product } from '@prisma/client';
 import Link from 'next/link';
+import { tss } from 'tss-react/dsfr';
 
 interface Indicator {
 	title: string;
@@ -13,11 +16,27 @@ interface Indicator {
 
 const ProductCard = ({
 	product,
-	entity
+	userId,
+	entity,
+	isFavorite,
+	refetchFavorites
 }: {
 	product: ProductWithButtons;
+	userId: number;
 	entity: Entity;
+	isFavorite: boolean;
+	refetchFavorites: () => void;
 }) => {
+	const { classes, cx } = useStyles();
+
+	const createFavorite = trpc.favorite.create.useMutation({
+		onSuccess: () => refetchFavorites()
+	});
+
+	const deleteFavorite = trpc.favorite.delete.useMutation({
+		onSuccess: () => refetchFavorites()
+	});
+
 	const diplayAppreciation = (appreciation: string) => {
 		switch (appreciation) {
 			case 'bad':
@@ -52,8 +71,14 @@ const ProductCard = ({
 
 	return (
 		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--gutters',
+					'fr-grid-row--middle'
+				)}
+			>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 					<Link
 						href={`/administration/dashboard/product/${product.id}/stats`}
 						className={fr.cx('fr-card__title')}
@@ -62,7 +87,33 @@ const ProductCard = ({
 					</Link>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-					<p>{entity?.name}</p>
+					<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
+				</div>
+				<div
+					className={cx(
+						fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
+						classes.favoriteWrapper
+					)}
+				>
+					<Button
+						iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+						title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
+						priority="tertiary"
+						size="small"
+						onClick={() => {
+							if (isFavorite) {
+								deleteFavorite.mutate({
+									product_id: product.id,
+									user_id: userId
+								});
+							} else {
+								createFavorite.mutate({
+									product_id: product.id,
+									user_id: userId
+								});
+							}
+						}}
+					/>
 				</div>
 
 				<div className={fr.cx('fr-col', 'fr-col-12')}>
@@ -101,5 +152,12 @@ const ProductCard = ({
 		</div>
 	);
 };
+
+const useStyles = tss.withName(ProductCard.name).create({
+	favoriteWrapper: {
+		display: 'flex',
+		justifyContent: 'end'
+	}
+});
 
 export default ProductCard;

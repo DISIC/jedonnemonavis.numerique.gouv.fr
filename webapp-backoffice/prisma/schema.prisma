@@ -45,6 +45,7 @@ model User {
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]
   accessRights          AccessRight[]
+  favorites             Favorite[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -110,6 +111,7 @@ model Product {
   observatoire_id Int?          @unique
   buttons         Button[]
   accessRights    AccessRight[]
+  favorites       Favorite[]
 }
 
 model AccessRight {
@@ -129,4 +131,16 @@ model AccessRight {
 model WhiteListedDomain {
   id     Int    @id @default(autoincrement())
   domain String @unique
+}
+
+model Favorite {
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([user_id, product_id], name: "favorite_id")
 }
