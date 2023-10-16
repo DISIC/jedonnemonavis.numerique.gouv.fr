@@ -1,14 +1,20 @@
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import type { WhiteListedDomain } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
-	whitelist: WhiteListedDomain;
+	domain: WhiteListedDomain;
 };
 
-const WhitelistCard = ({ whitelist }: Props) => {
+const DomainCard = ({ domain }: Props) => {
+	const utils = trpc.useContext();
 	const { cx, classes } = useStyles();
+
+	const deleteDomain = trpc.domains.delete.useMutation({
+		onSuccess: () => utils.domains.getList.invalidate()
+	});
 
 	return (
 		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
@@ -20,7 +26,7 @@ const WhitelistCard = ({ whitelist }: Props) => {
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-					<span className={classes.spanDomainName}>@{whitelist.domain}</span>
+					<span className={classes.spanDomainName}>@{domain.domain}</span>
 				</div>
 				<div
 					className={cx(
@@ -29,27 +35,20 @@ const WhitelistCard = ({ whitelist }: Props) => {
 					)}
 				>
 					<Button
-						priority="tertiary"
 						iconId="fr-icon-delete-bin-line"
-						iconPosition="right"
+						priority="tertiary"
+						size="small"
+						title="Supprimer le domaine"
+						onClick={() => deleteDomain.mutate({ domain: domain.domain })}
 						className={cx(fr.cx('fr-mr-5v'), classes.errorColor)}
-					>
-						Supprimer
-					</Button>
-					<Button
-						priority="secondary"
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-					>
-						Modifier
-					</Button>
+					/>
 				</div>
 			</div>
 		</div>
 	);
 };
 
-const useStyles = tss.withName(WhitelistCard.name).create(() => ({
+const useStyles = tss.withName(DomainCard.name).create(() => ({
 	spanDomainName: {
 		fontWeight: 'bold'
 	},
@@ -62,4 +61,4 @@ const useStyles = tss.withName(WhitelistCard.name).create(() => ({
 	}
 }));
 
-export default WhitelistCard;
+export default DomainCard;

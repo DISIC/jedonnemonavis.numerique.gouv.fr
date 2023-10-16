@@ -1,4 +1,4 @@
-import WhitelistCard from '@/src/components/dashboard/Whitelist/WhitelistCard';
+import DomainCard from '@/src/components/dashboard/Domain/DomainCard';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -6,12 +6,16 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
-import SearchBar from '@codegouvfr/react-dsfr/SearchBar';
 import Select from '@codegouvfr/react-dsfr/Select';
 import React from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
-const DashBoardWhitelistWhitelists = () => {
+type FormValues = {
+	domain: string;
+};
+
+const DashBoardDomainDomains = () => {
 	const [filter, setFilter] = React.useState<string>('domain:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
@@ -21,11 +25,39 @@ const DashBoardWhitelistWhitelists = () => {
 
 	const { cx, classes } = useStyles();
 
+	const createDomain = trpc.domains.create.useMutation({
+		onSuccess: () => {
+			refectDomains();
+			reset({ domain: '' });
+		},
+		onError: error => {
+			if (error.data?.httpStatus == 409) {
+				setError('domain', {
+					type: 'Conflict domain',
+					message: 'Ce domaine est déjà existant'
+				});
+			}
+		}
+	});
+
 	const {
-		data: whitelistsResult,
-		isLoading: isLoadingWhitelists,
-		isRefetching: isRefetchingWhitelists
-	} = trpc.whitelist.getList.useQuery(
+		control,
+		reset,
+		handleSubmit,
+		setError,
+		formState: { errors }
+	} = useForm<FormValues>();
+
+	const onSubmit: SubmitHandler<FormValues> = data => {
+		createDomain.mutate(data);
+	};
+
+	const {
+		data: domainsResult,
+		isLoading: isLoadingDomains,
+		refetch: refectDomains,
+		isRefetching: isRefetchingDomains
+	} = trpc.domains.getList.useQuery(
 		{
 			search: validatedSearch,
 			sort: filter,
@@ -43,15 +75,15 @@ const DashBoardWhitelistWhitelists = () => {
 	);
 
 	const {
-		data: whitelists,
-		metadata: { count: whitelistsCount }
-	} = whitelistsResult;
+		data: domains,
+		metadata: { count: domainsCount }
+	} = domainsResult;
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(whitelistsCount, numberPerPage);
+	const nbPages = getNbPages(domainsCount, numberPerPage);
 
 	return (
 		<>
@@ -65,7 +97,40 @@ const DashBoardWhitelistWhitelists = () => {
 						</h1>
 					</div>
 				</div>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div
+					className={fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--gutters',
+						'fr-grid-row--top'
+					)}
+				>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+						<form className={classes.formAdd} onSubmit={handleSubmit(onSubmit)}>
+							<Controller
+								control={control}
+								name="domain"
+								render={({ field: { onChange, value } }) => (
+									<Input
+										label="Ajouter un nom de domaine"
+										style={{ width: '100%' }}
+										state={errors.domain ? 'error' : 'default'}
+										stateRelatedMessage={errors.domain?.message}
+										nativeInputProps={{
+											onChange,
+											value
+										}}
+									/>
+								)}
+							/>
+							<Button
+								priority="primary"
+								type="submit"
+								className={cx(classes.buttonAdd, classes.labelHeight)}
+							>
+								Ajouter
+							</Button>
+						</form>
+					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 						<Select
 							label="Trier Par"
@@ -79,7 +144,7 @@ const DashBoardWhitelistWhitelists = () => {
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<form
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
@@ -87,9 +152,12 @@ const DashBoardWhitelistWhitelists = () => {
 								setValidatedSearch(search);
 							}}
 						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
+							<div
+								role="search"
+								className={cx(fr.cx('fr-search-bar'), classes.labelHeight)}
+							>
 								<Input
-									label="Rechercher un nom de whiteliste"
+									label="Rechercher un nom de domaine"
 									hideLabel
 									nativeInputProps={{
 										placeholder: 'Rechercher un nom de domaine',
@@ -115,7 +183,7 @@ const DashBoardWhitelistWhitelists = () => {
 						</form>
 					</div>
 				</div>
-				{isLoadingWhitelists ? (
+				{isLoadingDomains ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -130,18 +198,18 @@ const DashBoardWhitelistWhitelists = () => {
 									</span>{' '}
 									à{' '}
 									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + whitelists.length}
+										{numberPerPage * (currentPage - 1) + domains.length}
 									</span>{' '}
 									de{' '}
 									<span className={cx(classes.boldText)}>
-										{whitelistsResult.metadata.count}
+										{domainsResult.metadata.count}
 									</span>
 								</span>
 							)}
 						</div>
 						<div
 							className={cx(
-								whitelists.length === 0 ? classes.whitelistsContainer : ''
+								domains.length === 0 ? classes.domainsContainer : ''
 							)}
 						>
 							<div className={fr.cx('fr-mt-2v')}>
@@ -160,16 +228,16 @@ const DashBoardWhitelistWhitelists = () => {
 									</div>
 								</div>
 							</div>
-							{isRefetchingWhitelists ? (
+							{isRefetchingDomains ? (
 								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 									<Loader />
 								</div>
 							) : (
-								whitelists.map((whitelist, index) => (
-									<WhitelistCard whitelist={whitelist} key={index} />
+								domains.map((domain, index) => (
+									<DomainCard domain={domain} key={index} />
 								))
 							)}
-							{whitelists.length === 0 && !isRefetchingWhitelists && (
+							{domains.length === 0 && !isRefetchingDomains && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
 										className={cx(
@@ -202,7 +270,7 @@ const DashBoardWhitelistWhitelists = () => {
 										},
 										href: '#',
 										classes: { link: fr.cx('fr-pagination__link') },
-										key: `pagination-link-whitelist-${pageNumber}`
+										key: `pagination-link-domain-${pageNumber}`
 									})}
 									className={fr.cx('fr-mt-1w')}
 								/>
@@ -215,48 +283,56 @@ const DashBoardWhitelistWhitelists = () => {
 	);
 };
 
-const useStyles = tss
-	.withName(DashBoardWhitelistWhitelists.name)
-	.create(() => ({
-		buttonContainer: {
-			[fr.breakpoints.up('md')]: {
-				display: 'flex',
-				alignSelf: 'flex-end',
-				justifyContent: 'flex-end',
-				'.fr-btn': {
-					justifySelf: 'flex-end',
-					'&:first-of-type': {
-						marginRight: '1rem'
-					}
-				}
-			},
-			[fr.breakpoints.down('md')]: {
-				'.fr-btn:first-of-type': {
-					marginBottom: '1rem'
+const useStyles = tss.withName(DashBoardDomainDomains.name).create(() => ({
+	buttonContainer: {
+		[fr.breakpoints.up('md')]: {
+			display: 'flex',
+			alignSelf: 'flex-end',
+			justifyContent: 'flex-end',
+			'.fr-btn': {
+				justifySelf: 'flex-end',
+				'&:first-of-type': {
+					marginRight: '1rem'
 				}
 			}
 		},
-		whitelistsContainer: {
-			minHeight: '20rem'
-		},
-		textContainer: {
-			textAlign: 'center',
-			p: {
-				margin: 0,
-				fontWeight: 'bold'
+		[fr.breakpoints.down('md')]: {
+			'.fr-btn:first-of-type': {
+				marginBottom: '1rem'
 			}
-		},
-		searchForm: {
-			'.fr-search-bar': {
-				'.fr-input-group': {
-					width: '100%',
-					marginBottom: 0
-				}
-			}
-		},
-		boldText: {
+		}
+	},
+	domainsContainer: {
+		minHeight: '20rem'
+	},
+	textContainer: {
+		textAlign: 'center',
+		p: {
+			margin: 0,
 			fontWeight: 'bold'
 		}
-	}));
+	},
+	searchForm: {
+		'.fr-search-bar': {
+			'.fr-input-group': {
+				width: '100%',
+				marginBottom: 0
+			}
+		}
+	},
+	formAdd: {
+		display: 'flex',
+		alignItems: 'start'
+	},
+	buttonAdd: {
+		marginLeft: '1.5rem'
+	},
+	boldText: {
+		fontWeight: 'bold'
+	},
+	labelHeight: {
+		marginTop: '2rem'
+	}
+}));
 
-export default DashBoardWhitelistWhitelists;
+export default DashBoardDomainDomains;

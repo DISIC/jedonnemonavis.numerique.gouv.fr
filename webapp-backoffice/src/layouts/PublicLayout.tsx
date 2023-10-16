@@ -60,10 +60,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			{
 				text: 'Liste blanche des noms de domaines',
 				linkProps: {
-					href: '/administration/dashboard/whitelist',
+					href: '/administration/dashboard/domains',
 					target: '_self'
 				},
-				isActive: pathname == '/administration/dashboard/whitelist'
+				isActive: pathname == '/administration/dashboard/domains'
 			}
 		];
 		navigationItems.push(...adminNavigationItems);

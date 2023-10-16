@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
 import { Prisma } from '@prisma/client';
+import { WhiteListedDomainCreateInputSchema } from '@/prisma/generated/zod';
+import { TRPCError } from '@trpc/server';
 
-export const whitelistRouter = router({
+export const domainRouter = router({
 	getList: protectedProcedure
+		.meta({ isAdmin: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -61,5 +64,47 @@ export const whitelistRouter = router({
 			const count = await ctx.prisma.whiteListedDomain.count({ where });
 
 			return { data: entities, metadata: { count } };
+		}),
+
+	create: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(WhiteListedDomainCreateInputSchema)
+		.mutation(async ({ ctx, input }) => {
+			const { domain } = input;
+
+			const existsDomain = await ctx.prisma.whiteListedDomain.findUnique({
+				where: {
+					domain
+				}
+			});
+
+			if (existsDomain)
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'Domain already exists'
+				});
+
+			const createdDomain = await ctx.prisma.whiteListedDomain.create({
+				data: {
+					domain
+				}
+			});
+
+			return { data: createdDomain };
+		}),
+
+	delete: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ domain: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { domain } = input;
+
+			const deletedDomain = await ctx.prisma.whiteListedDomain.delete({
+				where: {
+					domain
+				}
+			});
+
+			return { data: deletedDomain };
 		})
 });
