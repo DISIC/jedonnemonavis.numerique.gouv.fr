@@ -17,6 +17,7 @@ generator zod {
 
 enum UserRole {
   admin
+	supervisor
   user
 }
 
