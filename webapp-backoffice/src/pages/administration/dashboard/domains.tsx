@@ -49,7 +49,7 @@ const DashBoardDomainDomains = () => {
 		}
 	};
 
-	const createDomain = trpc.domains.create.useMutation({
+	const createDomain = trpc.domain.create.useMutation({
 		onSuccess: result => {
 			refectDomains();
 			reset({ domain: '' });
@@ -65,7 +65,7 @@ const DashBoardDomainDomains = () => {
 		}
 	});
 
-	const deleteDomain = trpc.domains.delete.useMutation({
+	const deleteDomain = trpc.domain.delete.useMutation({
 		onSuccess: result => {
 			utils.domains.getList.invalidate();
 			setCurrentDomain({ ...result.data, type: 'delete' });
@@ -89,7 +89,7 @@ const DashBoardDomainDomains = () => {
 		isLoading: isLoadingDomains,
 		refetch: refectDomains,
 		isRefetching: isRefetchingDomains
-	} = trpc.domains.getList.useQuery(
+	} = trpc.domain.getList.useQuery(
 		{
 			search: validatedSearch,
 			sort: filter,
