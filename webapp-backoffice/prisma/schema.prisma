@@ -57,6 +57,9 @@ model UserRequest {
   user_id Int         @unique
   reason  String
   mode    RequestMode
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserOTP {
@@ -65,6 +68,9 @@ model UserOTP {
   user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserValidationToken {
@@ -72,12 +78,18 @@ model UserValidationToken {
   user    User   @relation(fields: [user_id], references: [id])
   user_id Int    @unique
   token   String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserInviteToken {
   id         Int    @id @default(autoincrement())
   user_email String
   token      String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Entity {
@@ -85,6 +97,9 @@ model Entity {
   name     String    @unique
   acronym  String
   products Product[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Button {
@@ -131,6 +146,9 @@ model AccessRight {
 model WhiteListedDomain {
   id     Int    @id @default(autoincrement())
   domain String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Favorite {

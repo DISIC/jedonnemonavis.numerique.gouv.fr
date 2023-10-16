@@ -5,6 +5,7 @@ import { buttonRouter } from './button';
 import { accessRightRouter } from './accessRight';
 import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
+import { whitelistRouter } from './whitelist';
 
 export const appRouter = router({
 	user: userRouter,
@@ -12,7 +13,8 @@ export const appRouter = router({
 	entity: entityRouter,
 	accessRight: accessRightRouter,
 	button: buttonRouter,
-	favorite: favoriteRouter
+	favorite: favoriteRouter,
+	whitelist: whitelistRouter
 });
 
 export type AppRouter = typeof appRouter;

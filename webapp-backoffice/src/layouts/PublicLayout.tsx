@@ -56,6 +56,14 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					target: '_self'
 				},
 				isActive: pathname == '/administration/dashboard/users'
+			},
+			{
+				text: 'Liste blanche des noms de domaines',
+				linkProps: {
+					href: '/administration/dashboard/whitelist',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/whitelist'
 			}
 		];
 		navigationItems.push(...adminNavigationItems);

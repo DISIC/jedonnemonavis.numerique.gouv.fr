@@ -1,5 +1,4 @@
-import UserCard from '@/src/components/dashboard/User/UserCard';
-import UserModal from '@/src/components/dashboard/User/UserModal';
+import WhitelistCard from '@/src/components/dashboard/Whitelist/WhitelistCard';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -7,36 +6,26 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Select } from '@codegouvfr/react-dsfr/Select';
-import { User } from '@prisma/client';
+import SearchBar from '@codegouvfr/react-dsfr/SearchBar';
+import Select from '@codegouvfr/react-dsfr/Select';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const modal = createModal({
-	id: 'user-modal',
-	isOpenedByDefault: false
-});
-
-const DashBoardUsers = () => {
-	const [filter, setFilter] = React.useState<string>('email:asc');
+const DashBoardWhitelistWhitelists = () => {
+	const [filter, setFilter] = React.useState<string>('domain:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
-	const [currentUser, setCurrentUser] = React.useState<User>();
-
 	const { cx, classes } = useStyles();
 
 	const {
-		data: usersResult,
-		isLoading: isLoadingUsers,
-		refetch: refetchUsers,
-		isRefetching: isRefetchingUsers
-	} = trpc.user.getList.useQuery(
+		data: whitelistsResult,
+		isLoading: isLoadingWhitelists,
+		isRefetching: isRefetchingWhitelists
+	} = trpc.whitelist.getList.useQuery(
 		{
 			search: validatedSearch,
 			sort: filter,
@@ -54,53 +43,26 @@ const DashBoardUsers = () => {
 	);
 
 	const {
-		data: users,
-		metadata: { count: usersCount }
-	} = usersResult;
+		data: whitelists,
+		metadata: { count: whitelistsCount }
+	} = whitelistsResult;
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(usersCount, numberPerPage);
-
-	const isModalOpen = useIsModalOpen(modal);
-
-	const handleModalOpening = async (user?: User) => {
-		setCurrentUser(user);
-		modal.open();
-	};
+	const nbPages = getNbPages(whitelistsCount, numberPerPage);
 
 	return (
 		<>
-			<UserModal
-				modal={modal}
-				isOpen={isModalOpen}
-				user={currentUser}
-				refetchUsers={refetchUsers}
-			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h1 className={fr.cx('fr-mb-0')}>Utilisateurs</h1>
-					</div>
-					<div
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-7'),
-							classes.buttonContainer
-						)}
-					>
-						<Button
-							priority="secondary"
-							iconId="fr-icon-add-circle-line"
-							iconPosition="right"
-							type="button"
-							onClick={() => handleModalOpening(undefined)}
-						>
-							Ajouter un nouvel utilisateur
-						</Button>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-12')}>
+						<h1 className={fr.cx('fr-mb-0')}>
+							Liste blanche des noms de domaines
+						</h1>
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -112,7 +74,7 @@ const DashBoardUsers = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="email:asc">Nom A à Z</option>
+							<option value="domain:asc">Nom A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
@@ -127,10 +89,10 @@ const DashBoardUsers = () => {
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
 								<Input
-									label="Rechercher un utilisateur"
+									label="Rechercher un nom de whiteliste"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher un utilisateur',
+										placeholder: 'Rechercher un nom de domaine',
 										type: 'search',
 										value: search,
 										onChange: event => {
@@ -147,13 +109,13 @@ const DashBoardUsers = () => {
 									iconId="ri-search-2-line"
 									iconPosition="left"
 								>
-									Rechercher
+									Rechercher un domaine
 								</Button>
 							</div>
 						</form>
 					</div>
 				</div>
-				{isLoadingUsers ? (
+				{isLoadingWhitelists ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -162,23 +124,25 @@ const DashBoardUsers = () => {
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
 								<span className={fr.cx('fr-ml-0')}>
-									Utilisateurs de{' '}
+									Domaines de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}
 									</span>{' '}
 									à{' '}
 									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + users.length}
+										{numberPerPage * (currentPage - 1) + whitelists.length}
 									</span>{' '}
 									de{' '}
 									<span className={cx(classes.boldText)}>
-										{usersResult.metadata.count}
+										{whitelistsResult.metadata.count}
 									</span>
 								</span>
 							)}
 						</div>
 						<div
-							className={cx(users.length === 0 ? classes.usersContainer : '')}
+							className={cx(
+								whitelists.length === 0 ? classes.whitelistsContainer : ''
+							)}
 						>
 							<div className={fr.cx('fr-mt-2v')}>
 								<div
@@ -192,30 +156,20 @@ const DashBoardUsers = () => {
 									)}
 								>
 									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-										<span>Utilisateur</span>
-									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-										<span>Date de création</span>
-									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-										<span>Observatoire</span>
+										<span>Nom de domaine</span>
 									</div>
 								</div>
 							</div>
-							{isRefetchingUsers ? (
+							{isRefetchingWhitelists ? (
 								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 									<Loader />
 								</div>
 							) : (
-								users.map((user, index) => (
-									<UserCard
-										user={user}
-										key={index}
-										onButtonClick={handleModalOpening}
-									/>
+								whitelists.map((whitelist, index) => (
+									<WhitelistCard whitelist={whitelist} key={index} />
 								))
 							)}
-							{users.length === 0 && (
+							{whitelists.length === 0 && !isRefetchingWhitelists && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
 										className={cx(
@@ -224,7 +178,7 @@ const DashBoardUsers = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun produit trouvé</p>
+										<p>Aucun domaine trouvé</p>
 									</div>
 								</div>
 							)}
@@ -248,7 +202,7 @@ const DashBoardUsers = () => {
 										},
 										href: '#',
 										classes: { link: fr.cx('fr-pagination__link') },
-										key: `pagination-link-user-${pageNumber}`
+										key: `pagination-link-whitelist-${pageNumber}`
 									})}
 									className={fr.cx('fr-mt-1w')}
 								/>
@@ -261,46 +215,48 @@ const DashBoardUsers = () => {
 	);
 };
 
-const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
-	buttonContainer: {
-		[fr.breakpoints.up('md')]: {
-			display: 'flex',
-			alignSelf: 'flex-end',
-			justifyContent: 'flex-end',
-			'.fr-btn': {
-				justifySelf: 'flex-end',
-				'&:first-of-type': {
-					marginRight: '1rem'
+const useStyles = tss
+	.withName(DashBoardWhitelistWhitelists.name)
+	.create(() => ({
+		buttonContainer: {
+			[fr.breakpoints.up('md')]: {
+				display: 'flex',
+				alignSelf: 'flex-end',
+				justifyContent: 'flex-end',
+				'.fr-btn': {
+					justifySelf: 'flex-end',
+					'&:first-of-type': {
+						marginRight: '1rem'
+					}
+				}
+			},
+			[fr.breakpoints.down('md')]: {
+				'.fr-btn:first-of-type': {
+					marginBottom: '1rem'
 				}
 			}
 		},
-		[fr.breakpoints.down('md')]: {
-			'.fr-btn:first-of-type': {
-				marginBottom: '1rem'
+		whitelistsContainer: {
+			minHeight: '20rem'
+		},
+		textContainer: {
+			textAlign: 'center',
+			p: {
+				margin: 0,
+				fontWeight: 'bold'
 			}
-		}
-	},
-	usersContainer: {
-		minHeight: '20rem'
-	},
-	textContainer: {
-		textAlign: 'center',
-		p: {
-			margin: 0,
+		},
+		searchForm: {
+			'.fr-search-bar': {
+				'.fr-input-group': {
+					width: '100%',
+					marginBottom: 0
+				}
+			}
+		},
+		boldText: {
 			fontWeight: 'bold'
 		}
-	},
-	searchForm: {
-		'.fr-search-bar': {
-			'.fr-input-group': {
-				width: '100%',
-				marginBottom: 0
-			}
-		}
-	},
-	boldText: {
-		fontWeight: 'bold'
-	}
-}));
+	}));
 
-export default DashBoardUsers;
+export default DashBoardWhitelistWhitelists;
