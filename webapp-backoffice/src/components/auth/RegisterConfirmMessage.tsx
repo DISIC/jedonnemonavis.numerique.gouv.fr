@@ -22,8 +22,8 @@ export const RegisterValidationMessage = (props: Props) => {
 					<br />
 					{!isUserInvited ? (
 						<>
-							Vous allez recevoir un email contenant un lien de validation dans les
-							prochaines minutes.
+							Vous allez recevoir un email contenant un lien de validation dans
+							les prochaines minutes.
 						</>
 					) : (
 						<Link className={fr.cx('fr-link')} href="/login">

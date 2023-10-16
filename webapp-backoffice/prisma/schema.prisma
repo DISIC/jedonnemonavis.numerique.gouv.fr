@@ -15,6 +15,11 @@ generator zod {
   addSelectType          = false
 }
 
+enum UserRole {
+  admin
+  user
+}
+
 enum RequestMode {
   whitelist
   superuser
@@ -35,11 +40,16 @@ model User {
   observatoire_username String?
   email                 String                @unique
   password              String
+  role                  UserRole              @default(user)
   UserOTPs              UserOTP[]
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]
   accessRights          AccessRight[]
   entities              Entity[]
+  favorites             Favorite[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserRequest {
@@ -48,6 +58,9 @@ model UserRequest {
   user_id Int         @unique
   reason  String
   mode    RequestMode
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserOTP {
@@ -56,6 +69,9 @@ model UserOTP {
   user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserValidationToken {
@@ -63,12 +79,18 @@ model UserValidationToken {
   user    User   @relation(fields: [user_id], references: [id])
   user_id Int    @unique
   token   String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model UserInviteToken {
   id         Int    @id @default(autoincrement())
   user_email String
   token      String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Entity {
@@ -77,6 +99,9 @@ model Entity {
   acronym  String
   products Product[]
   users    User[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Button {
@@ -103,6 +128,7 @@ model Product {
   observatoire_id Int?          @unique
   buttons         Button[]
   accessRights    AccessRight[]
+  favorites       Favorite[]
 }
 
 model AccessRight {
@@ -122,4 +148,19 @@ model AccessRight {
 model WhiteListedDomain {
   id     Int    @id @default(autoincrement())
   domain String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Favorite {
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([user_id, product_id], name: "favorite_id")
 }

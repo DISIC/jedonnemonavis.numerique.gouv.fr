@@ -31,6 +31,21 @@ export const getServerSideProps: GetServerSideProps = async context => {
 			}
 		};
 
+	const currentUser = await prisma.user.findUnique({
+		where: {
+			email: currentUserToken.email as string
+		}
+	});
+
+	if (!currentUser) {
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false
+			}
+		};
+	}
+
 	const hasAccessRightToProduct = await prisma.accessRight.findFirst({
 		where: {
 			user_email: currentUserToken.email as string,
@@ -39,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	if (!hasAccessRightToProduct) {
+	if (!hasAccessRightToProduct && currentUser.role !== 'admin') {
 		return {
 			redirect: {
 				destination: '/',

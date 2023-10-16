@@ -8,10 +8,13 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { classes, cx } = useStyles();
 	const { pathname } = useRouter();
+
+	const { data: session } = useSession();
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!pathname.startsWith('/administration')
@@ -34,6 +37,38 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			  }
 	];
 
+	const navigationItems = [];
+
+	if (session?.user.role === 'admin') {
+		const adminNavigationItems = [
+			{
+				text: 'Démarches',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
+			},
+			{
+				text: 'Utilisateurs',
+				linkProps: {
+					href: '/administration/dashboard/users',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/users'
+			},
+			{
+				text: 'Liste blanche des noms de domaines',
+				linkProps: {
+					href: '/administration/dashboard/domains',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/domains'
+			}
+		];
+		navigationItems.push(...adminNavigationItems);
+	}
+
 	return (
 		<>
 			<Head>
@@ -52,6 +87,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				}}
 				id="fr-header-public-header"
 				quickAccessItems={quickAccessItems}
+				navigation={navigationItems}
 				serviceTitle="Je donne mon avis"
 				serviceTagline="baseline - précisions sur l'organisation"
 			/>

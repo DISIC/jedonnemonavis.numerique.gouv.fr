@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
 		!!token
 	) {
 		return NextResponse.redirect(
-			new URL('/administration/dashboard', request.url)
+			new URL('/administration/dashboard/products', request.url)
 		);
 	}
 }

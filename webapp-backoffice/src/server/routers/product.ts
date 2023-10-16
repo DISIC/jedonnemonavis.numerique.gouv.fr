@@ -5,6 +5,7 @@ import {
 	ProductSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 
 export const productRouter = router({
 	getById: publicProcedure
@@ -33,35 +34,60 @@ export const productRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				sort: z.string().optional(),
-				search: z.string().optional()
+				search: z.string().optional(),
+				filterEntityId: z.number().optional(),
+				filterByUserFavorites: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const userEmail = ctx.session?.user?.email;
-			const { numberPerPage, page, sort, search } = input;
+			const contextUser = ctx.session.user;
+			const {
+				numberPerPage,
+				page,
+				sort,
+				search,
+				filterEntityId,
+				filterByUserFavorites
+			} = input;
 
-			let orderBy: any = [
+			let orderBy: Prisma.ProductOrderByWithAggregationInput[] = [
 				{
 					title: 'asc'
 				}
 			];
 
-			let where: any = {
-				title: {
-					contains: ''
-				},
-				accessRights: {
-					some: {
-						user_email: userEmail,
-						status: 'carrier'
-					}
-				}
+			let where: Prisma.ProductWhereInput = {
+				accessRights:
+					contextUser.role !== 'admin'
+						? {
+								some: {
+									user_email: contextUser.email,
+									status: 'carrier'
+								}
+						  }
+						: {}
 			};
 
 			if (search) {
 				const searchQuery = search.split(' ').join(' | ');
 				where.title = {
 					contains: searchQuery
+				};
+			}
+
+			if (filterEntityId) {
+				where.entity = {
+					id: filterEntityId
+				};
+			}
+
+			if (filterByUserFavorites) {
+				where = {
+					favorites: {
+						some: {
+							user_id: parseInt(contextUser.id)
+						}
+					}
 				};
 			}
 

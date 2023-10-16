@@ -80,7 +80,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				currentPageLabel={product.title}
 				segments={[
 					{
-						label: 'Tableau de bord',
+						label: 'Démarches',
 						linkProps: {
 							href: '/'
 						}

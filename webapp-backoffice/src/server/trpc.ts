@@ -5,10 +5,12 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { OpenApiMeta } from 'trpc-openapi';
+import { Session } from 'next-auth';
 
 // Metadata for protected procedures
 interface Meta {
-	authRequired: boolean;
+	authRequired?: boolean;
+	isAdmin?: boolean;
 }
 
 // Create context with Prisma and NextAuth session
@@ -26,11 +28,12 @@ export type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC
 	.context<Context>()
-	.meta<OpenApiMeta | Meta>()
+	.meta<OpenApiMeta<Meta>>()
 	.create({
 		transformer: SuperJSON,
 		defaultMeta: {
-			authRequired: true
+			authRequired: true,
+			isAdmin: false
 		},
 		errorFormatter({ shape, error }) {
 			return {
@@ -50,17 +53,31 @@ const t = initTRPC
 	});
 
 // Auth middleware
-const isAuthed = t.middleware(({ next, meta, ctx }) => {
-	if (!ctx.session?.user?.email && (meta?.authRequired || true)) {
+const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
+	const user = await ctx.prisma.user.findUnique({
+		where: {
+			email: ctx.session?.user?.email as string
+		}
+	});
+
+	if (meta?.authRequired && (!ctx.session?.user === undefined || !user)) {
 		throw new TRPCError({
-			code: 'UNAUTHORIZED'
+			code: 'UNAUTHORIZED',
+			message: 'You are not authorized to perform this action'
+		});
+	}
+
+	if (meta?.isAdmin && ctx.session?.user?.role !== 'admin') {
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'You are not authorized to perform this action'
 		});
 	}
 
 	return next({
 		ctx: {
 			// Infers the `session` as non-nullable
-			session: ctx.session
+			session: ctx.session as Session
 		}
 	});
 });

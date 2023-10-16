@@ -182,6 +182,7 @@ const ProductModal = (props: Props) => {
 							<Autocomplete
 								disablePortal
 								id={id}
+								noOptionsText="Aucune organisation trouvée"
 								sx={{ width: '100%' }}
 								options={entities.map((entity: Entity) => entity.name)}
 								onChange={(event, value) => {

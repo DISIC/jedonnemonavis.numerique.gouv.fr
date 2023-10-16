@@ -132,6 +132,7 @@ const ProductButtonsPage = (props: Props) => {
 				)}
 				<div className={fr.cx('fr-col-4')}>
 					<Checkbox
+						style={{ userSelect: 'none' }}
 						options={[
 							{
 								label: 'Afficher les boutons de test',

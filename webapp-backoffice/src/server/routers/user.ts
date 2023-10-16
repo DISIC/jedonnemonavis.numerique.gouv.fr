@@ -1,6 +1,9 @@
 import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-import { UserCreateInputSchema } from '@/prisma/generated/zod';
+import {
+	UserCreateInputSchema,
+	UserUpdateInputSchema
+} from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
@@ -134,6 +137,136 @@ export async function checkUserDomain(prisma: PrismaClient, email: string) {
 }
 
 export const userRouter = router({
+	getList: protectedProcedure
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1),
+				sort: z.string().optional(),
+				search: z.string().optional()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { numberPerPage, page, sort, search } = input;
+
+			let orderBy: Prisma.UserOrderByWithAggregationInput[] = [
+				{
+					email: 'asc'
+				}
+			];
+
+			let where: Prisma.UserWhereInput = {};
+
+			if (search) {
+				const [firstName, lastName] = search.split(' ');
+				where = {
+					OR: [
+						{
+							firstName: { contains: firstName },
+							lastName: { contains: lastName }
+						},
+						{
+							firstName: { contains: lastName },
+							lastName: { contains: firstName }
+						}
+					]
+				};
+			}
+
+			if (sort) {
+				const values = sort.split(':');
+				if (values.length === 2) {
+					if (values[0].includes('.')) {
+						const subValues = values[0].split('.');
+						if (subValues.length === 2) {
+							orderBy = [
+								{
+									[subValues[0]]: {
+										[subValues[1]]: values[1]
+									}
+								}
+							];
+						}
+					} else {
+						orderBy = [
+							{
+								[values[0]]: values[1]
+							}
+						];
+					}
+				}
+			}
+
+			const users = await ctx.prisma.user.findMany({
+				orderBy,
+				where,
+				take: numberPerPage,
+				skip: numberPerPage * (page - 1)
+			});
+
+			const count = await ctx.prisma.user.count({ where });
+
+			return { data: users, metadata: { count } };
+		}),
+
+	create: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(UserCreateInputSchema)
+		.mutation(async ({ ctx, input: newUser }) => {
+			const userExists = await ctx.prisma.user.findUnique({
+				where: {
+					email: newUser.email
+				}
+			});
+
+			if (userExists)
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'User with email already exists'
+				});
+
+			const hashedPassword = crypto
+				.createHash('sha256')
+				.update(newUser.password)
+				.digest('hex');
+
+			newUser.password = hashedPassword;
+
+			const createdUser = await ctx.prisma.user.create({
+				data: {
+					...newUser
+				}
+			});
+
+			return { data: createdUser };
+		}),
+
+	update: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
+		.mutation(async ({ ctx, input }) => {
+			const { id, user } = input;
+			const updatedUser = await ctx.prisma.user.update({
+				where: { id },
+				data: { ...user }
+			});
+
+			return { data: updatedUser };
+		}),
+
+	delete: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const deletedUser = await ctx.prisma.user.delete({
+				where: { id }
+			});
+
+			return { data: deletedUser };
+		}),
+
 	register: publicProcedure
 		.input(
 			z.object({
