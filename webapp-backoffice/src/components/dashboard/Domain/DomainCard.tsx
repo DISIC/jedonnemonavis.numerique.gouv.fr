@@ -7,20 +7,12 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	domain: WhiteListedDomain;
 	setCurrentDomain: (
-		domain: WhiteListedDomain & { type: 'create' | 'delete' }
+		domain: WhiteListedDomain & { type: 'create' | 'on-confirm' | 'delete' }
 	) => void;
 };
 
 const DomainCard = ({ domain, setCurrentDomain }: Props) => {
-	const utils = trpc.useContext();
 	const { cx, classes } = useStyles();
-
-	const deleteDomain = trpc.domains.delete.useMutation({
-		onSuccess: result => {
-			utils.domains.getList.invalidate();
-			setCurrentDomain({ ...result.data, type: 'delete' });
-		}
-	});
 
 	return (
 		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
@@ -45,7 +37,7 @@ const DomainCard = ({ domain, setCurrentDomain }: Props) => {
 						priority="tertiary"
 						size="small"
 						title="Supprimer le domaine"
-						onClick={() => deleteDomain.mutate({ domain: domain.domain })}
+						onClick={() => setCurrentDomain({ ...domain, type: 'on-confirm' })}
 						className={cx(fr.cx('fr-mr-5v'), classes.errorColor)}
 					/>
 				</div>

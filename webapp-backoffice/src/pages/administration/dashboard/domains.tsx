@@ -1,12 +1,14 @@
 import DomainCard from '@/src/components/dashboard/Domain/DomainCard';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { WhiteListedDomain } from '@prisma/client';
 import React from 'react';
@@ -17,19 +19,35 @@ type FormValues = {
 	domain: string;
 };
 
+const onConfirmModal = createModal({
+	id: 'domain-on-confirm-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoardDomainDomains = () => {
+	const utils = trpc.useContext();
+
 	const [filter, setFilter] = React.useState<string>('domain:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
 	const [currentDomain, setCurrentDomain] = React.useState<
-		WhiteListedDomain & { type: 'create' | 'delete' }
+		WhiteListedDomain & { type: 'create' | 'on-confirm' | 'delete' }
 	>();
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
 	const { cx, classes } = useStyles();
+
+	const handleCurrentDomain = (
+		domain: WhiteListedDomain & { type: 'create' | 'on-confirm' | 'delete' }
+	) => {
+		setCurrentDomain(domain);
+		if (domain.type === 'on-confirm') {
+			onConfirmModal.open();
+		}
+	};
 
 	const createDomain = trpc.domains.create.useMutation({
 		onSuccess: result => {
@@ -44,6 +62,13 @@ const DashBoardDomainDomains = () => {
 					message: 'Ce domaine est déjà existant'
 				});
 			}
+		}
+	});
+
+	const deleteDomain = trpc.domains.delete.useMutation({
+		onSuccess: result => {
+			utils.domains.getList.invalidate();
+			setCurrentDomain({ ...result.data, type: 'delete' });
 		}
 	});
 
@@ -102,6 +127,21 @@ const DashBoardDomainDomains = () => {
 
 	return (
 		<>
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title="Supprimer un nom de domaine"
+				handleOnConfirm={() => {
+					deleteDomain.mutate({ id: currentDomain?.id as number });
+					onConfirmModal.close();
+				}}
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir supprimer le nom de domaine{' '}
+						<span className={classes.boldText}>@{currentDomain?.domain}</span> ?
+					</p>
+				</div>
+			</OnConfirmModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -198,7 +238,7 @@ const DashBoardDomainDomains = () => {
 						</form>
 					</div>
 				</div>
-				{currentDomain && (
+				{currentDomain && currentDomain.type !== 'on-confirm' && (
 					<Alert
 						severity={currentDomain.type === 'create' ? 'success' : 'info'}
 						description={getAlertTitle()}
@@ -262,7 +302,7 @@ const DashBoardDomainDomains = () => {
 									<DomainCard
 										key={index}
 										domain={domain}
-										setCurrentDomain={setCurrentDomain}
+										setCurrentDomain={handleCurrentDomain}
 									/>
 								))
 							)}

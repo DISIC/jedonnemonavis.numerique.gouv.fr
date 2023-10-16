@@ -95,13 +95,13 @@ export const domainRouter = router({
 
 	delete: protectedProcedure
 		.meta({ isAdmin: true })
-		.input(z.object({ domain: z.string() }))
+		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
-			const { domain } = input;
+			const { id } = input;
 
 			const deletedDomain = await ctx.prisma.whiteListedDomain.delete({
 				where: {
-					domain
+					id
 				}
 			});
 

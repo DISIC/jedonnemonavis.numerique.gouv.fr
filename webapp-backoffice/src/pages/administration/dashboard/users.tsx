@@ -2,6 +2,7 @@ import UserCard from '@/src/components/dashboard/User/UserCard';
 import UserModal from '@/src/components/dashboard/User/UserModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -18,8 +19,13 @@ export type OnButtonClickUserParams =
 	| { type: 'create'; user?: User }
 	| { type: 'delete'; user: User };
 
-const modal = createModal({
+const userModal = createModal({
 	id: 'user-modal',
+	isOpenedByDefault: false
+});
+
+const onConfirmModal = createModal({
+	id: 'user-on-confirm-modal',
 	isOpenedByDefault: false
 });
 
@@ -63,9 +69,7 @@ const DashBoardUsers = () => {
 	} = usersResult;
 
 	const deleteUser = trpc.user.delete.useMutation({
-		onSuccess: () => {
-			refetchUsers();
-		}
+		onSuccess: () => refetchUsers()
 	});
 
 	const handlePageChange = (pageNumber: number) => {
@@ -74,24 +78,42 @@ const DashBoardUsers = () => {
 
 	const nbPages = getNbPages(usersCount, numberPerPage);
 
-	const isModalOpen = useIsModalOpen(modal);
+	const isModalOpen = useIsModalOpen(userModal);
 
 	const handleModalOpening = async ({
 		type,
 		user
 	}: OnButtonClickUserParams) => {
+		setCurrentUser(user);
 		if (type === 'create') {
-			setCurrentUser(user);
-			modal.open();
+			userModal.open();
 		} else if (type === 'delete') {
-			deleteUser.mutate({ id: user.id });
+			onConfirmModal.open();
 		}
 	};
 
 	return (
 		<>
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title="Supprimer un utilisateur"
+				handleOnConfirm={() => {
+					deleteUser.mutate({ id: currentUser?.id as number });
+					onConfirmModal.close();
+				}}
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
+						<span className={classes.boldText}>
+							{currentUser?.firstName} {currentUser?.lastName}
+						</span>{' '}
+						?
+					</p>
+				</div>
+			</OnConfirmModal>
 			<UserModal
-				modal={modal}
+				modal={userModal}
 				isOpen={isModalOpen}
 				user={currentUser}
 				refetchUsers={refetchUsers}
