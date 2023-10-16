@@ -20,6 +20,12 @@ interface Props {
 	product: Product;
 }
 
+export type AccessRightModalType =
+	| 'add'
+	| 'remove'
+	| 'resend-email'
+	| 'reintegrate';
+
 const modal = createModal({
 	id: 'user-product-modal',
 	isOpenedByDefault: false
@@ -32,9 +38,7 @@ const AccessManagement = (props: Props) => {
 
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
-	const [modalType, setModalType] = React.useState<
-		'add' | 'remove' | 'resend-email'
-	>('add');
+	const [modalType, setModalType] = React.useState<AccessRightModalType>('add');
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -72,7 +76,7 @@ const AccessManagement = (props: Props) => {
 	});
 
 	const handleModalOpening = async (
-		modalType: 'add' | 'remove' | 'resend-email',
+		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => {
 		if (accessRight) setCurrentAccessRight(accessRight);
@@ -115,6 +119,12 @@ const AccessManagement = (props: Props) => {
 						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 						: currentAccessRight.user_email_invite
 				} a été retiré comme porteur ou porteuse de ce produit numérique.`;
+			case 'reintegrate':
+				return `${
+					currentAccessRight?.user !== null
+						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
+						: currentAccessRight.user_email_invite
+				} a été réintégré comme porteur ou porteuse de ce produit numérique.`;
 		}
 	};
 

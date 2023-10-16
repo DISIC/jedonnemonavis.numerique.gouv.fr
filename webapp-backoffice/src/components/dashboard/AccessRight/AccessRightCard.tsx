@@ -6,11 +6,12 @@ import { Menu, MenuItem } from '@mui/material';
 import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
+import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
 	onButtonClick: (
-		modalType: 'remove' | 'resend-email',
+		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
 }
@@ -89,10 +90,7 @@ const ProductAccessCard = (props: Props) => {
 							priority="tertiary"
 							className={menuOpen ? classes.buttonOptionsOpen : ''}
 							onClick={handleClick}
-							disabled={
-								accessRight.status === 'removed' ||
-								accessRight.user_email === session?.user?.email
-							}
+							disabled={accessRight.user_email === session?.user?.email}
 							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
 							iconPosition="right"
 							size="small"
@@ -108,24 +106,38 @@ const ProductAccessCard = (props: Props) => {
 								'aria-labelledby': 'button-options-access-right'
 							}}
 						>
-							{accessRight.user === null && (
+							{accessRight.status === 'carrier' && (
+								<>
+									{accessRight.user === null && (
+										<MenuItem
+											onClick={() => {
+												onButtonClick('resend-email', accessRight);
+												handleClose();
+											}}
+										>
+											Renvoyer l'e-mail d'invitation
+										</MenuItem>
+									)}
+									<MenuItem
+										onClick={() => {
+											onButtonClick('remove', accessRight);
+											handleClose();
+										}}
+									>
+										Retirer son droit d'accès
+									</MenuItem>
+								</>
+							)}
+							{accessRight.status === 'removed' && (
 								<MenuItem
 									onClick={() => {
-										onButtonClick('resend-email', accessRight);
+										onButtonClick('reintegrate', accessRight);
 										handleClose();
 									}}
 								>
-									Renvoyer l'e-mail d'invitation
+									Rétablir son droit d'accès
 								</MenuItem>
 							)}
-							<MenuItem
-								onClick={() => {
-									onButtonClick('remove', accessRight);
-									handleClose();
-								}}
-							>
-								Retirer son droit d'accès
-							</MenuItem>
 						</Menu>
 					</div>
 				</div>
