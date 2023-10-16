@@ -67,7 +67,7 @@ const DashBoardDomainDomains = () => {
 
 	const deleteDomain = trpc.domain.delete.useMutation({
 		onSuccess: result => {
-			utils.domains.getList.invalidate();
+			utils.domain.getList.invalidate();
 			setCurrentDomain({ ...result.data, type: 'delete' });
 		}
 	});
