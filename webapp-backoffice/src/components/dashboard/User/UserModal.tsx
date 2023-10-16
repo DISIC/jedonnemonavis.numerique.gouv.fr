@@ -151,7 +151,19 @@ const ButtonModal = (props: Props) => {
 						<Controller
 							control={control}
 							name="password"
-							rules={{ required: 'Ce champ est requis' }}
+							rules={{
+								required: 'Ce champ est requis',
+								minLength: {
+									value: 12,
+									message:
+										'Votre mot de passe doit contenir au moins 12 caractères'
+								},
+								pattern: {
+									value: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
+									message:
+										'Votre mot de passe doit contenir au moins un chiffre et un caractère spécial'
+								}
+							}}
 							render={({ field: { onChange, value } }) => (
 								<Input
 									label="Mot de passe"
