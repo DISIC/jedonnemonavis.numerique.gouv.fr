@@ -25,7 +25,18 @@ export async function importProduct(data: ImportProduct) {
 				create: data.users.map(user => ({
 					status: 'carrier',
 					user: {
-						connectOrCreate: { where: { email: user.email }, create: user }
+						connectOrCreate: {
+							where: { email: user.email },
+							create: {
+								...user,
+								entities: {
+									connectOrCreate: user.entities.map(e => ({
+										where: { name: e.name },
+										create: { ...e }
+									}))
+								}
+							}
+						}
 					}
 				}))
 			}

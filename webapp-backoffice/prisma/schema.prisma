@@ -4,15 +4,15 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
-	previewFeatures = ["fullTextSearch"]
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 generator zod {
-  provider       = "zod-prisma-types"
+  provider               = "zod-prisma-types"
   addInputTypeValidation = false
-  addIncludeType = false
-  addSelectType = false
+  addIncludeType         = false
+  addSelectType          = false
 }
 
 enum RequestMode {
@@ -39,6 +39,7 @@ model User {
   UserValidationTokens  UserValidationToken[]
   UserRequests          UserRequest[]
   accessRights          AccessRight[]
+  entities              Entity[]
 }
 
 model UserRequest {
@@ -75,6 +76,7 @@ model Entity {
   name     String    @unique
   acronym  String
   products Product[]
+  users    User[]
 }
 
 model Button {
@@ -91,7 +93,7 @@ model Button {
 model Product {
   id              Int           @id @default(autoincrement())
   title           String
-  entity          Entity       @relation(fields: [entity_id], references: [id])
+  entity          Entity        @relation(fields: [entity_id], references: [id])
   entity_id       Int
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
@@ -104,12 +106,12 @@ model Product {
 }
 
 model AccessRight {
-  id         Int     @id @default(autoincrement())
-  user       User?   @relation(fields: [user_email], references: [email])
-  user_email String?
+  id                Int     @id @default(autoincrement())
+  user              User?   @relation(fields: [user_email], references: [email])
+  user_email        String?
   user_email_invite String?
-  product    Product @relation(fields: [product_id], references: [id])
-  product_id Int
+  product           Product @relation(fields: [product_id], references: [id])
+  product_id        Int
 
   status RightAccessStatus @default(carrier)
 

@@ -19,3 +19,11 @@ const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
 export type ProductWithButtons = Prisma.ProductGetPayload<
 	typeof ProductWithButtons
 >;
+
+const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
+	include: {
+		entities: true
+	}
+});
+
+export type UserWithEntities = Prisma.UserGetPayload<typeof UserWithEntities>;
