@@ -254,6 +254,19 @@ export const userRouter = router({
 			return { data: updatedUser };
 		}),
 
+	delete: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const deletedUser = await ctx.prisma.user.delete({
+				where: { id }
+			});
+
+			return { data: deletedUser };
+		}),
+
 	register: publicProcedure
 		.input(
 			z.object({

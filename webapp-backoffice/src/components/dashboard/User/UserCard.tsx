@@ -1,3 +1,4 @@
+import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/users';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -7,7 +8,7 @@ import { tss } from 'tss-react/dsfr';
 
 type Props = {
 	user: User;
-	onButtonClick: (user: User) => void;
+	onButtonClick: ({ type, user }: OnButtonClickUserParams) => void;
 };
 
 const UserCard = ({ user, onButtonClick }: Props) => {
@@ -61,6 +62,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 						disabled={session?.user.email === user.email}
 						iconPosition="right"
 						className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+						onClick={() => onButtonClick({ type: 'delete', user })}
 					>
 						Supprimer
 					</Button>
@@ -68,7 +70,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 						priority="secondary"
 						iconId="fr-icon-edit-line"
 						iconPosition="right"
-						onClick={() => onButtonClick(user)}
+						onClick={() => onButtonClick({ type: 'create', user })}
 					>
 						Modifier
 					</Button>

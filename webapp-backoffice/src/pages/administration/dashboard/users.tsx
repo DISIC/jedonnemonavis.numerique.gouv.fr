@@ -14,6 +14,10 @@ import { User } from '@prisma/client';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
+export type OnButtonClickUserParams =
+	| { type: 'create'; user?: User }
+	| { type: 'delete'; user: User };
+
 const modal = createModal({
 	id: 'user-modal',
 	isOpenedByDefault: false
@@ -58,6 +62,12 @@ const DashBoardUsers = () => {
 		metadata: { count: usersCount }
 	} = usersResult;
 
+	const deleteUser = trpc.user.delete.useMutation({
+		onSuccess: () => {
+			refetchUsers();
+		}
+	});
+
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
@@ -66,9 +76,16 @@ const DashBoardUsers = () => {
 
 	const isModalOpen = useIsModalOpen(modal);
 
-	const handleModalOpening = async (user?: User) => {
-		setCurrentUser(user);
-		modal.open();
+	const handleModalOpening = async ({
+		type,
+		user
+	}: OnButtonClickUserParams) => {
+		if (type === 'create') {
+			setCurrentUser(user);
+			modal.open();
+		} else if (type === 'delete') {
+			deleteUser.mutate({ id: user.id });
+		}
 	};
 
 	return (
@@ -97,7 +114,7 @@ const DashBoardUsers = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							onClick={() => handleModalOpening(undefined)}
+							onClick={() => handleModalOpening({ type: 'create' })}
 						>
 							Ajouter un nouvel utilisateur
 						</Button>
