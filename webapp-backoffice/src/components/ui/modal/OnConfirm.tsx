@@ -50,9 +50,7 @@ const OnConfirmModal = (props: Props) => {
 				}
 			]}
 		>
-			<div>
-				<p>{children}</p>
-			</div>
+			<div>{children}</div>
 		</modal.Component>
 	);
 };
