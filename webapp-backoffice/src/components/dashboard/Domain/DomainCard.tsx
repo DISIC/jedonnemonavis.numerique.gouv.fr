@@ -6,14 +6,20 @@ import { tss } from 'tss-react/dsfr';
 
 type Props = {
 	domain: WhiteListedDomain;
+	setCurrentDomain: (
+		domain: WhiteListedDomain & { type: 'create' | 'delete' }
+	) => void;
 };
 
-const DomainCard = ({ domain }: Props) => {
+const DomainCard = ({ domain, setCurrentDomain }: Props) => {
 	const utils = trpc.useContext();
 	const { cx, classes } = useStyles();
 
 	const deleteDomain = trpc.domains.delete.useMutation({
-		onSuccess: () => utils.domains.getList.invalidate()
+		onSuccess: result => {
+			utils.domains.getList.invalidate();
+			setCurrentDomain({ ...result.data, type: 'delete' });
+		}
 	});
 
 	return (

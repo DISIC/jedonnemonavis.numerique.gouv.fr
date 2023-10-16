@@ -4,9 +4,11 @@ import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { WhiteListedDomain } from '@prisma/client';
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
@@ -20,15 +22,20 @@ const DashBoardDomainDomains = () => {
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 
+	const [currentDomain, setCurrentDomain] = React.useState<
+		WhiteListedDomain & { type: 'create' | 'delete' }
+	>();
+
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
 	const { cx, classes } = useStyles();
 
 	const createDomain = trpc.domains.create.useMutation({
-		onSuccess: () => {
+		onSuccess: result => {
 			refectDomains();
 			reset({ domain: '' });
+			setCurrentDomain({ ...result.data, type: 'create' });
 		},
 		onError: error => {
 			if (error.data?.httpStatus == 409) {
@@ -84,6 +91,14 @@ const DashBoardDomainDomains = () => {
 	};
 
 	const nbPages = getNbPages(domainsCount, numberPerPage);
+
+	const getAlertTitle = () => {
+		if (currentDomain?.type === 'delete') {
+			return `@${currentDomain?.domain} retiré de la liste !`;
+		} else {
+			return `@${currentDomain?.domain} ajouté sur la liste !`;
+		}
+	};
 
 	return (
 		<>
@@ -183,6 +198,16 @@ const DashBoardDomainDomains = () => {
 						</form>
 					</div>
 				</div>
+				{currentDomain && (
+					<Alert
+						severity={currentDomain.type === 'create' ? 'success' : 'info'}
+						description={getAlertTitle()}
+						className={classes.alert}
+						onClose={() => setCurrentDomain(undefined)}
+						closable
+						small
+					/>
+				)}
 				{isLoadingDomains ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
@@ -234,7 +259,11 @@ const DashBoardDomainDomains = () => {
 								</div>
 							) : (
 								domains.map((domain, index) => (
-									<DomainCard domain={domain} key={index} />
+									<DomainCard
+										key={index}
+										domain={domain}
+										setCurrentDomain={setCurrentDomain}
+									/>
 								))
 							)}
 							{domains.length === 0 && !isRefetchingDomains && (
@@ -332,6 +361,10 @@ const useStyles = tss.withName(DashBoardDomainDomains.name).create(() => ({
 	},
 	labelHeight: {
 		marginTop: '2rem'
+	},
+	alert: {
+		marginTop: '1rem',
+		marginBottom: '1rem'
 	}
 }));
 
