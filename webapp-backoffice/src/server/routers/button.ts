@@ -12,17 +12,22 @@ export const buttonRouter = router({
 			z.object({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
+				product_id: z.number().optional(),
 				isTest: z.boolean()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, isTest } = input;
+			const { numberPerPage, page, product_id, isTest } = input;
 
 			let where: Prisma.ButtonWhereInput = {
 				isTest: {
 					equals: !isTest ? false : undefined
 				}
 			};
+
+			if (product_id) {
+				where.product_id = product_id;
+			}
 
 			const entities = await ctx.prisma.button.findMany({
 				where,
