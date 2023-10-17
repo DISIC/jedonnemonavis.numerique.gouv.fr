@@ -71,7 +71,8 @@ export const productRouter = router({
 			if (search) {
 				const searchQuery = search.split(' ').join(' | ');
 				where.title = {
-					contains: searchQuery
+					contains: searchQuery,
+					mode: 'insensitive'
 				};
 			}
 
@@ -82,11 +83,9 @@ export const productRouter = router({
 			}
 
 			if (filterByUserFavorites) {
-				where = {
-					favorites: {
-						some: {
-							user_id: parseInt(contextUser.id)
-						}
+				where.favorites = {
+					some: {
+						user_id: parseInt(contextUser.id)
 					}
 				};
 			}

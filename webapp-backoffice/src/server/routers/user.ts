@@ -158,19 +158,17 @@ export const userRouter = router({
 			let where: Prisma.UserWhereInput = {};
 
 			if (search) {
-				const [firstName, lastName] = search.split(' ');
-				where = {
-					OR: [
-						{
-							firstName: { contains: firstName },
-							lastName: { contains: lastName }
-						},
-						{
-							firstName: { contains: lastName },
-							lastName: { contains: firstName }
-						}
-					]
-				};
+				const [firstName, lastName] = search.toLowerCase().split(' ');
+				where.OR = [
+					{
+						firstName: { contains: firstName, mode: 'insensitive' },
+						lastName: { contains: lastName, mode: 'insensitive' }
+					},
+					{
+						firstName: { contains: lastName, mode: 'insensitive' },
+						lastName: { contains: firstName, mode: 'insensitive' }
+					}
+				];
 			}
 
 			if (sort) {
