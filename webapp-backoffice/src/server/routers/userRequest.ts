@@ -7,6 +7,8 @@ import {
 	UserRequestUpdateInputSchema
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
+import { sendMail } from '@/src/utils/mailer';
+import { getUserRequestEmailHtml } from '@/src/utils/tools';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -53,12 +55,19 @@ export async function updateUserRequest(
 	});
 
 	if (updatedUserRequest.status === 'accepted') {
-		await prisma.user.update({
+		const updatedUser = await prisma.user.update({
 			where: { id: updatedUserRequest.user_id },
 			data: {
 				active: true
 			}
 		});
+
+		await sendMail(
+			`Votre demande d'accès sur "Je donne mon avis" a été acceptée`,
+			updatedUser.email,
+			getUserRequestEmailHtml(),
+			`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
+		);
 	}
 
 	if (createDomain) {
