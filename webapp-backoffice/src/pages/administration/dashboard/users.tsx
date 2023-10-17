@@ -102,15 +102,13 @@ const DashBoardUsers = () => {
 					onConfirmModal.close();
 				}}
 			>
-				<div>
-					<p>
-						Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
-						<span className={classes.boldText}>
-							{currentUser?.firstName} {currentUser?.lastName}
-						</span>{' '}
-						?
-					</p>
-				</div>
+				<>
+					Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
+					<span className={classes.boldText}>
+						{currentUser?.firstName} {currentUser?.lastName}
+					</span>{' '}
+					?
+				</>
 			</OnConfirmModal>
 			<UserModal
 				modal={userModal}
