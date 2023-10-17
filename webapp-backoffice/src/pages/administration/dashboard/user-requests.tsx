@@ -14,7 +14,7 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export type UserRequestExtended = UserRequestWithUser & {
-	type: 'accept-on-confirm' | 'accept' | 'delete-on-confirm' | 'delete';
+	type: 'accept-on-confirm' | 'accept' | 'refused-on-confirm' | 'refused';
 };
 
 const onConfirmDeleteModal = createModal({
@@ -29,13 +29,15 @@ const onConfirmAcceptModal = createModal({
 
 const DashBoardUserRequestUserRequests = () => {
 	const [filter, setFilter] = React.useState<string>('created_at:asc');
+	const [displayProcessed, setDisplayProcessed] =
+		React.useState<boolean>(false);
 
 	const [currentUserRequest, setCurrentUserRequest] =
 		React.useState<UserRequestExtended>();
 
 	const handleCurrentUserRequest = (user_request: UserRequestExtended) => {
 		setCurrentUserRequest(user_request);
-		if (user_request.type === 'delete-on-confirm') {
+		if (user_request.type === 'refused-on-confirm') {
 			onConfirmDeleteModal.open();
 		} else if (user_request.type === 'accept-on-confirm') {
 			onConfirmAcceptModal.open();
@@ -59,7 +61,8 @@ const DashBoardUserRequestUserRequests = () => {
 		{
 			sort: filter,
 			page: currentPage,
-			numberPerPage
+			numberPerPage,
+			displayProcessed
 		},
 		{
 			initialData: {
@@ -76,33 +79,36 @@ const DashBoardUserRequestUserRequests = () => {
 		metadata: { count: userRequestsCount }
 	} = userrequestsResult;
 
-	const createDomain = trpc.domain.create.useMutation();
-
-	const updateUser = trpc.user.update.useMutation({
-		onSuccess: () => refectUserRequests()
+	const updateUserRequest = trpc.userRequest.update.useMutation({
+		onSuccess: result => {
+			refectUserRequests();
+			setCurrentUserRequest({
+				...result.data,
+				type: result.data.status === 'accepted' ? 'accept' : 'refused'
+			});
+			setCreateDomainOnAccept(false);
+		}
 	});
-
-	const deleteUserRequest = trpc.userRequest.delete.useMutation();
 
 	const handleOnConfirmAccept = () => {
 		if (currentUserRequest) {
-			updateUser.mutate({
-				id: currentUserRequest.user.id,
-				user: { active: true }
-			});
-
-			if (createDomainOnAccept) {
-				createDomain.mutate({
-					domain: currentUserRequest.user.email.split('@')[1]
-				});
-			}
-
-			deleteUserRequest.mutate({
-				id: currentUserRequest.id
+			updateUserRequest.mutate({
+				id: currentUserRequest.id,
+				userRequest: { status: 'accepted' },
+				createDomain: createDomainOnAccept
 			});
 		}
-		setCreateDomainOnAccept(false);
 		onConfirmAcceptModal.close();
+	};
+
+	const handleOnConfirmRefuse = () => {
+		if (currentUserRequest) {
+			updateUserRequest.mutate({
+				id: currentUserRequest?.id as number,
+				userRequest: { status: 'refused' }
+			});
+		}
+		onConfirmDeleteModal.close();
 	};
 
 	const handlePageChange = (pageNumber: number) => {
@@ -111,16 +117,20 @@ const DashBoardUserRequestUserRequests = () => {
 
 	const nbPages = getNbPages(userRequestsCount, numberPerPage);
 
+	const getAlertTitle = () => {
+		if (currentUserRequest?.type === 'refused') {
+			return `La demande d'accès de ${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName} a été rejetée !`;
+		} else {
+			return `La demande d'accès de ${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName} a été acceptée !`;
+		}
+	};
+
 	return (
 		<>
 			<OnConfirmModal
 				modal={onConfirmDeleteModal}
 				title="Rejeter la demande d'accès"
-				handleOnConfirm={() =>
-					deleteUserRequest.mutate({
-						id: currentUserRequest?.id as number
-					})
-				}
+				handleOnConfirm={() => handleOnConfirmRefuse()}
 			>
 				<>
 					Voulez-vous vraiment rejeter la demande d'accès de{' '}
@@ -136,24 +146,26 @@ const DashBoardUserRequestUserRequests = () => {
 				handleOnConfirm={() => handleOnConfirmAccept()}
 			>
 				<>
-					Accepter la demande d'accès de{' '}
+					Vous voulez vraiment accepter la demande d'accès de{' '}
 					<span className={cx(classes.boldText)}>
 						{`${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName}`}
 					</span>{' '}
 					?
-					<Checkbox
-						options={[
-							{
-								label:
-									'Ajouter le domaine à la liste blanche des noms de domaines',
-								nativeInputProps: {
-									name: 'createDomainOnAccept',
-									onChange: event =>
-										setCreateDomainOnAccept(event.target.checked)
+					<div className={fr.cx('fr-input-group', 'fr-mt-3w')}>
+						<Checkbox
+							options={[
+								{
+									label:
+										'Ajouter le domaine à la liste blanche des noms de domaines',
+									nativeInputProps: {
+										name: 'createDomainOnAccept',
+										onChange: event =>
+											setCreateDomainOnAccept(event.target.checked)
+									}
 								}
-							}
-						]}
-					/>
+							]}
+						/>
+					</div>
 				</>
 			</OnConfirmModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
@@ -184,6 +196,46 @@ const DashBoardUserRequestUserRequests = () => {
 						</Select>
 					</div>
 				</div>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						'fr-mt-4w',
+						nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+						'fr-py-0'
+					)}
+				>
+					<Checkbox
+						className={fr.cx('fr-mb-0')}
+						style={{ userSelect: 'none' }}
+						options={[
+							{
+								label: 'Afficher les demandes traitées',
+								nativeInputProps: {
+									name: 'display-processed-user-request',
+									checked: displayProcessed,
+									onChange: e => {
+										setDisplayProcessed(e.currentTarget.checked);
+										setCurrentPage(1);
+									}
+								}
+							}
+						]}
+					/>
+				</div>
+				{currentUserRequest &&
+					(currentUserRequest.type === 'refused' ||
+						currentUserRequest.type === 'accept') && (
+						<Alert
+							severity={
+								currentUserRequest.type === 'accept' ? 'success' : 'info'
+							}
+							description={getAlertTitle()}
+							className={classes.alert}
+							onClose={() => setCurrentUserRequest(undefined)}
+							closable
+							small
+						/>
+					)}
 				{isLoadingUserRequests ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
@@ -227,10 +279,10 @@ const DashBoardUserRequestUserRequests = () => {
 									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 										<span>Utilisateur</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 										<span>Date de création</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 										<span>Raison de la demande</span>
 									</div>
 								</div>

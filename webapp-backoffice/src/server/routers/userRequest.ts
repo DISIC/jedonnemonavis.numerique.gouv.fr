@@ -3,7 +3,8 @@ import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import { Prisma, PrismaClient, RequestMode } from '@prisma/client';
 import {
 	RequestModeSchema,
-	UserCreateInputSchema
+	UserCreateInputSchema,
+	UserRequestUpdateInputSchema
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
 
@@ -37,6 +38,40 @@ export async function createUserRequest(
 	return createdUserRequest;
 }
 
+export async function updateUserRequest(
+	prisma: PrismaClient,
+	id: number,
+	userRequest: Prisma.UserRequestUpdateInput,
+	createDomain: boolean
+) {
+	const updatedUserRequest = await prisma.userRequest.update({
+		where: { id },
+		data: userRequest,
+		include: {
+			user: true
+		}
+	});
+
+	if (updatedUserRequest.status === 'accepted') {
+		await prisma.user.update({
+			where: { id: updatedUserRequest.user_id },
+			data: {
+				active: true
+			}
+		});
+	}
+
+	if (createDomain) {
+		await prisma.whiteListedDomain.create({
+			data: {
+				domain: updatedUserRequest.user.email.split('@')[1]
+			}
+		});
+	}
+
+	return updatedUserRequest;
+}
+
 export const userRequestRouter = router({
 	getList: protectedProcedure
 		.meta({ isAdmin: true })
@@ -44,12 +79,12 @@ export const userRequestRouter = router({
 			z.object({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
-				sort: z.string().optional()
+				sort: z.string().optional(),
+				displayProcessed: z.boolean()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const contextUser = ctx.session.user;
-			const { numberPerPage, page, sort } = input;
+			const { numberPerPage, page, sort, displayProcessed } = input;
 
 			let orderBy: Prisma.UserRequestOrderByWithAggregationInput[] = [
 				{
@@ -57,7 +92,9 @@ export const userRequestRouter = router({
 				}
 			];
 
-			let where: Prisma.UserRequestWhereInput = {};
+			let where: Prisma.UserRequestWhereInput = {
+				status: displayProcessed ? undefined : 'pending'
+			};
 
 			if (sort) {
 				const values = sort.split(':');
@@ -117,7 +154,30 @@ export const userRequestRouter = router({
 			return { data: createdUserRequest };
 		}),
 
+	update: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(
+			z.object({
+				id: z.number(),
+				userRequest: UserRequestUpdateInputSchema,
+				createDomain: z.boolean().default(false)
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, userRequest, createDomain } = input;
+
+			const updatedUserRequest = await updateUserRequest(
+				ctx.prisma,
+				id,
+				userRequest,
+				createDomain
+			);
+
+			return { data: updatedUserRequest };
+		}),
+
 	delete: protectedProcedure
+		.meta({ isAdmin: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;

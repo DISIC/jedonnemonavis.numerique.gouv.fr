@@ -126,7 +126,7 @@ const ButtonModal = (props: Props) => {
 
 	const displayModalContent = (): JSX.Element => {
 		return (
-			<div className={fr.cx('fr-container', 'fr-container--fluid')}>
+			<div className={fr.cx('fr-container--fluid')}>
 				<form onSubmit={handleSubmit(onSubmit)}>
 					<Controller
 						control={control}

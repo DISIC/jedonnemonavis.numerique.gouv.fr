@@ -1,8 +1,8 @@
 import { UserRequestExtended } from '@/src/pages/administration/dashboard/user-requests';
-import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/users';
 import { UserRequestWithUser } from '@/src/types/prismaTypesExtended';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 
@@ -20,7 +20,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--middle'
+					'fr-grid-row--top'
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
@@ -29,12 +29,12 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 					</p>
 					<span>{userRequest.user.email}</span>
 				</div>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 					<span>
 						{formatDateToFrenchString(userRequest.created_at.toString())}
 					</span>
 				</div>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 					<p className={fr.cx('fr-mb-0')}>{userRequest.reason}</p>
 				</div>
 				<div
@@ -43,34 +43,55 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 						classes.wrapperButtons
 					)}
 				>
-					<Button
-						priority="tertiary"
-						iconId="fr-icon-close-line"
-						iconPosition="right"
-						className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
-						onClick={() =>
-							setCurrentUserRequest({
-								...userRequest,
-								type: 'delete-on-confirm'
-							})
-						}
-					>
-						Rejeter
-					</Button>
-					<Button
-						priority="secondary"
-						iconId="fr-icon-check-line"
-						iconPosition="right"
-						className={cx(fr.cx('fr-mr-5v'))}
-						onClick={() =>
-							setCurrentUserRequest({
-								...userRequest,
-								type: 'accept-on-confirm'
-							})
-						}
-					>
-						Accepter
-					</Button>
+					{userRequest.status === 'pending' ? (
+						<>
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-close-line"
+								iconPosition="right"
+								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+								onClick={() =>
+									setCurrentUserRequest({
+										...userRequest,
+										type: 'refused-on-confirm'
+									})
+								}
+							>
+								Rejeter
+							</Button>
+							<Button
+								priority="secondary"
+								iconId="fr-icon-check-line"
+								iconPosition="right"
+								className={cx(fr.cx('fr-mr-5v'))}
+								onClick={() =>
+									setCurrentUserRequest({
+										...userRequest,
+										type: 'accept-on-confirm'
+									})
+								}
+							>
+								Accepter
+							</Button>
+						</>
+					) : (
+						<>
+							<Badge
+								noIcon
+								severity={
+									userRequest.status === 'accepted' ? 'success' : 'info'
+								}
+								className={cx(
+									classes.badge,
+									userRequest.status === 'refused'
+										? classes.badgeStatusRemoved
+										: ''
+								)}
+							>
+								{userRequest.status === 'accepted' ? 'Accepté' : 'Refusé'}
+							</Badge>
+						</>
+					)}
 				</div>
 			</div>
 		</div>
@@ -83,6 +104,16 @@ const useStyles = tss.withName(UserRequestCard.name).create(() => ({
 	},
 	iconSuccess: {
 		color: 'green'
+	},
+	badge: {
+		display: 'block',
+		width: '7.5rem',
+		textAlign: 'center'
+	},
+	badgeStatusRemoved: {
+		color: fr.colors.decisions.background.flat.purpleGlycine.default,
+		backgroundColor:
+			fr.colors.decisions.background.contrast.purpleGlycine.default
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default

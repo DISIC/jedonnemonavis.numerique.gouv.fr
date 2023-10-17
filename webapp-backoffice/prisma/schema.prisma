@@ -25,6 +25,12 @@ enum RequestMode {
   superuser
 }
 
+enum UserRequestStatus {
+  pending
+  accepted
+  refused
+}
+
 enum RightAccessStatus {
   carrier
   removed
@@ -57,7 +63,8 @@ model UserRequest {
   user    User        @relation(fields: [user_id], references: [id])
   user_id Int         @unique
   reason  String
-  mode    RequestMode
+  mode    RequestMode @default(whitelist)
+  status  UserRequestStatus @default(pending)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
