@@ -33,7 +33,8 @@ export async function createUserRequest(
 		data: {
 			reason: userRequest.reason,
 			mode: userRequest.mode,
-			user_id: createdUser.id
+			user_email: createdUser.email,
+			user_email_copy: createdUser.email
 		}
 	});
 
@@ -54,28 +55,39 @@ export async function updateUserRequest(
 		}
 	});
 
-	if (updatedUserRequest.status === 'accepted') {
-		const updatedUser = await prisma.user.update({
-			where: { id: updatedUserRequest.user_id },
-			data: {
-				active: true
-			}
-		});
+	if (updatedUserRequest.user !== null) {
+		if (updatedUserRequest.status === 'accepted') {
+			const updatedUser = await prisma.user.update({
+				where: { id: updatedUserRequest.user.id },
+				data: {
+					active: true
+				}
+			});
 
-		await sendMail(
-			`Votre demande d'accès sur "Je donne mon avis" a été acceptée`,
-			updatedUser.email,
-			getUserRequestEmailHtml(),
-			`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
-		);
-	}
-
-	if (createDomain) {
-		await prisma.whiteListedDomain.create({
-			data: {
-				domain: updatedUserRequest.user.email.split('@')[1]
+			if (createDomain) {
+				await prisma.whiteListedDomain.create({
+					data: {
+						domain: updatedUserRequest.user.email.split('@')[1]
+					}
+				});
 			}
-		});
+
+			await sendMail(
+				`Votre demande d'accès sur "Je donne mon avis" a été acceptée`,
+				updatedUser.email,
+				getUserRequestEmailHtml(),
+				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
+			);
+		} else if (updatedUserRequest.status === 'refused') {
+			await prisma.userRequest.update({
+				where: { id },
+				data: { user_email: null }
+			});
+
+			await prisma.user.delete({
+				where: { id: updatedUserRequest.user.id }
+			});
+		}
 	}
 
 	return updatedUserRequest;

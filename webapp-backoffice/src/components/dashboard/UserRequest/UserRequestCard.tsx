@@ -24,10 +24,16 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
-						{userRequest.user.firstName + ' ' + userRequest.user.lastName}
-					</p>
-					<span>{userRequest.user.email}</span>
+					{userRequest.user !== null ? (
+						<>
+							<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
+								`${userRequest?.user?.firstName} ${userRequest?.user?.lastName}`
+							</p>
+							<span>{userRequest?.user?.email}</span>
+						</>
+					) : (
+						<span>{userRequest.user_email_copy}</span>
+					)}
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 					<span>

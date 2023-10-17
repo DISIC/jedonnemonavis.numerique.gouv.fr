@@ -59,12 +59,13 @@ model User {
 }
 
 model UserRequest {
-  id      Int         @id @default(autoincrement())
-  user    User        @relation(fields: [user_id], references: [id])
-  user_id Int         @unique
-  reason  String
-  mode    RequestMode @default(whitelist)
-  status  UserRequestStatus @default(pending)
+  id              Int               @id @default(autoincrement())
+  user            User?             @relation(fields: [user_email], references: [email])
+  user_email      String?
+  user_email_copy String?
+  reason          String
+  mode            RequestMode       @default(whitelist)
+  status          UserRequestStatus @default(pending)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -161,9 +162,9 @@ model WhiteListedDomain {
 }
 
 model Favorite {
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User    @relation(fields: [user_id], references: [id])
   user_id    Int
-  product    Product  @relation(fields: [product_id], references: [id])
+  product    Product @relation(fields: [product_id], references: [id])
   product_id Int
 
   created_at DateTime @default(now())

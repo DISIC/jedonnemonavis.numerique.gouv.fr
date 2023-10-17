@@ -119,9 +119,9 @@ const DashBoardUserRequestUserRequests = () => {
 
 	const getAlertTitle = () => {
 		if (currentUserRequest?.type === 'refused') {
-			return `La demande d'accès de ${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName} a été rejetée !`;
+			return `La demande d'accès de ${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName} a été rejetée !`;
 		} else {
-			return `La demande d'accès de ${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName} a été acceptée !`;
+			return `La demande d'accès de ${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName} a été acceptée !`;
 		}
 	};
 
@@ -135,7 +135,7 @@ const DashBoardUserRequestUserRequests = () => {
 				<>
 					Voulez-vous vraiment rejeter la demande d'accès de{' '}
 					<span className={cx(classes.boldText)}>
-						{`${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName}`}
+						{`${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName}`}
 					</span>{' '}
 					?
 				</>
@@ -148,7 +148,7 @@ const DashBoardUserRequestUserRequests = () => {
 				<>
 					Vous voulez vraiment accepter la demande d'accès de{' '}
 					<span className={cx(classes.boldText)}>
-						{`${currentUserRequest?.user.firstName} ${currentUserRequest?.user.lastName}`}
+						{`${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName}`}
 					</span>{' '}
 					?
 					<div className={fr.cx('fr-input-group', 'fr-mt-3w')}>
@@ -309,7 +309,7 @@ const DashBoardUserRequestUserRequests = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun demande d'accès trouvé</p>
+										<p>Aucun demande d'accès trouvée</p>
 									</div>
 								</div>
 							)}
