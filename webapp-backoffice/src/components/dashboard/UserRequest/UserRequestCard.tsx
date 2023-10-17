@@ -88,7 +88,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 										: ''
 								)}
 							>
-								{userRequest.status === 'accepted' ? 'Accepté' : 'Refusé'}
+								{userRequest.status === 'accepted' ? 'Acceptée' : 'Refusée'}
 							</Badge>
 						</>
 					)}
