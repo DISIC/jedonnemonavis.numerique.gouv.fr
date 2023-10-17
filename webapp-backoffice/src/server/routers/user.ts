@@ -155,7 +155,20 @@ export const userRouter = router({
 				}
 			];
 
-			let where: Prisma.UserWhereInput = {};
+			let where: Prisma.UserWhereInput = {
+				UserRequests: {
+					none: {
+						OR: [
+							{
+								status: 'pending'
+							},
+							{
+								status: 'refused'
+							}
+						]
+					}
+				}
+			};
 
 			if (search) {
 				const [firstName, lastName] = search.split(' ');
