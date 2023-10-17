@@ -81,6 +81,7 @@ const DashBoardDomainDomains = () => {
 	} = useForm<FormValues>();
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
+		data.domain = data.domain.replace('@', '');
 		createDomain.mutate(data);
 	};
 
