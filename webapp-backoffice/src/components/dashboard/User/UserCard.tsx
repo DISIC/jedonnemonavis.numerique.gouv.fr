@@ -58,6 +58,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 				>
 					<Button
 						priority="tertiary"
+						size="small"
 						iconId="fr-icon-delete-bin-line"
 						disabled={session?.user.email === user.email}
 						iconPosition="right"
@@ -68,6 +69,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 					</Button>
 					<Button
 						priority="secondary"
+						size="small"
 						iconId="fr-icon-edit-line"
 						iconPosition="right"
 						onClick={() => onButtonClick({ type: 'create', user })}

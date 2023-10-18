@@ -64,6 +64,14 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					target: '_self'
 				},
 				isActive: pathname == '/administration/dashboard/domains'
+			},
+			{
+				text: "Demandes d'accès",
+				linkProps: {
+					href: '/administration/dashboard/user-requests',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/user-requests'
 			}
 		];
 		navigationItems.push(...adminNavigationItems);

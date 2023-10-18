@@ -238,3 +238,45 @@ export function getInviteEmailHtml(
 		</html>
 	`;
 }
+
+export function getUserRequestEmailHtml() {
+	const link = `${process.env.NODEMAILER_BASEURL}/login`;
+
+	return `
+		<!DOCTYPE html>
+		<html>
+			<head>
+				<style>
+					body {
+						font-family: Arial, sans-serif;
+					}
+					.container {
+						max-width: 600px;
+						margin: 0 auto;
+						padding: 20px;
+					}
+				</style>
+			</head>
+			<body>
+				<div class="container">
+					<p>Bonjour,</p>
+
+					<p>
+						Votre demande d'accès à "Je donne mon avis" a bien été prise en compte.
+					</p>
+
+					<p>
+						Vous pouvez vous connecter à votre compte en cliquant sur le lien ci-dessous.
+					</p>
+
+					<a href="${link}" target="_blank">${link}</a>
+
+					<p>
+						Merci,<br/>
+						L'équipe je donne mon avis
+					</p>
+				</div>
+			</body>
+		</html>
+	`;
+}
