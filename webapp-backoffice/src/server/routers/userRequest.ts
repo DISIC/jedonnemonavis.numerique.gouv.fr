@@ -65,10 +65,11 @@ export async function updateUserRequest(
 			});
 
 			if (createDomain) {
-				await prisma.whiteListedDomain.create({
-					data: {
-						domain: updatedUserRequest.user.email.split('@')[1]
-					}
+				const newDomain = updatedUserRequest.user.email.split('@')[1];
+				await prisma.whiteListedDomain.upsert({
+					where: { domain: newDomain },
+					create: { domain: newDomain },
+					update: {}
 				});
 			}
 
