@@ -6,6 +6,7 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
 import { useRouter } from 'next/router';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
+import { Loader } from '../ui/Loader';
 
 type Props = {
 	userInfos: UserInfos;
@@ -13,8 +14,6 @@ type Props = {
 
 export const RegisterNotWhiteListed = (props: Props) => {
 	const { userInfos } = props;
-
-	const { classes, cx } = useStyles();
 
 	const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 	const [reason, setReason] = useState<string | undefined>();
@@ -24,6 +23,8 @@ export const RegisterNotWhiteListed = (props: Props) => {
 			setIsSubmitted(true);
 		}
 	});
+
+	const { classes, cx } = useStyles({ isLoading: createUserRequest.isLoading });
 
 	const validateRequest = () => {
 		createUserRequest.mutate({
@@ -74,7 +75,7 @@ export const RegisterNotWhiteListed = (props: Props) => {
 					}
 				/>
 				<Button className={cx(classes.button)} type="submit">
-					Valider
+					{createUserRequest.isLoading ? <Loader size="sm" white /> : 'Valider'}
 				</Button>
 			</form>
 		</div>
@@ -83,10 +84,12 @@ export const RegisterNotWhiteListed = (props: Props) => {
 
 const useStyles = tss
 	.withName(RegisterNotWhiteListed.name)
-	.withParams()
-	.create(() => ({
+	.withParams<{ isLoading: boolean }>()
+	.create(({ isLoading }) => ({
 		button: {
 			display: 'block',
-			marginLeft: 'auto'
+			marginLeft: 'auto',
+			cursor: isLoading ? 'not-allowed' : 'pointer',
+			pointerEvents: isLoading ? 'none' : 'auto'
 		}
 	}));
