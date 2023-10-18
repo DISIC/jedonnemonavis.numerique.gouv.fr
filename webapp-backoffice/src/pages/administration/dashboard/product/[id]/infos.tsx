@@ -1,3 +1,4 @@
+import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
 import { Product } from '@prisma/client';
@@ -9,6 +10,8 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
+import { Toast } from '@/src/components/ui/Toast';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
@@ -23,6 +26,8 @@ const ProductInformationPage = (props: Props) => {
 	const { product } = props;
 
 	const router = useRouter();
+
+	const [displayToast, setDisplayToast] = React.useState(false);
 
 	const { data: entityResult, isLoading: isLoadingEntity } =
 		trpc.entity.getById.useQuery(
@@ -43,6 +48,13 @@ const ProductInformationPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={2000}
+				severity="info"
+				message="Identifiant copié dans le presse papier !"
+			/>
 			<ProductModal
 				modal={editProductModal}
 				product={product}
@@ -62,7 +74,18 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
-					{product.id}
+					<Tag
+						id="product-id"
+						small
+						nativeButtonProps={{
+							onClick: () => {
+								navigator.clipboard.writeText(product.id.toString());
+								setDisplayToast(true);
+							}
+						}}
+					>
+						{`#${product.id}`}
+					</Tag>
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>

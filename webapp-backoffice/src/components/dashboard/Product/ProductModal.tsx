@@ -255,12 +255,22 @@ const ProductModal = (props: Props) => {
 								<Controller
 									control={control}
 									name={`urls.${index}.value`}
+									rules={{
+										pattern: {
+											value: /^(http|https):\/\/[^ "]+$/,
+											message: "Format d'url invalide"
+										}
+									}}
 									render={({ field: { onChange, value, name } }) => (
 										<Input
 											className={cx(classes.autocomplete, fr.cx('fr-mb-0'))}
 											id={name}
 											hideLabel={true}
 											label={`URL ${index + 1}`}
+											state={errors['urls']?.[index] ? 'error' : 'default'}
+											stateRelatedMessage={
+												errors['urls']?.[index]?.value?.message
+											}
 											nativeInputProps={{
 												name,
 												value,
