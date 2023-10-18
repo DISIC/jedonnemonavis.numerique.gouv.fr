@@ -263,7 +263,7 @@ const DashBoardUsers = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun produit trouvé</p>
+										<p>Aucun utilisateur trouvé</p>
 									</div>
 								</div>
 							)}
