@@ -4,15 +4,18 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { tss } from 'tss-react/dsfr';
-
 import { useDebounce } from 'usehooks-ts';
-
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Entity, Product } from '@prisma/client';
 import React from 'react';
-import { useSession } from 'next-auth/react';
 import { trpc } from '@/src/utils/trpc';
+import {
+	Controller,
+	SubmitHandler,
+	useFieldArray,
+	useForm
+} from 'react-hook-form';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -33,35 +36,34 @@ interface Props {
 	onProductCreated: () => void;
 }
 
-type FormErrors = {
-	title: { required: boolean };
-	entity_id: { required: boolean };
-};
-
-const defaultErrors = {
-	title: { required: false },
-	entity_id: { required: false }
-};
-
-type CreationPayload = Omit<Product, 'id' | 'created_at' | 'updated_at'>;
-
-const defaultProduct = {
-	title: '',
-	entity_id: 0,
-	isEssential: false,
-	urls: [''],
-	volume: null,
-	observatoire_id: null
+type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
+	urls: { value: string }[];
 };
 
 const ProductModal = (props: Props) => {
 	const { modal } = props;
 	const { cx, classes } = useStyles();
-	const { data: session } = useSession({ required: true });
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
-	const [product, setProduct] = React.useState<CreationPayload>(defaultProduct);
-	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
+
+	const {
+		control,
+		handleSubmit,
+		formState: { errors }
+	} = useForm<FormValues>({
+		defaultValues: {
+			urls: [{ value: '' }]
+		}
+	});
+
+	const {
+		fields: urls,
+		append: appendUrl,
+		remove: removeUrl
+	} = useFieldArray({
+		control,
+		name: 'urls'
+	});
 
 	const { data: entitiesResult } = trpc.entity.getList.useQuery(
 		{ numberPerPage: 1000, search: debouncedSearch },
@@ -74,44 +76,16 @@ const ProductModal = (props: Props) => {
 
 	const saveProductTmp = trpc.product.create.useMutation({});
 
-	const formHasErrors = (tmpErrors?: FormErrors): boolean => {
-		return Object.values(tmpErrors || errors)
-			.map(e => Object.values(e).some(value => value === true))
-			.some(value => value);
-	};
+	const onSubmit: SubmitHandler<FormValues> = async data => {
+		const { urls, ...product } = data;
 
-	const hasErrors = (key: keyof FormErrors): boolean => {
-		return Object.values(errors[key]).some(value => value === true);
-	};
-
-	const getErrorMessage = (key: keyof FormErrors): string | undefined => {
-		if (errors[key].required) {
-			return 'Veuillez compléter ce champ.';
-		}
-
-		return;
-	};
-
-	const saveProduct = async () => {
-		if (!product.title) {
-			errors.title.required = true;
-		}
-
-		if (product.entity_id === 0) {
-			errors.entity_id.required = true;
-		}
-
-		if (formHasErrors(errors)) {
-			setErrors({ ...errors });
-			return;
-		}
-
+		console.log(product);
 		await saveProductTmp.mutateAsync({
-			...product
+			...product,
+			urls: urls.filter(url => url.value !== '').map(url => url.value)
 		});
 
 		props.onProductCreated();
-		setProduct(defaultProduct);
 		modal.close();
 	};
 
@@ -131,10 +105,8 @@ const ProductModal = (props: Props) => {
 					children: 'Annuler'
 				},
 				{
-					onClick: () => {
-						saveProduct();
-					},
 					doClosesModal: false,
+					onClick: handleSubmit(onSubmit),
 					children: 'Ajouter ce produit'
 				}
 			]}
@@ -145,26 +117,26 @@ const ProductModal = (props: Props) => {
 			</p>
 			<form id="product-form">
 				<div className={fr.cx('fr-input-group')}>
-					<Input
-						id="product-name"
-						label={
-							<p className={fr.cx('fr-mb-0')}>
-								Nom du produit <span className={cx(classes.asterisk)}>*</span>
-							</p>
-						}
-						nativeInputProps={{
-							name: 'title',
-							value: product?.title,
-							onChange: event => {
-								setErrors({ ...errors, title: { required: false } });
-								setProduct({
-									...product,
-									title: event.target.value
-								} as CreationPayload);
-							}
-						}}
-						state={hasErrors('title') ? 'error' : 'default'}
-						stateRelatedMessage={getErrorMessage('title')}
+					<Controller
+						control={control}
+						name="title"
+						rules={{ required: 'Ce champ est obligatoire' }}
+						render={({ field: { onChange, value, name } }) => (
+							<Input
+								label={
+									<p className={fr.cx('fr-mb-0')}>
+										Nom du produit{' '}
+										<span className={cx(classes.asterisk)}>*</span>
+									</p>
+								}
+								nativeInputProps={{
+									onChange,
+									defaultValue: value
+								}}
+								state={errors[name] ? 'error' : 'default'}
+								stateRelatedMessage={errors[name]?.message}
+							/>
+						)}
 					/>
 				</div>
 				<div className={fr.cx('fr-input-group')}>
@@ -175,49 +147,46 @@ const ProductModal = (props: Props) => {
 						Entité de rattachement{' '}
 						<span className={cx(classes.asterisk)}>*</span>
 					</label>
-					<SearchBar
-						id="product-description"
-						label="Entité de rattachement"
-						renderInput={({ className, id, placeholder, type }) => (
+					<Controller
+						name="entity_id"
+						control={control}
+						rules={{ required: 'Ce champ est obligatoire' }}
+						render={({ field: { onChange, value, name } }) => (
 							<Autocomplete
 								disablePortal
-								id={id}
 								noOptionsText="Aucune organisation trouvée"
 								sx={{ width: '100%' }}
-								options={entities.map((entity: Entity) => entity.name)}
-								onChange={(event, value) => {
-									setErrors({ ...errors, entity_id: { required: false } });
-									setProduct({
-										...product,
-										entity_id: entities.find(entity => entity.name === value)
-											?.id
-									} as CreationPayload);
+								options={entities.map(entity => ({
+									label: entity.name,
+									value: entity.id
+								}))}
+								isOptionEqualToValue={(option, value) =>
+									option?.value === value.value
+								}
+								onChange={(_, optionSelected) => {
+									onChange(optionSelected?.value);
 								}}
 								renderInput={params => (
 									<div
 										ref={params.InputProps.ref}
 										className={fr.cx(
 											'fr-input-group',
-											errors.entity_id.required
-												? 'fr-input-group--error'
-												: undefined
+											errors[name] ? 'fr-input-group--error' : undefined
 										)}
 									>
 										<input
 											{...params.inputProps}
 											className={cx(
 												params.inputProps.className,
-												className,
-												errors.entity_id.required
-													? 'fr-input--error'
-													: undefined
+												fr.cx('fr-input'),
+												errors[name] ? 'fr-input--error' : undefined
 											)}
-											placeholder={placeholder}
-											type={type}
+											placeholder="Rechercher une organisation"
+											type="search"
 										/>
-										{hasErrors('entity_id') && (
+										{errors[name] && (
 											<p className={fr.cx('fr-error-text')}>
-												{getErrorMessage('entity_id')}
+												{errors[name]?.message}
 											</p>
 										)}
 									</div>
@@ -228,95 +197,92 @@ const ProductModal = (props: Props) => {
 				</div>
 
 				<div className={fr.cx('fr-input-group')}>
-					<Checkbox
-						className={fr.cx('fr-mt-3w')}
-						options={[
-							{
-								label: 'Démarche essentielle',
-								hintText:
-									'Cocher cette case si ce produit fait parti des démarches suivies sur le site Vos démarches essentielles',
-								nativeInputProps: {
-									name: 'essential',
-									onChange: event => {
-										setProduct({
-											...product,
-											isEssential: event.target.checked
-										} as CreationPayload);
+					<Controller
+						control={control}
+						name="isEssential"
+						render={({ field: { onChange, value } }) => (
+							<Checkbox
+								className={fr.cx('fr-mt-3w')}
+								options={[
+									{
+										label: 'Démarche essentielle',
+										hintText:
+											'Cocher cette case si ce produit fait parti des démarches suivies sur le site Vos démarches essentielles',
+										nativeInputProps: {
+											name: 'essential',
+											onChange,
+											checked: value === true
+										}
 									}
-								}
-							}
-						]}
+								]}
+							/>
+						)}
 					/>
 				</div>
 				<div className={fr.cx('fr-input-group')}>
 					<label className={fr.cx('fr-label')}>URL(s)</label>
-					{product.urls.map((url, index) => (
-						<div key={index} className={cx(classes.flexContainer)}>
-							<Input
-								className={cx(classes.autocomplete)}
-								id={`product-url-${index + 1}`}
-								hideLabel={true}
-								label={`url ${index + 1}`}
-								nativeInputProps={{
-									name: `url-${index + 1}`,
-									value: url,
-									onChange: event => {
-										setProduct({
-											...product,
-											urls: product.urls.map((url, i) =>
-												i === index ? event.target.value : url
-											)
-										});
-									}
-								}}
-							/>
-							<Button
-								priority="secondary"
-								type="button"
-								className={cx(classes.innerButton)}
-								onClick={() => {
-									setProduct({
-										...product,
-										urls: product.urls.filter((url, i) => i !== index)
-									});
-								}}
-							>
-								<i className="ri-delete-bin-line"></i>
-							</Button>
-						</div>
-					))}
-					<Button
-						priority="secondary"
-						iconId="fr-icon-add-circle-line"
-						iconPosition="left"
-						type="button"
-						onClick={() => {
-							setProduct({
-								...product,
-								urls: [...product.urls, '']
-							});
-						}}
-					>
-						Ajouter un URL
-					</Button>
+					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+						{urls.map((url, index) => (
+							<div key={url.id} className={cx(classes.flexContainer)}>
+								<Controller
+									control={control}
+									name={`urls.${index}.value`}
+									render={({ field: { onChange, value, name } }) => (
+										<Input
+											className={cx(classes.autocomplete, fr.cx('fr-mb-0'))}
+											id={name}
+											hideLabel={true}
+											label={`URL ${index + 1}`}
+											nativeInputProps={{
+												name,
+												value,
+												onChange
+											}}
+										/>
+									)}
+								/>
+								{index !== 0 && (
+									<Button
+										priority="secondary"
+										type="button"
+										className={cx(classes.innerButton)}
+										onClick={() => removeUrl(index)}
+									>
+										<i className="ri-delete-bin-line"></i>
+									</Button>
+								)}
+							</div>
+						))}
+						<Button
+							priority="secondary"
+							iconId="fr-icon-add-line"
+							className={fr.cx('fr-mt-1w')}
+							iconPosition="left"
+							type="button"
+							onClick={() => appendUrl({ value: '' })}
+						>
+							Ajouter un URL
+						</Button>
+					</div>
 				</div>
 				<div className={fr.cx('fr-input-group')}>
-					<Input
-						className={fr.cx('fr-mt-3w')}
-						id="product-volume"
-						label="Volumétrie par an"
-						nativeInputProps={{
-							inputMode: 'numeric',
-							pattern: '[0-9]*',
-							type: 'number',
-							value: product.volume ? product.volume : undefined,
-							onChange: event => {
-								setProduct({
-									...product,
-									volume: parseInt(event.target.value)
-								});
-							}
-						}}
+					<Controller
+						control={control}
+						name="volume"
+						render={({ field: { onChange, value } }) => (
+							<Input
+								className={fr.cx('fr-mt-3w')}
+								id="product-volume"
+								label="Volumétrie par an"
+								nativeInputProps={{
+									inputMode: 'numeric',
+									pattern: '[0-9]*',
+									type: 'number',
+									value: value !== null ? value : undefined,
+									onChange
+								}}
+							/>
+						)}
 					/>
 				</div>
 			</form>
