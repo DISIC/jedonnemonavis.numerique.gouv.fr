@@ -27,7 +27,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 					{userRequest.user !== null ? (
 						<>
 							<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
-								`${userRequest?.user?.firstName} ${userRequest?.user?.lastName}`
+								{`${userRequest?.user?.firstName} ${userRequest?.user?.lastName}`}
 							</p>
 							<span>{userRequest?.user?.email}</span>
 						</>
@@ -53,6 +53,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 						<>
 							<Button
 								priority="tertiary"
+								size="small"
 								iconId="fr-icon-close-line"
 								iconPosition="right"
 								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
@@ -67,6 +68,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 							</Button>
 							<Button
 								priority="secondary"
+								size="small"
 								iconId="fr-icon-check-line"
 								iconPosition="right"
 								className={cx(fr.cx('fr-mr-5v'))}

@@ -33,7 +33,7 @@ export async function createUserRequest(
 		data: {
 			reason: userRequest.reason,
 			mode: userRequest.mode,
-			user_email: createdUser.email,
+			user_id: createdUser.id,
 			user_email_copy: createdUser.email
 		}
 	});
@@ -81,7 +81,7 @@ export async function updateUserRequest(
 		} else if (updatedUserRequest.status === 'refused') {
 			await prisma.userRequest.update({
 				where: { id },
-				data: { user_email: null }
+				data: { user_id: null }
 			});
 
 			await prisma.user.delete({
