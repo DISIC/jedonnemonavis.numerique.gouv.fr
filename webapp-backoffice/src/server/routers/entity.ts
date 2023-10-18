@@ -29,5 +29,13 @@ export const entityRouter = router({
 			const count = await ctx.prisma.entity.count({ where });
 
 			return { data: entities, metadata: { count } };
+		}),
+
+	getById: protectedProcedure
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+			const entity = await ctx.prisma.entity.findUnique({ where: { id } });
+			return { data: entity };
 		})
 });

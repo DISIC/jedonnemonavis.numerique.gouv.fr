@@ -107,27 +107,26 @@ const ProductAccessCard = (props: Props) => {
 							}}
 						>
 							{accessRight.status === 'carrier' && (
-								<>
-									{accessRight.user === null && (
-										<MenuItem
-											onClick={() => {
-												onButtonClick('resend-email', accessRight);
-												handleClose();
-											}}
-										>
-											Renvoyer l'e-mail d'invitation
-										</MenuItem>
-									)}
+								<MenuItem
+									onClick={() => {
+										onButtonClick('remove', accessRight);
+										handleClose();
+									}}
+								>
+									Retirer son droit d'accès
+								</MenuItem>
+							)}
+							{accessRight.status === 'carrier' &&
+								accessRight.user === null && (
 									<MenuItem
 										onClick={() => {
-											onButtonClick('remove', accessRight);
+											onButtonClick('resend-email', accessRight);
 											handleClose();
 										}}
 									>
-										Retirer son droit d'accès
+										Renvoyer l'e-mail d'invitation
 									</MenuItem>
-								</>
-							)}
+								)}
 							{accessRight.status === 'removed' && (
 								<MenuItem
 									onClick={() => {

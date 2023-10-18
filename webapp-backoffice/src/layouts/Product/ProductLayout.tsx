@@ -103,7 +103,9 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 						burgerMenuButtonText="Menu"
 					/>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>{children}</div>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-20v')}>
+					{children}
+				</div>
 			</div>
 		</div>
 	);
