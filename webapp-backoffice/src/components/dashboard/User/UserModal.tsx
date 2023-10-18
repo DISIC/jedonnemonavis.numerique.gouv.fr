@@ -3,7 +3,7 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, User, UserRole } from '@prisma/client';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
@@ -37,7 +37,7 @@ type FormValues = {
 	firstName: string;
 	lastName: string;
 	password: string;
-	role: 'user' | 'admin';
+	role: UserRole;
 };
 
 const ButtonModal = (props: Props) => {

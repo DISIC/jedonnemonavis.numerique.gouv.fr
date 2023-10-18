@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Entity } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
 
@@ -26,6 +27,7 @@ const ProductCard = ({
 	isFavorite: boolean;
 }) => {
 	const utils = trpc.useContext();
+	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
 
 	const createFavorite = trpc.favorite.create.useMutation({
@@ -94,33 +96,34 @@ const ProductCard = ({
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 					<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
 				</div>
-				<div
-					className={cx(
-						fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
-						classes.favoriteWrapper
-					)}
-				>
-					<Button
-						iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-						title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
-						priority="tertiary"
-						size="small"
-						onClick={() => {
-							if (isFavorite) {
-								deleteFavorite.mutate({
-									product_id: product.id,
-									user_id: userId
-								});
-							} else {
-								createFavorite.mutate({
-									product_id: product.id,
-									user_id: userId
-								});
-							}
-						}}
-					/>
-				</div>
-
+				{session?.user.role !== 'user' && (
+					<div
+						className={cx(
+							fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
+							classes.favoriteWrapper
+						)}
+					>
+						<Button
+							iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+							title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
+							priority="tertiary"
+							size="small"
+							onClick={() => {
+								if (isFavorite) {
+									deleteFavorite.mutate({
+										product_id: product.id,
+										user_id: userId
+									});
+								} else {
+									createFavorite.mutate({
+										product_id: product.id,
+										user_id: userId
+									});
+								}
+							}}
+						/>
+					</div>
+				)}
 				<div className={fr.cx('fr-col', 'fr-col-12')}>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{indicators.map((indicator, index) => (

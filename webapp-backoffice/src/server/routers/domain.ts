@@ -26,7 +26,8 @@ export const domainRouter = router({
 
 			let where: Prisma.WhiteListedDomainWhereInput = {
 				domain: {
-					contains: search || ''
+					contains: search || '',
+					mode: 'insensitive'
 				}
 			};
 

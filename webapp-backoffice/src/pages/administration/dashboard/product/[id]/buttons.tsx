@@ -46,6 +46,7 @@ const ProductButtonsPage = (props: Props) => {
 		{
 			numberPerPage,
 			page: currentPage,
+			product_id: product.id,
 			isTest: testFilter
 		},
 		{

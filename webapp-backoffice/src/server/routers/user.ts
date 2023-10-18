@@ -173,15 +173,15 @@ export const userRouter = router({
 			};
 
 			if (search) {
-				const [firstName, lastName] = search.split(' ');
+				const [firstName, lastName] = search.toLowerCase().split(' ');
 				where.OR = [
 					{
-						firstName: { contains: firstName },
-						lastName: { contains: lastName }
+						firstName: { contains: firstName, mode: 'insensitive' },
+						lastName: { contains: lastName, mode: 'insensitive' }
 					},
 					{
-						firstName: { contains: lastName },
-						lastName: { contains: firstName }
+						firstName: { contains: lastName, mode: 'insensitive' },
+						lastName: { contains: firstName, mode: 'insensitive' }
 					}
 				];
 			}

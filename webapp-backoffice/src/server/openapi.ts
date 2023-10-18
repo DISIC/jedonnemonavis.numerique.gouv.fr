@@ -6,5 +6,5 @@ import { appRouter } from './routers/root';
 export const openApiDocument = generateOpenApiDocument(appRouter, {
 	title: 'JDMA CRUD API',
 	version: '1.0.0',
-	baseUrl: 'http://localhost:3000/api/open-api'
+	baseUrl: `${process.env.NEXTAUTH_URL}/api/open-api`
 });

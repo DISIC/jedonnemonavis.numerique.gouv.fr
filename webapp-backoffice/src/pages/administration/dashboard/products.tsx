@@ -210,32 +210,34 @@ const DashBoard = () => {
 							</div>
 						</form>
 					</div>
-					<div
-						className={fr.cx(
-							'fr-col-12',
-							'fr-mt-4w',
-							nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-							'fr-py-0'
-						)}
-					>
-						<Checkbox
-							className={fr.cx('fr-mb-0')}
-							style={{ userSelect: 'none' }}
-							options={[
-								{
-									label: 'Afficher uniquement mes favoris',
-									nativeInputProps: {
-										name: 'favorites-products',
-										checked: filterOnlyFavorites,
-										onChange: e => {
-											setFilterOnlyFavorites(e.currentTarget.checked);
-											setCurrentPage(1);
+					{session?.user.role !== 'user' && (
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-mt-4w',
+								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+								'fr-py-0'
+							)}
+						>
+							<Checkbox
+								className={fr.cx('fr-mb-0')}
+								style={{ userSelect: 'none' }}
+								options={[
+									{
+										label: 'Afficher uniquement mes favoris',
+										nativeInputProps: {
+											name: 'favorites-products',
+											checked: filterOnlyFavorites,
+											onChange: e => {
+												setFilterOnlyFavorites(e.currentTarget.checked);
+												setCurrentPage(1);
+											}
 										}
 									}
-								}
-							]}
-						/>
-					</div>
+								]}
+							/>
+						</div>
+					)}
 				</div>
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
