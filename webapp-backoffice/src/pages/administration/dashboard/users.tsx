@@ -252,7 +252,7 @@ const DashBoardUsers = () => {
 									/>
 								))
 							)}
-							{users.length === 0 && (
+							{!isRefetchingUsers && users.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
 										className={cx(
