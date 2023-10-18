@@ -90,14 +90,11 @@ const DashBoard = () => {
 
 	const nbPages = getNbPages(productsCount, numberPerPage);
 
-	const isOpen = useIsModalOpen(modal);
-
 	return (
 		<>
 			<ProductModal
 				modal={modal}
-				isOpen={isOpen}
-				onProductCreated={() => {
+				onSubmit={() => {
 					setSearch('');
 					if (filter === 'created_at') {
 						setValidatedSearch('');

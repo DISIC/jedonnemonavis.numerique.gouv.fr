@@ -2,12 +2,11 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { SearchBar } from '@codegouvfr/react-dsfr/SearchBar';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Entity, Product } from '@prisma/client';
+import { Product } from '@prisma/client';
 import React from 'react';
 import { trpc } from '@/src/utils/trpc';
 import {
@@ -31,9 +30,9 @@ interface CustomModalProps {
 }
 
 interface Props {
-	isOpen: boolean;
 	modal: CustomModalProps;
-	onProductCreated: () => void;
+	product?: Product;
+	onSubmit: () => void;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -41,7 +40,7 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal } = props;
+	const { modal, product } = props;
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
@@ -51,9 +50,9 @@ const ProductModal = (props: Props) => {
 		handleSubmit,
 		formState: { errors }
 	} = useForm<FormValues>({
-		defaultValues: {
-			urls: [{ value: '' }]
-		}
+		defaultValues: product
+			? { ...product, urls: product.urls.map(url => ({ value: url })) }
+			: { urls: [{ value: '' }] }
 	});
 
 	const {
@@ -65,27 +64,47 @@ const ProductModal = (props: Props) => {
 		name: 'urls'
 	});
 
-	const { data: entitiesResult } = trpc.entity.getList.useQuery(
-		{ numberPerPage: 1000, search: debouncedSearch },
-		{
-			initialData: { data: [], metadata: { count: 0 } }
-		}
-	);
+	const { data: entitiesResult, isLoading: isLoadingEntities } =
+		trpc.entity.getList.useQuery(
+			{ numberPerPage: 1000, search: debouncedSearch },
+			{
+				initialData: { data: [], metadata: { count: 0 } }
+			}
+		);
 
 	const { data: entities } = entitiesResult;
 
+	const entityOptions = entities.map(entity => ({
+		label: entity.name,
+		value: entity.id
+	}));
+
 	const saveProductTmp = trpc.product.create.useMutation({});
+	const updateProduct = trpc.product.update.useMutation({});
 
 	const onSubmit: SubmitHandler<FormValues> = async data => {
-		const { urls, ...product } = data;
+		const { urls, ...tmpProduct } = data;
 
-		console.log(product);
-		await saveProductTmp.mutateAsync({
-			...product,
-			urls: urls.filter(url => url.value !== '').map(url => url.value)
-		});
+		const filteredUrls = urls
+			.filter(url => url.value !== '')
+			.map(url => url.value);
 
-		props.onProductCreated();
+		if (product && product.id) {
+			await updateProduct.mutateAsync({
+				id: product.id,
+				product: {
+					...tmpProduct,
+					urls: filteredUrls
+				}
+			});
+		} else {
+			await saveProductTmp.mutateAsync({
+				...tmpProduct,
+				urls: filteredUrls
+			});
+		}
+
+		props.onSubmit();
 		modal.close();
 	};
 
@@ -98,16 +117,24 @@ const ProductModal = (props: Props) => {
 				'fr-my-0'
 			)}
 			concealingBackdrop={false}
-			title="Ajouter un nouveau produit"
+			title={
+				product && product.id
+					? 'Modifier les informations du produit'
+					: 'Ajouter un nouveau produit'
+			}
 			size="large"
 			buttons={[
 				{
-					children: 'Annuler'
+					children:
+						product && product.id ? 'Annuler les modifications' : 'Annuler'
 				},
 				{
 					doClosesModal: false,
 					onClick: handleSubmit(onSubmit),
-					children: 'Ajouter ce produit'
+					children:
+						product && product.id
+							? 'Sauvegarder les modifications'
+							: 'Ajouter ce produit'
 				}
 			]}
 		>
@@ -147,53 +174,54 @@ const ProductModal = (props: Props) => {
 						Entité de rattachement{' '}
 						<span className={cx(classes.asterisk)}>*</span>
 					</label>
-					<Controller
-						name="entity_id"
-						control={control}
-						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => (
-							<Autocomplete
-								disablePortal
-								noOptionsText="Aucune organisation trouvée"
-								sx={{ width: '100%' }}
-								options={entities.map(entity => ({
-									label: entity.name,
-									value: entity.id
-								}))}
-								isOptionEqualToValue={(option, value) =>
-									option?.value === value.value
-								}
-								onChange={(_, optionSelected) => {
-									onChange(optionSelected?.value);
-								}}
-								renderInput={params => (
-									<div
-										ref={params.InputProps.ref}
-										className={fr.cx(
-											'fr-input-group',
-											errors[name] ? 'fr-input-group--error' : undefined
-										)}
-									>
-										<input
-											{...params.inputProps}
-											className={cx(
-												params.inputProps.className,
-												fr.cx('fr-input'),
-												errors[name] ? 'fr-input--error' : undefined
+					{!isLoadingEntities && entityOptions.length > 0 && (
+						<Controller
+							name="entity_id"
+							control={control}
+							rules={{ required: 'Ce champ est obligatoire' }}
+							render={({ field: { onChange, value, name } }) => (
+								<Autocomplete
+									disablePortal
+									id="entity-select-autocomplete"
+									noOptionsText="Aucune organisation trouvée"
+									sx={{ width: '100%' }}
+									options={entityOptions}
+									onChange={(_, optionSelected) => {
+										onChange(optionSelected?.value);
+									}}
+									isOptionEqualToValue={option => option.value === value}
+									defaultValue={entityOptions.find(
+										option => option.value === value
+									)}
+									renderInput={params => (
+										<div
+											ref={params.InputProps.ref}
+											className={fr.cx(
+												'fr-input-group',
+												errors[name] ? 'fr-input-group--error' : undefined
 											)}
-											placeholder="Rechercher une organisation"
-											type="search"
-										/>
-										{errors[name] && (
-											<p className={fr.cx('fr-error-text')}>
-												{errors[name]?.message}
-											</p>
-										)}
-									</div>
-								)}
-							/>
-						)}
-					/>
+										>
+											<input
+												{...params.inputProps}
+												className={cx(
+													params.inputProps.className,
+													fr.cx('fr-input'),
+													errors[name] ? 'fr-input--error' : undefined
+												)}
+												placeholder="Rechercher une organisation"
+												type="search"
+											/>
+											{errors[name] && (
+												<p className={fr.cx('fr-error-text')}>
+													{errors[name]?.message}
+												</p>
+											)}
+										</div>
+									)}
+								/>
+							)}
+						/>
+					)}
 				</div>
 
 				<div className={fr.cx('fr-input-group')}>
@@ -278,8 +306,8 @@ const ProductModal = (props: Props) => {
 									inputMode: 'numeric',
 									pattern: '[0-9]*',
 									type: 'number',
-									value: value !== null ? value : undefined,
-									onChange
+									defaultValue: value !== null ? value : undefined,
+									onChange: e => onChange(parseInt(e.target.value))
 								}}
 							/>
 						)}

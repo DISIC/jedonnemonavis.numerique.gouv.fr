@@ -6,13 +6,23 @@ import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
 import Tag from '@codegouvfr/react-dsfr/Tag';
+import ProductModal from '@/src/components/dashboard/Product/ProductModal';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useRouter } from 'next/router';
 
 interface Props {
 	product: Product;
 }
 
+const editProductModal = createModal({
+	id: 'edit-product-modal',
+	isOpenedByDefault: false
+});
+
 const ProductInformationPage = (props: Props) => {
 	const { product } = props;
+
+	const router = useRouter();
 
 	const { data: entityResult, isLoading: isLoadingEntity } =
 		trpc.entity.getById.useQuery(
@@ -22,7 +32,8 @@ const ProductInformationPage = (props: Props) => {
 			{
 				initialData: {
 					data: null
-				}
+				},
+				enabled: product.entity_id !== null
 			}
 		);
 
@@ -32,6 +43,11 @@ const ProductInformationPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<ProductModal
+				modal={editProductModal}
+				product={product}
+				onSubmit={() => router.replace(router.asPath)}
+			/>
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
@@ -39,6 +55,7 @@ const ProductInformationPage = (props: Props) => {
 						priority="secondary"
 						iconId="fr-icon-edit-line"
 						iconPosition="right"
+						nativeButtonProps={editProductModal.buttonProps}
 					>
 						Modifier
 					</Button>
@@ -53,13 +70,21 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>URLs</h4>
-					{product.urls.map(url => (
-						<Tag linkProps={{ href: url }}>{url}</Tag>
-					))}
+					<div className={classes.urlsWrapper}>
+						{product.urls.map(url => (
+							<Tag key={url} linkProps={{ href: url }}>
+								{url}
+							</Tag>
+						))}
+					</div>
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Volumétrie par an</h4>
 					{product.volume ? product.volume : 'Non renseigné'}
+				</div>
+				<div>
+					<h4 className={fr.cx('fr-mb-3v')}>Top 250</h4>
+					{product.isEssential ? 'Oui' : 'Non'}
 				</div>
 			</div>
 		</ProductLayout>
@@ -76,6 +101,11 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: fr.spacing('10v')
+	},
+	urlsWrapper: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: fr.spacing('4v')
 	}
 });
 
