@@ -1,10 +1,12 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
 import { Product } from '@prisma/client';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { Toast } from '@/src/components/ui/Toast';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -22,6 +24,8 @@ interface MenuItems {
 
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
+
+	const [displayToast, setDisplayToast] = React.useState(false);
 
 	const router = useRouter();
 
@@ -76,17 +80,27 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	];
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
-			<Breadcrumb
-				currentPageLabel={product.title}
-				segments={[
-					{
-						label: 'Démarches',
-						linkProps: {
-							href: '/'
-						}
-					}
-				]}
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={2000}
+				severity="info"
+				message="Identifiant copié dans le presse papier !"
 			/>
+			<div className={fr.cx('fr-mt-4w', 'fr-mb-5v')}>
+				<Tag
+					id="product-id"
+					small
+					nativeButtonProps={{
+						onClick: () => {
+							navigator.clipboard.writeText(product.id.toString());
+							setDisplayToast(true);
+						}
+					}}
+				>
+					{`#${id}`}
+				</Tag>
+			</div>
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
 			</div>
@@ -103,7 +117,9 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 						burgerMenuButtonText="Menu"
 					/>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>{children}</div>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-20v')}>
+					{children}
+				</div>
 			</div>
 		</div>
 	);
