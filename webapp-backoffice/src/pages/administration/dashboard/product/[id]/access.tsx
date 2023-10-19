@@ -15,6 +15,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { trpc } from '@/src/utils/trpc';
+import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
 	product: Product;
@@ -209,13 +210,19 @@ const AccessManagement = (props: Props) => {
 				</div>
 			</div>
 			<div>
-				{accessRights?.map((accessRight, index) => (
-					<AccessRightCard
-						key={index}
-						accessRight={accessRight}
-						onButtonClick={handleModalOpening}
-					/>
-				))}
+				{isLoadingAccessRights ? (
+					<div className={fr.cx('fr-py-10v')}>
+						<Loader />
+					</div>
+				) : (
+					accessRights.map((accessRight, index) => (
+						<AccessRightCard
+							key={index}
+							accessRight={accessRight}
+							onButtonClick={handleModalOpening}
+						/>
+					))
+				)}
 			</div>
 			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mb-15w')}>
 				{nbPages > 1 && (

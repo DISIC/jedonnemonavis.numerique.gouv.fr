@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	ProductUncheckedCreateInputSchema,
+	ProductUncheckedUpdateInputSchema,
 	ProductSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
@@ -148,6 +149,23 @@ export const productRouter = router({
 				}
 			});
 
-			return product;
+			return { data: product };
+		}),
+
+	update: protectedProcedure
+		.input(
+			z.object({ id: z.number(), product: ProductUncheckedUpdateInputSchema })
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, product } = input;
+
+			const updatedProduct = await ctx.prisma.product.update({
+				where: { id },
+				data: {
+					...product
+				}
+			});
+
+			return { data: updatedProduct };
 		})
 });
