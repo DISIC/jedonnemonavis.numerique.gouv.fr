@@ -124,9 +124,33 @@ export const secondSection: FormField[] = [
     ]
   },
   {
+    name: 'contact_details',
+    kind: 'radio',
+    label: 'fields.contact_details.label',
     condition: {
       name: 'contact',
       values: ['yes']
+    },
+    options: [
+      {
+        label: 'fields.contact_details.options.0.label',
+        value: 'not-found'
+      },
+      {
+        label: 'fields.contact_details.options.1.label',
+        value: 'not-reached'
+      },
+      {
+        label: 'fields.contact_details.options.2.label',
+        value: 'reached'
+      }
+    ]
+  },
+
+  {
+    condition: {
+      name: 'contact_details',
+      values: ['not-reached', 'reached']
     },
     name: 'contact_channels',
     kind: 'checkbox',
@@ -159,29 +183,6 @@ export const secondSection: FormField[] = [
     kind: 'input-text',
     hint: 'fields.contact_channels_verbatim.hint',
     label: 'fields.contact_channels_verbatim.label'
-  },
-  {
-    name: 'contact_details',
-    kind: 'radio',
-    label: 'fields.contact_details.label',
-    condition: {
-      name: 'contact',
-      values: ['yes']
-    },
-    options: [
-      {
-        label: 'fields.contact_details.options.0.label',
-        value: 'but-not-found'
-      },
-      {
-        label: 'fields.contact_details.options.1.label',
-        value: 'but-not-reached'
-      },
-      {
-        label: 'fields.contact_details.options.2.label',
-        value: 'reached'
-      }
-    ]
   },
   {
     condition: {
