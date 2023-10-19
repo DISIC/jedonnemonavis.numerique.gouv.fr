@@ -105,8 +105,8 @@ export const secondSection: FormField[] = [
     },
     name: 'difficulties_details_verbatim',
     kind: 'input-text',
-    hint: 'fields.difficulties_details.hint',
-    label: 'fields.difficulties_details.label'
+    hint: 'fields.difficulties_details_verbatim.hint',
+    label: 'fields.difficulties_details_verbatim.label'
   },
   {
     name: 'contact',
