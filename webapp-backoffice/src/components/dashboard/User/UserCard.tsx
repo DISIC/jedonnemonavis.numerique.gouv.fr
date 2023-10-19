@@ -28,7 +28,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
 						{user.firstName + ' ' + user.lastName}
 					</p>
-					<span>{user.email}</span>
+					<span className={classes.userEmail}>{user.email}</span>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<span>{formatDateToFrenchString(user.created_at.toString())}</span>
@@ -95,6 +95,9 @@ const useStyles = tss.withName(UserCard.name).create(() => ({
 	wrapperButtons: {
 		display: 'flex',
 		justifyContent: 'end'
+	},
+	userEmail: {
+		wordWrap: 'break-word'
 	}
 }));
 
