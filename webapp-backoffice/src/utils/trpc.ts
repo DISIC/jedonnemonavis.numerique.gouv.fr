@@ -7,6 +7,13 @@ export const trpc = createTRPCNext<AppRouter>({
 	config(opts) {
 		return {
 			transformer: SuperJSON,
+			queryClientConfig: {
+				defaultOptions: {
+					queries: {
+						refetchOnWindowFocus: false
+					}
+				}
+			},
 			links: [
 				httpBatchLink({
 					/**
