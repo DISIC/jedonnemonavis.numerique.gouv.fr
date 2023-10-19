@@ -34,7 +34,7 @@
       ]
     },
     "comprehension": {
-      "label": "Qu'avez vous pensé du language utilisé ?",
+      "label": "Qu'avez vous pensé du langage utilisé ?",
       "options": [
         {
           "label": "Peu clair, difficile à comprendre"
@@ -97,7 +97,7 @@
       ]
     },
     "contact_channels": {
-      "label": "Par quel(s) moyen(s) avez-vous tenter de contacter le service de la démarche ?",
+      "label": "Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?",
       "options": [
         {
           "label": "Téléphone"
