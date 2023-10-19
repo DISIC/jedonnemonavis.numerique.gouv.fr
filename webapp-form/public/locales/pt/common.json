@@ -81,7 +81,7 @@
         }
       ]
     },
-    "difficulties_verbatim": {
+    "difficulties_details_verbatim": {
       "label": "Você pode especificar quais outras dificuldades encontrou?",
       "hint": "Máximo de 250 caracteres."
     },
@@ -162,7 +162,7 @@
         }
       ]
     },
-    "help_verbatim": {
+    "help_details_verbatim": {
       "label": "Você pode especificar que outra ajuda precisou?",
       "hint": "Máximo de 250 caracteres."
     },

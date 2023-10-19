@@ -81,7 +81,7 @@
         }
       ]
     },
-    "difficulties_verbatim": {
+    "difficulties_details_verbatim": {
       "label": "هل يمكنك تحديد ما هي الصعوبات الأخرى التي واجهتها؟",
       "hint": "الحد الأقصى 250 حرفًا."
     },
@@ -162,7 +162,7 @@
         }
       ]
     },
-    "help_verbatim": {
+    "help_details_verbatim": {
       "label": "هل يمكنك تحديد ما هي المساعدة الأخرى التي كنت بحاجة إليها؟",
       "hint": "الحد الأقصى 250 حرفًا."
     },

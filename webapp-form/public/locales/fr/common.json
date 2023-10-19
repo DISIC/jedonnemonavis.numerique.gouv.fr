@@ -81,7 +81,7 @@
         }
       ]
     },
-    "difficulties_verbatim": {
+    "difficulties_details_verbatim": {
       "label": "Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?",
       "hint": "Maximum 250 caractères."
     },
@@ -162,7 +162,7 @@
         }
       ]
     },
-    "help_verbatim": {
+    "help_details_verbatim": {
       "label": "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?",
       "hint": "Maximum 250 caractères."
     },
