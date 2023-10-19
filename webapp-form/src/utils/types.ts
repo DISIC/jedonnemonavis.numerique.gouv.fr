@@ -11,10 +11,10 @@ export type Opinion = {
   contact_channels_verbatim?: string;
   difficulties?: string;
   difficulties_details: string[];
-  difficulties_verbatim?: string;
+  difficulties_details_verbatim?: string;
   help?: string;
   help_details: string[];
-  help_verbatim?: string;
+  help_details_verbatim?: string;
   verbatim?: string;
 };
 

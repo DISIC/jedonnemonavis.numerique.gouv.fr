@@ -103,10 +103,10 @@ export const secondSection: FormField[] = [
       name: 'difficulties_details',
       values: ['other']
     },
-    name: 'difficulties_verbatim',
+    name: 'difficulties_details_verbatim',
     kind: 'input-text',
-    hint: 'fields.difficulties_verbatim.hint',
-    label: 'fields.difficulties_verbatim.label'
+    hint: 'fields.difficulties_details.hint',
+    label: 'fields.difficulties_details.label'
   },
   {
     name: 'contact',
@@ -239,10 +239,10 @@ export const secondSection: FormField[] = [
       name: 'help_details',
       values: ['other']
     },
-    name: 'help_verbatim',
+    name: 'help_details_verbatim',
     kind: 'input-text',
-    hint: 'fields.help_verbatim.hint',
-    label: 'fields.help_verbatim.label'
+    hint: 'fields.help_details_verbatim.hint',
+    label: 'fields.help_details_verbatim.label'
   },
   {
     name: 'verbatim',

@@ -12,13 +12,18 @@ type Props = {
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
+type CheckboxOpinionKeys =
+  | 'difficulties_details'
+  | 'help_details'
+  | 'contact_channels';
+
 export const Field = (props: Props) => {
   const { field, opinion, setOpinion } = props;
 
   const { t } = useTranslation('common');
 
   const onChangeCheckbox = (
-    key: 'difficulties' | 'help',
+    key: CheckboxOpinionKeys,
     isolated: boolean,
     e: ChangeEvent<HTMLInputElement>,
     options: CheckboxOption[]
@@ -97,11 +102,13 @@ export const Field = (props: Props) => {
               label: t(opt.label),
               nativeInputProps: {
                 name: opt.name || `${field.name}-${index}`,
-                checked: opinion[field.name]?.includes(opt.value),
+                checked: opinion[field.name as CheckboxOpinionKeys]?.includes(
+                  opt.value
+                ),
                 value: opt.value,
                 onChange: e => {
                   onChangeCheckbox(
-                    field.name as 'difficulties' | 'help',
+                    field.name as CheckboxOpinionKeys,
                     opt.isolated || false,
                     e,
                     field.options

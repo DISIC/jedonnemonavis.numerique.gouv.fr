@@ -23,7 +23,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     easy: undefined,
     difficulties: undefined,
     difficulties_details: [],
-    difficulties_verbatim: undefined,
+    difficulties_details_verbatim: undefined,
     contact: undefined,
     contact_details: [],
     contact_satisfaction: undefined,
@@ -31,7 +31,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     contact_channels_verbatim: undefined,
     help: undefined,
     help_details: [],
-    help_verbatim: undefined,
+    help_details_verbatim: undefined,
     verbatim: undefined
   });
 
