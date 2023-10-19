@@ -15,6 +15,7 @@ import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
 import { trpc } from '@/src/utils/trpc';
 import { Prisma } from '@prisma/client';
+import { Loader } from '../ui/Loader';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -97,7 +98,10 @@ export const RegisterForm = (props: Props) => {
 		}
 	});
 
-	const { classes, cx } = useStyles({ errors });
+	const { classes, cx } = useStyles({
+		errors,
+		isLoading: registerUser.isLoading
+	});
 
 	const resetErrors = (key: keyof FormErrors) => {
 		setErrors({ ...errors, [key]: defaultErrors[key] });
@@ -322,7 +326,7 @@ export const RegisterForm = (props: Props) => {
 					}
 				/>
 				<Button className={cx(classes.button)} type="submit">
-					Valider
+					{registerUser.isLoading ? <Loader size="sm" white /> : 'Valider'}
 				</Button>
 			</form>
 		</div>
@@ -331,11 +335,13 @@ export const RegisterForm = (props: Props) => {
 
 const useStyles = tss
 	.withName(RegisterForm.name)
-	.withParams<{ errors: FormErrors }>()
-	.create(({ errors }) => ({
+	.withParams<{ errors: FormErrors; isLoading: boolean }>()
+	.create(({ errors, isLoading }) => ({
 		button: {
 			display: 'block',
-			marginLeft: 'auto'
+			marginLeft: 'auto',
+			cursor: isLoading ? 'not-allowed' : 'pointer',
+			pointerEvents: isLoading ? 'none' : 'auto'
 		},
 		password: {
 			marginBottom:

@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { Loader } from '../ui/Loader';
 
 type FormCredentials = {
 	email: string;
@@ -39,10 +40,9 @@ export const LoginForm = () => {
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 	const [showPassword, setShowPassword] = useState<boolean>(false);
+	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 
 	const passwordRef = useRef<HTMLInputElement | null>(null);
-
-	const { classes, cx } = useStyles({ passwordIncorrect });
 
 	const checkEmailUser = trpc.user.checkEmail.useMutation({
 		onSuccess: result => {
@@ -68,6 +68,12 @@ export const LoginForm = () => {
 					break;
 			}
 		}
+	});
+
+	const isLoading = checkEmailUser.isLoading || isSignInLoading;
+	const { classes, cx } = useStyles({
+		passwordIncorrect,
+		isLoading
 	});
 
 	const resetErrors = () => {
@@ -105,13 +111,18 @@ export const LoginForm = () => {
 	};
 
 	const login = (): void => {
-		signIn('credentials', { ...credentials, redirect: false }).then(res => {
-			if (res?.error) {
-				if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
-			} else {
-				router.push('/administration/dashboard/products');
-			}
-		});
+		setIsSignInLoading(true);
+		signIn('credentials', { ...credentials, redirect: false })
+			.then(res => {
+				if (res?.error) {
+					if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
+				} else {
+					router.push('/administration/dashboard/products');
+				}
+			})
+			.finally(() => {
+				setIsSignInLoading(false);
+			});
 	};
 
 	useEffect(() => {
@@ -163,7 +174,13 @@ export const LoginForm = () => {
 					/>
 				)}
 				<Button type="submit" className={cx(classes.button)}>
-					{showPassword ? 'Confirmer' : 'Continuer'}
+					{isLoading ? (
+						<Loader size="sm" white />
+					) : showPassword ? (
+						'Confirmer'
+					) : (
+						'Continuer'
+					)}
 				</Button>
 			</form>
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
@@ -180,11 +197,13 @@ export const LoginForm = () => {
 
 const useStyles = tss
 	.withName(LoginForm.name)
-	.withParams<{ passwordIncorrect: boolean }>()
-	.create(({ passwordIncorrect }) => ({
+	.withParams<{ passwordIncorrect: boolean; isLoading: boolean }>()
+	.create(({ passwordIncorrect, isLoading }) => ({
 		button: {
 			width: '100%',
-			justifyContent: 'center'
+			justifyContent: 'center',
+			cursor: isLoading ? 'not-allowed' : 'pointer',
+			pointerEvents: isLoading ? 'none' : 'auto'
 		},
 		password: {
 			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0
