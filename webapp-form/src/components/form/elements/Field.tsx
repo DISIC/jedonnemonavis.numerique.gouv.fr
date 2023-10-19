@@ -164,10 +164,11 @@ export const Field = (props: Props) => {
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
           label={t(field.label)}
-          state="default"
-          stateRelatedMessage="Text de validation / d'explication de l'erreur"
+          state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
+          stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{
             value: opinion[field.name],
+            maxLength: 250,
             onChange: e => {
               setOpinion({
                 ...opinion,
