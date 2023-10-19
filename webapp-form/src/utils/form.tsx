@@ -50,44 +50,58 @@ export const secondSection: FormField[] = [
   },
   {
     name: 'difficulties',
-    kind: 'checkbox',
+    kind: 'radio',
     label: 'fields.difficulties.label',
     options: [
       {
         label: 'fields.difficulties.options.0.label',
-        value: 'no',
-        isolated: true
+        value: 'yes'
       },
       {
         label: 'fields.difficulties.options.1.label',
-        value: 'yes-missing-infos-before'
+        value: 'no'
+      }
+    ]
+  },
+  {
+    name: 'difficulties_details',
+    kind: 'checkbox',
+    label: 'fields.difficulties_details.label',
+    condition: {
+      name: 'difficulties',
+      values: ['yes']
+    },
+    options: [
+      {
+        label: 'fields.difficulties_details.options.0.label',
+        value: 'missing-infos-before'
       },
       {
-        label: 'fields.difficulties.options.2.label',
-        value: 'yes-bug'
+        label: 'fields.difficulties_details.options.1.label',
+        value: 'bug'
       },
       {
-        label: 'fields.difficulties.options.3.label',
-        value: 'yes-bug-display-mobile'
+        label: 'fields.difficulties_details.options.2.label',
+        value: 'bug-display-mobile'
       },
       {
-        label: 'fields.difficulties.options.4.label',
-        value: 'yes-bug-upload-documents'
+        label: 'fields.difficulties_details.options.3.label',
+        value: 'bug-upload-documents'
       },
       {
-        label: 'fields.difficulties.options.5.label',
-        value: 'yes-missing-infos-after'
+        label: 'fields.difficulties_details.options.4.label',
+        value: 'missing-infos-after'
       },
       {
-        label: 'fields.difficulties.options.6.label',
-        value: 'yes-other'
+        label: 'fields.difficulties_details.options.5.label',
+        value: 'other'
       }
     ]
   },
   {
     condition: {
-      name: 'difficulties',
-      values: ['yes-other']
+      name: 'difficulties_details',
+      values: ['other']
     },
     name: 'difficulties_verbatim',
     kind: 'input-text',
@@ -101,35 +115,18 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: 'fields.contact.options.0.label',
-        value: 'no'
+        value: 'yes'
       },
       {
         label: 'fields.contact.options.1.label',
-        value: 'yes-but-not-found'
-      },
-      {
-        label: 'fields.contact.options.2.label',
-        value: 'yes-but-not-reached'
-      },
-      {
-        label: 'fields.contact.options.3.label',
-        value: 'yes-reached'
+        value: 'no'
       }
     ]
   },
   {
     condition: {
       name: 'contact',
-      values: ['yes-reached']
-    },
-    name: 'contact_satisfaction',
-    kind: 'smiley',
-    label: 'fields.contact_satisfaction.label'
-  },
-  {
-    condition: {
-      name: 'contact',
-      values: ['yes-but-not-found', 'yes-but-not-reached', 'yes-reached']
+      values: ['yes']
     },
     name: 'contact_channels',
     kind: 'checkbox',
@@ -154,37 +151,93 @@ export const secondSection: FormField[] = [
     ]
   },
   {
-    name: 'help',
-    kind: 'checkbox',
-    label: 'fields.help.label',
+    condition: {
+      name: 'contact_channels',
+      values: ['other']
+    },
+    name: 'contact_channels_verbatim',
+    kind: 'input-text',
+    hint: 'fields.contact_channels_verbatim.hint',
+    label: 'fields.contact_channels_verbatim.label'
+  },
+  {
+    name: 'contact_details',
+    kind: 'radio',
+    label: 'fields.contact_details.label',
+    condition: {
+      name: 'contact',
+      values: ['yes']
+    },
     options: [
       {
-        label: 'fields.help.options.0.label',
-        value: 'no',
-        isolated: true
+        label: 'fields.contact_details.options.0.label',
+        value: 'but-not-found'
       },
       {
-        label: 'fields.help.options.1.label',
-        value: 'yes-internet'
+        label: 'fields.contact_details.options.1.label',
+        value: 'but-not-reached'
       },
       {
-        label: 'fields.help.options.2.label',
-        value: 'yes-relative'
-      },
-      {
-        label: 'fields.help.options.3.label',
-        value: 'yes-association'
-      },
-      {
-        label: 'fields.help.options.4.label',
-        value: 'yes-other'
+        label: 'fields.contact_details.options.2.label',
+        value: 'reached'
       }
     ]
   },
   {
     condition: {
+      name: 'contact_details',
+      values: ['reached']
+    },
+    name: 'contact_satisfaction',
+    kind: 'smiley',
+    label: 'fields.contact_satisfaction.label'
+  },
+  {
+    name: 'help',
+    kind: 'radio',
+    label: 'fields.help.label',
+    options: [
+      {
+        label: 'fields.help.options.0.label',
+        value: 'yes'
+      },
+      {
+        label: 'fields.help.options.1.label',
+        value: 'no'
+      }
+    ]
+  },
+  {
+    name: 'help_details',
+    kind: 'checkbox',
+    label: 'fields.help_details.label',
+    condition: {
       name: 'help',
-      values: ['yes-other']
+      values: ['yes']
+    },
+    options: [
+      {
+        label: 'fields.help_details.options.0.label',
+        value: 'internet'
+      },
+      {
+        label: 'fields.help_details.options.1.label',
+        value: 'relative'
+      },
+      {
+        label: 'fields.help_details.options.2.label',
+        value: 'association'
+      },
+      {
+        label: 'fields.help_details.options.3.label',
+        value: 'other'
+      }
+    ]
+  },
+  {
+    condition: {
+      name: 'help_details',
+      values: ['other']
     },
     name: 'help_verbatim',
     kind: 'input-text',

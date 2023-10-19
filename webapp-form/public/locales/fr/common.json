@@ -51,22 +51,30 @@
       "label": "Avez-vous rencontré des difficultés ?",
       "options": [
         {
-          "label": "Non, je n’ai pas eu de difficultés"
+          "label": "Oui"
         },
         {
-          "label": "Oui, j’ai manqué d’information avant de commencer la démarche"
+          "label": "Non"
+        }
+      ]
+    },
+    "difficulties_details": {
+      "label": "Quelles ont été ces difficultés ?",
+      "options": [
+        {
+          "label": "J’ai manqué d’information avant de commencer la démarche"
         },
         {
-          "label": "Oui, la démarche n’a pas fonctionné"
+          "label": "La démarche n’a pas fonctionné"
         },
         {
-          "label": "Oui, le site ne s’affichait pas bien sur mobile"
+          "label": "Le site ne s’affichait pas bien sur mobile"
         },
         {
-          "label": "Oui, j’ai eu des difficultés à joindre des documents"
+          "label": "J’ai eu des difficultés à joindre des documents"
         },
         {
-          "label": "Oui, il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)"
+          "label": "Il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)"
         },
         {
           "label": "Autre"
@@ -78,27 +86,18 @@
       "hint": "Maximum 250 caractères."
     },
     "contact": {
-      "label": "Avez-vous tenter de contacter le service de la démarche pour obtenir de l’aide ?",
+      "label": "Avez-vous tenté de contacter le service d'aide en charge de la démarche ?",
       "options": [
         {
-          "label": "Non, je n’ai pas eu besoin de les contacter"
+          "label": "Oui"
         },
         {
-          "label": "Oui, mais je n’ai pas trouvé comment les contacter"
-        },
-        {
-          "label": "Oui, je les ai contacté mais je n’ai pas réussi à les joindre"
-        },
-        {
-          "label": "Oui, je les ai contacté et ils m’ont répondu"
+          "label": "Non"
         }
       ]
     },
-    "contact_satisfaction": {
-      "label": "Comment s’est passé l’échange avec le service de la démarche ?"
-    },
     "contact_channels": {
-      "label": "Par quel(s) moyen(s) avez-vous tenter de contacter le service de la démarche ? (plusieurs réponses possibles)",
+      "label": "Par quel(s) moyen(s) avez-vous tenter de contacter le service de la démarche ?",
       "options": [
         {
           "label": "Téléphone"
@@ -114,20 +113,49 @@
         }
       ]
     },
-    "help": {
-      "label": "Avez-vous eu besoin d'une autre aide pour compléter cette démarche ?",
+    "contact_channels_verbatim": {
+      "label": "Pouvez-vous préciser quelle(s) autre(s) moyen(s) avez-vous tenter de contacter le service ?",
+      "hint": "Maximum 250 caractères."
+    },
+    "contact_details": {
+      "label": "Avez-vous réussi à les joindre ?",
       "options": [
         {
-          "label": "Non, je l'ai complété sans aide"
+          "label": "Je n’ai pas trouvé comment les contacter"
         },
         {
-          "label": "Oui, j'ai fait une recherche sur internet (site, forum)"
+          "label": "Je les ai contacté mais je n’ai pas réussi à les joindre"
         },
         {
-          "label": "Oui, j'ai demandé de l’aide à un proche (famille, ami)"
+          "label": "Je les ai contacté et ils m’ont répondu"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "Comment s’est passé l’échange avec le service de la démarche ?"
+    },
+    "help": {
+      "label": "Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?",
+      "options": [
+        {
+          "label": "Oui"
         },
         {
-          "label": "Oui, j'ai demandé de l’aide à une association"
+          "label": "Non"
+        }
+      ]
+    },
+    "help_details": {
+      "label": "De quelle aide avez vous eu besoin ?",
+      "options": [
+        {
+          "label": "J'ai fait une recherche sur internet (site, forum)"
+        },
+        {
+          "label": "J'ai demandé de l’aide à un proche (famille, ami)"
+        },
+        {
+          "label": "J'ai demandé de l’aide à une association"
         },
         {
           "label": "Autre"

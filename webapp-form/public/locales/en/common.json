@@ -1,13 +1,13 @@
 {
   "first_block": {
-    "title": "I give my opinion",
+    "title": "Share your feedback",
     "product": "Process",
     "validate": "Submit"
   },
   "second_block": {
     "title": "Thank you!",
     "subtitle": "Can you tell us more?",
-    "validate": "Submit my opinion"
+    "validate": "Submit my feedback"
   },
   "smileys": {
     "good": "Very good",
@@ -16,7 +16,7 @@
   },
   "fields": {
     "satisfaction": {
-      "label": "How did this process go for you?",
+      "label": "How was this process for you?",
       "hint": "This field is mandatory."
     },
     "easy": {
@@ -48,25 +48,33 @@
       ]
     },
     "difficulties": {
-      "label": "Did you encounter any difficulties?",
+      "label": "Did you face any difficulties?",
       "options": [
         {
-          "label": "No, I did not encounter any difficulties"
+          "label": "Yes"
         },
         {
-          "label": "Yes, I lacked information before starting the process"
+          "label": "No"
+        }
+      ]
+    },
+    "difficulties_details": {
+      "label": "What were these difficulties?",
+      "options": [
+        {
+          "label": "I lacked information before starting the process"
         },
         {
-          "label": "Yes, the process did not work"
+          "label": "The process did not work"
         },
         {
-          "label": "Yes, the site did not display well on mobile"
+          "label": "The site did not display well on mobile"
         },
         {
-          "label": "Yes, I had difficulty attaching documents"
+          "label": "I had difficulty attaching documents"
         },
         {
-          "label": "Yes, there was a lack of information about the follow-up to my request or process (timeframe, etc.)"
+          "label": "There was a lack of information about the progress of my request or process (timeline, etc.)"
         },
         {
           "label": "Other"
@@ -78,27 +86,18 @@
       "hint": "Maximum 250 characters."
     },
     "contact": {
-      "label": "Did you try to contact the process service for help?",
+      "label": "Did you try to contact the assistance service for the process?",
       "options": [
         {
-          "label": "No, I did not need to contact them"
+          "label": "Yes"
         },
         {
-          "label": "Yes, but I did not find how to contact them"
-        },
-        {
-          "label": "Yes, I contacted them but could not reach them"
-        },
-        {
-          "label": "Yes, I contacted them and they responded to me"
+          "label": "No"
         }
       ]
     },
-    "contact_satisfaction": {
-      "label": "How was the interaction with the process service?"
-    },
     "contact_channels": {
-      "label": "By what means did you try to contact the process service? (multiple answers possible)",
+      "label": "By what means did you try to contact the process service?",
       "options": [
         {
           "label": "Phone"
@@ -114,20 +113,49 @@
         }
       ]
     },
-    "help": {
-      "label": "Did you need any other help to complete this process?",
+    "contact_channels_verbatim": {
+      "label": "Can you specify what other means you tried to contact the service?",
+      "hint": "Maximum 250 characters."
+    },
+    "contact_details": {
+      "label": "Were you able to reach them?",
       "options": [
         {
-          "label": "No, I completed it without assistance"
+          "label": "I did not find how to contact them"
         },
         {
-          "label": "Yes, I searched the internet (site, forum)"
+          "label": "I contacted them but could not reach them"
         },
         {
-          "label": "Yes, I asked for help from a family member or friend"
+          "label": "I contacted them and they responded to me"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "How was the interaction with the process service?"
+    },
+    "help": {
+      "label": "Did you need additional help for this process?",
+      "options": [
+        {
+          "label": "Yes"
         },
         {
-          "label": "Yes, I asked for help from an association"
+          "label": "No"
+        }
+      ]
+    },
+    "help_details": {
+      "label": "What help did you need?",
+      "options": [
+        {
+          "label": "I searched on the internet (site, forum)"
+        },
+        {
+          "label": "I asked for help from a close person (family, friend)"
+        },
+        {
+          "label": "I asked for help from an association"
         },
         {
           "label": "Other"
@@ -139,7 +167,7 @@
       "hint": "Maximum 250 characters."
     },
     "verbatim": {
-      "label": "Would you like to tell us more?",
+      "label": "Do you want to tell us more?",
       "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this process, contact the relevant service."
     }
   }
