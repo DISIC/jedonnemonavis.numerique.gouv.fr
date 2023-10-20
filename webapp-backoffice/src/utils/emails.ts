@@ -29,32 +29,14 @@ function getEmailWithLayout(content: string) {
 					margin-bottom: 30px;
 				}
 				.header img {
-					width: 88px;
-				}
-				.header div {
-					margin-top: 10px;
-					padding-left: 40px;
-				}
-				.header h1 {
-					font-size: 20px;
-					font-style: normal;
-					font-weight: 700;
-					line-height: 28px;
-					margin: 0;
-				}
-				.header span {
-					font-size: 14px;
+					height: 88px;
 				}
 			</style>
 		</head>
 		<body>
 			<div class="container">
 				<div class="header">
-					<img src="https://upload.wikimedia.org/wikipedia/fr/thumb/2/22/Republique-francaise-logo.svg/1024px-Republique-francaise-logo.svg.png"/>
-					<div>
-					<h1>Je donne mon avis</h1>
-					<span>sous-titre</span>
-					</div>
+					<img src="https://numericite.eu/wp-content/uploads/2023/10/Frame-12104.png"/>
 				</div>
 				${content}
 				<p>
