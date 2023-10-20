@@ -3,12 +3,9 @@ import { router, protectedProcedure } from '@/src/server/trpc';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { sendMail } from '@/src/utils/mailer';
-import {
-	generateRandomString,
-	getInviteEmailHtml,
-	getUserInviteEmailHtml
-} from '@/src/utils/tools';
+import { generateRandomString } from '@/src/utils/tools';
 import { AccessRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
+import { getInviteEmailHtml, getUserInviteEmailHtml } from '@/src/utils/emails';
 
 export const generateInviteToken = async (
 	prisma: PrismaClient,
