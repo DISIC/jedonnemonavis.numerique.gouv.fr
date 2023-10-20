@@ -82,15 +82,15 @@ export function getOTPEmailHtml(code: string) {
 		<p>Bonjour,</p>
 
 		<p>
-			Vous vous connectez pour la première fois à "Je donne mon avis" avec votre ancien compte observatoire.
-			Afin de confirmer votre identité et de définir un nouveau mot de passe, veuillez utiliser le mot de passe temporaire suivant :
+			Vous vous connectez pour la première fois à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » 
+			avec votre ancien compte <a href="https://observatoire.numerique.gouv.fr/" target="_blank">Observatoire / Vos démarches essentielles</a>. 
+			Afin de confirmer votre identité, veuillez utiliser le mot de passe temporaire suivant :
 		</p>
 
 		<p class="code">${code}</p>
 
 		<p>
-			Ce code est valable pour les 15 prochaines minutes. Si vous n'avez pas demandé ce
-			code, veuillez ignorer cet e-mail.
+			Ce code est valable pour les 15 prochaines minutes. Si vous n'avez pas demandé ce code, veuillez ignorer cet e-mail.
 		</p>
 	`);
 }
