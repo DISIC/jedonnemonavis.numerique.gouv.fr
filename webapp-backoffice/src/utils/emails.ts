@@ -115,6 +115,7 @@ export function getRegisterEmailHtml(token: string) {
 }
 
 export function getUserInviteEmailHtml(
+	contextUser: Session['user'],
 	email: string,
 	inviteToken: string,
 	productTitle: string
@@ -127,7 +128,7 @@ export function getUserInviteEmailHtml(
 		<p>Bonjour,</p>
 
 		<p>
-			Quelqu'un vous a invité à rejoindre "Je donne mon avis" en tant que porteur pour le produit "${productTitle}". Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
+			${contextUser?.name} vous invite à rejoindre la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » et vous donne accès à la démarche « ${productTitle} ». Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
 		</p>
 
 		<a href="${link}" target="_blank">${link}</a>

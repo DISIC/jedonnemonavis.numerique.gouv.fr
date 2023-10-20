@@ -111,9 +111,10 @@ export const accessRightRouter = router({
 				const token = await generateInviteToken(ctx.prisma, user_email);
 
 				await sendMail(
-					'Invitation à rejoindre "Je donne mon avis"',
+					'Invitation à rejoindre « Je donne mon avis »',
 					user_email,
 					getUserInviteEmailHtml(
+						contextUser,
 						user_email,
 						token,
 						newAccessRight.product.title
@@ -127,7 +128,7 @@ export const accessRightRouter = router({
 				);
 			} else {
 				await sendMail(
-					`Invitation à rejoindre le produit numérique "${newAccessRight.product.title}" sur "Je donne mon avis"`,
+					`Accès à la démarche « ${newAccessRight.product.title} » sur la plateforme « Je donne mon avis »`,
 					user_email,
 					getInviteEmailHtml(contextUser, newAccessRight.product.title),
 					`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
@@ -141,6 +142,7 @@ export const accessRightRouter = router({
 		.input(z.object({ product_id: z.number(), user_email: z.string().email() }))
 		.mutation(async ({ ctx, input }) => {
 			const { user_email, product_id } = input;
+			const contextUser = ctx.session.user;
 
 			const product = await ctx.prisma.product.findUnique({
 				where: {
@@ -157,9 +159,9 @@ export const accessRightRouter = router({
 			const token = await generateInviteToken(ctx.prisma, user_email);
 
 			await sendMail(
-				'Invitation à rejoindre "Je donne mon avis"',
+				'Invitation à rejoindre « Je donne mon avis »',
 				user_email,
-				getUserInviteEmailHtml(user_email, token, product.title),
+				getUserInviteEmailHtml(contextUser, user_email, token, product.title),
 				`Cliquez sur ce lien pour créer votre compte : ${
 					process.env.NODEMAILER_BASEURL
 				}/register?${new URLSearchParams({
