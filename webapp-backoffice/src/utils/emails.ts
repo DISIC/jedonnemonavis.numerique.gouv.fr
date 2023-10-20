@@ -26,14 +26,13 @@ function getEmailWithLayout(content: string) {
 					margin-top: 30px;
 				}
 				.header {
-					display: flex;
-					align-items: center;
 					margin-bottom: 30px;
 				}
 				.header img {
 					width: 88px;
 				}
 				.header div {
+					margin-top: 10px;
 					padding-left: 40px;
 				}
 				.header h1 {
@@ -104,7 +103,7 @@ export function getRegisterEmailHtml(token: string) {
 		<p>Bonjour,</p>
 
 		<p>
-			Vous venez de créer un compte "Je donne mon avis". Afin de valider votre compte, veuillez cliquer sur le lien ci-dessous.
+			Vous venez de créer un compte sur la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> ». Afin de valider votre compte, veuillez cliquer sur le lien ci-dessous.
 		</p>
 
 		<a href="${link}" target="_blank">${link}</a>
