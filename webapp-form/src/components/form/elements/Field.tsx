@@ -1,4 +1,9 @@
-import { CheckboxOption, FormField, Opinion } from "@/src/utils/types";
+import {
+  CheckboxOption,
+  Condition,
+  FormField,
+  Opinion,
+} from "@/src/utils/types";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Input } from "@codegouvfr/react-dsfr/Input";
@@ -9,6 +14,7 @@ import { SmileyInput } from "./SmileyInput";
 type Props = {
   field: FormField;
   opinion: Opinion;
+  form: FormField[];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
@@ -18,9 +24,28 @@ type CheckboxOpinionKeys =
   | "contact_channels";
 
 export const Field = (props: Props) => {
-  const { field, opinion, setOpinion } = props;
+  const { field, opinion, setOpinion, form } = props;
 
   const { t } = useTranslation("common");
+
+  const getChildrenResetObject = () => {
+    const children = form.filter(
+      (f) =>
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+    );
+
+    let opinionPropsObj: {
+      [key in keyof Opinion]?: any;
+    } = {};
+
+    children.forEach((cf) => {
+      opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
+        ? []
+        : undefined;
+    });
+
+    return opinionPropsObj;
+  };
 
   const onChangeCheckbox = (
     key: CheckboxOpinionKeys,
@@ -32,9 +57,7 @@ export const Field = (props: Props) => {
       setOpinion({
         ...opinion,
         [key]: e.target.checked ? [e.target.value] : [],
-        [`${key}_verbatim`]: !e.target.checked
-          ? undefined
-          : opinion[`${key}_verbatim`],
+        ...getChildrenResetObject(),
       });
     } else {
       const isolatedSiblings = options
@@ -50,38 +73,49 @@ export const Field = (props: Props) => {
               e.target.value,
             ]
           : opinion[key].filter((d) => d !== e.target.value),
-        [`${key}_verbatim`]: !e.target.checked
-          ? undefined
-          : opinion[`${key}_verbatim`],
+        ...getChildrenResetObject(),
+      });
+      console.log({
+        ...opinion,
+        [key]: e.target.checked
+          ? [
+              ...opinion[key].filter(
+                (sibling) => !isolatedSiblings.includes(sibling)
+              ),
+              e.target.value,
+            ]
+          : opinion[key].filter((d) => d !== e.target.value),
+        ...getChildrenResetObject(),
       });
     }
   };
 
   if (field.conditions) {
-    const isOneConditionMatching = field.conditions.some((condition) => {
+    const showField = field.conditions.some((condition) => {
       // Si la valeur de la source de condition n'est pas encore définie
       if (!opinion[condition.name] || !opinion[condition.name]?.length)
-        return true;
+        return false;
 
-      // Si le champ de la source de condition est un Array et qu'il contient la valeur cible
+      // Si le champ de la source de condition est un Array et qu'il contient l'une des valeurs cibles
       if (
         Array.isArray(opinion[condition.name]) &&
-        !(opinion[condition.name] as string[])?.some(
+        (opinion[condition.name] as string[])?.some(
           (v) => condition?.values.includes(v)
         )
       )
         return true;
-      // Si le champ de la source de condition n'est pas un Array et que la valeur n'est pas égale
-      else if (
+
+      // Si le champ de la source de condition n'est pas un Array et que la valeur est égale à l'une des valeurs cibles
+      if (
         !Array.isArray(opinion[condition.name]) &&
-        !condition.values.includes(opinion[condition.name] as string)
+        condition.values.includes(opinion[condition.name] as string)
       )
         return true;
 
       return false;
     });
 
-    if (isOneConditionMatching) return;
+    if (!showField) return;
   }
 
   switch (field.kind) {
@@ -136,6 +170,7 @@ export const Field = (props: Props) => {
                   setOpinion({
                     ...opinion,
                     [field.name]: e.target.value,
+                    ...getChildrenResetObject(),
                   });
                 },
               },
