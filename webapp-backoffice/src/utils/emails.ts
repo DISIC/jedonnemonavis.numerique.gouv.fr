@@ -144,7 +144,7 @@ export function getInviteEmailHtml(
 		<p>Bonjour,</p>
 
 		<p>
-			${contextUser?.name} vous a invité à rejoindre le produit numérique "${productTitle}" sur "Je donne mon avis".
+			${contextUser?.name} vient de vous donner accès à la démarche « ${productTitle} » sur la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> ».
 		</p>
 
 		<p>
