@@ -74,7 +74,7 @@ export async function updateUserRequest(
 			}
 
 			await sendMail(
-				`Votre demande d'accès sur "Je donne mon avis" a été acceptée`,
+				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
 				updatedUser.email,
 				getUserRequestEmailHtml(),
 				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`

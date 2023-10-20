@@ -162,7 +162,7 @@ export function getUserRequestEmailHtml() {
 		<p>Bonjour,</p>
 
 		<p>
-			Votre demande d'accès à "Je donne mon avis" a bien été prise en compte.
+			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été acceptée.		
 		</p>
 
 		<p>
