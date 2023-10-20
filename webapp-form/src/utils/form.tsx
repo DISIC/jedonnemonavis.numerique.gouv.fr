@@ -200,16 +200,6 @@ export const secondSection: FormField[] = [
     label: "fields.contact_satisfaction.label",
   },
   {
-    conditions: [
-      {
-        name: "contact",
-        values: ["no"],
-      },
-      {
-        name: "contact_reached",
-        values: ["no"],
-      },
-    ],
     name: "help",
     kind: "radio",
     label: "fields.help.label",
