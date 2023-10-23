@@ -231,11 +231,14 @@ const DashBoardUsers = () => {
 									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 										<span>Utilisateur</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 										<span>Date de création</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-										<span>Observatoire</span>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+										<span>Rôle</span>
+									</div>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
+										<span>xWiki</span>
 									</div>
 								</div>
 							</div>

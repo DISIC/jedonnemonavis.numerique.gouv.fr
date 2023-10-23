@@ -1,5 +1,8 @@
 import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/users';
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import {
+	displayReadableRole,
+	formatDateToFrenchString
+} from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { User } from '@prisma/client';
@@ -30,10 +33,13 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 					</p>
 					<span className={classes.userEmail}>{user.email}</span>
 				</div>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 					<span>{formatDateToFrenchString(user.created_at.toString())}</span>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+					<span>{displayReadableRole(user.role)}</span>
+				</div>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
 					{user.observatoire_account ? (
 						<i
 							className={cx(
