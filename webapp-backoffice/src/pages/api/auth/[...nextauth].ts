@@ -20,13 +20,15 @@ export const authOptions: NextAuthOptions = {
 			user: {
 				...session.user,
 				id: token.uid,
-				role: token.role
+				role: token.role,
+				entities: token.entities
 			}
 		}),
 		jwt: ({ user, token }) => {
 			if (user) {
 				token.uid = user.id;
 				token.role = user.role;
+				token.entities = user.entities;
 			}
 			return token;
 		}
@@ -42,7 +44,10 @@ export const authOptions: NextAuthOptions = {
 				}
 
 				const { email, password } = credentials;
-				const user = await prisma.user.findUnique({ where: { email } });
+				const user = await prisma.user.findUnique({
+					where: { email },
+					include: { entities: true }
+				});
 
 				if (!user) {
 					return null;

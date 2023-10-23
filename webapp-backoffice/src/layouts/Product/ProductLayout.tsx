@@ -5,8 +5,8 @@ import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
 import { Product } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
+import { useSession } from 'next-auth/react';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -24,6 +24,7 @@ interface MenuItems {
 
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
+	const { data: session } = useSession();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
 
@@ -31,7 +32,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 	const { cx, classes } = useStyles();
 
-	const menuItems: MenuItems[] = [
+	let menuItems: MenuItems[] = [
 		{
 			text: 'Statistiques',
 			isActive:
@@ -49,35 +50,42 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				href: `/administration/dashboard/product/${id}/reviews`,
 				alt: 'Avis'
 			}
-		},
-		{
-			text: 'Gérer mes boutons',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/buttons`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/buttons`,
-				alt: 'Gérer mes boutons'
-			}
-		},
-		{
-			text: "Gérer les droits d'accès",
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/access`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/access`,
-				alt: "Gérer les droits d'accès"
-			}
-		},
-		{
-			text: 'Informations',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/infos`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/infos`,
-				alt: 'Informations'
-			}
 		}
 	];
+
+	if (session?.user?.role === 'user' || session?.user?.role === 'admin') {
+		menuItems = [
+			...menuItems,
+			{
+				text: 'Gérer mes boutons',
+				isActive:
+					router.pathname === `/administration/dashboard/product/[id]/buttons`,
+				linkProps: {
+					href: `/administration/dashboard/product/${id}/buttons`,
+					alt: 'Gérer mes boutons'
+				}
+			},
+			{
+				text: "Gérer les droits d'accès",
+				isActive:
+					router.pathname === `/administration/dashboard/product/[id]/access`,
+				linkProps: {
+					href: `/administration/dashboard/product/${id}/access`,
+					alt: "Gérer les droits d'accès"
+				}
+			},
+			{
+				text: 'Informations',
+				isActive:
+					router.pathname === `/administration/dashboard/product/[id]/infos`,
+				linkProps: {
+					href: `/administration/dashboard/product/${id}/infos`,
+					alt: 'Informations'
+				}
+			}
+		];
+	}
+
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
 			<Toast

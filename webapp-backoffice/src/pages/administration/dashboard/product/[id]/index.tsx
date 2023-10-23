@@ -34,10 +34,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const currentUser = await prisma.user.findUnique({
 		where: {
 			email: currentUserToken.email as string
-		}
+		},
+		include: { entities: true }
 	});
 
-	if (!currentUser) {
+	if (!currentUser || !product) {
 		return {
 			redirect: {
 				destination: '/',
@@ -46,13 +47,21 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	const hasAccessRightToProduct = await prisma.accessRight.findFirst({
-		where: {
-			user_email: currentUserToken.email as string,
-			product_id: parseInt(id as string),
-			status: 'carrier'
-		}
-	});
+	let hasAccessRightToProduct = false;
+
+	if (currentUser.role === 'user') {
+		hasAccessRightToProduct = !!(await prisma.accessRight.findFirst({
+			where: {
+				user_email: currentUserToken.email as string,
+				product_id: parseInt(id as string),
+				status: 'carrier'
+			}
+		}));
+	} else if (currentUser.role === 'supervisor') {
+		hasAccessRightToProduct = currentUser.entities.some(
+			e => e.id === product.entity_id
+		);
+	}
 
 	if (!hasAccessRightToProduct && currentUser.role !== 'admin') {
 		return {

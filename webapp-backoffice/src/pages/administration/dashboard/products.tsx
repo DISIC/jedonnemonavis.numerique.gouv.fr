@@ -88,7 +88,18 @@ const DashBoard = () => {
 		setCurrentPage(pageNumber);
 	};
 
+	const getEntitiesFilterOptions = (): Entity[] => {
+		if (session?.user?.role === 'admin') {
+			return entities;
+		} else {
+			return session?.user?.entities || [];
+		}
+	};
+
 	const nbPages = getNbPages(productsCount, numberPerPage);
+	const showEntitiesFilter =
+		session?.user.role === 'admin' ||
+		(session?.user.role === 'supervisor' && session.user.entities.length > 1);
 
 	return (
 		<>
@@ -144,34 +155,36 @@ const DashBoard = () => {
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-						<Autocomplete
-							id="filter-entity"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={entities.map((entity: Entity) => ({
-								label: entity.name,
-								value: entity.id
-							}))}
-							onChange={(_, option) => {
-								setFilterEntityId(option?.value);
-							}}
-							noOptionsText="Aucune organisation trouvée"
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label className="fr-label">
-										Filtrer par une organisation
-									</label>
-									<input
-										{...params.inputProps}
-										className={cx(params.inputProps.className, 'fr-input')}
-										placeholder="Sélectionner une option"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
-					</div>
+					{showEntitiesFilter && (
+						<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+							<Autocomplete
+								id="filter-entity"
+								disablePortal
+								sx={{ width: '100%' }}
+								options={getEntitiesFilterOptions().map((entity: Entity) => ({
+									label: entity.name,
+									value: entity.id
+								}))}
+								onChange={(_, option) => {
+									setFilterEntityId(option?.value);
+								}}
+								noOptionsText="Aucune organisation trouvée"
+								renderInput={params => (
+									<div ref={params.InputProps.ref}>
+										<label className="fr-label">
+											Filtrer par une organisation
+										</label>
+										<input
+											{...params.inputProps}
+											className={cx(params.inputProps.className, 'fr-input')}
+											placeholder="Sélectionner une option"
+											type="search"
+										/>
+									</div>
+								)}
+							/>
+						</div>
+					)}
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
 						<form
 							className={cx(classes.searchForm)}

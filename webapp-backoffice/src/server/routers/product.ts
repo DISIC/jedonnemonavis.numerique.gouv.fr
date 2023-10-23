@@ -57,17 +57,18 @@ export const productRouter = router({
 				}
 			];
 
-			let where: Prisma.ProductWhereInput = {
-				accessRights:
-					contextUser.role !== 'admin'
-						? {
-								some: {
-									user_email: contextUser.email,
-									status: 'carrier'
-								}
-						  }
-						: {}
-			};
+			let where: Prisma.ProductWhereInput = {};
+
+			if (contextUser.role === 'user') {
+				where.accessRights = {
+					some: {
+						user_email: contextUser.email,
+						status: 'carrier'
+					}
+				};
+			} else if (contextUser.role === 'supervisor') {
+				where.entity_id = { in: contextUser.entities.map(e => e.id) };
+			}
 
 			if (search) {
 				const searchQuery = search.split(' ').join(' | ');
