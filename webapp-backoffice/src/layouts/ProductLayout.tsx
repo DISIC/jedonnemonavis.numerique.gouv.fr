@@ -7,6 +7,7 @@ import { Product } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Toast } from '@/src/components/ui/Toast';
 import { useSession } from 'next-auth/react';
+import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -88,6 +89,20 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
+			{session?.user.role !== 'admin' && (
+				<Breadcrumb
+					className={fr.cx('fr-mb-1v')}
+					currentPageLabel={product.title}
+					segments={[
+						{
+							label: 'Démarches',
+							linkProps: {
+								href: '/'
+							}
+						}
+					]}
+				/>
+			)}
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
