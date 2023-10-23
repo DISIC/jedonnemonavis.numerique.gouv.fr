@@ -42,9 +42,11 @@ export async function createReview(
         body: {
           ...answerWithoutId,
           review_id: newReview.id,
-
           button_id: newReview.button_id,
+          button_name: newReview.button.title,
           product_id: newReview.product_id,
+          product_name: newReview.product.title,
+          created_at: newReview.created_at,
         },
       });
     }),

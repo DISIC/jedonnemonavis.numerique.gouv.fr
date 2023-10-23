@@ -1,12 +1,15 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
 import { FormSecondBlock } from "@/src/components/form/layouts/FormSecondBlock";
-import { Opinion, Product } from "@/src/utils/types";
+import { FormField, Opinion, Product } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
+import { trpc } from "../utils/trpc";
+import { Prisma } from "@prisma/client";
+import { firstSection, secondSection } from "../utils/form";
 
 type JDMAFormProps = {
   product: Product;
@@ -16,6 +19,75 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
   const { t } = useTranslation("common");
+
+  const createReview = trpc.review.create.useMutation();
+
+  const getValueLabel = (field: FormField, value: string) => {
+    if (field.kind === "radio" || field.kind == "checkbox") {
+      return t(
+        field.options.find((option) => option.value === value)?.label as string,
+        {
+          lng: "fr",
+        }
+      );
+    } else if (field.kind === "smiley") {
+      return t(`smileys.${value}`, {
+        lng: "fr",
+      });
+    } else {
+      return value;
+    }
+  };
+
+  const handleSubmitReview = async (opinion: Opinion) => {
+    const answers: Prisma.AnswerUncheckedCreateInput[] = Object.entries(
+      opinion
+    ).flatMap(([key, value], index) => {
+      const fieldInSection = (
+        key === "satisfaction" ? firstSection : secondSection
+      ).find((field) => field.name === key) as FormField;
+
+      let tmpAnswer = {
+        answer_item_id: index + 1,
+        field_code: fieldInSection.name,
+        field_label: t(fieldInSection.label, {
+          lng: "fr",
+        }) as string,
+        kind:
+          fieldInSection.kind === "smiley"
+            ? "radio"
+            : fieldInSection.kind !== "input-text" &&
+              fieldInSection.kind !== "input-textarea"
+            ? fieldInSection.kind
+            : "text",
+      } as Prisma.AnswerUncheckedCreateInput;
+
+      if (typeof value == "string") {
+        const valueLabel = getValueLabel(fieldInSection, value as string);
+        tmpAnswer.answer_text = valueLabel;
+        return tmpAnswer;
+      } else if (Array.isArray(value)) {
+        let tmpAnswers = [] as Prisma.AnswerUncheckedCreateInput[];
+        value.map((value) => {
+          let currentValueLabel = getValueLabel(fieldInSection, value);
+          tmpAnswer.answer_text = currentValueLabel;
+          tmpAnswers.push({ ...tmpAnswer });
+        });
+        return tmpAnswers;
+      } else {
+        return [];
+      }
+    });
+
+    createReview.mutate({
+      review: {
+        product_id: product.id,
+        form_id: 1,
+        button_id: 1,
+      },
+      answers,
+    });
+  };
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
@@ -60,15 +132,16 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               {opinion.satisfaction ? (
                 <FormSecondBlock
                   opinion={opinion}
-                  onSubmit={(result) => setOpinion({ ...result })}
+                  onSubmit={(result) => {
+                    setOpinion({ ...result });
+                    handleSubmitReview(result);
+                  }}
                 />
               ) : (
                 <FormFirstBlock
                   opinion={opinion}
                   product={product}
-                  onSubmit={(tmpOpinion) => {
-                    setOpinion({ ...tmpOpinion });
-                  }}
+                  onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
                 />
               )}
             </div>

@@ -1,18 +1,21 @@
 import { PrismaClient } from "@prisma/client";
-import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { inferAsyncReturnType, initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { ZodError } from "zod";
 import { OpenApiMeta } from "trpc-openapi";
 import { Client as ElkClient } from "@elastic/elasticsearch";
 
 // Create context with Prisma and NextAuth session
-export const createContext = async (opts: CreateNextContextOptions) => {
+export const createContext = async () => {
   const prisma = new PrismaClient();
 
   const elkClient = new ElkClient({
     cloud: {
       id: process.env.ELASTIC_CLOUD_ID as string,
+    },
+    auth: {
+      username: process.env.ELASTIC_CLOUD_USERNAME as string,
+      password: process.env.ELASTIC_CLOUD_PASSWORD as string,
     },
   });
 
