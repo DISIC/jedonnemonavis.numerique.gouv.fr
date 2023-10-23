@@ -1,3 +1,5 @@
+import { Answer, Prisma } from "@prisma/client";
+
 export type Feeling = "good" | "bad" | "medium";
 
 export type Opinion = {
@@ -81,3 +83,11 @@ export type FormField =
       conditions?: Condition[];
       options: RadioOption[];
     };
+
+export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
+  product_name: string;
+  product_id: number;
+  button_name: string;
+  button_id: number;
+  created_at: Date;
+}

@@ -10,6 +10,7 @@ import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
 import { Prisma } from "@prisma/client";
 import { firstSection, secondSection } from "../utils/form";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type JDMAFormProps = {
   product: Product;
@@ -20,7 +21,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const { t } = useTranslation("common");
 
-  const createReview = trpc.review.create.useMutation();
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  const createReview = trpc.review.create.useMutation({
+    onSuccess: () => setIsFormSubmitted(true),
+  });
 
   const getValueLabel = (field: FormField, value: string) => {
     if (field.kind === "radio" || field.kind == "checkbox") {
@@ -40,50 +45,51 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const handleSubmitReview = async (opinion: Opinion) => {
-    const answers: Prisma.AnswerUncheckedCreateInput[] = Object.entries(
-      opinion
-    ).flatMap(([key, value], index) => {
-      const fieldInSection = (
-        key === "satisfaction" ? firstSection : secondSection
-      ).find((field) => field.name === key) as FormField;
+    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
+      ([key, value], index) => {
+        const fieldInSection = (
+          key === "satisfaction" ? firstSection : secondSection
+        ).find((field) => field.name === key) as FormField;
 
-      let tmpAnswer = {
-        answer_item_id: index + 1,
-        field_code: fieldInSection.name,
-        field_label: t(fieldInSection.label, {
-          lng: "fr",
-        }) as string,
-        kind:
-          fieldInSection.kind === "smiley"
-            ? "radio"
-            : fieldInSection.kind !== "input-text" &&
-              fieldInSection.kind !== "input-textarea"
-            ? fieldInSection.kind
-            : "text",
-      } as Prisma.AnswerUncheckedCreateInput;
+        let tmpAnswer = {
+          answer_item_id: index + 1,
+          field_code: fieldInSection.name,
+          field_label: t(fieldInSection.label, {
+            lng: "fr",
+          }) as string,
+          kind:
+            fieldInSection.kind === "smiley"
+              ? "radio"
+              : fieldInSection.kind !== "input-text" &&
+                fieldInSection.kind !== "input-textarea"
+              ? fieldInSection.kind
+              : "text",
+          review: {},
+        } as Prisma.AnswerCreateInput;
 
-      if (typeof value == "string") {
-        const valueLabel = getValueLabel(fieldInSection, value as string);
-        tmpAnswer.answer_text = valueLabel;
-        return tmpAnswer;
-      } else if (Array.isArray(value)) {
-        let tmpAnswers = [] as Prisma.AnswerUncheckedCreateInput[];
-        value.map((value) => {
-          let currentValueLabel = getValueLabel(fieldInSection, value);
-          tmpAnswer.answer_text = currentValueLabel;
-          tmpAnswers.push({ ...tmpAnswer });
-        });
-        return tmpAnswers;
-      } else {
-        return [];
+        if (typeof value == "string") {
+          const valueLabel = getValueLabel(fieldInSection, value as string);
+          tmpAnswer.answer_text = valueLabel;
+          return tmpAnswer;
+        } else if (Array.isArray(value)) {
+          let tmpAnswers = [] as Prisma.AnswerCreateInput[];
+          value.map((value) => {
+            let currentValueLabel = getValueLabel(fieldInSection, value);
+            tmpAnswer.answer_text = currentValueLabel;
+            tmpAnswers.push({ ...tmpAnswer });
+          });
+          return tmpAnswers;
+        } else {
+          return [];
+        }
       }
-    });
+    );
 
     createReview.mutate({
       review: {
         product_id: product.id,
-        form_id: 1,
         button_id: 1,
+        form_id: 1,
       },
       answers,
     });
@@ -109,41 +115,62 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   return (
     <div>
-      <div className={classes.blueSection}>
-        {opinion.satisfaction ? (
-          <h1>
-            {t("second_block.title")}
-            <br />
-            {t("second_block.subtitle")}
-          </h1>
-        ) : (
-          <h1>{t("first_block.title")}</h1>
-        )}
-      </div>
-      <div
-        className={cx(
-          classes.mainContainer,
-          fr.cx("fr-container--fluid", "fr-container")
-        )}
-      >
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-          <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
-            <div className={cx(classes.formSection)}>
-              {opinion.satisfaction ? (
-                <FormSecondBlock
-                  opinion={opinion}
-                  onSubmit={(result) => {
-                    setOpinion({ ...result });
-                    handleSubmitReview(result);
-                  }}
-                />
-              ) : (
-                <FormFirstBlock
-                  opinion={opinion}
-                  product={product}
-                  onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
-                />
-              )}
+      <div>
+        <div className={classes.blueSection}>
+          {!isFormSubmitted ? (
+            opinion.satisfaction ? (
+              <h1>
+                {t("second_block.title")}
+                <br />
+                {t("second_block.subtitle")}
+              </h1>
+            ) : (
+              <h1>{t("first_block.title")}</h1>
+            )
+          ) : (
+            <h1>{t("success_block.title")}</h1>
+          )}
+        </div>
+        <div
+          className={cx(
+            classes.mainContainer,
+            fr.cx("fr-container--fluid", "fr-container")
+          )}
+        >
+          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+              <div className={cx(classes.formSection)}>
+                {!isFormSubmitted ? (
+                  opinion.satisfaction ? (
+                    <FormSecondBlock
+                      opinion={opinion}
+                      onSubmit={(result) => {
+                        setOpinion({ ...result });
+                        handleSubmitReview(result);
+                      }}
+                    />
+                  ) : (
+                    <FormFirstBlock
+                      opinion={opinion}
+                      product={product}
+                      onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
+                    />
+                  )
+                ) : (
+                  <div>
+                    <h1 className={classes.titleSection}>
+                      {t("success_block.title")}
+                    </h1>
+                    <div>
+                      <Alert
+                        severity="success"
+                        description={t("success_block.alert")}
+                        small
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -211,6 +238,11 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         height: `${blueSectionPxHeight}px`,
+      },
+    },
+    titleSection: {
+      [fr.breakpoints.down("md")]: {
+        display: "none",
       },
     },
     formSection: {

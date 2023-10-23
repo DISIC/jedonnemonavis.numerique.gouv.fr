@@ -1,17 +1,18 @@
 import { z } from "zod";
 import { router, publicProcedure } from "@/src/server/trpc";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Answer, Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
-  AnswerUncheckedCreateInputSchema,
+  AnswerCreateInputSchema,
 } from "@/prisma/generated/zod";
 import { Client } from "@elastic/elasticsearch";
+import { ElkAnswer } from "@/src/utils/types";
 
 export async function createReview(
   ctx: { prisma: PrismaClient; elkClient: Client },
   input: {
     review: Prisma.ReviewUncheckedCreateInput;
-    answers: Prisma.AnswerUncheckedCreateInput[];
+    answers: Prisma.AnswerCreateInput[];
   }
 ) {
   const { prisma, elkClient } = ctx;
@@ -30,13 +31,17 @@ export async function createReview(
       const newAnswer = await prisma.answer.create({
         data: {
           ...answer,
-          review_id: newReview.id,
+          review: {
+            connect: {
+              id: newReview.id,
+            },
+          },
         },
       });
 
       const { id: newAnswerId, ...answerWithoutId } = newAnswer;
 
-      await elkClient.index({
+      await elkClient.index<ElkAnswer>({
         index: "jdma-answers",
         id: newAnswerId.toString(),
         body: {
@@ -60,7 +65,7 @@ export const reviewRouter = router({
     .input(
       z.object({
         review: ReviewUncheckedCreateInputSchema,
-        answers: z.array(AnswerUncheckedCreateInputSchema),
+        answers: z.array(AnswerCreateInputSchema),
       })
     )
     .mutation(async ({ ctx, input }) => {
