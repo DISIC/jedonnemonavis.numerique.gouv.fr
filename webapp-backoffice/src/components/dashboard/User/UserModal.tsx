@@ -126,117 +126,151 @@ const ButtonModal = (props: Props) => {
 
 	const displayModalContent = (): JSX.Element => {
 		return (
-			<div className={fr.cx('fr-container--fluid')}>
-				<form onSubmit={handleSubmit(onSubmit)}>
-					<Controller
-						control={control}
-						name="email"
-						rules={{ required: 'Ce champ est requis' }}
-						disabled={!!user}
-						render={({ field: { onChange, value, disabled } }) => (
-							<Input
-								label="Email"
-								className={cx(classes.boldText)}
-								disabled={disabled}
-								state={errors.email ? 'error' : 'default'}
-								stateRelatedMessage={errors.email?.message}
-								nativeInputProps={{
-									onChange,
-									value
-								}}
-							/>
-						)}
-					/>
-					{!user && (
+			<form onSubmit={handleSubmit(onSubmit)}>
+				<div
+					className={fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--center',
+						'fr-grid-row--gutters'
+					)}
+				>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 						<Controller
 							control={control}
-							name="password"
-							rules={{
-								required: 'Ce champ est requis',
-								minLength: {
-									value: 12,
-									message:
-										'Votre mot de passe doit contenir au moins 12 caractères'
-								},
-								pattern: {
-									value: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-									message:
-										'Votre mot de passe doit contenir au moins un chiffre et un caractère spécial'
-								}
-							}}
+							name="firstName"
+							rules={{ required: 'Ce champ est requis' }}
 							render={({ field: { onChange, value } }) => (
 								<Input
-									label="Mot de passe"
+									label={
+										<>
+											Prénom <span className={cx(classes.asterisk)}>*</span>
+										</>
+									}
 									className={cx(classes.boldText)}
-									state={errors.password ? 'error' : 'default'}
-									stateRelatedMessage={errors.password?.message}
+									state={errors.firstName ? 'error' : 'default'}
+									stateRelatedMessage={errors.firstName?.message}
 									nativeInputProps={{
 										onChange,
-										value,
-										type: 'password'
+										value
 									}}
 								/>
 							)}
 						/>
+					</div>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+						<Controller
+							control={control}
+							name="lastName"
+							rules={{ required: 'Ce champ est requis' }}
+							render={({ field: { onChange, value } }) => (
+								<Input
+									label={
+										<>
+											Nom <span className={cx(classes.asterisk)}>*</span>
+										</>
+									}
+									className={cx(classes.boldText)}
+									state={errors.lastName ? 'error' : 'default'}
+									stateRelatedMessage={errors.lastName?.message}
+									nativeInputProps={{
+										onChange,
+										value
+									}}
+								/>
+							)}
+						/>
+					</div>
+					<div className={fr.cx('fr-col-12')}>
+						<Controller
+							control={control}
+							name="email"
+							rules={{ required: 'Ce champ est requis' }}
+							disabled={!!user}
+							render={({ field: { onChange, value, disabled } }) => (
+								<Input
+									label={
+										<>
+											Email <span className={cx(classes.asterisk)}>*</span>
+										</>
+									}
+									className={cx(classes.boldText)}
+									disabled={disabled}
+									state={errors.email ? 'error' : 'default'}
+									stateRelatedMessage={errors.email?.message}
+									nativeInputProps={{
+										onChange,
+										value
+									}}
+								/>
+							)}
+						/>
+					</div>
+					{!user && (
+						<div className={fr.cx('fr-col-12')}>
+							<Controller
+								control={control}
+								name="password"
+								rules={{
+									required: 'Ce champ est requis',
+									minLength: {
+										value: 12,
+										message:
+											'Votre mot de passe doit contenir au moins 12 caractères'
+									},
+									pattern: {
+										value: /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
+										message:
+											'Votre mot de passe doit contenir au moins un chiffre et un caractère spécial'
+									}
+								}}
+								render={({ field: { onChange, value } }) => (
+									<Input
+										label={
+											<>
+												Mot de passe{' '}
+												<span className={cx(classes.asterisk)}>*</span>
+											</>
+										}
+										className={cx(classes.boldText)}
+										state={errors.password ? 'error' : 'default'}
+										stateRelatedMessage={errors.password?.message}
+										nativeInputProps={{
+											onChange,
+											value,
+											type: 'password'
+										}}
+									/>
+								)}
+							/>
+						</div>
 					)}
-					<Controller
-						control={control}
-						name="firstName"
-						rules={{ required: 'Ce champ est requis' }}
-						render={({ field: { onChange, value } }) => (
-							<Input
-								label="Prénom"
-								className={cx(classes.boldText)}
-								state={errors.firstName ? 'error' : 'default'}
-								stateRelatedMessage={errors.firstName?.message}
-								nativeInputProps={{
-									onChange,
-									value
-								}}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name="lastName"
-						rules={{ required: 'Ce champ est requis' }}
-						render={({ field: { onChange, value } }) => (
-							<Input
-								label="Nom"
-								className={cx(classes.boldText)}
-								state={errors.lastName ? 'error' : 'default'}
-								stateRelatedMessage={errors.lastName?.message}
-								nativeInputProps={{
-									onChange,
-									value
-								}}
-							/>
-						)}
-					/>
-					<Controller
-						control={control}
-						name="role"
-						rules={{ required: 'Ce champ est requis' }}
-						render={({ field: { onChange, value } }) => (
-							<Select
-								label="Rôle"
-								className={cx(classes.boldText)}
-								state={errors.role ? 'error' : 'default'}
-								stateRelatedMessage={errors.role?.message}
-								nativeSelectProps={{
-									onChange,
-									value
-								}}
-							>
-								<option value="user" defaultChecked>
-									Utilisateur
-								</option>
-								<option value="admin">Administrateur</option>
-							</Select>
-						)}
-					/>
-				</form>
-			</div>
+					<div className={fr.cx('fr-col-12')}>
+						<Controller
+							control={control}
+							name="role"
+							rules={{ required: 'Ce champ est requis' }}
+							render={({ field: { onChange, value } }) => (
+								<Select
+									label="Rôle"
+									className={cx(classes.boldText)}
+									state={errors.role ? 'error' : 'default'}
+									stateRelatedMessage={errors.role?.message}
+									nativeSelectProps={{
+										onChange,
+										value
+									}}
+								>
+									<option value="user" defaultChecked>
+										Utilisateur
+									</option>
+									<option value="supervisor">Superviseur</option>
+									<option value="admin">Administrateur</option>
+								</Select>
+							)}
+						/>
+					</div>
+				</div>
+			</form>
 		);
 	};
 
