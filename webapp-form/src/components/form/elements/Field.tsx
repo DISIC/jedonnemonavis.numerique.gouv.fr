@@ -1,26 +1,51 @@
-import { CheckboxOption, FormField, Opinion } from '@/src/utils/types';
-import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
-import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { useTranslation } from 'next-i18next';
-import { ChangeEvent, SetStateAction } from 'react';
-import { SmileyInput } from './SmileyInput';
+import {
+  CheckboxOption,
+  Condition,
+  FormField,
+  Opinion,
+} from "@/src/utils/types";
+import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
+import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
+import { Input } from "@codegouvfr/react-dsfr/Input";
+import { useTranslation } from "next-i18next";
+import { ChangeEvent, SetStateAction } from "react";
+import { SmileyInput } from "./SmileyInput";
 
 type Props = {
   field: FormField;
   opinion: Opinion;
+  form: FormField[];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
 type CheckboxOpinionKeys =
-  | 'difficulties_details'
-  | 'help_details'
-  | 'contact_channels';
+  | "difficulties_details"
+  | "help_details"
+  | "contact_channels";
 
 export const Field = (props: Props) => {
-  const { field, opinion, setOpinion } = props;
+  const { field, opinion, setOpinion, form } = props;
 
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common");
+
+  const getChildrenResetObject = () => {
+    const children = form.filter(
+      (f) =>
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+    );
+
+    let opinionPropsObj: {
+      [key in keyof Opinion]?: any;
+    } = {};
+
+    children.forEach((cf) => {
+      opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
+        ? []
+        : undefined;
+    });
+
+    return opinionPropsObj;
+  };
 
   const onChangeCheckbox = (
     key: CheckboxOpinionKeys,
@@ -32,68 +57,80 @@ export const Field = (props: Props) => {
       setOpinion({
         ...opinion,
         [key]: e.target.checked ? [e.target.value] : [],
-        [`${key}_verbatim`]: !e.target.checked
-          ? undefined
-          : opinion[`${key}_verbatim`]
+        ...getChildrenResetObject(),
       });
     } else {
       const isolatedSiblings = options
-        .filter(opt => opt.isolated)
-        .map(opt => opt.value);
+        .filter((opt) => opt.isolated)
+        .map((opt) => opt.value);
       setOpinion({
         ...opinion,
         [key]: e.target.checked
           ? [
               ...opinion[key].filter(
-                sibling => !isolatedSiblings.includes(sibling)
+                (sibling) => !isolatedSiblings.includes(sibling)
               ),
-              e.target.value
+              e.target.value,
             ]
-          : opinion[key].filter(d => d !== e.target.value),
-        [`${key}_verbatim`]: !e.target.checked
-          ? undefined
-          : opinion[`${key}_verbatim`]
+          : opinion[key].filter((d) => d !== e.target.value),
+        ...getChildrenResetObject(),
+      });
+      console.log({
+        ...opinion,
+        [key]: e.target.checked
+          ? [
+              ...opinion[key].filter(
+                (sibling) => !isolatedSiblings.includes(sibling)
+              ),
+              e.target.value,
+            ]
+          : opinion[key].filter((d) => d !== e.target.value),
+        ...getChildrenResetObject(),
       });
     }
   };
 
-  if (field.condition) {
-    // Si la valeur de la source de condition n'est pas encore définie
-    if (
-      !opinion[field.condition.name] ||
-      !opinion[field.condition.name]?.length
-    )
-      return;
+  if (field.conditions) {
+    const showField = field.conditions.some((condition) => {
+      // Si la valeur de la source de condition n'est pas encore définie
+      if (!opinion[condition.name] || !opinion[condition.name]?.length)
+        return false;
 
-    // Si le champ de la source de condition est un Array et qu'il contient la valeur cible
-    if (
-      Array.isArray(opinion[field.condition.name]) &&
-      !(opinion[field.condition.name] as string[])?.some(
-        v => field.condition?.values.includes(v)
+      // Si le champ de la source de condition est un Array et qu'il contient l'une des valeurs cibles
+      if (
+        Array.isArray(opinion[condition.name]) &&
+        (opinion[condition.name] as string[])?.some(
+          (v) => condition?.values.includes(v)
+        )
       )
-    )
-      return;
-    // Si le champ de la source de condition n'est pas un Array et que la valeur n'est pas égale
-    else if (
-      !Array.isArray(opinion[field.condition.name]) &&
-      !field.condition.values.includes(opinion[field.condition.name] as string)
-    )
-      return;
+        return true;
+
+      // Si le champ de la source de condition n'est pas un Array et que la valeur est égale à l'une des valeurs cibles
+      if (
+        !Array.isArray(opinion[condition.name]) &&
+        condition.values.includes(opinion[condition.name] as string)
+      )
+        return true;
+
+      return false;
+    });
+
+    if (!showField) return;
   }
 
   switch (field.kind) {
-    case 'smiley':
+    case "smiley":
       return (
         <SmileyInput
           label={t(field.label)}
           hint={field.hint ? t(field.hint) : undefined}
           name={field.name}
-          onChange={value => {
+          onChange={(value) => {
             setOpinion({ ...opinion, [field.name]: value });
           }}
         />
       );
-    case 'checkbox':
+    case "checkbox":
       return (
         <>
           <Checkbox
@@ -106,20 +143,20 @@ export const Field = (props: Props) => {
                   opt.value
                 ),
                 value: opt.value,
-                onChange: e => {
+                onChange: (e) => {
                   onChangeCheckbox(
                     field.name as CheckboxOpinionKeys,
                     opt.isolated || false,
                     e,
                     field.options
                   );
-                }
-              }
+                },
+              },
             }))}
           />
         </>
       );
-    case 'radio':
+    case "radio":
       return (
         <>
           <RadioButtons
@@ -129,18 +166,19 @@ export const Field = (props: Props) => {
               nativeInputProps: {
                 checked: opinion[field.name] === opt.value,
                 value: opt.value,
-                onChange: e => {
+                onChange: (e) => {
                   setOpinion({
                     ...opinion,
-                    [field.name]: e.target.value
+                    [field.name]: e.target.value,
+                    ...getChildrenResetObject(),
                   });
-                }
-              }
+                },
+              },
             }))}
           />
         </>
       );
-    case 'input-textarea':
+    case "input-textarea":
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
@@ -149,32 +187,32 @@ export const Field = (props: Props) => {
           stateRelatedMessage="Text de validation / d'explication de l'erreur"
           nativeTextAreaProps={{
             value: opinion[field.name],
-            onChange: e => {
+            onChange: (e) => {
               setOpinion({
                 ...opinion,
-                [field.name]: e.target.value
+                [field.name]: e.target.value,
               });
-            }
+            },
           }}
           textArea
         />
       );
-    case 'input-text':
+    case "input-text":
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
           label={t(field.label)}
-          state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
+          state={(opinion[field.name] || "").length > 250 ? "error" : "default"}
           stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{
             value: opinion[field.name],
             maxLength: 250,
-            onChange: e => {
+            onChange: (e) => {
               setOpinion({
                 ...opinion,
-                [field.name]: e.target.value
+                [field.name]: e.target.value,
               });
-            }
+            },
           }}
         />
       );

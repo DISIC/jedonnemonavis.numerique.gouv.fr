@@ -1,46 +1,46 @@
 {
   "first_block": {
-    "title": "Dê a sua opinião",
-    "product": "Processo",
-    "validate": "Enviar"
+    "title": "Dê a minha opinião",
+    "product": "Procedimento",
+    "validate": "Validar"
   },
   "second_block": {
     "title": "Obrigado!",
-    "subtitle": "Você pode nos contar mais?",
-    "validate": "Enviar a minha opinião"
+    "subtitle": "Pode contar-nos mais?",
+    "validate": "Validar a minha opinião"
   },
   "smileys": {
     "good": "Muito bom",
     "medium": "Médio",
-    "bad": "Não ótimo"
+    "bad": "Não bom"
   },
   "fields": {
     "satisfaction": {
-      "label": "Como foi este processo para você?",
+      "label": "Como correu este procedimento para si?",
       "hint": "Este campo é obrigatório."
     },
     "easy": {
-      "label": "De acordo com as seguintes respostas, o que se adequa melhor a você:",
+      "label": "De acordo com as respostas seguintes, o que melhor descreve você:",
       "options": [
         {
-          "label": "O processo foi fácil de completar"
+          "label": "O procedimento foi fácil de completar"
         },
         {
-          "label": "O processo não foi fácil nem difícil de completar"
+          "label": "O procedimento não foi fácil nem difícil de completar"
         },
         {
-          "label": "O processo foi difícil de completar"
+          "label": "O procedimento foi difícil de completar"
         }
       ]
     },
     "comprehension": {
-      "label": "O que você achou da linguagem utilizada?",
+      "label": "O que achou da linguagem utilizada?",
       "options": [
         {
           "label": "Pouco claro, difícil de entender"
         },
         {
-          "label": "Não foi nem fácil nem difícil de entender"
+          "label": "Nem fácil nem difícil de entender"
         },
         {
           "label": "Claro, fácil de entender"
@@ -48,7 +48,7 @@
       ]
     },
     "difficulties": {
-      "label": "Você enfrentou alguma dificuldade?",
+      "label": "Encontrou dificuldades?",
       "options": [
         {
           "label": "Sim"
@@ -62,19 +62,19 @@
       "label": "Quais foram essas dificuldades?",
       "options": [
         {
-          "label": "Falta de informações antes de começar o processo"
+          "label": "Faltou-me informação antes de começar o procedimento"
         },
         {
-          "label": "O processo não funcionou"
+          "label": "O procedimento não funcionou"
         },
         {
-          "label": "O site não estava sendo exibido corretamente no celular"
+          "label": "O site não aparecia bem no telemóvel"
         },
         {
-          "label": "Dificuldade em anexar documentos"
+          "label": "Tive dificuldade em anexar documentos"
         },
         {
-          "label": "Falta de informações sobre o andamento do meu pedido ou processo (prazos, etc.)"
+          "label": "Faltava informação sobre o acompanhamento do meu pedido ou procedimento (prazo, etc.)"
         },
         {
           "label": "Outro"
@@ -82,11 +82,25 @@
       ]
     },
     "difficulties_details_verbatim": {
-      "label": "Você pode especificar quais outras dificuldades encontrou?",
+      "label": "Pode especificar quais foram as outras dificuldades que encontrou?",
       "hint": "Máximo de 250 caracteres."
     },
     "contact": {
-      "label": "Você tentou entrar em contato com o serviço de ajuda para o processo?",
+      "label": "Tentou contactar o serviço de ajuda responsável pelo procedimento?",
+      "options": [
+        {
+          "label": "Não"
+        },
+        {
+          "label": "Sim"
+        },
+        {
+          "label": "Sim, mas não consegui encontrar como os contactar"
+        }
+      ]
+    },
+    "contact_reached": {
+      "label": "Conseguiu contactá-los?",
       "options": [
         {
           "label": "Sim"
@@ -97,13 +111,13 @@
       ]
     },
     "contact_channels": {
-      "label": "Por quais meios você tentou entrar em contato com o serviço do processo?",
+      "label": "Por que meios tentou contactar o serviço do procedimento?",
       "options": [
         {
           "label": "Telefone"
         },
         {
-          "label": "E-mail ou mensagem"
+          "label": "Email ou mensagens"
         },
         {
           "label": "Agência ou balcão"
@@ -114,28 +128,28 @@
       ]
     },
     "contact_channels_verbatim": {
-      "label": "Você pode especificar quais outros meios tentou usar para entrar em contato com o serviço?",
+      "label": "Pode especificar quais foram os outros meios que tentou usar para contactar o serviço?",
       "hint": "Máximo de 250 caracteres."
     },
     "contact_details": {
-      "label": "Você conseguiu entrar em contato com eles?",
+      "label": "Conseguiu contactá-los?",
       "options": [
         {
-          "label": "Não encontrei como entrar em contato"
+          "label": "Não consegui descobrir como os contactar"
         },
         {
-          "label": "Eu entrei em contato, mas não consegui falar com eles"
+          "label": "Contactei-os mas não consegui contactá-los"
         },
         {
-          "label": "Eu entrei em contato e eles me responderam"
+          "label": "Contactei-os e eles responderam"
         }
       ]
     },
     "contact_satisfaction": {
-      "label": "Como foi a interação com o serviço do processo?"
+      "label": "Como foi a troca com o serviço do procedimento?"
     },
     "help": {
-      "label": "Você precisou de ajuda adicional para este processo?",
+      "label": "Precisou de ajuda adicional para este procedimento?",
       "options": [
         {
           "label": "Sim"
@@ -146,16 +160,16 @@
       ]
     },
     "help_details": {
-      "label": "De que ajuda você precisou?",
+      "label": "De que ajuda precisou?",
       "options": [
         {
-          "label": "Eu pesquisei na internet (site, fórum)"
+          "label": "Pesquisei na internet (site, fórum)"
         },
         {
-          "label": "Eu pedi ajuda a alguém próximo (família, amigo)"
+          "label": "Pedi ajuda a um familiar ou amigo"
         },
         {
-          "label": "Eu pedi ajuda a uma associação"
+          "label": "Pedi ajuda a uma associação"
         },
         {
           "label": "Outro"
@@ -163,12 +177,12 @@
       ]
     },
     "help_details_verbatim": {
-      "label": "Você pode especificar que outra ajuda precisou?",
+      "label": "Pode especificar de que outra ajuda precisou?",
       "hint": "Máximo de 250 caracteres."
     },
     "verbatim": {
-      "label": "Você gostaria de nos contar mais?",
-      "hint": "Não forneça informações pessoais aqui. Este não é um formulário de contato. Se tiver dúvidas sobre este processo, entre em contato com o serviço relevante."
+      "label": "Gostaria de nos contar mais?",
+      "hint": "Não forneça informações pessoais aqui. Isto não é um formulário de contato. Se tiver perguntas sobre este procedimento, entre em contato com o serviço correspondente."
     }
   }
 }

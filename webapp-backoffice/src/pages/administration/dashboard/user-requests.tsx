@@ -3,7 +3,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { UserRequestWithUser } from '@/src/types/prismaTypesExtended';
-import { getNbPages } from '@/src/utils/tools';
+import { extractDomainFromEmail, getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -125,6 +125,8 @@ const DashBoardUserRequestUserRequests = () => {
 		}
 	};
 
+	console.log(currentUserRequest?.user);
+
 	return (
 		<>
 			<OnConfirmModal
@@ -155,8 +157,15 @@ const DashBoardUserRequestUserRequests = () => {
 						<Checkbox
 							options={[
 								{
-									label:
-										'Ajouter le domaine à la liste blanche des noms de domaines',
+									label: (
+										<>
+											Ajouter le domaine
+											{` @${extractDomainFromEmail(
+												(currentUserRequest?.user?.email as string) || ''
+											)} `}
+											à la liste blanche des noms de domaines
+										</>
+									),
 									nativeInputProps: {
 										name: 'createDomainOnAccept',
 										onChange: event =>

@@ -9,11 +9,10 @@ import { Prisma, PrismaClient, User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import {
 	extractDomainFromEmail,
-	generateRandomString,
-	getOTPEmailHtml,
-	getRegisterEmailHtml
+	generateRandomString
 } from '@/src/utils/tools';
 import { sendMail } from '@/src/utils/mailer';
+import { getOTPEmailHtml, getRegisterEmailHtml } from '@/src/utils/emails';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
