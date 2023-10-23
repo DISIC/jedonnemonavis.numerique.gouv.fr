@@ -82,7 +82,7 @@ const ProductCard = ({
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--middle'
+					'fr-grid-row--top'
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
