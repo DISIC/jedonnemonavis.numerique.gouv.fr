@@ -246,7 +246,8 @@ export const userRouter = router({
 
 			const createdUser = await ctx.prisma.user.create({
 				data: {
-					...newUser
+					...newUser,
+					active: true
 				}
 			});
 
