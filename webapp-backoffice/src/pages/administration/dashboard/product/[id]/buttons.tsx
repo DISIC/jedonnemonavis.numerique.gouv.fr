@@ -1,5 +1,5 @@
 import ProductButtonCard from '@/src/components/dashboard/ProductButton/ProductButtonCard';
-import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import ProductLayout from '@/src/layouts/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';

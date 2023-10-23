@@ -1,4 +1,4 @@
-import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import ProductLayout from '@/src/layouts/ProductLayout';
 import { getServerSideProps } from '.';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
