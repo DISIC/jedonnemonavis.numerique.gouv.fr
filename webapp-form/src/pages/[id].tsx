@@ -25,7 +25,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     difficulties_details: [],
     difficulties_details_verbatim: undefined,
     contact: undefined,
-    contact_details: [],
+    contact_reached: undefined,
     contact_satisfaction: undefined,
     contact_channels: [],
     contact_channels_verbatim: undefined,

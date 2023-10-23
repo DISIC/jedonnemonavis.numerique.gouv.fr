@@ -1,11 +1,11 @@
-export type Feeling = 'good' | 'bad' | 'medium';
+export type Feeling = "good" | "bad" | "medium";
 
 export type Opinion = {
   satisfaction?: Feeling;
   easy?: Feeling;
   comprehension?: Feeling;
   contact?: string;
-  contact_details: [];
+  contact_reached?: string;
   contact_satisfaction?: Feeling;
   contact_channels: string[];
   contact_channels_verbatim?: string;
@@ -47,37 +47,37 @@ export type Condition = {
 
 export type FormField =
   | {
-      kind: 'smiley';
+      kind: "smiley";
       name: keyof Opinion;
       label: string;
       hint?: string;
-      condition?: Condition;
+      conditions?: Condition[];
     }
   | {
-      kind: 'input-text';
+      kind: "input-text";
       name: keyof Opinion;
       label: string;
       hint?: string;
-      condition?: Condition;
+      conditions?: Condition[];
     }
   | {
-      kind: 'input-textarea';
+      kind: "input-textarea";
       name: keyof Opinion;
       label: string;
       hint?: string;
-      condition?: Condition;
+      conditions?: Condition[];
     }
   | {
-      kind: 'checkbox';
+      kind: "checkbox";
       name: keyof Opinion;
       label: string;
-      condition?: Condition;
+      conditions?: Condition[];
       options: CheckboxOption[];
     }
   | {
-      kind: 'radio';
+      kind: "radio";
       name: keyof Opinion;
       label: string;
-      condition?: Condition;
+      conditions?: Condition[];
       options: RadioOption[];
     };

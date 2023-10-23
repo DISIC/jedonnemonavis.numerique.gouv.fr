@@ -1,13 +1,13 @@
 {
   "first_block": {
-    "title": "Share your feedback",
-    "product": "Process",
+    "title": "Give my opinion",
+    "product": "Procedure",
     "validate": "Submit"
   },
   "second_block": {
     "title": "Thank you!",
     "subtitle": "Can you tell us more?",
-    "validate": "Submit my feedback"
+    "validate": "Submit my opinion"
   },
   "smileys": {
     "good": "Very good",
@@ -16,20 +16,20 @@
   },
   "fields": {
     "satisfaction": {
-      "label": "How was this process for you?",
+      "label": "How did this procedure go for you?",
       "hint": "This field is mandatory."
     },
     "easy": {
-      "label": "According to the following answers, what suits you best:",
+      "label": "According to the following answers, what best describes you:",
       "options": [
         {
-          "label": "The process was easy to complete"
+          "label": "The procedure was easy to complete"
         },
         {
-          "label": "The process was neither easy nor difficult to complete"
+          "label": "The procedure was neither easy nor difficult to complete"
         },
         {
-          "label": "The process was difficult to complete"
+          "label": "The procedure was difficult to complete"
         }
       ]
     },
@@ -48,7 +48,7 @@
       ]
     },
     "difficulties": {
-      "label": "Did you face any difficulties?",
+      "label": "Did you encounter difficulties?",
       "options": [
         {
           "label": "Yes"
@@ -62,10 +62,10 @@
       "label": "What were these difficulties?",
       "options": [
         {
-          "label": "I lacked information before starting the process"
+          "label": "I lacked information before starting the procedure"
         },
         {
-          "label": "The process did not work"
+          "label": "The procedure did not work"
         },
         {
           "label": "The site did not display well on mobile"
@@ -74,7 +74,7 @@
           "label": "I had difficulty attaching documents"
         },
         {
-          "label": "There was a lack of information about the progress of my request or process (timeline, etc.)"
+          "label": "There was missing information about the follow-up of my request or procedure (deadline, etc.)"
         },
         {
           "label": "Other"
@@ -86,7 +86,21 @@
       "hint": "Maximum 250 characters."
     },
     "contact": {
-      "label": "Did you try to contact the assistance service for the process?",
+      "label": "Did you try to contact the responsible help service for the procedure?",
+      "options": [
+        {
+          "label": "No"
+        },
+        {
+          "label": "Yes"
+        },
+        {
+          "label": "Yes, but I couldn't find how to contact them"
+        }
+      ]
+    },
+    "contact_reached": {
+      "label": "Did you manage to reach them?",
       "options": [
         {
           "label": "Yes"
@@ -97,7 +111,7 @@
       ]
     },
     "contact_channels": {
-      "label": "By what means did you try to contact the process service?",
+      "label": "By what means did you try to contact the procedure service?",
       "options": [
         {
           "label": "Phone"
@@ -114,28 +128,28 @@
       ]
     },
     "contact_channels_verbatim": {
-      "label": "Can you specify what other means you tried to contact the service?",
+      "label": "Can you specify what other means you tried to contact the service with?",
       "hint": "Maximum 250 characters."
     },
     "contact_details": {
-      "label": "Were you able to reach them?",
+      "label": "Did you manage to reach them?",
       "options": [
         {
-          "label": "I did not find how to contact them"
+          "label": "I couldn't figure out how to contact them"
         },
         {
-          "label": "I contacted them but could not reach them"
+          "label": "I contacted them but couldn't reach them"
         },
         {
-          "label": "I contacted them and they responded to me"
+          "label": "I contacted them and they responded"
         }
       ]
     },
     "contact_satisfaction": {
-      "label": "How was the interaction with the process service?"
+      "label": "How did the exchange with the procedure service go?"
     },
     "help": {
-      "label": "Did you need additional help for this process?",
+      "label": "Did you need additional help for this procedure?",
       "options": [
         {
           "label": "Yes"
@@ -149,10 +163,10 @@
       "label": "What help did you need?",
       "options": [
         {
-          "label": "I searched on the internet (site, forum)"
+          "label": "I searched the internet (site, forum)"
         },
         {
-          "label": "I asked for help from a close person (family, friend)"
+          "label": "I asked for help from a family member or friend"
         },
         {
           "label": "I asked for help from an association"
@@ -167,8 +181,8 @@
       "hint": "Maximum 250 characters."
     },
     "verbatim": {
-      "label": "Do you want to tell us more?",
-      "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this process, contact the relevant service."
+      "label": "Would you like to tell us more?",
+      "hint": "Do not provide any personal information here. This is not a contact form. If you have questions about this procedure, contact the relevant service."
     }
   }
 }

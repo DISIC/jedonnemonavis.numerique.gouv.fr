@@ -89,6 +89,20 @@
       "label": "Avez-vous tenté de contacter le service d'aide en charge de la démarche ?",
       "options": [
         {
+          "label": "Non"
+        },
+        {
+          "label": "Oui"
+        },
+        {
+          "label": "Oui, mais je n'ai pas trouvé comment les contacter"
+        }
+      ]
+    },
+    "contact_reached": {
+      "label": "Avez vous réussi à les joindre ?",
+      "options": [
+        {
           "label": "Oui"
         },
         {

@@ -1,35 +1,35 @@
 {
   "first_block": {
     "title": "Doy mi opinión",
-    "product": "Proceso",
+    "product": "Procedimiento",
     "validate": "Validar"
   },
   "second_block": {
     "title": "¡Gracias!",
-    "subtitle": "¿Puede decirnos más?",
+    "subtitle": "¿Puede contarnos más?",
     "validate": "Validar mi opinión"
   },
   "smileys": {
     "good": "Muy bien",
     "medium": "Regular",
-    "bad": "No muy bien"
+    "bad": "No bien"
   },
   "fields": {
     "satisfaction": {
-      "label": "¿Cómo fue este proceso para ti?",
+      "label": "¿Cómo fue este procedimiento para usted?",
       "hint": "Este campo es obligatorio."
     },
     "easy": {
-      "label": "Según las siguientes respuestas, ¿qué te corresponde mejor?",
+      "label": "Según las siguientes respuestas, ¿qué describe mejor usted:",
       "options": [
         {
-          "label": "El proceso fue fácil de completar"
+          "label": "El procedimiento fue fácil de completar"
         },
         {
-          "label": "El proceso ni fue fácil ni difícil de completar"
+          "label": "El procedimiento no fue ni fácil ni difícil de completar"
         },
         {
-          "label": "El proceso fue difícil de completar"
+          "label": "El procedimiento fue difícil de completar"
         }
       ]
     },
@@ -48,7 +48,7 @@
       ]
     },
     "difficulties": {
-      "label": "¿Encontraste alguna dificultad?",
+      "label": "¿Encontraste dificultades?",
       "options": [
         {
           "label": "Sí"
@@ -62,10 +62,10 @@
       "label": "¿Cuáles fueron esas dificultades?",
       "options": [
         {
-          "label": "Me faltó información antes de comenzar el proceso"
+          "label": "Me faltaba información antes de comenzar el procedimiento"
         },
         {
-          "label": "El proceso no funcionó"
+          "label": "El procedimiento no funcionó"
         },
         {
           "label": "El sitio no se mostraba bien en el móvil"
@@ -74,19 +74,33 @@
           "label": "Tuve dificultades para adjuntar documentos"
         },
         {
-          "label": "Faltaba información sobre el seguimiento de mi solicitud o proceso (plazos, etc.)"
+          "label": "Faltaba información sobre el seguimiento de mi solicitud o procedimiento (plazo, etc.)"
         },
         {
-          "label": "Otro"
+          "label": "Otra"
         }
       ]
     },
     "difficulties_details_verbatim": {
-      "label": "¿Puedes especificar qué otras dificultades encontraste?",
+      "label": "¿Puede especificar cuáles fueron las otras dificultades que encontró?",
       "hint": "Máximo 250 caracteres."
     },
     "contact": {
-      "label": "¿Intentaste contactar al servicio de ayuda para el proceso?",
+      "label": "¿Intentaste contactar con el servicio de ayuda a cargo del procedimiento?",
+      "options": [
+        {
+          "label": "No"
+        },
+        {
+          "label": "Sí"
+        },
+        {
+          "label": "Sí, pero no encontré cómo contactarlos"
+        }
+      ]
+    },
+    "contact_reached": {
+      "label": "¿Lograste contactarlos?",
       "options": [
         {
           "label": "Sí"
@@ -97,7 +111,7 @@
       ]
     },
     "contact_channels": {
-      "label": "¿Por qué medios intentaste contactar al servicio del proceso?",
+      "label": "¿Por qué medios intentaste contactar con el servicio del procedimiento?",
       "options": [
         {
           "label": "Teléfono"
@@ -106,7 +120,7 @@
           "label": "Correo electrónico o mensajería"
         },
         {
-          "label": "Agencia o mostrador"
+          "label": "Agencia o ventanilla"
         },
         {
           "label": "Otro"
@@ -114,17 +128,17 @@
       ]
     },
     "contact_channels_verbatim": {
-      "label": "¿Puedes especificar qué otros medios intentaste usar para contactar al servicio?",
+      "label": "¿Puede especificar qué otros medios intentó utilizar para contactar con el servicio?",
       "hint": "Máximo 250 caracteres."
     },
     "contact_details": {
-      "label": "¿Pudiste contactarlos?",
+      "label": "¿Lograste contactarlos?",
       "options": [
         {
           "label": "No encontré cómo contactarlos"
         },
         {
-          "label": "Los contacté pero no pude comunicarme con ellos"
+          "label": "Los contacté pero no logré comunicarme con ellos"
         },
         {
           "label": "Los contacté y me respondieron"
@@ -132,10 +146,10 @@
       ]
     },
     "contact_satisfaction": {
-      "label": "¿Cómo fue la interacción con el servicio del proceso?"
+      "label": "¿Cómo fue el intercambio con el servicio del procedimiento?"
     },
     "help": {
-      "label": "¿Necesitaste ayuda adicional para este proceso?",
+      "label": "¿Necesitaste ayuda adicional para este procedimiento?",
       "options": [
         {
           "label": "Sí"
@@ -149,26 +163,26 @@
       "label": "¿Qué ayuda necesitaste?",
       "options": [
         {
-          "label": "Investigué en internet (sitio, foro)"
+          "label": "Investigué en Internet (sitio, foro)"
         },
         {
-          "label": "Pedí ayuda a una persona cercana (familia, amigo)"
+          "label": "Solicitó ayuda a un familiar o amigo"
         },
         {
-          "label": "Pedí ayuda a una asociación"
+          "label": "Solicitó ayuda a una asociación"
         },
         {
-          "label": "Otro"
+          "label": "Otra"
         }
       ]
     },
     "help_details_verbatim": {
-      "label": "¿Puedes especificar qué otra ayuda necesitaste?",
+      "label": "¿Puede especificar qué otra ayuda necesitó?",
       "hint": "Máximo 250 caracteres."
     },
     "verbatim": {
       "label": "¿Quieres contarnos más?",
-      "hint": "No proporciones información personal aquí. Esto no es un formulario de contacto. Si tienes preguntas sobre este proceso, comunícate con el servicio correspondiente."
+      "hint": "No proporciones información personal aquí. Esto no es un formulario de contacto. Si tienes preguntas sobre este procedimiento, ponte en contacto con el servicio correspondiente."
     }
   }
 }
