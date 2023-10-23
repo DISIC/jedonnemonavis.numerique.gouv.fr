@@ -438,9 +438,8 @@ export const userRouter = router({
 
 				return { data: undefined, metadata: { statusCode: 206 } };
 			} else if (!user.active) {
-				// Code: 423
 				throw new TRPCError({
-					code: 'CONFLICT',
+					code: 'FORBIDDEN',
 					message: "User isn't active"
 				});
 			} else {
