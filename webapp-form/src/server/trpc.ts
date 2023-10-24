@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { PrismaClient } from "@prisma/client";
 import { inferAsyncReturnType, initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
@@ -10,12 +12,14 @@ export const createContext = async () => {
   const prisma = new PrismaClient();
 
   const elkClient = new ElkClient({
-    cloud: {
-      id: process.env.ELASTIC_CLOUD_ID as string,
-    },
+    node: process.env.ELASTIC_HOST as string,
     auth: {
-      username: process.env.ELASTIC_CLOUD_USERNAME as string,
-      password: process.env.ELASTIC_CLOUD_PASSWORD as string,
+      username: process.env.ELASTIC_USERNAME as string,
+      password: process.env.ELASTIC_PASSWORD as string,
+    },
+    tls: {
+      ca: fs.readFileSync(path.resolve(process.cwd(), "./certs/ca/ca.crt")),
+      rejectUnauthorized: false,
     },
   });
 
@@ -32,10 +36,6 @@ const t = initTRPC
   .meta<OpenApiMeta>()
   .create({
     transformer: SuperJSON,
-    defaultMeta: {
-      authRequired: true,
-      isAdmin: false,
-    },
     errorFormatter({ shape, error }) {
       return {
         ...shape,

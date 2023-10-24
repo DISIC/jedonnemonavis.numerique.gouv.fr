@@ -1,6 +1,43 @@
-version: '3.4'
+version: "3.4"
 
 services:
+  elasticsearch:
+    build: docker/elasticsearch
+    container_name: elasticsearch
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes:
+      - jdma_es_data:/usr/share/elasticsearch/data
+      - jdma_es_certs:/usr/share/elasticsearch/config/certs
+    networks:
+      - elastic
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+
+  kibana:
+    build: docker/kibana
+    container_name: kibana
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    volumes:
+      - jdma_kibana_data:/usr/share/kibana/data
+      - jdma_es_certs:/usr/share/kibana/config/certs
+    networks:
+      - elastic
+    environment:
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+
   postgres:
     image: postgres:16-alpine
     environment:
@@ -8,7 +45,12 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: jdma
     ports:
-      - '5433:5432'
+      - "5433:5432"
 
 networks:
-  jdma:
+  elastic:
+
+volumes:
+  jdma_kibana_data:
+  jdma_es_data:
+  jdma_es_certs:
