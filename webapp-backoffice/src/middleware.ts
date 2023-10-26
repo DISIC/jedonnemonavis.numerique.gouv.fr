@@ -1,8 +1,7 @@
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { JWT, getToken } from 'next-auth/jwt';
-import { signOut } from 'next-auth/react';
+import { getToken } from 'next-auth/jwt';
 
 const PUBLIC_FILE = /\.(.*)$/;
 
@@ -11,8 +10,6 @@ export async function middleware(request: NextRequest) {
 		req: request,
 		secret: process.env.JWT_SECRET
 	});
-
-	if (!token) return signOut();
 
 	if (
 		request.nextUrl.pathname.startsWith('/_next') || // exclude Next.js internals
