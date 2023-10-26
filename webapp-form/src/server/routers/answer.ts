@@ -103,9 +103,13 @@ export const answerRouter = router({
           return 0;
         });
 
-      const average = buckets.reduce((acc, curr) => {
-        return acc + (curr.answer_score * curr.doc_count) / curr.doc_count;
-      }, 0);
+      const average = Number(
+        (
+          buckets.reduce((acc, curr) => {
+            return acc + curr.answer_score * curr.doc_count;
+          }, 0) / total
+        ).toFixed(1)
+      );
 
       return { data: buckets, metadata: { total, average } };
     }),
