@@ -281,8 +281,7 @@ const DashBoardUserRequestUserRequests = () => {
 											'fr-grid-row',
 											'fr-grid-row--gutters',
 											'fr-grid-row--middle'
-										),
-										classes.boldText
+										)
 									)}
 								>
 									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>

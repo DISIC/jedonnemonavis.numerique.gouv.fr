@@ -75,6 +75,26 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 			}
 		];
 		navigationItems.push(...adminNavigationItems);
+	} else if (session?.user.role === 'supervisor') {
+		const supervisorNavigationItems = [
+			{
+				text: 'Démarches',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
+			},
+			{
+				text: 'Organisations',
+				linkProps: {
+					href: '/administration/dashboard/entities',
+					target: '_self'
+				},
+				isActive: pathname == '/administration/dashboard/entities'
+			}
+		];
+		navigationItems.push(...supervisorNavigationItems);
 	}
 
 	return (

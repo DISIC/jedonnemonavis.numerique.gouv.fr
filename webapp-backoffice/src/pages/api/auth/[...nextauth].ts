@@ -24,12 +24,25 @@ export const authOptions: NextAuthOptions = {
 				entities: token.entities
 			}
 		}),
-		jwt: ({ user, token }) => {
+		jwt: async ({ user, token, trigger, session }) => {
 			if (user) {
 				token.uid = user.id;
 				token.role = user.role;
 				token.entities = user.entities;
 			}
+
+			if (trigger === 'update') {
+				const dbUser = await prisma.user.findUnique({
+					where: { email: token.email || '' },
+					include: { entities: true }
+				});
+
+				if (!dbUser) return token;
+
+				token.role = dbUser.role;
+				token.entities = dbUser.entities;
+			}
+
 			return token;
 		}
 	},

@@ -87,7 +87,7 @@ export const productRouter = router({
 			if (filterByUserFavorites) {
 				where.favorites = {
 					some: {
-						user_id: parseInt(contextUser.id)
+						user_id: contextUser.id
 					}
 				};
 			}

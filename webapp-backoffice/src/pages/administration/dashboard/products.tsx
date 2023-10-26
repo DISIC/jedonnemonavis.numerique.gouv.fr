@@ -75,7 +75,7 @@ const DashBoard = () => {
 
 	const { data: favoritesResult, isLoading: isLoadingFavorites } =
 		trpc.favorite.getByUser.useQuery(
-			{ user_id: parseInt(session?.user?.id as string) },
+			{ user_id: session?.user?.id || 0 },
 			{
 				initialData: { data: [] },
 				enabled: session?.user?.id !== undefined
@@ -286,7 +286,7 @@ const DashBoard = () => {
 								products.map((product, index) => (
 									<ProductCard
 										product={product}
-										userId={parseInt(session?.user?.id as string)}
+										userId={session?.user?.id || 0}
 										entity={
 											entities.find(
 												entity => product.entity_id === entity.id

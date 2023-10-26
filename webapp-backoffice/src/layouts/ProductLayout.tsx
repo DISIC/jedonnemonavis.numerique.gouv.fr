@@ -89,7 +89,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
-			{session?.user.role !== 'admin' && (
+			{session?.user.role === 'user' && (
 				<Breadcrumb
 					className={fr.cx('fr-mb-1v')}
 					currentPageLabel={product.title}
