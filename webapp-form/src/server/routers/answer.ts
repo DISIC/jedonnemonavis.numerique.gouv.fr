@@ -66,10 +66,10 @@ export const answerRouter = router({
         size: 0,
       });
 
-      const tmpBuckets = fieldCodeAggs?.aggregations?.term
-        ?.buckets as any as unknown as Buckets;
+      const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
+        ?.buckets as Buckets;
 
-      const total = fieldCodeAggs.hits?.total?.value;
+      const total = (fieldCodeAggs.hits?.total as any)?.value;
 
       const buckets = tmpBuckets
         .map((bucket) => {
