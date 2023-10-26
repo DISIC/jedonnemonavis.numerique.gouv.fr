@@ -6,6 +6,11 @@ export const firstSection: FormField[] = [
     kind: "smiley",
     label: "fields.satisfaction.label",
     hint: "fields.satisfaction.hint",
+    values: {
+      bad: 1,
+      medium: 2,
+      good: 3,
+    },
   },
 ];
 
@@ -198,6 +203,11 @@ export const secondSection: FormField[] = [
     name: "contact_satisfaction",
     kind: "smiley",
     label: "fields.contact_satisfaction.label",
+    values: {
+      bad: 1,
+      medium: 2,
+      good: 3,
+    },
   },
   {
     name: "help",

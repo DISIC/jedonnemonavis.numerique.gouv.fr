@@ -104,20 +104,15 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
 			</div>
-			<div
-				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--center'),
-					classes.children
-				)}
-			>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 					<SideMenu
 						align="left"
 						items={menuItems}
 						burgerMenuButtonText="Menu"
 					/>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-20v')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
 					{children}
 				</div>
 			</div>

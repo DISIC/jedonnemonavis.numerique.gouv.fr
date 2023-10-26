@@ -1,10 +1,17 @@
+import {
+	getIntentionFromAverage,
+	getStatsAnswerText,
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
+import AverageCard from './AverageCard';
 
-const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
+const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
 });
 
@@ -14,7 +21,7 @@ type Props = {
 };
 
 const SmileySection = ({ fieldCode, productId }: Props) => {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
 		queryKey: ['getAnswerByFieldCode', fieldCode, productId],
@@ -31,75 +38,80 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 							doc_count: number;
 						}
 					];
-					metadata: { total: number };
+					metadata: { total: number; average: number };
 				};
 			}
 		}
 	});
 
+	const currentAnswerTextFromAverage = getStatsAnswerText({
+		buckets: resultFieldCode?.data || [],
+		intention: getIntentionFromAverage(
+			resultFieldCode?.metadata.average as number
+		)
+	});
+
 	const barChartData =
-		resultFieldCode?.data.map(({ intention, doc_count }) => ({
+		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
 			name: intention,
-			value: doc_count
+			value: doc_count,
+			answer_text
 		})) || [];
 
 	return (
 		<div className={classes.mainSection}>
-			<div
-				style={{
-					width: '200px',
-					height: '250px',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-					backgroundColor: 'red'
-				}}
-			></div>
-			<div>
+			<AverageCard
+				average={resultFieldCode?.metadata.average as number}
+				answerText={currentAnswerTextFromAverage}
+			/>
+			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 				<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
 				<p>{resultFieldCode?.metadata.total} avis total</p>
-				{resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => {
-					const color =
-						intention == 'good'
-							? '#18753C'
-							: intention === 'medium'
-							? '#716043'
-							: '#CE0500';
-
-					const icon = (
-						<i
-							className={fr.cx(
-								intention === 'good'
-									? 'ri-emotion-happy-line'
-									: intention === 'medium'
-									? 'ri-emotion-normal-line'
-									: 'ri-emotion-unhappy-line'
-							)}
-							style={{ color }}
-						/>
-					);
-					return (
-						<div key={answer_text} style={{ display: 'flex', gap: '0.5rem' }}>
-							{icon}
-							<div
-								style={{
-									display: 'flex',
-									flexDirection: 'column'
-								}}
-							>
-								<span color={color}>{answer_text}</span>
-								<span>
-									{((doc_count / resultFieldCode.metadata.total) * 100).toFixed(
-										0
-									)}
-									% / {doc_count} avis
-								</span>
-							</div>
-						</div>
-					);
-				})}
+				<div style={{ display: 'flex' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'flex',
+							flexDirection: 'column',
+							gap: '0.75rem'
+						}}
+					>
+						{resultFieldCode?.data.map(
+							({ answer_text, intention, doc_count }) => (
+								<div
+									key={answer_text}
+									style={{ display: 'flex', gap: '0.25rem' }}
+								>
+									<i
+										className={fr.cx(getStatsIcon({ intention }))}
+										style={{ color: getStatsColor({ intention }) }}
+									/>
+									<div
+										style={{
+											display: 'flex',
+											flexDirection: 'column'
+										}}
+									>
+										<span style={{ color: getStatsColor({ intention }) }}>
+											{answer_text}
+										</span>
+										<span
+											style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}
+										>
+											{(
+												(doc_count / resultFieldCode.metadata.total) *
+												100
+											).toFixed(0)}
+											% / {doc_count} avis
+										</span>
+									</div>
+								</div>
+							)
+						)}
+					</div>
+					<BarChart kind="pie" data={barChartData} />
+				</div>
 			</div>
-			<BarChart kind="pie" data={barChartData} />
 		</div>
 	);
 };
@@ -107,8 +119,26 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 const useStyles = tss.create({
 	mainSection: {
 		display: 'flex',
-		justifyContent: 'space-between',
 		gap: '2rem'
+	},
+	averageCard: {
+		display: 'flex',
+		flexDirection: 'column',
+		width: '325px',
+		padding: '0 2rem',
+		gap: '0.75rem',
+		alignItems: 'center',
+		justifyContent: 'center'
+	},
+	textAverageCard: {
+		fontWeight: 'bold',
+		fontSize: '1.5rem',
+		textAlign: 'center'
+	},
+	iconAverageCard: {
+		'::before': {
+			'--icon-size': '6.5rem'
+		}
 	}
 });
 
