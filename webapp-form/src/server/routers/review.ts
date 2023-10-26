@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "@/src/server/trpc";
-import { Answer, Prisma, PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
   AnswerCreateInputSchema,

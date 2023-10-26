@@ -43,6 +43,13 @@ enum AnswerKind {
   radio
 }
 
+enum AnswerIntention {
+  good
+  medium
+  bad
+  neutral
+}
+
 // Next auth
 model User {
   id                    Int                   @id @default(autoincrement())
@@ -198,12 +205,13 @@ model Review {
 }
 
 model Answer {
-  id             Int        @id @default(autoincrement())
+  id             Int          @id @default(autoincrement())
   field_label    String
   field_code     String
   answer_item_id Int
   answer_text    String
+  intention      AnswerIntention?
   kind           AnswerKind
-  review         Review     @relation(fields: [review_id], references: [id])
+  review         Review       @relation(fields: [review_id], references: [id])
   review_id      Int
 }

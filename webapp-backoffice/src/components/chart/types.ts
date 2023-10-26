@@ -1,17 +1,25 @@
-export type ChartProps =
-	| {
-			data: PieData[];
-			kind: 'pie';
-	  }
-	| {
-			data: LineBarData[];
-			kind: 'line' | 'bar';
-	  };
+import { AnswerScore } from '@prisma/client';
 
-export interface PieData {
-	name: string;
+interface ChartBaseProps {
+	width?: number;
+	height?: number;
+}
+
+export interface ChartPieProps extends ChartBaseProps {
+	data: PieData[];
+	kind: 'pie';
+	innerRadius?: number;
+	outerRadius?: number;
+}
+
+interface PieData {
+	name: AnswerScore;
 	value: number;
-	color: string;
+}
+
+export interface ChartLineBarProps extends ChartBaseProps {
+	data: LineBarData[];
+	kind: 'line' | 'bar';
 }
 
 interface LineBarData {

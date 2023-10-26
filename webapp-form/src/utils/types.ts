@@ -91,3 +91,5 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
   button_id: number;
   created_at: Date;
 }
+
+export type Buckets = [{ key: string; doc_count: number }];

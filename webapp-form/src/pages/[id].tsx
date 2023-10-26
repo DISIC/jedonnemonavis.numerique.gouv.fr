@@ -1,6 +1,6 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
 import { FormSecondBlock } from "@/src/components/form/layouts/FormSecondBlock";
-import { FormField, Opinion, Product } from "@/src/utils/types";
+import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -8,7 +8,7 @@ import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
-import { Prisma } from "@prisma/client";
+import { AnswerIntention, Prisma } from "@prisma/client";
 import { firstSection, secondSection } from "../utils/form";
 import Alert from "@codegouvfr/react-dsfr/Alert";
 
@@ -27,20 +27,29 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     onSuccess: () => setIsFormSubmitted(true),
   });
 
-  const getValueLabel = (field: FormField, value: string) => {
+  const getSelectedOption = (field: FormField, value: string) => {
     if (field.kind === "radio" || field.kind == "checkbox") {
-      return t(
-        field.options.find((option) => option.value === value)?.label as string,
-        {
+      const selectedOption = field.options.find(
+        (option) => option.value === value
+      ) as RadioOption;
+
+      return {
+        label: t(selectedOption.label as string, {
           lng: "fr",
-        }
-      );
+        }),
+        value: selectedOption.value,
+      };
     } else if (field.kind === "smiley") {
-      return t(`smileys.${value}`, {
-        lng: "fr",
-      });
+      const smileyLabel = t(`smileys.${value}`, { lng: "fr" });
+      return {
+        label: smileyLabel,
+        value,
+      };
     } else {
-      return value;
+      return {
+        label: "",
+        value,
+      };
     }
   };
 
@@ -68,14 +77,31 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         } as Prisma.AnswerCreateInput;
 
         if (typeof value == "string") {
-          const valueLabel = getValueLabel(fieldInSection, value as string);
-          tmpAnswer.answer_text = valueLabel;
+          const selectedOption = getSelectedOption(
+            fieldInSection,
+            value as string
+          );
+
+          tmpAnswer.answer_text = selectedOption.label;
+
+          if (
+            fieldInSection.kind === "smiley" ||
+            fieldInSection.kind === "radio"
+          ) {
+            tmpAnswer.intention =
+              selectedOption.value == "yes"
+                ? "good"
+                : selectedOption.value == "no"
+                ? "bad"
+                : (selectedOption.value as AnswerIntention);
+          }
+
           return tmpAnswer;
         } else if (Array.isArray(value)) {
           let tmpAnswers = [] as Prisma.AnswerCreateInput[];
           value.map((value) => {
-            let currentValueLabel = getValueLabel(fieldInSection, value);
-            tmpAnswer.answer_text = currentValueLabel;
+            let currentValueLabel = getSelectedOption(fieldInSection, value);
+            tmpAnswer.answer_text = currentValueLabel.label;
             tmpAnswers.push({ ...tmpAnswer });
           });
           return tmpAnswers;
