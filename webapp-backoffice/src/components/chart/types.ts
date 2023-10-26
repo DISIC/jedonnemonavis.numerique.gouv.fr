@@ -1,4 +1,4 @@
-import { AnswerScore } from '@prisma/client';
+import { AnswerIntention } from '@prisma/client';
 
 interface ChartBaseProps {
 	width?: number;
@@ -13,7 +13,7 @@ export interface ChartPieProps extends ChartBaseProps {
 }
 
 interface PieData {
-	name: AnswerScore;
+	name: AnswerIntention;
 	value: number;
 }
 
