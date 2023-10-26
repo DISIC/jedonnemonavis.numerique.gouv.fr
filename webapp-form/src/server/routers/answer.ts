@@ -24,6 +24,7 @@ export const answerRouter = router({
         metadata: z.object({
           total: z.number(),
           average: z.number(),
+          fieldLabel: z.string(),
         }),
       })
     )
@@ -48,17 +49,11 @@ export const answerRouter = router({
             ],
           },
         },
-        runtime_mappings: {
-          answer_text_with_intention: {
-            type: "keyword",
-            script:
-              "emit(doc['answer_text.keyword'].value + '_' + doc['intention.keyword'].value)",
-          },
-        },
         aggs: {
           term: {
             terms: {
-              field: "answer_text_with_intention",
+              script:
+                'doc["answer_text.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["field_label.keyword"].value',
               size: 1000,
             },
           },
@@ -69,21 +64,25 @@ export const answerRouter = router({
       const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
         ?.buckets as Buckets;
 
-      const total = (fieldCodeAggs.hits?.total as any)?.value;
+      let metadata = {} as {
+        total: number;
+        average: number;
+        fieldLabel: string;
+      };
+
+      metadata.total = (fieldCodeAggs.hits?.total as any)?.value;
 
       const buckets = tmpBuckets
         .map((bucket) => {
-          const [answerText, answerIntention] = bucket.key.split("_");
+          const [answerText, intention, fieldLabel] = bucket.key.split("_");
+
+          if (!metadata.fieldLabel) metadata.fieldLabel = fieldLabel;
 
           return {
             answer_text: answerText,
-            intention: answerIntention as AnswerIntention,
+            intention: intention as AnswerIntention,
             answer_score:
-              answerIntention === "good"
-                ? 10
-                : answerIntention === "medium"
-                ? 5
-                : 0,
+              intention === "good" ? 10 : intention === "medium" ? 5 : 0,
             doc_count: bucket.doc_count,
           };
         })
@@ -103,14 +102,14 @@ export const answerRouter = router({
           return 0;
         });
 
-      const average = Number(
+      metadata.average = Number(
         (
           buckets.reduce((acc, curr) => {
             return acc + curr.answer_score * curr.doc_count;
-          }, 0) / total
+          }, 0) / metadata.total
         ).toFixed(1)
       );
 
-      return { data: buckets, metadata: { total, average } };
+      return { data: buckets, metadata };
     }),
 });

@@ -4,6 +4,8 @@ import { Product } from '@prisma/client';
 import SmileySection from '@/src/components/dashboard/Stats/SmileySection';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
+import BooleanSection from '@/src/components/dashboard/Stats/BooleanSection';
+import CustomBarChart from '@/src/components/chart/BarChart';
 
 interface Props {
 	product: Product;
@@ -28,6 +30,10 @@ const ProductStatPage = (props: Props) => {
 			<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
 				<h3>Simplicité du langage ⓘ</h3>
 				<SmileySection fieldCode="comprehension" productId={product.id} />
+			</div>
+			<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
+				<h3>Difficultés rencontrées ⓘ</h3>
+				<BooleanSection fieldCode="difficulties" productId={product.id} />
 			</div>
 		</ProductLayout>
 	);

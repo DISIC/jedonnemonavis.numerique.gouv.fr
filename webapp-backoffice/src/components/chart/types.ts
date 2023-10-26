@@ -15,6 +15,7 @@ export interface ChartPieProps extends ChartBaseProps {
 interface PieData {
 	name: AnswerIntention;
 	value: number;
+	answer_text: string;
 }
 
 export interface ChartLineBarProps extends ChartBaseProps {

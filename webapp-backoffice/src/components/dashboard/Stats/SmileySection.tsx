@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
 
-const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
+const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
 });
 
@@ -52,9 +52,10 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 	});
 
 	const barChartData =
-		resultFieldCode?.data.map(({ intention, doc_count }) => ({
+		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
 			name: intention,
-			value: doc_count
+			value: doc_count,
+			answer_text
 		})) || [];
 
 	return (

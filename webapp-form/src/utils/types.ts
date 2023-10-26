@@ -53,6 +53,7 @@ export type FormField =
       name: keyof Opinion;
       label: string;
       hint?: string;
+      values: { [key in Feeling]: number };
       conditions?: Condition[];
     }
   | {
