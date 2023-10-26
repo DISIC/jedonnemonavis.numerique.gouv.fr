@@ -9,6 +9,7 @@ import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
+import AverageCard from './AverageCard';
 
 const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
 	ssr: false
@@ -43,6 +44,13 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 		}
 	});
 
+	const currentAnswerTextFromAverage = getStatsAnswerText({
+		buckets: resultFieldCode?.data || [],
+		intention: getIntentionFromAverage(
+			resultFieldCode?.metadata.average as number
+		)
+	});
+
 	const barChartData =
 		resultFieldCode?.data.map(({ intention, doc_count }) => ({
 			name: intention,
@@ -51,46 +59,27 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 
 	return (
 		<div className={classes.mainSection}>
-			<div
-				className={classes.averageCard}
-				style={{
-					backgroundColor: getStatsColor({
-						average: resultFieldCode?.metadata.average,
-						kind: 'background'
-					}),
-					color: getStatsColor({
-						average: resultFieldCode?.metadata.average
-					})
-				}}
-			>
-				<span className={classes.textAverageCard}>
-					{getStatsAnswerText({
-						buckets: resultFieldCode?.data || [],
-						intention: getIntentionFromAverage(
-							resultFieldCode?.metadata.average as number
-						)
-					})}
-				</span>
-				<i
-					className={cx(
-						fr.cx(getStatsIcon({ average: resultFieldCode?.metadata.average })),
-						classes.iconAverageCard
-					)}
-				/>
-				<span className={classes.textAverageCard}>
-					{resultFieldCode?.metadata.average} / 10
-				</span>
-			</div>
+			<AverageCard
+				average={resultFieldCode?.metadata.average as number}
+				answerText={currentAnswerTextFromAverage}
+			/>
 			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
 				<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
 				<p>{resultFieldCode?.metadata.total} avis total</p>
 				<div style={{ display: 'flex' }}>
-					<div style={{ width: '100%' }}>
+					<div
+						style={{
+							width: '100%',
+							display: 'flex',
+							flexDirection: 'column',
+							gap: '0.75rem'
+						}}
+					>
 						{resultFieldCode?.data.map(
 							({ answer_text, intention, doc_count }) => (
 								<div
 									key={answer_text}
-									style={{ display: 'flex', gap: '0.5rem' }}
+									style={{ display: 'flex', gap: '0.25rem' }}
 								>
 									<i
 										className={fr.cx(getStatsIcon({ intention }))}
@@ -102,10 +91,12 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 											flexDirection: 'column'
 										}}
 									>
-										<span color={getStatsColor({ intention })}>
+										<span style={{ color: getStatsColor({ intention }) }}>
 											{answer_text}
 										</span>
-										<span>
+										<span
+											style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}
+										>
 											{(
 												(doc_count / resultFieldCode.metadata.total) *
 												100

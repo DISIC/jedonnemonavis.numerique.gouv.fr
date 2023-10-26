@@ -26,7 +26,7 @@ const ProductStatPage = (props: Props) => {
 				<SmileySection fieldCode="easy" productId={product.id} />
 			</div>
 			<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
-				<h3>Facilité d'usage ⓘ</h3>
+				<h3>Simplicité du langage ⓘ</h3>
 				<SmileySection fieldCode="comprehension" productId={product.id} />
 			</div>
 		</ProductLayout>

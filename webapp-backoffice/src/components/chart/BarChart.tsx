@@ -26,10 +26,10 @@ const contextChart = {
 
 const BarChart = ({
 	data,
-	width = 220,
-	height = 220,
-	innerRadius = 60,
-	outerRadius = 100
+	width = 200,
+	height = 200,
+	innerRadius = 55,
+	outerRadius = 95
 }: ChartPieProps) => {
 	const renderCustomizedLabel = ({
 		cx,
