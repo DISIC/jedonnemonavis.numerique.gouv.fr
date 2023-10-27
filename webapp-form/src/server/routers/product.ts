@@ -37,7 +37,7 @@ export const productRouter = router({
         data: z.array(
           z.object({
             id: z.number(),
-            observatoire_id: z.number().nullable(),
+            xwiki_id: z.number().nullable(),
             buttons: z.array(
               z.object({
                 id: z.number()
@@ -64,7 +64,7 @@ export const productRouter = router({
       return {
         data: products.map(product => ({
           id: product.id,
-          observatoire_id: product.observatoire_id,
+          xwiki_id: product.xwiki_id,
           buttons: product.buttons.map(b => ({ id: b.id }))
         })),
         metadata: { count }

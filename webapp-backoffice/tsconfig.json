@@ -17,6 +17,11 @@
 			"@/*": ["./*"]
 		}
 	},
-	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		"../webapp-form/src/pages/api/import/reviews.ts"
+	],
 	"exclude": ["node_modules"]
 }

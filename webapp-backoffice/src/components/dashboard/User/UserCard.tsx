@@ -34,7 +34,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 					<span>{formatDateToFrenchString(user.created_at.toString())}</span>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
-					{user.observatoire_account ? (
+					{user.xwiki_account ? (
 						<i
 							className={cx(
 								fr.cx('fr-icon-checkbox-circle-line'),

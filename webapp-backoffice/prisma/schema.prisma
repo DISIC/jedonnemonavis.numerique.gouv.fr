@@ -56,8 +56,8 @@ model User {
   firstName             String?
   lastName              String?
   active                Boolean               @default(false)
-  observatoire_account  Boolean               @default(false)
-  observatoire_username String?
+  xwiki_account         Boolean               @default(false)
+  xwiki_username String?
   email                 String                @unique
   password              String
   role                  UserRole              @default(user)
@@ -141,20 +141,20 @@ model Button {
 }
 
 model Product {
-  id              Int           @id @default(autoincrement())
-  title           String
-  entity          Entity        @relation(fields: [entity_id], references: [id])
-  entity_id       Int
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  isEssential     Boolean?      @default(false)
-  urls            String[]
-  volume          Int?
-  observatoire_id Int?          @unique
-  buttons         Button[]
-  accessRights    AccessRight[]
-  favorites       Favorite[]
-  reviews         Review[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  entity       Entity        @relation(fields: [entity_id], references: [id])
+  entity_id    Int
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  isEssential  Boolean?      @default(false)
+  urls         String[]
+  volume       Int?
+  xwiki_id     Int?          @unique
+  buttons      Button[]
+  accessRights AccessRight[]
+  favorites    Favorite[]
+  reviews      Review[]
 }
 
 model AccessRight {
@@ -198,6 +198,7 @@ model Review {
   product_id Int
   button     Button  @relation(fields: [button_id], references: [id])
   button_id  Int
+	xwiki_id	 Int?
 
   answers Answer[]
 

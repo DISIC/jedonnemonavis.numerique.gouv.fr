@@ -289,7 +289,7 @@ export const userRouter = router({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { otp, inviteToken, user } = input;
-			const { observatoire_account, ...newUser } = user;
+			const { xwiki_account, ...newUser } = user;
 
 			const hashedPassword = crypto
 				.createHash('sha256')
@@ -301,7 +301,7 @@ export const userRouter = router({
 			if (otp != undefined) {
 				const user = await registerUserFromOTP(
 					ctx.prisma,
-					{ ...newUser, active: true, observatoire_account: true },
+					{ ...newUser, active: true, xwiki_account: true },
 					otp as string
 				);
 
@@ -433,7 +433,7 @@ export const userRouter = router({
 					code: 'NOT_FOUND',
 					message: 'User not found'
 				});
-			} else if (user.observatoire_account && !user.active) {
+			} else if (user.xwiki_account && !user.active) {
 				createOTP(ctx.prisma, user);
 
 				return { data: undefined, metadata: { statusCode: 206 } };
