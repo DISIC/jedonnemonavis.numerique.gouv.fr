@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ImportReview } from '../../../../../webapp-backoffice/src/pages/api/import/types';
+import { ImportReview } from './types';
 import { ElkAnswer } from '@/src/utils/types';
 import { Client as ElkClient } from '@elastic/elasticsearch';
 import fs from 'fs';
