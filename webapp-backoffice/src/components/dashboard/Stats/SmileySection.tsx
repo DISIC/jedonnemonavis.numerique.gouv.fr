@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
+import { useRouter } from 'next/router';
 
 const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
@@ -18,9 +19,14 @@ const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 type Props = {
 	fieldCode: string;
 	productId: number;
+	displayFieldLabel?: boolean;
 };
 
-const SmileySection = ({ fieldCode, productId }: Props) => {
+const SmileySection = ({
+	fieldCode,
+	productId,
+	displayFieldLabel = false
+}: Props) => {
 	const { classes } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
@@ -38,7 +44,7 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 							doc_count: number;
 						}
 					];
-					metadata: { total: number; average: number };
+					metadata: { total: number; average: number; fieldLabel: string };
 				};
 			}
 		}
@@ -59,64 +65,71 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 		})) || [];
 
 	return (
-		<div className={classes.mainSection}>
-			<AverageCard
-				average={resultFieldCode?.metadata.average as number}
-				answerText={currentAnswerTextFromAverage}
-			/>
-			<div
-				style={{
-					display: 'flex',
-					flexDirection: 'column',
-					flex: 1,
-					width: '100%'
-				}}
-			>
-				<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
-				<p>{resultFieldCode?.metadata.total} avis total</p>
-				<div style={{ display: 'flex' }}>
-					<div
-						style={{
-							width: '100%',
-							display: 'flex',
-							flexDirection: 'column',
-							gap: '0.75rem'
-						}}
-					>
-						{resultFieldCode?.data.map(
-							({ answer_text, intention, doc_count }) => (
-								<div
-									key={answer_text}
-									style={{ display: 'flex', gap: '0.25rem' }}
-								>
-									<i
-										className={fr.cx(getStatsIcon({ intention }))}
-										style={{ color: getStatsColor({ intention }) }}
-									/>
+		<div className={displayFieldLabel ? classes.wrapperSection : ''}>
+			{displayFieldLabel && (
+				<h4 className={fr.cx('fr-mb-0')}>
+					{resultFieldCode?.metadata.fieldLabel}
+				</h4>
+			)}
+			<div className={classes.mainSection}>
+				<AverageCard
+					average={resultFieldCode?.metadata.average as number}
+					answerText={currentAnswerTextFromAverage}
+				/>
+				<div
+					style={{
+						display: 'flex',
+						flexDirection: 'column',
+						flex: 1,
+						width: '100%'
+					}}
+				>
+					<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
+					<p>{resultFieldCode?.metadata.total} avis total</p>
+					<div style={{ display: 'flex' }}>
+						<div
+							style={{
+								width: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								gap: '0.75rem'
+							}}
+						>
+							{resultFieldCode?.data.map(
+								({ answer_text, intention, doc_count }) => (
 									<div
-										style={{
-											display: 'flex',
-											flexDirection: 'column'
-										}}
+										key={answer_text}
+										style={{ display: 'flex', gap: '0.25rem' }}
 									>
-										<span style={{ color: getStatsColor({ intention }) }}>
-											{answer_text}
-										</span>
-										<span
-											style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}
+										<i
+											className={fr.cx(getStatsIcon({ intention }))}
+											style={{ color: getStatsColor({ intention }) }}
+										/>
+										<div
+											style={{
+												display: 'flex',
+												flexDirection: 'column'
+											}}
 										>
-											{(
-												(doc_count / resultFieldCode.metadata.total) *
-												100
-											).toFixed(0)}
-											% / {doc_count} avis
-										</span>
+											<span style={{ color: getStatsColor({ intention }) }}>
+												{answer_text}
+											</span>
+											<span
+												style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}
+											>
+												{(
+													(doc_count / resultFieldCode.metadata.total) *
+													100
+												).toFixed(0)}
+												% / {doc_count} avis
+											</span>
+										</div>
 									</div>
-								</div>
-							)
-						)}
+								)
+							)}
+						</div>
+						<BarChart kind="pie" data={barChartData} />
 					</div>
-					<BarChart kind="pie" data={barChartData} />
 				</div>
 			</div>
 		</div>
@@ -124,6 +137,11 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 };
 
 const useStyles = tss.create({
+	wrapperSection: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('3v')
+	},
 	mainSection: {
 		display: 'flex',
 		flexWrap: 'wrap',

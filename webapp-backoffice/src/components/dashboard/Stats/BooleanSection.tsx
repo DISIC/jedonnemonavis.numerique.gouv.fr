@@ -22,12 +22,13 @@ const BarVerticalChart = dynamic(
 );
 
 type Props = {
-	fieldCode: string;
+	fieldCode?: string;
+	fieldCodeMultiple: string;
 	productId: number;
 };
 
-const BooleanSection = ({ fieldCode, productId }: Props) => {
-	const { classes } = useStyles();
+const BooleanSection = ({ fieldCode, fieldCodeMultiple, productId }: Props) => {
+	const { classes, cx } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
 		queryKey: ['getAnswerByFieldCode', fieldCode, productId],
@@ -47,14 +48,15 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 					metadata: { total: number; average: number; fieldLabel: string };
 				};
 			}
-		}
+		},
+		enabled: !!fieldCode
 	});
 
 	const { data: resultFieldCodeDetails } = useQuery({
 		queryKey: ['getAnswerByFieldCodeDetails', fieldCode, productId],
 		queryFn: async () => {
 			const res = await fetch(
-				`http://localhost:3001/api/open-api/answers/${fieldCode}_details?product_id=${productId}`
+				`http://localhost:3001/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}`
 			);
 			if (res.ok) {
 				return (await res.json()) as {
@@ -86,48 +88,53 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<div
-				className={fr.cx('fr-col-6', 'fr-pr-6v')}
-				style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
-			>
-				<h4 className={fr.cx('fr-mb-0')}>
-					{resultFieldCode?.metadata.fieldLabel}
-				</h4>
-				<p className={fr.cx('fr-hint-text', 'fr-text--md')}>
-					{resultFieldCode?.metadata.total} avis total
-				</p>
-				<div style={{ display: 'flex' }}>
-					<div
-						style={{
-							width: '100%',
-							display: 'flex',
-							flexDirection: 'column',
-							gap: '0.75rem'
-						}}
-					>
-						{resultFieldCode?.data.map(({ answer_text, doc_count }) => (
-							<div
-								key={answer_text}
-								style={{
-									display: 'flex',
-									flexDirection: 'column'
-								}}
-							>
-								<span className={classes.blueColor}>{answer_text}</span>
-								<span style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}>
-									{((doc_count / resultFieldCode.metadata.total) * 100).toFixed(
-										0
-									)}
-									% / {doc_count} avis
-								</span>
-							</div>
-						))}
+			{fieldCode && (
+				<div
+					className={fr.cx('fr-col-6', 'fr-pr-6v')}
+					style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+				>
+					<h4 className={fr.cx('fr-mb-0')}>
+						{resultFieldCode?.metadata.fieldLabel}
+					</h4>
+					<p className={fr.cx('fr-hint-text', 'fr-text--md')}>
+						{resultFieldCode?.metadata.total} avis total
+					</p>
+					<div style={{ display: 'flex' }}>
+						<div
+							style={{
+								width: '100%',
+								display: 'flex',
+								flexDirection: 'column',
+								gap: '0.75rem'
+							}}
+						>
+							{resultFieldCode?.data.map(({ answer_text, doc_count }) => (
+								<div
+									key={answer_text}
+									style={{
+										display: 'flex',
+										flexDirection: 'column'
+									}}
+								>
+									<span className={classes.blueColor}>{answer_text}</span>
+									<span style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}>
+										{(
+											(doc_count / resultFieldCode.metadata.total) *
+											100
+										).toFixed(0)}
+										% / {doc_count} avis
+									</span>
+								</div>
+							))}
+						</div>
+						<PieChart kind="pie" data={barChartData} />
 					</div>
-					<PieChart kind="pie" data={barChartData} />
 				</div>
-			</div>
+			)}
 			<div
-				className={fr.cx('fr-col-6', 'fr-pl-6v')}
+				className={cx(
+					fieldCode ? fr.cx('fr-col-6', 'fr-pl-6v') : fr.cx('fr-col-12')
+				)}
 				style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
 			>
 				<h4 className={fr.cx('fr-mb-0')}>
