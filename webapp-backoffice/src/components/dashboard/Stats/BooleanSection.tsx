@@ -1,9 +1,3 @@
-import {
-	getIntentionFromAverage,
-	getStatsAnswerText,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
@@ -25,16 +19,30 @@ type Props = {
 	fieldCode?: string;
 	fieldCodeMultiple: string;
 	productId: number;
+	startDate: string;
+	endDate: string;
 };
 
-const BooleanSection = ({ fieldCode, fieldCodeMultiple, productId }: Props) => {
+const BooleanSection = ({
+	fieldCode,
+	fieldCodeMultiple,
+	productId,
+	startDate,
+	endDate
+}: Props) => {
 	const { classes, cx } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
-		queryKey: ['getAnswerByFieldCode', fieldCode, productId],
+		queryKey: [
+			'getAnswerByFieldCode',
+			fieldCode,
+			productId,
+			startDate,
+			endDate
+		],
 		queryFn: async () => {
 			const res = await fetch(
-				`http://localhost:3001/api/open-api/answers/${fieldCode}?product_id=${productId}`
+				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 			);
 			if (res.ok) {
 				return (await res.json()) as {
@@ -53,10 +61,16 @@ const BooleanSection = ({ fieldCode, fieldCodeMultiple, productId }: Props) => {
 	});
 
 	const { data: resultFieldCodeDetails } = useQuery({
-		queryKey: ['getAnswerByFieldCodeDetails', fieldCode, productId],
+		queryKey: [
+			'getAnswerByFieldCodeDetails',
+			fieldCodeMultiple,
+			productId,
+			startDate,
+			endDate
+		],
 		queryFn: async () => {
 			const res = await fetch(
-				`http://localhost:3001/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}`
+				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 			);
 			if (res.ok) {
 				return (await res.json()) as {
