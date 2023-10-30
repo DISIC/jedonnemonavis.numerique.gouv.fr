@@ -11,6 +11,7 @@ import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
 import { useRouter } from 'next/router';
+import { Skeleton } from '@mui/material';
 
 const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
@@ -33,7 +34,7 @@ const SmileySection = ({
 }: Props) => {
 	const { classes } = useStyles();
 
-	const { data: resultFieldCode } = useQuery({
+	const { data: resultFieldCode, isLoading } = useQuery({
 		queryKey: [
 			'getAnswerByFieldCode',
 			fieldCode,
@@ -74,8 +75,36 @@ const SmileySection = ({
 			answer_text
 		})) || [];
 
+	if (isLoading) {
+		return (
+			<div className={classes.mainSection}>
+				<Skeleton variant="rectangular" width={232} height="inherit" />
+				<div style={{ flex: 1 }}>
+					<Skeleton variant="text" width="75%" height={40} />
+					<Skeleton variant="text" width="25%" height={25} />
+					<div style={{ display: 'flex', marginTop: '2rem' }}>
+						<div
+							style={{
+								display: 'flex',
+								flexDirection: 'column',
+								width: '100%',
+								gap: '0.5rem',
+								flex: 1
+							}}
+						>
+							<Skeleton variant="text" width="40%" height={45} />
+							<Skeleton variant="text" width="45%" height={45} />
+							<Skeleton variant="text" width="40%" height={45} />
+						</div>
+						<Skeleton variant="circular" width={185} height={185} />
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
-		<div className={displayFieldLabel ? classes.wrapperSection : ''}>
+		<div className={classes.wrapperSection}>
 			{displayFieldLabel && (
 				<h4 className={fr.cx('fr-mb-0')}>
 					{resultFieldCode?.metadata.fieldLabel}
@@ -94,7 +123,7 @@ const SmileySection = ({
 						width: '100%'
 					}}
 				>
-					<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
+					<h4 className={fr.cx('fr-mb-0')}>Répartition des avis</h4>
 					<p>{resultFieldCode?.metadata.total} avis total</p>
 					<div style={{ display: 'flex' }}>
 						<div

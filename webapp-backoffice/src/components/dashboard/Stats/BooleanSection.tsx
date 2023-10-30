@@ -1,4 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { Skeleton } from '@mui/material';
 import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
@@ -32,7 +33,7 @@ const BooleanSection = ({
 }: Props) => {
 	const { classes, cx } = useStyles();
 
-	const { data: resultFieldCode } = useQuery({
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } = useQuery({
 		queryKey: [
 			'getAnswerByFieldCode',
 			fieldCode,
@@ -60,32 +61,33 @@ const BooleanSection = ({
 		enabled: !!fieldCode
 	});
 
-	const { data: resultFieldCodeDetails } = useQuery({
-		queryKey: [
-			'getAnswerByFieldCodeDetails',
-			fieldCodeMultiple,
-			productId,
-			startDate,
-			endDate
-		],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-			);
-			if (res.ok) {
-				return (await res.json()) as {
-					data: [
-						{
-							answer_text: string;
-							intention: AnswerIntention;
-							doc_count: number;
-						}
-					];
-					metadata: { total: number; average: number; fieldLabel: string };
-				};
+	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } =
+		useQuery({
+			queryKey: [
+				'getAnswerByFieldCodeDetails',
+				fieldCodeMultiple,
+				productId,
+				startDate,
+				endDate
+			],
+			queryFn: async () => {
+				const res = await fetch(
+					`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
+				);
+				if (res.ok) {
+					return (await res.json()) as {
+						data: [
+							{
+								answer_text: string;
+								intention: AnswerIntention;
+								doc_count: number;
+							}
+						];
+						metadata: { total: number; average: number; fieldLabel: string };
+					};
+				}
 			}
-		}
-	});
+		});
 
 	const barChartData =
 		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
@@ -99,6 +101,51 @@ const BooleanSection = ({
 			name: answer_text,
 			value: doc_count
 		})) || [];
+
+	if ((fieldCode && isLoadingFieldCode) || isLoadingFieldCodeDetails) {
+		return (
+			<div style={{ display: 'flex', gap: '3rem' }}>
+				{fieldCode && (
+					<div style={{ flexBasis: '50%' }}>
+						<Skeleton variant="text" width="75%" height={40} />
+						<Skeleton variant="text" width="25%" height={25} />
+						<div style={{ display: 'flex', marginTop: '2rem' }}>
+							<div
+								style={{
+									display: 'flex',
+									flexDirection: 'column',
+									width: '100%',
+									gap: '0.5rem',
+									flex: 1
+								}}
+							>
+								<Skeleton variant="text" width="40%" height={45} />
+								<Skeleton variant="text" width="45%" height={45} />
+								<Skeleton variant="text" width="40%" height={45} />
+							</div>
+							<Skeleton variant="circular" width={185} height={185} />
+						</div>
+					</div>
+				)}
+				<div style={{ flexBasis: fieldCode ? '50%' : '100%' }}>
+					<Skeleton variant="text" width="75%" height={40} />
+					<Skeleton variant="text" width="25%" height={25} />
+					<div
+						style={{
+							display: 'flex',
+							flexDirection: 'column',
+							marginTop: '2rem'
+						}}
+					>
+						<Skeleton variant="text" width="80%" height={45} />
+						<Skeleton variant="text" width="20%" height={45} />
+						<Skeleton variant="text" width="50%" height={45} />
+						<Skeleton variant="text" width="35%" height={45} />
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
