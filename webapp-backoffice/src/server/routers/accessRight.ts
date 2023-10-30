@@ -91,7 +91,7 @@ export const accessRightRouter = router({
 
 			const newAccessRight = await ctx.prisma.accessRight.upsert({
 				where: {
-					id: accessRightAlreadyExists?.id || -1
+					id: accessRightAlreadyExists?.id || 0
 				},
 				update: {
 					status: 'carrier'

@@ -37,3 +37,16 @@ const UserRequestWithUser = Prisma.validator<Prisma.UserRequestDefaultArgs>()({
 export type UserRequestWithUser = Prisma.UserRequestGetPayload<
 	typeof UserRequestWithUser
 >;
+
+const EntityWithUsersAndProducts = Prisma.validator<Prisma.EntityDefaultArgs>()(
+	{
+		include: {
+			products: true,
+			users: true
+		}
+	}
+);
+
+export type EntityWithUsersAndProducts = Prisma.EntityGetPayload<
+	typeof EntityWithUsersAndProducts
+>;

@@ -246,7 +246,8 @@ export const userRouter = router({
 
 			const createdUser = await ctx.prisma.user.create({
 				data: {
-					...newUser
+					...newUser,
+					active: true
 				}
 			});
 
@@ -254,13 +255,23 @@ export const userRouter = router({
 		}),
 
 	update: protectedProcedure
-		.meta({ isAdmin: true })
 		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
 			const { id, user } = input;
+
+			if (ctx.session.user.role !== 'admin' && id !== ctx.session.user.id) {
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'User email domain not whitelisted'
+				});
+			}
+
 			const updatedUser = await ctx.prisma.user.update({
 				where: { id },
-				data: { ...user }
+				data: { ...user },
+				include: {
+					entities: true
+				}
 			});
 
 			return { data: updatedUser };
@@ -438,9 +449,8 @@ export const userRouter = router({
 
 				return { data: undefined, metadata: { statusCode: 206 } };
 			} else if (!user.active) {
-				// Code: 423
 				throw new TRPCError({
-					code: 'CONFLICT',
+					code: 'FORBIDDEN',
 					message: "User isn't active"
 				});
 			} else {

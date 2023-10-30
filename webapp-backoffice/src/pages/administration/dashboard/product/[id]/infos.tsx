@@ -1,5 +1,5 @@
 import React from 'react';
-import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import ProductLayout from '@/src/layouts/ProductLayout';
 import { getServerSideProps } from '.';
 import { Product } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';

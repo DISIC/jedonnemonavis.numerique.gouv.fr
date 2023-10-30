@@ -63,7 +63,7 @@ export const LoginForm = () => {
 				case 404:
 					setErrors({ ...errors, emailNotFound: true });
 					break;
-				case 423:
+				case 403:
 					setErrors({ ...errors, userInactive: true });
 					break;
 			}

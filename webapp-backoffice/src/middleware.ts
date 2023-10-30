@@ -5,7 +5,6 @@ import { getToken } from 'next-auth/jwt';
 
 const PUBLIC_FILE = /\.(.*)$/;
 
-// This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
 	const token = await getToken({
 		req: request,

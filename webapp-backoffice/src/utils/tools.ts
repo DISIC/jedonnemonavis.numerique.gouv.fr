@@ -1,3 +1,5 @@
+import { UserRole } from '@prisma/client';
+
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 	return emailRegex.test(email);
@@ -53,5 +55,16 @@ export function extractDomainFromEmail(email: string): string | null {
 		return match[1];
 	} else {
 		return null;
+	}
+}
+
+export function displayReadableRole(role: UserRole) {
+	switch (role) {
+		case 'admin':
+			return 'Administrateur';
+		case 'supervisor':
+			return 'Superviseur';
+		case 'user':
+			return 'Utilisateur';
 	}
 }
