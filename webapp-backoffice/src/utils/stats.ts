@@ -18,7 +18,7 @@ export const getStatsColor = ({
 	average?: number;
 	kind?: 'text' | 'background';
 }) => {
-	if (average) {
+	if (average !== undefined) {
 		intention = getIntentionFromAverage(average);
 	}
 	switch (intention) {
@@ -46,7 +46,7 @@ export const getStatsIcon = ({
 	intention?: AnswerIntention;
 	average?: number;
 }) => {
-	if (average) {
+	if (average !== undefined) {
 		intention = getIntentionFromAverage(average);
 	}
 	switch (intention) {
