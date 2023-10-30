@@ -3,19 +3,19 @@ import { Answer, Prisma } from "@prisma/client";
 export type Feeling = "good" | "bad" | "medium";
 
 export type Opinion = {
-  satisfaction?: Feeling;
-  easy?: Feeling;
-  comprehension?: Feeling;
-  contact?: string;
-  contact_reached?: string;
-  contact_satisfaction?: Feeling;
-  contact_channels: string[];
+  satisfaction?: number;
+  easy?: number;
+  comprehension?: number;
+  contact?: number;
+  contact_reached?: number;
+  contact_satisfaction?: number;
+  contact_channels: number[];
   contact_channels_verbatim?: string;
-  difficulties?: string;
-  difficulties_details: string[];
+  difficulties?: number;
+  difficulties_details: number[];
   difficulties_details_verbatim?: string;
-  help?: string;
-  help_details: string[];
+  help?: number;
+  help_details: number[];
   help_details_verbatim?: string;
   verbatim?: string;
 };
@@ -25,26 +25,24 @@ export type Product = {
   title: string;
 };
 
-export type CheckboxOption = {
+type BaseOption = {
   label: string;
-  value: string;
+  value: number;
+  intention: "good" | "medium" | "bad" | "neutral";
   name?: string;
   hint?: string;
   isolated?: boolean;
-  explanation?: boolean;
 };
 
-export type RadioOption = {
-  label: string;
-  value: string;
-  name?: string;
-  hint?: string;
+export type CheckboxOption = {
   explanation?: boolean;
-};
+} & BaseOption;
+
+export type RadioOption = BaseOption;
 
 export type Condition = {
   name: keyof Opinion;
-  values: string[];
+  values: number[];
 };
 
 export type FormField =
@@ -58,14 +56,26 @@ export type FormField =
     }
   | {
       kind: "input-text";
-      name: keyof Opinion;
+      name: keyof Pick<
+        Opinion,
+        | "verbatim"
+        | "help_details_verbatim"
+        | "difficulties_details_verbatim"
+        | "contact_channels_verbatim"
+      >;
       label: string;
       hint?: string;
       conditions?: Condition[];
     }
   | {
       kind: "input-textarea";
-      name: keyof Opinion;
+      name: keyof Pick<
+        Opinion,
+        | "verbatim"
+        | "help_details_verbatim"
+        | "difficulties_details_verbatim"
+        | "contact_channels_verbatim"
+      >;
       label: string;
       hint?: string;
       conditions?: Condition[];

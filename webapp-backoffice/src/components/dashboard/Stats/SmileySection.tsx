@@ -21,7 +21,7 @@ type Props = {
 };
 
 const SmileySection = ({ fieldCode, productId }: Props) => {
-	const { classes, cx } = useStyles();
+	const { classes } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
 		queryKey: ['getAnswerByFieldCode', fieldCode, productId],

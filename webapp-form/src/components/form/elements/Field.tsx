@@ -8,7 +8,7 @@ import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Input } from "@codegouvfr/react-dsfr/Input";
 import { useTranslation } from "next-i18next";
-import { ChangeEvent, SetStateAction } from "react";
+import { ChangeEvent, SetStateAction, useEffect } from "react";
 import { SmileyInput } from "./SmileyInput";
 
 type Props = {
@@ -70,9 +70,9 @@ export const Field = (props: Props) => {
               ...opinion[key].filter(
                 (sibling) => !isolatedSiblings.includes(sibling)
               ),
-              e.target.value,
+              parseInt(e.target.value),
             ]
-          : opinion[key].filter((d) => d !== e.target.value),
+          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
         ...getChildrenResetObject(),
       });
       console.log({
@@ -82,9 +82,9 @@ export const Field = (props: Props) => {
               ...opinion[key].filter(
                 (sibling) => !isolatedSiblings.includes(sibling)
               ),
-              e.target.value,
+              parseInt(e.target.value),
             ]
-          : opinion[key].filter((d) => d !== e.target.value),
+          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
         ...getChildrenResetObject(),
       });
     }
@@ -92,23 +92,26 @@ export const Field = (props: Props) => {
 
   if (field.conditions) {
     const showField = field.conditions.some((condition) => {
+      const currentCondition = opinion[condition.name] as number[] | number;
+
       // Si la valeur de la source de condition n'est pas encore définie
-      if (!opinion[condition.name] || !opinion[condition.name]?.length)
+      if (
+        !currentCondition ||
+        (typeof currentCondition !== "number" && !currentCondition?.length)
+      )
         return false;
 
       // Si le champ de la source de condition est un Array et qu'il contient l'une des valeurs cibles
       if (
-        Array.isArray(opinion[condition.name]) &&
-        (opinion[condition.name] as string[])?.some(
-          (v) => condition?.values.includes(v)
-        )
+        Array.isArray(currentCondition) &&
+        currentCondition?.some((v) => condition?.values.includes(v))
       )
         return true;
 
       // Si le champ de la source de condition n'est pas un Array et que la valeur est égale à l'une des valeurs cibles
       if (
-        !Array.isArray(opinion[condition.name]) &&
-        condition.values.includes(opinion[condition.name] as string)
+        !Array.isArray(currentCondition) &&
+        condition.values.includes(currentCondition)
       )
         return true;
 
@@ -126,7 +129,7 @@ export const Field = (props: Props) => {
           hint={field.hint ? t(field.hint) : undefined}
           name={field.name}
           onChange={(value) => {
-            setOpinion({ ...opinion, [field.name]: value });
+            setOpinion({ ...opinion, [field.name]: field.values[value] });
           }}
         />
       );
@@ -167,11 +170,11 @@ export const Field = (props: Props) => {
                 checked: opinion[field.name] === opt.value,
                 value: opt.value,
                 onChange: (e) => {
-                  setOpinion({
-                    ...opinion,
-                    [field.name]: e.target.value,
+                  setOpinion((prevOpinion) => ({
+                    ...prevOpinion,
+                    [field.name]: parseInt(e.target.value),
                     ...getChildrenResetObject(),
-                  });
+                  }));
                 },
               },
             }))}
@@ -205,7 +208,7 @@ export const Field = (props: Props) => {
           state={(opinion[field.name] || "").length > 250 ? "error" : "default"}
           stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{
-            value: opinion[field.name],
+            value: opinion[field.name] as string,
             maxLength: 250,
             onChange: (e) => {
               setOpinion({

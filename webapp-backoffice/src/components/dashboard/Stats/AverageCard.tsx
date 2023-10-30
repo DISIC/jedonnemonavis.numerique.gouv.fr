@@ -1,9 +1,4 @@
-import {
-	getIntentionFromAverage,
-	getStatsAnswerText,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
+import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 

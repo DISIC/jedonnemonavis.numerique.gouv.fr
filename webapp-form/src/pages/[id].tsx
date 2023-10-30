@@ -27,7 +27,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     onSuccess: () => setIsFormSubmitted(true),
   });
 
-  const getSelectedOption = (field: FormField, value: string) => {
+  const getSelectedOption = (
+    field: FormField,
+    value: number
+  ): { label: string; intention: AnswerIntention; value: number } => {
     if (field.kind === "radio" || field.kind == "checkbox") {
       const selectedOption = field.options.find(
         (option) => option.value === value
@@ -38,30 +41,34 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           lng: "fr",
         }),
         value: selectedOption.value,
+        intention: selectedOption.intention,
       };
     } else if (field.kind === "smiley") {
-      const smileyLabel = t(`smileys.${value}`, { lng: "fr" });
+      const smileyIntention =
+        value === 1 ? "bad" : value === 2 ? "medium" : "good";
+      const smileyLabel = t(`smileys.${smileyIntention}`, { lng: "fr" });
       return {
         label: smileyLabel,
+        intention: smileyIntention,
         value,
       };
     } else {
       return {
         label: "",
-        value,
+        intention: "good",
+        value: 0,
       };
     }
   };
 
   const handleSubmitReview = async (opinion: Opinion) => {
     const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
-      ([key, value], index) => {
+      ([key, value]) => {
         const fieldInSection = (
           key === "satisfaction" ? firstSection : secondSection
         ).find((field) => field.name === key) as FormField;
 
         let tmpAnswer = {
-          answer_item_id: index + 1,
           field_code: fieldInSection.name,
           field_label: t(fieldInSection.label, {
             lng: "fr",
@@ -76,32 +83,24 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           review: {},
         } as Prisma.AnswerCreateInput;
 
-        if (typeof value == "string") {
-          const selectedOption = getSelectedOption(
-            fieldInSection,
-            value as string
-          );
-
+        if (typeof value == "number") {
+          const selectedOption = getSelectedOption(fieldInSection, value);
           tmpAnswer.answer_text = selectedOption.label;
-
-          if (
-            fieldInSection.kind === "smiley" ||
-            fieldInSection.kind === "radio"
-          ) {
-            tmpAnswer.intention =
-              selectedOption.value == "yes"
-                ? "good"
-                : selectedOption.value == "no"
-                ? "bad"
-                : (selectedOption.value as AnswerIntention);
-          }
-
+          tmpAnswer.intention = selectedOption.intention;
+          tmpAnswer.answer_item_id = selectedOption.value;
+          return tmpAnswer;
+        } else if (typeof value == "string") {
+          tmpAnswer.answer_text = value;
+          tmpAnswer.intention = "neutral";
+          tmpAnswer.answer_item_id = 0;
           return tmpAnswer;
         } else if (Array.isArray(value)) {
           let tmpAnswers = [] as Prisma.AnswerCreateInput[];
           value.map((value) => {
-            let currentValueLabel = getSelectedOption(fieldInSection, value);
-            tmpAnswer.answer_text = currentValueLabel.label;
+            let selectedOption = getSelectedOption(fieldInSection, value);
+            tmpAnswer.answer_text = selectedOption.label;
+            tmpAnswer.intention = selectedOption.intention;
+            tmpAnswer.answer_item_id = selectedOption.value;
             tmpAnswers.push({ ...tmpAnswer });
           });
           return tmpAnswers;

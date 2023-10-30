@@ -49,7 +49,7 @@ const PieChartComponent = ({
 		const x = cx + (cos * (innerRadius + outerRadius)) / 2;
 		const y = cy + (sin * (innerRadius + outerRadius)) / 2;
 
-		if (data.length === 2) {
+		if (answer_text === 'Oui' || answer_text === 'Non') {
 			return (
 				<text
 					x={x}
@@ -63,7 +63,7 @@ const PieChartComponent = ({
 					{answer_text}
 				</text>
 			);
-		} else if (data.length === 3) {
+		} else {
 			return (
 				<g width={30}>
 					<path
@@ -90,12 +90,14 @@ const PieChartComponent = ({
 					outerRadius={outerRadius}
 					cornerRadius={10}
 					dataKey="value"
-					paddingAngle={data.length === 2 ? 3 : 1}
+					paddingAngle={
+						data.map(a => a.answer_text).includes('Oui' || 'Non') ? 3 : 1
+					}
 					labelLine={false}
 					label={renderCustomizedLabel}
 				>
 					{data.map((answer, index) => {
-						if (data.length === 2) {
+						if (answer.answer_text === 'Oui' || answer.answer_text === 'Non') {
 							return (
 								<Cell
 									key={`cell-${index}`}
@@ -106,7 +108,7 @@ const PieChartComponent = ({
 									}
 								/>
 							);
-						} else if (data.length === 3) {
+						} else {
 							return (
 								<Cell
 									key={`cell-${index}`}

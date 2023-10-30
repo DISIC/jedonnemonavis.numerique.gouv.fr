@@ -22,15 +22,18 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.easy.options.0.label",
-        value: "good",
+        value: 4,
+        intention: "good",
       },
       {
         label: "fields.easy.options.1.label",
-        value: "medium",
+        value: 5,
+        intention: "medium",
       },
       {
         label: "fields.easy.options.2.label",
-        value: "bad",
+        value: 6,
+        intention: "bad",
       },
     ],
   },
@@ -41,15 +44,18 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.comprehension.options.0.label",
-        value: "bad",
+        value: 7,
+        intention: "bad",
       },
       {
         label: "fields.comprehension.options.1.label",
-        value: "medium",
+        value: 8,
+        intention: "medium",
       },
       {
         label: "fields.comprehension.options.2.label",
-        value: "good",
+        value: 9,
+        intention: "good",
       },
     ],
   },
@@ -60,11 +66,13 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.difficulties.options.0.label",
-        value: "yes",
+        value: 10,
+        intention: "bad",
       },
       {
         label: "fields.difficulties.options.1.label",
-        value: "no",
+        value: 11,
+        intention: "good",
       },
     ],
   },
@@ -75,33 +83,39 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "difficulties",
-        values: ["yes"],
+        values: [10],
       },
     ],
     options: [
       {
         label: "fields.difficulties_details.options.0.label",
-        value: "missing-infos-before",
+        value: 12,
+        intention: "bad",
       },
       {
         label: "fields.difficulties_details.options.1.label",
-        value: "bug",
+        value: 13,
+        intention: "bad",
       },
       {
         label: "fields.difficulties_details.options.2.label",
-        value: "bug-display-mobile",
+        value: 14,
+        intention: "bad",
       },
       {
         label: "fields.difficulties_details.options.3.label",
-        value: "bug-upload-documents",
+        value: 15,
+        intention: "bad",
       },
       {
         label: "fields.difficulties_details.options.4.label",
-        value: "missing-infos-after",
+        value: 16,
+        intention: "bad",
       },
       {
         label: "fields.difficulties_details.options.5.label",
-        value: "other",
+        value: 17,
+        intention: "bad",
       },
     ],
   },
@@ -109,7 +123,7 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "difficulties_details",
-        values: ["other"],
+        values: [17],
       },
     ],
     name: "difficulties_details_verbatim",
@@ -124,31 +138,36 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.contact.options.0.label",
-        value: "no",
+        value: 18,
+        intention: "neutral",
       },
       {
         label: "fields.contact.options.1.label",
-        value: "yes",
+        value: 19,
+        intention: "neutral",
       },
       {
         label: "fields.contact.options.2.label",
-        value: "yes-but-failed",
+        value: 20,
+        intention: "neutral",
       },
     ],
   },
   {
-    conditions: [{ name: "contact", values: ["yes"] }],
+    conditions: [{ name: "contact", values: [19] }],
     name: "contact_reached",
     kind: "radio",
     label: "fields.contact_reached.label",
     options: [
       {
         label: "fields.contact_reached.options.0.label",
-        value: "yes",
+        value: 21,
+        intention: "good",
       },
       {
         label: "fields.contact_reached.options.1.label",
-        value: "no",
+        value: 22,
+        intention: "bad",
       },
     ],
   },
@@ -156,7 +175,7 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "contact_reached",
-        values: ["yes"],
+        values: [21],
       },
     ],
     name: "contact_channels",
@@ -165,19 +184,23 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.contact_channels.options.0.label",
-        value: "phone",
+        value: 23,
+        intention: "neutral",
       },
       {
         label: "fields.contact_channels.options.1.label",
-        value: "email-or-messaging",
+        value: 24,
+        intention: "neutral",
       },
       {
         label: "fields.contact_channels.options.2.label",
-        value: "agency-counter",
+        value: 25,
+        intention: "neutral",
       },
       {
         label: "fields.contact_channels.options.3.label",
-        value: "other",
+        value: 26,
+        intention: "neutral",
       },
     ],
   },
@@ -185,7 +208,7 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "contact_channels",
-        values: ["other"],
+        values: [26],
       },
     ],
     name: "contact_channels_verbatim",
@@ -197,16 +220,16 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "contact_reached",
-        values: ["yes"],
+        values: [21],
       },
     ],
     name: "contact_satisfaction",
     kind: "smiley",
     label: "fields.contact_satisfaction.label",
     values: {
-      bad: 1,
-      medium: 2,
-      good: 3,
+      bad: 27,
+      medium: 28,
+      good: 29,
     },
   },
   {
@@ -216,11 +239,13 @@ export const secondSection: FormField[] = [
     options: [
       {
         label: "fields.help.options.0.label",
-        value: "yes",
+        value: 30,
+        intention: "neutral",
       },
       {
         label: "fields.help.options.1.label",
-        value: "no",
+        value: 31,
+        intention: "neutral",
       },
     ],
   },
@@ -231,25 +256,29 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "help",
-        values: ["yes"],
+        values: [30],
       },
     ],
     options: [
       {
         label: "fields.help_details.options.0.label",
-        value: "internet",
+        value: 32,
+        intention: "neutral",
       },
       {
         label: "fields.help_details.options.1.label",
-        value: "relative",
+        value: 33,
+        intention: "neutral",
       },
       {
         label: "fields.help_details.options.2.label",
-        value: "association",
+        value: 34,
+        intention: "neutral",
       },
       {
         label: "fields.help_details.options.3.label",
-        value: "other",
+        value: 35,
+        intention: "neutral",
       },
     ],
   },
@@ -257,7 +286,7 @@ export const secondSection: FormField[] = [
     conditions: [
       {
         name: "help_details",
-        values: ["other"],
+        values: [35],
       },
     ],
     name: "help_details_verbatim",
