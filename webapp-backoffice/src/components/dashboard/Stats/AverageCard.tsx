@@ -37,15 +37,15 @@ const useStyles = tss.create({
 	averageCard: {
 		display: 'flex',
 		flexDirection: 'column',
-		width: '325px',
-		padding: '1.5rem 2rem',
+		width: '232px',
+		padding: '1.5rem 1.25rem',
 		gap: '0.75rem',
 		alignItems: 'center',
 		justifyContent: 'center'
 	},
 	textAverageCard: {
 		fontWeight: 'bold',
-		fontSize: '1.5rem',
+		fontSize: '1.375rem',
 		textAlign: 'center'
 	},
 	iconAverageCard: {

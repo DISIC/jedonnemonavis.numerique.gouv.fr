@@ -6,16 +6,28 @@ interface ChartBaseProps {
 }
 
 export interface ChartPieProps extends ChartBaseProps {
-	data: PieData[];
+	data: ChartPieData[];
 	kind: 'pie';
 	innerRadius?: number;
 	outerRadius?: number;
 }
 
-interface PieData {
+export interface ChartVerticalBarProps extends ChartBaseProps {
+	data: ChartBarData[];
+	kind: 'bar';
+	innerRadius?: number;
+	outerRadius?: number;
+}
+
+interface ChartPieData {
 	name: AnswerIntention;
 	value: number;
 	answer_text: string;
+}
+
+interface ChartBarData {
+	name: string;
+	value: number;
 }
 
 export interface ChartLineBarProps extends ChartBaseProps {

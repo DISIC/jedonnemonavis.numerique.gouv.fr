@@ -26,9 +26,9 @@ const contextChart = {
 
 const PieChartComponent = ({
 	data,
-	width = 200,
-	height = 200,
-	innerRadius = 52,
+	width = 185,
+	height = 185,
+	innerRadius = data.map(a => a.answer_text).includes('Oui' || 'Non') ? 54 : 52,
 	outerRadius = 85
 }: ChartPieProps) => {
 	const renderCustomizedLabel = ({
@@ -56,7 +56,7 @@ const PieChartComponent = ({
 					y={y}
 					fill={answer_text === 'Non' ? '#000091' : 'white'}
 					textAnchor="middle"
-					fontSize={14}
+					fontSize={13}
 					fontWeight="bold"
 					dominantBaseline="central"
 				>

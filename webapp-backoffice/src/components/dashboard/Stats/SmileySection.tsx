@@ -64,7 +64,14 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 				average={resultFieldCode?.metadata.average as number}
 				answerText={currentAnswerTextFromAverage}
 			/>
-			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+			<div
+				style={{
+					display: 'flex',
+					flexDirection: 'column',
+					flex: 1,
+					width: '100%'
+				}}
+			>
 				<h4 className={fr.cx('fr-mb-0')}>Répartition des avis </h4>
 				<p>{resultFieldCode?.metadata.total} avis total</p>
 				<div style={{ display: 'flex' }}>
@@ -119,26 +126,8 @@ const SmileySection = ({ fieldCode, productId }: Props) => {
 const useStyles = tss.create({
 	mainSection: {
 		display: 'flex',
-		gap: '2rem'
-	},
-	averageCard: {
-		display: 'flex',
-		flexDirection: 'column',
-		width: '325px',
-		padding: '0 2rem',
-		gap: '0.75rem',
-		alignItems: 'center',
-		justifyContent: 'center'
-	},
-	textAverageCard: {
-		fontWeight: 'bold',
-		fontSize: '1.5rem',
-		textAlign: 'center'
-	},
-	iconAverageCard: {
-		'::before': {
-			'--icon-size': '6.5rem'
-		}
+		flexWrap: 'wrap',
+		gap: '3rem'
 	}
 });
 

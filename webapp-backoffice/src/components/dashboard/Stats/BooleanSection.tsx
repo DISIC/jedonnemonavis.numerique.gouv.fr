@@ -10,9 +10,16 @@ import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 
-const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
+const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
 });
+
+const BarVerticalChart = dynamic(
+	() => import('@/src/components/chart/BarVerticalChart'),
+	{
+		ssr: false
+	}
+);
 
 type Props = {
 	fieldCode: string;
@@ -43,6 +50,27 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 		}
 	});
 
+	const { data: resultFieldCodeDetails } = useQuery({
+		queryKey: ['getAnswerByFieldCodeDetails', fieldCode, productId],
+		queryFn: async () => {
+			const res = await fetch(
+				`http://localhost:3001/api/open-api/answers/${fieldCode}_details?product_id=${productId}`
+			);
+			if (res.ok) {
+				return (await res.json()) as {
+					data: [
+						{
+							answer_text: string;
+							intention: AnswerIntention;
+							doc_count: number;
+						}
+					];
+					metadata: { total: number; average: number; fieldLabel: string };
+				};
+			}
+		}
+	});
+
 	const barChartData =
 		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
 			name: intention,
@@ -50,13 +78,24 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 			answer_text
 		})) || [];
 
+	const barChartDataDetails =
+		resultFieldCodeDetails?.data.map(({ answer_text, doc_count }) => ({
+			name: answer_text,
+			value: doc_count
+		})) || [];
+
 	return (
-		<div className={classes.mainSection}>
-			<div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+		<div className={fr.cx('fr-grid-row')}>
+			<div
+				className={fr.cx('fr-col-6', 'fr-pr-6v')}
+				style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
+			>
 				<h4 className={fr.cx('fr-mb-0')}>
 					{resultFieldCode?.metadata.fieldLabel}
 				</h4>
-				<p>{resultFieldCode?.metadata.total} avis total</p>
+				<p className={fr.cx('fr-hint-text', 'fr-text--md')}>
+					{resultFieldCode?.metadata.total} avis total
+				</p>
 				<div style={{ display: 'flex' }}>
 					<div
 						style={{
@@ -84,21 +123,26 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 							</div>
 						))}
 					</div>
-					<BarChart kind="pie" data={barChartData} />
+					<PieChart kind="pie" data={barChartData} />
 				</div>
 			</div>
 			<div
+				className={fr.cx('fr-col-6', 'fr-pl-6v')}
 				style={{ display: 'flex', flexDirection: 'column', width: '100%' }}
-			></div>
+			>
+				<h4 className={fr.cx('fr-mb-0')}>
+					{resultFieldCodeDetails?.metadata.fieldLabel}
+				</h4>
+				<p className={fr.cx('fr-mb-0', 'fr-hint-text', 'fr-text--md')}>
+					{resultFieldCodeDetails?.metadata.total} réponses total
+				</p>
+				<BarVerticalChart data={barChartDataDetails} kind="bar" />
+			</div>
 		</div>
 	);
 };
 
 const useStyles = tss.create({
-	mainSection: {
-		display: 'flex',
-		gap: '2rem'
-	},
 	blueColor: {
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default
 	}
