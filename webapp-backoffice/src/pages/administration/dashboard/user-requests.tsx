@@ -125,8 +125,6 @@ const DashBoardUserRequestUserRequests = () => {
 		}
 	};
 
-	console.log(currentUserRequest?.user);
-
 	return (
 		<>
 			<OnConfirmModal

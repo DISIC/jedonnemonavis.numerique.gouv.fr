@@ -9,12 +9,33 @@ import { tss } from 'tss-react/dsfr';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
+import { trpc } from '@/src/utils/trpc';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
-	const { classes, cx } = useStyles();
 	const { pathname } = useRouter();
 
 	const { data: session } = useSession();
+
+	const { data: userRequestsResult, refetch } =
+		trpc.userRequest.getList.useQuery(
+			{
+				page: 1,
+				numberPerPage: 0,
+				displayProcessed: false
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
+	const { classes, cx } = useStyles({
+		countUserRequests: userRequestsResult.metadata.count
+	});
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!pathname.startsWith('/administration')
@@ -69,7 +90,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				text: "Demandes d'accès",
 				linkProps: {
 					href: '/administration/dashboard/user-requests',
-					target: '_self'
+					target: '_self',
+					id: 'fr-header-public-header-main-navigation-link-badge'
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
 			}
@@ -93,6 +115,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					href: '/',
 					title: 'Accueil'
 				}}
+				className={classes.navigation}
 				id="fr-header-public-header"
 				quickAccessItems={quickAccessItems}
 				navigation={navigationItems}
@@ -112,9 +135,31 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
 const useStyles = tss
 	.withName(PublicLayout.name)
-	.withParams()
-	.create(() => ({
+	.withParams<{ countUserRequests: number }>()
+	.create(({ countUserRequests }) => ({
 		logo: {
 			maxHeight: fr.spacing('11v')
-		}
+		},
+		navigation: countUserRequests
+			? {
+					'.fr-nav__link#fr-header-public-header-main-navigation-link-badge': {
+						position: 'relative',
+						'&::after': {
+							content: `"${countUserRequests.toString()}"`, // displaying the number 2
+							color: fr.colors.decisions.background.default.grey.default,
+							backgroundColor:
+								fr.colors.decisions.background.flat.redMarianne.default,
+							borderRadius: '50%',
+							width: fr.spacing('4v'),
+							height: fr.spacing('4v'),
+							display: 'inline-block',
+							textAlign: 'center',
+							lineHeight: fr.spacing('4v'),
+							marginLeft: '5px',
+							fontSize: '10px',
+							fontWeight: 'bold'
+						}
+					}
+			  }
+			: {}
 	}));
