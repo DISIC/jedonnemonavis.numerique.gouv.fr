@@ -44,7 +44,7 @@ const ButtonModal = (props: Props) => {
 		setCurrentAccessRight
 	} = props;
 
-	const utils = trpc.useContext();
+	const utils = trpc.useUtils();
 
 	const [email, setEmail] = React.useState<string>('');
 	const [errorStatus, setErrorStatus] = React.useState<number>();

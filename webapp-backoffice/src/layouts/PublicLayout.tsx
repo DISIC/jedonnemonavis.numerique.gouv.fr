@@ -1,37 +1,35 @@
 import Head from 'next/head';
 import { ReactNode } from 'react';
 
-import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import { Footer } from '@codegouvfr/react-dsfr/Footer';
-import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
+import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
+import { Footer } from '@codegouvfr/react-dsfr/Footer';
+import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
-import { GetServerSideProps } from 'next';
-import { trpc } from '@/src/utils/trpc';
+import { tss } from 'tss-react/dsfr';
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
 	const { pathname } = useRouter();
 
 	const { data: session } = useSession();
 
-	const { data: userRequestsResult, refetch } =
-		trpc.userRequest.getList.useQuery(
-			{
-				page: 1,
-				numberPerPage: 0,
-				displayProcessed: false
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
+	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
+		{
+			page: 1,
+			numberPerPage: 0,
+			displayProcessed: false
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
 				}
 			}
-		);
+		}
+	);
 
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
@@ -155,7 +153,9 @@ const useStyles = tss
 							display: 'inline-block',
 							textAlign: 'center',
 							lineHeight: fr.spacing('4v'),
-							marginLeft: '5px',
+							marginLeft: '8px',
+							position: 'relative',
+							bottom: '2px',
 							fontSize: '10px',
 							fontWeight: 'bold'
 						}
