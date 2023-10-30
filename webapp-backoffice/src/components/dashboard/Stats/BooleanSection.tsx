@@ -24,16 +24,23 @@ const BarVerticalChart = dynamic(
 type Props = {
 	fieldCode: string;
 	productId: number;
+	startDate: string;
+	endDate: string;
 };
 
-const BooleanSection = ({ fieldCode, productId }: Props) => {
+const BooleanSection = ({
+	fieldCode,
+	productId,
+	startDate,
+	endDate
+}: Props) => {
 	const { classes } = useStyles();
 
 	const { data: resultFieldCode } = useQuery({
 		queryKey: ['getAnswerByFieldCode', fieldCode, productId],
 		queryFn: async () => {
 			const res = await fetch(
-				`http://localhost:3001/api/open-api/answers/${fieldCode}?product_id=${productId}`
+				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 			);
 			if (res.ok) {
 				return (await res.json()) as {
@@ -51,7 +58,13 @@ const BooleanSection = ({ fieldCode, productId }: Props) => {
 	});
 
 	const { data: resultFieldCodeDetails } = useQuery({
-		queryKey: ['getAnswerByFieldCodeDetails', fieldCode, productId],
+		queryKey: [
+			'getAnswerByFieldCodeDetails',
+			fieldCode,
+			productId,
+			startDate,
+			endDate
+		],
 		queryFn: async () => {
 			const res = await fetch(
 				`http://localhost:3001/api/open-api/answers/${fieldCode}_details?product_id=${productId}`
