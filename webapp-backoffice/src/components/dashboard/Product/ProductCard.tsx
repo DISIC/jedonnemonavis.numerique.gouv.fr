@@ -26,7 +26,7 @@ const ProductCard = ({
 	entity: Entity;
 	isFavorite: boolean;
 }) => {
-	const utils = trpc.useContext();
+	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
 
