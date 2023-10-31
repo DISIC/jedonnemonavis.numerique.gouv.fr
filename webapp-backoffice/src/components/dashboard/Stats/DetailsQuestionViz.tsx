@@ -1,6 +1,7 @@
+import { useStats } from '@/src/contexts/StatsContext';
+import { ElkSimpleAnswerResponse, FieldCodeDetails } from '@/src/types/custom';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton } from '@mui/material';
-import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
@@ -13,7 +14,7 @@ const BarVerticalChart = dynamic(
 );
 
 type Props = {
-	fieldCodeMultiple: string;
+	fieldCodeMultiple: FieldCodeDetails;
 	productId: number;
 	startDate: string;
 	endDate: string;
@@ -26,6 +27,7 @@ const DetailsQuestionViz = ({
 	endDate
 }: Props) => {
 	const { classes, cx } = useStyles();
+	const { updateStatsTotals } = useStats();
 
 	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } =
 		useQuery({
@@ -41,16 +43,13 @@ const DetailsQuestionViz = ({
 					`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 				);
 				if (res.ok) {
-					return (await res.json()) as {
-						data: [
-							{
-								answer_text: string;
-								intention: AnswerIntention;
-								doc_count: number;
-							}
-						];
-						metadata: { total: number; average: number; fieldLabel: string };
-					};
+					const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
+
+					updateStatsTotals({
+						[fieldCodeMultiple]: jsonResponse.metadata.total
+					});
+
+					return jsonResponse;
 				}
 			}
 		});

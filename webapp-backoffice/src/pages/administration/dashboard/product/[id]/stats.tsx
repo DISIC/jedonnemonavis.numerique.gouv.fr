@@ -1,14 +1,19 @@
 import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
 import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
+import { useStats } from '@/src/contexts/StatsContext';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '.';
 import { useDebounce } from 'usehooks-ts';
+import { getServerSideProps } from '.';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { trpc } from '@/src/utils/trpc';
+import { Loader } from '@/src/components/ui/Loader';
+import Link from 'next/link';
 
 interface Props {
 	product: Product;
@@ -33,6 +38,9 @@ const SectionWrapper = ({
 
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
+	const { statsTotals } = useStats();
+
+	const [nbReviews, setNbReviews] = useState<number | null>(null);
 
 	const [startDate, setStartDate] = useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
@@ -43,8 +51,84 @@ const ProductStatPage = (props: Props) => {
 		new Date().toISOString().split('T')[0]
 	);
 
+	const { data: buttonsResult, isLoading: isLoadingButtons } =
+		trpc.button.getList.useQuery(
+			{
+				numberPerPage: 0,
+				page: 1,
+				product_id: product.id,
+				isTest: false
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
+	const fetchNbReviews = async () => {
+		const res = await fetch(
+			`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/reviews/list?product_id=${product.id}&page=1&numberPerPage=0`
+		);
+
+		const data = (await res.json()) as { metadata: { count: number } };
+
+		setNbReviews(data.metadata.count);
+	};
+
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
+
+	useEffect(() => {
+		fetchNbReviews();
+	}, []);
+
+	if (nbReviews === null || isLoadingButtons) {
+		return (
+			<ProductLayout product={product}>
+				<h1>Statistiques</h1>
+				<div className={fr.cx('fr-mt-20v')}>
+					<Loader />
+				</div>
+			</ProductLayout>
+		);
+	}
+
+	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
+		return (
+			<ProductLayout product={product}>
+				<h1>Statistiques</h1>
+				{buttonsResult.metadata.count === 0 ? (
+					<Alert
+						severity="info"
+						title=""
+						description={
+							<>
+								Afin de récolter les avis et produire les statistiques pour ce
+								produit, vous devez{' '}
+								<Link
+									className={fr.cx('fr-link')}
+									href={`/administration/dashboard/product/${product.id}/buttons`}
+								>
+									créer un bouton
+								</Link>
+								.
+							</>
+						}
+					/>
+				) : (
+					<Alert
+						severity="info"
+						title="Cette démarche n'a pas encore d'avis"
+						description="Une fois qu’un utilisateur a donné un avis, vous verrez une synthèse ici."
+					/>
+				)}
+			</ProductLayout>
+		);
+	}
 
 	return (
 		<ProductLayout product={product}>
@@ -81,7 +165,6 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
-					noDataText="Aucune donnée disponible pour la satisfaction usagers"
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Facilité d'usage">
@@ -90,7 +173,6 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
-					noDataText="Aucune donnée disponible pour la facilité d'usage"
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Simplicité du langage">
@@ -99,7 +181,6 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
-					noDataText="Aucune donnée disponible pour la simplicité du langage"
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Difficultés rencontrées">

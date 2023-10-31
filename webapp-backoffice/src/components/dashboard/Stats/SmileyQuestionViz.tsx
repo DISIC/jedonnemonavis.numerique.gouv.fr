@@ -1,3 +1,5 @@
+import { useStats } from '@/src/contexts/StatsContext';
+import { ElkSimpleAnswerResponse, FieldCodeSmiley } from '@/src/types/custom';
 import {
 	getIntentionFromAverage,
 	getStatsAnswerText,
@@ -6,7 +8,6 @@ import {
 } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton } from '@mui/material';
-import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
@@ -17,7 +18,7 @@ const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 });
 
 type Props = {
-	fieldCode: string;
+	fieldCode: FieldCodeSmiley;
 	productId: number;
 	startDate: string;
 	endDate: string;
@@ -32,6 +33,7 @@ const SmileyQuestionViz = ({
 	displayFieldLabel = false
 }: Props) => {
 	const { classes } = useStyles();
+	const { updateStatsTotals } = useStats();
 
 	const { data: resultFieldCode, isLoading } = useQuery({
 		queryKey: [
@@ -46,16 +48,13 @@ const SmileyQuestionViz = ({
 				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 			);
 			if (res.ok) {
-				return (await res.json()) as {
-					data: [
-						{
-							answer_text: string;
-							intention: AnswerIntention;
-							doc_count: number;
-						}
-					];
-					metadata: { total: number; average: number; fieldLabel: string };
-				};
+				const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
+
+				updateStatsTotals({
+					[fieldCode]: jsonResponse.metadata.total
+				});
+
+				return jsonResponse;
 			}
 		}
 	});
