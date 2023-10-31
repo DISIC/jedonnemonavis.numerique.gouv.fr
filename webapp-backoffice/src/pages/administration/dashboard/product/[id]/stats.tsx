@@ -1,5 +1,6 @@
-import BooleanSection from '@/src/components/dashboard/Stats/BooleanSection';
-import SmileySection from '@/src/components/dashboard/Stats/SmileySection';
+import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
+import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
+import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -81,11 +82,12 @@ const ProductStatPage = (props: Props) => {
 				</div>
 			</div>
 			<SectionWrapper title="Satisfaction usagers">
-				<SmileySection
+				<SmileyQuestionViz
 					fieldCode="satisfaction"
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+					noDataText="Aucune donnée disponible pour la satisfaction usagers"
 				/>
 				<ReviewAverageInterval
 					fieldCode="satisfaction"
@@ -95,46 +97,70 @@ const ProductStatPage = (props: Props) => {
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Facilité d'usage">
-				<SmileySection
+				<SmileyQuestionViz
 					fieldCode="easy"
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+					noDataText="Aucune donnée disponible pour la facilité d'usage"
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Simplicité du langage">
-				<SmileySection
+				<SmileyQuestionViz
 					fieldCode="comprehension"
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+					noDataText="Aucune donnée disponible pour la simplicité du langage"
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Difficultés rencontrées">
-				<BooleanSection
-					fieldCode="difficulties"
-					fieldCodeMultiple="difficulties_details"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<BooleanQuestionViz
+							fieldCode="difficulties"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<DetailsQuestionViz
+							fieldCodeMultiple="difficulties_details"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+				</div>
 			</SectionWrapper>
 			<SectionWrapper title="Aide joignable et efficace">
-				<BooleanSection
-					fieldCode="contact"
-					fieldCodeMultiple="contact_reached"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
-				<SmileySection
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<BooleanQuestionViz
+							fieldCode="contact"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<DetailsQuestionViz
+							fieldCodeMultiple="contact_reached"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+				</div>
+				<SmileyQuestionViz
 					fieldCode="contact_satisfaction"
 					displayFieldLabel={true}
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 				/>
-				<BooleanSection
+				<DetailsQuestionViz
 					fieldCodeMultiple="contact_channels"
 					productId={product.id}
 					startDate={debouncedStartDate}
@@ -142,13 +168,24 @@ const ProductStatPage = (props: Props) => {
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Niveau d’autonomie">
-				<BooleanSection
-					fieldCode="help"
-					fieldCodeMultiple="help_details"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<BooleanQuestionViz
+							fieldCode="help"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+						<DetailsQuestionViz
+							fieldCodeMultiple="help_details"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					</div>
+				</div>
 			</SectionWrapper>
 		</ProductLayout>
 	);
