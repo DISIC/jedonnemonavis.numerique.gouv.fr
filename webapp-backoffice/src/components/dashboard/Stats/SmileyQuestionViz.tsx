@@ -5,13 +5,13 @@ import {
 	getStatsIcon
 } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { Skeleton } from '@mui/material';
 import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
-import { useRouter } from 'next/router';
-import { Skeleton } from '@mui/material';
 
 const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
@@ -22,14 +22,16 @@ type Props = {
 	productId: number;
 	startDate: string;
 	endDate: string;
+	noDataText?: string;
 	displayFieldLabel?: boolean;
 };
 
-const SmileySection = ({
+const SmileyQuestionViz = ({
 	fieldCode,
 	productId,
 	startDate,
 	endDate,
+	noDataText = 'Aucune donnée',
 	displayFieldLabel = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -61,37 +63,15 @@ const SmileySection = ({
 		}
 	});
 
-	const currentAnswerTextFromAverage = getStatsAnswerText({
-		buckets: resultFieldCode?.data || [],
-		intention: getIntentionFromAverage(
-			resultFieldCode?.metadata.average as number
-		)
-	});
-
-	const barChartData =
-		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
-			name: intention,
-			value: doc_count,
-			answer_text
-		})) || [];
-
-	if (isLoading) {
+	if (isLoading || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
 				<Skeleton variant="rectangular" width={232} height="inherit" />
-				<div style={{ flex: 1 }}>
+				<div className={classes.skeleton}>
 					<Skeleton variant="text" width="75%" height={40} />
 					<Skeleton variant="text" width="25%" height={25} />
-					<div style={{ display: 'flex', marginTop: '2rem' }}>
-						<div
-							style={{
-								display: 'flex',
-								flexDirection: 'column',
-								width: '100%',
-								gap: '0.5rem',
-								flex: 1
-							}}
-						>
+					<div className={classes.subSkeleton}>
+						<div>
 							<Skeleton variant="text" width="40%" height={45} />
 							<Skeleton variant="text" width="45%" height={45} />
 							<Skeleton variant="text" width="40%" height={45} />
@@ -103,59 +83,53 @@ const SmileySection = ({
 		);
 	}
 
+	if (!resultFieldCode.metadata.total) {
+		return <Alert description={noDataText} severity="info" title="" />;
+	}
+
+	const currentAnswerTextFromAverage = getStatsAnswerText({
+		buckets: resultFieldCode.data || [],
+		intention: getIntentionFromAverage(
+			resultFieldCode.metadata.average as number
+		)
+	});
+
+	const barChartData =
+		resultFieldCode.data.map(({ answer_text, intention, doc_count }) => ({
+			name: intention,
+			value: doc_count,
+			answer_text
+		})) || [];
+
 	return (
 		<div className={classes.wrapperSection}>
 			{displayFieldLabel && (
 				<h4 className={fr.cx('fr-mb-0')}>
-					{resultFieldCode?.metadata.fieldLabel}
+					{resultFieldCode.metadata.fieldLabel}
 				</h4>
 			)}
 			<div className={classes.mainSection}>
 				<AverageCard
-					average={resultFieldCode?.metadata.average as number}
+					average={resultFieldCode.metadata.average as number}
 					answerText={currentAnswerTextFromAverage}
 				/>
-				<div
-					style={{
-						display: 'flex',
-						flexDirection: 'column',
-						flex: 1,
-						width: '100%'
-					}}
-				>
+				<div className={classes.container}>
 					<h4 className={fr.cx('fr-mb-0')}>Répartition des avis</h4>
-					<p>{resultFieldCode?.metadata.total} avis total</p>
-					<div style={{ display: 'flex' }}>
-						<div
-							style={{
-								width: '100%',
-								display: 'flex',
-								flexDirection: 'column',
-								gap: '0.75rem'
-							}}
-						>
-							{resultFieldCode?.data.map(
+					<p>{resultFieldCode.metadata.total} avis total</p>
+					<div className={classes.dataContainer}>
+						<div>
+							{resultFieldCode.data.map(
 								({ answer_text, intention, doc_count }) => (
-									<div
-										key={answer_text}
-										style={{ display: 'flex', gap: '0.25rem' }}
-									>
+									<div key={answer_text} className={classes.itemData}>
 										<i
 											className={fr.cx(getStatsIcon({ intention }))}
 											style={{ color: getStatsColor({ intention }) }}
 										/>
-										<div
-											style={{
-												display: 'flex',
-												flexDirection: 'column'
-											}}
-										>
+										<div className={classes.itemDataText}>
 											<span style={{ color: getStatsColor({ intention }) }}>
 												{answer_text}
 											</span>
-											<span
-												style={{ marginTop: '0.15rem', fontSize: '0.875rem' }}
-											>
+											<span className={classes.total}>
 												{(
 													(doc_count / resultFieldCode.metadata.total) *
 													100
@@ -185,7 +159,40 @@ const useStyles = tss.create({
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: '3rem'
+	},
+	container: {
+		display: 'flex',
+		flexDirection: 'column',
+		flex: 1,
+		width: '100%'
+	},
+	dataContainer: {
+		display: 'flex',
+		['& > div']: {
+			width: '100%',
+			display: 'flex',
+			flexDirection: 'column',
+			gap: '0.75rem'
+		}
+	},
+	itemData: { display: 'flex', gap: '0.25rem' },
+	itemDataText: {
+		display: 'flex',
+		flexDirection: 'column'
+	},
+	total: { marginTop: '0.15rem', fontSize: '0.875rem' },
+	skeleton: { flex: 1 },
+	subSkeleton: {
+		display: 'flex',
+		marginTop: '2rem',
+		['& > div']: {
+			display: 'flex',
+			flexDirection: 'column',
+			width: '100%',
+			gap: '0.5rem',
+			flex: 1
+		}
 	}
 });
 
-export default SmileySection;
+export default SmileyQuestionViz;
