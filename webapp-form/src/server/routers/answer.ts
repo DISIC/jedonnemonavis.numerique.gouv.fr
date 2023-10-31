@@ -125,6 +125,8 @@ export const answerRouter = router({
         );
       }
 
+      console.log({ data: buckets, metadata });
+
       return { data: buckets, metadata };
     })
 });

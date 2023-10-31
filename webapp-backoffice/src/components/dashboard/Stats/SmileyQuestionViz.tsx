@@ -5,7 +5,6 @@ import {
 	getStatsIcon
 } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Skeleton } from '@mui/material';
 import { AnswerIntention } from '@prisma/client';
 import { useQuery } from '@tanstack/react-query';
@@ -22,7 +21,6 @@ type Props = {
 	productId: number;
 	startDate: string;
 	endDate: string;
-	noDataText?: string;
 	displayFieldLabel?: boolean;
 };
 
@@ -31,7 +29,6 @@ const SmileyQuestionViz = ({
 	productId,
 	startDate,
 	endDate,
-	noDataText = 'Aucune donnée',
 	displayFieldLabel = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -81,10 +78,6 @@ const SmileyQuestionViz = ({
 				</div>
 			</div>
 		);
-	}
-
-	if (!resultFieldCode.metadata.total) {
-		return <Alert description={noDataText} severity="info" title="" />;
 	}
 
 	const currentAnswerTextFromAverage = getStatsAnswerText({

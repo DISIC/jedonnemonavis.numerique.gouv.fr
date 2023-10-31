@@ -55,13 +55,7 @@ const DetailsQuestionViz = ({
 			}
 		});
 
-	const barChartDataDetails =
-		resultFieldCodeDetails?.data.map(({ answer_text, doc_count }) => ({
-			name: answer_text,
-			value: doc_count
-		})) || [];
-
-	if (isLoadingFieldCodeDetails) {
+	if (isLoadingFieldCodeDetails || !resultFieldCodeDetails) {
 		return (
 			<div>
 				<Skeleton variant="text" width="75%" height={40} />
@@ -76,14 +70,20 @@ const DetailsQuestionViz = ({
 		);
 	}
 
+	const barChartDataDetails =
+		resultFieldCodeDetails.data.map(({ answer_text, doc_count }) => ({
+			name: answer_text,
+			value: doc_count
+		})) || [];
+
 	return (
 		<div className={fr.cx('fr-grid-row')}>
 			<div className={cx(classes.dataContainer, fr.cx('fr-col-12'))}>
 				<h4 className={fr.cx('fr-mb-0')}>
-					{resultFieldCodeDetails?.metadata.fieldLabel}
+					{resultFieldCodeDetails.metadata.fieldLabel}
 				</h4>
 				<p className={fr.cx('fr-mb-0', 'fr-hint-text', 'fr-text--md')}>
-					{resultFieldCodeDetails?.metadata.total} réponses total
+					{resultFieldCodeDetails.metadata.total} réponses total
 				</p>
 				<BarVerticalChart data={barChartDataDetails} kind="bar" />
 			</div>

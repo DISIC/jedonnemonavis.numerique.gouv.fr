@@ -51,14 +51,7 @@ const BooleanQuestionViz = ({
 		}
 	});
 
-	const barChartData =
-		resultFieldCode?.data.map(({ answer_text, intention, doc_count }) => ({
-			name: intention,
-			value: doc_count,
-			answer_text
-		})) || [];
-
-	if (isLoadingFieldCode) {
+	if (isLoadingFieldCode || !resultFieldCode) {
 		return (
 			<div>
 				<Skeleton variant="text" width="75%" height={40} />
@@ -75,17 +68,24 @@ const BooleanQuestionViz = ({
 		);
 	}
 
+	const barChartData =
+		resultFieldCode.data.map(({ answer_text, intention, doc_count }) => ({
+			name: intention,
+			value: doc_count,
+			answer_text
+		})) || [];
+
 	return (
 		<div className={classes.container}>
 			<h4 className={fr.cx('fr-mb-0')}>
-				{resultFieldCode?.metadata.fieldLabel}
+				{resultFieldCode.metadata.fieldLabel}
 			</h4>
 			<p className={fr.cx('fr-hint-text', 'fr-text--md')}>
-				{resultFieldCode?.metadata.total} avis total
+				{resultFieldCode.metadata.total} avis total
 			</p>
 			<div className={classes.dataContainer}>
 				<div>
-					{resultFieldCode?.data.map(({ answer_text, doc_count }) => (
+					{resultFieldCode.data.map(({ answer_text, doc_count }) => (
 						<div key={answer_text} className={classes.dataAnswers}>
 							<span className={classes.blueColor}>{answer_text}</span>
 							<span className={classes.dataText}>
