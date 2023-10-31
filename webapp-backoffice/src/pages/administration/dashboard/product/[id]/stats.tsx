@@ -4,10 +4,16 @@ import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import { useDebounce } from 'usehooks-ts';
+import dynamic from 'next/dynamic';
+import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
+
+const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
+	ssr: false
+});
 
 interface Props {
 	product: Product;
@@ -80,6 +86,12 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+				/>
+				<ReviewAverageInterval
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={startDate}
+					endDate={endDate}
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Facilité d'usage">

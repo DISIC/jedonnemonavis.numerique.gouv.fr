@@ -13,7 +13,7 @@ import AverageCard from './AverageCard';
 import { useRouter } from 'next/router';
 import { Skeleton } from '@mui/material';
 
-const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
+const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
 });
 
@@ -167,7 +167,7 @@ const SmileySection = ({
 								)
 							)}
 						</div>
-						<BarChart kind="pie" data={barChartData} />
+						<PieChart kind="pie" data={barChartData} />
 					</div>
 				</div>
 			</div>

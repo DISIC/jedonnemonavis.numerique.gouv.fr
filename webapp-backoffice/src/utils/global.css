@@ -1,0 +1,5 @@
+.recharts-wrapper
+	.recharts-cartesian-grid-horizontal
+	.review-average-line:last-child {
+	stroke-opacity: 0 !important;
+}
