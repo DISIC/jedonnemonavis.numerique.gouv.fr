@@ -26,7 +26,7 @@ export const answerRouter = router({
         metadata: z.object({
           total: z.number(),
           average: z.number(),
-          fieldLabel: z.string()
+          fieldLabel: z.string().optional()
         })
       })
     )
@@ -74,10 +74,13 @@ export const answerRouter = router({
       const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
         ?.buckets as Buckets;
 
-      let metadata = {} as {
+      let metadata = {
+        total: 0,
+        average: 0
+      } as {
         total: number;
         average: number;
-        fieldLabel: string;
+        fieldLabel?: string;
       };
 
       metadata.total = (fieldCodeAggs.hits?.total as any)?.value;
@@ -112,13 +115,15 @@ export const answerRouter = router({
           return 0;
         });
 
-      metadata.average = Number(
-        (
-          buckets.reduce((acc, curr) => {
-            return acc + curr.answer_score * curr.doc_count;
-          }, 0) / metadata.total
-        ).toFixed(1)
-      );
+      if (!!metadata.total) {
+        metadata.average = Number(
+          (
+            buckets.reduce((acc, curr) => {
+              return acc + curr.answer_score * curr.doc_count;
+            }, 0) / metadata.total
+          ).toFixed(1)
+        );
+      }
 
       return { data: buckets, metadata };
     })
