@@ -1,16 +1,16 @@
-import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
-import { FormSecondBlock } from "@/src/components/form/layouts/FormSecondBlock";
-import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
-import { fr } from "@codegouvfr/react-dsfr";
-import { useTranslation } from "next-i18next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { GetServerSideProps } from "next/types";
-import { useState } from "react";
-import { tss } from "tss-react/dsfr";
-import { trpc } from "../utils/trpc";
-import { AnswerIntention, Prisma } from "@prisma/client";
-import { firstSection, secondSection } from "../utils/form";
-import Alert from "@codegouvfr/react-dsfr/Alert";
+import { FormFirstBlock } from '@/src/components/form/layouts/FormFirstBlock';
+import { FormSecondBlock } from '@/src/components/form/layouts/FormSecondBlock';
+import { FormField, Opinion, Product, RadioOption } from '@/src/utils/types';
+import { fr } from '@codegouvfr/react-dsfr';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetServerSideProps } from 'next/types';
+import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { trpc } from '../utils/trpc';
+import { AnswerIntention, Prisma } from '@prisma/client';
+import { firstSection, secondSection } from '../utils/form';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 type JDMAFormProps = {
   product: Product;
@@ -19,44 +19,48 @@ type JDMAFormProps = {
 export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
-  const { t } = useTranslation("common");
+  const { t } = useTranslation('common');
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   const createReview = trpc.review.create.useMutation({
-    onSuccess: () => setIsFormSubmitted(true),
+    onSuccess: () => setIsFormSubmitted(true)
   });
 
   const getSelectedOption = (
     field: FormField,
     value: number
   ): { label: string; intention: AnswerIntention; value: number } => {
-    if (field.kind === "radio" || field.kind == "checkbox") {
+    if (field.kind === 'radio' || field.kind == 'checkbox') {
       const selectedOption = field.options.find(
-        (option) => option.value === value
+        option => option.value === value
       ) as RadioOption;
 
       return {
         label: t(selectedOption.label as string, {
-          lng: "fr",
+          lng: 'fr'
         }),
         value: selectedOption.value,
-        intention: selectedOption.intention,
+        intention: selectedOption.intention
       };
-    } else if (field.kind === "smiley") {
+    } else if (field.kind === 'smiley') {
       const smileyIntention =
-        value === 1 ? "bad" : value === 2 ? "medium" : "good";
-      const smileyLabel = t(`smileys.${smileyIntention}`, { lng: "fr" });
+        value === field.values.bad
+          ? 'bad'
+          : value === field.values.medium
+          ? 'medium'
+          : 'good';
+      const smileyLabel = t(`smileys.${smileyIntention}`, { lng: 'fr' });
       return {
         label: smileyLabel,
         intention: smileyIntention,
-        value,
+        value
       };
     } else {
       return {
-        label: "",
-        intention: "good",
-        value: 0,
+        label: '',
+        intention: 'good',
+        value: 0
       };
     }
   };
@@ -65,38 +69,38 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
       ([key, value]) => {
         const fieldInSection = (
-          key === "satisfaction" ? firstSection : secondSection
-        ).find((field) => field.name === key) as FormField;
+          key === 'satisfaction' ? firstSection : secondSection
+        ).find(field => field.name === key) as FormField;
 
         let tmpAnswer = {
           field_code: fieldInSection.name,
           field_label: t(fieldInSection.label, {
-            lng: "fr",
+            lng: 'fr'
           }) as string,
           kind:
-            fieldInSection.kind === "smiley"
-              ? "radio"
-              : fieldInSection.kind !== "input-text" &&
-                fieldInSection.kind !== "input-textarea"
+            fieldInSection.kind === 'smiley'
+              ? 'radio'
+              : fieldInSection.kind !== 'input-text' &&
+                fieldInSection.kind !== 'input-textarea'
               ? fieldInSection.kind
-              : "text",
-          review: {},
+              : 'text',
+          review: {}
         } as Prisma.AnswerCreateInput;
 
-        if (typeof value == "number") {
+        if (typeof value == 'number') {
           const selectedOption = getSelectedOption(fieldInSection, value);
           tmpAnswer.answer_text = selectedOption.label;
           tmpAnswer.intention = selectedOption.intention;
           tmpAnswer.answer_item_id = selectedOption.value;
           return tmpAnswer;
-        } else if (typeof value == "string") {
+        } else if (typeof value == 'string') {
           tmpAnswer.answer_text = value;
-          tmpAnswer.intention = "neutral";
+          tmpAnswer.intention = 'neutral';
           tmpAnswer.answer_item_id = 0;
           return tmpAnswer;
         } else if (Array.isArray(value)) {
           let tmpAnswers = [] as Prisma.AnswerCreateInput[];
-          value.map((value) => {
+          value.map(value => {
             let selectedOption = getSelectedOption(fieldInSection, value);
             tmpAnswer.answer_text = selectedOption.label;
             tmpAnswer.intention = selectedOption.intention;
@@ -114,9 +118,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       review: {
         product_id: product.id,
         button_id: 1,
-        form_id: 1,
+        form_id: 1
       },
-      answers,
+      answers
     });
   };
 
@@ -135,7 +139,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     help: undefined,
     help_details: [],
     help_details_verbatim: undefined,
-    verbatim: undefined,
+    verbatim: undefined
   });
 
   return (
@@ -145,31 +149,31 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           {!isFormSubmitted ? (
             opinion.satisfaction ? (
               <h1>
-                {t("second_block.title")}
+                {t('second_block.title')}
                 <br />
-                {t("second_block.subtitle")}
+                {t('second_block.subtitle')}
               </h1>
             ) : (
-              <h1>{t("first_block.title")}</h1>
+              <h1>{t('first_block.title')}</h1>
             )
           ) : (
-            <h1>{t("success_block.title")}</h1>
+            <h1>{t('success_block.title')}</h1>
           )}
         </div>
         <div
           className={cx(
             classes.mainContainer,
-            fr.cx("fr-container--fluid", "fr-container")
+            fr.cx('fr-container--fluid', 'fr-container')
           )}
         >
-          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+          <div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+            <div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
               <div className={cx(classes.formSection)}>
                 {!isFormSubmitted ? (
                   opinion.satisfaction ? (
                     <FormSecondBlock
                       opinion={opinion}
-                      onSubmit={(result) => {
+                      onSubmit={result => {
                         setOpinion({ ...result });
                         handleSubmitReview(result);
                       }}
@@ -178,18 +182,18 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                     <FormFirstBlock
                       opinion={opinion}
                       product={product}
-                      onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
+                      onSubmit={tmpOpinion => setOpinion({ ...tmpOpinion })}
                     />
                   )
                 ) : (
                   <div>
                     <h1 className={classes.titleSection}>
-                      {t("success_block.title")}
+                      {t('success_block.title')}
                     </h1>
                     <div>
                       <Alert
                         severity="success"
-                        description={t("success_block.alert")}
+                        description={t('success_block.alert')}
                         small
                       />
                     </div>
@@ -209,7 +213,7 @@ export const getServerSideProps: GetServerSideProps<{
 }> = async ({ params, locale }) => {
   if (!params?.id) {
     return {
-      notFound: true,
+      notFound: true
     };
   }
 
@@ -224,19 +228,19 @@ export const getServerSideProps: GetServerSideProps<{
 
     if (!product) {
       return {
-        notFound: true,
+        notFound: true
       };
     }
 
     return {
       props: {
         product,
-        ...(await serverSideTranslations(locale ?? "fr", ["common"])),
-      },
+        ...(await serverSideTranslations(locale ?? 'fr', ['common']))
+      }
     };
   } else {
     return {
-      notFound: true,
+      notFound: true
     };
   }
 };
@@ -247,40 +251,40 @@ const useStyles = tss
   .withParams()
   .create(() => ({
     mainContainer: {
-      overflow: "inherit",
+      overflow: 'inherit'
     },
     blueSection: {
       backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-      ...fr.spacing("padding", { topBottom: "6v", rightLeft: "10v" }),
+      ...fr.spacing('padding', { topBottom: '6v', rightLeft: '10v' }),
       h1: {
-        textAlign: "center",
-        fontSize: "2.5rem",
+        textAlign: 'center',
+        fontSize: '2.5rem',
         margin: 0,
         color: fr.colors.decisions.background.flat.blueFrance.default,
-        [fr.breakpoints.up("md")]: {
-          display: "none",
-        },
+        [fr.breakpoints.up('md')]: {
+          display: 'none'
+        }
       },
-      [fr.breakpoints.up("md")]: {
-        height: `${blueSectionPxHeight}px`,
-      },
+      [fr.breakpoints.up('md')]: {
+        height: `${blueSectionPxHeight}px`
+      }
     },
     titleSection: {
-      [fr.breakpoints.down("md")]: {
-        display: "none",
-      },
+      [fr.breakpoints.down('md')]: {
+        display: 'none'
+      }
     },
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,
-      ...fr.spacing("padding", { topBottom: "4v", rightLeft: "6v" }),
+      ...fr.spacing('padding', { topBottom: '4v', rightLeft: '6v' }),
       h1: {
-        textAlign: "center",
+        textAlign: 'center',
         color: fr.colors.decisions.background.flat.blueFrance.default,
-        ...fr.spacing("margin", { bottom: "8v" }),
+        ...fr.spacing('margin', { bottom: '8v' })
       },
-      [fr.breakpoints.up("md")]: {
+      [fr.breakpoints.up('md')]: {
         transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-        ...fr.spacing("padding", { topBottom: "8v", rightLeft: "18v" }),
-      },
-    },
+        ...fr.spacing('padding', { topBottom: '8v', rightLeft: '18v' })
+      }
+    }
   }));
