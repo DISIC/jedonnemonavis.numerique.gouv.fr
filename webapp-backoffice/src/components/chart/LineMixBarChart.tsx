@@ -14,7 +14,7 @@ import { AnswerIntention } from '@prisma/client';
 const CustomYAxisTick = (props: any) => {
 	const { x, y, payload } = props;
 
-	// if (payload.value === 12) return null;
+	if (payload.value === 12) return null;
 
 	return (
 		<g transform={`translate(${x},${y})`}>
