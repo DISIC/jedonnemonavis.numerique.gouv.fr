@@ -1,6 +1,6 @@
 import { AnswerIntention } from '@prisma/client';
 
-export type FieldCodeBoolean = 'difficulties' | 'help' | 'contact';
+export type FieldCodeBoolean = 'difficulties' | 'help' | 'contact_reached';
 export type FieldCodeSmiley =
 	| 'satisfaction'
 	| 'easy'
@@ -8,7 +8,7 @@ export type FieldCodeSmiley =
 	| 'contact_satisfaction';
 export type FieldCodeDetails =
 	| 'difficulties_details'
-	| 'contact_reached'
+	| 'contact'
 	| 'contact_channels'
 	| 'help_details';
 

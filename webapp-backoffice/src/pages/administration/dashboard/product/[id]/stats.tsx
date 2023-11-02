@@ -23,9 +23,13 @@ interface Props {
 
 const SectionWrapper = ({
 	title,
+	count,
+	noDataText = 'Aucune donnée',
 	children
 }: {
 	title: string;
+	count?: number;
+	noDataText?: string;
 	children: React.ReactNode;
 }) => {
 	const { classes, cx } = useStyles();
@@ -33,7 +37,11 @@ const SectionWrapper = ({
 	return (
 		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
 			<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
-			<>{children}</>
+			{count === 0 ? (
+				<Alert title="" description={noDataText} severity="info" />
+			) : (
+				children
+			)}
 		</div>
 	);
 };
@@ -132,6 +140,8 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
+	console.log(statsTotals);
+
 	return (
 		<ProductLayout product={product}>
 			<h1>Statistiques</h1>
@@ -161,7 +171,11 @@ const ProductStatPage = (props: Props) => {
 					/>
 				</div>
 			</div>
-			<SectionWrapper title="Satisfaction usagers">
+			<SectionWrapper
+				title="Satisfaction usagers"
+				count={statsTotals.satisfaction}
+				noDataText="Aucune donnée pour la satisfaction usagers"
+			>
 				<SmileyQuestionViz
 					fieldCode="satisfaction"
 					productId={product.id}
@@ -181,7 +195,11 @@ const ProductStatPage = (props: Props) => {
 					endDate={endDate}
 				/>
 			</SectionWrapper>
-			<SectionWrapper title="Facilité d'usage">
+			<SectionWrapper
+				title="Facilité d'usage"
+				count={statsTotals.easy}
+				noDataText="Aucune donnée pour la facilité d'usage"
+			>
 				<SmileyQuestionViz
 					fieldCode="easy"
 					productId={product.id}
@@ -189,7 +207,11 @@ const ProductStatPage = (props: Props) => {
 					endDate={debouncedEndDate}
 				/>
 			</SectionWrapper>
-			<SectionWrapper title="Simplicité du langage">
+			<SectionWrapper
+				title="Simplicité du langage"
+				count={statsTotals.comprehension}
+				noDataText="Aucune donnée pour la simplicité du langage"
+			>
 				<SmileyQuestionViz
 					fieldCode="comprehension"
 					productId={product.id}
@@ -197,9 +219,19 @@ const ProductStatPage = (props: Props) => {
 					endDate={debouncedEndDate}
 				/>
 			</SectionWrapper>
-			<SectionWrapper title="Difficultés rencontrées">
+			<SectionWrapper
+				title="Difficultés rencontrées"
+				count={statsTotals.difficulties}
+				noDataText="Aucune donnée pour les difficultés rencontrées"
+			>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+					<div
+						className={
+							statsTotals.difficulties_details
+								? fr.cx('fr-col-6', 'fr-pr-6v')
+								: fr.cx('fr-col-12')
+						}
+					>
 						<BooleanQuestionViz
 							fieldCode="difficulties"
 							productId={product.id}
@@ -207,52 +239,80 @@ const ProductStatPage = (props: Props) => {
 							endDate={debouncedEndDate}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-						<DetailsQuestionViz
-							fieldCodeMultiple="difficulties_details"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					</div>
+					{statsTotals.difficulties_details !== 0 && (
+						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+							<DetailsQuestionViz
+								fieldCodeMultiple="difficulties_details"
+								productId={product.id}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</div>
+					)}
 				</div>
 			</SectionWrapper>
-			<SectionWrapper title="Aide joignable et efficace">
+			<SectionWrapper
+				title="Aide joignable et efficace"
+				count={statsTotals.contact}
+				noDataText="Aucune donnée pour l'aide joignable et efficace"
+			>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-						<BooleanQuestionViz
-							fieldCode="contact"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					</div>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+					<div
+						className={
+							statsTotals.contact_reached
+								? fr.cx('fr-col-6', 'fr-pr-6v')
+								: fr.cx('fr-col-12')
+						}
+					>
 						<DetailsQuestionViz
-							fieldCodeMultiple="contact_reached"
+							fieldCodeMultiple="contact"
 							productId={product.id}
 							startDate={debouncedStartDate}
 							endDate={debouncedEndDate}
 						/>
 					</div>
+					{statsTotals.contact_reached !== 0 && (
+						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+							<BooleanQuestionViz
+								fieldCode="contact_reached"
+								productId={product.id}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</div>
+					)}
 				</div>
-				<SmileyQuestionViz
-					fieldCode="contact_satisfaction"
-					displayFieldLabel={true}
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
-				<DetailsQuestionViz
-					fieldCodeMultiple="contact_channels"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
+				{statsTotals.contact_satisfaction !== 0 && (
+					<SmileyQuestionViz
+						fieldCode="contact_satisfaction"
+						displayFieldLabel={true}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+				)}
+				{statsTotals.contact_channels !== 0 && (
+					<DetailsQuestionViz
+						fieldCodeMultiple="contact_channels"
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+				)}
 			</SectionWrapper>
-			<SectionWrapper title="Niveau d’autonomie">
+			<SectionWrapper
+				title="Niveau d’autonomie"
+				count={statsTotals.help}
+				noDataText="Aucune donnée pour le niveau d'autonomie"
+			>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+					<div
+						className={
+							statsTotals.help_details
+								? fr.cx('fr-col-6', 'fr-pr-6v')
+								: fr.cx('fr-col-12')
+						}
+					>
 						<BooleanQuestionViz
 							fieldCode="help"
 							productId={product.id}
@@ -260,14 +320,16 @@ const ProductStatPage = (props: Props) => {
 							endDate={debouncedEndDate}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-						<DetailsQuestionViz
-							fieldCodeMultiple="help_details"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					</div>
+					{statsTotals.help_details !== 0 && (
+						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+							<DetailsQuestionViz
+								fieldCodeMultiple="help_details"
+								productId={product.id}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</div>
+					)}
 				</div>
 			</SectionWrapper>
 		</ProductLayout>
