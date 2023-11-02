@@ -59,8 +59,13 @@ const PieChartComponent = ({
 	};
 
 	return (
-		<div style={{ position: 'relative', marginTop: 'auto' }}>
-			<PieChart width={width} height={height}>
+		<div
+			style={{
+				position: 'relative',
+				marginTop: 'auto'
+			}}
+		>
+			<PieChart width={width} height={height} style={{ marginLeft: 'auto' }}>
 				<Pie
 					data={data}
 					cx={width / 2}
