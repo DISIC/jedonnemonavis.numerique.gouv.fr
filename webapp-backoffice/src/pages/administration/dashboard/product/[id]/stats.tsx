@@ -15,6 +15,7 @@ import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
 import Link from 'next/link';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
+import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 
 interface Props {
 	product: Product;
@@ -168,6 +169,12 @@ const ProductStatPage = (props: Props) => {
 					endDate={debouncedEndDate}
 				/>
 				<ReviewAverageInterval
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={startDate}
+					endDate={endDate}
+				/>
+				<ReviewAverage
 					fieldCode="satisfaction"
 					productId={product.id}
 					startDate={startDate}

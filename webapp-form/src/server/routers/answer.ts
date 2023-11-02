@@ -158,6 +158,7 @@ export const answerRouter = router({
         ),
         metadata: z.object({
           total: z.number(),
+          average: z.number(),
         }),
       })
     )
@@ -195,7 +196,7 @@ export const answerRouter = router({
             date_histogram: {
               field: "created_at",
               calendar_interval: "month",
-              format: "yyyy-MM-dd",
+              format: "MM/yy",
             },
             aggs: {
               term: {
@@ -215,7 +216,10 @@ export const answerRouter = router({
         fieldCodeIntervalAggs?.aggregations?.count_per_month as any
       )?.buckets as BucketsInside;
 
-      let metadata = { total: 0 } as { total: number };
+      let metadata = { total: 0, average: 0 } as {
+        total: number;
+        average: number;
+      };
 
       let returnValue: Record<
         string,
@@ -225,8 +229,11 @@ export const answerRouter = router({
           doc_count: number;
         }>
       > = {};
+      let bucketsAverage: number[] = [];
 
       tmpBuckets.forEach((bucketInterval) => {
+        let currentBucketTotal = 0;
+
         if (!returnValue[bucketInterval.key_as_string])
           returnValue[bucketInterval.key_as_string] = [];
 
@@ -234,6 +241,7 @@ export const answerRouter = router({
           const [answerText, intention] = bucket.key.split("_");
 
           metadata.total += bucket.doc_count;
+          currentBucketTotal += bucket.doc_count;
 
           returnValue[bucketInterval.key_as_string].push({
             answer_text: answerText,
@@ -241,7 +249,17 @@ export const answerRouter = router({
             doc_count: bucket.doc_count,
           });
         });
+
+        if (currentBucketTotal !== 0) bucketsAverage.push(currentBucketTotal);
       });
+
+      metadata.average = Number(
+        (
+          bucketsAverage.reduce((acc, curr) => {
+            return acc + curr;
+          }, 0) / bucketsAverage.length
+        ).toFixed(1)
+      );
 
       return { data: returnValue, metadata };
     }),
