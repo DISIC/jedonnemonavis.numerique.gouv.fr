@@ -33,7 +33,7 @@ const SmileyQuestionViz = ({
 	displayFieldLabel = false
 }: Props) => {
 	const { classes } = useStyles();
-	const { updateStatsTotals } = useStats();
+	const { statsTotals, updateStatsTotals } = useStats();
 
 	const { data: resultFieldCode, isLoading } = useQuery({
 		queryKey: [
@@ -92,6 +92,8 @@ const SmileyQuestionViz = ({
 			value: doc_count,
 			answer_text
 		})) || [];
+
+	if (statsTotals[fieldCode] === 0) return;
 
 	return (
 		<div className={classes.wrapperSection}>

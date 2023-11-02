@@ -27,7 +27,7 @@ const DetailsQuestionViz = ({
 	endDate
 }: Props) => {
 	const { classes, cx } = useStyles();
-	const { updateStatsTotals } = useStats();
+	const { statsTotals, updateStatsTotals } = useStats();
 
 	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } =
 		useQuery({
@@ -74,6 +74,8 @@ const DetailsQuestionViz = ({
 			name: answer_text,
 			value: doc_count
 		})) || [];
+
+	if (statsTotals[fieldCodeMultiple] === 0) return;
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>

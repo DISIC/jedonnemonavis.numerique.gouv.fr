@@ -24,7 +24,7 @@ const BooleanQuestionViz = ({
 	endDate
 }: Props) => {
 	const { classes, cx } = useStyles();
-	const { updateStatsTotals } = useStats();
+	const { statsTotals, updateStatsTotals } = useStats();
 
 	const { data: resultFieldCode, isLoading: isLoadingFieldCode } = useQuery({
 		queryKey: [
@@ -73,6 +73,8 @@ const BooleanQuestionViz = ({
 			value: doc_count,
 			answer_text
 		})) || [];
+
+	if (statsTotals[fieldCode] === 0) return;
 
 	return (
 		<div className={classes.container}>
