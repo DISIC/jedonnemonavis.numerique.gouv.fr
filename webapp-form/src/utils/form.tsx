@@ -1,303 +1,303 @@
-import { FormField } from "./types";
+import { FormField } from './types';
 
 export const firstSection: FormField[] = [
   {
-    name: "satisfaction",
-    kind: "smiley",
-    label: "fields.satisfaction.label",
-    hint: "fields.satisfaction.hint",
+    name: 'satisfaction',
+    kind: 'smiley',
+    label: 'fields.satisfaction.label',
+    hint: 'fields.satisfaction.hint',
     values: {
       bad: 1,
       medium: 2,
-      good: 3,
-    },
-  },
+      good: 3
+    }
+  }
 ];
 
 export const secondSection: FormField[] = [
   {
-    name: "easy",
-    kind: "radio",
-    label: "fields.easy.label",
+    name: 'easy',
+    kind: 'radio',
+    label: 'fields.easy.label',
     options: [
       {
-        label: "fields.easy.options.0.label",
+        label: 'fields.easy.options.0.label',
         value: 4,
-        intention: "good",
+        intention: 'good'
       },
       {
-        label: "fields.easy.options.1.label",
+        label: 'fields.easy.options.1.label',
         value: 5,
-        intention: "medium",
+        intention: 'medium'
       },
       {
-        label: "fields.easy.options.2.label",
+        label: 'fields.easy.options.2.label',
         value: 6,
-        intention: "bad",
-      },
-    ],
+        intention: 'bad'
+      }
+    ]
   },
   {
-    name: "comprehension",
-    kind: "radio",
-    label: "fields.comprehension.label",
+    name: 'comprehension',
+    kind: 'radio',
+    label: 'fields.comprehension.label',
     options: [
       {
-        label: "fields.comprehension.options.0.label",
+        label: 'fields.comprehension.options.0.label',
         value: 7,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.comprehension.options.1.label",
+        label: 'fields.comprehension.options.1.label',
         value: 8,
-        intention: "medium",
+        intention: 'medium'
       },
       {
-        label: "fields.comprehension.options.2.label",
+        label: 'fields.comprehension.options.2.label',
         value: 9,
-        intention: "good",
-      },
-    ],
+        intention: 'good'
+      }
+    ]
   },
   {
-    name: "difficulties",
-    kind: "radio",
-    label: "fields.difficulties.label",
+    name: 'difficulties',
+    kind: 'radio',
+    label: 'fields.difficulties.label',
     options: [
       {
-        label: "fields.difficulties.options.0.label",
+        label: 'fields.difficulties.options.0.label',
         value: 10,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties.options.1.label",
+        label: 'fields.difficulties.options.1.label',
         value: 11,
-        intention: "good",
-      },
-    ],
+        intention: 'good'
+      }
+    ]
   },
   {
-    name: "difficulties_details",
-    kind: "checkbox",
-    label: "fields.difficulties_details.label",
+    name: 'difficulties_details',
+    kind: 'checkbox',
+    label: 'fields.difficulties_details.label',
     conditions: [
       {
-        name: "difficulties",
-        values: [10],
-      },
+        name: 'difficulties',
+        values: [10]
+      }
     ],
     options: [
       {
-        label: "fields.difficulties_details.options.0.label",
+        label: 'fields.difficulties_details.options.0.label',
         value: 12,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties_details.options.1.label",
+        label: 'fields.difficulties_details.options.1.label',
         value: 13,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties_details.options.2.label",
+        label: 'fields.difficulties_details.options.2.label',
         value: 14,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties_details.options.3.label",
+        label: 'fields.difficulties_details.options.3.label',
         value: 15,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties_details.options.4.label",
+        label: 'fields.difficulties_details.options.4.label',
         value: 16,
-        intention: "bad",
+        intention: 'bad'
       },
       {
-        label: "fields.difficulties_details.options.5.label",
+        label: 'fields.difficulties_details.options.5.label',
         value: 17,
-        intention: "bad",
-      },
-    ],
+        intention: 'bad'
+      }
+    ]
   },
   {
     conditions: [
       {
-        name: "difficulties_details",
-        values: [17],
-      },
+        name: 'difficulties_details',
+        values: [17]
+      }
     ],
-    name: "difficulties_details_verbatim",
-    kind: "input-text",
-    hint: "fields.difficulties_details_verbatim.hint",
-    label: "fields.difficulties_details_verbatim.label",
+    name: 'difficulties_details_verbatim',
+    kind: 'input-text',
+    hint: 'fields.difficulties_details_verbatim.hint',
+    label: 'fields.difficulties_details_verbatim.label'
   },
   {
-    name: "contact",
-    kind: "radio",
-    label: "fields.contact.label",
+    name: 'contact',
+    kind: 'radio',
+    label: 'fields.contact.label',
     options: [
       {
-        label: "fields.contact.options.0.label",
+        label: 'fields.contact.options.0.label',
         value: 18,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.contact.options.1.label",
+        label: 'fields.contact.options.1.label',
         value: 19,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.contact.options.2.label",
+        label: 'fields.contact.options.2.label',
         value: 20,
-        intention: "neutral",
-      },
-    ],
+        intention: 'neutral'
+      }
+    ]
   },
   {
-    conditions: [{ name: "contact", values: [19] }],
-    name: "contact_reached",
-    kind: "radio",
-    label: "fields.contact_reached.label",
+    conditions: [{ name: 'contact', values: [19] }],
+    name: 'contact_reached',
+    kind: 'radio',
+    label: 'fields.contact_reached.label',
     options: [
       {
-        label: "fields.contact_reached.options.0.label",
+        label: 'fields.contact_reached.options.0.label',
         value: 21,
-        intention: "good",
+        intention: 'good'
       },
       {
-        label: "fields.contact_reached.options.1.label",
+        label: 'fields.contact_reached.options.1.label',
         value: 22,
-        intention: "bad",
-      },
-    ],
+        intention: 'bad'
+      }
+    ]
   },
   {
     conditions: [
       {
-        name: "contact_reached",
-        values: [21],
-      },
+        name: 'contact_reached',
+        values: [21]
+      }
     ],
-    name: "contact_channels",
-    kind: "checkbox",
-    label: "fields.contact_channels.label",
+    name: 'contact_channels',
+    kind: 'checkbox',
+    label: 'fields.contact_channels.label',
     options: [
       {
-        label: "fields.contact_channels.options.0.label",
+        label: 'fields.contact_channels.options.0.label',
         value: 23,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.contact_channels.options.1.label",
+        label: 'fields.contact_channels.options.1.label',
         value: 24,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.contact_channels.options.2.label",
+        label: 'fields.contact_channels.options.2.label',
         value: 25,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.contact_channels.options.3.label",
+        label: 'fields.contact_channels.options.3.label',
         value: 26,
-        intention: "neutral",
-      },
-    ],
+        intention: 'neutral'
+      }
+    ]
   },
   {
     conditions: [
       {
-        name: "contact_channels",
-        values: [26],
-      },
+        name: 'contact_channels',
+        values: [26]
+      }
     ],
-    name: "contact_channels_verbatim",
-    kind: "input-text",
-    hint: "fields.contact_channels_verbatim.hint",
-    label: "fields.contact_channels_verbatim.label",
+    name: 'contact_channels_verbatim',
+    kind: 'input-text',
+    hint: 'fields.contact_channels_verbatim.hint',
+    label: 'fields.contact_channels_verbatim.label'
   },
   {
     conditions: [
       {
-        name: "contact_reached",
-        values: [21],
-      },
+        name: 'contact_reached',
+        values: [21]
+      }
     ],
-    name: "contact_satisfaction",
-    kind: "smiley",
-    label: "fields.contact_satisfaction.label",
+    name: 'contact_satisfaction',
+    kind: 'smiley',
+    label: 'fields.contact_satisfaction.label',
     values: {
       bad: 27,
       medium: 28,
-      good: 29,
-    },
+      good: 29
+    }
   },
   {
-    name: "help",
-    kind: "radio",
-    label: "fields.help.label",
+    name: 'help',
+    kind: 'radio',
+    label: 'fields.help.label',
     options: [
       {
-        label: "fields.help.options.0.label",
+        label: 'fields.help.options.0.label',
         value: 30,
-        intention: "neutral",
+        intention: 'bad'
       },
       {
-        label: "fields.help.options.1.label",
+        label: 'fields.help.options.1.label',
         value: 31,
-        intention: "neutral",
-      },
-    ],
+        intention: 'good'
+      }
+    ]
   },
   {
-    name: "help_details",
-    kind: "checkbox",
-    label: "fields.help_details.label",
+    name: 'help_details',
+    kind: 'checkbox',
+    label: 'fields.help_details.label',
     conditions: [
       {
-        name: "help",
-        values: [30],
-      },
+        name: 'help',
+        values: [30]
+      }
     ],
     options: [
       {
-        label: "fields.help_details.options.0.label",
+        label: 'fields.help_details.options.0.label',
         value: 32,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.help_details.options.1.label",
+        label: 'fields.help_details.options.1.label',
         value: 33,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.help_details.options.2.label",
+        label: 'fields.help_details.options.2.label',
         value: 34,
-        intention: "neutral",
+        intention: 'neutral'
       },
       {
-        label: "fields.help_details.options.3.label",
+        label: 'fields.help_details.options.3.label',
         value: 35,
-        intention: "neutral",
-      },
-    ],
+        intention: 'neutral'
+      }
+    ]
   },
   {
     conditions: [
       {
-        name: "help_details",
-        values: [35],
-      },
+        name: 'help_details',
+        values: [35]
+      }
     ],
-    name: "help_details_verbatim",
-    kind: "input-text",
-    hint: "fields.help_details_verbatim.hint",
-    label: "fields.help_details_verbatim.label",
+    name: 'help_details_verbatim',
+    kind: 'input-text',
+    hint: 'fields.help_details_verbatim.hint',
+    label: 'fields.help_details_verbatim.label'
   },
   {
-    name: "verbatim",
-    kind: "input-textarea",
-    hint: "fields.verbatim.hint",
-    label: "fields.verbatim.label",
-  },
+    name: 'verbatim',
+    kind: 'input-textarea',
+    hint: 'fields.verbatim.hint',
+    label: 'fields.verbatim.label'
+  }
 ];
