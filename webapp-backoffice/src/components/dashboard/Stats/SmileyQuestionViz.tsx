@@ -161,7 +161,10 @@ const useStyles = tss.create({
 	dataContainer: {
 		display: 'flex',
 		['& > div']: {
-			width: '100%',
+			width: '35%'
+		},
+		['& > div:first-of-type']: {
+			width: '65%',
 			display: 'flex',
 			flexDirection: 'column',
 			gap: '0.75rem'
