@@ -14,6 +14,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
 import Link from 'next/link';
+import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 
 interface Props {
 	product: Product;
@@ -165,6 +166,12 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+				/>
+				<ReviewAverageInterval
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={startDate}
+					endDate={endDate}
 				/>
 			</SectionWrapper>
 			<SectionWrapper title="Facilité d'usage">

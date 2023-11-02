@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
 
-const BarChart = dynamic(() => import('@/src/components/chart/PieChart'), {
+const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
 });
 
@@ -133,7 +133,7 @@ const SmileyQuestionViz = ({
 								)
 							)}
 						</div>
-						<BarChart kind="pie" data={barChartData} />
+						<PieChart kind="pie" data={barChartData} />
 					</div>
 				</div>
 			</div>
