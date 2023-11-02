@@ -1,0 +1,11 @@
+# Default Kibana configuration for docker target
+server.name: "kibana"
+server.host: "0.0.0.0"
+server.shutdownTimeout: "5s"
+
+elasticsearch.hosts: [ "https://elasticsearch:9200" ]
+elasticsearch.ssl.certificateAuthorities: [ "config/certs/ca/ca.crt" ]
+elasticsearch.username: "kibana_system"
+elasticsearch.password: "bootstrap.password" # environnement variable set in docker-compose.yml
+
+monitoring.ui.container.elasticsearch.enabled: true

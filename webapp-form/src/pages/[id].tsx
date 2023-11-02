@@ -1,12 +1,16 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
 import { FormSecondBlock } from "@/src/components/form/layouts/FormSecondBlock";
-import { Opinion, Product } from "@/src/utils/types";
+import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
+import { trpc } from "../utils/trpc";
+import { AnswerIntention, Prisma } from "@prisma/client";
+import { firstSection, secondSection } from "../utils/form";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type JDMAFormProps = {
   product: Product;
@@ -16,6 +20,105 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
   const { t } = useTranslation("common");
+
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  const createReview = trpc.review.create.useMutation({
+    onSuccess: () => setIsFormSubmitted(true),
+  });
+
+  const getSelectedOption = (
+    field: FormField,
+    value: number
+  ): { label: string; intention: AnswerIntention; value: number } => {
+    if (field.kind === "radio" || field.kind == "checkbox") {
+      const selectedOption = field.options.find(
+        (option) => option.value === value
+      ) as RadioOption;
+
+      return {
+        label: t(selectedOption.label as string, {
+          lng: "fr",
+        }),
+        value: selectedOption.value,
+        intention: selectedOption.intention,
+      };
+    } else if (field.kind === "smiley") {
+      const smileyIntention =
+        value === 1 ? "bad" : value === 2 ? "medium" : "good";
+      const smileyLabel = t(`smileys.${smileyIntention}`, { lng: "fr" });
+      return {
+        label: smileyLabel,
+        intention: smileyIntention,
+        value,
+      };
+    } else {
+      return {
+        label: "",
+        intention: "good",
+        value: 0,
+      };
+    }
+  };
+
+  const handleSubmitReview = async (opinion: Opinion) => {
+    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
+      ([key, value]) => {
+        const fieldInSection = (
+          key === "satisfaction" ? firstSection : secondSection
+        ).find((field) => field.name === key) as FormField;
+
+        let tmpAnswer = {
+          field_code: fieldInSection.name,
+          field_label: t(fieldInSection.label, {
+            lng: "fr",
+          }) as string,
+          kind:
+            fieldInSection.kind === "smiley"
+              ? "radio"
+              : fieldInSection.kind !== "input-text" &&
+                fieldInSection.kind !== "input-textarea"
+              ? fieldInSection.kind
+              : "text",
+          review: {},
+        } as Prisma.AnswerCreateInput;
+
+        if (typeof value == "number") {
+          const selectedOption = getSelectedOption(fieldInSection, value);
+          tmpAnswer.answer_text = selectedOption.label;
+          tmpAnswer.intention = selectedOption.intention;
+          tmpAnswer.answer_item_id = selectedOption.value;
+          return tmpAnswer;
+        } else if (typeof value == "string") {
+          tmpAnswer.answer_text = value;
+          tmpAnswer.intention = "neutral";
+          tmpAnswer.answer_item_id = 0;
+          return tmpAnswer;
+        } else if (Array.isArray(value)) {
+          let tmpAnswers = [] as Prisma.AnswerCreateInput[];
+          value.map((value) => {
+            let selectedOption = getSelectedOption(fieldInSection, value);
+            tmpAnswer.answer_text = selectedOption.label;
+            tmpAnswer.intention = selectedOption.intention;
+            tmpAnswer.answer_item_id = selectedOption.value;
+            tmpAnswers.push({ ...tmpAnswer });
+          });
+          return tmpAnswers;
+        } else {
+          return [];
+        }
+      }
+    );
+
+    createReview.mutate({
+      review: {
+        product_id: product.id,
+        button_id: 1,
+        form_id: 1,
+      },
+      answers,
+    });
+  };
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
@@ -37,40 +140,62 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   return (
     <div>
-      <div className={classes.blueSection}>
-        {opinion.satisfaction ? (
-          <h1>
-            {t("second_block.title")}
-            <br />
-            {t("second_block.subtitle")}
-          </h1>
-        ) : (
-          <h1>{t("first_block.title")}</h1>
-        )}
-      </div>
-      <div
-        className={cx(
-          classes.mainContainer,
-          fr.cx("fr-container--fluid", "fr-container")
-        )}
-      >
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-          <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
-            <div className={cx(classes.formSection)}>
-              {opinion.satisfaction ? (
-                <FormSecondBlock
-                  opinion={opinion}
-                  onSubmit={(result) => setOpinion({ ...result })}
-                />
-              ) : (
-                <FormFirstBlock
-                  opinion={opinion}
-                  product={product}
-                  onSubmit={(tmpOpinion) => {
-                    setOpinion({ ...tmpOpinion });
-                  }}
-                />
-              )}
+      <div>
+        <div className={classes.blueSection}>
+          {!isFormSubmitted ? (
+            opinion.satisfaction ? (
+              <h1>
+                {t("second_block.title")}
+                <br />
+                {t("second_block.subtitle")}
+              </h1>
+            ) : (
+              <h1>{t("first_block.title")}</h1>
+            )
+          ) : (
+            <h1>{t("success_block.title")}</h1>
+          )}
+        </div>
+        <div
+          className={cx(
+            classes.mainContainer,
+            fr.cx("fr-container--fluid", "fr-container")
+          )}
+        >
+          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+              <div className={cx(classes.formSection)}>
+                {!isFormSubmitted ? (
+                  opinion.satisfaction ? (
+                    <FormSecondBlock
+                      opinion={opinion}
+                      onSubmit={(result) => {
+                        setOpinion({ ...result });
+                        handleSubmitReview(result);
+                      }}
+                    />
+                  ) : (
+                    <FormFirstBlock
+                      opinion={opinion}
+                      product={product}
+                      onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
+                    />
+                  )
+                ) : (
+                  <div>
+                    <h1 className={classes.titleSection}>
+                      {t("success_block.title")}
+                    </h1>
+                    <div>
+                      <Alert
+                        severity="success"
+                        description={t("success_block.alert")}
+                        small
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -91,11 +216,12 @@ export const getServerSideProps: GetServerSideProps<{
   const productId = params.id as string;
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_WEBAPP_URL}/api/open-api/product/${productId}`
+    `${process.env.NEXT_PUBLIC_WEBAPP_FORM_URL}/api/open-api/product/${productId}`
   );
 
   if (response.ok) {
     const { data: product } = (await response.json()) as { data: Product };
+
     if (!product) {
       return {
         notFound: true,
@@ -137,6 +263,11 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         height: `${blueSectionPxHeight}px`,
+      },
+    },
+    titleSection: {
+      [fr.breakpoints.down("md")]: {
+        display: "none",
       },
     },
     formSection: {

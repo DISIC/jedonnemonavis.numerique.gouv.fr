@@ -17,7 +17,7 @@ generator zod {
 
 enum UserRole {
   admin
-	supervisor
+  supervisor
   user
 }
 
@@ -37,14 +37,27 @@ enum RightAccessStatus {
   removed
 }
 
+enum AnswerKind {
+  text
+  checkbox
+  radio
+}
+
+enum AnswerIntention {
+  good
+  medium
+  bad
+  neutral
+}
+
 // Next auth
 model User {
   id                    Int                   @id @default(autoincrement())
   firstName             String?
   lastName              String?
   active                Boolean               @default(false)
-  observatoire_account  Boolean               @default(false)
-  observatoire_username String?
+  xwiki_account         Boolean               @default(false)
+  xwiki_username String?
   email                 String                @unique
   password              String
   role                  UserRole              @default(user)
@@ -120,24 +133,28 @@ model Button {
   isTest      Boolean? @default(false)
   product     Product? @relation(fields: [product_id], references: [id])
   product_id  Int
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+
+  reviews Review[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model Product {
-  id              Int           @id @default(autoincrement())
-  title           String
-  entity          Entity        @relation(fields: [entity_id], references: [id])
-  entity_id       Int
-  created_at      DateTime      @default(now())
-  updated_at      DateTime      @updatedAt
-  isEssential     Boolean?      @default(false)
-  urls            String[]
-  volume          Int?
-  observatoire_id Int?          @unique
-  buttons         Button[]
-  accessRights    AccessRight[]
-  favorites       Favorite[]
+  id           Int           @id @default(autoincrement())
+  title        String
+  entity       Entity        @relation(fields: [entity_id], references: [id])
+  entity_id    Int
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  isEssential  Boolean?      @default(false)
+  urls         String[]
+  volume       Int?
+  xwiki_id     Int?          @unique
+  buttons      Button[]
+  accessRights AccessRight[]
+  favorites    Favorite[]
+  reviews      Review[]
 }
 
 model AccessRight {
@@ -172,4 +189,30 @@ model Favorite {
   updated_at DateTime @updatedAt
 
   @@id([user_id, product_id], name: "favorite_id")
+}
+
+model Review {
+  id         Int     @id @default(autoincrement())
+  form_id    Int
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id Int
+  button     Button  @relation(fields: [button_id], references: [id])
+  button_id  Int
+	xwiki_id	 Int?
+
+  answers Answer[]
+
+  created_at DateTime @default(now())
+}
+
+model Answer {
+  id             Int              @id @default(autoincrement())
+  field_label    String
+  field_code     String
+  answer_item_id Int
+  answer_text    String
+  intention      AnswerIntention?
+  kind           AnswerKind
+  review         Review           @relation(fields: [review_id], references: [id])
+  review_id      Int
 }

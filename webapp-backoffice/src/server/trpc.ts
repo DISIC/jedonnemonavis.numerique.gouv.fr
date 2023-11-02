@@ -4,7 +4,6 @@ import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
-import { OpenApiMeta } from 'trpc-openapi';
 import { Session } from 'next-auth';
 
 // Metadata for protected procedures
@@ -28,7 +27,7 @@ export type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC
 	.context<Context>()
-	.meta<OpenApiMeta<Meta>>()
+	.meta<Meta>()
 	.create({
 		transformer: SuperJSON,
 		defaultMeta: {

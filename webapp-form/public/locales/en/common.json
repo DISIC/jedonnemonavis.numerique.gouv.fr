@@ -9,6 +9,10 @@
     "subtitle": "Can you tell us more?",
     "validate": "Submit my opinion"
   },
+  "success_block": {
+    "title": "Thank you for your help!",
+    "alert": "Your feedback has been successfully sent to the department in charge of this process."
+  },
   "smileys": {
     "good": "Very good",
     "medium": "Average",

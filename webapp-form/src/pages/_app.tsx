@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { createEmotionSsrAdvancedApproach } from "tss-react/next";
 import "@/src/styles/global.css";
+import { trpc } from "@/src/utils/trpc";
 
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {
@@ -46,4 +47,6 @@ function App({ Component, pageProps }: AppProps) {
   return getLayout(<Component {...pageProps} />);
 }
 
-export default appWithTranslation(withDsfr(withAppEmotionCache(App)));
+export default trpc.withTRPC(
+  appWithTranslation(withDsfr(withAppEmotionCache(App)))
+);

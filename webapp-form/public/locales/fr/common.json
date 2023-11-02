@@ -9,6 +9,10 @@
     "subtitle": "Pouvez-vous nous en dire plus ?",
     "validate": "Valider mon avis"
   },
+  "success_block": {
+    "title": "Merci pour votre aide !",
+    "alert": "Votre avis a bien été transmis au service qui s'occupe de cette démarche."
+  },
   "smileys": {
     "good": "Très bien",
     "medium": "Moyen",

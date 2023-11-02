@@ -6,8 +6,10 @@ import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
+import '../utils/global.css';
 import '../utils/keyframes.css';
 import { trpc } from '@/src/utils/trpc';
+import { StatsTotalsProvider } from '../contexts/StatsContext';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -50,7 +52,9 @@ function App({ Component, pageProps }: AppProps) {
 	return (
 		<MuiDsfrThemeProvider>
 			<SessionProvider session={pageProps.session}>
-				{getLayout(<Component {...pageProps} />)}
+				<StatsTotalsProvider>
+					{getLayout(<Component {...pageProps} />)}
+				</StatsTotalsProvider>
 			</SessionProvider>
 		</MuiDsfrThemeProvider>
 	);

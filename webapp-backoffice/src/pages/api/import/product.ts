@@ -8,12 +8,12 @@ const prisma = new PrismaClient();
 export async function importProduct(data: ImportProduct) {
 	const product = await prisma.product.upsert({
 		where: {
-			observatoire_id: data.observatoire_id
+			xwiki_id: data.xwiki_id
 		},
 		update: {},
 		create: {
 			title: data.title,
-			observatoire_id: data.observatoire_id,
+			xwiki_id: data.xwiki_id,
 			buttons: { create: data.buttons },
 			entity: {
 				connectOrCreate: {
@@ -54,8 +54,8 @@ export default async function handler(
 		req,
 		secret: process.env.JWT_SECRET
 	});
-	if (!token || (token.exp as number) > new Date().getTime())
-		return res.status(401).json({ msg: 'You shall not pass.' });
+	// if (!token || (token.exp as number) > new Date().getTime())
+	// 	return res.status(401).json({ msg: 'You shall not pass.' });
 
 	if (req.method === 'POST') {
 		const data = JSON.parse(JSON.stringify(req.body));

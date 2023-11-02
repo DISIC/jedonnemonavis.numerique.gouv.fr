@@ -1,0 +1,218 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
+}
+
+generator zod {
+  provider               = "zod-prisma-types"
+  addInputTypeValidation = false
+  addIncludeType         = false
+  addSelectType          = false
+}
+
+enum UserRole {
+  admin
+  supervisor
+  user
+}
+
+enum RequestMode {
+  whitelist
+  superuser
+}
+
+enum UserRequestStatus {
+  pending
+  accepted
+  refused
+}
+
+enum RightAccessStatus {
+  carrier
+  removed
+}
+
+enum AnswerKind {
+  text
+  checkbox
+  radio
+}
+
+enum AnswerIntention {
+  good
+  medium
+  bad
+  neutral
+}
+
+// Next auth
+model User {
+  id                    Int                   @id @default(autoincrement())
+  firstName             String?
+  lastName              String?
+  active                Boolean               @default(false)
+  xwiki_account  Boolean               @default(false)
+  xwiki_username String?
+  email                 String                @unique
+  password              String
+  role                  UserRole              @default(user)
+  UserOTPs              UserOTP[]
+  UserValidationTokens  UserValidationToken[]
+  UserRequests          UserRequest[]
+  accessRights          AccessRight[]
+  entities              Entity[]
+  favorites             Favorite[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model UserRequest {
+  id              Int               @id @default(autoincrement())
+  user            User?             @relation(fields: [user_id], references: [id])
+  user_id         Int?              @unique
+  user_email_copy String?
+  reason          String
+  mode            RequestMode       @default(whitelist)
+  status          UserRequestStatus @default(pending)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model UserOTP {
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [user_id], references: [id])
+  user_id         Int      @unique
+  code            String   @unique
+  expiration_date DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model UserValidationToken {
+  id      Int    @id @default(autoincrement())
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id Int    @unique
+  token   String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model UserInviteToken {
+  id         Int    @id @default(autoincrement())
+  user_email String
+  token      String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Entity {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  acronym  String
+  products Product[]
+  users    User[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Button {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  isTest      Boolean? @default(false)
+  product     Product? @relation(fields: [product_id], references: [id])
+  product_id  Int
+
+  reviews Review[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Product {
+  id              Int           @id @default(autoincrement())
+  title           String
+  entity          Entity        @relation(fields: [entity_id], references: [id])
+  entity_id       Int
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  isEssential     Boolean?      @default(false)
+  urls            String[]
+  volume          Int?
+  xwiki_id Int?          @unique
+  buttons         Button[]
+  accessRights    AccessRight[]
+  favorites       Favorite[]
+  reviews         Review[]
+}
+
+model AccessRight {
+  id                Int     @id @default(autoincrement())
+  user              User?   @relation(fields: [user_email], references: [email])
+  user_email        String?
+  user_email_invite String?
+  product           Product @relation(fields: [product_id], references: [id])
+  product_id        Int
+
+  status RightAccessStatus @default(carrier)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model WhiteListedDomain {
+  id     Int    @id @default(autoincrement())
+  domain String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Favorite {
+  user       User    @relation(fields: [user_id], references: [id])
+  user_id    Int
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([user_id, product_id], name: "favorite_id")
+}
+
+model Review {
+  id         Int     @id @default(autoincrement())
+  form_id    Int
+  product    Product @relation(fields: [product_id], references: [id])
+  product_id Int
+  button     Button  @relation(fields: [button_id], references: [id])
+  button_id  Int
+	xwiki_id	 Int?
+
+  answers Answer[]
+
+  created_at DateTime @default(now())
+}
+
+model Answer {
+  id             Int          @id @default(autoincrement())
+  field_label    String
+  field_code     String
+  answer_item_id Int
+  answer_text    String
+  intention      AnswerIntention?
+  kind           AnswerKind
+  review         Review       @relation(fields: [review_id], references: [id])
+  review_id      Int
+}

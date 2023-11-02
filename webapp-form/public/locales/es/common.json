@@ -9,6 +9,10 @@
     "subtitle": "¿Puede contarnos más?",
     "validate": "Validar mi opinión"
   },
+  "success_block": {
+    "title": "¡Gracias por tu ayuda!",
+    "alert": "Tu opinión ha sido enviada con éxito al departamento encargado de este proceso."
+  },
   "smileys": {
     "good": "Muy bien",
     "medium": "Regular",
