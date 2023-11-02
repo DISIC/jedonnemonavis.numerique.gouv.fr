@@ -25,7 +25,7 @@ const onConfirmModal = createModal({
 });
 
 const DashBoardDomainDomains = () => {
-	const utils = trpc.useContext();
+	const utils = trpc.useUtils();
 
 	const [filter, setFilter] = React.useState<string>('domain:asc');
 	const [search, setSearch] = React.useState<string>('');

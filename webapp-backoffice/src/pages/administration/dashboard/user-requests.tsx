@@ -10,7 +10,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export type UserRequestExtended = UserRequestWithUser & {
@@ -50,6 +50,8 @@ const DashBoardUserRequestUserRequests = () => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
+	const utils = trpc.useUtils();
+
 	const { cx, classes } = useStyles();
 
 	const {
@@ -78,6 +80,10 @@ const DashBoardUserRequestUserRequests = () => {
 		data: userRequests,
 		metadata: { count: userRequestsCount }
 	} = userrequestsResult;
+
+	useEffect(() => {
+		utils.userRequest.getList.invalidate();
+	}, [userRequestsCount]);
 
 	const updateUserRequest = trpc.userRequest.update.useMutation({
 		onSuccess: result => {
@@ -124,8 +130,6 @@ const DashBoardUserRequestUserRequests = () => {
 			return `La demande d'accès de ${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName} a été acceptée !`;
 		}
 	};
-
-	console.log(currentUserRequest?.user);
 
 	return (
 		<>

@@ -2,14 +2,14 @@ import {
   CheckboxOption,
   Condition,
   FormField,
-  Opinion,
-} from "@/src/utils/types";
-import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { Input } from "@codegouvfr/react-dsfr/Input";
-import { useTranslation } from "next-i18next";
-import { ChangeEvent, SetStateAction, useEffect } from "react";
-import { SmileyInput } from "./SmileyInput";
+  Opinion
+} from '@/src/utils/types';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { useTranslation } from 'next-i18next';
+import { ChangeEvent, SetStateAction } from 'react';
+import { SmileyInput } from './SmileyInput';
 
 type Props = {
   field: FormField;
@@ -19,26 +19,25 @@ type Props = {
 };
 
 type CheckboxOpinionKeys =
-  | "difficulties_details"
-  | "help_details"
-  | "contact_channels";
+  | 'difficulties_details'
+  | 'help_details'
+  | 'contact_channels';
 
 export const Field = (props: Props) => {
   const { field, opinion, setOpinion, form } = props;
 
-  const { t } = useTranslation("common");
+  const { t } = useTranslation('common');
 
   const getChildrenResetObject = () => {
     const children = form.filter(
-      (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+      f => f.conditions && f.conditions.map(c => c.name).includes(field.name)
     );
 
     let opinionPropsObj: {
       [key in keyof Opinion]?: any;
     } = {};
 
-    children.forEach((cf) => {
+    children.forEach(cf => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
         ? []
         : undefined;
@@ -57,30 +56,18 @@ export const Field = (props: Props) => {
       setOpinion({
         ...opinion,
         [key]: e.target.checked ? [e.target.value] : [],
-        ...getChildrenResetObject(),
+        ...getChildrenResetObject()
       });
     } else {
       const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
-        .map((opt) => opt.value);
+        .filter(opt => opt.isolated)
+        .map(opt => opt.value);
       setOpinion({
         ...opinion,
         [key]: e.target.checked
           ? [
               ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
-      console.log({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
+                sibling => !isolatedSiblings.includes(sibling)
               ),
               parseInt(e.target.value),
             ]
@@ -122,7 +109,7 @@ export const Field = (props: Props) => {
   }
 
   switch (field.kind) {
-    case "smiley":
+    case 'smiley':
       return (
         <SmileyInput
           label={t(field.label)}
@@ -133,7 +120,7 @@ export const Field = (props: Props) => {
           }}
         />
       );
-    case "checkbox":
+    case 'checkbox':
       return (
         <>
           <Checkbox
@@ -146,20 +133,20 @@ export const Field = (props: Props) => {
                   opt.value
                 ),
                 value: opt.value,
-                onChange: (e) => {
+                onChange: e => {
                   onChangeCheckbox(
                     field.name as CheckboxOpinionKeys,
                     opt.isolated || false,
                     e,
                     field.options
                   );
-                },
-              },
+                }
+              }
             }))}
           />
         </>
       );
-    case "radio":
+    case 'radio':
       return (
         <>
           <RadioButtons
@@ -181,7 +168,7 @@ export const Field = (props: Props) => {
           />
         </>
       );
-    case "input-textarea":
+    case 'input-textarea':
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
@@ -190,32 +177,32 @@ export const Field = (props: Props) => {
           stateRelatedMessage="Text de validation / d'explication de l'erreur"
           nativeTextAreaProps={{
             value: opinion[field.name],
-            onChange: (e) => {
+            onChange: e => {
               setOpinion({
                 ...opinion,
-                [field.name]: e.target.value,
+                [field.name]: e.target.value
               });
-            },
+            }
           }}
           textArea
         />
       );
-    case "input-text":
+    case 'input-text':
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
           label={t(field.label)}
-          state={(opinion[field.name] || "").length > 250 ? "error" : "default"}
+          state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
           stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{
             value: opinion[field.name] as string,
             maxLength: 250,
-            onChange: (e) => {
+            onChange: e => {
               setOpinion({
                 ...opinion,
-                [field.name]: e.target.value,
+                [field.name]: e.target.value
               });
-            },
+            }
           }}
         />
       );
