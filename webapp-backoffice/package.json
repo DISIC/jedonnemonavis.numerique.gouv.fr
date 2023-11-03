@@ -50,6 +50,7 @@
 		"react-dom": "18.2.0",
 		"react-hook-form": "^7.47.0",
 		"recharts": "^2.9.0",
+		"sharp": "^0.32.6",
 		"superjson": "^1.13.3",
 		"tss-react": "^4.9.0",
 		"typescript": "5.2.2",
