@@ -40,6 +40,20 @@ export const buttonRouter = router({
 			return { data: entities, metadata: { count } };
 		}),
 
+	getById: publicProcedure
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const button = await ctx.prisma.button.findUnique({
+				where: {
+					id
+				}
+			});
+
+			return { data: button };
+		}),
+
 	create: protectedProcedure
 		.input(ButtonUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {

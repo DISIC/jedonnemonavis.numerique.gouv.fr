@@ -50,7 +50,7 @@ export const reviewRouter = router({
 
 			if (startDate && !endDate) {
 				where.created_at = {
-					gte: startDate
+					gte: new Date(startDate)
 				};
 			}
 

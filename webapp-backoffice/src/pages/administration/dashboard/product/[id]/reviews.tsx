@@ -10,6 +10,8 @@ import { trpc } from '@/src/utils/trpc';
 import { getNbPages } from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { Pagination } from '@/src/components/ui/Pagination';
+import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 
 interface Props {
 	product: Product;
@@ -18,7 +20,7 @@ interface Props {
 const ProductReviewsPage = (props: Props) => {
 	const { product } = props;
 	const [startDate, setStartDate] = React.useState<string>(
-		new Date(new Date().setFullYear(new Date().getFullYear()))
+		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
 			.split('T')[0]
 	);
@@ -39,8 +41,8 @@ const ProductReviewsPage = (props: Props) => {
 	} = trpc.review.getList.useQuery(
 		{
 			product_id: product.id,
-			numberPerPage: 10,
-			page: 1,
+			numberPerPage: numberPerPage,
+			page: currentPage,
 			shouldIncludeAnswers: true,
 			search: validatedSearch,
 			startDate,
@@ -61,11 +63,31 @@ const ProductReviewsPage = (props: Props) => {
 		metadata: { count: reviewsCount }
 	} = reviewResults;
 
-	console.log('reviews', reviews);
+	const reviewsExtended = reviews.map(review => {
+		if (review.answers) {
+			return {
+				...review,
+				satisfaction: review.answers.find(
+					answer => answer.field_code === 'satisfaction'
+				),
+				easy: review.answers.find(answer => answer.field_code === 'easy'),
+				comprehension: review.answers.find(
+					answer => answer.field_code === 'comprehension'
+				),
+				verbatim: review.answers.find(
+					answer => answer.field_code === 'verbatim'
+				)
+			};
+		}
+	});
 
 	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(reviewsCount, numberPerPage);
+
+	const handlePageChange = (pageNumber: number) => {
+		setCurrentPage(pageNumber);
+	};
 
 	const handleViewFilter = () => {
 		console.log('handleViewFilter');
@@ -203,9 +225,32 @@ const ProductReviewsPage = (props: Props) => {
 				)}
 			</div>
 			<div>
-				{reviews.map(review => (
-					<div></div>
-				))}
+				{reviewsExtended ? (
+					reviewsExtended.map((review, index) => {
+						if (review) {
+							return <ReviewLine key={index} review={review} />;
+						}
+					})
+				) : (
+					<p>Aucun avis disponible </p>
+				)}
+			</div>
+			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+				<Pagination
+					count={nbPages}
+					showFirstLast
+					defaultPage={currentPage}
+					getPageLinkProps={pageNumber => ({
+						onClick: event => {
+							event.preventDefault();
+							handlePageChange(pageNumber);
+						},
+						href: '#',
+						classes: { link: fr.cx('fr-pagination__link') },
+						key: `pagination-link-${pageNumber}`
+					})}
+					className={fr.cx('fr-mt-1w')}
+				/>
 			</div>
 		</ProductLayout>
 	);
