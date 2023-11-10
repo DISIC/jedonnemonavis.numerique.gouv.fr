@@ -61,108 +61,99 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 
 	return (
 		<div className={cx(classes.lineContainer)}>
-			<div
-				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--middle'),
-					classes.grid
+			<div className={cx(classes.date)}>
+				{formatDateToFrenchString(
+					review.created_at?.toISOString().split('T')[0] || ''
 				)}
-			>
-				<div className={cx(fr.cx('fr-col-2'), classes.date)}>
-					{formatDateToFrenchString(
-						review.created_at?.toISOString().split('T')[0] || ''
-					)}
-				</div>
-				{review.satisfaction && (
-					<Badge
-						className={cx(fr.cx('fr-col-2'), classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.satisfaction.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.satisfaction.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.satisfaction.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.satisfaction.intention ?? 'neutral')}
-					</Badge>
-				)}
-				{review.easy && (
-					<Badge
-						className={cx(fr.cx('fr-col-2'), classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.easy.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.easy.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.easy.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.easy.intention ?? 'neutral')}
-					</Badge>
-				)}
-				{review.comprehension && (
-					<Badge
-						className={cx(fr.cx('fr-col-2'), classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.comprehension.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.comprehension.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.comprehension.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.comprehension.intention ?? 'neutral')}
-					</Badge>
-				)}
+			</div>
+			{review.satisfaction && (
 				<Badge
-					className={cx(fr.cx('fr-col-2'), classes.badge)}
-					severity={review.verbatim ? 'info' : 'error'}
+					className={cx(classes.badge)}
+					small={true}
+					noIcon={true}
+					severity={getSeverity(review.satisfaction.intention || '')}
 				>
-					{review.verbatim ? 'Verbatim' : 'Non'}
+					<i
+						className={fr.cx(
+							getStatsIcon({
+								intention: review.satisfaction.intention ?? 'neutral'
+							})
+						)}
+						style={{
+							color: getStatsColor({
+								intention: review.satisfaction.intention ?? 'neutral'
+							})
+						}}
+					/>
+					{displayIntention(review.satisfaction.intention ?? 'neutral')}
 				</Badge>
-				{review.button_id ? (
-					<div className={cx(fr.cx('fr-col-2'))}>
-						{retrieveButtonName(review.button_id)}
-					</div>
-				) : (
-					<div className={fr.cx('fr-col-2')}>Pas de source</div>
-				)}
-			</div>
-			<div className={cx(classes.button)}>
-				<Button
-					priority="secondary"
-					iconPosition="right"
-					iconId="fr-icon-arrow-down-s-fill"
-					size="small"
+			)}
+			{review.easy && (
+				<Badge
+					className={cx(classes.badge)}
+					small={true}
+					noIcon={true}
+					severity={getSeverity(review.easy.intention || '')}
 				>
-					{' '}
-					Plus d'infos
-				</Button>
-			</div>
+					<i
+						className={fr.cx(
+							getStatsIcon({
+								intention: review.easy.intention ?? 'neutral'
+							})
+						)}
+						style={{
+							color: getStatsColor({
+								intention: review.easy.intention ?? 'neutral'
+							})
+						}}
+					/>
+					{displayIntention(review.easy.intention ?? 'neutral')}
+				</Badge>
+			)}
+			{review.comprehension && (
+				<Badge
+					className={cx(classes.badge)}
+					small={true}
+					noIcon={true}
+					severity={getSeverity(review.comprehension.intention || '')}
+				>
+					<i
+						className={fr.cx(
+							getStatsIcon({
+								intention: review.comprehension.intention ?? 'neutral'
+							})
+						)}
+						style={{
+							color: getStatsColor({
+								intention: review.comprehension.intention ?? 'neutral'
+							})
+						}}
+					/>
+					{displayIntention(review.comprehension.intention ?? 'neutral')}
+				</Badge>
+			)}
+			<Badge
+				className={cx(classes.badge)}
+				severity={review.verbatim ? 'info' : 'error'}
+			>
+				{review.verbatim ? 'Verbatim' : 'Non'}
+			</Badge>
+			{review.button_id ? (
+				<div className={cx(classes.badge)}>
+					{retrieveButtonName(review.button_id)}
+				</div>
+			) : (
+				<div className={cx(classes.badge)}>Pas de source</div>
+			)}
+			<Button
+				priority="secondary"
+				iconPosition="right"
+				iconId="fr-icon-arrow-down-s-fill"
+				size="small"
+			>
+				{' '}
+				Plus d'infos
+			</Button>
 		</div>
 	);
 };
@@ -176,22 +167,17 @@ const useStyles = tss.create({
 		border: '1px solid',
 		borderColor: fr.colors.decisions.border.default.grey.default,
 		padding: 12,
-		marginBottom: 12
-	},
-	grid: {
-		flexGrow: 1,
-		alignItems: 'center',
+		marginBottom: 12,
 		gap: 12
 	},
 	date: {
-		fontSize: 12
+		fontSize: 12,
+		width: 100
 	},
 	badge: {
 		fontSize: 12,
+		width: 100,
 		paddingVertical: 4
-	},
-	button: {
-		marginLeft: 12
 	}
 });
 

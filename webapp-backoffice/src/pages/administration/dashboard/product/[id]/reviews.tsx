@@ -12,6 +12,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
+import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 
 interface Props {
 	product: Product;
@@ -209,8 +210,8 @@ const ProductReviewsPage = (props: Props) => {
 				)}
 			>
 				{reviews.length > 0 && nbPages > 0 && (
-					<div className={fr.cx('fr-col-12')}>
-						<p>
+					<>
+						<div className={fr.cx('fr-col-12')}>
 							Avis de{' '}
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + 1}
@@ -220,17 +221,20 @@ const ProductReviewsPage = (props: Props) => {
 								{numberPerPage * (currentPage - 1) + reviews.length}
 							</span>{' '}
 							sur <span className={cx(classes.boldText)}>{reviewsCount}</span>
-						</p>
-					</div>
+						</div>
+					</>
 				)}
 			</div>
 			<div>
 				{reviewsExtended ? (
-					reviewsExtended.map((review, index) => {
-						if (review) {
-							return <ReviewLine key={index} review={review} />;
-						}
-					})
+					<>
+						<ReviewFilters />
+						{reviewsExtended.map((review, index) => {
+							if (review) {
+								return <ReviewLine key={index} review={review} />;
+							}
+						})}
+					</>
 				) : (
 					<p>Aucun avis disponible </p>
 				)}
