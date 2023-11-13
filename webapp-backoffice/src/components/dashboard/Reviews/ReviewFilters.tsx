@@ -1,24 +1,64 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const ReviewFilters = () => {
-	const { cx, classes } = useStyles();
+interface Props {
+	onClick: (sort: string) => void;
+	sort: string;
+}
 
-	const filterList = [
-		'Date',
-		'Satisfaction',
-		'Facilité',
-		'Langage',
-		'Verbatim',
-		'Source'
+const ReviewFilters = (props: Props) => {
+	const { onClick } = props;
+
+	const { cx, classes } = useStyles({});
+
+	const sortList = [
+		{
+			label: 'Date',
+			code:
+				props.sort === 'created_at:desc' ? 'created_at:asc' : 'created_at:desc'
+		},
+
+		{
+			label: 'Satisfaction'
+		},
+		{
+			label: 'Facilité'
+		},
+		{
+			label: 'Langage'
+		},
+		{
+			label: 'Verbatim'
+		},
+		{
+			label: 'Source'
+		}
 	];
 
 	return (
 		<div className={cx(classes.lineContainer)}>
-			{filterList.map((filter, index) => (
-				<div className={cx(classes.badge)} key={index}>
+			{sortList.map((sort, index) => (
+				<div
+					className={cx(classes.badge)}
+					key={index}
+					onClick={() => {
+						if (sort.code) {
+							onClick(sort.code);
+						}
+					}}
+				>
 					<span>
-						{filter} <i className={'ri-arrow-drop-down-fill'}></i>
+						{sort.label}{' '}
+						{sort.code && (
+							<i
+								className={
+									props.sort.includes('asc')
+										? 'ri-arrow-drop-down-fill'
+										: 'ri-arrow-drop-up-fill'
+								}
+							></i>
+						)}
 					</span>
 				</div>
 			))}

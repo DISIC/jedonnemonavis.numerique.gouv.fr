@@ -34,6 +34,7 @@ const ProductReviewsPage = (props: Props) => {
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [sort, setSort] = React.useState<string>('created_at:desc');
 
 	const {
 		data: reviewResults,
@@ -47,6 +48,7 @@ const ProductReviewsPage = (props: Props) => {
 			shouldIncludeAnswers: true,
 			search: validatedSearch,
 			startDate,
+			sort: sort,
 			endDate
 		},
 		{
@@ -90,9 +92,11 @@ const ProductReviewsPage = (props: Props) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const handleViewFilter = () => {
-		console.log('handleViewFilter');
+	const handleSortChange = (sort: string) => {
+		setSort(sort);
 	};
+
+	const handleFilterClick = (filter: string) => {};
 
 	if (isLoadingReviews) {
 		return (
@@ -180,7 +184,7 @@ const ProductReviewsPage = (props: Props) => {
 					<div className={cx(classes.filterView)}>
 						<label>Vue</label>
 						<div className={fr.cx('fr-mt-2v')}>
-							<Button priority="primary" onClick={() => handleViewFilter}>
+							<Button priority="primary" onClick={() => {}}>
 								Avis
 							</Button>
 							<Button priority="secondary">Verbatims</Button>
@@ -202,60 +206,71 @@ const ProductReviewsPage = (props: Props) => {
 					</Button>
 				</div>
 			</div>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--right'
-				)}
-			>
-				{reviews.length > 0 && nbPages > 0 && (
-					<>
-						<div className={fr.cx('fr-col-12')}>
-							Avis de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + reviews.length}
-							</span>{' '}
-							sur <span className={cx(classes.boldText)}>{reviewsCount}</span>
+			{isLoadingReviews ? (
+				<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+					<Loader />
+				</div>
+			) : (
+				<>
+					<div
+						className={fr.cx(
+							'fr-grid-row',
+							'fr-grid-row--gutters',
+							'fr-grid-row--right'
+						)}
+					>
+						{reviews.length > 0 && nbPages > 0 && (
+							<>
+								<div className={fr.cx('fr-col-12')}>
+									Avis de{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + 1}
+									</span>{' '}
+									à{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + reviews.length}
+									</span>{' '}
+									sur{' '}
+									<span className={cx(classes.boldText)}>{reviewsCount}</span>
+								</div>
+							</>
+						)}
+					</div>
+					<div>
+						{reviewsExtended ? (
+							<>
+								<ReviewFilters sort={sort} onClick={handleSortChange} />
+								{reviewsExtended.map((review, index) => {
+									if (review) {
+										return <ReviewLine key={index} review={review} />;
+									}
+								})}
+							</>
+						) : (
+							<p>Aucun avis disponible </p>
+						)}
+					</div>
+					{reviewsExtended.length > 0 && (
+						<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+							<Pagination
+								count={nbPages}
+								showFirstLast
+								defaultPage={currentPage}
+								getPageLinkProps={pageNumber => ({
+									onClick: event => {
+										event.preventDefault();
+										handlePageChange(pageNumber);
+									},
+									href: '#',
+									classes: { link: fr.cx('fr-pagination__link') },
+									key: `pagination-link-${pageNumber}`
+								})}
+								className={fr.cx('fr-mt-1w')}
+							/>
 						</div>
-					</>
-				)}
-			</div>
-			<div>
-				{reviewsExtended ? (
-					<>
-						<ReviewFilters />
-						{reviewsExtended.map((review, index) => {
-							if (review) {
-								return <ReviewLine key={index} review={review} />;
-							}
-						})}
-					</>
-				) : (
-					<p>Aucun avis disponible </p>
-				)}
-			</div>
-			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-				<Pagination
-					count={nbPages}
-					showFirstLast
-					defaultPage={currentPage}
-					getPageLinkProps={pageNumber => ({
-						onClick: event => {
-							event.preventDefault();
-							handlePageChange(pageNumber);
-						},
-						href: '#',
-						classes: { link: fr.cx('fr-pagination__link') },
-						key: `pagination-link-${pageNumber}`
-					})}
-					className={fr.cx('fr-mt-1w')}
-				/>
-			</div>
+					)}
+				</>
+			)}
 		</ProductLayout>
 	);
 };

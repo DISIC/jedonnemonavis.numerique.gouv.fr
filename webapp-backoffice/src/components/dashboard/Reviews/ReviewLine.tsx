@@ -20,7 +20,6 @@ interface ExtendedReview extends ReviewPartialWithRelations {
 
 const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 	const { cx, classes } = useStyles();
-	console.log('review', review);
 
 	const getSeverity = (intention: string) => {
 		switch (intention) {

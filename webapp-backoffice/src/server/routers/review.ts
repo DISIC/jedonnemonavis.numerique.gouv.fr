@@ -11,6 +11,7 @@ export const reviewRouter = router({
 				page: z.number().default(1),
 				product_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
+				sort: z.string().optional(),
 				search: z.string().optional(),
 				startDate: z.string().optional(),
 				endDate: z.string().optional()
@@ -31,6 +32,7 @@ export const reviewRouter = router({
 				product_id,
 				shouldIncludeAnswers,
 				search,
+				sort,
 				startDate,
 				endDate
 			} = input;
@@ -54,6 +56,36 @@ export const reviewRouter = router({
 				};
 			}
 
+			let orderBy: Prisma.ReviewOrderByWithRelationAndSearchRelevanceInput[] = [
+				{
+					created_at: 'asc'
+				}
+			];
+
+			if (sort) {
+				const values = sort.split(':');
+				if (values.length === 2) {
+					if (values[0].includes('.')) {
+						const subValues = values[0].split('.');
+						if (subValues.length === 2) {
+							orderBy = [
+								{
+									[subValues[0]]: {
+										[subValues[1]]: values[1]
+									}
+								}
+							];
+						}
+					} else {
+						orderBy = [
+							{
+								[values[0]]: values[1]
+							}
+						];
+					}
+				}
+			}
+
 			if (search) {
 				where = {
 					...where,
@@ -74,6 +106,7 @@ export const reviewRouter = router({
 
 			const entities = await ctx.prisma.review.findMany({
 				where,
+				orderBy: orderBy,
 				take: numberPerPage,
 				skip: (page - 1) * numberPerPage,
 				include: {
