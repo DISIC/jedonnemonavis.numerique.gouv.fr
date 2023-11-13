@@ -1,25 +1,17 @@
-import {
-	ReviewPartialWithRelations,
-	AnswerPartialWithRelations
-} from '@/prisma/generated/zod';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Skeleton } from '@mui/material';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
-
-interface ExtendedReview extends ReviewPartialWithRelations {
-	satisfaction: AnswerPartialWithRelations | undefined;
-	easy: AnswerPartialWithRelations | undefined;
-	comprehension: AnswerPartialWithRelations | undefined;
-	verbatim: AnswerPartialWithRelations | undefined;
-}
+import { ExtendedReview } from './interface';
+import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 
 const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 	const { cx, classes } = useStyles();
+	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
 	const getSeverity = (intention: string) => {
 		switch (intention) {
@@ -59,114 +51,125 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 	};
 
 	return (
-		<div className={cx(classes.lineContainer)}>
-			<div className={cx(classes.date)}>
-				{formatDateToFrenchString(
-					review.created_at?.toISOString().split('T')[0] || ''
-				)}
-			</div>
-			{review.satisfaction && (
-				<Badge
-					className={cx(classes.badge)}
-					small={true}
-					noIcon={true}
-					severity={getSeverity(review.satisfaction.intention || '')}
-				>
-					<i
-						className={fr.cx(
-							getStatsIcon({
-								intention: review.satisfaction.intention ?? 'neutral'
-							})
-						)}
-						style={{
-							color: getStatsColor({
-								intention: review.satisfaction.intention ?? 'neutral'
-							})
-						}}
-					/>
-					{displayIntention(review.satisfaction.intention ?? 'neutral')}
-				</Badge>
-			)}
-			{review.easy && (
-				<Badge
-					className={cx(classes.badge)}
-					small={true}
-					noIcon={true}
-					severity={getSeverity(review.easy.intention || '')}
-				>
-					<i
-						className={fr.cx(
-							getStatsIcon({
-								intention: review.easy.intention ?? 'neutral'
-							})
-						)}
-						style={{
-							color: getStatsColor({
-								intention: review.easy.intention ?? 'neutral'
-							})
-						}}
-					/>
-					{displayIntention(review.easy.intention ?? 'neutral')}
-				</Badge>
-			)}
-			{review.comprehension && (
-				<Badge
-					className={cx(classes.badge)}
-					small={true}
-					noIcon={true}
-					severity={getSeverity(review.comprehension.intention || '')}
-				>
-					<i
-						className={fr.cx(
-							getStatsIcon({
-								intention: review.comprehension.intention ?? 'neutral'
-							})
-						)}
-						style={{
-							color: getStatsColor({
-								intention: review.comprehension.intention ?? 'neutral'
-							})
-						}}
-					/>
-					{displayIntention(review.comprehension.intention ?? 'neutral')}
-				</Badge>
-			)}
-			<Badge
-				className={cx(classes.badge)}
-				severity={review.verbatim ? 'info' : 'error'}
-			>
-				{review.verbatim ? 'Verbatim' : 'Non'}
-			</Badge>
-			{review.button_id ? (
-				<div className={cx(classes.badge)}>
-					{retrieveButtonName(review.button_id)}
+		<div className={cx(classes.container)}>
+			<div className={cx(classes.lineContainer)}>
+				<div className={cx(classes.date)}>
+					{formatDateToFrenchString(
+						review.created_at?.toISOString().split('T')[0] || ''
+					)}
 				</div>
-			) : (
-				<div className={cx(classes.badge)}>Pas de source</div>
-			)}
-			<Button
-				priority="secondary"
-				iconPosition="right"
-				iconId="fr-icon-arrow-down-s-fill"
-				size="small"
-			>
-				{' '}
-				Plus d'infos
-			</Button>
+				{review.satisfaction && (
+					<Badge
+						className={cx(classes.badge)}
+						small={true}
+						noIcon={true}
+						severity={getSeverity(review.satisfaction.intention || '')}
+					>
+						<i
+							className={fr.cx(
+								getStatsIcon({
+									intention: review.satisfaction.intention ?? 'neutral'
+								})
+							)}
+							style={{
+								color: getStatsColor({
+									intention: review.satisfaction.intention ?? 'neutral'
+								})
+							}}
+						/>
+						{displayIntention(review.satisfaction.intention ?? 'neutral')}
+					</Badge>
+				)}
+				{review.easy && (
+					<Badge
+						className={cx(classes.badge)}
+						small={true}
+						noIcon={true}
+						severity={getSeverity(review.easy.intention || '')}
+					>
+						<i
+							className={fr.cx(
+								getStatsIcon({
+									intention: review.easy.intention ?? 'neutral'
+								})
+							)}
+							style={{
+								color: getStatsColor({
+									intention: review.easy.intention ?? 'neutral'
+								})
+							}}
+						/>
+						{displayIntention(review.easy.intention ?? 'neutral')}
+					</Badge>
+				)}
+				{review.comprehension && (
+					<Badge
+						className={cx(classes.badge)}
+						small={true}
+						noIcon={true}
+						severity={getSeverity(review.comprehension.intention || '')}
+					>
+						<i
+							className={fr.cx(
+								getStatsIcon({
+									intention: review.comprehension.intention ?? 'neutral'
+								})
+							)}
+							style={{
+								color: getStatsColor({
+									intention: review.comprehension.intention ?? 'neutral'
+								})
+							}}
+						/>
+						{displayIntention(review.comprehension.intention ?? 'neutral')}
+					</Badge>
+				)}
+				<Badge
+					className={cx(classes.badge)}
+					noIcon
+					severity={review.verbatim ? 'info' : 'error'}
+				>
+					{review.verbatim ? 'Verbatim' : 'Non'}
+				</Badge>
+				{review.button_id ? (
+					<div className={cx(classes.badge)}>
+						{retrieveButtonName(review.button_id)}
+					</div>
+				) : (
+					<div className={cx(classes.badge)}>Pas de source</div>
+				)}
+				<Button
+					priority="secondary"
+					iconPosition="right"
+					iconId="fr-icon-arrow-down-s-fill"
+					size="small"
+					onClick={() => {
+						setDisplayMoreInfo(!displayMoreInfo);
+					}}
+				>
+					{' '}
+					Plus d'infos
+				</Button>
+			</div>
+			{displayMoreInfo && <ReviewLineMoreInfos review={review} />}
 		</div>
 	);
 };
 
 const useStyles = tss.create({
+	container: {
+		display: 'flex',
+		flexDirection: 'column',
+		border: '1px solid',
+		borderColor: fr.colors.decisions.border.default.grey.default,
+		marginBottom: 12
+	},
 	lineContainer: {
 		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		border: '1px solid',
-		borderColor: fr.colors.decisions.border.default.grey.default,
 		padding: 12,
-		marginBottom: 12,
 		gap: 12
 	},
 	date: {

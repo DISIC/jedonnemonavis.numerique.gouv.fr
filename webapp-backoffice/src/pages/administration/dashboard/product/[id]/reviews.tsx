@@ -177,7 +177,8 @@ const ProductReviewsPage = (props: Props) => {
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--left'
+					'fr-grid-row--left',
+					'fr-mt-4v'
 				)}
 			>
 				<div className={fr.cx('fr-col-3')}>
@@ -221,7 +222,7 @@ const ProductReviewsPage = (props: Props) => {
 					>
 						{reviews.length > 0 && nbPages > 0 && (
 							<>
-								<div className={fr.cx('fr-col-12')}>
+								<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
 									Avis de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}
