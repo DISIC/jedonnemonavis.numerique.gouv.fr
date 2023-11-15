@@ -13,6 +13,8 @@ generator zod {
   addInputTypeValidation = false
   addIncludeType         = false
   addSelectType          = false
+  createRelationValuesTypes = true
+  createPartialTypes = true
 }
 
 enum UserRole {

@@ -55,3 +55,18 @@ export function extractDomainFromEmail(email: string): string | null {
 		return null;
 	}
 }
+
+export const getSeverity = (intention: string) => {
+	switch (intention) {
+		case 'bad':
+			return 'error';
+		case 'medium':
+			return 'new';
+		case 'good':
+			return 'success';
+		case 'neutral':
+			return 'info';
+		default:
+			return 'info';
+	}
+};
