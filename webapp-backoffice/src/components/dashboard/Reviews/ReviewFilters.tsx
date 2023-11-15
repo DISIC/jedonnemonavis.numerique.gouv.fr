@@ -5,36 +5,67 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	onClick: (sort: string) => void;
 	sort: string;
+	displayMode: 'reviews' | 'verbatim';
 }
 
 const ReviewFilters = (props: Props) => {
-	const { onClick } = props;
+	const { onClick, displayMode } = props;
 
 	const { cx, classes } = useStyles({});
 
-	const sortList = [
+	const [sortList, setSortList] = React.useState<
 		{
-			label: 'Date',
-			code:
-				props.sort === 'created_at:desc' ? 'created_at:asc' : 'created_at:desc'
-		},
+			label: string;
+			code?: string;
+		}[]
+	>([]);
 
-		{
-			label: 'Satisfaction'
-		},
-		{
-			label: 'Facilité'
-		},
-		{
-			label: 'Langage'
-		},
-		{
-			label: 'Verbatim'
-		},
-		{
-			label: 'Source'
+	React.useEffect(() => {
+		if (displayMode === 'reviews') {
+			setSortList([
+				{
+					label: 'Date',
+					code:
+						props.sort === 'created_at:desc'
+							? 'created_at:asc'
+							: 'created_at:desc'
+				},
+
+				{
+					label: 'Satisfaction'
+				},
+				{
+					label: 'Facilité'
+				},
+				{
+					label: 'Langage'
+				},
+				{
+					label: 'Verbatim'
+				},
+				{
+					label: 'Source'
+				}
+			]);
+		} else {
+			setSortList([
+				{
+					label: 'Date',
+					code:
+						props.sort === 'created_at:desc'
+							? 'created_at:asc'
+							: 'created_at:desc'
+				},
+
+				{
+					label: 'Satisfaction'
+				},
+				{
+					label: 'Verbatim'
+				}
+			]);
 		}
-	];
+	}, [displayMode]);
 
 	return (
 		<div className={cx(classes.lineContainer)}>

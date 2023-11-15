@@ -11,7 +11,6 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;

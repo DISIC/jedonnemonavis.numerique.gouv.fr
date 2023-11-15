@@ -1,5 +1,5 @@
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -12,21 +12,6 @@ import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
-
-	const getSeverity = (intention: string) => {
-		switch (intention) {
-			case 'bad':
-				return 'error';
-			case 'medium':
-				return 'new';
-			case 'good':
-				return 'success';
-			case 'neutral':
-				return 'info';
-			default:
-				return 'info';
-		}
-	};
 
 	const displayIntention = (intention: string) => {
 		switch (intention) {

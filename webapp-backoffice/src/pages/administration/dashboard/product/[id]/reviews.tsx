@@ -13,6 +13,7 @@ import Select from '@codegouvfr/react-dsfr/Select';
 import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
+import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
 
 interface Props {
 	product: Product;
@@ -35,6 +36,10 @@ const ProductReviewsPage = (props: Props) => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
+	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
+		'reviews'
+	);
+	const [buttonId, setButtonId] = React.useState<number>();
 
 	const {
 		data: reviewResults,
@@ -49,7 +54,8 @@ const ProductReviewsPage = (props: Props) => {
 			search: validatedSearch,
 			startDate,
 			sort: sort,
-			endDate
+			endDate,
+			button_id: buttonId
 		},
 		{
 			initialData: {
@@ -60,6 +66,13 @@ const ProductReviewsPage = (props: Props) => {
 			}
 		}
 	);
+
+	const { data: buttonResults } = trpc.button.getList.useQuery({
+		page: currentPage,
+		numberPerPage: numberPerPage,
+		product_id: product.id,
+		isTest: true
+	});
 
 	const {
 		data: reviews,
@@ -185,16 +198,42 @@ const ProductReviewsPage = (props: Props) => {
 					<div className={cx(classes.filterView)}>
 						<label>Vue</label>
 						<div className={fr.cx('fr-mt-2v')}>
-							<Button priority="primary" onClick={() => {}}>
+							<Button
+								priority={displayMode === 'reviews' ? 'primary' : 'secondary'}
+								onClick={() => setDisplayMode('reviews')}
+							>
 								Avis
 							</Button>
-							<Button priority="secondary">Verbatims</Button>
+							<Button
+								priority={displayMode === 'reviews' ? 'secondary' : 'primary'}
+								onClick={() => setDisplayMode('verbatim')}
+							>
+								Verbatims
+							</Button>
 						</div>
 					</div>
 				</div>
 				<div className={fr.cx('fr-col-5')}>
-					<Select label="Sélectionner une source" nativeSelectProps={{}}>
-						<option value="">Toutes les sources</option>
+					<Select
+						label="Sélectionner une source"
+						nativeSelectProps={{
+							onChange: e => {
+								if (e.target.value !== 'undefined') {
+									setButtonId(parseInt(e.target.value));
+								} else {
+									setButtonId(undefined);
+								}
+							}
+						}}
+					>
+						<option value="undefined">Toutes les sources</option>
+						{buttonResults?.data?.map(button => {
+							return (
+								<option key={button.id} value={button.id}>
+									{button.title}
+								</option>
+							);
+						})}
 					</Select>
 				</div>
 				<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
@@ -238,17 +277,31 @@ const ProductReviewsPage = (props: Props) => {
 						)}
 					</div>
 					<div>
-						{reviewsExtended ? (
+						{reviewsExtended.length > 0 ? (
 							<>
-								<ReviewFilters sort={sort} onClick={handleSortChange} />
+								<ReviewFilters
+									displayMode={displayMode}
+									sort={sort}
+									onClick={handleSortChange}
+								/>
 								{reviewsExtended.map((review, index) => {
-									if (review) {
+									if (review && displayMode === 'reviews') {
 										return <ReviewLine key={index} review={review} />;
+									} else if (review && displayMode === 'verbatim') {
+										return <ReviewLineVerbatim key={index} review={review} />;
 									}
 								})}
 							</>
 						) : (
-							<p>Aucun avis disponible </p>
+							<div
+								className={fr.cx(
+									'fr-grid-row',
+									'fr-grid-row--center',
+									'fr-mt-20v'
+								)}
+							>
+								<p>Aucun avis disponible </p>
+							</div>
 						)}
 					</div>
 					{reviewsExtended.length > 0 && (

@@ -14,7 +14,8 @@ export const reviewRouter = router({
 				sort: z.string().optional(),
 				search: z.string().optional(),
 				startDate: z.string().optional(),
-				endDate: z.string().optional()
+				endDate: z.string().optional(),
+				button_id: z.number().optional()
 			})
 		)
 		.output(
@@ -34,13 +35,18 @@ export const reviewRouter = router({
 				search,
 				sort,
 				startDate,
-				endDate
+				endDate,
+				button_id
 			} = input;
 
 			let where: Prisma.ReviewWhereInput = {};
 
 			if (product_id) {
 				where.product_id = product_id;
+			}
+
+			if (button_id) {
+				where.button_id = button_id;
 			}
 
 			if (startDate && endDate) {
