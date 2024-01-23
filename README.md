@@ -97,6 +97,12 @@ Accédez au dossier de l'application NextJS webapp-form :
 cd webapp-form
 ```
 
+Copiez le fichier .env.example :
+
+```bash
+cp .env.example .env
+```
+
 Installez les dépendances nécessaires :
 
 ```bash
