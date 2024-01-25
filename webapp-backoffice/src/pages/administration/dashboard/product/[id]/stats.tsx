@@ -139,7 +139,7 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	console.log(statsTotals);
+	//console.log('stats : ', statsTotals);
 
 	return (
 		<ProductLayout product={product}>

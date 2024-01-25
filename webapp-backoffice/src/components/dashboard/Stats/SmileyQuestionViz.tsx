@@ -49,6 +49,7 @@ const SmileyQuestionViz = ({
 			);
 			if (res.ok) {
 				const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
+				console.log('smiley res : ', jsonResponse)
 
 				updateStatsTotals({
 					[fieldCode]: jsonResponse.metadata.total
@@ -92,6 +93,8 @@ const SmileyQuestionViz = ({
 			value: doc_count,
 			answer_text
 		})) || [];
+
+	console.log('barChart : ', barChartData)
 
 	if (statsTotals[fieldCode] === 0) return;
 

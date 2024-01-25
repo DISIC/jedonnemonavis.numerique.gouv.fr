@@ -64,7 +64,9 @@ const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 		)
 	}));
 
-	if (!resultFieldCodeInterval?.data.length) return;
+	
+	
+	if (!Object.keys(resultFieldCodeInterval?.data || {})) return;
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>

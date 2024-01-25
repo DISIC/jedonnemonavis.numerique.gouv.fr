@@ -52,8 +52,8 @@ const ReviewAverageInterval = ({
 		name: interval,
 		value: average
 	}));
-
-	if (!resultFieldCodeIntervalAverage?.data.length) return;
+	
+	if (!Object.keys(resultFieldCodeIntervalAverage?.data || {})) return;
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
