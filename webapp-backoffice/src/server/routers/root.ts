@@ -7,6 +7,7 @@ import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
+import { answerRouter } from "./answer";
 
 export const appRouter = router({
 	user: userRouter,
@@ -16,7 +17,8 @@ export const appRouter = router({
 	button: buttonRouter,
 	favorite: favoriteRouter,
 	domain: domainRouter,
-	userRequest: userRequestRouter
+	userRequest: userRequestRouter,
+	answer: answerRouter
 });
 
 export type AppRouter = typeof appRouter;
