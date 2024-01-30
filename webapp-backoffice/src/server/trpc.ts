@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { PrismaClient } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
@@ -5,6 +7,8 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { Session } from 'next-auth';
+import { OpenApiMeta } from "trpc-openapi";
+import { Client as ElkClient } from "@elastic/elasticsearch";
 
 // Metadata for protected procedures
 interface Meta {
@@ -17,9 +21,22 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const prisma = new PrismaClient();
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
 
+	const elkClient = new ElkClient({
+	  node: process.env.ELASTIC_HOST as string,
+	  auth: {
+		username: process.env.ELASTIC_USERNAME as string,
+		password: process.env.ELASTIC_PASSWORD as string,
+	  },
+	  tls: {
+		ca: fs.readFileSync(path.resolve(process.cwd(), "./certs/ca/ca.crt")),
+		rejectUnauthorized: false,
+	  },
+	});
+
 	return {
 		prisma,
-		session
+		session,
+		elkClient
 	};
 };
 
@@ -27,7 +44,7 @@ export type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC
 	.context<Context>()
-	.meta<Meta>()
+	.meta<OpenApiMeta>()
 	.create({
 		transformer: SuperJSON,
 		defaultMeta: {

@@ -1,4 +1,5 @@
 import { AnswerIntention } from '@prisma/client';
+import { Answer, Prisma } from "@prisma/client";
 
 export type FieldCodeBoolean = 'difficulties' | 'help' | 'contact_reached';
 export type FieldCodeSmiley =
@@ -24,3 +25,27 @@ export type ElkSimpleAnswerResponse = {
 	];
 	metadata: { total: number; average: number; fieldLabel: string };
 };
+
+export type Buckets = [
+	{ key: string; key_as_string: string; doc_count: number },
+  ];
+  
+  export type BucketsInside = [
+	{
+	  key: string;
+	  key_as_string: string;
+	  doc_count: number;
+	  term: {
+		buckets: Buckets;
+	  };
+	},
+  ];
+
+
+export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
+	product_name: string;
+	product_id: number;
+	button_name: string;
+	button_id: number;
+	created_at: Date;
+  }
