@@ -75,7 +75,7 @@ const ProductModal = (props: Props) => {
 	const { data: entities } = entitiesResult;
 
 	const entityOptions = entities.map(entity => ({
-		label: entity.name,
+		label: `${entity.name} (${entity.acronym})`,
 		value: entity.id
 	}));
 
