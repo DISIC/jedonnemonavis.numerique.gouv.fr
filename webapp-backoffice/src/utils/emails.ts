@@ -138,7 +138,7 @@ export function getInviteEmailHtml(
 	`);
 }
 
-export function getUserRequestEmailHtml() {
+export function getUserRequestAcceptedEmailHtml() {
 	const link = `${process.env.NODEMAILER_BASEURL}/login`;
 
 	return getEmailWithLayout(`
@@ -153,5 +153,18 @@ export function getUserRequestEmailHtml() {
 		</p>
 
 		<a href="${link}" target="_blank">${link}</a>
+	`);
+}
+
+export function getUserRequestRefusedEmailHtml(message?: string) {
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été refusée.		
+		</p>
+
+		${message ? `<p>Message de l'adminstrateur : ${message}</p>` : `<p>Pour plus d'information, contactez la brigade numérique.</p>`}
+		
 	`);
 }
