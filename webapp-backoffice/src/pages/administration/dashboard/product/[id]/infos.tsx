@@ -89,7 +89,7 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>
-					{!isLoadingEntity && <Tag>{entity?.name}</Tag>}
+					{!isLoadingEntity && <Tag>{entity?.name} ({entity?.acronym})</Tag>}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>URLs</h4>
