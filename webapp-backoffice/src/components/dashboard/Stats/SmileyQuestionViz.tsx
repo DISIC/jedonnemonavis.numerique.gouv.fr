@@ -45,7 +45,7 @@ const SmileyQuestionViz = ({
 		],
 		queryFn: async () => {
 			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
+				`${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
 			);
 			if (res.ok) {
 				const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
