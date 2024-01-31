@@ -8,6 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
 import React, { useEffect } from 'react';
@@ -34,6 +35,8 @@ const DashBoardUserRequestUserRequests = () => {
 
 	const [currentUserRequest, setCurrentUserRequest] =
 		React.useState<UserRequestExtended>();
+
+	const [refusedReason, setRefusedReason] = React.useState<string | undefined>();
 
 	const handleCurrentUserRequest = (user_request: UserRequestExtended) => {
 		setCurrentUserRequest(user_request);
@@ -111,7 +114,8 @@ const DashBoardUserRequestUserRequests = () => {
 		if (currentUserRequest) {
 			updateUserRequest.mutate({
 				id: currentUserRequest?.id as number,
-				userRequest: { status: 'refused' }
+				userRequest: { status: 'refused' },
+				message: refusedReason
 			});
 		}
 		onConfirmDeleteModal.close();
@@ -138,13 +142,24 @@ const DashBoardUserRequestUserRequests = () => {
 				title="Rejeter la demande d'accès"
 				handleOnConfirm={() => handleOnConfirmRefuse()}
 			>
-				<>
+				<p>
 					Voulez-vous vraiment rejeter la demande d'accès de{' '}
 					<span className={cx(classes.boldText)}>
 						{`${currentUserRequest?.user?.firstName} ${currentUserRequest?.user?.lastName}`}
 					</span>{' '}
 					?
-				</>
+				</p>
+				<Input
+					label="Explication du refus (optionnel)"
+					textArea
+					nativeTextAreaProps={{
+						onChange: e => {
+							setRefusedReason(e.target.value);
+						},
+						value: refusedReason,
+						name: 'reason'
+					}}
+				/>
 			</OnConfirmModal>
 			<OnConfirmModal
 				modal={onConfirmAcceptModal}
