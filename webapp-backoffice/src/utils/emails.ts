@@ -31,6 +31,11 @@ function getEmailWithLayout(content: string) {
 				.header img {
 					height: 88px;
 				}
+				blockquote {
+					background-color: #f3f3f3;
+					margin: 0;
+					padding: 20px;
+				}
 			</style>
 		</head>
 		<body>
@@ -41,11 +46,11 @@ function getEmailWithLayout(content: string) {
 				${content}
 				<p>
 					Merci,<br/>
-					La brigade
+					La brigade d'intervention Numérique.
 				</p>
 				<div class="footer">
 					<p>
-						Ce message a ete envoyé par la Brigade, l’équipe du <a href="https://design.numerique.gouv.fr/a-propos/" target="_blank">Pôle design des services numériques</a>,
+						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'intervention Numérique</a>,
 						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>. 
 					</p>
 					<p>
@@ -164,7 +169,7 @@ export function getUserRequestRefusedEmailHtml(message?: string) {
 			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été refusée.		
 		</p>
 
-		${message ? `<p>Message de l'adminstrateur : ${message}</p>` : `<p>Pour plus d'information, contactez la brigade numérique.</p>`}
+		${message ? `<p>Message de l'adminstrateur :</p><blockquote>${message}</blockquote><br>` : `<p>Une question ?<br/>Pour plus d'information, contactez <a href="mailto:experts@design.numerique.gouv.fr">La Brigade d’Intervention du Numérique</a>.</p>`}
 		
 	`);
 }
