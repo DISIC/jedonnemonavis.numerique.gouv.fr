@@ -1,34 +1,17 @@
 import { BucketsInside, Buckets, ElkAnswer } from "../../types/custom";
 import { z } from "zod";
-import { router, publicProcedure } from "@/src/server/trpc";
+import { router, publicProcedure, protectedProcedure } from "@/src/server/trpc";
 import { Answer, AnswerIntention } from "@prisma/client";
 import { AnswerIntentionSchema } from "@/prisma/generated/zod";
 
 export const answerRouter = router({
-  getByFieldCode: publicProcedure
-    .meta({ openapi: { method: "GET", path: "/answers/{field_code}" } })
+  getByFieldCode: protectedProcedure
     .input(
       z.object({
         field_code: z.string(),
         product_id: z.string() /* To change to button_id */,
         start_date: z.string(),
         end_date: z.string(),
-      })
-    )
-    .output(
-      z.object({
-        data: z.array(
-          z.object({
-            answer_text: z.string(),
-            intention: z.string(),
-            doc_count: z.number(),
-          })
-        ),
-        metadata: z.object({
-          total: z.number(),
-          average: z.number(),
-          fieldLabel: z.string().optional(),
-        }),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -131,34 +114,13 @@ export const answerRouter = router({
       return { data: buckets, metadata };
     }),
 
-  getByFieldCodeInterval: publicProcedure
-    .meta({
-      openapi: { method: "GET", path: "/answers/interval/{field_code}" },
-    })
+  getByFieldCodeInterval: protectedProcedure
     .input(
       z.object({
         field_code: z.string(),
         product_id: z.string() /* To change to button_id */,
         start_date: z.string(),
         end_date: z.string(),
-      })
-    )
-    .output(
-      z.object({
-        data: z.record(
-          z.string(),
-          z.array(
-            z.object({
-              answer_text: z.string(),
-              intention: z.string(),
-              doc_count: z.number(),
-            })
-          )
-        ),
-        metadata: z.object({
-          total: z.number(),
-          average: z.number(),
-        }),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -263,28 +225,13 @@ export const answerRouter = router({
       return { data: returnValue, metadata };
     }),
 
-  getByFieldCodeIntervalAverage: publicProcedure
-    .meta({
-      openapi: {
-        method: "GET",
-        path: "/answers/interval/average/{field_code}",
-      },
-    })
+  getByFieldCodeIntervalAverage: protectedProcedure
     .input(
       z.object({
         field_code: z.string(),
         product_id: z.string() /* To change to button_id */,
         start_date: z.string(),
         end_date: z.string(),
-      })
-    )
-    .output(
-      z.object({
-        data: z.record(z.string(), z.number()),
-        metadata: z.object({
-          total: z.number(),
-          average: z.number(),
-        }),
       })
     )
     .query(async ({ ctx, input }) => {

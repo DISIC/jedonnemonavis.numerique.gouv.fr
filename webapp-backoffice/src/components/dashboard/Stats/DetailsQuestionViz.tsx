@@ -5,6 +5,7 @@ import { Skeleton } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
+import { trpc } from '@/src/utils/trpc';
 
 const BarVerticalChart = dynamic(
 	() => import('@/src/components/chart/BarVerticalChart'),
@@ -29,30 +30,28 @@ const DetailsQuestionViz = ({
 	const { classes, cx } = useStyles();
 	const { statsTotals, updateStatsTotals } = useStats();
 
-	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } =
-		useQuery({
-			queryKey: [
-				'getAnswerByFieldCodeDetails',
-				fieldCodeMultiple,
-				productId,
-				startDate,
-				endDate
-			],
-			queryFn: async () => {
-				const res = await fetch(
-					`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCodeMultiple}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-				);
-				if (res.ok) {
-					const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
-
-					updateStatsTotals({
-						[fieldCodeMultiple]: jsonResponse.metadata.total
-					});
-
-					return jsonResponse;
+	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } = 
+		trpc.answer.getByFieldCode.useQuery({
+			product_id: productId.toString(), 
+			field_code: fieldCodeMultiple,
+			start_date: startDate,
+			end_date: endDate
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					total: 0,
+					average: 0,
+					fieldLabel: ''
 				}
+			},
+			onSuccess: (data) => {
+				updateStatsTotals({
+					[fieldCodeMultiple]: data.metadata.total
+				});
 			}
-		});
+		})
 
 	if (isLoadingFieldCodeDetails || !resultFieldCodeDetails) {
 		return (

@@ -5,6 +5,7 @@ import { Skeleton } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
+import { trpc } from '@/src/utils/trpc';
 
 const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
@@ -26,29 +27,28 @@ const BooleanQuestionViz = ({
 	const { classes, cx } = useStyles();
 	const { statsTotals, updateStatsTotals } = useStats();
 
-	const { data: resultFieldCode, isLoading: isLoadingFieldCode } = useQuery({
-		queryKey: [
-			'getAnswerByFieldCode',
-			fieldCode,
-			productId,
-			startDate,
-			endDate
-		],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-			);
-			if (res.ok) {
-				const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
-
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } = 
+		trpc.answer.getByFieldCode.useQuery({
+			product_id: productId.toString(), 
+			field_code: fieldCode,
+			start_date: startDate,
+			end_date: endDate
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					total: 0,
+					average: 0,
+					fieldLabel: ''
+				}
+			},
+			onSuccess: (data) => {
 				updateStatsTotals({
-					[fieldCode]: jsonResponse.metadata.total
+					[fieldCode]: data.metadata.total
 				});
-
-				return jsonResponse;
 			}
-		}
-	});
+		})
 
 	if (isLoadingFieldCode || !resultFieldCode) {
 		return (

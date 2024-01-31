@@ -4,7 +4,7 @@ import { tss } from 'tss-react/dsfr';
 import { contextSmileys } from '../../chart/types';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
-import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/src/utils/trpc';
 
 const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
 	ssr: false
@@ -25,26 +25,22 @@ const ReviewAverageInterval = ({
 }: Props) => {
 	const { cx } = useStyles();
 
-	const { data: resultFieldCodeIntervalAverage } = useQuery({
-		queryKey: [
-			'getAnswerByFieldCodeIntervalAverage',
-			fieldCode,
-			productId,
-			startDate,
-			endDate
-		],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/interval/average/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-			);
-			if (res.ok) {
-				return (await res.json()) as {
-					data: Record<string, number>;
-					metadata: { total: number; average: number };
-				};
+	const { data: resultFieldCodeIntervalAverage, isLoading } = 
+		trpc.answer.getByFieldCodeIntervalAverage.useQuery({
+			product_id: productId.toString(), 
+			field_code: fieldCode,
+			start_date: startDate,
+			end_date: endDate
+		},
+		{
+			initialData: {
+				data: {},
+				metadata: {
+					total: 0,
+					average: 0
+				}
 			}
-		}
-	});
+		})
 
 	const barChartData = Object.entries(
 		resultFieldCodeIntervalAverage?.data ?? {}
