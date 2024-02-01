@@ -37,3 +37,13 @@ const UserRequestWithUser = Prisma.validator<Prisma.UserRequestDefaultArgs>()({
 export type UserRequestWithUser = Prisma.UserRequestGetPayload<
 	typeof UserRequestWithUser
 >;
+
+const UserWithAccessRight = Prisma.validator<Prisma.UserDefaultArgs>()({
+	include: {
+		accessRights: true
+	}
+});
+
+export type UserWithAccessRight = Prisma.UserGetPayload<
+	typeof UserWithAccessRight
+>;

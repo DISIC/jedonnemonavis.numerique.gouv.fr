@@ -67,6 +67,7 @@ model User {
   accessRights          AccessRight[]
   entities              Entity[]
   favorites             Favorite[]
+  api_keys              ApiKey[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -140,6 +141,14 @@ model Button {
   updated_at DateTime @updatedAt
 }
 
+model ApiKey {
+  id      Int @id @default(autoincrement())
+  key     String
+  scope   UserRole
+  user    User @relation(fields: [user_id], references: [id])
+  user_id Int
+}
+
 model Product {
   id           Int           @id @default(autoincrement())
   title        String
@@ -155,6 +164,7 @@ model Product {
   accessRights AccessRight[]
   favorites    Favorite[]
   reviews      Review[]
+  is_top_250   Boolean?
 }
 
 model AccessRight {

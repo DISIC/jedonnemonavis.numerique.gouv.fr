@@ -92,8 +92,6 @@ const SmileyQuestionViz = ({
 			answer_text
 		})) || [];
 
-	console.log('barChart : ', barChartData)
-
 	if (statsTotals[fieldCode] === 0) return;
 
 	return (
