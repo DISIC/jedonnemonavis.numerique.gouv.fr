@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { AccessRight, ApiKey, PrismaClient, User } from '@prisma/client';
+import { ApiKey, PrismaClient } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import SuperJSON from 'superjson';

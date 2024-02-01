@@ -1,8 +1,7 @@
 import { BucketsInside, Buckets, ElkAnswer } from "../../types/custom";
 import { z } from "zod";
-import { router, publicProcedure, protectedProcedure } from "@/src/server/trpc";
-import { Answer, AnswerIntention } from "@prisma/client";
-import { AnswerIntentionSchema } from "@/prisma/generated/zod";
+import { router, protectedProcedure } from "@/src/server/trpc";
+import { AnswerIntention } from "@prisma/client";
 
 export const answerRouter = router({
   getByFieldCode: protectedProcedure
@@ -16,6 +15,8 @@ export const answerRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const { field_code, product_id, start_date, end_date } = input;
+
+      console.log('field_code : ', field_code)
 
       const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
         index: "jdma-answers",
@@ -55,7 +56,7 @@ export const answerRouter = router({
         size: 0,
       });
 
-      console.log('fieldCodeAggs : ', fieldCodeAggs, fieldCodeAggs.aggregations.term.buckets)
+      // console.log('fieldCodeAggs : ', fieldCodeAggs, fieldCodeAggs.aggregations.term.buckets)
 
       const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
         ?.buckets as Buckets;

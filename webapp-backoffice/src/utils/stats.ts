@@ -1,5 +1,8 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { AnswerIntention } from '@prisma/client';
+import { Buckets, ElkAnswer, OpenProduct, ProductMapEntry } from '../types/custom';
+import { Client as ElkClient } from "@elastic/elasticsearch";
+import { Context } from '../server/trpc';
 
 export const getIntentionFromAverage = (average: number): AnswerIntention => {
 	return average >= 8
@@ -76,3 +79,103 @@ export const getStatsAnswerText = ({
 
 	return currentAnswerText.charAt(0).toUpperCase() + currentAnswerText.slice(1);
 };
+
+export const fetchAndFormatData = async ({
+	ctx,
+	field_codes,
+	product_ids,
+	start_date,
+	end_date
+}: {
+	ctx: Context,
+	field_codes: string[],
+	product_ids: string[] | number[],
+	start_date: string,
+	end_date: string
+}) => {
+	console.log('field_codes : ', field_codes)
+	console.log('product_ids : ', product_ids)
+	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
+		index: "jdma-answers",
+		query: {
+		  bool: {
+			must: [
+			  {
+				terms: {
+				  field_code: field_codes,
+				},
+			  },
+			  {
+				terms: {
+				  product_id: product_ids,
+				},
+			  },
+			  {
+				range: {
+				  created_at: {
+					gte: start_date,
+					lte: end_date,
+				  },
+				},
+			  },
+			],
+		  },
+		},
+		aggs: {
+		  term: {
+			terms: {
+			  script:
+				'doc["product_id"].value + "_" + doc["product_name.keyword"].value + "_" + doc["field_code.keyword"].value + "_" + doc["field_label.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["answer_text.keyword"].value',
+			  size: 1000,
+			},
+		  },
+		},
+		size: 0,
+	  });
+
+	  
+	  const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
+		?.buckets as Buckets;
+	  
+	  let result: OpenProduct[] = [];
+	  
+	  let productMap: { [productId: string]: ProductMapEntry } = {};
+
+	  tmpBuckets.forEach(bucket => {
+		  const [productId, productName, fieldCode, fieldLabel, intention, answerText] = bucket.key.split('_');
+		  const docCount = bucket.doc_count;
+
+		  if (!productMap.hasOwnProperty(productId)) {
+			  const newProduct = {
+				  product_id: productId,
+				  product_name: productName,
+				  data: []
+			  };
+			  result.push(newProduct);
+			  productMap[productId] = {
+				  productIndex: result.length - 1,
+				  categories: {}
+			  };
+		  }
+
+		  const productIndex = productMap[productId].productIndex;
+		  if (!productMap[productId].categories.hasOwnProperty(fieldCode)) {
+			  const newCategory = {
+				  category: fieldCode,
+				  label: fieldLabel,
+				  number_hits: []
+			  };
+			  result[productIndex].data.push(newCategory);
+			  productMap[productId].categories[fieldCode] = result[productIndex].data.length - 1;
+		  }
+
+		  const categoryIndex = productMap[productId].categories[fieldCode];
+		  result[productIndex].data[categoryIndex].number_hits.push({
+			  intention: intention,
+			  label: answerText,
+			  count: docCount
+		  });
+	  });
+
+	  return result;
+}

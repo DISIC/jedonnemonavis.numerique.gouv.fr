@@ -8,6 +8,7 @@ import { favoriteRouter } from './favorite';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
 import { answerRouter } from "./answer";
+import { openAPIRouter } from "./openapi";
 
 export const appRouter = router({
 	user: userRouter,
@@ -18,7 +19,8 @@ export const appRouter = router({
 	favorite: favoriteRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,
-	answer: answerRouter
+	answer: answerRouter,
+	openAPI: openAPIRouter
 });
 
 export type AppRouter = typeof appRouter;

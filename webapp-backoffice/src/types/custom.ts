@@ -1,17 +1,10 @@
 import { AnswerIntention } from '@prisma/client';
 import { Answer, Prisma } from "@prisma/client";
+import { FIELD_CODE_BOOLEAN_VALUES, FIELD_CODE_DETAILS_VALUES, FIELD_CODE_SMILEY_VALUES } from '../utils/helpers';
 
-export type FieldCodeBoolean = 'difficulties' | 'help' | 'contact_reached';
-export type FieldCodeSmiley =
-	| 'satisfaction'
-	| 'easy'
-	| 'comprehension'
-	| 'contact_satisfaction';
-export type FieldCodeDetails =
-	| 'difficulties_details'
-	| 'contact'
-	| 'contact_channels'
-	| 'help_details';
+export type FieldCodeBoolean = typeof FIELD_CODE_BOOLEAN_VALUES[number];
+export type FieldCodeSmiley = typeof FIELD_CODE_SMILEY_VALUES[number];
+export type FieldCodeDetails = typeof FIELD_CODE_DETAILS_VALUES[number];
 
 export type FieldCode = FieldCodeBoolean | FieldCodeSmiley | FieldCodeDetails;
 
@@ -48,4 +41,29 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
 	button_name: string;
 	button_id: number;
 	created_at: Date;
+  }
+
+export type Hit = {
+	intention: string;
+	label: string;
+	count: number;
+  };
+  
+  export type CategoryData = {
+	category: string;
+	label: string;
+	number_hits: Hit[];
+  };
+  
+  export type OpenProduct = {
+	product_id: string;
+	product_name: string;
+	data: CategoryData[];
+  };
+
+  export interface ProductMapEntry {
+	  productIndex: number;
+	  categories: {
+		  [category: string]: number; // clés de type string mappées à des nombres
+	  };
   }
