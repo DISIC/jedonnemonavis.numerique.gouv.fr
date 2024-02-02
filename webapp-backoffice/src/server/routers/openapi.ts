@@ -59,7 +59,7 @@ export const openAPIRouter = router({
 
         const result = await fetchAndFormatData({
             ctx, 
-            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_DETAILS_VALUES, ...FIELD_CODE_SMILEY_VALUES], 
+            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_SMILEY_VALUES], 
             product_ids: product_ids.length > 0 ? product_ids : list_250_ids, 
             start_date, 
             end_date
@@ -121,7 +121,7 @@ export const openAPIRouter = router({
 
         const result = await fetchAndFormatData({
             ctx, 
-            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_DETAILS_VALUES, ...FIELD_CODE_SMILEY_VALUES],
+            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_SMILEY_VALUES],
             product_ids: product_ids.length > 0 ? product_ids : ctx.user_api.accessRights.map((data: AccessRight) => {return data.product_id}), 
             start_date, 
             end_date

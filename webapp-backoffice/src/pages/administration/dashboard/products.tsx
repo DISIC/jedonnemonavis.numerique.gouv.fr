@@ -1,3 +1,4 @@
+import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
@@ -20,6 +21,11 @@ import { tss } from 'tss-react/dsfr';
 const modal = createModal({
 	id: 'product-modal',
 	isOpenedByDefault: false
+});
+
+const api_modal = createModal({
+    id: "api-modal", 
+    isOpenedByDefault: false
 });
 
 const DashBoard = () => {
@@ -103,18 +109,40 @@ const DashBoard = () => {
 					}
 				}}
 			/>
+			<ApiKeyModal
+				modal={api_modal} />
+				
+			<api_modal.Component title="Api Key Modal">
+				<h1>Foo modal content</h1>
+			</api_modal.Component>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
 							{session?.user?.role !== 'admin' ? 'Mes démarches' : 'Démarches'}
 						</h1>
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-7'),
+							fr.cx('fr-col-12', 'fr-col-md-4'),
+							classes.buttonContainer
+						)}
+					>
+						<Button
+							priority="secondary"
+							iconId="fr-icon-add-circle-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={api_modal.buttonProps}
+						>
+							Mes clés API
+						</Button>
+					</div>
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-4'),
 							classes.buttonContainer
 						)}
 					>
