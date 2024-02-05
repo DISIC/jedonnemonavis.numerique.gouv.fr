@@ -60,7 +60,7 @@ export const openAPIRouter = router({
         const result = await fetchAndFormatData({
             ctx, 
             field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_SMILEY_VALUES], 
-            product_ids: product_ids.length > 0 ? product_ids : list_250_ids, 
+            product_ids: product_ids.length > 0 ?  list_250_ids.filter(value => product_ids.includes(value)) : list_250_ids, 
             start_date, 
             end_date
         })
@@ -117,12 +117,12 @@ export const openAPIRouter = router({
             }
         })
 
-        console.log('userl linked to api', ctx.user_api)
+        const authorized_products_ids: number[] = ctx.user_api.accessRights.map((data: AccessRight) => {return data.product_id})
 
         const result = await fetchAndFormatData({
             ctx, 
             field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_SMILEY_VALUES],
-            product_ids: product_ids.length > 0 ? product_ids : ctx.user_api.accessRights.map((data: AccessRight) => {return data.product_id}), 
+            product_ids: product_ids.length > 0 ? authorized_products_ids.filter(value => product_ids.includes(value)) : authorized_products_ids, 
             start_date, 
             end_date
         })
