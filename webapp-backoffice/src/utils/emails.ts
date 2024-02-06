@@ -45,12 +45,12 @@ function getEmailWithLayout(content: string) {
 				</div>
 				${content}
 				<p>
-					Merci,<br/>
-					La brigade d'intervention Numérique.
+					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
+					La Brigade d'Intervention du Numérique (BIN).
 				</p>
 				<div class="footer">
 					<p>
-						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'intervention Numérique</a>,
+						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
 						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>. 
 					</p>
 					<p>
@@ -169,7 +169,7 @@ export function getUserRequestRefusedEmailHtml(message?: string) {
 			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été refusée.		
 		</p>
 
-		${message ? `<p>Message de l'adminstrateur :</p><blockquote>${message}</blockquote><br>` : `<p>Une question ?<br/>Pour plus d'information, contactez <a href="mailto:experts@design.numerique.gouv.fr">La Brigade d’Intervention du Numérique</a>.</p>`}
+		${message ? `<p>Message de l'adminstrateur :</p><blockquote>${message}</blockquote><br>` : ``}
 		
 	`);
 }
