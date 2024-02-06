@@ -62,9 +62,8 @@ export const apiKeyRouter = router({
 					user: true
 				}
 			})
-
-			if(keyFound.user.id === ctx_user.id) {	
-				const deleteKey = await ctx.prisma.apiKey.delete({
+			if(keyFound && keyFound.user.id === parseInt(ctx_user.id)) {	
+				await ctx.prisma.apiKey.delete({
 					where: {
 						id: keyFound.id
 					}

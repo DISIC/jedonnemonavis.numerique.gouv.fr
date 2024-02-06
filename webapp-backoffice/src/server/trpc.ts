@@ -22,7 +22,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const prisma = new PrismaClient();
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
 	const req = opts.req
-	const user_api: UserWithAccessRight = {}
+	const user_api = null as UserWithAccessRight | null
 
 	const elkClient = new ElkClient({
 	  node: process.env.ELASTIC_HOST as string,
@@ -109,7 +109,7 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 
 		const apiKey = ctx.req.headers.authorization.split(' ')[1];
 
-		const checkApiKey: ApiKey = await ctx.prisma.apiKey.findFirst({
+		const checkApiKey = await ctx.prisma.apiKey.findFirst({
 			where: {
 				key: apiKey
 			},
