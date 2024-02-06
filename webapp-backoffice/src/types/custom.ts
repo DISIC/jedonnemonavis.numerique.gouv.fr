@@ -2,9 +2,9 @@ import { AnswerIntention } from '@prisma/client';
 import { Answer, Prisma } from "@prisma/client";
 import { FIELD_CODE_BOOLEAN_VALUES, FIELD_CODE_DETAILS_VALUES, FIELD_CODE_SMILEY_VALUES } from '../utils/helpers';
 
-export type FieldCodeBoolean = typeof FIELD_CODE_BOOLEAN_VALUES[number];
-export type FieldCodeSmiley = typeof FIELD_CODE_SMILEY_VALUES[number];
-export type FieldCodeDetails = typeof FIELD_CODE_DETAILS_VALUES[number];
+export type FieldCodeBoolean = typeof FIELD_CODE_BOOLEAN_VALUES[number]['slug'];
+export type FieldCodeSmiley = typeof FIELD_CODE_SMILEY_VALUES[number]['slug'];
+export type FieldCodeDetails = typeof FIELD_CODE_DETAILS_VALUES[number]['slug'];
 
 export type FieldCode = FieldCodeBoolean | FieldCodeSmiley | FieldCodeDetails;
 

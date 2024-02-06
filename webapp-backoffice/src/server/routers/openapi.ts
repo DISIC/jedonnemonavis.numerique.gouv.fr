@@ -13,7 +13,7 @@ const description = `Ce point d'accès offre les options de filtrage suivantes :
                             <b>filed_codes : </b> Les codes des questions posées aux utilisateurs. Si vide, retourne les données pour l'esemble des codes. <br />
                             Voici la correspondance entre les field_codes et les questions : <br />
                             ${[ ...FIELD_CODE_BOOLEAN_VALUES, ...FIELD_CODE_SMILEY_VALUES].map((code) => {
-                                return `- ${code.code} : ${code.question} <br />`
+                                return `- ${code.slug} : ${code.question} <br />`
                             }).join().replace(/,/g, "")}
                         </li>
                         <li>
@@ -93,7 +93,7 @@ export const openAPIRouter = router({
 
         const result = await fetchAndFormatData({
             ctx, 
-            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES.map(code => code.code), ...FIELD_CODE_SMILEY_VALUES.map(code => code.code)], 
+            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug), ...FIELD_CODE_SMILEY_VALUES.map(code => code.slug)], 
             product_ids: product_ids.length > 0 ?  list_250_ids.filter(value => product_ids.includes(value)) : list_250_ids, 
             start_date, 
             end_date
@@ -166,7 +166,7 @@ export const openAPIRouter = router({
 
         const result = await fetchAndFormatData({
             ctx, 
-            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES.map(code => code.code), ...FIELD_CODE_SMILEY_VALUES.map(code => code.code)],
+            field_codes: field_codes.length > 0 ? field_codes : [ ...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug), ...FIELD_CODE_SMILEY_VALUES.map(code => code.slug)],
             product_ids: product_ids.length > 0 ? authorized_products_ids.filter(value => product_ids.includes(value)) : authorized_products_ids, 
             start_date, 
             end_date
