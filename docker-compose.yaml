@@ -18,10 +18,7 @@ services:
       memlock:
         soft: -1
         hard: -1
-    deploy:
-      resources:
-        limits:
-          mem_limit: 4G
+    mem_limit: 4g
 
   kibana:
     build: docker/kibana

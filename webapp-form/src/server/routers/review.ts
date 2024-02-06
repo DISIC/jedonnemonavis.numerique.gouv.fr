@@ -74,41 +74,4 @@ export const reviewRouter = router({
 
       return { data: newReview };
     }),
-
-  getList: publicProcedure
-    .meta({ openapi: { method: 'GET', path: '/reviews/list' } })
-    .input(
-      z.object({
-        numberPerPage: z.number(),
-        page: z.number().default(1),
-        product_id: z.number().optional()
-      })
-    )
-    .output(
-      z.object({
-        data: z.array(ReviewSchema),
-        metadata: z.object({
-          count: z.number()
-        })
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const { numberPerPage, page, product_id } = input;
-
-      let where: Prisma.ReviewWhereInput = {};
-
-      if (product_id) {
-        where.product_id = product_id;
-      }
-
-      const entities = await ctx.prisma.review.findMany({
-        where,
-        take: numberPerPage,
-        skip: (page - 1) * numberPerPage
-      });
-
-      const count = await ctx.prisma.review.count({ where });
-
-      return { data: entities, metadata: { count } };
-    })
 });

@@ -127,6 +127,56 @@ export const productRouter = router({
 			return { data: products, metadata: { count } };
 		}),
 
+	getXWikiIds: publicProcedure
+		.meta({ openapi: { method: 'GET', path: '/products/xwiki' } })
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1)
+			})
+		)
+		.output(
+			z.object({
+				data: z.array(
+					z.object({
+						id: z.number(),
+						xwiki_id: z.number().nullable(),
+						title: z.string(),
+						buttons: z.array(
+							z.object({
+								id: z.number(),
+								title: z.string()
+							})
+						)
+					})
+				),
+				metadata: z.object({ count: z.number() })
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { numberPerPage, page } = input;
+
+			const products = await ctx.prisma.product.findMany({
+				take: numberPerPage,
+				skip: numberPerPage * (page - 1),
+				include: {
+					buttons: true
+				}
+			});
+
+			const count = await ctx.prisma.product.count();
+
+			return {
+				data: products.map(product => ({
+					id: product.id,
+					xwiki_id: product.xwiki_id,
+					title: product.title,
+					buttons: product.buttons.map(b => ({ id: b.id, title: b.title }))
+				})),
+				metadata: { count }
+			};
+		}),
+
 	create: protectedProcedure
 		.input(ProductUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input: productPayload }) => {

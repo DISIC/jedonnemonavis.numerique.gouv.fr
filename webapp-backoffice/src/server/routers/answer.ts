@@ -16,8 +16,6 @@ export const answerRouter = router({
     .query(async ({ ctx, input }) => {
       const { field_code, product_id, start_date, end_date } = input;
 
-      console.log('field_code : ', field_code)
-
       const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
         index: "jdma-answers",
         query: {
