@@ -49,8 +49,6 @@ const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const { statsTotals } = useStats();
 
-	const [nbReviews, setNbReviews] = useState<number | null>(null);
-
 	const [startDate, setStartDate] = useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
@@ -78,24 +76,20 @@ const ProductStatPage = (props: Props) => {
 			}
 		);
 
-	const fetchNbReviews = async () => {
-		const res = await fetch(
-			`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/reviews/list?product_id=${product.id}&page=1&numberPerPage=0`
+	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
+		trpc.review.getList.useQuery(
+			{
+				numberPerPage: 0,
+				page: 1,
+				product_id: product.id
+			}
 		);
-
-		const data = (await res.json()) as { metadata: { count: number } };
-
-		setNbReviews(data.metadata.count);
-	};
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
+	const nbReviews = reviewsData?.metadata.count
 
-	useEffect(() => {
-		fetchNbReviews();
-	}, []);
-
-	if (nbReviews === null || isLoadingButtons) {
+	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<ProductLayout product={product}>
 				<h1>Statistiques</h1>

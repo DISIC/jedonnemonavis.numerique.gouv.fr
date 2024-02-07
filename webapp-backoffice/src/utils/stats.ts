@@ -1,8 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { AnswerIntention } from '@prisma/client';
-import { Buckets, ElkAnswer, OpenProduct, ProductMapEntry } from '../types/custom';
-import { Client as ElkClient } from "@elastic/elasticsearch";
 import { Context } from '../server/trpc';
+import { Buckets, ElkAnswer, OpenProduct, ProductMapEntry } from '../types/custom';
 
 export const getIntentionFromAverage = (average: number): AnswerIntention => {
 	return average >= 8
@@ -93,8 +92,6 @@ export const fetchAndFormatData = async ({
 	start_date: string,
 	end_date: string
 }) => {
-	console.log('field_codes : ', field_codes)
-	console.log('product_ids : ', product_ids)
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: "jdma-answers",
 		query: {

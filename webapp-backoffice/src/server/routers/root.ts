@@ -10,6 +10,7 @@ import { userRequestRouter } from './userRequest';
 import { answerRouter } from "./answer";
 import { openAPIRouter } from "./openapi";
 import { apiKeyRouter } from "./apiKey";
+import { reviewRouter } from "./review";
 
 export const appRouter = router({
 	user: userRouter,
@@ -22,7 +23,8 @@ export const appRouter = router({
 	userRequest: userRequestRouter,
 	answer: answerRouter,
 	openAPI: openAPIRouter,
-	apiKey: apiKeyRouter
+	apiKey: apiKeyRouter,
+	review: reviewRouter
 });
 
 export type AppRouter = typeof appRouter;

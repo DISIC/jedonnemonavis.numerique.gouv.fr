@@ -18,6 +18,7 @@ export const answerRouter = router({
 
       const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
         index: "jdma-answers",
+        track_total_hits: true,
         query: {
           bool: {
             must: [
@@ -127,6 +128,7 @@ export const answerRouter = router({
 
       const fieldCodeIntervalAggs = await ctx.elkClient.search<ElkAnswer[]>({
         index: "jdma-answers",
+        track_total_hits: true,
         query: {
           bool: {
             must: [
