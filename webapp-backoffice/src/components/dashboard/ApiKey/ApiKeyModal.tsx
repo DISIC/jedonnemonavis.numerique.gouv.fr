@@ -57,8 +57,10 @@ const ApiKeyModal = (props: Props) => {
 	};
 
 	const handleDelteKey = async (key: string) => {
-		const deletedKey = await deleteKey.mutateAsync({ key: key });
-		RefectchKeys();
+		if (confirm('Êtes vous sûr de vouloir supprimer cette clé ?')) {
+			await deleteKey.mutateAsync({ key: key });
+			RefectchKeys();
+		}
 	};
 
 	return (
@@ -73,8 +75,16 @@ const ApiKeyModal = (props: Props) => {
 			title={'Gérer mes clés API'}
 			size="large"
 		>
+			<p>
+				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
+					Voir la documentation de l'API
+				</Link>
+			</p>
+			
 			{!isLoadingKeys && apiKeys.length === 0 && (
-				<p>Vous n'avez aucune clé API pour le moment.</p>
+					<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<p className={fr.cx('fr-mb-0')}>Vous n'avez aucune clé API pour le moment.</p>
+				</div>
 			)}
 
 			{isLoadingKeys ? (
@@ -88,7 +98,8 @@ const ApiKeyModal = (props: Props) => {
 							className={fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
-								'fr-grid-row--top'
+								'fr-grid-row--top',
+								'fr-grid-row--middle'
 							)}
 						>
 							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
@@ -105,7 +116,7 @@ const ApiKeyModal = (props: Props) => {
 									size="small"
 									iconId="fr-icon-delete-bin-line"
 									iconPosition="right"
-									className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+									className={cx(classes.iconError)}
 									onClick={() => handleDelteKey(key.key)}
 								>
 									Supprimer
@@ -115,12 +126,6 @@ const ApiKeyModal = (props: Props) => {
 					</div>
 				))
 			)}
-
-			<p>
-				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
-					Voir la documentation de l'API
-				</Link>
-			</p>
 
 			<Button
 				priority="secondary"
@@ -132,6 +137,7 @@ const ApiKeyModal = (props: Props) => {
 			>
 				Ajouter une clé API
 			</Button>
+
 		</modal.Component>
 	);
 };

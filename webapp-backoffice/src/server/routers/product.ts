@@ -177,7 +177,11 @@ export const productRouter = router({
 					id: product.id,
 					xwiki_id: product.xwiki_id,
 					title: product.title,
-					buttons: product.buttons.map(b => ({ id: b.id, title: b.title, xwiki_title: b.xwiki_title }))
+					buttons: product.buttons.map(b => ({
+						id: b.id,
+						title: b.title,
+						xwiki_title: b.xwiki_title
+					}))
 				})),
 				metadata: { count }
 			};
