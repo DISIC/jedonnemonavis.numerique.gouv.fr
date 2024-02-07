@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure, protectedApiProcedure } from '@/src/server/trpc';
+import {
+	router,
+	publicProcedure,
+	protectedProcedure,
+	protectedApiProcedure
+} from '@/src/server/trpc';
 import {
 	ProductUncheckedCreateInputSchema,
 	ProductUncheckedUpdateInputSchema
@@ -62,7 +67,7 @@ export const productRouter = router({
 									user_email: contextUser.email,
 									status: 'carrier'
 								}
-						  }
+							}
 						: {}
 			};
 
@@ -214,5 +219,5 @@ export const productRouter = router({
 			});
 
 			return { data: updatedProduct };
-		}),
+		})
 });

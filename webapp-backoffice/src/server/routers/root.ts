@@ -7,10 +7,10 @@ import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
-import { answerRouter } from "./answer";
-import { openAPIRouter } from "./openapi";
-import { apiKeyRouter } from "./apiKey";
-import { reviewRouter } from "./review";
+import { answerRouter } from './answer';
+import { openAPIRouter } from './openapi';
+import { apiKeyRouter } from './apiKey';
+import { reviewRouter } from './review';
 
 export const appRouter = router({
 	user: userRouter,

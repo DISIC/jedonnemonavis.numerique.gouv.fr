@@ -44,7 +44,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 						target: '_self'
 					},
 					text: 'Connexion / Inscription'
-			  }
+				}
 			: {
 					iconId: 'ri-logout-circle-line',
 					buttonProps: {
@@ -53,7 +53,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 						}
 					},
 					text: 'Déconnexion'
-			  }
+				}
 	];
 
 	const navigationItems = [];
@@ -160,6 +160,6 @@ const useStyles = tss
 							fontWeight: 'bold'
 						}
 					}
-			  }
+				}
 			: {}
 	}));

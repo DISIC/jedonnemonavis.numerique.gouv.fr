@@ -23,22 +23,24 @@ type Props = {
 const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 	const { cx } = useStyles();
 
-	const { data: resultFieldCodeInterval, isLoading } = 
-		trpc.answer.getByFieldCodeInterval.useQuery({
-			product_id: productId.toString(), 
-			field_code: fieldCode,
-			start_date: startDate,
-			end_date: endDate
-		},
-		{
-			initialData: {
-				data: {},
-				metadata: {
-					total: 0,
-					average: 0
+	const { data: resultFieldCodeInterval, isLoading } =
+		trpc.answer.getByFieldCodeInterval.useQuery(
+			{
+				product_id: productId.toString(),
+				field_code: fieldCode,
+				start_date: startDate,
+				end_date: endDate
+			},
+			{
+				initialData: {
+					data: {},
+					metadata: {
+						total: 0,
+						average: 0
+					}
 				}
 			}
-		})
+		);
 
 	const lineMixBarChartData = Object.entries(
 		resultFieldCodeInterval?.data || {}
@@ -53,8 +55,6 @@ const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 		)
 	}));
 
-	
-	
 	if (!Object.keys(resultFieldCodeInterval?.data || {})) return;
 
 	return (

@@ -25,22 +25,24 @@ const ReviewAverageInterval = ({
 }: Props) => {
 	const { cx } = useStyles();
 
-	const { data: resultFieldCodeIntervalAverage, isLoading } = 
-		trpc.answer.getByFieldCodeIntervalAverage.useQuery({
-			product_id: productId.toString(), 
-			field_code: fieldCode,
-			start_date: startDate,
-			end_date: endDate
-		},
-		{
-			initialData: {
-				data: {},
-				metadata: {
-					total: 0,
-					average: 0
+	const { data: resultFieldCodeIntervalAverage, isLoading } =
+		trpc.answer.getByFieldCodeIntervalAverage.useQuery(
+			{
+				product_id: productId.toString(),
+				field_code: fieldCode,
+				start_date: startDate,
+				end_date: endDate
+			},
+			{
+				initialData: {
+					data: {},
+					metadata: {
+						total: 0,
+						average: 0
+					}
 				}
 			}
-		})
+		);
 
 	const barChartData = Object.entries(
 		resultFieldCodeIntervalAverage?.data ?? {}
@@ -48,7 +50,7 @@ const ReviewAverageInterval = ({
 		name: interval,
 		value: average
 	}));
-	
+
 	if (!Object.keys(resultFieldCodeIntervalAverage?.data || {})) return;
 
 	return (

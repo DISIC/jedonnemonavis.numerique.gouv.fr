@@ -24,8 +24,8 @@ const modal = createModal({
 });
 
 const api_modal = createModal({
-    id: "api-modal", 
-    isOpenedByDefault: false
+	id: 'api-modal',
+	isOpenedByDefault: false
 });
 
 const DashBoard = () => {
@@ -109,9 +109,8 @@ const DashBoard = () => {
 					}
 				}}
 			/>
-			<ApiKeyModal
-				modal={api_modal} />
-				
+			<ApiKeyModal modal={api_modal} />
+
 			<api_modal.Component title="Api Key Modal">
 				<h1>Foo modal content</h1>
 			</api_modal.Component>

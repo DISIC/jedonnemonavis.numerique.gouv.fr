@@ -1,5 +1,5 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 import { ApiKey, PrismaClient } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
@@ -7,9 +7,9 @@ import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { Session } from 'next-auth';
-import { OpenApiMeta } from "trpc-openapi";
-import { Client as ElkClient } from "@elastic/elasticsearch";
-import { UserWithAccessRight } from "../types/prismaTypesExtended";
+import { OpenApiMeta } from 'trpc-openapi';
+import { Client as ElkClient } from '@elastic/elasticsearch';
+import { UserWithAccessRight } from '../types/prismaTypesExtended';
 
 // Metadata for protected procedures
 interface Meta {
@@ -21,19 +21,19 @@ interface Meta {
 export const createContext = async (opts: CreateNextContextOptions) => {
 	const prisma = new PrismaClient();
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
-	const req = opts.req
-	const user_api = null as UserWithAccessRight | null
+	const req = opts.req;
+	const user_api = null as UserWithAccessRight | null;
 
 	const elkClient = new ElkClient({
-	  node: process.env.ELASTIC_HOST as string,
-	  auth: {
-		username: process.env.ELASTIC_USERNAME as string,
-		password: process.env.ELASTIC_PASSWORD as string,
-	  },
-	  tls: {
-		ca: fs.readFileSync(path.resolve(process.cwd(), "./certs/ca/ca.crt")),
-		rejectUnauthorized: false,
-	  },
+		node: process.env.ELASTIC_HOST as string,
+		auth: {
+			username: process.env.ELASTIC_USERNAME as string,
+			password: process.env.ELASTIC_PASSWORD as string
+		},
+		tls: {
+			ca: fs.readFileSync(path.resolve(process.cwd(), './certs/ca/ca.crt')),
+			rejectUnauthorized: false
+		}
 	});
 
 	return {
@@ -104,9 +104,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 });
 
 const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
-
-	if(ctx.req.headers.authorization) {
-
+	if (ctx.req.headers.authorization) {
 		const apiKey = ctx.req.headers.authorization.split(' ')[1];
 
 		const checkApiKey = await ctx.prisma.apiKey.findFirst({
@@ -120,28 +118,27 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 					}
 				}
 			}
-		})
+		});
 
-		if(checkApiKey === null) {
-			throw new TRPCError({ 
+		if (checkApiKey === null) {
+			throw new TRPCError({
 				code: 'UNAUTHORIZED',
-				message: 'Please provide a valid API key' 
+				message: 'Please provide a valid API key'
 			});
 		} else {
-			console.log('user_id : ', checkApiKey.user_id)
+			console.log('user_id : ', checkApiKey.user_id);
 
 			return next({
 				ctx: {
-					...ctx, 
+					...ctx,
 					user_api: checkApiKey.user
 				}
-			})
+			});
 		}
-		
 	} else {
-		throw new TRPCError({ 
+		throw new TRPCError({
 			code: 'UNAUTHORIZED',
-			message: 'Please provide your API key' 
+			message: 'Please provide your API key'
 		});
 	}
 });
@@ -157,4 +154,4 @@ export const publicProcedure = t.procedure;
 export const protectedProcedure = t.procedure.use(isAuthed);
 
 // Protected open-api procedure
-export const protectedApiProcedure = t.procedure.use(isKeyAllowed)
+export const protectedApiProcedure = t.procedure.use(isKeyAllowed);

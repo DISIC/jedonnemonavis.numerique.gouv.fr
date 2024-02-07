@@ -27,28 +27,30 @@ const BooleanQuestionViz = ({
 	const { classes, cx } = useStyles();
 	const { statsTotals, updateStatsTotals } = useStats();
 
-	const { data: resultFieldCode, isLoading: isLoadingFieldCode } = 
-		trpc.answer.getByFieldCode.useQuery({
-			product_id: productId.toString(), 
-			field_code: fieldCode,
-			start_date: startDate,
-			end_date: endDate
-		},
-		{
-			initialData: {
-				data: [],
-				metadata: {
-					total: 0,
-					average: 0,
-					fieldLabel: ''
-				}
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
+		trpc.answer.getByFieldCode.useQuery(
+			{
+				product_id: productId.toString(),
+				field_code: fieldCode,
+				start_date: startDate,
+				end_date: endDate
 			},
-			onSuccess: (data) => {
-				updateStatsTotals({
-					[fieldCode]: data.metadata.total
-				});
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						total: 0,
+						average: 0,
+						fieldLabel: ''
+					}
+				},
+				onSuccess: data => {
+					updateStatsTotals({
+						[fieldCode]: data.metadata.total
+					});
+				}
 			}
-		})
+		);
 
 	if (isLoadingFieldCode || !resultFieldCode) {
 		return (
