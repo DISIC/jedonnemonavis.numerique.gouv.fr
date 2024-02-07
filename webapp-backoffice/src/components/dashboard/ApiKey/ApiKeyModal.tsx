@@ -80,10 +80,12 @@ const ApiKeyModal = (props: Props) => {
 					Voir la documentation de l'API
 				</Link>
 			</p>
-			
+
 			{!isLoadingKeys && apiKeys.length === 0 && (
-					<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
-				<p className={fr.cx('fr-mb-0')}>Vous n'avez aucune clé API pour le moment.</p>
+				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+					<p className={fr.cx('fr-mb-0')}>
+						Vous n'avez aucune clé API pour le moment.
+					</p>
 				</div>
 			)}
 
@@ -137,7 +139,6 @@ const ApiKeyModal = (props: Props) => {
 			>
 				Ajouter une clé API
 			</Button>
-
 		</modal.Component>
 	);
 };

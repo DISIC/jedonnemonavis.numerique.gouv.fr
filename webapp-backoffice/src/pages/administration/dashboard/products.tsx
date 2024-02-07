@@ -125,15 +125,18 @@ const DashBoard = () => {
 							classes.buttonContainer
 						)}
 					>
-						<Button
-							priority="secondary"
-							iconId="fr-icon-earth-line"
-							iconPosition="right"
-							type="button"
-							nativeButtonProps={api_modal.buttonProps}
-						>
-							Mes clés API
-						</Button>
+						{session?.user.role === 'user' && (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-earth-line"
+								iconPosition="right"
+								type="button"
+								nativeButtonProps={api_modal.buttonProps}
+							>
+								Mes clés API
+							</Button>
+						)}
+
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
