@@ -52,22 +52,22 @@ enum AnswerIntention {
 
 // Next auth
 model User {
-  id                    Int                   @id @default(autoincrement())
-  firstName             String?
-  lastName              String?
-  active                Boolean               @default(false)
-  xwiki_account         Boolean               @default(false)
-  xwiki_username String?
-  email                 String                @unique
-  password              String
-  role                  UserRole              @default(user)
-  UserOTPs              UserOTP[]
-  UserValidationTokens  UserValidationToken[]
-  UserRequests          UserRequest[]
-  accessRights          AccessRight[]
-  entities              Entity[]
-  favorites             Favorite[]
-  api_keys              ApiKey[]
+  id                   Int                   @id @default(autoincrement())
+  firstName            String?
+  lastName             String?
+  active               Boolean               @default(false)
+  xwiki_account        Boolean               @default(false)
+  xwiki_username       String?
+  email                String                @unique
+  password             String
+  role                 UserRole              @default(user)
+  UserOTPs             UserOTP[]
+  UserValidationTokens UserValidationToken[]
+  UserRequests         UserRequest[]
+  accessRights         AccessRight[]
+  entities             Entity[]
+  favorites            Favorite[]
+  api_keys             ApiKey[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -131,6 +131,7 @@ model Button {
   id          Int      @id @default(autoincrement())
   title       String
   description String?
+  xwiki_title String?
   isTest      Boolean? @default(false)
   product     Product? @relation(fields: [product_id], references: [id])
   product_id  Int
@@ -142,10 +143,10 @@ model Button {
 }
 
 model ApiKey {
-  id      Int @id @default(autoincrement())
+  id      Int      @id @default(autoincrement())
   key     String
   scope   UserRole
-  user    User @relation(fields: [user_id], references: [id])
+  user    User     @relation(fields: [user_id], references: [id])
   user_id Int
 }
 
@@ -208,7 +209,7 @@ model Review {
   product_id Int
   button     Button  @relation(fields: [button_id], references: [id])
   button_id  Int
-	xwiki_id	 Int?
+  xwiki_id   Int?
 
   answers Answer[]
 
