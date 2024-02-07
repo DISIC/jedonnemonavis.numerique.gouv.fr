@@ -4,6 +4,7 @@
 	stroke-opacity: 0 !important;
 }
 
-.swagger-ui .information-container, .swagger-ui .scheme-container {
+.swagger-ui .information-container,
+.swagger-ui .scheme-container {
 	display: none;
 }
