@@ -13,8 +13,6 @@ import {
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
 
-import fs from 'fs/promises';
-
 const description = `Ce point d'accès offre les options de filtrage suivantes : <br />
                     <ul>
                         <li>

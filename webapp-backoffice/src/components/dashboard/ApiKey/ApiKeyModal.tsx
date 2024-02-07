@@ -1,7 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { tss } from 'tss-react/dsfr';
-import { Product } from '@prisma/client';
 import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
@@ -52,12 +51,12 @@ const ApiKeyModal = (props: Props) => {
 	const deleteKey = trpc.apiKey.delete.useMutation({});
 
 	const handleCreateKey = async () => {
-		const keyCreated = await createKey.mutateAsync();
+		await createKey.mutateAsync();
 		RefectchKeys();
 	};
 
 	const handleDelteKey = async (key: string) => {
-		const deletedKey = await deleteKey.mutateAsync({ key: key });
+		await deleteKey.mutateAsync({ key: key });
 		RefectchKeys();
 	};
 
@@ -117,7 +116,7 @@ const ApiKeyModal = (props: Props) => {
 			)}
 
 			<p>
-				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
+				<Link className={fr.cx('fr-link')} target="_blank" href="/administration/open-api">
 					Voir la documentation de l'API
 				</Link>
 			</p>
