@@ -1,5 +1,7 @@
+import { ProductArgsSchema, ProductScalarFieldEnumSchema } from '@/prisma/generated/zod';
 import {
 	protectedApiProcedure,
+	protectedProcedure,
 	publicProcedure,
 	router
 } from '@/src/server/trpc';
@@ -39,6 +41,62 @@ const description = `Ce point d'accès offre les options de filtrage suivantes :
                     </ul>`;
 
 export const openAPIRouter = router({
+	infoDemarches: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'GET',
+				path: '/demarches',
+				protect: true,
+				enabled: true,
+				summary:
+					"Point d'accès informations démarches.",
+				example: {
+					request: {}
+				}
+			}
+		})
+		.input(
+			z.object({
+
+			})
+		)
+		.output(
+			z.object({
+				data: z.array(
+					z.object({
+						id: z.number().int(),
+						title: z.string(),
+						entity: z.string()
+					})
+				)
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
+				(data: AccessRight) => {
+					return data.product_id;
+				}
+			);
+
+			const products = await ctx.prisma.product.findMany({
+				where: {
+					id: {
+						in: authorized_products_ids
+					}
+				},
+				include: {
+					entity: true
+				}
+			})
+
+			return ({data: products.map((prod) => {
+				return {
+					id: prod.id,
+					title: prod.title,
+					entity: prod.entity.name
+				}
+			})})
+		}),
 	publicData: publicProcedure
 		.meta({
 			openapi: {
@@ -46,14 +104,12 @@ export const openAPIRouter = router({
 				path: '/publicData',
 				protect: false,
 				enabled: true,
-				tags: ['public'],
 				summary:
-					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches faisant actuellement partie du Top 250.",
-				description: description,
+					"Point d'accès retourne les données de satisfaction des usagers pour toutes les démarches faisant actuellement partie du Top 250.",
 				example: {
 					request: {
 						field_codes: ['satisfaction', 'comprehension'],
-						product_ids: [1, 2, 3],
+						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: '2024-01-01'
 					}
@@ -123,21 +179,19 @@ export const openAPIRouter = router({
 			return { data: result };
 		}),
 
-	privateData: protectedApiProcedure
+	statsUsagers: protectedApiProcedure
 		.meta({
 			openapi: {
 				method: 'POST',
-				path: '/privateData',
+				path: '/stats',
 				protect: true,
 				enabled: true,
-				tags: ['privé'],
 				summary:
 					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
-				description: description,
 				example: {
 					request: {
 						field_codes: ['satisfaction', 'comprehension'],
-						product_ids: [1, 2, 3],
+						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: '2024-01-01'
 					}
@@ -218,8 +272,7 @@ export const openAPIRouter = router({
 				method: 'POST',
 				path: '/setTop250',
 				protect: true,
-				enabled: true,
-				tags: ['system']
+				enabled: true
 			}
 		})
 		.input(
