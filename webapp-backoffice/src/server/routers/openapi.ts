@@ -1,17 +1,16 @@
-import { z } from 'zod';
 import {
-	router,
+	protectedApiProcedure,
 	publicProcedure,
-	protectedApiProcedure
+	router
 } from '@/src/server/trpc';
-import { TRPCError } from '@trpc/server';
-import { AccessRight, Product } from '@prisma/client';
-import { fetchAndFormatData } from '@/src/utils/stats';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
-	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
+import { fetchAndFormatData } from '@/src/utils/stats';
+import { AccessRight, Product } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
 const description = `Ce point d'accès offre les options de filtrage suivantes : <br />
                     <ul>

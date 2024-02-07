@@ -27,7 +27,7 @@ export const apiKeyRouter = router({
 		var password = '';
 		const chars =
 			'0123456789abcdefghijklmnopqrstuvwxyz!_ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		for (var i = 0; i <= 16; i++) {
+		for (var i = 0; i <= 32; i++) {
 			var randomNumber = Math.floor(Math.random() * chars.length);
 			password += chars.substring(randomNumber, randomNumber + 1);
 		}

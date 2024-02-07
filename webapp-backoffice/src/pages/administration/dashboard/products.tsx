@@ -18,7 +18,7 @@ import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const modal = createModal({
+const product_modal = createModal({
 	id: 'product-modal',
 	isOpenedByDefault: false
 });
@@ -99,7 +99,7 @@ const DashBoard = () => {
 	return (
 		<>
 			<ProductModal
-				modal={modal}
+				modal={product_modal}
 				onSubmit={() => {
 					setSearch('');
 					if (filter === 'created_at') {
@@ -110,10 +110,6 @@ const DashBoard = () => {
 				}}
 			/>
 			<ApiKeyModal modal={api_modal} />
-
-			<api_modal.Component title="Api Key Modal">
-				<h1>Foo modal content</h1>
-			</api_modal.Component>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -125,32 +121,25 @@ const DashBoard = () => {
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-4'),
+							fr.cx('fr-col-12', 'fr-col-md-8'),
 							classes.buttonContainer
 						)}
 					>
 						<Button
 							priority="secondary"
-							iconId="fr-icon-add-circle-line"
+							iconId="fr-icon-earth-line"
 							iconPosition="right"
 							type="button"
 							nativeButtonProps={api_modal.buttonProps}
 						>
 							Mes clés API
 						</Button>
-					</div>
-					<div
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-4'),
-							classes.buttonContainer
-						)}
-					>
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={modal.buttonProps}
+							nativeButtonProps={product_modal.buttonProps}
 						>
 							Ajouter un nouveau produit
 						</Button>
