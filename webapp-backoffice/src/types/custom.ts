@@ -69,6 +69,6 @@ export type OpenProduct = {
 export interface ProductMapEntry {
 	productIndex: number;
 	categories: {
-		[category: string]: number; // clés de type string mappées à des nombres
+		[category: string]: number;
 	};
 }

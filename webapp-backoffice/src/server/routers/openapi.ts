@@ -1,7 +1,5 @@
-import { ProductArgsSchema, ProductScalarFieldEnumSchema } from '@/prisma/generated/zod';
 import {
 	protectedApiProcedure,
-	protectedProcedure,
 	publicProcedure,
 	router
 } from '@/src/server/trpc';
@@ -14,32 +12,6 @@ import { AccessRight, Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
-const description = `Ce point d'accès offre les options de filtrage suivantes : <br />
-                    <ul>
-                        <li>
-                            <b>filed_codes : </b> Les codes des questions posées aux utilisateurs. Si vide, retourne les données pour l'esemble des codes. <br />
-                            Voici la correspondance entre les field_codes et les questions : <br />
-                            ${[
-															...FIELD_CODE_BOOLEAN_VALUES,
-															...FIELD_CODE_SMILEY_VALUES
-														]
-															.map(code => {
-																return `- ${code.slug} : ${code.question} <br />`;
-															})
-															.join()
-															.replace(/,/g, '')}
-                        </li>
-                        <li>
-                            <b>product_ids : </b> Les ids des produits sur lesquels vous souhaitez filtrer les résultats. Si vide, retourne l'ensemble des produits du scope.
-                        </li>
-                        <li>
-                            <b>start_date : </b> Date de début.
-                        </li>
-                        <li>
-                            <b>end_date : </b> Date de fin.
-                        </li>
-                    </ul>`;
-
 export const openAPIRouter = router({
 	infoDemarches: protectedApiProcedure
 		.meta({
@@ -48,18 +20,13 @@ export const openAPIRouter = router({
 				path: '/demarches',
 				protect: true,
 				enabled: true,
-				summary:
-					"Point d'accès informations démarches.",
+				summary: "Point d'accès informations démarches.",
 				example: {
 					request: {}
 				}
 			}
 		})
-		.input(
-			z.object({
-
-			})
-		)
+		.input(z.object({}))
 		.output(
 			z.object({
 				data: z.array(
@@ -87,15 +54,17 @@ export const openAPIRouter = router({
 				include: {
 					entity: true
 				}
-			})
+			});
 
-			return ({data: products.map((prod) => {
-				return {
-					id: prod.id,
-					title: prod.title,
-					entity: prod.entity.name
-				}
-			})})
+			return {
+				data: products.map(prod => {
+					return {
+						id: prod.id,
+						title: prod.title,
+						entity: prod.entity.name
+					};
+				})
+			};
 		}),
 	publicData: publicProcedure
 		.meta({
@@ -231,12 +200,6 @@ export const openAPIRouter = router({
 		)
 		.query(async ({ ctx, input }) => {
 			const { field_codes, product_ids, start_date, end_date } = input;
-
-			const actual250 = await ctx.prisma.product.findMany({
-				where: {
-					is_top_250: true
-				}
-			});
 
 			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
 				(data: AccessRight) => {

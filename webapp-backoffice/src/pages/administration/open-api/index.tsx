@@ -9,7 +9,10 @@ const SwaggerUI = dynamic<SwaggerUIProps>(import('swagger-ui-react') as any, {
 });
 import 'swagger-ui-react/swagger-ui.css';
 import { Loader } from '@/src/components/ui/Loader';
-import { FIELD_CODE_BOOLEAN_VALUES, FIELD_CODE_SMILEY_VALUES } from '@/src/utils/helpers';
+import {
+	FIELD_CODE_BOOLEAN_VALUES,
+	FIELD_CODE_SMILEY_VALUES
+} from '@/src/utils/helpers';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -68,15 +71,19 @@ const DocAPI = () => {
 					<div className={fr.cx('fr-container', 'fr-py-6w')}>
 						<h5>1. Générer une clé API</h5>
 						<p>
-							Afin de pouvoir utiliser les points d'accès décrits dans cette documentation, vous allez en premier lieu devoir générer une clé API.
+							Afin de pouvoir utiliser les points d'accès décrits dans cette
+							documentation, vous allez en premier lieu devoir générer une clé
+							API.
 						</p>
 						<p>
-							Pour ce faire, rendez-vous sur la page <Link href={'/administration/dashboard/products'} target='_blank'>Mes démarches</Link>
+							Pour ce faire, rendez-vous sur la page{' '}
+							<Link href={'/administration/dashboard/products'} target="_blank">
+								Mes démarches
+							</Link>
 						</p>
 						<p className={classes.wrapperTextImg}>
 							Cliquez ensuite sur le bouton 'Mes Clés API' :
 							<Image
-									
 								alt="bouton-mes-clés-api"
 								src={`/assets/button-api-key.png`}
 								width={165}
@@ -84,9 +91,9 @@ const DocAPI = () => {
 							/>
 						</p>
 						<p className={classes.wrapperTextImg}>
-							Dans la popup qui s'ouvre, vous pouvez ensuite cliquer sur 'Ajouter une clé API' :
+							Dans la popup qui s'ouvre, vous pouvez ensuite cliquer sur
+							'Ajouter une clé API' :
 							<Image
-									
 								alt="bouton-ajouter-clé-api"
 								src={`/assets/add-api-key.png`}
 								width={222}
@@ -94,44 +101,63 @@ const DocAPI = () => {
 							/>
 						</p>
 						<p>
-							Vous pouvez désormais copier/coller la clé nouvellement créée, vous en aurez besoin pour chacun des points d'accès décrits dans cette documentation.
+							Vous pouvez désormais copier/coller la clé nouvellement créée,
+							vous en aurez besoin pour chacun des points d'accès décrits dans
+							cette documentation.
 						</p>
 					</div>
 					<div className={fr.cx('fr-container', 'fr-py-6w')}>
 						<h5>2. Point d'accès Infos Démarches</h5>
 						<p>
-							Ce point d'accès retourne les informations sur les démarches sur lesquelles vous êtes porteur.
-						</p><p>
-							Il sera notamment utile pour récupérer les ids des démarches, et ainsi pouvoir filtrer les résultats du point d'accès /statsUsagers.
+							Ce point d'accès retourne les informations sur les démarches sur
+							lesquelles vous êtes porteur.
 						</p>
-						<SwaggerUI spec={filterDoc('/demarches')} layout='BaseLayout' presets={[]}/>
+						<p>
+							Il sera notamment utile pour récupérer les ids des démarches, et
+							ainsi pouvoir filtrer les résultats du point d'accès
+							/statsUsagers.
+						</p>
+						<SwaggerUI
+							spec={filterDoc('/demarches')}
+							layout="BaseLayout"
+							presets={[]}
+						/>
 					</div>
 					<br />
 					<div className={fr.cx('fr-container', 'fr-py-6w')}>
 						<h5>3. Point d'accès statistiques de statisfaction des usagers</h5>
 						<p>
-							Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.
+							Ce point d'accès retourne les données de satisfaction des
+							utilisateurs pour toutes les démarches liées au porteur du token
+							fourni.
 						</p>
 						<p>
-							Il offre les options de filtrage suivantes :  <br />
+							Il offre les options de filtrage suivantes : <br />
 							<ul>
 								<li>
-									<b>filed_codes : </b> Les codes des questions posées aux utilisateurs. Si vide, retourne les données pour l'esemble des codes. <br />
-									Voici la correspondance entre les field_codes et les questions : <br />
-									<p dangerouslySetInnerHTML={{__html: [
-																	...FIELD_CODE_BOOLEAN_VALUES,
-																	...FIELD_CODE_SMILEY_VALUES
-																]
-																	.map(code => {
-																		return `- ${code.slug} : ${code.question} <br />`;
-																	})
-																	.join()
-																	.replace(/,/g, '')}}
-																	>
-									</p>
+									<b>filed_codes : </b> Les codes des questions posées aux
+									utilisateurs. Si vide, retourne les données pour l'esemble des
+									codes. <br />
+									Voici la correspondance entre les field_codes et les questions
+									: <br />
+									<p
+										dangerouslySetInnerHTML={{
+											__html: [
+												...FIELD_CODE_BOOLEAN_VALUES,
+												...FIELD_CODE_SMILEY_VALUES
+											]
+												.map(code => {
+													return `- ${code.slug} : ${code.question} <br />`;
+												})
+												.join()
+												.replace(/,/g, '')
+										}}
+									></p>
 								</li>
 								<li>
-									<b>product_ids : </b> Les ids des produits sur lesquels vous souhaitez filtrer les résultats. Si vide, retourne l'ensemble des produits du scope.
+									<b>product_ids : </b> Les ids des produits sur lesquels vous
+									souhaitez filtrer les résultats. Si vide, retourne l'ensemble
+									des produits du scope.
 								</li>
 								<li>
 									<b>start_date : </b> Date de début (format: yyyy-mm-dd).
