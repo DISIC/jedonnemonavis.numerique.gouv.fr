@@ -75,7 +75,11 @@ const ApiKeyModal = (props: Props) => {
 			size="large"
 		>
 			<p>
-				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
+				<Link
+					className={fr.cx('fr-link')}
+					target="_blank"
+					href="/open-api"
+				>
 					Voir la documentation de l'API
 				</Link>
 			</p>

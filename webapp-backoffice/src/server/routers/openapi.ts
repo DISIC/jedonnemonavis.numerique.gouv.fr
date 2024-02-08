@@ -121,7 +121,7 @@ export const openAPIRouter = router({
 
 			const actual250 = await ctx.prisma.product.findMany({
 				where: {
-					is_top_250: true
+					isPublic: true
 				}
 			});
 			const list_250_ids: number[] = actual250.map((data: Product) => {
@@ -263,7 +263,7 @@ export const openAPIRouter = router({
 
 			const actual250 = await ctx.prisma.product.findMany({
 				where: {
-					is_top_250: true
+					isPublic: true
 				}
 			});
 
@@ -274,25 +274,25 @@ export const openAPIRouter = router({
 			const need_up = product_ids.filter(a => !list_actual_250.includes(a));
 			const need_down = list_actual_250.filter(a => !product_ids.includes(a));
 
-			const down_products = await ctx.prisma.product.updateMany({
+			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
 						in: need_down
 					}
 				},
 				data: {
-					is_top_250: false
+					isPublic: false
 				}
 			});
 
-			const up_products = await ctx.prisma.product.updateMany({
+			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
 						in: need_up
 					}
 				},
 				data: {
-					is_top_250: true
+					isPublic: true
 				}
 			});
 

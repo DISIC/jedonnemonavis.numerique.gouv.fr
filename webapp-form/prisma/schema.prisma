@@ -147,7 +147,7 @@ model Product {
   entity_id       Int
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
-  isEssential     Boolean?      @default(false)
+  isPublic        Boolean?      @default(false)
   urls            String[]
   volume          Int?
   xwiki_id Int?          @unique

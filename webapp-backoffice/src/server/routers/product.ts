@@ -117,19 +117,23 @@ export const productRouter = router({
 				}
 			}
 
-			const products = await ctx.prisma.product.findMany({
-				orderBy,
-				where,
-				take: numberPerPage,
-				skip: numberPerPage * (page - 1),
-				include: {
-					buttons: true
-				}
-			});
+			try {
+				const products = await ctx.prisma.product.findMany({
+					orderBy,
+					where,
+					take: numberPerPage,
+					skip: numberPerPage * (page - 1),
+					include: {
+						buttons: true
+					}
+				});
 
-			const count = await ctx.prisma.product.count({ where });
+				const count = await ctx.prisma.product.count({ where });
 
-			return { data: products, metadata: { count } };
+				return { data: products, metadata: { count } };
+			} catch (e) {
+				console.log(e);
+			}
 		}),
 
 	getXWikiIds: publicProcedure

@@ -157,7 +157,6 @@ model Product {
   entity_id    Int
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
-  isEssential  Boolean?      @default(false)
   urls         String[]
   volume       Int?
   xwiki_id     Int?          @unique
@@ -165,7 +164,7 @@ model Product {
   accessRights AccessRight[]
   favorites    Favorite[]
   reviews      Review[]
-  is_top_250   Boolean?
+  isPublic     Boolean?
 }
 
 model AccessRight {

@@ -227,7 +227,7 @@ const ProductModal = (props: Props) => {
 				<div className={fr.cx('fr-input-group')}>
 					<Controller
 						control={control}
-						name="isEssential"
+						name="isPublic"
 						render={({ field: { onChange, value } }) => (
 							<Checkbox
 								className={fr.cx('fr-mt-3w')}
