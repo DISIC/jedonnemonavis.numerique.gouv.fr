@@ -117,7 +117,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     createReview.mutate({
       review: {
         product_id: product.id,
-        button_id: 1,
+        button_id: product.buttons[0].id,
         form_id: 1
       },
       answers
