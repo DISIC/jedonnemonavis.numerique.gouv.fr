@@ -8,6 +8,8 @@ import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats
 const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, type: 'Line' | 'Verbatim' }) => {
 	const { cx, classes } = useStyles();
 
+    console.log('review : ', review)
+
 	if (!review) return null;
 
 	const displayFieldCodeText = (fieldCode: string) => {
@@ -91,6 +93,33 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 							<p className={cx(classes.content)}>Non renseigné</p>
 						)}
 					</div>
+                    {review.contact_satisfaction &&
+                        <>
+                            <p className={cx(classes.subtitle)}>Qualité de l'échange avec le service d'aide</p>
+                            <p className={cx(classes.content)}>
+                                <Badge
+                                    className={cx(classes.badge)}
+                                    small={true}
+                                    noIcon={true}
+                                    severity={getSeverity(review.contact_satisfaction.intention || '')}
+                                >
+                                    <i
+                                        className={fr.cx(
+                                            getStatsIcon({
+                                                intention: review.contact_satisfaction.intention ?? 'neutral' ?? 'neutral'
+                                            })
+                                        )}
+                                        style={{
+                                            color: getStatsColor({
+                                                intention: review.contact_satisfaction.intention ?? 'neutral' ?? 'neutral'
+                                            })
+                                        }}
+                                    />
+                                    {displayIntention(review.contact_satisfaction.intention ?? 'neutral') ?? 'neutral'}
+                                </Badge>
+                            </p>
+                        </>
+                    }
 				</div>
 				<div className={fr.cx('fr-col-4')}>
 					<div>
