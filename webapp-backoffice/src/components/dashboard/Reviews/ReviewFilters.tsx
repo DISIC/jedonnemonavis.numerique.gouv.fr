@@ -71,7 +71,7 @@ const ReviewFilters = (props: Props) => {
 		<div className={cx(classes.lineContainer)}>
 			{sortList.map((sort, index) => (
 				<div
-					className={cx(classes.badge)}
+					className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim)}
 					key={index}
 					onClick={() => {
 						if (sort.code) {
@@ -111,6 +111,13 @@ const useStyles = tss.create({
 	badge: {
 		width: 'fit-content',
 		minWidth: 100,
+		paddingVertical: 4,
+		fontSize: 14,
+		cursor: 'pointer'
+	},
+	badgeVerbatim: {
+		width: 'fit-content',
+		minWidth: 120,
 		paddingVertical: 4,
 		fontSize: 14,
 		cursor: 'pointer'

@@ -1,6 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
+import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
 const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 	const { cx, classes } = useStyles();
@@ -42,86 +43,7 @@ const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					</p>
 				</div>
 			</div>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--left'
-				)}
-			>
-				<div className={fr.cx('fr-col-3')}>
-					<div>
-						<p className={cx(classes.subtitle)}>Difficulté</p>
-						{displayFieldCodeText('difficulties') === 'Oui' && (
-							<p className={cx(classes.content)}>
-								{review.answers &&
-									review.answers
-										.filter(
-											answer => answer.field_code === 'difficulties_details'
-										)
-										?.map(
-											(el, index, array) =>
-												el.answer_text + (index < array.length - 1 ? ', ' : '.')
-										)}
-							</p>
-						)}
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-4')}>
-					<div>
-						<p className={cx(classes.subtitle)}>
-							Tentative de contacter le service d'aide ?
-						</p>
-						<p className={cx(classes.content)}>
-							{displayFieldCodeText('contact')}
-						</p>
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>Résultat de la tentative ?</p>
-						{displayFieldCodeText('contact') === 'Oui' ? (
-							<p className={cx(classes.content)}>
-								{displayFieldCodeText('contact_reached')}
-							</p>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>Moyen(s) de contact ?</p>
-						{displayFieldCodeText('contact_reached') === 'Oui' ? (
-							<p className={cx(classes.content)}>
-								{review.answers &&
-									review.answers
-										.filter(answer => answer.field_code === 'contact_channels')
-										?.map(
-											(el, index, array) =>
-												el.answer_text + (index < array.length - 1 ? ', ' : '.')
-										)}
-							</p>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-4')}>
-					<div>
-						<p className={cx(classes.subtitle)}>Autre aide sollicitée ?</p>
-						<p className={cx(classes.content)}>
-							{displayFieldCodeText('help')}
-						</p>
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>
-							Autre type(s) d'aide sollicitée(s)
-						</p>
-						<p className={cx(classes.content)}>
-							{displayFieldCodeText('help_details') === 'Oui'
-								? displayFieldCodeText('help_details')
-								: 'Non renseigné'}
-						</p>
-					</div>
-				</div>
-			</div>
+			<ReviewCommonVerbatimLine review={review} type={'Line'}></ReviewCommonVerbatimLine>
 		</div>
 	);
 };
