@@ -8,4 +8,5 @@ export interface ExtendedReview extends ReviewPartialWithRelations {
 	easy: AnswerPartialWithRelations | undefined;
 	comprehension: AnswerPartialWithRelations | undefined;
 	verbatim: AnswerPartialWithRelations | undefined;
+	contact_satisfaction: AnswerPartialWithRelations | undefined;
 }

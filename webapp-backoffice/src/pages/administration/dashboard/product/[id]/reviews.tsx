@@ -91,6 +91,9 @@ const ProductReviewsPage = (props: Props) => {
 				),
 				verbatim: review.answers.find(
 					answer => answer.field_code === 'verbatim'
+				),
+				contact_satisfaction: review.answers.find(
+					answer => answer.field_code === 'contact_satisfaction'
 				)
 			};
 		}
