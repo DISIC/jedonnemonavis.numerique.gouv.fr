@@ -35,6 +35,7 @@ interface Props {
 const defaultButton = {
 	title: '',
 	description: '',
+	xwiki_title: null,
 	product_id: -1,
 	isTest: false
 };

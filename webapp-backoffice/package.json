@@ -27,11 +27,12 @@
 	},
 	"dependencies": {
 		"@codegouvfr/react-dsfr": "^0.75.3",
+		"@elastic/elasticsearch": "^8.11.0",
 		"@emotion/react": "^11.11.1",
 		"@emotion/server": "^11.11.0",
 		"@emotion/styled": "^11.11.0",
 		"@mui/material": "^5.14.10",
-		"@prisma/client": "^5.2.0",
+		"@prisma/client": "~5.2.0",
 		"@tanstack/react-query": "^4.36.1",
 		"@trpc/client": "^10.41.0",
 		"@trpc/next": "^10.41.0",
@@ -40,6 +41,7 @@
 		"@types/node": "20.5.7",
 		"@types/react": "18.2.21",
 		"@types/react-dom": "18.2.7",
+		"@types/swagger-ui-react": "^4.18.3",
 		"dotenv": "^16.3.1",
 		"eslint": "8.48.0",
 		"eslint-config-next": "13.5.5",
@@ -52,6 +54,8 @@
 		"recharts": "^2.9.0",
 		"sharp": "^0.32.6",
 		"superjson": "^1.13.3",
+		"swagger-ui-react": "^5.11.2",
+		"trpc-openapi": "^1.2.0",
 		"tss-react": "^4.9.0",
 		"typescript": "5.2.2",
 		"usehooks-ts": "^2.9.1",
@@ -71,7 +75,7 @@
 		"eslint-plugin-prettier": "^5.0.0",
 		"husky": "^8.0.3",
 		"prettier": "^3.0.3",
-		"prisma": "^5.2.0",
+		"prisma": "~5.2.0",
 		"ts-node": "^10.9.1"
 	}
 }

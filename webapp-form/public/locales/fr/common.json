@@ -38,7 +38,7 @@
       ]
     },
     "comprehension": {
-      "label": "Qu'avez vous pensé du langage utilisé ?",
+      "label": "Qu'avez-vous pensé du langage utilisé ?",
       "options": [
         {
           "label": "Peu clair, difficile à comprendre"

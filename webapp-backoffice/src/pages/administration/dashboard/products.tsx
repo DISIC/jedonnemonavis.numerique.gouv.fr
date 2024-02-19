@@ -1,3 +1,4 @@
+import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
@@ -17,8 +18,13 @@ import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const modal = createModal({
+const product_modal = createModal({
 	id: 'product-modal',
+	isOpenedByDefault: false
+});
+
+const api_modal = createModal({
+	id: 'api-modal',
 	isOpenedByDefault: false
 });
 
@@ -93,7 +99,7 @@ const DashBoard = () => {
 	return (
 		<>
 			<ProductModal
-				modal={modal}
+				modal={product_modal}
 				onSubmit={() => {
 					setSearch('');
 					if (filter === 'created_at') {
@@ -103,27 +109,40 @@ const DashBoard = () => {
 					}
 				}}
 			/>
+			<ApiKeyModal modal={api_modal} />
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
 							{session?.user?.role !== 'admin' ? 'Mes démarches' : 'Démarches'}
 						</h1>
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-7'),
+							fr.cx('fr-col-12', 'fr-col-md-8'),
 							classes.buttonContainer
 						)}
 					>
+						{session?.user.role === 'user' && (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-earth-line"
+								iconPosition="right"
+								type="button"
+								nativeButtonProps={api_modal.buttonProps}
+							>
+								Mes clés API
+							</Button>
+						)}
+
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={modal.buttonProps}
+							nativeButtonProps={product_modal.buttonProps}
 						>
 							Ajouter un nouveau produit
 						</Button>

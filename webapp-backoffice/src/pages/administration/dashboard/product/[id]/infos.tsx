@@ -106,8 +106,8 @@ const ProductInformationPage = (props: Props) => {
 					{product.volume ? product.volume : 'Non renseigné'}
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Top 250</h4>
-					{product.isEssential ? 'Oui' : 'Non'}
+					<h4 className={fr.cx('fr-mb-3v')}>Données statistiques publiques</h4>
+					{product.isPublic ? 'Oui' : 'Non'}
 				</div>
 			</div>
 		</ProductLayout>
