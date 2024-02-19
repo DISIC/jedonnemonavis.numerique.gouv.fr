@@ -81,12 +81,13 @@ yarn dev
 ```
 
 Voici les informations des utilisateurs prêts à être utilisés en développement grâce aux données de test :
-| Email | Compte activé | Ancien compte observatoire | Mot de passe |
-|---------------------|---------------|---------------------------|--------------|
-| user1@example.com | Non | Non | jdma |
-| user2@example.com | Non | Oui | jdma |
-| user3@example.com | Oui | Oui | jdma |
-| user4@example.com | Oui | Non | jdma |
+| Email | Rôle | Compte activé | Ancien compte observatoire | Mot de passe |
+|---------------------|---------------------|---------------|---------------------------|--------------|
+| user1@example.com | Porteur | Non | Non | jdma |
+| user2@example.com | Porteur | Non | Oui | jdma |
+| user3@example.com | Porteur | Oui | Oui | jdma |
+| user4@example.com | Porteur | Oui | Non | jdma |
+| admin@example.com | Administrateur | Oui | Non | jdma |
 
 ### Webapp Formulaire
 
@@ -94,6 +95,12 @@ Accédez au dossier de l'application NextJS webapp-form :
 
 ```bash
 cd webapp-form
+```
+
+Copiez le fichier .env.example :
+
+```bash
+cp .env.example .env
 ```
 
 Installez les dépendances nécessaires :

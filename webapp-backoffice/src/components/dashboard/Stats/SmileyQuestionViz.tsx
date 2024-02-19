@@ -1,5 +1,5 @@
 import { useStats } from '@/src/contexts/StatsContext';
-import { ElkSimpleAnswerResponse, FieldCodeSmiley } from '@/src/types/custom';
+import { FieldCodeSmiley } from '@/src/types/custom';
 import {
 	getIntentionFromAverage,
 	getStatsAnswerText,
@@ -8,10 +8,10 @@ import {
 } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import AverageCard from './AverageCard';
+import { trpc } from '@/src/utils/trpc';
 
 const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
 	ssr: false
@@ -35,29 +35,30 @@ const SmileyQuestionViz = ({
 	const { classes } = useStyles();
 	const { statsTotals, updateStatsTotals } = useStats();
 
-	const { data: resultFieldCode, isLoading } = useQuery({
-		queryKey: [
-			'getAnswerByFieldCode',
-			fieldCode,
-			productId,
-			startDate,
-			endDate
-		],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-			);
-			if (res.ok) {
-				const jsonResponse = (await res.json()) as ElkSimpleAnswerResponse;
-
-				updateStatsTotals({
-					[fieldCode]: jsonResponse.metadata.total
-				});
-
-				return jsonResponse;
+	const { data: resultFieldCode, isLoading } =
+		trpc.answer.getByFieldCode.useQuery(
+			{
+				product_id: productId.toString(),
+				field_code: fieldCode,
+				start_date: startDate,
+				end_date: endDate
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						total: 0,
+						average: 0,
+						fieldLabel: ''
+					}
+				},
+				onSuccess: data => {
+					updateStatsTotals({
+						[fieldCode]: data.metadata.total
+					});
+				}
 			}
-		}
-	});
+		);
 
 	if (isLoading || !resultFieldCode) {
 		return (

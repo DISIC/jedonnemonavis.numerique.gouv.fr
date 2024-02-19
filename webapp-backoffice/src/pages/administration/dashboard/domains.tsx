@@ -81,8 +81,10 @@ const DashBoardDomainDomains = () => {
 	} = useForm<FormValues>();
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
-		data.domain = data.domain.replace('@', '');
-		createDomain.mutate(data);
+		if (data.domain) {
+			data.domain = data.domain.replace('@', '');
+			createDomain.mutate(data);
+		}
 	};
 
 	const {
@@ -206,6 +208,7 @@ const DashBoardDomainDomains = () => {
 							onSubmit={e => {
 								e.preventDefault();
 								setValidatedSearch(search);
+								setCurrentPage(1)
 							}}
 						>
 							<div

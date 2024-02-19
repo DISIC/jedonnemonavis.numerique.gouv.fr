@@ -4,7 +4,7 @@ import { tss } from 'tss-react/dsfr';
 import { contextSmileys } from '../../chart/types';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
-import { useQuery } from '@tanstack/react-query';
+import { trpc } from '@/src/utils/trpc';
 
 const LineMixBarChart = dynamic(
 	() => import('@/src/components/chart/LineMixBarChart'),
@@ -23,33 +23,24 @@ type Props = {
 const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 	const { cx } = useStyles();
 
-	const { data: resultFieldCodeInterval } = useQuery({
-		queryKey: [
-			'getAnswerByFieldCodeInterval',
-			fieldCode,
-			productId,
-			startDate,
-			endDate
-		],
-		queryFn: async () => {
-			const res = await fetch(
-				`${process.env.NEXT_PUBLIC_FORM_APP_URL}/api/open-api/answers/interval/${fieldCode}?product_id=${productId}&start_date=${startDate}&end_date=${endDate}`
-			);
-			if (res.ok) {
-				return (await res.json()) as {
-					data: Record<
-						string,
-						Array<{
-							answer_text: string;
-							intention: AnswerIntention;
-							doc_count: number;
-						}>
-					>;
-					metadata: { total: number; average: number };
-				};
+	const { data: resultFieldCodeInterval, isLoading } =
+		trpc.answer.getByFieldCodeInterval.useQuery(
+			{
+				product_id: productId.toString(),
+				field_code: fieldCode,
+				start_date: startDate,
+				end_date: endDate
+			},
+			{
+				initialData: {
+					data: {},
+					metadata: {
+						total: 0,
+						average: 0
+					}
+				}
 			}
-		}
-	});
+		);
 
 	const lineMixBarChartData = Object.entries(
 		resultFieldCodeInterval?.data || {}
@@ -64,7 +55,7 @@ const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 		)
 	}));
 
-	if (!resultFieldCodeInterval?.data.length) return;
+	if (!Object.keys(resultFieldCodeInterval?.data || {})) return;
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>

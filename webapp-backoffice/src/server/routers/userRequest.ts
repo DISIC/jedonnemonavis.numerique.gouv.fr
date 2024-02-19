@@ -8,7 +8,7 @@ import {
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { sendMail } from '@/src/utils/mailer';
-import { getUserRequestEmailHtml } from '@/src/utils/emails';
+import { getUserRequestAcceptedEmailHtml, getUserRequestRefusedEmailHtml,  } from '@/src/utils/emails';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -45,7 +45,8 @@ export async function updateUserRequest(
 	prisma: PrismaClient,
 	id: number,
 	userRequest: Prisma.UserRequestUpdateInput,
-	createDomain: boolean
+	createDomain: boolean,
+	message?: string
 ) {
 	const updatedUserRequest = await prisma.userRequest.update({
 		where: { id },
@@ -76,7 +77,7 @@ export async function updateUserRequest(
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
 				updatedUser.email,
-				getUserRequestEmailHtml(),
+				getUserRequestAcceptedEmailHtml(),
 				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
 			);
 		} else if (updatedUserRequest.status === 'refused') {
@@ -88,6 +89,13 @@ export async function updateUserRequest(
 			await prisma.user.delete({
 				where: { id: updatedUserRequest.user.id }
 			});
+
+			await sendMail(
+				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
+				updatedUserRequest.user.email,
+				getUserRequestRefusedEmailHtml(message),
+				`Votre demande d'accès a été refusée${message ? ` pour la raison suivante : ${message}` : '.'}`
+			);
 		}
 	}
 
@@ -182,17 +190,19 @@ export const userRequestRouter = router({
 			z.object({
 				id: z.number(),
 				userRequest: UserRequestUpdateInputSchema,
-				createDomain: z.boolean().default(false)
+				createDomain: z.boolean().default(false),
+				message: z.string().optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
-			const { id, userRequest, createDomain } = input;
+			const { id, userRequest, createDomain, message } = input;
 
 			const updatedUserRequest = await updateUserRequest(
 				ctx.prisma,
 				id,
 				userRequest,
-				createDomain
+				createDomain,
+				message
 			);
 
 			return { data: updatedUserRequest };

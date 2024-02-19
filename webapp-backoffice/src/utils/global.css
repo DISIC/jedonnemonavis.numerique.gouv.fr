@@ -3,3 +3,7 @@
 	.review-average-line:last-child {
 	stroke-opacity: 0 !important;
 }
+
+.swagger-ui .information-container {
+	display: none;
+}

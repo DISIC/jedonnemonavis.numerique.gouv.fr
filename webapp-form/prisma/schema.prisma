@@ -143,20 +143,20 @@ model Button {
 }
 
 model Product {
-  id           Int           @id @default(autoincrement())
-  title        String
-  entity       Entity        @relation(fields: [entity_id], references: [id])
-  entity_id    Int
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  isEssential  Boolean?      @default(false)
-  urls         String[]
-  volume       Int?
-  xwiki_id     Int?          @unique
-  buttons      Button[]
-  accessRights AccessRight[]
-  favorites    Favorite[]
-  reviews      Review[]
+  id              Int           @id @default(autoincrement())
+  title           String
+  entity          Entity        @relation(fields: [entity_id], references: [id])
+  entity_id       Int
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  isPublic        Boolean?      @default(false)
+  urls            String[]
+  volume          Int?
+  xwiki_id Int?          @unique
+  buttons         Button[]
+  accessRights    AccessRight[]
+  favorites       Favorite[]
+  reviews         Review[]
 }
 
 model AccessRight {

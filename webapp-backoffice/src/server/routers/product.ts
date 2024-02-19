@@ -1,11 +1,16 @@
 import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
+import {
+	router,
+	publicProcedure,
+	protectedProcedure,
+	protectedApiProcedure
+} from '@/src/server/trpc';
 import {
 	ProductUncheckedCreateInputSchema,
 	ProductUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
-import { Prisma } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 
 export const productRouter = router({
 	getById: publicProcedure
@@ -62,7 +67,7 @@ export const productRouter = router({
 									user_email: contextUser.email,
 									status: 'carrier'
 								}
-						  }
+							}
 						: {}
 			};
 
@@ -112,9 +117,57 @@ export const productRouter = router({
 				}
 			}
 
+			try {
+				const products = await ctx.prisma.product.findMany({
+					orderBy,
+					where,
+					take: numberPerPage,
+					skip: numberPerPage * (page - 1),
+					include: {
+						buttons: true
+					}
+				});
+
+				const count = await ctx.prisma.product.count({ where });
+
+				return { data: products, metadata: { count } };
+			} catch (e) {
+				console.log(e);
+				return { data: [], metadata: { count: 0 }}
+			}
+		}),
+
+	getXWikiIds: publicProcedure
+		.meta({ openapi: { method: 'GET', path: '/products/xwiki' } })
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1)
+			})
+		)
+		.output(
+			z.object({
+				data: z.array(
+					z.object({
+						id: z.number(),
+						xwiki_id: z.number().nullable(),
+						title: z.string(),
+						buttons: z.array(
+							z.object({
+								id: z.number(),
+								title: z.string(),
+								xwiki_title: z.string().nullable()
+							})
+						)
+					})
+				),
+				metadata: z.object({ count: z.number() })
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { numberPerPage, page } = input;
+
 			const products = await ctx.prisma.product.findMany({
-				orderBy,
-				where,
 				take: numberPerPage,
 				skip: numberPerPage * (page - 1),
 				include: {
@@ -122,9 +175,21 @@ export const productRouter = router({
 				}
 			});
 
-			const count = await ctx.prisma.product.count({ where });
+			const count = await ctx.prisma.product.count();
 
-			return { data: products, metadata: { count } };
+			return {
+				data: products.map(product => ({
+					id: product.id,
+					xwiki_id: product.xwiki_id,
+					title: product.title,
+					buttons: product.buttons.map(b => ({
+						id: b.id,
+						title: b.title,
+						xwiki_title: b.xwiki_title
+					}))
+				})),
+				metadata: { count }
+			};
 		}),
 
 	create: protectedProcedure
