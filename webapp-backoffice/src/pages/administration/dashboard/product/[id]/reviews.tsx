@@ -27,7 +27,6 @@ const ProductReviewsPage = (props: Props) => {
 			.split('T')[0]
 	);
 	const currentDate = new Date();
-	currentDate.setFullYear(currentDate.getFullYear() + 1);
 	const [endDate, setEndDate] = React.useState<string>(
 		currentDate.toISOString().split('T')[0]
 	);

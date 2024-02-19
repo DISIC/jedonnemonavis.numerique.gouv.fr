@@ -50,9 +50,13 @@ export const reviewRouter = router({
 			}
 
 			if (startDate && endDate) {
+				const endDateAtNight = new Date(endDate)
+				endDateAtNight.setHours(23)
+				endDateAtNight.setMinutes(59)
+				endDateAtNight.setSeconds(59)
 				where.created_at = {
 					gte: new Date(startDate),
-					lte: new Date(endDate)
+					lte: new Date(endDateAtNight)
 				};
 			}
 

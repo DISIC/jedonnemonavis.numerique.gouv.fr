@@ -15,6 +15,8 @@ export const productRouter = router({
         }
       });
 
+      console.log(product)
+
       if (!product)
         throw new TRPCError({
           code: 'NOT_FOUND',
