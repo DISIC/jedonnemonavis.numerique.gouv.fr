@@ -5,6 +5,7 @@ import {
 } from '@/src/server/trpc';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
+	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
 import { fetchAndFormatData } from '@/src/utils/stats';
@@ -80,7 +81,7 @@ export const openAPIRouter = router({
 						field_codes: ['satisfaction', 'comprehension'],
 						product_ids: [],
 						start_date: '2023-01-01',
-						end_date: '2024-01-01'
+						end_date: new Date().toISOString().split('T')[0]
 					}
 				}
 			}
@@ -135,7 +136,8 @@ export const openAPIRouter = router({
 						? field_codes
 						: [
 								...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug),
-								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug)
+								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug),
+								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug),
 							],
 				product_ids:
 					product_ids.length > 0
@@ -162,7 +164,7 @@ export const openAPIRouter = router({
 						field_codes: ['satisfaction', 'comprehension'],
 						product_ids: [],
 						start_date: '2023-01-01',
-						end_date: '2024-01-01'
+						end_date: new Date().toISOString().split('T')[0]
 					}
 				}
 			}
@@ -214,7 +216,8 @@ export const openAPIRouter = router({
 						? field_codes
 						: [
 								...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug),
-								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug)
+								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug),
+								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug)
 							],
 				product_ids:
 					product_ids.length > 0

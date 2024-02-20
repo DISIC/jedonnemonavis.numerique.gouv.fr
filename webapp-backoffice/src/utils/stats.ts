@@ -127,8 +127,8 @@ export const fetchAndFormatData = async ({
 			term: {
 				terms: {
 					script:
-						'doc["product_id"].value + "_" + doc["product_name.keyword"].value + "_" + doc["field_code.keyword"].value + "_" + doc["field_label.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["answer_text.keyword"].value',
-					size: 1000
+						'doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value',
+					size: 10000		
 				}
 			}
 		},
@@ -150,7 +150,7 @@ export const fetchAndFormatData = async ({
 			fieldLabel,
 			intention,
 			answerText
-		] = bucket.key.split('_');
+		] = bucket.key.split('#!#');
 		const docCount = bucket.doc_count;
 
 		if (!productMap.hasOwnProperty(productId)) {

@@ -11,6 +11,7 @@ import 'swagger-ui-react/swagger-ui.css';
 import { Loader } from '@/src/components/ui/Loader';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
+	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
 import Link from 'next/link';
@@ -36,8 +37,6 @@ const DocAPI = () => {
 			}
 			return r.json();
 		});
-
-		console.log('fetching : ', fetching);
 
 		setDocApi(fetching as {} & { paths: Record<string, Object> });
 	};
@@ -137,22 +136,24 @@ const DocAPI = () => {
 								<li>
 									<b>filed_codes : </b> Les codes des questions posées aux
 									utilisateurs. Si vide, retourne les données pour l'esemble des
-									codes. <br />
+									codes. <br /><br/>
 									Voici la correspondance entre les field_codes et les questions
 									: <br />
-									<p
+									<table className={fr.cx('fr-table')}
 										dangerouslySetInnerHTML={{
 											__html: [
 												...FIELD_CODE_BOOLEAN_VALUES,
-												...FIELD_CODE_SMILEY_VALUES
+												...FIELD_CODE_SMILEY_VALUES,
+												...FIELD_CODE_DETAILS_VALUES
 											]
+											.sort((a, b) => a.slug.localeCompare(b.slug))
 												.map(code => {
-													return `- ${code.slug} : ${code.question} <br />`;
+													return `<tr><td>${code.slug}</td><td>${code.question}</td></tr>`;
 												})
 												.join()
 												.replace(/,/g, '')
 										}}
-									></p>
+									></table>
 								</li>
 								<li>
 									<b>product_ids : </b> Les ids des produits sur lesquels vous

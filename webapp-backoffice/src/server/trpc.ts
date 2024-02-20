@@ -126,8 +126,6 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 				message: 'Please provide a valid API key'
 			});
 		} else {
-			console.log('user_id : ', checkApiKey.user_id);
-
 			return next({
 				ctx: {
 					...ctx,

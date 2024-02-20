@@ -7,6 +7,7 @@ export const FIELD_CODE_BOOLEAN_VALUES = [
 	},
 	{ slug: 'contact_reached', question: 'Avez vous réussi à les joindre ?' }
 ] as const;
+
 export const FIELD_CODE_SMILEY_VALUES = [
 	{
 		slug: 'satisfaction',
