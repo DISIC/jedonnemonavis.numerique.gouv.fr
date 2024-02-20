@@ -1,6 +1,6 @@
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product } from '@prisma/client';
+import { AnswerIntention, Product } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
@@ -17,6 +17,11 @@ import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVer
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
 import { ReviewFiltersType } from '@/src/types/custom';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import { FILTER_LABELS } from '@/src/utils/helpers';
+import { displayIntention } from '@/src/utils/stats';
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import { on } from 'events';
 
 interface Props {
 	product: Product;
@@ -137,7 +142,24 @@ const ProductReviewsPage = (props: Props) => {
 		setSort(sort);
 	};
 
-	const handleFilterClick = (filter: string) => {};
+	const renderLabel = (type: string | undefined, key: string, value: string | boolean) => {
+		switch (type) {
+			case 'checkbox':
+				return <>
+					<p>Avec {FILTER_LABELS.find(filter => filter.value === key)?.label}</p>
+				</>
+			case 'iconbox': 
+				return <>
+					<p>{FILTER_LABELS.find(filter => filter.value === key)?.label} : {displayIntention((value ?? 'neutral') as AnswerIntention)}</p>
+				</>
+			case 'select':
+				return <>
+					<p>{value}</p>
+				</>
+			default:
+				return '';
+		}
+	};
 
 	if (isLoadingReviews) {
 		return (
@@ -153,6 +175,7 @@ const ProductReviewsPage = (props: Props) => {
 	return (
 		<>
 			<ReviewFiltersModal modal={filter_modal} filters={filters} submitFilters={handleSubmitfilters}></ReviewFiltersModal>
+			
 			<ProductLayout product={product}>
 				<h1>Avis</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
@@ -277,6 +300,26 @@ const ProductReviewsPage = (props: Props) => {
 							Plus de filtres
 						</Button>
 					</div>
+					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
+						{Object.keys(filters).map((key, index) => {
+							if (filters[key as keyof ReviewFiltersType] !== '' && filters[key as keyof ReviewFiltersType] !== false) {
+								return (
+									<Tag
+										key={index}
+										dismissible
+										className={cx(classes.tagFilter)}
+										nativeButtonProps={{
+											onClick: () => {
+												setFilters({...filters, [key]: typeof filters[key as keyof ReviewFiltersType] === 'boolean' ? false : ''});
+											}
+										}}
+									>
+										{renderLabel(FILTER_LABELS.find(filter => filter.value === key)?.type, key, filters[key as keyof ReviewFiltersType])}
+									</Tag>
+								);
+							}
+						})}
+					</div>
 				</div>
 				{isLoadingReviews ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -379,6 +422,9 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 	filterView: {
 		display: 'flex',
 		flexDirection: 'column'
+	},
+	tagFilter: {
+		marginRight: '0.5rem'
 	}
 }));
 

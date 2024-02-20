@@ -3,18 +3,13 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { tss } from 'tss-react/dsfr';
 import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '../../ui/Loader';
-import Link from 'next/link';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
 import { ReviewFiltersType } from '@/src/types/custom';
-import { getSeverity } from '@/src/utils/tools';
-import { set } from 'zod';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { DIFFICULTIES_LABEL, HELP_LABELS } from '@/src/utils/helpers';
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 
 interface CustomModalProps {
 	buttonProps: {
@@ -41,9 +36,13 @@ const ReviewFiltersModal = (props: Props) => {
 
 	const [tmpFilters, setTmpFilters] = React.useState<ReviewFiltersType>(filters);
 
+	const isOpen = useIsModalOpen(modal);
+
 	React.useEffect(() => {
-		console.log('tmpFilters : ', tmpFilters);
-	}, [tmpFilters]);
+		if(isOpen){
+			setTmpFilters(filters)
+		}
+	}, [isOpen]);
 
 	return (
 		<modal.Component
@@ -67,7 +66,7 @@ const ReviewFiltersModal = (props: Props) => {
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, satisfaction: intention})}}
+						onClick={() => {setTmpFilters({...tmpFilters, satisfaction: tmpFilters.satisfaction !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						style={{
@@ -91,7 +90,7 @@ const ReviewFiltersModal = (props: Props) => {
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, easy: intention})}}
+						onClick={() => {setTmpFilters({...tmpFilters, easy: tmpFilters.easy !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						style={{
@@ -116,7 +115,7 @@ const ReviewFiltersModal = (props: Props) => {
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, comprehension: intention})}}
+						onClick={() => {setTmpFilters({...tmpFilters, comprehension: tmpFilters.comprehension !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						style={{

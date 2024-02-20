@@ -146,8 +146,6 @@ export const reviewRouter = router({
 				};
 			}
 
-			console.log('where : ', where)
-
 			if (startDate && endDate) {
 				const endDateAtNight = new Date(endDate)
 				endDateAtNight.setHours(23)

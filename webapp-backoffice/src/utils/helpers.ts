@@ -91,3 +91,46 @@ export const HELP_LABELS = [
 		value: 'Autre'
 	}
 ] as const;
+
+export const FILTER_LABELS = [
+	{
+		label: 'Verbatim', 
+		value: "needVerbatim",
+		type: "checkbox"
+	},
+	{
+		label: 'Autre difficulté',
+		value: "needOtherDifficulties",
+		type: "checkbox"
+	},
+	{
+		label: 'Autre aide',
+		value: "needOtherHelp",
+		type: "checkbox"
+	},
+	{
+		label: "Satisfaction",
+		value: "satisfaction",
+		type: "iconbox"
+	},
+	{
+		label: "Facilité",
+		value: "easy",
+		type: "iconbox"
+	},
+	{
+		label: "Compréhension",
+		value: "comprehension",
+		type: "iconbox"
+	},
+	{
+		label: "Difficultés",
+		value: "difficulties",
+		type: "select"
+	},
+	{
+		label: "Aide",
+		value: "help",
+		type: "select"
+	}
+]
