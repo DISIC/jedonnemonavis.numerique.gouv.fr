@@ -84,6 +84,21 @@ export const getStatsAnswerText = ({
 	return currentAnswerText.charAt(0).toUpperCase() + currentAnswerText.slice(1);
 };
 
+export const displayIntention = (intention: string) => {
+	switch (intention) {
+		case 'bad':
+			return 'Mauvais';
+		case 'medium':
+			return 'Moyen';
+		case 'good':
+			return 'Très bien';
+		case 'neutral':
+			return 'Neutre';
+		default:
+			return '';
+	}
+}
+
 export const fetchAndFormatData = async ({
 	ctx,
 	field_codes,

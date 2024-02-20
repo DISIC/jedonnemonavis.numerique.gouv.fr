@@ -13,6 +13,8 @@ generator zod {
   addInputTypeValidation = false
   addIncludeType         = false
   addSelectType          = false
+  createRelationValuesTypes = true
+  createPartialTypes = true
 }
 
 enum UserRole {
@@ -56,7 +58,7 @@ model User {
   firstName             String?
   lastName              String?
   active                Boolean               @default(false)
-  xwiki_account  Boolean               @default(false)
+  xwiki_account         Boolean               @default(false)
   xwiki_username String?
   email                 String                @unique
   password              String
@@ -206,13 +208,13 @@ model Review {
 }
 
 model Answer {
-  id             Int          @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   field_label    String
   field_code     String
   answer_item_id Int
   answer_text    String
   intention      AnswerIntention?
   kind           AnswerKind
-  review         Review       @relation(fields: [review_id], references: [id])
+  review         Review           @relation(fields: [review_id], references: [id])
   review_id      Int
 }

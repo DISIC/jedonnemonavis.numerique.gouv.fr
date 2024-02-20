@@ -46,6 +46,8 @@ export const openAPIRouter = router({
 				}
 			);
 
+			console.log(ctx.user_api)
+
 			const products = await ctx.prisma.product.findMany({
 				where: {
 					id: {

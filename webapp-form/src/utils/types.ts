@@ -23,6 +23,7 @@ export type Opinion = {
 export type Product = {
   id: number;
   title: string;
+  buttons: {id: number}[]
 };
 
 type BaseOption = {

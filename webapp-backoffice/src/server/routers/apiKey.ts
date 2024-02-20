@@ -1,10 +1,5 @@
+import { protectedProcedure, router } from '@/src/server/trpc';
 import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-import { Prisma } from '@prisma/client';
-import {
-	ApiKeyUncheckedCreateInputSchema,
-	ApiKeyUncheckedUpdateInputSchema
-} from '@/prisma/generated/zod';
 
 export const apiKeyRouter = router({
 	getList: protectedProcedure
