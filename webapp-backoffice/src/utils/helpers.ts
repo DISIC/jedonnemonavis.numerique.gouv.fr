@@ -43,3 +43,51 @@ export const FIELD_CODE_DETAILS_VALUES = [
 	},
 	{ slug: 'help_details', question: 'De quelle aide avez vous eu besoin ?' }
 ] as const;
+
+export const DIFFICULTIES_LABEL = [
+	{
+		label: 'J’ai manqué d’information avant de commencer la démarche',
+		value: 'J’ai manqué d’information avant de commencer la démarche'
+	},
+	{
+		label: 'La démarche n’a pas fonctionné',
+		value: 'La démarche n’a pas fonctionné'
+	},
+	{
+		label: 'Le site ne s’affichait pas bien sur mobile',
+		value: 'Le site ne s’affichait pas bien sur mobile'
+	},
+	{
+		label: 'J’ai eu des difficultés à joindre des documents',
+		value: 'J’ai eu des difficultés à joindre des documents'
+	},
+	{
+		label:
+			'Il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)',
+		value:
+			'Il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)'
+	},
+	{
+		label: 'Autre',
+		value: 'Autre'
+	}
+] as const;
+
+export const HELP_LABELS = [
+	{
+		label: "J'ai fait une recherche sur internet (site, forum)",
+		value: "J'ai fait une recherche sur internet (site, forum)"
+	},
+	{
+		label: "J'ai demandé de l’aide à un proche (famille, ami)",
+		value: "J'ai demandé de l’aide à un proche (famille, ami)"
+	},
+	{
+		label: "J'ai demandé de l’aide à une association",
+		value: "J'ai demandé de l’aide à une association"
+	},
+	{
+		label: 'Autre',
+		value: 'Autre'
+	}
+] as const;

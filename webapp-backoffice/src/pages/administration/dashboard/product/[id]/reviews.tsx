@@ -14,6 +14,9 @@ import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
+import { ReviewFiltersType } from '@/src/types/custom';
 
 interface Props {
 	product: Product;
@@ -40,6 +43,27 @@ const ProductReviewsPage = (props: Props) => {
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
 
+	const filter_modal = createModal({
+		id: 'filter-modal',
+		isOpenedByDefault: false
+	});
+
+	const [filters, setFilters] = React.useState<ReviewFiltersType>({
+		satisfaction: '',
+		easy: '',
+		comprehension: '',
+		needVerbatim: false,
+		needOtherDifficulties: false,
+		needOtherHelp: false,
+		difficulties: '',
+		help: ''
+	})
+
+	const handleSubmitfilters = (filters: ReviewFiltersType) => {
+		setFilters(filters);
+		filter_modal.close();
+	}
+
 	const {
 		data: reviewResults,
 		isLoading: isLoadingReviews,
@@ -50,11 +74,13 @@ const ProductReviewsPage = (props: Props) => {
 			numberPerPage: numberPerPage,
 			page: currentPage,
 			shouldIncludeAnswers: true,
+			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
 			startDate,
 			sort: sort,
 			endDate,
-			button_id: buttonId
+			button_id: buttonId,
+			filters: filters
 		},
 		{
 			initialData: {
@@ -125,209 +151,214 @@ const ProductReviewsPage = (props: Props) => {
 	}
 
 	return (
-		<ProductLayout product={product}>
-			<h1>Avis</h1>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
-				<div className={fr.cx('fr-col-4')}>
-					<Input
-						label="Date de début"
-						nativeInputProps={{
-							type: 'date',
-							value: startDate,
-							onChange: e => {
-								setStartDate(e.target.value);
-							}
-						}}
-					/>
-				</div>
-				<div className={fr.cx('fr-col-4')}>
-					<Input
-						label="Date de fin"
-						nativeInputProps={{
-							type: 'date',
-							value: endDate,
-							onChange: e => {
-								setEndDate(e.target.value);
-							}
-						}}
-					/>
-				</div>
-				<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
-					<form
-						className={cx(classes.searchForm)}
-						onSubmit={e => {
-							e.preventDefault();
-							setValidatedSearch(search);
-						}}
-					>
-						<div role="search" className={fr.cx('fr-search-bar')}>
-							<Input
-								label="Rechercher un produit"
-								hideLabel
-								nativeInputProps={{
-									placeholder: 'Rechercher',
-									type: 'search',
-									value: search,
-									onChange: event => {
-										if (!event.target.value) {
-											setValidatedSearch('');
-										}
-										setSearch(event.target.value);
-									}
-								}}
-							/>
-							<Button
-								priority="primary"
-								type="submit"
-								iconId="ri-search-2-line"
-								iconPosition="left"
-							>
-								Rechercher
-							</Button>
-						</div>
-					</form>
-				</div>
-			</div>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--left',
-					'fr-mt-4v'
-				)}
-			>
-				<div className={fr.cx('fr-col-3')}>
-					<div className={cx(classes.filterView)}>
-						<label>Vue</label>
-						<div className={fr.cx('fr-mt-2v')}>
-							<Button
-								priority={displayMode === 'reviews' ? 'primary' : 'secondary'}
-								onClick={() => setDisplayMode('reviews')}
-							>
-								Avis
-							</Button>
-							<Button
-								priority={displayMode === 'reviews' ? 'secondary' : 'primary'}
-								onClick={() => setDisplayMode('verbatim')}
-							>
-								Verbatims
-							</Button>
-						</div>
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-5')}>
-					<Select
-						label="Sélectionner une source"
-						nativeSelectProps={{
-							onChange: e => {
-								if (e.target.value !== 'undefined') {
-									setButtonId(parseInt(e.target.value));
-								} else {
-									setButtonId(undefined);
+		<>
+			<ReviewFiltersModal modal={filter_modal} filters={filters} submitFilters={handleSubmitfilters}></ReviewFiltersModal>
+			<ProductLayout product={product}>
+				<h1>Avis</h1>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
+					<div className={fr.cx('fr-col-4')}>
+						<Input
+							label="Date de début"
+							nativeInputProps={{
+								type: 'date',
+								value: startDate,
+								onChange: e => {
+									setStartDate(e.target.value);
 								}
-							}
-						}}
-					>
-						<option value="undefined">Toutes les sources</option>
-						{buttonResults?.data?.map(button => {
-							return (
-								<option key={button.id} value={button.id}>
-									{button.title}
-								</option>
-							);
-						})}
-					</Select>
-				</div>
-				<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
-					<Button
-						priority="tertiary"
-						iconPosition="right"
-						iconId="ri-filter-2-line"
-					>
-						Plus de filtres
-					</Button>
-				</div>
-			</div>
-			{isLoadingReviews ? (
-				<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-					<Loader />
-				</div>
-			) : (
-				<>
-					<div
-						className={fr.cx(
-							'fr-grid-row',
-							'fr-grid-row--gutters',
-							'fr-grid-row--right'
-						)}
-					>
-						{reviews.length > 0 && nbPages > 0 && (
-							<>
-								<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
-									Avis de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + reviews.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>{reviewsCount}</span>
-								</div>
-							</>
-						)}
+							}}
+						/>
 					</div>
-					<div>
-						{reviewsExtended.length > 0 ? (
-							<>
-								<ReviewFilters
-									displayMode={displayMode}
-									sort={sort}
-									onClick={handleSortChange}
+					<div className={fr.cx('fr-col-4')}>
+						<Input
+							label="Date de fin"
+							nativeInputProps={{
+								type: 'date',
+								value: endDate,
+								onChange: e => {
+									setEndDate(e.target.value);
+								}
+							}}
+						/>
+					</div>
+					<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
+						<form
+							className={cx(classes.searchForm)}
+							onSubmit={e => {
+								e.preventDefault();
+								setValidatedSearch(search);
+							}}
+						>
+							<div role="search" className={fr.cx('fr-search-bar')}>
+								<Input
+									label="Rechercher un produit"
+									hideLabel
+									nativeInputProps={{
+										placeholder: 'Rechercher',
+										type: 'search',
+										value: search,
+										onChange: event => {
+											if (!event.target.value) {
+												setValidatedSearch('');
+											}
+											setSearch(event.target.value);
+										}
+									}}
 								/>
-								{reviewsExtended.map((review, index) => {
-									if (review && displayMode === 'reviews') {
-										return <ReviewLine key={index} review={review} />;
-									} else if (review && displayMode === 'verbatim') {
-										return <ReviewLineVerbatim key={index} review={review} />;
+								<Button
+									priority="primary"
+									type="submit"
+									iconId="ri-search-2-line"
+									iconPosition="left"
+								>
+									Rechercher
+								</Button>
+							</div>
+						</form>
+					</div>
+				</div>
+				<div
+					className={fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--gutters',
+						'fr-grid-row--left',
+						'fr-mt-4v'
+					)}
+				>
+					<div className={fr.cx('fr-col-3')}>
+						<div className={cx(classes.filterView)}>
+							<label>Vue</label>
+							<div className={fr.cx('fr-mt-2v')}>
+								<Button
+									priority={displayMode === 'reviews' ? 'primary' : 'secondary'}
+									onClick={() => setDisplayMode('reviews')}
+								>
+									Avis
+								</Button>
+								<Button
+									priority={displayMode === 'reviews' ? 'secondary' : 'primary'}
+									onClick={() => setDisplayMode('verbatim')}
+								>
+									Verbatims
+								</Button>
+							</div>
+						</div>
+					</div>
+					<div className={fr.cx('fr-col-5')}>
+						<Select
+							label="Sélectionner une source"
+							nativeSelectProps={{
+								onChange: e => {
+									if (e.target.value !== 'undefined') {
+										setButtonId(parseInt(e.target.value));
+									} else {
+										setButtonId(undefined);
 									}
-								})}
-							</>
-						) : (
-							<div
-								className={fr.cx(
-									'fr-grid-row',
-									'fr-grid-row--center',
-									'fr-mt-20v'
-								)}
-							>
-								<p>Aucun avis disponible </p>
+								}
+							}}
+						>
+							<option value="undefined">Toutes les sources</option>
+							{buttonResults?.data?.map(button => {
+								return (
+									<option key={button.id} value={button.id}>
+										{button.title}
+									</option>
+								);
+							})}
+						</Select>
+					</div>
+					<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
+						<Button
+							priority="tertiary"
+							iconId="fr-icon-earth-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={filter_modal.buttonProps}
+						>
+							Plus de filtres
+						</Button>
+					</div>
+				</div>
+				{isLoadingReviews ? (
+					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+						<Loader />
+					</div>
+				) : (
+					<>
+						<div
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--right'
+							)}
+						>
+							{reviews.length > 0 && nbPages > 0 && (
+								<>
+									<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+										Avis de{' '}
+										<span className={cx(classes.boldText)}>
+											{numberPerPage * (currentPage - 1) + 1}
+										</span>{' '}
+										à{' '}
+										<span className={cx(classes.boldText)}>
+											{numberPerPage * (currentPage - 1) + reviews.length}
+										</span>{' '}
+										sur{' '}
+										<span className={cx(classes.boldText)}>{reviewsCount}</span>
+									</div>
+								</>
+							)}
+						</div>
+						<div>
+							{reviewsExtended.length > 0 ? (
+								<>
+									<ReviewFilters
+										displayMode={displayMode}
+										sort={sort}
+										onClick={handleSortChange}
+									/>
+									{reviewsExtended.map((review, index) => {
+										if (review && displayMode === 'reviews') {
+											return <ReviewLine key={index} review={review} />;
+										} else if (review && displayMode === 'verbatim') {
+											return <ReviewLineVerbatim key={index} review={review} />;
+										}
+									})}
+								</>
+							) : (
+								<div
+									className={fr.cx(
+										'fr-grid-row',
+										'fr-grid-row--center',
+										'fr-mt-20v'
+									)}
+								>
+									<p>Aucun avis disponible </p>
+								</div>
+							)}
+						</div>
+						{reviewsExtended.length > 0 && (
+							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+								<Pagination
+									count={nbPages}
+									showFirstLast
+									defaultPage={currentPage}
+									getPageLinkProps={pageNumber => ({
+										onClick: event => {
+											event.preventDefault();
+											handlePageChange(pageNumber);
+										},
+										href: '#',
+										classes: { link: fr.cx('fr-pagination__link') },
+										key: `pagination-link-${pageNumber}`
+									})}
+									className={fr.cx('fr-mt-1w')}
+								/>
 							</div>
 						)}
-					</div>
-					{reviewsExtended.length > 0 && (
-						<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-							<Pagination
-								count={nbPages}
-								showFirstLast
-								defaultPage={currentPage}
-								getPageLinkProps={pageNumber => ({
-									onClick: event => {
-										event.preventDefault();
-										handlePageChange(pageNumber);
-									},
-									href: '#',
-									classes: { link: fr.cx('fr-pagination__link') },
-									key: `pagination-link-${pageNumber}`
-								})}
-								className={fr.cx('fr-mt-1w')}
-							/>
-						</div>
-					)}
-				</>
-			)}
-		</ProductLayout>
+					</>
+				)}
+			</ProductLayout>
+		</>
 	);
 };
 

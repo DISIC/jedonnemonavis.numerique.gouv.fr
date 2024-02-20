@@ -72,3 +72,14 @@ export interface ProductMapEntry {
 		[category: string]: number;
 	};
 }
+
+export type ReviewFiltersType = {
+	satisfaction: string;
+	easy: string;
+	comprehension: string;
+	needVerbatim: boolean;
+	needOtherDifficulties: boolean;
+	needOtherHelp: boolean;
+	difficulties: string;
+	help: string;
+}

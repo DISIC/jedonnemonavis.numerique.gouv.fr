@@ -18,7 +18,7 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 	};
 
 	return (
-		<div className={cx(fr.cx('fr-p-3v'), classes.container, type === 'Line' && classes.greyContainer)}>
+		<div className={cx(classes.container, type === 'Line' && classes.greyContainer)}>
 			<div
 				className={fr.cx(
 					'fr-grid-row',
@@ -29,7 +29,7 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 				<div className={fr.cx('fr-col-3')}>
 					<div>
 						<p className={cx(classes.subtitle)}>Difficulté</p>
-						{displayFieldCodeText('difficulties') === 'Oui' && (
+						{displayFieldCodeText('difficulties') === 'Oui' ? (
 							<p className={cx(classes.content)}>
 								{review.answers &&
 									review.answers
@@ -47,7 +47,11 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
                                     </p>
                                 }
 							</p>
-						)}
+						) : 
+							<p className={cx(classes.content)}>
+								Non renseigné
+							</p>
+						}
 					</div>
 				</div>
 				<div className={fr.cx('fr-col-4')}>
@@ -55,9 +59,18 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 						<p className={cx(classes.subtitle)}>
 							Tentative de contacter le service d'aide ?
 						</p>
-						<p className={cx(classes.content)}>
-							{displayFieldCodeText('contact')}
-						</p>
+						
+							{displayFieldCodeText('contact') ? (
+								<p className={cx(classes.content)}>
+									{displayFieldCodeText('contact')}
+								</p>
+
+							) : 
+								<p className={cx(classes.content)}>
+									Non renseigné
+								</p>
+							}
+						
 					</div>
 					<div>
 						<p className={cx(classes.subtitle)}>Résultat de la tentative ?</p>
@@ -124,9 +137,11 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 				<div className={fr.cx('fr-col-4')}>
 					<div>
 						<p className={cx(classes.subtitle)}>Autre aide sollicitée ?</p>
-						<p className={cx(classes.content)}>
-							{displayFieldCodeText('help')}
-						</p>
+						{displayFieldCodeText('help') ? (
+							<p className={cx(classes.content)}>{displayFieldCodeText('help')}</p>
+						) : 
+						<p className={cx(classes.content)}>Non renseigné</p>
+						}
 					</div>
 					<div>
 						<p className={cx(classes.subtitle)}>

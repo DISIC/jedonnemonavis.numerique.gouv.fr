@@ -43,72 +43,78 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 						review.created_at?.toISOString().split('T')[0] || ''
 					)}
 				</div>
-				{review.satisfaction && (
-					<Badge
-						className={cx(classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.satisfaction.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.satisfaction.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.satisfaction.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.satisfaction.intention ?? 'neutral')}
-					</Badge>
-				)}
-				{review.easy && (
-					<Badge
-						className={cx(classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.easy.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.easy.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.easy.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.easy.intention ?? 'neutral')}
-					</Badge>
-				)}
-				{review.comprehension && (
-					<Badge
-						className={cx(classes.badge)}
-						small={true}
-						noIcon={true}
-						severity={getSeverity(review.comprehension.intention || '')}
-					>
-						<i
-							className={fr.cx(
-								getStatsIcon({
-									intention: review.comprehension.intention ?? 'neutral'
-								})
-							)}
-							style={{
-								color: getStatsColor({
-									intention: review.comprehension.intention ?? 'neutral'
-								})
-							}}
-						/>
-						{displayIntention(review.comprehension.intention ?? 'neutral')}
-					</Badge>
-				)}
+				<div className={cx(classes.badge)}>
+					{review.satisfaction && (
+						<Badge
+							className={cx(classes.badge)}
+							small={true}
+							noIcon={true}
+							severity={getSeverity(review.satisfaction.intention || '')}
+						>
+							<i
+								className={fr.cx(
+									getStatsIcon({
+										intention: review.satisfaction.intention ?? 'neutral'
+									})
+								)}
+								style={{
+									color: getStatsColor({
+										intention: review.satisfaction.intention ?? 'neutral'
+									})
+								}}
+							/>
+							{displayIntention(review.satisfaction.intention ?? 'neutral')}
+						</Badge>
+					)}
+				</div>
+				<div className={cx(classes.badge)}>
+					{review.easy && (
+						<Badge
+							className={cx(classes.badge)}
+							small={true}
+							noIcon={true}
+							severity={getSeverity(review.easy.intention || '')}
+						>
+							<i
+								className={fr.cx(
+									getStatsIcon({
+										intention: review.easy.intention ?? 'neutral'
+									})
+								)}
+								style={{
+									color: getStatsColor({
+										intention: review.easy.intention ?? 'neutral'
+									})
+								}}
+							/>
+							{displayIntention(review.easy.intention ?? 'neutral')}
+						</Badge>
+					)}
+				</div>
+				<div className={cx(classes.badge)}>
+					{review.comprehension && (
+						<Badge
+							className={cx(classes.badge)}
+							small={true}
+							noIcon={true}
+							severity={getSeverity(review.comprehension.intention || '')}
+						>
+							<i
+								className={fr.cx(
+									getStatsIcon({
+										intention: review.comprehension.intention ?? 'neutral'
+									})
+								)}
+								style={{
+									color: getStatsColor({
+										intention: review.comprehension.intention ?? 'neutral'
+									})
+								}}
+							/>
+							{displayIntention(review.comprehension.intention ?? 'neutral')}
+						</Badge>
+					)}
+				</div>
 				<Badge
 					className={cx(classes.badge)}
 					noIcon
