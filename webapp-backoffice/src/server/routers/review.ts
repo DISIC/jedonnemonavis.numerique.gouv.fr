@@ -170,26 +170,16 @@ export const reviewRouter = router({
 			];
 
 			if (sort) {
-				const values = sort.split(':');
-				if (values.length === 2) {
-					if (values[0].includes('.')) {
-						const subValues = values[0].split('.');
-						if (subValues.length === 2) {
-							orderBy = [
-								{
-									[subValues[0]]: {
-										[subValues[1]]: values[1]
-									}
-								}
-							];
+				console.log('sort : ', sort)
+				const values = sort.split(':')
+				if(sort.includes('created_at')) {
+					orderBy = [
+						{
+							[values[0]]: values[1]
 						}
-					} else {
-						orderBy = [
-							{
-								[values[0]]: values[1]
-							}
-						];
-					}
+					];
+				} else {
+					
 				}
 			}
 

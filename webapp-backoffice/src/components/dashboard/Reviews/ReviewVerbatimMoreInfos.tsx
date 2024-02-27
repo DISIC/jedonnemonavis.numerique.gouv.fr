@@ -2,7 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { getSeverity } from '@/src/utils/tools';
+import { getSeverity, retrieveButtonName } from '@/src/utils/tools';
 import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
@@ -42,7 +42,13 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 				<div className={fr.cx('fr-col-2')}>
 					<p className={cx(classes.subtitle)}>Source</p>
 					<p className={cx(classes.content)}>
-						bouton 0
+						{review.button_id ? (
+							<div className={cx(classes.badge)}>
+								{retrieveButtonName(review.button_id)}
+							</div>
+						) : (
+							<div className={cx(classes.badge)}>Pas de source</div>
+						)}
 					</p>
 				</div>
 				<div className={fr.cx('fr-col-2')}>

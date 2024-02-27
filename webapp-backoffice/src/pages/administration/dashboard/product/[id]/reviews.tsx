@@ -138,9 +138,22 @@ const ProductReviewsPage = (props: Props) => {
 		setCurrentPage(pageNumber);
 	};
 
-	const handleSortChange = (sort: string) => {
-		setSort(sort);
+	const handleSortChange = (tmp_sort: string) => {
+		console.log('tmp_sort : ', tmp_sort)
+		if(!sort.includes(tmp_sort)) {
+			setSort(`${tmp_sort}:asc`)
+			return
+		}
+		if(sort.includes(':asc') || sort.includes(':desc')) {
+			setSort(`${sort.split(':')[0]}:${sort.split(':')[1] === 'asc' ? 'desc' : 'asc'}`)
+		} else {
+			setSort(`${sort}:asc`)
+		}
 	};
+
+	React.useEffect(() => {
+		console.log('actuel sort : ', sort)
+	}, [sort])
 
 	const renderLabel = (type: string | undefined, key: string, value: string | boolean) => {
 		switch (type) {

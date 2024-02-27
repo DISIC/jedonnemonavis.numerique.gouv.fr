@@ -16,7 +16,7 @@ const ReviewFilters = (props: Props) => {
 	const [sortList, setSortList] = React.useState<
 		{
 			label: string;
-			code?: string;
+			code: string;
 		}[]
 	>([]);
 
@@ -25,43 +25,44 @@ const ReviewFilters = (props: Props) => {
 			setSortList([
 				{
 					label: 'Date',
-					code:
-						props.sort === 'created_at:desc'
-							? 'created_at:asc'
-							: 'created_at:desc'
+					code: 'created_at'
 				},
 
 				{
-					label: 'Satisfaction'
+					label: 'Satisfaction',
+					code: 'statisfaction'
 				},
 				{
-					label: 'Facilité'
+					label: 'Facilité',
+					code: 'easy'
 				},
 				{
-					label: 'Langage'
+					label: 'Langage',
+					code: 'comprehension'
 				},
 				{
-					label: 'Verbatim'
+					label: 'Verbatim',
+					code: 'verbatim'
 				},
 				{
-					label: 'Source'
+					label: 'Source',
+					code: 'source'
 				}
 			]);
 		} else {
 			setSortList([
 				{
 					label: 'Date',
-					code:
-						props.sort === 'created_at:desc'
-							? 'created_at:asc'
-							: 'created_at:desc'
+					code: 'created_at'
 				},
 
 				{
-					label: 'Satisfaction'
+					label: 'Satisfaction',
+					code: 'statisfaction'
 				},
 				{
-					label: 'Verbatim'
+					label: 'Verbatim',
+					code: 'verbatim'
 				}
 			]);
 		}
@@ -81,7 +82,7 @@ const ReviewFilters = (props: Props) => {
 				>
 					<span>
 						{sort.label}{' '}
-						{sort.code && (
+						{props.sort.includes(sort.code) && (
 							<i
 								className={
 									props.sort.includes('asc')

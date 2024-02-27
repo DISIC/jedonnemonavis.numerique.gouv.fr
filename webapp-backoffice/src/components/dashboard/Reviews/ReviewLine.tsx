@@ -1,5 +1,5 @@
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
+import { formatDateToFrenchString, getSeverity, retrieveButtonName } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -26,13 +26,6 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 			default:
 				return '';
 		}
-	};
-
-	const retrieveButtonName = (buttonId: number) => {
-		const { data: button } = trpc.button.getById.useQuery({
-			id: buttonId
-		});
-		if (button?.data) return button.data?.title || '';
 	};
 
 	return (

@@ -1,3 +1,5 @@
+import { trpc } from '@/src/utils/trpc';
+
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 	return emailRegex.test(email);
@@ -69,4 +71,11 @@ export const getSeverity = (intention: string) => {
 		default:
 			return 'info';
 	}
+};
+
+export const retrieveButtonName = (buttonId: number) => {
+	const { data: button } = trpc.button.getById.useQuery({
+		id: buttonId
+	});
+	if (button?.data) return button.data?.title || '';
 };
