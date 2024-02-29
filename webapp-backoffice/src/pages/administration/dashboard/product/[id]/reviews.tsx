@@ -20,6 +20,7 @@ import { ReviewFiltersType } from '@/src/types/custom';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
+import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 
 interface Props {
 	product: Product;
@@ -308,15 +309,15 @@ const ProductReviewsPage = (props: Props) => {
 						</Button>
 					</div>
 					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-12', 'fr-col-xl-3'))}>
-						<Button
-							priority="tertiary"
-							iconId="fr-icon-file-download-line"
-							iconPosition="right"
-							type="button"
-							nativeButtonProps={filter_modal.buttonProps}
-						>
-							Télécharger
-						</Button>
+						<ExportReviews 
+							product_id={product.id} 
+							startDate={startDate} 
+							endDate={endDate}
+							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
+							search={search}
+							button_id={buttonId}
+							filters={filters}
+						></ExportReviews>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
 						{Object.keys(filters).map((key, index) => {
