@@ -69,6 +69,7 @@ const ReviewFiltersModal = (props: Props) => {
 						onClick={() => {setTmpFilters({...tmpFilters, satisfaction: tmpFilters.satisfaction !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
+						key={`satisfaction_${intention}`}
 						style={{
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
@@ -93,6 +94,7 @@ const ReviewFiltersModal = (props: Props) => {
 						onClick={() => {setTmpFilters({...tmpFilters, easy: tmpFilters.easy !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
+						key={`easy_${intention}`}
 						style={{
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
@@ -118,6 +120,7 @@ const ReviewFiltersModal = (props: Props) => {
 						onClick={() => {setTmpFilters({...tmpFilters, comprehension: tmpFilters.comprehension !== intention ? intention : ''})}}
 						priority="tertiary"
 						className={cx(classes.badge)}
+						key={`comprehension_${intention}`}
 						style={{
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
@@ -172,12 +175,13 @@ const ReviewFiltersModal = (props: Props) => {
 					label="Difficulté"
 					nativeSelectProps={{
 						name: 'difficulties',
-						onChange: event => setTmpFilters({...tmpFilters, difficulties: event.target.value})
+						onChange: event => setTmpFilters({...tmpFilters, difficulties: event.target.value}),
+						value: tmpFilters.difficulties
 					}}
 				>
-					<option selected={tmpFilters.difficulties===""} value="">Sélectionner une option</option>
+					<option disabled hidden value="">Sélectionner une option</option>
 					{DIFFICULTIES_LABEL.map((difficulty) => (
-						<option selected={tmpFilters.difficulties===difficulty.value} value={difficulty.value}>{difficulty.label}</option>
+						<option value={difficulty.value} key={`difficulty_${difficulty.value}`}>{difficulty.label}</option>
 					))}
 				</Select>
 			</div>
@@ -189,12 +193,13 @@ const ReviewFiltersModal = (props: Props) => {
 					label="Aide"
 					nativeSelectProps={{
 						name: 'help',
-						onChange: event => setTmpFilters({...tmpFilters, help: event.target.value})
+						onChange: event => setTmpFilters({...tmpFilters, help: event.target.value}),
+						value: tmpFilters.help
 					}}
 				>
-					<option selected={tmpFilters.help===""} value="">Sélectionner une option</option>
+					<option disabled hidden value="">Sélectionner une option</option>
 					{HELP_LABELS.map((help) => (
-						<option selected={tmpFilters.help===help.value} value={help.value}>{help.label}</option>
+						<option value={help.value} key={`help_${help.value}`}>{help.label}</option>
 					))}
 				</Select>
 			</div>
@@ -205,7 +210,7 @@ const ReviewFiltersModal = (props: Props) => {
 				'fr-grid-row--left',
 				'fr-mt-4v'
 			)}>
-				<div className={fr.cx('fr-col-3')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-sm-3')}>
 					<Button
 						priority="secondary"
 						className={fr.cx('fr-mt-1w')}
@@ -215,7 +220,7 @@ const ReviewFiltersModal = (props: Props) => {
 						Annuler
 					</Button>
 				</div>
-				<div className={fr.cx('fr-col-3')}>
+				<div className={cx(classes.wrapperMobile, fr.cx('fr-col-6', 'fr-col-sm-3'))}>
 					<Button
 						priority="secondary"
 						className={fr.cx('fr-mt-1w')}
@@ -236,7 +241,7 @@ const ReviewFiltersModal = (props: Props) => {
 						Réinitialiser
 					</Button>
 				</div>
-				<div className={cx(fr.cx('fr-col-6'), classes.applyWrapper)}>
+				<div className={cx(fr.cx('fr-col-12', 'fr-col-sm-6'), classes.applyWrapper)}>
 					<Button
 						priority="primary"
 						className={fr.cx('fr-mt-1w')}
@@ -257,6 +262,12 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 	applyWrapper: {
 		display: 'flex',
 		justifyContent: 'end'
+	},
+	wrapperMobile: {
+		[fr.breakpoints.down('sm')]: {
+			display: 'flex',
+			justifyContent: 'end'
+		}
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default

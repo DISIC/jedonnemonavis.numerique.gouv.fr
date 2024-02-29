@@ -20,8 +20,6 @@ import { ReviewFiltersType } from '@/src/types/custom';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
-import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
-import { on } from 'events';
 
 interface Props {
 	product: Product;
@@ -67,6 +65,7 @@ const ProductReviewsPage = (props: Props) => {
 	const handleSubmitfilters = (filters: ReviewFiltersType) => {
 		setFilters(filters);
 		filter_modal.close();
+		setCurrentPage(1);
 	}
 
 	const {
@@ -139,7 +138,6 @@ const ProductReviewsPage = (props: Props) => {
 	};
 
 	const handleSortChange = (tmp_sort: string) => {
-		console.log('tmp_sort : ', tmp_sort)
 		if(!sort.includes(tmp_sort)) {
 			setSort(`${tmp_sort}:asc`)
 			return
@@ -150,10 +148,6 @@ const ProductReviewsPage = (props: Props) => {
 			setSort(`${sort}:asc`)
 		}
 	};
-
-	React.useEffect(() => {
-		console.log('actuel sort : ', sort)
-	}, [sort])
 
 	const renderLabel = (type: string | undefined, key: string, value: string | boolean) => {
 		switch (type) {
@@ -192,7 +186,7 @@ const ProductReviewsPage = (props: Props) => {
 			<ProductLayout product={product}>
 				<h1>Avis</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
-					<div className={fr.cx('fr-col-4')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4')}>
 						<Input
 							label="Date de début"
 							nativeInputProps={{
@@ -204,7 +198,7 @@ const ProductReviewsPage = (props: Props) => {
 							}}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-4')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4')}>
 						<Input
 							label="Date de fin"
 							nativeInputProps={{
@@ -216,7 +210,7 @@ const ProductReviewsPage = (props: Props) => {
 							}}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col--bottom')}>
 						<form
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
@@ -260,26 +254,26 @@ const ProductReviewsPage = (props: Props) => {
 						'fr-mt-4v'
 					)}
 				>
-					<div className={fr.cx('fr-col-3')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
 						<div className={cx(classes.filterView)}>
 							<label>Vue</label>
 							<div className={fr.cx('fr-mt-2v')}>
 								<Button
 									priority={displayMode === 'reviews' ? 'primary' : 'secondary'}
-									onClick={() => setDisplayMode('reviews')}
+									onClick={() => {setDisplayMode('reviews'); setCurrentPage(1);}}
 								>
 									Avis
 								</Button>
 								<Button
 									priority={displayMode === 'reviews' ? 'secondary' : 'primary'}
-									onClick={() => setDisplayMode('verbatim')}
+									onClick={() => {setDisplayMode('verbatim'); setCurrentPage(1);}}
 								>
 									Verbatims
 								</Button>
 							</div>
 						</div>
 					</div>
-					<div className={fr.cx('fr-col-5')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
 						<Select
 							label="Sélectionner une source"
 							nativeSelectProps={{
@@ -302,15 +296,26 @@ const ProductReviewsPage = (props: Props) => {
 							})}
 						</Select>
 					</div>
-					<div className={fr.cx('fr-col-4', 'fr-col--bottom')}>
+					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
 						<Button
 							priority="tertiary"
-							iconId="fr-icon-earth-line"
+							iconId="fr-icon-filter-line"
 							iconPosition="right"
 							type="button"
 							nativeButtonProps={filter_modal.buttonProps}
 						>
 							Plus de filtres
+						</Button>
+					</div>
+					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-12', 'fr-col-xl-3'))}>
+						<Button
+							priority="tertiary"
+							iconId="fr-icon-file-download-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={filter_modal.buttonProps}
+						>
+							Télécharger
 						</Button>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
@@ -437,8 +442,24 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 		flexDirection: 'column'
 	},
 	tagFilter: {
-		marginRight: '0.5rem'
-	}
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	buttonContainer: {
+		[fr.breakpoints.up('lg')]: {
+			display: 'flex',
+			alignSelf: 'flex-end',
+			justifyContent: 'flex-end',
+			'.fr-btn': {
+				justifySelf: 'flex-end',
+			}
+		},
+		[fr.breakpoints.down('lg')]: {
+			'.fr-btn:first-of-type': {
+				marginBottom: '1rem'
+			}
+		}
+	},
 }));
 
 export { getServerSideProps };

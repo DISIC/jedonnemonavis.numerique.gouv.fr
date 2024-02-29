@@ -31,109 +31,131 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 	return (
 		<div className={cx(classes.container)}>
 			<div className={cx(classes.lineContainer)}>
-				<div className={cx(classes.date)}>
-					{formatDateToFrenchString(
-						review.created_at?.toISOString().split('T')[0] || ''
-					)}
+				<div className={cx(classes.cellContainer)}>
+					<div className={cx(classes.date)}>
+						<span className={fr.cx('fr-hidden-lg')}>Date : </span>
+						{formatDateToFrenchString(
+							review.created_at?.toISOString().split('T')[0] || ''
+						)}
+					</div>
 				</div>
-				<div className={cx(classes.badge)}>
+				<div className={cx(classes.cellContainer)}>
 					{review.satisfaction && (
-						<Badge
-							className={cx(classes.badge)}
-							small={true}
-							noIcon={true}
-							severity={getSeverity(review.satisfaction.intention || '')}
-						>
-							<i
-								className={fr.cx(
-									getStatsIcon({
-										intention: review.satisfaction.intention ?? 'neutral'
-									})
-								)}
-								style={{
-									color: getStatsColor({
-										intention: review.satisfaction.intention ?? 'neutral'
-									})
-								}}
-							/>
-							{displayIntention(review.satisfaction.intention ?? 'neutral')}
-						</Badge>
+						<>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Satisfaction : </span>
+							<Badge
+								className={cx(classes.badge)}
+								small={true}
+								noIcon={true}
+								severity={getSeverity(review.satisfaction.intention || '')}
+							>
+								<i
+									className={fr.cx(
+										getStatsIcon({
+											intention: review.satisfaction.intention ?? 'neutral'
+										})
+									)}
+									style={{
+										color: getStatsColor({
+											intention: review.satisfaction.intention ?? 'neutral'
+										})
+									}}
+								/>
+								{displayIntention(review.satisfaction.intention ?? 'neutral')}
+							</Badge>
+						</>
 					)}
 				</div>
-				<div className={cx(classes.badge)}>
+				<div className={cx(classes.cellContainer)}>
 					{review.easy && (
-						<Badge
-							className={cx(classes.badge)}
-							small={true}
-							noIcon={true}
-							severity={getSeverity(review.easy.intention || '')}
-						>
-							<i
-								className={fr.cx(
-									getStatsIcon({
-										intention: review.easy.intention ?? 'neutral'
-									})
-								)}
-								style={{
-									color: getStatsColor({
-										intention: review.easy.intention ?? 'neutral'
-									})
-								}}
-							/>
-							{displayIntention(review.easy.intention ?? 'neutral')}
-						</Badge>
+						<>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Facilité : </span>
+							<Badge
+								className={cx(classes.badge)}
+								small={true}
+								noIcon={true}
+								severity={getSeverity(review.easy.intention || '')}
+							>
+								<i
+									className={fr.cx(
+										getStatsIcon({
+											intention: review.easy.intention ?? 'neutral'
+										})
+									)}
+									style={{
+										color: getStatsColor({
+											intention: review.easy.intention ?? 'neutral'
+										})
+									}}
+								/>
+								{displayIntention(review.easy.intention ?? 'neutral')}
+							</Badge>
+						</>
 					)}
 				</div>
-				<div className={cx(classes.badge)}>
+				<div className={cx(classes.cellContainer)}>
 					{review.comprehension && (
-						<Badge
-							className={cx(classes.badge)}
-							small={true}
-							noIcon={true}
-							severity={getSeverity(review.comprehension.intention || '')}
-						>
-							<i
-								className={fr.cx(
-									getStatsIcon({
-										intention: review.comprehension.intention ?? 'neutral'
-									})
-								)}
-								style={{
-									color: getStatsColor({
-										intention: review.comprehension.intention ?? 'neutral'
-									})
-								}}
-							/>
-							{displayIntention(review.comprehension.intention ?? 'neutral')}
-						</Badge>
+						<>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Langage : </span>
+							<Badge
+								className={cx(classes.badge)}
+								small={true}
+								noIcon={true}
+								severity={getSeverity(review.comprehension.intention || '')}
+							>
+								<i
+									className={fr.cx(
+										getStatsIcon({
+											intention: review.comprehension.intention ?? 'neutral'
+										})
+									)}
+									style={{
+										color: getStatsColor({
+											intention: review.comprehension.intention ?? 'neutral'
+										})
+									}}
+								/>
+								{displayIntention(review.comprehension.intention ?? 'neutral')}
+							</Badge>
+						</>
 					)}
 				</div>
-				<Badge
-					className={cx(classes.badge)}
-					noIcon
-					severity={review.verbatim ? 'info' : 'error'}
-				>
-					{review.verbatim ? 'Verbatim' : 'Non'}
-				</Badge>
+				<div className={cx(classes.cellContainer)}>
+					<>
+						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Verbatim : </span>
+						<Badge
+							className={cx(classes.badge)}
+							noIcon
+							severity={review.verbatim ? 'info' : 'error'}
+						>
+							{review.verbatim ? 'Verbatim' : 'Non'}
+						</Badge>
+					</>
+				</div>
 				{review.button_id ? (
-					<div className={cx(classes.badge)}>
-						{retrieveButtonName(review.button_id)}
+					<div className={cx(classes.cellContainer)}>
+						<div className={cx(classes.badge)}>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Source : </span>
+							{retrieveButtonName(review.button_id)}
+						</div>
 					</div>
 				) : (
-					<div className={cx(classes.badge)}>Pas de source</div>
+					<div className={cx(classes.cellContainer)}>Pas de source</div>
 				)}
-				<Button
-					priority="secondary"
-					iconPosition="right"
-					iconId="fr-icon-arrow-down-s-fill"
-					size="small"
-					onClick={() => {
-						setDisplayMoreInfo(!displayMoreInfo);
-					}}
-				>
-					{' '}
-					Plus d'infos
-				</Button>
+				<div className={cx(classes.cellContainer)}>
+					<Button
+						priority="secondary"
+						iconPosition="right"
+						iconId="fr-icon-arrow-down-s-fill"
+						size="small"
+						onClick={() => {
+							setDisplayMoreInfo(!displayMoreInfo);
+						}}
+					>
+						{' '}
+						Plus d'infos
+					</Button>
+				</div>
 			</div>
 			{displayMoreInfo && <ReviewLineMoreInfos review={review} />}
 		</div>
@@ -150,19 +172,25 @@ const useStyles = tss.create({
 	},
 	lineContainer: {
 		display: 'flex',
+		flexWrap: 'wrap',
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		padding: 12,
-		gap: 12
 	},
 	date: {
-		fontSize: 12,
-		width: 100
+		fontSize: 12
+		
+	},
+	cellContainer: {
+		flex: '1 1 14.28%',
+		[fr.breakpoints.down('lg')]: {
+			flex: '50%',
+			marginTop: 12
+		}
 	},
 	badge: {
 		fontSize: 12,
-		width: 100,
 		paddingVertical: 4
 	}
 });

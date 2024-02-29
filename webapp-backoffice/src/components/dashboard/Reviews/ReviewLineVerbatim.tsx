@@ -17,19 +17,28 @@ const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
 
 	return (
 		<div className={cx(classes.container)}>
-			<Badge
-				noIcon
-				severity={getSeverity(review.satisfaction?.intention || '')}
-				className={cx(classes.line)}
+			<div
+				className={cx(classes.line)} style={{
+					backgroundColor: getStatsColor({
+						intention: review.satisfaction?.intention ?? 'neutral',
+						kind: 'background'
+					}),
+					borderColor: getStatsColor({
+						intention: review.satisfaction?.intention ?? 'neutral'
+					})
+				}}
 			>
-				<div 
-						className={cx(classes.line, fr.cx('fr-grid-row'))}>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+				<div className={cx(classes.line, fr.cx('fr-grid-row'))}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')}>
 						{formatDateToFrenchString(
 							review.created_at?.toISOString().split('T')[0] || ''
 						)}
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+					<div className={cx(classes.label, fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'))} style={{
+						color: getStatsColor({
+							intention: review.satisfaction?.intention ?? 'neutral'
+						})
+					}}>
 						{review.satisfaction && review.satisfaction.intention &&
 							<>
 								<i
@@ -44,11 +53,15 @@ const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
 										})
 									}}
 								/>
-								{displayIntention(review.satisfaction.intention ?? 'neutral')}
+								{displayIntention(review.satisfaction.intention ?? 'neutral').toUpperCase()}
 							</>
 						}
 					</div>
-					<div  className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+					<div  className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pr-3v')} style={{
+						color: getStatsColor({
+							intention: review.satisfaction?.intention ?? 'neutral'
+						})
+					}}>
 						{review.verbatim ? review.verbatim.answer_text : 'Non renseigné'}
 					</div>
 					<div  className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
@@ -60,6 +73,17 @@ const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
 							onClick={() => {
 								setDisplayMoreInfo(!displayMoreInfo);
 							}}
+							style={{
+								boxShadow: getStatsColor({
+									intention: review.satisfaction?.intention ?? 'neutral'
+								}),
+								border: `solid ${getStatsColor({
+									intention: review.satisfaction?.intention ?? 'neutral'
+								})} 1px`,
+								color: getStatsColor({
+									intention: review.satisfaction?.intention ?? 'neutral'
+								})
+							}}
 						>
 							{' '}
 							Plus d'infos
@@ -67,7 +91,7 @@ const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
 					</div>
 				</div>
 				
-			</Badge>
+			</div>
 			{displayMoreInfo && <ReviewVerbatimMoreInfos review={review} />}
 		</div>
 	);
@@ -95,6 +119,9 @@ const useStyles = tss
 			width: '100%',
 			borderRadius: 0,
 			fontWeight: 'normal'
+		},
+		label: {
+			fontWeight: 'bold'
 		},
 		verbatim: {
 			flexShrink: 1

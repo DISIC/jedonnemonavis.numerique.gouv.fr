@@ -16,7 +16,7 @@ const ReviewFilters = (props: Props) => {
 	const [sortList, setSortList] = React.useState<
 		{
 			label: string;
-			code: string;
+			code?: string;
 		}[]
 	>([]);
 
@@ -29,40 +29,32 @@ const ReviewFilters = (props: Props) => {
 				},
 
 				{
-					label: 'Satisfaction',
-					code: 'statisfaction'
+					label: 'Satisfaction'
 				},
 				{
-					label: 'Facilité',
-					code: 'easy'
+					label: 'Facilité'
 				},
 				{
-					label: 'Langage',
-					code: 'comprehension'
+					label: 'Langage'
 				},
 				{
-					label: 'Verbatim',
-					code: 'verbatim'
+					label: 'Verbatim'
 				},
 				{
-					label: 'Source',
-					code: 'source'
+					label: 'Source'
 				}
 			]);
 		} else {
 			setSortList([
 				{
-					label: 'Date',
-					code: 'created_at'
+					label: 'Date'
 				},
 
 				{
-					label: 'Satisfaction',
-					code: 'statisfaction'
+					label: 'Satisfaction'
 				},
 				{
-					label: 'Verbatim',
-					code: 'verbatim'
+					label: 'Verbatim'
 				}
 			]);
 		}
@@ -72,7 +64,7 @@ const ReviewFilters = (props: Props) => {
 		<div className={cx(classes.lineContainer)}>
 			{sortList.map((sort, index) => (
 				<div
-					className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim)}
+					className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim, sort.code ? classes.pointer : '', fr.cx('fr-hidden', 'fr-unhidden-lg'))}
 					key={index}
 					onClick={() => {
 						if (sort.code) {
@@ -82,7 +74,7 @@ const ReviewFilters = (props: Props) => {
 				>
 					<span>
 						{sort.label}{' '}
-						{props.sort.includes(sort.code) && (
+						{props.sort.includes(sort.code || sort.label) && (
 							<i
 								className={
 									props.sort.includes('asc')
@@ -94,7 +86,9 @@ const ReviewFilters = (props: Props) => {
 					</span>
 				</div>
 			))}
-			<div className={cx(classes.badge)}></div>
+			{new Array(displayMode === 'reviews' ? 1 : 3).fill(0).map((i, index) => (
+				<div className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim)} key={`fake_div_${index}`}></div>
+			))}
 		</div>
 	);
 };
@@ -103,25 +97,24 @@ const useStyles = tss.create({
 	lineContainer: {
 		display: 'flex',
 		flexDirection: 'row',
+		justifyContent: 'space-between',
 		alignItems: 'center',
-		justifyContent: 'start',
 		width: '100%',
 		padding: 12,
-		gap: 24
+	},
+	pointer: {
+		cursor: 'pointer'
 	},
 	badge: {
-		width: 'fit-content',
-		minWidth: 100,
-		paddingVertical: 4,
 		fontSize: 14,
-		cursor: 'pointer'
+		flex: '0 0 calc(100% / 7);'
 	},
 	badgeVerbatim: {
 		width: 'fit-content',
 		minWidth: 120,
 		paddingVertical: 4,
 		fontSize: 14,
-		cursor: 'pointer'
+		flex: '0 0 calc(100% / 6);'
 	}
 });
 

@@ -23,7 +23,7 @@ const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					'fr-mb-1-5v'
 				)}
 			>
-				<div className={fr.cx('fr-col-1')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-1')}>
 					<p className={cx(classes.subtitle)}>Horaire</p>
 					<p className={cx(classes.content)}>
 						{review.created_at &&
@@ -32,11 +32,11 @@ const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								new Date(review.created_at).getMinutes()}
 					</p>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Identifiant</p>
 					<p className={cx(classes.content)}>{review.form_id && review.id}</p>
 				</div>
-				<div className={fr.cx('fr-col-9')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
 					<p className={cx(classes.subtitle)}>Verbatim</p>
 					<p className={cx(classes.content)}>
 						{review.verbatim ? review.verbatim.answer_text : 'Non renseigné'}

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { router, publicProcedure } from '@/src/server/trpc';
-import { EnumAnswerIntentionNullableFilterSchema, EnumAnswerIntentionNullableWithAggregatesFilterSchema, ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
+import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma } from '@prisma/client';
+import { Condition } from '@/src/types/custom';
 
 export const reviewRouter = router({
 	getList: publicProcedure
@@ -52,115 +53,66 @@ export const reviewRouter = router({
 				filters
 			} = input;
 
-			let where: Prisma.ReviewWhereInput = {};
-
-			if (product_id) {
-				where.product_id = product_id;
-			}
-
-			if (button_id) {
-				where.button_id = button_id;
-			}
-
-			let andConditions = [];
-
-			if (filters?.comprehension) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'comprehension',
-							intention: filters.comprehension as AnswerIntention
-						}
+			let where: Prisma.ReviewWhereInput = {
+				...(product_id && { product_id }),
+				...(button_id && { button_id }),
+				...(endDate && {
+					created_at: {
+						...(startDate && { gte: new Date(startDate) }),
+						lte: (() => {
+							const adjustedEndDate = new Date(endDate);
+							adjustedEndDate.setHours(23, 59, 59);
+							return adjustedEndDate;
+						})()
 					}
-				});
-			}
-
-			if (filters?.easy) {
-				andConditions.push({
+				}),
+				...((mustHaveVerbatims || filters?.needVerbatim) && {
+				  OR: [{ answers: { some: { field_code: 'verbatim' } } }]
+				}),
+				...(search && {
+				  OR: [{
 					answers: {
-						some: {
-							field_code: 'easy',
-							intention: filters.easy as AnswerIntention
-						}
+					  some: {
+						AND: [
+						  { answer_text: { contains: search, mode: 'insensitive' } },
+						  { field_code: 'verbatim' }
+						]
+					  }
 					}
-				});
-			}
+				  }]
+				})
+			};
 
-			if (filters?.satisfaction) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'satisfaction',
-							intention: filters.satisfaction as AnswerIntention
-						}
+			let andConditions: Condition[] = [];
+
+			if(filters) {
+				const fields: { key: keyof typeof filters, field: string, isText?: boolean }[] = [
+					{ key: 'comprehension', field: 'comprehension' },
+					{ key: 'easy', field: 'easy' },
+					{ key: 'satisfaction', field: 'satisfaction' },
+					{ key: 'needOtherDifficulties', field: 'difficulties_details_verbatim', isText: false },
+					{ key: 'needOtherHelp', field: 'help_details_verbatim', isText: false },
+					{ key: 'difficulties', field: 'difficulties_details' },
+					{ key: 'help', field: 'help_details' }
+				];
+				Object.keys(filters).map((key) => {
+					if(filters[key as keyof typeof filters]) {
+						let condition: Condition = {
+							answers: {
+								some: {
+									field_code: fields.find(field => field.key === key)?.field as string,
+									...(['comprehension', 'easy', 'satisfaction'].includes(key) && {intention: filters[key as keyof typeof filters] as AnswerIntention}),
+									...(['difficulties', 'help'].includes(key) && {answer_text: filters[key as keyof typeof filters] as string})
+								}
+							}
+						};
+						andConditions.push(condition);
 					}
-				});
+				})
 			}
 
-			if (filters?.needOtherDifficulties) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'difficulties_details_verbatim',
-						}
-					}
-				});
-			}
-
-			if(filters?.needOtherHelp) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'help_details_verbatim',
-						}
-					}
-				});
-			}
-
-			if(filters?.difficulties) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'difficulties_details',
-							answer_text: filters.difficulties
-						}
-					}
-				});
-			}
-
-			if(filters?.help) {
-				andConditions.push({
-					answers: {
-						some: {
-							field_code: 'help_details',
-							answer_text: filters.help
-						}
-					}
-				});
-			}
-
-			if (andConditions.length > 0) {
-				where = {
-					...where,
-					AND: andConditions
-				};
-			}
-
-			if (startDate && endDate) {
-				const endDateAtNight = new Date(endDate)
-				endDateAtNight.setHours(23)
-				endDateAtNight.setMinutes(59)
-				endDateAtNight.setSeconds(59)
-				where.created_at = {
-					gte: new Date(startDate),
-					lte: new Date(endDateAtNight)
-				};
-			}
-
-			if (startDate && !endDate) {
-				where.created_at = {
-					gte: new Date(startDate)
-				};
+			if (andConditions.length) {
+			  where.AND = andConditions;
 			}
 
 			let orderBy: Prisma.ReviewOrderByWithRelationAndSearchRelevanceInput[] = [
@@ -178,61 +130,19 @@ export const reviewRouter = router({
 							[values[0]]: values[1]
 						}
 					];
-				} else {
-					
 				}
 			}
 
-			if(mustHaveVerbatims || filters?.needVerbatim) {
-				where = {
-					...where,
-					OR: [
-						{
-							answers: {
-								some: {field_code: 'verbatim'}
-							}
-							
-						}
-					]
-				};
-			}
-
-			if (search) {
-				where = {
-					...where,
-					OR: [
-						{
-							answers: {
-								some: {
-									AND: [
-										{
-											answer_text: {
-												contains: search,
-												mode: 'insensitive'
-											}
-										},
-										{
-											field_code: 'verbatim'
-										}
-									]
-								}
-							}
-						}
-					]
-				};
-			}
-
-			const entities = await ctx.prisma.review.findMany({
-				where,
-				orderBy: orderBy,
-				take: numberPerPage,
-				skip: (page - 1) * numberPerPage,
-				include: {
-					answers: shouldIncludeAnswers
-				}
-			});
-
-			const count = await ctx.prisma.review.count({ where });
+			const [entities, count] = await Promise.all([
+				ctx.prisma.review.findMany({
+					where,
+					orderBy: orderBy,
+					take: numberPerPage,
+					skip: (page - 1) * numberPerPage,
+					include: { answers: shouldIncludeAnswers }
+				}),
+				ctx.prisma.review.count({ where })
+			]);
 
 			return { data: entities, metadata: { count } };
 		})

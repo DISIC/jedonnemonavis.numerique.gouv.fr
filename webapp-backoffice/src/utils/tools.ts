@@ -1,4 +1,4 @@
-import { trpc } from '@/src/utils/trpc';
+import { trpc } from "./trpc";
 
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
