@@ -3,6 +3,9 @@ import { router, publicProcedure } from '@/src/server/trpc';
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { formatDateToFrenchString } from '@/src/utils/tools';
+import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
+import fs from 'fs';
+import path from 'path';
 
 export const reviewRouter = router({
 	getList: publicProcedure
@@ -105,19 +108,20 @@ export const reviewRouter = router({
 				{code : "verbatim", label: "Verbatim"}
 			]
 
+			const headers = ['Date', 'ID', 'Bouton'].concat(OpinionLabels.map(o => o.label))
+
 			const { where, orderBy } = formatWhereAndOrder(input)
 
 			const countReviews = await ctx.prisma.review.count({ where })
 
+			// MAYBE DO IT 100 BY 100 ?
 			const lines = await ctx.prisma.review.findMany({
 				where,
 				orderBy: orderBy,
 				take: countReviews,
 				skip: 0,
-				include: { answers: true, button: true }
+				include: { answers: true, button: true, product: true }
 			})
-
-			const headers = ['Date', 'ID', 'Bouton'].concat(OpinionLabels.map(o => o.label))
 
 			const rows = lines.map(line => {
 				return headers.map(header => {
@@ -129,18 +133,41 @@ export const reviewRouter = router({
 					} else if(header === 'ID') {
 						const value = line.id
     					return `"${String(value).replace(/"/g, '""')}"`;
-					} else if(header ==='bouton') {
+					} else if(header ==='Bouton') {
 						const value = line.button.title
     					return `"${String(value).replace(/"/g, '""')}"`;
 					} else {
-						const value = line.answers[header] || ''; // Gérer les clés manquantes
-    					return `"${String(value).replace(/"/g, '""')}"`; // Échapper les valeurs
+						const value = line.answers.find(a => a.field_code === OpinionLabels.find(o => o.label === header)?.code as string)?.answer_text || '';
+    					return `"${String(value).replace(/"/g, '""')}"`;
 					}
-				}).join(',')
-			})
+				}).join('!-!')
+			}).map((entry: string) => entry.split('!-!').map(value => value.replace(/"/g, '')));
 
-			console.log('count reviews : ', countReviews)
+			const name = `avis_${lines[0].product.title.replace(/ /g, '_')}_${new Date().toISOString()}.csv`
 
-			return {count: countReviews, lines: lines, headers, rows}
+			const csvWriter = createCsvWriter({
+				path: path.join('/mnt/jdma/reviews', name),
+				header: headers.map(header => {
+					return {id: header, title: header}
+				})
+			});
+
+			const records = rows.map(d => {
+				return headers.reduce((acc: Record<string, any>, header, index) => {
+					acc[header] = d[index];
+					return acc;
+				}
+				, {});
+			});
+		
+			await csvWriter.writeRecords(records)
+				.then(() => {
+					console.log('The CSV file was written successfully');
+				})
+				.catch(err => {
+					console.error('Error writing CSV file', err);
+				});
+
+			return {fileName: name};
 		})
 });
