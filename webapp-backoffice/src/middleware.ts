@@ -17,6 +17,7 @@ export async function middleware(request: NextRequest) {
 		request.nextUrl.pathname.startsWith('/api') || //  exclude all API routes
 		request.nextUrl.pathname.startsWith('/static') || // exclude static files
 		request.nextUrl.pathname.startsWith('/open-api') || // exclude api doc
+		request.nextUrl.pathname.startsWith('/public') || // exclude api doc
 		PUBLIC_FILE.test(request.nextUrl.pathname) // exclude all files in the public folder
 	)
 		return NextResponse.next();
