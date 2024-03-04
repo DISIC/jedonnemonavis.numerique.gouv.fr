@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { AnswerIntention, Prisma } from "@prisma/client";
 import { Condition } from "../types/custom";
 
 export const formatWhereAndOrder = (input: {[key: string]: any}) => {
