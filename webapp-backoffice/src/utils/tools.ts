@@ -1,14 +1,14 @@
 import { trpc } from "./trpc";
 
 export function isValidDate(dateString: string) {
-	var regex = /^\d{2}-\d{2}-\d{4}$/;
+	var regex = /^\d{4}-\d{2}-\d{2}$/;
 	if (dateString.match(regex) === null) {
 	  return false;
 	}
 	var parts = dateString.split('-');
-	var day = parseInt(parts[0], 10);
+	var year = parseInt(parts[0], 10);
 	var month = parseInt(parts[1], 10);
-	var year = parseInt(parts[2], 10);
+	var day = parseInt(parts[2], 10);
 	if (year < 1000 || year > 3000 || month == 0 || month > 12) {
 	  return false;
 	}
