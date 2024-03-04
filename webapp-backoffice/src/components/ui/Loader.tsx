@@ -26,6 +26,7 @@ const useStyles = tss
 		loaderContainer: {
 			display: 'flex',
 			justifyContent: 'center',
+			alignItems: 'center',
 			i: {
 				display: 'inline-block',
 				animation: 'spin 1s linear infinite;',

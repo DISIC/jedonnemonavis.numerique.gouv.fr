@@ -2,7 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { getSeverity } from '@/src/utils/tools';
+import { getSeverity, retrieveButtonName } from '@/src/utils/tools';
 import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
@@ -26,7 +26,7 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					'fr-mb-1-5v'
 				)}
 			>
-				<div className={fr.cx('fr-col-1')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-1')}>
 					<p className={cx(classes.subtitle)}>Horaire</p>
 					<p className={cx(classes.content)}>
 						{review.created_at &&
@@ -35,19 +35,25 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								new Date(review.created_at).getMinutes()}
 					</p>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Identifiant</p>
 					<p className={cx(classes.content)}>{review.form_id && review.id}</p>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Source</p>
-					<p className={cx(classes.content)}>
-						bouton 0
-					</p>
+					<div className={cx(classes.content)}>
+						{review.button_id ? (
+							<p className={cx(classes.badge)}>
+								{retrieveButtonName(review.button_id)}
+							</p>
+						) : (
+							<p className={cx(classes.badge)}>Pas de source</p>
+						)}
+					</div>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Satisfaction</p>
-					<p className={cx(classes.content)}>
+					<div className={cx(classes.content)}>
 						{review.satisfaction && (
 							<Badge
 								className={cx(classes.badge)}
@@ -70,11 +76,11 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								{displayIntention(review.satisfaction.intention ?? 'neutral')}
 							</Badge>
 						)}
-					</p>
+					</div>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Facilité</p>
-					<p className={cx(classes.content)}>
+					<div className={cx(classes.content)}>
 						{review.easy && (
 							<Badge
 								className={cx(classes.badge)}
@@ -97,11 +103,11 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								{displayIntention(review.easy.intention ?? 'neutral')}
 							</Badge>
 						)}
-					</p>
+					</div>
 				</div>
-				<div className={fr.cx('fr-col-2')}>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<p className={cx(classes.subtitle)}>Langage</p>
-					<p className={cx(classes.content)}>
+					<div className={cx(classes.content)}>
 						{review.comprehension && (
 							<Badge
 								className={cx(classes.badge)}
@@ -124,7 +130,7 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								{displayIntention(review.comprehension.intention ?? 'neutral')}
 							</Badge>
 						)}
-					</p>
+					</div>
 				</div>
 			</div>
 			<ReviewCommonVerbatimLine review={review} type={'Verbatim'}></ReviewCommonVerbatimLine>

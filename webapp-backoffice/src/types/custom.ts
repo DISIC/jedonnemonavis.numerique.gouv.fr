@@ -83,3 +83,13 @@ export type ReviewFiltersType = {
 	difficulties: string;
 	help: string;
 }
+
+export type Condition = {
+	answers: {
+	  some: {
+		field_code: string;
+		intention?: AnswerIntention;
+		answer_text?: string;
+	  };
+	};
+};
