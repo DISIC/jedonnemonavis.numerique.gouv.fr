@@ -13,11 +13,13 @@ import { Loader } from '@/src/components/ui/Loader';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 import { transformDateToFrenchReadable } from '@/src/utils/tools';
+import Input from '@codegouvfr/react-dsfr/Input';
+import { useState } from 'react';
 
 interface Props {
 	product: Product | null;
-	startDate: string;
-	endDate: string;
+	defaultStartDate: string;
+	defaultEndDate: string;
 }
 
 const SectionWrapper = ({
@@ -45,8 +47,12 @@ const SectionWrapper = ({
 };
 
 const ProductStatPage = (props: Props) => {
-	const { product, startDate, endDate } = props;
+	const { product, defaultStartDate, defaultEndDate } = props;
 	const { statsTotals } = useStats();
+
+
+	const [startDate, setStartDate] = useState<string>(defaultStartDate);
+	const [endDate, setEndDate] = useState<string>(defaultEndDate);
 
 	if (product === null) {
 		return (
@@ -107,8 +113,34 @@ const ProductStatPage = (props: Props) => {
 				<h1>{product.title}</h1>
 			</div>
 			<p className={fr.cx('fr-mt-5v')}>
-				Données recueillies en ligne, entre le {transformDateToFrenchReadable(startDate)} et le {transformDateToFrenchReadable(endDate)}, auprès de {statsTotals.satisfaction} internautes.
+				Données recueillies en ligne, entre le {transformDateToFrenchReadable(debouncedStartDate)} et le {transformDateToFrenchReadable(debouncedEndDate)}, auprès de {statsTotals.satisfaction} internautes.
 			</p>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-6')}>
+					<Input
+						label="Date de début"
+						nativeInputProps={{
+							type: 'date',
+							value: startDate,
+							onChange: e => {
+								setStartDate(e.target.value);
+							}
+						}}
+					/>
+				</div>
+				<div className={fr.cx('fr-col-6')}>
+					<Input
+						label="Date de fin"
+						nativeInputProps={{
+							type: 'date',
+							value: endDate,
+							onChange: e => {
+								setEndDate(e.target.value);
+							}
+						}}
+					/>
+				</div>
+			</div>
 			<SectionWrapper
 				title="Satisfaction usagers"
 				count={statsTotals.satisfaction}
