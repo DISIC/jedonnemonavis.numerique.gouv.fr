@@ -120,7 +120,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				quickAccessItems={light ? [] : quickAccessItems}
 				navigation={navigationItems}
 				serviceTitle="Je donne mon avis"
-				serviceTagline="baseline - précisions sur l'organisation"
+				serviceTagline="La voix de vos usagers"
 			/>
 			<main id="main" role="main">
 				{children}
