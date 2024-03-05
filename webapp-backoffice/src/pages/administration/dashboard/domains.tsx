@@ -208,7 +208,7 @@ const DashBoardDomainDomains = () => {
 							onSubmit={e => {
 								e.preventDefault();
 								setValidatedSearch(search);
-								setCurrentPage(1)
+								setCurrentPage(1);
 							}}
 						>
 							<div

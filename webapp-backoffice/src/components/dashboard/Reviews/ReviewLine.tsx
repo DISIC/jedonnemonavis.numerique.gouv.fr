@@ -1,5 +1,9 @@
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { formatDateToFrenchString, getSeverity, retrieveButtonName } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	getSeverity,
+	retrieveButtonName
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -42,7 +46,9 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 				<div className={cx(classes.cellContainer)}>
 					{review.satisfaction && (
 						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Satisfaction : </span>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+								Satisfaction :{' '}
+							</span>
 							<Badge
 								className={cx(classes.badge)}
 								small={true}
@@ -69,7 +75,9 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 				<div className={cx(classes.cellContainer)}>
 					{review.easy && (
 						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Facilité : </span>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+								Facilité :{' '}
+							</span>
 							<Badge
 								className={cx(classes.badge)}
 								small={true}
@@ -96,7 +104,9 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 				<div className={cx(classes.cellContainer)}>
 					{review.comprehension && (
 						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Langage : </span>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+								Langage :{' '}
+							</span>
 							<Badge
 								className={cx(classes.badge)}
 								small={true}
@@ -122,7 +132,9 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 				</div>
 				<div className={cx(classes.cellContainer)}>
 					<>
-						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Verbatim : </span>
+						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+							Verbatim :{' '}
+						</span>
 						<Badge
 							className={cx(classes.badge)}
 							noIcon
@@ -135,7 +147,9 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 				{review.button_id ? (
 					<div className={cx(classes.cellContainer)}>
 						<div className={cx(classes.badge)}>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>Source : </span>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+								Source :{' '}
+							</span>
 							{retrieveButtonName(review.button_id)}
 						</div>
 					</div>
@@ -176,11 +190,10 @@ const useStyles = tss.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: 12,
+		padding: 12
 	},
 	date: {
 		fontSize: 12
-		
 	},
 	cellContainer: {
 		flex: '1 1 14.28%',

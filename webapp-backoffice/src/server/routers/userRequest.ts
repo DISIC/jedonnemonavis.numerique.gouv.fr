@@ -8,7 +8,10 @@ import {
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { sendMail } from '@/src/utils/mailer';
-import { getUserRequestAcceptedEmailHtml, getUserRequestRefusedEmailHtml,  } from '@/src/utils/emails';
+import {
+	getUserRequestAcceptedEmailHtml,
+	getUserRequestRefusedEmailHtml
+} from '@/src/utils/emails';
 
 export async function createUserRequest(
 	prisma: PrismaClient,

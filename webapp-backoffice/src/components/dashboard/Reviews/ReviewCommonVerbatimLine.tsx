@@ -3,9 +3,19 @@ import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { getSeverity } from '@/src/utils/tools';
-import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import {
+	displayIntention,
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats';
 
-const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, type: 'Line' | 'Verbatim' }) => {
+const ReviewCommonVerbatimLine = ({
+	review,
+	type
+}: {
+	review: ExtendedReview;
+	type: 'Line' | 'Verbatim';
+}) => {
 	const { cx, classes } = useStyles();
 
 	if (!review) return null;
@@ -16,7 +26,12 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 	};
 
 	return (
-		<div className={cx(classes.container, type === 'Line' && classes.greyContainer)}>
+		<div
+			className={cx(
+				classes.container,
+				type === 'Line' && classes.greyContainer
+			)}
+		>
 			<div
 				className={fr.cx(
 					'fr-grid-row',
@@ -35,23 +50,31 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 											.filter(
 												answer => answer.field_code === 'difficulties_details'
 											)
-											?.map(
-												(el, index, array) => {
-													return el.answer_text !== 'Autre' ? el.answer_text + (index < array.length - 1 ? ', ' : '.') : ''
-												}
-											)}
+											?.map((el, index, array) => {
+												return el.answer_text !== 'Autre'
+													? el.answer_text +
+															(index < array.length - 1 ? ', ' : '.')
+													: '';
+											})}
 								</p>
-								{review.answers && review.answers.filter(answer => answer.field_code === 'difficulties_details_verbatim').length > 0 &&
-									<p className={cx(classes.content)}>
-										Autre : "{review.answers.filter(answer => answer.field_code === 'difficulties_details_verbatim')[0].answer_text || ''}"
-									</p>
-								}
+								{review.answers &&
+									review.answers.filter(
+										answer =>
+											answer.field_code === 'difficulties_details_verbatim'
+									).length > 0 && (
+										<p className={cx(classes.content)}>
+											Autre : "
+											{review.answers.filter(
+												answer =>
+													answer.field_code === 'difficulties_details_verbatim'
+											)[0].answer_text || ''}
+											"
+										</p>
+									)}
 							</>
-						) : 
-							<p className={cx(classes.content)}>
-								Non renseigné
-							</p>
-						}
+						) : (
+							<p className={cx(classes.content)}>Non renseigné</p>
+						)}
 					</div>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
@@ -59,18 +82,14 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 						<p className={cx(classes.subtitle)}>
 							Tentative de contacter le service d'aide ?
 						</p>
-						
-							{displayFieldCodeText('contact') ? (
-								<p className={cx(classes.content)}>
-									{displayFieldCodeText('contact')}
-								</p>
 
-							) : 
-								<p className={cx(classes.content)}>
-									Non renseigné
-								</p>
-							}
-						
+						{displayFieldCodeText('contact') ? (
+							<p className={cx(classes.content)}>
+								{displayFieldCodeText('contact')}
+							</p>
+						) : (
+							<p className={cx(classes.content)}>Non renseigné</p>
+						)}
 					</div>
 					<div>
 						<p className={cx(classes.subtitle)}>Résultat de la tentative ?</p>
@@ -89,82 +108,114 @@ const ReviewCommonVerbatimLine = ({ review, type }: { review: ExtendedReview, ty
 								<p className={cx(classes.content)}>
 									{review.answers &&
 										review.answers
-											.filter(answer => answer.field_code === 'contact_channels')
-											?.map(
-												(el, index, array) => {
-												return el.answer_text !== 'Autre' ? el.answer_text + (index < array.length - 1 ? ', ' : '.') : ''
-												}
-													
-											)}
+											.filter(
+												answer => answer.field_code === 'contact_channels'
+											)
+											?.map((el, index, array) => {
+												return el.answer_text !== 'Autre'
+													? el.answer_text +
+															(index < array.length - 1 ? ', ' : '.')
+													: '';
+											})}
 								</p>
-								{review.answers && review.answers.filter(answer => answer.field_code === 'contact_channels_verbatim').length > 0 &&
-									<p className={cx(classes.content)}>
-										Autre : "{review.answers.filter(answer => answer.field_code === 'contact_channels_verbatim')[0].answer_text || ''}"
-									</p>
-								}
+								{review.answers &&
+									review.answers.filter(
+										answer => answer.field_code === 'contact_channels_verbatim'
+									).length > 0 && (
+										<p className={cx(classes.content)}>
+											Autre : "
+											{review.answers.filter(
+												answer =>
+													answer.field_code === 'contact_channels_verbatim'
+											)[0].answer_text || ''}
+											"
+										</p>
+									)}
 							</>
 						) : (
 							<p className={cx(classes.content)}>Non renseigné</p>
 						)}
 					</div>
-                    {review.contact_satisfaction &&
-                        <>
-                            <p className={cx(classes.subtitle)}>Qualité de l'échange avec le service d'aide</p>
-                            <div className={cx(classes.content)}>
-                                <Badge
-                                    className={cx(classes.badge)}
-                                    small={true}
-                                    noIcon={true}
-                                    severity={getSeverity(review.contact_satisfaction.intention || '')}
-                                >
-                                    <i
-                                        className={fr.cx(
-                                            getStatsIcon({
-                                                intention: review.contact_satisfaction.intention ?? 'neutral' ?? 'neutral'
-                                            })
-                                        )}
-                                        style={{
-                                            color: getStatsColor({
-                                                intention: review.contact_satisfaction.intention ?? 'neutral' ?? 'neutral'
-                                            })
-                                        }}
-                                    />
-                                    {displayIntention(review.contact_satisfaction.intention ?? 'neutral') ?? 'neutral'}
-                                </Badge>
-                            </div>
-                        </>
-                    }
+					{review.contact_satisfaction && (
+						<>
+							<p className={cx(classes.subtitle)}>
+								Qualité de l'échange avec le service d'aide
+							</p>
+							<div className={cx(classes.content)}>
+								<Badge
+									className={cx(classes.badge)}
+									small={true}
+									noIcon={true}
+									severity={getSeverity(
+										review.contact_satisfaction.intention || ''
+									)}
+								>
+									<i
+										className={fr.cx(
+											getStatsIcon({
+												intention:
+													review.contact_satisfaction.intention ??
+													'neutral' ??
+													'neutral'
+											})
+										)}
+										style={{
+											color: getStatsColor({
+												intention:
+													review.contact_satisfaction.intention ??
+													'neutral' ??
+													'neutral'
+											})
+										}}
+									/>
+									{displayIntention(
+										review.contact_satisfaction.intention ?? 'neutral'
+									) ?? 'neutral'}
+								</Badge>
+							</div>
+						</>
+					)}
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 					<div>
 						<p className={cx(classes.subtitle)}>Autre aide sollicitée ?</p>
 						{displayFieldCodeText('help') ? (
-							<p className={cx(classes.content)}>{displayFieldCodeText('help')}</p>
-						) : 
-						<p className={cx(classes.content)}>Non renseigné</p>
-						}
+							<p className={cx(classes.content)}>
+								{displayFieldCodeText('help')}
+							</p>
+						) : (
+							<p className={cx(classes.content)}>Non renseigné</p>
+						)}
 					</div>
 					<div>
 						<p className={cx(classes.subtitle)}>
 							Autre type(s) d'aide sollicitée(s)
 						</p>
-                        {displayFieldCodeText('help') === 'Oui'? (
+						{displayFieldCodeText('help') === 'Oui' ? (
 							<>
 								<p className={cx(classes.content)}>
 									{review.answers &&
 										review.answers
 											.filter(answer => answer.field_code === 'help_details')
-											?.map(
-												(el, index, array) => {
-													return el.answer_text !== 'Autre' ? el.answer_text + (index < array.length - 1 ? ', ' : '.') : ''
-												}
-											)}
+											?.map((el, index, array) => {
+												return el.answer_text !== 'Autre'
+													? el.answer_text +
+															(index < array.length - 1 ? ', ' : '.')
+													: '';
+											})}
 								</p>
-								{review.answers && review.answers.filter(answer => answer.field_code === 'help_details_verbatim').length > 0 &&
-									<p className={cx(classes.content)}>
-										Autre : "{review.answers.filter(answer => answer.field_code === 'help_details_verbatim')[0].answer_text || ''}"
-									</p>
-								}
+								{review.answers &&
+									review.answers.filter(
+										answer => answer.field_code === 'help_details_verbatim'
+									).length > 0 && (
+										<p className={cx(classes.content)}>
+											Autre : "
+											{review.answers.filter(
+												answer => answer.field_code === 'help_details_verbatim'
+											)[0].answer_text || ''}
+											"
+										</p>
+									)}
 							</>
 						) : (
 							<p className={cx(classes.content)}>Non renseigné</p>
@@ -183,9 +234,9 @@ const useStyles = tss.create({
 		justifyContent: 'space-between',
 		height: '100%'
 	},
-    greyContainer: {
-        backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
-    },
+	greyContainer: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
+	},
 	subtitle: {
 		fontSize: 12,
 		fontWeight: 'bold',

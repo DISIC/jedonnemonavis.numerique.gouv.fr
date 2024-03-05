@@ -49,7 +49,9 @@ function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
 	const getLayout = (children: ReactNode) => {
-		const lightMode = router.pathname.startsWith('/public') || router.pathname.startsWith('/open-api')
+		const lightMode =
+			router.pathname.startsWith('/public') ||
+			router.pathname.startsWith('/open-api');
 		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
 	};
 

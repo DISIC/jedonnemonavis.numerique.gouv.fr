@@ -133,7 +133,7 @@ export const productRouter = router({
 				return { data: products, metadata: { count } };
 			} catch (e) {
 				console.log(e);
-				return { data: [], metadata: { count: 0 }}
+				return { data: [], metadata: { count: 0 } };
 			}
 		}),
 
