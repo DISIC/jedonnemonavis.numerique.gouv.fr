@@ -12,6 +12,7 @@ import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
+import { transformDateToFrenchReadable } from '@/src/utils/tools';
 
 interface Props {
 	product: Product | null;
@@ -33,7 +34,7 @@ const SectionWrapper = ({
 	const { classes, cx } = useStyles();
 
 	return (
-		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
+		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-2w'))}>
 			<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
 			{count === 0 && (
 				<Alert title="" description={noDataText} severity="info" />
@@ -93,8 +94,7 @@ const ProductStatPage = (props: Props) => {
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<div className={fr.cx('fr-container')}>
-				<h1>Statistiques</h1>
-				<div className={fr.cx('fr-mt-20v')}>
+				<div className={fr.cx('fr-my-16w')}>
 					<Loader />
 				</div>
 			</div>
@@ -102,10 +102,13 @@ const ProductStatPage = (props: Props) => {
 	}
 
 	return (
-		<div className={fr.cx('fr-container')}>
+		<div className={fr.cx('fr-container', 'fr-mb-10w')}>
 			<div className={fr.cx('fr-mt-5w')}>
 				<h1>{product.title}</h1>
 			</div>
+			<p className={fr.cx('fr-mt-5v')}>
+				Données recueillies en ligne, entre le {transformDateToFrenchReadable(startDate)} et le {transformDateToFrenchReadable(endDate)}, auprès de {statsTotals.satisfaction} internautes.
+			</p>
 			<SectionWrapper
 				title="Satisfaction usagers"
 				count={statsTotals.satisfaction}
