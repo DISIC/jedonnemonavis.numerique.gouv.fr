@@ -113,7 +113,7 @@ const ProductStatPage = (props: Props) => {
 				<div className={fr.cx('fr-mt-10v')}>
 					<Alert
 						severity="info"
-						title="Aucun avis pour sur cette période"
+						title="Aucun avis sur cette période"
 						description={`Nous n'avons pas trouvé d'avis entre le ${transformDateToFrenchReadable(debouncedStartDate)} et le ${transformDateToFrenchReadable(debouncedEndDate)}, tentez de changer la période de date.`}
 					/>
 				</div>
