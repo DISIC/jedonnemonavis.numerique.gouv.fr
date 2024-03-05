@@ -53,7 +53,7 @@ const ProductStatPage = (props: Props) => {
 				<h1 className={fr.cx('fr-mt-20v')}>Statistiques</h1>
 				<Alert
 					severity="info"
-					title="Cette démarche n'existe pas ou n'est pas public"
+					title="Cette démarche n'existe pas ou n'est pas publique"
 					description="Veuillez vérifier l'identifiant de la démarche ou contacter le porteur."
 					className={fr.cx('fr-mt-20v', 'fr-mb-20v')}
 				/>
