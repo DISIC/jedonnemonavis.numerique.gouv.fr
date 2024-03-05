@@ -136,17 +136,19 @@ const DocAPI = () => {
 								<li>
 									<b>filed_codes : </b> Les codes des questions posées aux
 									utilisateurs. Si vide, retourne les données pour l'esemble des
-									codes. <br /><br/>
+									codes. <br />
+									<br />
 									Voici la correspondance entre les field_codes et les questions
 									: <br />
-									<table className={fr.cx('fr-table')}
+									<table
+										className={fr.cx('fr-table')}
 										dangerouslySetInnerHTML={{
 											__html: [
 												...FIELD_CODE_BOOLEAN_VALUES,
 												...FIELD_CODE_SMILEY_VALUES,
 												...FIELD_CODE_DETAILS_VALUES
 											]
-											.sort((a, b) => a.slug.localeCompare(b.slug))
+												.sort((a, b) => a.slug.localeCompare(b.slug))
 												.map(code => {
 													return `<tr><td>${code.slug}</td><td>${code.question}</td></tr>`;
 												})

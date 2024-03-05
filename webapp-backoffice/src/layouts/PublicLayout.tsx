@@ -10,7 +10,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 
-type PublicLayoutProps = { children: ReactNode, light: boolean }
+type PublicLayoutProps = { children: ReactNode; light: boolean };
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();

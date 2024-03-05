@@ -61,13 +61,13 @@ const ProductReviewsPage = (props: Props) => {
 		needOtherHelp: false,
 		difficulties: '',
 		help: ''
-	})
+	});
 
 	const handleSubmitfilters = (filters: ReviewFiltersType) => {
 		setFilters(filters);
 		filter_modal.close();
 		setCurrentPage(1);
-	}
+	};
 
 	const {
 		data: reviewResults,
@@ -139,31 +139,48 @@ const ProductReviewsPage = (props: Props) => {
 	};
 
 	const handleSortChange = (tmp_sort: string) => {
-		if(!sort.includes(tmp_sort)) {
-			setSort(`${tmp_sort}:asc`)
-			return
+		if (!sort.includes(tmp_sort)) {
+			setSort(`${tmp_sort}:asc`);
+			return;
 		}
-		if(sort.includes(':asc') || sort.includes(':desc')) {
-			setSort(`${sort.split(':')[0]}:${sort.split(':')[1] === 'asc' ? 'desc' : 'asc'}`)
+		if (sort.includes(':asc') || sort.includes(':desc')) {
+			setSort(
+				`${sort.split(':')[0]}:${sort.split(':')[1] === 'asc' ? 'desc' : 'asc'}`
+			);
 		} else {
-			setSort(`${sort}:asc`)
+			setSort(`${sort}:asc`);
 		}
 	};
 
-	const renderLabel = (type: string | undefined, key: string, value: string | boolean) => {
+	const renderLabel = (
+		type: string | undefined,
+		key: string,
+		value: string | boolean
+	) => {
 		switch (type) {
 			case 'checkbox':
-				return <>
-					<p>Avec {FILTER_LABELS.find(filter => filter.value === key)?.label}</p>
-				</>
-			case 'iconbox': 
-				return <>
-					<p>{FILTER_LABELS.find(filter => filter.value === key)?.label} : {displayIntention((value ?? 'neutral') as AnswerIntention)}</p>
-				</>
+				return (
+					<>
+						<p>
+							Avec {FILTER_LABELS.find(filter => filter.value === key)?.label}
+						</p>
+					</>
+				);
+			case 'iconbox':
+				return (
+					<>
+						<p>
+							{FILTER_LABELS.find(filter => filter.value === key)?.label} :{' '}
+							{displayIntention((value ?? 'neutral') as AnswerIntention)}
+						</p>
+					</>
+				);
 			case 'select':
-				return <>
-					<p>{value}</p>
-				</>
+				return (
+					<>
+						<p>{value}</p>
+					</>
+				);
 			default:
 				return '';
 		}
@@ -182,11 +199,17 @@ const ProductReviewsPage = (props: Props) => {
 
 	return (
 		<>
-			<ReviewFiltersModal modal={filter_modal} filters={filters} submitFilters={handleSubmitfilters}></ReviewFiltersModal>
-			
+			<ReviewFiltersModal
+				modal={filter_modal}
+				filters={filters}
+				submitFilters={handleSubmitfilters}
+			></ReviewFiltersModal>
+
 			<ProductLayout product={product}>
 				<h1>Avis</h1>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
+				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4')}>
 						<Input
 							label="Date de début"
@@ -211,7 +234,14 @@ const ProductReviewsPage = (props: Props) => {
 							}}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col--bottom')}>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-col-md-6',
+							'fr-col-lg-4',
+							'fr-col--bottom'
+						)}
+					>
 						<form
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
@@ -255,26 +285,46 @@ const ProductReviewsPage = (props: Props) => {
 						'fr-mt-4v'
 					)}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-col-md-6',
+							'fr-col-lg-4',
+							'fr-col-xl-3'
+						)}
+					>
 						<div className={cx(classes.filterView)}>
 							<label>Vue</label>
 							<div className={fr.cx('fr-mt-2v')}>
 								<Button
 									priority={displayMode === 'reviews' ? 'primary' : 'secondary'}
-									onClick={() => {setDisplayMode('reviews'); setCurrentPage(1);}}
+									onClick={() => {
+										setDisplayMode('reviews');
+										setCurrentPage(1);
+									}}
 								>
 									Avis
 								</Button>
 								<Button
 									priority={displayMode === 'reviews' ? 'secondary' : 'primary'}
-									onClick={() => {setDisplayMode('verbatim'); setCurrentPage(1);}}
+									onClick={() => {
+										setDisplayMode('verbatim');
+										setCurrentPage(1);
+									}}
 								>
 									Verbatims
 								</Button>
 							</div>
 						</div>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-col-md-6',
+							'fr-col-lg-4',
+							'fr-col-xl-3'
+						)}
+					>
 						<Select
 							label="Sélectionner une source"
 							nativeSelectProps={{
@@ -297,7 +347,12 @@ const ProductReviewsPage = (props: Props) => {
 							})}
 						</Select>
 					</div>
-					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
+					<div
+						className={cx(
+							classes.buttonContainer,
+							fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')
+						)}
+					>
 						<Button
 							priority="tertiary"
 							iconId="fr-icon-filter-line"
@@ -308,10 +363,15 @@ const ProductReviewsPage = (props: Props) => {
 							Plus de filtres
 						</Button>
 					</div>
-					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-12', 'fr-col-xl-3'))}>
-						<ExportReviews 
-							product_id={product.id} 
-							startDate={startDate} 
+					<div
+						className={cx(
+							classes.buttonContainer,
+							fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-12', 'fr-col-xl-3')
+						)}
+					>
+						<ExportReviews
+							product_id={product.id}
+							startDate={startDate}
 							endDate={endDate}
 							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 							search={search}
@@ -321,7 +381,10 @@ const ProductReviewsPage = (props: Props) => {
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
 						{Object.keys(filters).map((key, index) => {
-							if (filters[key as keyof ReviewFiltersType] !== '' && filters[key as keyof ReviewFiltersType] !== false) {
+							if (
+								filters[key as keyof ReviewFiltersType] !== '' &&
+								filters[key as keyof ReviewFiltersType] !== false
+							) {
 								return (
 									<Tag
 										key={index}
@@ -329,11 +392,22 @@ const ProductReviewsPage = (props: Props) => {
 										className={cx(classes.tagFilter)}
 										nativeButtonProps={{
 											onClick: () => {
-												setFilters({...filters, [key]: typeof filters[key as keyof ReviewFiltersType] === 'boolean' ? false : ''});
+												setFilters({
+													...filters,
+													[key]:
+														typeof filters[key as keyof ReviewFiltersType] ===
+														'boolean'
+															? false
+															: ''
+												});
 											}
 										}}
 									>
-										{renderLabel(FILTER_LABELS.find(filter => filter.value === key)?.type, key, filters[key as keyof ReviewFiltersType])}
+										{renderLabel(
+											FILTER_LABELS.find(filter => filter.value === key)?.type,
+											key,
+											filters[key as keyof ReviewFiltersType]
+										)}
 									</Tag>
 								);
 							}
@@ -452,7 +526,7 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 			alignSelf: 'flex-end',
 			justifyContent: 'flex-end',
 			'.fr-btn': {
-				justifySelf: 'flex-end',
+				justifySelf: 'flex-end'
 			}
 		},
 		[fr.breakpoints.down('lg')]: {
@@ -460,7 +534,7 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 				marginBottom: '1rem'
 			}
 		}
-	},
+	}
 }));
 
 export { getServerSideProps };

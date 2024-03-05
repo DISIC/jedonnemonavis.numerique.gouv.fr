@@ -23,7 +23,8 @@ export const answerRouter = router({
 			});
 
 			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user) throw new Error('Product is not public');
+			if (!product.isPublic && !ctx.session?.user)
+				throw new Error('Product is not public');
 
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
@@ -142,7 +143,8 @@ export const answerRouter = router({
 			});
 
 			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user) throw new Error('Product is not public');
+			if (!product.isPublic && !ctx.session?.user)
+				throw new Error('Product is not public');
 
 			const fieldCodeIntervalAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
@@ -263,7 +265,8 @@ export const answerRouter = router({
 			});
 
 			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user) throw new Error('Product is not public');
+			if (!product.isPublic && !ctx.session?.user)
+				throw new Error('Product is not public');
 
 			const fieldCodeIntervalAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',

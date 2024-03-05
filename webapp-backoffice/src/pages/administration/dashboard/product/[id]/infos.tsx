@@ -89,7 +89,11 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>
-					{!isLoadingEntity && <Tag>{entity?.name} ({entity?.acronym})</Tag>}
+					{!isLoadingEntity && (
+						<Tag>
+							{entity?.name} ({entity?.acronym})
+						</Tag>
+					)}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>URLs</h4>
@@ -108,15 +112,17 @@ const ProductInformationPage = (props: Props) => {
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Données statistiques publiques</h4>
 					{product.isPublic ? 'Oui' : 'Non'}
-					{
-						product.isPublic && (
-							<div className={fr.cx('fr-mt-1v')}>
-								<Link className={fr.cx('fr-link', 'fr-text--sm')} href={`/public/product/${product.id}/stats`} target="_blank">
-									Voir la page publique
-								</Link>
-							</div>
-						)
-					}
+					{product.isPublic && (
+						<div className={fr.cx('fr-mt-1v')}>
+							<Link
+								className={fr.cx('fr-link', 'fr-text--sm')}
+								href={`/public/product/${product.id}/stats`}
+								target="_blank"
+							>
+								Voir la page publique
+							</Link>
+						</div>
+					)}
 				</div>
 			</div>
 		</ProductLayout>

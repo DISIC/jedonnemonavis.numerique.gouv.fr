@@ -43,7 +43,10 @@ const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					</p>
 				</div>
 			</div>
-			<ReviewCommonVerbatimLine review={review} type={'Line'}></ReviewCommonVerbatimLine>
+			<ReviewCommonVerbatimLine
+				review={review}
+				type={'Line'}
+			></ReviewCommonVerbatimLine>
 		</div>
 	);
 };

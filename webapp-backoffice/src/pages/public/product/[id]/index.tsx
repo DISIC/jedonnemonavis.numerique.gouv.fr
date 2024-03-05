@@ -1,14 +1,13 @@
-import { GetServerSideProps } from 'next';
-import { PrismaClient } from '@prisma/client';
-import { getToken } from 'next-auth/jwt';
 import { isValidDate } from '@/src/utils/tools';
+import { PrismaClient } from '@prisma/client';
+import { GetServerSideProps } from 'next';
 
 const ProductPage = () => {
 	return;
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-	const { id, startDate, endDate } = context.query;
+	const { id, date_debut: startDate, date_fin: endDate } = context.query;
 	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
 		where: {
@@ -16,7 +15,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	if(!product || !product.isPublic) {
+	if (!product || !product.isPublic) {
 		return {
 			props: {
 				product: null
@@ -27,8 +26,16 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	return {
 		props: {
 			product: JSON.parse(JSON.stringify(product)),
-			startDate: startDate && isValidDate(startDate as string) ? startDate : new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString().split('T')[0],
-			endDate: endDate && isValidDate(endDate as string) ? endDate : new Date().toISOString().split('T')[0]
+			defaultStartDate:
+				startDate && isValidDate(startDate as string)
+					? startDate
+					: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+							.toISOString()
+							.split('T')[0],
+			defaultEndDate:
+				endDate && isValidDate(endDate as string)
+					? endDate
+					: new Date().toISOString().split('T')[0]
 		}
 	};
 };

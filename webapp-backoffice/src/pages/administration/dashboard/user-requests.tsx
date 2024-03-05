@@ -36,7 +36,9 @@ const DashBoardUserRequestUserRequests = () => {
 	const [currentUserRequest, setCurrentUserRequest] =
 		React.useState<UserRequestExtended>();
 
-	const [refusedReason, setRefusedReason] = React.useState<string | undefined>();
+	const [refusedReason, setRefusedReason] = React.useState<
+		string | undefined
+	>();
 
 	const handleCurrentUserRequest = (user_request: UserRequestExtended) => {
 		setCurrentUserRequest(user_request);
