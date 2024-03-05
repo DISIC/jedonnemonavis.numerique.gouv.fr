@@ -4,6 +4,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Skeleton } from '@mui/material';
 import { AnswerIntention, Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -34,42 +35,48 @@ const ProductCard = ({
 
 	const currentDate = new Date();
 
-	const { data: resultSatisfaction } = trpc.answer.getByFieldCode.useQuery({
-		product_id: product.id.toString(),
-		field_code: 'satisfaction',
-		start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-			.toISOString()
-			.split('T')[0],
-		end_date: currentDate.toISOString().split('T')[0]
-	});
+	const { data: resultSatisfaction, isLoading: isLoadingSatisfaction } =
+		trpc.answer.getByFieldCode.useQuery({
+			product_id: product.id.toString(),
+			field_code: 'satisfaction',
+			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+				.toISOString()
+				.split('T')[0],
+			end_date: currentDate.toISOString().split('T')[0]
+		});
 	const satisfaction =
 		(resultSatisfaction?.metadata.total || 0) > 0
 			? resultSatisfaction?.metadata.average
 			: -1;
 
-	const { data: resultEasy } = trpc.answer.getByFieldCode.useQuery({
-		product_id: product.id.toString(),
-		field_code: 'easy',
-		start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-			.toISOString()
-			.split('T')[0],
-		end_date: currentDate.toISOString().split('T')[0]
-	});
+	const { data: resultEasy, isLoading: isLoadingEasy } =
+		trpc.answer.getByFieldCode.useQuery({
+			product_id: product.id.toString(),
+			field_code: 'easy',
+			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+				.toISOString()
+				.split('T')[0],
+			end_date: currentDate.toISOString().split('T')[0]
+		});
 	const easy =
 		(resultEasy?.metadata.total || 0) > 0 ? resultEasy?.metadata.average : -1;
 
-	const { data: resultComprehension } = trpc.answer.getByFieldCode.useQuery({
-		product_id: product.id.toString(),
-		field_code: 'comprehension',
-		start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-			.toISOString()
-			.split('T')[0],
-		end_date: currentDate.toISOString().split('T')[0]
-	});
+	const { data: resultComprehension, isLoading: isLoadingComprehension } =
+		trpc.answer.getByFieldCode.useQuery({
+			product_id: product.id.toString(),
+			field_code: 'comprehension',
+			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+				.toISOString()
+				.split('T')[0],
+			end_date: currentDate.toISOString().split('T')[0]
+		});
 	const comprehension =
 		(resultComprehension?.metadata.total || 0) > 0
 			? resultComprehension?.metadata.average
 			: -1;
+
+	const isLoadingStats =
+		isLoadingSatisfaction || isLoadingEasy || isLoadingComprehension;
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -207,15 +214,24 @@ const ProductCard = ({
 								<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 									{indicator.title}
 								</p>
-								<Badge
-									noIcon
-									severity={!!nbReviews ? indicator.color : 'info'}
-									className={fr.cx('fr-text--sm')}
-								>
-									{!!nbReviews && indicator.value !== -1
-										? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/ 10`
-										: 'Aucune donnée'}
-								</Badge>
+								{isLoadingStats ? (
+									<Skeleton
+										className={cx(classes.badgeSkeleton)}
+										variant="text"
+										width={130}
+										height={25}
+									/>
+								) : (
+									<Badge
+										noIcon
+										severity={!!nbReviews ? indicator.color : 'info'}
+										className={fr.cx('fr-text--sm')}
+									>
+										{!!nbReviews && indicator.value !== -1
+											? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
+											: 'Aucune donnée'}
+									</Badge>
+								)}
 							</div>
 						))}
 						{!isLoadingReviewsCount && nbReviews !== undefined && (
@@ -237,6 +253,10 @@ const useStyles = tss.withName(ProductCard.name).create({
 	favoriteWrapper: {
 		display: 'flex',
 		justifyContent: 'end'
+	},
+	badgeSkeleton: {
+		transformOrigin: '0',
+		transform: 'none'
 	}
 });
 
