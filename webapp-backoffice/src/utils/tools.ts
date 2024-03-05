@@ -99,3 +99,16 @@ export const retrieveButtonName = (buttonId: number) => {
 	});
 	if (button?.data) return button.data?.title || '';
 };
+
+export const transformDateToFrenchReadable = (dateString: string): string => {
+    const monthsInFrench = [
+        "janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"
+    ];
+
+    const [year, month, day] = dateString.split('-').map(Number);
+
+    const monthInFrench = monthsInFrench[month - 1];
+    
+    return `${day === 1 ? '1er' : day} ${monthInFrench} ${year}`;
+}

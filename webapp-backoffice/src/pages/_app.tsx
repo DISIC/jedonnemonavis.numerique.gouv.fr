@@ -10,6 +10,7 @@ import '../utils/global.css';
 import '../utils/keyframes.css';
 import { trpc } from '@/src/utils/trpc';
 import { StatsTotalsProvider } from '../contexts/StatsContext';
+import { useRouter } from 'next/router';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -45,8 +46,11 @@ const { withAppEmotionCache, augmentDocumentWithEmotionCache } =
 export { augmentDocumentWithEmotionCache };
 
 function App({ Component, pageProps }: AppProps) {
+	const router = useRouter();
+
 	const getLayout = (children: ReactNode) => {
-		return <PublicLayout>{children}</PublicLayout>;
+		const lightMode = router.pathname.startsWith('/public') || router.pathname.startsWith('/open-api')
+		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
 	};
 
 	return (
