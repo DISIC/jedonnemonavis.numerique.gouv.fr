@@ -295,8 +295,10 @@ const ProductStatPage = (props: Props) => {
 			<p className={fr.cx('fr-mt-5v')}>
 				Données recueillies en ligne, entre le{' '}
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
-				{transformDateToFrenchReadable(debouncedEndDate)}, auprès de{' '}
-				{statsTotals.satisfaction} internautes.
+				{transformDateToFrenchReadable(debouncedEndDate)}
+				{!!nbReviews
+					? `, auprès de ${statsTotals.satisfaction} internautes.`
+					: '.'}
 			</p>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>
