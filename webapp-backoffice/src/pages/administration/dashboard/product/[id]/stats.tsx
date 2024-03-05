@@ -131,8 +131,6 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	//console.log('stats : ', statsTotals);
-
 	return (
 		<ProductLayout product={product}>
 			<h1>Statistiques</h1>
