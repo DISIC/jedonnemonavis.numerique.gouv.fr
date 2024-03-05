@@ -67,24 +67,6 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	const { data: buttonsResult, isLoading: isLoadingButtons } =
-		trpc.button.getList.useQuery(
-			{
-				numberPerPage: 0,
-				page: 1,
-				product_id: product.id,
-				isTest: false
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
-				}
-			}
-		);
-
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
