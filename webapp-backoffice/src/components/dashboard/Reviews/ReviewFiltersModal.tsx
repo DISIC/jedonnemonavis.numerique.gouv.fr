@@ -3,13 +3,17 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { tss } from 'tss-react/dsfr';
 import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { displayIntention, getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import {
+	displayIntention,
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
 import { ReviewFiltersType } from '@/src/types/custom';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { DIFFICULTIES_LABEL, HELP_LABELS } from '@/src/utils/helpers';
-import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -34,13 +38,14 @@ const ReviewFiltersModal = (props: Props) => {
 	const { modal, filters, submitFilters } = props;
 	const { cx, classes } = useStyles();
 
-	const [tmpFilters, setTmpFilters] = React.useState<ReviewFiltersType>(filters);
+	const [tmpFilters, setTmpFilters] =
+		React.useState<ReviewFiltersType>(filters);
 
 	const isOpen = useIsModalOpen(modal);
 
 	React.useEffect(() => {
-		if(isOpen){
-			setTmpFilters(filters)
+		if (isOpen) {
+			setTmpFilters(filters);
 		}
 	}, [isOpen]);
 
@@ -56,17 +61,20 @@ const ReviewFiltersModal = (props: Props) => {
 			title={'Filtres'}
 			size="large"
 		>
-
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
+			<div className={fr.cx('fr-mt-4v')}>
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
-				{['good', 'medium', 'bad'].map((intention) => (
+				{['good', 'medium', 'bad'].map(intention => (
 					<Button
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, satisfaction: tmpFilters.satisfaction !== intention ? intention : ''})}}
+						onClick={() => {
+							setTmpFilters({
+								...tmpFilters,
+								satisfaction:
+									tmpFilters.satisfaction !== intention ? intention : ''
+							});
+						}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						key={`satisfaction_${intention}`}
@@ -74,24 +82,30 @@ const ReviewFiltersModal = (props: Props) => {
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
 							}),
-							backgroundColor: tmpFilters.satisfaction === intention ? '#dfdfdf' : 'transparent'
+							backgroundColor:
+								tmpFilters.satisfaction === intention
+									? '#dfdfdf'
+									: 'transparent'
 						}}
 					>
 						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-				  </Button>
-				))}	
+					</Button>
+				))}
 			</div>
 
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
+			<div className={fr.cx('fr-mt-4v')}>
 				<p className={cx(classes.subtitle)}>Facilité</p>
-				{['good', 'medium', 'bad'].map((intention) => (
+				{['good', 'medium', 'bad'].map(intention => (
 					<Button
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, easy: tmpFilters.easy !== intention ? intention : ''})}}
+						onClick={() => {
+							setTmpFilters({
+								...tmpFilters,
+								easy: tmpFilters.easy !== intention ? intention : ''
+							});
+						}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						key={`easy_${intention}`}
@@ -99,25 +113,29 @@ const ReviewFiltersModal = (props: Props) => {
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
 							}),
-							backgroundColor: tmpFilters.easy === intention ? '#dfdfdf' : 'transparent'
+							backgroundColor:
+								tmpFilters.easy === intention ? '#dfdfdf' : 'transparent'
 						}}
 					>
 						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-				</Button>
-				))}	
+					</Button>
+				))}
 			</div>
 
-
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
+			<div className={fr.cx('fr-mt-4v')}>
 				<p className={cx(classes.subtitle)}>Langage</p>
-				{['good', 'medium', 'bad'].map((intention) => (
+				{['good', 'medium', 'bad'].map(intention => (
 					<Button
 						iconId={getStatsIcon({
 							intention: (intention ?? 'neutral') as AnswerIntention
 						})}
-						onClick={() => {setTmpFilters({...tmpFilters, comprehension: tmpFilters.comprehension !== intention ? intention : ''})}}
+						onClick={() => {
+							setTmpFilters({
+								...tmpFilters,
+								comprehension:
+									tmpFilters.comprehension !== intention ? intention : ''
+							});
+						}}
 						priority="tertiary"
 						className={cx(classes.badge)}
 						key={`comprehension_${intention}`}
@@ -125,18 +143,21 @@ const ReviewFiltersModal = (props: Props) => {
 							color: getStatsColor({
 								intention: (intention ?? 'neutral') as AnswerIntention
 							}),
-							backgroundColor: tmpFilters.comprehension === intention ? '#dfdfdf' : 'transparent'
+							backgroundColor:
+								tmpFilters.comprehension === intention
+									? '#dfdfdf'
+									: 'transparent'
 						}}
 					>
 						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-				  </Button>
-				))}	
+					</Button>
+				))}
 			</div>
 
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
-				<p className={cx(classes.subtitle)}>Informations rentrées par l'utilisateur</p>
+			<div className={fr.cx('fr-mt-4v')}>
+				<p className={cx(classes.subtitle)}>
+					Informations rentrées par l'utilisateur
+				</p>
 				<Checkbox
 					options={[
 						{
@@ -144,7 +165,12 @@ const ReviewFiltersModal = (props: Props) => {
 							nativeInputProps: {
 								name: 'needVerbatim',
 								checked: tmpFilters.needVerbatim,
-								onChange: () => {setTmpFilters({...tmpFilters, needVerbatim: !tmpFilters.needVerbatim})}
+								onChange: () => {
+									setTmpFilters({
+										...tmpFilters,
+										needVerbatim: !tmpFilters.needVerbatim
+									});
+								}
 							}
 						},
 						{
@@ -152,7 +178,12 @@ const ReviewFiltersModal = (props: Props) => {
 							nativeInputProps: {
 								name: 'needOtherDifficulties',
 								checked: tmpFilters.needOtherDifficulties,
-								onChange: () => {setTmpFilters({...tmpFilters, needOtherDifficulties: !tmpFilters.needOtherDifficulties})}
+								onChange: () => {
+									setTmpFilters({
+										...tmpFilters,
+										needOtherDifficulties: !tmpFilters.needOtherDifficulties
+									});
+								}
 							}
 						},
 						{
@@ -160,56 +191,75 @@ const ReviewFiltersModal = (props: Props) => {
 							nativeInputProps: {
 								name: 'needOtherHelp',
 								checked: tmpFilters.needOtherHelp,
-								onChange: () => {setTmpFilters({...tmpFilters, needOtherHelp: !tmpFilters.needOtherHelp})}
+								onChange: () => {
+									setTmpFilters({
+										...tmpFilters,
+										needOtherHelp: !tmpFilters.needOtherHelp
+									});
+								}
 							}
 						}
 					]}
 					state="default"
-					/>
+				/>
 			</div>
 
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
+			<div className={fr.cx('fr-mt-4v')}>
 				<Select
 					label="Difficulté"
 					nativeSelectProps={{
 						name: 'difficulties',
-						onChange: event => setTmpFilters({...tmpFilters, difficulties: event.target.value}),
+						onChange: event =>
+							setTmpFilters({
+								...tmpFilters,
+								difficulties: event.target.value
+							}),
 						value: tmpFilters.difficulties
 					}}
 				>
-					<option disabled hidden value="">Sélectionner une option</option>
-					{DIFFICULTIES_LABEL.map((difficulty) => (
-						<option value={difficulty.value} key={`difficulty_${difficulty.value}`}>{difficulty.label}</option>
+					<option disabled hidden value="">
+						Sélectionner une option
+					</option>
+					{DIFFICULTIES_LABEL.map(difficulty => (
+						<option
+							value={difficulty.value}
+							key={`difficulty_${difficulty.value}`}
+						>
+							{difficulty.label}
+						</option>
 					))}
 				</Select>
 			</div>
 
-			<div className={fr.cx(
-				'fr-mt-4v'
-			)}>
+			<div className={fr.cx('fr-mt-4v')}>
 				<Select
 					label="Aide"
 					nativeSelectProps={{
 						name: 'help',
-						onChange: event => setTmpFilters({...tmpFilters, help: event.target.value}),
+						onChange: event =>
+							setTmpFilters({ ...tmpFilters, help: event.target.value }),
 						value: tmpFilters.help
 					}}
 				>
-					<option disabled hidden value="">Sélectionner une option</option>
-					{HELP_LABELS.map((help) => (
-						<option value={help.value} key={`help_${help.value}`}>{help.label}</option>
+					<option disabled hidden value="">
+						Sélectionner une option
+					</option>
+					{HELP_LABELS.map(help => (
+						<option value={help.value} key={`help_${help.value}`}>
+							{help.label}
+						</option>
 					))}
 				</Select>
 			</div>
 
-			<div className={fr.cx(
-				'fr-grid-row',
-				'fr-grid-row--gutters',
-				'fr-grid-row--left',
-				'fr-mt-4v'
-			)}>
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--gutters',
+					'fr-grid-row--left',
+					'fr-mt-4v'
+				)}
+			>
 				<div className={fr.cx('fr-col-6', 'fr-col-sm-3')}>
 					<Button
 						priority="secondary"
@@ -220,28 +270,40 @@ const ReviewFiltersModal = (props: Props) => {
 						Annuler
 					</Button>
 				</div>
-				<div className={cx(classes.wrapperMobile, fr.cx('fr-col-6', 'fr-col-sm-3'))}>
+				<div
+					className={cx(
+						classes.wrapperMobile,
+						fr.cx('fr-col-6', 'fr-col-sm-3')
+					)}
+				>
 					<Button
 						priority="secondary"
 						className={fr.cx('fr-mt-1w')}
 						iconId="fr-icon-edit-line"
 						iconPosition="right"
 						type="button"
-						onClick={() => setTmpFilters({
-							satisfaction: '',
-							easy: '',
-							comprehension: '',
-							needVerbatim: false,
-							needOtherDifficulties: false,
-							needOtherHelp: false,
-							difficulties: '',
-							help: ''
-						})}
+						onClick={() =>
+							setTmpFilters({
+								satisfaction: '',
+								easy: '',
+								comprehension: '',
+								needVerbatim: false,
+								needOtherDifficulties: false,
+								needOtherHelp: false,
+								difficulties: '',
+								help: ''
+							})
+						}
 					>
 						Réinitialiser
 					</Button>
 				</div>
-				<div className={cx(fr.cx('fr-col-12', 'fr-col-sm-6'), classes.applyWrapper)}>
+				<div
+					className={cx(
+						fr.cx('fr-col-12', 'fr-col-sm-6'),
+						classes.applyWrapper
+					)}
+				>
 					<Button
 						priority="primary"
 						className={fr.cx('fr-mt-1w')}
@@ -251,9 +313,7 @@ const ReviewFiltersModal = (props: Props) => {
 						Appliquer les filtres
 					</Button>
 				</div>
-
 			</div>
-
 		</modal.Component>
 	);
 };

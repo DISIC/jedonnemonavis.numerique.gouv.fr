@@ -1,24 +1,24 @@
-import { trpc } from "./trpc";
+import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
 	if (dateString.match(regex) === null) {
-	  return false;
+		return false;
 	}
 	var parts = dateString.split('-');
 	var year = parseInt(parts[0], 10);
 	var month = parseInt(parts[1], 10);
 	var day = parseInt(parts[2], 10);
 	if (year < 1000 || year > 3000 || month == 0 || month > 12) {
-	  return false;
+		return false;
 	}
 	var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  
+
 	if (year % 400 == 0 || (year % 100 != 0 && year % 4 == 0)) {
-	  monthLength[1] = 29;
+		monthLength[1] = 29;
 	}
 	return day > 0 && day <= monthLength[month - 1];
-  }
+}
 
 export function isValidEmail(email: string): boolean {
 	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -98,4 +98,27 @@ export const retrieveButtonName = (buttonId: number) => {
 		id: buttonId
 	});
 	if (button?.data) return button.data?.title || '';
+};
+
+export const transformDateToFrenchReadable = (dateString: string): string => {
+	const monthsInFrench = [
+		'janvier',
+		'février',
+		'mars',
+		'avril',
+		'mai',
+		'juin',
+		'juillet',
+		'août',
+		'septembre',
+		'octobre',
+		'novembre',
+		'décembre'
+	];
+
+	const [year, month, day] = dateString.split('-').map(Number);
+
+	const monthInFrench = monthsInFrench[month - 1];
+
+	return `${day === 1 ? '1er' : day} ${monthInFrench} ${year}`;
 };

@@ -97,7 +97,7 @@ export const displayIntention = (intention: string) => {
 		default:
 			return '';
 	}
-}
+};
 
 export const fetchAndFormatData = async ({
 	ctx,
@@ -143,7 +143,7 @@ export const fetchAndFormatData = async ({
 				terms: {
 					script:
 						'doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value',
-					size: 10000		
+					size: 10000
 				}
 			}
 		},

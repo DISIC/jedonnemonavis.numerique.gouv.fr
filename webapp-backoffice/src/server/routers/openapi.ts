@@ -46,7 +46,7 @@ export const openAPIRouter = router({
 				}
 			);
 
-			console.log(ctx.user_api)
+			console.log(ctx.user_api);
 
 			const products = await ctx.prisma.product.findMany({
 				where: {
@@ -139,7 +139,7 @@ export const openAPIRouter = router({
 						: [
 								...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug),
 								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug),
-								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug),
+								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug)
 							],
 				product_ids:
 					product_ids.length > 0

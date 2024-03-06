@@ -64,7 +64,11 @@ const ReviewFilters = (props: Props) => {
 		<div className={cx(classes.lineContainer)}>
 			{sortList.map((sort, index) => (
 				<div
-					className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim, sort.code ? classes.pointer : '', fr.cx('fr-hidden', 'fr-unhidden-lg'))}
+					className={cx(
+						displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim,
+						sort.code ? classes.pointer : '',
+						fr.cx('fr-hidden', 'fr-unhidden-lg')
+					)}
 					key={index}
 					onClick={() => {
 						if (sort.code) {
@@ -87,7 +91,12 @@ const ReviewFilters = (props: Props) => {
 				</div>
 			))}
 			{new Array(displayMode === 'reviews' ? 1 : 3).fill(0).map((i, index) => (
-				<div className={cx(displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim)} key={`fake_div_${index}`}></div>
+				<div
+					className={cx(
+						displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim
+					)}
+					key={`fake_div_${index}`}
+				></div>
 			))}
 		</div>
 	);
@@ -100,7 +109,7 @@ const useStyles = tss.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		width: '100%',
-		padding: 12,
+		padding: 12
 	},
 	pointer: {
 		cursor: 'pointer'

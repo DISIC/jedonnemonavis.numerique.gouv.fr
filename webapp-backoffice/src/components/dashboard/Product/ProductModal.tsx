@@ -233,9 +233,9 @@ const ProductModal = (props: Props) => {
 								className={fr.cx('fr-mt-3w')}
 								options={[
 									{
-										label: 'Démarche essentielle',
+										label: 'Données statistiques publiques',
 										hintText:
-											'Cocher cette case si ce produit fait parti des démarches suivies sur le site Vos démarches essentielles',
+											'Cocher cette case pour rendre les statistiques de ce produit publiques.',
 										nativeInputProps: {
 											name: 'essential',
 											onChange,

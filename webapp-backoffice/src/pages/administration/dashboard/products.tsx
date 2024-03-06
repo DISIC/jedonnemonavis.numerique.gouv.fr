@@ -169,7 +169,7 @@ const DashBoard = () => {
 							disablePortal
 							sx={{ width: '100%' }}
 							options={entities.map((entity: Entity) => ({
-								label: `${entity.name} (${entity.acronym})` ,
+								label: `${entity.name} (${entity.acronym})`,
 								value: entity.id
 							}))}
 							onChange={(_, option) => {

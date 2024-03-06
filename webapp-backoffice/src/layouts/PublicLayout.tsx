@@ -10,7 +10,9 @@ import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 
-export default function PublicLayout({ children }: { children: ReactNode }) {
+type PublicLayoutProps = { children: ReactNode; light: boolean };
+
+export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
 
 	const { data: session } = useSession();
@@ -36,7 +38,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 	});
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
-		!pathname.startsWith('/administration')
+		!session?.user
 			? {
 					iconId: 'fr-icon-account-line',
 					linkProps: {
@@ -115,10 +117,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				}}
 				className={classes.navigation}
 				id="fr-header-public-header"
-				quickAccessItems={quickAccessItems}
+				quickAccessItems={light ? [] : quickAccessItems}
 				navigation={navigationItems}
 				serviceTitle="Je donne mon avis"
-				serviceTagline="baseline - précisions sur l'organisation"
+				serviceTagline="La voix de vos usagers"
 			/>
 			<main id="main" role="main">
 				{children}
