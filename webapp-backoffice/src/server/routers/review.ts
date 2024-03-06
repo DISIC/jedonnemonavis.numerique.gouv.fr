@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '@/src/server/trpc';
+import { router, protectedProcedure } from '@/src/server/trpc';
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
-import fs from 'fs';
 import path from 'path';
+import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
 
 export const reviewRouter = router({
-	getList: publicProcedure
+	getList: protectedProcedure
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -64,7 +64,7 @@ export const reviewRouter = router({
 			return { data: entities, metadata: { count } };
 		}),
 	
-	exportData: publicProcedure
+	exportData: protectedProcedure
 		.input(
 			z.object({
 				product_id: z.number().optional(),
@@ -84,7 +84,8 @@ export const reviewRouter = router({
 					needOtherHelp: z.boolean().optional(),
 					difficulties: z.string().optional(),
 					help: z.string().optional()
-				}).optional()
+				}).optional(),
+				memoryKey: z.string()
 			})
 		)
 		.mutation(async ({ctx, input}) => {
@@ -112,62 +113,95 @@ export const reviewRouter = router({
 
 			const { where, orderBy } = formatWhereAndOrder(input)
 
-			const countReviews = await ctx.prisma.review.count({ where })
+			const totalRows = await ctx.prisma.review.count({ where });
+			let processedRows = 0;
 
-			// MAYBE DO IT 100 BY 100 ?
-			const lines = await ctx.prisma.review.findMany({
-				where,
-				orderBy: orderBy,
-				take: countReviews,
-				skip: 0,
-				include: { answers: true, button: true, product: true }
-			})
+			let rows: string[][] = []
+			let name = ''
 
-			const rows = lines.map(line => {
-				return headers.map(header => {
-					if(header === 'Date') {
-						const value = formatDateToFrenchString(
-							line.created_at?.toISOString().split('T')[0] || ''
-						)
-    					return `"${String(value).replace(/"/g, '""')}"`;
-					} else if(header === 'ID') {
-						const value = line.id
-    					return `"${String(value).replace(/"/g, '""')}"`;
-					} else if(header ==='Bouton') {
-						const value = line.button.title
-    					return `"${String(value).replace(/"/g, '""')}"`;
-					} else {
-						const value = line.answers.find(a => a.field_code === OpinionLabels.find(o => o.label === header)?.code as string)?.answer_text || '';
-    					return `"${String(value).replace(/"/g, '""')}"`;
-					}
-				}).join('!-!')
-			}).map((entry: string) => entry.split('!-!').map(value => value.replace(/"/g, '')));
-
-			const name = `avis_${lines[0].product.title.replace(/ /g, '_')}_${new Date().toISOString()}.csv`
-
-			const csvWriter = createCsvWriter({
-				path: path.join('/mnt/jdma/reviews', name),
-				header: headers.map(header => {
-					return {id: header, title: header}
+			while (processedRows < totalRows) {
+				const batch = await ctx.prisma.review.findMany({
+					where,
+					orderBy: orderBy,
+					take: 1000,
+					skip: processedRows,
+					include: { answers: true, button: true, product: true }
 				})
-			});
 
-			const records = rows.map(d => {
-				return headers.reduce((acc: Record<string, any>, header, index) => {
-					acc[header] = d[index];
-					return acc;
+				if(processedRows === 0) {
+					name = `avis_${batch[0].product.title.replace(/ /g, '_')}_${new Date().toISOString()}.csv`
 				}
-				, {});
-			});
-		
-			await csvWriter.writeRecords(records)
-				.then(() => {
-					console.log('The CSV file was written successfully');
-				})
-				.catch(err => {
-					console.error('Error writing CSV file', err);
-				});
 
-			return {fileName: name};
+				const tmpRows = batch.map(line => {
+					return headers.map(header => {
+						if(header === 'Date') {
+							const value = formatDateToFrenchString(
+								line.created_at?.toISOString().split('T')[0] || ''
+							)
+							return `"${String(value).replace(/"/g, '""')}"`;
+						} else if(header === 'ID') {
+							const value = line.id
+							return `"${String(value).replace(/"/g, '""')}"`;
+						} else if(header ==='Bouton') {
+							const value = line.button.title
+							return `"${String(value).replace(/"/g, '""')}"`;
+						} else {
+							const value = line.answers.find(a => a.field_code === OpinionLabels.find(o => o.label === header)?.code as string)?.answer_text || '';
+							return `"${String(value).replace(/"/g, '""')}"`;
+						}
+					}).join('!-!')
+				}).map((entry: string) => entry.split('!-!').map(value => value.replace(/"/g, '')));
+
+				rows = rows.concat(tmpRows);
+
+				processedRows += batch.length
+
+				setMemoryValue(input.memoryKey, processedRows * 100 / totalRows)
+
+				if (processedRows >= totalRows) {
+	
+					const csvWriter = createCsvWriter({
+						path: path.join('/mnt/jdma/reviews', name),
+						header: headers.map(header => {
+							return {id: header, title: header}
+						})
+					});
+	
+					const records = rows.map(d => {
+						return headers.reduce((acc: Record<string, any>, header, index) => {
+							acc[header] = d[index];
+							return acc;
+						}
+						, {});
+					});
+				
+					await csvWriter.writeRecords(records)
+						.then(() => {
+							console.log('The CSV file was written successfully');
+						})
+						.catch(err => {
+							console.error('Error writing CSV file', err);
+						});
+
+					return {fileName: name};
+
+				}
+
+			}
+		}),
+
+	getProgressionExport: protectedProcedure
+		.input(
+			z.object({
+				memoryKey: z.string()
+			})
+		)
+		.output(
+			z.object({
+				progress: z.number()
+			})
+		)
+		.query(async ({ctx, input}) => {
+			return {progress: getMemoryValue(input.memoryKey) || 0}
 		})
 });

@@ -21,6 +21,8 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
+import { CallOut } from "@codegouvfr/react-dsfr/CallOut";
+import ExportModal from '@/src/components/dashboard/Reviews/ExportModal';
 
 interface Props {
 	product: Product;
@@ -255,7 +257,7 @@ const ProductReviewsPage = (props: Props) => {
 						'fr-mt-4v'
 					)}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
+					<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
 						<div className={cx(classes.filterView)}>
 							<label>Vue</label>
 							<div className={fr.cx('fr-mt-2v')}>
@@ -274,7 +276,7 @@ const ProductReviewsPage = (props: Props) => {
 							</div>
 						</div>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3')}>
+					<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
 						<Select
 							label="Sélectionner une source"
 							nativeSelectProps={{
@@ -297,27 +299,31 @@ const ProductReviewsPage = (props: Props) => {
 							})}
 						</Select>
 					</div>
-					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
-						<Button
-							priority="tertiary"
-							iconId="fr-icon-filter-line"
-							iconPosition="right"
-							type="button"
-							nativeButtonProps={filter_modal.buttonProps}
-						>
-							Plus de filtres
-						</Button>
+					<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
+						<div className={cx(classes.buttonContainer)}>
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-filter-line"
+								iconPosition="right"
+								type="button"
+								nativeButtonProps={filter_modal.buttonProps}
+							>
+								Plus de filtres
+							</Button>
+						</div>
 					</div>
-					<div className={cx(classes.buttonContainer, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-12', 'fr-col-xl-3'))}>
-						<ExportReviews 
-							product_id={product.id} 
-							startDate={startDate} 
-							endDate={endDate}
-							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
-							search={search}
-							button_id={buttonId}
-							filters={filters}
-						></ExportReviews>
+					<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4', 'fr-col-xl-3'))}>
+						<div className={cx(classes.buttonContainer)}>
+							<ExportReviews 
+								product_id={product.id} 
+								startDate={startDate} 
+								endDate={endDate}
+								mustHaveVerbatims={displayMode === 'reviews' ? false : true}
+								search={search}
+								button_id={buttonId}
+								filters={filters}
+							></ExportReviews>
+						</div>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
 						{Object.keys(filters).map((key, index) => {
@@ -446,7 +452,12 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 		marginRight: '0.5rem',
 		marginBottom: '0.5rem'
 	},
+	filtersWrapper: {
+		display: 'flex',
+		alignItems: 'end'
+	},
 	buttonContainer: {
+		width: '100%',
 		[fr.breakpoints.up('lg')]: {
 			display: 'flex',
 			alignSelf: 'flex-end',
