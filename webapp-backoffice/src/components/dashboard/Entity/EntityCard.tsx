@@ -7,9 +7,10 @@ import { tss } from 'tss-react/dsfr';
 
 type Props = {
 	entity: Entity;
+	isMine: boolean;
 };
 
-const EntityCard = ({ entity }: Props) => {
+const EntityCard = ({ entity, isMine }: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -32,15 +33,17 @@ const EntityCard = ({ entity }: Props) => {
 						classes.wrapperButtons
 					)}
 				>
-					<Button
-						priority="secondary"
-						size="small"
-						iconId="fr-icon-admin-line"
-						iconPosition="right"
-						className={classes.button}
-					>
-						Gérer les administrateurs
-					</Button>
+					{isMine && (
+						<Button
+							priority="secondary"
+							size="small"
+							iconId="fr-icon-admin-line"
+							iconPosition="right"
+							className={classes.button}
+						>
+							Gérer les administrateurs
+						</Button>
+					)}
 					<Button
 						priority="secondary"
 						size="small"

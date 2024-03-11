@@ -9,12 +9,12 @@ generator client {
 }
 
 generator zod {
-  provider               = "zod-prisma-types"
-  addInputTypeValidation = false
-  addIncludeType         = false
-  addSelectType          = false
+  provider                  = "zod-prisma-types"
+  addInputTypeValidation    = false
+  addIncludeType            = false
+  addSelectType             = false
   createRelationValuesTypes = true
-  createPartialTypes = true
+  createPartialTypes        = true
 }
 
 enum UserRole {
@@ -66,6 +66,7 @@ model User {
   UserValidationTokens UserValidationToken[]
   UserRequests         UserRequest[]
   accessRights         AccessRight[]
+  adminEntityRights    AdminEntityRight[]
   entities             Entity[]
   favorites            Favorite[]
   api_keys             ApiKey[]
@@ -118,11 +119,12 @@ model UserInviteToken {
 }
 
 model Entity {
-  id       Int       @id @default(autoincrement())
-  name     String    @unique
-  acronym  String
-  products Product[]
-  users    User[]
+  id                Int                @id @default(autoincrement())
+  name              String             @unique
+  acronym           String
+  products          Product[]
+  users             User[]
+  adminEntityRights AdminEntityRight[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -166,6 +168,18 @@ model Product {
   favorites    Favorite[]
   reviews      Review[]
   isPublic     Boolean?
+}
+
+model AdminEntityRight {
+  id                Int     @id @default(autoincrement())
+  user              User?   @relation(fields: [user_email], references: [email])
+  user_email        String?
+  user_email_invite String?
+  entity            Entity  @relation(fields: [entity_id], references: [id])
+  entity_id         Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model AccessRight {

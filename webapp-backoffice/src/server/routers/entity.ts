@@ -8,18 +8,39 @@ export const entityRouter = router({
 			z.object({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
+				isMine: z.boolean().default(false),
 				sort: z.string().optional(),
 				search: z.string().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, search, sort } = input;
+			const contextUser = ctx.session.user;
+			const { numberPerPage, page, search, sort, isMine } = input;
 
 			let where: Prisma.EntityWhereInput = {
 				name: {
 					contains: search || ''
 				}
 			};
+
+			const myEntities = await ctx.prisma.entity.findMany({
+				take: 10000,
+				where: {
+					adminEntityRights: {
+						some: {
+							user_email: contextUser.email
+						}
+					}
+				}
+			});
+
+			if (isMine) {
+				where.adminEntityRights = {
+					some: {
+						user_email: contextUser.email
+					}
+				};
+			}
 
 			let orderBy: Prisma.EntityOrderByWithAggregationInput[] = [
 				{
@@ -60,7 +81,7 @@ export const entityRouter = router({
 
 			const count = await ctx.prisma.entity.count({ where });
 
-			return { data: entities, metadata: { count } };
+			return { data: entities, metadata: { count, myEntities } };
 		}),
 
 	getById: protectedProcedure

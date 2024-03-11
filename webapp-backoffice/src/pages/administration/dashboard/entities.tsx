@@ -24,6 +24,7 @@ const DashBoardEntities = () => {
 	const [numberPerPage, _] = React.useState(10);
 
 	const [currentEntity, setCurrentEntity] = React.useState<Entity>();
+	const [isMine, setIsMine] = React.useState<boolean>(true);
 
 	const { cx, classes } = useStyles();
 
@@ -37,13 +38,15 @@ const DashBoardEntities = () => {
 			search: validatedSearch,
 			sort: filter,
 			page: currentPage,
+			isMine,
 			numberPerPage
 		},
 		{
 			initialData: {
 				data: [],
 				metadata: {
-					count: 0
+					count: 0,
+					myEntities: []
 				}
 			}
 		}
@@ -51,7 +54,7 @@ const DashBoardEntities = () => {
 
 	const {
 		data: entities,
-		metadata: { count: entitiesCount }
+		metadata: { count: entitiesCount, myEntities }
 	} = entitiesResult;
 
 	const deleteEntity = trpc.entity.delete.useMutation({
@@ -138,6 +141,28 @@ const DashBoardEntities = () => {
 							</div>
 						</form>
 					</div>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+						<Button
+							priority={isMine ? 'primary' : 'secondary'}
+							size="large"
+							onClick={() => {
+								setIsMine(true);
+								setCurrentPage(1);
+							}}
+						>
+							Mes organisations
+						</Button>
+						<Button
+							priority={isMine ? 'secondary' : 'primary'}
+							size="large"
+							onClick={() => {
+								setIsMine(false);
+								setCurrentPage(1);
+							}}
+						>
+							Toutes les organisations
+						</Button>
+					</div>
 				</div>
 				{isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -174,7 +199,13 @@ const DashBoardEntities = () => {
 								</div>
 							) : (
 								entities.map((entity, index) => (
-									<EntityCard entity={entity} key={index} />
+									<EntityCard
+										entity={entity}
+										key={index}
+										isMine={myEntities
+											.map(myEntity => myEntity.id)
+											.includes(entity.id)}
+									/>
 								))
 							)}
 							{!isRefetchingEntities && entities.length === 0 && (
