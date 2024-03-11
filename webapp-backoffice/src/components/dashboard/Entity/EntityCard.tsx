@@ -8,9 +8,10 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	entity: Entity;
 	isMine: boolean;
+	onButtonClick: ({ type, entity }: OnButtonClickEntityParams) => void;
 };
 
-const EntityCard = ({ entity, isMine }: Props) => {
+const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -41,6 +42,9 @@ const EntityCard = ({ entity, isMine }: Props) => {
 								iconId="fr-icon-admin-line"
 								iconPosition="right"
 								className={classes.button}
+								onClick={() => {
+									onButtonClick({ type: 'rights', entity });
+								}}
 							>
 								Gérer les administrateurs
 							</Button>
@@ -59,6 +63,9 @@ const EntityCard = ({ entity, isMine }: Props) => {
 							priority="secondary"
 							size="small"
 							className={classes.button}
+							onClick={() => {
+								onButtonClick({ type: 'rights', entity });
+							}}
 						>
 							Voir plus
 						</Button>

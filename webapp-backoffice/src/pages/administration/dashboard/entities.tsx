@@ -1,4 +1,5 @@
 import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
+import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -6,14 +7,24 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickEntityParams =
-	| { type: 'create'; entity?: Entity }
-	| { type: 'delete'; entity: Entity };
+	| { type: 'rights'; entity?: Entity }
+	| { type: 'edit'; entity: Entity };
+
+export type AdminEntityRightModalType = 'add' | 'remove' | 'resend-email';
+
+const entityRightsModal = createModal({
+	id: 'entity-rights-modal',
+	isOpenedByDefault: false
+});
 
 const DashBoardEntities = () => {
 	const [filter, setFilter] = React.useState<string>('name:asc');
@@ -27,6 +38,7 @@ const DashBoardEntities = () => {
 	const [isMine, setIsMine] = React.useState<boolean>(true);
 
 	const { cx, classes } = useStyles();
+	const { data: session } = useSession({ required: true });
 
 	const {
 		data: entitiesResult,
@@ -57,6 +69,8 @@ const DashBoardEntities = () => {
 		metadata: { count: entitiesCount, myEntities }
 	} = entitiesResult;
 
+	const nbPages = getNbPages(entitiesCount, numberPerPage);
+
 	const deleteEntity = trpc.entity.delete.useMutation({
 		onSuccess: () => refetchEntities()
 	});
@@ -65,9 +79,33 @@ const DashBoardEntities = () => {
 		setCurrentPage(pageNumber);
 	};
 
-	const nbPages = getNbPages(entitiesCount, numberPerPage);
+	const handleModalEntityRightsOpening = async ({
+		type,
+		entity
+	}: OnButtonClickEntityParams) => {
+		setCurrentEntity(entity);
+		if (type === 'rights') {
+			// avoid flick switching entity
+			setTimeout(() => {
+				entityRightsModal.open();
+			}, 100);
+		}
+	};
+
+	const isEntityRightsModalOpen = useIsModalOpen(entityRightsModal);
+
+	if (!session) return;
+
 	return (
 		<>
+			{entities.length && (
+				<EntityRightsModal
+					modal={entityRightsModal}
+					isOpen={isEntityRightsModalOpen}
+					entity={currentEntity || entities[0]}
+					refetchEntities={refetchEntities}
+				/>
+			)}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -209,6 +247,7 @@ const DashBoardEntities = () => {
 									<EntityCard
 										entity={entity}
 										key={index}
+										onButtonClick={handleModalEntityRightsOpening}
 										isMine={myEntities
 											.map(myEntity => myEntity.id)
 											.includes(entity.id)}

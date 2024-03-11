@@ -24,6 +24,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			displayProcessed: false
 		},
 		{
+			enabled: session?.user.role === 'admin',
 			initialData: {
 				data: [],
 				metadata: {

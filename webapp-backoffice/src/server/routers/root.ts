@@ -3,6 +3,7 @@ import { productRouter } from './product';
 import { entityRouter } from './entity';
 import { buttonRouter } from './button';
 import { accessRightRouter } from './accessRight';
+import { adminEntityRightRouter } from './adminEntityRight';
 import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { domainRouter } from './domain';
@@ -17,6 +18,7 @@ export const appRouter = router({
 	product: productRouter,
 	entity: entityRouter,
 	accessRight: accessRightRouter,
+	adminEntityRight: adminEntityRightRouter,
 	button: buttonRouter,
 	favorite: favoriteRouter,
 	domain: domainRouter,
