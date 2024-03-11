@@ -137,6 +137,7 @@ export async function checkUserDomain(prisma: PrismaClient, email: string) {
 
 export const userRouter = router({
 	getList: protectedProcedure
+		.meta({ isAdmin: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),

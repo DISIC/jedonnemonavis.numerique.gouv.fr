@@ -185,7 +185,7 @@ const AccessManagement = (props: Props) => {
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + accessRights.length}
 							</span>{' '}
-							de{' '}
+							sur{' '}
 							<span className={cx(classes.boldText)}>{accessRightsCount}</span>
 						</span>
 					)}

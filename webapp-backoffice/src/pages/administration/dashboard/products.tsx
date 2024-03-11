@@ -273,7 +273,7 @@ const DashBoard = () => {
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + products.length}
 									</span>{' '}
-									de{' '}
+									sur{' '}
 									<span className={cx(classes.boldText)}>
 										{productsResult.metadata.count}
 									</span>
