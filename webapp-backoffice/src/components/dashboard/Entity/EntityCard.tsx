@@ -33,26 +33,36 @@ const EntityCard = ({ entity, isMine }: Props) => {
 						classes.wrapperButtons
 					)}
 				>
-					{isMine && (
+					{isMine ? (
+						<>
+							<Button
+								priority="secondary"
+								size="small"
+								iconId="fr-icon-admin-line"
+								iconPosition="right"
+								className={classes.button}
+							>
+								Gérer les administrateurs
+							</Button>
+							<Button
+								priority="secondary"
+								size="small"
+								iconId="fr-icon-edit-line"
+								iconPosition="right"
+								className={classes.button}
+							>
+								Modifier
+							</Button>
+						</>
+					) : (
 						<Button
 							priority="secondary"
 							size="small"
-							iconId="fr-icon-admin-line"
-							iconPosition="right"
 							className={classes.button}
 						>
-							Gérer les administrateurs
+							Voir plus
 						</Button>
 					)}
-					<Button
-						priority="secondary"
-						size="small"
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-						className={classes.button}
-					>
-						Modifier
-					</Button>
 				</div>
 			</div>
 		</div>

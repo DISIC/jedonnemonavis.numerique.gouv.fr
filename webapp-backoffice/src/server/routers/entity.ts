@@ -18,9 +18,18 @@ export const entityRouter = router({
 			const { numberPerPage, page, search, sort, isMine } = input;
 
 			let where: Prisma.EntityWhereInput = {
-				name: {
-					contains: search || ''
-				}
+				OR: [
+					{
+						name: {
+							contains: search || ''
+						}
+					},
+					{
+						acronym: {
+							contains: search || ''
+						}
+					}
+				]
 			};
 
 			const myEntities = await ctx.prisma.entity.findMany({
