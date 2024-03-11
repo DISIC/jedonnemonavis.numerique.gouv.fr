@@ -141,7 +141,14 @@ const DashBoardEntities = () => {
 							</div>
 						</form>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-col-md-5',
+							'fr-col--bottom',
+							'fr-mt-2v'
+						)}
+					>
 						<Button
 							priority={isMine ? 'primary' : 'secondary'}
 							size="large"
