@@ -47,7 +47,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						target: '_self'
 					},
 					text: 'Connexion / Inscription'
-				}
+			  }
 			: {
 					iconId: 'ri-logout-circle-line',
 					buttonProps: {
@@ -56,27 +56,29 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					},
 					text: 'Déconnexion'
-				}
+			  }
 	];
 
-	const navigationItems = [
-		{
-			text: 'Démarches',
-			linkProps: {
-				href: '/administration/dashboard/products',
-				target: '_self'
-			},
-			isActive: pathname.startsWith('/administration/dashboard/product')
-		},
-		{
-			text: 'Organisations',
-			linkProps: {
-				href: '/administration/dashboard/entities',
-				target: '_self'
-			},
-			isActive: pathname.startsWith('/administration/dashboard/entities')
-		}
-	];
+	const navigationItems = session?.user
+		? [
+				{
+					text: 'Démarches',
+					linkProps: {
+						href: '/administration/dashboard/products',
+						target: '_self'
+					},
+					isActive: pathname.startsWith('/administration/dashboard/product')
+				},
+				{
+					text: 'Organisations',
+					linkProps: {
+						href: '/administration/dashboard/entities',
+						target: '_self'
+					},
+					isActive: pathname.startsWith('/administration/dashboard/entities')
+				}
+		  ]
+		: [];
 
 	if (session?.user.role === 'admin') {
 		const adminNavigationItems = [
@@ -172,6 +174,6 @@ const useStyles = tss
 							fontWeight: 'bold'
 						}
 					}
-				}
+			  }
 			: {}
 	}));
