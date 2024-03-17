@@ -301,7 +301,7 @@ const EntityRightsModal = (props: Props) => {
 
 	return (
 		<modal.Component
-			title="Devenir administrateur"
+			title={isMine ? 'Gérer les administrateurs' : 'Devenir administrateur'}
 			concealingBackdrop={false}
 			size="large"
 			className={fr.cx(
@@ -328,7 +328,7 @@ const useStyles = tss
 			display: 'flex',
 			alignItems: 'center',
 			width: '100%',
-			marginTop: fr.spacing('4v'),
+			marginTop: fr.spacing('6v'),
 			'& > div': {
 				flexGrow: 1
 			},
