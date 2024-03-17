@@ -30,10 +30,12 @@ export const RegisterNotWhiteListed = (props: Props) => {
 		createUserRequest.mutate({
 			userRequest: {
 				reason: reason as string,
-				mode: 'whitelist'
+				mode: 'whitelist',
+				inviteToken: userInfos.inviteToken
 			},
 			user: {
-				...userInfos,
+				firstName: userInfos.firstName,
+				lastName: userInfos.lastName,
 				email: userInfos.email as string,
 				password: userInfos.password as string
 			}

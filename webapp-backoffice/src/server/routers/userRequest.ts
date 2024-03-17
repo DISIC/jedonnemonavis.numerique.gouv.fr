@@ -12,11 +12,12 @@ import {
 	getUserRequestAcceptedEmailHtml,
 	getUserRequestRefusedEmailHtml
 } from '@/src/utils/emails';
+import { makeRelationFromUserInvite } from './user';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
 	user: Prisma.UserCreateInput,
-	userRequest: { reason: string; mode: RequestMode }
+	userRequest: { reason: string; mode: RequestMode; inviteToken?: string }
 ) {
 	const hashedPassword = crypto
 		.createHash('sha256')
@@ -40,6 +41,10 @@ export async function createUserRequest(
 			user_email_copy: createdUser.email
 		}
 	});
+
+	if (userRequest.inviteToken) {
+		await makeRelationFromUserInvite(prisma, createdUser);
+	}
 
 	return createdUserRequest;
 }
@@ -97,7 +102,9 @@ export async function updateUserRequest(
 				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
 				updatedUserRequest.user.email,
 				getUserRequestRefusedEmailHtml(message),
-				`Votre demande d'accès a été refusée${message ? ` pour la raison suivante : ${message}` : '.'}`
+				`Votre demande d'accès a été refusée${
+					message ? ` pour la raison suivante : ${message}` : '.'
+				}`
 			);
 		}
 	}
@@ -171,7 +178,11 @@ export const userRequestRouter = router({
 	create: publicProcedure
 		.input(
 			z.object({
-				userRequest: z.object({ reason: z.string(), mode: RequestModeSchema }),
+				userRequest: z.object({
+					reason: z.string(),
+					mode: RequestModeSchema,
+					inviteToken: z.string().optional()
+				}),
 				user: UserCreateInputSchema
 			})
 		)
