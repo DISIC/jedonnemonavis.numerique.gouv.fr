@@ -1,6 +1,10 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
 import { Prisma } from '@prisma/client';
+import {
+	EntityUncheckedCreateInputSchema,
+	EntityUncheckedUpdateInputSchema
+} from '@/prisma/generated/zod';
 
 export const entityRouter = router({
 	getList: protectedProcedure
@@ -111,5 +115,43 @@ export const entityRouter = router({
 			});
 
 			return { data: deletedEntity };
+		}),
+
+	create: protectedProcedure
+		.input(EntityUncheckedCreateInputSchema)
+		.mutation(async ({ ctx, input: entityPayload }) => {
+			const userEmail = ctx.session?.user?.email;
+
+			const entity = await ctx.prisma.entity.create({
+				data: {
+					...entityPayload,
+					adminEntityRights: {
+						create: [
+							{
+								user_email: userEmail
+							}
+						]
+					}
+				}
+			});
+
+			return { data: entity };
+		}),
+
+	update: protectedProcedure
+		.input(
+			z.object({ id: z.number(), entity: EntityUncheckedUpdateInputSchema })
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, entity } = input;
+
+			const updatedEntity = await ctx.prisma.entity.update({
+				where: { id },
+				data: {
+					...entity
+				}
+			});
+
+			return { data: updatedEntity };
 		})
 });

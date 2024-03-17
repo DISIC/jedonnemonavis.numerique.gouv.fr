@@ -1,4 +1,5 @@
 import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
+import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
@@ -21,6 +22,11 @@ export type OnButtonClickEntityParams =
 
 const entityRightsModal = createModal({
 	id: 'entity-rights-modal',
+	isOpenedByDefault: false
+});
+
+const entityModal = createModal({
+	id: 'entity-modal',
 	isOpenedByDefault: false
 });
 
@@ -82,15 +88,16 @@ const DashBoardEntities = () => {
 		entity
 	}: OnButtonClickEntityParams) => {
 		setCurrentEntity(entity);
-		if (type === 'rights') {
-			// avoid flick switching entity
-			setTimeout(() => {
+		// avoid flick switching entity
+		setTimeout(() => {
+			if (type === 'rights') {
 				entityRightsModal.open();
-			}, 100);
-		}
+			} else if (type === 'edit') {
+				console.log('there');
+				entityModal.open();
+			}
+		}, 100);
 	};
-
-	const isEntityRightsModalOpen = useIsModalOpen(entityRightsModal);
 
 	if (!session) return;
 
@@ -99,9 +106,15 @@ const DashBoardEntities = () => {
 			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}
-					isOpen={isEntityRightsModalOpen}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
+				/>
+			)}
+			{!!entities.length && (
+				<EntityModal
+					modal={entityModal}
+					entity={currentEntity || entities[0]}
+					onSubmit={refetchEntities}
 				/>
 			)}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>

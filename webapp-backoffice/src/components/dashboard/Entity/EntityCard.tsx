@@ -53,6 +53,9 @@ const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 								size="small"
 								iconId="fr-icon-edit-line"
 								iconPosition="right"
+								onClick={() => {
+									onButtonClick({ type: 'edit', entity });
+								}}
 								className={classes.button}
 							>
 								Modifier

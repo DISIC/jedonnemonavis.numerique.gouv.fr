@@ -2,16 +2,16 @@ import { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { getNbPages, isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { AdminEntityRight, Entity } from '@prisma/client';
-import React, { useEffect, useState } from 'react';
+import { Entity } from '@prisma/client';
+import { useSession } from 'next-auth/react';
+import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
-import { useSession } from 'next-auth/react';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import Input from '@codegouvfr/react-dsfr/Input';
-import Button from '@codegouvfr/react-dsfr/Button';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -29,14 +29,13 @@ interface CustomModalProps {
 }
 
 interface Props {
-	isOpen: boolean;
 	modal: CustomModalProps;
 	refetchEntities: () => void;
 	entity?: Entity;
 }
 
 const EntityRightsModal = (props: Props) => {
-	const { modal, entity, isOpen, refetchEntities } = props;
+	const { modal, entity, refetchEntities } = props;
 
 	const { data: session } = useSession();
 
