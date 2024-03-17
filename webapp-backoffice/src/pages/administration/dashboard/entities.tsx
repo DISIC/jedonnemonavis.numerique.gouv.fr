@@ -19,8 +19,6 @@ export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
 	| { type: 'edit'; entity: Entity };
 
-export type AdminEntityRightModalType = 'add' | 'remove' | 'resend-email';
-
 const entityRightsModal = createModal({
 	id: 'entity-rights-modal',
 	isOpenedByDefault: false
@@ -98,7 +96,7 @@ const DashBoardEntities = () => {
 
 	return (
 		<>
-			{entities.length && (
+			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}
 					isOpen={isEntityRightsModalOpen}

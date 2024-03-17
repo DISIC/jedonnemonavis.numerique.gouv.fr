@@ -1,11 +1,14 @@
-import { z } from 'zod';
-import { router, protectedProcedure } from '@/src/server/trpc';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
+import { AdminEntityRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
+import { protectedProcedure, router } from '@/src/server/trpc';
+import {
+	getInviteEntityEmailHtml,
+	getUserInviteEntityEmailHtml
+} from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import { generateRandomString } from '@/src/utils/tools';
-import { AdminEntityRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
-import { getInviteEmailHtml, getUserInviteEmailHtml } from '@/src/utils/emails';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
 export const generateInviteToken = async (
 	prisma: PrismaClient,
@@ -103,7 +106,7 @@ export const adminEntityRightRouter = router({
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
 					user_email,
-					getUserInviteEmailHtml(
+					getUserInviteEntityEmailHtml(
 						contextUser,
 						user_email,
 						token,
@@ -120,7 +123,10 @@ export const adminEntityRightRouter = router({
 				await sendMail(
 					`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
 					user_email,
-					getInviteEmailHtml(contextUser, newAdminEntityRight.entity.name),
+					getInviteEntityEmailHtml(
+						contextUser,
+						newAdminEntityRight.entity.name
+					),
 					`Cliquez sur ce lien pour rejoindre l'organisation "${newAdminEntityRight.entity.name}" : ${process.env.NODEMAILER_BASEURL}`
 				);
 			}
@@ -151,7 +157,12 @@ export const adminEntityRightRouter = router({
 			await sendMail(
 				'Invitation à rejoindre « Je donne mon avis »',
 				user_email,
-				getUserInviteEmailHtml(contextUser, user_email, token, entity.name),
+				getUserInviteEntityEmailHtml(
+					contextUser,
+					user_email,
+					token,
+					entity.name
+				),
 				`Cliquez sur ce lien pour créer votre compte : ${
 					process.env.NODEMAILER_BASEURL
 				}/register?${new URLSearchParams({
@@ -174,5 +185,19 @@ export const adminEntityRightRouter = router({
 			});
 
 			return adminEntityRight;
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ admin_entity_right_id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { admin_entity_right_id } = input;
+
+			const adminEntityRightDelete = await ctx.prisma.adminEntityRight.delete({
+				where: {
+					id: admin_entity_right_id
+				}
+			});
+
+			return adminEntityRightDelete;
 		})
 });

@@ -1,4 +1,3 @@
-import { AdminEntityRightModalType } from '@/src/pages/administration/dashboard/entities';
 import { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -11,6 +10,8 @@ import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
 import { useSession } from 'next-auth/react';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+
+export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -46,35 +47,63 @@ const EntityRightsModal = (props: Props) => {
 	const [adminEntityRightsCount, setAdminEntityRightsCount] =
 		useState<number>(0);
 
+	const [actionType, setActionType] =
+		useState<AdminEntityRightActionType | null>(null);
+	const [actionEntityRight, setActionEntityRight] =
+		useState<AdminEntityRightWithUsers | null>(null);
+
 	const nbPages = getNbPages(adminEntityRightsCount, numberPerPage);
 
-	trpc.adminEntityRight.getList.useQuery(
-		{
-			page: currentPage,
-			numberPerPage,
-			entity_id: entity?.id || -1
-		},
-		{
-			enabled: !!entity,
-			onSuccess: adminEntityRightsResult => {
-				setAdminEntityRights(adminEntityRightsResult.data);
-				setAdminEntityRightsCount(adminEntityRightsResult.metadata.count);
+	const { refetch: refetchAdminEntityRights, isLoading } =
+		trpc.adminEntityRight.getList.useQuery(
+			{
+				page: currentPage,
+				numberPerPage,
+				entity_id: entity?.id || -1
+			},
+			{
+				enabled: !!entity,
+				onSuccess: adminEntityRightsResult => {
+					setAdminEntityRights(adminEntityRightsResult.data);
+					setAdminEntityRightsCount(adminEntityRightsResult.metadata.count);
+				}
 			}
+		);
+
+	const resendEmailAdminEntityRight =
+		trpc.adminEntityRight.resendEmail.useMutation({});
+
+	const removeAdminEntityRight = trpc.adminEntityRight.delete.useMutation({
+		onSuccess: () => {
+			refetchAdminEntityRights();
 		}
-	);
+	});
 
 	const handleModalClose = () => {
 		modal.close();
 	};
 
-	const handleModalButtons = (
-		modalType: AdminEntityRightModalType,
-		adminEntityRight?: AdminEntityRightWithUsers
+	const handleActionsButtons = (
+		actionType: AdminEntityRightActionType,
+		adminEntityRight: AdminEntityRightWithUsers
 	) => {
-		if (modalType === 'remove') {
+		setActionType(actionType);
+		setActionEntityRight(adminEntityRight);
+
+		if (actionType === 'remove') {
+			removeAdminEntityRight.mutate({
+				admin_entity_right_id: adminEntityRight.id
+			});
+			return;
 		}
-		console.log(modalType);
-		console.log(adminEntityRight);
+
+		if (actionType == 'resend-email') {
+			resendEmailAdminEntityRight.mutate({
+				entity_id: entity?.id || -1,
+				user_email: adminEntityRight?.user_email_invite as string
+			});
+			return;
+		}
 	};
 
 	const displayModalButtons = ():
@@ -90,6 +119,25 @@ const EntityRightsModal = (props: Props) => {
 				onClick: () => handleModalClose()
 			}
 		];
+	};
+
+	const getAlertTitle = () => {
+		switch (actionType) {
+			case 'resend-email':
+				return `Un e-mail d’invitation a été renvoyé à ${
+					actionEntityRight?.user_email
+						? actionEntityRight?.user_email
+						: actionEntityRight?.user_email_invite
+				}.`;
+			case 'remove':
+				return `${
+					actionEntityRight?.user !== null
+						? `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName}`
+						: actionEntityRight.user_email_invite
+				} a été retiré comme administrateur ou administratrice de cette organisation.`;
+		}
+
+		return '';
 	};
 
 	const displayRightsTable = () => {
@@ -112,6 +160,18 @@ const EntityRightsModal = (props: Props) => {
 
 		return (
 			<>
+				{actionType && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setActionType(null);
+						}}
+						severity={actionType === 'remove' ? 'info' : 'success'}
+						className={fr.cx('fr-mb-2w')}
+						small
+						description={getAlertTitle()}
+					/>
+				)}
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
 						{nbPages > 1 && (
@@ -133,7 +193,7 @@ const EntityRightsModal = (props: Props) => {
 					</div>
 				</div>
 				<div>
-					{!entity ? (
+					{!entity || isLoading ? (
 						<div className={fr.cx('fr-py-10v')}>
 							<Loader />
 						</div>
@@ -142,7 +202,7 @@ const EntityRightsModal = (props: Props) => {
 							<EntityRightCard
 								key={index}
 								adminEntityRight={adminEntityRight}
-								onButtonClick={handleModalButtons}
+								onButtonClick={handleActionsButtons}
 								isMine={isMine}
 							/>
 						))
