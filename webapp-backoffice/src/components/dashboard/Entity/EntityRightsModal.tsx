@@ -245,35 +245,37 @@ const EntityRightsModal = (props: Props) => {
 						))
 					)}
 				</div>
-				<form
-					onSubmit={e => {
-						e.preventDefault();
-						handleAddUser();
-					}}
-				>
-					<div className={classes.addSection}>
-						<Input
-							label="Adresse email"
-							nativeInputProps={{
-								onChange: e => {
-									setAddError('');
-									setUserAddEmail(e.target.value);
-								},
-								value: userAddEmail,
-								name: 'email'
-							}}
-							state={addError ? 'error' : 'default'}
-							stateRelatedMessage={addError}
-						/>
-						<Button
-							priority="secondary"
-							type="submit"
-							disabled={!userAddEmail || !isValidEmail(userAddEmail)}
-						>
-							Inviter
-						</Button>
-					</div>
-				</form>
+				{isMine && (
+					<form
+						onSubmit={e => {
+							e.preventDefault();
+							handleAddUser();
+						}}
+					>
+						<div className={classes.addSection}>
+							<Input
+								label="Adresse email"
+								nativeInputProps={{
+									onChange: e => {
+										setAddError('');
+										setUserAddEmail(e.target.value);
+									},
+									value: userAddEmail,
+									name: 'email'
+								}}
+								state={addError ? 'error' : 'default'}
+								stateRelatedMessage={addError}
+							/>
+							<Button
+								priority="secondary"
+								type="submit"
+								disabled={!userAddEmail || !isValidEmail(userAddEmail)}
+							>
+								Inviter
+							</Button>
+						</div>
+					</form>
+				)}
 			</>
 		);
 	};
