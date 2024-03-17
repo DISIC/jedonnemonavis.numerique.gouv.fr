@@ -1,6 +1,7 @@
 import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
+import EntitySearchModal from '@/src/components/dashboard/Entity/EntitySearchModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -9,7 +10,6 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
@@ -30,10 +30,16 @@ const entityModal = createModal({
 	isOpenedByDefault: false
 });
 
+const entitySearchModal = createModal({
+	id: 'entity-search-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoardEntities = () => {
 	const [filter, setFilter] = React.useState<string>('name:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+	const [fromSearch, setFromSearch] = React.useState<boolean>(false);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -54,7 +60,7 @@ const DashBoardEntities = () => {
 			search: validatedSearch,
 			sort: filter,
 			page: currentPage,
-			isMine,
+			isMine: isMine ? isMine : undefined,
 			numberPerPage
 		},
 		{
@@ -87,15 +93,25 @@ const DashBoardEntities = () => {
 		type,
 		entity
 	}: OnButtonClickEntityParams) => {
+		setFromSearch(false);
 		setCurrentEntity(entity);
 		// avoid flick switching entity
 		setTimeout(() => {
 			if (type === 'rights') {
 				entityRightsModal.open();
 			} else if (type === 'edit') {
-				console.log('there');
 				entityModal.open();
 			}
+		}, 100);
+	};
+
+	const onEntitySelected = (entity: Entity) => {
+		setFromSearch(true);
+		entitySearchModal.close();
+		setCurrentEntity(entity);
+		// avoid flick switching entity
+		setTimeout(() => {
+			entityRightsModal.open();
 		}, 100);
 	};
 
@@ -108,6 +124,9 @@ const DashBoardEntities = () => {
 					modal={entityRightsModal}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
+					onClose={() => {
+						if (fromSearch) entitySearchModal.open();
+					}}
 				/>
 			)}
 			{!!entities.length && (
@@ -117,6 +136,10 @@ const DashBoardEntities = () => {
 					onSubmit={refetchEntities}
 				/>
 			)}
+			<EntitySearchModal
+				modal={entitySearchModal}
+				onEntitySelected={onEntitySelected}
+			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -135,6 +158,9 @@ const DashBoardEntities = () => {
 							iconId="fr-icon-admin-line"
 							iconPosition="right"
 							type="button"
+							onClick={() => {
+								entitySearchModal.open();
+							}}
 						>
 							Devenir administrateur
 						</Button>
@@ -340,6 +366,9 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			fontWeight: 'bold'
 		}
 	},
+	boldText: {
+		fontWeight: 'bold'
+	},
 	searchForm: {
 		'.fr-search-bar': {
 			'.fr-input-group': {
@@ -347,9 +376,6 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 				marginBottom: 0
 			}
 		}
-	},
-	boldText: {
-		fontWeight: 'bold'
 	}
 }));
 

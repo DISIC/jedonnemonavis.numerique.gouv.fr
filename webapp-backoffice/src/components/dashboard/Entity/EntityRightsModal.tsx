@@ -32,10 +32,11 @@ interface Props {
 	modal: CustomModalProps;
 	refetchEntities: () => void;
 	entity?: Entity;
+	onClose: () => void;
 }
 
 const EntityRightsModal = (props: Props) => {
-	const { modal, entity, refetchEntities } = props;
+	const { modal, entity, refetchEntities, onClose } = props;
 
 	const { data: session } = useSession();
 
@@ -102,6 +103,7 @@ const EntityRightsModal = (props: Props) => {
 
 	const handleModalClose = () => {
 		modal.close();
+		onClose();
 	};
 
 	const handleAddUser = () => {

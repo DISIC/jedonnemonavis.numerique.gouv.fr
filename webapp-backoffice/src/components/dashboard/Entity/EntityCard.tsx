@@ -8,10 +8,11 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	entity: Entity;
 	isMine: boolean;
+	fromSearch?: boolean;
 	onButtonClick: ({ type, entity }: OnButtonClickEntityParams) => void;
 };
 
-const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
+const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -70,7 +71,7 @@ const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 								onButtonClick({ type: 'rights', entity });
 							}}
 						>
-							Voir plus
+							{fromSearch ? 'Devenir administrateur' : 'Voir plus'}
 						</Button>
 					)}
 				</div>

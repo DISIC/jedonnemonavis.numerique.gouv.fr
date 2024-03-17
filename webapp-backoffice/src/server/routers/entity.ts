@@ -12,7 +12,7 @@ export const entityRouter = router({
 			z.object({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
-				isMine: z.boolean().default(false),
+				isMine: z.boolean().optional(),
 				sort: z.string().optional(),
 				search: z.string().optional()
 			})
@@ -25,12 +25,14 @@ export const entityRouter = router({
 				OR: [
 					{
 						name: {
-							contains: search || ''
+							contains: search || '',
+							mode: 'insensitive'
 						}
 					},
 					{
 						acronym: {
-							contains: search || ''
+							contains: search || '',
+							mode: 'insensitive'
 						}
 					}
 				]
@@ -50,6 +52,12 @@ export const entityRouter = router({
 			if (isMine) {
 				where.adminEntityRights = {
 					some: {
+						user_email: contextUser.email
+					}
+				};
+			} else if (isMine === false) {
+				where.adminEntityRights = {
+					none: {
 						user_email: contextUser.email
 					}
 				};
