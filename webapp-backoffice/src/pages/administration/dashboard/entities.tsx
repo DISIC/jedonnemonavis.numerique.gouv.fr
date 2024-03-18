@@ -197,7 +197,7 @@ const DashBoardEntities = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="email:asc">Nom A à Z</option>
+							<option value="name:asc">Nom A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
