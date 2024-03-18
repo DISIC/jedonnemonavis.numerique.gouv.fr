@@ -1,5 +1,5 @@
 import { Pagination } from '@/src/components/ui/Pagination';
-import { getNbPages } from '@/src/utils/tools';
+import { getLastPage, getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -12,6 +12,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityCard from './EntityCard';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Link from 'next/link';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -31,6 +33,7 @@ interface CustomModalProps {
 interface Props {
 	modal: CustomModalProps;
 	onEntitySelected: (entity: Entity) => void;
+	onCreate: () => void;
 }
 
 type FormValues = {
@@ -38,20 +41,21 @@ type FormValues = {
 };
 
 const EntitySearchModal = (props: Props) => {
-	const { modal, onEntitySelected } = props;
+	const { modal, onEntitySelected, onCreate } = props;
 	const { data: session } = useSession();
+	const { cx, classes } = useStyles();
 
 	const [search, setSearch] = React.useState<string>('');
 	const [submitedSearch, setSubmitedSearch] = React.useState<string>('');
-	const showNoResult = search.length >= 3;
+	const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, _] = React.useState(10);
+	const [numberPerPage, _] = React.useState(2);
 	const [countEntititesSearch, setCountEntitiesSearch] = React.useState(0);
 	const [entitiesSearch, setEntitiesSearch] = React.useState<Entity[]>([]);
 	const [hasSubmitedOnce, setsHasSubmitedOnce] = React.useState(false);
 
-	const { cx, classes } = useStyles({ showNoResult });
+	const showNoResult = search.length >= 3 && !hasSubmitedOnce;
 
 	const { control } = useForm<FormValues>({
 		defaultValues: {}
@@ -78,6 +82,7 @@ const EntitySearchModal = (props: Props) => {
 		}
 	);
 	const nbPages = getNbPages(countEntititesSearch, numberPerPage);
+	const lastPage = getLastPage(countEntititesSearch, numberPerPage);
 
 	const { data: entitiesResult, isLoading: isLoadingEntities } =
 		trpc.entity.getList.useQuery(
@@ -105,21 +110,32 @@ const EntitySearchModal = (props: Props) => {
 	};
 
 	useEffect(() => {
+		if (search === '') setsHasSubmitedOnce(false);
+	}, [search]);
+
+	useEffect(() => {
 		if (currentPage && hasSubmitedOnce) entitiesSearchRefetch();
 	}, [currentPage]);
 
-	console.log(entitiesSearch);
+	const notFound =
+		!isRefetchingEntitiesSearch &&
+		entitiesSearch.length === 0 &&
+		hasSubmitedOnce;
 
 	const displayModalContent = () => {
 		return (
 			<>
+				<p>
+					Les administrateurs ont accès à toutes les démarches de leur
+					organisation.
+				</p>
+				<p>Pour devenir administrateur, rechercher l’organisation.</p>
 				<form
 					id="search-form"
 					onSubmit={e => {
 						e.preventDefault();
 						onSubmit();
 					}}
-					className={classes.form}
 				>
 					<div className={fr.cx('fr-mt-8v')}>
 						{!isLoadingEntities && entityOptions.length > 0 && (
@@ -133,11 +149,19 @@ const EntitySearchModal = (props: Props) => {
 											// disablePortal
 											id="entity-select-autocomplete"
 											noOptionsText={
-												search.length >= 3 ? 'Aucune organisation trouvée' : ''
+												search.length >= 3
+													? 'Aucune organisation trouvée'
+													: 'Écrivez au moins 3 caractères'
 											}
 											sx={{ width: '100%' }}
-											disablePortal
 											options={showNoResult ? entityOptions : []}
+											open={showNoResult && isSearchFocused}
+											onFocus={() => {
+												setIsSearchFocused(true);
+											}}
+											onBlur={() => {
+												setIsSearchFocused(false);
+											}}
 											onChange={(_, optionSelected) => {
 												if (optionSelected?.value)
 													onEntitySelected(optionSelected.value);
@@ -146,6 +170,20 @@ const EntitySearchModal = (props: Props) => {
 											defaultValue={entityOptions.find(
 												option => option.value === value
 											)}
+											componentsProps={{
+												popper: {
+													modifiers: [
+														{
+															name: 'flip',
+															enabled: false
+														},
+														{
+															name: 'preventOverflow',
+															enabled: false
+														}
+													]
+												}
+											}}
 											renderInput={params => (
 												<div
 													ref={params.InputProps.ref}
@@ -188,80 +226,91 @@ const EntitySearchModal = (props: Props) => {
 						<Loader />
 					</div>
 				) : (
-					<div className={fr.cx('fr-mt-10v')}>
-						{hasSubmitedOnce && (
-							<h6>Résultats de la recherche « {submitedSearch} »</h6>
-						)}
-						<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
+					hasSubmitedOnce && (
+						<div className={fr.cx('fr-mt-10v')}>
+							<h6>
+								{notFound
+									? `Pas de résultats pour la recherche « ${submitedSearch} »`
+									: `Résultats de la recherche « ${submitedSearch} »`}
+							</h6>
 							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
-									Organisation de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + entitiesSearch.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{countEntititesSearch}
+								<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
+									<span className={fr.cx('fr-ml-0')}>
+										Organisation de{' '}
+										<span className={cx(classes.boldText)}>
+											{numberPerPage * (currentPage - 1) + 1}
+										</span>{' '}
+										à{' '}
+										<span className={cx(classes.boldText)}>
+											{numberPerPage * (currentPage - 1) +
+												entitiesSearch.length}
+										</span>{' '}
+										sur{' '}
+										<span className={cx(classes.boldText)}>
+											{countEntititesSearch}
+										</span>
 									</span>
-								</span>
-							)}
-						</div>
-						<div>
-							{isRefetchingEntitiesSearch ? (
-								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-									<Loader />
 								</div>
-							) : (
-								entitiesSearch.map((entity, index) => (
-									<EntityCard
-										fromSearch
-										entity={entity}
-										key={index}
-										isMine={false}
-										onButtonClick={() => onEntitySelected(entity)}
-									/>
-								))
 							)}
-							{!isRefetchingEntitiesSearch &&
-								entitiesSearch.length === 0 &&
-								hasSubmitedOnce && (
-									<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-										<div
-											className={cx(
-												fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-												classes.textContainer
-											)}
-											role="status"
-										>
-											<p>Aucune organisation trouvée</p>
-										</div>
+							<div>
+								{isRefetchingEntitiesSearch ? (
+									<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+										<Loader />
 									</div>
+								) : (
+									entitiesSearch.map((entity, index) => (
+										<EntityCard
+											fromSearch
+											entity={entity}
+											key={index}
+											isMine={false}
+											onButtonClick={() => onEntitySelected(entity)}
+										/>
+									))
 								)}
+								{(lastPage === currentPage || notFound) && (
+									<Alert
+										className={fr.cx('fr-mb-4v')}
+										description={
+											<>
+												Vous ne trouvez pas l'oganisation ?
+												<Link
+													className={fr.cx('fr-link', 'fr-ml-2v')}
+													onClick={() => {
+														onCreate();
+													}}
+													href="#"
+												>
+													Créer une organisation.
+												</Link>
+											</>
+										}
+										severity="info"
+										title=""
+									/>
+								)}
+							</div>
+							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+								{nbPages > 1 && (
+									<Pagination
+										showFirstLast
+										count={nbPages}
+										defaultPage={currentPage}
+										getPageLinkProps={pageNumber => ({
+											onClick: event => {
+												event.preventDefault();
+												setCurrentPage(pageNumber);
+											},
+											href: '#',
+											classes: { link: fr.cx('fr-pagination__link') },
+											key: `pagination-link-entity-${pageNumber}`
+										})}
+										className={fr.cx('fr-mt-1w')}
+									/>
+								)}
+							</div>
 						</div>
-						<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
-							{nbPages > 1 && (
-								<Pagination
-									showFirstLast
-									count={nbPages}
-									defaultPage={currentPage}
-									getPageLinkProps={pageNumber => ({
-										onClick: event => {
-											event.preventDefault();
-											setCurrentPage(pageNumber);
-										},
-										href: '#',
-										classes: { link: fr.cx('fr-pagination__link') },
-										key: `pagination-link-entity-${pageNumber}`
-									})}
-									className={fr.cx('fr-mt-1w')}
-								/>
-							)}
-						</div>
-					</div>
+					)
 				)}
 			</>
 		);
@@ -284,26 +333,17 @@ const EntitySearchModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss
-	.withName(EntitySearchModal.name)
-	.withParams<{ showNoResult: boolean }>()
-	.create(({ showNoResult }) => ({
-		form: {
-			'.base-Popper-root': {
-				display: showNoResult ? 'inherit' : 'none',
-				zIndex: 9999
-			}
-		},
-		textContainer: {
-			textAlign: 'center',
-			p: {
-				margin: 0,
-				fontWeight: 'bold'
-			}
-		},
-		boldText: {
+const useStyles = tss.withName(EntitySearchModal.name).create(() => ({
+	textContainer: {
+		textAlign: 'center',
+		p: {
+			margin: 0,
 			fontWeight: 'bold'
 		}
-	}));
+	},
+	boldText: {
+		fontWeight: 'bold'
+	}
+}));
 
 export default EntitySearchModal;

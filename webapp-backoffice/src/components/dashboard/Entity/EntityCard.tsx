@@ -25,8 +25,16 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
-						{entity.name}
+					<p
+						className={cx(
+							fr.cx('fr-mb-0', fromSearch ? 'fr-text--sm' : 'fr-text--md'),
+							classes.spanFullName
+						)}
+					>
+						{entity.name}{' '}
+						<span className={cx(fr.cx('fr-hint-text'), classes.acronym)}>
+							({entity.acronym})
+						</span>
 					</p>
 				</div>
 				<div
@@ -101,6 +109,10 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 		'&:not(:last-of-type)': {
 			marginRight: fr.spacing('4v')
 		}
+	},
+	acronym: {
+		display: 'inline-block',
+		marginLeft: fr.spacing('1v')
 	}
 }));
 

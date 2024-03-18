@@ -15,3 +15,7 @@
 .fr-alert__title:empty {
 	margin-bottom: 0;
 }
+
+.MuiAutocomplete-popper {
+	z-index: 9999 !important;
+}

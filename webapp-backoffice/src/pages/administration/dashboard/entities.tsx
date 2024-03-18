@@ -115,6 +115,13 @@ const DashBoardEntities = () => {
 		}, 100);
 	};
 
+	const onCreateEntity = () => {
+		setCurrentEntity(undefined);
+		setTimeout(() => {
+			entityModal.open();
+		}, 100);
+	};
+
 	if (!session) return;
 
 	return (
@@ -132,13 +139,14 @@ const DashBoardEntities = () => {
 			{!!entities.length && (
 				<EntityModal
 					modal={entityModal}
-					entity={currentEntity || entities[0]}
+					entity={currentEntity}
 					onSubmit={refetchEntities}
 				/>
 			)}
 			<EntitySearchModal
 				modal={entitySearchModal}
 				onEntitySelected={onEntitySelected}
+				onCreate={onCreateEntity}
 			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div

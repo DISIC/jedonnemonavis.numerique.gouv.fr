@@ -74,7 +74,7 @@ const EntityModal = (props: Props) => {
 			title={
 				entity && entity.id
 					? "Modifier l'organisation"
-					: 'Ajouter une organisation'
+					: 'Créer une organisation'
 			}
 			size="large"
 			buttons={[
@@ -85,7 +85,7 @@ const EntityModal = (props: Props) => {
 					doClosesModal: false,
 					onClick: handleSubmit(onSubmit),
 					children:
-						entity && entity.id ? 'Sauvegarder' : 'Créer cette organisation'
+						entity && entity.id ? 'Sauvegarder' : 'Créer une organisation'
 				}
 			]}
 		>
