@@ -57,6 +57,10 @@ export function getNbPages(count: number, numberPerPage: number) {
 		: Math.trunc(count / numberPerPage) + 1;
 }
 
+export function getLastPage(count: number, numberPerPage: number): number {
+	return Math.ceil(count / numberPerPage);
+}
+
 export function getRandomObjectFromArray<T>(array: T[]): T | undefined {
 	if (array.length === 0) {
 		return undefined; // Return undefined for an empty array

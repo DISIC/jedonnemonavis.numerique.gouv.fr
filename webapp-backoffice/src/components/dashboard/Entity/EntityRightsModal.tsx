@@ -1,16 +1,19 @@
-import { AdminEntityRightModalType } from '@/src/pages/administration/dashboard/entities';
 import { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
-import { getNbPages } from '@/src/utils/tools';
+import { getNbPages, isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { AdminEntityRight, Entity } from '@prisma/client';
+import { Entity } from '@prisma/client';
+import { useSession } from 'next-auth/react';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
-import { useSession } from 'next-auth/react';
-import Alert from '@codegouvfr/react-dsfr/Alert';
+
+export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -26,15 +29,14 @@ interface CustomModalProps {
 }
 
 interface Props {
-	isOpen: boolean;
 	modal: CustomModalProps;
 	refetchEntities: () => void;
 	entity?: Entity;
+	onClose: () => void;
 }
 
 const EntityRightsModal = (props: Props) => {
-	const { cx, classes } = useStyles();
-	const { modal, entity, isOpen, refetchEntities } = props;
+	const { modal, entity, refetchEntities, onClose } = props;
 
 	const { data: session } = useSession();
 
@@ -46,35 +48,92 @@ const EntityRightsModal = (props: Props) => {
 	const [adminEntityRightsCount, setAdminEntityRightsCount] =
 		useState<number>(0);
 
+	const [actionType, setActionType] =
+		useState<AdminEntityRightActionType | null>(null);
+	const [actionEntityRight, setActionEntityRight] =
+		useState<AdminEntityRightWithUsers | null>(null);
+
+	const [userAddEmail, setUserAddEmail] = useState<string>('');
+	const [addError, setAddError] = useState<string>('');
+
+	const { cx, classes } = useStyles({ addError });
+
 	const nbPages = getNbPages(adminEntityRightsCount, numberPerPage);
 
-	trpc.adminEntityRight.getList.useQuery(
-		{
-			page: currentPage,
-			numberPerPage,
-			entity_id: entity?.id || -1
+	const { refetch: refetchAdminEntityRights, isLoading } =
+		trpc.adminEntityRight.getList.useQuery(
+			{
+				page: currentPage,
+				numberPerPage,
+				entity_id: entity?.id || -1
+			},
+			{
+				enabled: !!entity,
+				onSuccess: adminEntityRightsResult => {
+					setAdminEntityRights(adminEntityRightsResult.data);
+					setAdminEntityRightsCount(adminEntityRightsResult.metadata.count);
+				}
+			}
+		);
+
+	const addAdminEntityRight = trpc.adminEntityRight.create.useMutation({
+		onSuccess: response => {
+			setActionType('add');
+			setActionEntityRight(response.data);
+			refetchAdminEntityRights();
+			setUserAddEmail('');
 		},
-		{
-			enabled: !!entity,
-			onSuccess: adminEntityRightsResult => {
-				setAdminEntityRights(adminEntityRightsResult.data);
-				setAdminEntityRightsCount(adminEntityRightsResult.metadata.count);
+		onError: e => {
+			if (e.data?.httpStatus === 409) {
+				setAddError('Cet utilisateur fait déjà parti des administrateurs');
+			} else {
+				setAddError('Erreur coté serveur...');
 			}
 		}
-	);
+	});
+
+	const resendEmailAdminEntityRight =
+		trpc.adminEntityRight.resendEmail.useMutation({});
+
+	const removeAdminEntityRight = trpc.adminEntityRight.delete.useMutation({
+		onSuccess: () => {
+			refetchAdminEntityRights();
+		}
+	});
 
 	const handleModalClose = () => {
 		modal.close();
+		onClose();
 	};
 
-	const handleModalButtons = (
-		modalType: AdminEntityRightModalType,
-		adminEntityRight?: AdminEntityRightWithUsers
+	const handleAddUser = () => {
+		addAdminEntityRight.mutate({
+			user_email: userAddEmail,
+			entity_id: entity?.id || -1
+		});
+	};
+
+	const handleActionsButtons = (
+		actionType: AdminEntityRightActionType,
+		adminEntityRight: AdminEntityRightWithUsers
 	) => {
-		if (modalType === 'remove') {
+		setActionType(actionType);
+		setActionEntityRight(adminEntityRight);
+
+		if (actionType === 'remove') {
+			removeAdminEntityRight.mutate({
+				admin_entity_right_id: adminEntityRight.id
+			});
+			return;
 		}
-		console.log(modalType);
-		console.log(adminEntityRight);
+
+		if (actionType == 'resend-email') {
+			resendEmailAdminEntityRight.mutate({
+				entity_id: entity?.id || -1,
+				user_email: adminEntityRight?.user_email_invite as string
+			});
+			return;
+		}
 	};
 
 	const displayModalButtons = ():
@@ -92,16 +151,44 @@ const EntityRightsModal = (props: Props) => {
 		];
 	};
 
+	const getAlertTitle = () => {
+		switch (actionType) {
+			case 'add':
+				if (actionEntityRight?.user === null) {
+					return `Un e-mail d’invitation a été envoyé à ${
+						actionEntityRight?.user_email
+							? actionEntityRight?.user_email
+							: actionEntityRight?.user_email_invite
+					}.`;
+				} else {
+					return `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName} a été ajouté comme administrateur.`;
+				}
+			case 'resend-email':
+				return `Un e-mail d’invitation a été renvoyé à ${
+					actionEntityRight?.user_email
+						? actionEntityRight?.user_email
+						: actionEntityRight?.user_email_invite
+				}.`;
+			case 'remove':
+				return `${
+					actionEntityRight?.user !== null
+						? `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName}`
+						: actionEntityRight.user_email_invite
+				} a été retiré comme administrateur ou administratrice de cette organisation.`;
+		}
+
+		return '';
+	};
+
 	const displayRightsTable = () => {
-		if (!adminEntityRights.length) {
+		if (!adminEntityRights.length && session?.user.role !== 'admin') {
 			return (
 				<Alert
 					className={fr.cx('fr-mb-16v')}
 					description={
 						<>
-							Cette organisation n’a pas d’administrateur. Si vous voulez
-							devenir administrateur, merci d’envoyer un email à la brigade :
-							[adresse email de contact].
+							Pour devenir administrateur, envoyer un email à [adresse email de
+							contact].
 						</>
 					}
 					severity="info"
@@ -112,6 +199,18 @@ const EntityRightsModal = (props: Props) => {
 
 		return (
 			<>
+				{actionType && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setActionType(null);
+						}}
+						severity={actionType === 'remove' ? 'info' : 'success'}
+						className={fr.cx('fr-mb-2w')}
+						small
+						description={getAlertTitle()}
+					/>
+				)}
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
 						{nbPages > 1 && (
@@ -133,7 +232,7 @@ const EntityRightsModal = (props: Props) => {
 					</div>
 				</div>
 				<div>
-					{!entity ? (
+					{!entity || isLoading ? (
 						<div className={fr.cx('fr-py-10v')}>
 							<Loader />
 						</div>
@@ -142,19 +241,52 @@ const EntityRightsModal = (props: Props) => {
 							<EntityRightCard
 								key={index}
 								adminEntityRight={adminEntityRight}
-								onButtonClick={handleModalButtons}
+								onButtonClick={handleActionsButtons}
 								isMine={isMine}
 							/>
 						))
 					)}
 				</div>
+				{isMine && (
+					<form
+						onSubmit={e => {
+							e.preventDefault();
+							handleAddUser();
+						}}
+					>
+						<div className={classes.addSection}>
+							<Input
+								label="Adresse email"
+								nativeInputProps={{
+									onChange: e => {
+										setAddError('');
+										setUserAddEmail(e.target.value);
+									},
+									value: userAddEmail,
+									name: 'email'
+								}}
+								state={addError ? 'error' : 'default'}
+								stateRelatedMessage={addError}
+							/>
+							<Button
+								priority="secondary"
+								type="submit"
+								disabled={!userAddEmail || !isValidEmail(userAddEmail)}
+							>
+								Inviter
+							</Button>
+						</div>
+					</form>
+				)}
 			</>
 		);
 	};
 
-	const isMine = adminEntityRights
-		.map(aer => aer.user_email)
-		.includes(session?.user?.email || 'none');
+	const isMine =
+		session?.user.role === 'admin' ||
+		adminEntityRights
+			.map(aer => aer.user_email)
+			.includes(session?.user?.email || 'none');
 
 	const displayModalContent = () => {
 		if (entity) {
@@ -173,14 +305,12 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	useEffect(() => {
-		if (!!entity) {
-			console.log(entity);
-		}
+		setUserAddEmail('');
 	}, [entity]);
 
 	return (
 		<modal.Component
-			title="Devenir administrateur"
+			title={isMine ? 'Gérer les administrateurs' : 'Devenir administrateur'}
 			concealingBackdrop={false}
 			size="large"
 			className={fr.cx(
@@ -196,39 +326,27 @@ const EntityRightsModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(EntityRightsModal.name).create(() => ({
-	textArea: {
-		'.fr-input': {
-			height: '200px',
-			minHeight: '200px'
-		}
-	},
-	topContainer: {
-		display: 'flex',
-		justifyContent: 'space-between'
-	},
-	accordion: {
-		'.fr-accordion__btn': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default
+const useStyles = tss
+	.withName(EntityRightsModal.name)
+	.withParams<{ addError: string }>()
+	.create(({ addError }) => ({
+		boldText: {
+			fontWeight: 'bold'
 		},
-		'.fr-accordion__btn[aria-expanded=true]': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default,
-			'&:hover': {
-				backgroundColor: '#FFF'
+		addSection: {
+			display: 'flex',
+			alignItems: 'center',
+			width: '100%',
+			marginTop: fr.spacing('6v'),
+			'& > div': {
+				flexGrow: 1
 			},
-			'&:active': {
-				backgroundColor: '#FFF'
+			'& > button': {
+				marginLeft: fr.spacing('5v'),
+				marginTop: fr.spacing('2v'),
+				marginBottom: !!addError ? fr.spacing('9v') : ''
 			}
 		}
-	},
-	boldText: {
-		fontWeight: 'bold'
-	},
-	asterisk: {
-		color: fr.colors.decisions.text.default.error.default
-	}
-}));
+	}));
 
 export default EntityRightsModal;

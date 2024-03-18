@@ -1,5 +1,7 @@
 import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
+import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
+import EntitySearchModal from '@/src/components/dashboard/Entity/EntitySearchModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -8,37 +10,45 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
 	| { type: 'edit'; entity: Entity };
 
-export type AdminEntityRightModalType = 'add' | 'remove' | 'resend-email';
-
 const entityRightsModal = createModal({
 	id: 'entity-rights-modal',
 	isOpenedByDefault: false
 });
 
+const entityModal = createModal({
+	id: 'entity-modal',
+	isOpenedByDefault: false
+});
+
+const entitySearchModal = createModal({
+	id: 'entity-search-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoardEntities = () => {
+	const { cx, classes } = useStyles();
+	const { data: session } = useSession({ required: true });
+
 	const [filter, setFilter] = React.useState<string>('name:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+	const [fromSearch, setFromSearch] = React.useState<boolean>(false);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
 	const [currentEntity, setCurrentEntity] = React.useState<Entity>();
 	const [isMine, setIsMine] = React.useState<boolean>(true);
-
-	const { cx, classes } = useStyles();
-	const { data: session } = useSession({ required: true });
 
 	const {
 		data: entitiesResult,
@@ -50,7 +60,7 @@ const DashBoardEntities = () => {
 			search: validatedSearch,
 			sort: filter,
 			page: currentPage,
-			isMine,
+			isMine: isMine ? isMine : undefined,
 			numberPerPage
 		},
 		{
@@ -83,29 +93,63 @@ const DashBoardEntities = () => {
 		type,
 		entity
 	}: OnButtonClickEntityParams) => {
+		setFromSearch(false);
 		setCurrentEntity(entity);
-		if (type === 'rights') {
-			// avoid flick switching entity
-			setTimeout(() => {
+		// avoid flick switching entity
+		setTimeout(() => {
+			if (type === 'rights') {
 				entityRightsModal.open();
-			}, 100);
-		}
+			} else if (type === 'edit') {
+				entityModal.open();
+			}
+		}, 100);
 	};
 
-	const isEntityRightsModalOpen = useIsModalOpen(entityRightsModal);
+	const onEntitySelected = (entity: Entity) => {
+		setFromSearch(true);
+		entitySearchModal.close();
+		setCurrentEntity(entity);
+		// avoid flick switching entity
+		setTimeout(() => {
+			entityRightsModal.open();
+		}, 100);
+	};
+
+	const onCreateEntity = () => {
+		setCurrentEntity(undefined);
+		setTimeout(() => {
+			entityModal.open();
+		}, 100);
+	};
+
+	useEffect(() => {
+		if (session?.user.role === 'admin') setIsMine(false);
+	}, [session?.user.role]);
 
 	if (!session) return;
 
 	return (
 		<>
-			{entities.length && (
+			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}
-					isOpen={isEntityRightsModalOpen}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
+					onClose={() => {
+						if (fromSearch) entitySearchModal.open();
+					}}
 				/>
 			)}
+			<EntityModal
+				modal={entityModal}
+				entity={currentEntity}
+				onSubmit={refetchEntities}
+			/>
+			<EntitySearchModal
+				modal={entitySearchModal}
+				onEntitySelected={onEntitySelected}
+				onCreate={onCreateEntity}
+			/>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -119,14 +163,29 @@ const DashBoardEntities = () => {
 							classes.buttonContainer
 						)}
 					>
-						<Button
-							priority="secondary"
-							iconId="fr-icon-admin-line"
-							iconPosition="right"
-							type="button"
-						>
-							Devenir administrateur
-						</Button>
+						{session.user.role !== 'admin' ? (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-admin-line"
+								iconPosition="right"
+								type="button"
+								onClick={() => {
+									entitySearchModal.open();
+								}}
+							>
+								Devenir administrateur
+							</Button>
+						) : (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-add-circle-line"
+								iconPosition="right"
+								type="button"
+								onClick={onCreateEntity}
+							>
+								Créer une organisation
+							</Button>
+						)}
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -138,7 +197,7 @@ const DashBoardEntities = () => {
 								onChange: event => setFilter(event.target.value)
 							}}
 						>
-							<option value="email:asc">Nom A à Z</option>
+							<option value="name:asc">Nom A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
@@ -179,35 +238,37 @@ const DashBoardEntities = () => {
 							</div>
 						</form>
 					</div>
-					<div
-						className={fr.cx(
-							'fr-col-12',
-							'fr-col-md-5',
-							'fr-col--bottom',
-							'fr-mt-2v'
-						)}
-					>
-						<Button
-							priority={isMine ? 'primary' : 'secondary'}
-							size="large"
-							onClick={() => {
-								setIsMine(true);
-								setCurrentPage(1);
-							}}
+					{session.user.role !== 'admin' && (
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-col-md-5',
+								'fr-col--bottom',
+								'fr-mt-2v'
+							)}
 						>
-							Mes organisations
-						</Button>
-						<Button
-							priority={isMine ? 'secondary' : 'primary'}
-							size="large"
-							onClick={() => {
-								setIsMine(false);
-								setCurrentPage(1);
-							}}
-						>
-							Toutes les organisations
-						</Button>
-					</div>
+							<Button
+								priority={isMine ? 'primary' : 'secondary'}
+								size="large"
+								onClick={() => {
+									setIsMine(true);
+									setCurrentPage(1);
+								}}
+							>
+								Mes organisations
+							</Button>
+							<Button
+								priority={isMine ? 'secondary' : 'primary'}
+								size="large"
+								onClick={() => {
+									setIsMine(false);
+									setCurrentPage(1);
+								}}
+							>
+								Toutes les organisations
+							</Button>
+						</div>
+					)}
 				</div>
 				{isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -248,9 +309,12 @@ const DashBoardEntities = () => {
 										entity={entity}
 										key={index}
 										onButtonClick={handleModalEntityRightsOpening}
-										isMine={myEntities
-											.map(myEntity => myEntity.id)
-											.includes(entity.id)}
+										isMine={
+											session.user.role === 'admin' ||
+											myEntities
+												.map(myEntity => myEntity.id)
+												.includes(entity.id)
+										}
 									/>
 								))
 							)}
@@ -329,6 +393,9 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			fontWeight: 'bold'
 		}
 	},
+	boldText: {
+		fontWeight: 'bold'
+	},
 	searchForm: {
 		'.fr-search-bar': {
 			'.fr-input-group': {
@@ -336,9 +403,6 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 				marginBottom: 0
 			}
 		}
-	},
-	boldText: {
-		fontWeight: 'bold'
 	}
 }));
 

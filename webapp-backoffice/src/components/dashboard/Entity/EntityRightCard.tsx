@@ -6,13 +6,13 @@ import { Menu, MenuItem } from '@mui/material';
 import type { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
-import { AdminEntityRightModalType } from '@/src/pages/administration/dashboard/entities';
+import { AdminEntityRightActionType } from './EntityRightsModal';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
 	onButtonClick: (
-		modalType: AdminEntityRightModalType,
-		adminEntityRight?: AdminEntityRightWithUsers
+		actionType: AdminEntityRightActionType,
+		adminEntityRight: AdminEntityRightWithUsers
 	) => void;
 	isMine: boolean;
 }

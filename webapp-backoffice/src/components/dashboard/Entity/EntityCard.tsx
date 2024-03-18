@@ -8,10 +8,11 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	entity: Entity;
 	isMine: boolean;
+	fromSearch?: boolean;
 	onButtonClick: ({ type, entity }: OnButtonClickEntityParams) => void;
 };
 
-const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
+const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -24,8 +25,16 @@ const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 				)}
 			>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
-						{entity.name}
+					<p
+						className={cx(
+							fr.cx('fr-mb-0', fromSearch ? 'fr-text--sm' : 'fr-text--md'),
+							classes.spanFullName
+						)}
+					>
+						{entity.name}{' '}
+						<span className={cx(fr.cx('fr-hint-text'), classes.acronym)}>
+							({entity.acronym})
+						</span>
 					</p>
 				</div>
 				<div
@@ -53,6 +62,9 @@ const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 								size="small"
 								iconId="fr-icon-edit-line"
 								iconPosition="right"
+								onClick={() => {
+									onButtonClick({ type: 'edit', entity });
+								}}
 								className={classes.button}
 							>
 								Modifier
@@ -67,7 +79,7 @@ const EntityCard = ({ entity, isMine, onButtonClick }: Props) => {
 								onButtonClick({ type: 'rights', entity });
 							}}
 						>
-							Voir plus
+							{fromSearch ? 'Devenir administrateur' : 'Voir plus'}
 						</Button>
 					)}
 				</div>
@@ -97,6 +109,10 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 		'&:not(:last-of-type)': {
 			marginRight: fr.spacing('4v')
 		}
+	},
+	acronym: {
+		display: 'inline-block',
+		marginLeft: fr.spacing('1v')
 	}
 }));
 
