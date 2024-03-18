@@ -3,6 +3,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Entity } from '@prisma/client';
+import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
@@ -36,6 +37,7 @@ const EntityModal = (props: Props) => {
 	const {
 		control,
 		handleSubmit,
+		reset,
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: entity ? entity : {}
@@ -61,6 +63,14 @@ const EntityModal = (props: Props) => {
 		props.onSubmit();
 		modal.close();
 	};
+
+	useEffect(() => {
+		if (entity) {
+			reset({ ...entity });
+		} else {
+			reset({ name: undefined, acronym: undefined });
+		}
+	}, [entity]);
 
 	return (
 		<modal.Component

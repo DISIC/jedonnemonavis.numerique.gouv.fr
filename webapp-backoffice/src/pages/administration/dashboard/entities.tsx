@@ -13,7 +13,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickEntityParams =
@@ -36,6 +36,9 @@ const entitySearchModal = createModal({
 });
 
 const DashBoardEntities = () => {
+	const { cx, classes } = useStyles();
+	const { data: session } = useSession({ required: true });
+
 	const [filter, setFilter] = React.useState<string>('name:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
@@ -46,9 +49,6 @@ const DashBoardEntities = () => {
 
 	const [currentEntity, setCurrentEntity] = React.useState<Entity>();
 	const [isMine, setIsMine] = React.useState<boolean>(true);
-
-	const { cx, classes } = useStyles();
-	const { data: session } = useSession({ required: true });
 
 	const {
 		data: entitiesResult,
@@ -122,6 +122,10 @@ const DashBoardEntities = () => {
 		}, 100);
 	};
 
+	useEffect(() => {
+		if (session?.user.role === 'admin') setIsMine(false);
+	}, [session?.user.role]);
+
 	if (!session) return;
 
 	return (
@@ -136,13 +140,11 @@ const DashBoardEntities = () => {
 					}}
 				/>
 			)}
-			{!!entities.length && (
-				<EntityModal
-					modal={entityModal}
-					entity={currentEntity}
-					onSubmit={refetchEntities}
-				/>
-			)}
+			<EntityModal
+				modal={entityModal}
+				entity={currentEntity}
+				onSubmit={refetchEntities}
+			/>
 			<EntitySearchModal
 				modal={entitySearchModal}
 				onEntitySelected={onEntitySelected}
@@ -161,17 +163,29 @@ const DashBoardEntities = () => {
 							classes.buttonContainer
 						)}
 					>
-						<Button
-							priority="secondary"
-							iconId="fr-icon-admin-line"
-							iconPosition="right"
-							type="button"
-							onClick={() => {
-								entitySearchModal.open();
-							}}
-						>
-							Devenir administrateur
-						</Button>
+						{session.user.role !== 'admin' ? (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-admin-line"
+								iconPosition="right"
+								type="button"
+								onClick={() => {
+									entitySearchModal.open();
+								}}
+							>
+								Devenir administrateur
+							</Button>
+						) : (
+							<Button
+								priority="secondary"
+								iconId="fr-icon-add-circle-line"
+								iconPosition="right"
+								type="button"
+								onClick={onCreateEntity}
+							>
+								Créer une organisation
+							</Button>
+						)}
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -224,35 +238,37 @@ const DashBoardEntities = () => {
 							</div>
 						</form>
 					</div>
-					<div
-						className={fr.cx(
-							'fr-col-12',
-							'fr-col-md-5',
-							'fr-col--bottom',
-							'fr-mt-2v'
-						)}
-					>
-						<Button
-							priority={isMine ? 'primary' : 'secondary'}
-							size="large"
-							onClick={() => {
-								setIsMine(true);
-								setCurrentPage(1);
-							}}
+					{session.user.role !== 'admin' && (
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-col-md-5',
+								'fr-col--bottom',
+								'fr-mt-2v'
+							)}
 						>
-							Mes organisations
-						</Button>
-						<Button
-							priority={isMine ? 'secondary' : 'primary'}
-							size="large"
-							onClick={() => {
-								setIsMine(false);
-								setCurrentPage(1);
-							}}
-						>
-							Toutes les organisations
-						</Button>
-					</div>
+							<Button
+								priority={isMine ? 'primary' : 'secondary'}
+								size="large"
+								onClick={() => {
+									setIsMine(true);
+									setCurrentPage(1);
+								}}
+							>
+								Mes organisations
+							</Button>
+							<Button
+								priority={isMine ? 'secondary' : 'primary'}
+								size="large"
+								onClick={() => {
+									setIsMine(false);
+									setCurrentPage(1);
+								}}
+							>
+								Toutes les organisations
+							</Button>
+						</div>
+					)}
 				</div>
 				{isLoadingEntities ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -293,9 +309,12 @@ const DashBoardEntities = () => {
 										entity={entity}
 										key={index}
 										onButtonClick={handleModalEntityRightsOpening}
-										isMine={myEntities
-											.map(myEntity => myEntity.id)
-											.includes(entity.id)}
+										isMine={
+											session.user.role === 'admin' ||
+											myEntities
+												.map(myEntity => myEntity.id)
+												.includes(entity.id)
+										}
 									/>
 								))
 							)}

@@ -8,7 +8,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
@@ -181,7 +181,7 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	const displayRightsTable = () => {
-		if (!adminEntityRights.length) {
+		if (!adminEntityRights.length && session?.user.role !== 'admin') {
 			return (
 				<Alert
 					className={fr.cx('fr-mb-16v')}
@@ -282,9 +282,11 @@ const EntityRightsModal = (props: Props) => {
 		);
 	};
 
-	const isMine = adminEntityRights
-		.map(aer => aer.user_email)
-		.includes(session?.user?.email || 'none');
+	const isMine =
+		session?.user.role === 'admin' ||
+		adminEntityRights
+			.map(aer => aer.user_email)
+			.includes(session?.user?.email || 'none');
 
 	const displayModalContent = () => {
 		if (entity) {
@@ -301,6 +303,10 @@ const EntityRightsModal = (props: Props) => {
 			);
 		}
 	};
+
+	useEffect(() => {
+		setUserAddEmail('');
+	}, [entity]);
 
 	return (
 		<modal.Component
