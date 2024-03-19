@@ -50,7 +50,7 @@ const EntitySearchModal = (props: Props) => {
 	const [isSearchFocused, setIsSearchFocused] = React.useState(false);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, _] = React.useState(2);
+	const [numberPerPage, _] = React.useState(5);
 	const [countEntititesSearch, setCountEntitiesSearch] = React.useState(0);
 	const [entitiesSearch, setEntitiesSearch] = React.useState<Entity[]>([]);
 	const [hasSubmitedOnce, setsHasSubmitedOnce] = React.useState(false);
