@@ -60,15 +60,31 @@ export const productRouter = router({
 			];
 
 			let where: Prisma.ProductWhereInput = {
-				accessRights:
-					contextUser.role !== 'admin'
-						? {
-								some: {
-									user_email: contextUser.email,
-									status: 'carrier'
-								}
-							}
-						: {}
+				OR: [
+					{
+						accessRights:
+							contextUser.role !== 'admin'
+								? {
+										some: {
+											user_email: contextUser.email,
+											status: 'carrier'
+										}
+									}
+								: {}
+					},
+					{
+						entity: {
+							adminEntityRights:
+								contextUser.role !== 'admin'
+									? {
+											some: {
+												user_email: contextUser.email
+											}
+										}
+									: {}
+						}
+					}
+				]
 			};
 
 			if (search) {

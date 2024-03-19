@@ -283,7 +283,7 @@ const DashBoardUserRequestUserRequests = () => {
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + userRequests.length}
 									</span>{' '}
-									de{' '}
+									sur{' '}
 									<span className={cx(classes.boldText)}>
 										{userrequestsResult.metadata.count}
 									</span>

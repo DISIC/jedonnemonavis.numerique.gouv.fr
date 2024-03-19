@@ -7,3 +7,15 @@
 .swagger-ui .information-container {
 	display: none;
 }
+
+.MuiPopover-root {
+	z-index: 9999 !important;
+}
+
+.fr-alert__title:empty {
+	margin-bottom: 0;
+}
+
+.MuiAutocomplete-popper {
+	z-index: 9999 !important;
+}

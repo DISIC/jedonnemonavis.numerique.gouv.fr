@@ -123,6 +123,25 @@ export async function makeRelationFromUserInvite(
 			}
 		});
 	}
+
+	const userInvitesEntity = await prisma.adminEntityRight.findMany({
+		where: {
+			user_email_invite: user.email
+		}
+	});
+
+	if (userInvitesEntity.length > 0) {
+		await prisma.adminEntityRight.updateMany({
+			where: {
+				id: {
+					in: userInvitesEntity.map(invite => invite.id)
+				}
+			},
+			data: {
+				user_email: user.email
+			}
+		});
+	}
 }
 
 export async function checkUserDomain(prisma: PrismaClient, email: string) {
@@ -137,6 +156,7 @@ export async function checkUserDomain(prisma: PrismaClient, email: string) {
 
 export const userRouter = router({
 	getList: protectedProcedure
+		.meta({ isAdmin: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),

@@ -10,6 +10,17 @@ export type AccessRightWithUsers = Prisma.AccessRightGetPayload<
 	typeof AccessRightWithUsers
 >;
 
+const AdminEntityRightWithUsers =
+	Prisma.validator<Prisma.AdminEntityRightDefaultArgs>()({
+		include: {
+			user: true
+		}
+	});
+
+export type AdminEntityRightWithUsers = Prisma.AdminEntityRightGetPayload<
+	typeof AdminEntityRightWithUsers
+>;
+
 const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
 		buttons: true

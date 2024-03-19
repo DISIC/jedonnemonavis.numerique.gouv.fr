@@ -269,7 +269,7 @@ const DashBoardDomainDomains = () => {
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + domains.length}
 									</span>{' '}
-									de{' '}
+									sur{' '}
 									<span className={cx(classes.boldText)}>
 										{domainsResult.metadata.count}
 									</span>

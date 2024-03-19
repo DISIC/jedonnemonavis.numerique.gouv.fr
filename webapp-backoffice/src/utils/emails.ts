@@ -101,6 +101,27 @@ export function getRegisterEmailHtml(token: string) {
 	`);
 }
 
+export function getUserInviteEntityEmailHtml(
+	contextUser: Session['user'],
+	email: string,
+	inviteToken: string,
+	entityName: string
+) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/register?${new URLSearchParams({ email, inviteToken })}`;
+
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser?.name} vous invite à rejoindre la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » et vous donne accès à l'organisation « ${entityName} ». Afin de créer votre compte, veuillez cliquer sur le lien ci-dessous.
+		</p>
+
+		<a href="${link}" target="_blank">${link}</a>
+	`);
+}
+
 export function getUserInviteEmailHtml(
 	contextUser: Session['user'],
 	email: string,
@@ -143,6 +164,27 @@ export function getInviteEmailHtml(
 	`);
 }
 
+export function getInviteEntityEmailHtml(
+	contextUser: Session['user'],
+	entityName: string
+) {
+	const link = process.env.NODEMAILER_BASEURL;
+
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser?.name} vient de vous donner accès à l'organisation « ${entityName} » sur la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> ».
+		</p>
+
+		<p>
+			Vous pouvez vous connecter à votre compte en cliquant sur le lien ci-dessous.
+		</p>
+
+		<a href="${link}" target="_blank">${link}</a>
+	`);
+}
+
 export function getUserRequestAcceptedEmailHtml() {
 	const link = `${process.env.NODEMAILER_BASEURL}/login`;
 
@@ -166,10 +208,16 @@ export function getUserRequestRefusedEmailHtml(message?: string) {
 		<p>Bonjour,</p>
 
 		<p>
-			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été refusée.		
+			Votre demande d'accès à la plateforme « <a href="${
+				process.env.NODEMAILER_BASEURL
+			}" target="_blank">Je donne mon avis</a> » a été refusée.		
 		</p>
 
-		${message ? `<p>Message de l'adminstrateur :</p><blockquote>${message}</blockquote><br>` : ``}
+		${
+			message
+				? `<p>Message de l'adminstrateur :</p><blockquote>${message}</blockquote><br>`
+				: ``
+		}
 		
 	`);
 }

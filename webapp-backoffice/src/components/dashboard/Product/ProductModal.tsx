@@ -68,7 +68,7 @@ const ProductModal = (props: Props) => {
 		trpc.entity.getList.useQuery(
 			{ numberPerPage: 1000, search: debouncedSearch },
 			{
-				initialData: { data: [], metadata: { count: 0 } }
+				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
 			}
 		);
 
@@ -125,20 +125,16 @@ const ProductModal = (props: Props) => {
 			size="large"
 			buttons={[
 				{
-					children:
-						product && product.id ? 'Annuler les modifications' : 'Annuler'
+					children: 'Annuler'
 				},
 				{
 					doClosesModal: false,
 					onClick: handleSubmit(onSubmit),
-					children:
-						product && product.id
-							? 'Sauvegarder les modifications'
-							: 'Ajouter ce produit'
+					children: product && product.id ? 'Sauvegarder' : 'Créer ce produit'
 				}
 			]}
 		>
-			<p>
+			<p className={fr.cx('fr-hint-text')}>
 				Les champs marqués d&apos;un{' '}
 				<span className={cx(classes.asterisk)}>*</span> sont obligatoires
 			</p>
