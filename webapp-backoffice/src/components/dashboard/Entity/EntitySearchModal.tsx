@@ -1,5 +1,5 @@
 import { Pagination } from '@/src/components/ui/Pagination';
-import { getLastPage, getNbPages } from '@/src/utils/tools';
+import { getLastPage, getNbPages, removeAccents } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -123,6 +123,10 @@ const EntitySearchModal = (props: Props) => {
 		hasSubmitedOnce;
 
 	const displayModalContent = () => {
+		// AVOID BUG ON AUTOCOMPLETE WHEN REFOCUS FIELD WITH SEARCH TEXT
+		const filteredOptions = entityOptions.filter(eo =>
+			new RegExp(removeAccents(search), 'i').test(removeAccents(eo.label))
+		);
 		return (
 			<>
 				<p>
@@ -154,7 +158,7 @@ const EntitySearchModal = (props: Props) => {
 													: 'Écrivez au moins 3 caractères'
 											}
 											sx={{ width: '100%' }}
-											options={showNoResult ? entityOptions : []}
+											options={showNoResult ? filteredOptions : []}
 											open={showNoResult && isSearchFocused}
 											onFocus={() => {
 												setIsSearchFocused(true);
