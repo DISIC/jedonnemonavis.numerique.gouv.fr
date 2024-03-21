@@ -103,6 +103,7 @@ const EntityRightsModal = (props: Props) => {
 
 	const handleModalClose = () => {
 		modal.close();
+		setActionType(null);
 		onClose();
 	};
 
@@ -306,6 +307,7 @@ const EntityRightsModal = (props: Props) => {
 
 	useEffect(() => {
 		setUserAddEmail('');
+		setActionType(null);
 	}, [entity]);
 
 	return (
