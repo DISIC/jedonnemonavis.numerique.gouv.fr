@@ -37,31 +37,47 @@ const EntityModal = (props: Props) => {
 	const {
 		control,
 		handleSubmit,
+		setError,
 		reset,
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: entity ? entity : {}
 	});
 
-	const saveEntityTmp = trpc.entity.create.useMutation({});
+	const saveEntityTmp = trpc.entity.create.useMutation({
+		onSuccess: () => {
+			reset({ name: undefined, acronym: undefined });
+			props.onSubmit();
+			modal.close();
+		},
+		onError: e => {
+			if (e.data?.httpStatus === 409) {
+				setError('name', {
+					type: 'Conflict name',
+					message: 'Une organisation avec ce nom existe déjà'
+				});
+			}
+		}
+	});
 	const updateEntity = trpc.entity.update.useMutation({});
 
 	const onSubmit: SubmitHandler<FormValues> = async data => {
 		const tmpEntity = data;
 
-		if (entity && entity.id) {
-			await updateEntity.mutateAsync({
-				id: entity.id,
-				entity: tmpEntity
-			});
-		} else {
-			await saveEntityTmp.mutateAsync({
-				...tmpEntity
-			});
+		try {
+			if (entity && entity.id) {
+				await updateEntity.mutateAsync({
+					id: entity.id,
+					entity: tmpEntity
+				});
+			} else {
+				await saveEntityTmp.mutateAsync({
+					...tmpEntity
+				});
+			}
+		} catch (e) {
+			console.error(e);
 		}
-
-		props.onSubmit();
-		modal.close();
 	};
 
 	useEffect(() => {
@@ -119,7 +135,8 @@ const EntityModal = (props: Props) => {
 								}
 								nativeInputProps={{
 									onChange,
-									defaultValue: value
+									defaultValue: value,
+									value
 								}}
 								state={errors[name] ? 'error' : 'default'}
 								stateRelatedMessage={errors[name]?.message}
@@ -142,6 +159,7 @@ const EntityModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									defaultValue: value,
+									value,
 									width: '150px'
 								}}
 								state={errors[name] ? 'error' : 'default'}

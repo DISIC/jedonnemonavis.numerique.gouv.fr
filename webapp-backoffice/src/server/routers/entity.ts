@@ -5,6 +5,7 @@ import {
 	EntityUncheckedCreateInputSchema,
 	EntityUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
+import { TRPCError } from '@trpc/server';
 
 export const entityRouter = router({
 	getList: protectedProcedure
@@ -130,16 +131,31 @@ export const entityRouter = router({
 		.mutation(async ({ ctx, input: entityPayload }) => {
 			const userEmail = ctx.session?.user?.email;
 
+			const existsEntity = await ctx.prisma.entity.findUnique({
+				where: {
+					name: entityPayload.name
+				}
+			});
+
+			if (existsEntity)
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'Entity with this name already exists'
+				});
+
 			const entity = await ctx.prisma.entity.create({
 				data: {
 					...entityPayload,
-					adminEntityRights: {
-						create: [
-							{
-								user_email: userEmail
-							}
-						]
-					}
+					adminEntityRights:
+						ctx.session?.user?.role !== 'admin'
+							? {
+									create: [
+										{
+											user_email: userEmail
+										}
+									]
+								}
+							: {}
 				}
 			});
 
