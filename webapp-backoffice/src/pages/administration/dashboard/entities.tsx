@@ -126,6 +126,11 @@ const DashBoardEntities = () => {
 		if (session?.user.role === 'admin') setIsMine(false);
 	}, [session?.user.role]);
 
+	useEffect(() => {
+		setSearch('');
+		setValidatedSearch('');
+	}, [isMine]);
+
 	if (!session) return;
 
 	return (
