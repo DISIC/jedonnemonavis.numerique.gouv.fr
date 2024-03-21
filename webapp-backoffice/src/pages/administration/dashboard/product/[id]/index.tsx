@@ -54,10 +54,21 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	if (!hasAccessRightToProduct && currentUser.role !== 'admin') {
+	const hasAdminEntityRight = await prisma.adminEntityRight.findFirst({
+		where: {
+			user_email: currentUserToken.email as string,
+			entity_id: product?.entity_id
+		}
+	});
+
+	if (
+		!hasAccessRightToProduct &&
+		!hasAdminEntityRight &&
+		currentUser.role !== 'admin'
+	) {
 		return {
 			redirect: {
-				destination: '/',
+				destination: '/administration/dashboard/products',
 				permanent: false
 			}
 		};
