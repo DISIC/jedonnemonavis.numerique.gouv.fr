@@ -12,6 +12,7 @@ import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -58,6 +59,13 @@ const EntityRightsModal = (props: Props) => {
 
 	const { cx, classes } = useStyles({ addError });
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			setActionType(null);
+			onClose();
+		}
+	});
+
 	const nbPages = getNbPages(adminEntityRightsCount, numberPerPage);
 
 	const { refetch: refetchAdminEntityRights, isLoading } =
@@ -101,12 +109,6 @@ const EntityRightsModal = (props: Props) => {
 		}
 	});
 
-	const handleModalClose = () => {
-		modal.close();
-		setActionType(null);
-		onClose();
-	};
-
 	const handleAddUser = () => {
 		addAdminEntityRight.mutate({
 			user_email: userAddEmail,
@@ -147,7 +149,7 @@ const EntityRightsModal = (props: Props) => {
 				iconId: 'ri-arrow-left-line',
 				priority: 'secondary',
 				doClosesModal: false,
-				onClick: () => handleModalClose()
+				onClick: () => modal.close()
 			}
 		];
 	};

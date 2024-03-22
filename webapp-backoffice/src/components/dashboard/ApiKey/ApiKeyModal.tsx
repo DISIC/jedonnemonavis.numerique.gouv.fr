@@ -38,9 +38,6 @@ const ApiKeyModal = (props: Props) => {
 			initialData: {
 				count: 0,
 				data: []
-			},
-			onSuccess: data => {
-				console.log('data : ', data);
 			}
 		}
 	);

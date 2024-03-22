@@ -99,7 +99,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	];
 
 	if (sort) {
-		console.log('sort : ', sort);
 		const values = sort.split(':');
 		if (sort.includes('created_at')) {
 			orderBy = [
