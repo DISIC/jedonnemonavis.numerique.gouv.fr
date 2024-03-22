@@ -32,6 +32,7 @@ export type PaginationProps = {
 	style?: CSSProperties;
 	showFirstLast?: boolean;
 	maxVisiblePages?: number;
+	slicesSize?: number;
 	getPageLinkProps: (pageNumber: number) => RegisteredLinkProps;
 };
 
@@ -39,13 +40,15 @@ export type PaginationProps = {
 const getPaginationParts = ({
 	count,
 	defaultPage,
-	maxVisiblePages
+	maxVisiblePages,
+	slicesSize
 }: {
 	count: number;
 	defaultPage: number;
 	maxVisiblePages: number;
+	slicesSize: number;
 }) => {
-	const slicesSize = 4;
+	console.log(maxVisiblePages);
 	// first n pages
 	if (count <= maxVisiblePages) {
 		return Array.from({ length: count }, (_, v) => ({
@@ -93,6 +96,7 @@ export const Pagination = memo(
 			defaultPage = 1,
 			showFirstLast = true,
 			maxVisiblePages = 10,
+			slicesSize = 4,
 			getPageLinkProps,
 			classes = {},
 			style,
@@ -110,7 +114,12 @@ export const Pagination = memo(
 
 		// const { Link } = getLink();
 
-		const parts = getPaginationParts({ count, defaultPage, maxVisiblePages });
+		const parts = getPaginationParts({
+			count,
+			defaultPage,
+			maxVisiblePages,
+			slicesSize
+		});
 
 		return (
 			<nav
