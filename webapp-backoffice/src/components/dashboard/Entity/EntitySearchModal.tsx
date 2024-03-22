@@ -300,6 +300,7 @@ const EntitySearchModal = (props: Props) => {
 									<Pagination
 										showFirstLast
 										count={nbPages}
+										maxVisiblePages={6}
 										defaultPage={currentPage}
 										getPageLinkProps={pageNumber => ({
 											onClick: event => {

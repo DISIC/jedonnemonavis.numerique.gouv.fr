@@ -469,6 +469,7 @@ const ProductReviewsPage = (props: Props) => {
 									count={nbPages}
 									showFirstLast
 									defaultPage={currentPage}
+									maxVisiblePages={8}
 									getPageLinkProps={pageNumber => ({
 										onClick: event => {
 											event.preventDefault();

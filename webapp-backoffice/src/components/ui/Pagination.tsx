@@ -31,18 +31,20 @@ export type PaginationProps = {
 	classes?: Partial<Record<'root' | 'list' | 'link', string>>;
 	style?: CSSProperties;
 	showFirstLast?: boolean;
+	maxVisiblePages?: number;
 	getPageLinkProps: (pageNumber: number) => RegisteredLinkProps;
 };
 
 // naive page slicing
 const getPaginationParts = ({
 	count,
-	defaultPage
+	defaultPage,
+	maxVisiblePages
 }: {
 	count: number;
 	defaultPage: number;
+	maxVisiblePages: number;
 }) => {
-	const maxVisiblePages = 10;
 	const slicesSize = 4;
 	// first n pages
 	if (count <= maxVisiblePages) {
@@ -90,6 +92,7 @@ export const Pagination = memo(
 			count,
 			defaultPage = 1,
 			showFirstLast = true,
+			maxVisiblePages = 10,
 			getPageLinkProps,
 			classes = {},
 			style,
@@ -107,7 +110,7 @@ export const Pagination = memo(
 
 		// const { Link } = getLink();
 
-		const parts = getPaginationParts({ count, defaultPage });
+		const parts = getPaginationParts({ count, defaultPage, maxVisiblePages });
 
 		return (
 			<nav
