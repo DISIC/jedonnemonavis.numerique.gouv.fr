@@ -22,22 +22,22 @@ export const entityRouter = router({
 			const contextUser = ctx.session.user;
 			const { numberPerPage, page, search, sort, isMine } = input;
 
-			let where: Prisma.EntityWhereInput = {
-				OR: [
-					{
-						name: {
-							contains: search || '',
-							mode: 'insensitive'
-						}
-					},
-					{
-						acronym: {
-							contains: search || '',
-							mode: 'insensitive'
-						}
+			let where: Prisma.EntityWhereInput = search
+				? {
+						OR: [
+							{
+								name: {
+									search: search.split(' ').join('&')
+								}
+							},
+							{
+								acronym: {
+									search: search.split(' ').join('&')
+								}
+							}
+						]
 					}
-				]
-			};
+				: {};
 
 			const myEntities = await ctx.prisma.entity.findMany({
 				take: 10000,

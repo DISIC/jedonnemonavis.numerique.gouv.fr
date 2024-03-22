@@ -24,12 +24,13 @@ export const domainRouter = router({
 				}
 			];
 
-			let where: Prisma.WhiteListedDomainWhereInput = {
-				domain: {
-					contains: search || '',
-					mode: 'insensitive'
-				}
-			};
+			let where: Prisma.WhiteListedDomainWhereInput = search
+				? {
+						domain: {
+							search: search.split(' ').join('&')
+						}
+					}
+				: {};
 
 			if (sort) {
 				const values = sort.split(':');

@@ -35,7 +35,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								{ answer_text: { contains: search, mode: 'insensitive' } },
+								{ answer_text: { search: search.split(' ').join('&') } },
 								{ field_code: 'verbatim' }
 							]
 						}
