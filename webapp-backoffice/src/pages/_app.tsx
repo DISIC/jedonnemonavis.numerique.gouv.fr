@@ -1,16 +1,17 @@
 import PublicLayout from '@/src/layouts/PublicLayout';
+import { trpc } from '@/src/utils/trpc';
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
 import { createNextDsfrIntegrationApi } from '@codegouvfr/react-dsfr/next-pagesdir';
 import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
+import { AuthProvider } from '../contexts/AuthContext';
+import { StatsTotalsProvider } from '../contexts/StatsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
-import { trpc } from '@/src/utils/trpc';
-import { StatsTotalsProvider } from '../contexts/StatsContext';
-import { useRouter } from 'next/router';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -58,9 +59,11 @@ function App({ Component, pageProps }: AppProps) {
 	return (
 		<MuiDsfrThemeProvider>
 			<SessionProvider session={pageProps.session}>
-				<StatsTotalsProvider>
-					{getLayout(<Component {...pageProps} />)}
-				</StatsTotalsProvider>
+				<AuthProvider>
+					<StatsTotalsProvider>
+						{getLayout(<Component {...pageProps} />)}
+					</StatsTotalsProvider>
+				</AuthProvider>
 			</SessionProvider>
 		</MuiDsfrThemeProvider>
 	);

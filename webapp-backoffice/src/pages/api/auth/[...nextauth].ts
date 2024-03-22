@@ -63,24 +63,14 @@ export const authOptions: NextAuthOptions = {
 		})
 	],
 
-	// Use MongoDB to store sessions
 	session: {
 		strategy: 'jwt',
 		maxAge: 30 * 24 * 60 * 60, // 30 days
 		updateAge: 24 * 60 * 60 // 24 hours
 	},
 
-	// Use MongoDB to store users
-	// database: process.env.MONGODB_URI,
-
-	// Customize the JWT token
 	jwt: {
 		secret: process.env.JWT_SECRET
-		// encryption: true,
-		// signingKey: process.env.JWT_SIGNING_PRIVATE_KEY,
-		// verificationKey: process.env.JWT_VERIFICATION_PUBLIC_KEY,
-		// encryptionKey: process.env.JWT_ENCRYPTION_PRIVATE_KEY,
-		// decryptionKey: process.env.JWT_DECRYPTION_PUBLIC_KEY
 	}
 };
 
