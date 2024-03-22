@@ -469,7 +469,7 @@ const ProductReviewsPage = (props: Props) => {
 									count={nbPages}
 									showFirstLast
 									defaultPage={currentPage}
-									maxVisiblePages={8}
+									maxVisiblePages={6}
 									slicesSize={3}
 									getPageLinkProps={pageNumber => ({
 										onClick: event => {
