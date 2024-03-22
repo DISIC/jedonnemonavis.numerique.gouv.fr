@@ -22,22 +22,46 @@ export const entityRouter = router({
 			const contextUser = ctx.session.user;
 			const { numberPerPage, page, search, sort, isMine } = input;
 
-			let where: Prisma.EntityWhereInput = search
-				? {
+			let where: Prisma.EntityWhereInput = {};
+
+			if (search) {
+				const searchSplitted = search.split(' ');
+				console.log(searchSplitted);
+
+				if (searchSplitted.length > 1) {
+					where = {
 						OR: [
 							{
 								name: {
-									search: search.split(' ').join('&')
+									search: searchSplitted.join('&')
 								}
 							},
 							{
 								acronym: {
-									search: search.split(' ').join('&')
+									search: searchSplitted.join('&')
 								}
 							}
 						]
-					}
-				: {};
+					};
+				} else {
+					where = {
+						OR: [
+							{
+								name: {
+									contains: search,
+									mode: 'insensitive'
+								}
+							},
+							{
+								acronym: {
+									contains: search,
+									mode: 'insensitive'
+								}
+							}
+						]
+					};
+				}
+			}
 
 			const myEntities = await ctx.prisma.entity.findMany({
 				take: 10000,

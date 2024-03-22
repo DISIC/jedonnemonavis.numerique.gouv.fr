@@ -104,6 +104,7 @@ const EntitySearchModal = (props: Props) => {
 	};
 
 	const onSubmit = () => {
+		setCurrentPage(1);
 		setsHasSubmitedOnce(true);
 		setSubmitedSearch(search);
 		entitiesSearchRefetch();
