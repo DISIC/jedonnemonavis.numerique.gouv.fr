@@ -46,7 +46,7 @@ const EntityModal = (props: Props) => {
 
 	const saveEntityTmp = trpc.entity.create.useMutation({
 		onSuccess: () => {
-			reset({ name: undefined, acronym: undefined });
+			reset({ name: '', acronym: '' });
 			props.onSubmit();
 			modal.close();
 		},
@@ -84,7 +84,7 @@ const EntityModal = (props: Props) => {
 		if (entity) {
 			reset({ ...entity });
 		} else {
-			reset({ name: undefined, acronym: undefined });
+			reset({ name: '', acronym: '' });
 		}
 	}, [entity]);
 
