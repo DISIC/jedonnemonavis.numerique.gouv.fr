@@ -47,7 +47,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						target: '_self'
 					},
 					text: 'Connexion / Inscription'
-			  }
+				}
 			: {
 					iconId: 'ri-logout-circle-line',
 					buttonProps: {
@@ -56,7 +56,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					},
 					text: 'Déconnexion'
-			  }
+				}
 	];
 
 	const navigationItems = session?.user
@@ -77,7 +77,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					},
 					isActive: pathname.startsWith('/administration/dashboard/entities')
 				}
-		  ]
+			]
 		: [];
 
 	if (session?.user.role === 'admin') {
@@ -124,7 +124,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					</>
 				}
 				homeLinkProps={{
-					href: '/',
+					href: !session?.user ? '/' : '/administration/dashboard/products',
 					title: 'Accueil'
 				}}
 				className={classes.navigation}
@@ -174,6 +174,6 @@ const useStyles = tss
 							fontWeight: 'bold'
 						}
 					}
-			  }
+				}
 			: {}
 	}));
