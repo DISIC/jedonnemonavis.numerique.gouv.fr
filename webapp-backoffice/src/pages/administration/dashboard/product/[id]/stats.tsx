@@ -48,6 +48,9 @@ const SectionWrapper = ({
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const { statsTotals } = useStats();
+	const isTotalLoading = statsTotals.satisfaction === undefined;
+
+	const { classes, cx } = useStyles();
 
 	const [startDate, setStartDate] = useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
@@ -58,7 +61,7 @@ const ProductStatPage = (props: Props) => {
 		new Date().toISOString().split('T')[0]
 	);
 
-	const { data: buttonsResult, isLoading: isLoadingButtons } =
+	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
 			{
 				numberPerPage: 0,
@@ -134,193 +137,202 @@ const ProductStatPage = (props: Props) => {
 	return (
 		<ProductLayout product={product}>
 			<h1>Statistiques</h1>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}>
-				<div className={fr.cx('fr-col-6')}>
-					<Input
-						label="Date de début"
-						nativeInputProps={{
-							type: 'date',
-							value: startDate,
-							onChange: e => {
-								setStartDate(e.target.value);
-							}
-						}}
-					/>
-				</div>
-				<div className={fr.cx('fr-col-6')}>
-					<Input
-						label="Date de fin"
-						nativeInputProps={{
-							type: 'date',
-							value: endDate,
-							onChange: e => {
-								setEndDate(e.target.value);
-							}
-						}}
-					/>
-				</div>
-			</div>
-			<SectionWrapper
-				title="Satisfaction usagers"
-				count={statsTotals.satisfaction}
-				noDataText="Aucune donnée pour la satisfaction usagers"
-			>
-				<SmileyQuestionViz
-					fieldCode="satisfaction"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
-				<ReviewAverageInterval
-					fieldCode="satisfaction"
-					productId={product.id}
-					startDate={startDate}
-					endDate={endDate}
-				/>
-				<ReviewAverage
-					fieldCode="satisfaction"
-					productId={product.id}
-					startDate={startDate}
-					endDate={endDate}
-				/>
-			</SectionWrapper>
-			<SectionWrapper
-				title="Facilité d'usage"
-				count={statsTotals.easy}
-				noDataText="Aucune donnée pour la facilité d'usage"
-			>
-				<SmileyQuestionViz
-					fieldCode="easy"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
-			</SectionWrapper>
-			<SectionWrapper
-				title="Simplicité du langage"
-				count={statsTotals.comprehension}
-				noDataText="Aucune donnée pour la simplicité du langage"
-			>
-				<SmileyQuestionViz
-					fieldCode="comprehension"
-					productId={product.id}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
-			</SectionWrapper>
-			<SectionWrapper
-				title="Difficultés rencontrées"
-				count={statsTotals.difficulties}
-				noDataText="Aucune donnée pour les difficultés rencontrées"
-			>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div
-						className={
-							statsTotals.difficulties_details
-								? fr.cx('fr-col-6', 'fr-pr-6v')
-								: fr.cx('fr-col-12')
-						}
-					>
-						<BooleanQuestionViz
-							fieldCode="difficulties"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
+			<div className={cx(classes.container)}>
+				{isTotalLoading && (
+					<div className={cx(classes.overLoader, fr.cx('fr-pt-12v'))}>
+						<Loader />
+					</div>
+				)}
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
+				>
+					<div className={fr.cx('fr-col-6')}>
+						<Input
+							label="Date de début"
+							nativeInputProps={{
+								type: 'date',
+								value: startDate,
+								onChange: e => {
+									setStartDate(e.target.value);
+								}
+							}}
 						/>
 					</div>
-					{statsTotals.difficulties_details !== 0 && (
-						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-							<DetailsQuestionViz
-								fieldCodeMultiple="difficulties_details"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-					)}
-				</div>
-			</SectionWrapper>
-			<SectionWrapper
-				title="Aide joignable et efficace"
-				count={statsTotals.contact}
-				noDataText="Aucune donnée pour l'aide joignable et efficace"
-			>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div
-						className={
-							statsTotals.contact_reached
-								? fr.cx('fr-col-6', 'fr-pr-6v')
-								: fr.cx('fr-col-12')
-						}
-					>
-						<DetailsQuestionViz
-							fieldCodeMultiple="contact"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
+					<div className={fr.cx('fr-col-6')}>
+						<Input
+							label="Date de fin"
+							nativeInputProps={{
+								type: 'date',
+								value: endDate,
+								onChange: e => {
+									setEndDate(e.target.value);
+								}
+							}}
 						/>
 					</div>
-					{statsTotals.contact_reached !== 0 && (
-						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-							<BooleanQuestionViz
-								fieldCode="contact_reached"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-					)}
 				</div>
-				{statsTotals.contact_satisfaction !== 0 && (
+				<SectionWrapper
+					title="Satisfaction usagers"
+					count={statsTotals.satisfaction}
+					noDataText="Aucune donnée pour la satisfaction usagers"
+				>
 					<SmileyQuestionViz
-						fieldCode="contact_satisfaction"
-						displayFieldLabel={true}
+						fieldCode="satisfaction"
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-				)}
-				{statsTotals.contact_channels !== 0 && (
-					<DetailsQuestionViz
-						fieldCodeMultiple="contact_channels"
+					<ReviewAverageInterval
+						fieldCode="satisfaction"
+						productId={product.id}
+						startDate={startDate}
+						endDate={endDate}
+					/>
+					<ReviewAverage
+						fieldCode="satisfaction"
+						productId={product.id}
+						startDate={startDate}
+						endDate={endDate}
+					/>
+				</SectionWrapper>
+				<SectionWrapper
+					title="Facilité d'usage"
+					count={statsTotals.easy}
+					noDataText="Aucune donnée pour la facilité d'usage"
+				>
+					<SmileyQuestionViz
+						fieldCode="easy"
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-				)}
-			</SectionWrapper>
-			<SectionWrapper
-				title="Niveau d’autonomie"
-				count={statsTotals.help}
-				noDataText="Aucune donnée pour le niveau d'autonomie"
-			>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div
-						className={
-							statsTotals.help_details
-								? fr.cx('fr-col-6', 'fr-pr-6v')
-								: fr.cx('fr-col-12')
-						}
-					>
-						<BooleanQuestionViz
-							fieldCode="help"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					</div>
-					{statsTotals.help_details !== 0 && (
-						<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-							<DetailsQuestionViz
-								fieldCodeMultiple="help_details"
+				</SectionWrapper>
+				<SectionWrapper
+					title="Simplicité du langage"
+					count={statsTotals.comprehension}
+					noDataText="Aucune donnée pour la simplicité du langage"
+				>
+					<SmileyQuestionViz
+						fieldCode="comprehension"
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+				</SectionWrapper>
+				<SectionWrapper
+					title="Difficultés rencontrées"
+					count={statsTotals.difficulties}
+					noDataText="Aucune donnée pour les difficultés rencontrées"
+				>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div
+							className={
+								statsTotals.difficulties_details
+									? fr.cx('fr-col-6', 'fr-pr-6v')
+									: fr.cx('fr-col-12')
+							}
+						>
+							<BooleanQuestionViz
+								fieldCode="difficulties"
 								productId={product.id}
 								startDate={debouncedStartDate}
 								endDate={debouncedEndDate}
 							/>
 						</div>
+						{statsTotals.difficulties_details !== 0 && (
+							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+								<DetailsQuestionViz
+									fieldCodeMultiple="difficulties_details"
+									productId={product.id}
+									startDate={debouncedStartDate}
+									endDate={debouncedEndDate}
+								/>
+							</div>
+						)}
+					</div>
+				</SectionWrapper>
+				<SectionWrapper
+					title="Aide joignable et efficace"
+					count={statsTotals.contact}
+					noDataText="Aucune donnée pour l'aide joignable et efficace"
+				>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div
+							className={
+								statsTotals.contact_reached
+									? fr.cx('fr-col-6', 'fr-pr-6v')
+									: fr.cx('fr-col-12')
+							}
+						>
+							<DetailsQuestionViz
+								fieldCodeMultiple="contact"
+								productId={product.id}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</div>
+						{statsTotals.contact_reached !== 0 && (
+							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+								<BooleanQuestionViz
+									fieldCode="contact_reached"
+									productId={product.id}
+									startDate={debouncedStartDate}
+									endDate={debouncedEndDate}
+								/>
+							</div>
+						)}
+					</div>
+					{statsTotals.contact_satisfaction !== 0 && (
+						<SmileyQuestionViz
+							fieldCode="contact_satisfaction"
+							displayFieldLabel={true}
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
 					)}
-				</div>
-			</SectionWrapper>
+					{statsTotals.contact_channels !== 0 && (
+						<DetailsQuestionViz
+							fieldCodeMultiple="contact_channels"
+							productId={product.id}
+							startDate={debouncedStartDate}
+							endDate={debouncedEndDate}
+						/>
+					)}
+				</SectionWrapper>
+				<SectionWrapper
+					title="Niveau d’autonomie"
+					count={statsTotals.help}
+					noDataText="Aucune donnée pour le niveau d'autonomie"
+				>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div
+							className={
+								statsTotals.help_details
+									? fr.cx('fr-col-6', 'fr-pr-6v')
+									: fr.cx('fr-col-12')
+							}
+						>
+							<BooleanQuestionViz
+								fieldCode="help"
+								productId={product.id}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</div>
+						{statsTotals.help_details !== 0 && (
+							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
+								<DetailsQuestionViz
+									fieldCodeMultiple="help_details"
+									productId={product.id}
+									startDate={debouncedStartDate}
+									endDate={debouncedEndDate}
+								/>
+							</div>
+						)}
+					</div>
+				</SectionWrapper>
+			</div>
 		</ProductLayout>
 	);
 };
@@ -332,6 +344,19 @@ const useStyles = tss.create({
 		gap: '3rem',
 		padding: '2rem',
 		border: '1px solid #E5E5E5'
+	},
+	container: {
+		position: 'relative'
+	},
+	overLoader: {
+		position: 'absolute',
+		display: 'block',
+		top: 0,
+		left: 0,
+		width: '100%',
+		height: '100%',
+		backgroundColor: 'white',
+		zIndex: 9
 	}
 });
 
