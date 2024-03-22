@@ -8,3 +8,8 @@ export type ImportProduct = {
 	buttons: Omit<Button, 'id'>[];
 	entity: Omit<Entity, 'id'>;
 };
+
+export type ImportAdminEntityRight = {
+	user_email: string;
+	entity_name: string;
+};

@@ -32,6 +32,7 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 		}
 	});
 
+	console.log(code);
 	await sendMail(
 		'Votre mot de passe temporaire',
 		user.email,
