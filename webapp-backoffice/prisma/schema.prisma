@@ -242,5 +242,5 @@ model Answer {
   review         Review           @relation(fields: [review_id], references: [id])
   review_id      Int
 
-  @@index([intention])
+  @@index([intention, field_code])
 }
