@@ -164,6 +164,26 @@ export function getInviteEmailHtml(
 	`);
 }
 
+export function getResetPasswordEmailHtml(token: string) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/reset-password?${new URLSearchParams({ token })}`;
+
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			Vous avez demandé à réinitialiser votre mot de passe sur la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> ». Afin de choisir un nouveau mot de passe, veuillez cliquer sur le lien ci-dessous.
+		</p>
+
+		<a href="${link}" target="_blank">${link}</a>
+
+		<p>
+			Ce lien est valable pour les 24 prochaines heures. Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
+		</p>
+	`);
+}
+
 export function getInviteEntityEmailHtml(
 	contextUser: Session['user'],
 	entityName: string

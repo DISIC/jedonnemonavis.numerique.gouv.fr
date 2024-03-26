@@ -12,7 +12,7 @@ import {
 	generateRandomString
 } from '@/src/utils/tools';
 import { sendMail } from '@/src/utils/mailer';
-import { getOTPEmailHtml, getRegisterEmailHtml } from '@/src/utils/emails';
+import { getOTPEmailHtml, getRegisterEmailHtml, getResetPasswordEmailHtml } from '@/src/utils/emails';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -565,5 +565,109 @@ export const userRouter = router({
 					return { data: { id: userOTP.id } };
 				}
 			}
-		})
+		}),
+
+	initResetPwd: publicProcedure
+		.input(z.object({ email: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { email } = input;
+			console.log('test email : ', email)
+
+			const user = await ctx.prisma.user.findUnique({
+				where: {
+					email
+				}
+			});
+
+			if (!user) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'User not found'
+				});
+			}
+
+			const token = generateRandomString(32);
+
+			//delete old token if exists
+			await ctx.prisma.userResetToken.deleteMany({
+				where: {
+					user_id: user.id
+				}
+			})
+
+			await ctx.prisma.userResetToken.create({
+				data: {
+					user_id: user.id,
+					token,
+					user_email: user.email,
+					expiration_date: new Date(new Date().getTime() + 15 * 60 * 1000)
+				}
+			});
+
+			await sendMail(
+				'Mot de passe oublié',
+				email,
+				getResetPasswordEmailHtml(token),
+				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
+					process.env.NODEMAILER_BASEURL
+				}/reset-password?${new URLSearchParams({ token })}`
+			);
+
+			return { data: token };
+		}),
+
+	changePAssword: publicProcedure
+		.input(z.object({token: z.string(), password: z.string()}))
+		.mutation(async ({ ctx, input }) => {
+			const { token, password } = input;
+
+			const userResetToken = await ctx.prisma.userResetToken.findUnique({
+				where: {
+					token
+				}
+			});
+
+			if (!userResetToken) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Invalid token'
+				});
+			}
+
+			const now = new Date();
+			if (now.getTime() > userResetToken.expiration_date.getTime()) {
+				await ctx.prisma.userResetToken.delete({
+					where: {
+						token
+					}
+				});
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Expired token'
+				});
+			}
+
+			const hashedPassword = crypto
+				.createHash('sha256')
+				.update(password)
+				.digest('hex');
+
+			const updatedUser = await ctx.prisma.user.update({
+				where: {
+					id: userResetToken.user_id
+				},
+				data: {
+					password: hashedPassword
+				}
+			});
+
+			await ctx.prisma.userResetToken.delete({
+				where: {
+					token
+				}
+			});
+
+			return { data: updatedUser };
+		}),
+
 });

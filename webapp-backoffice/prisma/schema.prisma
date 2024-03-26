@@ -65,6 +65,7 @@ model User {
   UserOTPs             UserOTP[]
   UserValidationTokens UserValidationToken[]
   UserRequests         UserRequest[]
+  UserResetTokens      UserResetToken[]
   accessRights         AccessRight[]
   adminEntityRights    AdminEntityRight[]
   entities             Entity[]
@@ -113,6 +114,18 @@ model UserInviteToken {
   id         Int    @id @default(autoincrement())
   user_email String
   token      String @unique
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model UserResetToken {
+  id         Int    @id @default(autoincrement())
+  user            User     @relation(fields: [user_id], references: [id])
+  user_id         Int      @unique
+  user_email String
+  token      String @unique
+  expiration_date DateTime
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
