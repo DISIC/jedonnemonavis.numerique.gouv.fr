@@ -5,7 +5,6 @@ import {
 	PasswordInputProps
 } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -31,6 +30,7 @@ export const OTPForm = (props: Props) => {
 
 	const [otp, setOtp] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
+	const [resend, setResend] = useState<boolean>(false)
 
 	const { classes, cx } = useStyles({ errors });
 
@@ -56,6 +56,12 @@ export const OTPForm = (props: Props) => {
 			}
 		}
 	});
+
+	const checkMail = trpc.user.checkEmail.useMutation({
+		onSuccess: () => {
+
+		}
+	})
 
 	const getPasswordInputMessages = (): {
 		severity: PasswordInputProps.Severity;
@@ -108,9 +114,18 @@ export const OTPForm = (props: Props) => {
 					Si vous ne recevez pas de courriel sous 15 minutes (n’hésitez pas à
 					vérifier dans les indésirables),
 					<br />
-					<Link className={fr.cx('fr-link', 'fr-text--sm')} href="#">
+					<Button
+						onClick={async () => {
+							checkMail.mutate({email: (router.query.email || '') as string});
+							setResend(true)
+						}}
+						priority="tertiary no outline"
+						type="button"
+						className={fr.cx('fr-p-0')}
+						disabled={resend}
+						>
 						vous pouvez le renvoyer en cliquant ici
-					</Link>
+					</Button>
 					.
 				</p>
 				<Button className={cx(classes.button)} type="submit">

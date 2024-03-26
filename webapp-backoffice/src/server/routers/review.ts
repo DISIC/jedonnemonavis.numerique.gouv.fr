@@ -203,5 +203,40 @@ export const reviewRouter = router({
 		)
 		.query(async ({ctx, input}) => {
 			return {progress: getMemoryValue(input.memoryKey) || 0}
+		}),
+
+	getCounts: protectedProcedure
+		.input(
+			z.object({
+				product_id: z.number().optional(),
+				startDate: z.string().optional(),
+				endDate: z.string().optional(),
+				button_id: z.number().optional(),
+				filters: z.object({
+					satisfaction: z.string().optional(),
+					easy: z.string().optional(),
+					comprehension: z.string().optional(),
+					needVerbatim: z.boolean().optional(),
+					needOtherDifficulties: z.boolean().optional(),
+					needOtherHelp: z.boolean().optional(),
+					difficulties: z.string().optional(),
+					help: z.string().optional()
+				}).optional()
+			})
+		)
+		.output(
+			z.object({
+				countFiltered: z.number(),
+				countAll: z.number()
+			})
+		)
+		.query(async ({ctx, input}) => {
+			const { where, orderBy } = formatWhereAndOrder(input)
+
+			const countFiltered = await ctx.prisma.review.count({ where });
+
+			const countAll = await ctx.prisma.review.count({})
+
+			return { countFiltered, countAll }
 		})
 });

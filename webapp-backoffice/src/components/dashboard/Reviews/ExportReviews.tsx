@@ -66,6 +66,26 @@ const ExportReviews = (props: Props) => {
         }
     }, [exportStatus]);
 
+	const {
+		data: countsReviews,
+		isLoading: isLoadingCounts,
+		refetch: RefectchCounts
+	} = trpc.review.getCounts.useQuery(
+		{
+			product_id,
+            startDate,
+            endDate,
+            button_id,
+            filters
+		},
+		{
+			initialData: {
+				countFiltered: 0,
+				countAll: 0
+			}
+		}
+	);
+
     const applyChoice = (choice: 'all' | 'filtered') => {
         export_modal.close();
         setExportStatus('inProgress');
@@ -85,7 +105,7 @@ const ExportReviews = (props: Props) => {
 	return (
 		<> 
 
-			<ExportModal modal={export_modal} action={applyChoice}></ExportModal>
+			<ExportModal modal={export_modal} counts={countsReviews} action={applyChoice}></ExportModal>
 
             {exportStatus === 'idle' &&
                 
