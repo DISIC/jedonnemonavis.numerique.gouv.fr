@@ -108,9 +108,15 @@ export const OTPForm = (props: Props) => {
 					Si vous ne recevez pas de courriel sous 15 minutes (n’hésitez pas à
 					vérifier dans les indésirables),
 					<br />
-					<Link className={fr.cx('fr-link', 'fr-text--sm')} href="#">
+					<Button
+						onClick={() => {
+							
+						}}
+						priority="tertiary no outline"
+						type="button"
+						>
 						vous pouvez le renvoyer en cliquant ici
-					</Link>
+					</Button>
 					.
 				</p>
 				<Button className={cx(classes.button)} type="submit">
