@@ -1,17 +1,11 @@
-import { isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { Input } from '@codegouvfr/react-dsfr/Input';
 import { PasswordInput, PasswordInputProps } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
-import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { Loader } from '../ui/Loader';
-import { get } from 'http';
-
 type FormErrors = {
 	password: { required: boolean; format: boolean };
 };
@@ -33,10 +27,10 @@ export const ResetForm = () => {
 		}
 	};
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
-    const [successChange, setSuccessChange] = useState<Boolean>(false)
+    const [successChange, setSuccessChange] = useState<'Ok' | 'Error' | null>(null)
     const { classes, cx } = useStyles({
 		errors,
-		isLoading: false
+		successChange
 	});
 
 	const resetErrors = (key: keyof FormErrors) => {
@@ -93,7 +87,10 @@ export const ResetForm = () => {
 
     const resetPassword = trpc.user.changePAssword.useMutation({
         onSuccess: () => {
-            setSuccessChange(true)
+            setSuccessChange('Ok')
+        },
+        onError: () => {
+            setSuccessChange('Error')
         }
     });
 
@@ -142,7 +139,6 @@ export const ResetForm = () => {
                                 onChange: e => {
                                     setUserInfosVerif({ ...userInfosVerif, password: e.target.value });
                                     resetErrors('password');
-                                    console.log(getPasswordMessages())
                                 },
                                 value: userInfosVerif.password
                             }}
@@ -161,9 +157,9 @@ export const ResetForm = () => {
                     </form>
                 </>
             }
-			{successChange && 
+			{successChange &&
                 <>
-                    <p>Votre mot de passe a bien été réinitialisé.</p>
+                    <p className={cx(classes.result)}>{successChange === "Ok" ? `Votre mot de passe a bien été réinitialisé.` : 'Ce lien ne semble plus être valide. Votre mot de passe n\'a pas été changé.'}</p>
                     <Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
                         Retourner à l'écran de connexion
                     </Link>
@@ -175,8 +171,8 @@ export const ResetForm = () => {
 
 const useStyles = tss
     .withName(ResetForm.name)
-    .withParams<{ errors: FormErrors; isLoading: boolean }>()
-    .create(({ errors, isLoading }) => ({
+    .withParams<{ errors: FormErrors, successChange: string | null }>()
+    .create(({ errors, successChange }) => ({
         button: {
             width: '100%',
             justifyContent: 'center',
@@ -188,5 +184,10 @@ const useStyles = tss
                 errors.password.format || errors.password.required
                     ? fr.spacing('5v')
                     : 0
+        },
+        result: {
+            color: successChange === 'Ok' 
+                ? fr.colors.decisions.text.default.success.default
+                : fr.colors.decisions.text.default.error.default
         }
 }));

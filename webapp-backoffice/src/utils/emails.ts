@@ -179,7 +179,7 @@ export function getResetPasswordEmailHtml(token: string) {
 		<a href="${link}" target="_blank">${link}</a>
 
 		<p>
-			Ce lien est valable pour les 24 prochaines heures. Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
+			Ce lien est valable pour les 15 prochaines minutes. Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet e-mail.
 		</p>
 	`);
 }
