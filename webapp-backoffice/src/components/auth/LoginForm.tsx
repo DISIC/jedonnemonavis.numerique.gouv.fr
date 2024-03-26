@@ -41,6 +41,7 @@ export const LoginForm = () => {
 	const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
+	const [initReset, setInitReset] = useState<boolean>(false);
 
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
@@ -67,6 +68,12 @@ export const LoginForm = () => {
 					setErrors({ ...errors, userInactive: true });
 					break;
 			}
+		}
+	});
+
+	const initResetPwd = trpc.user.initResetPwd.useMutation({
+		onSuccess: () => {
+			setInitReset(true);
 		}
 	});
 
@@ -172,6 +179,28 @@ export const LoginForm = () => {
 						}
 						messagesHint=""
 					/>
+				)}
+				{showPassword && !initReset && (
+					<div className={fr.cx('fr-mb-4v')}>
+						<Button
+							onClick={() => {
+								initResetPwd.mutate({
+									email: credentials.email
+								});
+							}}
+							priority="tertiary no outline"
+							type="button"
+							>
+							Mot de passe oublié
+						</Button>
+					</div>
+				)}
+				{showPassword && initReset && (
+					<div className={fr.cx('fr-mb-4v')}>
+						<p>
+							Un email vous a été envoyé pour réinitialiser votre mot de passe.
+						</p>
+					</div>
 				)}
 				<Button type="submit" className={cx(classes.button)}>
 					{isLoading ? (
