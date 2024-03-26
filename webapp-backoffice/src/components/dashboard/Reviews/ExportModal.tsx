@@ -22,11 +22,15 @@ interface CustomModalProps {
 
 interface Props {
 	modal: CustomModalProps;
+	counts: {
+		countFiltered: number,
+		countAll: number
+	},
 	action: (choice: 'all' | 'filtered') => void;
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, action } = props;
+	const { modal, counts, action } = props;
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null)
 	const { cx, classes } = useStyles();
 
@@ -57,7 +61,7 @@ const ExportModal = (props: Props) => {
 				name="radio"
 				options={[
 					{
-						label: 'Télécharger tous les avis',
+						label: `Télécharger tous les avis (${counts.countAll} avis)`,
 						nativeInputProps: {
 							value: 'all',
 							onClick: () => {
@@ -66,7 +70,7 @@ const ExportModal = (props: Props) => {
 						}
 					},
 					{
-						label: 'Télécharger en fonction des filtres',
+						label: `Télécharger en fonction des filtres (${counts.countFiltered} avis)`,
 						nativeInputProps: {
 							value: 'filtered',
 							onClick: () => {

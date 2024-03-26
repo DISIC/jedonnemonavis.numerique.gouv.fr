@@ -104,8 +104,6 @@ export const ResetForm = () => {
         });
     }
 
-    console.log(router.query.token)
-
 	return (
 		<div>
 			<h4>Mot de passe oublié</h4>
