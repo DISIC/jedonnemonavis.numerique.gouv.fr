@@ -219,30 +219,7 @@ const ProductModal = (props: Props) => {
 						/>
 					)}
 				</div>
-
-				<div className={fr.cx('fr-input-group')}>
-					<Controller
-						control={control}
-						name="isPublic"
-						render={({ field: { onChange, value } }) => (
-							<Checkbox
-								className={fr.cx('fr-mt-3w')}
-								options={[
-									{
-										label: 'Données statistiques publiques',
-										hintText:
-											'Cocher cette case pour rendre les statistiques de ce produit publiques.',
-										nativeInputProps: {
-											name: 'essential',
-											onChange,
-											checked: value === true
-										}
-									}
-								]}
-							/>
-						)}
-					/>
-				</div>
+				
 				<div className={fr.cx('fr-input-group')}>
 					<label className={fr.cx('fr-label')}>URL(s)</label>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

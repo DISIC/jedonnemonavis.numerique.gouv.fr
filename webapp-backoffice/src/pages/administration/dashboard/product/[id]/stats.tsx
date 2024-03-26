@@ -16,6 +16,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import Link from 'next/link';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
+import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
 
 interface Props {
 	product: Product;
@@ -49,6 +50,7 @@ const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const { statsTotals } = useStats();
 	const isTotalLoading = statsTotals.satisfaction === undefined;
+	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false)
 
 	const { classes, cx } = useStyles();
 
@@ -89,6 +91,8 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.count;
+
+	const updateProduct = trpc.product.update.useMutation({});
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
@@ -143,6 +147,25 @@ const ProductStatPage = (props: Props) => {
 						<Loader />
 					</div>
 				)}
+				<div>
+					<ToggleSwitch
+						inputTitle="the-title"
+						label="Partager un lien publique"
+						labelPosition="right"
+						showCheckedHint={false}
+						checked={isPublic}
+						onChange={async () => {
+							setIsPublic(!isPublic)
+							await updateProduct.mutateAsync({
+								id: product.id,
+								product: {
+									...product,
+									isPublic: !isPublic
+								}
+							})
+						}}
+					/>
+				</div>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
 				>
