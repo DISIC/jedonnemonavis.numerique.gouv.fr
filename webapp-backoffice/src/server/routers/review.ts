@@ -235,7 +235,11 @@ export const reviewRouter = router({
 
 			const countFiltered = await ctx.prisma.review.count({ where });
 
-			const countAll = await ctx.prisma.review.count({})
+			const countAll = await ctx.prisma.review.count({
+				where: {
+					product_id: input.product_id
+				}
+			})
 
 			return { countFiltered, countAll }
 		})
