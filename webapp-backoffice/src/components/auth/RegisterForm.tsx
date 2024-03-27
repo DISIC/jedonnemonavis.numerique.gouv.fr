@@ -234,9 +234,6 @@ export const RegisterForm = (props: Props) => {
 	return (
 		<div>
 			<h5>Se créer un compte</h5>
-			<p>
-				Description — Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-			</p>
 			<p className={fr.cx('fr-hint-text')}>
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
