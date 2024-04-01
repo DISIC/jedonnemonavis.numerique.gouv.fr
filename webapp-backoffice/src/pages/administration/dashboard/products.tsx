@@ -116,7 +116,7 @@ const DashBoard = () => {
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
-							{session?.user?.role !== 'admin' ? 'Mes démarches' : 'Démarches'}
+							{session?.user?.role !== 'admin' ? 'Mes services' : 'Services'}
 						</h1>
 					</div>
 					<div
@@ -158,7 +158,7 @@ const DashBoard = () => {
 							}}
 						>
 							<option value="title:asc">Nom A à Z</option>
-							<option value="entity.name:asc">Ministère A à Z</option>
+							<option value="entity.name:asc">Organisation A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
@@ -265,7 +265,7 @@ const DashBoard = () => {
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
 								<span className={fr.cx('fr-ml-0')}>
-									Démarches de{' '}
+									Services de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}
 									</span>{' '}
@@ -318,7 +318,7 @@ const DashBoard = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun produit trouvé</p>
+										<p>Aucun service trouvé</p>
 									</div>
 								</div>
 							)}

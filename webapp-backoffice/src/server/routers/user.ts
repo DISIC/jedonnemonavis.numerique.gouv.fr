@@ -571,7 +571,6 @@ export const userRouter = router({
 		.input(z.object({ email: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			const { email } = input;
-			console.log('test email : ', email)
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
@@ -614,6 +613,40 @@ export const userRouter = router({
 			);
 
 			return { data: token };
+		}),
+
+	checkToken: publicProcedure
+		.input(z.object({ token: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const { token } = input;
+
+			const userResetToken = await ctx.prisma.userResetToken.findUnique({
+				where: {
+					token
+				}
+			});
+
+			if (!userResetToken) {
+				throw new TRPCError({
+					code: 'NOT_FOUND',
+					message: 'Invalid token'
+				});
+			}
+
+			const now = new Date();
+			if (now.getTime() > userResetToken.expiration_date.getTime()) {
+				await ctx.prisma.userResetToken.delete({
+					where: {
+						token
+					}
+				});
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: 'Expired token'
+				});
+			}
+
+			return { data: userResetToken };
 		}),
 
 	changePAssword: publicProcedure
