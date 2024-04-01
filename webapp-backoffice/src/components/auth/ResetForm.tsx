@@ -4,8 +4,11 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { PasswordInput, PasswordInputProps } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { Loader } from '../ui/Loader';
+
 type FormErrors = {
 	password: { required: boolean; format: boolean };
 };
@@ -85,6 +88,17 @@ export const ResetForm = () => {
 		return messages;
 	};
 
+    const { data: testLink, isLoading: loadingCheck, isError: loadingError } = trpc.user.checkToken.useQuery({
+        token: router.query.token as string
+    });
+
+    useEffect(() => {
+        if (loadingError && !loadingCheck) {
+            setSuccessChange('Error');
+        }
+        console.log('testLink : ', testLink)
+    }, [loadingError]);
+
     const resetPassword = trpc.user.changePAssword.useMutation({
         onSuccess: () => {
             setSuccessChange('Ok')
@@ -103,10 +117,11 @@ export const ResetForm = () => {
 
 	return (
 		<div>
-			<h4>Mot de passe oublié</h4>
-            {!successChange && 
+            {loadingCheck &&
+                <Loader size="md" />
+            }
+            {!successChange && !loadingCheck &&
                 <>
-                    <h5>Veuillez renseigner votre nouveau mot de passe</h5>
                     <form
                         onSubmit={e => {
                             e.preventDefault();
@@ -157,9 +172,21 @@ export const ResetForm = () => {
                     </form>
                 </>
             }
-			{successChange &&
+			{successChange && !loadingCheck &&
                 <>
-                    <p className={cx(classes.result)}>{successChange === "Ok" ? `Votre mot de passe a bien été réinitialisé.` : 'Ce lien ne semble plus être valide. Votre mot de passe n\'a pas été changé.'}</p>
+                    {successChange === "Ok" ? 
+                        <Alert
+                            description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
+                            severity="success"
+                            title="Mot de passe réinitilialisé"
+                        />
+                    :
+                        <Alert
+                            description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
+                            severity="error"
+                            title="Lien invalide"
+                        />
+                    }
                     <Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
                         Retourner à l'écran de connexion
                     </Link>

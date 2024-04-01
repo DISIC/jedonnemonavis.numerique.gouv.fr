@@ -10,6 +10,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
 
 type FormCredentials = {
 	email: string;
@@ -41,7 +43,6 @@ export const LoginForm = () => {
 	const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
-	const [initReset, setInitReset] = useState<boolean>(false);
 
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
@@ -71,11 +72,12 @@ export const LoginForm = () => {
 		}
 	});
 
-	const initResetPwd = trpc.user.initResetPwd.useMutation({
-		onSuccess: () => {
-			setInitReset(true);
-		}
+	const modal = createModal({
+		id: "reset-modal", 
+		isOpenedByDefault: false
 	});
+
+	const initResetPwd = trpc.user.initResetPwd.useMutation({});
 
 	const isLoading = checkEmailUser.isLoading || isSignInLoading;
 	const { classes, cx } = useStyles({
@@ -138,6 +140,30 @@ export const LoginForm = () => {
 
 	return (
 		<div>
+			<modal.Component title="Mot de passe oublié">
+				<p className={fr.cx('fr-my-10v')}>Nous vous enverrons un lien pour réinitialiser votre mot de passe à l'adresse email suivante : {credentials.email}</p>
+				<div className={cx(classes.actionModal)}>
+					<Button 
+						onClick={() => modal.close()}
+						priority="secondary"
+						type="button"
+					>
+						Annuler
+					</Button>
+					<Button
+						onClick={() => {
+							initResetPwd.mutate({
+								email: credentials.email
+							});
+							modal.close();
+						}}
+						priority="primary"
+						type="button"
+					>
+						Envoyer
+					</Button>
+				</div>
+			</modal.Component>
 			<h4>Connexion</h4>
 			<h5>Se connecter avec son compte</h5>
 			<form
@@ -180,26 +206,17 @@ export const LoginForm = () => {
 						messagesHint=""
 					/>
 				)}
-				{showPassword && !initReset && (
+				{showPassword && (
 					<div className={fr.cx('fr-mb-4v')}>
 						<Button
 							onClick={() => {
-								initResetPwd.mutate({
-									email: credentials.email
-								});
+								modal.open()
 							}}
 							priority="tertiary no outline"
 							type="button"
 							>
 							Mot de passe oublié
 						</Button>
-					</div>
-				)}
-				{showPassword && initReset && (
-					<div className={fr.cx('fr-mb-4v')}>
-						<p>
-							Un email vous a été envoyé pour réinitialiser votre mot de passe.
-						</p>
 					</div>
 				)}
 				<Button type="submit" className={cx(classes.button)}>
@@ -236,5 +253,9 @@ const useStyles = tss
 		},
 		password: {
 			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0
+		},
+		actionModal: {
+			display: 'flex',
+			justifyContent: 'space-between',
 		}
 	}));

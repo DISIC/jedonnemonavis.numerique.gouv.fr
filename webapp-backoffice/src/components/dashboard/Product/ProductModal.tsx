@@ -120,7 +120,7 @@ const ProductModal = (props: Props) => {
 			title={
 				product && product.id
 					? 'Modifier les informations du produit'
-					: 'Ajouter un nouveau produit'
+					: 'Ajouter un nouveau service'
 			}
 			size="large"
 			buttons={[
