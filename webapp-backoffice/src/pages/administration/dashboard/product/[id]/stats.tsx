@@ -17,10 +17,18 @@ import Link from 'next/link';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 
 interface Props {
 	product: Product;
 }
+
+const public_modal = createModal({
+	id: 'public-modal',
+	isOpenedByDefault: false
+});
 
 const SectionWrapper = ({
 	title,
@@ -140,7 +148,18 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
-			<h1>Statistiques</h1>
+			<PublicDataModal modal={public_modal} product={product} />
+			<div className={cx(classes.title)}>
+				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+				
+				<Button
+					priority="secondary"
+					type="button"
+					nativeButtonProps={public_modal.buttonProps}
+				>
+					Partager les statistiques publiquement
+				</Button>
+			</div>
 			<div className={cx(classes.container)}>
 				{isTotalLoading && (
 					<div className={cx(classes.overLoader, fr.cx('fr-pt-12v'))}>
@@ -148,23 +167,6 @@ const ProductStatPage = (props: Props) => {
 					</div>
 				)}
 				<div>
-					<ToggleSwitch
-						inputTitle="the-title"
-						label="Partager un lien publique"
-						labelPosition="right"
-						showCheckedHint={false}
-						checked={isPublic}
-						onChange={async () => {
-							setIsPublic(!isPublic)
-							await updateProduct.mutateAsync({
-								id: product.id,
-								product: {
-									...product,
-									isPublic: !isPublic
-								}
-							})
-						}}
-					/>
 				</div>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
@@ -380,6 +382,11 @@ const useStyles = tss.create({
 		height: '100%',
 		backgroundColor: 'white',
 		zIndex: 9
+	},
+	title: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		marginBottom: '1rem'
 	}
 });
 
