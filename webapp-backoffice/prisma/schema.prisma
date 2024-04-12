@@ -167,20 +167,21 @@ model ApiKey {
 }
 
 model Product {
-  id           Int           @id @default(autoincrement())
-  title        String
-  entity       Entity        @relation(fields: [entity_id], references: [id])
-  entity_id    Int
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  urls         String[]
-  volume       Int?
-  xwiki_id     Int?          @unique
-  buttons      Button[]
-  accessRights AccessRight[]
-  favorites    Favorite[]
-  reviews      Review[]
-  isPublic     Boolean?
+  id              Int           @id @default(autoincrement())
+  title           String
+  title_formatted String?
+  entity          Entity        @relation(fields: [entity_id], references: [id])
+  entity_id       Int
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+  urls            String[]
+  volume          Int?
+  xwiki_id        Int?          @unique
+  buttons         Button[]
+  accessRights    AccessRight[]
+  favorites       Favorite[]
+  reviews         Review[]
+  isPublic        Boolean?
 }
 
 model AdminEntityRight {

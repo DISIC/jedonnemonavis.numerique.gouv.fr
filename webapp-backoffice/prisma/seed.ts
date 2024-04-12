@@ -10,7 +10,7 @@ import { users } from './seeds/users';
 import { products } from './seeds/products';
 import { whiteListedDomains } from './seeds/white-listed-domains';
 import { entities } from './seeds/entities';
-import { getRandomObjectFromArray } from '../src/utils/tools';
+import { getRandomObjectFromArray, removeAccents } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { Domain } from 'domain';
 
@@ -106,7 +106,43 @@ async function main() {
 		});
 	});
 }
-main()
+
+async function formatted_title() {
+	 
+
+	const products = await prisma.product.findMany();
+
+	products.forEach(async (p) => {
+		const formattedTitle = removeAccents(p.title)
+		console.log('processing product : ', p.title)
+		await prisma.product.update({
+			where: {
+				id: p.id
+			},
+			data: {
+				title_formatted: formattedTitle
+			}
+		});
+	});
+
+	const entities = await prisma.entity.findMany();
+
+	entities.forEach(async (e) => {
+		const formattedName = removeAccents(e.name)
+		console.log('processing entity : ', e.name)
+		await prisma.entity.update({
+			where: {
+				id: e.id
+			},
+			data: {
+				name_formatted: formattedName
+			}
+		});
+	});
+
+}
+
+formatted_title()
 	.then(async () => {
 		await prisma.$disconnect();
 	})

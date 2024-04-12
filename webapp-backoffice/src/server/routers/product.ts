@@ -11,6 +11,7 @@ import {
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 import { Prisma, Product } from '@prisma/client';
+import { removeAccents } from '@/src/utils/tools';
 
 export const productRouter = router({
 	getById: publicProcedure
@@ -88,9 +89,10 @@ export const productRouter = router({
 			};
 
 			if (search) {
-				const searchQuery = search.split(' ').join(' | ');
-				where.title = {
-					contains: searchQuery,
+				let searchWithoutAccents = removeAccents(search);
+				
+				where.title_formatted = {
+					contains: searchWithoutAccents,
 					mode: 'insensitive'
 				};
 			}
@@ -213,6 +215,8 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
 
+			productPayload.title_formatted = removeAccents(productPayload.title);
+
 			const product = await ctx.prisma.product.create({
 				data: {
 					...productPayload,
@@ -236,6 +240,8 @@ export const productRouter = router({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { id, product } = input;
+
+			product.title_formatted = removeAccents(product.title as string);
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id },
