@@ -59,13 +59,28 @@ const EntityModal = (props: Props) => {
 			}
 		}
 	});
-	const updateEntity = trpc.entity.update.useMutation({});
+	const updateEntity = trpc.entity.update.useMutation({
+		onSuccess: () => {
+			reset({ name: '', acronym: '' });
+			props.onSubmit();
+			modal.close();
+		},
+		onError: e => {
+			if (e.data?.httpStatus === 409) {
+				setError('name', {
+					type: 'Conflict name',
+					message: 'Une organisation avec ce nom existe déjà'
+				});
+			}
+		}
+	});
 
 	const onSubmit: SubmitHandler<FormValues> = async data => {
 		const tmpEntity = data;
 
 		try {
 			if (entity && entity.id) {
+				console.log('update')
 				await updateEntity.mutateAsync({
 					id: entity.id,
 					entity: tmpEntity

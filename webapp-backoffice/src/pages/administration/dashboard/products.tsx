@@ -12,6 +12,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
+import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
@@ -30,11 +31,12 @@ const api_modal = createModal({
 
 const DashBoard = () => {
 	const [filter, setFilter] = React.useState<string>('title');
-	const [filterEntityId, setFilterEntityId] = React.useState<number>();
+	const [filterEntity, setFilterEntity] = React.useState<{label: string | undefined, value: number | undefined} | null>(null)
 	const [filterOnlyFavorites, setFilterOnlyFavorites] =
 		React.useState<boolean>(false);
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+	const [inputValue, setInputValue] = React.useState<string>('');
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -53,7 +55,7 @@ const DashBoard = () => {
 			sort: filter,
 			page: currentPage,
 			numberPerPage,
-			filterEntityId,
+			filterEntityId: filterEntity?.value,
 			filterByUserFavorites: filterOnlyFavorites
 		},
 		{
@@ -164,32 +166,36 @@ const DashBoard = () => {
 						</Select>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-						<Autocomplete
-							id="filter-entity"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={entities.map((entity: Entity) => ({
-								label: `${entity.name} (${entity.acronym})`,
-								value: entity.id
-							}))}
-							onChange={(_, option) => {
-								setFilterEntityId(option?.value);
-							}}
-							noOptionsText="Aucune organisation trouvée"
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label className="fr-label">
-										Filtrer par une organisation
-									</label>
-									<input
-										{...params.inputProps}
-										className={cx(params.inputProps.className, 'fr-input')}
-										placeholder="Sélectionner une option"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
+					<Autocomplete
+						id="filter-entity"
+						disablePortal
+						sx={{ width: '100%' }}
+						value={filterEntity}
+						options={entities.map((entity) => ({
+							label: `${entity.name} (${entity.acronym})`,
+							value: entity.id
+						}))}
+						onChange={(_, option) => {
+							setFilterEntity(option ?? null); // Met à jour l'option sélectionnée
+							setInputValue(''); // Efface l'input de texte
+						}}
+						noOptionsText="Aucune organisation trouvée"
+						inputValue={inputValue} // Contrôle la valeur de l'input de texte
+						onInputChange={(event, newInputValue) => {
+							setInputValue(newInputValue); // Met à jour la valeur de l'input uniquement si c'est une saisie utilisateur
+						}}
+						renderInput={(params) => (
+							<div ref={params.InputProps.ref}>
+							<label className="fr-label">Filtrer par une organisation</label>
+							<input
+								{...params.inputProps}
+								className={params.inputProps.className + ' fr-input'}
+								placeholder="Sélectionner une option"
+								type="search"
+							/>
+							</div>
+						)}
+					/>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
 						<form
@@ -255,6 +261,21 @@ const DashBoard = () => {
 							/>
 						</div>
 					)}
+					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
+						{filterEntity?.label &&
+							<Tag
+								dismissible
+								nativeButtonProps={{
+									onClick: () => {
+										setFilterEntity(null)
+										setInputValue('')
+									}
+								}}
+							>
+								<p>{filterEntity.label}</p>
+							</Tag>
+						}
+					</div>
 				</div>
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>

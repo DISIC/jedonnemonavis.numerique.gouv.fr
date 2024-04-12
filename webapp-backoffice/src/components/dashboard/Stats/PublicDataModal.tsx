@@ -44,7 +44,7 @@ const PublicDataModal = (props: Props) => {
     console.log(origin);
 
     return (
-        <modal.Component title="Partager les statistiques publiquement" size='large'>
+        <modal.Component title="Autoriser le partage public des statistiques" size='large'>
             <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
                 <div className={fr.cx('fr-col-12')}>
                     <p className={fr.cx('fr-my-5v')}>En activant le partage public, toutes les personnes disposant du lien peuvent consulter la page de statistiques. Elles ne vont pas avoir accès aux verbatims.</p>
@@ -52,9 +52,9 @@ const PublicDataModal = (props: Props) => {
                 <div className={fr.cx('fr-col-12')}>
                     <ToggleSwitch
                         inputTitle="the-title"
-                        label="Activer le partage publique de ces statistiques"
+                        label="Autoriser le partage publique de ces statistiques"
                         labelPosition="right"
-                        showCheckedHint={false}
+                        showCheckedHint={true}
                         defaultChecked={isPublic}
                         onChange={async () => {
                             setIsPublic(!isPublic)
@@ -83,11 +83,22 @@ const PublicDataModal = (props: Props) => {
                                 <Button
                                     priority="tertiary"
                                     size="small"
-                                    iconId="fr-icon-delete-bin-line"
+                                    iconId="ri-file-copy-line"
                                     iconPosition="right"
-                                    onClick={() => {}}
+                                    onClick={async () => {
+                                        if ('clipboard' in navigator) {
+                                            try {
+                                                await navigator.clipboard.writeText(`${origin}/public/product/${product.id}/stats`);
+                                                alert('Lien copié dans le presse-papiers');
+                                            } catch (err) {
+                                                alert(err);
+                                            }
+                                        } else {
+                                            alert('Fonctionnalité de presse-papiers non prise en charge');
+                                        }
+                                    }}
                                 >
-                                    {'copier'}
+                                    {'Copier'}
                                 </Button>
                             </div>
                         </div>

@@ -156,96 +156,98 @@ const ProductCard = ({
 	];
 
 	return (
-		<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--top'
-				)}
-			>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-					<Link
-						href={`/administration/dashboard/product/${product.id}/stats`}
-						className={fr.cx('fr-card__title')}
-					>
-						{product.title}
-					</Link>
-				</div>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-					<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
-				</div>
-				{session?.user.role !== 'user' && (
-					<div
-						className={cx(
-							fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
-							classes.favoriteWrapper
-						)}
-					>
-						<Button
-							iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-							title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
-							priority="tertiary"
-							size="small"
-							onClick={() => {
-								if (isFavorite) {
-									deleteFavorite.mutate({
-										product_id: product.id,
-										user_id: userId
-									});
-								} else {
-									createFavorite.mutate({
-										product_id: product.id,
-										user_id: userId
-									});
-								}
-							}}
-						/>
+		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
+			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<div
+					className={fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--gutters',
+						'fr-grid-row--top'
+					)}
+				>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+						<Link
+							href={`/administration/dashboard/product/${product.id}/stats`}
+							className={fr.cx('fr-card__title')}
+						>
+							{product.title}
+						</Link>
 					</div>
-				)}
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+						<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
+					</div>
+					{session?.user.role !== 'user' && (
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
+								classes.favoriteWrapper
+							)}
+						>
+							<Button
+								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+								title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
+								priority="tertiary"
+								size="small"
+								onClick={() => {
+									if (isFavorite) {
+										deleteFavorite.mutate({
+											product_id: product.id,
+											user_id: userId
+										});
+									} else {
+										createFavorite.mutate({
+											product_id: product.id,
+											user_id: userId
+										});
+									}
+								}}
+							/>
+						</div>
+					)}
 
-				<div className={fr.cx('fr-col', 'fr-col-12')}>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						{indicators.map((indicator, index) => (
-							<div
-								className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
-								key={index}
-							>
-								<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-									{indicator.title}
-								</p>
-								{isLoadingStats ? (
-									<Skeleton
-										className={cx(classes.badgeSkeleton)}
-										variant="text"
-										width={130}
-										height={25}
-									/>
-								) : (
-									<Badge
-										noIcon
-										severity={!!nbReviews ? indicator.color : 'info'}
-										className={fr.cx('fr-text--sm')}
-									>
-										{!!nbReviews && indicator.value !== -1
-											? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
-											: 'Aucune donnée'}
+					<div className={fr.cx('fr-col', 'fr-col-12')}>
+						<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+							{indicators.map((indicator, index) => (
+								<div
+									className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+									key={index}
+								>
+									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+										{indicator.title}
+									</p>
+									{isLoadingStats ? (
+										<Skeleton
+											className={cx(classes.badgeSkeleton)}
+											variant="text"
+											width={130}
+											height={25}
+										/>
+									) : (
+										<Badge
+											noIcon
+											severity={!!nbReviews ? indicator.color : 'info'}
+											className={fr.cx('fr-text--sm')}
+										>
+											{!!nbReviews && indicator.value !== -1
+												? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
+												: 'Aucune donnée'}
+										</Badge>
+									)}
+								</div>
+							))}
+							{!isLoadingReviewsCount && nbReviews !== undefined && (
+								<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
+									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>Nombre d'avis</p>
+									<Badge noIcon severity="info">
+										{nbReviews}
 									</Badge>
-								)}
-							</div>
-						))}
-						{!isLoadingReviewsCount && nbReviews !== undefined && (
-							<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-								<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>Nombre d'avis</p>
-								<Badge noIcon severity="info">
-									{nbReviews}
-								</Badge>
-							</div>
-						)}
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</Link>
 	);
 };
 
