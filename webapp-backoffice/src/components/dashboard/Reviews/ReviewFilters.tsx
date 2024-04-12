@@ -27,6 +27,12 @@ const ReviewFilters = (props: Props) => {
 					label: 'Date',
 					code: 'created_at'
 				},
+				{
+					label: 'Heure'
+				},
+				{
+					label: 'Id'
+				},
 
 				{
 					label: 'Satisfaction'
@@ -116,7 +122,7 @@ const useStyles = tss.create({
 	},
 	badge: {
 		fontSize: 14,
-		flex: '0 0 calc(100% / 7);'
+		flex: '0 0 calc(100% / 9.5);'
 	},
 	badgeVerbatim: {
 		width: 'fit-content',

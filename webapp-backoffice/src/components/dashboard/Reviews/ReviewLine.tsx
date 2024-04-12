@@ -44,6 +44,18 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 					</div>
 				</div>
 				<div className={cx(classes.cellContainer)}>
+					<div className={cx(classes.date)}>
+						<span className={fr.cx('fr-hidden-lg')}>Heure : </span>
+						{review.created_at?.toLocaleTimeString('fr-FR')}
+					</div>
+				</div>
+				<div className={cx(classes.cellContainer)}>
+					<div className={cx(classes.date)}>
+						<span className={fr.cx('fr-hidden-lg')}>Id : </span>
+						{review.id}
+					</div>
+				</div>
+				<div className={cx(classes.cellContainer)}>
 					{review.satisfaction && (
 						<>
 							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
@@ -196,14 +208,14 @@ const useStyles = tss.create({
 		fontSize: 12
 	},
 	cellContainer: {
-		flex: '1 1 14.28%',
+		flex: '1 1 10%',
 		[fr.breakpoints.down('lg')]: {
 			flex: '50%',
 			marginTop: 12
 		}
 	},
 	badge: {
-		fontSize: 12,
+		fontSize: 11,
 		paddingVertical: 4
 	}
 });
