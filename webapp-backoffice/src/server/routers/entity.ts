@@ -33,12 +33,14 @@ export const entityRouter = router({
 						OR: [
 							{
 								name: {
-									search: searchSplitted.join('&')
+									search: searchSplitted.join('&'),
+									mode: 'insensitive'
 								}
 							},
 							{
 								acronym: {
-									search: searchSplitted.join('&')
+									search: searchSplitted.join('&'),
+									mode: 'insensitive'
 								}
 							}
 						]

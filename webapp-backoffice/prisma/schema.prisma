@@ -233,7 +233,7 @@ model Review {
   id         Int     @id @default(autoincrement())
   form_id    Int
   product    Product @relation(fields: [product_id], references: [id])
-  product_id Int 
+  product_id Int
   button     Button  @relation(fields: [button_id], references: [id])
   button_id  Int
   xwiki_id   Int?
