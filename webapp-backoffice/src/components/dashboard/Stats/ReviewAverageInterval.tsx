@@ -57,7 +57,10 @@ const ReviewAverageInterval = ({
 		<div className={fr.cx('fr-grid-row')}>
 			<div className={fr.cx('fr-col-4')}>
 				<h4 className={fr.cx('fr-mb-0')}>Historique des avis</h4>
-				<p>{resultFieldCodeIntervalAverage?.metadata.average} moyen par mois</p>
+				<p>
+					Note moyenne mensuelle :{' '}
+					{resultFieldCodeIntervalAverage?.metadata.average} / 10
+				</p>
 				<div style={{ display: 'flex' }}>
 					<div
 						style={{
