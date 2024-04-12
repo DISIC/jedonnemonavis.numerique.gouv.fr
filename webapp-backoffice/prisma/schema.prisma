@@ -134,11 +134,11 @@ model UserResetToken {
 model Entity {
   id                Int                @id @default(autoincrement())
   name              String             @unique
+  name_formatted    String?
   acronym           String
   products          Product[]
   users             User[]
   adminEntityRights AdminEntityRight[]
-
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
