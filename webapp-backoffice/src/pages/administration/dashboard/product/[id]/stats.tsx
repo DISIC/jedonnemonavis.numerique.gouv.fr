@@ -157,7 +157,7 @@ const ProductStatPage = (props: Props) => {
 					type="button"
 					nativeButtonProps={public_modal.buttonProps}
 				>
-					Partager les statistiques publiquement
+					Autoriser le partage public des statistiques
 				</Button>
 			</div>
 			<div className={cx(classes.container)}>
@@ -386,7 +386,13 @@ const useStyles = tss.create({
 	title: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		marginBottom: '1rem'
+		marginBottom: '1rem',
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'column',
+			'.fr-btn': {
+				marginTop: '1rem'
+			}
+		}
 	}
 });
 
