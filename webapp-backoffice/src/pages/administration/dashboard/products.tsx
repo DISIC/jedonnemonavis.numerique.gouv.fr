@@ -3,6 +3,7 @@ import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
+import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -30,15 +31,12 @@ const api_modal = createModal({
 });
 
 const DashBoard = () => {
-	const [filter, setFilter] = React.useState<string>('title');
-	const [filterEntity, setFilterEntity] = React.useState<{label: string | undefined, value: number | undefined} | null>(null)
-	const [filterOnlyFavorites, setFilterOnlyFavorites] =
-		React.useState<boolean>(false);
-	const [search, setSearch] = React.useState<string>('');
-	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+
+	const { filters, updateFilters } = useFilters();
+	
+	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
 
-	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
 
 	const { data: session } = useSession({ required: true });
@@ -51,12 +49,12 @@ const DashBoard = () => {
 		isRefetching: isRefetchingProducts
 	} = trpc.product.getList.useQuery(
 		{
-			search: validatedSearch,
-			sort: filter,
-			page: currentPage,
+			search: filters.validatedSearch,
+			sort: filters.filter,
+			page: filters.currentPage,
 			numberPerPage,
-			filterEntityId: filterEntity?.value,
-			filterByUserFavorites: filterOnlyFavorites
+			filterEntityId: filters.filterEntity?.value,
+			filterByUserFavorites: filters.filterOnlyFavorites
 		},
 		{
 			initialData: {
@@ -93,7 +91,7 @@ const DashBoard = () => {
 	const { data: favorites } = favoritesResult;
 
 	const handlePageChange = (pageNumber: number) => {
-		setCurrentPage(pageNumber);
+		updateFilters({ ...filters, currentPage: pageNumber });
 	};
 
 	const nbPages = getNbPages(productsCount, numberPerPage);
@@ -104,10 +102,10 @@ const DashBoard = () => {
 				modal={product_modal}
 				onSubmit={() => {
 					setSearch('');
-					if (filter === 'created_at') {
-						setValidatedSearch('');
+					if (filters.filter === 'created_at') {
+						updateFilters({...filters, validatedSearch: ''});
 					} else {
-						setFilter('created_at');
+						updateFilters({...filters, filter: 'created_at'});
 					}
 				}}
 			/>
@@ -156,7 +154,8 @@ const DashBoard = () => {
 							label="Trier Par"
 							nativeSelectProps={{
 								name: 'my-select',
-								onChange: event => setFilter(event.target.value)
+								value: filters.filter,
+								onChange: event => updateFilters({...filters, filter: event.target.value})
 							}}
 						>
 							<option value="title:asc">Nom A à Z</option>
@@ -170,19 +169,19 @@ const DashBoard = () => {
 						id="filter-entity"
 						disablePortal
 						sx={{ width: '100%' }}
-						value={filterEntity}
+						value={filters.filterEntity}
 						options={entities.map((entity) => ({
 							label: `${entity.name} (${entity.acronym})`,
 							value: entity.id
 						}))}
 						onChange={(_, option) => {
-							setFilterEntity(option ?? null); // Met à jour l'option sélectionnée
-							setInputValue(''); // Efface l'input de texte
+							updateFilters({...filters, filterEntity: option ?? null, currentPage: 1})
+							setInputValue(''); 
 						}}
 						noOptionsText="Aucune organisation trouvée"
-						inputValue={inputValue} // Contrôle la valeur de l'input de texte
+						inputValue={inputValue} 
 						onInputChange={(event, newInputValue) => {
-							setInputValue(newInputValue); // Met à jour la valeur de l'input uniquement si c'est une saisie utilisateur
+							setInputValue(newInputValue);
 						}}
 						renderInput={(params) => (
 							<div ref={params.InputProps.ref}>
@@ -202,8 +201,7 @@ const DashBoard = () => {
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
 								e.preventDefault();
-								setValidatedSearch(search);
-								setCurrentPage(1);
+								updateFilters({...filters, currentPage: 1, validatedSearch: search});
 							}}
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
@@ -216,7 +214,7 @@ const DashBoard = () => {
 										value: search,
 										onChange: event => {
 											if (!event.target.value) {
-												setValidatedSearch('');
+												updateFilters({...filters, currentPage: 1, validatedSearch: ''})
 											}
 											setSearch(event.target.value);
 										}
@@ -250,10 +248,9 @@ const DashBoard = () => {
 										label: 'Afficher uniquement mes favoris',
 										nativeInputProps: {
 											name: 'favorites-products',
-											checked: filterOnlyFavorites,
+											checked: filters.filterOnlyFavorites,
 											onChange: e => {
-												setFilterOnlyFavorites(e.currentTarget.checked);
-												setCurrentPage(1);
+												updateFilters({...filters, currentPage: 1, filterOnlyFavorites: e.target.checked});
 											}
 										}
 									}
@@ -262,17 +259,17 @@ const DashBoard = () => {
 						</div>
 					)}
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
-						{filterEntity?.label &&
+						{filters.filterEntity?.label &&
 							<Tag
 								dismissible
 								nativeButtonProps={{
 									onClick: () => {
-										setFilterEntity(null)
+										updateFilters({...filters, filterEntity: null})
 										setInputValue('')
 									}
 								}}
 							>
-								<p>{filterEntity.label}</p>
+								<p>{filters.filterEntity.label}</p>
 							</Tag>
 						}
 					</div>
@@ -288,11 +285,11 @@ const DashBoard = () => {
 								<span className={fr.cx('fr-ml-0')}>
 									Services de{' '}
 									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
+										{numberPerPage * (filters.currentPage - 1) + 1}
 									</span>{' '}
 									à{' '}
 									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + products.length}
+										{numberPerPage * (filters.currentPage - 1) + products.length}
 									</span>{' '}
 									sur{' '}
 									<span className={cx(classes.boldText)}>
@@ -355,7 +352,7 @@ const DashBoard = () => {
 								<Pagination
 									showFirstLast
 									count={nbPages}
-									defaultPage={currentPage}
+									defaultPage={filters.currentPage}
 									getPageLinkProps={pageNumber => ({
 										onClick: event => {
 											event.preventDefault();

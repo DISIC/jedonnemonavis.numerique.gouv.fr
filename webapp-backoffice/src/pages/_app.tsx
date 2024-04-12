@@ -12,6 +12,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { StatsTotalsProvider } from '../contexts/StatsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
+import { FiltersContextProvider } from '../contexts/FiltersContext';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -61,7 +62,9 @@ function App({ Component, pageProps }: AppProps) {
 			<SessionProvider session={pageProps.session}>
 				<AuthProvider>
 					<StatsTotalsProvider>
-						{getLayout(<Component {...pageProps} />)}
+						<FiltersContextProvider>
+							{getLayout(<Component {...pageProps} />)}
+						</FiltersContextProvider>
 					</StatsTotalsProvider>
 				</AuthProvider>
 			</SessionProvider>
