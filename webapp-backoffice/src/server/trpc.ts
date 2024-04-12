@@ -24,22 +24,22 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const req = opts.req;
 	const user_api = null as UserWithAccessRight | null;
 
-	// const elkClient = new ElkClient({
-	// 	node: process.env.ELASTIC_HOST as string,
-	// 	auth: {
-	// 		username: process.env.ELASTIC_USERNAME as string,
-	// 		password: process.env.ELASTIC_PASSWORD as string
-	// 	},
-	// 	tls: {
-	// 		ca: fs.readFileSync(path.resolve(process.cwd(), './certs/ca/ca.crt')),
-	// 		rejectUnauthorized: false
-	// 	}
-	// });
+	const elkClient = new ElkClient({
+		node: process.env.ELASTIC_HOST as string,
+		auth: {
+			username: process.env.ELASTIC_USERNAME as string,
+			password: process.env.ELASTIC_PASSWORD as string
+		},
+		tls: {
+			ca: fs.readFileSync(path.resolve(process.cwd(), './certs/ca/ca.crt')),
+			rejectUnauthorized: false
+		}
+	});
 
 	return {
 		prisma,
 		session,
-		// elkClient,
+		elkClient,
 		req,
 		user_api
 	};
