@@ -60,9 +60,9 @@ const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 	return (
 		<div className={fr.cx('fr-grid-row')}>
 			<div className={fr.cx('fr-col-4')}>
-				<h4 className={fr.cx('fr-mb-0')}>Nombre des avis</h4>
+				<h4 className={fr.cx('fr-mb-0')}>Nombre d’avis</h4>
 				<p>
-					{resultFieldCodeInterval?.metadata.average} avis au moyen par mois
+					En moyenne : {resultFieldCodeInterval?.metadata.average} avis par mois
 				</p>
 				<div style={{ display: 'flex' }}>
 					<div
