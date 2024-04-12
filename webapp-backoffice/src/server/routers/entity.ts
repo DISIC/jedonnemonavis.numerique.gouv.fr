@@ -204,7 +204,7 @@ export const entityRouter = router({
 				}
 			});
 
-			if (existsEntity)
+			if (existsEntity && existsEntity.id !== entity.id)
 				throw new TRPCError({
 					code: 'CONFLICT',
 					message: 'Entity with this name already exists'
