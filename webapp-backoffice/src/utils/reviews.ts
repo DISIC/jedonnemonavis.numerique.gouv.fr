@@ -29,7 +29,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
 		}),
-		...((filters.needOtherHelp) && {
+		...((filters && filters.needOtherHelp) && {
 			OR: [{ answers: { some: { field_code: 'help_details_verbatim' }}}]
 		}),
 		...(search && {
