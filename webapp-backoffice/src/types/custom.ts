@@ -74,22 +74,20 @@ export interface ProductMapEntry {
 }
 
 export type ReviewFiltersType = {
-	satisfaction: string;
-	easy: string;
-	comprehension: string;
+	satisfaction: string[];
+	comprehension: string[];
 	needVerbatim: boolean;
 	needOtherDifficulties: boolean;
 	needOtherHelp: boolean;
-	difficulties: string;
-	help: string;
+	help: string[];
 };
 
 export type Condition = {
 	answers: {
 		some: {
 			field_code: string;
-			intention?: AnswerIntention;
-			answer_text?: string;
+			intention?: {in: AnswerIntention[]};
+			answer_text?: {in: string[]};
 		};
 	};
 };

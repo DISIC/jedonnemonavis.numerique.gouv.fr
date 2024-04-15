@@ -48,7 +48,6 @@ const getPaginationParts = ({
 	maxVisiblePages: number;
 	slicesSize: number;
 }) => {
-	console.log(maxVisiblePages);
 	// first n pages
 	if (count <= maxVisiblePages) {
 		return Array.from({ length: count }, (_, v) => ({

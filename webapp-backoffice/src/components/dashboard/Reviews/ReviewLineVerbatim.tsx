@@ -12,7 +12,7 @@ import {
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
 
-const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
+const ReviewLineVerbatim = ({ review, search }: { review: ExtendedReview, search: string }) => {
 	const color = getStatsColor({
 		intention: review.satisfaction?.intention || 'neutral'
 	});
@@ -80,7 +80,9 @@ const ReviewLineVerbatim = ({ review }: { review: ExtendedReview }) => {
 							})
 						}}
 					>
-						{review.verbatim ? review.verbatim.answer_text : 'Non renseigné'}
+						<p className={cx(classes.content)} dangerouslySetInnerHTML={{ 
+							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}` 
+						}}></p>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 						<Button
@@ -147,6 +149,11 @@ const useStyles = tss
 			fontSize: 12,
 			width: 100,
 			flexShrink: 0
+		},
+		content: {
+			'span': {
+				backgroundColor: 'yellow'
+			}
 		}
 	}));
 

@@ -96,7 +96,6 @@ export const ResetForm = () => {
         if (loadingError && !loadingCheck) {
             setSuccessChange('Error');
         }
-        console.log('testLink : ', testLink)
     }, [loadingError]);
 
     const resetPassword = trpc.user.changePAssword.useMutation({

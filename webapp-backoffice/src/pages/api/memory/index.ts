@@ -8,7 +8,6 @@ export function exportData(req: NextApiRequest, res: NextApiResponse) {
 	const memoryValue = getMemoryValue(memoryKey as string)
 	if(memoryValue === 100) {
 		deleteMemoryValue(memoryKey as string)
-		console.log('memory value deleted')
 	}
     res.status(201).json({progress : memoryValue})
 }

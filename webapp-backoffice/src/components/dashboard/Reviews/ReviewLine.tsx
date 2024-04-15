@@ -13,9 +13,9 @@ import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 
-const ReviewLine = ({ review }: { review: ExtendedReview }) => {
+const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string }) => {
 	const { cx, classes } = useStyles();
-	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
+	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(search !== '' && review.verbatim?.answer_text?.toLowerCase().includes(search.toLowerCase()) || false);
 
 	const displayIntention = (intention: string) => {
 		switch (intention) {
@@ -183,7 +183,7 @@ const ReviewLine = ({ review }: { review: ExtendedReview }) => {
 					</Button>
 				</div>
 			</div>
-			{displayMoreInfo && <ReviewLineMoreInfos review={review} />}
+			{displayMoreInfo && <ReviewLineMoreInfos review={review} search={search} />}
 		</div>
 	);
 };
