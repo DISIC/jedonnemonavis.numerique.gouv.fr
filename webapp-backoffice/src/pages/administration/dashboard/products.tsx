@@ -53,7 +53,7 @@ const DashBoard = () => {
 			sort: filters.filter,
 			page: filters.currentPage,
 			numberPerPage,
-			filterEntityId: filters.filterEntity?.value,
+			filterEntityId: filters.filterEntity?.map(e => e.value),
 			filterByUserFavorites: filters.filterOnlyFavorites
 		},
 		{
@@ -144,7 +144,7 @@ const DashBoard = () => {
 							type="button"
 							nativeButtonProps={product_modal.buttonProps}
 						>
-							Ajouter un nouveau produit
+							Ajouter un nouveau service
 						</Button>
 					</div>
 				</div>
@@ -169,14 +169,15 @@ const DashBoard = () => {
 						id="filter-entity"
 						disablePortal
 						sx={{ width: '100%' }}
-						value={filters.filterEntity}
 						options={entities.map((entity) => ({
 							label: `${entity.name} (${entity.acronym})`,
 							value: entity.id
-						}))}
+						})).filter(entity => 
+							!filters.filterEntity.some(filter => filter.value === entity.value)
+						)}
 						onChange={(_, option) => {
-							updateFilters({...filters, filterEntity: option ?? null, currentPage: 1})
-							setInputValue(''); 
+							if(option)
+							updateFilters({...filters, filterEntity: [...filters.filterEntity, option] ?? null, currentPage: 1})
 						}}
 						noOptionsText="Aucune organisation trouvée"
 						inputValue={inputValue} 
@@ -206,10 +207,10 @@ const DashBoard = () => {
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
 								<Input
-									label="Rechercher un produit"
+									label="Rechercher un service"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher un produit',
+										placeholder: 'Rechercher un service',
 										type: 'search',
 										value: search,
 										onChange: event => {
@@ -258,19 +259,21 @@ const DashBoard = () => {
 							/>
 						</div>
 					)}
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
-						{filters.filterEntity?.label &&
+					<div className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}>
+						{filters.filterEntity.map((entity) => (
 							<Tag
 								dismissible
+								className={cx(classes.tagFilter)}
 								nativeButtonProps={{
 									onClick: () => {
-										updateFilters({...filters, filterEntity: null})
+										updateFilters({...filters, filterEntity: filters.filterEntity.filter(e => e.value !== entity.value)})
 										setInputValue('')
 									}
 								}}
-							>
-								<p>{filters.filterEntity.label}</p>
+								>
+								<p>{entity.label}</p>
 							</Tag>
+						))
 						}
 					</div>
 				</div>
@@ -391,6 +394,10 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 				marginBottom: '1rem'
 			}
 		}
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
 	},
 	productsContainer: {
 		minHeight: '20rem'

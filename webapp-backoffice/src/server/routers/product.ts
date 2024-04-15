@@ -39,7 +39,7 @@ export const productRouter = router({
 				page: z.number().default(1),
 				sort: z.string().optional(),
 				search: z.string().optional(),
-				filterEntityId: z.number().optional(),
+				filterEntityId: z.array(z.number()),
 				filterByUserFavorites: z.boolean().optional()
 			})
 		)
@@ -97,9 +97,11 @@ export const productRouter = router({
 				};
 			}
 
-			if (filterEntityId) {
+			if (filterEntityId.length > 0) {
 				where.entity = {
-					id: filterEntityId
+					id: {
+						in: filterEntityId
+					}
 				};
 			}
 
