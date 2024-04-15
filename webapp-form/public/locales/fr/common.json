@@ -1,8 +1,10 @@
 {
   "first_block": {
     "title": "Je donne mon avis",
+    "subtitle_part_1": "Aidez-nous à améliorer",
+    "subtitle_part_2": "en répondant à quelques questions. Vos réponses sont anonymes.",
     "product": "Démarche",
-    "validate": "Valider"
+    "validate": "Envoyer mon avis"
   },
   "second_block": {
     "title": "Merci !",
@@ -18,22 +20,75 @@
     "medium": "Moyen",
     "bad": "Pas bien"
   },
+  "steps": {
+    "A_1": {
+      "name": "Clarté",
+      "button": "Continuer"
+    }, 
+    "A_2": {
+      "name": "Aides",
+      "button": "Continuer"
+    }, 
+    "A_3": {
+      "name": "Informations complémentaires ",
+      "button": "Terminer"
+    }
+  },
   "fields": {
     "satisfaction": {
-      "label": "Comment s'est passée cette démarche pour vous ?",
+      "label": "De façon générale, comment ça s’est passé ?",
       "hint": "Ce champ est obligatoire."
     },
     "easy": {
-      "label": "Selon les réponses suivantes, qu'est ce qui vous correspond le mieux :",
+      "label": "Qu'avez-vous pensé des informations et des instructions fournies ?",
+      "hint": "Sur une échelle de 1 à 5, 1 est incompréhensible et 5 est très clair.",
+      "hintLeft": "Incompréhensible",
+      "hintRight": "Très clair",
       "options": [
         {
-          "label": "La démarche a été facile à compléter"
+          "label": "1"
         },
         {
-          "label": "La démarche a été ni facile, ni difficile à compléter"
+          "label": "2"
         },
         {
-          "label": "La démarche a été difficile à compléter"
+          "label": "3"
+        },
+        {
+          "label": "4"
+        },
+        {
+          "label": "5"
+        }
+      ]
+    },
+    "contact_tried": {
+      "label": "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
+      "hint": "Plusieurs choix possibles",
+      "options": [
+        {
+          "label": "Au guichet avec l'administration"
+        },
+        {
+          "label": "Par téléphone avec l'administration"
+        },
+        {
+          "label": "Par e-mail avec l'administration"
+        },
+        {
+          "label": "Par chat avec l'administration"
+        },
+        {
+          "label": "Une personne proche"
+        },
+        {
+          "label": "Une association"
+        },
+        {
+          "label": "Des sites internet"
+        },
+        {
+          "label": "Autres, précisez"
         }
       ]
     },

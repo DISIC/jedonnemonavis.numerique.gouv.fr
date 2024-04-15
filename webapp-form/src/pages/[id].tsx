@@ -9,8 +9,9 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '../utils/trpc';
 import { AnswerIntention, Prisma } from '@prisma/client';
-import { firstSection, secondSection } from '../utils/form';
+import { firstSection, secondSection, steps_A } from '../utils/form';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import { FormStepper } from '../components/form/layouts/FormStepper';
 
 type JDMAFormProps = {
   product: Product;
@@ -134,6 +135,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     contact: undefined,
     contact_reached: undefined,
     contact_satisfaction: undefined,
+    contact_tried: [],
     contact_channels: [],
     contact_channels_verbatim: undefined,
     help: undefined,
@@ -171,11 +173,12 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <div className={cx(classes.formSection)}>
                 {!isFormSubmitted ? (
                   opinion.satisfaction ? (
-                    <FormSecondBlock
+                    <FormStepper
                       opinion={opinion}
+                      steps={steps_A}
                       onSubmit={result => {
                         setOpinion({ ...result });
-                        handleSubmitReview(result);
+                        //handleSubmitReview(result);
                       }}
                     />
                   ) : (

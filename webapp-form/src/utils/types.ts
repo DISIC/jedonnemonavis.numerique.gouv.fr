@@ -7,6 +7,7 @@ export type Opinion = {
   easy?: number;
   comprehension?: number;
   contact?: number;
+  contact_tried: number[];
   contact_reached?: number;
   contact_satisfaction?: number;
   contact_channels: number[];
@@ -29,7 +30,7 @@ export type Product = {
 type BaseOption = {
   label: string;
   value: number;
-  intention: "good" | "medium" | "bad" | "neutral";
+  intention: "very_good" | "good" | "medium" | "bad" | "very_bad" | "neutral";
   name?: string;
   hint?: string;
   isolated?: boolean;
@@ -85,6 +86,7 @@ export type FormField =
       kind: "checkbox";
       name: keyof Opinion;
       label: string;
+      hint: string;
       conditions?: Condition[];
       options: CheckboxOption[];
     }
@@ -92,9 +94,18 @@ export type FormField =
       kind: "radio";
       name: keyof Opinion;
       label: string;
+      hint?: string;
+      hintLeft?: string,
+      hintRight?: string;
       conditions?: Condition[];
       options: RadioOption[];
     };
+
+export type Step = {
+  name: string,
+  section: FormField[]
+  button: string
+}
 
 export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
   product_name: string;
