@@ -65,8 +65,6 @@ export const answerRouter = router({
 				size: 0
 			});
 
-			// console.log('fieldCodeAggs : ', fieldCodeAggs, fieldCodeAggs.aggregations.term.buckets)
-
 			const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
 				?.buckets as Buckets;
 

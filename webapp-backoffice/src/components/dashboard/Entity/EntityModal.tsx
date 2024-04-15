@@ -80,7 +80,6 @@ const EntityModal = (props: Props) => {
 
 		try {
 			if (entity && entity.id) {
-				console.log('update')
 				await updateEntity.mutateAsync({
 					id: entity.id,
 					entity: tmpEntity

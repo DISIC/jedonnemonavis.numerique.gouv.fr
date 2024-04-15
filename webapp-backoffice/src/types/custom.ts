@@ -74,9 +74,8 @@ export interface ProductMapEntry {
 }
 
 export type ReviewFiltersType = {
-	satisfaction: string;
-	easy: string;
-	comprehension: string;
+	satisfaction: string[];
+	comprehension: string[];
 	needVerbatim: boolean;
 	needOtherDifficulties: boolean;
 	needOtherHelp: boolean;

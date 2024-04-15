@@ -41,7 +41,6 @@ const PublicDataModal = (props: Props) => {
             : '';
 
     const URL = `${origin}${asPath}`;
-    console.log(origin);
 
     return (
         <modal.Component title="Autoriser le partage public des statistiques" size='large'>

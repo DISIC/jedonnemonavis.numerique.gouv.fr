@@ -71,8 +71,9 @@ const ReviewFiltersModal = (props: Props) => {
 						onClick={() => {
 							setTmpFilters({
 								...tmpFilters,
-								satisfaction:
-									tmpFilters.satisfaction !== intention ? intention : ''
+								satisfaction: tmpFilters.satisfaction.includes(intention) 
+									? tmpFilters.satisfaction.filter(item => item !== intention) 
+									: [...tmpFilters.satisfaction, intention]
 							});
 						}}
 						priority="tertiary"
@@ -83,7 +84,7 @@ const ReviewFiltersModal = (props: Props) => {
 								intention: (intention ?? 'neutral') as AnswerIntention
 							}),
 							backgroundColor:
-								tmpFilters.satisfaction === intention
+								tmpFilters.satisfaction.includes(intention)
 									? '#dfdfdf'
 									: 'transparent'
 						}}
@@ -94,7 +95,7 @@ const ReviewFiltersModal = (props: Props) => {
 			</div>
 
 			<div className={fr.cx('fr-mt-4v')}>
-				<p className={cx(classes.subtitle)}>Facilité</p>
+				<p className={cx(classes.subtitle)}>Compréhension des informations et des instructions fournies</p>
 				{['good', 'medium', 'bad'].map(intention => (
 					<Button
 						iconId={getStatsIcon({
@@ -103,37 +104,9 @@ const ReviewFiltersModal = (props: Props) => {
 						onClick={() => {
 							setTmpFilters({
 								...tmpFilters,
-								easy: tmpFilters.easy !== intention ? intention : ''
-							});
-						}}
-						priority="tertiary"
-						className={cx(classes.badge)}
-						key={`easy_${intention}`}
-						style={{
-							color: getStatsColor({
-								intention: (intention ?? 'neutral') as AnswerIntention
-							}),
-							backgroundColor:
-								tmpFilters.easy === intention ? '#dfdfdf' : 'transparent'
-						}}
-					>
-						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-					</Button>
-				))}
-			</div>
-
-			<div className={fr.cx('fr-mt-4v')}>
-				<p className={cx(classes.subtitle)}>Langage</p>
-				{['good', 'medium', 'bad'].map(intention => (
-					<Button
-						iconId={getStatsIcon({
-							intention: (intention ?? 'neutral') as AnswerIntention
-						})}
-						onClick={() => {
-							setTmpFilters({
-								...tmpFilters,
-								comprehension:
-									tmpFilters.comprehension !== intention ? intention : ''
+								comprehension: tmpFilters.comprehension.includes(intention) 
+									? tmpFilters.comprehension.filter(item => item !== intention) 
+									: [...tmpFilters.comprehension, intention]
 							});
 						}}
 						priority="tertiary"
@@ -144,7 +117,7 @@ const ReviewFiltersModal = (props: Props) => {
 								intention: (intention ?? 'neutral') as AnswerIntention
 							}),
 							backgroundColor:
-								tmpFilters.comprehension === intention
+								tmpFilters.comprehension.includes(intention)
 									? '#dfdfdf'
 									: 'transparent'
 						}}
@@ -156,10 +129,23 @@ const ReviewFiltersModal = (props: Props) => {
 
 			<div className={fr.cx('fr-mt-4v')}>
 				<p className={cx(classes.subtitle)}>
-					Informations rentrées par l'utilisateur
+					Champs remplis par l'utilisateur
 				</p>
 				<Checkbox
 					options={[
+						{
+							label: 'Aides (autres)',
+							nativeInputProps: {
+								name: 'needOtherHelp',
+								checked: tmpFilters.needOtherHelp,
+								onChange: () => {
+									setTmpFilters({
+										...tmpFilters,
+										needOtherHelp: !tmpFilters.needOtherHelp
+									});
+								}
+							}
+						},
 						{
 							label: 'Verbatim',
 							nativeInputProps: {
@@ -172,63 +158,10 @@ const ReviewFiltersModal = (props: Props) => {
 									});
 								}
 							}
-						},
-						{
-							label: 'Autre difficulté',
-							nativeInputProps: {
-								name: 'needOtherDifficulties',
-								checked: tmpFilters.needOtherDifficulties,
-								onChange: () => {
-									setTmpFilters({
-										...tmpFilters,
-										needOtherDifficulties: !tmpFilters.needOtherDifficulties
-									});
-								}
-							}
-						},
-						{
-							label: 'Autre aide',
-							nativeInputProps: {
-								name: 'needOtherHelp',
-								checked: tmpFilters.needOtherHelp,
-								onChange: () => {
-									setTmpFilters({
-										...tmpFilters,
-										needOtherHelp: !tmpFilters.needOtherHelp
-									});
-								}
-							}
 						}
 					]}
 					state="default"
 				/>
-			</div>
-
-			<div className={fr.cx('fr-mt-4v')}>
-				<Select
-					label="Difficulté"
-					nativeSelectProps={{
-						name: 'difficulties',
-						onChange: event =>
-							setTmpFilters({
-								...tmpFilters,
-								difficulties: event.target.value
-							}),
-						value: tmpFilters.difficulties
-					}}
-				>
-					<option disabled hidden value="">
-						Sélectionner une option
-					</option>
-					{DIFFICULTIES_LABEL.map(difficulty => (
-						<option
-							value={difficulty.value}
-							key={`difficulty_${difficulty.value}`}
-						>
-							{difficulty.label}
-						</option>
-					))}
-				</Select>
 			</div>
 
 			<div className={fr.cx('fr-mt-4v')}>
@@ -284,9 +217,8 @@ const ReviewFiltersModal = (props: Props) => {
 						type="button"
 						onClick={() =>
 							setTmpFilters({
-								satisfaction: '',
-								easy: '',
-								comprehension: '',
+								satisfaction: [],
+								comprehension: [],
 								needVerbatim: false,
 								needOtherDifficulties: false,
 								needOtherHelp: false,

@@ -22,9 +22,8 @@ export const reviewRouter = router({
 				endDate: z.string().optional(),
 				button_id: z.number().optional(),
 				filters: z.object({
-					satisfaction: z.string().optional(),
-					easy: z.string().optional(),
-					comprehension: z.string().optional(),
+					satisfaction: z.array(z.string()).optional(),
+					comprehension: z.array(z.string()).optional(),
 					needVerbatim: z.boolean().optional(),
 					needOtherDifficulties: z.boolean().optional(),
 					needOtherHelp: z.boolean().optional(),
@@ -213,9 +212,8 @@ export const reviewRouter = router({
 				endDate: z.string().optional(),
 				button_id: z.number().optional(),
 				filters: z.object({
-					satisfaction: z.string().optional(),
-					easy: z.string().optional(),
-					comprehension: z.string().optional(),
+					satisfaction: z.array(z.string()).optional(),
+					comprehension: z.array(z.string()).optional(),
 					needVerbatim: z.boolean().optional(),
 					needOtherDifficulties: z.boolean().optional(),
 					needOtherHelp: z.boolean().optional(),

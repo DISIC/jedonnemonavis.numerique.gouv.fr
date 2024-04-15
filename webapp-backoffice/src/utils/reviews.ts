@@ -54,7 +54,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 			isText?: boolean;
 		}[] = [
 			{ key: 'comprehension', field: 'comprehension' },
-			{ key: 'easy', field: 'easy' },
 			{ key: 'satisfaction', field: 'satisfaction' },
 			{
 				key: 'needOtherDifficulties',
@@ -66,16 +65,18 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 			{ key: 'help', field: 'help_details' }
 		];
 		Object.keys(filters).map(key => {
-			if (filters[key as keyof typeof filters]) {
+			if (filters[key as keyof typeof filters] && filters[key as keyof typeof filters].length > 0) {
 				let condition: Condition = {
 					answers: {
 						some: {
 							field_code: fields.find(field => field.key === key)
 								?.field as string,
-							...(['comprehension', 'easy', 'satisfaction'].includes(key) && {
-								intention: filters[
-									key as keyof typeof filters
-								] as AnswerIntention
+							...(['comprehension', 'satisfaction'].includes(key) && {
+								intention: {
+									in: filters[
+										key as keyof typeof filters
+									] as AnswerIntention[]
+								}
 							}),
 							...(['difficulties', 'help'].includes(key) && {
 								answer_text: filters[key as keyof typeof filters] as string

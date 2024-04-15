@@ -3,7 +3,7 @@ import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
-const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
+const ReviewLineMoreInfos = ({ review, search }: { review: ExtendedReview, search: string }) => {
 	const { cx, classes } = useStyles();
 
 	if (!review) return null;
@@ -38,9 +38,9 @@ const ReviewLineMoreInfos = ({ review }: { review: ExtendedReview }) => {
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
 					<p className={cx(classes.subtitle)}>Verbatim</p>
-					<p className={cx(classes.content)}>
-						{review.verbatim ? review.verbatim.answer_text : 'Non renseigné'}
-					</p>
+					<p className={cx(classes.content)} dangerouslySetInnerHTML={{ 
+						__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}` 
+					}}></p>
 				</div>
 			</div>
 			<ReviewCommonVerbatimLine
@@ -67,7 +67,10 @@ const useStyles = tss.create({
 	content: {
 		fontSize: 12,
 		fontWeight: 400,
-		marginBottom: 0
+		marginBottom: 0,
+		'span': {
+			backgroundColor: 'yellow'
+		}
 	}
 });
 

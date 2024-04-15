@@ -55,9 +55,8 @@ const ProductReviewsPage = (props: Props) => {
 	});
 
 	const [filters, setFilters] = React.useState<ReviewFiltersType>({
-		satisfaction: '',
-		easy: '',
-		comprehension: '',
+		satisfaction: [],
+		comprehension: [],
 		needVerbatim: false,
 		needOtherDifficulties: false,
 		needOtherHelp: false,
@@ -154,10 +153,74 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
+	const renderTags = () => {
+		const tags = Object.keys(filters).flatMap((key, index) => {
+			const filterValue = filters[key as keyof ReviewFiltersType];
+			if (
+				!Array.isArray(filterValue) &&
+				filterValue !== '' &&
+				filterValue !== false
+			) {
+				return (
+					<Tag
+						key={index}
+						dismissible
+						className={cx(classes.tagFilter)}
+						nativeButtonProps={{
+							onClick: () => {
+								setFilters({
+									...filters,
+									[key]:
+										typeof filterValue === 'boolean'
+											? false
+											: ''
+								});
+							}
+						}}
+					>
+						{renderLabel(
+							FILTER_LABELS.find(filter => filter.value === key)?.type,
+							key,
+							filterValue
+						)}
+					</Tag>
+				);
+			} else if (Array.isArray(filterValue) && filterValue.length > 0) {
+				return filterValue.map((value, subIndex) => (
+					<Tag
+						key={`${key}-${subIndex}`}
+						dismissible
+						className={cx(classes.tagFilter)}
+						nativeButtonProps={{
+							onClick: () => {
+								setFilters({
+									...filters,
+									[key]: filterValue.filter(
+										(item) => item !== value
+									)
+								});
+							}
+						}}
+					>
+						{renderLabel(
+							FILTER_LABELS.find(filter => filter.value === key)?.type,
+							key,
+							value
+						)}
+					</Tag>
+				));
+			} else {
+				return null;
+			}
+		});
+	
+		return tags.length > 0 ? tags : null;
+	}
+
 	const renderLabel = (
 		type: string | undefined,
 		key: string,
-		value: string | boolean
+		value: string | string[] | boolean
 	) => {
 		switch (type) {
 			case 'checkbox':
@@ -201,7 +264,7 @@ const ProductReviewsPage = (props: Props) => {
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
 						<Input
 							label="Date de début"
 							nativeInputProps={{
@@ -213,7 +276,7 @@ const ProductReviewsPage = (props: Props) => {
 							}}
 						/>
 					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-4')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
 						<Input
 							label="Date de fin"
 							nativeInputProps={{
@@ -229,7 +292,7 @@ const ProductReviewsPage = (props: Props) => {
 						className={fr.cx(
 							'fr-col-12',
 							'fr-col-md-6',
-							'fr-col-lg-4',
+							'fr-col-lg-6',
 							'fr-col--bottom'
 						)}
 					>
@@ -242,10 +305,10 @@ const ProductReviewsPage = (props: Props) => {
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
 								<Input
-									label="Rechercher un produit"
+									label="Rechercher un avis"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher',
+										placeholder: 'Rechercher dans les verbatims',
 										type: 'search',
 										value: search,
 										onChange: event => {
@@ -371,38 +434,7 @@ const ProductReviewsPage = (props: Props) => {
 						</div>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
-						{Object.keys(filters).map((key, index) => {
-							if (
-								filters[key as keyof ReviewFiltersType] !== '' &&
-								filters[key as keyof ReviewFiltersType] !== false
-							) {
-								return (
-									<Tag
-										key={index}
-										dismissible
-										className={cx(classes.tagFilter)}
-										nativeButtonProps={{
-											onClick: () => {
-												setFilters({
-													...filters,
-													[key]:
-														typeof filters[key as keyof ReviewFiltersType] ===
-														'boolean'
-															? false
-															: ''
-												});
-											}
-										}}
-									>
-										{renderLabel(
-											FILTER_LABELS.find(filter => filter.value === key)?.type,
-											key,
-											filters[key as keyof ReviewFiltersType]
-										)}
-									</Tag>
-								);
-							}
-						})}
+						{renderTags()}
 					</div>
 				</div>
 				{isLoadingReviews ? (
@@ -445,9 +477,9 @@ const ProductReviewsPage = (props: Props) => {
 									/>
 									{reviewsExtended.map((review, index) => {
 										if (review && displayMode === 'reviews') {
-											return <ReviewLine key={index} review={review} />;
+											return <ReviewLine key={index} review={review} search={validatedSearch}/>;
 										} else if (review && displayMode === 'verbatim') {
-											return <ReviewLineVerbatim key={index} review={review} />;
+											return <ReviewLineVerbatim key={index} review={review} search={validatedSearch} />;
 										}
 									})}
 								</>
