@@ -60,8 +60,7 @@ const ProductReviewsPage = (props: Props) => {
 		needVerbatim: false,
 		needOtherDifficulties: false,
 		needOtherHelp: false,
-		difficulties: '',
-		help: ''
+		help: []
 	});
 
 	const handleSubmitfilters = (filters: ReviewFiltersType) => {
@@ -158,7 +157,6 @@ const ProductReviewsPage = (props: Props) => {
 			const filterValue = filters[key as keyof ReviewFiltersType];
 			if (
 				!Array.isArray(filterValue) &&
-				filterValue !== '' &&
 				filterValue !== false
 			) {
 				return (

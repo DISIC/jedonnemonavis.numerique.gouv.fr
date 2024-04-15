@@ -27,8 +27,7 @@ export const reviewRouter = router({
 					needVerbatim: z.boolean().optional(),
 					needOtherDifficulties: z.boolean().optional(),
 					needOtherHelp: z.boolean().optional(),
-					difficulties: z.string().optional(),
-					help: z.string().optional()
+					help: z.array(z.string()).optional()
 				}).optional()
 			})
 		)
@@ -217,8 +216,7 @@ export const reviewRouter = router({
 					needVerbatim: z.boolean().optional(),
 					needOtherDifficulties: z.boolean().optional(),
 					needOtherHelp: z.boolean().optional(),
-					difficulties: z.string().optional(),
-					help: z.string().optional()
+					help: z.array(z.string()).optional()
 				}).optional()
 			})
 		)

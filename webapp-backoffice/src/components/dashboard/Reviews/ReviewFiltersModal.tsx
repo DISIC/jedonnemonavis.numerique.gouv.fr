@@ -15,6 +15,7 @@ import Select from '@codegouvfr/react-dsfr/Select';
 import { DIFFICULTIES_LABEL, HELP_LABELS } from '@/src/utils/helpers';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
+
 interface CustomModalProps {
 	buttonProps: {
 		id: string;
@@ -165,24 +166,28 @@ const ReviewFiltersModal = (props: Props) => {
 			</div>
 
 			<div className={fr.cx('fr-mt-4v')}>
-				<Select
-					label="Aide"
-					nativeSelectProps={{
-						name: 'help',
-						onChange: event =>
-							setTmpFilters({ ...tmpFilters, help: event.target.value }),
-						value: tmpFilters.help
-					}}
-				>
-					<option disabled hidden value="">
-						Sélectionner une option
-					</option>
-					{HELP_LABELS.map(help => (
-						<option value={help.value} key={`help_${help.value}`}>
-							{help.label}
-						</option>
-					))}
-				</Select>
+
+				<Checkbox
+					legend="Aide requise par l'utilisateur"
+					options={HELP_LABELS.map((help) => {
+						return {
+							label: help.label,
+							nativeInputProps:{
+								value: help.value,
+								onChange: event => {
+									setTmpFilters({
+										...tmpFilters,
+										help: tmpFilters.help.includes(help.value) 
+											? tmpFilters.help.filter(item => item !== help.value) 
+											: [...tmpFilters.help, help.value]
+									});
+								}
+							},
+							checked: tmpFilters.help.includes(help.value)
+						}
+					})}
+					orientation="vertical"
+				/>
 			</div>
 
 			<div
@@ -222,8 +227,7 @@ const ReviewFiltersModal = (props: Props) => {
 								needVerbatim: false,
 								needOtherDifficulties: false,
 								needOtherHelp: false,
-								difficulties: '',
-								help: ''
+								help: []
 							})
 						}
 					>

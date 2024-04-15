@@ -17,6 +17,23 @@ import { Domain } from 'domain';
 const prisma = new PrismaClient();
 
 async function main() {
+
+	const command = process.argv[2];
+
+	switch (command) {
+		case 'seedUsersProducts':
+			await seed_users_products();
+			break;
+		case 'seedFormattedTitles':
+			await formatted_title();
+			break;
+		default:
+			console.log(`Unknown command: ${command}`);
+	}
+
+}
+
+async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
@@ -142,7 +159,7 @@ async function formatted_title() {
 
 }
 
-formatted_title()
+main()
 	.then(async () => {
 		await prisma.$disconnect();
 	})

@@ -29,6 +29,9 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
 		}),
+		...((filters.needOtherHelp) && {
+			OR: [{ answers: { some: { field_code: 'help_details_verbatim' }}}]
+		}),
 		...(search && {
 			OR: [
 				{
@@ -55,31 +58,25 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		}[] = [
 			{ key: 'comprehension', field: 'comprehension' },
 			{ key: 'satisfaction', field: 'satisfaction' },
-			{
-				key: 'needOtherDifficulties',
-				field: 'difficulties_details_verbatim',
-				isText: false
-			},
 			{ key: 'needOtherHelp', field: 'help_details_verbatim', isText: false },
 			{ key: 'difficulties', field: 'difficulties_details' },
 			{ key: 'help', field: 'help_details' }
 		];
 		Object.keys(filters).map(key => {
-			if (filters[key as keyof typeof filters] && filters[key as keyof typeof filters].length > 0) {
+			if (filters[key] && filters[key].length > 0) {
 				let condition: Condition = {
 					answers: {
 						some: {
-							field_code: fields.find(field => field.key === key)
-								?.field as string,
+							field_code: fields.find(field => field.key === key)?.field as string,
 							...(['comprehension', 'satisfaction'].includes(key) && {
 								intention: {
-									in: filters[
-										key as keyof typeof filters
-									] as AnswerIntention[]
+									in: filters[key] as AnswerIntention[]
 								}
 							}),
-							...(['difficulties', 'help'].includes(key) && {
-								answer_text: filters[key as keyof typeof filters] as string
+							...(['help'].includes(key) && {
+								answer_text: {
+									in: filters[key] as string[]
+								}
 							})
 						}
 					}
