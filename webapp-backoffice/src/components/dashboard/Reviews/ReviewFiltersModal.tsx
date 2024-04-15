@@ -181,9 +181,9 @@ const ReviewFiltersModal = (props: Props) => {
 											? tmpFilters.help.filter(item => item !== help.value) 
 											: [...tmpFilters.help, help.value]
 									});
-								}
+								},
+								checked: tmpFilters.help.includes(help.value)
 							},
-							checked: tmpFilters.help.includes(help.value)
 						}
 					})}
 					orientation="vertical"
