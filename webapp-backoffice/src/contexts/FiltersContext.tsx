@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Filters = {
-    filterEntity?: {label: string | undefined, value: number | undefined} | null;
+    filterEntity: {label: string, value: number}[];
     currentPage: number;
     filter: string;
     filterOnlyFavorites: boolean;
@@ -20,7 +20,7 @@ interface FiltersContextProviderProps {
 }
 
 export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({ children }) => {
-    const [filters, setFilters] = useState<Filters>({currentPage: 1, filter: 'title', filterOnlyFavorites: false, validatedSearch: ''});
+    const [filters, setFilters] = useState<Filters>({filterEntity: [], currentPage: 1, filter: 'title', filterOnlyFavorites: false, validatedSearch: ''});
 
     const updateFilters = (newFilters: Partial<Filters>) => {
         setFilters(prevFilters => ({
