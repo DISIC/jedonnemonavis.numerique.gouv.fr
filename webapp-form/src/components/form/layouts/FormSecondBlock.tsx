@@ -1,4 +1,4 @@
-import { secondSection } from "@/src/utils/form";
+import { secondSectionA } from "@/src/utils/form";
 import { FormField, Opinion } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -33,13 +33,13 @@ export const FormSecondBlock = (props: Props) => {
           onSubmit(tmpOpinion);
         }}
       >
-        {secondSection.map((field: FormField) => (
+        {secondSectionA.map((field: FormField) => (
           <div key={field.name} className={cx(classes.field)}>
             <Field
               field={field}
               opinion={tmpOpinion}
               setOpinion={setTmpOpinion}
-              form={secondSection}
+              form={secondSectionA}
             />
           </div>
         ))}
