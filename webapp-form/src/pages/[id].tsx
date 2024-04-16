@@ -1,5 +1,4 @@
 import { FormFirstBlock } from '@/src/components/form/layouts/FormFirstBlock';
-import { FormSecondBlock } from '@/src/components/form/layouts/FormSecondBlock';
 import { FormField, Opinion, Product, RadioOption } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useTranslation } from 'next-i18next';
@@ -10,8 +9,10 @@ import { tss } from 'tss-react/dsfr';
 import { trpc } from '../utils/trpc';
 import { AnswerIntention, Prisma } from '@prisma/client';
 import { firstSection, secondSection, steps_A } from '../utils/form';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { FormStepper } from '../components/form/layouts/FormStepper';
+import { Highlight } from "@codegouvfr/react-dsfr/Highlight";
+import Link from 'next/link';
+import Image from 'next/image';
 
 type JDMAFormProps = {
   product: Product;
@@ -30,7 +31,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const getSelectedOption = (
     field: FormField,
-    value: number
+    value: number | string
   ): { label: string; intention: AnswerIntention; value: number } => {
     if (field.kind === 'radio' || field.kind == 'checkbox') {
       const selectedOption = field.options.find(
@@ -55,7 +56,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       return {
         label: smileyLabel,
         intention: smileyIntention,
-        value
+        value: value as number
       };
     } else {
       return {
@@ -180,6 +181,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                         setOpinion({ ...result });
                         //handleSubmitReview(result);
                       }}
+                      isFormSubmitted={isFormSubmitted}
+                      setIsFormSubmitted={setIsFormSubmitted}
                     />
                   ) : (
                     <FormFirstBlock
@@ -190,15 +193,47 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                   )
                 ) : (
                   <div>
-                    <h1 className={classes.titleSection}>
-                      {t('success_block.title')}
-                    </h1>
-                    <div>
-                      <Alert
-                        severity="success"
-                        description={t('success_block.alert')}
-                        small
+                    <div className={classes.titleSuccess}>
+                      <Image
+                        alt="Service public +"
+                        src="/assets/icon-check.svg"
+                        title="Icone - Merci pour votre aide"
+                        width={40}
+                        height={40}
                       />
+                      <h1 className={fr.cx('fr-mb-0', 'fr-ml-5v')}>
+                        {t('success_block.title')}
+                      </h1>
+                    </div>
+                    <p>{t('success_block.thanks')}</p>
+                    <Highlight>
+                      <b>{t('success_block.question')}{` ${product.title} ?`}</b>{' '}
+                      <Link className={fr.cx('fr-link')} href={'mailto:experts@design.numerique.gouv.fr'}>{t('success_block.support')}</Link>
+                    </Highlight>
+                    <div className={cx(classes.furtherSection, fr.cx('fr-grid-row'))}>
+                      <div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+                        <h2>
+                          {t('success_block.further')}
+                        </h2>
+                      </div>
+                      <div className={fr.cx('fr-col-md-8', 'fr-mt-4v')}>
+                        <p>{t('success_block.share')}</p>
+                        <Link className={fr.cx('fr-link')} 
+                              href={'https://www.plus.transformation.gouv.fr/experience/step_1#breadcrumb'}
+                              target='_blank'>
+                                {t('success_block.link')}
+                        </Link>
+                      </div>
+                      <div className={cx(classes.logoContainer, fr.cx('fr-col-md-4', 'fr-mt-4v'))}>
+                        <Image
+                          className={classes.logo}
+                          alt="Service public +"
+                          src="/assets/services-plus.svg"
+                          title="Service public + logo"
+                          width={830}
+                          height={250}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -276,6 +311,25 @@ const useStyles = tss
       [fr.breakpoints.down('md')]: {
         display: 'none'
       }
+    },
+    titleSuccess: {
+      display: 'flex',
+      justifyContent: 'center',
+      marginBottom: '2rem',
+      alignItems: 'center'
+    },
+    furtherSection: {
+      'h2': {
+        color: fr.colors.decisions.background.flat.blueFrance.default,
+      },
+    },
+    logoContainer: {
+      display: 'flex',
+      alignItems: "center"
+    },
+    logo: {
+      maxHeight: fr.spacing("11v"),
+      width: "100%",
     },
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,

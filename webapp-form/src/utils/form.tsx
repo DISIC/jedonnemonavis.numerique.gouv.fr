@@ -462,7 +462,15 @@ export const secondSectionA: FormField[] = [
     needed: [9, 10, 11, 12],
     excluded: [16]
   }
-  
+]
+
+export const thirdSectionA: FormField[] = [
+  {
+    name: 'verbatim',
+    kind: 'input-textarea',
+    hint: 'fields.verbatim.hint',
+    label: 'fields.verbatim.label'
+  }
 ]
 
 export const steps_A: Step[] = [
@@ -478,7 +486,7 @@ export const steps_A: Step[] = [
   },
   {
     name: 'steps.A_3.name',
-    section: secondSection,
+    section: thirdSectionA,
     button: 'steps.A_3.button'
   }       
 ]

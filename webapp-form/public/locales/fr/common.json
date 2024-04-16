@@ -13,6 +13,12 @@
   },
   "success_block": {
     "title": "Merci pour votre aide !",
+    "thanks": "Votre avis nous permettra d’améliorer la qualité du service. ",
+    "question": "Des questions pour",
+    "support": "Contactez le support.",
+    "further": "Vous souhaitez aller plus loin ?",
+    "share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
+    "link": "Partager mon expérience publiquement",
     "alert": "Votre avis a bien été transmis au service qui s'occupe de cette démarche."
   },
   "smileys": {
@@ -66,7 +72,7 @@
       "label": "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
       "hint": "Plusieurs choix possibles",
       "options": [
-        {
+        { 
           "label": "Au guichet avec l'administration"
         },
         {
@@ -261,7 +267,7 @@
     },
     "verbatim": {
       "label": "Souhaitez-vous nous en dire plus ?",
-      "hint": "Ne communiquez aucune information personnelle ici. Ceci n'est pas un formulaire de contact. Si vous avez des questions sur cette démarche, contactez le service concerné."
+      "hint": "Ne partagez pas d’information personnelle."
     }
   }
 }

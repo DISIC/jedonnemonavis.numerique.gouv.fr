@@ -13,10 +13,12 @@ type Props = {
   opinion: Opinion;
   steps: Step[];
   onSubmit: (opinion: Opinion) => void;
+  isFormSubmitted: boolean;
+  setIsFormSubmitted: (choice: boolean) => void
 };
 
 export const FormStepper = (props: Props) => {
-  const { onSubmit, opinion, steps } = props;
+  const { onSubmit, opinion, steps, isFormSubmitted, setIsFormSubmitted } = props;
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
   const [ currentStep, setCurrentStep ] = useState<number>(0)
@@ -42,7 +44,11 @@ export const FormStepper = (props: Props) => {
       <form
         onSubmit={(e) => {
             console.log('submit')
-            setCurrentStep(currentStep + 1)
+            if((currentStep + 1) < steps.length) {
+                setCurrentStep(currentStep + 1)
+            } else {
+                setIsFormSubmitted(true)
+            }
           e.preventDefault();
           onSubmit(tmpOpinion);
         }}
