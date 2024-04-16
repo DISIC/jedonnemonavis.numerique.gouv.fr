@@ -24,10 +24,14 @@ export const FormFirstBlock = (props: Props) => {
   return (
     <div>
       <h1 className={cx(classes.title)}>{t("first_block.title")}</h1>
-      {/* <h2 className={fr.cx("fr-mt-4v", "fr-mt-md-14v", "fr-mb-10v")}>
-        {t("first_block.product")} :{" "}
-        <span className={fr.cx("fr-text--regular")}>{product.title}</span>
-      </h2> */}
+      <div className={fr.cx('fr-grid-row')}>
+        <div className={cx(classes.notice, fr.cx('fr-col-12', 'fr-p-10v'))}>
+          <p className={fr.cx("fr-mb-0")}>
+            <span className={cx(classes.bold)}>{t("first_block.subtitle_part_1")} {product.title}</span>
+            <span>{' '}{t("first_block.subtitle_part_2")}</span>
+          </p>
+        </div>
+      </div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -60,6 +64,12 @@ const useStyles = tss
   .withName(SmileyInput.name)
   .withParams()
   .create(() => ({
+    notice: {
+      backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
+    },
+    bold: {
+      fontWeight: 800,
+    },
     title: {
       [fr.breakpoints.down("md")]: {
         display: "none",

@@ -45,9 +45,11 @@ enum AnswerKind {
 }
 
 enum AnswerIntention {
+  very_good
   good
   medium
   bad
+  very_bad
   neutral
 }
 
