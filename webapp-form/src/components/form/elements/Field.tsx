@@ -14,6 +14,8 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
 import { RadioInput } from './RadioInput';
 import { CheckboxInput } from './CheckboxInput';
+import { YesNoInput } from './YesNoInput';
+import { ArrayRadio } from './ArrayRadio';
 
 type Props = {
   field: FormField;
@@ -124,6 +126,14 @@ export const Field = (props: Props) => {
             setOpinion({ ...opinion, [field.name]: field.values[value] });
           }}
         />
+      );
+    case 'array-radio':
+      return (
+          <ArrayRadio field={field} opinion={opinion} form={form} setOpinion={setOpinion}></ArrayRadio>
+      );
+    case 'yes-no':
+      return (
+          <YesNoInput field={field} opinion={opinion} form={form} setOpinion={setOpinion}></YesNoInput>
       );
     case 'checkbox':
       return (

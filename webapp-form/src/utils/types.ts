@@ -8,7 +8,7 @@ export type Opinion = {
   comprehension?: number;
   contact?: number;
   contact_tried: number[];
-  contact_reached?: number;
+  contact_reached: string[];
   contact_satisfaction?: number;
   contact_channels: number[];
   contact_channels_verbatim?: string;
@@ -89,6 +89,24 @@ export type FormField =
       hint: string;
       conditions?: Condition[];
       options: CheckboxOption[];
+    }
+  | {
+      kind: "array-radio";
+      name: keyof Opinion;
+      label: string;
+      conditions?: Condition[];
+      options: RadioOption[];
+      needed: number[];
+      excluded: number[]
+    }
+  | {
+      kind: "yes-no";
+      name: keyof Opinion;
+      label: string;
+      conditions?: Condition[];
+      options: RadioOption[];
+      needed: number[];
+      excluded: number[]
     }
   | {
       kind: "radio";

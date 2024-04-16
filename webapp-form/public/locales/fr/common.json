@@ -92,6 +92,40 @@
         }
       ]
     },
+    "contact_reached": {
+      "label": "Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
+      "options": [
+        {
+          "label": "Oui"
+        },
+        {
+          "label": "Non"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
+      "options": [
+        {
+          "label": "Très mauvaise"
+        },
+        {
+          "label": "Mauvaise"
+        },
+        {
+          "label": "Ni bonne, ni mauvaise"
+        },
+        {
+          "label": "Bonne"
+        },
+        {
+          "label": "Excellente"
+        },
+        {
+          "label": "Ne se prononce pas"
+        }
+      ]
+    },
     "comprehension": {
       "label": "Qu'avez-vous pensé du langage utilisé ?",
       "options": [
@@ -158,17 +192,6 @@
         }
       ]
     },
-    "contact_reached": {
-      "label": "Avez vous réussi à les joindre ?",
-      "options": [
-        {
-          "label": "Oui"
-        },
-        {
-          "label": "Non"
-        }
-      ]
-    },
     "contact_channels": {
       "label": "Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?",
       "options": [
@@ -187,7 +210,7 @@
       ]
     },
     "contact_channels_verbatim": {
-      "label": "Pouvez-vous préciser quelle(s) autre(s) moyen(s) avez-vous tenter de contacter le service ?",
+      "label": "Quels autres types d'aide avez-vous utilisés ?",
       "hint": "Maximum 250 caractères."
     },
     "contact_details": {
@@ -203,9 +226,6 @@
           "label": "Je les ai contacté et ils m’ont répondu"
         }
       ]
-    },
-    "contact_satisfaction": {
-      "label": "Comment s’est passé l’échange avec le service de la démarche ?"
     },
     "help": {
       "label": "Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?",

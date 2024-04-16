@@ -42,6 +42,12 @@ import {
                             type="radio"
                             name={f.value.toString()}
                             checked={opinion.easy === f.value}
+                            onChange={() => {
+                              setOpinion((prevOpinion) => ({
+                                ...prevOpinion,
+                                [field.name]: f.value
+                              }));
+                            }}
                             onClick={() => {
                               setOpinion((prevOpinion) => ({
                                 ...prevOpinion,

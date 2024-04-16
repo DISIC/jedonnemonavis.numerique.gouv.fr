@@ -1,4 +1,4 @@
-import { secondSection } from "@/src/utils/form";
+import { secondSection, secondSectionA } from "@/src/utils/form";
 import { FormField, Opinion, Step } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -53,7 +53,7 @@ export const FormStepper = (props: Props) => {
                     field={field}
                     opinion={tmpOpinion}
                     setOpinion={setTmpOpinion}
-                    form={secondSection}
+                    form={secondSectionA}
                 />
             </div>
         ))}

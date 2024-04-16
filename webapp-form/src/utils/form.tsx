@@ -353,45 +353,116 @@ export const secondSectionA: FormField[] = [
       {
         label: 'fields.contact_tried.options.0.label',
         value: 9,
-        intention: 'very_bad'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.1.label', 
         value: 10,
-        intention: 'bad'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.2.label',
         value: 11,
-        intention: 'medium'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.3.label',
         value: 12,
-        intention: 'good'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.4.label',
         value: 13,
-        intention: 'very_good'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.5.label',
         value: 14,
-        intention: 'very_good'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.6.label',
         value: 15,
-        intention: 'very_good'
+        intention: 'neutral'
       },
       {
         label: 'fields.contact_tried.options.7.label',
         value: 16,
-        intention: 'very_good'
+        intention: 'neutral'
       }
     ]
+  },
+  {
+    conditions: [
+      {
+        name: 'contact_tried',
+        values: [16]
+      }
+    ],
+    name: 'contact_channels_verbatim',
+    kind: 'input-textarea',
+    hint: 'fields.contact_channels_verbatim.hint',
+    label: 'fields.contact_channels_verbatim.label'
+  },
+  {
+    name: 'contact_reached',
+    kind: 'yes-no',
+    label: 'fields.contact_reached.label',
+    options: [
+      {
+        label: 'fields.contact_reached.options.0.label',
+        value: 17,
+        intention: 'neutral'
+      },
+      {
+        label: 'fields.contact_reached.options.1.label',
+        value: 18,
+        intention: 'neutral'
+      }
+    ],
+    needed: [9, 10, 11, 12],
+    excluded: [16]
+  },
+  {
+    name: 'contact_satisfaction',
+    kind: 'array-radio',
+    label: 'fields.contact_satisfaction.label',
+    options: [
+      {
+        label: 'fields.contact_satisfaction.options.0.label',
+        value: 19,
+        intention: 'very_bad'
+      },
+      {
+        label: 'fields.contact_satisfaction.options.1.label',
+        value: 20,
+        intention: 'bad'
+      },
+      {
+        label: 'fields.contact_satisfaction.options.2.label',
+        value: 21,
+        intention: 'medium'
+      },
+      {
+        label: 'fields.contact_satisfaction.options.3.label',
+        value: 22,
+        intention: 'good'
+      },
+      {
+        label: 'fields.contact_satisfaction.options.4.label',
+        value: 23,
+        intention: 'very_good'
+      },
+      {
+        label: 'fields.contact_satisfaction.options.5.label',
+        value: 24,
+        intention: 'neutral'
+      }
+    ],
+    needed: [9, 10, 11, 12],
+    excluded: [16]
   }
+  
 ]
 
 export const steps_A: Step[] = [

@@ -133,7 +133,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     difficulties_details: [],
     difficulties_details_verbatim: undefined,
     contact: undefined,
-    contact_reached: undefined,
+    contact_reached: [],
     contact_satisfaction: undefined,
     contact_tried: [],
     contact_channels: [],
