@@ -59,12 +59,7 @@ const EntityRightsModal = (props: Props) => {
 
 	const { cx, classes } = useStyles({ addError });
 
-	useIsModalOpen(modal, {
-		onConceal: () => {
-			setActionType(null);
-			onClose();
-		}
-	});
+	useIsModalOpen(modal);
 
 	const nbPages = getNbPages(adminEntityRightsCount, numberPerPage);
 
