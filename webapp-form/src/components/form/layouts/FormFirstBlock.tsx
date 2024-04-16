@@ -1,4 +1,4 @@
-import { firstSection } from "@/src/utils/form";
+import { primarySection } from "@/src/utils/form";
 import { FormField, Opinion, Product } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
@@ -27,7 +27,8 @@ export const FormFirstBlock = (props: Props) => {
       <div className={fr.cx('fr-grid-row')}>
         <div className={cx(classes.notice, fr.cx('fr-col-12', 'fr-p-10v'))}>
           <p className={fr.cx("fr-mb-0")}>
-            <span className={cx(classes.bold)}>{t("first_block.subtitle_part_1")} {product.title}</span>
+            <span>{t("first_block.subtitle_part_1")}</span>
+            <span className={cx(classes.bold)}> {product.title}</span>
             <span>{' '}{t("first_block.subtitle_part_2")}</span>
           </p>
         </div>
@@ -40,13 +41,13 @@ export const FormFirstBlock = (props: Props) => {
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
         className={fr.cx("fr-mt-14v")}
       >
-        {firstSection.map((field: FormField) => (
+        {primarySection.map((field: FormField) => (
           <div key={field.name} className={cx(classes.field)}>
             <Field
               field={field}
               opinion={tmpOpinion}
               setOpinion={setTmpOpinion}
-              form={firstSection}
+              form={primarySection}
             />
           </div>
         ))}
