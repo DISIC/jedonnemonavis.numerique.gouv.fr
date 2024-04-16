@@ -52,61 +52,64 @@ import { BaseOptions } from 'vm';
     if(field.kind === "yes-no") {
         return (
             <div className={fr.cx('fr-grid-row')}>
-              <div className={fr.cx('fr-col-12')}>
-                <h6>{t(field.label)}</h6>
-              </div>
-                {'options' in form[0] && form[0].options && form[0].options.map((option: RadioOption) => (
-                  <div className={fr.cx('fr-col-12')} key={option.value}>
-                    {(field.needed.includes(option.value) || opinion.contact_tried.includes(option.value) && !field.excluded.includes(option.value)) &&
-                      <div>
-                        <label className={cx(classes.label)}>{t(option.label)}</label>
-                        <div className={cx(classes.radioContainer)}>
-                          <fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
-                            <ul>
-                              {field.options.map(f => (
-                                <form key={`${option.name}_${f.value}`}>
-                                  <li>
-                                    <input
-                                      id={`radio-${f.label}-${option.label}-${f.value}`}
-                                      className={fr.cx('fr-sr-only')}
-                                      type="radio"
-                                      name={f.value.toString()}
-                                      checked={opinion.contact_reached.includes(`${option.value}_${f.value}`)}
-                                      onClick={() => {
-                                        setOpinion(() => {
-                                          const key = `${option.value}_${f.value}`;
-                                          let newContactReached;
-                                          if (opinion.contact_reached.includes(key)) {
-                                            newContactReached = opinion.contact_reached.filter(item => item !== key);
-                                          } else if(containsSpecificVariableNumberPattern(opinion.contact_reached, `${option.value}`)) {
-                                            console.log('test')
-                                            newContactReached = [...opinion.contact_reached.filter(o => {o === key}), key]
-                                          } else {
-                                            newContactReached = [...opinion.contact_reached, key];
-                                          }
-                                          return {
-                                            ...opinion,
-                                            contact_reached: newContactReached
-                                          };
-                                        });
-                                      }}
-                                    />
-                                    <label
-                                      htmlFor={`radio-${f.label}-${option.label}-${f.value}`}
-                                      className={cx(classes.radioInput)}
-                                    >
-                                      {t(f.label)}
-                                    </label>
-                                  </li>
-                                </form>
-                              ))}
-                            </ul>
-                          </fieldset>
-                        </div>
-                      </div>
-                    }
+              {opinion.contact_tried.some(element => 'options' in form[0] && field.needed.includes(element)) &&
+                <div className={fr.cx('fr-col-12')}>
+                  <h6>{t(field.label)}</h6>
+                </div>
+              }
+              {'options' in form[0] && form[0].options.map((option: RadioOption) => (
+                <div className={fr.cx('fr-col-12')} key={option.value}>
+                  {(opinion.contact_tried.includes(option.value) && !field.excluded.includes(option.value)) &&
+                    <div>
+                      <label className={cx(classes.label)}>{t(option.label)}</label>
+                      <div className={cx(classes.radioContainer)}>
+                        <fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
+                          <ul>
+                            {field.options.map(f => (
+                              <form key={`${option.name}_${f.value}`}>
+                                <li>
+                                <input
+                                  id={`radio-${f.label}-${option.label}-${f.value}`}
+                                  className={fr.cx('fr-sr-only')}
+                                  type="radio"
+                                  name={f.value.toString()}
+                                  checked={opinion.contact_reached.includes(`${option.value}_${f.value}`)}
+                                  onChange={() => {
+                                    setOpinion((currentOpinion) => {
+                                      const key = `${option.value}_${f.value}`;
+                                      let newContactReached;
+                                      if (currentOpinion.contact_reached.includes(key)) {
+                                        newContactReached = currentOpinion.contact_reached.filter(item => item !== key);
+                                      } else {
+                                        if (containsSpecificVariableNumberPattern(currentOpinion.contact_reached, `${option.value}`)) {
+                                          newContactReached = [...currentOpinion.contact_reached.filter(item => !item.includes(`${option.value}_`)), key];
+                                        } else {
+                                          newContactReached = [...currentOpinion.contact_reached, key];
+                                        }
+                                      }
+                                      return {
+                                        ...currentOpinion,
+                                        contact_reached: newContactReached
+                                      };
+                                    });
+                                  }}
+                                />
+                                <label
+                                  htmlFor={`radio-${f.label}-${option.label}-${f.value}`}
+                                  className={cx(classes.radioInput)}
+                                >
+                                  {t(f.label)}
+                                </label>
+                              </li>
+                            </form>
+                          ))}
+                        </ul>
+                      </fieldset>
+                    </div>
                   </div>
-                ))}
+                }
+              </div>
+              ))}
             </div>
         );
     

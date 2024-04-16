@@ -90,31 +90,31 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
                                 name="radio"
                                 options={[
                                   {
-                                    label: 'f',
+                                    label: '.',
                                     nativeInputProps: {
                                       value: 'value1'
                                     }
                                   },
                                   {
-                                    label: 'f',
+                                    label: '.',
                                     nativeInputProps: {
                                       value: 'value2'
                                     }
                                   },
                                   {
-                                    label: 'f',
+                                    label: '.',
                                     nativeInputProps: {
                                       value: 'value3'
                                     }
                                   },
                                   {
-                                    label: 'f',
+                                    label: '.',
                                     nativeInputProps: {
                                       value: 'value3'
                                     }
                                   },
                                   {
-                                    label: 'f',
+                                    label: '.',
                                     nativeInputProps: {
                                       value: 'value3'
                                     }

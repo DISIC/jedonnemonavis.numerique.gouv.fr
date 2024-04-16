@@ -122,7 +122,17 @@ const useStyles = tss.create({
 	},
 	badge: {
 		fontSize: 14,
-		flex: '0 0 calc(100% / 9.5);'
+		flex: '1 1 10%',
+		[fr.breakpoints.down('lg')]: {
+			flex: '50%',
+			marginTop: 12
+		},
+		['&:nth-child(2), &:nth-child(3)']: {
+			flex: "1 1 8%"
+		},
+		['&:nth-child(9)']: {
+			flex: "1 1 14%"
+		}
 	},
 	badgeVerbatim: {
 		width: 'fit-content',

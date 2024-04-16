@@ -1,7 +1,7 @@
 {
   "first_block": {
     "title": "Je donne mon avis",
-    "subtitle_part_1": "Aidez-nous à améliorer",
+    "subtitle_part_1": "Aidez-nous à améliorer le service",
     "subtitle_part_2": "en répondant à quelques questions. Vos réponses sont anonymes.",
     "product": "Démarche",
     "validate": "Envoyer mon avis"
@@ -12,9 +12,9 @@
     "validate": "Valider mon avis"
   },
   "success_block": {
-    "title": "Merci pour votre aide !",
+    "title": "Merci beaucoup !",
     "thanks": "Votre avis nous permettra d’améliorer la qualité du service. ",
-    "question": "Des questions pour",
+    "question": "Des questions pour le service ",
     "support": "Contactez le support.",
     "further": "Vous souhaitez aller plus loin ?",
     "share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
@@ -36,7 +36,31 @@
       "button": "Continuer"
     }, 
     "A_3": {
-      "name": "Informations complémentaires ",
+      "name": "Informations complémentaire",
+      "button": "Terminer"
+    },
+    "B_1": {
+      "name": "Expérience générale",                          
+      "button": "Envoyer mon avis"
+    },
+    "B_2": {
+      "name": "Compréhension",
+      "button": "Continuer"
+    },
+    "B_3": {
+      "name": "Aides",
+      "button": "Continuer"
+    },
+    "B_4": {
+      "name": "Joignabilité",
+      "button": "Continuer"
+    },
+    "B_5": {
+      "name": "Efficacité",
+      "button": "Continuer"
+    },
+    "B_6": {
+      "name": "Commentaires supplémentaires",
       "button": "Terminer"
     }
   },

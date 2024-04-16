@@ -212,7 +212,15 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('lg')]: {
 			flex: '50%',
 			marginTop: 12
-		}
+		},
+		[fr.breakpoints.up('lg')]: {
+			['&:nth-child(2), &:nth-child(3)']: {
+				flex: "1 1 8%"
+			},
+			['&:nth-child(9)']: {
+				flex: "1 1 14%"
+			}
+		},
 	},
 	badge: {
 		fontSize: 11,
