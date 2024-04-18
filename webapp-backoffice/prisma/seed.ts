@@ -17,7 +17,6 @@ import { Domain } from 'domain';
 const prisma = new PrismaClient();
 
 async function main() {
-
 	const command = process.argv[2];
 
 	switch (command) {
@@ -28,9 +27,9 @@ async function main() {
 			await formatted_title();
 			break;
 		default:
-			console.log(`Unknown command: ${command}`);
+			await seed_users_products();
+			await formatted_title();
 	}
-
 }
 
 async function seed_users_products() {
@@ -125,13 +124,11 @@ async function seed_users_products() {
 }
 
 async function formatted_title() {
-	 
-
 	const products = await prisma.product.findMany();
 
-	products.forEach(async (p) => {
-		const formattedTitle = removeAccents(p.title)
-		console.log('processing product : ', p.title)
+	products.forEach(async p => {
+		const formattedTitle = removeAccents(p.title);
+		console.log('processing product : ', p.title);
 		await prisma.product.update({
 			where: {
 				id: p.id
@@ -144,9 +141,9 @@ async function formatted_title() {
 
 	const entities = await prisma.entity.findMany();
 
-	entities.forEach(async (e) => {
-		const formattedName = removeAccents(e.name)
-		console.log('processing entity : ', e.name)
+	entities.forEach(async e => {
+		const formattedName = removeAccents(e.name);
+		console.log('processing entity : ', e.name);
 		await prisma.entity.update({
 			where: {
 				id: e.id
@@ -156,7 +153,6 @@ async function formatted_title() {
 			}
 		});
 	});
-
 }
 
 main()
