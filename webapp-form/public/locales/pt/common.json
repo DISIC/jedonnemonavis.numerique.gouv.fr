@@ -1,39 +1,158 @@
 {
   "first_block": {
-    "title": "Dê a minha opinião",
+    "title": "Dê a sua opinião",
+    "subtitle_part_1": "Ajude-nos a melhorar o serviço",
+    "subtitle_part_2": "respondendo a algumas perguntas. As suas respostas são anónimas.",
     "product": "Procedimento",
-    "validate": "Validar"
+    "validate": "Enviar a minha opinião"
   },
   "second_block": {
     "title": "Obrigado!",
-    "subtitle": "Pode contar-nos mais?",
+    "subtitle": "Pode-nos dizer mais alguma coisa?",
     "validate": "Validar a minha opinião"
   },
   "success_block": {
-    "title": "Obrigado pela sua ajuda!",
-    "alert": "Seu feedback foi enviado com sucesso para o departamento responsável por este processo."
+    "title": "Muito obrigado!",
+    "thanks": "A sua opinião vai ajudar-nos a melhorar a qualidade do serviço.",
+    "question": "Perguntas sobre o serviço",
+    "support": "Contacte o suporte.",
+    "further": "Quer ir mais longe?",
+    "share": "Partilhe a sua experiência publicamente de forma anónima. A administração irá responder e utilizar a sua experiência para melhorar os seus serviços.",
+    "link": "Partilhar a minha experiência publicamente",
+    "alert": "A sua opinião foi transmitida com sucesso ao departamento responsável por este procedimento."
   },
   "smileys": {
     "good": "Muito bom",
-    "medium": "Médio",
+    "medium": "Razoável",
     "bad": "Não bom"
+  },
+  "steps": {
+    "A_1": {
+      "name": "Clareza",
+      "button": "Continuar"
+    },
+    "A_2": {
+      "name": "Ajudas",
+      "button": "Continuar"
+    },
+    "A_3": {
+      "name": "Informações adicionais",
+      "button": "Terminar"
+    },
+    "B_1": {
+      "name": "Experiência geral",
+      "button": "Enviar a minha opinião"
+    },
+    "B_2": {
+      "name": "Compreensão",
+      "button": "Continuar"
+    },
+    "B_3": {
+      "name": "Ajudas",
+      "button": "Continuar"
+    },
+    "B_4": {
+      "name": "Acessibilidade",
+      "button": "Continuar"
+    },
+    "B_5": {
+      "name": "Eficiência",
+      "button": "Continuar"
+    },
+    "B_6": {
+      "name": "Comentários adicionais",
+      "button": "Terminar"
+    }
   },
   "fields": {
     "satisfaction": {
-      "label": "Como correu este procedimento para si?",
+      "label": "No geral, como foi a sua experiência?",
       "hint": "Este campo é obrigatório."
     },
     "easy": {
-      "label": "De acordo com as respostas seguintes, o que melhor descreve você:",
+      "label": "O que achou das informações e instruções fornecidas?",
+      "hint": "Numa escala de 1 a 5, onde 1 é incompreensível e 5 é muito claro.",
+      "hintLeft": "Incompreensível",
+      "hintRight": "Muito claro",
       "options": [
         {
-          "label": "O procedimento foi fácil de completar"
+          "label": "1"
         },
         {
-          "label": "O procedimento não foi fácil nem difícil de completar"
+          "label": "2"
         },
         {
-          "label": "O procedimento foi difícil de completar"
+          "label": "3"
+        },
+        {
+          "label": "4"
+        },
+        {
+          "label": "5"
+        }
+      ]
+    },
+    "contact_tried": {
+      "label": "Durante o seu percurso, tentou obter ajuda através de algum dos seguintes meios?",
+      "hint": "Várias opções possíveis",
+      "options": [
+        {
+          "label": "No balcão com a administração"
+        },
+        {
+          "label": "Por telefone com a administração"
+        },
+        {
+          "label": "Por e-mail com a administração"
+        },
+        {
+          "label": "Por chat com a administração"
+        },
+        {
+          "label": "Uma pessoa próxima"
+        },
+        {
+          "label": "Uma associação"
+        },
+        {
+          "label": "Sites da internet"
+        },
+        {
+          "label": "Outros, especificar"
+        }
+      ]
+    },
+    "contact_reached": {
+      "label": "Quando procurou ajuda, conseguiu contactar a administração?",
+      "options": [
+        {
+          "label": "Sim"
+        },
+        {
+          "label": "Não"
+        }
+      ]
+    },
+    "contact_satisfaction": {
+      "label": "Como avalia a qualidade da ajuda que recebeu da administração?",
+      "options": [
+        {
+          "label": "Muito má"
+        },
+        {
+          "label": "Má"
+        },
+        {
+          "label": "Nem boa, nem má"
+        },
+        {
+          "label": "Boa"
+        },
+        {
+          "label": "Excelente"
+        },
+        {
+          "label": "Não quero opinar"
         }
       ]
     },
@@ -41,18 +160,18 @@
       "label": "O que achou da linguagem utilizada?",
       "options": [
         {
-          "label": "Pouco claro, difícil de entender"
+          "label": "Pouco clara, difícil de entender"
         },
         {
-          "label": "Nem fácil nem difícil de entender"
+          "label": "Nem fácil, nem difícil de entender"
         },
         {
-          "label": "Claro, fácil de entender"
+          "label": "Clara, fácil de entender"
         }
       ]
     },
     "difficulties": {
-      "label": "Encontrou dificuldades?",
+      "label": "Encontrou alguma dificuldade?",
       "options": [
         {
           "label": "Sim"
@@ -63,30 +182,30 @@
       ]
     },
     "difficulties_details": {
-      "label": "Quais foram essas dificuldades?",
+      "label": "Quais foram estas dificuldades?",
       "options": [
         {
-          "label": "Faltou-me informação antes de começar o procedimento"
+          "label": "Faltava informação antes de começar o procedimento"
         },
         {
-          "label": "O procedimento não funcionou"
+          "label": "O procedimento não funcionava"
         },
         {
-          "label": "O site não aparecia bem no telemóvel"
+          "label": "O site não era bem visualizado no telemóvel"
         },
         {
-          "label": "Tive dificuldade em anexar documentos"
+          "label": "Tive dificuldades em anexar documentos"
         },
         {
-          "label": "Faltava informação sobre o acompanhamento do meu pedido ou procedimento (prazo, etc.)"
+          "label": "Faltava informação sobre o seguimento do meu pedido ou procedimento (prazo, etc.)"
         },
         {
-          "label": "Outro"
+          "label": "Outra"
         }
       ]
     },
     "difficulties_details_verbatim": {
-      "label": "Pode especificar quais foram as outras dificuldades que encontrou?",
+      "label": "Pode especificar que outra(s) dificuldade(s) encontrou?",
       "hint": "Máximo de 250 caracteres."
     },
     "contact": {
@@ -99,29 +218,18 @@
           "label": "Sim"
         },
         {
-          "label": "Sim, mas não consegui encontrar como os contactar"
-        }
-      ]
-    },
-    "contact_reached": {
-      "label": "Conseguiu contactá-los?",
-      "options": [
-        {
-          "label": "Sim"
-        },
-        {
-          "label": "Não"
+          "label": "Sim, mas não encontrei como contactá-los"
         }
       ]
     },
     "contact_channels": {
-      "label": "Por que meios tentou contactar o serviço do procedimento?",
+      "label": "Por que meio(s) tentou contactar o serviço do procedimento?",
       "options": [
         {
           "label": "Telefone"
         },
         {
-          "label": "Email ou mensagens"
+          "label": "E-mail ou mensagens"
         },
         {
           "label": "Agência ou balcão"
@@ -132,25 +240,22 @@
       ]
     },
     "contact_channels_verbatim": {
-      "label": "Pode especificar quais foram os outros meios que tentou usar para contactar o serviço?",
+      "label": "Que outros tipos de ajuda utilizou?",
       "hint": "Máximo de 250 caracteres."
     },
     "contact_details": {
       "label": "Conseguiu contactá-los?",
       "options": [
         {
-          "label": "Não consegui descobrir como os contactar"
+          "label": "Não encontrei como contactá-los"
         },
         {
           "label": "Contactei-os mas não consegui contactá-los"
         },
         {
-          "label": "Contactei-os e eles responderam"
+          "label": "Contactei-os e responderam-me"
         }
       ]
-    },
-    "contact_satisfaction": {
-      "label": "Como foi a troca com o serviço do procedimento?"
     },
     "help": {
       "label": "Precisou de ajuda adicional para este procedimento?",
@@ -164,13 +269,13 @@
       ]
     },
     "help_details": {
-      "label": "De que ajuda precisou?",
+      "label": "De que tipo de ajuda precisou?",
       "options": [
         {
           "label": "Pesquisei na internet (site, fórum)"
         },
         {
-          "label": "Pedi ajuda a um familiar ou amigo"
+          "label": "Pedi ajuda a alguém próximo (família, amigo)"
         },
         {
           "label": "Pedi ajuda a uma associação"
@@ -181,12 +286,12 @@
       ]
     },
     "help_details_verbatim": {
-      "label": "Pode especificar de que outra ajuda precisou?",
+      "label": "Pode especificar que outra ajuda precisou?",
       "hint": "Máximo de 250 caracteres."
     },
     "verbatim": {
-      "label": "Gostaria de nos contar mais?",
-      "hint": "Não forneça informações pessoais aqui. Isto não é um formulário de contato. Se tiver perguntas sobre este procedimento, entre em contato com o serviço correspondente."
+      "label": "Quer partilhar mais alguma coisa?",
+      "hint": "Não partilhe informações pessoais."
     }
   }
 }
