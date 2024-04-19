@@ -207,13 +207,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           </div>
         </div>
       );
-    } else if (process.env.NEXT_PUBLIC_AB_TESTING === "A") {
+    } else {
       return (
         <>
           {opinion.satisfaction ? (
             <FormStepper
               opinion={opinion}
-              steps={steps_A}
+              steps={process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B}
               onSubmit={(result) => {
                 setOpinion({ ...result });
                 //handleSubmitReview(result);
@@ -228,21 +228,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
             />
           )}
-        </>
-      );
-    } else if (process.env.NEXT_PUBLIC_AB_TESTING === "B") {
-      return (
-        <>
-          <FormStepper
-            opinion={opinion}
-            steps={steps_B}
-            onSubmit={(result) => {
-              setOpinion({ ...result });
-              //handleSubmitReview(result);
-            }}
-            isFormSubmitted={isFormSubmitted}
-            setIsFormSubmitted={setIsFormSubmitted}
-          />
         </>
       );
     }
