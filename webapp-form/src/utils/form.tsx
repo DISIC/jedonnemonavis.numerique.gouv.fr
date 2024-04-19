@@ -202,33 +202,8 @@ export const steps_A: Step[] = [
 
 export const steps_B = [
   {
-    name: "steps.B_1.name",
-    section: primarySection,
-    button: "steps.B_1.button",
-  },
-  {
     name: "steps.B_2.name",
-    section: firstSectionA,
+    section: firstSectionA.concat(secondSectionA, thirdSectionA),
     button: "steps.B_2.button",
-  },
-  {
-    name: "steps.B_3.name",
-    section: secondSectionA.slice(0, 2),
-    button: "steps.B_3.button",
-  },
-  {
-    name: "steps.B_4.name",
-    section: secondSectionA.slice(2, 3),
-    button: "steps.B_4.button",
-  },
-  {
-    name: "steps.B_5.name",
-    section: secondSectionA.slice(3, 4),
-    button: "steps.B_5.button",
-  },
-  {
-    name: "steps.B_6.name",
-    section: thirdSectionA,
-    button: "steps.B_6.button",
-  },
+  }
 ];
