@@ -28,7 +28,7 @@ fi
 # the values being specified explicitly when running the container.
 #
 # This is also sourced in elasticsearch-env, and is only needed here
-# as well because we use ELASTIC_PASSWORD below. Sourcing this script
+# as well because we use ES_ADDON_PASSWORD below. Sourcing this script
 # is idempotent.
 source /usr/share/elasticsearch/bin/elasticsearch-env-from-file
 
@@ -45,19 +45,19 @@ if [ ! -f config/certs/certs.zip ]; then
 fi;
 
 if [[ -f bin/elasticsearch-users ]]; then
-  # Check for the ELASTIC_PASSWORD environment variable to set the
+  # Check for the ES_ADDON_PASSWORD environment variable to set the
   # bootstrap password for Security.
   #
   # This is only required for the first node in a cluster with Security
   # enabled, but we have no way of knowing which node we are yet. We'll just
   # honor the variable if it's present.
 
-  if [[ -n "$ELASTIC_PASSWORD" ]]; then
+  if [[ -n "$ES_ADDON_PASSWORD" ]]; then
     [[ -f /usr/share/elasticsearch/config/elasticsearch.keystore ]] || (elasticsearch-keystore create)
     if ! (elasticsearch-keystore has-passwd --silent) ; then
       # keystore is unencrypted
       if ! (elasticsearch-keystore list | grep -q '^bootstrap.password$'); then
-        (echo "$ELASTIC_PASSWORD" | elasticsearch-keystore add -x 'bootstrap.password')
+        (echo "$ES_ADDON_PASSWORD" | elasticsearch-keystore add -x 'bootstrap.password')
         # setup password for built-in user kibana_system
 
       fi
@@ -65,7 +65,7 @@ if [[ -f bin/elasticsearch-users ]]; then
       # keystore requires password
       if ! (echo "$KEYSTORE_PASSWORD" \
           | elasticsearch-keystore list | grep -q '^bootstrap.password$') ; then
-        COMMANDS="$(printf "%s\n%s" "$KEYSTORE_PASSWORD" "$ELASTIC_PASSWORD")"
+        COMMANDS="$(printf "%s\n%s" "$KEYSTORE_PASSWORD" "$ES_ADDON_PASSWORD")"
         (echo "$COMMANDS" | elasticsearch-keystore add -x 'bootstrap.password')
       fi
     fi

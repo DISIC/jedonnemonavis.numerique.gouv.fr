@@ -25,10 +25,10 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const user_api = null as UserWithAccessRight | null;
 
 	const elkClient = new ElkClient({
-		node: process.env.ELASTIC_HOST as string,
+		node: process.env.ES_ADDON_URI as string,
 		auth: {
-			username: process.env.ELASTIC_USERNAME as string,
-			password: process.env.ELASTIC_PASSWORD as string
+			username: process.env.ES_ADDON_USER as string,
+			password: process.env.ES_ADDON_PASSWORD as string
 		},
 		tls: {
 			ca: fs.readFileSync(path.resolve(process.cwd(), './certs/ca/ca.crt')),

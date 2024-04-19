@@ -13,7 +13,7 @@ services:
     networks:
       - elastic
     environment:
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_ADDON_PASSWORD=${ES_ADDON_PASSWORD}
     ulimits:
       memlock:
         soft: -1
