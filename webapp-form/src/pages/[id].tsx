@@ -7,7 +7,7 @@ import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
-import { AnswerIntention, Prisma } from "@prisma/client";
+import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
 import {
   primarySection,
   secondSectionA,
@@ -286,7 +286,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 export const getServerSideProps: GetServerSideProps<{
   product: Product;
 }> = async ({ params, locale }) => {
-  if (!params?.id) {
+  if (!params?.id || isNaN(parseInt(params?.id as string))) {
     return {
       notFound: true,
     };
@@ -294,22 +294,30 @@ export const getServerSideProps: GetServerSideProps<{
 
   const productId = params.id as string;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_WEBAPP_FORM_URL}/api/open-api/product/${productId}`
-  );
+  const prisma = new PrismaClient();
+  const product = await prisma.product.findUnique({
+    where: {
+      id: parseInt(productId),
+    },
+    include: {
+      buttons: true,
+    },
+  });
+  prisma.$disconnect();
 
-  if (response.ok) {
-    const { data: product } = (await response.json()) as { data: Product };
-
-    if (!product) {
-      return {
-        notFound: true,
-      };
-    }
-
+  if (product) {
     return {
       props: {
-        product,
+        product: {
+          ...product,
+          created_at: product.created_at.toString(),
+          updated_at: product.updated_at.toString(),
+          buttons: product.buttons.map((button: Button) => ({
+            ...button,
+            created_at: button.created_at.toString(),
+            updated_at: button.updated_at.toString(),
+          })),
+        },
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
     };
