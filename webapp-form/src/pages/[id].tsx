@@ -9,6 +9,7 @@ import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
 import { AnswerIntention, Prisma } from "@prisma/client";
 import {
+  allFields,
   primarySection,
   secondSectionA,
   steps_A,
@@ -72,11 +73,16 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const handleSubmitReview = async (opinion: Opinion) => {
+    console.log(opinion);
     const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
       ([key, value]) => {
-        const fieldInSection = (
-          key === "satisfaction" ? primarySection : secondSectionA
-        ).find((field) => field.name === key) as FormField;
+        const fieldInSection = allFields.find(
+          (field) => field.name === key
+        ) as FormField;
+
+        console.log(key);
+        console.log(value);
+        console.log(fieldInSection);
 
         let tmpAnswer = {
           field_code: fieldInSection.name,
@@ -120,32 +126,25 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       }
     );
 
-    createReview.mutate({
-      review: {
-        product_id: product.id,
-        button_id: product.buttons[0].id,
-        form_id: 1,
-      },
-      answers,
-    });
+    console.log(answers);
+
+    // createReview.mutate({
+    //   review: {
+    //     product_id: product.id,
+    //     button_id: product.buttons[0].id,
+    //     form_id: 1,
+    //   },
+    //   answers,
+    // });
   };
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
-    comprehension: undefined,
     easy: undefined,
-    difficulties: undefined,
-    difficulties_details: [],
-    difficulties_details_verbatim: undefined,
-    contact: undefined,
     contact_reached: [],
     contact_satisfaction: undefined,
     contact_tried: [],
-    contact_channels: [],
-    contact_channels_verbatim: undefined,
-    help: undefined,
-    help_details: [],
-    help_details_verbatim: undefined,
+    contact_tried_verbatim: undefined,
     verbatim: undefined,
   });
 
@@ -214,12 +213,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             <FormStepper
               opinion={opinion}
               steps={steps_A}
-              onSubmit={(result) => {
+              onSubmit={(result, isLastStep) => {
                 setOpinion({ ...result });
-                //handleSubmitReview(result);
+                if (isLastStep) {
+                  handleSubmitReview(result);
+                  setIsFormSubmitted(true);
+                }
               }}
-              isFormSubmitted={isFormSubmitted}
-              setIsFormSubmitted={setIsFormSubmitted}
             />
           ) : (
             <FormFirstBlock
@@ -236,12 +236,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           <FormStepper
             opinion={opinion}
             steps={steps_B}
-            onSubmit={(result) => {
+            onSubmit={(result, isLastStep) => {
               setOpinion({ ...result });
-              //handleSubmitReview(result);
+              if (isLastStep) {
+                handleSubmitReview(result);
+                setIsFormSubmitted(true);
+              }
             }}
-            isFormSubmitted={isFormSubmitted}
-            setIsFormSubmitted={setIsFormSubmitted}
           />
         </>
       );

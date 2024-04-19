@@ -12,14 +12,11 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 type Props = {
   opinion: Opinion;
   steps: Step[];
-  onSubmit: (opinion: Opinion) => void;
-  isFormSubmitted: boolean;
-  setIsFormSubmitted: (choice: boolean) => void;
+  onSubmit: (opinion: Opinion, isLastStep: boolean) => void;
 };
 
 export const FormStepper = (props: Props) => {
-  const { onSubmit, opinion, steps, isFormSubmitted, setIsFormSubmitted } =
-    props;
+  const { onSubmit, opinion, steps } = props;
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<number>(0);
@@ -44,14 +41,12 @@ export const FormStepper = (props: Props) => {
       </div>
       <form
         onSubmit={(e) => {
-          console.log("submit");
-          if (currentStep + 1 < steps.length) {
+          const isLastStep = currentStep + 1 === steps.length;
+          if (!isLastStep) {
             setCurrentStep(currentStep + 1);
-          } else {
-            setIsFormSubmitted(true);
           }
           e.preventDefault();
-          onSubmit(tmpOpinion);
+          onSubmit(tmpOpinion, isLastStep);
         }}
       >
         {steps[currentStep].section.map((field: FormField) => (

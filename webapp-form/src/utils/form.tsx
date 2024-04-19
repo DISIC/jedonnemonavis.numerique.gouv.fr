@@ -108,10 +108,10 @@ export const secondSectionA: FormField[] = [
         values: [16],
       },
     ],
-    name: "contact_channels_verbatim",
+    name: "contact_tried_verbatim",
     kind: "input-textarea",
-    hint: "fields.contact_channels_verbatim.hint",
-    label: "fields.contact_channels_verbatim.label",
+    hint: "fields.contact_tried_verbatim.hint",
+    label: "fields.contact_tried_verbatim.label",
   },
   {
     name: "contact_reached",
@@ -182,6 +182,11 @@ export const thirdSectionA: FormField[] = [
   },
 ];
 
+export const allFields: FormField[] = primarySection
+  .concat(firstSectionA)
+  .concat(secondSectionA)
+  .concat(thirdSectionA);
+
 export const steps_A: Step[] = [
   {
     name: "steps.A_1.name",
@@ -200,7 +205,7 @@ export const steps_A: Step[] = [
   },
 ];
 
-export const steps_B = [
+export const steps_B: Step[] = [
   {
     name: "steps.B_1.name",
     section: primarySection,
