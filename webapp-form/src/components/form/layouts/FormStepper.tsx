@@ -26,18 +26,22 @@ export const FormStepper = (props: Props) => {
   return (
     <div>
       <div className={cx(classes.step)}>
-        <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
-          {t(`${steps[currentStep].name}`)}
-        </h1>
-        <Stepper
-          currentStep={currentStep + 1}
-          stepCount={
-            process.env.NEXT_PUBLIC_AB_TESTING === "A"
-              ? steps_A.length
-              : steps_B.length
-          }
-          title={t(`${steps[currentStep].name}`)}
-        />
+        {steps.length > 1 && (
+          <>
+            <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
+              {t(`${steps[currentStep].name}`)}
+            </h1>
+            <Stepper
+              currentStep={currentStep + 1}
+              stepCount={
+                process.env.NEXT_PUBLIC_AB_TESTING === "A"
+                  ? steps_A.length
+                  : steps_B.length
+              }
+              title={t(`${steps[currentStep].name}`)}
+            />
+          </>
+        )}
       </div>
       <form
         onSubmit={(e) => {
