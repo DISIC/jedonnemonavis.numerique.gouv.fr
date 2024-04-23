@@ -259,7 +259,7 @@ model Answer {
   review           Review           @relation(fields: [review_id], references: [id])
   review_id        Int
   parent_answer    Answer?          @relation("ParentAnswer", fields: [parent_answer_id], references: [id])
-  parent_answer_id Int?             @unique
+  parent_answer_id Int?
   child_answers    Answer[]         @relation("ParentAnswer")
 
   @@index([intention, field_code, review_id])

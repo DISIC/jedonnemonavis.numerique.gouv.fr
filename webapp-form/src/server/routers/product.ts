@@ -1,4 +1,4 @@
-import { ProductSchema } from "@/prisma/generated/zod";
+import { ButtonSchema, ProductSchema } from "@/prisma/generated/zod";
 import { publicProcedure, router } from "@/src/server/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -7,7 +7,11 @@ export const productRouter = router({
   getById: publicProcedure
     .meta({ openapi: { method: "GET", path: "/product/{id}" } })
     .input(z.object({ id: z.number() }))
-    .output(z.object({ data: ProductSchema }))
+    .output(
+      z.object({
+        data: ProductSchema.extend({ buttons: z.array(ButtonSchema) }),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const product = await ctx.prisma.product.findUnique({
         where: {

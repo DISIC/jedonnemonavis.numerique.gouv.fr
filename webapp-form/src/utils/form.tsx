@@ -121,12 +121,12 @@ export const secondSectionA: FormField[] = [
       {
         label: "fields.contact_reached.options.0.label",
         value: 17,
-        intention: "neutral",
+        intention: "good",
       },
       {
         label: "fields.contact_reached.options.1.label",
         value: 18,
-        intention: "neutral",
+        intention: "bad",
       },
     ],
     needed: [9, 10, 11, 12],

@@ -73,10 +73,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const handleSubmitReview = async (opinion: Opinion) => {
-    const toto = [] as Prisma.AnswerCreateNestedManyWithoutParent_answerInput;
     const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).reduce(
       (accumulator, [key, value]) => {
-        if (key === "contact_reached") {
+        if (["contact_reached", "contact_satisfaction"].includes(key)) {
           if (Array.isArray(value)) {
             value.map((ids) => {
               const [parent_id, child_id] = ids.toString().split("_");
@@ -123,7 +122,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                                 answer_text: t(childOption.label, {
                                   lng: "fr",
                                 }),
-                                intention: "neutral",
+                                intention: childOption.intention,
                                 answer_item_id: childOption.value,
                               },
                             ],
