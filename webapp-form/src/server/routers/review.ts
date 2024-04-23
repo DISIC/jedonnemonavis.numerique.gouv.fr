@@ -1,13 +1,13 @@
-import { z } from 'zod';
-import { router, publicProcedure } from '@/src/server/trpc';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { z } from "zod";
+import { router, publicProcedure } from "@/src/server/trpc";
+import { Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
   AnswerCreateInputSchema,
-  ReviewSchema
-} from '@/prisma/generated/zod';
-import { Client } from '@elastic/elasticsearch';
-import { ElkAnswer } from '@/src/utils/types';
+  ReviewSchema,
+} from "@/prisma/generated/zod";
+import { Client } from "@elastic/elasticsearch";
+import { ElkAnswer } from "@/src/utils/types";
 
 export async function createReview(
   ctx: { prisma: PrismaClient; elkClient: Client },
@@ -23,39 +23,52 @@ export async function createReview(
     data: review,
     include: {
       product: true,
-      button: true
-    }
+      button: true,
+    },
   });
 
   Promise.all([
-    answers.forEach(async answer => {
+    answers.forEach(async (answer) => {
       const newAnswer = await prisma.answer.create({
         data: {
           ...answer,
+          child_answers: answer.child_answers
+            ? {
+                createMany: {
+                  data: (
+                    answer.child_answers.createMany
+                      ?.data as Prisma.AnswerCreateManyParent_answerInput[]
+                  ).map((item) => ({
+                    ...item,
+                    review_id: newReview.id,
+                  })),
+                },
+              }
+            : undefined,
           review: {
             connect: {
-              id: newReview.id
-            }
-          }
-        }
+              id: newReview.id,
+            },
+          },
+        },
       });
 
       const { id: newAnswerId, ...answerWithoutId } = newAnswer;
 
-      await elkClient.index<ElkAnswer>({
-        index: 'jdma-answers',
-        id: newAnswerId.toString(),
-        body: {
-          ...answerWithoutId,
-          review_id: newReview.id,
-          button_id: newReview.button_id,
-          button_name: newReview.button.title,
-          product_id: newReview.product_id,
-          product_name: newReview.product.title,
-          created_at: newReview.created_at
-        }
-      });
-    })
+      // await elkClient.index<ElkAnswer>({
+      //   index: 'jdma-answers',
+      //   id: newAnswerId.toString(),
+      //   body: {
+      //     ...answerWithoutId,
+      //     review_id: newReview.id,
+      //     button_id: newReview.button_id,
+      //     button_name: newReview.button.title,
+      //     product_id: newReview.product_id,
+      //     product_name: newReview.product.title,
+      //     created_at: newReview.created_at
+      //   }
+      // });
+    }),
   ]);
 
   return newReview;
@@ -66,7 +79,7 @@ export const reviewRouter = router({
     .input(
       z.object({
         review: ReviewUncheckedCreateInputSchema,
-        answers: z.array(AnswerCreateInputSchema)
+        answers: z.array(AnswerCreateInputSchema),
       })
     )
     .mutation(async ({ ctx, input }) => {

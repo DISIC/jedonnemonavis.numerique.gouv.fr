@@ -7,7 +7,7 @@ export type Opinion = {
   easy?: number;
   contact_tried: number[];
   contact_reached: string[];
-  contact_satisfaction?: number;
+  contact_satisfaction?: string[];
   contact_tried_verbatim?: string;
   verbatim?: string;
 };

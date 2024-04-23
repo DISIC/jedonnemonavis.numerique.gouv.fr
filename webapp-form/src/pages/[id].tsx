@@ -7,7 +7,7 @@ import { GetServerSideProps } from "next/types";
 import { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
-import { AnswerIntention, Prisma } from "@prisma/client";
+import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
 import {
   allFields,
   primarySection,
@@ -73,78 +73,134 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const handleSubmitReview = async (opinion: Opinion) => {
-    console.log(opinion);
-    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).flatMap(
-      ([key, value]) => {
-        const fieldInSection = allFields.find(
-          (field) => field.name === key
-        ) as FormField;
+    const toto = [] as Prisma.AnswerCreateNestedManyWithoutParent_answerInput;
+    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).reduce(
+      (accumulator, [key, value]) => {
+        if (key === "contact_reached") {
+          if (Array.isArray(value)) {
+            value.map((ids) => {
+              const [parent_id, child_id] = ids.toString().split("_");
 
-        console.log(key);
-        console.log(value);
-        console.log(fieldInSection);
+              const parentFieldInSection = allFields.find(
+                (field) => field.name === "contact_tried"
+              ) as FormField;
 
-        let tmpAnswer = {
-          field_code: fieldInSection.name,
-          field_label: t(fieldInSection.label, {
-            lng: "fr",
-          }) as string,
-          kind:
-            fieldInSection.kind === "smiley"
-              ? "radio"
-              : fieldInSection.kind !== "input-text" &&
-                  fieldInSection.kind !== "input-textarea"
-                ? fieldInSection.kind
-                : "text",
-          review: {},
-        } as Prisma.AnswerCreateInput;
+              const childFieldInSection = allFields.find(
+                (field) => field.name === key
+              ) as FormField;
 
-        if (typeof value == "number") {
-          const selectedOption = getSelectedOption(fieldInSection, value);
-          tmpAnswer.answer_text = selectedOption.label;
-          tmpAnswer.intention = selectedOption.intention;
-          tmpAnswer.answer_item_id = selectedOption.value;
-          return tmpAnswer;
-        } else if (typeof value == "string") {
-          tmpAnswer.answer_text = value;
-          tmpAnswer.intention = "neutral";
-          tmpAnswer.answer_item_id = 0;
-          return tmpAnswer;
-        } else if (Array.isArray(value)) {
-          let tmpAnswers = [] as Prisma.AnswerCreateInput[];
-          value.map((value) => {
-            let selectedOption = getSelectedOption(fieldInSection, value);
+              if (
+                "options" in parentFieldInSection &&
+                "options" in childFieldInSection
+              ) {
+                const parentOption = parentFieldInSection.options.find(
+                  (o) => o.value === parseInt(parent_id)
+                );
+                const childOption = childFieldInSection.options.find(
+                  (o) => o.value === parseInt(child_id)
+                );
+
+                if (parentOption && childOption) {
+                  accumulator = accumulator.map((answer) => {
+                    if (answer.answer_item_id === parentOption.value) {
+                      const existingChildCreations =
+                        answer.child_answers?.createMany?.data;
+                      return {
+                        ...answer,
+                        child_answers: {
+                          createMany: {
+                            data: [
+                              ...(Array.isArray(existingChildCreations)
+                                ? existingChildCreations
+                                : []),
+                              {
+                                field_code: childFieldInSection.name,
+                                field_label: t(childFieldInSection.label, {
+                                  lng: "fr",
+                                }) as string,
+                                kind: "radio",
+                                review_id: -1,
+                                answer_text: t(childOption.label, {
+                                  lng: "fr",
+                                }),
+                                intention: "neutral",
+                                answer_item_id: childOption.value,
+                              },
+                            ],
+                          },
+                        },
+                      };
+                    }
+                    return answer;
+                  });
+                }
+              }
+            });
+          }
+        } else {
+          const fieldInSection = allFields.find(
+            (field) => field.name === key
+          ) as FormField;
+
+          let tmpAnswer = {
+            field_code: fieldInSection.name,
+            field_label: t(fieldInSection.label, {
+              lng: "fr",
+            }) as string,
+            kind:
+              fieldInSection.kind === "smiley"
+                ? "radio"
+                : fieldInSection.kind !== "input-text" &&
+                    fieldInSection.kind !== "input-textarea"
+                  ? fieldInSection.kind
+                  : "text",
+            review: {},
+          } as Prisma.AnswerCreateInput;
+
+          if (typeof value == "number") {
+            const selectedOption = getSelectedOption(fieldInSection, value);
             tmpAnswer.answer_text = selectedOption.label;
             tmpAnswer.intention = selectedOption.intention;
             tmpAnswer.answer_item_id = selectedOption.value;
-            tmpAnswers.push({ ...tmpAnswer });
-          });
-          return tmpAnswers;
-        } else {
-          return [];
+            accumulator.push(tmpAnswer);
+          } else if (typeof value == "string") {
+            tmpAnswer.answer_text = value;
+            tmpAnswer.intention = "neutral";
+            tmpAnswer.answer_item_id = 0;
+            accumulator.push(tmpAnswer);
+          } else if (Array.isArray(value)) {
+            value.map((value) => {
+              let selectedOption = getSelectedOption(fieldInSection, value);
+              tmpAnswer.answer_text = selectedOption.label;
+              tmpAnswer.intention = selectedOption.intention;
+              tmpAnswer.answer_item_id = selectedOption.value;
+              accumulator.push({ ...tmpAnswer });
+            });
+          }
         }
-      }
+
+        return accumulator;
+      },
+      [] as Prisma.AnswerCreateInput[]
     );
 
-    console.log(answers);
-
-    // createReview.mutate({
-    //   review: {
-    //     product_id: product.id,
-    //     button_id: product.buttons[0].id,
-    //     form_id: 1,
-    //   },
-    //   answers,
-    // });
+    createReview.mutate({
+      review: {
+        product_id: product.id,
+        button_id: product.buttons[0].id,
+        form_id: 1,
+      },
+      answers,
+    });
   };
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
     easy: undefined,
-    contact_reached: [],
-    contact_satisfaction: undefined,
     contact_tried: [],
     contact_tried_verbatim: undefined,
+    contact_reached: [],
+    contact_satisfaction: [],
     verbatim: undefined,
   });
 
