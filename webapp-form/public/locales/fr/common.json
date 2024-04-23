@@ -97,16 +97,16 @@
       "hint": "Plusieurs choix possibles",
       "options": [
         {
-          "label": "Au guichet avec l'administration"
+          "label": "Au guichet avec l’administration"
         },
         {
-          "label": "Par téléphone avec l'administration"
+          "label": "Par téléphone avec l’administration"
         },
         {
-          "label": "Par e-mail avec l'administration"
+          "label": "Par e-mail avec l’administration"
         },
         {
-          "label": "Par chat avec l'administration"
+          "label": "Par chat avec l’administration"
         },
         {
           "label": "Une personne proche"

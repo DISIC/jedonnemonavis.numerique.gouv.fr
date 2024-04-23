@@ -51,23 +51,54 @@ export async function createReview(
             },
           },
         },
+        include: {
+          child_answers: true,
+        },
       });
 
-      const { id: newAnswerId, ...answerWithoutId } = newAnswer;
+      const {
+        id: newAnswerId,
+        parent_answer_id: newAnswerParentAnswerId,
+        child_answers: newAnswerChildAnswers,
+        ...answerForElk
+      } = newAnswer;
 
-      // await elkClient.index<ElkAnswer>({
-      //   index: 'jdma-answers',
-      //   id: newAnswerId.toString(),
-      //   body: {
-      //     ...answerWithoutId,
-      //     review_id: newReview.id,
-      //     button_id: newReview.button_id,
-      //     button_name: newReview.button.title,
-      //     product_id: newReview.product_id,
-      //     product_name: newReview.product.title,
-      //     created_at: newReview.created_at
-      //   }
-      // });
+      elkClient
+        .index<ElkAnswer>({
+          index: "jdma-answers",
+          id: newAnswerId.toString(),
+          body: {
+            ...answerForElk,
+            review_id: newReview.id,
+            button_id: newReview.button_id,
+            button_name: newReview.button.title,
+            product_id: newReview.product_id,
+            product_name: newReview.product.title,
+            created_at: newReview.created_at,
+          },
+        })
+        .then(() => {
+          if (newAnswerChildAnswers) {
+            newAnswerChildAnswers.map((item) => {
+              const { id: childAnswerId, ...childAnswerForElk } = item;
+              elkClient.index<ElkAnswer>({
+                index: "jdma-answers",
+                id: childAnswerId.toString(),
+                body: {
+                  ...childAnswerForElk,
+                  parent_field_code: newAnswer.field_code,
+                  parent_answer_item_id: newAnswer.answer_item_id,
+                  review_id: newReview.id,
+                  button_id: newReview.button_id,
+                  button_name: newReview.button.title,
+                  product_id: newReview.product_id,
+                  product_name: newReview.product.title,
+                  created_at: newReview.created_at,
+                },
+              });
+            });
+          }
+        });
     }),
   ]);
 

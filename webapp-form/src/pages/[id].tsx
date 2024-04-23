@@ -267,7 +267,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           {opinion.satisfaction ? (
             <FormStepper
               opinion={opinion}
-              steps={process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B}
+              steps={
+                process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
+              }
               onSubmit={(result, isLastStep) => {
                 setOpinion({ ...result });
                 if (isLastStep) {
