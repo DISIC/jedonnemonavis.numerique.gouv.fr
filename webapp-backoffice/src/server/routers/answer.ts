@@ -57,7 +57,7 @@ export const answerRouter = router({
 					term: {
 						terms: {
 							script:
-								'doc["answer_text.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["field_label.keyword"].value',
+								'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
 							size: 1000
 						}
 					}
@@ -81,7 +81,7 @@ export const answerRouter = router({
 
 			const buckets = tmpBuckets
 				.map(bucket => {
-					const [answerText, intention, fieldLabel] = bucket.key.split('_');
+					const [answerText, intention, fieldLabel] = bucket.key.split('#');
 
 					if (!metadata.fieldLabel) metadata.fieldLabel = fieldLabel;
 
@@ -182,7 +182,7 @@ export const answerRouter = router({
 							term: {
 								terms: {
 									script:
-										'doc["answer_text.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["field_label.keyword"].value',
+										'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
 									size: 1000
 								}
 							}
@@ -218,7 +218,7 @@ export const answerRouter = router({
 					returnValue[bucketInterval.key_as_string] = [];
 
 				bucketInterval.term.buckets.forEach(bucket => {
-					const [answerText, intention] = bucket.key.split('_');
+					const [answerText, intention] = bucket.key.split('#');
 
 					metadata.total += bucket.doc_count;
 					currentBucketTotal += bucket.doc_count;
@@ -303,7 +303,7 @@ export const answerRouter = router({
 							term: {
 								terms: {
 									script:
-										'doc["answer_text.keyword"].value + "_" + doc["intention.keyword"].value + "_" + doc["field_label.keyword"].value',
+										'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
 									size: 1000
 								}
 							}
@@ -330,7 +330,7 @@ export const answerRouter = router({
 				let currentBucketTotal = 0;
 
 				bucketInterval.term.buckets.forEach(bucket => {
-					const [_, intention] = bucket.key.split('_');
+					const [_, intention] = bucket.key.split('#');
 
 					metadata.total += bucket.doc_count;
 
