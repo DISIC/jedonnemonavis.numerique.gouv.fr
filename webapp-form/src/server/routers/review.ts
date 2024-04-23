@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, publicProcedure } from "@/src/server/trpc";
-import { Prisma, PrismaClient } from "@prisma/client";
+import { Answer, Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
   AnswerCreateInputSchema,
@@ -79,7 +79,7 @@ export async function createReview(
         })
         .then(() => {
           if (newAnswerChildAnswers) {
-            newAnswerChildAnswers.map((item) => {
+            newAnswerChildAnswers.map((item: Answer) => {
               const { id: childAnswerId, ...childAnswerForElk } = item;
               elkClient.index<ElkAnswer>({
                 index: "jdma-answers",
