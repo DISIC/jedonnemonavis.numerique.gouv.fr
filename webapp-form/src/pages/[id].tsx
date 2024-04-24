@@ -139,9 +139,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const step = parseInt(queryParams.get("step") as string) || 0;
       setCurrentStep(step);
     };
-    router.events.on("routeChangeComplete", handleRouteChange);
+    router.events.on("routeChangeStart", handleRouteChange);
     return () => {
-      router.events.off("routeChangeComplete", handleRouteChange);
+      router.events.off("routeChangeStart", handleRouteChange);
     };
   }, [router.events]);
 
