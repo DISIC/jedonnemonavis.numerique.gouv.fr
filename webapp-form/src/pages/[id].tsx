@@ -4,7 +4,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { GetServerSideProps } from "next/types";
-import { useState } from "react";
+import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
 import { AnswerIntention, Prisma } from "@prisma/client";
@@ -17,6 +17,8 @@ import {
 import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { Loader } from "../components/global/Loader";
 
 type JDMAFormProps = {
   product: Product;
@@ -26,8 +28,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
   const { t } = useTranslation("common");
+  const router = useRouter();
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const createReview = trpc.review.create.useMutation({
     onSuccess: () => setIsFormSubmitted(true),
@@ -130,6 +135,42 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     });
   };
 
+  React.useEffect(() => {
+    const handleRouteChange = (url: string) => {
+      const queryParams = new URLSearchParams(url.split("?")[1]);
+      const step = parseInt(queryParams.get("step") as string) || 0;
+      setCurrentStep(step);
+    };
+    router.events.on("routeChangeStart", handleRouteChange);
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [router.events]);
+
+  React.useEffect(() => {
+    setIsLoading(true);
+    if (router.isReady) {
+      router.replace({
+        pathname: router.pathname,
+        query: { id: product.id },
+      });
+      setIsLoading(false);
+    }
+  }, [router.isReady]);
+
+  React.useEffect(() => {
+    if (currentStep !== 0) {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { id: product.id, step: currentStep },
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [currentStep]);
+
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
     comprehension: undefined,
@@ -208,12 +249,16 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         </div>
       );
     } else {
-      return (
+      return !isLoading ? (
         <>
-          {opinion.satisfaction ? (
+          {router.query.step ? (
             <FormStepper
               opinion={opinion}
-              steps={process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B}
+              currentStep={currentStep}
+              setCurrentStep={setCurrentStep}
+              steps={
+                process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
+              }
               onSubmit={(result) => {
                 setOpinion({ ...result });
                 //handleSubmitReview(result);
@@ -229,6 +274,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             />
           )}
         </>
+      ) : (
+        <Loader size="md" />
       );
     }
   };
