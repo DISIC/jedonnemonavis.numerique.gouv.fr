@@ -18,6 +18,7 @@ import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { Loader } from "../components/global/Loader";
 
 type JDMAFormProps = {
   product: Product;
@@ -31,6 +32,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const createReview = trpc.review.create.useMutation({
     onSuccess: () => setIsFormSubmitted(true),
@@ -146,6 +148,17 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }, [router.events]);
 
   React.useEffect(() => {
+    setIsLoading(true);
+    if (router.isReady) {
+      router.replace({
+        pathname: router.pathname,
+        query: { id: product.id },
+      });
+      setIsLoading(false);
+    }
+  }, [router.isReady]);
+
+  React.useEffect(() => {
     if (currentStep !== 0) {
       router.push(
         {
@@ -236,7 +249,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         </div>
       );
     } else {
-      return (
+      return !isLoading ? (
         <>
           {router.query.step ? (
             <FormStepper
@@ -261,6 +274,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             />
           )}
         </>
+      ) : (
+        <Loader size="md" />
       );
     }
   };
