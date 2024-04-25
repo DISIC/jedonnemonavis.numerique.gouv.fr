@@ -10,16 +10,21 @@ import { Client as ElkClient } from "@elastic/elasticsearch";
 export const createContext = async () => {
   const prisma = new PrismaClient();
 
+  const caCrtPath = path.resolve(process.cwd(), "./certs/ca/ca.crt");
+  const tlsOptions = fs.existsSync(caCrtPath)
+    ? {
+        ca: fs.readFileSync(caCrtPath),
+        rejectUnauthorized: false,
+      }
+    : undefined;
+
   const elkClient = new ElkClient({
     node: process.env.ES_ADDON_URI as string,
     auth: {
       username: process.env.ES_ADDON_USER as string,
       password: process.env.ES_ADDON_PASSWORD as string,
     },
-    tls: {
-      ca: fs.readFileSync(path.resolve(process.cwd(), "./certs/ca/ca.crt")),
-      rejectUnauthorized: false,
-    },
+    tls: tlsOptions,
   });
 
   return {

@@ -24,16 +24,21 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const req = opts.req;
 	const user_api = null as UserWithAccessRight | null;
 
+	const caCrtPath = path.resolve(process.cwd(), './certs/ca/ca.crt');
+	const tlsOptions = fs.existsSync(caCrtPath)
+		? {
+				ca: fs.readFileSync(caCrtPath),
+				rejectUnauthorized: false
+			}
+		: undefined;
+
 	const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
 		auth: {
 			username: process.env.ES_ADDON_USER as string,
 			password: process.env.ES_ADDON_PASSWORD as string
 		},
-		tls: {
-			ca: fs.readFileSync(path.resolve(process.cwd(), './certs/ca/ca.crt')),
-			rejectUnauthorized: false
-		}
+		tls: tlsOptions
 	});
 
 	return {
