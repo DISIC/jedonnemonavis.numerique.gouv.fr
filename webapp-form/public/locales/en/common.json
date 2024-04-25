@@ -239,7 +239,7 @@
         }
       ]
     },
-    "contact_channels_verbatim": {
+    "contact_tried_verbatim": {
       "label": "What other types of assistance did you use?",
       "hint": "Maximum 250 characters."
     },

@@ -30,17 +30,17 @@
     "A_1": {
       "name": "Clarté",
       "button": "Continuer"
-    }, 
+    },
     "A_2": {
       "name": "Aides",
       "button": "Continuer"
-    }, 
+    },
     "A_3": {
       "name": "Informations complémentaire",
       "button": "Terminer"
     },
     "B_1": {
-      "name": "Expérience générale",                          
+      "name": "Expérience générale",
       "button": "Envoyer mon avis"
     },
     "B_2": {
@@ -96,17 +96,17 @@
       "label": "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
       "hint": "Plusieurs choix possibles",
       "options": [
-        { 
-          "label": "Au guichet avec l'administration"
+        {
+          "label": "Au guichet avec l’administration"
         },
         {
-          "label": "Par téléphone avec l'administration"
+          "label": "Par téléphone avec l’administration"
         },
         {
-          "label": "Par e-mail avec l'administration"
+          "label": "Par e-mail avec l’administration"
         },
         {
-          "label": "Par chat avec l'administration"
+          "label": "Par chat avec l’administration"
         },
         {
           "label": "Une personne proche"
@@ -239,7 +239,7 @@
         }
       ]
     },
-    "contact_channels_verbatim": {
+    "contact_tried_verbatim": {
       "label": "Quels autres types d'aide avez-vous utilisés ?",
       "hint": "Maximum 250 caractères."
     },

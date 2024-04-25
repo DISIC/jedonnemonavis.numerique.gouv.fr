@@ -122,11 +122,11 @@ model UserInviteToken {
 }
 
 model UserResetToken {
-  id         Int    @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   user            User     @relation(fields: [user_id], references: [id])
   user_id         Int      @unique
-  user_email String
-  token      String @unique
+  user_email      String
+  token           String   @unique
   expiration_date DateTime
 
   created_at DateTime @default(now())
@@ -141,8 +141,8 @@ model Entity {
   products          Product[]
   users             User[]
   adminEntityRights AdminEntityRight[]
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at        DateTime           @default(now())
+  updated_at        DateTime           @updatedAt
 }
 
 model Button {
@@ -244,19 +244,23 @@ model Review {
   answers Answer[]
 
   created_at DateTime @default(now())
+
   @@index([product_id, created_at])
 }
 
 model Answer {
-  id             Int              @id @default(autoincrement())
-  field_label    String
-  field_code     String
-  answer_item_id Int
-  answer_text    String
-  intention      AnswerIntention?
-  kind           AnswerKind
-  review         Review           @relation(fields: [review_id], references: [id])
-  review_id      Int
+  id               Int              @id @default(autoincrement())
+  field_label      String
+  field_code       String
+  answer_item_id   Int
+  answer_text      String
+  intention        AnswerIntention?
+  kind             AnswerKind
+  review           Review           @relation(fields: [review_id], references: [id])
+  review_id        Int
+  parent_answer    Answer?          @relation("ParentAnswer", fields: [parent_answer_id], references: [id])
+  parent_answer_id Int?
+  child_answers    Answer[]         @relation("ParentAnswer")
 
   @@index([intention, field_code, review_id])
 }

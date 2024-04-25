@@ -13,23 +13,14 @@ import { useRouter } from "next/router";
 type Props = {
   opinion: Opinion;
   steps: Step[];
-  onSubmit: (opinion: Opinion) => void;
-  isFormSubmitted: boolean;
-  setIsFormSubmitted: (choice: boolean) => void;
+  onSubmit: (opinion: Opinion, isLastStep: boolean) => void;
   currentStep: number;
   setCurrentStep: (step: number) => void;
 };
 
 export const FormStepper = (props: Props) => {
-  const {
-    onSubmit,
-    opinion,
-    steps,
-    isFormSubmitted,
-    setIsFormSubmitted,
-    currentStep,
-    setCurrentStep,
-  } = props;
+  const { onSubmit, opinion, steps, currentStep, setCurrentStep } = props;
+
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
 
@@ -59,13 +50,12 @@ export const FormStepper = (props: Props) => {
       </div>
       <form
         onSubmit={(e) => {
-          e.preventDefault();
-          if (currentStep + 1 < steps.length) {
+          const isLastStep = currentStep + 1 === steps.length;
+          if (!isLastStep) {
             setCurrentStep(currentStep + 1);
-          } else {
-            setIsFormSubmitted(true);
           }
-          onSubmit(tmpOpinion);
+          e.preventDefault();
+          onSubmit(tmpOpinion, isLastStep);
         }}
       >
         {steps[currentStep].section.map((field: FormField) => (

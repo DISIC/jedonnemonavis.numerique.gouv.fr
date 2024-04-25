@@ -5,26 +5,17 @@ export type Feeling = "good" | "bad" | "medium";
 export type Opinion = {
   satisfaction?: number;
   easy?: number;
-  comprehension?: number;
-  contact?: number;
   contact_tried: number[];
   contact_reached: string[];
-  contact_satisfaction?: number;
-  contact_channels: number[];
-  contact_channels_verbatim?: string;
-  difficulties?: number;
-  difficulties_details: number[];
-  difficulties_details_verbatim?: string;
-  help?: number;
-  help_details: number[];
-  help_details_verbatim?: string;
+  contact_satisfaction: string[];
+  contact_tried_verbatim?: string;
   verbatim?: string;
 };
 
 export type Product = {
   id: number;
   title: string;
-  buttons: {id: number}[]
+  buttons: { id: number }[];
 };
 
 type BaseOption = {
@@ -58,26 +49,14 @@ export type FormField =
     }
   | {
       kind: "input-text";
-      name: keyof Pick<
-        Opinion,
-        | "verbatim"
-        | "help_details_verbatim"
-        | "difficulties_details_verbatim"
-        | "contact_channels_verbatim"
-      >;
+      name: keyof Pick<Opinion, "verbatim" | "contact_tried_verbatim">;
       label: string;
       hint?: string;
       conditions?: Condition[];
     }
   | {
       kind: "input-textarea";
-      name: keyof Pick<
-        Opinion,
-        | "verbatim"
-        | "help_details_verbatim"
-        | "difficulties_details_verbatim"
-        | "contact_channels_verbatim"
-      >;
+      name: keyof Pick<Opinion, "verbatim" | "contact_tried_verbatim">;
       label: string;
       hint?: string;
       conditions?: Condition[];
@@ -97,7 +76,7 @@ export type FormField =
       conditions?: Condition[];
       options: RadioOption[];
       needed: number[];
-      excluded: number[]
+      excluded: number[];
     }
   | {
       kind: "yes-no";
@@ -106,30 +85,32 @@ export type FormField =
       conditions?: Condition[];
       options: RadioOption[];
       needed: number[];
-      excluded: number[]
+      excluded: number[];
     }
   | {
       kind: "radio";
       name: keyof Opinion;
       label: string;
       hint?: string;
-      hintLeft?: string,
+      hintLeft?: string;
       hintRight?: string;
       conditions?: Condition[];
       options: RadioOption[];
     };
 
 export type Step = {
-  name: string,
-  section: FormField[]
-  button: string
-}
+  name: string;
+  section: FormField[];
+  button: string;
+};
 
 export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
   product_name: string;
   product_id: number;
   button_name: string;
   button_id: number;
+  parent_field_code?: string;
+  parent_answer_item_id?: number;
   created_at: Date;
 }
 
