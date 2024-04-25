@@ -8,18 +8,33 @@ import { Field } from "../elements/Field";
 import { SmileyInput } from "../elements/SmileyInput";
 import { useTranslation } from "next-i18next";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import { useRouter } from "next/router";
 
 type Props = {
   opinion: Opinion;
   steps: Step[];
-  onSubmit: (opinion: Opinion, isLastStep: boolean) => void;
+  onSubmit: (opinion: Opinion) => void;
+  isFormSubmitted: boolean;
+  setIsFormSubmitted: (choice: boolean) => void;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
 };
 
 export const FormStepper = (props: Props) => {
-  const { onSubmit, opinion, steps } = props;
+  const {
+    onSubmit,
+    opinion,
+    steps,
+    isFormSubmitted,
+    setIsFormSubmitted,
+    currentStep,
+    setCurrentStep,
+  } = props;
+  
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
-  const [currentStep, setCurrentStep] = useState<number>(0);
+
+  const router = useRouter();
 
   const { classes, cx } = useStyles();
 
@@ -45,12 +60,11 @@ export const FormStepper = (props: Props) => {
       </div>
       <form
         onSubmit={(e) => {
-          const isLastStep = currentStep + 1 === steps.length;
-          if (!isLastStep) {
+          e.preventDefault();
+          if (currentStep + 1 < steps.length) {
             setCurrentStep(currentStep + 1);
           }
-          e.preventDefault();
-          onSubmit(tmpOpinion, isLastStep);
+          onSubmit(tmpOpinion);
         }}
       >
         {steps[currentStep].section.map((field: FormField) => (

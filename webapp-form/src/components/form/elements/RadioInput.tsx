@@ -29,41 +29,39 @@ export const RadioInput = (props: Props) => {
         <div className={fr.cx("fr-col-12")}>
           <div className={cx(classes.radioContainer)}>
             <div>{t(field.hintLeft ?? "")}</div>
-            <form>
-              <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
-                <ul>
-                  {field.options.map((f) => (
-                    <li key={f.value}>
-                      <input
-                        id={`radio-${f.label}-${f.value}`}
-                        className={fr.cx("fr-sr-only")}
-                        type="radio"
-                        name={f.value.toString()}
-                        checked={opinion.easy === f.value}
-                        onChange={() => {
-                          setOpinion((prevOpinion) => ({
-                            ...prevOpinion,
-                            [field.name]: f.value,
-                          }));
-                        }}
-                        onClick={() => {
-                          setOpinion((prevOpinion) => ({
-                            ...prevOpinion,
-                            [field.name]: f.value,
-                          }));
-                        }}
-                      />
-                      <label
-                        htmlFor={`radio-${f.label}-${f.value}`}
-                        className={cx(classes.radioInput)}
-                      >
-                        {t(f.label)}
-                      </label>
-                    </li>
-                  ))}
-                </ul>
-              </fieldset>
-            </form>
+            <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
+              <ul>
+                {field.options.map((f) => (
+                  <li key={f.value}>
+                    <input
+                      id={`radio-${f.label}-${f.value}`}
+                      className={fr.cx("fr-sr-only")}
+                      type="radio"
+                      name={f.value.toString()}
+                      checked={opinion.easy === f.value}
+                      onChange={() => {
+                        setOpinion((prevOpinion) => ({
+                          ...prevOpinion,
+                          [field.name]: f.value,
+                        }));
+                      }}
+                      onClick={() => {
+                        setOpinion((prevOpinion) => ({
+                          ...prevOpinion,
+                          [field.name]: f.value,
+                        }));
+                      }}
+                    />
+                    <label
+                      htmlFor={`radio-${f.label}-${f.value}`}
+                      className={cx(classes.radioInput)}
+                    >
+                      {t(f.label)}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
             <div>{t(field.hintRight ?? "")}</div>
           </div>
         </div>

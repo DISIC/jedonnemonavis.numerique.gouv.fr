@@ -7,6 +7,7 @@ import { tss } from "tss-react/dsfr";
 import { Field } from "../elements/Field";
 import { SmileyInput } from "../elements/SmileyInput";
 import { useTranslation } from "next-i18next";
+import { useRouter } from "next/router";
 
 type Props = {
   product: Product;
@@ -18,18 +19,19 @@ export const FormFirstBlock = (props: Props) => {
   const { onSubmit, product, opinion } = props;
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation("common");
+  const router = useRouter();
 
   const { classes, cx } = useStyles();
 
   return (
     <div>
       <h1 className={cx(classes.title)}>{t("first_block.title")}</h1>
-      <div className={fr.cx('fr-grid-row')}>
-        <div className={cx(classes.notice, fr.cx('fr-col-12', 'fr-p-10v'))}>
+      <div className={fr.cx("fr-grid-row")}>
+        <div className={cx(classes.notice, fr.cx("fr-col-12", "fr-p-10v"))}>
           <p className={fr.cx("fr-mb-0")}>
             <span>{t("first_block.subtitle_part_1")}</span>
             <span className={cx(classes.bold)}> {product.title}</span>
-            <span>{' '}{t("first_block.subtitle_part_2")}</span>
+            <span> {t("first_block.subtitle_part_2")}</span>
           </p>
         </div>
       </div>
@@ -37,6 +39,10 @@ export const FormFirstBlock = (props: Props) => {
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(tmpOpinion);
+          router.push({
+            pathname: router.pathname,
+            query: { id: product.id, step: 0 },
+          });
         }}
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
         className={fr.cx("fr-mt-14v")}
@@ -66,7 +72,7 @@ const useStyles = tss
   .withParams()
   .create(() => ({
     notice: {
-      backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
+      backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
     },
     bold: {
       fontWeight: 800,
