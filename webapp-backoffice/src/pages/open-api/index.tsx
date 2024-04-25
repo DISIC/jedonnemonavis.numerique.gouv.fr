@@ -64,10 +64,10 @@ const DocAPI = () => {
 				<Loader></Loader>
 			) : (
 				<>
-					<div className={fr.cx('fr-container', 'fr-py-6w')}>
+					<div className={fr.cx('fr-container')}>
 						<h3>Documentation API JDMA</h3>
 					</div>
-					<div className={fr.cx('fr-container', 'fr-py-6w')}>
+					<div className={fr.cx('fr-container', 'fr-pt-6w')}>
 						<h5>1. Générer une clé API</h5>
 						<p>
 							Afin de pouvoir utiliser les points d'accès décrits dans cette
@@ -105,7 +105,7 @@ const DocAPI = () => {
 							cette documentation.
 						</p>
 					</div>
-					<div className={fr.cx('fr-container', 'fr-py-6w')}>
+					<div className={fr.cx('fr-container', 'fr-pt-6w')}>
 						<h5>2. Point d'accès Infos Démarches</h5>
 						<p>
 							Ce point d'accès retourne les informations sur les démarches sur
