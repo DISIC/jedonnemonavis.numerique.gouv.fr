@@ -3,10 +3,13 @@ import { AnswerIntention } from '@prisma/client';
 import { Context } from '../server/trpc';
 import {
 	Buckets,
+	CategoryData,
 	ElkAnswer,
+	Hit,
 	OpenProduct,
 	ProductMapEntry
 } from '../types/custom';
+import { FieldCodeHelper } from './helpers';
 
 export const getIntentionFromAverage = (average: number): AnswerIntention => {
 	return average >= 8
@@ -99,6 +102,118 @@ export const displayIntention = (intention: string) => {
 	}
 };
 
+const handleChildren = (buckets: Buckets) => {
+	let result: CategoryData[] = [];
+
+	buckets.forEach(bucket => {
+		const [
+			productId,
+			productName,
+			fieldCode,
+			parentFieldCode,
+			parentAnswerItemId,
+			fieldLabel,
+			intention,
+			answerText,
+			answerItemId
+		] = bucket.key.split('#!#');
+		const docCount = bucket.doc_count;
+
+		let categoryIndex = result.findIndex(c => c.category === fieldCode);
+
+		if (categoryIndex === -1) {
+			const newCategory = {
+				category: fieldCode,
+				label: fieldLabel,
+				number_hits: []
+			};
+			result.push(newCategory);
+			categoryIndex = result.length - 1;
+		}
+
+		const children = buckets.filter(b => {
+			const bParentFieldCode = b.key.split('#!#')[3];
+			return bParentFieldCode === fieldCode;
+		}) as Buckets;
+
+		result[categoryIndex].number_hits.push({
+			intention: intention,
+			label: answerText,
+			count: docCount,
+			children: !!children.length ? handleChildren(children) : undefined
+		});
+	});
+
+	return result;
+};
+
+const handleBucket = (buckets: Buckets) => {
+	let result: OpenProduct[] = [];
+	let productMap: { [productId: string]: ProductMapEntry } = {};
+
+	buckets.forEach(bucket => {
+		const [
+			productId,
+			productName,
+			fieldCode,
+			parentFieldCode,
+			parentAnswerItemId,
+			fieldLabel,
+			intention,
+			answerText,
+			answerItemId
+		] = bucket.key.split('#!#');
+		const docCount = bucket.doc_count;
+
+		if (!productMap.hasOwnProperty(productId)) {
+			const newProduct = {
+				product_id: productId,
+				product_name: productName,
+				data: []
+			};
+			result.push(newProduct);
+			productMap[productId] = {
+				productIndex: result.length - 1,
+				categories: {}
+			};
+		}
+
+		const productIndex = productMap[productId].productIndex;
+
+		if (!parentFieldCode) {
+			if (!productMap[productId].categories.hasOwnProperty(fieldCode)) {
+				const newCategory = {
+					category: fieldCode,
+					label: fieldLabel,
+					number_hits: []
+				};
+				result[productIndex].data.push(newCategory);
+				productMap[productId].categories[fieldCode] =
+					result[productIndex].data.length - 1;
+			}
+
+			const children = buckets.filter(b => {
+				const bParentFieldCode = b.key.split('#!#')[3];
+				const bParentFieldAnswerItemId = b.key.split('#!#')[4];
+				return (
+					bParentFieldCode === fieldCode &&
+					bParentFieldAnswerItemId === answerItemId
+				);
+			}) as Buckets;
+
+			const categoryIndex = productMap[productId].categories[fieldCode];
+			result[productIndex].data[categoryIndex].number_hits.push({
+				intention: intention,
+				label: answerText,
+				count: docCount,
+				children: !!children.length ? handleChildren(children) : undefined
+			});
+		}
+	});
+
+	return result;
+};
+
 export const fetchAndFormatData = async ({
 	ctx,
 	field_codes,
@@ -107,7 +222,7 @@ export const fetchAndFormatData = async ({
 	end_date
 }: {
 	ctx: Context;
-	field_codes: string[];
+	field_codes: FieldCodeHelper[];
 	product_ids: string[] | number[];
 	start_date: string;
 	end_date: string;
@@ -118,8 +233,19 @@ export const fetchAndFormatData = async ({
 			bool: {
 				must: [
 					{
-						terms: {
-							field_code: field_codes
+						bool: {
+							should: [
+								{
+									terms: {
+										field_code: field_codes.map(fc => fc.slug)
+									}
+								},
+								{
+									terms: {
+										parent_field_code: field_codes.map(fc => fc.slug)
+									}
+								}
+							]
 						}
 					},
 					{
@@ -141,8 +267,12 @@ export const fetchAndFormatData = async ({
 		aggs: {
 			term: {
 				terms: {
-					script:
-						'doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value',
+					script: {
+						source: `
+						doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value
+						`,
+						lang: 'painless'
+					},
 					size: 10000
 				}
 			}
@@ -153,53 +283,5 @@ export const fetchAndFormatData = async ({
 	const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
 		?.buckets as Buckets;
 
-	let result: OpenProduct[] = [];
-
-	let productMap: { [productId: string]: ProductMapEntry } = {};
-
-	tmpBuckets.forEach(bucket => {
-		const [
-			productId,
-			productName,
-			fieldCode,
-			fieldLabel,
-			intention,
-			answerText
-		] = bucket.key.split('#!#');
-		const docCount = bucket.doc_count;
-
-		if (!productMap.hasOwnProperty(productId)) {
-			const newProduct = {
-				product_id: productId,
-				product_name: productName,
-				data: []
-			};
-			result.push(newProduct);
-			productMap[productId] = {
-				productIndex: result.length - 1,
-				categories: {}
-			};
-		}
-
-		const productIndex = productMap[productId].productIndex;
-		if (!productMap[productId].categories.hasOwnProperty(fieldCode)) {
-			const newCategory = {
-				category: fieldCode,
-				label: fieldLabel,
-				number_hits: []
-			};
-			result[productIndex].data.push(newCategory);
-			productMap[productId].categories[fieldCode] =
-				result[productIndex].data.length - 1;
-		}
-
-		const categoryIndex = productMap[productId].categories[fieldCode];
-		result[productIndex].data[categoryIndex].number_hits.push({
-			intention: intention,
-			label: answerText,
-			count: docCount
-		});
-	});
-
-	return result;
+	return handleBucket(tmpBuckets);
 };

@@ -3,6 +3,7 @@ import {
 	publicProcedure,
 	router
 } from '@/src/server/trpc';
+import { ZOpenApiStatsOutput } from '@/src/types/custom';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
@@ -94,29 +95,7 @@ export const openAPIRouter = router({
 				end_date: z.string()
 			})
 		)
-		.output(
-			z.object({
-				data: z.array(
-					z.object({
-						product_id: z.string(),
-						product_name: z.string(),
-						data: z.array(
-							z.object({
-								category: z.string(),
-								label: z.string(),
-								number_hits: z.array(
-									z.object({
-										intention: z.string(),
-										label: z.string(),
-										count: z.number()
-									})
-								)
-							})
-						)
-					})
-				)
-			})
-		)
+		.output(ZOpenApiStatsOutput)
 		.query(async ({ ctx, input }) => {
 			const { field_codes, product_ids, start_date, end_date } = input;
 
@@ -129,16 +108,18 @@ export const openAPIRouter = router({
 				return data.id;
 			});
 
+			const allFields = [
+				...FIELD_CODE_BOOLEAN_VALUES,
+				...FIELD_CODE_SMILEY_VALUES,
+				...FIELD_CODE_DETAILS_VALUES
+			];
+
 			const result = await fetchAndFormatData({
 				ctx,
 				field_codes:
 					field_codes.length > 0
-						? field_codes
-						: [
-								...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug),
-								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug),
-								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug)
-							],
+						? allFields.filter(f => field_codes.includes(f.slug))
+						: allFields,
 				product_ids:
 					product_ids.length > 0
 						? list_250_ids.filter(value => product_ids.includes(value))
@@ -161,7 +142,7 @@ export const openAPIRouter = router({
 					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
 				example: {
 					request: {
-						field_codes: ['satisfaction', 'comprehension'],
+						field_codes: ['satisfaction', 'easy', 'contact_tried'],
 						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0]
@@ -177,29 +158,7 @@ export const openAPIRouter = router({
 				end_date: z.string()
 			})
 		)
-		.output(
-			z.object({
-				data: z.array(
-					z.object({
-						product_id: z.string(),
-						product_name: z.string(),
-						data: z.array(
-							z.object({
-								category: z.string(),
-								label: z.string(),
-								number_hits: z.array(
-									z.object({
-										intention: z.string(),
-										label: z.string(),
-										count: z.number()
-									})
-								)
-							})
-						)
-					})
-				)
-			})
-		)
+		.output(ZOpenApiStatsOutput)
 		.query(async ({ ctx, input }) => {
 			const { field_codes, product_ids, start_date, end_date } = input;
 
@@ -209,16 +168,18 @@ export const openAPIRouter = router({
 				}
 			);
 
+			const allFields = [
+				...FIELD_CODE_BOOLEAN_VALUES,
+				...FIELD_CODE_SMILEY_VALUES,
+				...FIELD_CODE_DETAILS_VALUES
+			];
+
 			const result = await fetchAndFormatData({
 				ctx,
 				field_codes:
 					field_codes.length > 0
-						? field_codes
-						: [
-								...FIELD_CODE_BOOLEAN_VALUES.map(code => code.slug),
-								...FIELD_CODE_SMILEY_VALUES.map(code => code.slug),
-								...FIELD_CODE_DETAILS_VALUES.map(code => code.slug)
-							],
+						? allFields.filter(f => field_codes.includes(f.slug))
+						: allFields,
 				product_ids:
 					product_ids.length > 0
 						? authorized_products_ids.filter(value =>
