@@ -1,10 +1,15 @@
 export const FIELD_CODE_BOOLEAN_VALUES = [
-	// { slug: 'difficulties', question: 'Avez-vous rencontré des difficultés ?' },
-	// {
-	// 	slug: 'help',
-	// 	question:
-	// 		"Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?"
-	// },
+	{
+		slug: 'difficulties',
+		hideInDocs: true,
+		question: 'Avez-vous rencontré des difficultés ?'
+	},
+	{
+		slug: 'help',
+		hideInDocs: true,
+		question:
+			"Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?"
+	},
 	{
 		slug: 'contact_reached',
 		hideInDocs: true,
@@ -22,17 +27,19 @@ export const FIELD_CODE_SMILEY_VALUES = [
 		slug: 'easy',
 		question:
 			"Selon les réponses suivantes, qu'est ce qui vous correspond le mieux :"
+	},
+	{
+		slug: 'comprehension',
+		hideInDocs: true,
+		question: "Qu'avez-vous pensé du langage utilisé ?"
 	}
-	// {
-	// 	slug: 'comprehension',
-	// 	question: "Qu'avez-vous pensé du langage utilisé ?"
-	// },
 ] as const;
 export const FIELD_CODE_DETAILS_VALUES = [
-	// {
-	// 	slug: 'difficulties_details',
-	// 	question: 'Quelles ont été ces difficultés ?'
-	// },
+	{
+		slug: 'difficulties_details',
+		hideInDocs: true,
+		question: 'Quelles ont été ces difficultés ?'
+	},
 	{
 		slug: 'contact_tried',
 		hint: 'Des sous-questions conditionnelles associées à cette question sont incluses dans le résultat.',
@@ -43,18 +50,24 @@ export const FIELD_CODE_DETAILS_VALUES = [
 		slug: 'contact_satisfaction',
 		hideInDocs: true,
 		question: 'Comment s’est passé l’échange avec le service de la démarche ?'
+	},
+	{
+		slug: 'contact',
+		hideInDocs: true,
+		question:
+			"Avez-vous tenté de contacter le service d'aide en charge de la démarche ?"
+	},
+	{
+		slug: 'contact_channels',
+		hideInDocs: true,
+		question:
+			'Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?'
+	},
+	{
+		slug: 'help_details',
+		hideInDocs: true,
+		question: 'De quelle aide avez vous eu besoin ?'
 	}
-	// {
-	// 	slug: 'contact',
-	// 	question:
-	// 		"Avez-vous tenté de contacter le service d'aide en charge de la démarche ?"
-	// },
-	// {
-	// 	slug: 'contact_channels',
-	// 	question:
-	// 		'Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?'
-	// },
-	// { slug: 'help_details', question: 'De quelle aide avez vous eu besoin ?' }
 ] as const;
 
 export type FieldCodeHelper =

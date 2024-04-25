@@ -16,9 +16,9 @@ import { Loader } from '@/src/components/ui/Loader';
 import Link from 'next/link';
 import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
 import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { ToggleSwitch } from "@codegouvfr/react-dsfr/ToggleSwitch";
+import { ToggleSwitch } from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 
 interface Props {
@@ -58,7 +58,7 @@ const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const { statsTotals } = useStats();
 	const isTotalLoading = statsTotals.satisfaction === undefined;
-	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false)
+	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false);
 
 	const { classes, cx } = useStyles();
 
@@ -151,7 +151,7 @@ const ProductStatPage = (props: Props) => {
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
-				
+
 				<Button
 					priority="secondary"
 					type="button"
@@ -166,8 +166,7 @@ const ProductStatPage = (props: Props) => {
 						<Loader />
 					</div>
 				)}
-				<div>
-				</div>
+				<div></div>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
 				>
@@ -307,15 +306,6 @@ const ProductStatPage = (props: Props) => {
 							</div>
 						)}
 					</div>
-					{statsTotals.contact_satisfaction !== 0 && (
-						<SmileyQuestionViz
-							fieldCode="contact_satisfaction"
-							displayFieldLabel={true}
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					)}
 					{statsTotals.contact_channels !== 0 && (
 						<DetailsQuestionViz
 							fieldCodeMultiple="contact_channels"
