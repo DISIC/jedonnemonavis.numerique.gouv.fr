@@ -239,7 +239,7 @@
         }
       ]
     },
-    "contact_channels_verbatim": {
+    "contact_tried_verbatim": {
       "label": "Que outros tipos de ajuda utilizou?",
       "hint": "Máximo de 250 caracteres."
     },

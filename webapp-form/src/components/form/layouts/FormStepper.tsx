@@ -8,50 +8,54 @@ import { Field } from "../elements/Field";
 import { SmileyInput } from "../elements/SmileyInput";
 import { useTranslation } from "next-i18next";
 import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
+import { useRouter } from "next/router";
 
 type Props = {
   opinion: Opinion;
   steps: Step[];
-  onSubmit: (opinion: Opinion) => void;
-  isFormSubmitted: boolean;
-  setIsFormSubmitted: (choice: boolean) => void;
+  onSubmit: (opinion: Opinion, isLastStep: boolean) => void;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
 };
 
 export const FormStepper = (props: Props) => {
-  const { onSubmit, opinion, steps, isFormSubmitted, setIsFormSubmitted } =
-    props;
+  const { onSubmit, opinion, steps, currentStep, setCurrentStep } = props;
+
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
-  const [currentStep, setCurrentStep] = useState<number>(0);
+
+  const router = useRouter();
 
   const { classes, cx } = useStyles();
 
   return (
     <div>
       <div className={cx(classes.step)}>
-        <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
-          {t(`${steps[currentStep].name}`)}
-        </h1>
-        <Stepper
-          currentStep={currentStep + 1}
-          stepCount={
-            process.env.NEXT_PUBLIC_AB_TESTING === "A"
-              ? steps_A.length
-              : steps_B.length
-          }
-          title={t(`${steps[currentStep].name}`)}
-        />
+        {steps.length > 1 && (
+          <>
+            <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
+              {t(`${steps[currentStep].name}`)}
+            </h1>
+            <Stepper
+              currentStep={currentStep + 1}
+              stepCount={
+                process.env.NEXT_PUBLIC_AB_TESTING === "A"
+                  ? steps_A.length
+                  : steps_B.length
+              }
+              title={t(`${steps[currentStep].name}`)}
+            />
+          </>
+        )}
       </div>
       <form
         onSubmit={(e) => {
-          console.log("submit");
-          if (currentStep + 1 < steps.length) {
+          const isLastStep = currentStep + 1 === steps.length;
+          if (!isLastStep) {
             setCurrentStep(currentStep + 1);
-          } else {
-            setIsFormSubmitted(true);
           }
           e.preventDefault();
-          onSubmit(tmpOpinion);
+          onSubmit(tmpOpinion, isLastStep);
         }}
       >
         {steps[currentStep].section.map((field: FormField) => (

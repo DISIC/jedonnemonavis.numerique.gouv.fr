@@ -239,7 +239,7 @@
         }
       ]
     },
-    "contact_channels_verbatim": {
+    "contact_tried_verbatim": {
       "label": "ما هي أنواع المساعدة الأخرى التي استخدمتها؟",
       "hint": "250 حرف كحد أقصى."
     },

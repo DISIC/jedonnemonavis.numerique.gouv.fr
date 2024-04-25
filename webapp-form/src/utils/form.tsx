@@ -108,10 +108,10 @@ export const secondSectionA: FormField[] = [
         values: [16],
       },
     ],
-    name: "contact_channels_verbatim",
+    name: "contact_tried_verbatim",
     kind: "input-textarea",
-    hint: "fields.contact_channels_verbatim.hint",
-    label: "fields.contact_channels_verbatim.label",
+    hint: "fields.contact_tried_verbatim.hint",
+    label: "fields.contact_tried_verbatim.label",
   },
   {
     name: "contact_reached",
@@ -121,12 +121,12 @@ export const secondSectionA: FormField[] = [
       {
         label: "fields.contact_reached.options.0.label",
         value: 17,
-        intention: "neutral",
+        intention: "good",
       },
       {
         label: "fields.contact_reached.options.1.label",
         value: 18,
-        intention: "neutral",
+        intention: "bad",
       },
     ],
     needed: [9, 10, 11, 12],
@@ -162,11 +162,6 @@ export const secondSectionA: FormField[] = [
         value: 23,
         intention: "very_good",
       },
-      {
-        label: "fields.contact_satisfaction.options.5.label",
-        value: 24,
-        intention: "neutral",
-      },
     ],
     needed: [9, 10, 11, 12],
     excluded: [16],
@@ -181,6 +176,11 @@ export const thirdSectionA: FormField[] = [
     label: "fields.verbatim.label",
   },
 ];
+
+export const allFields: FormField[] = primarySection
+  .concat(firstSectionA)
+  .concat(secondSectionA)
+  .concat(thirdSectionA);
 
 export const steps_A: Step[] = [
   {
@@ -200,35 +200,10 @@ export const steps_A: Step[] = [
   },
 ];
 
-export const steps_B = [
-  {
-    name: "steps.B_1.name",
-    section: primarySection,
-    button: "steps.B_1.button",
-  },
+export const steps_B: Step[] = [
   {
     name: "steps.B_2.name",
-    section: firstSectionA,
+    section: firstSectionA.concat(secondSectionA, thirdSectionA),
     button: "steps.B_2.button",
-  },
-  {
-    name: "steps.B_3.name",
-    section: secondSectionA.slice(0, 2),
-    button: "steps.B_3.button",
-  },
-  {
-    name: "steps.B_4.name",
-    section: secondSectionA.slice(2, 3),
-    button: "steps.B_4.button",
-  },
-  {
-    name: "steps.B_5.name",
-    section: secondSectionA.slice(3, 4),
-    button: "steps.B_5.button",
-  },
-  {
-    name: "steps.B_6.name",
-    section: thirdSectionA,
-    button: "steps.B_6.button",
   },
 ];

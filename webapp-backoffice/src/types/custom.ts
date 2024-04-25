@@ -1,5 +1,5 @@
-import { AnswerIntention } from '@prisma/client';
-import { Answer, Prisma } from '@prisma/client';
+import { AnswerIntention, Prisma } from '@prisma/client';
+import { z } from 'zod';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
@@ -52,6 +52,7 @@ export type Hit = {
 	intention: string;
 	label: string;
 	count: number;
+	children?: CategoryData[];
 };
 
 export type CategoryData = {
@@ -86,8 +87,34 @@ export type Condition = {
 	answers: {
 		some: {
 			field_code: string;
-			intention?: {in: AnswerIntention[]};
-			answer_text?: {in: string[]};
+			intention?: { in: AnswerIntention[] };
+			answer_text?: { in: string[] };
 		};
 	};
 };
+
+const ZBaseHitSchema = z.object({
+	intention: z.string(),
+	label: z.string(),
+	count: z.number()
+});
+
+const ZOpenApiStatsCategory: z.ZodType = z.object({
+	category: z.string(),
+	label: z.string(),
+	number_hits: z.array(
+		ZBaseHitSchema.extend({
+			children: z.lazy(() => ZOpenApiStatsCategory.array().optional())
+		})
+	)
+});
+
+export const ZOpenApiStatsOutput = z.object({
+	data: z.array(
+		z.object({
+			product_id: z.string(),
+			product_name: z.string(),
+			data: z.array(ZOpenApiStatsCategory)
+		})
+	)
+});

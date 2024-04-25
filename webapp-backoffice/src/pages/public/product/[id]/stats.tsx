@@ -215,15 +215,6 @@ const ProductStatPage = (props: Props) => {
 							</div>
 						)}
 					</div>
-					{statsTotals.contact_satisfaction !== 0 && (
-						<SmileyQuestionViz
-							fieldCode="contact_satisfaction"
-							displayFieldLabel={true}
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					)}
 					{statsTotals.contact_channels !== 0 && (
 						<DetailsQuestionViz
 							fieldCodeMultiple="contact_channels"
