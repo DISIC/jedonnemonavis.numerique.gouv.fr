@@ -1,14 +1,15 @@
 import { z } from 'zod';
-import { router, protectedProcedure } from '@/src/server/trpc';
+import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
 import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
+import { TRPCError } from '@trpc/server';
 
 export const reviewRouter = router({
-	getList: protectedProcedure
+	getList: publicProcedure
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -43,10 +44,24 @@ export const reviewRouter = router({
 			const {
 				numberPerPage,
 				page,
-				shouldIncludeAnswers
+				shouldIncludeAnswers,
+				product_id
 			} = input;
 
 			const {where, orderBy} = formatWhereAndOrder(input)
+
+			const product = await ctx.prisma.product.findUnique({
+				where: {
+					id: product_id
+				}
+			})
+
+			if(!product?.isPublic && !ctx.session?.user) {
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'This product is not public'
+				});
+			}
 
 			const [entities, count] = await Promise.all([
 				ctx.prisma.review.findMany({
