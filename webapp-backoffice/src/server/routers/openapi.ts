@@ -142,7 +142,7 @@ export const openAPIRouter = router({
 					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
 				example: {
 					request: {
-						field_codes: ['satisfaction', 'easy', 'contact_tried'],
+						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0]
