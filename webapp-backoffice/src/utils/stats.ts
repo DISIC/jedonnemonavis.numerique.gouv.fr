@@ -147,7 +147,7 @@ const handleChildren = (buckets: Buckets) => {
 	return result;
 };
 
-const handleBucket = (buckets: Buckets) => {
+const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 	let result: OpenProduct[] = [];
 	let productMap: { [productId: string]: ProductMapEntry } = {};
 
@@ -180,7 +180,7 @@ const handleBucket = (buckets: Buckets) => {
 
 		const productIndex = productMap[productId].productIndex;
 
-		if (!parentFieldCode) {
+		if (field_codes_slugs.includes(fieldCode)) {
 			if (!productMap[productId].categories.hasOwnProperty(fieldCode)) {
 				const newCategory = {
 					category: fieldCode,
@@ -202,12 +202,22 @@ const handleBucket = (buckets: Buckets) => {
 			}) as Buckets;
 
 			const categoryIndex = productMap[productId].categories[fieldCode];
-			result[productIndex].data[categoryIndex].number_hits.push({
-				intention: intention,
-				label: answerText,
-				count: docCount,
-				children: !!children.length ? handleChildren(children) : undefined
-			});
+			const existingHitIndex = result[productIndex].data[
+				categoryIndex
+			].number_hits.findIndex(hit => hit.label === answerText);
+
+			if (existingHitIndex !== -1) {
+				result[productIndex].data[categoryIndex].number_hits[
+					existingHitIndex
+				].count += docCount;
+			} else {
+				result[productIndex].data[categoryIndex].number_hits.push({
+					intention: intention,
+					label: answerText,
+					count: docCount,
+					children: !!children.length ? handleChildren(children) : undefined
+				});
+			}
 		}
 	});
 
@@ -283,5 +293,8 @@ export const fetchAndFormatData = async ({
 	const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
 		?.buckets as Buckets;
 
-	return handleBucket(tmpBuckets);
+	return handleBucket(
+		tmpBuckets,
+		field_codes.map(fc => fc.slug)
+	);
 };
