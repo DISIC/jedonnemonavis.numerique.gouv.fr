@@ -38,7 +38,7 @@ export const RadioInput = (props: Props) => {
                       className={fr.cx("fr-sr-only")}
                       type="radio"
                       name={f.value.toString()}
-                      checked={opinion.easy === f.value}
+                      checked={opinion.comprehension === f.value}
                       onChange={() => {
                         setOpinion((prevOpinion) => ({
                           ...prevOpinion,

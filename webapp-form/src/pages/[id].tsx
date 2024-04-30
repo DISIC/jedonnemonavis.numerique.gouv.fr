@@ -236,7 +236,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
-    easy: undefined,
+    comprehension: undefined,
     contact_tried: [],
     contact_tried_verbatim: undefined,
     contact_reached: [],

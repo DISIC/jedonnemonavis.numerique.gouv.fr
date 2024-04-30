@@ -25,13 +25,14 @@ export const FIELD_CODE_SMILEY_VALUES = [
 	},
 	{
 		slug: 'easy',
+		hideInDocs: true,
 		question:
 			"Selon les réponses suivantes, qu'est ce qui vous correspond le mieux :"
 	},
 	{
 		slug: 'comprehension',
-		hideInDocs: true,
-		question: "Qu'avez-vous pensé du langage utilisé ?"
+		question:
+			"Qu'avez-vous pensé des informations et des instructions fournies ?"
 	}
 ] as const;
 export const FIELD_CODE_DETAILS_VALUES = [

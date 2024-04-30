@@ -4,7 +4,7 @@ export type Feeling = "good" | "bad" | "medium";
 
 export type Opinion = {
   satisfaction?: number;
-  easy?: number;
+  comprehension?: number;
   contact_tried: number[];
   contact_reached: string[];
   contact_satisfaction: string[];

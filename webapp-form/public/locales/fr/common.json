@@ -69,7 +69,7 @@
       "label": "De façon générale, comment ça s’est passé ?",
       "hint": "Ce champ est obligatoire."
     },
-    "easy": {
+    "comprehension": {
       "label": "Qu'avez-vous pensé des informations et des instructions fournies ?",
       "hint": "Sur une échelle de 1 à 5, 1 est incompréhensible et 5 est très clair.",
       "hintLeft": "Incompréhensible",
@@ -153,20 +153,6 @@
         },
         {
           "label": "Ne se prononce pas"
-        }
-      ]
-    },
-    "comprehension": {
-      "label": "Qu'avez-vous pensé du langage utilisé ?",
-      "options": [
-        {
-          "label": "Peu clair, difficile à comprendre"
-        },
-        {
-          "label": "Ni facile, ni difficile à comprendre"
-        },
-        {
-          "label": "Clair, facile à comprendre"
         }
       ]
     },

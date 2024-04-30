@@ -16,35 +16,35 @@ export const primarySection: FormField[] = [
 
 export const firstSectionA: FormField[] = [
   {
-    name: "easy",
+    name: "comprehension",
     kind: "radio",
-    label: "fields.easy.label",
-    hint: "fields.easy.hint",
-    hintLeft: "fields.easy.hintLeft",
-    hintRight: "fields.easy.hintRight",
+    label: "fields.comprehension.label",
+    hint: "fields.comprehension.hint",
+    hintLeft: "fields.comprehension.hintLeft",
+    hintRight: "fields.comprehension.hintRight",
     options: [
       {
-        label: "fields.easy.options.0.label",
+        label: "fields.comprehension.options.0.label",
         value: 4,
         intention: "very_bad",
       },
       {
-        label: "fields.easy.options.1.label",
+        label: "fields.comprehension.options.1.label",
         value: 5,
         intention: "bad",
       },
       {
-        label: "fields.easy.options.2.label",
+        label: "fields.comprehension.options.2.label",
         value: 6,
         intention: "medium",
       },
       {
-        label: "fields.easy.options.3.label",
+        label: "fields.comprehension.options.3.label",
         value: 7,
         intention: "good",
       },
       {
-        label: "fields.easy.options.4.label",
+        label: "fields.comprehension.options.4.label",
         value: 8,
         intention: "very_good",
       },
