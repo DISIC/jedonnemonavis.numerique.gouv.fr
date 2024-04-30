@@ -144,9 +144,9 @@ const DocAPI = () => {
 										className={fr.cx('fr-table')}
 										dangerouslySetInnerHTML={{
 											__html: [
-												...FIELD_CODE_BOOLEAN_VALUES,
 												...FIELD_CODE_SMILEY_VALUES,
-												...FIELD_CODE_DETAILS_VALUES
+												...FIELD_CODE_DETAILS_VALUES,
+												...FIELD_CODE_BOOLEAN_VALUES
 											]
 												.filter(fc => !('hideInDocs' in fc) || !fc.hideInDocs)
 												.map(code => {

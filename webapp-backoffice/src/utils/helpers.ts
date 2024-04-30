@@ -12,7 +12,7 @@ export const FIELD_CODE_BOOLEAN_VALUES = [
 	},
 	{
 		slug: 'contact_reached',
-		hideInDocs: true,
+		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
 		question:
 			"Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?"
 	}
@@ -42,13 +42,13 @@ export const FIELD_CODE_DETAILS_VALUES = [
 	},
 	{
 		slug: 'contact_tried',
-		hint: 'Des sous-questions conditionnelles associées à cette question sont incluses dans le résultat.',
+		hint: 'Les sous-questions conditionnelles "contact_reached" et "contact_satisfaction" associées à cette question sont incluses dans le résultat.',
 		question:
 			'Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?'
 	},
 	{
 		slug: 'contact_satisfaction',
-		hideInDocs: true,
+		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
 		question: 'Comment s’est passé l’échange avec le service de la démarche ?'
 	},
 	{
