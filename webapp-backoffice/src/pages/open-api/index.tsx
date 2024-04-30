@@ -150,7 +150,7 @@ const DocAPI = () => {
 											]
 												.filter(fc => !('hideInDocs' in fc) || !fc.hideInDocs)
 												.map(code => {
-													return `<tr><td>${code.slug}</td><td>${code.question}${'hint' in code && code.hint && `<br><span class="fr-hint-text">${code.hint}</span>`}</td></tr>`;
+													return `<tr><td>${code.slug}</td><td>${code.question}${'hint' in code && code.hint ? `<br><span class="fr-hint-text">${code.hint}</span>` : ''}</td></tr>`;
 												})
 												.join()
 												.replace(/,/g, '')
