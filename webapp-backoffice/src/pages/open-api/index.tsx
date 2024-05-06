@@ -84,7 +84,7 @@ const DocAPI = () => {
 							Cliquez ensuite sur le bouton 'Mes Clés API' :
 							<Image
 								alt="bouton-mes-clés-api"
-								src={`/assets/button-api-key.png`}
+								src={`/Demarches/assets/button-api-key.png`}
 								width={165}
 								height={56}
 							/>
@@ -94,7 +94,7 @@ const DocAPI = () => {
 							'Ajouter une clé API' :
 							<Image
 								alt="bouton-ajouter-clé-api"
-								src={`/assets/add-api-key.png`}
+								src={`/Demarches/assets/add-api-key.png`}
 								width={222}
 								height={57}
 							/>

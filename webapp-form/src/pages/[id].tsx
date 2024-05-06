@@ -252,7 +252,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           <div className={classes.titleSuccess}>
             <Image
               alt="Service public +"
-              src="/assets/icon-check.svg"
+              src="/Demarches/assets/icon-check.svg"
               title="Icone - Merci pour votre aide"
               width={40}
               height={40}
@@ -293,7 +293,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <Image
                 className={classes.logo}
                 alt="Service public +"
-                src="/assets/services-plus.svg"
+                src="/Demarches/assets/services-plus.svg"
                 title="Service public + logo"
                 width={830}
                 height={250}

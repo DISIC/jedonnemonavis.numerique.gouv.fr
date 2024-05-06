@@ -41,7 +41,7 @@ function getEmailWithLayout(content: string) {
 		<body>
 			<div class="container">
 				<div class="header">
-					<img src="https://preprod.jdma.numericite.eu/assets/JDMA_Banner.png"/>
+					<img src="https://preprod.jdma.numericite.eu/Demarches/assets/JDMA_Banner.png"/>
 				</div>
 				${content}
 				<p>

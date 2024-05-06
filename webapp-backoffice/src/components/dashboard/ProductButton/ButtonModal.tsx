@@ -170,7 +170,7 @@ const ButtonModal = (props: Props) => {
 							<Image
 								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}
 								alt="bouton-je-donne-mon-avis"
-								src={`/assets/bouton-${buttonColor}.png`}
+								src={`/Demarches/assets/bouton-${buttonColor}.png`}
 								width={150}
 								height={85}
 							/>

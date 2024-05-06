@@ -43,7 +43,7 @@ const HomeHeader = () => {
 					>
 						<Image
 							className={cx(classes.headerImage)}
-							src={'/assets/header_home.png'}
+							src={'/Demarches/assets/header_home.png'}
 							alt=""
 							width={351}
 							height={584}
