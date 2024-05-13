@@ -125,7 +125,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				}
 				homeLinkProps={{
 					href: !session?.user ? '/' : '/administration/dashboard/products',
-					title: 'Accueil'
+					title: "Je donne mon avis, retour à l'accueil"
 				}}
 				className={classes.navigation}
 				id="fr-header-public-header"
