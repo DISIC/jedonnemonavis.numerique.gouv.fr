@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
+import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { signOut, useSession } from 'next-auth/react';
@@ -115,6 +116,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 
 	return (
 		<>
+			<SkipLinks
+				links={[
+					{
+						anchor: '#main',
+						label: 'Contenu'
+					},
+					{
+						anchor: '#footer',
+						label: 'Pied de page'
+					}
+				]}
+			/>
 			<Head>
 				<title>Je donne mon avis</title>
 				<meta name="description" content="Je donne mon avis" />
@@ -140,6 +153,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				{children}
 			</main>
 			<Footer
+				id="footer"
 				accessibility="non compliant"
 				bottomItems={[headerFooterDisplayItem]}
 			/>
