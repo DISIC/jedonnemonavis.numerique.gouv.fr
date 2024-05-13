@@ -103,7 +103,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				linkProps: {
 					href: '/administration/dashboard/user-requests',
 					target: '_self',
-					id: 'fr-header-public-header-main-navigation-link-badge'
+					id: 'fr-header-public-header-main-navigation-link-badge',
+					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`,
+					'aria-label': `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
 			}
