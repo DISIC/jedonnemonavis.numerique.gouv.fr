@@ -35,7 +35,7 @@ const HomeStepper = () => {
 		<section className={cx(fr.cx('fr-container'), classes.container)}>
 			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
 				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
-					<h2>Commencez à receuillir des avis en 4 étapes simples :</h2>
+					<h2>Commencez à recueillir des avis en 4 étapes simples :</h2>
 					<div
 						className={cx(
 							fr.cx(

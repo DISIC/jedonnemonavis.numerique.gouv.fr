@@ -135,7 +135,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			<Header
 				brandTop={
 					<>
-						REPUBLIQUE <br /> FRANCAISE
+						RÉPUBLIQUE <br /> FRANÇAISE
 					</>
 				}
 				homeLinkProps={{
