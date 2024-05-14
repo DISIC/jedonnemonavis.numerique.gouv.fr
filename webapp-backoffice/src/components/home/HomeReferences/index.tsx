@@ -27,7 +27,7 @@ const HomeReferences = (props: HomeReferencesProps) => {
 							className={fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
-								'fr-pb-6w'
+								'fr-py-6w'
 							)}
 						>
 							<div
