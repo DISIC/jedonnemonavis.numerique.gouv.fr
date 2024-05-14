@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
+import { Quote } from '@codegouvfr/react-dsfr/Quote';
 
 export interface Reference {
 	image_path: string;
@@ -22,44 +23,21 @@ const HomeReferences = (props: HomeReferencesProps) => {
 				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
 					<h2>Elles recommandent</h2>
 					{props.references.map((reference, index) => (
-						<div
-							key={index}
-							className={fr.cx(
-								'fr-grid-row',
-								'fr-grid-row--gutters',
-								'fr-py-6w'
-							)}
-						>
-							<div
-								className={cx(
-									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'),
-									classes.imageContainer
-								)}
-							>
-								<Image
-									src={reference.image_path}
-									alt={reference.author}
-									width={180}
-									height={180}
-									className={cx(classes.image)}
-								/>
-							</div>
-							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}>
-								<div className={cx(classes.textContainer)}>
-									<i
-										className={cx(fr.cx('fr-icon-quote-line'), classes.icon)}
-									/>
-									<h6>{reference.description}</h6>
-									<div>
-										<p className={cx(classes.underInfos, classes.bold)}>
-											{reference.author}
-										</p>
-										<p className={cx(classes.underInfos, classes.italic)}>
-											{reference.job_title}
-										</p>
-									</div>
-								</div>
-							</div>
+						<div key={index}>
+							<Quote
+								author={reference.author}
+								className=""
+								imageUrl={reference.image_path}
+								size="xlarge"
+								source={
+									<>
+										<li>
+											<cite>{reference.job_title}</cite>
+										</li>
+									</>
+								}
+								text={reference.description}
+							/>
 						</div>
 					))}
 				</div>
