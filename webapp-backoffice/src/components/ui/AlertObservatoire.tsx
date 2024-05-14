@@ -16,11 +16,11 @@ export const AlertObservatoire = () => {
 						ce site.
 						<br />
 						<br /> <b>Vous n’avez pas besoin de créer un nouveau compte.</b> Il
-						suffit de verifier votre ancien compte{' '}
+						suffit de verifier votre ancien compte sur la{' '}
 					</div>
 
 					<Link className={fr.cx('fr-link')} href="/login">
-						sur la page de connexion.
+						page de connexion.
 					</Link>
 				</>
 			}

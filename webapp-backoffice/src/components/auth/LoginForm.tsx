@@ -10,8 +10,8 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
-import { createModal } from "@codegouvfr/react-dsfr/Modal";
-import { useIsModalOpen } from "@codegouvfr/react-dsfr/Modal/useIsModalOpen";
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 type FormCredentials = {
 	email: string;
@@ -73,7 +73,7 @@ export const LoginForm = () => {
 	});
 
 	const modal = createModal({
-		id: "reset-modal", 
+		id: 'reset-modal',
 		isOpenedByDefault: false
 	});
 
@@ -141,9 +141,12 @@ export const LoginForm = () => {
 	return (
 		<div>
 			<modal.Component title="Mot de passe oublié">
-				<p className={fr.cx('fr-my-10v')}>Nous vous enverrons un lien pour réinitialiser votre mot de passe à l'adresse email suivante : {credentials.email}</p>
+				<p className={fr.cx('fr-my-10v')}>
+					Nous vous enverrons un lien pour réinitialiser votre mot de passe à
+					l'adresse email suivante : {credentials.email}
+				</p>
 				<div className={cx(classes.actionModal)}>
-					<Button 
+					<Button
 						onClick={() => modal.close()}
 						priority="secondary"
 						type="button"
@@ -164,7 +167,7 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			<h4>Connexion</h4>
+			<h1>Connexion</h1>
 			<h5>Se connecter avec son compte</h5>
 			<form
 				onSubmit={e => {
@@ -210,11 +213,11 @@ export const LoginForm = () => {
 					<div className={fr.cx('fr-mb-4v')}>
 						<Button
 							onClick={() => {
-								modal.open()
+								modal.open();
 							}}
 							priority="tertiary no outline"
 							type="button"
-							>
+						>
 							Mot de passe oublié
 						</Button>
 					</div>
@@ -256,6 +259,6 @@ const useStyles = tss
 		},
 		actionModal: {
 			display: 'flex',
-			justifyContent: 'space-between',
+			justifyContent: 'space-between'
 		}
 	}));
