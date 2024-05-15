@@ -87,19 +87,23 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				severity="info"
 				message="Identifiant copié dans le presse papier !"
 			/>
-			<div className={fr.cx('fr-mt-4w', 'fr-mb-5v')}>
-				<Tag
-					id="product-id"
-					small
-					nativeButtonProps={{
-						onClick: () => {
-							navigator.clipboard.writeText(product.id.toString());
-							setDisplayToast(true);
-						}
+			<div className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}>
+				<Tag id="product-id" small>
+					{`# ${id}`}
+				</Tag>
+				<button
+					className="fr-btn fr-btn--sm fr-btn--tertiary-no-outline"
+					title={`Copier l’identifiant du service « ${id} » dans le presse-papier`}
+					aria-label={`Copier l’identifiant du service « ${id} » dans le presse-papier`}
+					data-js-only
+					hidden
+					onClick={() => {
+						navigator.clipboard.writeText(product.id.toString());
+						setDisplayToast(true);
 					}}
 				>
-					{`#${id}`}
-				</Tag>
+					Copier dans le presse-papier
+				</button>
 			</div>
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
@@ -129,6 +133,10 @@ const useStyles = tss.create({
 	},
 	children: {
 		minHeight: '40rem'
+	},
+	tagContainer: {
+		display: 'flex',
+		gap: 10
 	}
 });
 
