@@ -185,7 +185,8 @@ export const LoginForm = () => {
 							setShowPassword(false);
 							resetErrors();
 						},
-						name: 'email'
+						name: 'email',
+						autoComplete: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={getEmailErrorMessage()}
@@ -199,7 +200,8 @@ export const LoginForm = () => {
 							onChange: e => {
 								setCredentials({ ...credentials, password: e.target.value });
 								setPasswordIncorrect(false);
-							}
+							},
+							autoComplete: 'current-password'
 						}}
 						messages={
 							passwordIncorrect
