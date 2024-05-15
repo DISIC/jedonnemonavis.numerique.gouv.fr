@@ -37,7 +37,7 @@ const SectionWrapper = ({
 
 	return (
 		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-2w'))}>
-			<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
+			<h2 className={fr.cx('fr-mb-0')}>{title}</h2>
 			{count === 0 && (
 				<Alert title="" description={noDataText} severity="info" />
 			)}
