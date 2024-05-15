@@ -320,6 +320,7 @@ const ProductModal = (props: Props) => {
 								className={fr.cx('fr-mt-3w')}
 								id="product-volume"
 								label="Volumétrie par an"
+								hintText="Nombre"
 								nativeInputProps={{
 									inputMode: 'numeric',
 									pattern: '[0-9]*',
