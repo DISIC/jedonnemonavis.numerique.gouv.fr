@@ -36,8 +36,9 @@ const HomeStepper = () => {
 			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
 				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
 					<h2>Commencez à recueillir des avis en 4 étapes simples :</h2>
-					<div
+					<ol
 						className={cx(
+							'no-bullets-point',
 							fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
@@ -46,7 +47,7 @@ const HomeStepper = () => {
 						)}
 					>
 						{steps.map(step => (
-							<div
+							<li
 								key={step.number}
 								className={fr.cx('fr-col-12', 'fr-col-md-3')}
 							>
@@ -56,14 +57,12 @@ const HomeStepper = () => {
 										fr.cx('fr-card', 'fr-card--grey', 'fr-card--no-border')
 									)}
 								>
-									<div className={cx(classes.numberContainer)}>
-										<p className={cx(classes.number)}>{step.number}</p>
-									</div>
+									<p className={cx(classes.number)}></p>
 									<div className={cx(classes.title)}>{step.title}</div>
 								</div>
-							</div>
+							</li>
 						))}
-					</div>
+					</ol>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 						<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
 							Commencer
@@ -111,13 +110,19 @@ const useStyles = tss
 		},
 		number: {
 			color: fr.colors.decisions.background.flat.blueFrance.default,
-
+			background: 'white',
 			fontSize: '4rem',
+			width: '5rem',
+			height: '5rem',
+			borderRadius: '50%',
+			textAlign: 'center',
 			lineHeight: '4.5rem',
 			fontWeight: 700,
 			padding: '0.5rem 0'
 		},
 		title: {
+			display: 'flex',
+			flexDirection: 'column',
 			textAlign: 'center',
 			fontStyle: 'normal',
 			fontSize: '1rem',
