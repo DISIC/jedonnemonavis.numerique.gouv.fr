@@ -112,8 +112,10 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 					<SideMenu
 						align="left"
+						aria-label="Menu latéral"
 						items={menuItems}
 						burgerMenuButtonText="Menu"
+						sticky
 					/>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
