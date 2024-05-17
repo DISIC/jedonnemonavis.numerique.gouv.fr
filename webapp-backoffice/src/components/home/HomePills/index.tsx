@@ -14,32 +14,37 @@ const HomePills = (props: HomePillsProps) => {
 	const { cx, classes } = useStyles();
 
 	return (
-		<section className={fr.cx('fr-container')}>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--center',
-					'fr-py-12w',
-					'fr-px-10v'
-				)}
-			>
-				{props.pills.map((pill, index) => (
+		<section className={cx(fr.cx('fr-container'), classes.root)}>
+			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--center'))}>
+				<div className={cx(fr.cx('fr-col-12', 'fr-col-md-10'))}>
+					<h2>Les avantages</h2>
 					<div
-						key={index}
-						className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'))}
+						className={fr.cx(
+							'fr-grid-row',
+							'fr-grid-row--gutters',
+							'fr-grid-row--center',
+							'fr-py-6w',
+							'fr-px-10v'
+						)}
 					>
-						<div className={cx(classes.badge)}>
-							<h2 className={cx(classes.title)}>{pill.title}</h2>
-							<div className={cx(classes.badgeIcon)}>
-								<i className="ri-check-line"></i>
+						{props.pills.map((pill, index) => (
+							<div
+								key={index}
+								className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'))}
+							>
+								<div className={cx(classes.badge)}>
+									<h3 className={cx(classes.title)}>{pill.title}</h3>
+									<div className={cx(classes.badgeIcon)}>
+										<i className="ri-check-line"></i>
+									</div>
+								</div>
+								<div className={cx(classes.paragraph)}>
+									<p>{pill.description}</p>
+								</div>
 							</div>
-						</div>
-						<div className={cx(classes.paragraph)}>
-							<p>{pill.description}</p>
-						</div>
+						))}
 					</div>
-				))}
+				</div>
 			</div>
 		</section>
 	);
@@ -49,6 +54,11 @@ const useStyles = tss
 	.withName(HomePills.name)
 	.withParams()
 	.create(() => ({
+		root: {
+			h2: {
+				color: fr.colors.decisions.text.title.blueFrance.default
+			}
+		},
 		badge: {
 			...fr.spacing('margin', {
 				rightLeft: '5w'

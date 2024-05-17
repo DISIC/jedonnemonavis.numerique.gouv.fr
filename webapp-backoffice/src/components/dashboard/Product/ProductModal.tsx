@@ -7,7 +7,7 @@ import { useDebounce } from 'usehooks-ts';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Product } from '@prisma/client';
-import React from 'react';
+import React, { useRef } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import {
 	Controller,
@@ -44,6 +44,7 @@ const ProductModal = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
+	const lastUrlRef = useRef<HTMLInputElement>(null);
 
 	const {
 		control,
@@ -108,6 +109,33 @@ const ProductModal = (props: Props) => {
 		modal.close();
 	};
 
+	const handleRemoveUrl = (index: number) => {
+		const shouldFocusPreviousUrl = index !== 0;
+		removeUrl(index);
+		if (shouldFocusPreviousUrl) {
+			const previousIndex = index - 1;
+			const previousInputRef = document.querySelector(
+				`input[name="urls.${previousIndex}.value"]`
+			) as HTMLInputElement | null;
+			if (previousInputRef) {
+				previousInputRef.focus();
+			}
+		}
+	};
+
+	const handleAppendUrl = () => {
+		appendUrl({ value: '' });
+		setTimeout(() => {
+			const newInputRef = document.querySelector(
+				`input[name="urls.${urls.length}.value"]`
+			) as HTMLInputElement | null;
+
+			if (newInputRef) {
+				newInputRef.focus();
+			}
+		}, 100);
+	};
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -154,7 +182,8 @@ const ProductModal = (props: Props) => {
 								}
 								nativeInputProps={{
 									onChange,
-									defaultValue: value
+									defaultValue: value,
+									required: true
 								}}
 								state={errors[name] ? 'error' : 'default'}
 								stateRelatedMessage={errors[name]?.message}
@@ -164,7 +193,7 @@ const ProductModal = (props: Props) => {
 				</div>
 				<div className={fr.cx('fr-input-group')}>
 					<label
-						htmlFor={'product-description'}
+						htmlFor={'entity-select-autocomplete'}
 						className={fr.cx('fr-label', 'fr-mb-1w')}
 					>
 						Entité de rattachement{' '}
@@ -206,6 +235,7 @@ const ProductModal = (props: Props) => {
 												)}
 												placeholder="Rechercher une organisation"
 												type="search"
+												required
 											/>
 											{errors[name] && (
 												<p className={fr.cx('fr-error-text')}>
@@ -219,61 +249,66 @@ const ProductModal = (props: Props) => {
 						/>
 					)}
 				</div>
-				
+
 				<div className={fr.cx('fr-input-group')}>
-					<label className={fr.cx('fr-label')}>URL(s)</label>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-						{urls.map((url, index) => (
-							<div key={url.id} className={cx(classes.flexContainer)}>
-								<Controller
-									control={control}
-									name={`urls.${index}.value`}
-									rules={{
-										pattern: {
-											value: /^(http|https):\/\/[^ "]+$/,
-											message: "Format d'url invalide"
-										}
-									}}
-									render={({ field: { onChange, value, name } }) => (
-										<Input
-											className={cx(classes.autocomplete, fr.cx('fr-mb-0'))}
-											id={name}
-											hideLabel={true}
-											label={`URL ${index + 1}`}
-											state={errors['urls']?.[index] ? 'error' : 'default'}
-											stateRelatedMessage={
-												errors['urls']?.[index]?.value?.message
+						<fieldset>
+							<legend>Adresses web</legend>
+							{urls.map((url, index) => (
+								<div key={url.id} className={cx(classes.flexContainer)}>
+									<Controller
+										control={control}
+										name={`urls.${index}.value`}
+										rules={{
+											pattern: {
+												value: /^(http|https):\/\/[^ "]+$/,
+												message: "Format d'url invalide"
 											}
-											nativeInputProps={{
-												name,
-												value,
-												onChange
-											}}
-										/>
+										}}
+										render={({ field: { onChange, value, name } }) => (
+											<Input
+												className={cx(classes.autocomplete, fr.cx('fr-mb-0'))}
+												id={name}
+												hideLabel={true}
+												label={`URL ${index + 1}`}
+												state={errors['urls']?.[index] ? 'error' : 'default'}
+												stateRelatedMessage={
+													errors['urls']?.[index]?.value?.message
+												}
+												nativeInputProps={{
+													name,
+													value,
+													onChange
+												}}
+												ref={index === urls.length - 1 ? lastUrlRef : null}
+											/>
+										)}
+									/>
+									{index !== 0 && (
+										<Button
+											title={`Supprimer l'adresse web n°${index + 1}`}
+											aria-label={`Supprimer l'adresse web n°${index + 1}`}
+											priority="secondary"
+											type="button"
+											className={cx(classes.innerButton)}
+											onClick={() => handleRemoveUrl(index)}
+										>
+											<i className="ri-delete-bin-line"></i>
+										</Button>
 									)}
-								/>
-								{index !== 0 && (
-									<Button
-										priority="secondary"
-										type="button"
-										className={cx(classes.innerButton)}
-										onClick={() => removeUrl(index)}
-									>
-										<i className="ri-delete-bin-line"></i>
-									</Button>
-								)}
-							</div>
-						))}
-						<Button
-							priority="secondary"
-							iconId="fr-icon-add-line"
-							className={fr.cx('fr-mt-1w')}
-							iconPosition="left"
-							type="button"
-							onClick={() => appendUrl({ value: '' })}
-						>
-							Ajouter un URL
-						</Button>
+								</div>
+							))}
+							<Button
+								priority="secondary"
+								iconId="fr-icon-add-line"
+								className={fr.cx('fr-mt-1w')}
+								iconPosition="left"
+								type="button"
+								onClick={() => handleAppendUrl()}
+							>
+								Ajouter un URL
+							</Button>
+						</fieldset>
 					</div>
 				</div>
 				<div className={fr.cx('fr-input-group')}>
@@ -285,6 +320,7 @@ const ProductModal = (props: Props) => {
 								className={fr.cx('fr-mt-3w')}
 								id="product-volume"
 								label="Volumétrie par an"
+								hintText="Nombre"
 								nativeInputProps={{
 									inputMode: 'numeric',
 									pattern: '[0-9]*',
@@ -304,7 +340,8 @@ const ProductModal = (props: Props) => {
 const useStyles = tss.withName(ProductModal.name).create(() => ({
 	flexContainer: {
 		display: 'flex',
-		alignItems: 'center'
+		alignItems: 'center',
+		padding: '0.3rem 0'
 	},
 	innerButton: {
 		alignSelf: 'baseline',

@@ -185,7 +185,16 @@ const ProductCard = ({
 						>
 							<Button
 								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-								title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
+								title={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
+								aria-label={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
 								priority="tertiary"
 								size="small"
 								onClick={() => {
@@ -237,7 +246,9 @@ const ProductCard = ({
 							))}
 							{!isLoadingReviewsCount && nbReviews !== undefined && (
 								<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>Nombre d'avis</p>
+									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+										Nombre d'avis
+									</p>
 									<Badge noIcon severity="info">
 										{nbReviews}
 									</Badge>
