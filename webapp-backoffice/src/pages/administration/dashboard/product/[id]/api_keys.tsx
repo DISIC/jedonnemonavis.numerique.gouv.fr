@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
 import { Loader } from '@/src/components/ui/Loader';
+import { transformDateToFrenchReadable } from '@/src/utils/tools';
 
 interface Props {
 	product: Product;
@@ -32,8 +33,8 @@ const ProductApiKeysPage = (props: Props) => {
 		refetch: RefectchKeys
 	} = trpc.apiKey.getList.useQuery(
 		{
-            product_id: product.id
-        },
+			product_id: product.id
+		},
 		{
 			initialData: {
 				count: 0,
@@ -49,13 +50,13 @@ const ProductApiKeysPage = (props: Props) => {
 
 	const handleCreateKey = async () => {
 		await createKey.mutateAsync({
-            product_id: product.id
-        });
+			product_id: product.id
+		});
 		RefectchKeys();
 	};
 
 	const handleDeleteKey = async (key: string) => {
-		if (confirm('Êtes vous sûr de vouloir supprimer cette clé ?')) {
+		if (confirm(`Êtes vous sûr de vouloir supprimer la clé « ${key} » ?`)) {
 			await deleteKey.mutateAsync({ key: key });
 			RefectchKeys();
 		}
@@ -70,71 +71,111 @@ const ProductApiKeysPage = (props: Props) => {
 				severity="info"
 				message="Clé copiée dans le presse papier !"
 			/>
-            <div className={classes.headerWrapper}>
-                <h1>Gérer les clés API</h1>
+			<div className={classes.headerWrapper}>
+				<h1>Gérer les clés API</h1>
 				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
 					Voir la documentation de l'API
 				</Link>
-            </div>
-            <h3 className={fr.cx('fr-mt-10v')}>Clés API</h3>
-            {isLoadingKeys ? (
+			</div>
+			<h3 className={fr.cx('fr-mt-10v')}>Clés API</h3>
+			{isLoadingKeys ? (
 				<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 					<Loader />
 				</div>
 			) : (
-				apiKeys.map((key, index) => (
-					<div className={cx(fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w'), classes.keyWrapper)} key={index}>
-						<div
-							className={fr.cx(
-								'fr-grid-row',
-								'fr-grid-row--gutters',
-								'fr-grid-row--top',
-								'fr-grid-row--middle'
-							)}
-						>
-							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-								{key.key}
-							</div>
-							<div
-								className={cx(
-									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
-									classes.actionsWrapper
-								)}
-							>
-                                <Button
-                                    priority="tertiary"
-                                    size="small"
-                                    iconId="ri-file-copy-line"
-                                    iconPosition="right"
-                                    onClick={async () => {
-                                        if ('clipboard' in navigator) {
-                                            try {
-                                                await navigator.clipboard.writeText(key.key);
-                                                setDisplayToast(true);
-                                            } catch (err) {
-                                                alert(err);
-                                            }
-                                        } else {
-                                            alert('Fonctionnalité de presse-papiers non prise en charge');
-                                        }
-                                    }}
-                                >
-                                    {'Copier'}
-                                </Button>
-								<Button
-									priority="tertiary"
-									size="small"
-									iconId="fr-icon-delete-bin-line"
-									iconPosition="right"
-									className={cx(classes.iconError)}
-									onClick={() => handleDeleteKey(key.key)}
-								>
-									Supprimer
-								</Button>
-							</div>
+				<div>
+					<div
+						className={fr.cx(
+							'fr-grid-row',
+							'fr-grid-row--gutters',
+							'fr-grid-row--top',
+							'fr-grid-row--middle',
+							'fr-mt-2w',
+							'fr-mb-1w'
+						)}
+					>
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+							<b>Clé</b>
+						</div>
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+							<b>Dernière utilisation</b>
 						</div>
 					</div>
-				))
+					{apiKeys.map((item, index) => (
+						<div
+							className={cx(
+								fr.cx('fr-card', 'fr-mb-3w', 'fr-p-2w'),
+								classes.keyWrapper
+							)}
+							key={index}
+						>
+							<div
+								className={fr.cx(
+									'fr-grid-row',
+									'fr-grid-row--gutters',
+									'fr-grid-row--top',
+									'fr-grid-row--middle'
+								)}
+							>
+								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+									{item.key}
+								</div>
+								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+									<i>
+										{item.api_key_logs[0]
+											? transformDateToFrenchReadable(
+													item.api_key_logs[0].created_at
+														.toISOString()
+														.split('T')[0]
+												)
+											: 'Aucune'}
+									</i>
+								</div>
+								<div
+									className={cx(
+										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+										classes.actionsWrapper
+									)}
+								>
+									<Button
+										priority="tertiary"
+										size="small"
+										iconId="ri-file-copy-line"
+										iconPosition="right"
+										title={`Copier la clé API « ${item.key} » dans le presse-papier`}
+										onClick={async () => {
+											if ('clipboard' in navigator) {
+												try {
+													await navigator.clipboard.writeText(item.key);
+													setDisplayToast(true);
+												} catch (err) {
+													alert(err);
+												}
+											} else {
+												alert(
+													'Fonctionnalité de presse-papiers non prise en charge'
+												);
+											}
+										}}
+									>
+										{'Copier'}
+									</Button>
+									<Button
+										priority="tertiary"
+										size="small"
+										iconId="fr-icon-delete-bin-line"
+										iconPosition="right"
+										title={`Supprimer la clé API « ${item.key} ».`}
+										className={cx(classes.iconError)}
+										onClick={() => handleDeleteKey(item.key)}
+									>
+										Supprimer
+									</Button>
+								</div>
+							</div>
+						</div>
+					))}
+				</div>
 			)}
 
 			<Button
@@ -167,15 +208,15 @@ const useStyles = tss.withName(ProductApiKeysPage.name).create({
 		flexWrap: 'wrap',
 		gap: fr.spacing('4v')
 	},
-    keyWrapper: {
-        height: 'auto !important'
-    },
+	keyWrapper: {
+		height: 'auto !important'
+	},
 	actionsWrapper: {
 		display: 'flex',
 		justifyContent: 'end',
-        'button': {
-            marginLeft: '1rem'
-        }
+		button: {
+			marginLeft: '1rem'
+		}
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default
