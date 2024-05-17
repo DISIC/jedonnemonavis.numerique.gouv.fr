@@ -35,9 +35,29 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		}
 	);
 
+	const {
+		data: userAdminEntityRights,
+		isLoading: isUserAdminEntityRightsLoading
+	} = trpc.adminEntityRight.getUserList.useQuery(
+		{
+			page: 1,
+			numberPerPage: 0
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
+				}
+			}
+		}
+	);
+
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
+
+	console.log(userAdminEntityRights.metadata.count);
 
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!session?.user
@@ -61,24 +81,26 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	];
 
 	const navigationItems = session?.user
-		? [
-				{
-					text: 'Démarches',
-					linkProps: {
-						href: '/administration/dashboard/products',
-						target: '_self'
+		? !!userAdminEntityRights.metadata.count
+			? [
+					{
+						text: 'Démarches',
+						linkProps: {
+							href: '/administration/dashboard/products',
+							target: '_self'
+						},
+						isActive: pathname.startsWith('/administration/dashboard/product')
 					},
-					isActive: pathname.startsWith('/administration/dashboard/product')
-				},
-				{
-					text: 'Organisations',
-					linkProps: {
-						href: '/administration/dashboard/entities',
-						target: '_self'
-					},
-					isActive: pathname.startsWith('/administration/dashboard/entities')
-				}
-			]
+					{
+						text: 'Organisations',
+						linkProps: {
+							href: '/administration/dashboard/entities',
+							target: '_self'
+						},
+						isActive: pathname.startsWith('/administration/dashboard/entities')
+					}
+				]
+			: []
 		: [];
 
 	if (session?.user.role === 'admin') {

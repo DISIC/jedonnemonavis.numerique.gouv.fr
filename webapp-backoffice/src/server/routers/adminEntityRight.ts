@@ -56,6 +56,33 @@ export const adminEntityRightRouter = router({
 			return { data: entities, metadata: { count } };
 		}),
 
+	getUserList: protectedProcedure
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1)
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { numberPerPage, page } = input;
+
+			let where: Prisma.AdminEntityRightWhereInput = {
+				user: {
+					id: parseInt(ctx.session.user.id)
+				}
+			};
+
+			const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+				where,
+				take: numberPerPage,
+				skip: (page - 1) * numberPerPage
+			});
+
+			const count = await ctx.prisma.adminEntityRight.count({ where });
+
+			return { data: adminEntityRights, metadata: { count } };
+		}),
+
 	create: protectedProcedure
 		.input(
 			z.object({
