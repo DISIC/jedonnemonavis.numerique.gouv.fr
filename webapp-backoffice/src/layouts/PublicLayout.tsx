@@ -57,8 +57,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		countUserRequests: userRequestsResult.metadata.count
 	});
 
-	console.log(userAdminEntityRights.metadata.count);
-
 	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
 		!session?.user
 			? {
@@ -81,7 +79,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	];
 
 	const navigationItems = session?.user
-		? !!userAdminEntityRights.metadata.count
+		? !!userAdminEntityRights.metadata.count || session.user.role === 'admin'
 			? [
 					{
 						text: 'Démarches',
