@@ -14,6 +14,7 @@ import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
 import { Loader } from '@/src/components/ui/Loader';
 import { transformDateToFrenchReadable } from '@/src/utils/tools';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -64,6 +65,13 @@ const ProductApiKeysPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>Gérer les clés API | Je donne mon avis</title>
+				<meta
+					name="description"
+					content="Gérer les clés API | Je donne mon avis"
+				/>
+			</Head>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
