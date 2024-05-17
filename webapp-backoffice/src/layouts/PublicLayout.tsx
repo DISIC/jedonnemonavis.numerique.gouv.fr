@@ -128,10 +128,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 				]}
 			/>
-			<Head>
-				<title>Je donne mon avis</title>
-				<meta name="description" content="Je donne mon avis" />
-			</Head>
 			<Header
 				brandTop={
 					<>

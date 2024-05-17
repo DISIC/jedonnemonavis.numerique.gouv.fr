@@ -15,6 +15,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import React from 'react';
 import { trpc } from '@/src/utils/trpc';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -86,6 +87,13 @@ const ProductButtonsPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Gérer mes boutons | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} | Gérer mes boutons | Je donne mon avis`}
+				/>
+			</Head>
 			<ButtonModal
 				product_id={product.id}
 				modal={modal}

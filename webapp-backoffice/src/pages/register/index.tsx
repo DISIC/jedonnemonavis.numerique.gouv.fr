@@ -4,6 +4,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -39,6 +40,13 @@ export default function Register() {
 
 	return (
 		<div className={fr.cx('fr-container')}>
+			<Head>
+				<title>Création de compte | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Création de compte | Je donne mon avis`}
+				/>
+			</Head>
 			<Breadcrumb
 				currentPageLabel="Création de compte"
 				homeLinkProps={{

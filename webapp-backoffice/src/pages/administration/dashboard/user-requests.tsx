@@ -11,6 +11,7 @@ import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
+import Head from 'next/head';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -139,6 +140,13 @@ const DashBoardUserRequestUserRequests = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Demandes d'accès | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Demandes d'accès | Je donne mon avis`}
+				/>
+			</Head>
 			<OnConfirmModal
 				modal={onConfirmDeleteModal}
 				title="Rejeter la demande d'accès"

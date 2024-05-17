@@ -96,14 +96,17 @@ const DashBoard = () => {
 
 	const nbPages = getNbPages(productsCount, numberPerPage);
 
+	const headTitle = () => {
+		return search
+			? `Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`
+			: 'Services | Je donne mon avis';
+	};
+
 	return (
 		<>
 			<Head>
-				<title>{`Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`}</title>
-				<meta
-					name="description"
-					content={`Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`}
-				/>
+				<title>{headTitle()}</title>
+				<meta name="description" content={headTitle()} />
 			</Head>
 			<ProductModal
 				modal={product_modal}

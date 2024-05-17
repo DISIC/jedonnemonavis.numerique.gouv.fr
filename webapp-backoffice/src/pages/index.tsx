@@ -13,6 +13,7 @@ import HomeReferences, {
 import HomeActionButton from '@/src/components/home/HomeActionButton';
 import HomeQuestions, { Question } from '@/src/components/home/HomeQuestions';
 import HomeHeader from '@/src/components/home/HomeHeader';
+import Head from 'next/head';
 
 export default function Home() {
 	const features: Feature[] = [
@@ -119,6 +120,10 @@ export default function Home() {
 
 	return (
 		<div>
+			<Head>
+				<title>Accueil | Je donne mon avis</title>
+				<meta name="description" content="Accueil | Je donne mon avis" />
+			</Head>
 			<HomeHeader />
 			<HomeStepper />
 			{displayHomeFeature()}

@@ -16,6 +16,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -137,6 +138,15 @@ const AccessManagement = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>
+					{product.title} | Gérer les droits d'accès | Je donne mon avis
+				</title>
+				<meta
+					name="description"
+					content={`${product.title} | Gérer les droits d'accès | Je donne mon avis`}
+				/>
+			</Head>
 			<AccessRightModal
 				modal={modal}
 				isOpen={isModalOpen}
