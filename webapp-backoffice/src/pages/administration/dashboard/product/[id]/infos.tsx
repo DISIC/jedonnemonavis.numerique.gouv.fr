@@ -85,19 +85,21 @@ const ProductInformationPage = (props: Props) => {
 					<Tag id="product-id" small>
 						{`# ${product.id}`}
 					</Tag>
-					<button
-						className="fr-btn fr-btn--sm fr-btn--tertiary-no-outline"
-						title={`Copier l’identifiant du service « ${product.id} » dans le presse-papier`}
-						aria-label={`Copier l’identifiant du service « ${product.id} » dans le presse-papier`}
-						data-js-only
-						hidden
+					<Button
+						priority="tertiary"
+						type="button"
+						className={classes.copyBtn}
+						nativeButtonProps={{
+							title: `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier l’identifiant du service « ${product.id} » dans le presse-papier`
+						}}
 						onClick={() => {
 							navigator.clipboard.writeText(product.id.toString());
 							setDisplayToast(true);
 						}}
 					>
 						Copier dans le presse-papier
-					</button>
+					</Button>
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>
@@ -156,6 +158,9 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: fr.spacing('4v')
+	},
+	copyBtn: {
+		boxShadow: 'none'
 	}
 });
 
