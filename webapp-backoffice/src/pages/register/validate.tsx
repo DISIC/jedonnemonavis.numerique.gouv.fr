@@ -2,6 +2,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import { User } from '@prisma/client';
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -61,6 +62,14 @@ export default function Register() {
 
 	return (
 		<div className={fr.cx('fr-container')}>
+			<Head>
+				<title>Validation de votre compte | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Validation de votre compte
+					| Je donne mon avis`}
+				/>
+			</Head>
 			<Breadcrumb
 				currentPageLabel="Validation du compte"
 				homeLinkProps={{

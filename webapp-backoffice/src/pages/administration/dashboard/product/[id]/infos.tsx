@@ -12,6 +12,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -48,6 +49,13 @@ const ProductInformationPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Informations | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} | Informations | Je donne mon avis`}
+				/>
+			</Head>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -74,18 +82,22 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
-					<Tag
-						id="product-id"
-						small
-						nativeButtonProps={{
-							onClick: () => {
-								navigator.clipboard.writeText(product.id.toString());
-								setDisplayToast(true);
-							}
+					<Tag id="product-id" small>
+						{`# ${product.id}`}
+					</Tag>
+					<button
+						className="fr-btn fr-btn--sm fr-btn--tertiary-no-outline"
+						title={`Copier l’identifiant du service « ${product.id} » dans le presse-papier`}
+						aria-label={`Copier l’identifiant du service « ${product.id} » dans le presse-papier`}
+						data-js-only
+						hidden
+						onClick={() => {
+							navigator.clipboard.writeText(product.id.toString());
+							setDisplayToast(true);
 						}}
 					>
-						{`#${product.id}`}
-					</Tag>
+						Copier dans le presse-papier
+					</button>
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>

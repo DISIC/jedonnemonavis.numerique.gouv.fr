@@ -20,6 +20,7 @@ import { ToggleSwitch } from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -116,6 +117,13 @@ const ProductStatPage = (props: Props) => {
 	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
 		return (
 			<ProductLayout product={product}>
+				<Head>
+					<title>{product.title} | Statistiques | Je donne mon avis</title>
+					<meta
+						name="description"
+						content={`${product.title} | Statistiques | Je donne mon avis`}
+					/>
+				</Head>
 				<h1>Statistiques</h1>
 				{buttonsResult.metadata.count === 0 ? (
 					<Alert

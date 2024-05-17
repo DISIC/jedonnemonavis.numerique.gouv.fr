@@ -23,6 +23,7 @@ import { displayIntention } from '@/src/utils/stats';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
 import ExportModal from '@/src/components/dashboard/Reviews/ExportModal';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -155,10 +156,7 @@ const ProductReviewsPage = (props: Props) => {
 	const renderTags = () => {
 		const tags = Object.keys(filters).flatMap((key, index) => {
 			const filterValue = filters[key as keyof ReviewFiltersType];
-			if (
-				!Array.isArray(filterValue) &&
-				filterValue !== false
-			) {
+			if (!Array.isArray(filterValue) && filterValue !== false) {
 				return (
 					<Tag
 						key={index}
@@ -168,10 +166,7 @@ const ProductReviewsPage = (props: Props) => {
 							onClick: () => {
 								setFilters({
 									...filters,
-									[key]:
-										typeof filterValue === 'boolean'
-											? false
-											: ''
+									[key]: typeof filterValue === 'boolean' ? false : ''
 								});
 							}
 						}}
@@ -193,9 +188,7 @@ const ProductReviewsPage = (props: Props) => {
 							onClick: () => {
 								setFilters({
 									...filters,
-									[key]: filterValue.filter(
-										(item) => item !== value
-									)
+									[key]: filterValue.filter(item => item !== value)
 								});
 							}
 						}}
@@ -211,9 +204,9 @@ const ProductReviewsPage = (props: Props) => {
 				return null;
 			}
 		});
-	
+
 		return tags.length > 0 ? tags : null;
-	}
+	};
 
 	const renderLabel = (
 		type: string | undefined,
@@ -258,6 +251,13 @@ const ProductReviewsPage = (props: Props) => {
 			></ReviewFiltersModal>
 
 			<ProductLayout product={product}>
+				<Head>
+					<title>{product.title} | Avis | Je donne mon avis</title>
+					<meta
+						name="description"
+						content={`${product.title} Avis | Je donne mon avis`}
+					/>
+				</Head>
 				<h1>Avis</h1>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
@@ -475,9 +475,21 @@ const ProductReviewsPage = (props: Props) => {
 									/>
 									{reviewsExtended.map((review, index) => {
 										if (review && displayMode === 'reviews') {
-											return <ReviewLine key={index} review={review} search={validatedSearch}/>;
+											return (
+												<ReviewLine
+													key={index}
+													review={review}
+													search={validatedSearch}
+												/>
+											);
 										} else if (review && displayMode === 'verbatim') {
-											return <ReviewLineVerbatim key={index} review={review} search={validatedSearch} />;
+											return (
+												<ReviewLineVerbatim
+													key={index}
+													review={review}
+													search={validatedSearch}
+												/>
+											);
 										}
 									})}
 								</>

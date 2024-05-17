@@ -13,6 +13,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import Head from 'next/head';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -130,6 +131,13 @@ const DashBoardEntities = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Organisations | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Organisations | Je donne mon avis`}
+				/>
+			</Head>
 			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}

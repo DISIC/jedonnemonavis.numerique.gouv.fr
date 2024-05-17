@@ -15,6 +15,7 @@ import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 import { transformDateToFrenchReadable } from '@/src/utils/tools';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { useState } from 'react';
+import Head from 'next/head';
 
 interface Props {
 	product: Product | null;
@@ -262,6 +263,13 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-mb-10w')}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} | Statistiques | Je donne mon avis`}
+				/>
+			</Head>
 			<div className={fr.cx('fr-mt-5w')}>
 				<h1>{product.title}</h1>
 			</div>

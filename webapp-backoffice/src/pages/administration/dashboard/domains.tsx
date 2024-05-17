@@ -11,6 +11,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { WhiteListedDomain } from '@prisma/client';
+import Head from 'next/head';
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
@@ -130,6 +131,13 @@ const DashBoardDomainDomains = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Liste blanche des noms de domaines | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Liste blanche des noms de domaines | Je donne mon avis`}
+				/>
+			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
 				title="Supprimer un nom de domaine"
