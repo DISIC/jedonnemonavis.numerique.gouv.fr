@@ -33,19 +33,19 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 			}
 		: undefined;
 
-	/*const elkClient = new ElkClient({
+	const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
 		auth: {
 			username: process.env.ES_ADDON_USER as string,
 			password: process.env.ES_ADDON_PASSWORD as string
 		},
 		tls: tlsOptions
-	});*/
+	});
 
 	return {
 		prisma,
 		session,
-		//elkClient,
+		elkClient,
 		req,
 		user_api,
 		api_key
