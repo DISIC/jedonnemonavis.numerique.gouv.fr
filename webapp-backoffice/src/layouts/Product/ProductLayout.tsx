@@ -51,7 +51,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Gérer mes boutons',
+			text: 'Gérer vos boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
@@ -60,7 +60,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: "Gérer les droits d'accès",
+			text: "Gérer l'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
