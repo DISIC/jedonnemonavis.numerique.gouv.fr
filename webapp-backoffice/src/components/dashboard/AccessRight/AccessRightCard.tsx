@@ -106,16 +106,6 @@ const ProductAccessCard = (props: Props) => {
 								'aria-labelledby': 'button-options-access-right'
 							}}
 						>
-							{accessRight.status === 'carrier' && (
-								<MenuItem
-									onClick={() => {
-										onButtonClick('remove', accessRight);
-										handleClose();
-									}}
-								>
-									Retirer son droit d'accès
-								</MenuItem>
-							)}
 							{accessRight.status === 'carrier' &&
 								accessRight.user === null && (
 									<MenuItem
@@ -124,9 +114,20 @@ const ProductAccessCard = (props: Props) => {
 											handleClose();
 										}}
 									>
-										Renvoyer l'e-mail d'invitation
+										Renvoyer l'invitation
 									</MenuItem>
 								)}
+
+							{accessRight.status === 'carrier' && (
+								<MenuItem
+									onClick={() => {
+										onButtonClick('remove', accessRight);
+										handleClose();
+									}}
+								>
+									Retirer l'accès
+								</MenuItem>
+							)}
 							{accessRight.status === 'removed' && (
 								<MenuItem
 									onClick={() => {
@@ -134,7 +135,7 @@ const ProductAccessCard = (props: Props) => {
 										handleClose();
 									}}
 								>
-									Rétablir son droit d'accès
+									Rétablir l'accès
 								</MenuItem>
 							)}
 						</Menu>
