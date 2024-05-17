@@ -124,7 +124,7 @@ const DashBoard = () => {
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
-							{session?.user?.role !== 'admin' ? 'Mes services' : 'Services'}
+							{session?.user?.role !== 'admin' ? 'Vos services' : 'Services'}
 						</h1>
 					</div>
 					<div
