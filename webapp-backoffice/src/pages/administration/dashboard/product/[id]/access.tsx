@@ -139,12 +139,10 @@ const AccessManagement = (props: Props) => {
 	return (
 		<ProductLayout product={product}>
 			<Head>
-				<title>
-					{product.title} | Gérer les droits d'accès | Je donne mon avis
-				</title>
+				<title>{product.title} | Gérer l'accès | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`${product.title} | Gérer les droits d'accès | Je donne mon avis`}
+					content={`${product.title} | Gérer l'accès | Je donne mon avis`}
 				/>
 			</Head>
 			<AccessRightModal
@@ -170,16 +168,16 @@ const AccessManagement = (props: Props) => {
 			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>Gérer les droits d'accès</h2>
+					<h2 className={fr.cx('fr-mb-2w')}>Gérer l'accès</h2>
 				</div>
-				<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
+				<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
 					<Button
 						priority="secondary"
 						iconPosition="right"
 						iconId="ri-user-add-line"
 						onClick={() => handleModalOpening('add')}
 					>
-						Inviter un porteur
+						Inviter un administrateur
 					</Button>
 				</div>
 			</div>
@@ -200,9 +198,9 @@ const AccessManagement = (props: Props) => {
 						</span>
 					)}
 				</div>
-				<div className={fr.cx('fr-col-4')}>
+				<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
 					<Checkbox
-						className={fr.cx('fr-ml-auto')}
+						className={cx(fr.cx('fr-ml-auto'), classes.checkbox)}
 						style={{ userSelect: 'none' }}
 						options={[
 							{
@@ -263,8 +261,14 @@ const useStyles = tss.create({
 	boldText: {
 		fontWeight: 'bold'
 	},
-	buttonRight: {
+	alignRight: {
 		textAlign: 'right'
+	},
+	checkbox: {
+		'.fr-checkbox-group': {
+			display: 'flex',
+			justifyContent: 'end'
+		}
 	}
 });
 

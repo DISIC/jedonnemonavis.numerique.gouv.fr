@@ -163,7 +163,11 @@ const DashBoardEntities = () => {
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h1 className={fr.cx('fr-mb-0')}>Organisations</h1>
+						<h1 className={fr.cx('fr-mb-0')}>
+							{session.user.role === 'admin'
+								? 'Organisations'
+								: 'Vos organisations'}
+						</h1>
 					</div>
 					<div
 						className={cx(
@@ -181,7 +185,7 @@ const DashBoardEntities = () => {
 									entitySearchModal.open();
 								}}
 							>
-								Devenir administrateur
+								Administrer une autre organisation
 							</Button>
 						) : (
 							<Button
@@ -191,62 +195,69 @@ const DashBoardEntities = () => {
 								type="button"
 								onClick={onCreateEntity}
 							>
-								Créer une organisation
+								Ajouter une organisation
 							</Button>
 						)}
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<Select
-							label="Trier Par"
-							nativeSelectProps={{
-								name: 'my-select',
-								onChange: event => setFilter(event.target.value)
-							}}
-						>
-							<option value="name:asc">Nom A à Z</option>
-							<option value="created_at:desc">Date de création</option>
-							<option value="updated_at:desc">Date de mise à jour</option>
-						</Select>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
-						<form
-							className={cx(classes.searchForm)}
-							onSubmit={e => {
-								e.preventDefault();
-								setValidatedSearch(search);
-								setCurrentPage(1);
-							}}
-						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
-								<Input
-									label="Rechercher"
-									hideLabel
-									nativeInputProps={{
-										placeholder: 'Rechercher',
-										type: 'search',
-										value: search,
-										onChange: event => {
-											if (!event.target.value) {
-												setValidatedSearch('');
-											}
-											setSearch(event.target.value);
-										}
+					{nbPages > 1 && (
+						<>
+							<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+								<Select
+									label="Trier Par"
+									nativeSelectProps={{
+										name: 'my-select',
+										onChange: event => setFilter(event.target.value)
 									}}
-								/>
-								<Button
-									priority="primary"
-									type="submit"
-									iconId="ri-search-2-line"
-									iconPosition="left"
 								>
-									Rechercher
-								</Button>
+									<option value="name:asc">Nom A à Z</option>
+									<option value="created_at:desc">Date de création</option>
+									<option value="updated_at:desc">Date de mise à jour</option>
+								</Select>
 							</div>
-						</form>
-					</div>
-					{session.user.role !== 'admin' && (
+							<div
+								className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}
+							>
+								<form
+									className={cx(classes.searchForm)}
+									onSubmit={e => {
+										e.preventDefault();
+										setValidatedSearch(search);
+										setCurrentPage(1);
+									}}
+								>
+									<div role="search" className={fr.cx('fr-search-bar')}>
+										<Input
+											label="Rechercher"
+											hideLabel
+											nativeInputProps={{
+												placeholder: 'Rechercher',
+												type: 'search',
+												value: search,
+												onChange: event => {
+													if (!event.target.value) {
+														setValidatedSearch('');
+													}
+													setSearch(event.target.value);
+												}
+											}}
+										/>
+										<Button
+											priority="primary"
+											type="submit"
+											iconId="ri-search-2-line"
+											iconPosition="left"
+										>
+											Rechercher
+										</Button>
+									</div>
+								</form>
+							</div>
+						</>
+					)}
+
+					{session.user.role !== 'admin' && false && (
 						<div
 							className={fr.cx(
 								'fr-col-12',
@@ -379,10 +390,7 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			alignSelf: 'flex-end',
 			justifyContent: 'flex-end',
 			'.fr-btn': {
-				justifySelf: 'flex-end',
-				'&:first-of-type': {
-					marginRight: '1rem'
-				}
+				justifySelf: 'flex-end'
 			}
 		},
 		[fr.breakpoints.down('md')]: {
