@@ -1,4 +1,3 @@
-import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
@@ -119,7 +118,6 @@ const DashBoard = () => {
 					}
 				}}
 			/>
-			<ApiKeyModal modal={api_modal} />
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -135,17 +133,6 @@ const DashBoard = () => {
 							classes.buttonContainer
 						)}
 					>
-						{session?.user.role === 'user' && (
-							<Button
-								priority="secondary"
-								iconId="fr-icon-earth-line"
-								iconPosition="right"
-								type="button"
-								nativeButtonProps={api_modal.buttonProps}
-							>
-								Mes clés API
-							</Button>
-						)}
 
 						<Button
 							priority="secondary"
