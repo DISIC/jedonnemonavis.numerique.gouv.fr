@@ -13,6 +13,7 @@ import { StatsTotalsProvider } from '../contexts/StatsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
+import React from 'react';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -56,6 +57,18 @@ function App({ Component, pageProps }: AppProps) {
 			router.pathname.startsWith('/open-api');
 		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
 	};
+
+	React.useEffect(() => {
+		const removeButtonOnLoad = () => {
+			const buttonToRemove = document.getElementById(
+				'fr-theme-modal-hidden-control-button'
+			);
+			if (buttonToRemove) {
+				buttonToRemove.remove();
+			}
+		};
+		removeButtonOnLoad();
+	}, []);
 
 	return (
 		<MuiDsfrThemeProvider>
