@@ -143,6 +143,7 @@ model Entity {
   adminEntityRights AdminEntityRight[]
   created_at        DateTime           @default(now())
   updated_at        DateTime           @updatedAt
+  api_keys          ApiKey[]
 }
 
 model Button {
@@ -166,6 +167,10 @@ model ApiKey {
   scope   UserRole
   user    User     @relation(fields: [user_id], references: [id])
   user_id Int
+  product Product? @relation(fields: [product_id], references: [id])
+  product_id Int? 
+  entity Entity? @relation(fields: [entity_id], references: [id])
+  entity_id Int?
 }
 
 model Product {
@@ -184,6 +189,7 @@ model Product {
   favorites       Favorite[]
   reviews         Review[]
   isPublic        Boolean?
+  api_keys        ApiKey[]
 }
 
 model AdminEntityRight {

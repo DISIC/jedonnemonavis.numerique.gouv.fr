@@ -41,11 +41,27 @@ export const openAPIRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
-				(data: AccessRight) => {
-					return data.product_id;
+
+			const getAuthorizedProductIds = async (): Promise<number[]> => {
+				if (ctx.api_key.product_id) {
+					return [ctx.api_key.product_id];
+				} 
+				
+				if (ctx.api_key.entity_id) {
+					const entity = await ctx.prisma.entity.findFirst({
+						where: { id: ctx.api_key.entity_id },
+						include: { products: true }
+					});
+					
+					if (entity && entity.products) {
+						return entity.products.map(prod => prod.id);
+					}
 				}
-			);
+				
+				return [];
+			};
+			
+			const authorized_products_ids: number[] = await getAuthorizedProductIds();
 
 			const products = await ctx.prisma.product.findMany({
 				where: {
@@ -161,12 +177,27 @@ export const openAPIRouter = router({
 		.output(ZOpenApiStatsOutput)
 		.query(async ({ ctx, input }) => {
 			const { field_codes, product_ids, start_date, end_date } = input;
-
-			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
-				(data: AccessRight) => {
-					return data.product_id;
+			
+			const getAuthorizedProductIds = async (): Promise<number[]> => {
+				if (ctx.api_key.product_id) {
+					return [ctx.api_key.product_id];
+				} 
+				
+				if (ctx.api_key.entity_id) {
+					const entity = await ctx.prisma.entity.findFirst({
+						where: { id: ctx.api_key.entity_id },
+						include: { products: true }
+					});
+					
+					if (entity && entity.products) {
+						return entity.products.map(prod => prod.id);
+					}
 				}
-			);
+				
+				return [];
+			};
+			
+			const authorized_products_ids: number[] = await getAuthorizedProductIds();
 
 			const allFields = [
 				...FIELD_CODE_BOOLEAN_VALUES,

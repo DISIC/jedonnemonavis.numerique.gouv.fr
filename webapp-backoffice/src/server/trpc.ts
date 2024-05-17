@@ -23,6 +23,7 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
 	const req = opts.req;
 	const user_api = null as UserWithAccessRight | null;
+	const api_key = null as ApiKey | null;
 
 	const caCrtPath = path.resolve(process.cwd(), './certs/ca/ca.crt');
 	const tlsOptions = fs.existsSync(caCrtPath)
@@ -32,21 +33,22 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 			}
 		: undefined;
 
-	const elkClient = new ElkClient({
+	/*const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
 		auth: {
 			username: process.env.ES_ADDON_USER as string,
 			password: process.env.ES_ADDON_PASSWORD as string
 		},
 		tls: tlsOptions
-	});
+	});*/
 
 	return {
 		prisma,
 		session,
-		elkClient,
+		//elkClient,
 		req,
-		user_api
+		user_api,
+		api_key
 	};
 };
 
@@ -134,7 +136,8 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 			return next({
 				ctx: {
 					...ctx,
-					user_api: checkApiKey.user
+					user_api: checkApiKey.user,
+					api_key: checkApiKey
 				}
 			});
 		}

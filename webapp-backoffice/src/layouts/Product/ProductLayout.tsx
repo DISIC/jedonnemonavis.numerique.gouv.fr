@@ -76,6 +76,15 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				href: `/administration/dashboard/product/${id}/infos`,
 				alt: 'Informations'
 			}
+		},
+		{
+			text: 'Gérer les clés API',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
+			linkProps: {
+				href: `/administration/dashboard/product/${id}/api_keys`,
+				alt: 'Gérer les clés API'
+			}
 		}
 	];
 	return (
