@@ -3,10 +3,12 @@ import { z } from 'zod';
 
 export const apiKeyRouter = router({
 	getList: protectedProcedure
-		.input(z.object({
-			product_id: z.number().optional(),
-			organization_id: z.number().optional()
-		}))
+		.input(
+			z.object({
+				product_id: z.number().optional(),
+				organization_id: z.number().optional()
+			})
+		)
 		.query(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
 
@@ -19,6 +21,9 @@ export const apiKeyRouter = router({
 					...(input.organization_id && {
 						organization_id: input.organization_id
 					})
+				},
+				include: {
+					api_key_logs: true
 				}
 			});
 
@@ -26,10 +31,12 @@ export const apiKeyRouter = router({
 		}),
 
 	create: protectedProcedure
-		.input(z.object({
-			product_id: z.number().optional(),
-			organization_id: z.number().optional()
-		}))
+		.input(
+			z.object({
+				product_id: z.number().optional(),
+				organization_id: z.number().optional()
+			})
+		)
 		.mutation(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
 

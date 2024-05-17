@@ -7,6 +7,7 @@ import { Product } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -51,7 +52,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Gérer mes boutons',
+			text: 'Gérer vos boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
@@ -60,7 +61,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: "Gérer les droits d'accès",
+			text: "Gérer l'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
@@ -100,19 +101,21 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				<Tag id="product-id" small>
 					{`# ${id}`}
 				</Tag>
-				<button
-					className="fr-btn fr-btn--sm fr-btn--tertiary-no-outline"
-					title={`Copier l’identifiant du service « ${id} » dans le presse-papier`}
-					aria-label={`Copier l’identifiant du service « ${id} » dans le presse-papier`}
-					data-js-only
-					hidden
+				<Button
+					priority="tertiary"
+					type="button"
+					className={cx(classes.copyBtn)}
+					nativeButtonProps={{
+						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
+						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`
+					}}
 					onClick={() => {
 						navigator.clipboard.writeText(product.id.toString());
 						setDisplayToast(true);
 					}}
 				>
 					Copier dans le presse-papier
-				</button>
+				</Button>
 			</div>
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
@@ -146,8 +149,10 @@ const useStyles = tss.create({
 		minHeight: '40rem'
 	},
 	tagContainer: {
-		display: 'flex',
-		gap: 10
+		display: 'flex'
+	},
+	copyBtn: {
+		boxShadow: 'none'
 	}
 });
 
