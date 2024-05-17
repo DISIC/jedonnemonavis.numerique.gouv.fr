@@ -107,11 +107,11 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 					className={cx(classes.copyBtn)}
 					nativeButtonProps={{
 						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`
-					}}
-					onClick={() => {
-						navigator.clipboard.writeText(product.id.toString());
-						setDisplayToast(true);
+						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
+						onClick: () => {
+							navigator.clipboard.writeText(product.id.toString());
+							setDisplayToast(true);
+						}
 					}}
 				>
 					Copier dans le presse-papier
