@@ -77,7 +77,7 @@ const ProductAccessCard = (props: Props) => {
 							{accessRight.user === null
 								? 'Invité'
 								: accessRight.status === 'carrier'
-									? 'Porteur'
+									? 'ADMIN'
 									: 'Retiré'}
 						</Badge>
 					</div>

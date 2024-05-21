@@ -107,7 +107,7 @@ const AccessManagement = (props: Props) => {
 							: currentAccessRight?.user_email_invite
 					}.`;
 				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été ajouté comme porteur.`;
+					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été ajouté comme administrateur.`;
 				}
 			case 'resend-email':
 				return `Un e-mail d’invitation a été renvoyé à ${
@@ -120,13 +120,13 @@ const AccessManagement = (props: Props) => {
 					currentAccessRight?.user !== null
 						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 						: currentAccessRight.user_email_invite
-				} a été retiré comme porteur ou porteuse de ce produit numérique.`;
+				} a été retiré comme administrateur de ce produit numérique.`;
 			case 'reintegrate':
 				return `${
 					currentAccessRight?.user !== null
 						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 						: currentAccessRight.user_email_invite
-				} a été réintégré comme porteur ou porteuse de ce produit numérique.`;
+				} a été réintégré comme administrateur de ce produit numérique.`;
 		}
 	};
 
@@ -150,6 +150,7 @@ const AccessManagement = (props: Props) => {
 				isOpen={isModalOpen}
 				modalType={modalType}
 				productId={product.id}
+				productName={product.title}
 				setIsModalSubmitted={setIsModalSubmitted}
 				currentAccessRight={currentAccessRight}
 				setCurrentAccessRight={setCurrentAccessRight}
@@ -185,7 +186,7 @@ const AccessManagement = (props: Props) => {
 				<div className={fr.cx('fr-col-8')}>
 					{nbPages > 1 && (
 						<span className={fr.cx('fr-ml-0')}>
-							Porteur de{' '}
+							Admin de{' '}
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + 1}
 							</span>{' '}
@@ -204,7 +205,7 @@ const AccessManagement = (props: Props) => {
 						style={{ userSelect: 'none' }}
 						options={[
 							{
-								label: 'Afficher les porteur retirés',
+								label: 'Afficher les admins retirés',
 								nativeInputProps: {
 									name: 'carriers-removed',
 									onChange: () => {
