@@ -16,6 +16,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import React from 'react';
 import { trpc } from '@/src/utils/trpc';
 import Head from 'next/head';
+import CreateButtonJDMA from '@/src/components/dashboard/ProductButton/CreateButtonJDMA';
 
 interface Props {
 	product: Product;
@@ -106,16 +107,18 @@ const ProductButtonsPage = (props: Props) => {
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>
 				</div>
-				<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-					<Button
-						priority="secondary"
-						iconPosition="right"
-						iconId="ri-add-box-line"
-						onClick={() => handleModalOpening('create')}
-					>
-						Créer un bouton
-					</Button>
-				</div>
+				{buttons.length > 0 && (
+					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
+						<Button
+							priority="secondary"
+							iconPosition="right"
+							iconId="ri-add-box-line"
+							onClick={() => handleModalOpening('create')}
+						>
+							Créer un bouton
+						</Button>
+					</div>
+				)}
 			</div>
 			<div
 				className={fr.cx(
@@ -139,24 +142,26 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
-				<div className={fr.cx('fr-col-4')}>
-					<Checkbox
-						style={{ userSelect: 'none' }}
-						options={[
-							{
-								label: 'Afficher les boutons de test',
-								nativeInputProps: {
-									name: 'test-buttons',
-									checked: testFilter,
-									onChange: e => {
-										setTestFilter(e.currentTarget.checked);
-										setCurrentPage(1);
+				{buttons.length > 0 && (
+					<div className={fr.cx('fr-col-4')}>
+						<Checkbox
+							style={{ userSelect: 'none' }}
+							options={[
+								{
+									label: 'Afficher les boutons de test',
+									nativeInputProps: {
+										name: 'test-buttons',
+										checked: testFilter,
+										onChange: e => {
+											setTestFilter(e.currentTarget.checked);
+											setCurrentPage(1);
+										}
 									}
 								}
-							}
-						]}
-					/>
-				</div>
+							]}
+						/>
+					</div>
+				)}
 				{/* <div className={fr.cx('fr-col-4')}>
 					<Checkbox
 						options={[
@@ -179,9 +184,9 @@ const ProductButtonsPage = (props: Props) => {
 				) : (
 					<>
 						{!buttons.length && (
-							<div className={cx(classes.noResults)}>
-								<p role="status">Aucun bouton trouvé</p>
-							</div>
+							<CreateButtonJDMA
+								onButtonClick={() => handleModalOpening('create')}
+							/>
 						)}
 						{buttons?.map((button, index) => (
 							<ProductButtonCard
