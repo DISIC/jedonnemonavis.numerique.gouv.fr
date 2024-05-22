@@ -252,7 +252,7 @@ const ProductModal = (props: Props) => {
 				<div className={fr.cx('fr-input-group')}>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 						<fieldset>
-							<legend>URLS</legend>
+							<legend>URL(s)</legend>
 							{urls.map((url, index) => (
 								<div key={url.id} className={cx(classes.flexContainer)}>
 									<Controller
