@@ -90,17 +90,21 @@ export const productRouter = router({
 
 			if (search) {
 				let searchWithoutAccents = removeAccents(search);
+				const searchQuery = searchWithoutAccents
+					.split(' ')
+					.map(word => `${word}:*`)
+					.join('&');
 
 				where = {
 					OR: [
 						{
 							title_formatted: {
-								search: searchWithoutAccents.split(' ').join('&')
+								search: searchQuery
 							}
 						},
 						{
 							title: {
-								search: searchWithoutAccents.split(' ').join('&')
+								search: searchQuery
 							}
 						}
 					]
@@ -146,6 +150,8 @@ export const productRouter = router({
 					}
 				}
 			}
+
+			console.log(JSON.stringify(where));
 
 			try {
 				const products = await ctx.prisma.product.findMany({
