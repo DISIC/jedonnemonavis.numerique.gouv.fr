@@ -107,7 +107,7 @@ const AccessManagement = (props: Props) => {
 							: currentAccessRight?.user_email_invite
 					}.`;
 				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} a été ajouté comme administrateur.`;
+					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} fait partie de ${product.title}.`;
 				}
 			case 'resend-email':
 				return `Un e-mail d’invitation a été renvoyé à ${
@@ -120,7 +120,7 @@ const AccessManagement = (props: Props) => {
 					currentAccessRight?.user !== null
 						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 						: currentAccessRight.user_email_invite
-				} a été retiré comme administrateur de ce produit numérique.`;
+				} ne fait plus partie de ${product.title}.`;
 			case 'reintegrate':
 				return `${
 					currentAccessRight?.user !== null
@@ -137,69 +137,76 @@ const AccessManagement = (props: Props) => {
 	const nbPages = getNbPages(accessRightsCount, numberPerPage);
 
 	return (
-		<ProductLayout product={product}>
-			<Head>
-				<title>{product.title} | Gérer l'accès | Je donne mon avis</title>
-				<meta
-					name="description"
-					content={`${product.title} | Gérer l'accès | Je donne mon avis`}
-				/>
-			</Head>
-			<AccessRightModal
-				modal={modal}
-				isOpen={isModalOpen}
-				modalType={modalType}
-				productId={product.id}
-				productName={product.title}
-				setIsModalSubmitted={setIsModalSubmitted}
-				currentAccessRight={currentAccessRight}
-				setCurrentAccessRight={setCurrentAccessRight}
-			/>
-			{isModalSubmitted && (
-				<Alert
-					closable
-					onClose={function noRefCheck() {
-						setIsModalSubmitted(false);
-					}}
-					severity={modalType === 'remove' ? 'info' : 'success'}
-					className={fr.cx('fr-mb-5w')}
-					small
-					description={getAlertTitle()}
-				/>
-			)}
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>Gérer l'accès</h2>
-				</div>
-				<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
-					<Button
-						priority="secondary"
-						iconPosition="right"
-						iconId="ri-user-add-line"
-						onClick={() => handleModalOpening('add')}
-					>
-						Inviter un administrateur
-					</Button>
-				</div>
+		<>
+			<div className={cx(fr.cx('fr-container'), classes.alertContainer)}>
+				{isModalSubmitted && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setIsModalSubmitted(false);
+						}}
+						severity={'success'}
+						className={fr.cx('fr-mb-5w')}
+						small
+						description={getAlertTitle()}
+					/>
+				)}
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-8')}>
-					{nbPages > 1 && (
-						<span className={fr.cx('fr-ml-0')}>
-							Admin de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + accessRights.length}
-							</span>{' '}
-							sur{' '}
-							<span className={cx(classes.boldText)}>{accessRightsCount}</span>
-						</span>
-					)}
+
+			<ProductLayout product={product}>
+				<Head>
+					<title>{product.title} | Gérer l'accès | Je donne mon avis</title>
+					<meta
+						name="description"
+						content={`${product.title} | Gérer l'accès | Je donne mon avis`}
+					/>
+				</Head>
+				<AccessRightModal
+					modal={modal}
+					isOpen={isModalOpen}
+					modalType={modalType}
+					productId={product.id}
+					productName={product.title}
+					setIsModalSubmitted={setIsModalSubmitted}
+					currentAccessRight={currentAccessRight}
+					setCurrentAccessRight={setCurrentAccessRight}
+				/>
+
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-8')}>
+						<h2 className={fr.cx('fr-mb-2w')}>Gérer l'accès</h2>
+					</div>
+					<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
+						<Button
+							priority="secondary"
+							iconPosition="right"
+							iconId="ri-user-add-line"
+							onClick={() => handleModalOpening('add')}
+						>
+							Inviter des administrateurs
+						</Button>
+					</div>
 				</div>
-				<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-8')}>
+						{nbPages > 1 && (
+							<span className={fr.cx('fr-ml-0')}>
+								Admin de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + accessRights.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{accessRightsCount}
+								</span>
+							</span>
+						)}
+					</div>
+					{/* <div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
 					<Checkbox
 						className={cx(fr.cx('fr-ml-auto'), classes.checkbox)}
 						style={{ userSelect: 'none' }}
@@ -216,43 +223,79 @@ const AccessManagement = (props: Props) => {
 							}
 						]}
 					/>
+				</div> */}
 				</div>
-			</div>
-			<div>
 				{isLoadingAccessRights ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
 					</div>
 				) : (
-					accessRights.map((accessRight, index) => (
-						<AccessRightCard
-							key={index}
-							accessRight={accessRight}
-							onButtonClick={handleModalOpening}
+					<div>
+						<div className={cx(classes.categoryTitle)}>
+							Administrateurs du service
+						</div>
+						<div>
+							{accessRights.map((accessRight, index) => {
+								if (
+									accessRight.status === 'carrier' &&
+									accessRight.user !== null
+								) {
+									return (
+										<AccessRightCard
+											key={index}
+											accessRight={accessRight}
+											onButtonClick={handleModalOpening}
+										/>
+									);
+								}
+							})}
+						</div>
+						<div className={cx(classes.inviteTitle)}>Invitations envoyées</div>
+						<div>
+							{accessRights.map((accessRight, index) => {
+								if (accessRight.user === null) {
+									return (
+										<AccessRightCard
+											key={index}
+											accessRight={accessRight}
+											onButtonClick={handleModalOpening}
+										/>
+									);
+								}
+							})}
+						</div>
+						<div
+							className={cx(classes.categoryTitle, classes.organizationTitle)}
+						>
+							Administrateurs de l'organisation
+						</div>
+						<div>{/* TODO */}</div>
+					</div>
+				)}
+
+				<div
+					className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mb-15w')}
+				>
+					{nbPages > 1 && (
+						<Pagination
+							showFirstLast
+							count={nbPages}
+							defaultPage={currentPage}
+							getPageLinkProps={pageNumber => ({
+								onClick: event => {
+									event.preventDefault();
+									handlePageChange(pageNumber);
+								},
+								href: '#',
+								classes: { link: fr.cx('fr-pagination__link') },
+								key: `pagination - link - access - right - ${pageNumber}`
+							})}
+							className={fr.cx('fr-mt-1w')}
 						/>
-					))
-				)}
-			</div>
-			<div className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mb-15w')}>
-				{nbPages > 1 && (
-					<Pagination
-						showFirstLast
-						count={nbPages}
-						defaultPage={currentPage}
-						getPageLinkProps={pageNumber => ({
-							onClick: event => {
-								event.preventDefault();
-								handlePageChange(pageNumber);
-							},
-							href: '#',
-							classes: { link: fr.cx('fr-pagination__link') },
-							key: `pagination - link - access - right - ${pageNumber}`
-						})}
-						className={fr.cx('fr-mt-1w')}
-					/>
-				)}
-			</div>
-		</ProductLayout>
+					)}
+				</div>
+			</ProductLayout>
+		</>
 	);
 };
 
@@ -270,6 +313,21 @@ const useStyles = tss.create({
 			display: 'flex',
 			justifyContent: 'end'
 		}
+	},
+	categoryTitle: {
+		fontWeight: 'bold',
+		paddingBottom: '10px',
+		borderBottom: '1px solid black'
+	},
+	inviteTitle: {
+		fontWeight: 'bold',
+		padding: '5px 0'
+	},
+	organizationTitle: {
+		paddingTop: '3rem'
+	},
+	alertContainer: {
+		marginTop: '1.5rem'
 	}
 });
 
