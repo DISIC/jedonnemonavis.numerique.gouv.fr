@@ -8,6 +8,12 @@ import {
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import {
+	FIELD_CODE_BOOLEAN_VALUES,
+	FIELD_CODE_DETAILS_VALUES,
+	FIELD_CODE_SMILEY_VALUES
+} from '@/src/utils/helpers';
 
 const ReviewCommonVerbatimLine = ({
 	review,
@@ -20,220 +26,122 @@ const ReviewCommonVerbatimLine = ({
 
 	if (!review) return null;
 
-	const displayFieldCodeText = (fieldCode: string) => {
-		return review.answers?.find(answer => answer.field_code === fieldCode)
-			?.answer_text;
+	const getConditionnalValueText = (
+		parentSlug: string,
+		parentText: string,
+		childSlug: string
+	): string => {
+		const parentAnswer = review.answers?.find(
+			answer =>
+				answer.field_code === parentSlug && answer.answer_text === parentText
+		);
+
+		if (!parentAnswer) return '';
+
+		const childAnswer = review.answers?.find(
+			answer =>
+				answer.parent_answer_id === parentAnswer.id &&
+				answer.field_code === childSlug
+		);
+
+		return childAnswer?.answer_text || '-';
 	};
 
-	return (
-		<div
-			className={cx(
-				classes.container,
-				type === 'Line' && classes.greyContainer
-			)}
-		>
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--left'
-				)}
-			>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-					<div>
-						<p className={cx(classes.subtitle)}>Difficulté</p>
-						{displayFieldCodeText('difficulties') === 'Oui' ? (
-							<>
-								<p className={cx(classes.content)}>
-									{review.answers &&
-										review.answers
-											.filter(
-												answer => answer.field_code === 'difficulties_details'
-											)
-											?.map((el, index, array) => {
-												return el.answer_text !== 'Autre'
-													? el.answer_text +
-															(index < array.length - 1 ? ', ' : '.')
-													: '';
-											})}
-								</p>
-								{review.answers &&
-									review.answers.filter(
-										answer =>
-											answer.field_code === 'difficulties_details_verbatim'
-									).length > 0 && (
-										<p className={cx(classes.content)}>
-											Autre : "
-											{review.answers.filter(
-												answer =>
-													answer.field_code === 'difficulties_details_verbatim'
-											)[0].answer_text || ''}
-											"
-										</p>
-									)}
-							</>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-					<div>
-						<p className={cx(classes.subtitle)}>
-							Tentative de contacter le service d'aide ?
-						</p>
+	const getFieldCodeTexts = (fieldCode: string) => {
+		const answers =
+			review.answers?.filter(answer => answer.field_code === fieldCode) || [];
 
-						{displayFieldCodeText('contact') ? (
-							<p className={cx(classes.content)}>
-								{displayFieldCodeText('contact')}
-							</p>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>Résultat de la tentative ?</p>
-						{displayFieldCodeText('contact') === 'Oui' ? (
-							<p className={cx(classes.content)}>
-								{displayFieldCodeText('contact_reached')}
-							</p>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>Moyen(s) de contact ?</p>
-						{displayFieldCodeText('contact_reached') === 'Oui' ? (
-							<>
-								<p className={cx(classes.content)}>
-									{review.answers &&
-										review.answers
-											.filter(
-												answer => answer.field_code === 'contact_channels'
-											)
-											?.map((el, index, array) => {
-												return el.answer_text !== 'Autre'
-													? el.answer_text +
-															(index < array.length - 1 ? ', ' : '.')
-													: '';
-											})}
-								</p>
-								{review.answers &&
-									review.answers.filter(
-										answer => answer.field_code === 'contact_channels_verbatim'
-									).length > 0 && (
-										<p className={cx(classes.content)}>
-											Autre : "
-											{review.answers.filter(
-												answer =>
-													answer.field_code === 'contact_channels_verbatim'
-											)[0].answer_text || ''}
-											"
-										</p>
-									)}
-							</>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-					{review.contact_satisfaction && (
-						<>
-							<p className={cx(classes.subtitle)}>
-								Qualité de l'échange avec le service d'aide
-							</p>
-							<div className={cx(classes.content)}>
-								<Badge
-									className={cx(classes.badge)}
-									small={true}
-									noIcon={true}
-									severity={getSeverity(
-										review.contact_satisfaction.intention || ''
-									)}
-								>
-									<i
-										className={fr.cx(
-											getStatsIcon({
-												intention:
-													review.contact_satisfaction.intention ??
-													'neutral' ??
-													'neutral'
-											})
+		return answers.map(a => {
+			if (a.field_code === 'comprehension') return `${a.answer_text} / 5`;
+
+			return a.answer_text || '-';
+		});
+	};
+
+	const fieldCodesHelper = [
+		FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'comprehension'),
+		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried')
+	];
+
+	const tableFieldCodeHelper = [
+		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried'),
+		FIELD_CODE_BOOLEAN_VALUES.find(fcdv => fcdv.slug === 'contact_reached'),
+		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_satisfaction')
+	];
+
+	return (
+		<>
+			{fieldCodesHelper.map(fch => (
+				<div className={fr.cx('fr-col-12')}>
+					<p className={cx(classes.subtitle)}>{fch?.question}</p>
+					{getFieldCodeTexts(fch?.slug || '').map(text => (
+						<div>
+							<Badge
+								className={cx(classes.badge)}
+								small={true}
+								noIcon={true}
+								severity={'info'}
+							>
+								{text}
+							</Badge>
+						</div>
+					))}
+				</div>
+			))}
+			<div className={fr.cx('fr-col-12')}>
+				<p className={cx(classes.subtitle)}>
+					Votre rapport à l'aide de l'administration
+				</p>
+				<table className={cx(fr.cx('fr-table'), classes.table)}>
+					<thead>
+						<tr>
+							<td>Aide</td>
+							<td>{tableFieldCodeHelper[1]?.question}</td>
+							<td>{tableFieldCodeHelper[2]?.question}</td>
+						</tr>
+					</thead>
+					<tbody>
+						{getFieldCodeTexts(tableFieldCodeHelper[0]?.slug || '').map(row => (
+							<tr>
+								<td>{row}</td>
+								<td>
+									<Badge
+										className={cx(classes.badge)}
+										small={true}
+										noIcon={true}
+										severity={'info'}
+									>
+										{getConditionnalValueText(
+											tableFieldCodeHelper[0]?.slug || '',
+											row,
+											tableFieldCodeHelper[1]?.slug || ''
 										)}
-										style={{
-											color: getStatsColor({
-												intention:
-													review.contact_satisfaction.intention ??
-													'neutral' ??
-													'neutral'
-											})
-										}}
-									/>
-									{displayIntention(
-										review.contact_satisfaction.intention ?? 'neutral'
-									) ?? 'neutral'}
-								</Badge>
-							</div>
-						</>
-					)}
-				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-					<div>
-						<p className={cx(classes.subtitle)}>Autre aide sollicitée ?</p>
-						{displayFieldCodeText('help') ? (
-							<p className={cx(classes.content)}>
-								{displayFieldCodeText('help')}
-							</p>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-					<div>
-						<p className={cx(classes.subtitle)}>
-							Autre type(s) d'aide sollicitée(s)
-						</p>
-						{displayFieldCodeText('help') === 'Oui' ? (
-							<>
-								<p className={cx(classes.content)}>
-									{review.answers &&
-										review.answers
-											.filter(answer => answer.field_code === 'help_details')
-											?.map((el, index, array) => {
-												return el.answer_text !== 'Autre'
-													? el.answer_text +
-															(index < array.length - 1 ? ', ' : '.')
-													: '';
-											})}
-								</p>
-								{review.answers &&
-									review.answers.filter(
-										answer => answer.field_code === 'help_details_verbatim'
-									).length > 0 && (
-										<p className={cx(classes.content)}>
-											Autre : "
-											{review.answers.filter(
-												answer => answer.field_code === 'help_details_verbatim'
-											)[0].answer_text || ''}
-											"
-										</p>
-									)}
-							</>
-						) : (
-							<p className={cx(classes.content)}>Non renseigné</p>
-						)}
-					</div>
-				</div>
+									</Badge>
+								</td>
+								<td>
+									<Badge
+										className={cx(classes.badge)}
+										small={true}
+										noIcon={true}
+										severity={'info'}
+									>
+										{getConditionnalValueText(
+											tableFieldCodeHelper[0]?.slug || '',
+											row,
+											tableFieldCodeHelper[2]?.slug || ''
+										)}
+									</Badge>
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
 			</div>
-		</div>
+		</>
 	);
 };
 
 const useStyles = tss.create({
-	container: {
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'space-between',
-		height: '100%'
-	},
 	greyContainer: {
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
@@ -249,8 +157,16 @@ const useStyles = tss.create({
 	},
 	badge: {
 		fontSize: 12,
-		width: 100,
-		paddingVertical: 4
+		paddingVertical: 4,
+		textTransform: 'initial'
+	},
+	table: {
+		marginBottom: 0,
+		tr: {
+			td: {
+				fontSize: '0.75rem'
+			}
+		}
 	}
 });
 

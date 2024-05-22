@@ -50,7 +50,8 @@ export const FIELD_CODE_DETAILS_VALUES = [
 	{
 		slug: 'contact_satisfaction',
 		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
-		question: 'Comment s’est passé l’échange avec le service de la démarche ?'
+		question:
+			"Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?"
 	},
 	{
 		slug: 'contact',

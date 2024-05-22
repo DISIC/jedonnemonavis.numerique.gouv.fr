@@ -33,21 +33,15 @@ const ReviewFilters = (props: Props) => {
 				{
 					label: 'Id'
 				},
+				{
+					label: 'Source'
+				},
 
 				{
 					label: 'Satisfaction'
 				},
 				{
-					label: 'Facilité'
-				},
-				{
-					label: 'Langage'
-				},
-				{
 					label: 'Verbatim'
-				},
-				{
-					label: 'Source'
 				}
 			]);
 		} else {
@@ -128,10 +122,10 @@ const useStyles = tss.create({
 			marginTop: 12
 		},
 		['&:nth-child(2), &:nth-child(3)']: {
-			flex: "1 1 8%"
+			flex: '1 1 8%'
 		},
 		['&:nth-child(9)']: {
-			flex: "1 1 14%"
+			flex: '1 1 14%'
 		}
 	},
 	badgeVerbatim: {
