@@ -120,10 +120,6 @@ const ProductInformationPage = (props: Props) => {
 					</div>
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Volumétrie par an</h4>
-					{product.volume ? product.volume : 'Non renseigné'}
-				</div>
-				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Données statistiques publiques</h4>
 					{product.isPublic ? 'Oui' : 'Non'}
 					{product.isPublic && (
