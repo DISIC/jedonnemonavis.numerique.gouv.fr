@@ -161,19 +161,20 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				}}
 				className={classes.navigation}
 				id="fr-header-public-header"
-				quickAccessItems={light ? [] : quickAccessItems}
-				navigation={navigationItems}
+				quickAccessItems={light ? undefined : quickAccessItems}
+				navigation={!!navigationItems.length ? navigationItems : undefined}
 				serviceTitle="Je donne mon avis"
 				serviceTagline="La voix de vos usagers"
 			/>
-			<main id="main" role="main">
+			<main id="main" role="main" tabIndex={-1}>
 				{children}
 			</main>
-			<Footer
-				id="footer"
-				accessibility="non compliant"
-				bottomItems={[headerFooterDisplayItem]}
-			/>
+			<div id="footer" tabIndex={-1}>
+				<Footer
+					accessibility="non compliant"
+					bottomItems={[headerFooterDisplayItem]}
+				/>
+			</div>
 		</>
 	);
 }
