@@ -90,10 +90,20 @@ export const productRouter = router({
 
 			if (search) {
 				let searchWithoutAccents = removeAccents(search);
-				
-				where.title_formatted = {
-					contains: searchWithoutAccents,
-					mode: 'insensitive'
+
+				where = {
+					OR: [
+						{
+							title_formatted: {
+								search: searchWithoutAccents.split(' ').join('&')
+							}
+						},
+						{
+							title: {
+								search: searchWithoutAccents.split(' ').join('&')
+							}
+						}
+					]
 				};
 			}
 
