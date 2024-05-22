@@ -44,6 +44,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			numberPerPage: 0
 		},
 		{
+			enabled: !!session?.user,
 			initialData: {
 				data: [],
 				metadata: {
