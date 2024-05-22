@@ -145,6 +145,7 @@ const DashBoard = () => {
 
 	return (
 		<>
+			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
