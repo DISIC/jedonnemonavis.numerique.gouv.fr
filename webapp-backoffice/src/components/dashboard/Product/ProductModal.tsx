@@ -33,6 +33,7 @@ interface Props {
 	modal: CustomModalProps;
 	product?: Product;
 	onSubmit: () => void;
+	onTitleChange: (title: string) => void;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -181,7 +182,10 @@ const ProductModal = (props: Props) => {
 									</p>
 								}
 								nativeInputProps={{
-									onChange,
+									onChange: e => {
+										onChange(e);
+										props.onTitleChange(e.target.value);
+									},
 									defaultValue: value,
 									required: true
 								}}
