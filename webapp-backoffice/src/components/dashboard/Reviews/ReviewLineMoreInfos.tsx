@@ -33,16 +33,11 @@ const ReviewLineMoreInfos = ({
 						<p className={cx(classes.subtitle)}>
 							Souhaitez-vous nous en dire plus ?
 						</p>
-						{review.verbatim ? (
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity="info"
-							>{`${search ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : review.verbatim.answer_text}`}</Badge>
-						) : (
-							'-'
-						)}
+						<p className={cx(classes.content)}>
+							{review.verbatim
+								? `${search ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : review.verbatim.answer_text}`
+								: '-'}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -59,12 +54,12 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	subtitle: {
-		fontSize: 12,
+		...fr.typography[18].style,
 		fontWeight: 'bold',
 		marginBottom: 0
 	},
 	content: {
-		fontSize: 12,
+		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0,
 		span: {
@@ -72,7 +67,7 @@ const useStyles = tss.create({
 		}
 	},
 	badge: {
-		fontSize: 12,
+		...fr.typography[17].style,
 		paddingVertical: 4,
 		textTransform: 'initial'
 	}

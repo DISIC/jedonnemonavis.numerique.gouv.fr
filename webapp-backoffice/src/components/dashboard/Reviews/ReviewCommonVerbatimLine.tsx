@@ -51,6 +51,8 @@ const ReviewCommonVerbatimLine = ({
 		const answers =
 			review.answers?.filter(answer => answer.field_code === fieldCode) || [];
 
+		if (!answers.length) return ['-'];
+
 		return answers.map(a => {
 			if (a.field_code === 'comprehension') return `${a.answer_text} / 5`;
 
@@ -69,22 +71,25 @@ const ReviewCommonVerbatimLine = ({
 		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_satisfaction')
 	];
 
+	const tableAdministrationItems = getFieldCodeTexts(
+		tableFieldCodeHelper[0]?.slug || ''
+	).filter(row => row.includes('administration'));
+
 	return (
 		<>
 			{fieldCodesHelper.map(fch => (
 				<div className={fr.cx('fr-col-12')}>
 					<p className={cx(classes.subtitle)}>{fch?.question}</p>
 					{getFieldCodeTexts(fch?.slug || '').map(text => (
-						<div>
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={'info'}
-							>
-								{text}
-							</Badge>
-						</div>
+						<span
+							className={
+								text !== '-'
+									? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+									: ''
+							}
+						>
+							{text}
+						</span>
 					))}
 				</div>
 			))}
@@ -92,52 +97,60 @@ const ReviewCommonVerbatimLine = ({
 				<p className={cx(classes.subtitle)}>
 					Votre rapport à l'aide de l'administration
 				</p>
-				<table className={cx(fr.cx('fr-table'), classes.table)}>
-					<thead>
-						<tr>
-							<td>Aide</td>
-							<td>{tableFieldCodeHelper[1]?.question}</td>
-							<td>{tableFieldCodeHelper[2]?.question}</td>
-						</tr>
-					</thead>
-					<tbody>
-						{getFieldCodeTexts(tableFieldCodeHelper[0]?.slug || '')
-							.filter(row => row.includes('administration'))
-							.map(row => (
-								<tr>
-									<td>{row}</td>
-									<td>
-										<Badge
-											className={cx(classes.badge)}
-											small={true}
-											noIcon={true}
-											severity={'info'}
-										>
-											{getConditionnalValueText(
-												tableFieldCodeHelper[0]?.slug || '',
-												row,
-												tableFieldCodeHelper[1]?.slug || ''
-											)}
-										</Badge>
-									</td>
-									<td>
-										<Badge
-											className={cx(classes.badge)}
-											small={true}
-											noIcon={true}
-											severity={'info'}
-										>
-											{getConditionnalValueText(
-												tableFieldCodeHelper[0]?.slug || '',
-												row,
-												tableFieldCodeHelper[2]?.slug || ''
-											)}
-										</Badge>
-									</td>
-								</tr>
-							))}
-					</tbody>
-				</table>
+				{!!tableAdministrationItems.length ? (
+					<table className={cx(fr.cx('fr-table'), classes.table)}>
+						<thead>
+							<tr>
+								<td>Aide</td>
+								<td>{tableFieldCodeHelper[1]?.question}</td>
+								<td>{tableFieldCodeHelper[2]?.question}</td>
+							</tr>
+						</thead>
+						<tbody>
+							{tableAdministrationItems.map(row => {
+								const contact_reached_answer = getConditionnalValueText(
+									tableFieldCodeHelper[0]?.slug || '',
+									row,
+									tableFieldCodeHelper[1]?.slug || ''
+								);
+								const contact_satisfaction_answer = getConditionnalValueText(
+									tableFieldCodeHelper[0]?.slug || '',
+									row,
+									tableFieldCodeHelper[2]?.slug || ''
+								);
+								return (
+									<tr>
+										<td>{row}</td>
+										<td>
+											<p
+												className={
+													contact_reached_answer !== '-'
+														? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+														: ''
+												}
+											>
+												{contact_reached_answer}
+											</p>
+										</td>
+										<td>
+											<p
+												className={
+													contact_satisfaction_answer !== '-'
+														? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+														: ''
+												}
+											>
+												{contact_satisfaction_answer}
+											</p>
+										</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				) : (
+					'-'
+				)}
 			</div>
 		</>
 	);
@@ -148,25 +161,37 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	subtitle: {
-		fontSize: 12,
+		...fr.typography[18].style,
 		fontWeight: 'bold',
 		marginBottom: 0
 	},
 	content: {
-		fontSize: 12,
+		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0
 	},
-	badge: {
-		fontSize: 12,
-		paddingVertical: 4,
-		textTransform: 'initial'
+	tag: {
+		...fr.typography[17].style,
+		backgroundColor:
+			fr.colors.decisions.background.actionLow.blueFrance.default,
+		color: fr.colors.decisions.background.actionHigh.blueFrance.default,
+		textTransform: 'initial',
+		'&:not(:first-of-type)': {
+			marginLeft: 10
+		}
 	},
 	table: {
 		marginBottom: 0,
 		tr: {
 			td: {
 				fontSize: '0.75rem'
+			}
+		},
+		thead: {
+			tr: {
+				td: {
+					fontSiez: '0.5rem'
+				}
 			}
 		}
 	}
