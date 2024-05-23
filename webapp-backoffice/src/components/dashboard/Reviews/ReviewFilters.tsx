@@ -121,10 +121,10 @@ const useStyles = tss.create({
 			flex: '50%',
 			marginTop: 12
 		},
-		['&:nth-child(2), &:nth-child(3)']: {
+		['&:nth-of-type(2), &:nth-of-type(3)']: {
 			flex: '1 1 8%'
 		},
-		['&:nth-child(9)']: {
+		['&:nth-of-type(9)']: {
 			flex: '1 1 14%'
 		}
 	},

@@ -1,16 +1,5 @@
 export const FIELD_CODE_BOOLEAN_VALUES = [
 	{
-		slug: 'difficulties',
-		hideInDocs: true,
-		question: 'Avez-vous rencontré des difficultés ?'
-	},
-	{
-		slug: 'help',
-		hideInDocs: true,
-		question:
-			"Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?"
-	},
-	{
 		slug: 'contact_reached',
 		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
 		question:
@@ -26,8 +15,7 @@ export const FIELD_CODE_SMILEY_VALUES = [
 	{
 		slug: 'easy',
 		hideInDocs: true,
-		question:
-			"Selon les réponses suivantes, qu'est ce qui vous correspond le mieux :"
+		question: 'Était-ce facile à utiliser ?'
 	},
 	{
 		slug: 'comprehension',
@@ -37,9 +25,14 @@ export const FIELD_CODE_SMILEY_VALUES = [
 ] as const;
 export const FIELD_CODE_DETAILS_VALUES = [
 	{
-		slug: 'difficulties_details',
+		slug: 'difficulties',
 		hideInDocs: true,
-		question: 'Quelles ont été ces difficultés ?'
+		question: 'Avez-vous rencontré des difficultés ?'
+	},
+	{
+		slug: 'help',
+		hideInDocs: true,
+		question: 'De quelle aide avez-vous eu besoin ?'
 	},
 	{
 		slug: 'contact_tried',

@@ -1,19 +1,11 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { ExtendedReview } from './interface';
-import { tss } from 'tss-react/dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { getSeverity } from '@/src/utils/tools';
-import {
-	displayIntention,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
-import Tag from '@codegouvfr/react-dsfr/Tag';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
+import { fr } from '@codegouvfr/react-dsfr';
+import { tss } from 'tss-react/dsfr';
+import { ExtendedReview } from './interface';
 
 const ReviewCommonVerbatimLine = ({
 	review,
@@ -56,20 +48,40 @@ const ReviewCommonVerbatimLine = ({
 		return answers.map(a => {
 			if (a.field_code === 'comprehension') return `${a.answer_text} / 5`;
 
+			if (a.answer_text?.includes('Autre')) {
+				const otherAnswer = review.answers?.find(
+					answer => answer.field_code === `${fieldCode}_verbatim`
+				);
+				return otherAnswer
+					? `${a.answer_text} : "${otherAnswer.answer_text}"`
+					: a.answer_text;
+			}
+
 			return a.answer_text || '-';
 		});
 	};
 
-	const fieldCodesHelper = [
-		FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'comprehension'),
-		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried')
-	];
+	const fieldCodesHelper = review.xwiki_id
+		? [
+				FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'comprehension'),
+				FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'easy'),
+				FIELD_CODE_DETAILS_VALUES.find(fcsv => fcsv.slug === 'difficulties'),
+				FIELD_CODE_DETAILS_VALUES.find(fcsv => fcsv.slug === 'help')
+			]
+		: [
+				FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'comprehension'),
+				FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried')
+			];
 
-	const tableFieldCodeHelper = [
-		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried'),
-		FIELD_CODE_BOOLEAN_VALUES.find(fcdv => fcdv.slug === 'contact_reached'),
-		FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_satisfaction')
-	];
+	const tableFieldCodeHelper = review.xwiki_id
+		? []
+		: [
+				FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried'),
+				FIELD_CODE_BOOLEAN_VALUES.find(fcdv => fcdv.slug === 'contact_reached'),
+				FIELD_CODE_DETAILS_VALUES.find(
+					fcdv => fcdv.slug === 'contact_satisfaction'
+				)
+			];
 
 	const tableAdministrationItems = getFieldCodeTexts(
 		tableFieldCodeHelper[0]?.slug || ''
@@ -77,11 +89,12 @@ const ReviewCommonVerbatimLine = ({
 
 	return (
 		<>
-			{fieldCodesHelper.map(fch => (
-				<div className={fr.cx('fr-col-12')}>
+			{fieldCodesHelper.map((fch, index) => (
+				<div key={index} className={fr.cx('fr-col-12')}>
 					<p className={cx(classes.subtitle)}>{fch?.question}</p>
 					{getFieldCodeTexts(fch?.slug || '').map(text => (
 						<span
+							key={text}
 							className={
 								text !== '-'
 									? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
@@ -93,65 +106,67 @@ const ReviewCommonVerbatimLine = ({
 					))}
 				</div>
 			))}
-			<div className={fr.cx('fr-col-12')}>
-				<p className={cx(classes.subtitle)}>
-					Votre rapport à l'aide de l'administration
-				</p>
-				{!!tableAdministrationItems.length ? (
-					<table className={cx(fr.cx('fr-table'), classes.table)}>
-						<thead>
-							<tr>
-								<td>Aide</td>
-								<td>{tableFieldCodeHelper[1]?.question}</td>
-								<td>{tableFieldCodeHelper[2]?.question}</td>
-							</tr>
-						</thead>
-						<tbody>
-							{tableAdministrationItems.map(row => {
-								const contact_reached_answer = getConditionnalValueText(
-									tableFieldCodeHelper[0]?.slug || '',
-									row,
-									tableFieldCodeHelper[1]?.slug || ''
-								);
-								const contact_satisfaction_answer = getConditionnalValueText(
-									tableFieldCodeHelper[0]?.slug || '',
-									row,
-									tableFieldCodeHelper[2]?.slug || ''
-								);
-								return (
-									<tr>
-										<td>{row}</td>
-										<td>
-											<p
-												className={
-													contact_reached_answer !== '-'
-														? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-														: ''
-												}
-											>
-												{contact_reached_answer}
-											</p>
-										</td>
-										<td>
-											<p
-												className={
-													contact_satisfaction_answer !== '-'
-														? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-														: ''
-												}
-											>
-												{contact_satisfaction_answer}
-											</p>
-										</td>
-									</tr>
-								);
-							})}
-						</tbody>
-					</table>
-				) : (
-					'-'
-				)}
-			</div>
+			{!review.xwiki_id && (
+				<div className={fr.cx('fr-col-12')}>
+					<p className={cx(classes.subtitle)}>
+						Votre rapport à l'aide de l'administration
+					</p>
+					{!!tableAdministrationItems.length ? (
+						<table className={cx(fr.cx('fr-table'), classes.table)}>
+							<thead>
+								<tr>
+									<td>Aide</td>
+									<td>{tableFieldCodeHelper[1]?.question}</td>
+									<td>{tableFieldCodeHelper[2]?.question}</td>
+								</tr>
+							</thead>
+							<tbody>
+								{tableAdministrationItems.map(row => {
+									const contact_reached_answer = getConditionnalValueText(
+										tableFieldCodeHelper[0]?.slug || '',
+										row,
+										tableFieldCodeHelper[1]?.slug || ''
+									);
+									const contact_satisfaction_answer = getConditionnalValueText(
+										tableFieldCodeHelper[0]?.slug || '',
+										row,
+										tableFieldCodeHelper[2]?.slug || ''
+									);
+									return (
+										<tr key={row}>
+											<td>{row}</td>
+											<td>
+												<p
+													className={
+														contact_reached_answer !== '-'
+															? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+															: ''
+													}
+												>
+													{contact_reached_answer}
+												</p>
+											</td>
+											<td>
+												<p
+													className={
+														contact_satisfaction_answer !== '-'
+															? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+															: ''
+													}
+												>
+													{contact_satisfaction_answer}
+												</p>
+											</td>
+										</tr>
+									);
+								})}
+							</tbody>
+						</table>
+					) : (
+						'-'
+					)}
+				</div>
+			)}
 		</>
 	);
 };
