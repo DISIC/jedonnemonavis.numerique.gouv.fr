@@ -101,39 +101,41 @@ const ReviewCommonVerbatimLine = ({
 						</tr>
 					</thead>
 					<tbody>
-						{getFieldCodeTexts(tableFieldCodeHelper[0]?.slug || '').map(row => (
-							<tr>
-								<td>{row}</td>
-								<td>
-									<Badge
-										className={cx(classes.badge)}
-										small={true}
-										noIcon={true}
-										severity={'info'}
-									>
-										{getConditionnalValueText(
-											tableFieldCodeHelper[0]?.slug || '',
-											row,
-											tableFieldCodeHelper[1]?.slug || ''
-										)}
-									</Badge>
-								</td>
-								<td>
-									<Badge
-										className={cx(classes.badge)}
-										small={true}
-										noIcon={true}
-										severity={'info'}
-									>
-										{getConditionnalValueText(
-											tableFieldCodeHelper[0]?.slug || '',
-											row,
-											tableFieldCodeHelper[2]?.slug || ''
-										)}
-									</Badge>
-								</td>
-							</tr>
-						))}
+						{getFieldCodeTexts(tableFieldCodeHelper[0]?.slug || '')
+							.filter(row => row.includes('administration'))
+							.map(row => (
+								<tr>
+									<td>{row}</td>
+									<td>
+										<Badge
+											className={cx(classes.badge)}
+											small={true}
+											noIcon={true}
+											severity={'info'}
+										>
+											{getConditionnalValueText(
+												tableFieldCodeHelper[0]?.slug || '',
+												row,
+												tableFieldCodeHelper[1]?.slug || ''
+											)}
+										</Badge>
+									</td>
+									<td>
+										<Badge
+											className={cx(classes.badge)}
+											small={true}
+											noIcon={true}
+											severity={'info'}
+										>
+											{getConditionnalValueText(
+												tableFieldCodeHelper[0]?.slug || '',
+												row,
+												tableFieldCodeHelper[2]?.slug || ''
+											)}
+										</Badge>
+									</td>
+								</tr>
+							))}
 					</tbody>
 				</table>
 			</div>
