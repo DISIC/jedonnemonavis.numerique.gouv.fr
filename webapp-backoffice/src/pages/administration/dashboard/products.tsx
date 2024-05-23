@@ -19,7 +19,7 @@ import { Autocomplete } from '@mui/material';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const product_modal = createModal({

@@ -6,22 +6,32 @@ import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	onButtonClick: () => void;
+	isSmall?: boolean;
 }
 const CreateButtonJDMA = (props: Props) => {
-	const { onButtonClick } = props;
+	const { onButtonClick, isSmall } = props;
 	const { cx, classes } = useStyles();
+
+	const getTitle = () => {
+		return isSmall ? (
+			<div className={cx(classes.title)}>Obtenez vos premiers avis</div>
+		) : (
+			<h3>Obtenez vos premiers avis</h3>
+		);
+	};
 
 	return (
 		<div className={cx(classes.container, fr.cx('fr-container'))}>
-			<h3>Obtenez vos premiers avis</h3>
+			{getTitle()}
 			<Button
 				priority="primary"
 				iconId="fr-icon-add-circle-line"
 				iconPosition="right"
 				type="button"
-				size="medium"
+				size={isSmall ? 'small' : 'medium'}
 				nativeButtonProps={{
-					onClick: () => {
+					onClick: event => {
+						event.preventDefault();
 						onButtonClick();
 					}
 				}}
@@ -37,11 +47,15 @@ const useStyles = tss.create({
 		...fr.spacing('padding', {}),
 		padding: '2rem',
 		background: '#F3F6FE',
-		marginTop: '3rem',
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'center',
 		alignItems: 'center'
+	},
+	title: {
+		fontWeight: 'bold',
+		fontSize: '16px',
+		paddingBottom: '1.5rem'
 	}
 });
 

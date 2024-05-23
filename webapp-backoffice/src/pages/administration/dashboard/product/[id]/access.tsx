@@ -17,6 +17,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
 interface Props {
 	product: Product;
@@ -41,6 +42,9 @@ const AccessManagement = (props: Props) => {
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
 	const [modalType, setModalType] = React.useState<AccessRightModalType>('add');
+
+	const router = useRouter();
+	const [isMounted, setIsMounted] = React.useState(false);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -94,7 +98,7 @@ const AccessManagement = (props: Props) => {
 		}
 
 		setIsModalSubmitted(false);
-		modal.open();
+		if (isMounted) modal.open();
 	};
 
 	const getAlertTitle = () => {
@@ -135,6 +139,13 @@ const AccessManagement = (props: Props) => {
 	};
 
 	const nbPages = getNbPages(accessRightsCount, numberPerPage);
+
+	React.useEffect(() => {
+		setIsMounted(true);
+		if (router.query.autoCreate === 'true') {
+			handleModalOpening('add');
+		}
+	}, [router.query, isMounted]);
 
 	return (
 		<>

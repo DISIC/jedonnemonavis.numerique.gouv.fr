@@ -13,10 +13,11 @@ import { Loader } from '@/src/components/ui/Loader';
 import { getNbPages } from '@/src/utils/tools';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import Head from 'next/head';
-import CreateButtonJDMA from '@/src/components/dashboard/ProductButton/CreateButtonJDMA';
+import CreateButtonPanel from '@/src/components/dashboard/Pannels/CreateButtonPanel';
+import { useRouter } from 'next/router';
 
 interface Props {
 	product: Product;
@@ -33,8 +34,11 @@ const ProductButtonsPage = (props: Props) => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [modalType, setModalType] = React.useState<string>('');
+	const [isMounted, setIsMounted] = React.useState(false);
+
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
+	const router = useRouter();
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
@@ -75,7 +79,9 @@ const ProductButtonsPage = (props: Props) => {
 	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
-		modal.open();
+		if (isMounted) {
+			modal.open();
+		}
 	};
 
 	const onButtonCreatedOrUpdated = (isTest: boolean) => {
@@ -85,6 +91,13 @@ const ProductButtonsPage = (props: Props) => {
 	};
 
 	const nbPages = getNbPages(buttonsCount, numberPerPage);
+
+	React.useEffect(() => {
+		setIsMounted(true);
+		if (router.query.autoCreate === 'true') {
+			handleModalOpening('create');
+		}
+	}, [router.query, isMounted]);
 
 	return (
 		<ProductLayout product={product}>
@@ -183,11 +196,14 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				) : (
 					<>
-						{!buttons.length && (
-							<CreateButtonJDMA
-								onButtonClick={() => handleModalOpening('create')}
-							/>
-						)}
+						<div className={cx(classes.btnContainer)}>
+							{!buttons.length && (
+								<CreateButtonPanel
+									onButtonClick={() => handleModalOpening('create')}
+								/>
+							)}
+						</div>
+
 						{buttons?.map((button, index) => (
 							<ProductButtonCard
 								key={index}
@@ -240,6 +256,9 @@ const useStyles = tss
 			paddingBottom: fr.spacing('10v'),
 			fontWeight: 'bold',
 			textAlign: 'center'
+		},
+		btnContainer: {
+			marginTop: '3rem'
 		}
 	});
 
