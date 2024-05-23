@@ -92,7 +92,8 @@ const ProductReviewsPage = (props: Props) => {
 			initialData: {
 				data: [],
 				metadata: {
-					count: 0
+					countFiltered: 0,
+					countAll: 0
 				}
 			}
 		}
@@ -107,7 +108,7 @@ const ProductReviewsPage = (props: Props) => {
 
 	const {
 		data: reviews,
-		metadata: { count: reviewsCount }
+		metadata: { countFiltered: reviewsCountFiltered, countAll: reviewsCountAll }
 	} = reviewResults;
 
 	const reviewsExtended = reviews.map(review => {
@@ -133,7 +134,7 @@ const ProductReviewsPage = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
-	const nbPages = getNbPages(reviewsCount, numberPerPage);
+	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
@@ -428,6 +429,8 @@ const ProductReviewsPage = (props: Props) => {
 								search={search}
 								button_id={buttonId}
 								filters={filters}
+								reviewsCountfiltered={reviewsCountFiltered}
+								reviewsCountAll={reviewsCountAll}
 							></ExportReviews>
 						</div>
 					</div>
@@ -460,7 +463,9 @@ const ProductReviewsPage = (props: Props) => {
 											{numberPerPage * (currentPage - 1) + reviews.length}
 										</span>{' '}
 										sur{' '}
-										<span className={cx(classes.boldText)}>{reviewsCount}</span>
+										<span className={cx(classes.boldText)}>
+											{reviewsCountFiltered}
+										</span>
 									</div>
 								</>
 							)}

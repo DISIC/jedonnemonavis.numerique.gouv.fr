@@ -107,6 +107,8 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		}
 	}
 
+	console.log('where : ', JSON.stringify(where, null, 2))
+
 	return {
 		where: where,
 		orderBy: orderBy

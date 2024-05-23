@@ -36,7 +36,8 @@ export const reviewRouter = router({
 			z.object({
 				data: z.array(ReviewPartialWithRelationsSchema),
 				metadata: z.object({
-					count: z.number()
+					countFiltered: z.number(),
+					countAll: z.number()
 				})
 			})
 		)
@@ -63,7 +64,7 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [entities, count] = await Promise.all([
+			const [entities, countFiltered, countAll] = await Promise.all([
 				ctx.prisma.review.findMany({
 					where,
 					orderBy: orderBy,
@@ -71,10 +72,15 @@ export const reviewRouter = router({
 					skip: (page - 1) * numberPerPage,
 					include: { answers: shouldIncludeAnswers }
 				}),
-				ctx.prisma.review.count({ where })
+				ctx.prisma.review.count({ where }),
+				ctx.prisma.review.count({
+					where: {
+						product_id: input.product_id
+					}
+				})
 			]);
 
-			return { data: entities, metadata: { count } };
+			return { data: entities, metadata: { countFiltered, countAll } };
 		}),
 	
 	exportData: protectedProcedure
@@ -167,7 +173,10 @@ export const reviewRouter = router({
 
 				processedRows += batch.length
 
+				console.log('procedure - processe rows : ', processedRows)
+				console.log('procedure - memory key : ', input.memoryKey)
 				setMemoryValue(input.memoryKey, processedRows * 100 / totalRows)
+				console.log('procedure - memory value : ', getMemoryValue(input.memoryKey))
 
 				if (processedRows >= totalRows) {
 	
