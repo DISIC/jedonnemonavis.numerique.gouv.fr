@@ -182,16 +182,18 @@ const ProductCard = ({
 						'fr-grid-row--top'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 						<Link
 							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={fr.cx('fr-card__title')}
+							className={cx(classes.productTitle)}
 						>
 							{product.title}
 						</Link>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-						<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
+							{entity?.name}
+						</p>
 					</div>
 					{session?.user.role !== 'user' && (
 						<div
@@ -231,7 +233,7 @@ const ProductCard = ({
 						</div>
 					)}
 
-					<div className={fr.cx('fr-col', 'fr-col-12')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
 						{product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
@@ -296,6 +298,15 @@ const useStyles = tss.withName(ProductCard.name).create({
 	badgeSkeleton: {
 		transformOrigin: '0',
 		transform: 'none'
+	},
+	productTitle: {
+		fontSize: '18px',
+		fontWeight: 'bold',
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		textDecoration: 'none'
+	},
+	entityName: {
+		color: fr.colors.decisions.text.disabled.grey.default
 	}
 });
 
