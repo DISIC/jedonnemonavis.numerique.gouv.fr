@@ -255,7 +255,7 @@ const ProductModal = (props: Props) => {
 
 				<div className={fr.cx('fr-input-group')}>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-						<fieldset>
+						<fieldset className={cx(classes.fieldset)}>
 							<legend>URL(s)</legend>
 							{urls.map((url, index) => (
 								<div key={url.id} className={cx(classes.flexContainer)}>
@@ -335,6 +335,16 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	autocomplete: {
 		width: '100%'
+	},
+	fieldset: {
+		ul: {
+			listStyle: 'none',
+			...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
+			paddingLeft: 0,
+			width: '100%'
+		},
+		border: 'none',
+		padding: 0
 	}
 }));
 export default ProductModal;

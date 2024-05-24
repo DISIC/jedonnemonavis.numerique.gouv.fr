@@ -7,7 +7,10 @@ import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightC
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import React from 'react';
 import { Product, AccessRight } from '@prisma/client';
-import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
+import {
+	AccessRightWithUsers,
+	AdminEntityRightWithUsers
+} from '@/src/types/prismaTypesExtended';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
@@ -18,6 +21,8 @@ import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
@@ -41,6 +46,7 @@ const AccessManagement = (props: Props) => {
 
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
+
 	const [modalType, setModalType] = React.useState<AccessRightModalType>('add');
 
 	const router = useRouter();
@@ -53,6 +59,7 @@ const AccessManagement = (props: Props) => {
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const isModalOpen = useIsModalOpen(modal);
+	const { data: session } = useSession();
 
 	const { data: accessRightsResult, isLoading: isLoadingAccessRights } =
 		trpc.accessRight.getList.useQuery(
@@ -76,6 +83,39 @@ const AccessManagement = (props: Props) => {
 		data: accessRights,
 		metadata: { count: accessRightsCount }
 	} = accessRightsResult;
+
+	const { data: accessAdminEntityRightsResult } =
+		trpc.adminEntityRight.getList.useQuery(
+			{
+				page: currentPage,
+				numberPerPage,
+				entity_id: product?.entity_id || -1
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
+	const { data: accessAdminEntityRights } = accessAdminEntityRightsResult;
+
+	const { data: entityResult } = trpc.entity.getById.useQuery(
+		{
+			id: product.entity_id
+		},
+		{
+			initialData: {
+				data: null
+			},
+			enabled: product.entity_id !== null
+		}
+	);
+
+	const { data: entity } = entityResult;
 
 	const resendEmailAccessRight = trpc.accessRight.resendEmail.useMutation({
 		onSuccess: () => setIsModalSubmitted(true)
@@ -261,26 +301,48 @@ const AccessManagement = (props: Props) => {
 								}
 							})}
 						</div>
-						<div className={cx(classes.inviteTitle)}>Invitations envoyées</div>
-						<div>
-							{accessRights.map((accessRight, index) => {
-								if (accessRight.user === null) {
-									return (
-										<AccessRightCard
-											key={index}
-											accessRight={accessRight}
-											onButtonClick={handleModalOpening}
-										/>
-									);
-								}
-							})}
-						</div>
-						<div
-							className={cx(classes.categoryTitle, classes.organizationTitle)}
-						>
-							Administrateurs de l'organisation
-						</div>
-						<div>{/* TODO */}</div>
+						{accessRights.some(accessRight => accessRight.user === null) && (
+							<>
+								<div className={cx(classes.inviteTitle)}>
+									Invitations envoyées
+								</div>
+								<div>
+									{accessRights.map((accessRight, index) => {
+										if (accessRight.user === null) {
+											return (
+												<AccessRightCard
+													key={index}
+													accessRight={accessRight}
+													onButtonClick={handleModalOpening}
+												/>
+											);
+										}
+									})}
+								</div>
+							</>
+						)}
+						{accessAdminEntityRights.length > 0 && (
+							<>
+								<div className={cx(classes.entityWrapper)}>
+									<div className={cx(classes.organizationTitle)}>
+										Administrateurs de l'organisation
+									</div>
+									<div className={cx(classes.entityName)}>{entity?.name}</div>
+								</div>
+								<div>
+									{accessAdminEntityRights.map(
+										(accessAdminEntityRight, index) => {
+											return (
+												<EntityRightCard
+													key={index}
+													adminEntityRight={accessAdminEntityRight}
+												/>
+											);
+										}
+									)}
+								</div>
+							</>
+						)}
 					</div>
 				)}
 
@@ -335,10 +397,23 @@ const useStyles = tss.create({
 		padding: '5px 0'
 	},
 	organizationTitle: {
-		paddingTop: '3rem'
+		fontWeight: 'bold'
 	},
 	alertContainer: {
 		marginTop: '1.5rem'
+	},
+	entityWrapper: {
+		display: 'flex',
+		gap: 10,
+		width: '100%',
+		alignItems: 'center',
+		borderBottom: '1px solid black',
+		paddingBottom: '10px',
+		paddingTop: '3rem'
+	},
+	entityName: {
+		color: '#666666',
+		paddingLeft: '1rem'
 	}
 });
 

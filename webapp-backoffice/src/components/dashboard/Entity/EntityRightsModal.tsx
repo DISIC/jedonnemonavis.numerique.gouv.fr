@@ -240,7 +240,7 @@ const EntityRightsModal = (props: Props) => {
 								key={index}
 								adminEntityRight={adminEntityRight}
 								onButtonClick={handleActionsButtons}
-								isMine={isMine}
+								withOptions={isMine}
 							/>
 						))
 					)}

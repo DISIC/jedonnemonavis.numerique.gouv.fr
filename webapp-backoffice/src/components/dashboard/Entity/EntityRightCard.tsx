@@ -10,15 +10,15 @@ import { AdminEntityRightActionType } from './EntityRightsModal';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
-	onButtonClick: (
+	onButtonClick?: (
 		actionType: AdminEntityRightActionType,
 		adminEntityRight: AdminEntityRightWithUsers
 	) => void;
-	isMine: boolean;
+	withOptions?: boolean;
 }
 
 const EntityRightCard = (props: Props) => {
-	const { adminEntityRight, onButtonClick, isMine } = props;
+	const { adminEntityRight, onButtonClick, withOptions } = props;
 	const { data: session } = useSession({ required: true });
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -33,7 +33,12 @@ const EntityRightCard = (props: Props) => {
 
 	return (
 		<>
-			<div className={cx(fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'))}>
+			<div
+				className={cx(
+					fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'),
+					classes.entityCard
+				)}
+			>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
@@ -55,23 +60,7 @@ const EntityRightCard = (props: Props) => {
 								: adminEntityRight?.user_email_invite}
 						</span>
 					</div>
-					<div
-						className={fr.cx(
-							'fr-col',
-							'fr-col-12',
-							isMine ? 'fr-col-md-2' : 'fr-col-md-2',
-							isMine ? 'fr-col' : 'fr-col-offset-2'
-						)}
-					>
-						<Badge
-							noIcon
-							severity={adminEntityRight.user !== null ? 'success' : 'info'}
-							className={cx(classes.badge)}
-						>
-							{adminEntityRight.user === null ? 'Invité' : 'Admin'}
-						</Badge>
-					</div>
-					{isMine && (
+					{withOptions && (
 						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 							<Button
 								id="button-options-access-right"
@@ -102,7 +91,8 @@ const EntityRightCard = (props: Props) => {
 								{adminEntityRight.user === null && (
 									<MenuItem
 										onClick={() => {
-											onButtonClick('resend-email', adminEntityRight);
+											if (onButtonClick)
+												onButtonClick('resend-email', adminEntityRight);
 											handleClose();
 										}}
 									>
@@ -111,7 +101,8 @@ const EntityRightCard = (props: Props) => {
 								)}
 								<MenuItem
 									onClick={() => {
-										onButtonClick('remove', adminEntityRight);
+										if (onButtonClick)
+											onButtonClick('remove', adminEntityRight);
 										handleClose();
 									}}
 								>
@@ -127,6 +118,9 @@ const EntityRightCard = (props: Props) => {
 };
 
 const useStyles = tss.create({
+	entityCard: {
+		backgroundColor: fr.colors.decisions.background.disabled.grey.default
+	},
 	cardStatusRemoved: {
 		backgroundColor: fr.colors.decisions.background.disabled.grey.default
 	},
