@@ -162,23 +162,23 @@ model Button {
 }
 
 model ApiKey {
-  id         Int         @id @default(autoincrement())
-  key        String
-  scope      UserRole
-  user       User        @relation(fields: [user_id], references: [id])
-  user_id    Int
-  product    Product?    @relation(fields: [product_id], references: [id])
-  product_id Int?
-  entity     Entity?     @relation(fields: [entity_id], references: [id])
-  entity_id  Int?
-  api_key_logs  ApiKeyLog[]
+  id           Int         @id @default(autoincrement())
+  key          String
+  scope        UserRole
+  user         User        @relation(fields: [user_id], references: [id])
+  user_id      Int
+  product      Product?    @relation(fields: [product_id], references: [id])
+  product_id   Int?
+  entity       Entity?     @relation(fields: [entity_id], references: [id])
+  entity_id    Int?
+  api_key_logs ApiKeyLog[]
 }
 
 model ApiKeyLog {
-  id        Int    @id @default(autoincrement())
-  apikey    ApiKey @relation(fields: [apikey_id], references: [id])
-  apikey_id Int
-  url       String
+  id         Int      @id @default(autoincrement())
+  apikey     ApiKey   @relation(fields: [apikey_id], references: [id], onDelete: Cascade)
+  apikey_id  Int
+  url        String
   created_at DateTime @default(now())
 }
 

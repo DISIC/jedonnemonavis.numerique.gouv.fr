@@ -6,11 +6,12 @@ export const apiKeyRouter = router({
 		.input(
 			z.object({
 				product_id: z.number().optional(),
-				organization_id: z.number().optional()
+				entity_id: z.number().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
+			console.log('input get list : ', input)
 
 			const keys = await ctx.prisma.apiKey.findMany({
 				where: {
@@ -18,8 +19,8 @@ export const apiKeyRouter = router({
 					...(input.product_id && {
 						product_id: input.product_id
 					}),
-					...(input.organization_id && {
-						organization_id: input.organization_id
+					...(input.entity_id && {
+						entity_id: input.entity_id
 					})
 				},
 				include: {
@@ -34,11 +35,12 @@ export const apiKeyRouter = router({
 		.input(
 			z.object({
 				product_id: z.number().optional(),
-				organization_id: z.number().optional()
+				entity_id: z.number().optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
+			console.log('input create : ', input)
 
 			var password = '';
 			const chars =
@@ -55,6 +57,9 @@ export const apiKeyRouter = router({
 					scope: 'user',
 					...(input.product_id && {
 						product_id: input.product_id
+					}),
+					...(input.entity_id && {
+						entity_id: input.entity_id
 					})
 				}
 			});

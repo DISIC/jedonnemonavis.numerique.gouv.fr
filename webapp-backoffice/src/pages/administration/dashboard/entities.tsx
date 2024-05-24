@@ -2,6 +2,7 @@ import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
 import EntitySearchModal from '@/src/components/dashboard/Entity/EntitySearchModal';
+import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -19,6 +20,7 @@ import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
+	| { type: 'api'; entity: Entity }
 	| { type: 'edit'; entity: Entity };
 
 const entityRightsModal = createModal({
@@ -33,6 +35,11 @@ const entityModal = createModal({
 
 const entitySearchModal = createModal({
 	id: 'entity-search-modal',
+	isOpenedByDefault: false
+});
+
+const apiKeyModal = createModal({
+	id: 'api-key-modal',
 	isOpenedByDefault: false
 });
 
@@ -102,6 +109,8 @@ const DashBoardEntities = () => {
 				entityRightsModal.open();
 			} else if (type === 'edit') {
 				entityModal.open();
+			} else if (type === 'api') {
+				apiKeyModal.open();
 			}
 		}, 100);
 	};
@@ -158,6 +167,7 @@ const DashBoardEntities = () => {
 				onEntitySelected={onEntitySelected}
 				onCreate={onCreateEntity}
 			/>
+			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}

@@ -4,6 +4,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { tss } from 'tss-react/dsfr';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 
 type Props = {
 	entity: Entity;
@@ -24,7 +25,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 					'fr-grid-row--middle'
 				)}
 			>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 					<p
 						className={cx(
 							fr.cx('fr-mb-0', fromSearch ? 'fr-text--sm' : 'fr-text--md'),
@@ -39,7 +40,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 				</div>
 				<div
 					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
 						classes.wrapperButtons
 					)}
 				>
@@ -56,6 +57,18 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 								}}
 							>
 								Gérer les administrateurs
+							</Button>
+							<Button
+								priority="secondary"
+								size="small"
+								iconId="fr-icon-lock-unlock-line"
+								iconPosition="right"
+								className={classes.button}
+								onClick={() => {
+									onButtonClick({ type: 'api', entity });
+								}}
+							>
+								Clés API
 							</Button>
 							<Button
 								priority="secondary"

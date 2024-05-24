@@ -80,7 +80,7 @@ const ProductStatPage = (props: Props) => {
 			endDate: debouncedEndDate
 		});
 
-	const nbReviews = reviewsData?.metadata.count;
+	const nbReviews = reviewsData?.metadata.countAll;
 
 	const getStatsDisplay = () => {
 		if (nbReviews === undefined) {

@@ -99,7 +99,7 @@ const ProductStatPage = (props: Props) => {
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
-	const nbReviews = reviewsData?.metadata.count;
+	const nbReviews = reviewsData?.metadata.countAll;
 
 	const updateProduct = trpc.product.update.useMutation({});
 

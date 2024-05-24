@@ -85,7 +85,7 @@ const ProductCard = ({
 			product_id: product.id
 		});
 
-	const nbReviews = reviewsData?.metadata.count;
+	const nbReviews = reviewsData?.metadata.countAll;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
