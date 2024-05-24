@@ -98,7 +98,7 @@ export const displayIntention = (intention: string) => {
 		case 'neutral':
 			return 'Neutre';
 		default:
-			return '';
+			return intention;
 	}
 };
 

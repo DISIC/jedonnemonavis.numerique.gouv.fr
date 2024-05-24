@@ -29,9 +29,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
 		}),
-		...((filters && filters.needOtherHelp) && {
-			OR: [{ answers: { some: { field_code: 'help_details_verbatim' }}}]
-		}),
 		...(search && {
 			OR: [
 				{
@@ -67,13 +64,14 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 				let condition: Condition = {
 					answers: {
 						some: {
-							field_code: fields.find(field => field.key === key)?.field as string,
-							...(['comprehension', 'satisfaction'].includes(key) && {
+							field_code: fields.find(field => field.key === key)
+								?.field as string,
+							...(['satisfaction'].includes(key) && {
 								intention: {
 									in: filters[key] as AnswerIntention[]
 								}
 							}),
-							...(['help'].includes(key) && {
+							...(['comprehension'].includes(key) && {
 								answer_text: {
 									in: filters[key] as string[]
 								}

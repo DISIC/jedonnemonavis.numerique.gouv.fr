@@ -11,7 +11,7 @@ type Props = {
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
-export const RadioInput = (props: Props) => {
+export const MarkInput = (props: Props) => {
   const { field, opinion, setOpinion, form } = props;
   const { classes, cx } = useStyles({ nbItems: 5 });
 
@@ -71,7 +71,7 @@ export const RadioInput = (props: Props) => {
 };
 
 const useStyles = tss
-  .withName(RadioInput.name)
+  .withName(MarkInput.name)
   .withParams<{ nbItems: number }>()
   .create(({ nbItems }) => ({
     smallText: {
