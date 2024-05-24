@@ -168,7 +168,7 @@ const ProductCard = ({
 	const handleSendInvitation = () => {
 		router.push({
 			pathname: `/administration/dashboard/product/${product.id}/access`,
-			query: { autoCreate: true }
+			query: { autoInvite: true }
 		});
 	};
 
@@ -303,10 +303,13 @@ const useStyles = tss.withName(ProductCard.name).create({
 		fontSize: '18px',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
-		textDecoration: 'none'
+		backgroundImage: 'none',
+		'&:hover': {
+			textDecoration: 'underline'
+		}
 	},
 	entityName: {
-		color: fr.colors.decisions.text.disabled.grey.default
+		color: '#666666'
 	}
 });
 

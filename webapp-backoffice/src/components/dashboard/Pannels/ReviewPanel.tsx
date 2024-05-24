@@ -21,7 +21,7 @@ const ProductEmptyState = (props: Props) => {
 			</div>
 			<div
 				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--center', 'fr-grid-row--gutters'),
+					fr.cx('fr-grid-row', 'fr-grid-row--center'),
 					classes.rowContainer
 				)}
 			>
@@ -98,7 +98,7 @@ const useStyles = tss.create({
 	blocs: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: 5
+		padding: '0 !important'
 	},
 	subtitle: {
 		fontSize: '18px',

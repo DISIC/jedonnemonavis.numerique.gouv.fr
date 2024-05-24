@@ -142,7 +142,7 @@ const AccessManagement = (props: Props) => {
 
 	React.useEffect(() => {
 		setIsMounted(true);
-		if (router.query.autoCreate === 'true') {
+		if (router.query.autoInvite === 'true') {
 			handleModalOpening('add');
 		}
 	}, [router.query, isMounted]);
