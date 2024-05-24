@@ -218,7 +218,8 @@ const ProductReviewsPage = (props: Props) => {
 				return (
 					<>
 						<p>
-							Avec {FILTER_LABELS.find(filter => filter.value === key)?.label}
+							{FILTER_LABELS.find(filter => filter.value === key)?.label}{' '}
+							complété
 						</p>
 					</>
 				);
