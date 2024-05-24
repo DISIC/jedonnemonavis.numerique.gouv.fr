@@ -38,7 +38,8 @@ export const reviewRouter = router({
 			z.object({
 				data: z.array(ReviewPartialWithRelationsSchema),
 				metadata: z.object({
-					count: z.number()
+					countFiltered: z.number(),
+					countAll: z.number()
 				})
 			})
 		)
@@ -60,7 +61,7 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [entities, count] = await Promise.all([
+			const [entities, countFiltered, countAll] = await Promise.all([
 				ctx.prisma.review.findMany({
 					where,
 					orderBy: orderBy,
@@ -76,10 +77,15 @@ export const reviewRouter = router({
 							: false
 					}
 				}),
-				ctx.prisma.review.count({ where })
+				ctx.prisma.review.count({ where }),
+				ctx.prisma.review.count({
+					where: {
+						product_id: input.product_id
+					}
+				})
 			]);
 
-			return { data: entities, metadata: { count } };
+			return { data: entities, metadata: { countFiltered, countAll } };
 		}),
 
 	exportData: protectedProcedure
