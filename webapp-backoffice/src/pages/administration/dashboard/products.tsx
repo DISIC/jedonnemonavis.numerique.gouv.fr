@@ -1,4 +1,5 @@
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
+import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
@@ -6,6 +7,7 @@ import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -35,6 +37,9 @@ const DashBoard = () => {
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
+
+	const [productTitle, setProductTitle] = React.useState<string>('');
+	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -101,23 +106,69 @@ const DashBoard = () => {
 			: 'Services | Je donne mon avis';
 	};
 
+	const loadModalAndHead = () => {
+		return (
+			<>
+				<Head>
+					<title>{headTitle()}</title>
+					<meta name="description" content={headTitle()} />
+				</Head>
+				<ProductModal
+					modal={product_modal}
+					onSubmit={() => {
+						setSearch('');
+						if (filters.filter === 'created_at') {
+							updateFilters({ ...filters, validatedSearch: '' });
+						} else {
+							updateFilters({ ...filters, filter: 'created_at' });
+						}
+						setIsModalSubmitted(true);
+					}}
+					onTitleChange={title => {
+						setProductTitle(title);
+					}}
+				/>
+			</>
+		);
+	};
+
+	if (
+		products.length === 0 &&
+		filters.filterEntity.length === 0 &&
+		filters.validatedSearch === '' &&
+		!isLoadingProducts &&
+		!isRefetchingProducts
+	) {
+		return (
+			<>
+				{loadModalAndHead()}
+				<ProductEmptyState
+					onButtonClick={() => {
+						product_modal.open();
+					}}
+				/>
+			</>
+		);
+	}
+
 	return (
 		<>
-			<Head>
-				<title>{headTitle()}</title>
-				<meta name="description" content={headTitle()} />
-			</Head>
-			<ProductModal
-				modal={product_modal}
-				onSubmit={() => {
-					setSearch('');
-					if (filters.filter === 'created_at') {
-						updateFilters({ ...filters, validatedSearch: '' });
-					} else {
-						updateFilters({ ...filters, filter: 'created_at' });
-					}
-				}}
-			/>
+			<div className={cx(classes.container, fr.cx('fr-container'))}>
+				{isModalSubmitted && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setIsModalSubmitted(false);
+						}}
+						severity={'success'}
+						className={fr.cx('fr-mb-5w')}
+						small
+						description={`Vous êtes désormais administrateur de ${productTitle}`}
+					/>
+				)}
+			</div>
+
+			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -144,163 +195,169 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<Select
-							label="Trier Par"
-							nativeSelectProps={{
-								name: 'my-select',
-								value: filters.filter,
-								onChange: event =>
-									updateFilters({ ...filters, filter: event.target.value })
-							}}
-						>
-							<option value="title:asc">Nom A à Z</option>
-							<option value="entity.name:asc">Organisation A à Z</option>
-							<option value="created_at:desc">Date de création</option>
-							<option value="updated_at:desc">Date de mise à jour</option>
-						</Select>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-						<Autocomplete
-							id="filter-entity"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={entities
-								.map(entity => ({
-									label: `${entity.name} (${entity.acronym})`,
-									value: entity.id
-								}))
-								.filter(
-									entity =>
-										!filters.filterEntity.some(
-											filter => filter.value === entity.value
-										)
-								)}
-							onChange={(_, option) => {
-								if (option)
-									updateFilters({
-										...filters,
-										filterEntity: [...filters.filterEntity, option] ?? null,
-										currentPage: 1
-									});
-							}}
-							noOptionsText="Aucune organisation trouvée"
-							inputValue={inputValue}
-							onInputChange={(event, newInputValue) => {
-								setInputValue(newInputValue);
-							}}
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label htmlFor="filter-entity" className="fr-label">
-										Filtrer par organisation
-									</label>
-									<input
-										{...params.inputProps}
-										className={params.inputProps.className + ' fr-input'}
-										placeholder="Sélectionner une option"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
-						<form
-							className={cx(classes.searchForm)}
-							onSubmit={e => {
-								e.preventDefault();
-								updateFilters({
-									...filters,
-									currentPage: 1,
-									validatedSearch: search
-								});
-							}}
-						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
-								<Input
-									label="Rechercher un service"
-									hideLabel
-									nativeInputProps={{
-										placeholder: 'Rechercher un service',
-										type: 'search',
-										value: search,
-										onChange: event => {
-											if (!event.target.value) {
-												updateFilters({
-													...filters,
-													currentPage: 1,
-													validatedSearch: ''
-												});
-											}
-											setSearch(event.target.value);
-										}
-									}}
-								/>
-								<Button
-									priority="primary"
-									type="submit"
-									iconId="ri-search-2-line"
-									iconPosition="left"
-								>
-									Rechercher
-								</Button>
-							</div>
-						</form>
-					</div>
-					{session?.user.role !== 'user' && (
-						<div
-							className={fr.cx(
-								'fr-col-12',
-								'fr-mt-4w',
-								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-								'fr-py-0'
-							)}
-						>
-							<Checkbox
-								className={fr.cx('fr-mb-0')}
-								style={{ userSelect: 'none' }}
-								options={[
-									{
-										label: 'Afficher uniquement mes favoris',
-										nativeInputProps: {
-											name: 'favorites-products',
-											checked: filters.filterOnlyFavorites,
-											onChange: e => {
-												updateFilters({
-													...filters,
-													currentPage: 1,
-													filterOnlyFavorites: e.target.checked
-												});
-											}
-										}
-									}
-								]}
-							/>
-						</div>
-					)}
-					<div className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}>
-						{filters.filterEntity.map(entity => (
-							<Tag
-								dismissible
-								className={cx(classes.tagFilter)}
-								nativeButtonProps={{
-									onClick: () => {
-										updateFilters({
-											...filters,
-											filterEntity: filters.filterEntity.filter(
-												e => e.value !== entity.value
-											)
-										});
-										setInputValue('');
-									}
+				{nbPages > 1 && (
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+							<Select
+								label="Trier Par"
+								nativeSelectProps={{
+									name: 'my-select',
+									value: filters.filter,
+									onChange: event =>
+										updateFilters({ ...filters, filter: event.target.value })
 								}}
 							>
-								<p>{entity.label}</p>
-							</Tag>
-						))}
+								<option value="title:asc">Nom A à Z</option>
+								<option value="entity.name:asc">Organisation A à Z</option>
+								<option value="created_at:desc">Date de création</option>
+								<option value="updated_at:desc">Date de mise à jour</option>
+							</Select>
+						</div>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+							<Autocomplete
+								id="filter-entity"
+								disablePortal
+								sx={{ width: '100%' }}
+								options={entities
+									.map(entity => ({
+										label: `${entity.name} (${entity.acronym})`,
+										value: entity.id
+									}))
+									.filter(
+										entity =>
+											!filters.filterEntity.some(
+												filter => filter.value === entity.value
+											)
+									)}
+								onChange={(_, option) => {
+									if (option)
+										updateFilters({
+											...filters,
+											filterEntity: [...filters.filterEntity, option] ?? null,
+											currentPage: 1
+										});
+								}}
+								noOptionsText="Aucune organisation trouvée"
+								inputValue={inputValue}
+								onInputChange={(event, newInputValue) => {
+									setInputValue(newInputValue);
+								}}
+								renderInput={params => (
+									<div ref={params.InputProps.ref}>
+										<label htmlFor="filter-entity" className="fr-label">
+											Filtrer par organisation
+										</label>
+										<input
+											{...params.inputProps}
+											className={params.inputProps.className + ' fr-input'}
+											placeholder="Sélectionner une option"
+											type="search"
+										/>
+									</div>
+								)}
+							/>
+						</div>
+						<div
+							className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}
+						>
+							<form
+								className={cx(classes.searchForm)}
+								onSubmit={e => {
+									e.preventDefault();
+									updateFilters({
+										...filters,
+										currentPage: 1,
+										validatedSearch: search
+									});
+								}}
+							>
+								<div role="search" className={fr.cx('fr-search-bar')}>
+									<Input
+										label="Rechercher un service"
+										hideLabel
+										nativeInputProps={{
+											placeholder: 'Rechercher un service',
+											type: 'search',
+											value: search,
+											onChange: event => {
+												if (!event.target.value) {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														validatedSearch: ''
+													});
+												}
+												setSearch(event.target.value);
+											}
+										}}
+									/>
+									<Button
+										priority="primary"
+										type="submit"
+										iconId="ri-search-2-line"
+										iconPosition="left"
+									>
+										Rechercher
+									</Button>
+								</div>
+							</form>
+						</div>
+						{session?.user.role !== 'user' && (
+							<div
+								className={fr.cx(
+									'fr-col-12',
+									'fr-mt-4w',
+									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+									'fr-py-0'
+								)}
+							>
+								<Checkbox
+									className={fr.cx('fr-mb-0')}
+									style={{ userSelect: 'none' }}
+									options={[
+										{
+											label: 'Afficher uniquement mes favoris',
+											nativeInputProps: {
+												name: 'favorites-products',
+												checked: filters.filterOnlyFavorites,
+												onChange: e => {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														filterOnlyFavorites: e.target.checked
+													});
+												}
+											}
+										}
+									]}
+								/>
+							</div>
+						)}
+						<div
+							className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
+						>
+							{filters.filterEntity.map(entity => (
+								<Tag
+									dismissible
+									className={cx(classes.tagFilter)}
+									nativeButtonProps={{
+										onClick: () => {
+											updateFilters({
+												...filters,
+												filterEntity: filters.filterEntity.filter(
+													e => e.value !== entity.value
+												)
+											});
+											setInputValue('');
+										}
+									}}
+								>
+									<p>{entity.label}</p>
+								</Tag>
+							))}
+						</div>
 					</div>
-				</div>
+				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
@@ -419,6 +476,9 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 				marginBottom: '1rem'
 			}
 		}
+	},
+	container: {
+		marginTop: '1.5rem'
 	},
 	tagFilter: {
 		marginRight: '0.5rem',

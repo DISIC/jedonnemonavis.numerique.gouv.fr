@@ -10,6 +10,9 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import router from 'next/router';
+import CreateButtonPanel from '../Pannels/CreateButtonPanel';
+import ReviewPanel from '../Pannels/ReviewPanel';
 
 interface Indicator {
 	title: string;
@@ -155,6 +158,20 @@ const ProductCard = ({
 		}
 	];
 
+	const handleButtonClick = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			query: { autoCreate: true }
+		});
+	};
+
+	const handleSendInvitation = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/access`,
+			query: { autoInvite: true }
+		});
+	};
+
 	return (
 		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
 			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
@@ -165,16 +182,18 @@ const ProductCard = ({
 						'fr-grid-row--top'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 						<Link
 							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={fr.cx('fr-card__title')}
+							className={cx(classes.productTitle)}
 						>
 							{product.title}
 						</Link>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-						<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
+							{entity?.name}
+						</p>
 					</div>
 					{session?.user.role !== 'user' && (
 						<div
@@ -214,47 +233,56 @@ const ProductCard = ({
 						</div>
 					)}
 
-					<div className={fr.cx('fr-col', 'fr-col-12')}>
-						<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-							{indicators.map((indicator, index) => (
-								<div
-									className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
-									key={index}
-								>
-									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-										{indicator.title}
-									</p>
-									{isLoadingStats ? (
-										<Skeleton
-											className={cx(classes.badgeSkeleton)}
-											variant="text"
-											width={130}
-											height={25}
-										/>
-									) : (
-										<Badge
-											noIcon
-											severity={!!nbReviews ? indicator.color : 'info'}
-											className={fr.cx('fr-text--sm')}
-										>
-											{!!nbReviews && indicator.value !== -1
-												? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
-												: 'Aucune donnée'}
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+						{product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
+							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+								{indicators.map((indicator, index) => (
+									<div
+										className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+										key={index}
+									>
+										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+											{indicator.title}
+										</p>
+										{isLoadingStats ? (
+											<Skeleton
+												className={cx(classes.badgeSkeleton)}
+												variant="text"
+												width={130}
+												height={25}
+											/>
+										) : (
+											<Badge
+												noIcon
+												severity={!!nbReviews ? indicator.color : 'info'}
+												className={fr.cx('fr-text--sm')}
+											>
+												{!!nbReviews && indicator.value !== -1
+													? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
+													: 'Aucune donnée'}
+											</Badge>
+										)}
+									</div>
+								))}
+								{!isLoadingReviewsCount && nbReviews !== undefined && (
+									<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
+										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+											Nombre d'avis
+										</p>
+										<Badge noIcon severity="info">
+											{nbReviews}
 										</Badge>
-									)}
-								</div>
-							))}
-							{!isLoadingReviewsCount && nbReviews !== undefined && (
-								<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-										Nombre d'avis
-									</p>
-									<Badge noIcon severity="info">
-										{nbReviews}
-									</Badge>
-								</div>
-							)}
-						</div>
+									</div>
+								)}
+							</div>
+						) : product.buttons.length === 0 ? (
+							<CreateButtonPanel isSmall onButtonClick={handleButtonClick} />
+						) : (
+							<ReviewPanel
+								improveBtnClick={() => {}}
+								sendInvitationBtnClick={handleSendInvitation}
+							/>
+						)}
 					</div>
 				</div>
 			</div>
@@ -270,6 +298,18 @@ const useStyles = tss.withName(ProductCard.name).create({
 	badgeSkeleton: {
 		transformOrigin: '0',
 		transform: 'none'
+	},
+	productTitle: {
+		fontSize: '18px',
+		fontWeight: 'bold',
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		backgroundImage: 'none',
+		'&:hover': {
+			textDecoration: 'underline'
+		}
+	},
+	entityName: {
+		color: '#666666'
 	}
 });
 

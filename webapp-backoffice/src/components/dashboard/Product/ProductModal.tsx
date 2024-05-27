@@ -33,6 +33,7 @@ interface Props {
 	modal: CustomModalProps;
 	product?: Product;
 	onSubmit: () => void;
+	onTitleChange: (title: string) => void;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -158,7 +159,7 @@ const ProductModal = (props: Props) => {
 				{
 					doClosesModal: false,
 					onClick: handleSubmit(onSubmit),
-					children: product && product.id ? 'Sauvegarder' : 'Créer ce produit'
+					children: product && product.id ? 'Sauvegarder' : 'Ajouter ce service'
 				}
 			]}
 		>
@@ -176,12 +177,15 @@ const ProductModal = (props: Props) => {
 							<Input
 								label={
 									<p className={fr.cx('fr-mb-0')}>
-										Nom du produit{' '}
+										Nom du service{' '}
 										<span className={cx(classes.asterisk)}>*</span>
 									</p>
 								}
 								nativeInputProps={{
-									onChange,
+									onChange: e => {
+										onChange(e);
+										props.onTitleChange(e.target.value);
+									},
 									defaultValue: value,
 									required: true
 								}}
@@ -196,8 +200,7 @@ const ProductModal = (props: Props) => {
 						htmlFor={'entity-select-autocomplete'}
 						className={fr.cx('fr-label', 'fr-mb-1w')}
 					>
-						Entité de rattachement{' '}
-						<span className={cx(classes.asterisk)}>*</span>
+						Organisation <span className={cx(classes.asterisk)}>*</span>
 					</label>
 					{!isLoadingEntities && entityOptions.length > 0 && (
 						<Controller
@@ -252,8 +255,8 @@ const ProductModal = (props: Props) => {
 
 				<div className={fr.cx('fr-input-group')}>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-						<fieldset>
-							<legend>Adresses web</legend>
+						<fieldset className={cx(classes.fieldset)}>
+							<legend>URL(s)</legend>
 							{urls.map((url, index) => (
 								<div key={url.id} className={cx(classes.flexContainer)}>
 									<Controller
@@ -311,27 +314,6 @@ const ProductModal = (props: Props) => {
 						</fieldset>
 					</div>
 				</div>
-				<div className={fr.cx('fr-input-group')}>
-					<Controller
-						control={control}
-						name="volume"
-						render={({ field: { onChange, value } }) => (
-							<Input
-								className={fr.cx('fr-mt-3w')}
-								id="product-volume"
-								label="Volumétrie par an"
-								hintText="Nombre"
-								nativeInputProps={{
-									inputMode: 'numeric',
-									pattern: '[0-9]*',
-									type: 'number',
-									defaultValue: value !== null ? value : undefined,
-									onChange: e => onChange(parseInt(e.target.value))
-								}}
-							/>
-						)}
-					/>
-				</div>
 			</form>
 		</modal.Component>
 	);
@@ -353,6 +335,16 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	autocomplete: {
 		width: '100%'
+	},
+	fieldset: {
+		ul: {
+			listStyle: 'none',
+			...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
+			paddingLeft: 0,
+			width: '100%'
+		},
+		border: 'none',
+		padding: 0
 	}
 }));
 export default ProductModal;
