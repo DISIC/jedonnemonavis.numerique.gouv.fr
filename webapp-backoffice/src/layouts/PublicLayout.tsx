@@ -83,7 +83,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		? !!userAdminEntityRights.metadata.count || session.user.role === 'admin'
 			? [
 					{
-						text: 'Démarches',
+						text: 'Services',
 						linkProps: {
 							href: '/administration/dashboard/products',
 							target: '_self'

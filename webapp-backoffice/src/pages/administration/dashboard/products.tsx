@@ -195,7 +195,7 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				{nbPages > 1 && (
+				{(nbPages > 1 || search !== '') && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 							<Select
