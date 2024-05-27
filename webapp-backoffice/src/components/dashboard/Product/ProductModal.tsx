@@ -33,7 +33,7 @@ interface Props {
 	modal: CustomModalProps;
 	product?: Product;
 	onSubmit: () => void;
-	onTitleChange: (title: string) => void;
+	onTitleChange?: (title: string) => void;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -41,7 +41,7 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal, product } = props;
+	const { modal, product, onTitleChange, onSubmit } = props;
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
@@ -84,7 +84,7 @@ const ProductModal = (props: Props) => {
 	const saveProductTmp = trpc.product.create.useMutation({});
 	const updateProduct = trpc.product.update.useMutation({});
 
-	const onSubmit: SubmitHandler<FormValues> = async data => {
+	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		const { urls, ...tmpProduct } = data;
 
 		const filteredUrls = urls
@@ -106,7 +106,7 @@ const ProductModal = (props: Props) => {
 			});
 		}
 
-		props.onSubmit();
+		onSubmit();
 		modal.close();
 	};
 
@@ -158,7 +158,7 @@ const ProductModal = (props: Props) => {
 				},
 				{
 					doClosesModal: false,
-					onClick: handleSubmit(onSubmit),
+					onClick: handleSubmit(onLocalSubmit),
 					children: product && product.id ? 'Sauvegarder' : 'Ajouter ce service'
 				}
 			]}
@@ -184,7 +184,7 @@ const ProductModal = (props: Props) => {
 								nativeInputProps={{
 									onChange: e => {
 										onChange(e);
-										props.onTitleChange(e.target.value);
+										if (onTitleChange) onTitleChange(e.target.value);
 									},
 									defaultValue: value,
 									required: true
