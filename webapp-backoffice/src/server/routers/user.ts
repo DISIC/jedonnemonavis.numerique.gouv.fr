@@ -12,7 +12,11 @@ import {
 	generateRandomString
 } from '@/src/utils/tools';
 import { sendMail } from '@/src/utils/mailer';
-import { getOTPEmailHtml, getRegisterEmailHtml, getResetPasswordEmailHtml } from '@/src/utils/emails';
+import {
+	getOTPEmailHtml,
+	getRegisterEmailHtml,
+	getResetPasswordEmailHtml
+} from '@/src/utils/emails';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -266,7 +270,8 @@ export const userRouter = router({
 
 			const createdUser = await ctx.prisma.user.create({
 				data: {
-					...newUser
+					...newUser,
+					active: true
 				}
 			});
 
@@ -591,7 +596,7 @@ export const userRouter = router({
 				where: {
 					user_id: user.id
 				}
-			})
+			});
 
 			await ctx.prisma.userResetToken.create({
 				data: {
@@ -649,7 +654,7 @@ export const userRouter = router({
 		}),
 
 	changePAssword: publicProcedure
-		.input(z.object({token: z.string(), password: z.string()}))
+		.input(z.object({ token: z.string(), password: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			const { token, password } = input;
 
@@ -700,6 +705,5 @@ export const userRouter = router({
 			});
 
 			return { data: updatedUser };
-		}),
-
+		})
 });
