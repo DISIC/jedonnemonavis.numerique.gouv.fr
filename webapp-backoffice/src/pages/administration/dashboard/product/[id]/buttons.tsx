@@ -34,7 +34,6 @@ const ProductButtonsPage = (props: Props) => {
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [modalType, setModalType] = React.useState<string>('');
-	const [isMounted, setIsMounted] = React.useState(false);
 
 	const [currentButton, setCurrentButton] =
 		React.useState<PrismaButtonType | null>(null);
@@ -80,9 +79,7 @@ const ProductButtonsPage = (props: Props) => {
 	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
-		if (isMounted) {
-			modal.open();
-		}
+		modal.open();
 	};
 
 	const onButtonCreatedOrUpdated = (isTest: boolean) => {
@@ -94,11 +91,12 @@ const ProductButtonsPage = (props: Props) => {
 	const nbPages = getNbPages(buttonsCount, numberPerPage);
 
 	React.useEffect(() => {
-		setIsMounted(true);
 		if (router.query.autoCreate === 'true') {
-			handleModalOpening('create');
+			setTimeout(() => {
+				handleModalOpening('create');
+			}, 100);
 		}
-	}, [router.query, isMounted]);
+	}, [router.query]);
 
 	return (
 		<ProductLayout product={product}>
