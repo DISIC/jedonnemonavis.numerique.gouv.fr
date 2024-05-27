@@ -91,77 +91,66 @@ const ReviewCommonVerbatimLine = ({
 		<>
 			{fieldCodesHelper.map((fch, index) => (
 				<div key={index} className={fr.cx('fr-col-12')}>
-					<p className={cx(classes.subtitle)}>{fch?.question}</p>
-					{getFieldCodeTexts(fch?.slug || '').map(text => (
-						<span
-							key={text}
-							className={
-								text !== '-'
-									? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-									: ''
-							}
-						>
-							{text}
-						</span>
-					))}
+					<h2 className={cx(classes.subtitle)}>{fch?.question}</h2>
+					<p className={cx(classes.content)}>
+						{getFieldCodeTexts(fch?.slug || '').map(text => (
+							<span
+								key={text}
+								className={
+									text !== '-'
+										? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+										: ''
+								}
+							>
+								{text}
+							</span>
+						))}
+					</p>
 				</div>
 			))}
 			{!review.xwiki_id && (
 				<div className={fr.cx('fr-col-12')}>
-					<p className={cx(classes.subtitle)}>
+					<h2 className={cx(classes.subtitle)}>
 						Votre rapport à l'aide de l'administration
-					</p>
+					</h2>
+
 					{!!tableAdministrationItems.length ? (
-						<table className={cx(fr.cx('fr-table'), classes.table)}>
-							<thead>
-								<tr>
-									<td>Aide</td>
-									<td>{tableFieldCodeHelper[1]?.question}</td>
-									<td>{tableFieldCodeHelper[2]?.question}</td>
-								</tr>
-							</thead>
-							<tbody>
-								{tableAdministrationItems.map(row => {
-									const contact_reached_answer = getConditionnalValueText(
-										tableFieldCodeHelper[0]?.slug || '',
-										row,
-										tableFieldCodeHelper[1]?.slug || ''
-									);
-									const contact_satisfaction_answer = getConditionnalValueText(
-										tableFieldCodeHelper[0]?.slug || '',
-										row,
-										tableFieldCodeHelper[2]?.slug || ''
-									);
-									return (
-										<tr key={row}>
-											<td>{row}</td>
-											<td>
-												<p
-													className={
-														contact_reached_answer !== '-'
-															? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-															: ''
-													}
+						<div
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--left',
+								'fr-mt-0-5v'
+							)}
+						>
+							{tableFieldCodeHelper.slice(1).map(tfch => (
+								<div className={fr.cx('fr-col-12')}>
+									<h3 className={cx(classes.subtitle2)}>{tfch?.question}</h3>
+									{tableAdministrationItems.map(row => {
+										const answer = getConditionnalValueText(
+											tableFieldCodeHelper[0]?.slug || '',
+											row,
+											tfch?.slug || ''
+										);
+										return (
+											<p className={cx(classes.content)}>
+												{row} :{' '}
+												<span
+													key={row}
+													className={cx(
+														fr.cx('fr-tag', 'fr-tag--sm'),
+														classes.tag,
+														classes.rowTag
+													)}
 												>
-													{contact_reached_answer}
-												</p>
-											</td>
-											<td>
-												<p
-													className={
-														contact_satisfaction_answer !== '-'
-															? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-															: ''
-													}
-												>
-													{contact_satisfaction_answer}
-												</p>
-											</td>
-										</tr>
-									);
-								})}
-							</tbody>
-						</table>
+													{answer}
+												</span>
+											</p>
+										);
+									})}
+								</div>
+							))}
+						</div>
 					) : (
 						'-'
 					)}
@@ -180,6 +169,11 @@ const useStyles = tss.create({
 		fontWeight: 'bold',
 		marginBottom: 0
 	},
+	subtitle2: {
+		...fr.typography[17].style,
+		fontWeight: 'bold',
+		marginBottom: 0
+	},
 	content: {
 		...fr.typography[17].style,
 		fontWeight: 400,
@@ -194,6 +188,9 @@ const useStyles = tss.create({
 		'&:not(:first-of-type)': {
 			marginLeft: 10
 		}
+	},
+	rowTag: {
+		marginTop: 4
 	},
 	table: {
 		marginBottom: 0,

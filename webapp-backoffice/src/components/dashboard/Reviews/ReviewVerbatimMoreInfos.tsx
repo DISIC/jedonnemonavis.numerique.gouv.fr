@@ -31,7 +31,7 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 				)}
 			>
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Horaire</p>
+					<h2 className={cx(classes.subtitle)}>Horaire</h2>
 					<p className={cx(classes.content)}>
 						{review.created_at &&
 							new Date(review.created_at).getHours() +
@@ -40,11 +40,11 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					</p>
 				</div>
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Identifiant</p>
+					<h2 className={cx(classes.subtitle)}>Identifiant</h2>
 					<p className={cx(classes.content)}>{review.form_id && review.id}</p>
 				</div>
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Source</p>
+					<h2 className={cx(classes.subtitle)}>Source</h2>
 					<p className={cx(classes.content)}>
 						{review.button_id
 							? retrieveButtonName(review.button_id)

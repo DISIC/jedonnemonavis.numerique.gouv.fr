@@ -30,9 +30,9 @@ const ReviewLineMoreInfos = ({
 						type={'Line'}
 					></ReviewCommonVerbatimLine>
 					<div className={fr.cx('fr-col-12')}>
-						<p className={cx(classes.subtitle)}>
+						<h2 className={cx(classes.subtitle)}>
 							Souhaitez-vous nous en dire plus ?
-						</p>
+						</h2>
 						<p className={cx(classes.content)}>
 							{review.verbatim
 								? `${search ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : review.verbatim.answer_text}`
