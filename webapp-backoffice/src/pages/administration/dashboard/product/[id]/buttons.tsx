@@ -47,6 +47,7 @@ const ProductButtonsPage = (props: Props) => {
 	const {
 		data: buttonsResult,
 		isLoading: isLoadingButtons,
+		isRefetching: isRefetchingButtons,
 		refetch: refetchButtons
 	} = trpc.button.getList.useQuery(
 		{
@@ -197,7 +198,7 @@ const ProductButtonsPage = (props: Props) => {
 				) : (
 					<>
 						<div className={cx(classes.btnContainer)}>
-							{!buttons.length && (
+							{!buttons.length && !isRefetchingButtons && (
 								<CreateButtonPanel
 									onButtonClick={() => handleModalOpening('create')}
 								/>
