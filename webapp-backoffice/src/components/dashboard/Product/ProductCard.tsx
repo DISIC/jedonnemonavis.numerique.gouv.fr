@@ -235,12 +235,7 @@ const ProductCard = ({
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
 						{isLoadingStats ? (
-							<Skeleton
-								className={cx(classes.cardSkeleton)}
-								variant="text"
-								width={'full'}
-								height={50}
-							/>
+							<Skeleton variant="text" width={'full'} height={50} />
 						) : product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
@@ -251,24 +246,15 @@ const ProductCard = ({
 										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 											{indicator.title}
 										</p>
-										{isLoadingStats ? (
-											<Skeleton
-												className={cx(classes.badgeSkeleton)}
-												variant="text"
-												width={130}
-												height={25}
-											/>
-										) : (
-											<Badge
-												noIcon
-												severity={!!nbReviews ? indicator.color : 'info'}
-												className={fr.cx('fr-text--sm')}
-											>
-												{!!nbReviews && indicator.value !== -1
-													? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
-													: 'Aucune donnée'}
-											</Badge>
-										)}
+										<Badge
+											noIcon
+											severity={!!nbReviews ? indicator.color : 'info'}
+											className={fr.cx('fr-text--sm')}
+										>
+											{!!nbReviews && indicator.value !== -1
+												? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
+												: 'Aucune donnée'}
+										</Badge>
 									</div>
 								))}
 								{!isLoadingReviewsCount && nbReviews !== undefined && (
@@ -302,11 +288,6 @@ const useStyles = tss.withName(ProductCard.name).create({
 		display: 'flex',
 		justifyContent: 'end'
 	},
-	badgeSkeleton: {
-		transformOrigin: '0',
-		transform: 'none'
-	},
-	cardSkeleton: {},
 	productTitle: {
 		fontSize: '18px',
 		fontWeight: 'bold',

@@ -15,6 +15,7 @@ import {
 	useFieldArray,
 	useForm
 } from 'react-hook-form';
+import { useRouter } from 'next/router';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -32,6 +33,7 @@ interface CustomModalProps {
 interface Props {
 	modal: CustomModalProps;
 	product?: Product;
+	fromEmptyState?: boolean;
 	onSubmit: () => void;
 	onTitleChange?: (title: string) => void;
 }
@@ -41,11 +43,12 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal, product, onTitleChange, onSubmit } = props;
+	const { modal, product, fromEmptyState, onTitleChange, onSubmit } = props;
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const lastUrlRef = useRef<HTMLInputElement>(null);
+	const router = useRouter();
 
 	const {
 		control,
@@ -91,6 +94,8 @@ const ProductModal = (props: Props) => {
 			.filter(url => url.value !== '')
 			.map(url => url.value);
 
+		let productId;
+
 		if (product && product.id) {
 			await updateProduct.mutateAsync({
 				id: product.id,
@@ -100,10 +105,15 @@ const ProductModal = (props: Props) => {
 				}
 			});
 		} else {
-			await saveProductTmp.mutateAsync({
+			const savedProductResponse = await saveProductTmp.mutateAsync({
 				...tmpProduct,
 				urls: filteredUrls
 			});
+			productId = savedProductResponse.data.id;
+		}
+
+		if (productId && fromEmptyState) {
+			router.push(`/administration/dashboard/product/${productId}/buttons`);
 		}
 
 		onSubmit();

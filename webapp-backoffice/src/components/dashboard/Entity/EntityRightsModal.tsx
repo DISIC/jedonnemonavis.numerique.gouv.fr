@@ -34,10 +34,11 @@ interface Props {
 	refetchEntities: () => void;
 	entity?: Entity;
 	onClose: () => void;
+	fromSearch?: boolean;
 }
 
 const EntityRightsModal = (props: Props) => {
-	const { modal, entity, refetchEntities, onClose } = props;
+	const { modal, entity, fromSearch, refetchEntities, onClose } = props;
 
 	const { data: session } = useSession();
 
@@ -144,7 +145,9 @@ const EntityRightsModal = (props: Props) => {
 				iconId: 'ri-arrow-left-line',
 				priority: 'secondary',
 				doClosesModal: false,
-				onClick: () => modal.close()
+				onClick: () => {
+					onClose();
+				}
 			}
 		];
 	};
@@ -254,7 +257,9 @@ const EntityRightsModal = (props: Props) => {
 					>
 						<div className={classes.addSection}>
 							<Input
-								label="Adresse email"
+								label="Envoyez une invitation par e-mail"
+								hintText="Exemple : prenomnom@email.com"
+								className={classes.emailInput}
 								nativeInputProps={{
 									onChange: e => {
 										setAddError('');
@@ -318,7 +323,7 @@ const EntityRightsModal = (props: Props) => {
 				'fr-grid-row--gutters',
 				'fr-my-0'
 			)}
-			buttons={displayModalButtons()}
+			buttons={fromSearch ? displayModalButtons() : undefined}
 		>
 			{displayModalContent()}
 		</modal.Component>
@@ -332,9 +337,12 @@ const useStyles = tss
 		boldText: {
 			fontWeight: 'bold'
 		},
+		emailInput: {
+			marginBottom: '0 !important'
+		},
 		addSection: {
 			display: 'flex',
-			alignItems: 'center',
+			alignItems: 'flex-end',
 			width: '100%',
 			marginTop: fr.spacing('6v'),
 			'& > div': {
@@ -342,7 +350,6 @@ const useStyles = tss
 			},
 			'& > button': {
 				marginLeft: fr.spacing('5v'),
-				marginTop: fr.spacing('2v'),
 				marginBottom: !!addError ? fr.spacing('9v') : ''
 			}
 		}

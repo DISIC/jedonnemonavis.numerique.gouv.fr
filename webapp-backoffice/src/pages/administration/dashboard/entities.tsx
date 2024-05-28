@@ -150,6 +150,7 @@ const DashBoardEntities = () => {
 			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}
+					fromSearch={fromSearch}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
 					onClose={() => {

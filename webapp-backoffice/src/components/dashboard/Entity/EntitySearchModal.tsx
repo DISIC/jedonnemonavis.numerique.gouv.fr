@@ -128,6 +128,7 @@ const EntitySearchModal = (props: Props) => {
 		const filteredOptions = entityOptions.filter(eo =>
 			new RegExp(removeAccents(search), 'i').test(removeAccents(eo.label))
 		);
+
 		return (
 			<>
 				<p>

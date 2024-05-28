@@ -37,6 +37,7 @@ const DashBoard = () => {
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
+	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
@@ -115,6 +116,7 @@ const DashBoard = () => {
 				</Head>
 				<ProductModal
 					modal={product_modal}
+					fromEmptyState={fromEmptyState}
 					onSubmit={() => {
 						setSearch('');
 						if (filters.filter === 'created_at') {
@@ -145,6 +147,7 @@ const DashBoard = () => {
 				<ProductEmptyState
 					onButtonClick={() => {
 						product_modal.open();
+						setFromEmptyState(true);
 					}}
 				/>
 			</>
