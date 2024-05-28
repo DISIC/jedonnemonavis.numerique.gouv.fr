@@ -234,7 +234,14 @@ const ProductCard = ({
 					)}
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
-						{product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
+						{isLoadingStats ? (
+							<Skeleton
+								className={cx(classes.cardSkeleton)}
+								variant="text"
+								width={'full'}
+								height={50}
+							/>
+						) : product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
 									<div
@@ -299,6 +306,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		transformOrigin: '0',
 		transform: 'none'
 	},
+	cardSkeleton: {},
 	productTitle: {
 		fontSize: '18px',
 		fontWeight: 'bold',
