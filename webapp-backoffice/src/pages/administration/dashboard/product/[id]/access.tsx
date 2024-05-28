@@ -282,9 +282,9 @@ const AccessManagement = (props: Props) => {
 					</div>
 				) : (
 					<div>
-						<div className={cx(classes.categoryTitle)}>
+						<h2 className={cx(classes.categoryTitle)}>
 							Administrateurs du service
-						</div>
+						</h2>
 						<div>
 							{accessRights.map((accessRight, index) => {
 								if (
@@ -324,9 +324,9 @@ const AccessManagement = (props: Props) => {
 						{accessAdminEntityRights.length > 0 && (
 							<>
 								<div className={cx(classes.entityWrapper)}>
-									<div className={cx(classes.organizationTitle)}>
+									<h2 className={cx(classes.organizationTitle)}>
 										Administrateurs de l'organisation
-									</div>
+									</h2>
 									<div className={cx(classes.entityName)}>{entity?.name}</div>
 								</div>
 								<div>
@@ -388,6 +388,7 @@ const useStyles = tss.create({
 		}
 	},
 	categoryTitle: {
+		...fr.typography[20].style,
 		fontWeight: 'bold',
 		paddingBottom: '10px',
 		borderBottom: '1px solid black'
@@ -397,6 +398,8 @@ const useStyles = tss.create({
 		padding: '5px 0'
 	},
 	organizationTitle: {
+		...fr.typography[20].style,
+		marginBottom: 0,
 		fontWeight: 'bold'
 	},
 	alertContainer: {
@@ -412,6 +415,8 @@ const useStyles = tss.create({
 		paddingTop: '3rem'
 	},
 	entityName: {
+		...fr.typography[18].style,
+		marginBottom: 0,
 		color: '#666666',
 		paddingLeft: '1rem'
 	}
