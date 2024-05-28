@@ -36,7 +36,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const createReview = trpc.review.create.useMutation({
-    onSuccess: () => setIsFormSubmitted(true),
+    onSuccess: () => {
+      setIsLoading(false);
+      setIsFormSubmitted(true);
+    },
   });
 
   const getSelectedOption = (
@@ -316,8 +319,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               onSubmit={(result, isLastStep) => {
                 setOpinion({ ...result });
                 if (isLastStep) {
+                  setIsLoading(true);
                   handleSubmitReview(result);
-                  setIsFormSubmitted(true);
                 }
               }}
             />
@@ -330,7 +333,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           )}
         </>
       ) : (
-        <Loader size="md" />
+        <div className={fr.cx("fr-mt-10v")}>
+          <Loader size="md" />
+        </div>
       );
     }
   };

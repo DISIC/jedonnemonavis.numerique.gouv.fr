@@ -7,6 +7,7 @@ import { ReactNode } from "react";
 import { createEmotionSsrAdvancedApproach } from "tss-react/next";
 import "@/src/styles/global.css";
 import { trpc } from "@/src/utils/trpc";
+import "../utils/keyframes.css";
 
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {

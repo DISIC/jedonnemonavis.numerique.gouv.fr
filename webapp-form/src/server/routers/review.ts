@@ -27,59 +27,71 @@ export async function createReview(
     },
   });
 
-  Promise.all([
-    answers.forEach(async (answer) => {
-      const newAnswer = await prisma.answer.create({
-        data: {
-          ...answer,
-          child_answers: answer.child_answers
-            ? {
-                createMany: {
-                  data: (
-                    answer.child_answers.createMany
-                      ?.data as Prisma.AnswerCreateManyParent_answerInput[]
-                  ).map((item) => ({
-                    ...item,
-                    review_id: newReview.id,
-                  })),
-                },
-              }
-            : undefined,
-          review: {
-            connect: {
-              id: newReview.id,
+  const promises = Promise.all(
+    answers.map(async (answer) => {
+      return prisma.answer
+        .create({
+          data: {
+            ...answer,
+            child_answers: answer.child_answers
+              ? {
+                  createMany: {
+                    data: (
+                      answer.child_answers.createMany
+                        ?.data as Prisma.AnswerCreateManyParent_answerInput[]
+                    ).map((item) => ({
+                      ...item,
+                      review_id: newReview.id,
+                    })),
+                  },
+                }
+              : undefined,
+            review: {
+              connect: {
+                id: newReview.id,
+              },
             },
           },
-        },
-        include: {
-          child_answers: true,
-        },
-      });
-
-      const {
-        id: newAnswerId,
-        parent_answer_id: newAnswerParentAnswerId,
-        child_answers: newAnswerChildAnswers,
-        ...answerForElk
-      } = newAnswer;
-
-      elkClient
-        .index<ElkAnswer>({
-          index: "jdma-answers",
-          id: newAnswerId.toString(),
-          body: {
-            ...answerForElk,
-            review_id: newReview.id,
-            button_id: newReview.button_id,
-            button_name: newReview.button.title,
-            product_id: newReview.product_id,
-            product_name: newReview.product.title,
-            created_at: newReview.created_at,
+          include: {
+            child_answers: true,
           },
         })
-        .then(() => {
+        .then((newAnswer) => {
+          const {
+            id: newAnswerId,
+            parent_answer_id: newAnswerParentAnswerId,
+            child_answers: newAnswerChildAnswers,
+            ...answerForElk
+          } = newAnswer;
+
+          return elkClient
+            .index<ElkAnswer>({
+              index: "jdma-answers",
+              id: newAnswerId.toString(),
+              body: {
+                ...answerForElk,
+                review_id: newReview.id,
+                button_id: newReview.button_id,
+                button_name: newReview.button.title,
+                product_id: newReview.product_id,
+                product_name: newReview.product.title,
+                created_at: newReview.created_at,
+              },
+            })
+            .then(() => {
+              return newAnswer;
+            });
+        });
+    })
+  );
+
+  await promises.then((responses) => {
+    return Promise.all(
+      responses
+        .map((newAnswer) => {
+          const { child_answers: newAnswerChildAnswers } = newAnswer;
           if (newAnswerChildAnswers) {
-            newAnswerChildAnswers.map((item: Answer) => {
+            return newAnswerChildAnswers.map((item: Answer, index: number) => {
               const { id: childAnswerId, ...childAnswerForElk } = item;
               elkClient.index<ElkAnswer>({
                 index: "jdma-answers",
@@ -98,9 +110,10 @@ export async function createReview(
               });
             });
           }
-        });
-    }),
-  ]);
+        })
+        .flat()
+    );
+  });
 
   return newReview;
 }
