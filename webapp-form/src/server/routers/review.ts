@@ -27,6 +27,8 @@ export async function createReview(
     },
   });
 
+  console.log(newReview);
+
   const promises = Promise.all(
     answers.map(async (answer) => {
       return prisma.answer
@@ -42,13 +44,17 @@ export async function createReview(
                     ).map((item) => ({
                       ...item,
                       review_id: newReview.id,
+                      review_created_at: newReview.created_at,
                     })),
                   },
                 }
               : undefined,
             review: {
               connect: {
-                id: newReview.id,
+                id_created_at: {
+                  id: newReview.id,
+                  created_at: newReview.created_at,
+                },
               },
             },
           },
@@ -93,7 +99,7 @@ export async function createReview(
           if (newAnswerChildAnswers) {
             return newAnswerChildAnswers.map((item: Answer, index: number) => {
               const { id: childAnswerId, ...childAnswerForElk } = item;
-              elkClient.index<ElkAnswer>({
+              return elkClient.index<ElkAnswer>({
                 index: "jdma-answers",
                 id: childAnswerId.toString(),
                 body: {
