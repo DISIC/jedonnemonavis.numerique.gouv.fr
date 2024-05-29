@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
@@ -51,6 +52,9 @@ const DashBoardEntities = () => {
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 	const [fromSearch, setFromSearch] = React.useState<boolean>(false);
+	const [newEntity, setNewEntity] = React.useState<Entity | undefined>(
+		undefined
+	);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -132,6 +136,30 @@ const DashBoardEntities = () => {
 		}, 100);
 	};
 
+	const handleSubmit = (newEntity?: Entity) => {
+		refetchEntities();
+		setNewEntity(newEntity);
+	};
+
+	const getAlertText = () => {
+		return (
+			<p>
+				L'organisation est créée.{' '}
+				<span
+					className={cx(classes.inviteLink)}
+					onClick={() => {
+						handleModalEntityRightsOpening({
+							type: 'rights',
+							entity: newEntity
+						});
+					}}
+				>
+					Inviter des collègues.
+				</span>
+			</p>
+		);
+	};
+
 	useEffect(() => {
 		if (session?.user.role === 'admin') setIsMine(false);
 	}, [session?.user.role]);
@@ -161,7 +189,7 @@ const DashBoardEntities = () => {
 			<EntityModal
 				modal={entityModal}
 				entity={currentEntity}
-				onSubmit={refetchEntities}
+				onSubmit={newEntity => handleSubmit(newEntity)}
 			/>
 			<EntitySearchModal
 				modal={entitySearchModal}
@@ -170,6 +198,16 @@ const DashBoardEntities = () => {
 			/>
 			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
+				{newEntity && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {}}
+						severity={'success'}
+						className={fr.cx('fr-mb-4w')}
+						small
+						description={getAlertText()}
+					/>
+				)}
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
@@ -306,8 +344,8 @@ const DashBoardEntities = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
+						{nbPages > 1 && (
+							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 								<span className={fr.cx('fr-ml-0')}>
 									Organisation de{' '}
 									<span className={cx(classes.boldText)}>
@@ -322,8 +360,9 @@ const DashBoardEntities = () => {
 										{entitiesResult.metadata.count}
 									</span>
 								</span>
-							)}
-						</div>
+							</div>
+						)}
+
 						<div
 							className={cx(
 								entities.length === 0 ? classes.entitiesContainer : ''
@@ -419,6 +458,11 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			margin: 0,
 			fontWeight: 'bold'
 		}
+	},
+	inviteLink: {
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		textDecoration: 'underline',
+		cursor: 'pointer'
 	},
 	boldText: {
 		fontWeight: 'bold'

@@ -156,13 +156,13 @@ const EntityRightsModal = (props: Props) => {
 		switch (actionType) {
 			case 'add':
 				if (actionEntityRight?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${
+					return `Une invitation a été envoyée à ${
 						actionEntityRight?.user_email
 							? actionEntityRight?.user_email
 							: actionEntityRight?.user_email_invite
 					}.`;
 				} else {
-					return `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName} a été ajouté comme administrateur.`;
+					return `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName} est administrateur.`;
 				}
 			case 'resend-email':
 				return `Un e-mail d’invitation a été renvoyé à ${
@@ -175,7 +175,7 @@ const EntityRightsModal = (props: Props) => {
 					actionEntityRight?.user !== null
 						? `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName}`
 						: actionEntityRight.user_email_invite
-				} a été retiré comme administrateur ou administratrice de cette organisation.`;
+				} n'a plus accès.`;
 		}
 
 		return '';
@@ -206,7 +206,7 @@ const EntityRightsModal = (props: Props) => {
 						onClose={function noRefCheck() {
 							setActionType(null);
 						}}
-						severity={actionType === 'remove' ? 'info' : 'success'}
+						severity={'success'}
 						className={fr.cx('fr-mb-2w')}
 						small
 						description={getAlertTitle()}
@@ -238,14 +238,47 @@ const EntityRightsModal = (props: Props) => {
 							<Loader />
 						</div>
 					) : (
-						adminEntityRights.map((adminEntityRight, index) => (
-							<EntityRightCard
-								key={index}
-								adminEntityRight={adminEntityRight}
-								onButtonClick={handleActionsButtons}
-								withOptions={isMine}
-							/>
-						))
+						<>
+							<div className={cx(classes.entitySection)}>
+								{adminEntityRights.map((adminEntityRight, index) => {
+									if (adminEntityRight.user !== null) {
+										return (
+											<EntityRightCard
+												key={index}
+												adminEntityRight={adminEntityRight}
+												onButtonClick={handleActionsButtons}
+												withOptions={isMine}
+											/>
+										);
+									}
+								})}
+							</div>
+							<div>
+								{adminEntityRights.some(
+									adminEntityRight => adminEntityRight.user === null
+								) && (
+									<>
+										<div className={cx(classes.inviteTitle)}>
+											Invitations envoyées
+										</div>
+										<div>
+											{adminEntityRights
+												.filter(
+													adminEntityRight => adminEntityRight.user === null
+												)
+												.map((adminEntityRight, index) => (
+													<EntityRightCard
+														key={index}
+														adminEntityRight={adminEntityRight}
+														onButtonClick={handleActionsButtons}
+														withOptions={isMine}
+													/>
+												))}
+										</div>
+									</>
+								)}
+							</div>
+						</>
 					)}
 				</div>
 				{isMine && (
@@ -352,6 +385,13 @@ const useStyles = tss
 				marginLeft: fr.spacing('5v'),
 				marginBottom: !!addError ? fr.spacing('9v') : ''
 			}
+		},
+		entitySection: {
+			marginBottom: '0.75rem'
+		},
+		inviteTitle: {
+			fontWeight: 'bold',
+			padding: '5px 0'
 		}
 	}));
 
