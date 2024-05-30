@@ -17,14 +17,32 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...(product_id && { product_id }),
 		...(button_id && { button_id }),
 		...(endDate && {
-			created_at: {
-				...(startDate && { gte: new Date(startDate) }),
-				lte: (() => {
-					const adjustedEndDate = new Date(endDate);
-					adjustedEndDate.setHours(23, 59, 59);
-					return adjustedEndDate;
-				})()
-			}
+			AND: [
+				{
+					created_at: {
+						...(startDate && { gte: new Date(startDate) }),
+						lte: (() => {
+							const adjustedEndDate = new Date(endDate);
+							adjustedEndDate.setHours(23, 59, 59);
+							return adjustedEndDate;
+						})()
+					}
+				},
+				{
+					answers: {
+						some: {
+							created_at: {
+								...(startDate && { gte: new Date(startDate) }),
+								lte: (() => {
+									const adjustedEndDate = new Date(endDate);
+									adjustedEndDate.setHours(23, 59, 59);
+									return adjustedEndDate;
+								})()
+							}
+						}
+					}
+				}
+			]
 		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
@@ -45,7 +63,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		})
 	};
 
-	let andConditions: Condition[] = [];
+	let andConditions: Prisma.ReviewWhereInput[] = [];
 
 	if (filters) {
 		const fields: {
@@ -61,7 +79,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		];
 		Object.keys(filters).map(key => {
 			if (filters[key] && filters[key].length > 0) {
-				let condition: Condition = {
+				let condition: Prisma.ReviewWhereInput = {
 					answers: {
 						some: {
 							field_code: fields.find(field => field.key === key)
@@ -85,7 +103,8 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	}
 
 	if (andConditions.length) {
-		where.AND = andConditions;
+		if (Array.isArray(where.AND)) where.AND = where.AND.concat(andConditions);
+		else where.AND = andConditions;
 	}
 
 	let orderBy: Prisma.ReviewOrderByWithRelationAndSearchRelevanceInput[] = [
@@ -105,7 +124,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		}
 	}
 
-	console.log('where : ', JSON.stringify(where, null, 2))
+	console.log('where : ', JSON.stringify(where, null, 2));
 
 	return {
 		where: where,
