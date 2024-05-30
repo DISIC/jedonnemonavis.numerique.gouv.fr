@@ -286,4 +286,6 @@ model Answer {
   @@index([review_id, review_created_at])
   @@index([parent_answer_id, created_at])
   @@index([review_id, review_created_at, field_code])
+  @@index([review_id, review_created_at, field_code, intention])
+  @@index([review_id, review_created_at, field_code, answer_text])
 }
