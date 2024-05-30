@@ -23,7 +23,4 @@ CREATE INDEX "Answer_review_id_review_created_at_field_code_idx" ON "Answer"("re
 CREATE INDEX "Review_product_id_created_at_idx" ON "Review"("product_id", "created_at");
 
 -- CreateIndex
-CREATE INDEX "Answer_review_id_review_created_at_field_code_intention_idx" ON "Answer"("review_id", "review_created_at", "field_code", "intention");
-
--- CreateIndex
-CREATE INDEX "Answer_review_id_review_created_at_field_code_answer_text_idx" ON "Answer"("review_id", "review_created_at", "field_code", "answer_text");
+CREATE INDEX "Answer_review_id_field_code_idx" ON "Answer"("review_id", "field_code");
