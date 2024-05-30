@@ -17,32 +17,14 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...(product_id && { product_id }),
 		...(button_id && { button_id }),
 		...(endDate && {
-			AND: [
-				{
-					created_at: {
-						...(startDate && { gte: new Date(startDate) }),
-						lte: (() => {
-							const adjustedEndDate = new Date(endDate);
-							adjustedEndDate.setHours(23, 59, 59);
-							return adjustedEndDate;
-						})()
-					}
-				},
-				{
-					answers: {
-						some: {
-							created_at: {
-								...(startDate && { gte: new Date(startDate) }),
-								lte: (() => {
-									const adjustedEndDate = new Date(endDate);
-									adjustedEndDate.setHours(23, 59, 59);
-									return adjustedEndDate;
-								})()
-							}
-						}
-					}
-				}
-			]
+			created_at: {
+				...(startDate && { gte: new Date(startDate) }),
+				lte: (() => {
+					const adjustedEndDate = new Date(endDate);
+					adjustedEndDate.setHours(23, 59, 59);
+					return adjustedEndDate;
+				})()
+			}
 		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
