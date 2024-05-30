@@ -261,7 +261,7 @@ model Review {
   created_at DateTime @default(now())
 
   @@id([id, created_at])
-  @@index([product_id, created_at])
+  @@index([product_id, created_at, button_id])
 }
 
 model Answer {
@@ -281,5 +281,5 @@ model Answer {
   created_at       DateTime         @default(now())
 
   @@id([id, created_at])
-  @@index([intention, field_code, review_id])
+  @@index([intention, field_code, review_id, review_created_at, created_at])
 }
