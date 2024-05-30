@@ -261,6 +261,7 @@ model Review {
   created_at DateTime @default(now())
 
   @@id([id, created_at])
+  @@index([product_id, created_at])
   @@index([product_id, created_at, button_id])
 }
 
