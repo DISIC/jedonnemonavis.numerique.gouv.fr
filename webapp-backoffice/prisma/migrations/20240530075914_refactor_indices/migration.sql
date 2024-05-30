@@ -10,9 +10,3 @@ CREATE INDEX "Answer_review_id_review_created_at_idx" ON "Answer"("review_id", "
 
 -- CreateIndex
 CREATE INDEX "Answer_parent_answer_id_created_at_idx" ON "Answer"("parent_answer_id", "created_at");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Answer_id_created_at_key" ON "Answer"("id", "created_at");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Review_id_created_at_key" ON "Review"("id", "created_at");
