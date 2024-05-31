@@ -27,7 +27,27 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 			}
 		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
-			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
+			OR: [
+				{
+					answers: {
+						some: {
+							AND: [
+								{ field_code: 'verbatim' },
+								endDate && {
+									created_at: {
+										...(startDate && { gte: new Date(startDate) }),
+										lte: (() => {
+											const adjustedEndDate = new Date(endDate);
+											adjustedEndDate.setHours(23, 59, 59);
+											return adjustedEndDate;
+										})()
+									}
+								}
+							]
+						}
+					}
+				}
+			]
 		}),
 		...(search && {
 			OR: [
