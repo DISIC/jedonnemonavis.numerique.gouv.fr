@@ -56,7 +56,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ answer_text: { search: search.split(' ').join('&') } },
-								{ field_code: 'verbatim' }
+								{ field_code: 'verbatim' },
+								endDate && {
+									created_at: {
+										...(startDate && { gte: new Date(startDate) }),
+										lte: (() => {
+											const adjustedEndDate = new Date(endDate);
+											adjustedEndDate.setHours(23, 59, 59);
+											return adjustedEndDate;
+										})()
+									}
+								}
 							]
 						}
 					}
@@ -84,18 +94,32 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 				let condition: Prisma.ReviewWhereInput = {
 					answers: {
 						some: {
-							field_code: fields.find(field => field.key === key)
-								?.field as string,
-							...(['satisfaction'].includes(key) && {
-								intention: {
-									in: filters[key] as AnswerIntention[]
+							AND: [
+								endDate && {
+									created_at: {
+										...(startDate && { gte: new Date(startDate) }),
+										lte: (() => {
+											const adjustedEndDate = new Date(endDate);
+											adjustedEndDate.setHours(23, 59, 59);
+											return adjustedEndDate;
+										})()
+									}
+								},
+								{
+									field_code: fields.find(field => field.key === key)
+										?.field as string,
+									...(['satisfaction'].includes(key) && {
+										intention: {
+											in: filters[key] as AnswerIntention[]
+										}
+									}),
+									...(['comprehension'].includes(key) && {
+										answer_text: {
+											in: filters[key] as string[]
+										}
+									})
 								}
-							}),
-							...(['comprehension'].includes(key) && {
-								answer_text: {
-									in: filters[key] as string[]
-								}
-							})
+							]
 						}
 					}
 				};
