@@ -15,6 +15,18 @@ const ReviewLineMoreInfos = ({
 
 	if (!review) return null;
 
+	const createMarkup = () => {
+		if (review.verbatim?.answer_text) {
+			const regex = new RegExp(search, 'gi');
+			const highlightedText = review.verbatim.answer_text.replace(
+				regex,
+				`<span>${search}</span>`
+			);
+			return { __html: highlightedText };
+		}
+		return { __html: '-' };
+	};
+
 	return (
 		<div className={cx(fr.cx('fr-p-3v'), classes.container)}>
 			<div className={cx(classes.container)}>
@@ -33,11 +45,10 @@ const ReviewLineMoreInfos = ({
 						<h2 className={cx(classes.subtitle)}>
 							Souhaitez-vous nous en dire plus ?
 						</h2>
-						<p className={cx(classes.content)}>
-							{review.verbatim
-								? `${search ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : review.verbatim.answer_text}`
-								: '-'}
-						</p>
+						<p
+							className={cx(classes.content)}
+							dangerouslySetInnerHTML={createMarkup()}
+						/>
 					</div>
 				</div>
 			</div>
