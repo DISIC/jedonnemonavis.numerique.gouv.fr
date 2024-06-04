@@ -12,7 +12,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import router from 'next/router';
 import CreateButtonPanel from '../Pannels/CreateButtonPanel';
-import ReviewPanel from '../Pannels/ReviewPanel';
+import ProductEmptyState from '../Pannels/ProductEmptyState';
 
 interface Indicator {
 	title: string;
@@ -289,7 +289,7 @@ const ProductCard = ({
 						) : product.buttons.length === 0 ? (
 							<CreateButtonPanel isSmall onButtonClick={handleButtonClick} />
 						) : (
-							<ReviewPanel
+							<ProductEmptyState
 								improveBtnClick={() => {}}
 								sendInvitationBtnClick={handleSendInvitation}
 							/>

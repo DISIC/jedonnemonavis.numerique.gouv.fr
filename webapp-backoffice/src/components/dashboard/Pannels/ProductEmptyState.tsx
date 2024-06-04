@@ -25,7 +25,7 @@ const ProductEmptyState = (props: Props) => {
 					classes.rowContainer
 				)}
 			>
-				<div
+				{/* <div
 					className={cx(
 						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
 						classes.blocs
@@ -49,7 +49,7 @@ const ProductEmptyState = (props: Props) => {
 						Améliorer le placement de votre bouton
 					</Button>
 				</div>
-				<div className={cx(classes.divider)} />
+				<div className={cx(classes.divider)} /> */}
 				<div
 					className={cx(
 						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
@@ -98,6 +98,7 @@ const useStyles = tss.create({
 	blocs: {
 		display: 'flex',
 		flexDirection: 'column',
+		alignItems: 'center',
 		padding: '0 !important'
 	},
 	subtitle: {
