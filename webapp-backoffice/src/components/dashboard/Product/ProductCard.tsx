@@ -261,7 +261,11 @@ const ProductCard = ({
 										) : (
 											<Badge
 												noIcon
-												severity={!!nbReviews ? indicator.color : 'info'}
+												severity={
+													!!nbReviews && indicator.value !== -1
+														? indicator.color
+														: undefined
+												}
 												className={fr.cx('fr-text--sm')}
 											>
 												{!!nbReviews && indicator.value !== -1
