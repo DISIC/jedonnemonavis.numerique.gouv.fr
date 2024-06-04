@@ -132,6 +132,17 @@ const ReviewCommonVerbatimLine = ({
 											row,
 											tfch?.slug || ''
 										);
+
+										// Hardcoded logic for now
+										if (tfch?.slug === 'contact_satisfaction') {
+											const parent_answer = getConditionnalValueText(
+												'contact_tried',
+												row,
+												'contact_reached'
+											);
+											if (parent_answer === 'Non') return;
+										}
+
 										return (
 											<p key={answer} className={cx(classes.content)}>
 												{row} :{' '}
