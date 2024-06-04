@@ -42,10 +42,8 @@ const ReviewFiltersModal = (props: Props) => {
 	const isOpen = useIsModalOpen(modal);
 
 	React.useEffect(() => {
-		if (isOpen) {
-			setTmpFilters(filters);
-		}
-	}, [isOpen]);
+		setTmpFilters(filters);
+	}, [filters]);
 
 	return (
 		<modal.Component
