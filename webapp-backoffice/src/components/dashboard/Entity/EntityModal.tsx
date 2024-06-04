@@ -119,7 +119,10 @@ const EntityModal = (props: Props) => {
 			size="large"
 			buttons={[
 				{
-					children: 'Annuler'
+					children: 'Annuler',
+					onClick: () => {
+						reset();
+					}
 				},
 				{
 					doClosesModal: false,
