@@ -77,7 +77,7 @@ const DashBoard = () => {
 
 	const { data: entitiesResult, isLoading: isLoadingEntities } =
 		trpc.entity.getList.useQuery(
-			{ numberPerPage: 1000 },
+			{ numberPerPage: 1000, userCanCreateProduct: true },
 			{ initialData: { data: [], metadata: { count: 0, myEntities: [] } } }
 		);
 
