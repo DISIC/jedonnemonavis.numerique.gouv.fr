@@ -119,6 +119,9 @@
         },
         {
           "label": "Others, specify"
+        },
+        {
+          "label": "I did not need help"
         }
       ]
     },

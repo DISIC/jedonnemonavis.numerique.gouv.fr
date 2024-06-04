@@ -50,28 +50,37 @@ export const CheckboxInput = (props: Props) => {
     e: ChangeEvent<HTMLInputElement>,
     options: CheckboxOption[]
   ) => {
+    const value = parseInt(e.target.value);
+
     if (isolated) {
       setOpinion({
         ...opinion,
-        [key]: e.target.checked ? [e.target.value] : [],
+        [key]: e.target.checked ? [value] : [],
         ...getChildrenResetObject(),
       });
     } else {
       const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
+        .filter((option) => !option.isolated)
         .map((opt) => opt.value);
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
+
+      if (e.target.checked) {
+        setOpinion({
+          ...opinion,
+          [key]: [
+            ...opinion[key].filter((sibling) =>
+              isolatedSiblings.includes(sibling)
+            ),
+            value,
+          ],
+          ...getChildrenResetObject(),
+        });
+      } else {
+        setOpinion({
+          ...opinion,
+          [key]: opinion[key].filter((d) => d !== value),
+          ...getChildrenResetObject(),
+        });
+      }
     }
   };
 

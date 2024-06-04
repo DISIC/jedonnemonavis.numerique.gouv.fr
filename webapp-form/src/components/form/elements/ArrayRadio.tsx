@@ -54,16 +54,22 @@ export const ArrayRadio = (props: Props) => {
           new RegExp(escapeRegex("".toString()) + "_17")
         ) ? (
           <>
-            <div className={fr.cx("fr-grid-row")}>
+            <div className={fr.cx("fr-col-12")}>
               <div className={fr.cx("fr-col-12")}>
                 <h6>{t(field.label)}</h6>
               </div>
-              <div className={fr.cx("fr-col-2")}></div>
-              {field.options.map((option) => (
-                <div className={cx(classes.header, fr.cx("fr-col-2"))}>
-                  {t(option.label)}
+              <div className={cx(fr.cx("fr-grid-row"), classes.headerWrapper)}>
+                <div className={fr.cx("fr-col-2")} />
+                <div className={fr.cx("fr-col-10")}>
+                  <div className={cx(classes.labelsWrapper)}>
+                    {field.options.map((option) => (
+                      <div className={cx(fr.cx("fr-col-2"), classes.header)}>
+                        {t(option.label)}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
+              </div>
             </div>
             {"options" in form[0] &&
               form[0].options &&
@@ -166,6 +172,10 @@ const useStyles = tss
     },
     header: {
       textAlign: "center",
+      ...fr.typography[17].style,
+    },
+    headerWrapper: {
+      borderBottom: `1px solid #E5E5E5`,
     },
     containerRadio: {
       alignItems: "center",
@@ -175,5 +185,9 @@ const useStyles = tss
           color: "transparent",
         },
       },
+    },
+    labelsWrapper: {
+      display: "flex",
+      width: "100%",
     },
   }));
