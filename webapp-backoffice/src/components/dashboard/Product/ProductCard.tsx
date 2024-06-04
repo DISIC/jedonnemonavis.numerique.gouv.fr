@@ -241,7 +241,8 @@ const ProductCard = ({
 								width={'full'}
 								height={50}
 							/>
-						) : product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
+						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
+						  session?.user.role === 'admin' ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
 									<div
