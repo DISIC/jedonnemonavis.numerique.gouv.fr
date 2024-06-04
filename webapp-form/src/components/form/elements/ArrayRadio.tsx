@@ -1,16 +1,8 @@
-import {
-  CheckboxOption,
-  Condition,
-  FormField,
-  Opinion,
-  RadioOption,
-} from "@/src/utils/types";
+import { FormField, Opinion, RadioOption } from "@/src/utils/types";
 import { useTranslation } from "next-i18next";
-import { ChangeEvent, SetStateAction, useEffect, useState } from "react";
+import { SetStateAction } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
-import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
-import { BaseOptions } from "vm";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 
 type Props = {
@@ -58,98 +50,93 @@ export const ArrayRadio = (props: Props) => {
               <div className={fr.cx("fr-col-12")}>
                 <h6>{t(field.label)}</h6>
               </div>
-              <div className={cx(fr.cx("fr-grid-row"), classes.headerWrapper)}>
-                <div className={fr.cx("fr-col-2")} />
-                <div className={fr.cx("fr-col-10")}>
-                  <div className={cx(classes.labelsWrapper)}>
+              <table
+                className={cx(fr.cx("fr-table"), classes.mainTable)}
+                cellSpacing={1}
+                cellPadding={1}
+              >
+                <thead className={cx(classes.bgWhite)}>
+                  <tr>
+                    <th className={fr.cx("fr-col-3")} />
                     {field.options.map((option) => (
-                      <div className={cx(fr.cx("fr-col-2"), classes.header)}>
-                        {t(option.label)}
-                      </div>
+                      <>
+                        <th scope="col" className={cx(classes.headerLabels)}>
+                          {t(option.label)}
+                        </th>
+                      </>
                     ))}
-                  </div>
-                </div>
-              </div>
+                  </tr>
+                </thead>
+                <tbody className={cx(classes.bgWhite)}>
+                  {"options" in form[0] &&
+                    form[0].options &&
+                    form[0].options.map((option: RadioOption) => (
+                      <tr className={cx(classes.optionRow)} key={option.value}>
+                        {(field.needed.includes(option.value) ||
+                          (opinion.contact_tried.includes(option.value) &&
+                            !field.excluded.includes(option.value))) && (
+                          <>
+                            {containsPattern(
+                              opinion.contact_reached,
+                              new RegExp(
+                                escapeRegex(option.value.toString()) + "_17"
+                              )
+                            ) && (
+                              <>
+                                <td>
+                                  <label className={cx(classes.label)}>
+                                    {getFirstTwoWords(t(option.label))}
+                                  </label>
+                                </td>
+                                <td
+                                  className={cx(classes.radioWrapper)}
+                                  colSpan={6}
+                                >
+                                  <form className={cx(classes.containerRadio)}>
+                                    <RadioButtons
+                                      legend=""
+                                      name="radio"
+                                      options={field.options.map(
+                                        (opt, index) => ({
+                                          label: ".",
+                                          nativeInputProps: {
+                                            value: `value${index}`,
+                                            onChange: (event) => {
+                                              setOpinion({
+                                                ...opinion,
+                                                contact_satisfaction: [
+                                                  ...opinion.contact_satisfaction.filter(
+                                                    (cs) =>
+                                                      !cs.includes(
+                                                        escapeRegex(
+                                                          option.value.toString()
+                                                        )
+                                                      )
+                                                  ),
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  ) +
+                                                    "_" +
+                                                    opt.value,
+                                                ],
+                                              });
+                                            },
+                                          },
+                                        })
+                                      )}
+                                      orientation="horizontal"
+                                    />
+                                  </form>
+                                </td>
+                              </>
+                            )}
+                          </>
+                        )}
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
-            {"options" in form[0] &&
-              form[0].options &&
-              form[0].options.map((option: RadioOption) => (
-                <div
-                  className={cx(
-                    classes.containerRadio,
-                    fr.cx("fr-grid-row", "fr-mb-4v")
-                  )}
-                  key={option.value}
-                >
-                  {(field.needed.includes(option.value) ||
-                    (opinion.contact_tried.includes(option.value) &&
-                      !field.excluded.includes(option.value))) && (
-                    <>
-                      {containsPattern(
-                        opinion.contact_reached,
-                        new RegExp(escapeRegex(option.value.toString()) + "_17")
-                      ) && (
-                        <>
-                          <div className={fr.cx("fr-col-2")}>
-                            <label className={cx(classes.label)}>
-                              {getFirstTwoWords(t(option.label))}
-                            </label>
-                          </div>
-                          <div className={fr.cx("fr-col-10")}>
-                            <form>
-                              <RadioButtons
-                                legend=""
-                                name="radio"
-                                options={field.options.map((opt, index) => ({
-                                  label: ".",
-                                  nativeInputProps: {
-                                    value: `value${index}`,
-                                    onChange: (event) => {
-                                      setOpinion({
-                                        ...opinion,
-                                        contact_satisfaction: [
-                                          ...opinion.contact_satisfaction.filter(
-                                            (cs) =>
-                                              !cs.includes(
-                                                escapeRegex(
-                                                  option.value.toString()
-                                                )
-                                              )
-                                          ),
-                                          escapeRegex(option.value.toString()) +
-                                            "_" +
-                                            opt.value,
-                                        ],
-                                      });
-                                      console.log({
-                                        ...opinion,
-                                        contact_satisfaction: [
-                                          ...opinion.contact_satisfaction.filter(
-                                            (cs) =>
-                                              !cs.includes(
-                                                escapeRegex(
-                                                  option.value.toString()
-                                                )
-                                              )
-                                          ),
-                                          escapeRegex(option.value.toString()) +
-                                            "_" +
-                                            opt.value,
-                                        ],
-                                      });
-                                    },
-                                  },
-                                }))}
-                                orientation="horizontal"
-                              />
-                            </form>
-                          </div>
-                        </>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
           </>
         ) : (
           <></>
@@ -167,27 +154,61 @@ const useStyles = tss
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
     },
+
+    bgWhite: {
+      background: "white !important",
+    },
+
+    headerLabels: {
+      fontWeight: "normal !important",
+      ...fr.typography[17].style,
+      width: "15%",
+    },
     label: {
       fontWeight: "bold",
+      ...fr.typography[19].style,
     },
-    header: {
-      textAlign: "center",
-      ...fr.typography[17].style,
-    },
-    headerWrapper: {
-      borderBottom: `1px solid #E5E5E5`,
+    radioWrapper: {
+      padding: "0 !important",
     },
     containerRadio: {
       alignItems: "center",
       ".fr-fieldset__content": {
-        justifyContent: "space-around",
+        justifyContent: "space-between",
+        margin: 0,
         ".fr-label": {
           color: "transparent",
+          width: 0,
+          paddingLeft: "1.5rem",
         },
       },
+      ".fr-radio-group": {
+        marginRight: "0 !important",
+        width: "15%",
+        maxWidth: "initial !important",
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+      },
+      ".fr-radio-group:last-child": {
+        paddingLeft: "4rem",
+      },
     },
-    labelsWrapper: {
-      display: "flex",
-      width: "100%",
+
+    optionRow: {
+      background: "white !important",
+    },
+    mainTable: {
+      borderCollapse: "collapse",
+      "th, tr": {
+        borderBottom: "1px solid lightgray",
+      },
+      th: {
+        textAlign: "center",
+        "&:last-child": {
+          paddingRight: 0,
+          paddingLeft: "4rem",
+        },
+      },
     },
   }));

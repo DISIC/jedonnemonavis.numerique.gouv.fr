@@ -87,7 +87,7 @@ export const CheckboxInput = (props: Props) => {
   if (field.kind === "checkbox") {
     return (
       <div className={fr.cx("fr-grid-row")}>
-        <div className={fr.cx("fr-col-12")}>
+        <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
           <>
             <Checkbox
               legend={t(field.label)}
@@ -125,5 +125,10 @@ const useStyles = tss
     smallText: {
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
+    },
+    checkboxContainer: {
+      ".fr-fieldset__content": {
+        paddingTop: "1.5rem !important",
+      },
     },
   }));
