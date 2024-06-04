@@ -169,7 +169,10 @@ const ReviewFiltersModal = (props: Props) => {
 						priority="secondary"
 						className={fr.cx('fr-mt-1w')}
 						type="button"
-						onClick={() => modal.close()}
+						onClick={() => {
+							setTmpFilters(filters);
+							modal.close();
+						}}
 					>
 						Annuler
 					</Button>
