@@ -68,7 +68,11 @@ const ProductModal = (props: Props) => {
 
 	const { data: entitiesResult, isLoading: isLoadingEntities } =
 		trpc.entity.getList.useQuery(
-			{ numberPerPage: 1000, search: debouncedSearch },
+			{
+				numberPerPage: 1000,
+				search: debouncedSearch,
+				userCanCreateProduct: true
+			},
 			{
 				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
 			}
