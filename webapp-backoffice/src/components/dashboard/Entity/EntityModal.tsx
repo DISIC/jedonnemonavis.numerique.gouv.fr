@@ -2,6 +2,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Entity } from '@prisma/client';
 import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -102,6 +103,12 @@ const EntityModal = (props: Props) => {
 		}
 	}, [entity]);
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			reset();
+		}
+	});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -119,10 +126,7 @@ const EntityModal = (props: Props) => {
 			size="large"
 			buttons={[
 				{
-					children: 'Annuler',
-					onClick: () => {
-						reset();
-					}
+					children: 'Annuler'
 				},
 				{
 					doClosesModal: false,

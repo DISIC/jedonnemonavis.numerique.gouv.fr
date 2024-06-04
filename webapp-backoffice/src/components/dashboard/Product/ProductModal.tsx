@@ -15,6 +15,7 @@ import {
 	useFieldArray,
 	useForm
 } from 'react-hook-form';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -50,6 +51,7 @@ const ProductModal = (props: Props) => {
 	const {
 		control,
 		handleSubmit,
+		reset,
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: product
@@ -70,8 +72,7 @@ const ProductModal = (props: Props) => {
 		trpc.entity.getList.useQuery(
 			{
 				numberPerPage: 1000,
-				search: debouncedSearch,
-				userCanCreateProduct: true
+				search: debouncedSearch
 			},
 			{
 				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
@@ -141,6 +142,13 @@ const ProductModal = (props: Props) => {
 		}, 100);
 	};
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			console.log('reset : ', product);
+			reset({ title: '', entity_id: undefined });
+		}
+	});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -191,6 +199,7 @@ const ProductModal = (props: Props) => {
 										if (onTitleChange) onTitleChange(e.target.value);
 									},
 									defaultValue: value,
+									value,
 									required: true
 								}}
 								state={errors[name] ? 'error' : 'default'}
@@ -225,6 +234,11 @@ const ProductModal = (props: Props) => {
 									defaultValue={entityOptions.find(
 										option => option.value === value
 									)}
+									value={
+										value
+											? entityOptions.find(option => option.value === value)
+											: { label: '', value: undefined }
+									}
 									renderInput={params => (
 										<div
 											ref={params.InputProps.ref}

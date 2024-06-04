@@ -75,11 +75,14 @@ const DashBoard = () => {
 		metadata: { count: productsCount }
 	} = productsResult;
 
-	const { data: entitiesResult, isLoading: isLoadingEntities } =
-		trpc.entity.getList.useQuery(
-			{ numberPerPage: 1000, userCanCreateProduct: true },
-			{ initialData: { data: [], metadata: { count: 0, myEntities: [] } } }
-		);
+	const {
+		data: entitiesResult,
+		isLoading: isLoadingEntities,
+		refetch: refetchEntities
+	} = trpc.entity.getList.useQuery(
+		{ numberPerPage: 1000, userCanCreateProduct: true },
+		{ initialData: { data: [], metadata: { count: 0, myEntities: [] } } }
+	);
 
 	const { data: entities } = entitiesResult;
 
@@ -122,6 +125,7 @@ const DashBoard = () => {
 						} else {
 							updateFilters({ ...filters, filter: 'created_at' });
 						}
+						refetchEntities();
 						setIsModalSubmitted(true);
 					}}
 					onTitleChange={title => {
