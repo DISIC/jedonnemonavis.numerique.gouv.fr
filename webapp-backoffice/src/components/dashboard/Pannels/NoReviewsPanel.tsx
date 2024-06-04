@@ -8,7 +8,7 @@ interface Props {
 	sendInvitationBtnClick: () => void;
 }
 
-const ProductEmptyState = (props: Props) => {
+const NoReviewPanel = (props: Props) => {
 	const { improveBtnClick, sendInvitationBtnClick } = props;
 	const { cx, classes } = useStyles();
 
@@ -120,4 +120,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ProductEmptyState;
+export default NoReviewPanel;
