@@ -52,7 +52,7 @@ const NoReviewPanel = (props: Props) => {
 				<div className={cx(classes.divider)} /> */}
 				<div
 					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'),
 						classes.blocs
 					)}
 				>

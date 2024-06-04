@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import router from 'next/router';
-import CreateButtonPanel from '../Pannels/CreateButtonPanel';
+import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
 
 interface Indicator {
@@ -288,7 +288,7 @@ const ProductCard = ({
 								)}
 							</div>
 						) : product.buttons.length === 0 ? (
-							<CreateButtonPanel isSmall onButtonClick={handleButtonClick} />
+							<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
 						) : (
 							<NoReviewsPanel
 								improveBtnClick={() => {}}

@@ -16,7 +16,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import React, { useEffect } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import Head from 'next/head';
-import CreateButtonPanel from '@/src/components/dashboard/Pannels/CreateButtonPanel';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useRouter } from 'next/router';
 
 interface Props {
@@ -154,8 +154,8 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
-				{buttons.length > 0 && (
-					<div className={fr.cx('fr-col-4')}>
+				{/* {buttons.length > 0 && (
+					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 						<Checkbox
 							style={{ userSelect: 'none' }}
 							options={[
@@ -173,7 +173,7 @@ const ProductButtonsPage = (props: Props) => {
 							]}
 						/>
 					</div>
-				)}
+				)} */}
 				{/* <div className={fr.cx('fr-col-4')}>
 					<Checkbox
 						options={[
@@ -197,7 +197,7 @@ const ProductButtonsPage = (props: Props) => {
 					<>
 						<div className={cx(classes.btnContainer)}>
 							{!buttons.length && !isRefetchingButtons && (
-								<CreateButtonPanel
+								<NoButtonsPanel
 									onButtonClick={() => handleModalOpening('create')}
 								/>
 							)}
