@@ -46,7 +46,7 @@ export const ArrayRadio = (props: Props) => {
           new RegExp(escapeRegex("".toString()) + "_17")
         ) ? (
           <>
-            <div className={fr.cx("fr-col-12")}>
+            <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
               <div className={fr.cx("fr-col-12")}>
                 <h6>{t(field.label)}</h6>
               </div>
@@ -194,7 +194,9 @@ const useStyles = tss
         paddingLeft: "4rem",
       },
     },
-
+    reviewContainer: {
+      overflow: "auto",
+    },
     optionRow: {
       background: "white !important",
     },
