@@ -57,7 +57,7 @@ export const ArrayRadio = (props: Props) => {
               >
                 <thead className={cx(classes.bgWhite)}>
                   <tr>
-                    <th className={fr.cx("fr-col-3")} />
+                    <th />
                     {field.options.map((option) => (
                       <>
                         <th scope="col" className={cx(classes.headerLabels)}>
@@ -92,7 +92,7 @@ export const ArrayRadio = (props: Props) => {
                                   className={cx(classes.radioWrapper)}
                                   colSpan={6}
                                 >
-                                  <form className={cx(classes.containerRadio)}>
+                                  <div className={cx(classes.containerRadio)}>
                                     <RadioButtons
                                       legend=""
                                       name="radio"
@@ -126,7 +126,7 @@ export const ArrayRadio = (props: Props) => {
                                       )}
                                       orientation="horizontal"
                                     />
-                                  </form>
+                                  </div>
                                 </td>
                               </>
                             )}
@@ -162,7 +162,9 @@ const useStyles = tss
     headerLabels: {
       fontWeight: "normal !important",
       ...fr.typography[17].style,
-      width: "15%",
+      "&:last-child": {
+        paddingLeft: "3rem",
+      },
     },
     label: {
       fontWeight: "bold",
@@ -173,6 +175,9 @@ const useStyles = tss
     },
     containerRadio: {
       alignItems: "center",
+      fieldset: {
+        padding: 0,
+      },
       ".fr-fieldset__content": {
         justifyContent: "space-between",
         margin: 0,
@@ -184,14 +189,17 @@ const useStyles = tss
       },
       ".fr-radio-group": {
         marginRight: "0 !important",
-        width: "15%",
+        width: "calc((100% - 10rem) / 5)",
         maxWidth: "initial !important",
         display: "flex",
         justifyContent: "center",
         alignContent: "center",
+        "&:last-child": {
+          width: "10rem",
+        },
       },
       ".fr-radio-group:last-child": {
-        paddingLeft: "4rem",
+        paddingLeft: "2rem",
       },
     },
     reviewContainer: {
@@ -201,6 +209,7 @@ const useStyles = tss
       background: "white !important",
     },
     mainTable: {
+      width: "100%",
       borderCollapse: "collapse",
       "th, tr": {
         borderBottom: "1px solid lightgray",
@@ -208,9 +217,18 @@ const useStyles = tss
       th: {
         textAlign: "center",
         "&:last-child": {
-          paddingRight: 0,
-          paddingLeft: "4rem",
+          // paddingLeft: "3rem",
         },
       },
+      "th:first-child, td:first-child": {
+        width: "10rem",
+      },
+      "th:last-child, td:last-child": {
+        width: "10rem",
+      },
+      "th:not(:first-child):not(:last-child), td:not(:first-child):not(:last-child)":
+        {
+          width: "calc((100% - 20rem) / 6)",
+        },
     },
   }));
