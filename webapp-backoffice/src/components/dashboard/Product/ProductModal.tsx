@@ -16,6 +16,7 @@ import {
 	useForm
 } from 'react-hook-form';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { autocompleteFilterOptions } from '@/src/utils/tools';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -47,7 +48,6 @@ const ProductModal = (props: Props) => {
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const lastUrlRef = useRef<HTMLInputElement>(null);
-
 	const {
 		control,
 		handleSubmit,
@@ -227,6 +227,7 @@ const ProductModal = (props: Props) => {
 									noOptionsText="Aucune organisation trouvée"
 									sx={{ width: '100%' }}
 									options={entityOptions}
+									filterOptions={autocompleteFilterOptions}
 									onChange={(_, optionSelected) => {
 										onChange(optionSelected?.value);
 									}}

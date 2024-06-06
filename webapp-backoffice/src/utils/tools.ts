@@ -1,3 +1,4 @@
+import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
@@ -130,3 +131,11 @@ export const transformDateToFrenchReadable = (dateString: string): string => {
 export const removeAccents = (str: string): string => {
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
+
+export const autocompleteFilterOptions = (
+	options: {
+		label: string;
+		value?: number;
+	}[],
+	{ inputValue }: { inputValue: string }
+) => matchSorter(options, inputValue, { keys: [item => item.label] });
