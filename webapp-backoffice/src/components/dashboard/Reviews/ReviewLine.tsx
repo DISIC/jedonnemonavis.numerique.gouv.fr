@@ -64,7 +64,7 @@ const ReviewLine = ({
 				<div className={cx(classes.cellContainer)}>
 					<div className={cx(classes.date)}>
 						<span className={fr.cx('fr-hidden-lg')}>Id : </span>
-						{review.id}
+						{review.id?.toString(16)}
 					</div>
 				</div>
 				{review.button_id ? (

@@ -72,6 +72,20 @@ export const reviewRouter = router({
 							? {
 									include: {
 										parent_answer: true
+									},
+									where: {
+										...(input.endDate && {
+											created_at: {
+												...(input.startDate && {
+													gte: new Date(input.startDate)
+												}),
+												lte: (() => {
+													const adjustedEndDate = new Date(input.endDate);
+													adjustedEndDate.setHours(23, 59, 59);
+													return adjustedEndDate;
+												})()
+											}
+										})
 									}
 								}
 							: false

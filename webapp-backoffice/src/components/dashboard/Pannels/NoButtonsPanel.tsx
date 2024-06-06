@@ -8,7 +8,7 @@ interface Props {
 	onButtonClick: () => void;
 	isSmall?: boolean;
 }
-const CreateButtonJDMA = (props: Props) => {
+const NoButtonsPanel = (props: Props) => {
 	const { onButtonClick, isSmall } = props;
 	const { cx, classes } = useStyles();
 
@@ -59,4 +59,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default CreateButtonJDMA;
+export default NoButtonsPanel;

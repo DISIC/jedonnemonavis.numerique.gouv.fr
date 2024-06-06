@@ -11,8 +11,8 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import router from 'next/router';
-import CreateButtonPanel from '../Pannels/CreateButtonPanel';
-import ReviewPanel from '../Pannels/ReviewPanel';
+import NoButtonsPanel from '../Pannels/NoButtonsPanel';
+import NoReviewsPanel from '../Pannels/NoReviewsPanel';
 
 interface Indicator {
 	title: string;
@@ -235,8 +235,14 @@ const ProductCard = ({
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
 						{isLoadingStats ? (
-							<Skeleton variant="text" width={'full'} height={50} />
-						) : product.buttons.length > 0 && nbReviews && nbReviews > 0 ? (
+							<Skeleton
+								className={cx(classes.cardSkeleton)}
+								variant="text"
+								width={'full'}
+								height={50}
+							/>
+						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
+						  session?.user.role === 'admin' ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
 									<div
@@ -246,15 +252,28 @@ const ProductCard = ({
 										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 											{indicator.title}
 										</p>
-										<Badge
-											noIcon
-											severity={!!nbReviews ? indicator.color : 'info'}
-											className={fr.cx('fr-text--sm')}
-										>
-											{!!nbReviews && indicator.value !== -1
-												? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
-												: 'Aucune donnée'}
-										</Badge>
+										{isLoadingStats ? (
+											<Skeleton
+												className={cx(classes.badgeSkeleton)}
+												variant="text"
+												width={130}
+												height={25}
+											/>
+										) : (
+											<Badge
+												noIcon
+												severity={
+													!!nbReviews && indicator.value !== -1
+														? indicator.color
+														: undefined
+												}
+												className={fr.cx('fr-text--sm')}
+											>
+												{!!nbReviews && indicator.value !== -1
+													? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
+													: 'Aucune donnée'}
+											</Badge>
+										)}
 									</div>
 								))}
 								{!isLoadingReviewsCount && nbReviews !== undefined && (
@@ -269,9 +288,9 @@ const ProductCard = ({
 								)}
 							</div>
 						) : product.buttons.length === 0 ? (
-							<CreateButtonPanel isSmall onButtonClick={handleButtonClick} />
+							<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
 						) : (
-							<ReviewPanel
+							<NoReviewsPanel
 								improveBtnClick={() => {}}
 								sendInvitationBtnClick={handleSendInvitation}
 							/>

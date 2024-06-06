@@ -60,7 +60,11 @@ const EntityRightsModal = (props: Props) => {
 
 	const { cx, classes } = useStyles({ addError });
 
-	useIsModalOpen(modal);
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			setActionType(null);
+		}
+	});
 
 	const nbPages = getNbPages(adminEntityRightsCount, numberPerPage);
 
@@ -146,6 +150,7 @@ const EntityRightsModal = (props: Props) => {
 				priority: 'secondary',
 				doClosesModal: false,
 				onClick: () => {
+					setActionType(null);
 					onClose();
 				}
 			}

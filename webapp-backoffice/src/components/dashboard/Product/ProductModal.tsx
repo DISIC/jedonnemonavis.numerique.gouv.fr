@@ -16,6 +16,8 @@ import {
 	useForm
 } from 'react-hook-form';
 import { useRouter } from 'next/router';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { autocompleteFilterOptions } from '@/src/utils/tools';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -53,6 +55,7 @@ const ProductModal = (props: Props) => {
 	const {
 		control,
 		handleSubmit,
+		reset,
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: product
@@ -71,7 +74,10 @@ const ProductModal = (props: Props) => {
 
 	const { data: entitiesResult, isLoading: isLoadingEntities } =
 		trpc.entity.getList.useQuery(
-			{ numberPerPage: 1000, search: debouncedSearch },
+			{
+				numberPerPage: 1000,
+				search: debouncedSearch
+			},
 			{
 				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
 			}
@@ -147,6 +153,13 @@ const ProductModal = (props: Props) => {
 		}, 100);
 	};
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			console.log('reset : ', product);
+			reset({ title: '', entity_id: undefined });
+		}
+	});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -197,6 +210,7 @@ const ProductModal = (props: Props) => {
 										if (onTitleChange) onTitleChange(e.target.value);
 									},
 									defaultValue: value,
+									value,
 									required: true
 								}}
 								state={errors[name] ? 'error' : 'default'}
@@ -224,6 +238,7 @@ const ProductModal = (props: Props) => {
 									noOptionsText="Aucune organisation trouvée"
 									sx={{ width: '100%' }}
 									options={entityOptions}
+									filterOptions={autocompleteFilterOptions}
 									onChange={(_, optionSelected) => {
 										onChange(optionSelected?.value);
 									}}
@@ -231,6 +246,11 @@ const ProductModal = (props: Props) => {
 									defaultValue={entityOptions.find(
 										option => option.value === value
 									)}
+									value={
+										value
+											? entityOptions.find(option => option.value === value)
+											: { label: '', value: undefined }
+									}
 									renderInput={params => (
 										<div
 											ref={params.InputProps.ref}

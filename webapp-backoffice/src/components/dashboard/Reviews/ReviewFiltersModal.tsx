@@ -42,10 +42,8 @@ const ReviewFiltersModal = (props: Props) => {
 	const isOpen = useIsModalOpen(modal);
 
 	React.useEffect(() => {
-		if (isOpen) {
-			setTmpFilters(filters);
-		}
-	}, [isOpen]);
+		setTmpFilters(filters);
+	}, [filters]);
 
 	return (
 		<modal.Component
@@ -171,7 +169,10 @@ const ReviewFiltersModal = (props: Props) => {
 						priority="secondary"
 						className={fr.cx('fr-mt-1w')}
 						type="button"
-						onClick={() => modal.close()}
+						onClick={() => {
+							setTmpFilters(filters);
+							modal.close();
+						}}
 					>
 						Annuler
 					</Button>

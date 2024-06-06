@@ -21,6 +21,9 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import Head from 'next/head';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import { useRouter } from 'next/router';
+import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 
 interface Props {
 	product: Product;
@@ -58,6 +61,7 @@ const SectionWrapper = ({
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const { statsTotals } = useStats();
+	const router = useRouter();
 	const isTotalLoading = statsTotals.satisfaction === undefined;
 	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false);
 
@@ -103,6 +107,20 @@ const ProductStatPage = (props: Props) => {
 
 	const updateProduct = trpc.product.update.useMutation({});
 
+	const handleButtonClick = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			query: { autoCreate: true }
+		});
+	};
+
+	const handleSendInvitation = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/access`,
+			query: { autoInvite: true }
+		});
+	};
+
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<ProductLayout product={product}>
@@ -126,28 +144,11 @@ const ProductStatPage = (props: Props) => {
 				</Head>
 				<h1>Statistiques</h1>
 				{buttonsResult.metadata.count === 0 ? (
-					<Alert
-						severity="info"
-						title=""
-						description={
-							<>
-								Afin de récolter les avis et produire les statistiques pour ce
-								produit, vous devez{' '}
-								<Link
-									className={fr.cx('fr-link')}
-									href={`/administration/dashboard/product/${product.id}/buttons`}
-								>
-									créer un bouton
-								</Link>
-								.
-							</>
-						}
-					/>
+					<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
 				) : (
-					<Alert
-						severity="info"
-						title="Cette démarche n'a pas encore d'avis"
-						description="Une fois qu’un utilisateur a donné un avis, vous verrez une synthèse ici."
+					<NoReviewsPanel
+						improveBtnClick={() => {}}
+						sendInvitationBtnClick={handleSendInvitation}
 					/>
 				)}
 			</ProductLayout>

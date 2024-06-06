@@ -138,8 +138,7 @@ const ButtonModal = (props: Props) => {
 							<p>
 								Souhaitez-vous vraiment retirer les droits d’administration de{' '}
 								<span className={cx(classes.boldText)}>
-									{currentAccessRight?.user?.firstName}
-									{currentAccessRight?.user?.lastName}
+									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
 								</span>{' '}
 								pour <span className={cx(classes.boldText)}>{productName}</span>{' '}
 								?

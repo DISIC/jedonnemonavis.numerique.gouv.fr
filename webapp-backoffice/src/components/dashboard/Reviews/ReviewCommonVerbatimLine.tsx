@@ -124,7 +124,7 @@ const ReviewCommonVerbatimLine = ({
 							)}
 						>
 							{tableFieldCodeHelper.slice(1).map(tfch => (
-								<div className={fr.cx('fr-col-12')}>
+								<div key={tfch?.slug} className={fr.cx('fr-col-12')}>
 									<h3 className={cx(classes.subtitle2)}>{tfch?.question}</h3>
 									{tableAdministrationItems.map(row => {
 										const answer = getConditionnalValueText(
@@ -132,8 +132,19 @@ const ReviewCommonVerbatimLine = ({
 											row,
 											tfch?.slug || ''
 										);
+
+										// Hardcoded logic for now
+										if (tfch?.slug === 'contact_satisfaction') {
+											const parent_answer = getConditionnalValueText(
+												'contact_tried',
+												row,
+												'contact_reached'
+											);
+											if (parent_answer === 'Non') return;
+										}
+
 										return (
-											<p className={cx(classes.content)}>
+											<p key={answer} className={cx(classes.content)}>
 												{row} :{' '}
 												<span
 													key={row}

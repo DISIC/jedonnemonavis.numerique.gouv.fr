@@ -262,7 +262,7 @@ const ButtonModal = (props: Props) => {
 								}
 							}}
 						/>
-						{!('id' in currentButton) && (
+						{/* {!('id' in currentButton) && (
 							<Checkbox
 								options={[
 									{
@@ -282,7 +282,7 @@ const ButtonModal = (props: Props) => {
 									}
 								]}
 							/>
-						)}
+						)} */}
 					</div>
 				);
 

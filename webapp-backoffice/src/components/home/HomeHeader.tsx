@@ -30,7 +30,7 @@ const HomeHeader = () => {
 								Comment suivre la satisfaction de vos usagers ?
 							</h1>
 							<p className={cx(classes.description)}>
-								Avec l’outil Je donne mon avis, suivez-vous en temps réel la
+								Avec l’outil Je donne mon avis, suivez en temps réel la
 								satisfaction des usagers de vos services publics numériques.
 							</p>
 						</div>
