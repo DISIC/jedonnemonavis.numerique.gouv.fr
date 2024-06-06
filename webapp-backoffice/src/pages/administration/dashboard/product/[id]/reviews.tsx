@@ -27,6 +27,7 @@ import Head from 'next/head';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import { useRouter } from 'next/router';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import { useDebounce } from 'usehooks-ts';
 
 interface Props {
 	product: Product;
@@ -53,6 +54,9 @@ const ProductReviewsPage = (props: Props) => {
 		'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
+
+	const debouncedStartDate = useDebounce<string>(startDate, 500);
+	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const filter_modal = createModal({
 		id: 'filter-modal',
@@ -104,9 +108,9 @@ const ProductReviewsPage = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			startDate,
+			startDate: debouncedStartDate,
+			endDate: debouncedEndDate,
 			sort: sort,
-			endDate,
 			button_id: buttonId,
 			filters: filters
 		},
