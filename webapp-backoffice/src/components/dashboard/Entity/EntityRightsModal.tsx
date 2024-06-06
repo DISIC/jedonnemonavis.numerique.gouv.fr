@@ -34,10 +34,11 @@ interface Props {
 	refetchEntities: () => void;
 	entity?: Entity;
 	onClose: () => void;
+	fromSearch?: boolean;
 }
 
 const EntityRightsModal = (props: Props) => {
-	const { modal, entity, refetchEntities, onClose } = props;
+	const { modal, entity, fromSearch, refetchEntities, onClose } = props;
 
 	const { data: session } = useSession();
 
@@ -150,7 +151,7 @@ const EntityRightsModal = (props: Props) => {
 				doClosesModal: false,
 				onClick: () => {
 					setActionType(null);
-					modal.close();
+					onClose();
 				}
 			}
 		];
@@ -160,13 +161,13 @@ const EntityRightsModal = (props: Props) => {
 		switch (actionType) {
 			case 'add':
 				if (actionEntityRight?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${
+					return `Une invitation a été envoyée à ${
 						actionEntityRight?.user_email
 							? actionEntityRight?.user_email
 							: actionEntityRight?.user_email_invite
 					}.`;
 				} else {
-					return `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName} a été ajouté comme administrateur.`;
+					return `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName} est administrateur.`;
 				}
 			case 'resend-email':
 				return `Un e-mail d’invitation a été renvoyé à ${
@@ -179,7 +180,7 @@ const EntityRightsModal = (props: Props) => {
 					actionEntityRight?.user !== null
 						? `${actionEntityRight?.user?.firstName} ${actionEntityRight?.user?.lastName}`
 						: actionEntityRight.user_email_invite
-				} a été retiré comme administrateur ou administratrice de cette organisation.`;
+				} n'a plus accès.`;
 		}
 
 		return '';
@@ -210,7 +211,7 @@ const EntityRightsModal = (props: Props) => {
 						onClose={function noRefCheck() {
 							setActionType(null);
 						}}
-						severity={actionType === 'remove' ? 'info' : 'success'}
+						severity={'success'}
 						className={fr.cx('fr-mb-2w')}
 						small
 						description={getAlertTitle()}
@@ -242,14 +243,47 @@ const EntityRightsModal = (props: Props) => {
 							<Loader />
 						</div>
 					) : (
-						adminEntityRights.map((adminEntityRight, index) => (
-							<EntityRightCard
-								key={index}
-								adminEntityRight={adminEntityRight}
-								onButtonClick={handleActionsButtons}
-								withOptions={isMine}
-							/>
-						))
+						<>
+							<div className={cx(classes.entitySection)}>
+								{adminEntityRights.map((adminEntityRight, index) => {
+									if (adminEntityRight.user !== null) {
+										return (
+											<EntityRightCard
+												key={index}
+												adminEntityRight={adminEntityRight}
+												onButtonClick={handleActionsButtons}
+												withOptions={isMine}
+											/>
+										);
+									}
+								})}
+							</div>
+							<div>
+								{adminEntityRights.some(
+									adminEntityRight => adminEntityRight.user === null
+								) && (
+									<>
+										<div className={cx(classes.inviteTitle)}>
+											Invitations envoyées
+										</div>
+										<div>
+											{adminEntityRights
+												.filter(
+													adminEntityRight => adminEntityRight.user === null
+												)
+												.map((adminEntityRight, index) => (
+													<EntityRightCard
+														key={index}
+														adminEntityRight={adminEntityRight}
+														onButtonClick={handleActionsButtons}
+														withOptions={isMine}
+													/>
+												))}
+										</div>
+									</>
+								)}
+							</div>
+						</>
 					)}
 				</div>
 				{isMine && (
@@ -261,7 +295,9 @@ const EntityRightsModal = (props: Props) => {
 					>
 						<div className={classes.addSection}>
 							<Input
-								label="Adresse email"
+								label="Envoyez une invitation par e-mail"
+								hintText="Exemple : prenomnom@email.com"
+								className={classes.emailInput}
 								nativeInputProps={{
 									onChange: e => {
 										setAddError('');
@@ -325,7 +361,7 @@ const EntityRightsModal = (props: Props) => {
 				'fr-grid-row--gutters',
 				'fr-my-0'
 			)}
-			buttons={displayModalButtons()}
+			buttons={fromSearch ? displayModalButtons() : undefined}
 		>
 			{displayModalContent()}
 		</modal.Component>
@@ -339,9 +375,12 @@ const useStyles = tss
 		boldText: {
 			fontWeight: 'bold'
 		},
+		emailInput: {
+			marginBottom: '0 !important'
+		},
 		addSection: {
 			display: 'flex',
-			alignItems: 'center',
+			alignItems: 'flex-end',
 			width: '100%',
 			marginTop: fr.spacing('6v'),
 			'& > div': {
@@ -349,9 +388,15 @@ const useStyles = tss
 			},
 			'& > button': {
 				marginLeft: fr.spacing('5v'),
-				marginTop: fr.spacing('2v'),
 				marginBottom: !!addError ? fr.spacing('9v') : ''
 			}
+		},
+		entitySection: {
+			marginBottom: '0.75rem'
+		},
+		inviteTitle: {
+			fontWeight: 'bold',
+			padding: '5px 0'
 		}
 	}));
 

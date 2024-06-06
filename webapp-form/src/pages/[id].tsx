@@ -365,7 +365,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           )}
         >
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+            <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
               <div className={cx(classes.formSection)}>{displayLayout()}</div>
             </div>
           </div>
@@ -478,7 +478,7 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-        ...fr.spacing("padding", { topBottom: "8v", rightLeft: "18v" }),
+        ...fr.spacing("padding", { topBottom: "8v", rightLeft: "16v" }),
       },
     },
   }));
