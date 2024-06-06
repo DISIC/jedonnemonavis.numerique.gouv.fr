@@ -1,4 +1,3 @@
-import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { fr } from '@codegouvfr/react-dsfr';
 import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
@@ -9,10 +8,18 @@ type Props = {
 	description?: string;
 	link?: string;
 	linkName?: string;
+	isRow?: boolean;
 };
 
-const KPICard = ({ mainNumber, title, description, link, linkName }: Props) => {
-	const { classes, cx } = useStyles({ link });
+const KPICard = ({
+	mainNumber,
+	title,
+	description,
+	link,
+	linkName,
+	isRow
+}: Props) => {
+	const { classes, cx } = useStyles({ link, isRow });
 	const parseMainNumber = () => {
 		return mainNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 	};
@@ -48,27 +55,30 @@ const KPICard = ({ mainNumber, title, description, link, linkName }: Props) => {
 
 const useStyles = tss
 	.withName(KPICard.name)
-	.withParams<{ link: string | undefined }>()
-	.create(({ link }) => ({
+	.withParams<{ link: string | undefined; isRow: boolean | undefined }>()
+	.create(({ link, isRow }) => ({
 		kpiCardWrapper: {
 			background: 'white',
 			border: '1px solid lightgray',
 			padding: '2rem 1.5rem',
 			width: '100%',
 			[fr.breakpoints.up('md')]: {
-				width: '33%'
+				width: isRow ? '100%' : '33%'
 			},
 			display: 'flex',
 			alignItems: 'center',
-			flexDirection: 'column',
+			justifyContent: isRow ? 'center' : 'initial',
+			flexDirection: isRow ? 'row' : 'column',
+			gap: isRow ? '3rem' : 0,
 			borderBottom: `5px solid ${link ? fr.colors.decisions.text.title.blueFrance.default : '#3A3A3A'}`
 		},
 		mainNumberText: {
-			textAlign: 'center'
+			textAlign: 'center',
+			marginBottom: isRow ? 0 : '1.5rem'
 		},
 		title: {
 			...fr.typography[19].style,
-			marginBottom: '0.25rem',
+			marginBottom: isRow ? 0 : '0.25rem',
 			textAlign: 'center'
 		},
 		blueText: {
@@ -87,8 +97,11 @@ const useStyles = tss
 			}
 		},
 		description: {
-			minHeight: 50,
-			textAlign: 'center'
+			minHeight: isRow ? 'auto' : 50,
+			textAlign: 'center',
+			p: {
+				marginBottom: isRow ? 0 : '1.5rem'
+			}
 		}
 	}));
 
