@@ -50,35 +50,44 @@ export const CheckboxInput = (props: Props) => {
     e: ChangeEvent<HTMLInputElement>,
     options: CheckboxOption[]
   ) => {
+    const value = parseInt(e.target.value);
+
     if (isolated) {
       setOpinion({
         ...opinion,
-        [key]: e.target.checked ? [e.target.value] : [],
+        [key]: e.target.checked ? [value] : [],
         ...getChildrenResetObject(),
       });
     } else {
       const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
+        .filter((option) => !option.isolated)
         .map((opt) => opt.value);
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
+
+      if (e.target.checked) {
+        setOpinion({
+          ...opinion,
+          [key]: [
+            ...opinion[key].filter((sibling) =>
+              isolatedSiblings.includes(sibling)
+            ),
+            value,
+          ],
+          ...getChildrenResetObject(),
+        });
+      } else {
+        setOpinion({
+          ...opinion,
+          [key]: opinion[key].filter((d) => d !== value),
+          ...getChildrenResetObject(),
+        });
+      }
     }
   };
 
   if (field.kind === "checkbox") {
     return (
       <div className={fr.cx("fr-grid-row")}>
-        <div className={fr.cx("fr-col-12")}>
+        <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
           <>
             <Checkbox
               legend={t(field.label)}
@@ -116,5 +125,10 @@ const useStyles = tss
     smallText: {
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
+    },
+    checkboxContainer: {
+      ".fr-fieldset__content": {
+        paddingTop: "1.5rem !important",
+      },
     },
   }));
