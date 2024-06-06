@@ -19,7 +19,7 @@ const KPICard = ({ mainNumber, title, description, link, linkName }: Props) => {
 
 	return (
 		<div className={cx(classes.kpiCardWrapper)}>
-			<h2>{parseMainNumber()}</h2>
+			<h2 className={cx(classes.mainNumberText)}>{parseMainNumber()}</h2>
 			<h6 className={cx(classes.title, link ? cx(classes.blueText) : '')}>
 				{title}
 			</h6>
@@ -54,15 +54,22 @@ const useStyles = tss
 			background: 'white',
 			border: '1px solid lightgray',
 			padding: '2rem 1.5rem',
-			width: '33%',
+			width: '100%',
+			[fr.breakpoints.up('md')]: {
+				width: '33%'
+			},
 			display: 'flex',
 			alignItems: 'center',
 			flexDirection: 'column',
 			borderBottom: `5px solid ${link ? fr.colors.decisions.text.title.blueFrance.default : '#3A3A3A'}`
 		},
+		mainNumberText: {
+			textAlign: 'center'
+		},
 		title: {
 			...fr.typography[19].style,
-			marginBottom: '0.25rem'
+			marginBottom: '0.25rem',
+			textAlign: 'center'
 		},
 		blueText: {
 			color: fr.colors.decisions.text.title.blueFrance.default
