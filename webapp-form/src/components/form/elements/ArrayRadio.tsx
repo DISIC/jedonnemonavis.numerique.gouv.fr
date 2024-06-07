@@ -58,12 +58,14 @@ export const ArrayRadio = (props: Props) => {
                 <thead className={cx(classes.bgWhite)}>
                   <tr>
                     <th />
-                    {field.options.map((option) => (
-                      <>
-                        <th scope="col" className={cx(classes.headerLabels)}>
-                          {t(option.label)}
-                        </th>
-                      </>
+                    {field.options.map((option, index) => (
+                      <th
+                        key={`theader-${index}`}
+                        scope="col"
+                        className={cx(classes.headerLabels)}
+                      >
+                        {t(option.label)}
+                      </th>
                     ))}
                   </tr>
                 </thead>
@@ -233,17 +235,14 @@ const useStyles = tss
       },
       th: {
         textAlign: "center",
-        "&:last-child": {
-          // paddingLeft: "3rem",
-        },
       },
-      "th:first-child, td:first-child": {
+      "th:first-of-type, td:first-of-type": {
         width: "10rem",
       },
       "th:last-child, td:last-child": {
         width: "10rem",
       },
-      "th:not(:first-child):not(:last-child)": {
+      "th:not(:first-of-type):not(:last-child)": {
         width: "calc((100% - 20rem) / 6)",
       },
     },

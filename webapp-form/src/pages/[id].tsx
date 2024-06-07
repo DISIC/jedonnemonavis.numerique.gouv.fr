@@ -218,7 +218,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     if (router.isReady) {
       router.replace({
         pathname: router.pathname,
-        query: { id: product.id },
+        query: { id: router.query.id },
       });
       setIsLoading(false);
     }
@@ -229,7 +229,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       router.push(
         {
           pathname: router.pathname,
-          query: { id: product.id, step: currentStep },
+          query: { ...router.query, step: currentStep },
         },
         undefined,
         { shallow: true }
@@ -246,8 +246,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     contact_satisfaction: [],
     verbatim: undefined,
   });
-
-  console.log(opinion);
 
   const displayLayout = () => {
     if (isFormSubmitted) {
@@ -379,7 +377,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
 export const getServerSideProps: GetServerSideProps<{
   product: Product;
-}> = async ({ params, locale }) => {
+}> = async ({ params, query, locale, res }) => {
   if (!params?.id || isNaN(parseInt(params?.id as string))) {
     return {
       notFound: true,
@@ -387,12 +385,27 @@ export const getServerSideProps: GetServerSideProps<{
   }
 
   const productId = params.id as string;
+  const buttonId = query.button as string;
+
+  const isXWikiLink = !buttonId;
 
   const prisma = new PrismaClient();
   const product = await prisma.product.findUnique({
-    where: {
-      id: parseInt(productId),
-    },
+    where: isXWikiLink
+      ? {
+          xwiki_id: parseInt(productId),
+          buttons: {
+            some: {},
+          },
+        }
+      : {
+          id: parseInt(productId),
+          buttons: {
+            some: {
+              id: { equals: parseInt(buttonId) },
+            },
+          },
+        },
     include: {
       buttons: true,
     },

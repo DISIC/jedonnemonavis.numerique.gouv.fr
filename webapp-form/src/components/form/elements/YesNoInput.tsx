@@ -39,7 +39,7 @@ export const YesNoInput = (props: Props) => {
           </div>
         )}
         {"options" in form[0] &&
-          form[0].options.map((option: RadioOption) => (
+          form[0].options.map((option: RadioOption, index) => (
             <div className={fr.cx("fr-col-12")} key={option.value}>
               {opinion.contact_tried.includes(option.value) &&
                 !field.excluded.includes(option.value) && (
@@ -49,71 +49,68 @@ export const YesNoInput = (props: Props) => {
                     </label>
                     <div className={cx(classes.radioContainer)}>
                       <fieldset
+                        id={`fieldset-${option.label}-${index}`}
                         className={cx(classes.fieldset, fr.cx("fr-fieldset"))}
                       >
                         <ul>
-                          {field.options.map((f) => (
-                            <form key={`${option.name}_${f.value}`}>
-                              <li>
-                                <input
-                                  id={`radio-${f.label}-${option.label}-${f.value}`}
-                                  className={fr.cx("fr-sr-only")}
-                                  type="radio"
-                                  name={f.value.toString()}
-                                  checked={opinion.contact_reached.includes(
-                                    `${option.value}_${f.value}`
-                                  )}
-                                  onChange={() => {
-                                    setOpinion((currentOpinion) => {
-                                      const key = `${option.value}_${f.value}`;
-                                      let newContactReached;
+                          {field.options.map((f, fIndex) => (
+                            <li key={`${option.name}_${f.value}_${index}`}>
+                              <input
+                                id={`radio-${index}-${fIndex}-${f.label}-${option.label}-${f.value}`}
+                                className={fr.cx("fr-sr-only")}
+                                type="radio"
+                                name={`${f.value.toString()}-${index}`}
+                                checked={opinion.contact_reached.includes(
+                                  `${option.value}_${f.value}`
+                                )}
+                                onChange={() => {
+                                  setOpinion((currentOpinion) => {
+                                    const key = `${option.value}_${f.value}`;
+                                    let newContactReached;
+                                    if (
+                                      currentOpinion.contact_reached.includes(
+                                        key
+                                      )
+                                    ) {
+                                      newContactReached =
+                                        currentOpinion.contact_reached.filter(
+                                          (item) => item !== key
+                                        );
+                                    } else {
                                       if (
-                                        currentOpinion.contact_reached.includes(
-                                          key
+                                        containsSpecificVariableNumberPattern(
+                                          currentOpinion.contact_reached,
+                                          `${option.value}`
                                         )
                                       ) {
-                                        newContactReached =
-                                          currentOpinion.contact_reached.filter(
-                                            (item) => item !== key
-                                          );
+                                        newContactReached = [
+                                          ...currentOpinion.contact_reached.filter(
+                                            (item) =>
+                                              !item.includes(`${option.value}_`)
+                                          ),
+                                          key,
+                                        ];
                                       } else {
-                                        if (
-                                          containsSpecificVariableNumberPattern(
-                                            currentOpinion.contact_reached,
-                                            `${option.value}`
-                                          )
-                                        ) {
-                                          newContactReached = [
-                                            ...currentOpinion.contact_reached.filter(
-                                              (item) =>
-                                                !item.includes(
-                                                  `${option.value}_`
-                                                )
-                                            ),
-                                            key,
-                                          ];
-                                        } else {
-                                          newContactReached = [
-                                            ...currentOpinion.contact_reached,
-                                            key,
-                                          ];
-                                        }
+                                        newContactReached = [
+                                          ...currentOpinion.contact_reached,
+                                          key,
+                                        ];
                                       }
-                                      return {
-                                        ...currentOpinion,
-                                        contact_reached: newContactReached,
-                                      };
-                                    });
-                                  }}
-                                />
-                                <label
-                                  htmlFor={`radio-${f.label}-${option.label}-${f.value}`}
-                                  className={cx(classes.radioInput)}
-                                >
-                                  {t(f.label)}
-                                </label>
-                              </li>
-                            </form>
+                                    }
+                                    return {
+                                      ...currentOpinion,
+                                      contact_reached: newContactReached,
+                                    };
+                                  });
+                                }}
+                              />
+                              <label
+                                htmlFor={`radio-${index}-${fIndex}-${f.label}-${option.label}-${f.value}`}
+                                className={cx(classes.radioInput)}
+                              >
+                                {t(f.label)}
+                              </label>
+                            </li>
                           ))}
                         </ul>
                       </fieldset>

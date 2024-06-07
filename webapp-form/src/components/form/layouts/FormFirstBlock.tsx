@@ -41,7 +41,7 @@ export const FormFirstBlock = (props: Props) => {
           onSubmit(tmpOpinion);
           router.push({
             pathname: router.pathname,
-            query: { id: product.id, step: 0 },
+            query: { ...router.query, step: 0 },
           });
         }}
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
