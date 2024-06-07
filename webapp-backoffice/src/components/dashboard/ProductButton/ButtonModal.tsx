@@ -133,11 +133,9 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const buttonCode = `
-		<a href="https://voxusagers.numerique.gouv.fr/Demarches/3119?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=372389f25377e55b5531c373cec246ac">
-      <img src="https://voxusagers.numerique.gouv.fr/static/bouton-${buttonColor}.svg" alt="Je donne mon avis" />
-		</a>
-	`;
+	const buttonCode = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}">
+      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}.svg" alt="Je donne mon avis" />
+</a>`;
 
 	const displayModalContent = (): JSX.Element => {
 		switch (modalType) {
@@ -176,7 +174,7 @@ const ButtonModal = (props: Props) => {
 							<Image
 								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}
 								alt="bouton-je-donne-mon-avis"
-								src={`/assets/bouton-${buttonColor}.png`}
+								src={`/assets/bouton-${buttonColor}.svg`}
 								width={150}
 								height={85}
 							/>
@@ -193,12 +191,6 @@ const ButtonModal = (props: Props) => {
 									contentEditable: false
 								}}
 							/>
-							<p className={fr.cx('fr-text--xs')}>
-								Attention, ces codes ne sont valables que pour cette démarche.
-								Une clé d'API est associée à votre compte et à tous les avis
-								exprimés via ces codes. En cas de difficulté, consultez votre
-								développeur web.
-							</p>
 						</div>
 						<Accordion
 							label="Où placer le bouton ?"
@@ -455,8 +447,8 @@ const ButtonModal = (props: Props) => {
 const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	textArea: {
 		'.fr-input': {
-			height: '200px',
-			minHeight: '200px'
+			height: '150px',
+			minHeight: '150px'
 		}
 	},
 	topContainer: {

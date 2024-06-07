@@ -93,7 +93,10 @@ const ProductButtonCard = (props: Props) => {
 							</MenuItem> */}
 							</Menu>
 							{!button.isTest && (
-								<Button size="small" onClick={() => onButtonClick('install')}>
+								<Button
+									size="small"
+									onClick={() => onButtonClick('install', button)}
+								>
 									Installer
 								</Button>
 							)}
