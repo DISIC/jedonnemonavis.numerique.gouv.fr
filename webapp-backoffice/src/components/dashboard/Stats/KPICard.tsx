@@ -36,17 +36,7 @@ const KPICard = ({
 			{link && linkName && (
 				<Link href={link} className={cx(classes.blueText, classes.linkLabel)}>
 					{linkName}{' '}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="1.2em"
-						height="1.2em"
-						viewBox="0 0 28 28"
-					>
-						<path
-							fill="currentColor"
-							d="M15.705 4.289a1 1 0 1 0-1.406 1.422L21.675 13H4a1 1 0 1 0 0 2h17.673l-7.374 7.286a1 1 0 0 0 1.406 1.423l8.927-8.821a1.25 1.25 0 0 0 0-1.778z"
-						/>
-					</svg>
+					<span className="fr-icon-arrow-right-line" aria-hidden="true"></span>
 				</Link>
 			)}
 		</div>
@@ -62,13 +52,15 @@ const useStyles = tss
 			border: '1px solid lightgray',
 			padding: '2rem 1.5rem',
 			width: '100%',
+			flexDirection: 'column',
+
 			[fr.breakpoints.up('md')]: {
-				width: isRow ? '100%' : '33%'
+				width: isRow ? '100%' : '33%',
+				flexDirection: isRow ? 'row' : 'column'
 			},
 			display: 'flex',
 			alignItems: 'center',
 			justifyContent: isRow ? 'center' : 'initial',
-			flexDirection: isRow ? 'row' : 'column',
 			gap: isRow ? '3rem' : 0,
 			borderBottom: `5px solid ${link ? fr.colors.decisions.text.title.blueFrance.default : '#3A3A3A'}`
 		},
