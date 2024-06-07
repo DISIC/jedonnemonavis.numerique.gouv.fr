@@ -73,11 +73,17 @@ const ButtonModal = (props: Props) => {
 	}, [button]);
 
 	const createButton = trpc.button.create.useMutation({
-		onSuccess: result => handleModalClose(result.data)
+		onSuccess: result => {
+			setCurrentButton(defaultButton);
+			handleModalClose(result.data);
+		}
 	});
 
 	const updateButton = trpc.button.update.useMutation({
-		onSuccess: result => handleModalClose(result.data)
+		onSuccess: result => {
+			setCurrentButton(defaultButton);
+			handleModalClose(result.data);
+		}
 	});
 
 	const hasErrors = (key: keyof FormErrors): boolean => {
