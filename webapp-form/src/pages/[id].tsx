@@ -216,9 +216,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   React.useEffect(() => {
     setIsLoading(true);
     if (router.isReady) {
+      const { step, ...queryWithoutStep } = router.query;
       router.replace({
         pathname: router.pathname,
-        query: { id: router.query.id },
+        query: { ...queryWithoutStep },
       });
       setIsLoading(false);
     }
