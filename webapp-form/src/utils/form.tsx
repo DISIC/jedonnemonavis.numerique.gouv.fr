@@ -135,6 +135,12 @@ export const secondSectionA: FormField[] = [
   // },
   {
     name: "contact_reached",
+    conditions: [
+      {
+        name: "contact_tried",
+        values: [9, 10, 11, 12],
+      },
+    ],
     kind: "yes-no",
     label: "fields.contact_reached.label",
     options: [

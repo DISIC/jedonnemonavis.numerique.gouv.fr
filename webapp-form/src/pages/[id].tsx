@@ -247,6 +247,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     verbatim: undefined,
   });
 
+  console.log(opinion);
+
   const displayLayout = () => {
     if (isFormSubmitted) {
       // LAST SCREEN

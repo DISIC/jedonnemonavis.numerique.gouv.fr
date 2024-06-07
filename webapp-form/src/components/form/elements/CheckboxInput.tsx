@@ -9,6 +9,7 @@ import { ChangeEvent, SetStateAction, useEffect } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { areArrayEquals } from "@/src/utils/tools";
 
 type Props = {
   field: FormField;
@@ -20,18 +21,29 @@ type Props = {
 export const CheckboxInput = (props: Props) => {
   const { field, opinion, setOpinion, form } = props;
   const { classes, cx } = useStyles({ nbItems: 5 });
-
   const { t } = useTranslation("common");
 
   const getChildrenResetObject = () => {
+    let opinionPropsObj: {
+      [key in keyof Opinion]?: any;
+    } = {};
+
     const children = form.filter(
       (f) =>
         f.conditions && f.conditions.map((c) => c.name).includes(field.name)
     );
 
-    let opinionPropsObj: {
-      [key in keyof Opinion]?: any;
-    } = {};
+    children.forEach((c) => {
+      const subChildren = form.filter(
+        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed)
+      );
+
+      subChildren.forEach((sc) => {
+        opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
+          ? []
+          : undefined;
+      });
+    });
 
     children.forEach((cf) => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])

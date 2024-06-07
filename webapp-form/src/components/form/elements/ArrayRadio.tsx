@@ -70,70 +70,83 @@ export const ArrayRadio = (props: Props) => {
                 <tbody className={cx(classes.bgWhite)}>
                   {"options" in form[0] &&
                     form[0].options &&
-                    form[0].options.map((option: RadioOption) => (
-                      <tr className={cx(classes.optionRow)} key={option.value}>
-                        {(field.needed.includes(option.value) ||
-                          (opinion.contact_tried.includes(option.value) &&
-                            !field.excluded.includes(option.value))) && (
-                          <>
-                            {containsPattern(
-                              opinion.contact_reached,
-                              new RegExp(
-                                escapeRegex(option.value.toString()) + "_17"
-                              )
-                            ) && (
-                              <>
-                                <td>
-                                  <label className={cx(classes.label)}>
-                                    {getFirstTwoWords(t(option.label))}
-                                  </label>
-                                </td>
-                                <td
-                                  className={cx(classes.radioWrapper)}
-                                  colSpan={6}
-                                >
-                                  <div className={cx(classes.containerRadio)}>
-                                    <RadioButtons
-                                      legend=""
-                                      name="radio"
-                                      options={field.options.map(
-                                        (opt, index) => ({
-                                          label: ".",
-                                          nativeInputProps: {
-                                            value: `value${index}`,
-                                            onChange: (event) => {
-                                              setOpinion({
-                                                ...opinion,
-                                                contact_satisfaction: [
-                                                  ...opinion.contact_satisfaction.filter(
-                                                    (cs) =>
-                                                      !cs.includes(
-                                                        escapeRegex(
-                                                          option.value.toString()
-                                                        )
-                                                      )
-                                                  ),
+                    form[0].options.map(
+                      (option: RadioOption, index: number) => (
+                        <tr
+                          className={cx(classes.optionRow)}
+                          key={option.value}
+                        >
+                          {(field.needed.includes(option.value) ||
+                            (opinion.contact_tried.includes(option.value) &&
+                              !field.excluded.includes(option.value))) && (
+                            <>
+                              {containsPattern(
+                                opinion.contact_reached,
+                                new RegExp(
+                                  escapeRegex(option.value.toString()) + "_17"
+                                )
+                              ) && (
+                                <>
+                                  <td>
+                                    <label className={cx(classes.label)}>
+                                      {getFirstTwoWords(t(option.label))}
+                                    </label>
+                                  </td>
+                                  <td
+                                    className={cx(classes.radioWrapper)}
+                                    colSpan={6}
+                                  >
+                                    <div className={cx(classes.containerRadio)}>
+                                      <RadioButtons
+                                        legend=""
+                                        name={`radio-${index}`}
+                                        options={field.options.map(
+                                          (opt, index) => ({
+                                            label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
+                                            nativeInputProps: {
+                                              value: `value${index}`,
+                                              checked:
+                                                opinion.contact_satisfaction.includes(
                                                   escapeRegex(
                                                     option.value.toString()
                                                   ) +
                                                     "_" +
-                                                    opt.value,
-                                                ],
-                                              });
+                                                    opt.value
+                                                ),
+                                              onChange: (event) => {
+                                                setOpinion({
+                                                  ...opinion,
+                                                  contact_satisfaction: [
+                                                    ...opinion.contact_satisfaction.filter(
+                                                      (cs) =>
+                                                        !cs.includes(
+                                                          escapeRegex(
+                                                            option.value.toString()
+                                                          )
+                                                        )
+                                                    ),
+                                                    escapeRegex(
+                                                      option.value.toString()
+                                                    ) +
+                                                      "_" +
+                                                      opt.value,
+                                                  ],
+                                                });
+                                              },
                                             },
-                                          },
-                                        })
-                                      )}
-                                      orientation="horizontal"
-                                    />
-                                  </div>
-                                </td>
-                              </>
-                            )}
-                          </>
-                        )}
-                      </tr>
-                    ))}
+                                          })
+                                        )}
+                                        orientation="horizontal"
+                                      />
+                                    </div>
+                                  </td>
+                                </>
+                              )}
+                            </>
+                          )}
+                        </tr>
+                      )
+                    )}
                 </tbody>
               </table>
             </div>
@@ -184,7 +197,10 @@ const useStyles = tss
         ".fr-label": {
           color: "transparent",
           width: 0,
+          height: 0,
+          overflow: "hidden",
           paddingLeft: "1.5rem",
+          paddingBottom: "2.3rem",
         },
       },
       ".fr-radio-group": {
@@ -211,6 +227,7 @@ const useStyles = tss
     mainTable: {
       width: "100%",
       borderCollapse: "collapse",
+      tableLayout: "fixed",
       "th, tr": {
         borderBottom: "1px solid lightgray",
       },
@@ -226,9 +243,8 @@ const useStyles = tss
       "th:last-child, td:last-child": {
         width: "10rem",
       },
-      "th:not(:first-child):not(:last-child), td:not(:first-child):not(:last-child)":
-        {
-          width: "calc((100% - 20rem) / 6)",
-        },
+      "th:not(:first-child):not(:last-child)": {
+        width: "calc((100% - 20rem) / 6)",
+      },
     },
   }));

@@ -46,6 +46,7 @@ export type FormField =
       hint?: string;
       values: { [key in Feeling]: number };
       conditions?: Condition[];
+      needed?: number[];
     }
   | {
       kind: "input-text";
@@ -53,6 +54,7 @@ export type FormField =
       label: string;
       hint?: string;
       conditions?: Condition[];
+      needed?: number[];
     }
   | {
       kind: "input-textarea";
@@ -60,6 +62,7 @@ export type FormField =
       label: string;
       hint?: string;
       conditions?: Condition[];
+      needed?: number[];
     }
   | {
       kind: "checkbox";
@@ -67,6 +70,7 @@ export type FormField =
       label: string;
       hint: string;
       conditions?: Condition[];
+      needed?: number[];
       options: CheckboxOption[];
     }
   | {
@@ -95,6 +99,7 @@ export type FormField =
       hintLeft?: string;
       hintRight?: string;
       conditions?: Condition[];
+      needed?: number[];
       options: RadioOption[];
     };
 
