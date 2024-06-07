@@ -307,6 +307,11 @@ const useStyles = tss.withName(ProductCard.name).create({
 		display: 'flex',
 		justifyContent: 'end'
 	},
+	badgeSkeleton: {
+		transformOrigin: '0',
+		transform: 'none'
+	},
+	cardSkeleton: {},
 	productTitle: {
 		fontSize: '18px',
 		fontWeight: 'bold',

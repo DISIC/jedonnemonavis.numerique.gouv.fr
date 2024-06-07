@@ -201,6 +201,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     });
   };
 
+  console.log(product.buttons);
+
   React.useEffect(() => {
     const handleRouteChange = (url: string) => {
       const queryParams = new URLSearchParams(url.split("?")[1]);
@@ -387,6 +389,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   const productId = params.id as string;
   const buttonId = query.button as string;
+  const xwikiButtonName = query.nd_source as string;
 
   const isXWikiLink = !buttonId;
 
@@ -408,10 +411,32 @@ export const getServerSideProps: GetServerSideProps<{
           },
         },
     include: {
-      buttons: true,
+      buttons: isXWikiLink
+        ? true
+        : {
+            where: {
+              id: { equals: parseInt(buttonId) },
+            },
+          },
     },
   });
   prisma.$disconnect();
+
+  if (isXWikiLink) {
+    if (!product?.buttons.length)
+      return {
+        notFound: true,
+      };
+
+    const sameName = product.buttons.find(
+      (b) => b.xwiki_title === xwikiButtonName
+    );
+    const nameButton = product.buttons.find((b) => b.xwiki_title === "button");
+
+    if (sameName) product.buttons = [sameName];
+    else if (nameButton) product.buttons = [nameButton];
+    else product.buttons = [product.buttons[0]];
+  }
 
   if (product) {
     return {
