@@ -172,9 +172,12 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			<div id="footer" tabIndex={-1}>
 				<Footer
 					accessibility="partially compliant"
-					bottomItems={[{ text: 'Contact', linkProps: { href: '/contact' } }]}
+					bottomItems={[
+						{ text: 'Données personnelles', linkProps: { href: '/cgu' } },
+						{ text: 'Contact', linkProps: { href: '/contact' } }
+					]}
 					termsLinkProps={{
-						href: '/CGU#MentionsLegales'
+						href: '/legalNotice'
 					}}
 				/>
 			</div>
