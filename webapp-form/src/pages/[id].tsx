@@ -34,11 +34,30 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const currentSteps =
+    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
+
+  const resetForm = () => {
+    setIsLoading(true);
+    if (router.isReady) {
+      const { step, ...queryWithoutStep } = router.query;
+      localStorage.removeItem("userId");
+      router.replace({
+        pathname: router.pathname,
+        query: { ...queryWithoutStep },
+      });
+      setIsLoading(false);
+    }
+  };
 
   const createReview = trpc.review.create.useMutation({
-    onSuccess: () => {
-      setIsLoading(false);
-      setIsFormSubmitted(true);
+    onSuccess: () => setIsLoading(false),
+  });
+
+  const insertOrUpdateReview = trpc.review.insertOrUpdate.useMutation({
+    onSuccess: () => setIsLoading(false),
+    onError: (error) => {
+      if (error.data?.httpStatus === 404) resetForm();
     },
   });
 
@@ -80,128 +99,156 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     }
   };
 
-  const handleSubmitReview = async (opinion: Opinion) => {
-    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).reduce(
-      (accumulator, [key, value]) => {
-        if (["contact_reached", "contact_satisfaction"].includes(key)) {
-          if (Array.isArray(value)) {
-            value.map((ids) => {
-              const [parent_id, child_id] = ids.toString().split("_");
+  const formatAnswers = (
+    opinion: Partial<Opinion>
+  ): Prisma.AnswerCreateInput[] => {
+    return Object.entries(opinion).reduce((accumulator, [key, value]) => {
+      if (["contact_reached", "contact_satisfaction"].includes(key)) {
+        if (Array.isArray(value)) {
+          value.map((ids) => {
+            const [parent_id, child_id] = ids.toString().split("_");
 
-              const parentFieldInSection = allFields.find(
-                (field) => field.name === "contact_tried"
-              ) as FormField;
+            const parentFieldInSection = allFields.find(
+              (field) => field.name === "contact_tried"
+            ) as FormField;
 
-              const childFieldInSection = allFields.find(
-                (field) => field.name === key
-              ) as FormField;
+            const childFieldInSection = allFields.find(
+              (field) => field.name === key
+            ) as FormField;
 
-              if (
-                "options" in parentFieldInSection &&
-                "options" in childFieldInSection
-              ) {
-                const parentOption = parentFieldInSection.options.find(
-                  (o) => o.value === parseInt(parent_id)
-                );
-                const childOption = childFieldInSection.options.find(
-                  (o) => o.value === parseInt(child_id)
-                );
+            if (
+              "options" in parentFieldInSection &&
+              "options" in childFieldInSection
+            ) {
+              const parentOption = parentFieldInSection.options.find(
+                (o) => o.value === parseInt(parent_id)
+              );
+              const childOption = childFieldInSection.options.find(
+                (o) => o.value === parseInt(child_id)
+              );
 
-                if (parentOption && childOption) {
-                  accumulator = accumulator.map((answer) => {
-                    if (answer.answer_item_id === parentOption.value) {
-                      const existingChildCreations =
-                        answer.child_answers?.createMany?.data;
-                      return {
-                        ...answer,
-                        child_answers: {
-                          createMany: {
-                            data: [
-                              ...(Array.isArray(existingChildCreations)
-                                ? existingChildCreations
-                                : []),
-                              {
-                                field_code: childFieldInSection.name,
-                                field_label: t(childFieldInSection.label, {
-                                  lng: "fr",
-                                }) as string,
-                                kind: "radio",
-                                review_id: -1,
-                                answer_text: t(childOption.label, {
-                                  lng: "fr",
-                                }),
-                                intention: childOption.intention,
-                                answer_item_id: childOption.value,
-                              },
-                            ],
-                          },
+              if (parentOption && childOption) {
+                accumulator = accumulator.map((answer) => {
+                  if (answer.answer_item_id === parentOption.value) {
+                    const existingChildCreations =
+                      answer.child_answers?.createMany?.data;
+                    return {
+                      ...answer,
+                      child_answers: {
+                        createMany: {
+                          data: [
+                            ...(Array.isArray(existingChildCreations)
+                              ? existingChildCreations
+                              : []),
+                            {
+                              field_code: childFieldInSection.name,
+                              field_label: t(childFieldInSection.label, {
+                                lng: "fr",
+                              }) as string,
+                              kind: "radio",
+                              review_id: -1,
+                              answer_text: t(childOption.label, {
+                                lng: "fr",
+                              }),
+                              intention: childOption.intention,
+                              answer_item_id: childOption.value,
+                            },
+                          ],
                         },
-                      };
-                    }
-                    return answer;
-                  });
-                }
+                      },
+                    };
+                  }
+                  return answer;
+                });
               }
-            });
-          }
-        } else {
-          const fieldInSection = allFields.find(
-            (field) => field.name === key
-          ) as FormField;
+            }
+          });
+        }
+      } else {
+        const fieldInSection = allFields.find(
+          (field) => field.name === key
+        ) as FormField;
 
-          let tmpAnswer = {
-            field_code: fieldInSection.name,
-            field_label: t(fieldInSection.label, {
-              lng: "fr",
-            }) as string,
-            kind:
-              fieldInSection.kind === "smiley"
-                ? "radio"
-                : fieldInSection.kind !== "input-text" &&
-                    fieldInSection.kind !== "input-textarea"
-                  ? fieldInSection.kind
-                  : "text",
-            review: {},
-          } as Prisma.AnswerCreateInput;
+        let tmpAnswer = {
+          field_code: fieldInSection.name,
+          field_label: t(fieldInSection.label, {
+            lng: "fr",
+          }) as string,
+          kind:
+            fieldInSection.kind === "smiley"
+              ? "radio"
+              : fieldInSection.kind !== "input-text" &&
+                  fieldInSection.kind !== "input-textarea"
+                ? fieldInSection.kind
+                : "text",
+          review: {},
+        } as Prisma.AnswerCreateInput;
 
-          if (typeof value == "number") {
-            const selectedOption = getSelectedOption(fieldInSection, value);
+        if (typeof value == "number") {
+          const selectedOption = getSelectedOption(fieldInSection, value);
+          tmpAnswer.answer_text = selectedOption.label;
+          tmpAnswer.intention = selectedOption.intention;
+          tmpAnswer.answer_item_id = selectedOption.value;
+          accumulator.push(tmpAnswer);
+        } else if (typeof value == "string") {
+          tmpAnswer.answer_text = value;
+          tmpAnswer.intention = "neutral";
+          tmpAnswer.answer_item_id = 0;
+          accumulator.push(tmpAnswer);
+        } else if (Array.isArray(value)) {
+          value.map((value) => {
+            let selectedOption = getSelectedOption(fieldInSection, value);
             tmpAnswer.answer_text = selectedOption.label;
             tmpAnswer.intention = selectedOption.intention;
             tmpAnswer.answer_item_id = selectedOption.value;
-            accumulator.push(tmpAnswer);
-          } else if (typeof value == "string") {
-            tmpAnswer.answer_text = value;
-            tmpAnswer.intention = "neutral";
-            tmpAnswer.answer_item_id = 0;
-            accumulator.push(tmpAnswer);
-          } else if (Array.isArray(value)) {
-            value.map((value) => {
-              let selectedOption = getSelectedOption(fieldInSection, value);
-              tmpAnswer.answer_text = selectedOption.label;
-              tmpAnswer.intention = selectedOption.intention;
-              tmpAnswer.answer_item_id = selectedOption.value;
-              accumulator.push({ ...tmpAnswer });
-            });
-          }
+            accumulator.push({ ...tmpAnswer });
+          });
         }
+      }
 
-        return accumulator;
-      },
-      [] as Prisma.AnswerCreateInput[]
-    );
+      return accumulator;
+    }, [] as Prisma.AnswerCreateInput[]);
+  };
 
-    createReview.mutate({
-      review: {
-        product_id: product.id,
-        button_id: product.buttons[0].id,
-        form_id: 1,
-      },
+  const handleCreateReview = async (opinion: Partial<Opinion>) => {
+    const answers = formatAnswers(opinion);
+
+    const userIdExists = localStorage.getItem("userId");
+
+    if (!userIdExists) {
+      const userId = crypto.randomUUID();
+
+      localStorage.setItem("userId", userId);
+
+      createReview.mutate({
+        review: {
+          product_id: product.id,
+          button_id: product.buttons[0].id,
+          form_id: 1,
+          user_id: userId,
+        },
+        answers,
+      });
+    } else {
+      handleInsertOrUpdateReview(opinion);
+    }
+  };
+
+  const handleInsertOrUpdateReview = async (opinion: Partial<Opinion>) => {
+    const answers = formatAnswers(opinion);
+
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) return;
+
+    insertOrUpdateReview.mutate({
+      user_id: userId,
+      product_id: product.id,
+      button_id:
+        parseInt(router.query.button as string) || product.buttons[0].id,
       answers,
     });
   };
-
-  console.log(product.buttons);
 
   React.useEffect(() => {
     const handleRouteChange = (url: string) => {
@@ -216,15 +263,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }, [router.events]);
 
   React.useEffect(() => {
-    setIsLoading(true);
-    if (router.isReady) {
-      const { step, ...queryWithoutStep } = router.query;
-      router.replace({
-        pathname: router.pathname,
-        query: { ...queryWithoutStep },
-      });
-      setIsLoading(false);
-    }
+    resetForm();
   }, [router.isReady]);
 
   React.useEffect(() => {
@@ -316,14 +355,27 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               opinion={opinion}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              steps={
-                process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
-              }
+              steps={currentSteps}
               onSubmit={(result, isLastStep) => {
                 setOpinion({ ...result });
+
+                const currentStepAnswerNames = currentSteps[
+                  currentStep
+                ].section.map((field) => field.name);
+
+                const currentStepValues = currentStepAnswerNames.reduce(
+                  (acc, name) => {
+                    acc[name] = result[name];
+                    return acc;
+                  },
+                  {} as any
+                );
+
+                handleInsertOrUpdateReview(currentStepValues);
+
                 if (isLastStep) {
-                  setIsLoading(true);
-                  handleSubmitReview(result);
+                  localStorage.removeItem("userId");
+                  setIsFormSubmitted(true);
                 }
               }}
             />
@@ -331,7 +383,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             <FormFirstBlock
               opinion={opinion}
               product={product}
-              onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
+              onSubmit={(tmpOpinion) => {
+                setOpinion({ ...tmpOpinion });
+                handleCreateReview({ satisfaction: tmpOpinion.satisfaction });
+              }}
             />
           )}
         </>

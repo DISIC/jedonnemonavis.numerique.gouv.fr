@@ -1,6 +1,7 @@
 import {
   CheckboxOption,
   Condition,
+  Feeling,
   FormField,
   Opinion,
 } from "@/src/utils/types";
@@ -120,6 +121,7 @@ export const Field = (props: Props) => {
           label={t(field.label)}
           hint={field.hint ? t(field.hint) : undefined}
           name={field.name}
+          value={opinion[field.name] as number}
           onChange={(value) => {
             setOpinion({ ...opinion, [field.name]: field.values[value] });
           }}
