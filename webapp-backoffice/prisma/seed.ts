@@ -30,7 +30,7 @@ async function main() {
 			await Promise.all(getWLDPromises());
 			break;
 		default:
-			await getWLDPromises();
+			await seed_users_products();
 			await formatted_title();
 	}
 }
