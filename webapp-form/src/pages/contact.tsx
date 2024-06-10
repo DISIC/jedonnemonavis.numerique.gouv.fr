@@ -50,7 +50,7 @@ const Contact = () => {
           </div>
         </div>
       </div>
-      <div className={cx(classes.socialBannerBg)}>
+      {/* <div className={cx(classes.socialBannerBg)}>
         <div className={fr.cx("fr-container", "fr-col-lg-10")}>
           <div
             className={cx(
@@ -89,7 +89,7 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 };
