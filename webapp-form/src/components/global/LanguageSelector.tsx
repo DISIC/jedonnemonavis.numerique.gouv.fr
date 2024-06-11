@@ -1,8 +1,8 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { memo } from 'react';
-import { tss } from 'tss-react/dsfr';
+import { fr } from "@codegouvfr/react-dsfr";
+import { memo } from "react";
+import { tss } from "tss-react/dsfr";
 
-export type Language = 'fr' | 'en' | 'ar' | 'es' | 'pt';
+export type Language = "fr" | "en" | "ar" | "es" | "pt";
 
 type Props = {
   lang: Language;
@@ -10,14 +10,14 @@ type Props = {
 };
 
 const fullNameByLang: Record<Language, string> = {
-  fr: 'Français',
-  en: 'English',
-  es: 'Español',
-  ar: 'العربية',
-  pt: 'Português'
+  fr: "Français",
+  en: "English",
+  es: "Español",
+  ar: "العربية",
+  pt: "Português",
 };
 
-const languages: Language[] = ['fr', 'en', 'ar', 'es', 'pt'];
+const languages: Language[] = ["fr", "en", "es"];
 
 /**
  * The button controlling the component must specify 2 attributes
@@ -32,25 +32,25 @@ export const LanguageSelector = memo((props: Props) => {
   return (
     <>
       <div className={classes.root}>
-        {' '}
+        {" "}
         <span className={classes.langShort}>{lang}</span>
-        <span className={fr.cx('fr-hidden-lg')}>
-          {' '}
+        <span className={fr.cx("fr-hidden-lg")}>
+          {" "}
           -{fullNameByLang[lang]}
-        </span>{' '}
+        </span>{" "}
       </div>
       <div
-        className={cx(fr.cx('fr-collapse', 'fr-menu'), classes.menuLanguage)}
+        className={cx(fr.cx("fr-collapse", "fr-menu"), classes.menuLanguage)}
         id="translate-select"
       >
-        <ul className={fr.cx('fr-menu__list')}>
-          {languages.map(lang_i => (
+        <ul className={fr.cx("fr-menu__list")}>
+          {languages.map((lang_i) => (
             <li key={lang_i}>
               <a
-                className={fr.cx('fr-translate__language', 'fr-nav__link')}
+                className={fr.cx("fr-translate__language", "fr-nav__link")}
                 href="#"
-                aria-current={lang_i === lang ? 'true' : undefined}
-                onClick={e => {
+                aria-current={lang_i === lang ? "true" : undefined}
+                onClick={(e) => {
                   e.preventDefault();
                   setLang(lang_i);
                 }}
@@ -68,12 +68,12 @@ export const LanguageSelector = memo((props: Props) => {
 
 const useStyles = tss.withName({ LanguageSelector }).create({
   root: {
-    display: 'inline-flex'
+    display: "inline-flex",
   },
   menuLanguage: {
-    right: 0
+    right: 0,
   },
   langShort: {
-    textTransform: 'uppercase'
-  }
+    textTransform: "uppercase",
+  },
 });
