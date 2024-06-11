@@ -1689,6 +1689,18 @@
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
+"@trpc-limiter/core@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@trpc-limiter/core/-/core-1.0.0.tgz#d3352405643b31bd0add47bcdc928af5639cc357"
+  integrity sha512-Wjq2oTCmCdwNbZKRfKpzpl1Um9QXGE8OHXOab+EUSj5Wk+26I/V6Vs2p0VBFAz6eEsBn36982cCC/vaaznA8+Q==
+
+"@trpc-limiter/memory@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@trpc-limiter/memory/-/memory-1.0.0.tgz#d79cd557fc77aaf79b31e55ed96132ec19ffdd3e"
+  integrity sha512-3ahqbHV7mVLH7+H69kOaNozMsID+3P4hoU178viPIGbfrOCiu2SGUFgB+TdGl2SZ6PNPmeCACF1AlfTfIerDvw==
+  dependencies:
+    "@trpc-limiter/core" "1.0.0"
+
 "@trpc/client@^10.41.0":
   version "10.45.0"
   resolved "https://registry.yarnpkg.com/@trpc/client/-/client-10.45.0.tgz#67cf34857cfa7e77bc498cb837c2226a42d24bf4"

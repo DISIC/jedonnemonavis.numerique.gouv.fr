@@ -8,13 +8,7 @@ import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
 import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
-import {
-  allFields,
-  primarySection,
-  secondSectionA,
-  steps_A,
-  steps_B,
-} from "../utils/form";
+import { allFields, steps_A, steps_B } from "../utils/form";
 import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,6 +28,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
   const currentSteps =
     process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
 
@@ -51,7 +46,16 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const createReview = trpc.review.create.useMutation({
-    onSuccess: () => setIsLoading(false),
+    onSuccess: () => {
+      setIsRateLimitReached(false);
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      if (error.data?.httpStatus === 429) {
+        localStorage.removeItem("userId");
+        setIsRateLimitReached(true);
+      }
+    },
   });
 
   const insertOrUpdateReview = trpc.review.insertOrUpdate.useMutation({
@@ -220,15 +224,22 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
       localStorage.setItem("userId", userId);
 
-      createReview.mutate({
-        review: {
-          product_id: product.id,
-          button_id: product.buttons[0].id,
-          form_id: 1,
-          user_id: userId,
-        },
-        answers,
-      });
+      createReview
+        .mutateAsync({
+          review: {
+            product_id: product.id,
+            button_id: product.buttons[0].id,
+            form_id: 1,
+            user_id: userId,
+          },
+          answers,
+        })
+        .then(() => {
+          router.push({
+            pathname: router.pathname,
+            query: { ...router.query, step: 0 },
+          });
+        });
     } else {
       handleInsertOrUpdateReview(opinion);
     }
@@ -383,6 +394,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             <FormFirstBlock
               opinion={opinion}
               product={product}
+              isRateLimitReached={isRateLimitReached}
+              setIsRateLimitReached={setIsRateLimitReached}
               onSubmit={(tmpOpinion) => {
                 setOpinion({ ...tmpOpinion });
                 handleCreateReview({ satisfaction: tmpOpinion.satisfaction });

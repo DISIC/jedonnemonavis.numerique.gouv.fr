@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { router, publicProcedure } from "@/src/server/trpc";
+import { router, publicProcedure, limitedProcedure } from "@/src/server/trpc";
 import { Answer, Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
@@ -171,7 +171,7 @@ export async function createReview(
 }
 
 export const reviewRouter = router({
-  create: publicProcedure
+  create: limitedProcedure
     .input(
       z.object({
         review: ReviewUncheckedCreateInputSchema,
