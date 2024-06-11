@@ -162,7 +162,11 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				className={classes.navigation}
 				id="fr-header-public-header"
 				quickAccessItems={light ? undefined : quickAccessItems}
-				navigation={!!navigationItems.length ? navigationItems : undefined}
+				navigation={
+					!!navigationItems.length && !pathname.startsWith('/public')
+						? navigationItems
+						: undefined
+				}
 				serviceTitle="Je donne mon avis"
 				serviceTagline="La voix de vos usagers"
 			/>
