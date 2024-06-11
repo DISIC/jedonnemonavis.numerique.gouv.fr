@@ -35,7 +35,7 @@ const Contact = () => {
 						<div className={cx(classes.description)}>
 							<p>Vous pouvez nous contacter à l'adresse e-mail suivante :</p>
 							<p className={fr.cx('fr-text--bold')}>
-								support@jedonnemonavis.numerique.gouv.fr
+								contact.jdma@design.numerique.gouv.fr
 							</p>
 						</div>
 					</div>
