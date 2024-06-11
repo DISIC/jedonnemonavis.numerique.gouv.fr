@@ -1,7 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Head from 'next/head';
 import React from 'react';
-import { CGU } from '../utils/content';
+import { CGU } from '../../utils/content';
 
 const GeneralConditions = () => {
 	return (

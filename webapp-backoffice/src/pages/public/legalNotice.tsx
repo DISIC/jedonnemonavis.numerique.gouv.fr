@@ -2,7 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { LegalNotice as LN } from '../utils/content';
+import { LegalNotice as LN } from '../../utils/content';
 
 const legalNotice = () => {
 	const { cx, classes } = useStyles();
