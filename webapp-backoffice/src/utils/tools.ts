@@ -139,3 +139,40 @@ export const autocompleteFilterOptions = (
 	}[],
 	{ inputValue }: { inputValue: string }
 ) => matchSorter(options, inputValue, { keys: [item => item.label] });
+
+export const getDatesByShortCut = (shortcutDateSelected: string) => {
+	const now = new Date();
+	let newStartDate: Date;
+	let newEndDate: Date = new Date();
+
+	switch (shortcutDateSelected) {
+		case 'one-year':
+			newStartDate = new Date(
+				now.getFullYear() - 1,
+				now.getMonth(),
+				now.getDate() + 1
+			);
+			break;
+		case 'one-month':
+			newStartDate = new Date(
+				now.getFullYear(),
+				now.getMonth() - 1,
+				now.getDate() + 1
+			);
+			break;
+		case 'one-week':
+			newStartDate = new Date(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate() - 6
+			);
+			break;
+		default:
+			newStartDate = new Date();
+	}
+
+	return {
+		startDate: newStartDate.toISOString().split('T')[0],
+		endDate: newEndDate.toISOString().split('T')[0]
+	};
+};

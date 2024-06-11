@@ -1,29 +1,25 @@
-import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
-import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
+import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
+import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
+import { Loader } from '@/src/components/ui/Loader';
 import { useStats } from '@/src/contexts/StatsContext';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import Link from 'next/link';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { ToggleSwitch } from '@codegouvfr/react-dsfr/ToggleSwitch';
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
-import Head from 'next/head';
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import { useRouter } from 'next/router';
-import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import Filters from '@/src/components/dashboard/Stats/Filters';
 
 interface Props {
 	product: Product;
@@ -63,7 +59,6 @@ const ProductStatPage = (props: Props) => {
 	const { statsTotals } = useStats();
 	const router = useRouter();
 	const isTotalLoading = statsTotals.satisfaction === undefined;
-	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false);
 
 	const { classes, cx } = useStyles();
 
@@ -104,8 +99,6 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.countAll;
-
-	const updateProduct = trpc.product.update.useMutation({});
 
 	const handleButtonClick = () => {
 		router.push({
@@ -175,35 +168,14 @@ const ProductStatPage = (props: Props) => {
 						<Loader />
 					</div>
 				)}
-				<div></div>
-				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
-				>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de début"
-							nativeInputProps={{
-								type: 'date',
-								value: startDate,
-								onChange: e => {
-									setStartDate(e.target.value);
-								}
-							}}
-						/>
-					</div>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de fin"
-							nativeInputProps={{
-								type: 'date',
-								value: endDate,
-								onChange: e => {
-									setEndDate(e.target.value);
-								}
-							}}
-						/>
-					</div>
-				</div>
+				<Filters
+					currentStartDate={startDate}
+					currentEndDate={endDate}
+					onChange={(tmpStartDate, tmpEndDate) => {
+						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
+						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+					}}
+				/>
 				<SectionWrapper
 					title="Satisfaction usagers"
 					count={statsTotals.satisfaction}
