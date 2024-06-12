@@ -102,7 +102,7 @@ export const secondSectionA: FormField[] = [
       {
         label: "fields.contact_tried.options.8.label",
         value: 17,
-        intention: "neutral",
+        intention: "good",
         isolated: true,
       },
     ],

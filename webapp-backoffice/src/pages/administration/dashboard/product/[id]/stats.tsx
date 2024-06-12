@@ -177,7 +177,11 @@ const ProductStatPage = (props: Props) => {
 						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
 					}}
 				/>
-				<ObservatoireStats productId={product.id} />
+				<ObservatoireStats
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
 				<SectionWrapper
 					title="Satisfaction usagers"
 					count={statsTotals.satisfaction}
