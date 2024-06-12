@@ -20,6 +20,7 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import Filters from '@/src/components/dashboard/Stats/Filters';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 
 interface Props {
 	product: Product;
@@ -175,6 +176,11 @@ const ProductStatPage = (props: Props) => {
 						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
 					}}
+				/>
+				<ObservatoireStats
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
 				/>
 				<SectionWrapper
 					title="Satisfaction usagers"

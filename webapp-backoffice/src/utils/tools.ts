@@ -176,3 +176,23 @@ export const getDatesByShortCut = (shortcutDateSelected: string) => {
 		endDate: newEndDate.toISOString().split('T')[0]
 	};
 };
+
+export const calculateBucketsAverage = (
+	buckets: any[],
+	marks: Record<string, number>
+) => {
+	const count = buckets.reduce((sum, sb) => sum + sb.doc_count, 0);
+	const average =
+		buckets.reduce((sum, sb) => {
+			const [, , intention] = sb.key.split('#');
+			return sum + (marks[intention] || 0) * sb.doc_count;
+		}, 0) / count;
+	return { count, average: isNaN(average) ? 0 : average };
+};
+
+export const getReadableValue = (value: number) => {
+	const readableValue = (Math.floor(value * 10) / 10)
+		.toString()
+		.replace('.', ',');
+	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
+};

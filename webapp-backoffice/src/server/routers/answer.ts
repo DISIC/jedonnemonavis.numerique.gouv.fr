@@ -2,6 +2,7 @@ import { BucketsInside, Buckets, ElkAnswer } from '../../types/custom';
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
 import { AnswerIntention } from '@prisma/client';
+import { calculateBucketsAverage } from '@/src/utils/tools';
 
 export const answerRouter = router({
 	getByFieldCode: publicProcedure
@@ -353,6 +354,158 @@ export const answerRouter = router({
 					}, 0) / bucketsAverage.length
 				).toFixed(1)
 			);
+
+			return { data: returnValue, metadata };
+		}),
+
+	getObservatoireStats: publicProcedure
+		.input(
+			z.object({
+				product_id: z.string() /* To change to button_id */,
+				start_date: z.string(),
+				end_date: z.string()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { product_id, start_date, end_date } = input;
+
+			const product = await ctx.prisma.product.findUnique({
+				where: { id: parseInt(product_id) }
+			});
+
+			if (!product) throw new Error('Product not found');
+			if (!product.isPublic && !ctx.session?.user)
+				throw new Error('Product is not public');
+
+			const fieldCodesCounts = await ctx.elkClient.search<ElkAnswer[]>({
+				index: 'jdma-answers',
+				query: {
+					bool: {
+						must: [
+							{
+								terms: {
+									field_code: [
+										'satisfaction',
+										'comprehension',
+										'contact_tried',
+										'contact_reached',
+										'contact_satisfaction'
+									]
+								}
+							},
+							{ match: { product_id } },
+							{ range: { created_at: { gte: start_date, lte: end_date } } }
+						]
+					}
+				},
+				aggs: {
+					count: {
+						terms: {
+							script:
+								'doc["field_code.keyword"].value + "#" + doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
+							size: 1000
+						}
+					}
+				}
+			});
+
+			const contactTriedUniqueCount = await ctx.elkClient.search<ElkAnswer[]>({
+				index: 'jdma-answers',
+				query: {
+					bool: {
+						must: [
+							{ match: { field_code: 'contact_tried' } },
+							{ match: { product_id } },
+							{ range: { created_at: { gte: start_date, lte: end_date } } }
+						]
+					}
+				},
+				aggs: {
+					unique_review_ids: {
+						cardinality: {
+							field: 'review_id'
+						}
+					}
+				}
+			});
+
+			const tmpBuckets = (fieldCodesCounts?.aggregations?.count as any)
+				?.buckets as BucketsInside;
+
+			const satisfactionMarks = { good: 10, medium: 5 };
+			const comprehensionMarks = {
+				very_good: 10,
+				good: 7.5,
+				medium: 5,
+				bad: 2.5
+			};
+			const contactMarks = { very_good: 10, good: 7.5, medium: 5, bad: 2.5 };
+
+			const satisfactionBuckets = tmpBuckets.filter(b =>
+				b.key.startsWith('satisfaction#')
+			);
+			const comprehensionBuckets = tmpBuckets.filter(b =>
+				b.key.startsWith('comprehension#')
+			);
+			const contactBuckets = tmpBuckets.filter(
+				b =>
+					b.key.startsWith('contact_reached#') ||
+					b.key.startsWith('contact_satisfaction#')
+			);
+			const autonomyBuckets = tmpBuckets.filter(b =>
+				b.key.startsWith('contact_tried#')
+			);
+
+			const { count: satisfaction_count, average: satisfaction_average } =
+				calculateBucketsAverage(satisfactionBuckets, satisfactionMarks);
+			const { count: comprehension_count, average: comprehension_average } =
+				calculateBucketsAverage(comprehensionBuckets, comprehensionMarks);
+
+			const contact_count = contactBuckets.reduce((sum, sb) => {
+				const [field_code, answer_text] = sb.key.split('#');
+				if (
+					field_code === 'contact_satisfaction' ||
+					(field_code === 'contact_reached' && answer_text === 'Non')
+				)
+					return sum + sb.doc_count;
+				return sum;
+			}, 0);
+
+			const contact_average =
+				contactBuckets.reduce((sum, sb) => {
+					const [field_code, , intention] = sb.key.split('#');
+					return (
+						sum +
+						((field_code === 'contact_satisfaction' &&
+							(contactMarks as any)[intention]) ||
+							0) *
+							sb.doc_count
+					);
+				}, 0) / contact_count;
+
+			const autonomy_count = (contactTriedUniqueCount.aggregations as any)
+				.unique_review_ids.value;
+			const autonomy_average =
+				autonomyBuckets.reduce((sum, sb) => {
+					const [field_code, answer_text, intention] = sb.key.split('#');
+					if (intention === 'good') return sum + 10 * sb.doc_count;
+
+					return sum;
+				}, 0) / autonomy_count;
+
+			const returnValue = {
+				satisfaction: satisfaction_average,
+				comprehension: comprehension_average,
+				contact: isNaN(contact_average) ? 0 : contact_average,
+				autonomy: isNaN(autonomy_average) ? 0 : autonomy_average
+			};
+
+			const metadata = {
+				satisfaction_count,
+				comprehension_count,
+				contact_count,
+				autonomy_count
+			};
 
 			return { data: returnValue, metadata };
 		})
