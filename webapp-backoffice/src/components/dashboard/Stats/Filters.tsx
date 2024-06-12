@@ -38,13 +38,18 @@ const Filters = ({
 	const [endDate, setEndDate] = useState<string>(currentEndDate);
 	const [shortcutDateSelected, setShortcutDateSelected] = useState<
 		(typeof dateShortcuts)[number]['name'] | undefined
-	>('this-year');
+	>('one-year');
 
 	useEffect(() => {
 		if (shortcutDateSelected) {
 			const dates = getDatesByShortCut(shortcutDateSelected);
-			setStartDate(dates.startDate);
-			setEndDate(dates.endDate);
+
+			if (dates.startDate !== startDate) {
+				setStartDate(dates.startDate);
+			}
+			if (dates.endDate !== endDate) {
+				setEndDate(dates.endDate);
+			}
 		}
 	}, [shortcutDateSelected]);
 
