@@ -2,6 +2,7 @@ import { getReadableValue } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
+import { Tooltip } from '@mui/material';
 import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
@@ -57,16 +58,26 @@ const ObservatoireStats = ({
 	};
 
 	const statFields = [
-		{ label: 'Satisfaction', value: resultStatsObservatoire.data.satisfaction },
+		{
+			label: 'Satisfaction',
+			value: resultStatsObservatoire.data.satisfaction,
+			tooltip: 'À rédiger'
+		},
 		{
 			label: 'Simplicité du langage',
-			value: resultStatsObservatoire.data.comprehension
+			value: resultStatsObservatoire.data.comprehension,
+			tooltip: 'À rédiger'
 		},
 		{
 			label: 'Joignabilité et efficacité',
-			value: resultStatsObservatoire.data.contact
+			value: resultStatsObservatoire.data.contact,
+			tooltip: 'À rédiger'
 		},
-		{ label: 'Autonomie', value: resultStatsObservatoire.data.autonomy }
+		{
+			label: 'Autonomie',
+			value: resultStatsObservatoire.data.autonomy,
+			tooltip: 'À rédiger'
+		}
 	];
 
 	return (
@@ -92,7 +103,18 @@ const ObservatoireStats = ({
 						)}
 					>
 						<div className={cx(classes.content)}>
-							<label className={cx(classes.label)}>{field.label}</label>
+							<label className={cx(classes.label)}>
+								{field.label}
+								<Tooltip placement="top" title={field.tooltip}>
+									<span
+										className={fr.cx(
+											'fr-icon-information-line',
+											'fr-icon--sm',
+											'fr-ml-1v'
+										)}
+									/>
+								</Tooltip>
+							</label>
 							<div
 								className={cx(classes.value, getClassFromValue(field.value))}
 							>
