@@ -151,6 +151,13 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} Avis | Je donne mon avis`}
+				/>
+			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
