@@ -59,24 +59,33 @@ const ObservatoireStats = ({
 		return classes.bien;
 	};
 
-	const statFields = [
+	const statFields: {
+		label: string;
+		slug: 'satisfaction' | 'comprehension' | 'contact' | 'autonomy';
+		value: number;
+		tooltip: string;
+	}[] = [
 		{
 			label: 'Satisfaction',
+			slug: 'satisfaction',
 			value: resultStatsObservatoire.data.satisfaction,
 			tooltip: 'À rédiger'
 		},
 		{
 			label: 'Simplicité du langage',
+			slug: 'comprehension',
 			value: resultStatsObservatoire.data.comprehension,
 			tooltip: 'À rédiger'
 		},
 		{
 			label: 'Joignabilité et efficacité',
+			slug: 'contact',
 			value: resultStatsObservatoire.data.contact,
 			tooltip: 'À rédiger'
 		},
 		{
 			label: 'Autonomie',
+			slug: 'autonomy',
 			value: resultStatsObservatoire.data.autonomy,
 			tooltip: 'À rédiger'
 		}
@@ -91,7 +100,7 @@ const ObservatoireStats = ({
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--middle'
+					'fr-grid-row--top'
 				)}
 			>
 				{statFields.map((field, index) => (
@@ -117,19 +126,40 @@ const ObservatoireStats = ({
 									/>
 								</Tooltip>
 							</label>
-							<div
-								className={cx(classes.value, getClassFromValue(field.value))}
-							>
-								{getReadableValue(field.value)} / 10
-							</div>
-							<span
-								className={cx(
-									classes.intention,
-									getClassFromValue(field.value)
-								)}
-							>
-								{getLabelFromValue(field.value)}
-							</span>
+							{!!resultStatsObservatoire.metadata[`${field.slug}_count`] ? (
+								<>
+									<div
+										className={cx(
+											classes.value,
+											getClassFromValue(field.value)
+										)}
+									>
+										{getReadableValue(field.value)} / 10
+									</div>
+									<span
+										className={cx(
+											classes.intention,
+											getClassFromValue(field.value)
+										)}
+									>
+										{getLabelFromValue(field.value)}
+									</span>
+								</>
+							) : (
+								<div>
+									<Tooltip
+										placement="top"
+										title="Aucune donnée pour calculer cette note."
+									>
+										<span
+											className={cx(
+												fr.cx('ri-question-line', 'fr-icon--lg'),
+												classes.noData
+											)}
+										/>
+									</Tooltip>
+								</div>
+							)}
 						</div>
 					</div>
 				))}
@@ -178,6 +208,9 @@ const useStyles = tss.create({
 	},
 	pasBien: {
 		color: fr.colors.decisions.background.flat.error.default
+	},
+	noData: {
+		color: fr.colors.decisions.text.mention.grey.default
 	}
 });
 
