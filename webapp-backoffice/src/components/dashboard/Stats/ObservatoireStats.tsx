@@ -137,6 +137,7 @@ const useStyles = tss.create({
 		height: '4rem'
 	},
 	intention: {
+		...fr.typography[18].style,
 		fontWeight: 'bold',
 		marginTop: '1rem',
 		textTransform: 'uppercase'
