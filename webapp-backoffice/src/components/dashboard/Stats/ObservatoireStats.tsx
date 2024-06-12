@@ -45,6 +45,8 @@ const ObservatoireStats = ({
 		}
 	);
 
+	if (isLoadingStatsObservatoire) return;
+
 	const getLabelFromValue = (value: number) => {
 		if (value < 5) return 'Pas bien';
 		if (value < 8) return 'Moyen';
