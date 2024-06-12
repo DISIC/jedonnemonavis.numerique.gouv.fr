@@ -149,7 +149,7 @@ const ObservatoireStats = ({
 								<div>
 									<Tooltip
 										placement="top"
-										title="Aucune donnée pour calculer cette note."
+										title="Aucune donnée pour calculer cette note"
 									>
 										<span
 											className={cx(
