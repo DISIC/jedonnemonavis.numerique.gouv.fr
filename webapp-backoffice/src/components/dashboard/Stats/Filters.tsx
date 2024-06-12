@@ -65,7 +65,7 @@ const Filters = ({
 				classes.dateShortcuts
 			)}
 		>
-			<div className={fr.cx('fr-col-6')}>
+			<div className={fr.cx('fr-col', 'fr-col-6')}>
 				<fieldset id="date-filters" className={fr.cx('fr-fieldset')}>
 					<legend className={fr.cx('fr-label')}>Filtres</legend>
 					<ul>
@@ -98,7 +98,7 @@ const Filters = ({
 					</ul>
 				</fieldset>
 			</div>
-			<div className={fr.cx('fr-col-3')}>
+			<div className={fr.cx('fr-col', 'fr-col-3')}>
 				<Input
 					label="Date de début"
 					nativeInputProps={{
@@ -111,7 +111,7 @@ const Filters = ({
 					}}
 				/>
 			</div>
-			<div className={fr.cx('fr-col-3')}>
+			<div className={fr.cx('fr-col', 'fr-col-3')}>
 				<Input
 					label="Date de fin"
 					nativeInputProps={{
@@ -132,6 +132,7 @@ const useStyles = tss.create({
 	dateShortcuts: {
 		fieldset: {
 			width: '100%',
+			margin: 0,
 			ul: {
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
