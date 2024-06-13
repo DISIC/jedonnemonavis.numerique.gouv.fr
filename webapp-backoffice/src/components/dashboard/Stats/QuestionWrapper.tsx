@@ -103,8 +103,8 @@ const useStyles = tss.create({
 	metaInfosTotal: {
 		display: 'flex',
 		alignItems: 'center',
-		...fr.typography[11].style,
 		fontSize: '2rem',
+		fontWeight: 'bold',
 		margin: 0,
 		span: {
 			...fr.typography[19].style,
