@@ -1,5 +1,6 @@
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
@@ -9,7 +10,6 @@ import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
@@ -213,6 +213,11 @@ const ProductStatPage = (props: Props) => {
 						</div> */}
 					</div>
 				</div>
+				<AnswersChart
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
 				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
