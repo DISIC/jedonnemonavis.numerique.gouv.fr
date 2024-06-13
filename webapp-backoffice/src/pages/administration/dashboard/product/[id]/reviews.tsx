@@ -49,7 +49,7 @@ const ProductReviewsPage = (props: Props) => {
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [numberPerPage, setNumberPerPage] = React.useState(1);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
 	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
 		view === 'verbatim' ? 'verbatim' : 'reviews'
@@ -119,8 +119,8 @@ const ProductReviewsPage = (props: Props) => {
 			initialData: {
 				data: [],
 				metadata: {
-					countFiltered: 0,
-					countAll: 0
+					countFiltered: -1,
+					countAll: -1
 				}
 			}
 		}
