@@ -155,7 +155,6 @@ const ProductModal = (props: Props) => {
 
 	useIsModalOpen(modal, {
 		onConceal: () => {
-			console.log('reset : ', product);
 			reset({ title: '', entity_id: undefined });
 		}
 	});

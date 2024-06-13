@@ -44,8 +44,6 @@ const SmileyQuestionViz = ({
 			}
 		);
 
-	console.log(resultFieldCode);
-
 	if (isLoading || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>

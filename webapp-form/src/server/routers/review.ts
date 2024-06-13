@@ -27,8 +27,6 @@ export async function createReview(
     },
   });
 
-  console.log(newReview);
-
   const promises = Promise.all(
     answers.map(async (answer) => {
       return prisma.answer

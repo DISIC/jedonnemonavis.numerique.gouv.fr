@@ -11,7 +11,6 @@ export const apiKeyRouter = router({
 		)
 		.query(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
-			console.log('input get list : ', input)
 
 			const keys = await ctx.prisma.apiKey.findMany({
 				where: {
@@ -40,7 +39,6 @@ export const apiKeyRouter = router({
 		)
 		.mutation(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
-			console.log('input create : ', input)
 
 			var password = '';
 			const chars =

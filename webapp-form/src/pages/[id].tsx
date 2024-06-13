@@ -201,8 +201,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     });
   };
 
-  console.log(product.buttons);
-
   React.useEffect(() => {
     const handleRouteChange = (url: string) => {
       const queryParams = new URLSearchParams(url.split("?")[1]);
