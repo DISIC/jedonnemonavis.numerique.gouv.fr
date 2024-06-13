@@ -80,7 +80,7 @@ const ObservatoireStats = ({
 			slug: 'comprehension',
 			value: resultStatsObservatoire.data.comprehension,
 			tooltip:
-				'Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Que pensez-vous du langage utilisé ? » en attribuant une note /10 aux trois réponses proposées dans le questionnaire.'
+				"Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Qu'avez-vous pensé des informations et des instructions fournies ? » en attribuant une note sur 10 aux cinq réponses proposées dans le questionnaire."
 		},
 		{
 			label: 'Aide joignable et efficace',
@@ -191,7 +191,7 @@ const useStyles = tss.create({
 	},
 	content: {
 		textAlign: 'center',
-		padding: '0 1.5rem',
+		padding: '0 1.7rem',
 		borderRadius: '0.5rem',
 		display: 'flex',
 		flexDirection: 'column'
