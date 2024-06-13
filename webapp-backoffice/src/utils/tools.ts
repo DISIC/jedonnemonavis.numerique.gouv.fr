@@ -220,3 +220,43 @@ export const getCalendarFormat = (nbDays: number) => {
 
 	return 'MMM Y';
 };
+
+export const translateMonthToFrench = (dateStr: string) => {
+	const monthLookup = {
+		Jan: 'Jan',
+		Feb: 'Fév',
+		Mar: 'Mar',
+		Apr: 'Avr',
+		May: 'Mai',
+		Jun: 'Juin',
+		Jul: 'Juil',
+		Aug: 'Août',
+		Sep: 'Sep',
+		Oct: 'Oct',
+		Nov: 'Nov',
+		Dec: 'Déc'
+	};
+
+	let day = '';
+	let monthAbbreviation = '';
+	let year = '';
+
+	const parts = dateStr.split(' ');
+	if (parts.length === 3) {
+		day = parts[0] + ' ';
+		monthAbbreviation = parts[1];
+		year = parts[2];
+	} else if (parts.length === 2) {
+		monthAbbreviation = parts[0];
+		year = parts[1];
+	} else {
+		return dateStr;
+	}
+
+	const translatedMonth =
+		monthLookup[monthAbbreviation as keyof typeof monthLookup];
+
+	if (!translatedMonth) return dateStr;
+
+	return `${day}${translatedMonth} ${year}`;
+};
