@@ -154,71 +154,75 @@ export const ArrayRadio = (props: Props) => {
               <div className={cx(classes.mobileReviews)}>
                 {"options" in form[0] &&
                   form[0].options &&
-                  form[0].options.map((option, outerIndex) => (
-                    <div className={cx(classes.optionRow)} key={option.value}>
-                      {(field.needed.includes(option.value) ||
-                        (opinion.contact_tried.includes(option.value) &&
-                          !field.excluded.includes(option.value))) &&
-                        containsPattern(
-                          opinion.contact_reached,
-                          new RegExp(
-                            escapeRegex(option.value.toString()) + "_17"
-                          )
-                        ) && (
-                          <>
-                            <div className={cx(classes.labelWrapper)}>
-                              <label
-                                className={cx(classes.label)}
-                                htmlFor={`mobile-radio-${outerIndex}`}
-                              >
-                                {getFirstTwoWords(t(option.label))}
-                              </label>
-                            </div>
-                            <ul>
-                              {field.options.map((opt, innerIndex) => (
-                                <li key={innerIndex}>
-                                  <input
-                                    type="radio"
-                                    id={`mobile-radio-${outerIndex}-${innerIndex}`}
-                                    name={`mobile-radio-${outerIndex}`}
-                                    value={`value-${outerIndex}`}
-                                    checked={opinion.contact_satisfaction.includes(
-                                      escapeRegex(option.value.toString()) +
-                                        "_" +
-                                        opt.value
-                                    )}
-                                    onChange={(event) => {
-                                      setOpinion({
-                                        ...opinion,
-                                        contact_satisfaction: [
-                                          ...opinion.contact_satisfaction.filter(
-                                            (cs) =>
-                                              !cs.includes(
-                                                escapeRegex(
-                                                  option.value.toString()
+                  form[0].options.map(
+                    (option: RadioOption, outerIndex: number) => (
+                      <div className={cx(classes.optionRow)} key={option.value}>
+                        {(field.needed.includes(option.value) ||
+                          (opinion.contact_tried.includes(option.value) &&
+                            !field.excluded.includes(option.value))) &&
+                          containsPattern(
+                            opinion.contact_reached,
+                            new RegExp(
+                              escapeRegex(option.value.toString()) + "_17"
+                            )
+                          ) && (
+                            <>
+                              <div className={cx(classes.labelWrapper)}>
+                                <label
+                                  className={cx(classes.label)}
+                                  htmlFor={`mobile-radio-${outerIndex}`}
+                                >
+                                  {getFirstTwoWords(t(option.label))}
+                                </label>
+                              </div>
+                              <ul>
+                                {field.options.map((opt, innerIndex) => (
+                                  <li key={innerIndex}>
+                                    <input
+                                      type="radio"
+                                      id={`mobile-radio-${outerIndex}-${innerIndex}`}
+                                      name={`mobile-radio-${outerIndex}`}
+                                      value={`value-${outerIndex}`}
+                                      checked={opinion.contact_satisfaction.includes(
+                                        escapeRegex(option.value.toString()) +
+                                          "_" +
+                                          opt.value
+                                      )}
+                                      onChange={(event) => {
+                                        setOpinion({
+                                          ...opinion,
+                                          contact_satisfaction: [
+                                            ...opinion.contact_satisfaction.filter(
+                                              (cs) =>
+                                                !cs.includes(
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  )
                                                 )
-                                              )
-                                          ),
-                                          escapeRegex(option.value.toString()) +
-                                            "_" +
-                                            opt.value,
-                                        ],
-                                      });
-                                    }}
-                                  />
-                                  <label
-                                    htmlFor={`mobile-radio-${outerIndex}-${innerIndex}`}
-                                    className={cx(classes.reviewInputLabel)}
-                                  >
-                                    {t(opt.label)}
-                                  </label>
-                                </li>
-                              ))}
-                            </ul>
-                          </>
-                        )}
-                    </div>
-                  ))}
+                                            ),
+                                            escapeRegex(
+                                              option.value.toString()
+                                            ) +
+                                              "_" +
+                                              opt.value,
+                                          ],
+                                        });
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`mobile-radio-${outerIndex}-${innerIndex}`}
+                                      className={cx(classes.reviewInputLabel)}
+                                    >
+                                      {t(opt.label)}
+                                    </label>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                      </div>
+                    )
+                  )}
               </div>
             </div>
           </>
