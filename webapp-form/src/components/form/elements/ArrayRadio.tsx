@@ -318,13 +318,13 @@ const useStyles = tss
       ul: {
         display: "flex",
         overflowX: "auto",
-        flexWrap: "nowrap",
+        flexWrap: "wrap",
         gap: "1rem",
         listStyle: "none",
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
         li: {
-          minWidth: "max-content",
+          minWidth: "100%",
           input: {
             position: "absolute",
             opacity: 0,
