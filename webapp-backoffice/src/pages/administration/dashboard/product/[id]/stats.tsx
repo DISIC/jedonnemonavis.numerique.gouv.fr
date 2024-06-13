@@ -21,6 +21,7 @@ import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
 
 interface Props {
 	product: Product;
@@ -97,9 +98,22 @@ const ProductStatPage = (props: Props) => {
 			product_id: product.id
 		});
 
+	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
+		trpc.answer.countByFieldCode.useQuery({
+			product_id: product.id,
+			field_code: 'verbatim',
+			start_date: startDate,
+			end_date: endDate
+		});
+
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
-	const nbReviews = reviewsData?.metadata.countAll;
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbVerbatims = dataNbVerbatims?.data || 0;
+	const percetengeVerbatimsOfReviews = (
+		(nbVerbatims / nbReviews) *
+		100
+	).toFixed(0);
 
 	const handleButtonClick = () => {
 		router.push({
@@ -115,7 +129,12 @@ const ProductStatPage = (props: Props) => {
 		});
 	};
 
-	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
+	if (
+		nbReviews === undefined ||
+		isLoadingButtons ||
+		isLoadingReviewsCount ||
+		isLoadingNbVerbatims
+	) {
 		return (
 			<ProductLayout product={product}>
 				<h1>Statistiques</h1>
@@ -155,7 +174,7 @@ const ProductStatPage = (props: Props) => {
 				<title>{product.title} | Statistiques | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`${product.title} Avis | Je donne mon avis`}
+					content={`${product.title} Avis | Je donne mon avis`}
 				/>
 			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
@@ -189,6 +208,36 @@ const ProductStatPage = (props: Props) => {
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 				/>
+				<div className={fr.cx('fr-mt-5w')}>
+					<h3>Participation</h3>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Avis"
+								kpi={nbReviews}
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+							/>
+						</div>
+						<div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Verbatims"
+								kpi={nbVerbatims || 0}
+								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+							/>
+						</div>
+						<div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Formulaires complets"
+								kpi={0}
+								desc="soit 0 % des répondants"
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								hideLink
+								grey
+							/>
+						</div>
+					</div>
+				</div>
 				<SectionWrapper
 					title="Satisfaction usagers"
 					count={statsTotals.satisfaction}
