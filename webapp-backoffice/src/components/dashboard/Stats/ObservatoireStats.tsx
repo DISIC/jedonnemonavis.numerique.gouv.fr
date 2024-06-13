@@ -2,13 +2,20 @@ import { getReadableValue } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
-import { Tooltip } from '@mui/material';
+import { Skeleton, Tooltip } from '@mui/material';
 import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
 	productId: number;
 	startDate: string;
 	endDate: string;
+};
+
+type StatField = {
+	label: string;
+	slug: 'satisfaction' | 'comprehension' | 'contact' | 'autonomy';
+	value: number;
+	tooltip: string;
 };
 
 const ObservatoireStats = ({
@@ -20,7 +27,8 @@ const ObservatoireStats = ({
 
 	const {
 		data: resultStatsObservatoire,
-		isLoading: isLoadingStatsObservatoire
+		isLoading: isLoadingStatsObservatoire,
+		isRefetching: isRefetchingStatsObservatoire
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
 			product_id: productId.toString(),
@@ -59,12 +67,7 @@ const ObservatoireStats = ({
 		return classes.bien;
 	};
 
-	const statFields: {
-		label: string;
-		slug: 'satisfaction' | 'comprehension' | 'contact' | 'autonomy';
-		value: number;
-		tooltip: string;
-	}[] = [
+	const statFields: StatField[] = [
 		{
 			label: 'Satisfaction',
 			slug: 'satisfaction',
@@ -90,6 +93,44 @@ const ObservatoireStats = ({
 			tooltip: 'À rédiger'
 		}
 	];
+
+	const getStatsDisplay = (field: StatField) => {
+		if (isLoadingStatsObservatoire || isRefetchingStatsObservatoire) {
+			return (
+				<Skeleton className={classes.skeleton} height={50} width={'80%'} />
+			);
+		}
+		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
+			return (
+				<>
+					<div className={cx(classes.value, getClassFromValue(field.value))}>
+						{getReadableValue(field.value)} / 10
+					</div>
+					<span
+						className={cx(classes.intention, getClassFromValue(field.value))}
+					>
+						{getLabelFromValue(field.value)}
+					</span>
+				</>
+			);
+		} else {
+			return (
+				<div>
+					<Tooltip
+						placement="top"
+						title="Aucune donnée pour calculer cette note"
+					>
+						<span
+							className={cx(
+								fr.cx('ri-question-line', 'fr-icon--lg'),
+								classes.noData
+							)}
+						/>
+					</Tooltip>
+				</div>
+			);
+		}
+	};
 
 	return (
 		<div className={cx(classes.card)}>
@@ -126,40 +167,7 @@ const ObservatoireStats = ({
 									/>
 								</Tooltip>
 							</label>
-							{!!resultStatsObservatoire.metadata[`${field.slug}_count`] ? (
-								<>
-									<div
-										className={cx(
-											classes.value,
-											getClassFromValue(field.value)
-										)}
-									>
-										{getReadableValue(field.value)} / 10
-									</div>
-									<span
-										className={cx(
-											classes.intention,
-											getClassFromValue(field.value)
-										)}
-									>
-										{getLabelFromValue(field.value)}
-									</span>
-								</>
-							) : (
-								<div>
-									<Tooltip
-										placement="top"
-										title="Aucune donnée pour calculer cette note"
-									>
-										<span
-											className={cx(
-												fr.cx('ri-question-line', 'fr-icon--lg'),
-												classes.noData
-											)}
-										/>
-									</Tooltip>
-								</div>
-							)}
+							{getStatsDisplay(field)}
 						</div>
 					</div>
 				))}
@@ -199,6 +207,9 @@ const useStyles = tss.create({
 	value: {
 		fontSize: '2rem',
 		fontWeight: 'bold'
+	},
+	skeleton: {
+		margin: 'auto'
 	},
 	bien: {
 		color: fr.colors.decisions.background.flat.success.default
