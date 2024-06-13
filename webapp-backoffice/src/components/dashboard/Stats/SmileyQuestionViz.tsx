@@ -55,9 +55,9 @@ const SmileyQuestionViz = ({
 	}
 
 	const sortOrder = {
-		'Pas bien': 0,
-		Moyen: 1,
-		'Très bien': 2
+		bad: 0,
+		medium: 1,
+		good: 2
 	};
 
 	return (
@@ -70,7 +70,11 @@ const SmileyQuestionViz = ({
 			<h4 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h4>
 			<div className={classes.distributionContainer}>
 				{resultFieldCode.data
-					.sort((a, b) => sortOrder[a.answer_text] - sortOrder[b.answer_text])
+					.sort(
+						(a, b) =>
+							sortOrder[a.intention as keyof typeof sortOrder] -
+							sortOrder[b.intention as keyof typeof sortOrder]
+					)
 					.map(rfc => {
 						const percentage = Math.round(
 							(rfc.doc_count / resultFieldCode.metadata.total) * 100
