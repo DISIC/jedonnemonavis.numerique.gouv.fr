@@ -3,6 +3,7 @@ import { symToStr } from 'tsafe/symToStr';
 import { fr } from '@codegouvfr/react-dsfr';
 import { getLink } from '@codegouvfr/react-dsfr/link';
 import { tss } from 'tss-react/dsfr';
+import { Skeleton } from '@mui/material';
 
 export type KPITileProps = {
 	id?: string;
@@ -13,6 +14,7 @@ export type KPITileProps = {
 	linkHref: string;
 	hideLink?: boolean;
 	grey?: boolean;
+	isLoading?: boolean;
 
 	/** Default false */
 	horizontal?: boolean;
@@ -22,7 +24,7 @@ export type KPITileProps = {
 export namespace KPITileProps {}
 
 export const KPITile = (props: KPITileProps) => {
-	const { title, kpi, desc, grey, hideLink, linkHref } = props;
+	const { title, kpi, desc, grey, hideLink, linkHref, isLoading } = props;
 
 	const { cx, classes } = useStyles({
 		grey: grey ?? false
@@ -42,7 +44,13 @@ export const KPITile = (props: KPITileProps) => {
 				>
 					{title}
 				</h3>
-				<p className={cx(classes.kpiText)}>{kpi}</p>
+				<p className={cx(classes.kpiText)}>
+					{isLoading ? (
+						<Skeleton variant="text" width="20%" height="2rem" />
+					) : (
+						kpi
+					)}
+				</p>
 				<p
 					className={cx(
 						fr.cx('fr-tile__desc', 'fr-text--sm'),
@@ -51,7 +59,6 @@ export const KPITile = (props: KPITileProps) => {
 				>
 					{desc}
 				</p>
-				<div style={{ flexGrow: 1 }} />
 				{!hideLink && (
 					<Link
 						href={linkHref}
@@ -61,7 +68,11 @@ export const KPITile = (props: KPITileProps) => {
 							!grey && classes.blueColor
 						)}
 					>
-						{`Voir les ${title.toLowerCase()}`}
+						{isLoading ? (
+							<Skeleton variant="text" width="50%" height="0.9rem" />
+						) : (
+							`Voir les ${title.toLowerCase()}`
+						)}
 						<i
 							className={cx(fr.cx('fr-icon-arrow-right-line', 'fr-icon--sm'))}
 						></i>
@@ -87,6 +98,8 @@ const useStyles = tss
 				: undefined
 		},
 		kpiText: {
+			display: 'flex',
+			justifyContent: 'center',
 			fontSize: '2rem',
 			fontWeight: 'bold',
 			marginBottom: '1rem'
