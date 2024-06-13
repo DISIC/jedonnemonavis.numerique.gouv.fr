@@ -235,7 +235,6 @@ const ProductStatPage = (props: Props) => {
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
-						required
 					/>
 				</SectionWrapper>
 			</div>
