@@ -2,7 +2,12 @@ import { BucketsInside, Buckets, ElkAnswer } from '../../types/custom';
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
 import { AnswerIntention } from '@prisma/client';
-import { calculateBucketsAverage } from '@/src/utils/tools';
+import {
+	calculateBucketsAverage,
+	getCalendarFormat,
+	getCalendarInterval,
+	getDiffDaysBetweenTwoDates
+} from '@/src/utils/tools';
 
 export const answerRouter = router({
 	getByFieldCode: publicProcedure
@@ -198,6 +203,8 @@ export const answerRouter = router({
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
 
+			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
+
 			const countByFieldCodePerMonth = await ctx.elkClient.search({
 				index: 'jdma-answers',
 				query: {
@@ -228,8 +235,8 @@ export const answerRouter = router({
 					count_per_month: {
 						date_histogram: {
 							field: 'created_at',
-							calendar_interval: 'month',
-							format: 'dd MMM'
+							calendar_interval: getCalendarInterval(nbDays),
+							format: getCalendarFormat(nbDays)
 						}
 					}
 				},
@@ -270,6 +277,8 @@ export const answerRouter = router({
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
 
+			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
+
 			const fieldCodeIntervalAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
@@ -301,8 +310,8 @@ export const answerRouter = router({
 					count_per_month: {
 						date_histogram: {
 							field: 'created_at',
-							calendar_interval: 'month',
-							format: 'MM/yy'
+							calendar_interval: getCalendarInterval(nbDays),
+							format: getCalendarFormat(nbDays)
 						},
 						aggs: {
 							term: {
@@ -392,6 +401,8 @@ export const answerRouter = router({
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
 
+			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
+
 			const fieldCodeIntervalAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				query: {
@@ -422,8 +433,8 @@ export const answerRouter = router({
 					count_per_month: {
 						date_histogram: {
 							field: 'created_at',
-							calendar_interval: 'month',
-							format: 'MM/yy'
+							calendar_interval: getCalendarInterval(nbDays),
+							format: getCalendarFormat(nbDays)
 						},
 						aggs: {
 							term: {

@@ -196,3 +196,27 @@ export const getReadableValue = (value: number) => {
 		.replace('.', ',');
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
 };
+
+export const getDiffDaysBetweenTwoDates = (
+	startDate: string,
+	endDate: string
+) => {
+	var date1 = new Date(startDate);
+	var date2 = new Date(endDate);
+	var diff = Math.abs(date1.getTime() - date2.getTime());
+	return Math.ceil(diff / (1000 * 3600 * 24));
+};
+
+export const getCalendarInterval = (nbDays: number) => {
+	if (nbDays < 30) return 'day';
+	if (nbDays < 62) return 'week';
+
+	return 'month';
+};
+
+export const getCalendarFormat = (nbDays: number) => {
+	if (nbDays < 30) return 'd MMM Y';
+	if (nbDays < 62) return 'd MMM Y';
+
+	return 'MMM Y';
+};
