@@ -1,11 +1,11 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton, Tooltip } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
 import QuestionWrapper from './QuestionWrapper';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
+import { trpc } from '@/src/utils/trpc';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -62,8 +62,10 @@ const SmileyQuestionViz = ({
 
 	return (
 		<QuestionWrapper
-			fieldLabel={resultFieldCode.metadata.fieldLabel || ''}
-			totalField={resultFieldCode.metadata.total}
+			fieldCode={fieldCode}
+			productId={productId}
+			startDate={startDate}
+			endDate={endDate}
 			total={total}
 			required={required}
 		>
