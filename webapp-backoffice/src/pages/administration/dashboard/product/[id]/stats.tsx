@@ -22,6 +22,7 @@ import { getServerSideProps } from '.';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 
 interface Props {
 	product: Product;
@@ -110,10 +111,8 @@ const ProductStatPage = (props: Props) => {
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
-	const percetengeVerbatimsOfReviews = (
-		(nbVerbatims / nbReviews) *
-		100
-	).toFixed(0);
+	const percetengeVerbatimsOfReviews =
+		((nbVerbatims / nbReviews) * 100).toFixed(0) || '0';
 
 	const handleButtonClick = () => {
 		router.push({
@@ -129,12 +128,7 @@ const ProductStatPage = (props: Props) => {
 		});
 	};
 
-	if (
-		nbReviews === undefined ||
-		isLoadingButtons ||
-		isLoadingReviewsCount ||
-		isLoadingNbVerbatims
-	) {
+	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<ProductLayout product={product}>
 				<h1>Statistiques</h1>
@@ -211,22 +205,23 @@ const ProductStatPage = (props: Props) => {
 				<div className={fr.cx('fr-mt-5w')}>
 					<h3>Participation</h3>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-4')}>
+						<div className={fr.cx('fr-col-6')}>
 							<KPITile
 								title="Avis"
 								kpi={nbReviews}
-								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
 							/>
 						</div>
-						<div className={fr.cx('fr-col-4')}>
+						<div className={fr.cx('fr-col-6')}>
 							<KPITile
 								title="Verbatims"
-								kpi={nbVerbatims || 0}
+								kpi={nbVerbatims}
+								isLoading={isLoadingNbVerbatims}
 								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
 								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
 							/>
 						</div>
-						<div className={fr.cx('fr-col-4')}>
+						{/* <div className={fr.cx('fr-col-4')}>
 							<KPITile
 								title="Formulaires complets"
 								kpi={0}
@@ -235,7 +230,7 @@ const ProductStatPage = (props: Props) => {
 								hideLink
 								grey
 							/>
-						</div>
+						</div> */}
 					</div>
 				</div>
 				<SectionWrapper
