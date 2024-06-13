@@ -22,6 +22,7 @@ import { getServerSideProps } from '.';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 
 interface Props {
 	product: Product;
@@ -231,6 +232,13 @@ const ProductStatPage = (props: Props) => {
 							/>
 						</div> */}
 					</div>
+				</div>
+				<div>
+					<AnswersChart
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
 				</div>
 				<SectionWrapper
 					title="Satisfaction usagers"

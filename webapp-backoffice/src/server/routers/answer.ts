@@ -176,6 +176,78 @@ export const answerRouter = router({
 			return { data: countByFieldCode.count };
 		}),
 
+	countByFieldCodePerMonth: publicProcedure
+		.input(
+			z.object({
+				field_code: z.string(),
+				product_id: z.number() /* To change to button_id */,
+				start_date: z.string(),
+				end_date: z.string()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { field_code, product_id, start_date, end_date } = input;
+
+			const product = await ctx.prisma.product.findUnique({
+				where: {
+					id: product_id
+				}
+			});
+
+			if (!product) throw new Error('Product not found');
+			if (!product.isPublic && !ctx.session?.user)
+				throw new Error('Product is not public');
+
+			const countByFieldCodePerMonth = await ctx.elkClient.search({
+				index: 'jdma-answers',
+				query: {
+					bool: {
+						must: [
+							{
+								match: {
+									field_code
+								}
+							},
+							{
+								match: {
+									product_id
+								}
+							},
+							{
+								range: {
+									created_at: {
+										gte: start_date,
+										lte: end_date
+									}
+								}
+							}
+						]
+					}
+				},
+				aggs: {
+					count_per_month: {
+						date_histogram: {
+							field: 'created_at',
+							calendar_interval: 'month',
+							format: 'yy MMM'
+						}
+					}
+				},
+				size: 0
+			});
+
+			const data = (
+				countByFieldCodePerMonth.aggregations?.count_per_month as {
+					buckets: { doc_count: number; key_as_string: string }[];
+				}
+			).buckets.map(countByFieldCodePerMonth => ({
+				value: countByFieldCodePerMonth.doc_count,
+				name: countByFieldCodePerMonth.key_as_string
+			}));
+
+			return { data: data };
+		}),
+
 	getByFieldCodeInterval: publicProcedure
 		.input(
 			z.object({
