@@ -36,6 +36,7 @@ interface Props {
 const ProductReviewsPage = (props: Props) => {
 	const { product } = props;
 	const router = useRouter();
+	const { view } = router.query;
 	const [startDate, setStartDate] = React.useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
@@ -51,7 +52,7 @@ const ProductReviewsPage = (props: Props) => {
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
 	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
-		'reviews'
+		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
 

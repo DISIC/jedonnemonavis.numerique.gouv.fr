@@ -217,7 +217,7 @@ const ProductStatPage = (props: Props) => {
 								kpi={nbVerbatims}
 								isLoading={isLoadingNbVerbatims}
 								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
-								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
 							/>
 						</div>
 						{/* <div className={fr.cx('fr-col-4')}>
