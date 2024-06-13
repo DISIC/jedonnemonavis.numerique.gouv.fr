@@ -1,11 +1,11 @@
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import Filters from '@/src/components/dashboard/Stats/Filters';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
-import { useStats } from '@/src/contexts/StatsContext';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -19,9 +19,6 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Filters from '@/src/components/dashboard/Stats/Filters';
-import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
-import KPITile from '@/src/components/dashboard/Stats/KPITile';
 
 interface Props {
 	product: Product;
@@ -34,33 +31,22 @@ const public_modal = createModal({
 
 const SectionWrapper = ({
 	title,
-	count,
-	noDataText = 'Aucune donnée',
 	children
 }: {
 	title: string;
-	count?: number;
-	noDataText?: string;
 	children: React.ReactNode;
 }) => {
-	const { classes, cx } = useStyles();
-
 	return (
-		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
-			<h2 className={fr.cx('fr-mb-0')}>{title}</h2>
-			{count === 0 && (
-				<Alert title="" description={noDataText} severity="info" />
-			)}
-			{children}
+		<div className={fr.cx('fr-mt-5w')}>
+			<h3>{title}</h3>
+			<div>{children}</div>
 		</div>
 	);
 };
 
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
-	const { statsTotals } = useStats();
 	const router = useRouter();
-	const isTotalLoading = statsTotals.satisfaction === undefined;
 
 	const { classes, cx } = useStyles();
 
@@ -183,11 +169,6 @@ const ProductStatPage = (props: Props) => {
 				</Button>
 			</div>
 			<div className={cx(classes.container)}>
-				{isTotalLoading && (
-					<div className={cx(classes.overLoader, fr.cx('fr-pt-12v'))}>
-						<Loader />
-					</div>
-				)}
 				<Filters
 					currentStartDate={startDate}
 					currentEndDate={endDate}
@@ -232,52 +213,14 @@ const ProductStatPage = (props: Props) => {
 						</div> */}
 					</div>
 				</div>
-				<SectionWrapper
-					title="Satisfaction usagers"
-					count={statsTotals.satisfaction}
-					noDataText="Aucune donnée pour la satisfaction usagers"
-				>
+				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
+						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
-					/>
-					<ReviewAverageInterval
-						fieldCode="satisfaction"
-						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
-					/>
-					<ReviewAverage
-						fieldCode="satisfaction"
-						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Facilité d'usage"
-					count={statsTotals.easy}
-					noDataText="Aucune donnée pour la facilité d'usage"
-				>
-					<SmileyQuestionViz
-						fieldCode="easy"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Simplicité du langage"
-					count={statsTotals.comprehension}
-					noDataText="Aucune donnée pour la simplicité du langage"
-				>
-					<SmileyQuestionViz
-						fieldCode="comprehension"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						required
 					/>
 				</SectionWrapper>
 			</div>
