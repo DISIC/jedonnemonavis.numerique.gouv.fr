@@ -72,25 +72,29 @@ const ObservatoireStats = ({
 			label: 'Satisfaction',
 			slug: 'satisfaction',
 			value: resultStatsObservatoire.data.satisfaction,
-			tooltip: 'À rédiger'
+			tooltip:
+				'Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire.'
 		},
 		{
 			label: 'Simplicité du langage',
 			slug: 'comprehension',
 			value: resultStatsObservatoire.data.comprehension,
-			tooltip: 'À rédiger'
+			tooltip:
+				'Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Que pensez-vous du langage utilisé ? » en attribuant une note /10 aux trois réponses proposées dans le questionnaire.'
 		},
 		{
-			label: 'Joignabilité et efficacité',
+			label: 'Aide joignable et efficace',
 			slug: 'contact',
 			value: resultStatsObservatoire.data.contact,
-			tooltip: 'À rédiger'
+			tooltip:
+				'Cette évaluation correspond à la somme des usagers ayant répondu, avoir eu l’intention de contacter le service mais qui n’aurait , soit pas réussi à trouver le moyen de le joindre ou pas pu faire aboutir cette prise de contact, cela sur le nombre total d’usagers ayant répondu au questionnaire.'
 		},
 		{
-			label: 'Autonomie',
+			label: "Niveau d'autonomie",
 			slug: 'autonomy',
 			value: resultStatsObservatoire.data.autonomy,
-			tooltip: 'À rédiger'
+			tooltip:
+				'Comme la note de satisfaction usager, cette note est calculée sur la base des retours usagers récoltés via le questionnaire de satisfaction (bouton «je donne mon avis», qui se trouve à la fin de la démarche).'
 		}
 	];
 
