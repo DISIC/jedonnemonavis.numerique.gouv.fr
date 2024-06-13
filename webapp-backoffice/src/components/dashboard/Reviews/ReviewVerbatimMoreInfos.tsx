@@ -1,13 +1,7 @@
+import { retrieveButtonName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { getSeverity, retrieveButtonName } from '@/src/utils/tools';
-import {
-	displayIntention,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
+import { ExtendedReview } from './interface';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
 const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {

@@ -50,15 +50,10 @@ export const getStatsColor = ({
 };
 
 export const getStatsIcon = ({
-	intention,
-	average
+	intention
 }: {
 	intention?: AnswerIntention;
-	average?: number;
 }) => {
-	if (average !== undefined) {
-		intention = getIntentionFromAverage(average);
-	}
 	switch (intention) {
 		case AnswerIntention.good:
 			return 'ri-emotion-happy-line';

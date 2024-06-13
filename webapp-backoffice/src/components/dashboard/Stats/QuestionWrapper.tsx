@@ -30,7 +30,7 @@ const QuestionWrapper = ({
 					<div>{totalField}</div> <span>Réponses</span>
 				</div>
 				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
-					taux de réponse : {Math.floor((totalField / total) * 100)} %{' '}
+					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
 					{required && '(question obligatoire)'}
 				</div>
 			</div>
