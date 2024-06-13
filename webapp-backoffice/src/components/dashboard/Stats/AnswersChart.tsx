@@ -32,14 +32,14 @@ const AnswersChart = ({ productId, startDate, endDate }: Props) => {
 		{ initialData: { data: [] } }
 	);
 
-	const { classes, cx, css } = useStyles({
+	const { classes, cx } = useStyles({
 		currentChart
 	});
 
 	const totalAnswers = data.reduce((acc, { value }) => acc + value, 0);
 
 	return (
-		<div className={classes.container}>
+		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
 					<h4 className={fr.cx('fr-mb-0')}>Evolution des réponses</h4>

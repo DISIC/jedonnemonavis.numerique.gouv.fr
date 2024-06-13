@@ -233,13 +233,11 @@ const ProductStatPage = (props: Props) => {
 						</div> */}
 					</div>
 				</div>
-				<div>
-					<AnswersChart
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</div>
+				<AnswersChart
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
 				<SectionWrapper
 					title="Satisfaction usagers"
 					count={statsTotals.satisfaction}
