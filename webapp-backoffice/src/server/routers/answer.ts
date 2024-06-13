@@ -1,8 +1,65 @@
 import { BucketsInside, Buckets, ElkAnswer } from '../../types/custom';
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
-import { AnswerIntention } from '@prisma/client';
+import { AnswerIntention, PrismaClient } from '@prisma/client';
 import { calculateBucketsAverage } from '@/src/utils/tools';
+import { Client } from '@elastic/elasticsearch';
+import { Session } from 'next-auth';
+
+const checkAndGetProduct = async ({
+	ctx,
+	product_id
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	product_id: number;
+}) => {
+	const product = await ctx.prisma.product.findUnique({
+		where: {
+			id: product_id
+		}
+	});
+
+	if (!product) throw new Error('Product not found');
+	if (!product.isPublic && !ctx.session?.user)
+		throw new Error('Product is not public');
+
+	return product;
+};
+
+const queryCountByFieldCode = ({
+	field_code,
+	product_id,
+	start_date,
+	end_date
+}: {
+	field_code: string;
+	product_id: number;
+	start_date: string;
+	end_date: string;
+}) => ({
+	bool: {
+		must: [
+			{
+				match: {
+					field_code
+				}
+			},
+			{
+				match: {
+					product_id
+				}
+			},
+			{
+				range: {
+					created_at: {
+						gte: start_date,
+						lte: end_date
+					}
+				}
+			}
+		]
+	}
+});
 
 export const answerRouter = router({
 	getByFieldCode: publicProcedure
@@ -133,47 +190,18 @@ export const answerRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { field_code, product_id, start_date, end_date } = input;
+			const { product_id } = input;
 
-			const product = await ctx.prisma.product.findUnique({
-				where: {
-					id: product_id
-				}
-			});
+			await checkAndGetProduct({ ctx, product_id });
 
-			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user)
-				throw new Error('Product is not public');
-
-			const countByFieldCode = await ctx.elkClient.count({
+			const data = await ctx.elkClient.count({
 				index: 'jdma-answers',
-				query: {
-					bool: {
-						must: [
-							{
-								match: {
-									field_code
-								}
-							},
-							{
-								match: {
-									product_id
-								}
-							},
-							{
-								range: {
-									created_at: {
-										gte: start_date,
-										lte: end_date
-									}
-								}
-							}
-						]
-					}
-				}
+				query: queryCountByFieldCode({
+					...input
+				})
 			});
 
-			return { data: countByFieldCode.count };
+			return { data: data.count };
 		}),
 
 	countByFieldCodePerMonth: publicProcedure
@@ -186,66 +214,75 @@ export const answerRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { field_code, product_id, start_date, end_date } = input;
+			const { field_code, product_id } = input;
 
-			const product = await ctx.prisma.product.findUnique({
-				where: {
-					id: product_id
-				}
-			});
+			await checkAndGetProduct({ ctx, product_id });
 
-			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user)
-				throw new Error('Product is not public');
-
-			const countByFieldCodePerMonth = await ctx.elkClient.search({
+			const data = await ctx.elkClient.search({
 				index: 'jdma-answers',
-				query: {
-					bool: {
-						must: [
-							{
-								match: {
-									field_code
-								}
-							},
-							{
-								match: {
-									product_id
-								}
-							},
-							{
-								range: {
-									created_at: {
-										gte: start_date,
-										lte: end_date
-									}
-								}
-							}
-						]
-					}
-				},
+				query: queryCountByFieldCode({
+					...input
+				}),
 				aggs: {
 					count_per_month: {
 						date_histogram: {
 							field: 'created_at',
 							calendar_interval: 'month',
 							format: 'dd MMM'
-						}
+						},
+						aggs:
+							field_code === 'comprehension'
+								? {
+										average_answer_text: {
+											avg: {
+												field: 'answer_text_as_number'
+											}
+										}
+									}
+								: undefined
 					}
 				},
-				size: 0
+				runtime_mappings: {
+					answer_text_as_number: {
+						type: 'long',
+						script: {
+							source: `
+								if (doc['answer_text.keyword'].size() > 0) {
+									emit(Long.parseLong(doc['answer_text.keyword'].value));
+								}
+							`
+						}
+					}
+				}
 			});
 
-			const data = (
-				countByFieldCodePerMonth.aggregations?.count_per_month as {
-					buckets: { doc_count: number; key_as_string: string }[];
+			const buckets = (
+				data.aggregations?.count_per_month as {
+					buckets: {
+						doc_count: number;
+						key_as_string: string;
+						average_answer_text?: { value: number };
+					}[];
 				}
-			).buckets.map(countByFieldCodePerMonth => ({
-				value: countByFieldCodePerMonth.doc_count,
-				name: countByFieldCodePerMonth.key_as_string
-			}));
+			).buckets.map(countByFieldCodePerMonth => {
+				if (countByFieldCodePerMonth.average_answer_text) {
+					return {
+						value: countByFieldCodePerMonth.average_answer_text.value
+							? Number(
+									countByFieldCodePerMonth.average_answer_text.value.toFixed(1)
+								)
+							: 0,
+						name: countByFieldCodePerMonth.key_as_string
+					};
+				}
 
-			return { data: data };
+				return {
+					value: countByFieldCodePerMonth.doc_count,
+					name: countByFieldCodePerMonth.key_as_string
+				};
+			});
+
+			return { data: buckets };
 		}),
 
 	getByFieldCodeInterval: publicProcedure

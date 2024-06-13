@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
+	fieldCode: string;
 	productId: number;
 	startDate: string;
 	endDate: string;
@@ -16,7 +17,7 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
-const AnswersChart = ({ productId, startDate, endDate }: Props) => {
+const AnswersChart = ({ fieldCode, productId, startDate, endDate }: Props) => {
 	const [currentChart, setCurrentChart] = useState<'chart' | 'table'>('chart');
 
 	const {
@@ -25,7 +26,7 @@ const AnswersChart = ({ productId, startDate, endDate }: Props) => {
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
-			field_code: 'satisfaction',
+			field_code: fieldCode,
 			start_date: startDate,
 			end_date: endDate
 		},
@@ -61,7 +62,12 @@ const AnswersChart = ({ productId, startDate, endDate }: Props) => {
 					</button>
 				</div> */}
 			</div>
-			<LineChart data={data} />
+			<LineChart
+				data={data}
+				labelAxisY={
+					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
+				}
+			/>
 		</div>
 	);
 };

@@ -1,6 +1,7 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
 import { fr } from '@codegouvfr/react-dsfr';
 import QuestionWrapper from './QuestionWrapper';
+import AnswersChart from './AnswersChart';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -11,7 +12,7 @@ type Props = {
 	required?: boolean;
 };
 
-const SmileyQuestionViz = ({
+const BarQuestionViz = ({
 	fieldCode,
 	productId,
 	startDate,
@@ -34,8 +35,14 @@ const SmileyQuestionViz = ({
 					<div>{rfc.answer_text}</div>
 				))}
 			</div> */}
+			<AnswersChart
+				fieldCode={fieldCode}
+				productId={productId}
+				startDate={startDate}
+				endDate={endDate}
+			/>
 		</QuestionWrapper>
 	);
 };
 
-export default SmileyQuestionViz;
+export default BarQuestionViz;

@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 
 interface Props {
 	product: Product;
@@ -214,6 +215,7 @@ const ProductStatPage = (props: Props) => {
 					</div>
 				</div>
 				<AnswersChart
+					fieldCode="satisfaction"
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
@@ -221,6 +223,14 @@ const ProductStatPage = (props: Props) => {
 				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarQuestionViz
+						fieldCode="comprehension"
 						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}
