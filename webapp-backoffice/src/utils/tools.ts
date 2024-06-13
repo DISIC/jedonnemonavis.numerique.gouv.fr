@@ -196,3 +196,67 @@ export const getReadableValue = (value: number) => {
 		.replace('.', ',');
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
 };
+
+export const getDiffDaysBetweenTwoDates = (
+	startDate: string,
+	endDate: string
+) => {
+	var date1 = new Date(startDate);
+	var date2 = new Date(endDate);
+	var diff = Math.abs(date1.getTime() - date2.getTime());
+	return Math.ceil(diff / (1000 * 3600 * 24));
+};
+
+export const getCalendarInterval = (nbDays: number) => {
+	if (nbDays < 30) return 'day';
+	if (nbDays < 62) return 'week';
+
+	return 'month';
+};
+
+export const getCalendarFormat = (nbDays: number) => {
+	if (nbDays < 30) return 'd MMM Y';
+	if (nbDays < 62) return 'd MMM Y';
+
+	return 'MMM Y';
+};
+
+export const translateMonthToFrench = (dateStr: string) => {
+	const monthLookup = {
+		Jan: 'Jan',
+		Feb: 'Fév',
+		Mar: 'Mar',
+		Apr: 'Avr',
+		May: 'Mai',
+		Jun: 'Juin',
+		Jul: 'Juil',
+		Aug: 'Août',
+		Sep: 'Sep',
+		Oct: 'Oct',
+		Nov: 'Nov',
+		Dec: 'Déc'
+	};
+
+	let day = '';
+	let monthAbbreviation = '';
+	let year = '';
+
+	const parts = dateStr.split(' ');
+	if (parts.length === 3) {
+		day = parts[0] + ' ';
+		monthAbbreviation = parts[1];
+		year = parts[2];
+	} else if (parts.length === 2) {
+		monthAbbreviation = parts[0];
+		year = parts[1];
+	} else {
+		return dateStr;
+	}
+
+	const translatedMonth =
+		monthLookup[monthAbbreviation as keyof typeof monthLookup];
+
+	if (!translatedMonth) return dateStr;
+
+	return `${day}${translatedMonth} ${year}`;
+};

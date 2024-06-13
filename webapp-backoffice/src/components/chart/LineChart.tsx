@@ -1,3 +1,4 @@
+import { translateMonthToFrench } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import React from 'react';
 import {
@@ -19,7 +20,12 @@ const CustomLineChart = ({
 }) => {
 	return (
 		<ResponsiveContainer width="100%" height={275}>
-			<LineChart data={data}>
+			<LineChart
+				data={data.map(item => ({
+					...item,
+					name: translateMonthToFrench(item.name)
+				}))}
+			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
