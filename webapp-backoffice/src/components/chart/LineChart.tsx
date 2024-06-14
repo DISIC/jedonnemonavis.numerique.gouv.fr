@@ -1,3 +1,4 @@
+import { translateMonthToFrench } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import React from 'react';
 import {
@@ -6,24 +7,32 @@ import {
 	CartesianGrid,
 	ResponsiveContainer,
 	Line,
-	LineChart
+	LineChart,
+	Tooltip
 } from 'recharts';
 
 const CustomLineChart = ({
-	data
+	data,
+	labelAxisY
 }: {
 	data: { value: number; name: string }[];
+	labelAxisY: string;
 }) => {
 	return (
 		<ResponsiveContainer width="100%" height={275}>
-			<LineChart data={data}>
+			<LineChart
+				data={data.map(item => ({
+					...item,
+					name: translateMonthToFrench(item.name)
+				}))}
+			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
 					dataKey="name"
 					fontSize="0.75rem"
 					tickLine={false}
-					padding={{ left: 25 }}
+					padding={{ left: 25, right: 25 }}
 				/>
 				<YAxis
 					axisLine={false}
@@ -31,13 +40,14 @@ const CustomLineChart = ({
 					fontSize="0.75rem"
 					tickCount={6}
 					label={{
-						value: 'Nombre de réponses',
+						value: labelAxisY,
 						angle: 90,
 						position: 'insideLeft',
 						fontSize: '0.75rem',
 						dy: -60
 					}}
 				/>
+				<Tooltip formatter={value => [value, labelAxisY]} />
 				<Line
 					type="linear"
 					dataKey="value"

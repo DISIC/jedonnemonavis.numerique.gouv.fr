@@ -1,18 +1,20 @@
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
+import { Skeleton } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
 
 type QuestionWrapperProps = {
-	fieldLabel: string;
 	totalField: number;
+	fieldLabel: string;
 	total: number;
 	required?: boolean;
 	children: React.ReactNode;
 };
 
 const QuestionWrapper = ({
-	fieldLabel,
 	totalField,
+	fieldLabel,
 	total,
 	required = false,
 	children
@@ -30,7 +32,7 @@ const QuestionWrapper = ({
 					<div>{totalField}</div> <span>Réponses</span>
 				</div>
 				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
-					taux de réponse : {Math.floor((totalField / total) * 100)} %{' '}
+					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
 					{required && '(question obligatoire)'}
 				</div>
 			</div>
@@ -45,6 +47,11 @@ const useStyles = tss.create({
 		flexDirection: 'column',
 		gap: fr.spacing('3v'),
 		marginTop: fr.spacing('10v')
+	},
+	mainSection: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: '3rem'
 	},
 	metaInfos: {
 		display: 'flex',
@@ -61,8 +68,8 @@ const useStyles = tss.create({
 	metaInfosTotal: {
 		display: 'flex',
 		alignItems: 'center',
-		...fr.typography[11].style,
 		fontSize: '2rem',
+		fontWeight: 'bold',
 		margin: 0,
 		span: {
 			...fr.typography[19].style,

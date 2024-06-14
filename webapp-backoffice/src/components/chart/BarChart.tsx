@@ -1,18 +1,11 @@
+import { getIntentionFromAverage, getStatsColor } from '@/src/utils/stats';
 import {
-	getIntentionFromAverage,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
-import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
-import {
-	BarChart,
 	Bar,
-	XAxis,
-	YAxis,
+	BarChart,
 	CartesianGrid,
-	Cell,
-	ResponsiveContainer
+	ResponsiveContainer,
+	XAxis,
+	YAxis
 } from 'recharts';
 import { contextSmileys } from './types';
 

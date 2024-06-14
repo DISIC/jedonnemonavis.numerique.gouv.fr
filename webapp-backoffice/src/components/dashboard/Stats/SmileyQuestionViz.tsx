@@ -1,9 +1,11 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Skeleton } from '@mui/material';
+import { Skeleton, Tooltip } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
 import QuestionWrapper from './QuestionWrapper';
+import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import { AnswerIntention } from '@prisma/client';
+import { trpc } from '@/src/utils/trpc';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -22,7 +24,7 @@ const SmileyQuestionViz = ({
 	total,
 	required = false
 }: Props) => {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 
 	const { data: resultFieldCode, isLoading } =
 		trpc.answer.getByFieldCode.useQuery(
@@ -52,19 +54,79 @@ const SmileyQuestionViz = ({
 		);
 	}
 
+	const sortOrder = {
+		bad: 0,
+		medium: 1,
+		good: 2
+	};
+
 	return (
 		<QuestionWrapper
-			fieldLabel={resultFieldCode.metadata.fieldLabel || ''}
 			totalField={resultFieldCode.metadata.total}
+			fieldLabel={resultFieldCode.metadata.fieldLabel as string}
 			total={total}
 			required={required}
 		>
 			<h4 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h4>
-			{/* <div>
-				{resultFieldCode.data.map(rfc => (
-					<div>{rfc.answer_text}</div>
-				))}
-			</div> */}
+			<div className={classes.distributionContainer}>
+				{resultFieldCode.data
+					.sort(
+						(a, b) =>
+							sortOrder[a.intention as keyof typeof sortOrder] -
+							sortOrder[b.intention as keyof typeof sortOrder]
+					)
+					.map(rfc => {
+						const percentage = Math.round(
+							(rfc.doc_count / resultFieldCode.metadata.total) * 100
+						);
+						const limitToShow = 10;
+						return (
+							<div
+								className={classes.distributionItem}
+								style={{
+									width: `${percentage}%`
+								}}
+							>
+								<span
+									className={cx(
+										fr.cx(
+											percentage >= limitToShow
+												? getStatsIcon({
+														intention: rfc.intention as AnswerIntention
+													})
+												: undefined
+										),
+										classes.distributionIcon
+									)}
+									style={{
+										color: getStatsColor({
+											intention: rfc.intention as AnswerIntention
+										})
+									}}
+								/>
+								<label className={classes.distributionLabel}>
+									{percentage >= limitToShow && rfc.answer_text}
+								</label>
+								<Tooltip
+									placement="top-start"
+									title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+								>
+									<div
+										className={classes.progressBar}
+										style={{
+											backgroundColor: getStatsColor({
+												intention: rfc.intention as AnswerIntention
+											})
+										}}
+									/>
+								</Tooltip>
+								<label className={classes.distributionPercentage}>
+									{`${percentage}%`}
+								</label>
+							</div>
+						);
+					})}
+			</div>
 		</QuestionWrapper>
 	);
 };
@@ -74,6 +136,36 @@ const useStyles = tss.create({
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: '3rem'
+	},
+	distributionContainer: {
+		display: 'flex',
+		width: '100%'
+	},
+	distributionItem: {
+		display: 'flex',
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	distributionIcon: {
+		height: '3rem',
+		'&::before': {
+			width: '3rem',
+			height: '3rem'
+		}
+	},
+	distributionLabel: {
+		marginTop: fr.spacing('4v'),
+		marginBottom: fr.spacing('2v'),
+		height: '1.5rem'
+	},
+	progressBar: {
+		width: '100%',
+		height: '1.5rem',
+		borderRadius: '1.5rem'
+	},
+	distributionPercentage: {
+		marginTop: fr.spacing('2v')
 	}
 });
 
