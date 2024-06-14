@@ -1,4 +1,5 @@
 import { protectedProcedure, router } from '@/src/server/trpc';
+import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 export const apiKeyRouter = router({
@@ -12,9 +13,38 @@ export const apiKeyRouter = router({
 		.query(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
 
+			if (input.product_id) {
+				const accessRight = await ctx.prisma.accessRight.findFirst({
+					where: {
+						user_email: ctx.user_api?.email,
+						product_id: input.product_id
+					}
+				});
+				if (!accessRight) {
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'Your are not authorized'
+					});
+				}
+			}
+
+			if (input.entity_id) {
+				const adminEntityRights = await ctx.prisma.adminEntityRight.findFirst({
+					where: {
+						user_email: ctx.user_api?.email,
+						entity_id: input.entity_id
+					}
+				});
+				if (!adminEntityRights) {
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'Your are not authorized'
+					});
+				}
+			}
+
 			const keys = await ctx.prisma.apiKey.findMany({
 				where: {
-					user_id: parseInt(ctx_user.id),
 					...(input.product_id && {
 						product_id: input.product_id
 					}),

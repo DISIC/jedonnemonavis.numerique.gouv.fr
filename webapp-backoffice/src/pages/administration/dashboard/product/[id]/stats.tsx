@@ -85,6 +85,15 @@ const ProductStatPage = (props: Props) => {
 			product_id: product.id
 		});
 
+	const {
+		data: reviewsDataWithFilters,
+		isLoading: isLoadingReviewsDataWithFilters
+	} = trpc.review.getList.useQuery({
+		numberPerPage: 0,
+		page: 1,
+		product_id: product.id
+	});
+
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
@@ -96,6 +105,8 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbReviewsWithFilters =
+		reviewsDataWithFilters?.metadata.countFiltered || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
 	const percetengeVerbatimsOfReviews =
 		((nbVerbatims / nbReviews) * 100).toFixed(0) || '0';
@@ -189,7 +200,8 @@ const ProductStatPage = (props: Props) => {
 						<div className={fr.cx('fr-col-6')}>
 							<KPITile
 								title="Avis"
-								kpi={nbReviews}
+								kpi={nbReviewsWithFilters}
+								isLoading={isLoadingReviewsDataWithFilters}
 								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
 							/>
 						</div>
