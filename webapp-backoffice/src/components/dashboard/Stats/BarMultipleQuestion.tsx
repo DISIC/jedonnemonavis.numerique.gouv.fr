@@ -6,14 +6,18 @@ import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
 import HeaderChart from './HeaderChart';
 import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
-const BarChart = dynamic(() => import('@/src/components/chart/BarChartNew'), {
-	ssr: false
-});
+const BarVerticalChart = dynamic(
+	() => import('@/src/components/chart/BarVerticalChartNew'),
+	{
+		ssr: false
+	}
+);
 
 type Props = {
 	fieldCode: string;
@@ -24,7 +28,7 @@ type Props = {
 	required?: boolean;
 };
 
-const BarQuestionViz = ({
+const BarMultipleQuestion = ({
 	fieldCode,
 	productId,
 	startDate,
@@ -34,7 +38,7 @@ const BarQuestionViz = ({
 }: Props) => {
 	const { classes } = useStyles();
 
-	const { data: resultFieldCode, isLoading } =
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
@@ -54,31 +58,49 @@ const BarQuestionViz = ({
 			}
 		);
 
-	const formatedFieldCodeData = [
-		{ name: 'incomprehensible', value: 0 },
-		...resultFieldCode.data
-			.map(item => ({
-				name: item.answer_text,
-				value: item.doc_count
-			}))
-			.sort((a, b) => a.name.localeCompare(b.name)),
-		{ name: 'très clair', value: 0 }
-	];
-
 	const {
-		data: { data: countByFieldCodePerMonth },
-		isLoading: isLoadingCountByFieldCodePerMonth
-	} = trpc.answer.countByFieldCodePerMonth.useQuery(
+		data: resultFieldCodeInterval,
+		isLoading: isLoadingFieldCodeInterval
+	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
 			field_code: fieldCode,
 			start_date: startDate,
 			end_date: endDate
 		},
-		{ initialData: { data: [] } }
+		{
+			initialData: {
+				data: {},
+				metadata: {
+					total: 0,
+					average: 0
+				}
+			}
+		}
 	);
 
-	if (isLoading || isLoadingCountByFieldCodePerMonth || !resultFieldCode) {
+	const formatedFieldCodeData = resultFieldCode.data.map(item => ({
+		name: item.answer_text,
+		value: item.doc_count
+	}));
+
+	const [allFieldCodeKeys, setAllFieldCodeKeys] = useState<string[]>([]);
+
+	const formatedFieldCodeDataPerInterval = Object.keys(
+		resultFieldCodeInterval.data
+	).map((interval: any) => {
+		const returnValue = {} as { [key: string]: number | string; name: string };
+		returnValue['name'] = interval;
+		resultFieldCodeInterval.data[interval].forEach(bucket => {
+			if (!allFieldCodeKeys.includes(bucket.answer_text)) {
+				setAllFieldCodeKeys([...allFieldCodeKeys, bucket.answer_text]);
+			}
+			returnValue[bucket.answer_text] = bucket.doc_count;
+		});
+		return returnValue;
+	});
+
+	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
 				<Skeleton />
@@ -94,14 +116,15 @@ const BarQuestionViz = ({
 			required={required}
 		>
 			<HeaderChart title="Répartition des réponses">
-				<BarChart data={formatedFieldCodeData} />
+				<BarVerticalChart data={formatedFieldCodeData} />
 			</HeaderChart>
 			<HeaderChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
 			>
 				<LineChart
-					data={countByFieldCodePerMonth}
+					data={formatedFieldCodeDataPerInterval}
+					dataKeys={allFieldCodeKeys}
 					labelAxisY={
 						fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 					}
@@ -119,4 +142,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default BarQuestionViz;
+export default BarMultipleQuestion;

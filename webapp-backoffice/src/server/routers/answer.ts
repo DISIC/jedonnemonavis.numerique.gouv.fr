@@ -77,45 +77,16 @@ export const answerRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { field_code, product_id, start_date, end_date } = input;
+			const { product_id } = input;
 
-			const product = await ctx.prisma.product.findUnique({
-				where: {
-					id: product_id
-				}
-			});
-
-			if (!product) throw new Error('Product not found');
-			if (!product.isPublic && !ctx.session?.user)
-				throw new Error('Product is not public');
+			await checkAndGetProduct({ ctx, product_id });
 
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
-				query: {
-					bool: {
-						must: [
-							{
-								match: {
-									field_code
-								}
-							},
-							{
-								match: {
-									product_id
-								}
-							},
-							{
-								range: {
-									created_at: {
-										gte: start_date,
-										lte: end_date
-									}
-								}
-							}
-						]
-					}
-				},
+				query: queryCountByFieldCode({
+					...input
+				}),
 				aggs: {
 					term: {
 						terms: {
@@ -148,13 +119,15 @@ export const answerRouter = router({
 
 					if (!metadata.fieldLabel) metadata.fieldLabel = fieldLabel;
 
-					return {
+					let returnValue = {
 						answer_text: answerText,
 						intention: intention as AnswerIntention,
 						answer_score:
 							intention === 'good' ? 10 : intention === 'medium' ? 5 : 0,
 						doc_count: bucket.doc_count
 					};
+
+					return returnValue;
 				})
 				.sort((a, b) => {
 					const aIntention = a.intention;
@@ -348,14 +321,16 @@ export const answerRouter = router({
 						date_histogram: {
 							field: 'created_at',
 							calendar_interval: getCalendarInterval(nbDays),
-							format: getCalendarFormat(nbDays)
+							format: getCalendarFormat(nbDays),
+							missing: 1
 						},
 						aggs: {
 							term: {
 								terms: {
 									script:
 										'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
-									size: 1000
+									size: 1000,
+									missing: 1
 								}
 							}
 						}
