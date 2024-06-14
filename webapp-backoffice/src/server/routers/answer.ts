@@ -120,7 +120,7 @@ export const answerRouter = router({
 					term: {
 						terms: {
 							script:
-								'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
+								'doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value.trim()',
 							size: 1000
 						}
 					}
