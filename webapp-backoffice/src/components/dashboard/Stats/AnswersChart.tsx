@@ -1,28 +1,36 @@
-import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { trpc } from '@/src/utils/trpc';
+import { FieldCodeSmiley } from '@/src/types/custom';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Skeleton } from '@mui/material';
-import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import QuestionWrapper from './QuestionWrapper';
+import { trpc } from '@/src/utils/trpc';
 import { tss } from 'tss-react/dsfr';
-
-type Props = {
-	fieldCode: string;
-	productId: number;
-	startDate: string;
-	endDate: string;
-};
+import { Skeleton } from '@mui/material';
+import HeaderChart from './HeaderChart';
+import dynamic from 'next/dynamic';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
-const AnswersChart = ({ fieldCode, productId, startDate, endDate }: Props) => {
-	const [currentChart, setCurrentChart] = useState<'chart' | 'table'>('chart');
+type Props = {
+	fieldCode: FieldCodeSmiley;
+	productId: number;
+	startDate: string;
+	endDate: string;
+	total: number;
+};
+
+const AnswersChart = ({
+	fieldCode,
+	productId,
+	startDate,
+	endDate,
+	total
+}: Props) => {
+	const { classes, cx } = useStyles();
 
 	const {
-		data: { data },
-		isLoading
+		data: { data: countByFieldCodePerMonth },
+		isLoading: isLoadingCountByFieldCodePerMonth
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
@@ -33,71 +41,27 @@ const AnswersChart = ({ fieldCode, productId, startDate, endDate }: Props) => {
 		{ initialData: { data: [] } }
 	);
 
-	const { classes, cx } = useStyles({
-		currentChart
-	});
-
-	const totalAnswers = data.reduce((acc, { value }) => acc + value, 0);
+	if (isLoadingCountByFieldCodePerMonth) {
+		return (
+			<div className={classes.mainSection}>
+				<Skeleton />
+			</div>
+		);
+	}
 
 	return (
-		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
-			<div className={classes.header}>
-				<div className={classes.container}>
-					<h4 className={fr.cx('fr-mb-0')}>Evolution des réponses</h4>
-					<span>
-						{isLoading ? (
-							<Skeleton variant="text" width={22} height="1rem" />
-						) : (
-							totalAnswers
-						)}{' '}
-						réponses
-					</span>
-				</div>
-				{/* <div className={classes.flexAlignCenter}>
-					<button className={cx(classes.button, 'button-chart')}>
-						Graphique
-					</button>
-					<button className={cx(classes.button, 'button-table')}>
-						Tableau
-					</button>
-				</div> */}
-			</div>
-			<LineChart
-				data={data}
-				labelAxisY={
-					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
-				}
-			/>
-		</div>
+		<HeaderChart title="Evolution des réponses" total={total}>
+			<LineChart data={countByFieldCodePerMonth} labelAxisY="Score moyen" />
+		</HeaderChart>
 	);
 };
 
-const useStyles = tss
-	.withName(AnswersChart.name)
-	.withParams<{ currentChart: 'chart' | 'table' }>()
-	.create({
-		container: {
-			display: 'flex',
-			flexDirection: 'column',
-			gap: '0.25rem'
-		},
-		header: {
-			display: 'flex',
-			justifyContent: 'space-between',
-			alignItems: 'center',
-			marginBottom: '1rem'
-		},
-		flexAlignCenter: {
-			display: 'flex',
-			alignItems: 'center'
-		},
-		button: {
-			backgroundColor: 'transparent',
-			border: '1px solid',
-			borderRadius: '0.25rem',
-			color: fr.colors.decisions.background.flat.blueFrance.default,
-			borderColor: fr.colors.decisions.background.flat.blueFrance.default
-		}
-	});
+const useStyles = tss.create({
+	mainSection: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: '3rem'
+	}
+});
 
 export default AnswersChart;

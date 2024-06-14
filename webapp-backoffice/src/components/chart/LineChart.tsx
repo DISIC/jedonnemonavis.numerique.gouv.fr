@@ -1,5 +1,4 @@
 import { translateMonthToFrench } from '@/src/utils/tools';
-import { fr } from '@codegouvfr/react-dsfr';
 import React from 'react';
 import {
 	XAxis,
@@ -18,6 +17,7 @@ const CustomLineChart = ({
 	data: { value: number; name: string }[];
 	labelAxisY: string;
 }) => {
+	console.log(data);
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<LineChart

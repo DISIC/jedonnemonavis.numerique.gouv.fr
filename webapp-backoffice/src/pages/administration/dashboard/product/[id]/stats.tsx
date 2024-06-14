@@ -1,6 +1,5 @@
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
-import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
@@ -20,6 +19,7 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 
 interface Props {
 	product: Product;
@@ -219,6 +219,7 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
+					total={nbReviews}
 				/>
 				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
