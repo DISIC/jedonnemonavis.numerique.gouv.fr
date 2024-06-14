@@ -100,7 +100,7 @@ const SmileyBarChart = ({
 
 	data.forEach(item => {
 		Object.keys(item).forEach(key => {
-			if (key !== 'name') {
+			if (key !== 'name' && !key.startsWith('value_')) {
 				fieldNamesSet.add(key);
 			}
 		});
@@ -124,12 +124,16 @@ const SmileyBarChart = ({
 					axisLine={false}
 					domain={[0, 1]}
 					ticks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-					tickFormatter={tick => 'test'}
 					tick={<CustomYAxisTick />}
 					tickLine={false}
 					fontSize="0.75rem"
 				/>
-				<Tooltip cursor={false} />
+				<Tooltip
+					cursor={false}
+					formatter={item => {
+						return Math.floor(item as number) + '%';
+					}}
+				/>
 				<Legend
 					verticalAlign="top"
 					align="left"

@@ -97,6 +97,7 @@ const SmileyQuestionViz = ({
 		const itemTotal = value.reduce((acc, curr) => acc + curr.doc_count, 0);
 		value.forEach(v => {
 			item[v.answer_text] = (v.doc_count / itemTotal) * 100;
+			item['value_' + v.answer_text] = v.doc_count;
 		});
 		data.push(item);
 	}
