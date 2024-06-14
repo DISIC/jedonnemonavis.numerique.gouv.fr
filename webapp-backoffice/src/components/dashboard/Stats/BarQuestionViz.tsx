@@ -28,7 +28,7 @@ const BarQuestionViz = ({
 	total,
 	required = false
 }: Props) => {
-	const { classes, cx } = useStyles();
+	const { classes } = useStyles();
 
 	const { data: resultFieldCode, isLoading } =
 		trpc.answer.getByFieldCode.useQuery(
@@ -78,7 +78,6 @@ const BarQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<h4 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h4>
 			<HeaderChart title="Répartition des réponses">
 				<></>
 			</HeaderChart>
