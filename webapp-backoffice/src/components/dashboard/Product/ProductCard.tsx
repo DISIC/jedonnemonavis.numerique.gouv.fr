@@ -13,6 +13,7 @@ import { tss } from 'tss-react/dsfr';
 import router from 'next/router';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
+import { getColorFromIntention } from '@/src/utils/tools';
 
 interface Indicator {
 	title: string;
@@ -40,7 +41,7 @@ const ProductCard = ({
 
 	const { data: resultSatisfaction, isLoading: isLoadingSatisfaction } =
 		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
+			product_id: product.id,
 			field_code: 'satisfaction',
 			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 				.toISOString()
@@ -54,7 +55,7 @@ const ProductCard = ({
 
 	const { data: resultEasy, isLoading: isLoadingEasy } =
 		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
+			product_id: product.id,
 			field_code: 'easy',
 			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 				.toISOString()
@@ -66,7 +67,7 @@ const ProductCard = ({
 
 	const { data: resultComprehension, isLoading: isLoadingComprehension } =
 		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
+			product_id: product.id,
 			field_code: 'comprehension',
 			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 				.toISOString()
@@ -103,19 +104,6 @@ const ProductCard = ({
 			utils.favorite.getByUser.invalidate({ user_id: result.data.user_id });
 		}
 	});
-
-	const getColorFromIntention = (appreciation: AnswerIntention) => {
-		switch (appreciation) {
-			case 'bad':
-				return 'error';
-			case 'medium':
-				return 'new';
-			case 'good':
-				return 'success';
-		}
-
-		return 'info';
-	};
 
 	const diplayAppreciation = (appreciation: AnswerIntention) => {
 		switch (appreciation) {

@@ -1,5 +1,6 @@
 import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
+import { AnswerIntention } from '@prisma/client';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -259,4 +260,30 @@ export const translateMonthToFrench = (dateStr: string) => {
 	if (!translatedMonth) return dateStr;
 
 	return `${day}${translatedMonth} ${year}`;
+};
+
+export const getColorFromIntention = (intention: AnswerIntention) => {
+	switch (intention) {
+		case 'bad':
+			return 'error';
+		case 'medium':
+			return 'new';
+		case 'good':
+			return 'success';
+	}
+
+	return 'info';
+};
+
+export const getHexaColorFromIntentionText = (intention: string) => {
+	switch (intention) {
+		case 'Pas bien':
+			return '#ce0500';
+		case 'Moyen':
+			return '#716043';
+		case 'Très bien':
+			return '#18753c';
+	}
+
+	return '#0063cb';
 };

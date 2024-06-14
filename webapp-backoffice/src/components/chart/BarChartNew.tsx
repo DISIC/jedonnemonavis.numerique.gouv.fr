@@ -55,7 +55,7 @@ const CustomBarChart = ({
 					padding={{ left: 50, right: 50 }}
 				/>
 				<YAxis axisLine={false} tickLine={false} fontSize="0.75rem" />
-				<Tooltip formatter={value => [value, 'dasda']} />
+				<Tooltip formatter={value => [value, 'dasda']} cursor={false} />
 				<Bar
 					dataKey="value"
 					fill="#929292"

@@ -1,11 +1,13 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
+import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import { translateMonthToFrench } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton, Tooltip } from '@mui/material';
-import { tss } from 'tss-react/dsfr';
-import QuestionWrapper from './QuestionWrapper';
-import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
-import { trpc } from '@/src/utils/trpc';
+import { tss } from 'tss-react/dsfr';
+import SmileyBarChart from '../../chart/SmileyBarChart';
+import QuestionWrapper from './QuestionWrapper';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -14,6 +16,12 @@ type Props = {
 	endDate: string;
 	total: number;
 	required?: boolean;
+};
+
+export const intentionSortOrder = {
+	bad: 0,
+	medium: 1,
+	good: 2
 };
 
 const SmileyQuestionViz = ({
@@ -26,10 +34,10 @@ const SmileyQuestionViz = ({
 }: Props) => {
 	const { classes, cx } = useStyles();
 
-	const { data: resultFieldCode, isLoading } =
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByFieldCode.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate
@@ -46,7 +54,28 @@ const SmileyQuestionViz = ({
 			}
 		);
 
-	if (isLoading || !resultFieldCode) {
+	const {
+		data: resultFieldCodeInterval,
+		isLoading: isLoadingFieldCodeInterval
+	} = trpc.answer.getByFieldCodeInterval.useQuery(
+		{
+			product_id: productId,
+			field_code: fieldCode,
+			start_date: startDate,
+			end_date: endDate
+		},
+		{
+			initialData: {
+				data: {},
+				metadata: {
+					total: 0,
+					average: 0
+				}
+			}
+		}
+	);
+
+	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
 				<Skeleton />
@@ -54,11 +83,23 @@ const SmileyQuestionViz = ({
 		);
 	}
 
-	const sortOrder = {
-		bad: 0,
-		medium: 1,
-		good: 2
-	};
+	let data: {
+		name: string;
+		[key: string]: number | string;
+	}[] = [];
+	for (const [key, value] of Object.entries(resultFieldCodeInterval.data)) {
+		let item: {
+			name: string;
+			[key: string]: number | string;
+		} = {
+			name: translateMonthToFrench(key)
+		};
+		const itemTotal = value.reduce((acc, curr) => acc + curr.doc_count, 0);
+		value.forEach(v => {
+			item[v.answer_text] = (v.doc_count / itemTotal) * 100;
+		});
+		data.push(item);
+	}
 
 	return (
 		<QuestionWrapper
@@ -72,8 +113,10 @@ const SmileyQuestionViz = ({
 				{resultFieldCode.data
 					.sort(
 						(a, b) =>
-							sortOrder[a.intention as keyof typeof sortOrder] -
-							sortOrder[b.intention as keyof typeof sortOrder]
+							intentionSortOrder[
+								a.intention as keyof typeof intentionSortOrder
+							] -
+							intentionSortOrder[b.intention as keyof typeof intentionSortOrder]
 					)
 					.map(rfc => {
 						const percentage = Math.round(
@@ -126,6 +169,13 @@ const SmileyQuestionViz = ({
 							</div>
 						);
 					})}
+			</div>
+			<h4 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h4>
+			<div>
+				<p className={fr.cx('fr-hint-text')}>
+					{total} réponse{total > 1 ? 's' : ''}
+				</p>
+				<SmileyBarChart data={data} total={total} />
 			</div>
 		</QuestionWrapper>
 	);

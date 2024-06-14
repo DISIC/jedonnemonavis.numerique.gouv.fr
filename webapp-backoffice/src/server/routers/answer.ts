@@ -71,7 +71,7 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.string() /* To change to button_id */,
+				product_id: z.number() /* To change to button_id */,
 				start_date: z.string(),
 				end_date: z.string()
 			})
@@ -81,7 +81,7 @@ export const answerRouter = router({
 
 			const product = await ctx.prisma.product.findUnique({
 				where: {
-					id: parseInt(product_id)
+					id: product_id
 				}
 			});
 
@@ -296,7 +296,7 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.string() /* To change to button_id */,
+				product_id: z.number() /* To change to button_id */,
 				start_date: z.string(),
 				end_date: z.string()
 			})
@@ -306,7 +306,7 @@ export const answerRouter = router({
 
 			const product = await ctx.prisma.product.findUnique({
 				where: {
-					id: parseInt(product_id)
+					id: product_id
 				}
 			});
 

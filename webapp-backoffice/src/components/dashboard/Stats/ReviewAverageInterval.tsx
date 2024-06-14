@@ -6,9 +6,12 @@ import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import { AnswerIntention } from '@prisma/client';
 import { trpc } from '@/src/utils/trpc';
 
-const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
-	ssr: false
-});
+const BarChart = dynamic(
+	() => import('@/src/components/chart/SmileyBarChart'),
+	{
+		ssr: false
+	}
+);
 
 type Props = {
 	fieldCode: string;

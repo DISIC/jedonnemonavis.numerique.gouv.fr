@@ -47,7 +47,7 @@ const CustomLineChart = ({
 						dy: -60
 					}}
 				/>
-				<Tooltip formatter={value => [value, labelAxisY]} />
+				<Tooltip formatter={value => [value, labelAxisY]} cursor={false} />
 				<Line
 					type="linear"
 					dataKey="value"
