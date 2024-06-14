@@ -81,7 +81,10 @@ const BarQuestionViz = ({
 			<HeaderChart title="Répartition des réponses">
 				<></>
 			</HeaderChart>
-			<HeaderChart title="Evolution des réponses" total={total}>
+			<HeaderChart
+				title="Evolution des réponses"
+				total={resultFieldCode.metadata.total}
+			>
 				<LineChart data={countByFieldCodePerMonth} labelAxisY="Score moyen" />
 			</HeaderChart>
 		</QuestionWrapper>
