@@ -62,10 +62,8 @@ const SmileyQuestionViz = ({
 
 	return (
 		<QuestionWrapper
-			fieldCode={fieldCode}
-			productId={productId}
-			startDate={startDate}
-			endDate={endDate}
+			totalField={resultFieldCode.metadata.total}
+			fieldLabel={resultFieldCode.metadata.fieldLabel as string}
 			total={total}
 			required={required}
 		>

@@ -5,56 +5,21 @@ import { Skeleton } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
 
 type QuestionWrapperProps = {
-	productId: number;
-	fieldCode: string;
-	startDate: string;
-	endDate: string;
+	totalField: number;
+	fieldLabel: string;
 	total: number;
 	required?: boolean;
 	children: React.ReactNode;
 };
 
 const QuestionWrapper = ({
-	productId,
-	fieldCode,
-	startDate,
-	endDate,
+	totalField,
+	fieldLabel,
 	total,
 	required = false,
 	children
 }: QuestionWrapperProps) => {
 	const { classes } = useStyles();
-
-	const { data: resultFieldCode, isLoading } =
-		trpc.answer.getByFieldCode.useQuery(
-			{
-				product_id: productId.toString(),
-				field_code: fieldCode,
-				start_date: startDate,
-				end_date: endDate
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						total: 0,
-						average: 0,
-						fieldLabel: ''
-					}
-				}
-			}
-		);
-
-	const totalField = resultFieldCode.metadata.total;
-	const fieldLabel = resultFieldCode.metadata.fieldLabel || '';
-
-	if (isLoading || !resultFieldCode) {
-		return (
-			<div className={classes.mainSection}>
-				<Skeleton />
-			</div>
-		);
-	}
 
 	return (
 		<div className={classes.wrapperSection}>
