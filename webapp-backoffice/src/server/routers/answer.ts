@@ -575,7 +575,7 @@ export const answerRouter = router({
 					count: {
 						terms: {
 							script:
-								'doc["field_code.keyword"].value + "#" + doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value + "#" + doc["field_label.keyword"].value',
+								'doc["field_code.keyword"].value + "#" + doc["answer_text.keyword"].value + "#" + doc["intention.keyword"].value',
 							size: 1000
 						}
 					}
