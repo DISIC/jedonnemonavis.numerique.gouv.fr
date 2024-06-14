@@ -30,7 +30,7 @@ const BooleanQuestionViz = ({
 	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByFieldCode.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate

@@ -26,7 +26,7 @@ const ReviewAverage = ({ fieldCode, productId, startDate, endDate }: Props) => {
 	const { data: resultFieldCodeInterval, isLoading } =
 		trpc.answer.getByFieldCodeInterval.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate

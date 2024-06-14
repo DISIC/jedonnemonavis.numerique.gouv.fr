@@ -33,7 +33,7 @@ const DetailsQuestionViz = ({
 	const { data: resultFieldCodeDetails, isLoading: isLoadingFieldCodeDetails } =
 		trpc.answer.getByFieldCode.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				field_code: fieldCodeMultiple,
 				start_date: startDate,
 				end_date: endDate
