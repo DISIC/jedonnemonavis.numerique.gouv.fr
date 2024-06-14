@@ -224,7 +224,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
       localStorage.setItem("userId", userId);
 
-      createReview
+      await createReview
         .mutateAsync({
           review: {
             product_id: product.id,
@@ -234,15 +234,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           },
           answers,
         })
-        .then(() => {
-          router.push({
-            pathname: router.pathname,
-            query: { ...router.query, step: 0 },
-          });
-        });
     } else {
-      handleInsertOrUpdateReview(opinion);
+      await handleInsertOrUpdateReview(opinion);
     }
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, step: 0 },
+    });
   };
 
   const handleInsertOrUpdateReview = async (opinion: Partial<Opinion>) => {
