@@ -18,7 +18,6 @@ const HeaderChart = ({ children, title, total }: Props) => {
 					<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
 					{total && <span>{total} réponses</span>}
 				</div>
-
 				{/* <div className={classes.flexAlignCenter}>
 					<button className={cx(classes.button, 'button-chart')}>
 						Graphique

@@ -11,6 +11,10 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
+const BarChart = dynamic(() => import('@/src/components/chart/BarChartNew'), {
+	ssr: false
+});
+
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
@@ -50,6 +54,17 @@ const BarQuestionViz = ({
 			}
 		);
 
+	const formatedFieldCodeData = [
+		{ name: 'incomprehensible', value: 0 },
+		...resultFieldCode.data
+			.map(item => ({
+				name: item.answer_text,
+				value: item.doc_count
+			}))
+			.sort((a, b) => a.name.localeCompare(b.name)),
+		{ name: 'très clair', value: 0 }
+	];
+
 	const {
 		data: { data: countByFieldCodePerMonth },
 		isLoading: isLoadingCountByFieldCodePerMonth
@@ -79,7 +94,7 @@ const BarQuestionViz = ({
 			required={required}
 		>
 			<HeaderChart title="Répartition des réponses">
-				<></>
+				<BarChart data={formatedFieldCodeData} />
 			</HeaderChart>
 			<HeaderChart
 				title="Evolution des réponses"
