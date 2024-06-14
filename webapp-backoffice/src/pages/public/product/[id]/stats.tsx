@@ -71,8 +71,8 @@ const ProductStatPage = (props: Props) => {
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id,
-			startDate: debouncedStartDate,
-			endDate: debouncedEndDate
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
 		});
 
 	const nbReviews = reviewsData?.metadata.countAll;

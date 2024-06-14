@@ -91,7 +91,9 @@ const ProductStatPage = (props: Props) => {
 	} = trpc.review.getList.useQuery({
 		numberPerPage: 0,
 		page: 1,
-		product_id: product.id
+		product_id: product.id,
+		start_date: startDate,
+		end_date: endDate
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =

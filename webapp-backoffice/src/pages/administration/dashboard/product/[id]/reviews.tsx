@@ -109,8 +109,8 @@ const ProductReviewsPage = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			startDate: debouncedStartDate,
-			endDate: debouncedEndDate,
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate,
 			sort: sort,
 			button_id: buttonId,
 			filters: filters

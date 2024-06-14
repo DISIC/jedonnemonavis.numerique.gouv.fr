@@ -92,8 +92,8 @@ const ExportReviews = (props: Props) => {
 				? { memoryKey }
 				: {
 						product_id,
-						startDate,
-						endDate,
+						start_date: startDate,
+						end_date: endDate,
 						shouldIncludeAnswers: true,
 						mustHaveVerbatims,
 						search,
