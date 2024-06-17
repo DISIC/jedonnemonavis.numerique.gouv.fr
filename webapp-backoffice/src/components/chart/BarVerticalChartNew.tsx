@@ -44,6 +44,7 @@ const BarVerticalChartNew = ({
 					axisLine={false}
 					tick={{ fontSize: '0.75rem', fill: '#666666' }}
 					tickSize={0}
+					tickCount={6}
 					type="number"
 				>
 					<Label
@@ -63,7 +64,7 @@ const BarVerticalChartNew = ({
 						dx={35}
 					/>
 				</YAxis>
-				<Tooltip />
+				<Tooltip formatter={value => [value, 'Nombre de réponses']} />
 				<Bar
 					dataKey="value"
 					fill="#929292"

@@ -42,11 +42,7 @@ const CustomBarChart = ({
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<BarChart data={data}>
-				<CartesianGrid
-					vertical={false}
-					strokeDasharray="3 3"
-					className="review-average-line"
-				/>
+				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
 					dataKey="name"
@@ -54,8 +50,16 @@ const CustomBarChart = ({
 					tickLine={false}
 					padding={{ left: 50, right: 50 }}
 				/>
-				<YAxis axisLine={false} tickLine={false} fontSize="0.75rem" />
-				<Tooltip formatter={value => [value, 'dasda']} cursor={false} />
+				<YAxis
+					axisLine={false}
+					tickLine={false}
+					tickCount={6}
+					fontSize="0.75rem"
+				/>
+				<Tooltip
+					formatter={value => [value, 'Nombre de réponses']}
+					cursor={false}
+				/>
 				<Bar
 					dataKey="value"
 					fill="#929292"
