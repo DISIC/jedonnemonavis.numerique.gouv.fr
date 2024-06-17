@@ -13,7 +13,7 @@ import {
 } from 'recharts';
 
 const lineColors = [
-	fr.colors.getHex({ isDark: false }).decisions.background.default.grey.default,
+	fr.colors.getHex({ isDark: false }).decisions.text.title.grey.default,
 	fr.colors.getHex({ isDark: false }).decisions.background.flat.blueFrance
 		.default,
 	fr.colors.getHex({ isDark: false }).decisions.border.default.redMarianne
@@ -86,7 +86,16 @@ const CustomLineChart = ({
 					</>
 				) : (
 					<>
-						<Legend verticalAlign="top" />
+						<Legend
+							verticalAlign="top"
+							align="left"
+							iconType="plainline"
+							iconSize={16}
+							wrapperStyle={{
+								paddingBottom: '20px',
+								fontSize: '0.75rem'
+							}}
+						/>
 						<Tooltip cursor={false} />
 						{dataKeys.map((key, index) => (
 							<Line
