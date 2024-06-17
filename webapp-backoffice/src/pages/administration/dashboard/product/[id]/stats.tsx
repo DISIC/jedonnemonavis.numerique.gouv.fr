@@ -267,6 +267,13 @@ const ProductStatPage = (props: Props) => {
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
 				</SectionWrapper>
 			</div>
 		</ProductLayout>

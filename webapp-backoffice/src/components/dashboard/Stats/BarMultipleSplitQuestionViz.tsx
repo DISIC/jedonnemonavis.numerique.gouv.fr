@@ -1,5 +1,3 @@
-import { FieldCodeSmiley } from '@/src/types/custom';
-import { fr } from '@codegouvfr/react-dsfr';
 import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
 import { tss } from 'tss-react/dsfr';
@@ -12,8 +10,8 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
-const SmileyVerticalBarChart = dynamic(
-	() => import('@/src/components/chart/SmileyVerticalBarChart'),
+const StackedVerticalBarChart = dynamic(
+	() => import('@/src/components/chart/StackedVerticalBarChart'),
 	{
 		ssr: false
 	}
@@ -116,9 +114,10 @@ const BarMultipleSplitQuestionViz = ({
 			required={required}
 		>
 			<HeaderChart title="Répartition des réponses">
-				<SmileyVerticalBarChart
+				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
 					dataKeys={allFieldCodeKeys}
+					fieldCode={fieldCode}
 					total={total}
 				/>
 			</HeaderChart>

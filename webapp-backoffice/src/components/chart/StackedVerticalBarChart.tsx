@@ -1,4 +1,5 @@
 import { getHexaColorFromIntentionText } from '@/src/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
 import {
 	Bar,
 	BarChart,
@@ -16,6 +17,20 @@ const sortOrder = {
 	Moyen: 1,
 	'Très bien': 2
 };
+
+const colorsContactReached = [
+	fr.colors.getHex({ isDark: false }).decisions.text.title.grey.default,
+	fr.colors.getHex({ isDark: false }).decisions.background.flat.blueFrance
+		.default,
+	fr.colors.getHex({ isDark: false }).decisions.border.default.redMarianne
+		.default,
+	fr.colors.getHex({ isDark: false }).decisions.border.default.greenEmeraude
+		.default,
+	fr.colors.getHex({ isDark: false }).decisions.border.default.purpleGlycine
+		.default,
+	fr.colors.getHex({ isDark: false }).decisions.border.default.blueCumulus
+		.default
+];
 
 const renderLegend = (props: any) => {
 	const { payload } = props;
@@ -72,12 +87,14 @@ const CustomBar = (props: any) => {
 	);
 };
 
-const SmileyVerticalBarChart = ({
+const StackedVerticalBarChart = ({
 	data,
-	dataKeys
+	dataKeys,
+	fieldCode
 }: {
 	data: { name: string; [key: string]: number | string }[];
 	dataKeys: string[];
+	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	total: number;
 }) => {
 	return (
@@ -129,7 +146,11 @@ const SmileyVerticalBarChart = ({
 						radius={5}
 						barSize={24}
 						stackId="a"
-						fill={getHexaColorFromIntentionText(key)}
+						fill={
+							fieldCode === 'contact_reached'
+								? getHexaColorFromIntentionText(key)
+								: colorsContactReached[index]
+						}
 						shape={<CustomBar currentIndex={index} />}
 					/>
 				))}
@@ -138,4 +159,4 @@ const SmileyVerticalBarChart = ({
 	);
 };
 
-export default SmileyVerticalBarChart;
+export default StackedVerticalBarChart;
