@@ -278,10 +278,14 @@ export const getColorFromIntention = (intention: AnswerIntention) => {
 export const getHexaColorFromIntentionText = (intention: string) => {
 	switch (intention) {
 		case 'Pas bien':
+		case 'Non':
 			return '#ce0500';
 		case 'Moyen':
 			return '#716043';
+		case 'Pas de réponse':
+			return '#929292';
 		case 'Très bien':
+		case 'Oui':
 			return '#18753c';
 	}
 

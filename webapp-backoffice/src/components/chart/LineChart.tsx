@@ -43,7 +43,6 @@ const CustomLineChart = ({
 	dataKeys?: string[];
 	labelAxisY: string;
 }) => {
-	console.log(dataKeys);
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<LineChart

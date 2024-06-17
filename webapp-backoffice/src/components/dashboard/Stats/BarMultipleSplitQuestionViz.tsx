@@ -12,15 +12,15 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
 });
 
-const BarVerticalChart = dynamic(
-	() => import('@/src/components/chart/BarVerticalChartNew'),
+const SmileyVerticalBarChart = dynamic(
+	() => import('@/src/components/chart/SmileyVerticalBarChart'),
 	{
 		ssr: false
 	}
 );
 
 type Props = {
-	fieldCode: string;
+	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	productId: number;
 	startDate: string;
 	endDate: string;
@@ -28,7 +28,7 @@ type Props = {
 	required?: boolean;
 };
 
-const BarMultipleQuestion = ({
+const BarMultipleSplitQuestionViz = ({
 	fieldCode,
 	productId,
 	startDate,
@@ -39,7 +39,7 @@ const BarMultipleQuestion = ({
 	const { classes } = useStyles();
 
 	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
-		trpc.answer.getByFieldCode.useQuery(
+		trpc.answer.getByChildFieldCode.useQuery(
 			{
 				product_id: productId,
 				field_code: fieldCode,
@@ -48,7 +48,7 @@ const BarMultipleQuestion = ({
 			},
 			{
 				initialData: {
-					data: [],
+					data: {},
 					metadata: {
 						total: 0,
 						average: 0,
@@ -79,26 +79,26 @@ const BarMultipleQuestion = ({
 		}
 	);
 
-	const formatedFieldCodeData = resultFieldCode.data.map(item => ({
-		name: item.answer_text,
-		value: item.doc_count
-	}));
-
 	const [allFieldCodeKeys, setAllFieldCodeKeys] = useState<string[]>([]);
 
-	const formatedFieldCodeDataPerInterval = Object.keys(
-		resultFieldCodeInterval.data
-	).map((interval: any) => {
-		const returnValue = {} as { [key: string]: number | string; name: string };
-		returnValue['name'] = interval;
-		resultFieldCodeInterval.data[interval].forEach(bucket => {
-			if (!allFieldCodeKeys.includes(bucket.answer_text)) {
-				setAllFieldCodeKeys([...allFieldCodeKeys, bucket.answer_text]);
-			}
-			returnValue[bucket.answer_text] = bucket.doc_count;
-		});
-		return returnValue;
-	});
+	const formatedFieldCodeData = Object.entries(resultFieldCode.data).map(
+		([key, value]) => {
+			const tmpData = value.map(item => {
+				if (!allFieldCodeKeys.includes(item.answer_text)) {
+					setAllFieldCodeKeys([...allFieldCodeKeys, item.answer_text]);
+				}
+
+				return {
+					[item.answer_text]: item.doc_count
+				};
+			});
+
+			return {
+				name: key,
+				...Object.assign({}, ...tmpData)
+			};
+		}
+	) as { name: string; [key: string]: number | string }[];
 
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
@@ -116,20 +116,22 @@ const BarMultipleQuestion = ({
 			required={required}
 		>
 			<HeaderChart title="Répartition des réponses">
-				<BarVerticalChart data={formatedFieldCodeData} />
+				<SmileyVerticalBarChart
+					data={formatedFieldCodeData}
+					dataKeys={allFieldCodeKeys}
+					total={total}
+				/>
 			</HeaderChart>
-			<HeaderChart
+			{/* <HeaderChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}
 					dataKeys={allFieldCodeKeys}
-					labelAxisY={
-						fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
-					}
+					labelAxisY="Nombre de réponses"
 				/>
-			</HeaderChart>
+			</HeaderChart> */}
 		</QuestionWrapper>
 	);
 };
@@ -142,4 +144,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default BarMultipleQuestion;
+export default BarMultipleSplitQuestionViz;

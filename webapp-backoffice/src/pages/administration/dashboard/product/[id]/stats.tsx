@@ -20,7 +20,8 @@ import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
-import BarMultipleQuestion from '@/src/components/dashboard/Stats/BarMultipleQuestion';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
 
 interface Props {
 	product: Product;
@@ -252,8 +253,15 @@ const ProductStatPage = (props: Props) => {
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-					<BarMultipleQuestion
+					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
 						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}

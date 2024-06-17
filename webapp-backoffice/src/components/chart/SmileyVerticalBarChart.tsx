@@ -3,6 +3,7 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	Label,
 	Legend,
 	ResponsiveContainer,
 	Tooltip,
@@ -56,95 +57,80 @@ const renderLegend = (props: any) => {
 	);
 };
 
-const CustomYAxisTick = (props: any) => {
-	const { x, y, payload } = props;
-
-	if (payload.value === 12) return null;
-
-	return (
-		<g transform={`translate(${x},${y})`}>
-			<text x={0} y={0} dy={4} textAnchor="end" fill="#666" fontSize="0.75rem">
-				{payload.value}
-			</text>
-		</g>
-	);
-};
-
 const CustomBar = (props: any) => {
-	const { x, y, width, height, value, fieldName } = props;
-
-	if (value === 0) return null;
+	const { x, y, width, height, name, currentIndex, fill } = props;
 
 	return (
 		<g>
-			<rect
-				x={x}
-				y={y}
-				width={width}
-				height={height}
-				fill={getHexaColorFromIntentionText(fieldName)}
-				ry={5}
-				style={{ stroke: '#fff', strokeWidth: 2 }}
-			/>
+			{currentIndex === 0 && (
+				<text x={x + 5} y={y} fill="#666666" style={{ fontSize: '0.8rem' }}>
+					{name}
+				</text>
+			)}
+			<rect x={x} y={y + 5} width={width} height={height} fill={fill} ry={15} />
 		</g>
 	);
 };
 
-const SmileyBarChart = ({
-	data
+const SmileyVerticalBarChart = ({
+	data,
+	dataKeys
 }: {
 	data: { name: string; [key: string]: number | string }[];
+	dataKeys: string[];
 	total: number;
 }) => {
-	const fieldNamesSet = new Set<string>();
-
-	data.forEach(item => {
-		Object.keys(item).forEach(key => {
-			if (key !== 'name' && !key.startsWith('value_')) {
-				fieldNamesSet.add(key);
-			}
-		});
-	});
-
 	return (
-		<ResponsiveContainer width="100%" height={335}>
-			<BarChart data={data}>
-				<CartesianGrid vertical={false} strokeDasharray="3 3" />
+		<ResponsiveContainer width="100%" height={300}>
+			<BarChart data={data} layout="vertical">
+				<CartesianGrid horizontal={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
-					dataKey="name"
+					type="number"
 					fontSize="0.75rem"
 					tickLine={false}
-				/>
+				>
+					<Label
+						value="Nombre de répondants"
+						fontSize="0.75rem"
+						dy={7.5}
+						position="insideBottom"
+					/>
+				</XAxis>
 				<YAxis
 					axisLine={false}
+					tick={false}
+					type="category"
+					dataKey="name"
 					domain={[0, 1]}
-					ticks={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-					tick={<CustomYAxisTick />}
 					tickLine={false}
 					fontSize="0.75rem"
-				/>
-				<Tooltip
-					cursor={false}
-					formatter={item => {
-						return Math.floor(item as number) + '%';
-					}}
-				/>
+				>
+					<Label
+						value="Réponses"
+						angle={90}
+						position="insideLeft"
+						fontSize="0.75rem"
+						dy={-25}
+						dx={35}
+					/>
+				</YAxis>
+				<Tooltip cursor={false} />
 				<Legend
 					verticalAlign="top"
 					align="left"
 					height={60}
 					content={renderLegend}
 				/>
-				{Array.from(fieldNamesSet).map((fieldName: string) => (
+				{dataKeys.map((key, index) => (
 					<Bar
-						dataKey={fieldName}
-						fill={getHexaColorFromIntentionText(fieldName)}
+						key={key}
+						dataKey={key}
 						radius={5}
+						barSize={24}
 						stackId="a"
-						barSize={25}
-						shape={<CustomBar fieldName={fieldName} />}
-						style={{ stroke: '#fff', strokeWidth: 2 }}
+						fill={getHexaColorFromIntentionText(key)}
+						shape={<CustomBar currentIndex={index} />}
 					/>
 				))}
 			</BarChart>
@@ -152,4 +138,4 @@ const SmileyBarChart = ({
 	);
 };
 
-export default SmileyBarChart;
+export default SmileyVerticalBarChart;
