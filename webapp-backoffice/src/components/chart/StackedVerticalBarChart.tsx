@@ -12,12 +12,6 @@ import {
 	YAxis
 } from 'recharts';
 
-const sortOrder = {
-	'Pas bien': 0,
-	Moyen: 1,
-	'Très bien': 2
-};
-
 const colorsContactReached = [
 	fr.colors.getHex({ isDark: false }).decisions.text.title.grey.default,
 	fr.colors.getHex({ isDark: false }).decisions.background.flat.blueFrance
@@ -32,7 +26,7 @@ const colorsContactReached = [
 		.default
 ];
 
-const renderLegend = (props: any) => {
+const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 	const { payload } = props;
 
 	return (
@@ -43,12 +37,8 @@ const renderLegend = (props: any) => {
 			}}
 		>
 			{payload
-				.sort(
-					(a: any, b: any) =>
-						sortOrder[a.value as keyof typeof sortOrder] -
-						sortOrder[b.value as keyof typeof sortOrder]
-				)
-				.map((entry: any, index: number) => (
+				.sort((a: any, b: any) => sortOrder[a.value] - sortOrder[b.value])
+				.map((entry: any) => (
 					<div
 						style={{
 							display: 'flex',
@@ -97,6 +87,22 @@ const StackedVerticalBarChart = ({
 	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	total: number;
 }) => {
+	const sortOrder: { [key: string]: number } =
+		fieldCode === 'contact_reached'
+			? {
+					Non: 0,
+					Oui: 1,
+					'Pas de réponse': 2
+				}
+			: {
+					'Très mauvaise': 0,
+					Mauvaise: 1,
+					'Ni bonne ni mauvaise': 2,
+					Bonne: 3,
+					Excellente: 4,
+					'Ne se prononce pas': 5
+				};
+
 	return (
 		<ResponsiveContainer width="100%" height={300}>
 			<BarChart data={data} layout="vertical">
@@ -137,23 +143,25 @@ const StackedVerticalBarChart = ({
 					verticalAlign="top"
 					align="left"
 					height={60}
-					content={renderLegend}
+					content={payload => renderLegend(payload, sortOrder)}
 				/>
-				{dataKeys.map((key, index) => (
-					<Bar
-						key={key}
-						dataKey={key}
-						radius={5}
-						barSize={24}
-						stackId="a"
-						fill={
-							fieldCode === 'contact_reached'
-								? getHexaColorFromIntentionText(key)
-								: colorsContactReached[index]
-						}
-						shape={<CustomBar currentIndex={index} />}
-					/>
-				))}
+				{dataKeys
+					.sort((a, b) => sortOrder[a] - sortOrder[b])
+					.map((key, index) => (
+						<Bar
+							key={key}
+							dataKey={key}
+							radius={5}
+							barSize={24}
+							stackId="a"
+							fill={
+								fieldCode === 'contact_reached'
+									? getHexaColorFromIntentionText(key)
+									: colorsContactReached[sortOrder[key]]
+							}
+							shape={<CustomBar currentIndex={index} />}
+						/>
+					))}
 			</BarChart>
 		</ResponsiveContainer>
 	);

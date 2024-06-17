@@ -78,13 +78,13 @@ const CustomLineChart = ({
 						<Line
 							type="linear"
 							dataKey="value"
-							dot={false}
 							stroke="black"
 							strokeWidth={2}
 						/>
 					</>
 				) : (
 					<>
+						<Tooltip cursor={false} />
 						<Legend
 							verticalAlign="top"
 							align="left"
@@ -95,14 +95,12 @@ const CustomLineChart = ({
 								fontSize: '0.75rem'
 							}}
 						/>
-						<Tooltip cursor={false} />
 						{dataKeys.map((key, index) => (
 							<Line
 								key={key}
 								type="linear"
 								dataKey={key}
 								stroke={lineColors[index % lineColors.length]}
-								dot={false}
 								strokeWidth={2}
 							/>
 						))}
