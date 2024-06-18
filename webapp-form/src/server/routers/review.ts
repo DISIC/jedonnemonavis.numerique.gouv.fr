@@ -21,14 +21,6 @@ export async function createOrUpdateAnswers(
   const { prisma, elkClient } = ctx;
   const { review, answers } = input;
 
-  const newReview = await prisma.review.create({
-    data: review,
-    include: {
-      product: true,
-      button: true,
-    },
-  });
-
   const promises = Promise.all(
     answers.map(async (answer) => {
       const existingAnswer = await prisma.answer.findFirst({
@@ -105,7 +97,7 @@ export async function createOrUpdateAnswers(
           product_id: review.product_id,
           product_name: review.product.title,
           form_id: 1,
-          created_at: new Date().toISOString(),
+          created_at: review.created_at,
         };
 
         const answerElk = {
