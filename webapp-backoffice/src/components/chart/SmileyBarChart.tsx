@@ -118,8 +118,10 @@ const SmileyBarChart = ({
 						<p>{label}</p>
 						<ul>
 							{payload.map((payloadItem: any) => {
-								const itemWithValue = data.find(item =>
-									item.hasOwnProperty(`value_${payloadItem.dataKey}`)
+								const itemWithValue = data.find(
+									item =>
+										item.name === label &&
+										item.hasOwnProperty(`value_${payloadItem.dataKey}`)
 								);
 
 								if (itemWithValue) {
