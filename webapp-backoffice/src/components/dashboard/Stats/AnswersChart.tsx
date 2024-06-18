@@ -50,7 +50,7 @@ const AnswersChart = ({
 	}
 
 	return (
-		<HeaderChart title="Evolution des réponses" total={total}>
+		<HeaderChart title="Évolution des réponses" total={total}>
 			<LineChart
 				data={countByFieldCodePerMonth}
 				labelAxisY="Nombre de réponses"

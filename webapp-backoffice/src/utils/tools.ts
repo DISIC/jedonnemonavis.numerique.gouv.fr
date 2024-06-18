@@ -291,3 +291,9 @@ export const getHexaColorFromIntentionText = (intention: string) => {
 
 	return '#0063cb';
 };
+
+export const formatNumberWithSpaces = (number: number): string => {
+	let numStr = number.toString();
+
+	return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+};

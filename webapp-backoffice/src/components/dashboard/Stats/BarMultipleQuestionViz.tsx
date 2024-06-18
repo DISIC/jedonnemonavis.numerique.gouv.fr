@@ -119,7 +119,7 @@ const BarMultipleQuestionViz = ({
 				<BarVerticalChart data={formatedFieldCodeData} />
 			</HeaderChart>
 			<HeaderChart
-				title="Evolution des réponses"
+				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 			>
 				<LineChart

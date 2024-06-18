@@ -1,6 +1,9 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { translateMonthToFrench } from '@/src/utils/tools';
+import {
+	formatNumberWithSpaces,
+	translateMonthToFrench
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton, Tooltip } from '@mui/material';
@@ -109,7 +112,7 @@ const SmileyQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<h4 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h4>
+			<h6 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h6>
 			<div className={classes.distributionContainer}>
 				{resultFieldCode.data
 					.sort(
@@ -171,10 +174,10 @@ const SmileyQuestionViz = ({
 						);
 					})}
 			</div>
-			<h4 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h4>
+			<h6 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h6>
 			<div>
 				<p className={fr.cx('fr-hint-text')}>
-					{total} réponse{total > 1 ? 's' : ''}
+					{formatNumberWithSpaces(total)} réponse{total > 1 ? 's' : ''}
 				</p>
 				<SmileyBarChart data={data} total={total} />
 			</div>

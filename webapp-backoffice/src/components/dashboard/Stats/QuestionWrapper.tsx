@@ -1,3 +1,4 @@
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
@@ -29,7 +30,7 @@ const QuestionWrapper = ({
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
 				<div className={classes.metaInfosTotal}>
-					<div>{totalField}</div> <span>Réponses</span>
+					<div>{formatNumberWithSpaces(totalField)}</div> <span>Réponses</span>
 				</div>
 				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
 					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}

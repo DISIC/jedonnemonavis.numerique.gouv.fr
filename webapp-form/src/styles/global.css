@@ -22,7 +22,6 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: bold !important;
-
 }
 
 .fr-fieldset .fr-fieldset__content {
@@ -34,7 +33,6 @@
 
 .fr-fieldset .fr-checkbox-group .fr-label {
   font-size: 1rem;
-
 }
 .fr-fieldset .fr-radio-group .fr-label {
   font-size: 1rem;

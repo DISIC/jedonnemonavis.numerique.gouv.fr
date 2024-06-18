@@ -1,3 +1,4 @@
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
@@ -15,8 +16,12 @@ const HeaderChart = ({ children, title, total }: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
-					<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
-					{total && <span>{total} réponses</span>}
+					<h6 className={fr.cx('fr-mb-0')}>{title}</h6>
+					{total && (
+						<p className={fr.cx('fr-hint-text', 'fr-mb-0')}>
+							{formatNumberWithSpaces(total)} réponses
+						</p>
+					)}
 				</div>
 				{/* <div className={classes.flexAlignCenter}>
 					<button className={cx(classes.button, 'button-chart')}>
