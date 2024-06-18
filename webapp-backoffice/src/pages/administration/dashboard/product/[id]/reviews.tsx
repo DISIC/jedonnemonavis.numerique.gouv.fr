@@ -119,8 +119,8 @@ const ProductReviewsPage = (props: Props) => {
 			initialData: {
 				data: [],
 				metadata: {
-					countFiltered: -1,
-					countAll: -1
+					countFiltered: 0,
+					countAll: 0
 				}
 			}
 		}
@@ -128,8 +128,8 @@ const ProductReviewsPage = (props: Props) => {
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
-			page: currentPage,
-			numberPerPage: numberPerPage,
+			page: 1,
+			numberPerPage: 1000,
 			product_id: product.id,
 			isTest: true
 		});
