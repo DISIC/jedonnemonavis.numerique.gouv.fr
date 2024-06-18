@@ -104,6 +104,7 @@ export async function createOrUpdateAnswers(
           button_name: review.button.title,
           product_id: review.product_id,
           product_name: review.product.title,
+          form_id: 1,
           created_at: new Date().toISOString(),
         };
 
