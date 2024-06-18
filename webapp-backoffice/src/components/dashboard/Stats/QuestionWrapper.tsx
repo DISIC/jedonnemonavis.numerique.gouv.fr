@@ -22,6 +22,8 @@ const QuestionWrapper = ({
 }: QuestionWrapperProps) => {
 	const { classes } = useStyles();
 
+	if (!totalField) return;
+
 	return (
 		<div className={classes.wrapperSection}>
 			<h4 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h4>
