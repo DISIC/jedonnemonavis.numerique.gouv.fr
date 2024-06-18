@@ -113,7 +113,7 @@ const ProductStatPage = (props: Props) => {
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
 	const percetengeVerbatimsOfReviews =
-		((nbVerbatims / nbReviews) * 100).toFixed(0) || '0';
+		((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || '0';
 
 	const handleButtonClick = () => {
 		router.push({
@@ -240,7 +240,7 @@ const ProductStatPage = (props: Props) => {
 				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -248,28 +248,28 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarQuestionViz
 						fieldCode="comprehension"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_reached"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -278,7 +278,7 @@ const ProductStatPage = (props: Props) => {
 				<SectionWrapper title="Détails des anciennes réponses">
 					<SmileyQuestionViz
 						fieldCode="easy"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -286,7 +286,7 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="difficulties"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
