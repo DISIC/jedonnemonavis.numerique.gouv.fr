@@ -36,13 +36,17 @@ const public_modal = createModal({
 const SectionWrapper = ({
 	title,
 	alert = '',
+	total,
 	children
 }: {
 	title: string;
 	alert?: string;
+	total: number;
 	children: React.ReactNode;
 }) => {
 	const { classes, cx } = useStyles();
+
+	if (!total) return;
 
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
@@ -120,8 +124,9 @@ const ProductStatPage = (props: Props) => {
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
-	const percetengeVerbatimsOfReviews =
-		((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || '0';
+	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
+		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
+		: 0;
 
 	const handleButtonClick = () => {
 		router.push({
@@ -222,7 +227,11 @@ const ProductStatPage = (props: Props) => {
 								title="Verbatims"
 								kpi={nbVerbatims}
 								isLoading={isLoadingNbVerbatims}
-								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
+								desc={
+									percetengeVerbatimsOfReviews
+										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
+										: undefined
+								}
 								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
 							/>
 						</div>
@@ -243,9 +252,12 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
-					total={nbReviews}
+					total={nbReviewsWithFilters}
 				/>
-				<SectionWrapper title="Détails des réponses">
+				<SectionWrapper
+					title="Détails des réponses"
+					total={nbReviewsWithFilters}
+				>
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
@@ -286,6 +298,7 @@ const ProductStatPage = (props: Props) => {
 				<SectionWrapper
 					title="Détails des anciennes réponses"
 					alert="Cette section présente les résultats de l'ancien questionnaire, modifié le 03 juillet 2024."
+					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
 						fieldCode="easy"

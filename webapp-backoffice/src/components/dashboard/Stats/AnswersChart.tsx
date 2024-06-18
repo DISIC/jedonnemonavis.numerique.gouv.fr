@@ -49,6 +49,8 @@ const AnswersChart = ({
 		);
 	}
 
+	if (!total) return;
+
 	return (
 		<>
 			<HeaderChart title="Évolution des réponses" total={total}>
