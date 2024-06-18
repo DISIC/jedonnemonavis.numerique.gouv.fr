@@ -255,6 +255,7 @@ model Review {
   button     Button  @relation(fields: [button_id], references: [id])
   button_id  Int
   xwiki_id   Int?
+  user_id    String?
 
   answers Answer[]
 

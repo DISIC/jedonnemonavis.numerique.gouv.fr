@@ -1,13 +1,16 @@
 import fs from "fs";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
-import { inferAsyncReturnType, initTRPC } from "@trpc/server";
+import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { ZodError } from "zod";
 import { Client as ElkClient } from "@elastic/elasticsearch";
+import { CreateNextContextOptions } from "@trpc/server/adapters/next";
+import { createTRPCStoreLimiter } from "@/src/utils/trpcRateLimiter";
+import { defaultFingerPrint } from "@trpc-limiter/memory";
 
 // Create context with Prisma and NextAuth session
-export const createContext = async () => {
+export const createContext = async (opts: CreateNextContextOptions) => {
   const prisma = new PrismaClient();
 
   const caCrtPath = path.resolve(process.cwd(), "./certs/ca/ca.crt");
@@ -28,6 +31,7 @@ export const createContext = async () => {
   });
 
   return {
+    req: opts.req,
     prisma,
     elkClient,
   };
@@ -52,9 +56,24 @@ const t = initTRPC.context<Context>().create({
   },
 });
 
+const limiter = createTRPCStoreLimiter<typeof t>({
+  fingerprint: (ctx) => defaultFingerPrint(ctx.req),
+  windowMs: 60000,
+  max: 5,
+  onLimit: (retryAfter) => {
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `Too many requests, please try again later. ${retryAfter}`,
+    });
+  },
+});
+
 // Base router and middleware helpers
 export const router = t.router;
 export const middleware = t.middleware;
 
 // Unprotected procedure
 export const publicProcedure = t.procedure;
+
+// Limited procedure
+export const limitedProcedure = t.procedure.use(limiter);

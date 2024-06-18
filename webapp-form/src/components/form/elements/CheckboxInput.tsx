@@ -23,7 +23,7 @@ export const CheckboxInput = (props: Props) => {
   const { classes, cx } = useStyles({ nbItems: 5 });
   const { t } = useTranslation("common");
 
-  const getChildrenResetObject = () => {
+  const getChildrenResetObject = (value?: number) => {
     let opinionPropsObj: {
       [key in keyof Opinion]?: any;
     } = {};
@@ -40,14 +40,22 @@ export const CheckboxInput = (props: Props) => {
 
       subChildren.forEach((sc) => {
         opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
-          ? []
+          ? value
+            ? (opinion[sc.name] as any[]).filter(
+                (field) => !field.startsWith(value + "_")
+              )
+            : []
           : undefined;
       });
     });
 
     children.forEach((cf) => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
-        ? []
+        ? value
+          ? (opinion[cf.name] as any[]).filter(
+              (field) => !field.startsWith(value + "_")
+            )
+          : []
         : undefined;
     });
 
@@ -84,13 +92,12 @@ export const CheckboxInput = (props: Props) => {
             ),
             value,
           ],
-          ...getChildrenResetObject(),
         });
       } else {
         setOpinion({
           ...opinion,
           [key]: opinion[key].filter((d) => d !== value),
-          ...getChildrenResetObject(),
+          ...getChildrenResetObject(value),
         });
       }
     }

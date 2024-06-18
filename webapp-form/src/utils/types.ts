@@ -110,6 +110,7 @@ export type Step = {
 };
 
 export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
+  review_user_id?: string;
   product_name: string;
   product_id: number;
   button_name: string;
