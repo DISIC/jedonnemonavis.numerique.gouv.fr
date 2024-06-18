@@ -1,4 +1,4 @@
-import { getReadableValue } from '@/src/utils/tools';
+import { getPercentageFromValue, getReadableValue } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
@@ -107,14 +107,25 @@ const ObservatoireStats = ({
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
 				<>
-					<div className={cx(classes.value, getClassFromValue(field.value))}>
-						{getReadableValue(field.value)} / 10
-					</div>
-					<span
-						className={cx(classes.intention, getClassFromValue(field.value))}
+					<div
+						className={cx(
+							classes.value,
+							field.slug !== 'autonomy'
+								? getClassFromValue(field.value)
+								: undefined
+						)}
 					>
-						{getLabelFromValue(field.value)}
-					</span>
+						{field.slug === 'autonomy'
+							? `${getPercentageFromValue(field.value)}%`
+							: `${getReadableValue(field.value)} / 10`}
+					</div>
+					{field.slug !== 'autonomy' && (
+						<span
+							className={cx(classes.intention, getClassFromValue(field.value))}
+						>
+							{getLabelFromValue(field.value)}
+						</span>
+					)}
 				</>
 			);
 		} else {

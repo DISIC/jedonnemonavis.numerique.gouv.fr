@@ -198,6 +198,10 @@ export const getReadableValue = (value: number) => {
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
 };
 
+export const getPercentageFromValue = (value: number) => {
+	return getReadableValue(value * 10);
+};
+
 export const getDiffDaysBetweenTwoDates = (
 	startDate: string,
 	endDate: string
