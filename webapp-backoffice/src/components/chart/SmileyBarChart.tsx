@@ -111,7 +111,6 @@ const SmileyBarChart = ({
 	});
 
 	const CustomTooltip = ({ active, payload, label }: any) => {
-		console.log(payload);
 		if (active && payload && payload.length) {
 			return (
 				<div className={classes.customTooltip}>
