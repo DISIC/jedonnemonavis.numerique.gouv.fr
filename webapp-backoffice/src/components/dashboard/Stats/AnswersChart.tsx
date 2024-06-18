@@ -51,7 +51,10 @@ const AnswersChart = ({
 
 	return (
 		<HeaderChart title="Evolution des réponses" total={total}>
-			<LineChart data={countByFieldCodePerMonth} labelAxisY="Score moyen" />
+			<LineChart
+				data={countByFieldCodePerMonth}
+				labelAxisY="Nombre de réponses"
+			/>
 		</HeaderChart>
 	);
 };

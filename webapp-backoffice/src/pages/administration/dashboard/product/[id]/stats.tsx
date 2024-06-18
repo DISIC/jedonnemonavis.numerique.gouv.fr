@@ -275,6 +275,23 @@ const ProductStatPage = (props: Props) => {
 						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
+				<SectionWrapper title="Détails des anciennes réponses">
+					<SmileyQuestionViz
+						fieldCode="easy"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarMultipleQuestionViz
+						fieldCode="difficulties"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+				</SectionWrapper>
 			</div>
 		</ProductLayout>
 	);

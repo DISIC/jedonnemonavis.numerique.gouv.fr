@@ -3,6 +3,7 @@ import {
 	Bar,
 	BarChart,
 	CartesianGrid,
+	Label,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
@@ -55,7 +56,16 @@ const CustomBarChart = ({
 					tickLine={false}
 					tickCount={6}
 					fontSize="0.75rem"
-				/>
+				>
+					<Label
+						value="Réponses"
+						angle={90}
+						position="insideLeft"
+						fontSize="0.75rem"
+						dy={-25}
+						dx={-5}
+					/>
+				</YAxis>
 				<Tooltip
 					formatter={value => [value, 'Nombre de réponses']}
 					cursor={false}

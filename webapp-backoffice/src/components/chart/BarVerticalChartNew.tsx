@@ -64,7 +64,10 @@ const BarVerticalChartNew = ({
 						dx={35}
 					/>
 				</YAxis>
-				<Tooltip formatter={value => [value, 'Nombre de réponses']} />
+				<Tooltip
+					formatter={value => [value, 'Nombre de réponses']}
+					cursor={false}
+				/>
 				<Bar
 					dataKey="value"
 					fill="#929292"
