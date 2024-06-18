@@ -61,7 +61,8 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [entities, countFiltered, countAll] = await Promise.all([
+			console.log(where);
+			const [reviews, countFiltered, countAll] = await Promise.all([
 				ctx.prisma.review.findMany({
 					where,
 					orderBy: orderBy,
@@ -99,7 +100,7 @@ export const reviewRouter = router({
 				})
 			]);
 
-			return { data: entities, metadata: { countFiltered, countAll } };
+			return { data: reviews, metadata: { countFiltered, countAll } };
 		}),
 
 	exportData: protectedProcedure
