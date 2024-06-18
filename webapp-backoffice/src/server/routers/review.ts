@@ -99,6 +99,9 @@ export const reviewRouter = router({
 				})
 			]);
 
+			console.log(where);
+			console.log(await ctx.prisma.review.count({ where }));
+
 			return { data: reviews, metadata: { countFiltered, countAll } };
 		}),
 

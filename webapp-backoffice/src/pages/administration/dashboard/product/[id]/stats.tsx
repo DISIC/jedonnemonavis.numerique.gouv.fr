@@ -74,6 +74,9 @@ const ProductStatPage = (props: Props) => {
 		new Date().toISOString().split('T')[0]
 	);
 
+	const debouncedStartDate = useDebounce<string>(startDate, 500);
+	const debouncedEndDate = useDebounce<string>(endDate, 500);
+
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
 			{
@@ -106,20 +109,18 @@ const ProductStatPage = (props: Props) => {
 		numberPerPage: 0,
 		page: 1,
 		product_id: product.id,
-		start_date: startDate,
-		end_date: endDate
+		start_date: debouncedStartDate,
+		end_date: debouncedEndDate
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
 			field_code: 'verbatim',
-			start_date: startDate,
-			end_date: endDate
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
 		});
 
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
