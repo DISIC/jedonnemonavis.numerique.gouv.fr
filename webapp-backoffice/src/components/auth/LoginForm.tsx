@@ -12,6 +12,7 @@ import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { Toast } from '@/src/components/ui/Toast';
 
 type FormCredentials = {
 	email: string;
@@ -43,6 +44,7 @@ export const LoginForm = () => {
 	const [passwordIncorrect, setPasswordIncorrect] = useState<boolean>(false);
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
+	const [displayToast, setDisplayToast] = useState<boolean>(false);
 
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
@@ -140,6 +142,13 @@ export const LoginForm = () => {
 
 	return (
 		<div>
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={4000}
+				severity="success"
+				message="Email envoyé avec succès"
+			/>
 			<modal.Component title="Mot de passe oublié">
 				<p className={fr.cx('fr-my-10v')}>
 					Nous vous enverrons un lien pour réinitialiser votre mot de passe à
@@ -158,6 +167,7 @@ export const LoginForm = () => {
 							initResetPwd.mutate({
 								email: credentials.email
 							});
+							setDisplayToast(true);
 							modal.close();
 						}}
 						priority="primary"
