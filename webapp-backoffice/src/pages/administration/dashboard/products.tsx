@@ -160,8 +160,8 @@ const DashBoard = () => {
 
 	return (
 		<>
-			<div className={cx(classes.container, fr.cx('fr-container'))}>
-				{isModalSubmitted && (
+			{isModalSubmitted && (
+				<div className={cx(classes.container, fr.cx('fr-container'))}>
 					<Alert
 						closable
 						onClose={function noRefCheck() {
@@ -172,8 +172,8 @@ const DashBoard = () => {
 						small
 						description={`Vous êtes désormais administrateur de ${productTitle}`}
 					/>
-				)}
-			</div>
+				</div>
+			)}
 
 			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
