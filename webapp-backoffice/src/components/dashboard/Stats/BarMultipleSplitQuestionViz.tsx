@@ -59,7 +59,7 @@ const BarMultipleSplitQuestionViz = ({
 	const {
 		data: resultFieldCodeInterval,
 		isLoading: isLoadingFieldCodeInterval
-	} = trpc.answer.getByFieldCodeInterval.useQuery(
+	} = trpc.answer.getByChildFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
 			field_code: fieldCode,
@@ -78,6 +78,9 @@ const BarMultipleSplitQuestionViz = ({
 	);
 
 	const [allFieldCodeKeys, setAllFieldCodeKeys] = useState<string[]>([]);
+	const [allParentFieldCodeKeys, setAllParentFieldCodeKeys] = useState<
+		string[]
+	>([]);
 
 	const formatedFieldCodeData = Object.entries(resultFieldCode.data).map(
 		([key, value]) => {
@@ -97,6 +100,23 @@ const BarMultipleSplitQuestionViz = ({
 			};
 		}
 	) as { name: string; [key: string]: number | string }[];
+
+	const formatedFieldCodeDataPerInterval = Object.keys(
+		resultFieldCodeInterval.data
+	).map((interval: any) => {
+		const returnValue = {} as { [key: string]: number | string; name: string };
+		returnValue['name'] = interval;
+		resultFieldCodeInterval.data[interval].forEach(bucket => {
+			if (!allParentFieldCodeKeys.includes(bucket.answer_text)) {
+				setAllParentFieldCodeKeys([
+					...allParentFieldCodeKeys,
+					bucket.answer_text
+				]);
+			}
+			returnValue[bucket.answer_text] = bucket.doc_count;
+		});
+		return returnValue;
+	});
 
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
@@ -121,16 +141,16 @@ const BarMultipleSplitQuestionViz = ({
 					total={total}
 				/>
 			</HeaderChart>
-			{/* <HeaderChart
+			<HeaderChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}
-					dataKeys={allFieldCodeKeys}
+					dataKeys={allParentFieldCodeKeys}
 					labelAxisY="Nombre de réponses"
 				/>
-			</HeaderChart> */}
+			</HeaderChart>
 		</QuestionWrapper>
 	);
 };
