@@ -50,12 +50,15 @@ const AnswersChart = ({
 	}
 
 	return (
-		<HeaderChart title="Évolution des réponses" total={total}>
-			<LineChart
-				data={countByFieldCodePerMonth}
-				labelAxisY="Nombre de réponses"
-			/>
-		</HeaderChart>
+		<>
+			<HeaderChart title="Évolution des réponses" total={total}>
+				<LineChart
+					data={countByFieldCodePerMonth}
+					labelAxisY="Nombre de réponses"
+				/>
+			</HeaderChart>
+			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
+		</>
 	);
 };
 

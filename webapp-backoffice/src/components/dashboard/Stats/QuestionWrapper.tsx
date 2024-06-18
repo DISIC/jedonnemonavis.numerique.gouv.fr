@@ -38,6 +38,7 @@ const QuestionWrapper = ({
 				</div>
 			</div>
 			<div>{children}</div>
+			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
 		</div>
 	);
 };
@@ -46,8 +47,7 @@ const useStyles = tss.create({
 	wrapperSection: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('3v'),
-		marginTop: fr.spacing('10v')
+		gap: fr.spacing('3v')
 	},
 	mainSection: {
 		display: 'flex',
