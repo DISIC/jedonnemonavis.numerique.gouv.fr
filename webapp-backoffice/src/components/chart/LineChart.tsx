@@ -35,13 +35,15 @@ const lineColors = [
 const CustomLineChart = ({
 	data,
 	dataKeys,
-	labelAxisY
+	labelAxisY,
+	ticks
 }: {
 	data:
 		| { value: number | number[]; name: string }[]
 		| { [key: string]: string | number; name: string }[];
 	dataKeys?: string[];
 	labelAxisY: string;
+	ticks?: number[];
 }) => {
 	return (
 		<ResponsiveContainer width="100%" height={275}>
@@ -64,6 +66,7 @@ const CustomLineChart = ({
 					tickLine={false}
 					fontSize="0.75rem"
 					tickCount={6}
+					ticks={ticks ? ticks : undefined}
 					label={{
 						value: labelAxisY,
 						angle: 90,
