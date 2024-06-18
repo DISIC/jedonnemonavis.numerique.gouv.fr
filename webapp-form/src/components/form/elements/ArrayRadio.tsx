@@ -151,6 +151,79 @@ export const ArrayRadio = (props: Props) => {
                     )}
                 </tbody>
               </table>
+              <div className={cx(classes.mobileReviews)}>
+                {"options" in form[0] &&
+                  form[0].options &&
+                  form[0].options.map(
+                    (option: RadioOption, outerIndex: number) => (
+                      <div className={cx(classes.optionRow)} key={option.value}>
+                        {(field.needed.includes(option.value) ||
+                          (opinion.contact_tried.includes(option.value) &&
+                            !field.excluded.includes(option.value))) &&
+                          containsPattern(
+                            opinion.contact_reached,
+                            new RegExp(
+                              escapeRegex(option.value.toString()) + "_17"
+                            )
+                          ) && (
+                            <>
+                              <div className={cx(classes.labelWrapper)}>
+                                <label
+                                  className={cx(classes.label)}
+                                  htmlFor={`mobile-radio-${outerIndex}`}
+                                >
+                                  {getFirstTwoWords(t(option.label))}
+                                </label>
+                              </div>
+                              <ul>
+                                {field.options.map((opt, innerIndex) => (
+                                  <li key={innerIndex}>
+                                    <input
+                                      type="radio"
+                                      id={`mobile-radio-${outerIndex}-${innerIndex}`}
+                                      name={`mobile-radio-${outerIndex}`}
+                                      value={`value-${outerIndex}`}
+                                      checked={opinion.contact_satisfaction.includes(
+                                        escapeRegex(option.value.toString()) +
+                                          "_" +
+                                          opt.value
+                                      )}
+                                      onChange={(event) => {
+                                        setOpinion({
+                                          ...opinion,
+                                          contact_satisfaction: [
+                                            ...opinion.contact_satisfaction.filter(
+                                              (cs) =>
+                                                !cs.includes(
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  )
+                                                )
+                                            ),
+                                            escapeRegex(
+                                              option.value.toString()
+                                            ) +
+                                              "_" +
+                                              opt.value,
+                                          ],
+                                        });
+                                      }}
+                                    />
+                                    <label
+                                      htmlFor={`mobile-radio-${outerIndex}-${innerIndex}`}
+                                      className={cx(classes.reviewInputLabel)}
+                                    >
+                                      {t(opt.label)}
+                                    </label>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                      </div>
+                    )
+                  )}
+              </div>
             </div>
           </>
         ) : (
@@ -179,6 +252,11 @@ const useStyles = tss
       ...fr.typography[17].style,
       "&:last-child": {
         paddingLeft: "3rem",
+      },
+    },
+    labelWrapper: {
+      [fr.breakpoints.down("sm")]: {
+        padding: "1rem 0",
       },
     },
     label: {
@@ -221,12 +299,48 @@ const useStyles = tss
       },
     },
     reviewContainer: {
-      overflow: "auto",
+      ["input:checked + label"]: {
+        borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+      },
+      ["input:focus-visible + label"]: {
+        outlineOffset: "2px",
+        outline: "2px solid #4D90FE",
+      },
     },
     optionRow: {
       background: "white !important",
     },
+    mobileReviews: {
+      display: "none",
+      [fr.breakpoints.down("sm")]: {
+        display: "block",
+      },
+      ul: {
+        display: "flex",
+        overflowX: "auto",
+        flexWrap: "wrap",
+        gap: "1rem",
+        listStyle: "none",
+        ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
+        paddingLeft: 0,
+        li: {
+          minWidth: "100%",
+          input: {
+            position: "absolute",
+            opacity: 0,
+            width: 0,
+            height: 0,
+          },
+        },
+        "::-webkit-scrollbar": {
+          display: "none",
+        },
+      },
+    },
     mainTable: {
+      [fr.breakpoints.down("sm")]: {
+        display: "none",
+      },
       width: "100%",
       borderCollapse: "collapse",
       tableLayout: "fixed",
@@ -244,6 +358,15 @@ const useStyles = tss
       },
       "th:not(:first-of-type):not(:last-child)": {
         width: "calc((100% - 20rem) / 6)",
+      },
+    },
+    reviewInputLabel: {
+      border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
+      padding: fr.spacing("3v"),
+      display: "flex",
+      cursor: "pointer",
+      ["&:hover"]: {
+        borderColor: fr.colors.decisions.background.alt.grey.active,
       },
     },
   }));

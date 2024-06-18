@@ -1,21 +1,16 @@
-import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
-import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
-import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
+import { Loader } from '@/src/components/ui/Loader';
 import { useStats } from '@/src/contexts/StatsContext';
+import { transformDateToFrenchReadable } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
+import Head from 'next/head';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { transformDateToFrenchReadable } from '@/src/utils/tools';
-import Input from '@codegouvfr/react-dsfr/Input';
-import { useState } from 'react';
-import Head from 'next/head';
 
 interface Props {
 	product: Product | null;
@@ -76,8 +71,8 @@ const ProductStatPage = (props: Props) => {
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id,
-			startDate: debouncedStartDate,
-			endDate: debouncedEndDate
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
 		});
 
 	const nbReviews = reviewsData?.metadata.countAll;
@@ -103,58 +98,7 @@ const ProductStatPage = (props: Props) => {
 			);
 		}
 
-		return (
-			<>
-				<SectionWrapper
-					title="Satisfaction usagers"
-					count={statsTotals.satisfaction}
-					noDataText="Aucune donnée pour la satisfaction usagers"
-				>
-					<SmileyQuestionViz
-						fieldCode="satisfaction"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-					<ReviewAverageInterval
-						fieldCode="satisfaction"
-						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
-					/>
-					<ReviewAverage
-						fieldCode="satisfaction"
-						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Facilité d'usage"
-					count={statsTotals.easy}
-					noDataText="Aucune donnée pour la facilité d'usage"
-				>
-					<SmileyQuestionViz
-						fieldCode="easy"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Simplicité du langage"
-					count={statsTotals.comprehension}
-					noDataText="Aucune donnée pour la simplicité du langage"
-				>
-					<SmileyQuestionViz
-						fieldCode="comprehension"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
-			</>
-		);
+		return <></>;
 	};
 
 	return (

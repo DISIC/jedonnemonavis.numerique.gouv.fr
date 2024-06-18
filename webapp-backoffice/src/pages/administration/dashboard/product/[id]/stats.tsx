@@ -1,29 +1,27 @@
-import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
-import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import Filters from '@/src/components/dashboard/Stats/Filters';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
+import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
-import { useStats } from '@/src/contexts/StatsContext';
+import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import Link from 'next/link';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { ToggleSwitch } from '@codegouvfr/react-dsfr/ToggleSwitch';
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
-import Head from 'next/head';
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import { useRouter } from 'next/router';
-import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
 
 interface Props {
 	product: Product;
@@ -36,34 +34,22 @@ const public_modal = createModal({
 
 const SectionWrapper = ({
 	title,
-	count,
-	noDataText = 'Aucune donnée',
 	children
 }: {
 	title: string;
-	count?: number;
-	noDataText?: string;
 	children: React.ReactNode;
 }) => {
-	const { classes, cx } = useStyles();
-
 	return (
-		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
-			<h2 className={fr.cx('fr-mb-0')}>{title}</h2>
-			{count === 0 && (
-				<Alert title="" description={noDataText} severity="info" />
-			)}
-			{children}
+		<div className={fr.cx('fr-mt-5w')}>
+			<h3>{title}</h3>
+			<div>{children}</div>
 		</div>
 	);
 };
 
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
-	const { statsTotals } = useStats();
 	const router = useRouter();
-	const isTotalLoading = statsTotals.satisfaction === undefined;
-	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false);
 
 	const { classes, cx } = useStyles();
 
@@ -101,11 +87,33 @@ const ProductStatPage = (props: Props) => {
 			product_id: product.id
 		});
 
+	const {
+		data: reviewsDataWithFilters,
+		isLoading: isLoadingReviewsDataWithFilters
+	} = trpc.review.getList.useQuery({
+		numberPerPage: 0,
+		page: 1,
+		product_id: product.id,
+		start_date: startDate,
+		end_date: endDate
+	});
+
+	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
+		trpc.answer.countByFieldCode.useQuery({
+			product_id: product.id,
+			field_code: 'verbatim',
+			start_date: startDate,
+			end_date: endDate
+		});
+
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
-	const nbReviews = reviewsData?.metadata.countAll;
-
-	const updateProduct = trpc.product.update.useMutation({});
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbReviewsWithFilters =
+		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbVerbatims = dataNbVerbatims?.data || 0;
+	const percetengeVerbatimsOfReviews =
+		((nbVerbatims / nbReviews) * 100).toFixed(0) || '0';
 
 	const handleButtonClick = () => {
 		router.push({
@@ -157,6 +165,13 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} Avis | Je donne mon avis`}
+				/>
+			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
@@ -170,83 +185,108 @@ const ProductStatPage = (props: Props) => {
 				</Button>
 			</div>
 			<div className={cx(classes.container)}>
-				{isTotalLoading && (
-					<div className={cx(classes.overLoader, fr.cx('fr-pt-12v'))}>
-						<Loader />
-					</div>
-				)}
-				<div></div>
-				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
-				>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de début"
-							nativeInputProps={{
-								type: 'date',
-								value: startDate,
-								onChange: e => {
-									setStartDate(e.target.value);
-								}
-							}}
-						/>
-					</div>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de fin"
-							nativeInputProps={{
-								type: 'date',
-								value: endDate,
-								onChange: e => {
-									setEndDate(e.target.value);
-								}
-							}}
-						/>
+				<Filters
+					currentStartDate={startDate}
+					currentEndDate={endDate}
+					onChange={(tmpStartDate, tmpEndDate) => {
+						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
+						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+					}}
+				/>
+				<ObservatoireStats
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
+				<div className={fr.cx('fr-mt-5w')}>
+					<h3>Participation</h3>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Avis"
+								kpi={nbReviewsWithFilters}
+								isLoading={isLoadingReviewsDataWithFilters}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
+							/>
+						</div>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Verbatims"
+								kpi={nbVerbatims}
+								isLoading={isLoadingNbVerbatims}
+								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
+							/>
+						</div>
+						{/* <div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Formulaires complets"
+								kpi={0}
+								desc="soit 0 % des répondants"
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								hideLink
+								grey
+							/>
+						</div> */}
 					</div>
 				</div>
-				<SectionWrapper
-					title="Satisfaction usagers"
-					count={statsTotals.satisfaction}
-					noDataText="Aucune donnée pour la satisfaction usagers"
-				>
+				<AnswersChart
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+					total={nbReviews}
+				/>
+				<SectionWrapper title="Détails des réponses">
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarQuestionViz
+						fieldCode="comprehension"
+						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-					<ReviewAverageInterval
-						fieldCode="satisfaction"
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviews}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
-					<ReviewAverage
-						fieldCode="satisfaction"
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviews}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviews}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
-				<SectionWrapper
-					title="Facilité d'usage"
-					count={statsTotals.easy}
-					noDataText="Aucune donnée pour la facilité d'usage"
-				>
+				<SectionWrapper title="Détails des anciennes réponses">
 					<SmileyQuestionViz
 						fieldCode="easy"
+						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
+						required
 					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Simplicité du langage"
-					count={statsTotals.comprehension}
-					noDataText="Aucune donnée pour la simplicité du langage"
-				>
-					<SmileyQuestionViz
-						fieldCode="comprehension"
+					<BarMultipleQuestionViz
+						fieldCode="difficulties"
+						total={nbReviews}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}

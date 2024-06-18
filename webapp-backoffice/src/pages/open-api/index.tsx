@@ -103,8 +103,8 @@ const DocAPI = () => {
 							clés API'.
 						</p>
 						<p className={classes.wrapperTextImg}>
-							Dans la popup qui s'ouvre, vous pouvez ensuite cliquer sur
-							'Ajouter une clé API' :
+							Dans la page qui s'ouvre, vous pouvez ensuite cliquer sur 'Ajouter
+							une clé API' :
 							<Image
 								alt="bouton-ajouter-clé-api"
 								src={`/assets/generer-cle-api.png`}

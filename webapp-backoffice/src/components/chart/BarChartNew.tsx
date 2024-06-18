@@ -1,18 +1,13 @@
+import { getIntentionFromAverage, getStatsColor } from '@/src/utils/stats';
 import {
-	getIntentionFromAverage,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
-import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
-import {
-	BarChart,
 	Bar,
-	XAxis,
-	YAxis,
+	BarChart,
 	CartesianGrid,
-	Cell,
-	ResponsiveContainer
+	Label,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis
 } from 'recharts';
 import { contextSmileys } from './types';
 
@@ -33,35 +28,9 @@ const CustomYAxisTick = (props: any) => {
 const CustomBar = (props: any) => {
 	const { x, y, width, height, value } = props;
 
-	if (value === 0) return null;
-
 	return (
 		<g>
-			<rect
-				x={x}
-				y={y}
-				width={width}
-				height={height}
-				fill={getStatsColor({ average: value })}
-				ry={15}
-			/>
-			<text
-				x={x + width / 2}
-				y={y + height - 10}
-				textAnchor="middle"
-				style={{ fontSize: '0.75rem' }}
-				fill="white"
-			>
-				{value}
-			</text>
-			<g>
-				<path
-					d={contextSmileys[getIntentionFromAverage(value)].svgPath} // 24 x 24
-					transform={`translate(${x + 2.5}, ${y - 20}),scale(0.8)`}
-					fill={getStatsColor({ average: value })}
-					opacity={0.9}
-				/>
-			</g>
+			<rect x={x} y={y} width={width} height={height} fill="#929292" ry={17} />
 		</g>
 	);
 };
@@ -74,28 +43,37 @@ const CustomBarChart = ({
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<BarChart data={data}>
-				<CartesianGrid
-					vertical={false}
-					strokeDasharray="3 3"
-					className="review-average-line"
-				/>
+				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
 					dataKey="name"
 					fontSize="0.75rem"
 					tickLine={false}
+					padding={{ left: 50, right: 50 }}
 				/>
 				<YAxis
 					axisLine={false}
-					ticks={[0, 2, 4, 6, 8, 10, 12]}
-					tick={<CustomYAxisTick />}
 					tickLine={false}
+					tickCount={6}
 					fontSize="0.75rem"
+				>
+					<Label
+						value="Réponses"
+						angle={90}
+						position="insideLeft"
+						fontSize="0.75rem"
+						dy={-25}
+						dx={-5}
+					/>
+				</YAxis>
+				<Tooltip
+					formatter={value => [value, 'Nombre de réponses']}
+					cursor={false}
 				/>
 				<Bar
 					dataKey="value"
-					fill="#8884d8"
-					barSize={25}
+					fill="#929292"
+					barSize={32}
 					shape={<CustomBar />}
 				/>
 			</BarChart>

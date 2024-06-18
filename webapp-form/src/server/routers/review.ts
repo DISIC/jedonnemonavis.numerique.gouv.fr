@@ -19,7 +19,15 @@ export async function createOrUpdateAnswers(
   }
 ) {
   const { prisma, elkClient } = ctx;
-  const { answers, review } = input;
+  const { review, answers } = input;
+
+  const newReview = await prisma.review.create({
+    data: review,
+    include: {
+      product: true,
+      button: true,
+    },
+  });
 
   const promises = Promise.all(
     answers.map(async (answer) => {

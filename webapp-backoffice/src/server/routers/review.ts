@@ -19,8 +19,8 @@ export const reviewRouter = router({
 				mustHaveVerbatims: z.boolean().optional().default(false),
 				sort: z.string().optional(),
 				search: z.string().optional(),
-				startDate: z.string().optional(),
-				endDate: z.string().optional(),
+				start_date: z.string().optional(),
+				end_date: z.string().optional(),
 				button_id: z.number().optional(),
 				filters: z
 					.object({
@@ -61,7 +61,7 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [entities, countFiltered, countAll] = await Promise.all([
+			const [reviews, countFiltered, countAll] = await Promise.all([
 				ctx.prisma.review.findMany({
 					where,
 					orderBy: orderBy,
@@ -74,13 +74,13 @@ export const reviewRouter = router({
 										parent_answer: true
 									},
 									where: {
-										...(input.endDate && {
+										...(input.end_date && {
 											created_at: {
-												...(input.startDate && {
-													gte: new Date(input.startDate)
+												...(input.start_date && {
+													gte: new Date(input.start_date)
 												}),
 												lte: (() => {
-													const adjustedEndDate = new Date(input.endDate);
+													const adjustedEndDate = new Date(input.end_date);
 													adjustedEndDate.setHours(23, 59, 59);
 													return adjustedEndDate;
 												})()
@@ -99,7 +99,7 @@ export const reviewRouter = router({
 				})
 			]);
 
-			return { data: entities, metadata: { countFiltered, countAll } };
+			return { data: reviews, metadata: { countFiltered, countAll } };
 		}),
 
 	exportData: protectedProcedure
@@ -110,8 +110,8 @@ export const reviewRouter = router({
 				mustHaveVerbatims: z.boolean().optional().default(false),
 				sort: z.string().optional(),
 				search: z.string().optional(),
-				startDate: z.string().optional(),
-				endDate: z.string().optional(),
+				start_date: z.string().optional(),
+				end_date: z.string().optional(),
 				button_id: z.number().optional(),
 				filters: z
 					.object({
@@ -260,8 +260,8 @@ export const reviewRouter = router({
 		.input(
 			z.object({
 				product_id: z.number().optional(),
-				startDate: z.string().optional(),
-				endDate: z.string().optional(),
+				start_date: z.string().optional(),
+				end_date: z.string().optional(),
 				button_id: z.number().optional(),
 				filters: z
 					.object({

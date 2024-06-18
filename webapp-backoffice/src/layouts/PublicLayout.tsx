@@ -162,7 +162,11 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				className={classes.navigation}
 				id="fr-header-public-header"
 				quickAccessItems={light ? undefined : quickAccessItems}
-				navigation={!!navigationItems.length ? navigationItems : undefined}
+				navigation={
+					!!navigationItems.length && !pathname.startsWith('/public')
+						? navigationItems
+						: undefined
+				}
 				serviceTitle="Je donne mon avis"
 				serviceTagline="La voix de vos usagers"
 			/>
@@ -171,8 +175,17 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
-					accessibility="non compliant"
-					bottomItems={[headerFooterDisplayItem]}
+					accessibility="partially compliant"
+					bottomItems={[
+						{
+							text: 'Données personnelles',
+							linkProps: { href: '/public/cgu' }
+						},
+						{ text: 'Contact', linkProps: { href: '/public/contact' } }
+					]}
+					termsLinkProps={{
+						href: '/public/legalNotice'
+					}}
 				/>
 			</div>
 		</>

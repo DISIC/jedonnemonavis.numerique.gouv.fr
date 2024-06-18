@@ -7,8 +7,8 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		mustHaveVerbatims,
 		search,
 		sort,
-		startDate,
-		endDate,
+		start_date,
+		end_date,
 		button_id,
 		filters
 	} = input;
@@ -16,13 +16,13 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
 		...(button_id && { button_id }),
-		...(endDate && {
+		...(end_date && {
 			created_at: {
-				...(startDate && { gte: new Date(startDate) }),
+				...(start_date && { gte: new Date(start_date) }),
 				lte: (() => {
-					const adjustedEndDate = new Date(endDate);
-					adjustedEndDate.setHours(23, 59, 59);
-					return adjustedEndDate;
+					const adjustedend_date = new Date(end_date);
+					adjustedend_date.setHours(23, 59, 59);
+					return adjustedend_date;
 				})()
 			}
 		}),
@@ -33,13 +33,13 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
-								endDate && {
+								end_date && {
 									created_at: {
-										...(startDate && { gte: new Date(startDate) }),
+										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
-											const adjustedEndDate = new Date(endDate);
-											adjustedEndDate.setHours(23, 59, 59);
-											return adjustedEndDate;
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
 										})()
 									}
 								}
@@ -57,13 +57,13 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 							AND: [
 								{ answer_text: { search: search.split(' ').join('&') } },
 								{ field_code: 'verbatim' },
-								endDate && {
+								end_date && {
 									created_at: {
-										...(startDate && { gte: new Date(startDate) }),
+										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
-											const adjustedEndDate = new Date(endDate);
-											adjustedEndDate.setHours(23, 59, 59);
-											return adjustedEndDate;
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
 										})()
 									}
 								}
@@ -95,13 +95,13 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								endDate && {
+								end_date && {
 									created_at: {
-										...(startDate && { gte: new Date(startDate) }),
+										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
-											const adjustedEndDate = new Date(endDate);
-											adjustedEndDate.setHours(23, 59, 59);
-											return adjustedEndDate;
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
 										})()
 									}
 								},
