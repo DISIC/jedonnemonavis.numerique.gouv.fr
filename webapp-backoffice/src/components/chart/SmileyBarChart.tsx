@@ -1,4 +1,5 @@
 import { getHexaColorFromIntentionText } from '@/src/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
 import {
 	Bar,
 	BarChart,
@@ -9,6 +10,7 @@ import {
 	XAxis,
 	YAxis
 } from 'recharts';
+import { tss } from 'tss-react/dsfr';
 
 const sortOrder = {
 	'Pas bien': 0,
@@ -64,7 +66,7 @@ const CustomYAxisTick = (props: any) => {
 	return (
 		<g transform={`translate(${x},${y})`}>
 			<text x={0} y={0} dy={4} textAnchor="end" fill="#666" fontSize="0.75rem">
-				{payload.value}
+				{payload.value}%
 			</text>
 		</g>
 	);
@@ -96,6 +98,8 @@ const SmileyBarChart = ({
 	data: { name: string; [key: string]: number | string }[];
 	total: number;
 }) => {
+	const { classes, cx } = useStyles();
+
 	const fieldNamesSet = new Set<string>();
 
 	data.forEach(item => {
@@ -105,6 +109,40 @@ const SmileyBarChart = ({
 			}
 		});
 	});
+
+	const CustomTooltip = ({ active, payload, label }: any) => {
+		console.log(payload);
+		if (active && payload && payload.length) {
+			return (
+				<div className={classes.customTooltip}>
+					<div>
+						<p>{label}</p>
+						<ul>
+							{payload.map((payloadItem: any) => {
+								const itemWithValue = data.find(item =>
+									item.hasOwnProperty(`value_${payloadItem.dataKey}`)
+								);
+
+								if (itemWithValue) {
+									return (
+										<li style={{ color: payloadItem.color }}>
+											{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
+										</li>
+									);
+								} else {
+									<li
+										style={{ color: payloadItem.color }}
+									>{`${payloadItem.name} : ${Math.round(payloadItem.value)}%`}</li>;
+								}
+							})}
+						</ul>
+					</div>
+				</div>
+			);
+		}
+
+		return null;
+	};
 
 	return (
 		<ResponsiveContainer width="100%" height={335}>
@@ -124,12 +162,7 @@ const SmileyBarChart = ({
 					tickLine={false}
 					fontSize="0.75rem"
 				/>
-				<Tooltip
-					cursor={false}
-					formatter={item => {
-						return Math.floor(item as number) + '%';
-					}}
-				/>
+				<Tooltip cursor={false} content={<CustomTooltip />} />
 				<Legend
 					verticalAlign="top"
 					align="left"
@@ -151,5 +184,21 @@ const SmileyBarChart = ({
 		</ResponsiveContainer>
 	);
 };
+
+const useStyles = tss.create({
+	customTooltip: {
+		backgroundColor: fr.colors.decisions.background.default.grey.default,
+		padding: '10px',
+		border: '1px solid rgb(204, 204, 204)',
+		p: {
+			marginBottom: '5px'
+		},
+		ul: {
+			padding: 0,
+			margin: 0,
+			listStyle: 'none'
+		}
+	}
+});
 
 export default SmileyBarChart;
