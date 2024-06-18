@@ -61,7 +61,6 @@ export const reviewRouter = router({
 				});
 			}
 
-			console.log(where);
 			const [reviews, countFiltered, countAll] = await Promise.all([
 				ctx.prisma.review.findMany({
 					where,
