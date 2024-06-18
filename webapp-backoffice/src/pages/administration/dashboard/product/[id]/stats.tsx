@@ -22,6 +22,7 @@ import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 
 interface Props {
 	product: Product;
@@ -34,14 +35,21 @@ const public_modal = createModal({
 
 const SectionWrapper = ({
 	title,
+	alert = '',
 	children
 }: {
 	title: string;
+	alert?: string;
 	children: React.ReactNode;
 }) => {
+	const { classes, cx } = useStyles();
+
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
 			<h3>{title}</h3>
+			{alert && (
+				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
+			)}
 			<div>{children}</div>
 		</div>
 	);
@@ -275,7 +283,10 @@ const ProductStatPage = (props: Props) => {
 						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
-				<SectionWrapper title="Détails des anciennes réponses">
+				<SectionWrapper
+					title="Détails des anciennes réponses"
+					alert="Cette section présente les résultats de l'ancien questionnaire, modifié le 03 juillet 2024."
+				>
 					<SmileyQuestionViz
 						fieldCode="easy"
 						total={nbReviewsWithFilters}
@@ -327,6 +338,17 @@ const useStyles = tss.create({
 			'.fr-btn': {
 				marginTop: '1rem'
 			}
+		}
+	},
+	highlight: {
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		margin: 0,
+		paddingTop: fr.spacing('7v'),
+		paddingBottom: fr.spacing('7v'),
+		paddingLeft: fr.spacing('12v'),
+		marginBottom: fr.spacing('6v'),
+		p: {
+			margin: 0
 		}
 	}
 });
