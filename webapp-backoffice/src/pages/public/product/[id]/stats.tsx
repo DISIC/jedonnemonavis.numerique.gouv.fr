@@ -51,24 +51,6 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
-	const { data: buttonsResult, isFetching: isLoadingButtons } =
-		trpc.button.getList.useQuery(
-			{
-				numberPerPage: 0,
-				page: 1,
-				product_id: product.id,
-				isTest: false
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
-				}
-			}
-		);
-
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
 			numberPerPage: 0,
@@ -104,7 +86,11 @@ const ProductStatPage = (props: Props) => {
 		: 0;
 
 	const getStatsDisplay = () => {
-		if (nbReviewsWithFilters === undefined) {
+		if (
+			nbReviewsWithFilters === undefined ||
+			isLoadingReviewsDataWithFilters ||
+			isLoadingReviewsCount
+		) {
 			return (
 				<div className={fr.cx('fr-my-16w')}>
 					<Loader />
