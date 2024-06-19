@@ -31,12 +31,14 @@ const ProductCard = ({
 	product,
 	userId,
 	entity,
-	isFavorite
+	isFavorite,
+	showFavoriteButton
 }: {
 	product: ProductWithButtons;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
+	showFavoriteButton: boolean;
 }) => {
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
@@ -177,7 +179,7 @@ const ProductCard = ({
 							{entity?.name}
 						</p>
 					</div>
-					{session?.user.role !== 'user' && (
+					{showFavoriteButton && (
 						<div
 							className={cx(
 								fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),

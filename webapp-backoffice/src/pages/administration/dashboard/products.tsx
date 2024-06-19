@@ -65,7 +65,8 @@ const DashBoard = () => {
 			initialData: {
 				data: [],
 				metadata: {
-					count: 0
+					count: 0,
+					countTotalUserScope: 0
 				}
 			}
 		}
@@ -97,6 +98,7 @@ const DashBoard = () => {
 		);
 
 	const { data: favorites } = favoritesResult;
+	const countTotalUserScope = productsResult.metadata.countTotalUserScope;
 
 	const handlePageChange = (pageNumber: number) => {
 		updateFilters({ ...filters, currentPage: pageNumber });
@@ -313,7 +315,7 @@ const DashBoard = () => {
 								</div>
 							</form>
 						</div>
-						{session?.user.role !== 'user' && (
+						{countTotalUserScope > 10 && (
 							<div
 								className={fr.cx(
 									'fr-col-12',
@@ -418,6 +420,7 @@ const DashBoard = () => {
 												favorite => favorite.product_id === product.id
 											)
 										}
+										showFavoriteButton={countTotalUserScope > 10}
 										key={index}
 									/>
 								))
