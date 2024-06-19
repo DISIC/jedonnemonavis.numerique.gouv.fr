@@ -1,5 +1,12 @@
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
+import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
-import { useStats } from '@/src/contexts/StatsContext';
+import { SectionWrapper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import {
 	betaTestXwikiIds,
 	transformDateToFrenchReadable
@@ -14,14 +21,6 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
-import KPITile from '@/src/components/dashboard/Stats/KPITile';
-import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
-import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
-import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
-import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
-import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
-import { SectionWrapper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 
 interface Props {
 	product: Product | null;
@@ -31,7 +30,6 @@ interface Props {
 
 const ProductStatPage = (props: Props) => {
 	const { product, defaultStartDate, defaultEndDate } = props;
-	const { statsTotals } = useStats();
 
 	const [startDate, setStartDate] = useState<string>(defaultStartDate);
 	const [endDate, setEndDate] = useState<string>(defaultEndDate);
@@ -258,9 +256,7 @@ const ProductStatPage = (props: Props) => {
 				Données recueillies en ligne, entre le{' '}
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
 				{transformDateToFrenchReadable(debouncedEndDate)}
-				{!!nbReviews
-					? `, auprès de ${statsTotals.satisfaction} internautes.`
-					: '.'}
+				{!!nbReviews ? `, auprès de ${nbReviewsWithFilters} internautes.` : '.'}
 			</p>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>
