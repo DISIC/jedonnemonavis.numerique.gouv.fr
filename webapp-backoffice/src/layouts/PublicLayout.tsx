@@ -175,6 +175,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				<Notice
 					isClosable
 					onClose={function noRefCheck() {}}
+					style={{
+						marginBottom: '-1rem'
+					}}
 					title={
 						<>
 							Version BETA : aidez-nous à améliorer cet outil, n'hésitez pas à
