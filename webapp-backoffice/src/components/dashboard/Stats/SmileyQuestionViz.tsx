@@ -127,7 +127,7 @@ const SmileyQuestionViz = ({
 							(rfc.doc_count / resultFieldCode.metadata.total) * 100
 						);
 						const limitToShowTopInfos = 10;
-						const limitToShowBottomInfos = 5;
+						const limitToShowBottomInfos = 4;
 						return (
 							<div
 								className={classes.distributionItem}
