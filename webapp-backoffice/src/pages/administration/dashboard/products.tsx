@@ -142,6 +142,7 @@ const DashBoard = () => {
 		products.length === 0 &&
 		filters.filterEntity.length === 0 &&
 		filters.validatedSearch === '' &&
+		!filters.filterOnlyFavorites &&
 		!isLoadingProducts &&
 		!isRefetchingProducts
 	) {
@@ -202,7 +203,10 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				{(nbPages > 1 || search !== '') && (
+				{(nbPages > 1 ||
+					search !== '' ||
+					filters.filterOnlyFavorites ||
+					filters.filterEntity.length) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 							<Select
@@ -428,7 +432,13 @@ const DashBoard = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun service trouvé</p>
+										<p>
+											{filters.filterOnlyFavorites &&
+											search === '' &&
+											!filters.filterEntity.length
+												? 'Aucun service dans vos favoris'
+												: 'Aucun service trouvé'}
+										</p>
 									</div>
 								</div>
 							)}

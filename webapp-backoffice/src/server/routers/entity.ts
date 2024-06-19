@@ -99,7 +99,7 @@ export const entityRouter = router({
 				};
 			}
 
-			if (userCanCreateProduct) {
+			if (userCanCreateProduct && contextUser.role !== 'admin') {
 				where.OR = [
 					{
 						adminEntityRights: {
