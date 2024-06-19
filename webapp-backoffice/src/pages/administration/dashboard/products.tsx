@@ -206,7 +206,7 @@ const DashBoard = () => {
 				{(nbPages > 1 ||
 					search !== '' ||
 					filters.filterOnlyFavorites ||
-					filters.filterEntity.length) && (
+					!!filters.filterEntity.length) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 							<Select
