@@ -53,6 +53,10 @@ export async function createOrUpdateAnswers(
         where: {
           review_id: review.id,
           field_code: answer.field_code,
+          answer_item_id:
+            step_name && step_name === "contact"
+              ? answer.answer_item_id
+              : undefined,
         },
       });
 
