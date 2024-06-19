@@ -198,7 +198,8 @@ const ProductCard = ({
 								}
 								priority="tertiary"
 								size="small"
-								onClick={() => {
+								onClick={e => {
+									e.preventDefault();
 									if (isFavorite) {
 										deleteFavorite.mutate({
 											product_id: product.id,

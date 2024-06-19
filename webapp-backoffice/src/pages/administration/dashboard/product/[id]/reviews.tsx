@@ -410,12 +410,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.filterView)}>
@@ -449,12 +444,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<Select
@@ -482,12 +472,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.buttonContainer)}>
@@ -505,12 +490,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.buttonContainer)}>
