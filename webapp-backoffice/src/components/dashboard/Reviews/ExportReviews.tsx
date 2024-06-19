@@ -86,7 +86,7 @@ const ExportReviews = (props: Props) => {
 
 	const applyChoice = (choice: 'all' | 'filtered') => {
 		export_modal.close();
-		setExportStatus('inProgress');
+		/*setExportStatus('inProgress');
 		exportData.mutate(
 			choice === 'all'
 				? { memoryKey }
@@ -101,7 +101,7 @@ const ExportReviews = (props: Props) => {
 						filters,
 						memoryKey
 					}
-		);
+		);*/
 	};
 
 	return (
@@ -112,6 +112,15 @@ const ExportReviews = (props: Props) => {
 					countFiltered: reviewsCountfiltered,
 					countAll: reviewsCountAll
 				}}
+				product_id={product_id}
+				params={JSON.stringify({
+					startDate,
+					endDate,
+					mustHaveVerbatims,
+					search,
+					button_id,
+					filters
+				})}
 				action={applyChoice}
 			></ExportModal>
 
