@@ -14,8 +14,10 @@ import { tss } from 'tss-react/dsfr';
 
 const sortOrder = {
 	'Pas bien': 0,
+	Non: 0,
 	Moyen: 1,
-	'Très bien': 2
+	'Très bien': 2,
+	Oui: 2
 };
 
 const renderLegend = (props: any) => {
