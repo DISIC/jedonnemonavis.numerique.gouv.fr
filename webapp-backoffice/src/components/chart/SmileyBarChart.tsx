@@ -126,7 +126,6 @@ const SmileyBarChart = ({
 										sortOrder[b.dataKey as keyof typeof sortOrder]
 								)
 								.map((payloadItem: any) => {
-									console.log(payloadItem);
 									const itemWithValue = data.find(
 										item =>
 											item.name === label &&
