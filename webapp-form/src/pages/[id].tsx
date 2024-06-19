@@ -19,6 +19,16 @@ type JDMAFormProps = {
   product: Product;
 };
 
+export type FormStepNames =
+  | keyof Omit<
+      Opinion,
+      | "contact_tried"
+      | "contact_reached"
+      | "contact_satisfaction"
+      | "contact_tried_verbatim"
+    >
+  | "contact";
+
 export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
@@ -224,18 +234,17 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
       localStorage.setItem("userId", userId);
 
-      await createReview
-        .mutateAsync({
-          review: {
-            product_id: product.id,
-            button_id: product.buttons[0].id,
-            form_id: 1,
-            user_id: userId,
-          },
-          answers,
-        })
+      await createReview.mutateAsync({
+        review: {
+          product_id: product.id,
+          button_id: product.buttons[0].id,
+          form_id: 1,
+          user_id: userId,
+        },
+        answers,
+      });
     } else {
-      await handleInsertOrUpdateReview(opinion);
+      await handleInsertOrUpdateReview(opinion, "satisfaction");
     }
     router.push({
       pathname: router.pathname,
@@ -243,7 +252,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     });
   };
 
-  const handleInsertOrUpdateReview = async (opinion: Partial<Opinion>) => {
+  const handleInsertOrUpdateReview = async (
+    opinion: Partial<Opinion>,
+    currentStepName: FormStepNames
+  ) => {
     const answers = formatAnswers(opinion);
 
     const userId = localStorage.getItem("userId");
@@ -255,6 +267,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       product_id: product.id,
       button_id:
         parseInt(router.query.button as string) || product.buttons[0].id,
+      step_name: currentStepName,
       answers,
     });
   };
@@ -380,7 +393,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                   {} as any
                 );
 
-                handleInsertOrUpdateReview(currentStepValues);
+                handleInsertOrUpdateReview(
+                  currentStepValues,
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
+                );
 
                 if (isLastStep) {
                   localStorage.removeItem("userId");
