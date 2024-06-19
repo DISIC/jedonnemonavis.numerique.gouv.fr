@@ -4,30 +4,48 @@ import { Answer, Prisma, PrismaClient } from "@prisma/client";
 import {
   ReviewUncheckedCreateInputSchema,
   AnswerCreateInputSchema,
-  ReviewSchema,
 } from "@/prisma/generated/zod";
 import { Client } from "@elastic/elasticsearch";
 import { ElkAnswer } from "@/src/utils/types";
 import { ReviewWithButtonAndProduct } from "@/prisma/augmented";
 import { TRPCError } from "@trpc/server";
+import { FormStepNames } from "@/src/pages/[id]";
 
 export async function createOrUpdateAnswers(
   ctx: { prisma: PrismaClient; elkClient: Client },
   input: {
     answers: Prisma.AnswerCreateInput[];
     review: ReviewWithButtonAndProduct;
+    step_name?: FormStepNames;
   }
 ) {
   const { prisma, elkClient } = ctx;
-  const { review, answers } = input;
+  const { review, answers, step_name } = input;
 
-  const newReview = await prisma.review.create({
-    data: review,
-    include: {
-      product: true,
-      button: true,
-    },
-  });
+  if (step_name && step_name === "contact") {
+    await prisma.answer.deleteMany({
+      where: {
+        review_id: review.id,
+        field_code: {
+          startsWith: "contact_",
+        },
+      },
+    });
+
+    await elkClient.deleteByQuery({
+      index: "jdma-answers",
+      body: {
+        query: {
+          bool: {
+            filter: [
+              { term: { review_id: review.id } },
+              { prefix: { field_code: "contact_" } },
+            ],
+          },
+        },
+      },
+    });
+  }
 
   const promises = Promise.all(
     answers.map(async (answer) => {
@@ -35,6 +53,10 @@ export async function createOrUpdateAnswers(
         where: {
           review_id: review.id,
           field_code: answer.field_code,
+          answer_item_id:
+            step_name && step_name === "contact"
+              ? answer.answer_item_id
+              : undefined,
         },
       });
 
@@ -104,7 +126,8 @@ export async function createOrUpdateAnswers(
           button_name: review.button.title,
           product_id: review.product_id,
           product_name: review.product.title,
-          created_at: new Date().toISOString(),
+          form_id: 1,
+          created_at: review.created_at,
         };
 
         const answerElk = {
@@ -199,10 +222,16 @@ export const reviewRouter = router({
         user_id: z.string(),
         product_id: z.number(),
         button_id: z.number(),
+        step_name: z.enum([
+          "satisfaction",
+          "comprehension",
+          "verbatim",
+          "contact",
+        ]),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { user_id, product_id, button_id, answers } = input;
+      const { user_id, product_id, button_id, answers, step_name } = input;
       const { prisma } = ctx;
 
       const existingReview = await prisma.review.findFirst({
@@ -224,6 +253,7 @@ export const reviewRouter = router({
         await createOrUpdateAnswers(ctx, {
           answers: answers,
           review: existingReview,
+          step_name,
         });
 
         return { data: existingReview };

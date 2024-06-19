@@ -29,10 +29,14 @@ ol.no-bullets-point > li p::before {
 	content: counter(steps-counter);
 }
 
-ol.no-bullets-point > li{
+ol.no-bullets-point > li {
 	list-style-type: none !important;
 }
 
 ol.no-bullets-point > li::marker {
 	content: none;
+}
+
+.recharts-legend-item-text {
+	color: #666666 !important;
 }

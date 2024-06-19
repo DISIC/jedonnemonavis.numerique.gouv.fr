@@ -1,3 +1,4 @@
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
@@ -21,6 +22,8 @@ const QuestionWrapper = ({
 }: QuestionWrapperProps) => {
 	const { classes } = useStyles();
 
+	if (!totalField) return;
+
 	return (
 		<div className={classes.wrapperSection}>
 			<h4 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h4>
@@ -29,7 +32,7 @@ const QuestionWrapper = ({
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
 				<div className={classes.metaInfosTotal}>
-					<div>{totalField}</div> <span>Réponses</span>
+					<div>{formatNumberWithSpaces(totalField)}</div> <span>Réponses</span>
 				</div>
 				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
 					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
@@ -37,6 +40,7 @@ const QuestionWrapper = ({
 				</div>
 			</div>
 			<div>{children}</div>
+			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
 		</div>
 	);
 };
@@ -45,8 +49,7 @@ const useStyles = tss.create({
 	wrapperSection: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('3v'),
-		marginTop: fr.spacing('10v')
+		gap: fr.spacing('3v')
 	},
 	mainSection: {
 		display: 'flex',

@@ -97,7 +97,7 @@ const BarQuestionViz = ({
 				<BarChart data={formatedFieldCodeData} />
 			</HeaderChart>
 			<HeaderChart
-				title="Evolution des réponses"
+				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 			>
 				<LineChart
@@ -105,6 +105,7 @@ const BarQuestionViz = ({
 					labelAxisY={
 						fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 					}
+					ticks={fieldCode === 'comprehension' ? [1, 2, 3, 4, 5] : undefined}
 				/>
 			</HeaderChart>
 		</QuestionWrapper>

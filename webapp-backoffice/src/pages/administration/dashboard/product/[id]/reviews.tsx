@@ -119,8 +119,8 @@ const ProductReviewsPage = (props: Props) => {
 			initialData: {
 				data: [],
 				metadata: {
-					countFiltered: -1,
-					countAll: -1
+					countFiltered: 0,
+					countAll: 0
 				}
 			}
 		}
@@ -128,8 +128,8 @@ const ProductReviewsPage = (props: Props) => {
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
-			page: currentPage,
-			numberPerPage: numberPerPage,
+			page: 1,
+			numberPerPage: 1000,
 			product_id: product.id,
 			isTest: true
 		});
@@ -410,12 +410,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.filterView)}>
@@ -449,12 +444,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<Select
@@ -482,12 +472,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.buttonContainer)}>
@@ -505,12 +490,7 @@ const ProductReviewsPage = (props: Props) => {
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx(
-										'fr-col-12',
-										'fr-col-md-6',
-										'fr-col-lg-4',
-										'fr-col-xl-3'
-									)
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
 								)}
 							>
 								<div className={cx(classes.buttonContainer)}>

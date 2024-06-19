@@ -14,8 +14,10 @@ import { tss } from 'tss-react/dsfr';
 
 const sortOrder = {
 	'Pas bien': 0,
+	Non: 0,
 	Moyen: 1,
-	'Très bien': 2
+	'Très bien': 2,
+	Oui: 2
 };
 
 const renderLegend = (props: any) => {
@@ -117,25 +119,31 @@ const SmileyBarChart = ({
 					<div>
 						<p>{label}</p>
 						<ul>
-							{payload.map((payloadItem: any) => {
-								const itemWithValue = data.find(
-									item =>
-										item.name === label &&
-										item.hasOwnProperty(`value_${payloadItem.dataKey}`)
-								);
-
-								if (itemWithValue) {
-									return (
-										<li style={{ color: payloadItem.color }}>
-											{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
-										</li>
+							{payload
+								.sort(
+									(a: any, b: any) =>
+										sortOrder[a.dataKey as keyof typeof sortOrder] -
+										sortOrder[b.dataKey as keyof typeof sortOrder]
+								)
+								.map((payloadItem: any) => {
+									const itemWithValue = data.find(
+										item =>
+											item.name === label &&
+											item.hasOwnProperty(`value_${payloadItem.dataKey}`)
 									);
-								} else {
-									<li
-										style={{ color: payloadItem.color }}
-									>{`${payloadItem.name} : ${Math.round(payloadItem.value)}%`}</li>;
-								}
-							})}
+
+									if (itemWithValue) {
+										return (
+											<li style={{ color: payloadItem.color }}>
+												{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
+											</li>
+										);
+									} else {
+										<li
+											style={{ color: payloadItem.color }}
+										>{`${payloadItem.name} : ${Math.round(payloadItem.value)}%`}</li>;
+									}
+								})}
 						</ul>
 					</div>
 				</div>

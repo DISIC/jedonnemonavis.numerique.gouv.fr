@@ -69,11 +69,15 @@ export const FormFirstBlock = (props: Props) => {
               setIsRateLimitReached(false);
             }}
             severity="error"
-            title="Trop de requêtes, veuillez patienter 1h avant de pouvoir recréer un avis."
+            title=""
+            description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
           />
         )}
         <div className={fr.cx("fr-mt-16v")}>
-          <Button type="submit" disabled={!tmpOpinion.satisfaction}>
+          <Button
+            type="submit"
+            disabled={!tmpOpinion.satisfaction || isRateLimitReached}
+          >
             {t("first_block.validate")}
           </Button>
         </div>

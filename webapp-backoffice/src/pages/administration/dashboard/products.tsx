@@ -65,7 +65,8 @@ const DashBoard = () => {
 			initialData: {
 				data: [],
 				metadata: {
-					count: 0
+					count: 0,
+					countTotalUserScope: 0
 				}
 			}
 		}
@@ -97,6 +98,7 @@ const DashBoard = () => {
 		);
 
 	const { data: favorites } = favoritesResult;
+	const countTotalUserScope = productsResult.metadata.countTotalUserScope;
 
 	const handlePageChange = (pageNumber: number) => {
 		updateFilters({ ...filters, currentPage: pageNumber });
@@ -142,6 +144,7 @@ const DashBoard = () => {
 		products.length === 0 &&
 		filters.filterEntity.length === 0 &&
 		filters.validatedSearch === '' &&
+		!filters.filterOnlyFavorites &&
 		!isLoadingProducts &&
 		!isRefetchingProducts
 	) {
@@ -160,8 +163,8 @@ const DashBoard = () => {
 
 	return (
 		<>
-			<div className={cx(classes.container, fr.cx('fr-container'))}>
-				{isModalSubmitted && (
+			{isModalSubmitted && (
+				<div className={cx(classes.container, fr.cx('fr-container'))}>
 					<Alert
 						closable
 						onClose={function noRefCheck() {
@@ -172,8 +175,8 @@ const DashBoard = () => {
 						small
 						description={`Vous êtes désormais administrateur de ${productTitle}`}
 					/>
-				)}
-			</div>
+				</div>
+			)}
 
 			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
@@ -202,7 +205,10 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				{(nbPages > 1 || search !== '') && (
+				{(nbPages > 1 ||
+					search !== '' ||
+					filters.filterOnlyFavorites ||
+					!!filters.filterEntity.length) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 							<Select
@@ -309,7 +315,7 @@ const DashBoard = () => {
 								</div>
 							</form>
 						</div>
-						{session?.user.role !== 'user' && (
+						{countTotalUserScope > 10 && (
 							<div
 								className={fr.cx(
 									'fr-col-12',
@@ -414,6 +420,7 @@ const DashBoard = () => {
 												favorite => favorite.product_id === product.id
 											)
 										}
+										showFavoriteButton={countTotalUserScope > 10}
 										key={index}
 									/>
 								))
@@ -428,7 +435,13 @@ const DashBoard = () => {
 										)}
 										role="status"
 									>
-										<p>Aucun service trouvé</p>
+										<p>
+											{filters.filterOnlyFavorites &&
+											search === '' &&
+											!filters.filterEntity.length
+												? 'Aucun service dans vos favoris'
+												: 'Aucun service trouvé'}
+										</p>
 									</div>
 								</div>
 							)}

@@ -1,6 +1,9 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
-import { translateMonthToFrench } from '@/src/utils/tools';
+import {
+	formatNumberWithSpaces,
+	translateMonthToFrench
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton, Tooltip } from '@mui/material';
@@ -109,7 +112,7 @@ const SmileyQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<h4 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h4>
+			<h6 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h6>
 			<div className={classes.distributionContainer}>
 				{resultFieldCode.data
 					.sort(
@@ -123,7 +126,8 @@ const SmileyQuestionViz = ({
 						const percentage = Math.round(
 							(rfc.doc_count / resultFieldCode.metadata.total) * 100
 						);
-						const limitToShow = 10;
+						const limitToShowTopInfos = 10;
+						const limitToShowBottomInfos = 4;
 						return (
 							<div
 								className={classes.distributionItem}
@@ -134,7 +138,7 @@ const SmileyQuestionViz = ({
 								<span
 									className={cx(
 										fr.cx(
-											percentage >= limitToShow
+											percentage >= limitToShowTopInfos
 												? getStatsIcon({
 														intention: rfc.intention as AnswerIntention
 													})
@@ -149,7 +153,7 @@ const SmileyQuestionViz = ({
 									}}
 								/>
 								<label className={classes.distributionLabel}>
-									{percentage >= limitToShow && rfc.answer_text}
+									{percentage >= limitToShowTopInfos && rfc.answer_text}
 								</label>
 								<Tooltip
 									placement="top-start"
@@ -165,16 +169,16 @@ const SmileyQuestionViz = ({
 									/>
 								</Tooltip>
 								<label className={classes.distributionPercentage}>
-									{`${percentage}%`}
+									{percentage >= limitToShowBottomInfos && `${percentage}%`}
 								</label>
 							</div>
 						);
 					})}
 			</div>
-			<h4 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h4>
+			<h6 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h6>
 			<div>
 				<p className={fr.cx('fr-hint-text')}>
-					{total} réponse{total > 1 ? 's' : ''}
+					{formatNumberWithSpaces(total)} réponse{total > 1 ? 's' : ''}
 				</p>
 				<SmileyBarChart data={data} total={total} />
 			</div>
@@ -216,7 +220,8 @@ const useStyles = tss.create({
 		borderRadius: '1.5rem'
 	},
 	distributionPercentage: {
-		marginTop: fr.spacing('2v')
+		marginTop: fr.spacing('2v'),
+		height: '1.5rem'
 	}
 });
 

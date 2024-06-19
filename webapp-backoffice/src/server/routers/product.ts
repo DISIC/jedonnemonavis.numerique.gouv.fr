@@ -60,7 +60,7 @@ export const productRouter = router({
 				}
 			];
 
-			let where: Prisma.ProductWhereInput = {
+			const whereUserScope: Prisma.ProductWhereInput = {
 				OR: [
 					{
 						accessRights:
@@ -87,6 +87,10 @@ export const productRouter = router({
 					}
 				]
 			};
+
+			let where: Prisma.ProductWhereInput = JSON.parse(
+				JSON.stringify(whereUserScope)
+			);
 
 			if (search) {
 				let searchWithoutAccents = removeAccents(search);
@@ -164,10 +168,14 @@ export const productRouter = router({
 
 				const count = await ctx.prisma.product.count({ where });
 
-				return { data: products, metadata: { count } };
+				const countTotalUserScope = await ctx.prisma.product.count({
+					where: whereUserScope
+				});
+
+				return { data: products, metadata: { count, countTotalUserScope } };
 			} catch (e) {
 				console.log(e);
-				return { data: [], metadata: { count: 0 } };
+				return { data: [], metadata: { count: 0, countTotalUserScope: 0 } };
 			}
 		}),
 

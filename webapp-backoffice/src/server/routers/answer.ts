@@ -785,8 +785,8 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				product_id: z.string() /* To change to button_id */,
-				start_date: z.string(),
-				end_date: z.string()
+				start_date: z.string().optional(),
+				end_date: z.string().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -817,7 +817,16 @@ export const answerRouter = router({
 								}
 							},
 							{ match: { product_id } },
-							{ range: { created_at: { gte: start_date, lte: end_date } } }
+							{
+								range: {
+									created_at: {
+										gte: start_date ? start_date : '1970-01-01',
+										lte: end_date
+											? end_date
+											: new Date().toISOString().split('T')[0]
+									}
+								}
+							}
 						]
 					}
 				},
@@ -839,7 +848,16 @@ export const answerRouter = router({
 						must: [
 							{ match: { field_code: 'contact_tried' } },
 							{ match: { product_id } },
-							{ range: { created_at: { gte: start_date, lte: end_date } } }
+							{
+								range: {
+									created_at: {
+										gte: start_date ? start_date : '1970-01-01',
+										lte: end_date
+											? end_date
+											: new Date().toISOString().split('T')[0]
+									}
+								}
+							}
 						]
 					}
 				},

@@ -8,6 +8,7 @@ import { Download } from '@codegouvfr/react-dsfr/Download';
 import { generateRandomString } from '@/src/utils/tools';
 import ExportModal from './ExportModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { Tooltip } from '@mui/material';
 
 interface Props {
 	product_id: number;
@@ -125,15 +126,20 @@ const ExportReviews = (props: Props) => {
 			></ExportModal>
 
 			{exportStatus === 'idle' && (
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-file-download-line"
-					iconPosition="right"
-					type="button"
-					nativeButtonProps={export_modal.buttonProps}
+				<Tooltip
+					placement="top"
+					title="🚧 Fonctionnalité en cours de déploiement, accessible dès la semaine prochaine."
 				>
-					Télécharger
-				</Button>
+					<Button
+						priority="tertiary"
+						iconId="fr-icon-file-download-line"
+						iconPosition="right"
+						type="button"
+						// nativeButtonProps={export_modal.buttonProps}
+					>
+						Télécharger
+					</Button>
+				</Tooltip>
 			)}
 			{exportStatus === 'inProgress' && (
 				<div>

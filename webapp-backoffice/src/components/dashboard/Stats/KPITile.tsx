@@ -4,6 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { getLink } from '@codegouvfr/react-dsfr/link';
 import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 
 export type KPITileProps = {
 	id?: string;
@@ -48,7 +49,7 @@ export const KPITile = (props: KPITileProps) => {
 					{isLoading ? (
 						<Skeleton variant="text" width="20%" height="2rem" />
 					) : (
-						kpi
+						formatNumberWithSpaces(kpi)
 					)}
 				</p>
 				<p
