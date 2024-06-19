@@ -4,7 +4,7 @@ import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
 import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
-import HeaderChart from './HeaderChart';
+import GlobalChart from './GlobalChart';
 import dynamic from 'next/dynamic';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
@@ -50,12 +50,17 @@ const AnswersChart = ({
 	}
 
 	return (
-		<HeaderChart title="Evolution des réponses" total={total}>
+		<GlobalChart
+			title="Evolution des réponses"
+			total={total}
+			data={countByFieldCodePerMonth}
+			labelX="Nombre de réponses"
+		>
 			<LineChart
 				data={countByFieldCodePerMonth}
 				labelAxisY="Nombre de réponses"
 			/>
-		</HeaderChart>
+		</GlobalChart>
 	);
 };
 

@@ -2,7 +2,7 @@ import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
 import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
-import HeaderChart from './HeaderChart';
+import GlobalChart from './GlobalChart';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
@@ -133,24 +133,28 @@ const BarMultipleSplitQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<HeaderChart title="Répartition des réponses">
+			<GlobalChart
+				title="Répartition des réponses"
+				data={formatedFieldCodeData}
+			>
 				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
 					dataKeys={allFieldCodeKeys}
 					fieldCode={fieldCode}
 					total={total}
 				/>
-			</HeaderChart>
-			<HeaderChart
+			</GlobalChart>
+			<GlobalChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
+				data={formatedFieldCodeDataPerInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}
 					dataKeys={allParentFieldCodeKeys}
 					labelAxisY="Nombre de réponses"
 				/>
-			</HeaderChart>
+			</GlobalChart>
 		</QuestionWrapper>
 	);
 };

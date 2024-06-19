@@ -4,7 +4,7 @@ import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
 import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
-import HeaderChart from './HeaderChart';
+import GlobalChart from './GlobalChart';
 import dynamic from 'next/dynamic';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
@@ -93,12 +93,18 @@ const BarQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<HeaderChart title="Répartition des réponses">
+			<GlobalChart
+				title="Répartition des réponses"
+				data={formatedFieldCodeData}
+				labelX="Nombre de réponses"
+			>
 				<BarChart data={formatedFieldCodeData} />
-			</HeaderChart>
-			<HeaderChart
+			</GlobalChart>
+			<GlobalChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
+				data={countByFieldCodePerMonth}
+				labelX="Score moyen"
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
@@ -106,7 +112,7 @@ const BarQuestionViz = ({
 						fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 					}
 				/>
-			</HeaderChart>
+			</GlobalChart>
 		</QuestionWrapper>
 	);
 };
