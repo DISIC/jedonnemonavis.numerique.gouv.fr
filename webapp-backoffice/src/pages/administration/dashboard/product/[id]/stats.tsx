@@ -23,6 +23,7 @@ import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
+import { betaTestXwikiIds } from '@/src/utils/tools';
 
 interface Props {
 	product: Product;
@@ -298,7 +299,7 @@ const ProductStatPage = (props: Props) => {
 				</SectionWrapper>
 				<SectionWrapper
 					title="Détails des anciennes réponses"
-					alert="Cette section présente les résultats de l'ancien questionnaire, modifié le 03 juillet 2024."
+					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
 					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
