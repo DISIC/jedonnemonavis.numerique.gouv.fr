@@ -34,7 +34,7 @@ const public_modal = createModal({
 	isOpenedByDefault: false
 });
 
-const SectionWrapper = ({
+export const SectionWrapper = ({
 	title,
 	alert = '',
 	total,
