@@ -126,7 +126,8 @@ const SmileyQuestionViz = ({
 						const percentage = Math.round(
 							(rfc.doc_count / resultFieldCode.metadata.total) * 100
 						);
-						const limitToShow = 10;
+						const limitToShowTopInfos = 10;
+						const limitToShowBottomInfos = 5;
 						return (
 							<div
 								className={classes.distributionItem}
@@ -137,7 +138,7 @@ const SmileyQuestionViz = ({
 								<span
 									className={cx(
 										fr.cx(
-											percentage >= limitToShow
+											percentage >= limitToShowTopInfos
 												? getStatsIcon({
 														intention: rfc.intention as AnswerIntention
 													})
@@ -152,7 +153,7 @@ const SmileyQuestionViz = ({
 									}}
 								/>
 								<label className={classes.distributionLabel}>
-									{percentage >= limitToShow && rfc.answer_text}
+									{percentage >= limitToShowTopInfos && rfc.answer_text}
 								</label>
 								<Tooltip
 									placement="top-start"
@@ -168,7 +169,7 @@ const SmileyQuestionViz = ({
 									/>
 								</Tooltip>
 								<label className={classes.distributionPercentage}>
-									{`${percentage}%`}
+									{percentage >= limitToShowBottomInfos && `${percentage}%`}
 								</label>
 							</div>
 						);
