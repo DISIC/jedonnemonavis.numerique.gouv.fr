@@ -220,7 +220,8 @@ const useStyles = tss.create({
 		borderRadius: '1.5rem'
 	},
 	distributionPercentage: {
-		marginTop: fr.spacing('2v')
+		marginTop: fr.spacing('2v'),
+		height: '1.5rem'
 	}
 });
 
