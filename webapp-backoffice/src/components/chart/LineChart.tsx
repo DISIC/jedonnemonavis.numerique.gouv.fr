@@ -1,15 +1,14 @@
 import { translateMonthToFrench } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
 import {
-	XAxis,
-	YAxis,
 	CartesianGrid,
-	ResponsiveContainer,
+	Legend,
 	Line,
 	LineChart,
+	ResponsiveContainer,
 	Tooltip,
-	Legend
+	XAxis,
+	YAxis
 } from 'recharts';
 
 const lineColors = [
