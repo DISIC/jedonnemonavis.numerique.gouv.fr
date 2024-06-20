@@ -25,6 +25,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 					}
 	});
 
+	prisma.$disconnect();
+
 	if (!product || !product.isPublic) {
 		return {
 			props: {
