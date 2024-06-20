@@ -180,8 +180,8 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Version BETA : aidez-nous à améliorer cet outil, n'hésitez pas à
-							nous faire part de vos retours depuis{' '}
+							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
+							de vos retours depuis{' '}
 							<a href="https://tally.so/r/m6kyyB" target="_blank">
 								ce court formulaire
 							</a>
