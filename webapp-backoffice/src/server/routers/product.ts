@@ -159,7 +159,6 @@ export const productRouter = router({
 			}
 
 			try {
-				console.log(where);
 				const products = await ctx.prisma.product.findMany({
 					orderBy,
 					where,
