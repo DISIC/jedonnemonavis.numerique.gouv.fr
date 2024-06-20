@@ -126,7 +126,7 @@ export async function createOrUpdateAnswers(
           button_name: review.button.title,
           product_id: review.product_id,
           product_name: review.product.title,
-          form_id: 1,
+          form_id: 2,
           created_at: review.created_at,
         };
 

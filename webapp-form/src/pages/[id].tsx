@@ -238,7 +238,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         review: {
           product_id: product.id,
           button_id: product.buttons[0].id,
-          form_id: 1,
+          form_id: 2,
           user_id: userId,
         },
         answers,
