@@ -1,5 +1,5 @@
+import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { getToken } from 'next-auth/jwt';
 
 const ProductPage = () => {
@@ -8,7 +8,6 @@ const ProductPage = () => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
-	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
 		where: {
 			id: parseInt(id as string)
