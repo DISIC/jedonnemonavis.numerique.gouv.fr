@@ -8,12 +8,15 @@ export const exportRouter = router({
             z.object({
                 user_id: z.number(),
 				params: z.string(),
-				product_id: z.number()
+				product_id: z.number(),
             })
         )
 		.mutation(async ({ ctx, input }) => {
 			const exportCsv = await ctx.prisma.export.create({
-				data: input
+				data: {
+                    ...input,
+                    status: 'idle', // Ajoute la valeur par défaut du statut
+                },
 			});
 
 			return { data: exportCsv };

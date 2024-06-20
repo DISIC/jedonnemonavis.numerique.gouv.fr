@@ -36,6 +36,7 @@ conn_params = {
 }
 
 PAGE_SIZE = int(os.getenv('PAGE_SIZE'))
+CONCURRENCY_LIMIT = int(os.getenv('CONCURRENCY_LIMIT'))
 
 CELLAR_ADDON_HOST = os.getenv('CELLAR_ADDON_HOST')
 CELLAR_ADDON_KEY_ID = os.getenv('CELLAR_ADDON_KEY_ID')
@@ -177,11 +178,6 @@ def build_filters_query(filters, search_term):
 
 def fetch_query_with_filters(conn, query, params):
     try:
-        print("Executing query:")
-        print(query)
-        print("With params:")
-        print(params)
-        
         with conn.cursor() as cursor:
             cursor.execute(query, params)
             results = cursor.fetchall()
@@ -190,17 +186,48 @@ def fetch_query_with_filters(conn, query, params):
         print(f"Erreur récupération résultats avec filtres: {e}")
         return []
 
+def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filled_length = int(length * iteration // total)
+    bar = fill * filled_length + '-' * (length - filled_length)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end='\r')
+    if iteration == total:
+        print()
+
 def main():
+    print('------ START EXPORT ------')
     conn = create_connection(conn_params)
     if not conn:
         return
     
+    # Check the number of exports currently being processed
+    concurrency_check_query = """
+    SELECT COUNT(*) FROM public."Export" WHERE status = 'processing'::\"StatusExport\"
+    """
+
+    # Execute the query and fetch the results
+    result = fetch_query(conn, concurrency_check_query)
+
+    # Check if the result is not empty
+    if result:
+        concurrency_count = result[0][0]
+    else:
+        concurrency_count = 0  # Or handle it as per your requirement
+
+    # Now you can use concurrency_count
+    print(f"Concurrency count: {concurrency_count}")
+    
+    if concurrency_count >= CONCURRENCY_LIMIT:
+        print("Le nombre limite d'exports en cours de traitement est atteint.")
+        return
+    
+    # Select the first export with status 'idle'
     select_query_export = """
     SELECT e.*, u.email, p.title
     FROM public."Export" e
     JOIN public."User" u ON e.user_id = u.id
     JOIN public."Product" p ON e.product_id = p.id
-    WHERE e.processed = false
+    WHERE e.status = 'idle'::\"StatusExport\"
     ORDER BY e.created_at ASC
     LIMIT 1
     """
@@ -208,6 +235,15 @@ def main():
     
     if results_export:
         first_result_export = results_export[0]
+        export_id = first_result_export[0]
+        
+        # Update the status and startDate of the selected export to 'processing'
+        start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        update_status_query = """
+        UPDATE public."Export" SET status = 'processing'::\"StatusExport\", \"startDate\" = %s WHERE id = %s
+        """
+        execute_query(conn, update_status_query, (start_date, export_id))
+        
         product_id = first_result_export[5]
         filter_params_raw = first_result_export[3]
 
@@ -224,13 +260,29 @@ def main():
             except json.JSONDecodeError:
                 print("Erreur lors du décodage des paramètres de filtre JSON. Aucun filtre ne sera appliqué.")
 
+        # Récupérer le nombre total de reviews à traiter
+        count_query = f"""
+        SELECT COUNT(*)
+        FROM public."Review" r
+        WHERE r.product_id = %s
+        AND r.created_at BETWEEN %s AND %s
+        {f'AND {filters_query}' if filters_query else ''}
+        """
+
+        start_date = filter_params.get('startDate', '1900-01-01')
+        end_date = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
+        count_params = [product_id, start_date, end_date] + filters_values
+        total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
+        print(f"{total_reviews} avis concernés")
+
         current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"Avis_{sanitize_filename(first_result_export[8])}_{current_date}.csv"
+        file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.csv"
 
         all_reviews = []
         field_labels = set()
 
         offset = 0
+        retrieved_reviews = 0
         while True:
             select_query_review = f"""
             SELECT
@@ -274,9 +326,6 @@ def main():
             LIMIT %s OFFSET %s;
             """
 
-            start_date = filter_params.get('startDate', '1900-01-01')
-            end_date = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
-
             query_params = [product_id, start_date, end_date] + filters_values + [PAGE_SIZE, offset]
             
             results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
@@ -297,6 +346,9 @@ def main():
                 }
                 all_reviews.append(review_data)
                 field_labels.update(review_data['answers'].keys())
+
+            retrieved_reviews += len(results_reviews)
+            print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
             offset += PAGE_SIZE
 
@@ -331,14 +383,17 @@ def main():
             if download_link:
                 print(f"Le lien de téléchargement est : {download_link}")
                 # Send email to the user with the download link
-                send_email(first_result_export[7], download_link)
+                send_email(first_result_export[9], download_link)
 
-        update_query = """
-        UPDATE public."Export" SET processed = true WHERE id = %s
-        """
-        execute_query(conn, update_query, (first_result_export[0],))  # Assuming the first column is 'id'
+                end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                update_query = """
+                UPDATE public."Export" SET status = 'done'::\"StatusExport\", \"endDate\" = %s, link = %s WHERE id = %s
+                """
+                execute_query(conn, update_query, (end_date, download_link, export_id))
     else:
         print("Aucun export à traiter.")
+
+    print('------- END EXPORT -------')
 
 if __name__ == "__main__":
     main()

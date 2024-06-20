@@ -53,6 +53,12 @@ enum AnswerIntention {
   neutral
 }
 
+enum StatusExport {
+  idle
+  processing
+  done
+}
+
 // Next auth
 model User {
   id                   Int                   @id @default(autoincrement())
@@ -292,13 +298,15 @@ model Answer {
 }
 
 model Export {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id])
+  id         Int          @id @default(autoincrement())
+  created_at DateTime     @default(now())
+  user       User         @relation(fields: [user_id], references: [id])
   user_id    Int
-  product    Product  @relation(fields: [product_id], references: [id])
+  product    Product      @relation(fields: [product_id], references: [id])
   product_id Int
   params     String?
-  processed  Boolean  @default(false)
+  status     StatusExport
+  startDate  DateTime?
+  endDate    DateTime?
   link       String?
 }

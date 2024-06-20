@@ -126,20 +126,15 @@ const ExportReviews = (props: Props) => {
 			></ExportModal>
 
 			{exportStatus === 'idle' && (
-				<Tooltip
-					placement="top"
-					title="🚧 Fonctionnalité en cours de déploiement, accessible dès la semaine prochaine."
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-file-download-line"
+					iconPosition="right"
+					type="button"
+					nativeButtonProps={export_modal.buttonProps}
 				>
-					<Button
-						priority="tertiary"
-						iconId="fr-icon-file-download-line"
-						iconPosition="right"
-						type="button"
-						// nativeButtonProps={export_modal.buttonProps}
-					>
-						Télécharger
-					</Button>
-				</Tooltip>
+					Télécharger
+				</Button>
 			)}
 			{exportStatus === 'inProgress' && (
 				<div>

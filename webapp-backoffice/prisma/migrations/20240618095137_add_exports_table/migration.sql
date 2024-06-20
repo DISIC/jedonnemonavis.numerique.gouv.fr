@@ -61,3 +61,17 @@ ALTER TABLE "Export" ADD CONSTRAINT "Export_product_id_fkey" FOREIGN KEY ("produ
 
 -- AlterTable
 ALTER TABLE "Export" ADD COLUMN     "processed" BOOLEAN NOT NULL DEFAULT false;
+
+
+-- CreateEnum
+CREATE TYPE "StatusExport" AS ENUM ('idle', 'processing', 'done');
+
+-- AlterTable
+ALTER TABLE "Export" DROP COLUMN "processed",
+ADD COLUMN     "endDate" TIMESTAMP(3) NOT NULL,
+ADD COLUMN     "startDate" TIMESTAMP(3) NOT NULL,
+ADD COLUMN     "status" "StatusExport" NOT NULL;
+
+-- AlterTable
+ALTER TABLE "Export" ALTER COLUMN "endDate" DROP NOT NULL,
+ALTER COLUMN "startDate" DROP NOT NULL;

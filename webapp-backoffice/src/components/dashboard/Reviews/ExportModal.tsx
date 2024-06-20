@@ -66,7 +66,7 @@ const ExportModal = (props: Props) => {
 				<>
 					<Alert
 						description="
-						Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés."
+						Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à 24 heures."
 						severity="info"
 						small
 						className={fr.cx('fr-mt-10v')}
