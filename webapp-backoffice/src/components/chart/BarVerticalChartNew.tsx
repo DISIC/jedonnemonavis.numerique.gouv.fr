@@ -1,14 +1,12 @@
-import React from 'react';
 import {
-	BarChart,
 	Bar,
-	XAxis,
-	YAxis,
-	ResponsiveContainer,
+	BarChart,
 	CartesianGrid,
+	Label,
+	ResponsiveContainer,
 	Tooltip,
-	Legend,
-	Label
+	XAxis,
+	YAxis
 } from 'recharts';
 
 const CustomBar = (props: any) => {
