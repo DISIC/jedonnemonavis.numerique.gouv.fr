@@ -195,7 +195,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
-					accessibility="partially compliant"
+					accessibility="non compliant"
 					bottomItems={[
 						{
 							text: 'Données personnelles',
