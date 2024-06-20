@@ -125,6 +125,10 @@ const ProductStatPage = (props: Props) => {
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbReviewsWithFiltersForm1 =
+		reviewsDataWithFilters?.metadata.countForm1 || 0;
+	const nbReviewsWithFiltersForm2 =
+		reviewsDataWithFilters?.metadata.countForm2 || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
 	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
 		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
@@ -277,21 +281,21 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
-						total={nbReviewsWithFilters}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_reached"
-						total={nbReviewsWithFilters}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
-						total={nbReviewsWithFilters}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -304,15 +308,14 @@ const ProductStatPage = (props: Props) => {
 				>
 					<SmileyQuestionViz
 						fieldCode="easy"
-						total={nbReviewsWithFilters}
+						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
-						required
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="difficulties"
-						total={nbReviewsWithFilters}
+						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}

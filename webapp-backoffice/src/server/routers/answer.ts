@@ -9,6 +9,7 @@ import {
 	getDiffDaysBetweenTwoDates
 } from '@/src/utils/tools';
 import { Session } from 'next-auth';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 const checkAndGetProduct = async ({
 	ctx,
@@ -34,36 +35,59 @@ const queryCountByFieldCode = ({
 	field_code,
 	product_id,
 	start_date,
-	end_date
+	end_date,
+	form_id
 }: {
 	field_code: string;
 	product_id: number;
 	start_date: string;
 	end_date: string;
-}) => ({
-	bool: {
-		must: [
-			{
-				match: {
-					field_code
-				}
-			},
-			{
-				match: {
-					product_id
-				}
-			},
-			{
-				range: {
-					created_at: {
-						gte: start_date,
-						lte: end_date
+	form_id?: number;
+}): QueryDslQueryContainer => {
+	let query: QueryDslQueryContainer = {
+		bool: {
+			must: [
+				{
+					match: {
+						field_code
+					}
+				},
+				{
+					match: {
+						product_id
+					}
+				},
+				{
+					range: {
+						created_at: {
+							gte: start_date,
+							lte: end_date
+						}
 					}
 				}
-			}
-		]
+			]
+		}
+	};
+
+	// SPECIFIC CODE BECAUSE FORM_ID DOES NOT EXIST IN THE MIGRATED DATA
+	if (query.bool && query.bool.must) {
+		if (form_id && form_id === 1) {
+			query.bool.must_not = {
+				exists: {
+					field: 'form_id'
+				}
+			};
+		} else if (form_id) {
+			(query.bool.must as QueryDslQueryContainer[]).push({
+				match: {
+					form_id
+				}
+			});
+		}
 	}
-});
+
+	return query;
+};
 
 export const answerRouter = router({
 	getByFieldCode: publicProcedure
@@ -72,13 +96,25 @@ export const answerRouter = router({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
 				start_date: z.string(),
-				end_date: z.string()
+				end_date: z.string(),
+				form_id: z.number().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id } = input;
+			const { product_id, form_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+
+			console.log(
+				JSON.stringify(
+					queryCountByFieldCode({
+						...input
+					}),
+					null,
+					2
+				)
+			);
+			console.log('------');
 
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
@@ -98,6 +134,21 @@ export const answerRouter = router({
 				size: 0
 			});
 
+			const uniqueCount = await ctx.elkClient.search<ElkAnswer[]>({
+				index: 'jdma-answers',
+				track_total_hits: true,
+				query: queryCountByFieldCode({
+					...input
+				}),
+				aggs: {
+					unique_review_ids: {
+						cardinality: {
+							field: 'review_id'
+						}
+					}
+				}
+			});
+
 			const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
 				?.buckets as Buckets;
 
@@ -110,7 +161,9 @@ export const answerRouter = router({
 				fieldLabel?: string;
 			};
 
-			metadata.total = (fieldCodeAggs.hits?.total as any)?.value;
+			metadata.total = (
+				uniqueCount.aggregations as any
+			).unique_review_ids.value;
 
 			const buckets = tmpBuckets
 				.map(bucket => {

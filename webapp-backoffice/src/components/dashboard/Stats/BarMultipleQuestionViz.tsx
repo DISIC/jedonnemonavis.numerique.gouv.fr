@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import HeaderChart from './HeaderChart';
 import QuestionWrapper from './QuestionWrapper';
+import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
@@ -42,7 +43,13 @@ const BarMultipleQuestionViz = ({
 				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
-				end_date: endDate
+				end_date: endDate,
+				...(oldFormFieldCodes.includes(fieldCode) && {
+					form_id: 1
+				}),
+				...(newFormFieldCodes.includes(fieldCode) && {
+					form_id: 2
+				})
 			},
 			{
 				initialData: {
