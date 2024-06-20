@@ -87,7 +87,7 @@ const ExportReviews = (props: Props) => {
 
 	const applyChoice = (choice: 'all' | 'filtered') => {
 		export_modal.close();
-		setExportStatus('inProgress');
+		/*setExportStatus('inProgress');
 		exportData.mutate(
 			choice === 'all'
 				? { memoryKey }
@@ -102,7 +102,7 @@ const ExportReviews = (props: Props) => {
 						filters,
 						memoryKey
 					}
-		);
+		);*/
 	};
 
 	return (
@@ -113,24 +113,28 @@ const ExportReviews = (props: Props) => {
 					countFiltered: reviewsCountfiltered,
 					countAll: reviewsCountAll
 				}}
+				product_id={product_id}
+				params={JSON.stringify({
+					startDate,
+					endDate,
+					mustHaveVerbatims,
+					search,
+					button_id,
+					filters
+				})}
 				action={applyChoice}
 			></ExportModal>
 
 			{exportStatus === 'idle' && (
-				<Tooltip
-					placement="top"
-					title="🚧 Fonctionnalité en cours de déploiement, accessible dès la semaine prochaine."
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-file-download-line"
+					iconPosition="right"
+					type="button"
+					nativeButtonProps={export_modal.buttonProps}
 				>
-					<Button
-						priority="tertiary"
-						iconId="fr-icon-file-download-line"
-						iconPosition="right"
-						type="button"
-						// nativeButtonProps={export_modal.buttonProps}
-					>
-						Télécharger
-					</Button>
-				</Tooltip>
+					Télécharger
+				</Button>
 			)}
 			{exportStatus === 'inProgress' && (
 				<div>
