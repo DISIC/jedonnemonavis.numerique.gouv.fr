@@ -105,17 +105,6 @@ export const answerRouter = router({
 
 			await checkAndGetProduct({ ctx, product_id });
 
-			console.log(
-				JSON.stringify(
-					queryCountByFieldCode({
-						...input
-					}),
-					null,
-					2
-				)
-			);
-			console.log('------');
-
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,

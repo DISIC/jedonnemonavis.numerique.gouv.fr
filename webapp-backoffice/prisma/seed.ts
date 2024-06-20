@@ -13,8 +13,7 @@ import { entities } from './seeds/entities';
 import { getRandomObjectFromArray, removeAccents } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { Domain } from 'domain';
-
-const prisma = new PrismaClient();
+import prisma from '@/src/utils/db';
 
 async function main() {
 	const command = process.argv[2];
