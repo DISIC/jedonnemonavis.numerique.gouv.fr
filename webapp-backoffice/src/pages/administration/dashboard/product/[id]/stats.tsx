@@ -1,25 +1,29 @@
-import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
-import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import Filters from '@/src/components/dashboard/Stats/Filters';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
+import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
-import { useStats } from '@/src/contexts/StatsContext';
+import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
-import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import Link from 'next/link';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { ToggleSwitch } from '@codegouvfr/react-dsfr/ToggleSwitch';
-import { Button } from '@codegouvfr/react-dsfr/Button';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
+import { betaTestXwikiIds } from '@/src/utils/tools';
 
 interface Props {
 	product: Product;
@@ -30,35 +34,35 @@ const public_modal = createModal({
 	isOpenedByDefault: false
 });
 
-const SectionWrapper = ({
+export const SectionWrapper = ({
 	title,
-	count,
-	noDataText = 'Aucune donnée',
+	alert = '',
+	total,
 	children
 }: {
 	title: string;
-	count?: number;
-	noDataText?: string;
+	alert?: string;
+	total: number;
 	children: React.ReactNode;
 }) => {
 	const { classes, cx } = useStyles();
 
+	if (!total) return;
+
 	return (
-		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-5w'))}>
-			<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
-			{count === 0 && (
-				<Alert title="" description={noDataText} severity="info" />
+		<div className={fr.cx('fr-mt-5w')}>
+			<h3>{title}</h3>
+			{alert && (
+				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
 			)}
-			{children}
+			<div>{children}</div>
 		</div>
 	);
 };
 
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
-	const { statsTotals } = useStats();
-	const isTotalLoading = statsTotals.satisfaction === undefined;
-	const [isPublic, setIsPublic] = useState<boolean>(product.isPublic || false);
+	const router = useRouter();
 
 	const { classes, cx } = useStyles();
 
@@ -70,6 +74,9 @@ const ProductStatPage = (props: Props) => {
 	const [endDate, setEndDate] = useState<string>(
 		new Date().toISOString().split('T')[0]
 	);
+
+	const debouncedStartDate = useDebounce<string>(startDate, 500);
+	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -96,11 +103,46 @@ const ProductStatPage = (props: Props) => {
 			product_id: product.id
 		});
 
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
-	const nbReviews = reviewsData?.metadata.count;
+	const {
+		data: reviewsDataWithFilters,
+		isLoading: isLoadingReviewsDataWithFilters
+	} = trpc.review.getList.useQuery({
+		numberPerPage: 0,
+		page: 1,
+		product_id: product.id,
+		start_date: debouncedStartDate,
+		end_date: debouncedEndDate
+	});
 
-	const updateProduct = trpc.product.update.useMutation({});
+	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
+		trpc.answer.countByFieldCode.useQuery({
+			product_id: product.id,
+			field_code: 'verbatim',
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
+		});
+
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbReviewsWithFilters =
+		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbVerbatims = dataNbVerbatims?.data || 0;
+	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
+		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
+		: 0;
+
+	const handleButtonClick = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			query: { autoCreate: true }
+		});
+	};
+
+	const handleSendInvitation = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/access`,
+			query: { autoInvite: true }
+		});
+	};
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
@@ -116,30 +158,20 @@ const ProductStatPage = (props: Props) => {
 	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
 		return (
 			<ProductLayout product={product}>
+				<Head>
+					<title>{product.title} | Statistiques | Je donne mon avis</title>
+					<meta
+						name="description"
+						content={`${product.title} | Statistiques | Je donne mon avis`}
+					/>
+				</Head>
 				<h1>Statistiques</h1>
 				{buttonsResult.metadata.count === 0 ? (
-					<Alert
-						severity="info"
-						title=""
-						description={
-							<>
-								Afin de récolter les avis et produire les statistiques pour ce
-								produit, vous devez{' '}
-								<Link
-									className={fr.cx('fr-link')}
-									href={`/administration/dashboard/product/${product.id}/buttons`}
-								>
-									créer un bouton
-								</Link>
-								.
-							</>
-						}
-					/>
+					<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
 				) : (
-					<Alert
-						severity="info"
-						title="Cette démarche n'a pas encore d'avis"
-						description="Une fois qu’un utilisateur a donné un avis, vous verrez une synthèse ici."
+					<NoReviewsPanel
+						improveBtnClick={() => {}}
+						sendInvitationBtnClick={handleSendInvitation}
 					/>
 				)}
 			</ProductLayout>
@@ -148,6 +180,13 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} Avis | Je donne mon avis`}
+				/>
+			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
@@ -161,191 +200,123 @@ const ProductStatPage = (props: Props) => {
 				</Button>
 			</div>
 			<div className={cx(classes.container)}>
-				{isTotalLoading && (
-					<div className={cx(classes.overLoader, fr.cx('fr-pt-12v'))}>
-						<Loader />
-					</div>
-				)}
-				<div></div>
-				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
-				>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de début"
-							nativeInputProps={{
-								type: 'date',
-								value: startDate,
-								onChange: e => {
-									setStartDate(e.target.value);
+				<Filters
+					currentStartDate={startDate}
+					currentEndDate={endDate}
+					onChange={(tmpStartDate, tmpEndDate) => {
+						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
+						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+					}}
+				/>
+				<ObservatoireStats
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
+				<div className={fr.cx('fr-mt-5w')}>
+					<h3>Participation</h3>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Avis"
+								kpi={nbReviewsWithFilters}
+								isLoading={isLoadingReviewsDataWithFilters}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
+							/>
+						</div>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Verbatims"
+								kpi={nbVerbatims}
+								isLoading={isLoadingNbVerbatims}
+								desc={
+									percetengeVerbatimsOfReviews
+										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
+										: undefined
 								}
-							}}
-						/>
-					</div>
-					<div className={fr.cx('fr-col-6')}>
-						<Input
-							label="Date de fin"
-							nativeInputProps={{
-								type: 'date',
-								value: endDate,
-								onChange: e => {
-									setEndDate(e.target.value);
-								}
-							}}
-						/>
+								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
+							/>
+						</div>
+						{/* <div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Formulaires complets"
+								kpi={0}
+								desc="soit 0 % des répondants"
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								hideLink
+								grey
+							/>
+						</div> */}
 					</div>
 				</div>
+				<AnswersChart
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+					total={nbReviewsWithFilters}
+				/>
 				<SectionWrapper
-					title="Satisfaction usagers"
-					count={statsTotals.satisfaction}
-					noDataText="Aucune donnée pour la satisfaction usagers"
+					title="Détails des réponses"
+					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarQuestionViz
+						fieldCode="comprehension"
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-					<ReviewAverageInterval
-						fieldCode="satisfaction"
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviewsWithFilters}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
-					<ReviewAverage
-						fieldCode="satisfaction"
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviewsWithFilters}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
 				<SectionWrapper
-					title="Facilité d'usage"
-					count={statsTotals.easy}
-					noDataText="Aucune donnée pour la facilité d'usage"
+					title="Détails des anciennes réponses"
+					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
+					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
 						fieldCode="easy"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarMultipleQuestionViz
+						fieldCode="difficulties"
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Simplicité du langage"
-					count={statsTotals.comprehension}
-					noDataText="Aucune donnée pour la simplicité du langage"
-				>
-					<SmileyQuestionViz
-						fieldCode="comprehension"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Difficultés rencontrées"
-					count={statsTotals.difficulties}
-					noDataText="Aucune donnée pour les difficultés rencontrées"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.difficulties_details
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<BooleanQuestionViz
-								fieldCode="difficulties"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.difficulties_details !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<DetailsQuestionViz
-									fieldCodeMultiple="difficulties_details"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Aide joignable et efficace"
-					count={statsTotals.contact}
-					noDataText="Aucune donnée pour l'aide joignable et efficace"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.contact_reached
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<DetailsQuestionViz
-								fieldCodeMultiple="contact"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.contact_reached !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<BooleanQuestionViz
-									fieldCode="contact_reached"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
-					{statsTotals.contact_channels !== 0 && (
-						<DetailsQuestionViz
-							fieldCodeMultiple="contact_channels"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					)}
-				</SectionWrapper>
-				<SectionWrapper
-					title="Niveau d’autonomie"
-					count={statsTotals.help}
-					noDataText="Aucune donnée pour le niveau d'autonomie"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.help_details
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<BooleanQuestionViz
-								fieldCode="help"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.help_details !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<DetailsQuestionViz
-									fieldCodeMultiple="help_details"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
 				</SectionWrapper>
 			</div>
 		</ProductLayout>
@@ -382,6 +353,17 @@ const useStyles = tss.create({
 			'.fr-btn': {
 				marginTop: '1rem'
 			}
+		}
+	},
+	highlight: {
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		margin: 0,
+		paddingTop: fr.spacing('7v'),
+		paddingBottom: fr.spacing('7v'),
+		paddingLeft: fr.spacing('12v'),
+		marginBottom: fr.spacing('6v'),
+		p: {
+			margin: 0
 		}
 	}
 });

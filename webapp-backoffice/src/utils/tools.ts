@@ -1,4 +1,6 @@
+import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
+import { AnswerIntention } from '@prisma/client';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -130,3 +132,180 @@ export const transformDateToFrenchReadable = (dateString: string): string => {
 export const removeAccents = (str: string): string => {
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
+
+export const autocompleteFilterOptions = (
+	options: {
+		label: string;
+		value?: number;
+	}[],
+	{ inputValue }: { inputValue: string }
+) => matchSorter(options, inputValue, { keys: [item => item.label] });
+
+export const getDatesByShortCut = (shortcutDateSelected: string) => {
+	const now = new Date();
+	let newStartDate: Date;
+	let newEndDate: Date = new Date();
+
+	switch (shortcutDateSelected) {
+		case 'one-year':
+			newStartDate = new Date(
+				now.getFullYear() - 1,
+				now.getMonth(),
+				now.getDate() + 1
+			);
+			break;
+		case 'one-month':
+			newStartDate = new Date(
+				now.getFullYear(),
+				now.getMonth() - 1,
+				now.getDate() + 1
+			);
+			break;
+		case 'one-week':
+			newStartDate = new Date(
+				now.getFullYear(),
+				now.getMonth(),
+				now.getDate() - 6
+			);
+			break;
+		default:
+			newStartDate = new Date();
+	}
+
+	return {
+		startDate: newStartDate.toISOString().split('T')[0],
+		endDate: newEndDate.toISOString().split('T')[0]
+	};
+};
+
+export const calculateBucketsAverage = (
+	buckets: any[],
+	marks: Record<string, number>
+) => {
+	const count = buckets.reduce((sum, sb) => sum + sb.doc_count, 0);
+	const average =
+		buckets.reduce((sum, sb) => {
+			const [, , intention] = sb.key.split('#');
+			return sum + (marks[intention] || 0) * sb.doc_count;
+		}, 0) / count;
+	return { count, average: isNaN(average) ? 0 : average };
+};
+
+export const getReadableValue = (value: number) => {
+	const readableValue = (Math.floor(value * 10) / 10)
+		.toString()
+		.replace('.', ',');
+	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
+};
+
+export const getPercentageFromValue = (value: number) => {
+	return getReadableValue(value * 10);
+};
+
+export const getDiffDaysBetweenTwoDates = (
+	startDate: string,
+	endDate: string
+) => {
+	var date1 = new Date(startDate);
+	var date2 = new Date(endDate);
+	var diff = Math.abs(date1.getTime() - date2.getTime());
+	return Math.ceil(diff / (1000 * 3600 * 24));
+};
+
+export const getCalendarInterval = (nbDays: number) => {
+	if (nbDays < 30) return 'day';
+	if (nbDays < 62) return 'week';
+
+	return 'month';
+};
+
+export const getCalendarFormat = (nbDays: number) => {
+	if (nbDays < 30) return 'd MMM Y';
+	if (nbDays < 62) return 'd MMM Y';
+
+	return 'MMM Y';
+};
+
+export const translateMonthToFrench = (dateStr: string) => {
+	const monthLookup = {
+		Jan: 'Jan',
+		Feb: 'Fév',
+		Mar: 'Mar',
+		Apr: 'Avr',
+		May: 'Mai',
+		Jun: 'Juin',
+		Jul: 'Juil',
+		Aug: 'Août',
+		Sep: 'Sep',
+		Oct: 'Oct',
+		Nov: 'Nov',
+		Dec: 'Déc'
+	};
+
+	let day = '';
+	let monthAbbreviation = '';
+	let year = '';
+
+	const parts = dateStr.split(' ');
+	if (parts.length === 3) {
+		day = parts[0] + ' ';
+		monthAbbreviation = parts[1];
+		year = parts[2];
+	} else if (parts.length === 2) {
+		monthAbbreviation = parts[0];
+		year = parts[1];
+	} else {
+		return dateStr;
+	}
+
+	const translatedMonth =
+		monthLookup[monthAbbreviation as keyof typeof monthLookup];
+
+	if (!translatedMonth) return dateStr;
+
+	return `${day}${translatedMonth} ${year}`;
+};
+
+export const getColorFromIntention = (intention: AnswerIntention) => {
+	switch (intention) {
+		case 'bad':
+			return 'error';
+		case 'medium':
+			return 'new';
+		case 'good':
+			return 'success';
+	}
+
+	return 'info';
+};
+
+export const getHexaColorFromIntentionText = (intention: string) => {
+	switch (intention) {
+		case 'Pas bien':
+		case 'Non':
+			return '#ce0500';
+		case 'Moyen':
+			return '#716043';
+		case 'Pas de réponse':
+			return '#929292';
+		case 'Très bien':
+		case 'Oui':
+			return '#18753c';
+	}
+
+	return '#0063cb';
+};
+
+export const formatNumberWithSpaces = (number: number): string => {
+	let numStr = number.toString();
+
+	return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+};
+
+export const betaTestXwikiIds: number[] = [
+	2404, 786, 812, 2542, 2672, 2674, 2675, 2737, 2802, 2904, 2939, 2980, 2982,
+	2983, 2984, 2985, 2986, 3002, 3004, 3005, 3035, 3038, 3074, 3075, 3076, 3077,
+	3078, 3079, 3080, 3081, 3082, 3083, 3084, 3085, 3086, 3087, 3088, 3089, 3090,
+	3091, 3092, 3093, 3094, 3095, 3096, 3097, 3098, 3099, 3100, 3412, 3442, 3535,
+	3671, 3733, 3865, 3426, 3427, 3428, 3429, 860, 863, 864, 867, 3378, 3720
+];

@@ -13,9 +13,21 @@ import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 
-const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string }) => {
+const ReviewLine = ({
+	review,
+	search
+}: {
+	review: ExtendedReview;
+	search: string;
+}) => {
 	const { cx, classes } = useStyles();
-	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(search !== '' && review.verbatim?.answer_text?.toLowerCase().includes(search.toLowerCase()) || false);
+	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(
+		(search !== '' &&
+			review.verbatim?.answer_text
+				?.toLowerCase()
+				.includes(search.toLowerCase())) ||
+			false
+	);
 
 	const displayIntention = (intention: string) => {
 		switch (intention) {
@@ -52,9 +64,21 @@ const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string
 				<div className={cx(classes.cellContainer)}>
 					<div className={cx(classes.date)}>
 						<span className={fr.cx('fr-hidden-lg')}>Id : </span>
-						{review.id}
+						{review.id?.toString(16)}
 					</div>
 				</div>
+				{review.button_id ? (
+					<div className={cx(classes.cellContainer)}>
+						<div className={cx(classes.badge)}>
+							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+								Source :{' '}
+							</span>
+							{retrieveButtonName(review.button_id)}
+						</div>
+					</div>
+				) : (
+					<div className={cx(classes.cellContainer)}>Pas de source</div>
+				)}
 				<div className={cx(classes.cellContainer)}>
 					{review.satisfaction && (
 						<>
@@ -85,64 +109,6 @@ const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string
 					)}
 				</div>
 				<div className={cx(classes.cellContainer)}>
-					{review.easy && (
-						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-								Facilité :{' '}
-							</span>
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.easy.intention || '')}
-							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.easy.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.easy.intention ?? 'neutral'
-										})
-									}}
-								/>
-								{displayIntention(review.easy.intention ?? 'neutral')}
-							</Badge>
-						</>
-					)}
-				</div>
-				<div className={cx(classes.cellContainer)}>
-					{review.comprehension && (
-						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-								Langage :{' '}
-							</span>
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.comprehension.intention || '')}
-							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.comprehension.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.comprehension.intention ?? 'neutral'
-										})
-									}}
-								/>
-								{displayIntention(review.comprehension.intention ?? 'neutral')}
-							</Badge>
-						</>
-					)}
-				</div>
-				<div className={cx(classes.cellContainer)}>
 					<>
 						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
 							Verbatim :{' '}
@@ -156,18 +122,6 @@ const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string
 						</Badge>
 					</>
 				</div>
-				{review.button_id ? (
-					<div className={cx(classes.cellContainer)}>
-						<div className={cx(classes.badge)}>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-								Source :{' '}
-							</span>
-							{retrieveButtonName(review.button_id)}
-						</div>
-					</div>
-				) : (
-					<div className={cx(classes.cellContainer)}>Pas de source</div>
-				)}
 				<div className={cx(classes.cellContainer)}>
 					<Button
 						priority="secondary"
@@ -183,7 +137,9 @@ const ReviewLine = ({ review, search }: { review: ExtendedReview, search: string
 					</Button>
 				</div>
 			</div>
-			{displayMoreInfo && <ReviewLineMoreInfos review={review} search={search} />}
+			{displayMoreInfo && (
+				<ReviewLineMoreInfos review={review} search={search} />
+			)}
 		</div>
 	);
 };
@@ -214,13 +170,13 @@ const useStyles = tss.create({
 			marginTop: 12
 		},
 		[fr.breakpoints.up('lg')]: {
-			['&:nth-child(2), &:nth-child(3)']: {
-				flex: "1 1 8%"
+			['&:nth-of-type(2), &:nth-of-type(3)']: {
+				flex: '1 1 8%'
 			},
-			['&:nth-child(9)']: {
-				flex: "1 1 14%"
+			['&:nth-of-type(9)']: {
+				flex: '1 1 14%'
 			}
-		},
+		}
 	},
 	badge: {
 		fontSize: 11,

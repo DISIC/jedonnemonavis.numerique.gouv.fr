@@ -9,6 +9,7 @@ import { ChangeEvent, SetStateAction, useEffect } from "react";
 import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { areArrayEquals } from "@/src/utils/tools";
 
 type Props = {
   field: FormField;
@@ -20,22 +21,41 @@ type Props = {
 export const CheckboxInput = (props: Props) => {
   const { field, opinion, setOpinion, form } = props;
   const { classes, cx } = useStyles({ nbItems: 5 });
-
   const { t } = useTranslation("common");
 
-  const getChildrenResetObject = () => {
+  const getChildrenResetObject = (value?: number) => {
+    let opinionPropsObj: {
+      [key in keyof Opinion]?: any;
+    } = {};
+
     const children = form.filter(
       (f) =>
         f.conditions && f.conditions.map((c) => c.name).includes(field.name)
     );
 
-    let opinionPropsObj: {
-      [key in keyof Opinion]?: any;
-    } = {};
+    children.forEach((c) => {
+      const subChildren = form.filter(
+        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed)
+      );
+
+      subChildren.forEach((sc) => {
+        opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
+          ? value
+            ? (opinion[sc.name] as any[]).filter(
+                (field) => !field.startsWith(value + "_")
+              )
+            : []
+          : undefined;
+      });
+    });
 
     children.forEach((cf) => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
-        ? []
+        ? value
+          ? (opinion[cf.name] as any[]).filter(
+              (field) => !field.startsWith(value + "_")
+            )
+          : []
         : undefined;
     });
 
@@ -50,35 +70,43 @@ export const CheckboxInput = (props: Props) => {
     e: ChangeEvent<HTMLInputElement>,
     options: CheckboxOption[]
   ) => {
+    const value = parseInt(e.target.value);
+
     if (isolated) {
       setOpinion({
         ...opinion,
-        [key]: e.target.checked ? [e.target.value] : [],
+        [key]: e.target.checked ? [value] : [],
         ...getChildrenResetObject(),
       });
     } else {
       const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
+        .filter((option) => !option.isolated)
         .map((opt) => opt.value);
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
+
+      if (e.target.checked) {
+        setOpinion({
+          ...opinion,
+          [key]: [
+            ...opinion[key].filter((sibling) =>
+              isolatedSiblings.includes(sibling)
+            ),
+            value,
+          ],
+        });
+      } else {
+        setOpinion({
+          ...opinion,
+          [key]: opinion[key].filter((d) => d !== value),
+          ...getChildrenResetObject(value),
+        });
+      }
     }
   };
 
   if (field.kind === "checkbox") {
     return (
       <div className={fr.cx("fr-grid-row")}>
-        <div className={fr.cx("fr-col-12")}>
+        <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
           <>
             <Checkbox
               legend={t(field.label)}
@@ -116,5 +144,10 @@ const useStyles = tss
     smallText: {
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
+    },
+    checkboxContainer: {
+      ".fr-fieldset__content": {
+        paddingTop: "1.5rem !important",
+      },
     },
   }));

@@ -1,28 +1,30 @@
-import { useStats } from '@/src/contexts/StatsContext';
 import { FieldCodeSmiley } from '@/src/types/custom';
+import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import {
-	getIntentionFromAverage,
-	getStatsAnswerText,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
-import { fr } from '@codegouvfr/react-dsfr';
-import { Skeleton } from '@mui/material';
-import dynamic from 'next/dynamic';
-import { tss } from 'tss-react/dsfr';
-import AverageCard from './AverageCard';
+	formatNumberWithSpaces,
+	translateMonthToFrench
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
-
-const PieChart = dynamic(() => import('@/src/components/chart/PieChart'), {
-	ssr: false
-});
+import { fr } from '@codegouvfr/react-dsfr';
+import { Skeleton, Tooltip } from '@mui/material';
+import { AnswerIntention } from '@prisma/client';
+import { tss } from 'tss-react/dsfr';
+import SmileyBarChart from '../../chart/SmileyBarChart';
+import QuestionWrapper from './QuestionWrapper';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
 	startDate: string;
 	endDate: string;
-	displayFieldLabel?: boolean;
+	total: number;
+	required?: boolean;
+};
+
+export const intentionSortOrder = {
+	bad: 0,
+	medium: 1,
+	good: 2
 };
 
 const SmileyQuestionViz = ({
@@ -30,15 +32,15 @@ const SmileyQuestionViz = ({
 	productId,
 	startDate,
 	endDate,
-	displayFieldLabel = false
+	total,
+	required = false
 }: Props) => {
-	const { classes } = useStyles();
-	const { statsTotals, updateStatsTotals } = useStats();
+	const { classes, cx } = useStyles();
 
-	const { data: resultFieldCode, isLoading } =
+	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByFieldCode.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate
@@ -51,145 +53,175 @@ const SmileyQuestionViz = ({
 						average: 0,
 						fieldLabel: ''
 					}
-				},
-				onSuccess: data => {
-					updateStatsTotals({
-						[fieldCode]: data.metadata.total
-					});
 				}
 			}
 		);
 
-	if (isLoading || !resultFieldCode) {
+	const {
+		data: resultFieldCodeInterval,
+		isLoading: isLoadingFieldCodeInterval
+	} = trpc.answer.getByFieldCodeInterval.useQuery(
+		{
+			product_id: productId,
+			field_code: fieldCode,
+			start_date: startDate,
+			end_date: endDate
+		},
+		{
+			initialData: {
+				data: {},
+				metadata: {
+					total: 0,
+					average: 0
+				}
+			}
+		}
+	);
+
+	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
-				<Skeleton variant="rectangular" width={232} height="inherit" />
-				<div className={classes.skeleton}>
-					<Skeleton variant="text" width="75%" height={40} />
-					<Skeleton variant="text" width="25%" height={25} />
-					<div className={classes.subSkeleton}>
-						<div>
-							<Skeleton variant="text" width="40%" height={45} />
-							<Skeleton variant="text" width="45%" height={45} />
-							<Skeleton variant="text" width="40%" height={45} />
-						</div>
-						<Skeleton variant="circular" width={185} height={185} />
-					</div>
-				</div>
+				<Skeleton />
 			</div>
 		);
 	}
 
-	const currentAnswerTextFromAverage = getStatsAnswerText({
-		buckets: resultFieldCode.data || [],
-		intention: getIntentionFromAverage(
-			resultFieldCode.metadata.average as number
-		)
-	});
-
-	const barChartData =
-		resultFieldCode.data.map(({ answer_text, intention, doc_count }) => ({
-			name: intention,
-			value: doc_count,
-			answer_text
-		})) || [];
-
-	if (statsTotals[fieldCode] === 0) return;
+	let data: {
+		name: string;
+		[key: string]: number | string;
+	}[] = [];
+	for (const [key, value] of Object.entries(resultFieldCodeInterval.data)) {
+		let item: {
+			name: string;
+			[key: string]: number | string;
+		} = {
+			name: translateMonthToFrench(key)
+		};
+		const itemTotal = value.reduce((acc, curr) => acc + curr.doc_count, 0);
+		value.forEach(v => {
+			item[v.answer_text] = (v.doc_count / itemTotal) * 100;
+			item['value_' + v.answer_text] = v.doc_count;
+		});
+		data.push(item);
+	}
 
 	return (
-		<div className={classes.wrapperSection}>
-			{displayFieldLabel && (
-				<h4 className={fr.cx('fr-mb-0')}>
-					{resultFieldCode.metadata.fieldLabel}
-				</h4>
-			)}
-			<div className={classes.mainSection}>
-				<AverageCard
-					average={resultFieldCode.metadata.average as number}
-					answerText={currentAnswerTextFromAverage}
-				/>
-				<div className={classes.container}>
-					<h4 className={fr.cx('fr-mb-0')}>Répartition des avis</h4>
-					<p>{resultFieldCode.metadata.total} avis total</p>
-					<div className={classes.dataContainer}>
-						<div>
-							{resultFieldCode.data.map(
-								({ answer_text, intention, doc_count }) => (
-									<div key={answer_text} className={classes.itemData}>
-										<i
-											className={fr.cx(getStatsIcon({ intention }))}
-											style={{ color: getStatsColor({ intention }) }}
-										/>
-										<div className={classes.itemDataText}>
-											<span style={{ color: getStatsColor({ intention }) }}>
-												{answer_text}
-											</span>
-											<span className={classes.total}>
-												{(
-													(doc_count / resultFieldCode.metadata.total) *
-													100
-												).toFixed(0)}
-												% / {doc_count} avis
-											</span>
-										</div>
-									</div>
-								)
-							)}
-						</div>
-						<PieChart kind="pie" data={barChartData} />
-					</div>
-				</div>
+		<QuestionWrapper
+			totalField={resultFieldCode.metadata.total}
+			fieldLabel={resultFieldCode.metadata.fieldLabel as string}
+			total={total}
+			required={required}
+		>
+			<h6 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h6>
+			<div className={classes.distributionContainer}>
+				{resultFieldCode.data
+					.sort(
+						(a, b) =>
+							intentionSortOrder[
+								a.intention as keyof typeof intentionSortOrder
+							] -
+							intentionSortOrder[b.intention as keyof typeof intentionSortOrder]
+					)
+					.map(rfc => {
+						const percentage = Math.round(
+							(rfc.doc_count / resultFieldCode.metadata.total) * 100
+						);
+						const limitToShowTopInfos = 10;
+						const limitToShowBottomInfos = 4;
+						return (
+							<div
+								className={classes.distributionItem}
+								style={{
+									width: `${percentage}%`
+								}}
+							>
+								<span
+									className={cx(
+										fr.cx(
+											percentage >= limitToShowTopInfos
+												? getStatsIcon({
+														intention: rfc.intention as AnswerIntention
+													})
+												: undefined
+										),
+										classes.distributionIcon
+									)}
+									style={{
+										color: getStatsColor({
+											intention: rfc.intention as AnswerIntention
+										})
+									}}
+								/>
+								<label className={classes.distributionLabel}>
+									{percentage >= limitToShowTopInfos && rfc.answer_text}
+								</label>
+								<Tooltip
+									placement="top-start"
+									title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+								>
+									<div
+										className={classes.progressBar}
+										style={{
+											backgroundColor: getStatsColor({
+												intention: rfc.intention as AnswerIntention
+											})
+										}}
+									/>
+								</Tooltip>
+								<label className={classes.distributionPercentage}>
+									{percentage >= limitToShowBottomInfos && `${percentage}%`}
+								</label>
+							</div>
+						);
+					})}
 			</div>
-		</div>
+			<h6 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h6>
+			<div>
+				<p className={fr.cx('fr-hint-text')}>
+					{formatNumberWithSpaces(total)} réponse{total > 1 ? 's' : ''}
+				</p>
+				<SmileyBarChart data={data} total={total} />
+			</div>
+		</QuestionWrapper>
 	);
 };
 
 const useStyles = tss.create({
-	wrapperSection: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: fr.spacing('3v')
-	},
 	mainSection: {
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: '3rem'
 	},
-	container: {
+	distributionContainer: {
 		display: 'flex',
-		flexDirection: 'column',
-		flex: 1,
 		width: '100%'
 	},
-	dataContainer: {
+	distributionItem: {
 		display: 'flex',
-		['& > div']: {
-			width: '35%'
-		},
-		['& > div:first-of-type']: {
-			width: '65%',
-			display: 'flex',
-			flexDirection: 'column',
-			gap: '0.75rem'
+		flexDirection: 'column',
+		justifyContent: 'center',
+		alignItems: 'center'
+	},
+	distributionIcon: {
+		height: '3rem',
+		'&::before': {
+			width: '3rem',
+			height: '3rem'
 		}
 	},
-	itemData: { display: 'flex', gap: '0.25rem' },
-	itemDataText: {
-		display: 'flex',
-		flexDirection: 'column'
+	distributionLabel: {
+		marginTop: fr.spacing('4v'),
+		marginBottom: fr.spacing('2v'),
+		height: '1.5rem'
 	},
-	total: { marginTop: '0.15rem', fontSize: '0.875rem' },
-	skeleton: { flex: 1 },
-	subSkeleton: {
-		display: 'flex',
-		marginTop: '2rem',
-		['& > div']: {
-			display: 'flex',
-			flexDirection: 'column',
-			width: '100%',
-			gap: '0.5rem',
-			flex: 1
-		}
+	progressBar: {
+		width: '100%',
+		height: '1.5rem',
+		borderRadius: '1.5rem'
+	},
+	distributionPercentage: {
+		marginTop: fr.spacing('2v'),
+		height: '1.5rem'
 	}
 });
 

@@ -7,6 +7,7 @@ import { Product } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -51,7 +52,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Gérer mes boutons',
+			text: 'Gérer vos boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
@@ -60,7 +61,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: "Gérer les droits d'accès",
+			text: "Gérer l'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
@@ -76,6 +77,15 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				href: `/administration/dashboard/product/${id}/infos`,
 				alt: 'Informations'
 			}
+		},
+		{
+			text: 'Gérer les clés API',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
+			linkProps: {
+				href: `/administration/dashboard/product/${id}/api_keys`,
+				alt: 'Gérer les clés API'
+			}
 		}
 	];
 	return (
@@ -87,19 +97,25 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				severity="info"
 				message="Identifiant copié dans le presse papier !"
 			/>
-			<div className={fr.cx('fr-mt-4w', 'fr-mb-5v')}>
-				<Tag
-					id="product-id"
-					small
+			<div className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}>
+				<Tag id="product-id" small>
+					{`# ${id}`}
+				</Tag>
+				<Button
+					priority="tertiary"
+					type="button"
+					className={cx(classes.copyBtn)}
 					nativeButtonProps={{
+						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
+						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
 						onClick: () => {
 							navigator.clipboard.writeText(product.id.toString());
 							setDisplayToast(true);
 						}
 					}}
 				>
-					{`#${id}`}
-				</Tag>
+					Copier dans le presse-papier
+				</Button>
 			</div>
 			<div className={cx(classes.title)}>
 				<h1>{product.title}</h1>
@@ -108,8 +124,10 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 					<SideMenu
 						align="left"
+						aria-label="Menu latéral"
 						items={menuItems}
 						burgerMenuButtonText="Menu"
+						sticky
 					/>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
@@ -129,6 +147,12 @@ const useStyles = tss.create({
 	},
 	children: {
 		minHeight: '40rem'
+	},
+	tagContainer: {
+		display: 'flex'
+	},
+	copyBtn: {
+		boxShadow: 'none'
 	}
 });
 

@@ -16,12 +16,20 @@ export const entityRouter = router({
 				page: z.number().default(1),
 				isMine: z.boolean().optional(),
 				sort: z.string().optional(),
-				search: z.string().optional()
+				search: z.string().optional(),
+				userCanCreateProduct: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
 			const contextUser = ctx.session.user;
-			const { numberPerPage, page, search, sort, isMine } = input;
+			const {
+				numberPerPage,
+				page,
+				search,
+				sort,
+				isMine,
+				userCanCreateProduct
+			} = input;
 
 			let where: Prisma.EntityWhereInput = {};
 
@@ -89,6 +97,29 @@ export const entityRouter = router({
 						user_email: contextUser.email
 					}
 				};
+			}
+
+			if (userCanCreateProduct && contextUser.role !== 'admin') {
+				where.OR = [
+					{
+						adminEntityRights: {
+							some: {
+								user_email: contextUser.email
+							}
+						}
+					},
+					{
+						products: {
+							some: {
+								accessRights: {
+									some: {
+										user_email: contextUser.email
+									}
+								}
+							}
+						}
+					}
+				];
 			}
 
 			let orderBy: Prisma.EntityOrderByWithAggregationInput[] = [
@@ -209,7 +240,7 @@ export const entityRouter = router({
 					code: 'CONFLICT',
 					message: 'Entity with this name already exists'
 				});
-      
+
 			entity.name_formatted = removeAccents(entity.name as string);
 
 			const updatedEntity = await ctx.prisma.entity.update({

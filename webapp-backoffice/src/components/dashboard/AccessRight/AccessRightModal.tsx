@@ -25,6 +25,7 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: AccessRightModalType;
 	productId: number;
+	productName: string;
 	setIsModalSubmitted: React.Dispatch<React.SetStateAction<boolean>>;
 	currentAccessRight: AccessRightWithUsers | undefined;
 	setCurrentAccessRight: React.Dispatch<
@@ -39,6 +40,7 @@ const ButtonModal = (props: Props) => {
 		isOpen,
 		modalType,
 		productId,
+		productName,
 		currentAccessRight,
 		setIsModalSubmitted,
 		setCurrentAccessRight
@@ -98,11 +100,11 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'add':
-				return 'Inviter un porteur ou une porteuse';
+				return 'Inviter un administrateur';
 			case 'remove':
-				return 'Retirer un porteur ou une porteuse';
+				return "Retirer l'accès";
 			case 'reintegrate':
-				return 'Réintégrer un porteur ou une porteuse';
+				return 'Réintégrer un administrateur';
 			default:
 				return '';
 		}
@@ -115,7 +117,7 @@ const ButtonModal = (props: Props) => {
 					<div className={fr.cx('fr-pt-4v')}>
 						<Input
 							id="button-code"
-							label="Adresse mail du porteur"
+							label="Email"
 							state={errorStatus ? 'error' : 'default'}
 							stateRelatedMessage={
 								errorStatus == 409
@@ -127,26 +129,26 @@ const ButtonModal = (props: Props) => {
 								onChange: e => setEmail(e.target.value)
 							}}
 						/>
-						<div className={classes.infoWrapper}>
-							<i className={fr.cx('fr-info-text', 'fr-mt-0')}></i>
-							<p className={cx(fr.cx(), classes.infoText)}>
-								Si la personne a déjà un compte sur Je donne mon avis, elle va
-								avoir accès immédiatement à ce produit numérique. Si la personne
-								n’a pas encore de compte, elle reçoit un e-mail d’invitation à
-								l’adresse saisie.
-							</p>
-						</div>
 					</div>
 				);
 			case 'remove':
 				return (
 					<div className={fr.cx('fr-pt-4v')}>
-						<p>
-							Vous êtes sûr de vouloir retirer{' '}
-							{currentAccessRight?.user?.firstName}{' '}
-							{currentAccessRight?.user?.lastName} comme porteur ou porteuse de
-							ce produit numérique ?
-						</p>
+						{currentAccessRight?.user ? (
+							<p>
+								Souhaitez-vous vraiment retirer les droits d’administration de{' '}
+								<span className={cx(classes.boldText)}>
+									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+								</span>{' '}
+								pour <span className={cx(classes.boldText)}>{productName}</span>{' '}
+								?
+							</p>
+						) : (
+							<p>
+								Souhaitez-vous vraiment retirer les droits d’administration pour{' '}
+								<span className={cx(classes.boldText)}>{productName}</span> ?
+							</p>
+						)}
 					</div>
 				);
 			case 'reintegrate':
@@ -243,6 +245,9 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 		fontSize: '0.875rem',
 		lineHeight: '1.25rem',
 		marginBottom: 0
+	},
+	boldText: {
+		fontWeight: 'bold'
 	}
 }));
 

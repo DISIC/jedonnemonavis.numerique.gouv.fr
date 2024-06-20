@@ -69,7 +69,7 @@
       "label": "Overall, how was your experience?",
       "hint": "This field is required."
     },
-    "easy": {
+    "comprehension": {
       "label": "What did you think of the information and instructions provided?",
       "hint": "On a scale of 1 to 5, 1 is incomprehensible and 5 is very clear.",
       "hintLeft": "Incomprehensible",
@@ -119,6 +119,9 @@
         },
         {
           "label": "Others, specify"
+        },
+        {
+          "label": "I did not need help"
         }
       ]
     },
@@ -153,20 +156,6 @@
         },
         {
           "label": "No comment"
-        }
-      ]
-    },
-    "comprehension": {
-      "label": "What did you think of the language used?",
-      "options": [
-        {
-          "label": "Unclear, difficult to understand"
-        },
-        {
-          "label": "Neither easy nor difficult to understand"
-        },
-        {
-          "label": "Clear, easy to understand"
         }
       ]
     },

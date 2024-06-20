@@ -1,6 +1,7 @@
 import {
   CheckboxOption,
   Condition,
+  Feeling,
   FormField,
   Opinion,
 } from "@/src/utils/types";
@@ -12,7 +13,7 @@ import { ChangeEvent, SetStateAction, useEffect } from "react";
 import { SmileyInput } from "./SmileyInput";
 import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
-import { RadioInput } from "./RadioInput";
+import { MarkInput } from "./MarkInput";
 import { CheckboxInput } from "./CheckboxInput";
 import { YesNoInput } from "./YesNoInput";
 import { ArrayRadio } from "./ArrayRadio";
@@ -120,6 +121,7 @@ export const Field = (props: Props) => {
           label={t(field.label)}
           hint={field.hint ? t(field.hint) : undefined}
           name={field.name}
+          value={opinion[field.name] as number}
           onChange={(value) => {
             setOpinion({ ...opinion, [field.name]: field.values[value] });
           }}
@@ -154,12 +156,12 @@ export const Field = (props: Props) => {
       );
     case "radio":
       return (
-        <RadioInput
+        <MarkInput
           field={field}
           opinion={opinion}
           form={form}
           setOpinion={setOpinion}
-        ></RadioInput>
+        ></MarkInput>
       );
     case "input-textarea":
       return (

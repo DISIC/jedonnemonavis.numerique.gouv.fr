@@ -69,7 +69,7 @@
       "label": "No geral, como foi a sua experiência?",
       "hint": "Este campo é obrigatório."
     },
-    "easy": {
+    "comprehension": {
       "label": "O que achou das informações e instruções fornecidas?",
       "hint": "Numa escala de 1 a 5, onde 1 é incompreensível e 5 é muito claro.",
       "hintLeft": "Incompreensível",
@@ -119,6 +119,9 @@
         },
         {
           "label": "Outros, especificar"
+        },
+        {
+          "label": "Não precisei de ajuda"
         }
       ]
     },
@@ -153,20 +156,6 @@
         },
         {
           "label": "Não quero opinar"
-        }
-      ]
-    },
-    "comprehension": {
-      "label": "O que achou da linguagem utilizada?",
-      "options": [
-        {
-          "label": "Pouco clara, difícil de entender"
-        },
-        {
-          "label": "Nem fácil, nem difícil de entender"
-        },
-        {
-          "label": "Clara, fácil de entender"
         }
       ]
     },

@@ -1,20 +1,26 @@
-import BooleanQuestionViz from '@/src/components/dashboard/Stats/BooleanQuestionViz';
-import DetailsQuestionViz from '@/src/components/dashboard/Stats/DetailsQuestionViz';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
+import KPITile from '@/src/components/dashboard/Stats/KPITile';
+import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
-import { useStats } from '@/src/contexts/StatsContext';
+import { Loader } from '@/src/components/ui/Loader';
+import { SectionWrapper } from '@/src/pages/administration/dashboard/product/[id]/stats';
+import {
+	betaTestXwikiIds,
+	transformDateToFrenchReadable
+} from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
+import Head from 'next/head';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import ReviewAverageInterval from '@/src/components/dashboard/Stats/ReviewAverageInterval';
-import ReviewAverage from '@/src/components/dashboard/Stats/ReviewInterval';
-import { transformDateToFrenchReadable } from '@/src/utils/tools';
-import Input from '@codegouvfr/react-dsfr/Input';
-import { useState } from 'react';
 
 interface Props {
 	product: Product | null;
@@ -22,33 +28,8 @@ interface Props {
 	defaultEndDate: string;
 }
 
-const SectionWrapper = ({
-	title,
-	count,
-	noDataText = 'Aucune donnée',
-	children
-}: {
-	title: string;
-	count?: number;
-	noDataText?: string;
-	children: React.ReactNode;
-}) => {
-	const { classes, cx } = useStyles();
-
-	return (
-		<div className={cx(classes.wrapperGlobal, fr.cx('fr-mt-2w'))}>
-			<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
-			{count === 0 && (
-				<Alert title="" description={noDataText} severity="info" />
-			)}
-			{children}
-		</div>
-	);
-};
-
 const ProductStatPage = (props: Props) => {
 	const { product, defaultStartDate, defaultEndDate } = props;
-	const { statsTotals } = useStats();
 
 	const [startDate, setStartDate] = useState<string>(defaultStartDate);
 	const [endDate, setEndDate] = useState<string>(defaultEndDate);
@@ -74,15 +55,42 @@ const ProductStatPage = (props: Props) => {
 		trpc.review.getList.useQuery({
 			numberPerPage: 0,
 			page: 1,
-			product_id: product.id,
-			startDate: debouncedStartDate,
-			endDate: debouncedEndDate
+			product_id: product.id
 		});
 
-	const nbReviews = reviewsData?.metadata.count;
+	const {
+		data: reviewsDataWithFilters,
+		isLoading: isLoadingReviewsDataWithFilters
+	} = trpc.review.getList.useQuery({
+		numberPerPage: 0,
+		page: 1,
+		product_id: product.id,
+		start_date: debouncedStartDate,
+		end_date: debouncedEndDate
+	});
+
+	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
+		trpc.answer.countByFieldCode.useQuery({
+			product_id: product.id,
+			field_code: 'verbatim',
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
+		});
+
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbReviewsWithFilters =
+		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbVerbatims = dataNbVerbatims?.data || 0;
+	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
+		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
+		: 0;
 
 	const getStatsDisplay = () => {
-		if (nbReviews === undefined) {
+		if (
+			nbReviewsWithFilters === undefined ||
+			isLoadingReviewsDataWithFilters ||
+			isLoadingReviewsCount
+		) {
 			return (
 				<div className={fr.cx('fr-my-16w')}>
 					<Loader />
@@ -90,7 +98,7 @@ const ProductStatPage = (props: Props) => {
 			);
 		}
 
-		if (nbReviews === 0) {
+		if (nbReviewsWithFilters === 0) {
 			return (
 				<div className={fr.cx('fr-mt-10v')}>
 					<Alert
@@ -104,157 +112,115 @@ const ProductStatPage = (props: Props) => {
 
 		return (
 			<>
+				<ObservatoireStats
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+				/>
+				<div className={fr.cx('fr-mt-5w')}>
+					<h3>Participation</h3>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Avis"
+								kpi={nbReviewsWithFilters}
+								isLoading={isLoadingReviewsDataWithFilters}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
+							/>
+						</div>
+						<div className={fr.cx('fr-col-6')}>
+							<KPITile
+								title="Verbatims"
+								kpi={nbVerbatims}
+								isLoading={isLoadingNbVerbatims}
+								desc={
+									percetengeVerbatimsOfReviews
+										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
+										: undefined
+								}
+								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
+							/>
+						</div>
+						{/* <div className={fr.cx('fr-col-4')}>
+							<KPITile
+								title="Formulaires complets"
+								kpi={0}
+								desc="soit 0 % des répondants"
+								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+								hideLink
+								grey
+							/>
+						</div> */}
+					</div>
+				</div>
+				<AnswersChart
+					fieldCode="satisfaction"
+					productId={product.id}
+					startDate={debouncedStartDate}
+					endDate={debouncedEndDate}
+					total={nbReviewsWithFilters}
+				/>
 				<SectionWrapper
-					title="Satisfaction usagers"
-					count={statsTotals.satisfaction}
-					noDataText="Aucune donnée pour la satisfaction usagers"
+					title="Détails des réponses"
+					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarQuestionViz
+						fieldCode="comprehension"
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-					<ReviewAverageInterval
-						fieldCode="satisfaction"
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviewsWithFilters}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
-					<ReviewAverage
-						fieldCode="satisfaction"
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviewsWithFilters}
 						productId={product.id}
-						startDate={startDate}
-						endDate={endDate}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
 				<SectionWrapper
-					title="Facilité d'usage"
-					count={statsTotals.easy}
-					noDataText="Aucune donnée pour la facilité d'usage"
+					title="Détails des anciennes réponses"
+					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
+					total={nbReviewsWithFilters}
 				>
 					<SmileyQuestionViz
 						fieldCode="easy"
+						total={nbReviewsWithFilters}
+						productId={product.id}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+						required
+					/>
+					<BarMultipleQuestionViz
+						fieldCode="difficulties"
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Simplicité du langage"
-					count={statsTotals.comprehension}
-					noDataText="Aucune donnée pour la simplicité du langage"
-				>
-					<SmileyQuestionViz
-						fieldCode="comprehension"
-						productId={product.id}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Difficultés rencontrées"
-					count={statsTotals.difficulties}
-					noDataText="Aucune donnée pour les difficultés rencontrées"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.difficulties_details
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<BooleanQuestionViz
-								fieldCode="difficulties"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.difficulties_details !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<DetailsQuestionViz
-									fieldCodeMultiple="difficulties_details"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
-				</SectionWrapper>
-				<SectionWrapper
-					title="Aide joignable et efficace"
-					count={statsTotals.contact}
-					noDataText="Aucune donnée pour l'aide joignable et efficace"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.contact_reached
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<DetailsQuestionViz
-								fieldCodeMultiple="contact"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.contact_reached !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<BooleanQuestionViz
-									fieldCode="contact_reached"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
-					{statsTotals.contact_channels !== 0 && (
-						<DetailsQuestionViz
-							fieldCodeMultiple="contact_channels"
-							productId={product.id}
-							startDate={debouncedStartDate}
-							endDate={debouncedEndDate}
-						/>
-					)}
-				</SectionWrapper>
-				<SectionWrapper
-					title="Niveau d’autonomie"
-					count={statsTotals.help}
-					noDataText="Aucune donnée pour le niveau d'autonomie"
-				>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div
-							className={
-								statsTotals.help_details
-									? fr.cx('fr-col-6', 'fr-pr-6v')
-									: fr.cx('fr-col-12')
-							}
-						>
-							<BooleanQuestionViz
-								fieldCode="help"
-								productId={product.id}
-								startDate={debouncedStartDate}
-								endDate={debouncedEndDate}
-							/>
-						</div>
-						{statsTotals.help_details !== 0 && (
-							<div className={fr.cx('fr-col-6', 'fr-pr-6v')}>
-								<DetailsQuestionViz
-									fieldCodeMultiple="help_details"
-									productId={product.id}
-									startDate={debouncedStartDate}
-									endDate={debouncedEndDate}
-								/>
-							</div>
-						)}
-					</div>
 				</SectionWrapper>
 			</>
 		);
@@ -262,6 +228,13 @@ const ProductStatPage = (props: Props) => {
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-mb-10w')}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} | Statistiques | Je donne mon avis`}
+				/>
+			</Head>
 			<div className={fr.cx('fr-mt-5w')}>
 				<h1>{product.title}</h1>
 			</div>
@@ -269,9 +242,7 @@ const ProductStatPage = (props: Props) => {
 				Données recueillies en ligne, entre le{' '}
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
 				{transformDateToFrenchReadable(debouncedEndDate)}
-				{!!nbReviews
-					? `, auprès de ${statsTotals.satisfaction} internautes.`
-					: '.'}
+				{!!nbReviews ? `, auprès de ${nbReviewsWithFilters} internautes.` : '.'}
 			</p>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>

@@ -39,7 +39,9 @@ const ProductButtonCard = (props: Props) => {
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<p className={fr.cx('fr-mb-0')}>{button.title}</p>
-						<p className={fr.cx('fr-mb-0')}>{button.description}</p>
+						<p className={fr.cx('fr-mb-0', 'fr-hint-text')}>
+							{button.description}
+						</p>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 						<p className={fr.cx('fr-mb-0')}>
@@ -93,7 +95,10 @@ const ProductButtonCard = (props: Props) => {
 							</MenuItem> */}
 							</Menu>
 							{!button.isTest && (
-								<Button size="small" onClick={() => onButtonClick('install')}>
+								<Button
+									size="small"
+									onClick={() => onButtonClick('install', button)}
+								>
 									Installer
 								</Button>
 							)}

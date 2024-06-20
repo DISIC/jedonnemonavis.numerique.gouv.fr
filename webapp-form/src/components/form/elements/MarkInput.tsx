@@ -11,7 +11,7 @@ type Props = {
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
-export const RadioInput = (props: Props) => {
+export const MarkInput = (props: Props) => {
   const { field, opinion, setOpinion, form } = props;
   const { classes, cx } = useStyles({ nbItems: 5 });
 
@@ -38,7 +38,7 @@ export const RadioInput = (props: Props) => {
                       className={fr.cx("fr-sr-only")}
                       type="radio"
                       name={f.value.toString()}
-                      checked={opinion.easy === f.value}
+                      checked={opinion.comprehension === f.value}
                       onChange={() => {
                         setOpinion((prevOpinion) => ({
                           ...prevOpinion,
@@ -71,7 +71,7 @@ export const RadioInput = (props: Props) => {
 };
 
 const useStyles = tss
-  .withName(RadioInput.name)
+  .withName(MarkInput.name)
   .withParams<{ nbItems: number }>()
   .create(({ nbItems }) => ({
     smallText: {

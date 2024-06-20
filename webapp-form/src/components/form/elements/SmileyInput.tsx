@@ -1,13 +1,14 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { Feeling } from '@/src/utils/types';
-import { useTranslation } from 'next-i18next';
+import { fr } from "@codegouvfr/react-dsfr";
+import { tss } from "tss-react/dsfr";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Feeling } from "@/src/utils/types";
+import { useTranslation } from "next-i18next";
 
 type Props = {
   label: string;
   name: string;
+  value?: number;
   hint?: string;
   onChange: (smileySelected: Feeling) => void;
 };
@@ -20,29 +21,29 @@ type Smiley = {
 
 const smileys: Smiley[] = [
   {
-    value: 'bad',
-    img: '/assets/smileys/bad.svg',
-    imgSelected: '/assets/smileys/bad-selected.svg'
+    value: "bad",
+    img: "/Demarches/assets/smileys/bad.svg",
+    imgSelected: "/Demarches/assets/smileys/bad-selected.svg",
   },
   {
-    value: 'medium',
-    img: '/assets/smileys/medium.svg',
-    imgSelected: '/assets/smileys/medium-selected.svg'
+    value: "medium",
+    img: "/Demarches/assets/smileys/medium.svg",
+    imgSelected: "/Demarches/assets/smileys/medium-selected.svg",
   },
   {
-    value: 'good',
-    img: '/assets/smileys/good.svg',
-    imgSelected: '/assets/smileys/good-selected.svg'
-  }
+    value: "good",
+    img: "/Demarches/assets/smileys/good.svg",
+    imgSelected: "/Demarches/assets/smileys/good-selected.svg",
+  },
 ];
 
 export const SmileyInput = (props: Props) => {
   const { classes, cx } = useStyles({ nbItems: smileys.length });
-  const { label, name, hint, onChange } = props;
+  const { label, name, hint, onChange, value } = props;
   const { t } = useTranslation();
 
   const [smileySelected, setSmileySelected] = useState<Feeling | undefined>(
-    undefined
+    value ? smileys[value - 1].value : undefined
   );
 
   useEffect(() => {
@@ -52,22 +53,23 @@ export const SmileyInput = (props: Props) => {
   return (
     <div>
       <div className={cx(classes.smileysContainer)}>
-        <fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
-          <legend className={fr.cx('fr-fieldset__legend')}>
+        <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
+          <legend className={fr.cx("fr-fieldset__legend")}>
             {label}
             {hint && (
-              <span className={fr.cx('fr-hint-text', 'fr-mt-2v')}>{hint}</span>
+              <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hint}</span>
             )}
           </legend>
           <ul>
-            {smileys.map(smiley => (
+            {smileys.map((smiley) => (
               <li key={smiley.value}>
                 <input
                   id={`radio-${name}-${smiley.value}`}
-                  className={fr.cx('fr-sr-only')}
+                  className={fr.cx("fr-sr-only")}
                   type="radio"
                   name={name}
-                  onClick={() => {
+                  checked={smileySelected === smiley.value}
+                  onChange={() => {
                     setSmileySelected(smiley.value);
                   }}
                 />
@@ -101,53 +103,53 @@ const useStyles = tss
   .withParams<{ nbItems: number }>()
   .create(({ nbItems }) => ({
     smileysContainer: {
-      display: 'flex',
-      marginTop: fr.spacing('4v'),
-      ['input:checked + label']: {
-        borderColor: fr.colors.decisions.background.flat.blueFrance.default
+      display: "flex",
+      marginTop: fr.spacing("4v"),
+      ["input:checked + label"]: {
+        borderColor: fr.colors.decisions.background.flat.blueFrance.default,
       },
-      ['input:focus-visible + label']: {
-        outlineOffset: '2px',
-        outline: '2px solid #4D90FE'
-      }
+      ["input:focus-visible + label"]: {
+        outlineOffset: "2px",
+        outline: "2px solid #4D90FE",
+      },
     },
     smileyInput: {
-      width: '100%',
+      width: "100%",
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      padding: fr.spacing('3v'),
-      display: 'flex',
-      alignItems: 'center',
-      cursor: 'pointer',
+      padding: fr.spacing("3v"),
+      display: "flex",
+      alignItems: "center",
+      cursor: "pointer",
       img: {
-        marginRight: fr.spacing('2v')
+        marginRight: fr.spacing("2v"),
       },
-      ['&:hover']: {
-        borderColor: fr.colors.decisions.background.alt.grey.active
+      ["&:hover"]: {
+        borderColor: fr.colors.decisions.background.alt.grey.active,
       },
-      [fr.breakpoints.up('md')]: {
-        flexDirection: 'column',
-        width: '8rem',
-        padding: fr.spacing('1v'),
+      [fr.breakpoints.up("md")]: {
+        flexDirection: "column",
+        width: "8rem",
+        padding: fr.spacing("1v"),
         img: {
-          marginTop: fr.spacing('2v'),
-          marginRight: 0
-        }
-      }
+          marginTop: fr.spacing("2v"),
+          marginRight: 0,
+        },
+      },
     },
     fieldset: {
-      width: '100%',
+      width: "100%",
       ul: {
-        listStyle: 'none',
-        ...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
+        listStyle: "none",
+        ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
-        width: '100%'
+        width: "100%",
       },
-      [fr.breakpoints.up('md')]: {
-        width: 'initial',
+      [fr.breakpoints.up("md")]: {
+        width: "initial",
         ul: {
-          width: 'initial',
-          columns: nbItems
-        }
-      }
-    }
+          width: "initial",
+          columns: nbItems,
+        },
+      },
+    },
   }));

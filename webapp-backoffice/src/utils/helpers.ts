@@ -1,18 +1,7 @@
 export const FIELD_CODE_BOOLEAN_VALUES = [
 	{
-		slug: 'difficulties',
-		hideInDocs: true,
-		question: 'Avez-vous rencontré des difficultés ?'
-	},
-	{
-		slug: 'help',
-		hideInDocs: true,
-		question:
-			"Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?"
-	},
-	{
 		slug: 'contact_reached',
-		hideInDocs: true,
+		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
 		question:
 			"Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?"
 	}
@@ -25,31 +14,37 @@ export const FIELD_CODE_SMILEY_VALUES = [
 	},
 	{
 		slug: 'easy',
-		question:
-			"Selon les réponses suivantes, qu'est ce qui vous correspond le mieux :"
+		hideInDocs: true,
+		question: 'Était-ce facile à utiliser ?'
 	},
 	{
 		slug: 'comprehension',
-		hideInDocs: true,
-		question: "Qu'avez-vous pensé du langage utilisé ?"
+		question:
+			"Qu'avez-vous pensé des informations et des instructions fournies ?"
 	}
 ] as const;
 export const FIELD_CODE_DETAILS_VALUES = [
 	{
-		slug: 'difficulties_details',
+		slug: 'difficulties',
 		hideInDocs: true,
-		question: 'Quelles ont été ces difficultés ?'
+		question: 'Avez-vous rencontré des difficultés ?'
+	},
+	{
+		slug: 'help',
+		hideInDocs: true,
+		question: 'De quelle aide avez-vous eu besoin ?'
 	},
 	{
 		slug: 'contact_tried',
-		hint: 'Des sous-questions conditionnelles associées à cette question sont incluses dans le résultat.',
+		hint: 'Les sous-questions conditionnelles "contact_reached" et "contact_satisfaction" associées à cette question sont incluses dans le résultat.',
 		question:
 			'Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?'
 	},
 	{
 		slug: 'contact_satisfaction',
-		hideInDocs: true,
-		question: 'Comment s’est passé l’échange avec le service de la démarche ?'
+		hint: 'Cette question est une sous-question de "contact_tried", mais l\'indiquer dans votre requête permettra d\'aggréger les données.',
+		question:
+			"Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?"
 	},
 	{
 		slug: 'contact',
@@ -125,28 +120,8 @@ export const HELP_LABELS = [
 
 export const FILTER_LABELS = [
 	{
-		label: 'Verbatim',
-		value: 'needVerbatim',
-		type: 'checkbox'
-	},
-	{
-		label: 'Autre difficulté',
-		value: 'needOtherDifficulties',
-		type: 'checkbox'
-	},
-	{
-		label: 'Autre aide',
-		value: 'needOtherHelp',
-		type: 'checkbox'
-	},
-	{
 		label: 'Satisfaction',
 		value: 'satisfaction',
-		type: 'iconbox'
-	},
-	{
-		label: 'Facilité',
-		value: 'easy',
 		type: 'iconbox'
 	},
 	{
@@ -155,13 +130,8 @@ export const FILTER_LABELS = [
 		type: 'iconbox'
 	},
 	{
-		label: 'Difficultés',
-		value: 'difficulties',
-		type: 'select'
-	},
-	{
-		label: 'Aide',
-		value: 'help',
-		type: 'select'
+		label: 'Verbatim',
+		value: 'needVerbatim',
+		type: 'checkbox'
 	}
 ];

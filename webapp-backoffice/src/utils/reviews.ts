@@ -7,8 +7,8 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		mustHaveVerbatims,
 		search,
 		sort,
-		startDate,
-		endDate,
+		start_date,
+		end_date,
 		button_id,
 		filters
 	} = input;
@@ -16,21 +16,38 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
 		...(button_id && { button_id }),
-		...(endDate && {
+		...(end_date && {
 			created_at: {
-				...(startDate && { gte: new Date(startDate) }),
+				...(start_date && { gte: new Date(start_date) }),
 				lte: (() => {
-					const adjustedEndDate = new Date(endDate);
-					adjustedEndDate.setHours(23, 59, 59);
-					return adjustedEndDate;
+					const adjustedend_date = new Date(end_date);
+					adjustedend_date.setHours(23, 59, 59);
+					return adjustedend_date;
 				})()
 			}
 		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
-			OR: [{ answers: { some: { field_code: 'verbatim' } } }]
-		}),
-		...((filters && filters.needOtherHelp) && {
-			OR: [{ answers: { some: { field_code: 'help_details_verbatim' }}}]
+			OR: [
+				{
+					answers: {
+						some: {
+							AND: [
+								{ field_code: 'verbatim' },
+								end_date && {
+									created_at: {
+										...(start_date && { gte: new Date(start_date) }),
+										lte: (() => {
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
+										})()
+									}
+								}
+							]
+						}
+					}
+				}
+			]
 		}),
 		...(search && {
 			OR: [
@@ -39,7 +56,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ answer_text: { search: search.split(' ').join('&') } },
-								{ field_code: 'verbatim' }
+								{ field_code: 'verbatim' },
+								end_date && {
+									created_at: {
+										...(start_date && { gte: new Date(start_date) }),
+										lte: (() => {
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
+										})()
+									}
+								}
 							]
 						}
 					}
@@ -48,7 +75,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		})
 	};
 
-	let andConditions: Condition[] = [];
+	let andConditions: Prisma.ReviewWhereInput[] = [];
 
 	if (filters) {
 		const fields: {
@@ -64,20 +91,35 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		];
 		Object.keys(filters).map(key => {
 			if (filters[key] && filters[key].length > 0) {
-				let condition: Condition = {
+				let condition: Prisma.ReviewWhereInput = {
 					answers: {
 						some: {
-							field_code: fields.find(field => field.key === key)?.field as string,
-							...(['comprehension', 'satisfaction'].includes(key) && {
-								intention: {
-									in: filters[key] as AnswerIntention[]
+							AND: [
+								end_date && {
+									created_at: {
+										...(start_date && { gte: new Date(start_date) }),
+										lte: (() => {
+											const adjustedend_date = new Date(end_date);
+											adjustedend_date.setHours(23, 59, 59);
+											return adjustedend_date;
+										})()
+									}
+								},
+								{
+									field_code: fields.find(field => field.key === key)
+										?.field as string,
+									...(['satisfaction'].includes(key) && {
+										intention: {
+											in: filters[key] as AnswerIntention[]
+										}
+									}),
+									...(['comprehension'].includes(key) && {
+										answer_text: {
+											in: filters[key] as string[]
+										}
+									})
 								}
-							}),
-							...(['help'].includes(key) && {
-								answer_text: {
-									in: filters[key] as string[]
-								}
-							})
+							]
 						}
 					}
 				};
@@ -87,7 +129,8 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	}
 
 	if (andConditions.length) {
-		where.AND = andConditions;
+		if (Array.isArray(where.AND)) where.AND = where.AND.concat(andConditions);
+		else where.AND = andConditions;
 	}
 
 	let orderBy: Prisma.ReviewOrderByWithRelationAndSearchRelevanceInput[] = [

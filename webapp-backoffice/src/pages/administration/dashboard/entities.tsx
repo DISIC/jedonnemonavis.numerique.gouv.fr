@@ -2,6 +2,7 @@ import EntityCard from '@/src/components/dashboard/Entity/EntityCard';
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsModal';
 import EntitySearchModal from '@/src/components/dashboard/Entity/EntitySearchModal';
+import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
@@ -13,11 +14,14 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import Head from 'next/head';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
+	| { type: 'api'; entity: Entity }
 	| { type: 'edit'; entity: Entity };
 
 const entityRightsModal = createModal({
@@ -35,6 +39,11 @@ const entitySearchModal = createModal({
 	isOpenedByDefault: false
 });
 
+const apiKeyModal = createModal({
+	id: 'api-key-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoardEntities = () => {
 	const { cx, classes } = useStyles();
 	const { data: session } = useSession({ required: true });
@@ -43,6 +52,9 @@ const DashBoardEntities = () => {
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 	const [fromSearch, setFromSearch] = React.useState<boolean>(false);
+	const [newEntity, setNewEntity] = React.useState<Entity | undefined>(
+		undefined
+	);
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, _] = React.useState(10);
@@ -101,6 +113,8 @@ const DashBoardEntities = () => {
 				entityRightsModal.open();
 			} else if (type === 'edit') {
 				entityModal.open();
+			} else if (type === 'api') {
+				apiKeyModal.open();
 			}
 		}, 100);
 	};
@@ -122,6 +136,30 @@ const DashBoardEntities = () => {
 		}, 100);
 	};
 
+	const handleSubmit = (newEntity?: Entity) => {
+		refetchEntities();
+		setNewEntity(newEntity);
+	};
+
+	const getAlertText = () => {
+		return (
+			<p>
+				L'organisation est créée.{' '}
+				<span
+					className={cx(classes.inviteLink)}
+					onClick={() => {
+						handleModalEntityRightsOpening({
+							type: 'rights',
+							entity: newEntity
+						});
+					}}
+				>
+					Inviter des collègues.
+				</span>
+			</p>
+		);
+	};
+
 	useEffect(() => {
 		if (session?.user.role === 'admin') setIsMine(false);
 	}, [session?.user.role]);
@@ -130,9 +168,17 @@ const DashBoardEntities = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Organisations | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`Organisations | Je donne mon avis`}
+				/>
+			</Head>
 			{!!entities.length && (
 				<EntityRightsModal
 					modal={entityRightsModal}
+					fromSearch={fromSearch}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
 					onClose={() => {
@@ -143,19 +189,34 @@ const DashBoardEntities = () => {
 			<EntityModal
 				modal={entityModal}
 				entity={currentEntity}
-				onSubmit={refetchEntities}
+				onSubmit={newEntity => handleSubmit(newEntity)}
 			/>
 			<EntitySearchModal
 				modal={entitySearchModal}
 				onEntitySelected={onEntitySelected}
 				onCreate={onCreateEntity}
 			/>
+			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
+				{newEntity && (
+					<Alert
+						closable
+						onClose={function noRefCheck() {}}
+						severity={'success'}
+						className={fr.cx('fr-mb-4w')}
+						small
+						description={getAlertText()}
+					/>
+				)}
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<h1 className={fr.cx('fr-mb-0')}>Organisations</h1>
+						<h1 className={fr.cx('fr-mb-0')}>
+							{session.user.role === 'admin'
+								? 'Organisations'
+								: 'Vos organisations'}
+						</h1>
 					</div>
 					<div
 						className={cx(
@@ -173,7 +234,7 @@ const DashBoardEntities = () => {
 									entitySearchModal.open();
 								}}
 							>
-								Devenir administrateur
+								Administrer une autre organisation
 							</Button>
 						) : (
 							<Button
@@ -183,62 +244,69 @@ const DashBoardEntities = () => {
 								type="button"
 								onClick={onCreateEntity}
 							>
-								Créer une organisation
+								Ajouter une organisation
 							</Button>
 						)}
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<Select
-							label="Trier Par"
-							nativeSelectProps={{
-								name: 'my-select',
-								onChange: event => setFilter(event.target.value)
-							}}
-						>
-							<option value="name:asc">Nom A à Z</option>
-							<option value="created_at:desc">Date de création</option>
-							<option value="updated_at:desc">Date de mise à jour</option>
-						</Select>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
-						<form
-							className={cx(classes.searchForm)}
-							onSubmit={e => {
-								e.preventDefault();
-								setValidatedSearch(search);
-								setCurrentPage(1);
-							}}
-						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
-								<Input
-									label="Rechercher"
-									hideLabel
-									nativeInputProps={{
-										placeholder: 'Rechercher',
-										type: 'search',
-										value: search,
-										onChange: event => {
-											if (!event.target.value) {
-												setValidatedSearch('');
-											}
-											setSearch(event.target.value);
-										}
+					{(nbPages > 1 || search !== '') && (
+						<>
+							<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+								<Select
+									label="Trier Par"
+									nativeSelectProps={{
+										name: 'my-select',
+										onChange: event => setFilter(event.target.value)
 									}}
-								/>
-								<Button
-									priority="primary"
-									type="submit"
-									iconId="ri-search-2-line"
-									iconPosition="left"
 								>
-									Rechercher
-								</Button>
+									<option value="name:asc">Nom A à Z</option>
+									<option value="created_at:desc">Date de création</option>
+									<option value="updated_at:desc">Date de mise à jour</option>
+								</Select>
 							</div>
-						</form>
-					</div>
-					{session.user.role !== 'admin' && (
+							<div
+								className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}
+							>
+								<form
+									className={cx(classes.searchForm)}
+									onSubmit={e => {
+										e.preventDefault();
+										setValidatedSearch(search);
+										setCurrentPage(1);
+									}}
+								>
+									<div role="search" className={fr.cx('fr-search-bar')}>
+										<Input
+											label="Rechercher"
+											hideLabel
+											nativeInputProps={{
+												placeholder: 'Rechercher',
+												type: 'search',
+												value: search,
+												onChange: event => {
+													if (!event.target.value) {
+														setValidatedSearch('');
+													}
+													setSearch(event.target.value);
+												}
+											}}
+										/>
+										<Button
+											priority="primary"
+											type="submit"
+											iconId="ri-search-2-line"
+											iconPosition="left"
+										>
+											Rechercher
+										</Button>
+									</div>
+								</form>
+							</div>
+						</>
+					)}
+
+					{session.user.role !== 'admin' && false && (
 						<div
 							className={fr.cx(
 								'fr-col-12',
@@ -276,8 +344,8 @@ const DashBoardEntities = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
+						{nbPages > 1 && (
+							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 								<span className={fr.cx('fr-ml-0')}>
 									Organisation de{' '}
 									<span className={cx(classes.boldText)}>
@@ -292,8 +360,9 @@ const DashBoardEntities = () => {
 										{entitiesResult.metadata.count}
 									</span>
 								</span>
-							)}
-						</div>
+							</div>
+						)}
+
 						<div
 							className={cx(
 								entities.length === 0 ? classes.entitiesContainer : ''
@@ -371,10 +440,7 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			alignSelf: 'flex-end',
 			justifyContent: 'flex-end',
 			'.fr-btn': {
-				justifySelf: 'flex-end',
-				'&:first-of-type': {
-					marginRight: '1rem'
-				}
+				justifySelf: 'flex-end'
 			}
 		},
 		[fr.breakpoints.down('md')]: {
@@ -392,6 +458,11 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 			margin: 0,
 			fontWeight: 'bold'
 		}
+	},
+	inviteLink: {
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		textDecoration: 'underline',
+		cursor: 'pointer'
 	},
 	boldText: {
 		fontWeight: 'bold'

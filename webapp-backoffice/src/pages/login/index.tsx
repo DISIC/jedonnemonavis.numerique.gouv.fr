@@ -2,6 +2,7 @@ import { LoginForm } from '@/src/components/auth/LoginForm';
 import { AlertObservatoire } from '@/src/components/ui/AlertObservatoire';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import Head from 'next/head';
 import { tss } from 'tss-react/dsfr';
 
 export default function Login() {
@@ -9,6 +10,10 @@ export default function Login() {
 
 	return (
 		<div className={fr.cx('fr-container')}>
+			<Head>
+				<title>Login | Je donne mon avis</title>
+				<meta name="description" content="Login | Je donne mon avis" />
+			</Head>
 			<Breadcrumb
 				currentPageLabel="Connexion"
 				homeLinkProps={{
@@ -18,7 +23,6 @@ export default function Login() {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-					<h2 className={fr.cx('fr-mb-12v')}>Connexion</h2>
 					<AlertObservatoire />
 					<div
 						className={cx(

@@ -8,15 +8,24 @@ import { Field } from "../elements/Field";
 import { SmileyInput } from "../elements/SmileyInput";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 
 type Props = {
   product: Product;
   opinion: Opinion;
   onSubmit: (opinion: Opinion) => void;
+  isRateLimitReached: boolean;
+  setIsRateLimitReached: (value: boolean) => void;
 };
 
 export const FormFirstBlock = (props: Props) => {
-  const { onSubmit, product, opinion } = props;
+  const {
+    onSubmit,
+    product,
+    opinion,
+    isRateLimitReached,
+    setIsRateLimitReached,
+  } = props;
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation("common");
   const router = useRouter();
@@ -39,10 +48,6 @@ export const FormFirstBlock = (props: Props) => {
         onSubmit={(e) => {
           e.preventDefault();
           onSubmit(tmpOpinion);
-          router.push({
-            pathname: router.pathname,
-            query: { id: product.id, step: 0 },
-          });
         }}
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
         className={fr.cx("fr-mt-14v")}
@@ -57,8 +62,22 @@ export const FormFirstBlock = (props: Props) => {
             />
           </div>
         ))}
+        {isRateLimitReached && (
+          <Alert
+            closable
+            onClose={function noRefCheck() {
+              setIsRateLimitReached(false);
+            }}
+            severity="error"
+            title=""
+            description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
+          />
+        )}
         <div className={fr.cx("fr-mt-16v")}>
-          <Button type="submit" disabled={!tmpOpinion.satisfaction}>
+          <Button
+            type="submit"
+            disabled={!tmpOpinion.satisfaction || isRateLimitReached}
+          >
             {t("first_block.validate")}
           </Button>
         </div>

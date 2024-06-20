@@ -12,6 +12,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
+import Head from 'next/head';
 
 interface Props {
 	product: Product;
@@ -48,6 +49,13 @@ const ProductInformationPage = (props: Props) => {
 
 	return (
 		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Informations | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} | Informations | Je donne mon avis`}
+				/>
+			</Head>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -74,18 +82,24 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
-					<Tag
-						id="product-id"
-						small
+					<Tag id="product-id" small>
+						{`# ${product.id}`}
+					</Tag>
+					<Button
+						priority="tertiary"
+						type="button"
+						className={classes.copyBtn}
 						nativeButtonProps={{
+							title: `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
 							onClick: () => {
 								navigator.clipboard.writeText(product.id.toString());
 								setDisplayToast(true);
 							}
 						}}
 					>
-						{`#${product.id}`}
-					</Tag>
+						Copier dans le presse-papier
+					</Button>
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>
@@ -104,10 +118,6 @@ const ProductInformationPage = (props: Props) => {
 							</Tag>
 						))}
 					</div>
-				</div>
-				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Volumétrie par an</h4>
-					{product.volume ? product.volume : 'Non renseigné'}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Données statistiques publiques</h4>
@@ -144,6 +154,9 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 		display: 'flex',
 		flexWrap: 'wrap',
 		gap: fr.spacing('4v')
+	},
+	copyBtn: {
+		boxShadow: 'none'
 	}
 });
 

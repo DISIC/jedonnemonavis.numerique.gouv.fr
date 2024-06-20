@@ -1,13 +1,7 @@
+import { retrieveButtonName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { getSeverity, retrieveButtonName } from '@/src/utils/tools';
-import {
-	displayIntention,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats';
+import { ExtendedReview } from './interface';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 
 const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
@@ -30,8 +24,8 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					'fr-mb-1-5v'
 				)}
 			>
-				<div className={fr.cx('fr-col-6', 'fr-col-md-1')}>
-					<p className={cx(classes.subtitle)}>Horaire</p>
+				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+					<h2 className={cx(classes.subtitle)}>Horaire</h2>
 					<p className={cx(classes.content)}>
 						{review.created_at &&
 							new Date(review.created_at).getHours() +
@@ -40,107 +34,22 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 					</p>
 				</div>
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Identifiant</p>
+					<h2 className={cx(classes.subtitle)}>Identifiant</h2>
 					<p className={cx(classes.content)}>{review.form_id && review.id}</p>
 				</div>
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Source</p>
-					<div className={cx(classes.content)}>
-						{review.button_id ? (
-							<p className={cx(classes.badge)}>
-								{retrieveButtonName(review.button_id)}
-							</p>
-						) : (
-							<p className={cx(classes.badge)}>Pas de source</p>
-						)}
-					</div>
+					<h2 className={cx(classes.subtitle)}>Source</h2>
+					<p className={cx(classes.content)}>
+						{review.button_id
+							? retrieveButtonName(review.button_id)
+							: 'Pas de source'}
+					</p>
 				</div>
-				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Satisfaction</p>
-					<div className={cx(classes.content)}>
-						{review.satisfaction && (
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.satisfaction.intention || '')}
-							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									}}
-								/>
-								{displayIntention(review.satisfaction.intention ?? 'neutral')}
-							</Badge>
-						)}
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Facilité</p>
-					<div className={cx(classes.content)}>
-						{review.easy && (
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.easy.intention || '')}
-							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.easy.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.easy.intention ?? 'neutral'
-										})
-									}}
-								/>
-								{displayIntention(review.easy.intention ?? 'neutral')}
-							</Badge>
-						)}
-					</div>
-				</div>
-				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
-					<p className={cx(classes.subtitle)}>Langage</p>
-					<div className={cx(classes.content)}>
-						{review.comprehension && (
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.comprehension.intention || '')}
-							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.comprehension.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.comprehension.intention ?? 'neutral'
-										})
-									}}
-								/>
-								{displayIntention(review.comprehension.intention ?? 'neutral')}
-							</Badge>
-						)}
-					</div>
-				</div>
+				<ReviewCommonVerbatimLine
+					review={review}
+					type={'Line'}
+				></ReviewCommonVerbatimLine>
 			</div>
-			<ReviewCommonVerbatimLine
-				review={review}
-				type={'Verbatim'}
-			></ReviewCommonVerbatimLine>
 		</div>
 	);
 };
@@ -153,12 +62,12 @@ const useStyles = tss.create({
 		height: '100%'
 	},
 	subtitle: {
-		fontSize: 12,
+		...fr.typography[18].style,
 		fontWeight: 'bold',
 		marginBottom: 0
 	},
 	content: {
-		fontSize: 12,
+		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0
 	},

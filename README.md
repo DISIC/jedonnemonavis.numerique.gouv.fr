@@ -18,10 +18,10 @@ Démarrez les conteneurs Docker pour Elastic, Kibana et Postgres avec la command
 docker compose up -d
 ```
 
-Au premier run ELK, lancez cette commande pour initialiser le mot de passe du user "kibana_system" (remplacer {ELASTIC_PASSWORD} et {KIBANA_PASSWORD} par les mots de passe de votre environnement) :
+Au premier run ELK, lancez cette commande pour initialiser le mot de passe du user "kibana_system" (remplacer {ES_ADDON_PASSWORD} et {KIBANA_PASSWORD} par les mots de passe de votre environnement) :
 
 ```bash
-docker exec elasticsearch curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:{ELASTIC_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"{KIBANA_PASSWORD}\"}"
+docker exec elasticsearch curl -s -X POST --cacert config/certs/ca/ca.crt -u "elastic:{ES_ADDON_PASSWORD}" -H "Content-Type: application/json" https://elasticsearch:9200/_security/user/kibana_system/_password -d "{\"password\":\"{KIBANA_PASSWORD}\"}"
 ```
 
 Au premier run ELK, lancez cette suite de commande

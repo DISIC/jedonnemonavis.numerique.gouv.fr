@@ -8,13 +8,7 @@ import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
 import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
-import {
-  allFields,
-  primarySection,
-  secondSectionA,
-  steps_A,
-  steps_B,
-} from "../utils/form";
+import { allFields, steps_A, steps_B } from "../utils/form";
 import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
@@ -25,6 +19,16 @@ type JDMAFormProps = {
   product: Product;
 };
 
+export type FormStepNames =
+  | keyof Omit<
+      Opinion,
+      | "contact_tried"
+      | "contact_reached"
+      | "contact_satisfaction"
+      | "contact_tried_verbatim"
+    >
+  | "contact";
+
 export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
 
@@ -34,9 +38,41 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
+  const currentSteps =
+    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
+
+  const resetForm = () => {
+    setIsLoading(true);
+    if (router.isReady) {
+      const { step, ...queryWithoutStep } = router.query;
+      localStorage.removeItem("userId");
+      router.replace({
+        pathname: router.pathname,
+        query: { ...queryWithoutStep },
+      });
+      setIsLoading(false);
+    }
+  };
 
   const createReview = trpc.review.create.useMutation({
-    onSuccess: () => setIsFormSubmitted(true),
+    onSuccess: () => {
+      setIsRateLimitReached(false);
+      setIsLoading(false);
+    },
+    onError: (error) => {
+      if (error.data?.httpStatus === 429) {
+        localStorage.removeItem("userId");
+        setIsRateLimitReached(true);
+      }
+    },
+  });
+
+  const insertOrUpdateReview = trpc.review.insertOrUpdate.useMutation({
+    onSuccess: () => setIsLoading(false),
+    onError: (error) => {
+      if (error.data?.httpStatus === 404) resetForm();
+    },
   });
 
   const getSelectedOption = (
@@ -77,123 +113,161 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     }
   };
 
-  const handleSubmitReview = async (opinion: Opinion) => {
-    const answers: Prisma.AnswerCreateInput[] = Object.entries(opinion).reduce(
-      (accumulator, [key, value]) => {
-        if (["contact_reached", "contact_satisfaction"].includes(key)) {
-          if (Array.isArray(value)) {
-            value.map((ids) => {
-              const [parent_id, child_id] = ids.toString().split("_");
+  const formatAnswers = (
+    opinion: Partial<Opinion>
+  ): Prisma.AnswerCreateInput[] => {
+    return Object.entries(opinion).reduce((accumulator, [key, value]) => {
+      if (["contact_reached", "contact_satisfaction"].includes(key)) {
+        if (Array.isArray(value)) {
+          value.map((ids) => {
+            const [parent_id, child_id] = ids.toString().split("_");
 
-              const parentFieldInSection = allFields.find(
-                (field) => field.name === "contact_tried"
-              ) as FormField;
+            const parentFieldInSection = allFields.find(
+              (field) => field.name === "contact_tried"
+            ) as FormField;
 
-              const childFieldInSection = allFields.find(
-                (field) => field.name === key
-              ) as FormField;
+            const childFieldInSection = allFields.find(
+              (field) => field.name === key
+            ) as FormField;
 
-              if (
-                "options" in parentFieldInSection &&
-                "options" in childFieldInSection
-              ) {
-                const parentOption = parentFieldInSection.options.find(
-                  (o) => o.value === parseInt(parent_id)
-                );
-                const childOption = childFieldInSection.options.find(
-                  (o) => o.value === parseInt(child_id)
-                );
+            if (
+              "options" in parentFieldInSection &&
+              "options" in childFieldInSection
+            ) {
+              const parentOption = parentFieldInSection.options.find(
+                (o) => o.value === parseInt(parent_id)
+              );
+              const childOption = childFieldInSection.options.find(
+                (o) => o.value === parseInt(child_id)
+              );
 
-                if (parentOption && childOption) {
-                  accumulator = accumulator.map((answer) => {
-                    if (answer.answer_item_id === parentOption.value) {
-                      const existingChildCreations =
-                        answer.child_answers?.createMany?.data;
-                      return {
-                        ...answer,
-                        child_answers: {
-                          createMany: {
-                            data: [
-                              ...(Array.isArray(existingChildCreations)
-                                ? existingChildCreations
-                                : []),
-                              {
-                                field_code: childFieldInSection.name,
-                                field_label: t(childFieldInSection.label, {
-                                  lng: "fr",
-                                }) as string,
-                                kind: "radio",
-                                review_id: -1,
-                                answer_text: t(childOption.label, {
-                                  lng: "fr",
-                                }),
-                                intention: childOption.intention,
-                                answer_item_id: childOption.value,
-                              },
-                            ],
-                          },
+              if (parentOption && childOption) {
+                accumulator = accumulator.map((answer) => {
+                  if (answer.answer_item_id === parentOption.value) {
+                    const existingChildCreations =
+                      answer.child_answers?.createMany?.data;
+                    return {
+                      ...answer,
+                      child_answers: {
+                        createMany: {
+                          data: [
+                            ...(Array.isArray(existingChildCreations)
+                              ? existingChildCreations
+                              : []),
+                            {
+                              field_code: childFieldInSection.name,
+                              field_label: t(childFieldInSection.label, {
+                                lng: "fr",
+                              }) as string,
+                              kind: "radio",
+                              review_id: -1,
+                              answer_text: t(childOption.label, {
+                                lng: "fr",
+                              }),
+                              intention: childOption.intention,
+                              answer_item_id: childOption.value,
+                            },
+                          ],
                         },
-                      };
-                    }
-                    return answer;
-                  });
-                }
+                      },
+                    };
+                  }
+                  return answer;
+                });
               }
-            });
-          }
-        } else {
-          const fieldInSection = allFields.find(
-            (field) => field.name === key
-          ) as FormField;
+            }
+          });
+        }
+      } else {
+        const fieldInSection = allFields.find(
+          (field) => field.name === key
+        ) as FormField;
 
-          let tmpAnswer = {
-            field_code: fieldInSection.name,
-            field_label: t(fieldInSection.label, {
-              lng: "fr",
-            }) as string,
-            kind:
-              fieldInSection.kind === "smiley"
-                ? "radio"
-                : fieldInSection.kind !== "input-text" &&
-                    fieldInSection.kind !== "input-textarea"
-                  ? fieldInSection.kind
-                  : "text",
-            review: {},
-          } as Prisma.AnswerCreateInput;
+        let tmpAnswer = {
+          field_code: fieldInSection.name,
+          field_label: t(fieldInSection.label, {
+            lng: "fr",
+          }) as string,
+          kind:
+            fieldInSection.kind === "smiley"
+              ? "radio"
+              : fieldInSection.kind !== "input-text" &&
+                  fieldInSection.kind !== "input-textarea"
+                ? fieldInSection.kind
+                : "text",
+          review: {},
+        } as Prisma.AnswerCreateInput;
 
-          if (typeof value == "number") {
-            const selectedOption = getSelectedOption(fieldInSection, value);
+        if (typeof value == "number") {
+          const selectedOption = getSelectedOption(fieldInSection, value);
+          tmpAnswer.answer_text = selectedOption.label;
+          tmpAnswer.intention = selectedOption.intention;
+          tmpAnswer.answer_item_id = selectedOption.value;
+          accumulator.push(tmpAnswer);
+        } else if (typeof value == "string") {
+          tmpAnswer.answer_text = value;
+          tmpAnswer.intention = "neutral";
+          tmpAnswer.answer_item_id = 0;
+          accumulator.push(tmpAnswer);
+        } else if (Array.isArray(value)) {
+          value.map((value) => {
+            let selectedOption = getSelectedOption(fieldInSection, value);
             tmpAnswer.answer_text = selectedOption.label;
             tmpAnswer.intention = selectedOption.intention;
             tmpAnswer.answer_item_id = selectedOption.value;
-            accumulator.push(tmpAnswer);
-          } else if (typeof value == "string") {
-            tmpAnswer.answer_text = value;
-            tmpAnswer.intention = "neutral";
-            tmpAnswer.answer_item_id = 0;
-            accumulator.push(tmpAnswer);
-          } else if (Array.isArray(value)) {
-            value.map((value) => {
-              let selectedOption = getSelectedOption(fieldInSection, value);
-              tmpAnswer.answer_text = selectedOption.label;
-              tmpAnswer.intention = selectedOption.intention;
-              tmpAnswer.answer_item_id = selectedOption.value;
-              accumulator.push({ ...tmpAnswer });
-            });
-          }
+            accumulator.push({ ...tmpAnswer });
+          });
         }
+      }
 
-        return accumulator;
-      },
-      [] as Prisma.AnswerCreateInput[]
-    );
+      return accumulator;
+    }, [] as Prisma.AnswerCreateInput[]);
+  };
 
-    createReview.mutate({
-      review: {
-        product_id: product.id,
-        button_id: product.buttons[0].id,
-        form_id: 1,
-      },
+  const handleCreateReview = async (opinion: Partial<Opinion>) => {
+    const answers = formatAnswers(opinion);
+
+    const userIdExists = localStorage.getItem("userId");
+
+    if (!userIdExists) {
+      const userId = crypto.randomUUID();
+
+      localStorage.setItem("userId", userId);
+
+      await createReview.mutateAsync({
+        review: {
+          product_id: product.id,
+          button_id: product.buttons[0].id,
+          form_id: 2,
+          user_id: userId,
+        },
+        answers,
+      });
+    } else {
+      await handleInsertOrUpdateReview(opinion, "satisfaction");
+    }
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, step: 0 },
+    });
+  };
+
+  const handleInsertOrUpdateReview = async (
+    opinion: Partial<Opinion>,
+    currentStepName: FormStepNames
+  ) => {
+    const answers = formatAnswers(opinion);
+
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) return;
+
+    insertOrUpdateReview.mutate({
+      user_id: userId,
+      product_id: product.id,
+      button_id:
+        parseInt(router.query.button as string) || product.buttons[0].id,
+      step_name: currentStepName,
       answers,
     });
   };
@@ -211,14 +285,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }, [router.events]);
 
   React.useEffect(() => {
-    setIsLoading(true);
-    if (router.isReady) {
-      router.replace({
-        pathname: router.pathname,
-        query: { id: product.id },
-      });
-      setIsLoading(false);
-    }
+    resetForm();
   }, [router.isReady]);
 
   React.useEffect(() => {
@@ -226,7 +293,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       router.push(
         {
           pathname: router.pathname,
-          query: { id: product.id, step: currentStep },
+          query: { ...router.query, step: currentStep },
         },
         undefined,
         { shallow: true }
@@ -236,7 +303,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const [opinion, setOpinion] = useState<Opinion>({
     satisfaction: undefined,
-    easy: undefined,
+    comprehension: undefined,
     contact_tried: [],
     contact_tried_verbatim: undefined,
     contact_reached: [],
@@ -252,7 +319,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           <div className={classes.titleSuccess}>
             <Image
               alt="Service public +"
-              src="/assets/icon-check.svg"
+              src="/Demarches/assets/icon-check.svg"
               title="Icone - Merci pour votre aide"
               width={40}
               height={40}
@@ -293,7 +360,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <Image
                 className={classes.logo}
                 alt="Service public +"
-                src="/assets/services-plus.svg"
+                src="/Demarches/assets/services-plus.svg"
                 title="Service public + logo"
                 width={830}
                 height={250}
@@ -310,13 +377,29 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               opinion={opinion}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              steps={
-                process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
-              }
+              steps={currentSteps}
               onSubmit={(result, isLastStep) => {
                 setOpinion({ ...result });
+
+                const currentStepAnswerNames = currentSteps[
+                  currentStep
+                ].section.map((field) => field.name);
+
+                const currentStepValues = currentStepAnswerNames.reduce(
+                  (acc, name) => {
+                    acc[name] = result[name];
+                    return acc;
+                  },
+                  {} as any
+                );
+
+                handleInsertOrUpdateReview(
+                  currentStepValues,
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
+                );
+
                 if (isLastStep) {
-                  handleSubmitReview(result);
+                  localStorage.removeItem("userId");
                   setIsFormSubmitted(true);
                 }
               }}
@@ -325,12 +408,19 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             <FormFirstBlock
               opinion={opinion}
               product={product}
-              onSubmit={(tmpOpinion) => setOpinion({ ...tmpOpinion })}
+              isRateLimitReached={isRateLimitReached}
+              setIsRateLimitReached={setIsRateLimitReached}
+              onSubmit={(tmpOpinion) => {
+                setOpinion({ ...tmpOpinion });
+                handleCreateReview({ satisfaction: tmpOpinion.satisfaction });
+              }}
             />
           )}
         </>
       ) : (
-        <Loader size="md" />
+        <div className={fr.cx("fr-mt-10v")}>
+          <Loader size="md" />
+        </div>
       );
     }
   };
@@ -360,7 +450,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           )}
         >
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-12", "fr-col-lg-8")}>
+            <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
               <div className={cx(classes.formSection)}>{displayLayout()}</div>
             </div>
           </div>
@@ -372,31 +462,77 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
 export const getServerSideProps: GetServerSideProps<{
   product: Product;
-}> = async ({ params, locale }) => {
-  if (!params?.id) {
+}> = async ({ params, query, locale, res }) => {
+  if (!params?.id || isNaN(parseInt(params?.id as string))) {
     return {
       notFound: true,
     };
   }
 
   const productId = params.id as string;
+  const buttonId = query.button as string;
+  const xwikiButtonName = query.nd_source as string;
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_WEBAPP_FORM_URL}/api/open-api/product/${productId}`
-  );
+  const isXWikiLink = !buttonId;
 
-  if (response.ok) {
-    const { data: product } = (await response.json()) as { data: Product };
+  const prisma = new PrismaClient();
+  const product = await prisma.product.findUnique({
+    where: isXWikiLink
+      ? {
+          xwiki_id: parseInt(productId),
+          buttons: {
+            some: {},
+          },
+        }
+      : {
+          id: parseInt(productId),
+          buttons: {
+            some: {
+              id: { equals: parseInt(buttonId) },
+            },
+          },
+        },
+    include: {
+      buttons: isXWikiLink
+        ? true
+        : {
+            where: {
+              id: { equals: parseInt(buttonId) },
+            },
+          },
+    },
+  });
+  prisma.$disconnect();
 
-    if (!product) {
+  if (isXWikiLink) {
+    if (!product?.buttons.length)
       return {
         notFound: true,
       };
-    }
 
+    const sameName = product.buttons.find(
+      (b) => b.xwiki_title === xwikiButtonName
+    );
+    const nameButton = product.buttons.find((b) => b.xwiki_title === "button");
+
+    if (sameName) product.buttons = [sameName];
+    else if (nameButton) product.buttons = [nameButton];
+    else product.buttons = [product.buttons[0]];
+  }
+
+  if (product) {
     return {
       props: {
-        product,
+        product: {
+          ...product,
+          created_at: product.created_at.toString(),
+          updated_at: product.updated_at.toString(),
+          buttons: product.buttons.map((button: Button) => ({
+            ...button,
+            created_at: button.created_at.toString(),
+            updated_at: button.updated_at.toString(),
+          })),
+        },
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
     };
@@ -465,7 +601,7 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-        ...fr.spacing("padding", { topBottom: "8v", rightLeft: "18v" }),
+        ...fr.spacing("padding", { topBottom: "8v", rightLeft: "16v" }),
       },
     },
   }));

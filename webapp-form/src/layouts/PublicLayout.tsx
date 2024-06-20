@@ -46,7 +46,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             <Image
               className={classes.logo}
               alt="Service public +"
-              src="/assets/services-plus.svg"
+              src="/Demarches/assets/services-plus.svg"
               title="Service public + logo"
               width={830}
               height={250}
@@ -75,7 +75,16 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <main id="main" role="main">
         {children}
       </main>
-      <Footer accessibility="non compliant" />
+      <Footer
+        accessibility="partially compliant"
+        bottomItems={[
+          { text: "Données personnelles", linkProps: { href: "/cgu" } },
+          { text: "Contact", linkProps: { href: "/contact" } },
+        ]}
+        termsLinkProps={{
+          href: "/legalNotice",
+        }}
+      />
     </>
   );
 }

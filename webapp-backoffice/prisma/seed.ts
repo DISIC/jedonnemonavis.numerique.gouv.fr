@@ -26,10 +26,33 @@ async function main() {
 		case 'seedFormattedTitles':
 			await formatted_title();
 			break;
+		case 'whiteList':
+			await Promise.all(getWLDPromises());
+			break;
 		default:
 			await seed_users_products();
 			await formatted_title();
 	}
+}
+
+function getWLDPromises() {
+	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
+
+	whiteListedDomains.forEach(wld => {
+		promisesWLDs.push(
+			prisma.whiteListedDomain.upsert({
+				where: {
+					domain: wld.domain
+				},
+				update: {},
+				create: {
+					...wld
+				}
+			})
+		);
+	});
+
+	return promisesWLDs;
 }
 
 async function seed_users_products() {
@@ -95,19 +118,7 @@ async function seed_users_products() {
 			);
 		});
 
-		whiteListedDomains.forEach(wld => {
-			promisesWLDs.push(
-				prisma.whiteListedDomain.upsert({
-					where: {
-						domain: wld.domain
-					},
-					update: {},
-					create: {
-						...wld
-					}
-				})
-			);
-		});
+		const promisesWLDs = getWLDPromises();
 
 		Promise.all([...promisesProducts, ...promisesWLDs]).then(responses => {
 			let log: { [key: string]: User | Product | Entity | Domain | string } =

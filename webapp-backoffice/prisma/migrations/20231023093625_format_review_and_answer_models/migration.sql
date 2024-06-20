@@ -23,7 +23,6 @@ ALTER TABLE "Review" DROP CONSTRAINT "Review_user_id_fkey";
 
 -- AlterTable
 ALTER TABLE "Answer" DROP COLUMN "answer_score",
-DROP COLUMN "created_at",
 DROP COLUMN "question_code",
 DROP COLUMN "question_text",
 DROP COLUMN "updated_at",

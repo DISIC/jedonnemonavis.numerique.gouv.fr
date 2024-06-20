@@ -16,35 +16,35 @@ export const primarySection: FormField[] = [
 
 export const firstSectionA: FormField[] = [
   {
-    name: "easy",
+    name: "comprehension",
     kind: "radio",
-    label: "fields.easy.label",
-    hint: "fields.easy.hint",
-    hintLeft: "fields.easy.hintLeft",
-    hintRight: "fields.easy.hintRight",
+    label: "fields.comprehension.label",
+    hint: "fields.comprehension.hint",
+    hintLeft: "fields.comprehension.hintLeft",
+    hintRight: "fields.comprehension.hintRight",
     options: [
       {
-        label: "fields.easy.options.0.label",
+        label: "fields.comprehension.options.0.label",
         value: 4,
         intention: "very_bad",
       },
       {
-        label: "fields.easy.options.1.label",
+        label: "fields.comprehension.options.1.label",
         value: 5,
         intention: "bad",
       },
       {
-        label: "fields.easy.options.2.label",
+        label: "fields.comprehension.options.2.label",
         value: 6,
         intention: "medium",
       },
       {
-        label: "fields.easy.options.3.label",
+        label: "fields.comprehension.options.3.label",
         value: 7,
         intention: "good",
       },
       {
-        label: "fields.easy.options.4.label",
+        label: "fields.comprehension.options.4.label",
         value: 8,
         intention: "very_good",
       },
@@ -99,6 +99,12 @@ export const secondSectionA: FormField[] = [
         value: 16,
         intention: "neutral",
       },
+      {
+        label: "fields.contact_tried.options.8.label",
+        value: 17,
+        intention: "good",
+        isolated: true,
+      },
     ],
   },
   {
@@ -113,8 +119,28 @@ export const secondSectionA: FormField[] = [
     hint: "fields.contact_tried_verbatim.hint",
     label: "fields.contact_tried_verbatim.label",
   },
+  // {
+  //   name: "contact_tried",
+  //   kind: "checkbox",
+  //   label: "",
+  //   hint: "",
+  //   options: [
+  //     {
+  //       label: "fields.contact_tried.options.8.label",
+  //       value: 17,
+  //       intention: "neutral",
+  //       isolated: true,
+  //     },
+  //   ],
+  // },
   {
     name: "contact_reached",
+    conditions: [
+      {
+        name: "contact_tried",
+        values: [9, 10, 11, 12],
+      },
+    ],
     kind: "yes-no",
     label: "fields.contact_reached.label",
     options: [
@@ -130,7 +156,7 @@ export const secondSectionA: FormField[] = [
       },
     ],
     needed: [9, 10, 11, 12],
-    excluded: [13, 14, 15, 16],
+    excluded: [13, 14, 15, 16, 17],
   },
   {
     name: "contact_satisfaction",
@@ -161,6 +187,11 @@ export const secondSectionA: FormField[] = [
         label: "fields.contact_satisfaction.options.4.label",
         value: 23,
         intention: "very_good",
+      },
+      {
+        label: "fields.contact_satisfaction.options.5.label",
+        value: 24,
+        intention: "neutral",
       },
     ],
     needed: [9, 10, 11, 12],

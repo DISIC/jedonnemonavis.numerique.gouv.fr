@@ -10,9 +10,18 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import router from 'next/router';
+import NoButtonsPanel from '../Pannels/NoButtonsPanel';
+import NoReviewsPanel from '../Pannels/NoReviewsPanel';
+import {
+	formatNumberWithSpaces,
+	getColorFromIntention,
+	getReadableValue
+} from '@/src/utils/tools';
 
 interface Indicator {
 	title: string;
+	total: number;
 	value: number;
 	color: 'new' | 'success' | 'error' | 'info';
 	appreciation: AnswerIntention;
@@ -22,12 +31,14 @@ const ProductCard = ({
 	product,
 	userId,
 	entity,
-	isFavorite
+	isFavorite,
+	showFavoriteButton
 }: {
 	product: ProductWithButtons;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
+	showFavoriteButton: boolean;
 }) => {
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
@@ -35,48 +46,31 @@ const ProductCard = ({
 
 	const currentDate = new Date();
 
-	const { data: resultSatisfaction, isLoading: isLoadingSatisfaction } =
-		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
-			field_code: 'satisfaction',
-			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-				.toISOString()
-				.split('T')[0],
-			end_date: currentDate.toISOString().split('T')[0]
-		});
-	const satisfaction =
-		(resultSatisfaction?.metadata.total || 0) > 0
-			? resultSatisfaction?.metadata.average
-			: -1;
-
-	const { data: resultEasy, isLoading: isLoadingEasy } =
-		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
-			field_code: 'easy',
-			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-				.toISOString()
-				.split('T')[0],
-			end_date: currentDate.toISOString().split('T')[0]
-		});
-	const easy =
-		(resultEasy?.metadata.total || 0) > 0 ? resultEasy?.metadata.average : -1;
-
-	const { data: resultComprehension, isLoading: isLoadingComprehension } =
-		trpc.answer.getByFieldCode.useQuery({
-			product_id: product.id.toString(),
-			field_code: 'comprehension',
-			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-				.toISOString()
-				.split('T')[0],
-			end_date: currentDate.toISOString().split('T')[0]
-		});
-	const comprehension =
-		(resultComprehension?.metadata.total || 0) > 0
-			? resultComprehension?.metadata.average
-			: -1;
-
-	const isLoadingStats =
-		isLoadingSatisfaction || isLoadingEasy || isLoadingComprehension;
+	const {
+		data: resultStatsObservatoire,
+		isLoading: isLoadingStatsObservatoire,
+		isRefetching: isRefetchingStatsObservatoire
+	} = trpc.answer.getObservatoireStats.useQuery(
+		{
+			product_id: product.id.toString()
+		},
+		{
+			initialData: {
+				data: {
+					satisfaction: 0,
+					comprehension: 0,
+					contact: 0,
+					autonomy: 0
+				},
+				metadata: {
+					satisfaction_count: 0,
+					comprehension_count: 0,
+					contact_count: 0,
+					autonomy_count: 0
+				}
+			}
+		}
+	);
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -85,7 +79,7 @@ const ProductCard = ({
 			product_id: product.id
 		});
 
-	const nbReviews = reviewsData?.metadata.count;
+	const nbReviews = reviewsData?.metadata.countAll;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -101,19 +95,6 @@ const ProductCard = ({
 		}
 	});
 
-	const getColorFromIntention = (appreciation: AnswerIntention) => {
-		switch (appreciation) {
-			case 'bad':
-				return 'error';
-			case 'medium':
-				return 'new';
-			case 'good':
-				return 'success';
-		}
-
-		return 'info';
-	};
-
 	const diplayAppreciation = (appreciation: AnswerIntention) => {
 		switch (appreciation) {
 			case 'bad':
@@ -125,10 +106,14 @@ const ProductCard = ({
 		}
 	};
 
+	const { satisfaction, comprehension, contact, autonomy } =
+		resultStatsObservatoire.data;
+
 	const indicators: Indicator[] = [
 		{
 			title: 'Satisfaction',
-			value: satisfaction || 0,
+			total: resultStatsObservatoire.metadata.satisfaction_count,
+			value: Math.round(satisfaction * 10) / 10 || 0,
 			color:
 				satisfaction !== -1
 					? getColorFromIntention(getIntentionFromAverage(satisfaction || 0))
@@ -136,24 +121,40 @@ const ProductCard = ({
 			appreciation: getIntentionFromAverage(satisfaction || 0)
 		},
 		{
-			title: "Simplicité d'usage",
-			value: easy || 0,
-			color:
-				easy !== -1
-					? getColorFromIntention(getIntentionFromAverage(easy || 0))
-					: 'info',
-			appreciation: getIntentionFromAverage(easy || 0)
-		},
-		{
-			title: 'Facilité du langage',
-			value: comprehension || 0,
+			title: 'Simplicité du langage',
+			value: Math.round(comprehension * 10) / 10 || 0,
+			total: resultStatsObservatoire.metadata.comprehension_count,
 			color:
 				comprehension !== -1
 					? getColorFromIntention(getIntentionFromAverage(comprehension || 0))
 					: 'info',
 			appreciation: getIntentionFromAverage(comprehension || 0)
+		},
+		{
+			title: 'Aide joignable et efficace',
+			total: resultStatsObservatoire.metadata.contact_count,
+			value: Math.round(contact * 10) / 10 || 0,
+			color:
+				contact !== -1
+					? getColorFromIntention(getIntentionFromAverage(contact || 0))
+					: 'info',
+			appreciation: getIntentionFromAverage(contact || 0)
 		}
 	];
+
+	const handleButtonClick = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			query: { autoCreate: true }
+		});
+	};
+
+	const handleSendInvitation = () => {
+		router.push({
+			pathname: `/administration/dashboard/product/${product.id}/access`,
+			query: { autoInvite: true }
+		});
+	};
 
 	return (
 		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
@@ -165,18 +166,20 @@ const ProductCard = ({
 						'fr-grid-row--top'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
 						<Link
 							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={fr.cx('fr-card__title')}
+							className={cx(classes.productTitle)}
 						>
 							{product.title}
 						</Link>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
-						<p className={fr.cx('fr-mb-0')}>{entity?.name}</p>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
+							{entity?.name}
+						</p>
 					</div>
-					{session?.user.role !== 'user' && (
+					{showFavoriteButton && (
 						<div
 							className={cx(
 								fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
@@ -185,10 +188,20 @@ const ProductCard = ({
 						>
 							<Button
 								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-								title={isFavorite ? 'Supprimer le favori' : 'Ajouter aux favoris'}
+								title={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
+								aria-label={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
 								priority="tertiary"
 								size="small"
-								onClick={() => {
+								onClick={e => {
+									e.preventDefault();
 									if (isFavorite) {
 										deleteFavorite.mutate({
 											product_id: product.id,
@@ -205,45 +218,66 @@ const ProductCard = ({
 						</div>
 					)}
 
-					<div className={fr.cx('fr-col', 'fr-col-12')}>
-						<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-							{indicators.map((indicator, index) => (
-								<div
-									className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
-									key={index}
-								>
-									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-										{indicator.title}
-									</p>
-									{isLoadingStats ? (
-										<Skeleton
-											className={cx(classes.badgeSkeleton)}
-											variant="text"
-											width={130}
-											height={25}
-										/>
-									) : (
-										<Badge
-											noIcon
-											severity={!!nbReviews ? indicator.color : 'info'}
-											className={fr.cx('fr-text--sm')}
-										>
-											{!!nbReviews && indicator.value !== -1
-												? `${diplayAppreciation(indicator.appreciation)} ${indicator.value}/10`
-												: 'Aucune donnée'}
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+						{isLoadingStatsObservatoire || isRefetchingStatsObservatoire ? (
+							<Skeleton
+								className={cx(classes.cardSkeleton)}
+								variant="text"
+								width={'full'}
+								height={50}
+							/>
+						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
+						  session?.user.role === 'admin' ? (
+							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+								{indicators.map((indicator, index) => (
+									<div
+										className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+										key={index}
+									>
+										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+											{indicator.title}
+										</p>
+										{isLoadingStatsObservatoire ? (
+											<Skeleton
+												className={cx(classes.badgeSkeleton)}
+												variant="text"
+												width={130}
+												height={25}
+											/>
+										) : (
+											<Badge
+												noIcon
+												severity={
+													!!indicator.total ? indicator.color : undefined
+												}
+												className={fr.cx('fr-text--sm')}
+											>
+												{!!indicator.total
+													? `${diplayAppreciation(indicator.appreciation)} ${getReadableValue(indicator.value)}/10`
+													: 'Aucune donnée'}
+											</Badge>
+										)}
+									</div>
+								))}
+								{!isLoadingReviewsCount && nbReviews !== undefined && (
+									<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
+										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+											Nombre d'avis
+										</p>
+										<Badge noIcon severity="info">
+											{formatNumberWithSpaces(nbReviews)}
 										</Badge>
-									)}
-								</div>
-							))}
-							{!isLoadingReviewsCount && nbReviews !== undefined && (
-								<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-									<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>Nombre d'avis</p>
-									<Badge noIcon severity="info">
-										{nbReviews}
-									</Badge>
-								</div>
-							)}
-						</div>
+									</div>
+								)}
+							</div>
+						) : product.buttons.length === 0 ? (
+							<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+						) : (
+							<NoReviewsPanel
+								improveBtnClick={() => {}}
+								sendInvitationBtnClick={handleSendInvitation}
+							/>
+						)}
 					</div>
 				</div>
 			</div>
@@ -259,6 +293,19 @@ const useStyles = tss.withName(ProductCard.name).create({
 	badgeSkeleton: {
 		transformOrigin: '0',
 		transform: 'none'
+	},
+	cardSkeleton: {},
+	productTitle: {
+		fontSize: '18px',
+		fontWeight: 'bold',
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		backgroundImage: 'none',
+		'&:hover': {
+			textDecoration: 'underline'
+		}
+	},
+	entityName: {
+		color: '#666666'
 	}
 });
 

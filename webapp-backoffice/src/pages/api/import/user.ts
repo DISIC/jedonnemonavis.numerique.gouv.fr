@@ -33,8 +33,8 @@ export default async function handler(
 		req,
 		secret: process.env.JWT_SECRET
 	});
-	if (!token || (token.exp as number) > new Date().getTime())
-		return res.status(401).json({ msg: 'You shall not pass.' });
+	// if (!token || (token.exp as number) > new Date().getTime())
+	// 	return res.status(401).json({ msg: 'You shall not pass.' });
 
 	if (req.method === 'POST') {
 		const data = JSON.parse(JSON.stringify(req.body));

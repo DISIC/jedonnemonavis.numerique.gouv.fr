@@ -2,6 +2,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Entity } from '@prisma/client';
 import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -23,7 +24,7 @@ interface CustomModalProps {
 interface Props {
 	modal: CustomModalProps;
 	entity?: Entity;
-	onSubmit: () => void;
+	onSubmit: (entity?: Entity) => void;
 }
 
 type FormValues = Omit<Entity, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -77,6 +78,7 @@ const EntityModal = (props: Props) => {
 
 	const onSubmit: SubmitHandler<FormValues> = async data => {
 		const tmpEntity = data;
+		let currentEntity;
 
 		try {
 			if (entity && entity.id) {
@@ -85,9 +87,15 @@ const EntityModal = (props: Props) => {
 					entity: tmpEntity
 				});
 			} else {
-				await saveEntityTmp.mutateAsync({
+				const entity = await saveEntityTmp.mutateAsync({
 					...tmpEntity
 				});
+
+				currentEntity = entity.data;
+			}
+
+			if (currentEntity) {
+				props.onSubmit(currentEntity);
 			}
 		} catch (e) {
 			console.error(e);
@@ -102,6 +110,12 @@ const EntityModal = (props: Props) => {
 		}
 	}, [entity]);
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			reset();
+		}
+	});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -114,7 +128,7 @@ const EntityModal = (props: Props) => {
 			title={
 				entity && entity.id
 					? "Modifier l'organisation"
-					: 'Créer une organisation'
+					: 'Ajouter une organisation'
 			}
 			size="large"
 			buttons={[
@@ -131,7 +145,7 @@ const EntityModal = (props: Props) => {
 		>
 			<p className={fr.cx('fr-hint-text')}>
 				Les champs marqués d&apos;un{' '}
-				<span className={cx(classes.asterisk)}>*</span> sont obligatoires
+				<span className={cx(classes.asterisk)}>*</span> sont obligatoires.
 			</p>
 			<form id="entity-form">
 				<div className={fr.cx('fr-input-group')}>

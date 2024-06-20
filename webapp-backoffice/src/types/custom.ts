@@ -26,7 +26,11 @@ export type ElkSimpleAnswerResponse = {
 };
 
 export type Buckets = [
-	{ key: string; key_as_string: string; doc_count: number }
+	{
+		key: string;
+		key_as_string: string;
+		doc_count: number;
+	}
 ];
 
 export type BucketsInside = [

@@ -12,6 +12,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import { User } from '@prisma/client';
+import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -94,6 +95,10 @@ const DashBoardUsers = () => {
 
 	return (
 		<>
+			<Head>
+				<title>Utilisateurs | Je donne mon avis</title>
+				<meta name="description" content={`Utilisateurs | Je donne mon avis`} />
+			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
 				title="Supprimer un utilisateur"

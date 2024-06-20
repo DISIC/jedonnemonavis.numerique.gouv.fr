@@ -16,7 +16,11 @@ const nextConfig = {
 	transpilePackages: [
 		'@codegouvfr/react-dsfr',
 		'tss-react' // This is for MUI or if you use htts://tss-react.dev
-	]
+	],
+	assetPrefix: '/v2',
+	rewrites() {
+		return [{ source: '/v2/_next/:path*', destination: '/_next/:path*' }];
+	}
 };
 
 module.exports = nextConfig;

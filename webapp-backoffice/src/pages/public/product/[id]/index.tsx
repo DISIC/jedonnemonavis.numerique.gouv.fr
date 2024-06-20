@@ -7,12 +7,22 @@ const ProductPage = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
-	const { id, date_debut: startDate, date_fin: endDate } = context.query;
+	const {
+		id,
+		'date-debut': startDate,
+		'date-fin': endDate,
+		xwiki
+	} = context.query;
 	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
-		where: {
-			id: parseInt(id as string)
-		}
+		where:
+			xwiki === 'true'
+				? {
+						xwiki_id: parseInt(id as string)
+					}
+				: {
+						id: parseInt(id as string)
+					}
 	});
 
 	if (!product || !product.isPublic) {

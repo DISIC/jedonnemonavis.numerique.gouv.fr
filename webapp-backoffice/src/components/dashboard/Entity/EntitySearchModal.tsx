@@ -99,10 +99,6 @@ const EntitySearchModal = (props: Props) => {
 		value: entity
 	}));
 
-	const handleModalClose = () => {
-		modal.close();
-	};
-
 	const onSubmit = () => {
 		setCurrentPage(1);
 		setsHasSubmitedOnce(true);

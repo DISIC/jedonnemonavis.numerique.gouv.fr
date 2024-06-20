@@ -41,11 +41,26 @@ export const openAPIRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
-				(data: AccessRight) => {
-					return data.product_id;
+			const getAuthorizedProductIds = async (): Promise<number[]> => {
+				if (ctx.api_key.product_id) {
+					return [ctx.api_key.product_id];
 				}
-			);
+
+				if (ctx.api_key.entity_id) {
+					const entity = await ctx.prisma.entity.findFirst({
+						where: { id: ctx.api_key.entity_id },
+						include: { products: true }
+					});
+
+					if (entity && entity.products) {
+						return entity.products.map(prod => prod.id);
+					}
+				}
+
+				return [];
+			};
+
+			const authorized_products_ids: number[] = await getAuthorizedProductIds();
 
 			const products = await ctx.prisma.product.findMany({
 				where: {
@@ -55,6 +70,13 @@ export const openAPIRouter = router({
 				},
 				include: {
 					entity: true
+				}
+			});
+
+			await ctx.prisma.apiKeyLog.create({
+				data: {
+					apikey_id: ctx.api_key.id,
+					url: ctx.req.url || ''
 				}
 			});
 
@@ -142,7 +164,7 @@ export const openAPIRouter = router({
 					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
 				example: {
 					request: {
-						field_codes: ['satisfaction', 'easy', 'contact_tried'],
+						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0]
@@ -162,11 +184,26 @@ export const openAPIRouter = router({
 		.query(async ({ ctx, input }) => {
 			const { field_codes, product_ids, start_date, end_date } = input;
 
-			const authorized_products_ids: number[] = ctx.user_api.accessRights.map(
-				(data: AccessRight) => {
-					return data.product_id;
+			const getAuthorizedProductIds = async (): Promise<number[]> => {
+				if (ctx.api_key.product_id) {
+					return [ctx.api_key.product_id];
 				}
-			);
+
+				if (ctx.api_key.entity_id) {
+					const entity = await ctx.prisma.entity.findFirst({
+						where: { id: ctx.api_key.entity_id },
+						include: { products: true }
+					});
+
+					if (entity && entity.products) {
+						return entity.products.map(prod => prod.id);
+					}
+				}
+
+				return [];
+			};
+
+			const authorized_products_ids: number[] = await getAuthorizedProductIds();
 
 			const allFields = [
 				...FIELD_CODE_BOOLEAN_VALUES,
@@ -188,6 +225,13 @@ export const openAPIRouter = router({
 						: authorized_products_ids,
 				start_date,
 				end_date
+			});
+
+			await ctx.prisma.apiKeyLog.create({
+				data: {
+					apikey_id: ctx.api_key.id,
+					url: ctx.req.url || ''
+				}
 			});
 
 			return { data: result };

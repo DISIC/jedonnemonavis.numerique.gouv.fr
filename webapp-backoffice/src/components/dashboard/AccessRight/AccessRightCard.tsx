@@ -39,10 +39,9 @@ const ProductAccessCard = (props: Props) => {
 				)}
 			>
 				<div
-					className={fr.cx(
-						'fr-grid-row',
-						'fr-grid-row--gutters',
-						'fr-grid-row--middle'
+					className={cx(
+						fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--middle'),
+						classes.rowCard
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
@@ -59,85 +58,91 @@ const ProductAccessCard = (props: Props) => {
 								: accessRight?.user_email_invite}
 						</span>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
-						<Badge
-							noIcon
-							severity={
-								accessRight.user !== null && accessRight.status === 'carrier'
-									? 'success'
-									: 'info'
-							}
-							className={cx(
-								classes.badge,
-								accessRight.status === 'removed'
-									? classes.badgeStatusRemoved
-									: ''
-							)}
-						>
-							{accessRight.user === null
-								? 'Invité'
-								: accessRight.status === 'carrier'
-									? 'Porteur'
-									: 'Retiré'}
-						</Badge>
-					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
-						<Button
-							id="button-options-access-right"
-							aria-controls={menuOpen ? 'option-menu' : undefined}
-							aria-haspopup="true"
-							aria-expanded={menuOpen ? 'true' : undefined}
-							priority="tertiary"
-							className={menuOpen ? classes.buttonOptionsOpen : ''}
-							onClick={handleClick}
-							disabled={accessRight.user_email === session?.user?.email}
-							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
-							iconPosition="right"
-							size="small"
-						>
-							Options
-						</Button>
-						<Menu
-							id="option-menu"
-							open={menuOpen}
-							anchorEl={anchorEl}
-							onClose={handleClose}
-							MenuListProps={{
-								'aria-labelledby': 'button-options-access-right'
-							}}
-						>
-							{accessRight.status === 'carrier' && (
-								<MenuItem
-									onClick={() => {
-										onButtonClick('remove', accessRight);
-										handleClose();
+
+					<div
+						className={cx(
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
+							classes.optionsDropdown
+						)}
+					>
+						{accessRight.status === 'carrier' && accessRight.user !== null && (
+							<Button
+								id="button-remove-access-right"
+								aria-haspopup="true"
+								aria-expanded={menuOpen ? 'true' : undefined}
+								priority="tertiary"
+								onClick={() => {
+									onButtonClick('remove', accessRight);
+								}}
+								disabled={accessRight.user_email === session?.user?.email}
+								size="small"
+							>
+								Retirer l&apos;accès
+							</Button>
+						)}
+						{accessRight.user === null && (
+							<>
+								<Button
+									id="button-options-access-right"
+									aria-controls={menuOpen ? 'option-menu' : undefined}
+									aria-haspopup="true"
+									aria-expanded={menuOpen ? 'true' : undefined}
+									priority="tertiary"
+									className={menuOpen ? classes.buttonOptionsOpen : ''}
+									onClick={handleClick}
+									disabled={accessRight.user_email === session?.user?.email}
+									iconId={
+										menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
+									}
+									iconPosition="right"
+									size="small"
+								>
+									Options
+								</Button>
+								<Menu
+									id="option-menu"
+									open={menuOpen}
+									anchorEl={anchorEl}
+									onClose={handleClose}
+									MenuListProps={{
+										'aria-labelledby': 'button-options-access-right'
 									}}
 								>
-									Retirer son droit d'accès
-								</MenuItem>
-							)}
-							{accessRight.status === 'carrier' &&
-								accessRight.user === null && (
-									<MenuItem
-										onClick={() => {
-											onButtonClick('resend-email', accessRight);
-											handleClose();
-										}}
-									>
-										Renvoyer l'e-mail d'invitation
-									</MenuItem>
-								)}
-							{accessRight.status === 'removed' && (
-								<MenuItem
-									onClick={() => {
-										onButtonClick('reintegrate', accessRight);
-										handleClose();
-									}}
-								>
-									Rétablir son droit d'accès
-								</MenuItem>
-							)}
-						</Menu>
+									{accessRight.status === 'carrier' &&
+										accessRight.user === null && (
+											<MenuItem
+												onClick={() => {
+													onButtonClick('resend-email', accessRight);
+													handleClose();
+												}}
+											>
+												Renvoyer l'invitation
+											</MenuItem>
+										)}
+
+									{accessRight.status === 'carrier' && (
+										<MenuItem
+											onClick={() => {
+												onButtonClick('remove', accessRight);
+												handleClose();
+											}}
+										>
+											Retirer l'accès
+										</MenuItem>
+									)}
+									{accessRight.status === 'removed' && (
+										<MenuItem
+											onClick={() => {
+												onButtonClick('reintegrate', accessRight);
+												handleClose();
+											}}
+										>
+											Rétablir l'accès
+										</MenuItem>
+									)}
+								</Menu>
+							</>
+						)}
 					</div>
 				</div>
 			</div>
@@ -148,6 +153,9 @@ const ProductAccessCard = (props: Props) => {
 const useStyles = tss.create({
 	cardStatusRemoved: {
 		backgroundColor: fr.colors.decisions.background.disabled.grey.default
+	},
+	rowCard: {
+		justifyContent: 'space-between'
 	},
 	badge: {
 		display: 'block',
@@ -164,6 +172,10 @@ const useStyles = tss.create({
 	},
 	userEmail: {
 		wordWrap: 'break-word'
+	},
+	optionsDropdown: {
+		display: 'flex',
+		justifyContent: 'flex-end'
 	}
 });
 
