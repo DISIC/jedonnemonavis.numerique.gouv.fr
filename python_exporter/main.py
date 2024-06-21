@@ -54,15 +54,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b"Export process initiated")
 
 def run_server():
-    with socketserver.TCPServer(("", 9000), Handler) as httpd:
-        print("Serving on port 9000")
+    with socketserver.TCPServer(("", 8080), Handler) as httpd:
+        print("Serving on port 8080")
         httpd.serve_forever()
 
 def call_self_every_minute():
     while True:
         time.sleep(60)
         try:
-            response = requests.get("http://localhost:9000")
+            response = requests.get("http://localhost:8080")
             print("Self call response:", response.status_code)
         except requests.exceptions.RequestException as e:
             print("Failed to call self:", e)
@@ -218,7 +218,7 @@ def main():
     
     # Check the number of exports currently being processed
     concurrency_check_query = """
-    SELECT COUNT(*) FROM public."Export" WHERE status = 'processing'::\"StatusExport\"
+    SELECT COUNT(*) FROM public."Export" WHERE status = 'processing'::"StatusExport"
     """
 
     # Execute the query and fetch the results
@@ -243,7 +243,7 @@ def main():
     FROM public."Export" e
     JOIN public."User" u ON e.user_id = u.id
     JOIN public."Product" p ON e.product_id = p.id
-    WHERE e.status = 'idle'::\"StatusExport\"
+    WHERE e.status = 'idle'::"StatusExport"
     ORDER BY e.created_at ASC
     LIMIT 1
     """
@@ -256,7 +256,7 @@ def main():
         # Update the status and startDate of the selected export to 'processing'
         start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         update_status_query = """
-        UPDATE public."Export" SET status = 'processing'::\"StatusExport\", \"startDate\" = %s WHERE id = %s
+        UPDATE public."Export" SET status = 'processing'::"StatusExport", "startDate" = %s WHERE id = %s
         """
         execute_query(conn, update_status_query, (start_date, export_id))
         
@@ -403,13 +403,19 @@ def main():
 
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """
-                UPDATE public."Export" SET status = 'done'::\"StatusExport\", \"endDate\" = %s, link = %s WHERE id = %s
+                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s WHERE id = %s
                 """
                 execute_query(conn, update_query, (end_date, download_link, export_id))
     else:
         print("Aucun export à traiter.")
 
     print('------- END EXPORT -------')
+
+def app(environ, start_response):
+    """Simplified application callable for uWSGI"""
+    start_response('200 OK', [('Content-Type', 'text/plain')])
+    main()
+    return [b"Export process initiated"]
 
 if __name__ == "__main__":
     server_thread = threading.Thread(target=run_server)
