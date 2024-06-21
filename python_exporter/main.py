@@ -23,7 +23,7 @@ load_dotenv()
 
 # Vérifier la présence des variables d'environnement
 required_env_vars = [
-    'POSTGRESQL_ADDON_URI', 'PAGE_SIZE', 
+    'POSTGRESQL_ADDON_URI', 'PAGE_SIZE', 'CONCURRENCY_LIMIT'
     'CELLAR_ADDON_HOST', 'CELLAR_ADDON_KEY_ID', 'CELLAR_ADDON_KEY_SECRET', 'BUCKET_NAME',
     'NODEMAILER_HOST', 'NODEMAILER_PORT', 'NODEMAILER_FROM', 'MAILPACE_API_KEY'
 ]
