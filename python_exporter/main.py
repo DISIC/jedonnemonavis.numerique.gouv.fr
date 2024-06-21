@@ -1,3 +1,8 @@
+import http.server
+import socketserver
+import threading
+import time
+import requests
 import boto3
 import psycopg2
 from psycopg2 import sql
@@ -18,23 +23,15 @@ load_dotenv()
 
 # Vérifier la présence des variables d'environnement
 required_env_vars = [
-    'DBNAME', 'DBUSER', 'DBPASSWORD', 'DBHOST', 'DBPORT', 'PAGE_SIZE', 
+    'POSTGRESQL_ADDON_URI', 'PAGE_SIZE', 
     'CELLAR_ADDON_HOST', 'CELLAR_ADDON_KEY_ID', 'CELLAR_ADDON_KEY_SECRET', 'BUCKET_NAME',
-    'SMTP_SERVER', 'SMTP_PORT', 'SMTP_USERNAME', 'SMTP_PASSWORD', 
-    'EMAIL_FROM', 'EMAIL_FROM_NAME', 'EMAIL_SUBJECT'
+    'NODEMAILER_HOST', 'NODEMAILER_PORT', 'NODEMAILER_FROM', 'MAILPACE_API_KEY'
 ]
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
     raise EnvironmentError(f"Les variables d'environnement suivantes sont manquantes: {', '.join(missing_vars)}")
 
-conn_params = {
-    'dbname': os.getenv('DBNAME'),
-    'user': os.getenv('DBUSER'),
-    'password': os.getenv('DBPASSWORD'),
-    'host': os.getenv('DBHOST'),
-    'port': os.getenv('DBPORT')
-}
-
+POSTGRESQL_ADDON_URI = os.getenv('POSTGRESQL_ADDON_URI')
 PAGE_SIZE = int(os.getenv('PAGE_SIZE'))
 CONCURRENCY_LIMIT = int(os.getenv('CONCURRENCY_LIMIT'))
 
@@ -43,17 +40,36 @@ CELLAR_ADDON_KEY_ID = os.getenv('CELLAR_ADDON_KEY_ID')
 CELLAR_ADDON_KEY_SECRET = os.getenv('CELLAR_ADDON_KEY_SECRET')
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 
-SMTP_SERVER = os.getenv('SMTP_SERVER')
-SMTP_PORT = int(os.getenv('SMTP_PORT'))
-SMTP_USERNAME = os.getenv('SMTP_USERNAME')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
-EMAIL_FROM = os.getenv('EMAIL_FROM')
-EMAIL_FROM_NAME = os.getenv('EMAIL_FROM_NAME')
-EMAIL_SUBJECT = os.getenv('EMAIL_SUBJECT')
+NODEMAILER_HOST = os.getenv('NODEMAILER_HOST')
+NODEMAILER_PORT = int(os.getenv('NODEMAILER_PORT'))
+NODEMAILER_FROM = os.getenv('NODEMAILER_FROM')
+MAILPACE_API_KEY = os.getenv('MAILPACE_API_KEY')
 
-def create_connection(params):
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        main()
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Export process initiated")
+
+def run_server():
+    with socketserver.TCPServer(("", 8080), Handler) as httpd:
+        print("Serving on port 8080")
+        httpd.serve_forever()
+
+def call_self_every_minute():
+    while True:
+        time.sleep(60)
+        try:
+            response = requests.get("http://localhost:8080")
+            print("Self call response:", response.status_code)
+        except requests.exceptions.RequestException as e:
+            print("Failed to call self:", e)
+
+def create_connection():
     try:
-        conn = psycopg2.connect(**params)
+        conn = psycopg2.connect(POSTGRESQL_ADDON_URI)
         print("Connexion BDD réussie")
         return conn
     except Exception as e:
@@ -110,9 +126,9 @@ def sanitize_filename(filename):
 
 def send_email(to_email, download_link):
     msg = MIMEMultipart('alternative')
-    msg['From'] = str(Header(EMAIL_FROM_NAME, 'utf-8'))
+    msg['From'] = str(Header(NODEMAILER_FROM, 'utf-8'))
     msg['To'] = to_email
-    msg['Subject'] = str(Header(EMAIL_SUBJECT, 'utf-8'))
+    msg['Subject'] = str(Header('Votre export est prêt', 'utf-8'))
 
     text = f"Bonjour,\n\nVotre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
     html = f"""\
@@ -137,11 +153,11 @@ def send_email(to_email, download_link):
     msg.attach(part2)
 
     try:
-        server = smtplib.SMTP(SMTP_SERVER, SMTP_PORT)
+        server = smtplib.SMTP(NODEMAILER_HOST, NODEMAILER_PORT)
         server.starttls()
-        server.login(SMTP_USERNAME, SMTP_PASSWORD)
+        server.login(MAILPACE_API_KEY, MAILPACE_API_KEY)
         text = msg.as_string()
-        server.sendmail(EMAIL_FROM, to_email, text)
+        server.sendmail(NODEMAILER_FROM, to_email, text)
         server.quit()
         print(f"Email envoyé avec succès à {to_email}")
     except Exception as e:
@@ -196,7 +212,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
 
 def main():
     print('------ START EXPORT ------')
-    conn = create_connection(conn_params)
+    conn = create_connection()
     if not conn:
         return
     
@@ -396,4 +412,8 @@ def main():
     print('------- END EXPORT -------')
 
 if __name__ == "__main__":
-    main()
+    server_thread = threading.Thread(target=run_server)
+    server_thread.daemon = True
+    server_thread.start()
+    
+    call_self_every_minute()
