@@ -54,15 +54,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(b"Export process initiated")
 
 def run_server():
-    with socketserver.TCPServer(("", 8080), Handler) as httpd:
-        print("Serving on port 8080")
+    with socketserver.TCPServer(("", 9000), Handler) as httpd:
+        print("Serving on port 9000")
         httpd.serve_forever()
 
 def call_self_every_minute():
     while True:
         time.sleep(60)
         try:
-            response = requests.get("http://localhost:8080")
+            response = requests.get("http://localhost:9000")
             print("Self call response:", response.status_code)
         except requests.exceptions.RequestException as e:
             print("Failed to call self:", e)
