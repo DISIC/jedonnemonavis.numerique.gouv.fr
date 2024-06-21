@@ -100,6 +100,52 @@ const BarMultipleQuestionViz = ({
 		return returnValue;
 	});
 
+	// DATA FOR TABLE
+	const dataTable = formatedFieldCodeData.flatMap(item => {
+		return Object.entries(item)
+			.filter(([key, value]) => key !== 'name')
+			.map(([key, value]) => ({
+				name: item.name,
+				value: value as number,
+				'Pourcentage de réponses':
+					total !== 0 ? Math.round(((value as number) / total) * 100) : 0
+			}));
+	});
+
+	// DATA FOR TABLE INTERVAL
+	interface FormattedData {
+		name: string;
+		data: { name: string; value: number }[];
+	}
+
+	const transformData = (data: any): FormattedData[] => {
+		const formattedData: FormattedData[] = [];
+
+		Object.keys(data).forEach(interval => {
+			const returnValue = {
+				name: interval,
+				data: [] as { name: string; value: number }[]
+			};
+
+			data[interval].forEach((bucket: any) => {
+				const newData = {
+					name: bucket.answer_text,
+					value: bucket.doc_count
+				};
+
+				returnValue.data.push(newData);
+			});
+
+			formattedData.push(returnValue);
+		});
+
+		return formattedData;
+	};
+
+	const tableDataInterval: FormattedData[] = transformData(
+		resultFieldCodeInterval.data
+	);
+
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
@@ -117,14 +163,16 @@ const BarMultipleQuestionViz = ({
 		>
 			<GlobalChart
 				title="Répartition des réponses"
-				data={formatedFieldCodeData}
+				data={dataTable}
+				tableHeaders={['Nombre de réponses', 'Pourcentage de réponses']}
 			>
 				<BarVerticalChart data={formatedFieldCodeData} />
 			</GlobalChart>
 			<GlobalChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
-				data={formatedFieldCodeDataPerInterval}
+				tableHeaders={tableDataInterval.map(data => data.name)}
+				intervalData={tableDataInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

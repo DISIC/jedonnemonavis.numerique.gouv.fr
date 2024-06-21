@@ -78,6 +78,34 @@ const BarQuestionViz = ({
 		{ initialData: { data: [] } }
 	);
 
+	interface CountByFieldCode {
+		name: string;
+		value: number;
+	}
+
+	interface Data {
+		name: string;
+		value: number;
+	}
+
+	interface IntervalData {
+		name: string;
+		data: Data[];
+	}
+
+	const transformCountByFieldCode = (
+		data: CountByFieldCode[]
+	): IntervalData[] => {
+		return data.map(item => ({
+			name: item.name,
+			data: [{ name: '', value: item.value }]
+		}));
+	};
+
+	const intervalData: IntervalData[] = transformCountByFieldCode(
+		countByFieldCodePerMonth
+	);
+
 	if (isLoading || isLoadingCountByFieldCodePerMonth || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
@@ -96,15 +124,16 @@ const BarQuestionViz = ({
 			<GlobalChart
 				title="Répartition des réponses"
 				data={formatedFieldCodeData}
-				labelX="Nombre de réponses"
+				singleRowLabel="Nombre de réponses"
 			>
 				<BarChart data={formatedFieldCodeData} />
 			</GlobalChart>
 			<GlobalChart
 				title="Evolution des réponses"
 				total={resultFieldCode.metadata.total}
-				data={countByFieldCodePerMonth}
-				labelX="Score moyen"
+				intervalData={intervalData}
+				tableHeaders={intervalData.map(data => data.name)}
+				singleRowLabel="Score moyen"
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}

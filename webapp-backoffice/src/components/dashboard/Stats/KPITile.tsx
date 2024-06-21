@@ -32,6 +32,10 @@ export const KPITile = (props: KPITileProps) => {
 
 	const { Link } = getLink();
 
+	const kpiFormatted = kpi
+		?.toString()
+		.replace(/(?<=[0-9])(?=(?:[0-9]{3})+(?![0-9]))/g, ' ');
+
 	return (
 		<div className={cx(fr.cx('fr-tile'))}>
 			<div className={cx(fr.cx('fr-tile__body'))}>
@@ -48,7 +52,7 @@ export const KPITile = (props: KPITileProps) => {
 					{isLoading ? (
 						<Skeleton variant="text" width="20%" height="2rem" />
 					) : (
-						kpi
+						kpiFormatted
 					)}
 				</p>
 				<p

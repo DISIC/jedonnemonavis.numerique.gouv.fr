@@ -21,6 +21,10 @@ const QuestionWrapper = ({
 }: QuestionWrapperProps) => {
 	const { classes } = useStyles();
 
+	const totalFormatted = totalField
+		?.toString()
+		.replace(/(?<=[0-9])(?=(?:[0-9]{3})+(?![0-9]))/g, ' ');
+
 	return (
 		<div className={classes.wrapperSection}>
 			<h4 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h4>
@@ -29,7 +33,7 @@ const QuestionWrapper = ({
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
 				<div className={classes.metaInfosTotal}>
-					<div>{totalField}</div> <span>Réponses</span>
+					<div>{totalFormatted}</div> <span>Réponses</span>
 				</div>
 				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
 					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
