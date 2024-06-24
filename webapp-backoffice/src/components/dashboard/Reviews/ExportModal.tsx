@@ -34,7 +34,8 @@ interface Props {
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, action, product_id, params, hasExportsInProgress } = props;
+	const { modal, counts, action, product_id, params, hasExportsInProgress } =
+		props;
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
 	const [validate, setValidate] = React.useState<boolean>(false);
 	const { cx, classes } = useStyles();
@@ -59,6 +60,29 @@ const ExportModal = (props: Props) => {
 				'fr-grid-row--gutters',
 				'fr-my-0'
 			)}
+			buttons={[
+				!validate && !hasExportsInProgress
+					? {
+							children: 'Valider',
+							type: 'submit',
+							doClosesModal: false,
+							priority: 'primary',
+							disabled: choice === null,
+							onClick: () => {
+								if (choice) validateExport();
+							}
+						}
+					: {
+							children: 'Fermer',
+							type: 'button',
+							doClosesModal: false,
+							priority: 'secondary',
+							disabled: choice === null,
+							onClick: () => {
+								if (choice) action(choice);
+							}
+						}
+			]}
 			concealingBackdrop={false}
 			title={'Télécharger les avis'}
 			size="large"
@@ -97,46 +121,17 @@ const ExportModal = (props: Props) => {
 						]}
 						className={fr.cx('fr-mt-10v')}
 					/>
-					<div className={cx(classes.buttonWrapper, fr.cx('fr-col-12'))}>
-						<Button
-							priority="primary"
-							type="button"
-							disabled={choice === null}
-							nativeButtonProps={{
-								onClick: () => {
-									if (choice) validateExport();
-								}
-							}}
-							className={fr.cx('fr-mt-10v')}
-						>
-							Valider
-						</Button>
-					</div>
 				</>
-			) : 
-			(
+			) : (
 				<>
 					<p className={fr.cx('fr-mt-10v')}>
-						Votre export est en cours de traitement, vous recevrez un lien de téléchargement par email dès qu'il sera prêt
+						Votre export est en cours de traitement, vous recevrez un lien de
+						téléchargement par email dès qu'il sera prêt
 					</p>
 					<p className={fr.cx('fr-mt-10v')}>
-						Vous pourrez lancer un nouvel export une fois que le précédent sera achevé.
+						Vous pourrez lancer un nouvel export une fois que le précédent sera
+						achevé.
 					</p>
-					<div className={cx(classes.buttonWrapper, fr.cx('fr-col-12'))}>
-						<Button
-							priority="secondary"
-							type="button"
-							disabled={choice === null}
-							nativeButtonProps={{
-								onClick: () => {
-									if (choice) action(choice);
-								}
-							}}
-							className={fr.cx('fr-mt-10v')}
-						>
-							Fermer
-						</Button>
-					</div>
 				</>
 			)}
 		</modal.Component>
