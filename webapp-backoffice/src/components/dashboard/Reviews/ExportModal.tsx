@@ -75,12 +75,8 @@ const ExportModal = (props: Props) => {
 					: {
 							children: 'Fermer',
 							type: 'button',
-							doClosesModal: false,
-							priority: 'secondary',
-							disabled: choice === null,
-							onClick: () => {
-								if (choice) action(choice);
-							}
+							doClosesModal: true,
+							priority: 'secondary'
 						}
 			]}
 			concealingBackdrop={false}
