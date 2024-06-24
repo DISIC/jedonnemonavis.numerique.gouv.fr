@@ -263,7 +263,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
     bar = fill * filled_length + '-' * (length - filled_length)
-    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end='\r')
+    print(f'\r{prefix} |{bar}| {percent}% ({iteration}) {suffix}', end='\r')
     if iteration == total:
         print()
 
@@ -353,6 +353,7 @@ def main():
 
         all_reviews = []
         field_labels = set()
+                
 
         offset = 0
         retrieved_reviews = 0
@@ -366,31 +367,32 @@ def main():
                 r.xwiki_id,
                 r.user_id,
                 r.created_at AS review_created_at,
-                json_agg(
-                    json_build_object(
-                        'answer_id', a.id,
-                        'field_label', a.field_label,
-                        'field_code', a.field_code,
-                        'answer_item_id', a.answer_item_id,
-                        'answer_text', a.answer_text,
-                        'intention', a.intention,
-                        'kind', a.kind,
-                        'review_id', a.review_id,
-                        'review_created_at', a.review_created_at,
-                        'parent_answer_id', a.parent_answer_id,
-                        'created_at', a.created_at
+                (
+                    SELECT json_agg(
+                        json_build_object(
+                            'answer_id', a.id,
+                            'field_label', a.field_label,
+                            'field_code', a.field_code,
+                            'answer_item_id', a.answer_item_id,
+                            'answer_text', a.answer_text,
+                            'intention', a.intention,
+                            'kind', a.kind,
+                            'review_id', a.review_id,
+                            'review_created_at', a.review_created_at,
+                            'parent_answer_id', a.parent_answer_id,
+                            'created_at', a.created_at
+                        )
                     )
+                    FROM public."Answer" a
+                    WHERE r.id = a.review_id
+                    AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'
                 ) AS answers
             FROM
                 public."Review" r
-            JOIN
-                public."Answer" a
-            ON
-                r.id = a.review_id
-                AND r.created_at = a.review_created_at
             WHERE
                 r.product_id = %s
                 AND r.created_at BETWEEN %s AND %s
+
                 {f'AND {filters_query}' if filters_query else ''}
             GROUP BY
                 r.id, r.form_id, r.product_id, r.button_id, r.xwiki_id, r.user_id, r.created_at
