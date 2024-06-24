@@ -45,7 +45,8 @@ const ExportModal = (props: Props) => {
 	} = trpc.export.getByUser.useQuery(
 		{
 			user_id: parseInt(session?.user?.id as string),
-			status: ['idle', 'processing']
+			status: ['idle', 'processing'],
+			product_id: product_id
 		},
 		{
 			enabled: modalOpen,
@@ -120,9 +121,9 @@ const ExportModal = (props: Props) => {
 			return (
 				<>
 					<p className={fr.cx('fr-mt-10v')}>
-						Votre export est en cours de traitement, vous recevrez un lien de
-						téléchargement par email à l'adresse <b>{session?.user.email}</b>{' '}
-						dès qu'il sera prêt.
+						Vous avez un export en cours de traitement sur ce service, vous
+						recevrez un lien de téléchargement par email à l'adresse{' '}
+						<b>{session?.user.email}</b> dès qu'il sera prêt.
 					</p>
 				</>
 			);
