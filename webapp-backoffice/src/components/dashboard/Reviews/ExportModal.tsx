@@ -117,7 +117,7 @@ const ExportModal = (props: Props) => {
 			(
 				<>
 					<p className={fr.cx('fr-mt-10v')}>
-						Votre export est en cours de traitement, vous recevrez un lien de téléchargement par email dès qu'il sera prêt
+						Vous avez un export en cours de traitement sur ce service, vous recevrez un lien de téléchargement par email dès qu'il sera prêt.
 					</p>
 					<p className={fr.cx('fr-mt-10v')}>
 						Vous pourrez lancer un nouvel export une fois que le précédent sera achevé.

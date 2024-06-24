@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
 import { StatusExportSchema } from '@/prisma/generated/zod';
+import { productRouter } from './product';
 
 export const exportRouter = router({
 
@@ -9,14 +10,16 @@ export const exportRouter = router({
 			z.object({
 				user_id: z.number(),
 				status: z.array(StatusExportSchema).optional(),
+				product_id: z.number().optional(),
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { user_id, status } = input;
+			const { user_id, status, product_id } = input;
 			const exportCsv = await ctx.prisma.export.findMany({
 				where: {
 					user_id: user_id,
 					...(status && { status: {in: status} }),
+					...(product_id && { product_id: product_id })
 				},
 			});
 

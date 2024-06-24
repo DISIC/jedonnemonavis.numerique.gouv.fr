@@ -51,7 +51,8 @@ const ExportReviews = (props: Props) => {
 	const { data: exportCsv, isFetching: isLoadingExport, refetch } = trpc.export.getByUser.useQuery(
 		{
 			user_id: parseInt(session?.user?.id as string),
-			status: ['idle', 'processing']
+			status: ['idle', 'processing'],
+			product_id: product_id
 		}, 
 		{
 			initialData: {
