@@ -9,6 +9,8 @@ import { generateRandomString } from '@/src/utils/tools';
 import ExportModal from './ExportModal';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Tooltip } from '@mui/material';
+import { useSession } from 'next-auth/react';
+import { set } from 'zod';
 
 interface Props {
 	product_id: number;
@@ -35,75 +37,30 @@ const ExportReviews = (props: Props) => {
 		reviewsCountAll
 	} = props;
 	const { cx, classes } = useStyles();
-	const [exportStatus, setExportStatus] = React.useState<
-		'idle' | 'inProgress' | 'completed'
-	>('idle');
-	const [intervalId, setIntervalId] = React.useState<NodeJS.Timeout | null>(
-		null
-	);
-	const [memoryKey, setMemoryKey] = React.useState<string>(
-		generateRandomString(10)
-	);
-	const [progress, setProgress] = React.useState<number>(0);
+	const { data: session } = useSession({ required: true });
 
 	const export_modal = createModal({
 		id: 'export-modal',
 		isOpenedByDefault: false
 	});
 
-	const exportData = trpc.review.exportData.useMutation({
-		onSuccess: () => {
-			setExportStatus('completed');
-		}
-	});
-
-	const getProgress = async () => {
-		const data = await fetch(`/api/memory?memoryKey=${memoryKey}`, {
-			method: 'GET'
-		}).then(async r => {
-			if (!r.ok) {
-				throw Error(`got status ${r.status}`);
-			}
-			return r.json();
-		});
-		if (data.progress) setProgress(data.progress);
-	};
-
-	React.useEffect(() => {
-		if (exportStatus === 'inProgress') {
-			const id = setInterval(() => {
-				getProgress();
-			}, 1000);
-			setIntervalId(id);
-			return () => {
-				clearInterval(id);
-			};
-		} else if (exportStatus === 'completed') {
-			if (intervalId) {
-				clearInterval(intervalId);
-			}
-		}
-	}, [exportStatus]);
-
-	const applyChoice = (choice: 'all' | 'filtered') => {
+	const applyChoice = () => {
 		export_modal.close();
-		/*setExportStatus('inProgress');
-		exportData.mutate(
-			choice === 'all'
-				? { memoryKey }
-				: {
-						product_id,
-						start_date: startDate,
-						end_date: endDate,
-						shouldIncludeAnswers: true,
-						mustHaveVerbatims,
-						search,
-						button_id,
-						filters,
-						memoryKey
-					}
-		);*/
 	};
+
+	const { data: exportCsv, isFetching: isLoadingExport, refetch } = trpc.export.getByUser.useQuery(
+		{
+			user_id: parseInt(session?.user?.id as string),
+			status: ['idle', 'processing']
+		}, 
+		{
+			initialData: {
+				data: []
+			}
+		}
+	);
+
+	const exportCsvData = exportCsv?.data;
 
 	return (
 		<>
@@ -122,54 +79,20 @@ const ExportReviews = (props: Props) => {
 					button_id,
 					filters
 				})}
+				hasExportsInProgress={exportCsvData?.length > 0}
 				action={applyChoice}
+
 			></ExportModal>
 
-			{exportStatus === 'idle' && (
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-file-download-line"
-					iconPosition="right"
-					type="button"
-					nativeButtonProps={export_modal.buttonProps}
-				>
-					Télécharger
-				</Button>
-			)}
-			{exportStatus === 'inProgress' && (
-				<div>
-					<div>
-						<p className={cx(classes.loading)}>
-							Export en cours : {Math.round(progress * 100) / 100}%
-						</p>
-					</div>
-					<div>
-						<div className={cx(classes.progressBarWrapper)}>
-							<div
-								style={{ width: `${progress}%` }}
-								className={cx(classes.progressBar)}
-							>
-								{' '}
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-			{exportStatus === 'completed' && (
-				<>
-					<div className={cx(classes.download)}>
-						<Download
-							details="Le fichier CSV est prêt."
-							label="Télécharger le fichier"
-							linkProps={{
-								href: `/api/export?fileName=${exportData.data?.fileName}`,
-								target: '_blank'
-							}}
-							style={{ marginBottom: '0' }}
-						/>
-					</div>
-				</>
-			)}
+			<Button
+				priority="tertiary"
+				iconId="fr-icon-file-download-line"
+				iconPosition="right"
+				type="button"
+				nativeButtonProps={export_modal.buttonProps}
+			>
+				Télécharger
+			</Button>
 		</>
 	);
 };

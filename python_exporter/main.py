@@ -132,16 +132,73 @@ def send_email(to_email, download_link):
 
     text = f"Bonjour,\n\nVotre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
     html = f"""\
+    <!DOCTYPE html>
+	<html>
+		<head>
+			<style>
+				body {{
+					font-family: Arial, sans-serif;
+				}}
+				.container {{
+					max-width: 640px;
+					margin: 0 auto;
+					padding: 20px;
+				}}
+				.code {{
+					font-size: 24px;
+					font-weight: bold;
+					margin: 20px 0;
+				}}
+				.footer {{
+					font-size: 12px;
+					padding: 16px 32px; 
+					background: #F5F5FE;
+					margin-top: 30px;
+				}}
+				.header {{
+					margin-bottom: 30px;
+				}}
+				.header img {{
+					height: 88px;
+				}}
+				blockquote {{
+					background-color: #f3f3f3;
+					margin: 0;
+					padding: 20px;
+				}}
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<div class="header">
+					<img src="https://jdma-develop.cleverapps.io/assets/JDMA_Banner.png"/>
+				</div>
+				<div>
+                    <p>Bonjour,<br><br>
+                    Votre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
+                    <a href="{download_link}">Télécharger le fichier</a><br><br>
+                    Ce lien expirera dans 30 jours.<br><br>
+                    </p>
+                </div>
+				<p>
+					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
+					La Brigade d'Intervention du Numérique (BIN).
+				</p>
+				<div class="footer">
+					<p>
+						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
+						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>. 
+					</p>
+					<p>
+						Pour toute question, merci de nous contacter à experts@design.numerique.gouv.fr.
+					</p>
+				</div>
+			</div>
+		</body>
+	</html>
     <html>
       <head></head>
       <body>
-        <p>Bonjour,<br><br>
-           Votre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
-           <a href="{download_link}">Télécharger le fichier</a><br><br>
-           Ce lien expirera dans 30 jours.<br><br>
-           Cordialement,<br>
-           L'équipe JDMA
-        </p>
       </body>
     </html>
     """

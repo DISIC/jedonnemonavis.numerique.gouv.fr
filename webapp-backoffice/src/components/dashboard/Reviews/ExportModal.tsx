@@ -29,11 +29,12 @@ interface Props {
 	};
 	product_id: number;
 	params: string;
+	hasExportsInProgress: boolean;
 	action: (choice: 'all' | 'filtered') => void;
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, action, product_id, params } = props;
+	const { modal, counts, action, product_id, params, hasExportsInProgress } = props;
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
 	const [validate, setValidate] = React.useState<boolean>(false);
 	const { cx, classes } = useStyles();
@@ -62,7 +63,7 @@ const ExportModal = (props: Props) => {
 			title={'Télécharger les avis'}
 			size="large"
 		>
-			{!validate && (
+			{!validate && !hasExportsInProgress ? (
 				<>
 					<Alert
 						description="
@@ -112,12 +113,14 @@ const ExportModal = (props: Props) => {
 						</Button>
 					</div>
 				</>
-			)}
-			{validate && (
+			) : 
+			(
 				<>
 					<p className={fr.cx('fr-mt-10v')}>
-						Votre export est en cours de traitement, vous recevrez un lien de
-						téléchargement par email dès que celui-ci sera terminé.
+						Votre export est en cours de traitement, vous recevrez un lien de téléchargement par email dès qu'il sera prêt
+					</p>
+					<p className={fr.cx('fr-mt-10v')}>
+						Vous pourrez lancer un nouvel export une fois que le précédent sera achevé.
 					</p>
 					<div className={cx(classes.buttonWrapper, fr.cx('fr-col-12'))}>
 						<Button
