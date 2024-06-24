@@ -162,7 +162,10 @@ const GlobalChart = ({
 												} else {
 													return (
 														<td key={index}>
-															{matchingItem ? matchingItem.value : 0}
+															{matchingItem ? matchingItem.value : 0}{' '}
+															{matchingItem?.['Pourcentage de réponses']
+																? `(${matchingItem?.['Pourcentage de réponses']}%)`
+																: ''}
 														</td>
 													);
 												}
