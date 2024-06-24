@@ -1,11 +1,13 @@
-import { type GetServerSidePropsContext } from 'next';
-import { PrismaClient } from '@prisma/client';
-import { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
-import NextAuth, { type NextAuthOptions, getServerSession } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
+import prisma from '@/src/utils/db';
 import crypto from 'crypto';
-
-const prisma = new PrismaClient();
+import {
+	NextApiHandler,
+	NextApiRequest,
+	NextApiResponse,
+	type GetServerSidePropsContext
+} from 'next';
+import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,

@@ -39,7 +39,9 @@ export const reviewRouter = router({
 				data: z.array(ReviewPartialWithRelationsSchema),
 				metadata: z.object({
 					countFiltered: z.number(),
-					countAll: z.number()
+					countAll: z.number(),
+					countForm1: z.number(),
+					countForm2: z.number()
 				})
 			})
 		)
@@ -61,45 +63,61 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [reviews, countFiltered, countAll] = await Promise.all([
-				ctx.prisma.review.findMany({
-					where,
-					orderBy: orderBy,
-					take: numberPerPage,
-					skip: (page - 1) * numberPerPage,
-					include: {
-						answers: shouldIncludeAnswers
-							? {
-									include: {
-										parent_answer: true
-									},
-									where: {
-										...(input.end_date && {
-											created_at: {
-												...(input.start_date && {
-													gte: new Date(input.start_date)
-												}),
-												lte: (() => {
-													const adjustedEndDate = new Date(input.end_date);
-													adjustedEndDate.setHours(23, 59, 59);
-													return adjustedEndDate;
-												})()
-											}
-										})
+			const [reviews, countFiltered, countAll, countForm1, countForm2] =
+				await Promise.all([
+					ctx.prisma.review.findMany({
+						where,
+						orderBy: orderBy,
+						take: numberPerPage,
+						skip: (page - 1) * numberPerPage,
+						include: {
+							answers: shouldIncludeAnswers
+								? {
+										include: {
+											parent_answer: true
+										},
+										where: {
+											...(input.end_date && {
+												created_at: {
+													...(input.start_date && {
+														gte: new Date(input.start_date)
+													}),
+													lte: (() => {
+														const adjustedEndDate = new Date(input.end_date);
+														adjustedEndDate.setHours(23, 59, 59);
+														return adjustedEndDate;
+													})()
+												}
+											})
+										}
 									}
-								}
-							: false
-					}
-				}),
-				ctx.prisma.review.count({ where }),
-				ctx.prisma.review.count({
-					where: {
-						product_id: input.product_id
-					}
-				})
-			]);
+								: false
+						}
+					}),
+					ctx.prisma.review.count({ where }),
+					ctx.prisma.review.count({
+						where: {
+							product_id: input.product_id
+						}
+					}),
+					ctx.prisma.review.count({
+						where: {
+							...where,
+							form_id: 1
+						}
+					}),
+					ctx.prisma.review.count({
+						where: {
+							...where,
+							form_id: 2
+						}
+					})
+				]);
 
-			return { data: reviews, metadata: { countFiltered, countAll } };
+			return {
+				data: reviews,
+				metadata: { countFiltered, countAll, countForm1, countForm2 }
+			};
 		}),
 
 	exportData: protectedProcedure

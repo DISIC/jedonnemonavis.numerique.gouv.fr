@@ -175,10 +175,13 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				<Notice
 					isClosable
 					onClose={function noRefCheck() {}}
+					style={{
+						marginBottom: '-1rem'
+					}}
 					title={
 						<>
-							Version BETA : aidez-nous à améliorer cet outil, n'hésitez pas à
-							nous faire part de vos retours depuis{' '}
+							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
+							de vos retours depuis{' '}
 							<a href="https://tally.so/r/m6kyyB" target="_blank">
 								ce court formulaire
 							</a>
@@ -192,7 +195,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
-					accessibility="partially compliant"
+					accessibility="non compliant"
 					bottomItems={[
 						{
 							text: 'Données personnelles',

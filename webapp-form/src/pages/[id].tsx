@@ -7,13 +7,14 @@ import { GetServerSideProps } from "next/types";
 import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
-import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
+import { AnswerIntention, Button, Prisma } from "@prisma/client";
 import { allFields, steps_A, steps_B } from "../utils/form";
 import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
+import prisma from "../utils/db";
 
 type JDMAFormProps = {
   product: Product;
@@ -238,7 +239,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         review: {
           product_id: product.id,
           button_id: product.buttons[0].id,
-          form_id: 1,
+          form_id: 2,
           user_id: userId,
         },
         answers,
@@ -475,7 +476,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   const isXWikiLink = !buttonId;
 
-  const prisma = new PrismaClient();
+  await prisma.$connect();
   const product = await prisma.product.findUnique({
     where: isXWikiLink
       ? {
@@ -502,7 +503,7 @@ export const getServerSideProps: GetServerSideProps<{
           },
     },
   });
-  prisma.$disconnect();
+  await prisma.$disconnect();
 
   if (isXWikiLink) {
     if (!product?.buttons.length)

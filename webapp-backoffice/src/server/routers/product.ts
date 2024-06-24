@@ -88,9 +88,7 @@ export const productRouter = router({
 				]
 			};
 
-			let where: Prisma.ProductWhereInput = JSON.parse(
-				JSON.stringify(whereUserScope)
-			);
+			let where: Prisma.ProductWhereInput = { ...whereUserScope };
 
 			if (search) {
 				let searchWithoutAccents = removeAccents(search);
@@ -100,16 +98,21 @@ export const productRouter = router({
 					.join('&');
 
 				where = {
-					OR: [
+					AND: [
+						{ ...where },
 						{
-							title_formatted: {
-								search: searchQuery
-							}
-						},
-						{
-							title: {
-								search: searchQuery
-							}
+							OR: [
+								{
+									title_formatted: {
+										search: searchQuery
+									}
+								},
+								{
+									title: {
+										search: searchQuery
+									}
+								}
+							]
 						}
 					]
 				};

@@ -1,7 +1,6 @@
 import { getPercentageFromValue, getReadableValue } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { cx } from '@codegouvfr/react-dsfr/fr/cx';
 import { Skeleton, Tooltip } from '@mui/material';
 import { tss } from 'tss-react';
 

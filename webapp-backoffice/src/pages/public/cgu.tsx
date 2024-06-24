@@ -30,7 +30,10 @@ const GeneralConditions = () => {
 				>
 					<div className={'fr-col-lg-12'}>
 						<h1 className={fr.cx('fr-mb-12v')}>{CGU.title}</h1>
-						<h2>{CGU.firstPart.subtitle}</h2>
+						<p>
+							<i>En cours de rédaction...</i>
+						</p>
+						{/* <h2>{CGU.firstPart.subtitle}</h2>
 						<p>{CGU.firstPart.firstBlock}</p>
 						<p>{CGU.firstPart.secondBlock}</p>
 						<p>{CGU.firstPart.thirdBlock.firstBlock}</p>
@@ -66,7 +69,7 @@ const GeneralConditions = () => {
 									)
 								)}
 							</div>
-						))}
+						))} */}
 					</div>
 				</div>
 			</div>

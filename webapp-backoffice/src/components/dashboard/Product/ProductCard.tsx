@@ -44,8 +44,6 @@ const ProductCard = ({
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
 
-	const currentDate = new Date();
-
 	const {
 		data: resultStatsObservatoire,
 		isLoading: isLoadingStatsObservatoire,
@@ -55,6 +53,11 @@ const ProductCard = ({
 			product_id: product.id.toString()
 		},
 		{
+			trpc: {
+				context: {
+					skipBatch: true
+				}
+			},
 			initialData: {
 				data: {
 					satisfaction: 0,

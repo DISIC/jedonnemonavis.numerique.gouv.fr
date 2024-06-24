@@ -2,6 +2,8 @@ import { FieldCodeSmiley } from '@/src/types/custom';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import {
 	formatNumberWithSpaces,
+	newFormFieldCodes,
+	oldFormFieldCodes,
 	translateMonthToFrench
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -43,7 +45,13 @@ const SmileyQuestionViz = ({
 				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
-				end_date: endDate
+				end_date: endDate,
+				...(oldFormFieldCodes.includes(fieldCode) && {
+					form_id: 1
+				}),
+				...(newFormFieldCodes.includes(fieldCode) && {
+					form_id: 2
+				})
 			},
 			{
 				initialData: {

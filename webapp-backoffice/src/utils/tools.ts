@@ -309,3 +309,11 @@ export const betaTestXwikiIds: number[] = [
 	3091, 3092, 3093, 3094, 3095, 3096, 3097, 3098, 3099, 3100, 3412, 3442, 3535,
 	3671, 3733, 3865, 3426, 3427, 3428, 3429, 860, 863, 864, 867, 3378, 3720
 ];
+
+export const oldFormFieldCodes = ['difficulties', 'easy'];
+
+export const newFormFieldCodes = [
+	'contact_tried',
+	'contact_reached',
+	'contact_satisfaction'
+];

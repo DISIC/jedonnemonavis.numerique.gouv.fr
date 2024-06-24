@@ -1,18 +1,16 @@
+import { createTRPCStoreLimiter } from "@/src/utils/trpcRateLimiter";
+import { Client as ElkClient } from "@elastic/elasticsearch";
+import { defaultFingerPrint } from "@trpc-limiter/memory";
+import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
+import { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import fs from "fs";
 import path from "path";
-import { PrismaClient } from "@prisma/client";
-import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
 import SuperJSON from "superjson";
 import { ZodError } from "zod";
-import { Client as ElkClient } from "@elastic/elasticsearch";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { createTRPCStoreLimiter } from "@/src/utils/trpcRateLimiter";
-import { defaultFingerPrint } from "@trpc-limiter/memory";
+import prisma from "../utils/db";
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
-  const prisma = new PrismaClient();
-
   const caCrtPath = path.resolve(process.cwd(), "./certs/ca/ca.crt");
   const tlsOptions = fs.existsSync(caCrtPath)
     ? {
