@@ -386,6 +386,7 @@ def main():
                     FROM public."Answer" a
                     WHERE r.id = a.review_id
                     AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'
+                    AND a.created_at = review_created_at
                 ) AS answers
             FROM
                 public."Review" r
