@@ -249,7 +249,8 @@ const GlobalChart = ({
 					<button
 						className={cx(
 							classes.button,
-							view === 'chart' && classes.activeButton
+							view === 'chart' && classes.activeButton,
+							view !== 'chart' && classes.inactiveChartBtn
 						)}
 						onClick={() => setView('chart')}
 					>
@@ -258,7 +259,8 @@ const GlobalChart = ({
 					<button
 						className={cx(
 							classes.button,
-							view === 'table' && classes.activeButton
+							view === 'table' && classes.activeButton,
+							view !== 'table' && classes.inactiveTableBtn
 						)}
 						onClick={() => setView('table')}
 					>
@@ -338,16 +340,31 @@ const useStyles = tss.withName(GlobalChart.name).create(() => ({
 	},
 	button: {
 		backgroundColor: 'transparent',
-		border: '1px solid',
-		borderRadius: '0.25rem',
-		color: 'grey',
+		borderTop: '1px solid',
+		borderBottom: '1px solid',
+		color: 'black',
 		borderColor: 'grey',
 		cursor: 'pointer',
 		padding: '0.2rem 0.5rem'
 	},
 	activeButton: {
 		color: fr.colors.decisions.background.flat.blueFrance.default,
-		borderColor: fr.colors.decisions.background.flat.blueFrance.default
+		borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+		borderLeft: '1px solid',
+		borderRight: '1px solid',
+		borderRadius: '0.25rem'
+	},
+	inactiveTableBtn: {
+		borderRight: '1px solid',
+		borderTopRightRadius: '0.25rem',
+		borderBottomRightRadius: '0.25rem',
+		borderColor: 'grey'
+	},
+	inactiveChartBtn: {
+		borderLeft: '1px solid',
+		borderTopLeftRadius: '0.25rem',
+		borderBottomLeftRadius: '0.25rem',
+		borderColor: 'grey'
 	}
 }));
 
