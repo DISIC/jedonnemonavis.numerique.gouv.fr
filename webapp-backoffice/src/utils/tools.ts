@@ -198,6 +198,10 @@ export const getReadableValue = (value: number) => {
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
 };
 
+export const getPercentageFromValue = (value: number) => {
+	return getReadableValue(value * 10);
+};
+
 export const getDiffDaysBetweenTwoDates = (
 	startDate: string,
 	endDate: string
@@ -291,3 +295,25 @@ export const getHexaColorFromIntentionText = (intention: string) => {
 
 	return '#0063cb';
 };
+
+export const formatNumberWithSpaces = (number: number): string => {
+	let numStr = number.toString();
+
+	return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+};
+
+export const betaTestXwikiIds: number[] = [
+	2404, 786, 812, 2542, 2672, 2674, 2675, 2737, 2802, 2904, 2939, 2980, 2982,
+	2983, 2984, 2985, 2986, 3002, 3004, 3005, 3035, 3038, 3074, 3075, 3076, 3077,
+	3078, 3079, 3080, 3081, 3082, 3083, 3084, 3085, 3086, 3087, 3088, 3089, 3090,
+	3091, 3092, 3093, 3094, 3095, 3096, 3097, 3098, 3099, 3100, 3412, 3442, 3535,
+	3671, 3733, 3865, 3426, 3427, 3428, 3429, 860, 863, 864, 867, 3378, 3720
+];
+
+export const oldFormFieldCodes = ['difficulties', 'easy'];
+
+export const newFormFieldCodes = [
+	'contact_tried',
+	'contact_reached',
+	'contact_satisfaction'
+];

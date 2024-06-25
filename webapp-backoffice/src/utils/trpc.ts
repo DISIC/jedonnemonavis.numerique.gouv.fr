@@ -1,4 +1,4 @@
-import { httpBatchLink } from '@trpc/client';
+import { httpBatchLink, httpLink, splitLink } from '@trpc/client';
 import { createTRPCNext } from '@trpc/next';
 import type { AppRouter } from '../server/routers/root';
 import SuperJSON from 'superjson';
@@ -15,18 +15,16 @@ export const trpc = createTRPCNext<AppRouter>({
 				}
 			},
 			links: [
-				httpBatchLink({
-					/**
-					 * If you want to use SSR, you need to use the server's full URL
-					 * @link https://trpc.io/docs/ssr
-					 **/
-					url: `/api/trpc`,
-					// You can pass any HTTP headers you wish here
-					async headers() {
-						return {
-							// authorization: getAuthCookie(),
-						};
-					}
+				splitLink({
+					condition(op) {
+						return Boolean(op.context.skipBatch);
+					},
+					true: httpLink({
+						url: `/api/trpc`
+					}),
+					false: httpBatchLink({
+						url: `/api/trpc`
+					})
 				})
 			]
 		};

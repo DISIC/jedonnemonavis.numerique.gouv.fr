@@ -1,5 +1,5 @@
+import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
-import { PrismaClient } from '@prisma/client';
 import { getToken } from 'next-auth/jwt';
 
 const ProductPage = () => {
@@ -8,7 +8,6 @@ const ProductPage = () => {
 
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
-	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
 		where: {
 			id: parseInt(id as string)
@@ -23,13 +22,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	if (
 		!currentUserToken ||
 		(currentUserToken.exp as number) > new Date().getTime()
-	)
+	) {
+		prisma.$disconnect();
 		return {
 			redirect: {
 				destination: '/',
 				permanent: false
 			}
 		};
+	}
 
 	const currentUser = await prisma.user.findUnique({
 		where: {
@@ -38,6 +39,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	});
 
 	if (!currentUser) {
+		prisma.$disconnect();
 		return {
 			redirect: {
 				destination: '/',
@@ -60,6 +62,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 			entity_id: product?.entity_id
 		}
 	});
+
+	prisma.$disconnect();
 
 	if (
 		!hasAccessRightToProduct &&

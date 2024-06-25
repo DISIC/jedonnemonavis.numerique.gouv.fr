@@ -1,10 +1,10 @@
-import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
-import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
 import GlobalChart from './GlobalChart';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import QuestionWrapper from './QuestionWrapper';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false

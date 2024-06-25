@@ -1,12 +1,11 @@
-import { FieldCodeSmiley } from '@/src/types/custom';
-import { fr } from '@codegouvfr/react-dsfr';
-import QuestionWrapper from './QuestionWrapper';
 import { trpc } from '@/src/utils/trpc';
-import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
 import GlobalChart from './GlobalChart';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import QuestionWrapper from './QuestionWrapper';
+import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
@@ -44,7 +43,13 @@ const BarMultipleQuestionViz = ({
 				product_id: productId,
 				field_code: fieldCode,
 				start_date: startDate,
-				end_date: endDate
+				end_date: endDate,
+				...(oldFormFieldCodes.includes(fieldCode) && {
+					form_id: 1
+				}),
+				...(newFormFieldCodes.includes(fieldCode) && {
+					form_id: 2
+				})
 			},
 			{
 				initialData: {

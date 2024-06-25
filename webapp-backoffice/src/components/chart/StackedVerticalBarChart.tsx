@@ -97,7 +97,7 @@ const StackedVerticalBarChart = ({
 			: {
 					'Très mauvaise': 0,
 					Mauvaise: 1,
-					'Ni bonne ni mauvaise': 2,
+					'Ni bonne, ni mauvaise': 2,
 					Bonne: 3,
 					Excellente: 4,
 					'Ne se prononce pas': 5

@@ -1,8 +1,8 @@
-import { tss } from 'tss-react/dsfr';
 import { getDatesByShortCut } from '@/src/utils/tools';
-import { useEffect, useState } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { useEffect, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 type FiltersProps = {
 	onChange: (startDate: string, endDate: string) => void;

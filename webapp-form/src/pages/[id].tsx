@@ -7,17 +7,28 @@ import { GetServerSideProps } from "next/types";
 import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
 import { trpc } from "../utils/trpc";
-import { AnswerIntention, Button, Prisma, PrismaClient } from "@prisma/client";
+import { AnswerIntention, Button, Prisma } from "@prisma/client";
 import { allFields, steps_A, steps_B } from "../utils/form";
 import { FormStepper } from "../components/form/layouts/FormStepper";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
+import prisma from "../utils/db";
 
 type JDMAFormProps = {
   product: Product;
 };
+
+export type FormStepNames =
+  | keyof Omit<
+      Opinion,
+      | "contact_tried"
+      | "contact_reached"
+      | "contact_satisfaction"
+      | "contact_tried_verbatim"
+    >
+  | "contact";
 
 export default function JDMAForm({ product }: JDMAFormProps) {
   const { classes, cx } = useStyles();
@@ -224,18 +235,17 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
       localStorage.setItem("userId", userId);
 
-      await createReview
-        .mutateAsync({
-          review: {
-            product_id: product.id,
-            button_id: product.buttons[0].id,
-            form_id: 1,
-            user_id: userId,
-          },
-          answers,
-        })
+      await createReview.mutateAsync({
+        review: {
+          product_id: product.id,
+          button_id: product.buttons[0].id,
+          form_id: 2,
+          user_id: userId,
+        },
+        answers,
+      });
     } else {
-      await handleInsertOrUpdateReview(opinion);
+      await handleInsertOrUpdateReview(opinion, "satisfaction");
     }
     router.push({
       pathname: router.pathname,
@@ -243,7 +253,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     });
   };
 
-  const handleInsertOrUpdateReview = async (opinion: Partial<Opinion>) => {
+  const handleInsertOrUpdateReview = async (
+    opinion: Partial<Opinion>,
+    currentStepName: FormStepNames
+  ) => {
     const answers = formatAnswers(opinion);
 
     const userId = localStorage.getItem("userId");
@@ -255,6 +268,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       product_id: product.id,
       button_id:
         parseInt(router.query.button as string) || product.buttons[0].id,
+      step_name: currentStepName,
       answers,
     });
   };
@@ -380,7 +394,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                   {} as any
                 );
 
-                handleInsertOrUpdateReview(currentStepValues);
+                handleInsertOrUpdateReview(
+                  currentStepValues,
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
+                );
 
                 if (isLastStep) {
                   localStorage.removeItem("userId");
@@ -459,7 +476,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   const isXWikiLink = !buttonId;
 
-  const prisma = new PrismaClient();
+  await prisma.$connect();
   const product = await prisma.product.findUnique({
     where: isXWikiLink
       ? {
@@ -486,7 +503,7 @@ export const getServerSideProps: GetServerSideProps<{
           },
     },
   });
-  prisma.$disconnect();
+  await prisma.$disconnect();
 
   if (isXWikiLink) {
     if (!product?.buttons.length)

@@ -1,15 +1,16 @@
-import fs from 'fs';
-import path from 'path';
-import { ApiKey, PrismaClient } from '@prisma/client';
+import { Client as ElkClient } from '@elastic/elasticsearch';
+import { ApiKey } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
+import fs from 'fs';
+import { Session } from 'next-auth';
+import path from 'path';
 import SuperJSON from 'superjson';
+import { OpenApiMeta } from 'trpc-openapi';
 import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
-import { Session } from 'next-auth';
-import { OpenApiMeta } from 'trpc-openapi';
-import { Client as ElkClient } from '@elastic/elasticsearch';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
+import prisma from '../utils/db';
 
 // Metadata for protected procedures
 interface Meta {
@@ -19,7 +20,6 @@ interface Meta {
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
-	const prisma = new PrismaClient();
 	const session = await getServerAuthSession({ req: opts.req, res: opts.res });
 	const req = opts.req;
 	const user_api = null as UserWithAccessRight | null;

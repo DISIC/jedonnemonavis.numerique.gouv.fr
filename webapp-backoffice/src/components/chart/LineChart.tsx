@@ -1,15 +1,14 @@
 import { translateMonthToFrench } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
 import {
-	XAxis,
-	YAxis,
 	CartesianGrid,
-	ResponsiveContainer,
+	Legend,
 	Line,
 	LineChart,
+	ResponsiveContainer,
 	Tooltip,
-	Legend
+	XAxis,
+	YAxis
 } from 'recharts';
 
 const lineColors = [
@@ -35,13 +34,15 @@ const lineColors = [
 const CustomLineChart = ({
 	data,
 	dataKeys,
-	labelAxisY
+	labelAxisY,
+	ticks
 }: {
 	data:
 		| { value: number | number[]; name: string }[]
 		| { [key: string]: string | number; name: string }[];
 	dataKeys?: string[];
 	labelAxisY: string;
+	ticks?: number[];
 }) => {
 	return (
 		<ResponsiveContainer width="100%" height={275}>
@@ -64,6 +65,7 @@ const CustomLineChart = ({
 					tickLine={false}
 					fontSize="0.75rem"
 					tickCount={6}
+					ticks={ticks ? ticks : undefined}
 					label={{
 						value: labelAxisY,
 						angle: 90,

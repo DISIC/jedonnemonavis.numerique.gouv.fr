@@ -1,12 +1,11 @@
-import Head from 'next/head';
 import { ReactNode } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { headerFooterDisplayItem } from '@codegouvfr/react-dsfr/Display';
-import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { Notice } from '@codegouvfr/react-dsfr/Notice';
+import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
@@ -170,12 +169,33 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				serviceTitle="Je donne mon avis"
 				serviceTagline="La voix de vos usagers"
 			/>
+
+			{/* FOR BETA TESTING */}
+			{!!session?.user && (
+				<Notice
+					isClosable
+					onClose={function noRefCheck() {}}
+					style={{
+						marginBottom: '-1rem'
+					}}
+					title={
+						<>
+							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
+							de vos retours depuis{' '}
+							<a href="https://tally.so/r/m6kyyB" target="_blank">
+								ce court formulaire
+							</a>
+						</>
+					}
+				/>
+			)}
+			{/* END FOR BETA TESTING */}
 			<main id="main" role="main" tabIndex={-1}>
 				{children}
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
-					accessibility="partially compliant"
+					accessibility="non compliant"
 					bottomItems={[
 						{
 							text: 'Données personnelles',

@@ -22,6 +22,8 @@ import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
+import { betaTestXwikiIds } from '@/src/utils/tools';
 
 interface Props {
 	product: Product;
@@ -32,16 +34,27 @@ const public_modal = createModal({
 	isOpenedByDefault: false
 });
 
-const SectionWrapper = ({
+export const SectionWrapper = ({
 	title,
+	alert = '',
+	total,
 	children
 }: {
 	title: string;
+	alert?: string;
+	total: number;
 	children: React.ReactNode;
 }) => {
+	const { classes, cx } = useStyles();
+
+	if (!total) return;
+
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
 			<h3>{title}</h3>
+			{alert && (
+				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
+			)}
 			<div>{children}</div>
 		</div>
 	);
@@ -61,6 +74,9 @@ const ProductStatPage = (props: Props) => {
 	const [endDate, setEndDate] = useState<string>(
 		new Date().toISOString().split('T')[0]
 	);
+
+	const debouncedStartDate = useDebounce<string>(startDate, 500);
+	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -94,26 +110,29 @@ const ProductStatPage = (props: Props) => {
 		numberPerPage: 0,
 		page: 1,
 		product_id: product.id,
-		start_date: startDate,
-		end_date: endDate
+		start_date: debouncedStartDate,
+		end_date: debouncedEndDate
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
 			field_code: 'verbatim',
-			start_date: startDate,
-			end_date: endDate
+			start_date: debouncedStartDate,
+			end_date: debouncedEndDate
 		});
 
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbReviewsWithFiltersForm1 =
+		reviewsDataWithFilters?.metadata.countForm1 || 0;
+	const nbReviewsWithFiltersForm2 =
+		reviewsDataWithFilters?.metadata.countForm2 || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
-	const percetengeVerbatimsOfReviews =
-		((nbVerbatims / nbReviews) * 100).toFixed(0) || '0';
+	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
+		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
+		: 0;
 
 	const handleButtonClick = () => {
 		router.push({
@@ -214,7 +233,11 @@ const ProductStatPage = (props: Props) => {
 								title="Verbatims"
 								kpi={nbVerbatims}
 								isLoading={isLoadingNbVerbatims}
-								desc={`soit ${percetengeVerbatimsOfReviews} % des répondants`}
+								desc={
+									percetengeVerbatimsOfReviews
+										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
+										: undefined
+								}
 								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
 							/>
 						</div>
@@ -235,12 +258,15 @@ const ProductStatPage = (props: Props) => {
 					productId={product.id}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
-					total={nbReviews}
+					total={nbReviewsWithFilters}
 				/>
-				<SectionWrapper title="Détails des réponses">
+				<SectionWrapper
+					title="Détails des réponses"
+					total={nbReviewsWithFilters}
+				>
 					<SmileyQuestionViz
 						fieldCode="satisfaction"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -248,45 +274,48 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarQuestionViz
 						fieldCode="comprehension"
-						total={nbReviews}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
-						total={nbReviews}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_reached"
-						total={nbReviews}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
-						total={nbReviews}
+						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
-				<SectionWrapper title="Détails des anciennes réponses">
+				<SectionWrapper
+					title="Détails des anciennes réponses"
+					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
+					total={nbReviewsWithFilters}
+				>
 					<SmileyQuestionViz
 						fieldCode="easy"
-						total={nbReviews}
+						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
-						required
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="difficulties"
-						total={nbReviews}
+						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -327,6 +356,17 @@ const useStyles = tss.create({
 			'.fr-btn': {
 				marginTop: '1rem'
 			}
+		}
+	},
+	highlight: {
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		margin: 0,
+		paddingTop: fr.spacing('7v'),
+		paddingBottom: fr.spacing('7v'),
+		paddingLeft: fr.spacing('12v'),
+		marginBottom: fr.spacing('6v'),
+		p: {
+			margin: 0
 		}
 	}
 });

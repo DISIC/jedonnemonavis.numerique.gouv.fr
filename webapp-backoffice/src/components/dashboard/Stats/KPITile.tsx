@@ -1,9 +1,10 @@
-import React, { type ReactNode, type CSSProperties } from 'react';
-import { symToStr } from 'tsafe/symToStr';
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { getLink } from '@codegouvfr/react-dsfr/link';
-import { tss } from 'tss-react/dsfr';
 import { Skeleton } from '@mui/material';
+import { type CSSProperties, type ReactNode } from 'react';
+import { symToStr } from 'tsafe/symToStr';
+import { tss } from 'tss-react/dsfr';
 
 export type KPITileProps = {
 	id?: string;
@@ -32,10 +33,6 @@ export const KPITile = (props: KPITileProps) => {
 
 	const { Link } = getLink();
 
-	const kpiFormatted = kpi
-		?.toString()
-		.replace(/(?<=[0-9])(?=(?:[0-9]{3})+(?![0-9]))/g, ' ');
-
 	return (
 		<div className={cx(fr.cx('fr-tile'))}>
 			<div className={cx(fr.cx('fr-tile__body'))}>
@@ -52,7 +49,7 @@ export const KPITile = (props: KPITileProps) => {
 					{isLoading ? (
 						<Skeleton variant="text" width="20%" height="2rem" />
 					) : (
-						kpiFormatted
+						formatNumberWithSpaces(kpi)
 					)}
 				</p>
 				<p

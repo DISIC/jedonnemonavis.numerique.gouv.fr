@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { Skeleton } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
 
@@ -35,9 +36,7 @@ const GlobalChart = ({
 	singleRowLabel,
 	tableHeaders
 }: Props) => {
-	const totalFormatted = total
-		?.toString()
-		.replace(/(?<=[0-9])(?=(?:[0-9]{3})+(?![0-9]))/g, ' ');
+	const totalFormatted = formatNumberWithSpaces(total ? total : 0);
 	const [view, setView] = useState<'chart' | 'table'>('chart');
 	const { classes, cx } = useStyles({ view });
 
