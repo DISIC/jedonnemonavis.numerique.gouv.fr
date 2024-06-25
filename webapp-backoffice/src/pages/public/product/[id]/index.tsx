@@ -1,5 +1,5 @@
+import prisma from '@/src/utils/db';
 import { isValidDate } from '@/src/utils/tools';
-import { PrismaClient } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 
 const ProductPage = () => {
@@ -13,7 +13,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		'date-fin': endDate,
 		xwiki
 	} = context.query;
-	const prisma = new PrismaClient();
 	const product = await prisma.product.findUnique({
 		where:
 			xwiki === 'true'
@@ -24,6 +23,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 						id: parseInt(id as string)
 					}
 	});
+
+	prisma.$disconnect();
 
 	if (!product || !product.isPublic) {
 		return {

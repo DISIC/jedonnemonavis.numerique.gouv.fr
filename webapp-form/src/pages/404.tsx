@@ -6,13 +6,9 @@ export default function JDMA404() {
 
   return (
     <div className={cx(fr.cx("fr-container"), classes.root)}>
-      <h1>Ce formulaire n'existe pas</h1>
+      <h1>Formulaire non trouvé</h1>
       <div className={fr.cx("fr-hint-text")}>
-        Besoin d'aide ? Une question ?<br />
-        Vous pouvez contacter notre équipe à l'adresse suivante :{" "}
-        <a href="mailto:support@jedonnemonavis.numerique.gouv.fr">
-          support@jedonnemonavis.numerique.gouv.fr
-        </a>
+        Le lien est invalide ou ce formulaire n'existe plus.
       </div>
     </div>
   );

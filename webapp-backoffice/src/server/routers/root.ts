@@ -6,6 +6,7 @@ import { accessRightRouter } from './accessRight';
 import { adminEntityRightRouter } from './adminEntityRight';
 import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
+import { exportRouter } from './export';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
 import { answerRouter } from './answer';
@@ -21,6 +22,7 @@ export const appRouter = router({
 	adminEntityRight: adminEntityRightRouter,
 	button: buttonRouter,
 	favorite: favoriteRouter,
+	export: exportRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,
 	answer: answerRouter,

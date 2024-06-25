@@ -53,6 +53,12 @@ enum AnswerIntention {
   neutral
 }
 
+enum StatusExport {
+  idle
+  processing
+  done
+}
+
 // Next auth
 model User {
   id                   Int                   @id @default(autoincrement())
@@ -73,6 +79,7 @@ model User {
   entities             Entity[]
   favorites            Favorite[]
   api_keys             ApiKey[]
+  exports              Export[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -199,6 +206,7 @@ model Product {
   reviews         Review[]
   isPublic        Boolean?
   api_keys        ApiKey[]
+  Export          Export[]
 }
 
 model AdminEntityRight {
@@ -267,24 +275,39 @@ model Review {
 }
 
 model Answer {
-  id               Int              @default(autoincrement())
-  field_label      String
-  field_code       String
-  answer_item_id   Int
-  answer_text      String
-  intention        AnswerIntention?
-  kind             AnswerKind
-  review           Review           @relation(fields: [review_id, review_created_at], references: [id, created_at])
-  review_id        Int
-  review_created_at DateTime @default(now())
-  parent_answer    Answer?          @relation("ParentAnswer", fields: [parent_answer_id, created_at], references: [id, created_at])
-  parent_answer_id Int?
-  child_answers    Answer[]         @relation("ParentAnswer")
-  created_at       DateTime         @default(now())
+  id                Int              @default(autoincrement())
+  field_label       String
+  field_code        String
+  answer_item_id    Int
+  answer_text       String
+  intention         AnswerIntention?
+  kind              AnswerKind
+  review            Review           @relation(fields: [review_id, review_created_at], references: [id, created_at])
+  review_id         Int
+  review_created_at DateTime         @default(now())
+  parent_answer     Answer?          @relation("ParentAnswer", fields: [parent_answer_id, created_at], references: [id, created_at])
+  parent_answer_id  Int?
+  child_answers     Answer[]         @relation("ParentAnswer")
+  created_at        DateTime         @default(now())
 
   @@id([id, created_at])
   @@index([intention, field_code, review_id, review_created_at, created_at])
   @@index([review_id, review_created_at])
+	@@index([review_id, review_created_at, field_code])
   @@index([parent_answer_id, created_at])
   @@index([review_id, field_code])
+}
+
+model Export {
+  id         Int          @id @default(autoincrement())
+  created_at DateTime     @default(now())
+  user       User         @relation(fields: [user_id], references: [id])
+  user_id    Int
+  product    Product      @relation(fields: [product_id], references: [id])
+  product_id Int
+  params     String?
+  status     StatusExport
+  startDate  DateTime?
+  endDate    DateTime?
+  link       String?
 }
