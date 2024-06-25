@@ -40,34 +40,6 @@ const AnswersChart = ({
 		{ initialData: { data: [] } }
 	);
 
-	interface CountByFieldCode {
-		name: string;
-		value: number;
-	}
-
-	interface Data {
-		name: string;
-		value: number;
-	}
-
-	interface IntervalData {
-		name: string;
-		data: Data[];
-	}
-
-	const transformCountByFieldCode = (
-		data: CountByFieldCode[]
-	): IntervalData[] => {
-		return data.map(item => ({
-			name: item.name,
-			data: [{ name: '', value: item.value }]
-		}));
-	};
-
-	const intervalData: IntervalData[] = transformCountByFieldCode(
-		countByFieldCodePerMonth
-	);
-
 	if (isLoadingCountByFieldCodePerMonth) {
 		return (
 			<div className={classes.mainSection}>
@@ -81,11 +53,9 @@ const AnswersChart = ({
 	return (
 		<>
 			<GlobalChart
-				title="Evolution des réponses"
+				title="Évolution des réponses"
 				total={total}
-				intervalData={intervalData}
-				tableHeaders={intervalData.map(data => data.name)}
-				singleRowLabel="Nombre de réponses"
+				data={countByFieldCodePerMonth}
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}

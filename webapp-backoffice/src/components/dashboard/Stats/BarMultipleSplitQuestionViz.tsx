@@ -118,65 +118,6 @@ const BarMultipleSplitQuestionViz = ({
 		return returnValue;
 	});
 
-	const dataTable = formatedFieldCodeData.flatMap(item => {
-		let total = Object.values(item)
-			.filter(val => typeof val === 'number')
-			.reduce((acc, val) => (acc as number) + (val as number), 0);
-
-		return Object.entries(item)
-			.filter(([key, value]) => key !== 'name')
-			.map(([key, value]) => ({
-				name: item.name,
-				value: value as number,
-				'Pourcentage de réponses':
-					typeof total === 'number' && total !== 0
-						? Math.round(((value as number) / total) * 100)
-						: 0,
-				'Total des réponses': total as number,
-				type: key
-			}));
-	});
-
-	const labelsSet = new Set<string>(
-		formatedFieldCodeData.flatMap(Object.keys).filter(key => key !== 'name')
-	);
-	const labels: string[] = Array.from(labelsSet);
-	labels.push('Total des réponses');
-
-	// DATA FOR TABLE INTERVAL
-	interface FormattedData {
-		name: string;
-		data: { name: string; value: number }[];
-	}
-
-	const transformData = (data: any): FormattedData[] => {
-		const formattedData: FormattedData[] = [];
-
-		Object.keys(data).forEach(interval => {
-			const returnValue = {
-				name: interval,
-				data: [] as { name: string; value: number }[]
-			};
-
-			data[interval].forEach((bucket: any) => {
-				const newData = {
-					name: bucket.answer_text,
-					value: bucket.doc_count
-				};
-
-				returnValue.data.push(newData);
-			});
-
-			formattedData.push(returnValue);
-		});
-
-		return formattedData;
-	};
-
-	const tableDataInterval: FormattedData[] = transformData(
-		resultFieldCodeInterval.data
-	);
-
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
@@ -194,9 +135,8 @@ const BarMultipleSplitQuestionViz = ({
 		>
 			<GlobalChart
 				title="Répartition des réponses"
-				total={resultFieldCode.metadata.total}
-				data={dataTable}
-				tableHeaders={labels}
+				data={formatedFieldCodeData}
+				reverseData
 			>
 				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
@@ -206,10 +146,9 @@ const BarMultipleSplitQuestionViz = ({
 				/>
 			</GlobalChart>
 			<GlobalChart
-				title="Evolution des réponses"
+				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
-				tableHeaders={tableDataInterval.map(data => data.name)}
-				intervalData={tableDataInterval}
+				data={formatedFieldCodeDataPerInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

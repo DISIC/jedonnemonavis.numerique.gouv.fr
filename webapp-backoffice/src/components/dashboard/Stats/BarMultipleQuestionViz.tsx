@@ -169,16 +169,15 @@ const BarMultipleQuestionViz = ({
 			<GlobalChart
 				title="Répartition des réponses"
 				total={resultFieldCode.metadata.total}
-				data={dataTable}
-				tableHeaders={['Nombre de réponses', 'Pourcentage de réponses']}
+				data={formatedFieldCodeData}
+				reverseData
 			>
 				<BarVerticalChart data={formatedFieldCodeData} />
 			</GlobalChart>
 			<GlobalChart
-				title="Evolution des réponses"
+				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
-				tableHeaders={tableDataInterval.map(data => data.name)}
-				intervalData={tableDataInterval}
+				data={formatedFieldCodeDataPerInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

@@ -1,216 +1,160 @@
-import { formatNumberWithSpaces, groupDataByName } from '@/src/utils/tools';
+import {
+	formatNumberWithSpaces,
+	getKeysFromArrayOfObjects
+} from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-export interface DataItem {
-	name: string;
-	value: number;
-	'Pourcentage de réponses'?: number;
-	'Total des réponses'?: number;
-	type?: string;
+interface AnyKey {
+	[key: string]: string | number;
 }
 
-interface FormattedData {
+export interface FormattedData {
 	name: string;
-	data: { name: string; value: number }[];
+	[key: string]: number | string;
 }
 
 type Props = {
 	children: React.ReactNode;
 	title: string;
 	total?: number;
-	data?: DataItem[];
-	intervalData?: FormattedData[];
-	singleRowLabel?: string;
-	tableHeaders?: string[];
+	data: FormattedData[];
+	reverseData?: boolean;
 };
 
-const GlobalChart = ({
-	children,
-	title,
-	total,
-	data,
-	intervalData,
-	singleRowLabel,
-	tableHeaders
-}: Props) => {
+const reverseDataInput = (inputArray: FormattedData[]) => {
+	const outputArray: FormattedData[] = [];
+
+	if (!inputArray.length) return outputArray;
+
+	const hasMultipleValues = !('value' in inputArray[0]);
+
+	if (hasMultipleValues) {
+		inputArray.forEach(item => {
+			Object.keys(item)
+				.filter(key => key !== 'name')
+				.forEach(key => {
+					const targetItemIndex = outputArray.findIndex(
+						oaItem => oaItem.name === key
+					);
+					if (targetItemIndex !== -1) {
+						(outputArray[targetItemIndex][item.name] as number) += parseInt(
+							item[key].toString()
+						);
+					} else {
+						outputArray.push({
+							name: key,
+							[item.name]: item[key]
+						});
+					}
+				});
+		});
+		console.log(outputArray);
+	} else {
+		let outputObject: FormattedData = { name: 'Nombre de réponses' };
+
+		inputArray.forEach(item => {
+			outputObject[item.name] = item.value;
+		});
+
+		outputArray.push(outputObject);
+	}
+
+	return outputArray;
+};
+
+const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
 	const { classes, cx } = useStyles({ view });
 
-	const hasSpecificData = data?.some(
-		d =>
-			(d.name === 'pas clair du tout' && d.value === 0) ||
-			(d.name === 'très clair' && d.value === 0)
+	if (!data.length) return <>{children}</>;
+
+	let cleanData = data.filter(
+		item =>
+			!item.name ||
+			(item.name !== 'pas clair du tout' && item.name !== 'très clair')
 	);
 
-	const filteredData = hasSpecificData
-		? data?.filter(
-				d =>
-					!(d.name === 'pas clair du tout' && d.value === 0) &&
-					!(d.name === 'très clair' && d.value === 0)
-			)
-		: data;
+	if (reverseData) {
+		cleanData = reverseDataInput(cleanData);
+	}
 
-	const getCellData = (data: DataItem[], header: string, index: number) => {
-		const matchingItem = data.find(
-			item => item.type === header || header === 'Nombre de réponses'
-		);
-		if (header === 'Nombre de réponses') {
-			const valueItem = data.find(item => item.value !== undefined);
-			return <td key={index}>{valueItem ? valueItem.value : 0}</td>;
-		} else if (header === 'Pourcentage de réponses') {
-			const percentageItem = data.find(
-				item => item['Pourcentage de réponses'] !== undefined
-			);
+	const headers = cleanData.map(item => item.name);
+	const singleRow =
+		Object.keys(cleanData[0]).length === 2 && 'value' in cleanData[0];
+
+	const cells = cleanData
+		.filter(
+			item =>
+				!item.name ||
+				(item.name !== 'pas clair du tout' && item.name !== 'très clair')
+		)
+		.map(item => {
+			const { name, ...rest } = item;
+			return Object.keys(rest)
+				.filter(key => !key.includes('value_'))
+				.reduce((obj, key) => {
+					obj[key] = rest[key];
+					return obj;
+				}, {} as AnyKey);
+		});
+
+	const rows = getKeysFromArrayOfObjects(cells);
+
+	const displayCellValue = (
+		cell: AnyKey,
+		key: keyof FormattedData,
+		dataIndex: number
+	) => {
+		const value = parseInt((cell[key] || 0).toString());
+		const attachedValue = cleanData[dataIndex][`value_${key}`];
+
+		if (attachedValue)
+			return Math.round(value * 10) / 10 + `% (${attachedValue})`;
+
+		return Math.round(value);
+	};
+
+	const displayRows = () => {
+		if (singleRow) {
 			return (
-				<td key={index}>
-					{percentageItem ? percentageItem['Pourcentage de réponses'] : 0}%
-				</td>
-			);
-		} else if (header === 'Total des réponses') {
-			const totalItem = data.find(
-				item => item['Total des réponses'] !== undefined
-			);
-			return (
-				<td key={index}>{totalItem ? totalItem['Total des réponses'] : 0}</td>
-			);
-		} else {
-			return (
-				<td key={index}>
-					{matchingItem ? matchingItem.value : 0}{' '}
-					{matchingItem?.['Pourcentage de réponses']
-						? `(${matchingItem?.['Pourcentage de réponses']}%)`
-						: ''}
-				</td>
+				<tr>
+					<td>Nombre de réponses</td>
+					{cells.map((c, index) => (
+						<td key={`${c}_${index}`}>{c.value}</td>
+					))}
+				</tr>
 			);
 		}
+
+		return rows.map((r, index) => (
+			<tr key={`${r}_${index}`}>
+				<td>{r}</td>
+				{cells.map((c, indexC) => (
+					<td key={`${r}_${index}_${c}_${indexC}`}>
+						{displayCellValue(c, r, indexC)}
+					</td>
+				))}
+			</tr>
+		));
 	};
 
 	const displayTable = () => {
-		if (filteredData) {
-			const groupedData = groupDataByName(filteredData);
-
-			return (
-				<div className={classes.tableContainer}>
-					<table className={cx(classes.table)}>
-						<thead>
-							<tr>
-								<th></th>
-								{singleRowLabel && !tableHeaders?.length ? (
-									filteredData.map(d => (
-										<th key={d.name}>
-											{hasSpecificData ? (
-												<>
-													{d.name}
-													{d.name === '1' && (
-														<div className={cx(classes.customValue)}>
-															<span>pas clair du tout</span>
-														</div>
-													)}
-													{d.name === '5' && (
-														<div className={cx(classes.customValue)}>
-															<span>très clair</span>
-														</div>
-													)}
-												</>
-											) : (
-												<> {d.name}</>
-											)}
-										</th>
-									))
-								) : (
-									<>
-										{tableHeaders?.map((label, index) => (
-											<th key={index}>{label}</th>
-										))}
-									</>
-								)}
-							</tr>
-						</thead>
-						<tbody>
-							{singleRowLabel ? (
-								<tr>
-									<td className={cx(classes.categoryLabel)}>
-										{singleRowLabel}
-									</td>
-									{filteredData?.map(d => <td key={d.name}>{d.value}</td>)}
-								</tr>
-							) : (
-								<>
-									{Object.keys(groupedData).map(name => (
-										<tr key={name}>
-											<td>{name}</td>
-											{tableHeaders?.map((header, index) => {
-												return getCellData(groupedData[name], header, index);
-											})}
-										</tr>
-									))}
-								</>
-							)}
-						</tbody>
-					</table>
-				</div>
-			);
-		}
-
-		if (intervalData?.length) {
-			const allCategoryNames = Array.from(
-				new Set(
-					intervalData.flatMap(interval => interval.data.map(data => data.name))
-				)
-			);
-
-			return (
-				<div className={classes.tableContainer}>
-					<table className={cx(classes.table)}>
-						<thead>
-							<tr>
-								<th></th>
-								{tableHeaders?.map(d => <th key={d}> {d}</th>)}
-							</tr>
-						</thead>
-						<tbody>
-							{singleRowLabel ? (
-								<tr>
-									<td className={cx(classes.categoryLabel)}>
-										{singleRowLabel}
-									</td>
-									{intervalData.map((interval, intervalIndex) => (
-										<React.Fragment key={intervalIndex}>
-											{interval.data.map((data, dataIndex) => (
-												<td key={dataIndex}>{data.value}</td>
-											))}
-										</React.Fragment>
-									))}
-								</tr>
-							) : (
-								<>
-									{allCategoryNames.map((categoryName, categoryIndex) => (
-										<tr key={categoryIndex}>
-											<td className={cx(classes.categoryLabel)}>
-												{categoryName}
-											</td>
-											{intervalData.map((interval, intervalIndex) => {
-												const categoryData = interval.data.find(
-													data => data.name === categoryName
-												);
-												return (
-													<td key={intervalIndex}>
-														{categoryData ? categoryData.value : 0}
-													</td>
-												);
-											})}
-										</tr>
-									))}
-								</>
-							)}
-						</tbody>
-					</table>
-				</div>
-			);
-		}
+		return (
+			<div className={cx(classes.tableContainer)}>
+				<table className={cx(fr.cx('fr-table'), classes.table)}>
+					<thead>
+						<td></td>
+						{headers.map((h, index) => (
+							<td key={`${h}_${index}`}>{h}</td>
+						))}
+					</thead>
+					<tbody>{displayRows()}</tbody>
+				</table>
+			</div>
+		);
 	};
 
 	return (
@@ -260,7 +204,6 @@ const useStyles = tss.withName(GlobalChart.name).create(() => ({
 		flexDirection: 'column',
 		gap: '0.25rem'
 	},
-
 	tableContainer: {
 		overflowX: 'auto',
 		width: '100%'
