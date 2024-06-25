@@ -128,24 +128,26 @@ const getDefaultValues = async ({
 		}
 	});
 
-	const defaultValuesBuckets = defaultValues.hits.hits
-		.filter(
+	let tmpHits = defaultValues.hits.hits;
+
+	if (onlyParentValues) {
+		tmpHits = tmpHits.filter(
 			hit =>
-				hit._source &&
-				onlyParentValues &&
-				hit._source.answer_text.includes('avec l’administration')
-		)
-		.map(hit => {
-			const { answer_text, intention, field_label } =
-				hit._source as ElkAnswerDefaults;
-			let tmpAnswerText = !onlyParentValues
-				? answer_text
-				: answer_text.replace(/\s*avec\s*l’administration/, '');
-			return {
-				key: `${tmpAnswerText}#${intention}#${field_label}`,
-				doc_count: 0
-			};
-		});
+				hit._source && hit._source.answer_text.includes('avec l’administration')
+		);
+	}
+
+	const defaultValuesBuckets = tmpHits.map(hit => {
+		const { answer_text, intention, field_label } =
+			hit._source as ElkAnswerDefaults;
+		let tmpAnswerText = !onlyParentValues
+			? answer_text
+			: answer_text.replace(/\s*avec\s*l’administration/, '');
+		return {
+			key: `${tmpAnswerText}#${intention}#${field_label}`,
+			doc_count: 0
+		};
+	});
 
 	return defaultValuesBuckets;
 };
