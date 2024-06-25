@@ -11,6 +11,7 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { AnswerIntention } from '@prisma/client';
 import React from 'react';
+import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 
 interface CustomModalProps {
@@ -61,9 +62,6 @@ const ReviewFiltersModal = (props: Props) => {
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
 				{['good', 'medium', 'bad'].map(intention => (
 					<Button
-						iconId={getStatsIcon({
-							intention: (intention ?? 'neutral') as AnswerIntention
-						})}
 						onClick={() => {
 							setTmpFilters({
 								...tmpFilters,
@@ -86,6 +84,14 @@ const ReviewFiltersModal = (props: Props) => {
 							})
 						}}
 					>
+						<Image
+							alt="smiley"
+							src={`/assets/smileys/${getStatsIcon({
+								intention: (intention ?? 'neutral') as AnswerIntention
+							})}.svg`}
+							width={15}
+							height={15}
+						/>
 						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
 					</Button>
 				))}
@@ -244,7 +250,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 	},
 	badge: {
 		marginRight: 10,
-		cursor: 'pointer'
+		cursor: 'pointer',
+		gap: '0.25rem'
 	},
 	selectedOption: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.hover

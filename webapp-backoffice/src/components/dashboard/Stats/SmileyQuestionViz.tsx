@@ -13,6 +13,7 @@ import { AnswerIntention } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import SmileyBarChart from '../../chart/SmileyBarChart';
 import QuestionWrapper from './QuestionWrapper';
+import Image from 'next/image';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -143,23 +144,18 @@ const SmileyQuestionViz = ({
 									width: `${percentage}%`
 								}}
 							>
-								<span
-									className={cx(
-										fr.cx(
-											percentage >= limitToShowTopInfos
-												? getStatsIcon({
-														intention: rfc.intention as AnswerIntention
-													})
-												: undefined
-										),
-										classes.distributionIcon
-									)}
-									style={{
-										color: getStatsColor({
+								{percentage >= limitToShowTopInfos ? (
+									<Image
+										alt="smiley"
+										src={`/assets/smileys/${getStatsIcon({
 											intention: rfc.intention as AnswerIntention
-										})
-									}}
-								/>
+										})}.svg`}
+										width={40}
+										height={40}
+									/>
+								) : (
+									<span className={cx(classes.distributionIcon)}></span>
+								)}
 								<label className={classes.distributionLabel}>
 									{percentage >= limitToShowTopInfos && rfc.answer_text}
 								</label>
@@ -211,14 +207,14 @@ const useStyles = tss.create({
 		alignItems: 'center'
 	},
 	distributionIcon: {
-		height: '3rem',
+		height: '2.5rem',
 		'&::before': {
 			width: '3rem',
 			height: '3rem'
 		}
 	},
 	distributionLabel: {
-		marginTop: fr.spacing('4v'),
+		marginTop: fr.spacing('2v'),
 		marginBottom: fr.spacing('2v'),
 		height: '1.5rem'
 	},

@@ -37,9 +37,7 @@ export const getStatsColor = ({
 				? fr.colors.decisions.text.default.success.default
 				: fr.colors.decisions.background.contrast.success.default;
 		case AnswerIntention.medium:
-			return kind === 'text'
-				? fr.colors.decisions.text.label.yellowTournesol.default
-				: fr.colors.decisions.background.alt.yellowTournesol.default;
+			return kind === 'text' ? '#FF9940' : '#FFF4EB';
 		case AnswerIntention.bad:
 			return kind === 'text'
 				? fr.colors.decisions.text.default.error.default
@@ -56,13 +54,13 @@ export const getStatsIcon = ({
 }) => {
 	switch (intention) {
 		case AnswerIntention.good:
-			return 'ri-emotion-happy-line';
+			return 'good';
 		case AnswerIntention.medium:
-			return 'ri-emotion-normal-line';
+			return 'medium';
 		case AnswerIntention.bad:
-			return 'ri-emotion-unhappy-line';
+			return 'bad';
 		default:
-			return 'ri-question-line';
+			return 'question';
 	}
 };
 
