@@ -1,6 +1,7 @@
 import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
 import { AnswerIntention } from '@prisma/client';
+import { DataItem } from '../components/dashboard/Stats/GlobalChart';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -317,3 +318,16 @@ export const newFormFieldCodes = [
 	'contact_reached',
 	'contact_satisfaction'
 ];
+
+export const groupDataByName = (
+	data: DataItem[]
+): { [name: string]: DataItem[] } => {
+	let groupedData: { [name: string]: DataItem[] } = {};
+	data.forEach(d => {
+		if (!groupedData[d.name]) {
+			groupedData[d.name] = [];
+		}
+		groupedData[d.name].push(d);
+	});
+	return groupedData;
+};

@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import { formatNumberWithSpaces, groupDataByName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import { formatNumberWithSpaces } from '@/src/utils/tools';
-import { Skeleton } from '@mui/material';
+import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-interface DataItem {
+export interface DataItem {
 	name: string;
 	value: number;
 	'Pourcentage de réponses'?: number;
@@ -36,39 +35,61 @@ const GlobalChart = ({
 	singleRowLabel,
 	tableHeaders
 }: Props) => {
-	const totalFormatted = formatNumberWithSpaces(total ? total : 0);
+	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
 	const { classes, cx } = useStyles({ view });
 
 	const hasSpecificData = data?.some(
 		d =>
-			(d.name === 'incomprehensible' && d.value === 0) ||
+			(d.name === 'pas clair du tout' && d.value === 0) ||
 			(d.name === 'très clair' && d.value === 0)
 	);
 
 	const filteredData = hasSpecificData
 		? data?.filter(
 				d =>
-					!(d.name === 'incomprehensible' && d.value === 0) &&
+					!(d.name === 'pas clair du tout' && d.value === 0) &&
 					!(d.name === 'très clair' && d.value === 0)
 			)
 		: data;
 
-	const table = () => {
-		if (filteredData) {
-			const groupDataByName = (
-				data: DataItem[]
-			): { [name: string]: DataItem[] } => {
-				let groupedData: { [name: string]: DataItem[] } = {};
-				data.forEach(d => {
-					if (!groupedData[d.name]) {
-						groupedData[d.name] = [];
-					}
-					groupedData[d.name].push(d);
-				});
-				return groupedData;
-			};
+	const getCellData = (data: DataItem[], header: string, index: number) => {
+		const matchingItem = data.find(
+			item => item.type === header || header === 'Nombre de réponses'
+		);
+		if (header === 'Nombre de réponses') {
+			const valueItem = data.find(item => item.value !== undefined);
+			return <td key={index}>{valueItem ? valueItem.value : 0}</td>;
+		} else if (header === 'Pourcentage de réponses') {
+			const percentageItem = data.find(
+				item => item['Pourcentage de réponses'] !== undefined
+			);
+			return (
+				<td key={index}>
+					{percentageItem ? percentageItem['Pourcentage de réponses'] : 0}%
+				</td>
+			);
+		} else if (header === 'Total des réponses') {
+			const totalItem = data.find(
+				item => item['Total des réponses'] !== undefined
+			);
+			return (
+				<td key={index}>{totalItem ? totalItem['Total des réponses'] : 0}</td>
+			);
+		} else {
+			return (
+				<td key={index}>
+					{matchingItem ? matchingItem.value : 0}{' '}
+					{matchingItem?.['Pourcentage de réponses']
+						? `(${matchingItem?.['Pourcentage de réponses']}%)`
+						: ''}
+				</td>
+			);
+		}
+	};
 
+	const displayTable = () => {
+		if (filteredData) {
 			const groupedData = groupDataByName(filteredData);
 
 			return (
@@ -85,7 +106,7 @@ const GlobalChart = ({
 													{d.name}
 													{d.name === '1' && (
 														<div className={cx(classes.customValue)}>
-															<span>incomprehensible</span>
+															<span>pas clair du tout</span>
 														</div>
 													)}
 													{d.name === '5' && (
@@ -122,52 +143,7 @@ const GlobalChart = ({
 										<tr key={name}>
 											<td>{name}</td>
 											{tableHeaders?.map((header, index) => {
-												const matchingItem = groupedData[name].find(
-													item =>
-														item.type === header ||
-														header === 'Nombre de réponses'
-												);
-												if (header === 'Nombre de réponses') {
-													const valueItem = groupedData[name].find(
-														item => item.value !== undefined
-													);
-													return (
-														<td key={index}>
-															{valueItem ? valueItem.value : 0}
-														</td>
-													);
-												} else if (header === 'Pourcentage de réponses') {
-													const percentageItem = groupedData[name].find(
-														item =>
-															item['Pourcentage de réponses'] !== undefined
-													);
-													return (
-														<td key={index}>
-															{percentageItem
-																? percentageItem['Pourcentage de réponses']
-																: 0}
-															%
-														</td>
-													);
-												} else if (header === 'Total des réponses') {
-													const totalItem = groupedData[name].find(
-														item => item['Total des réponses'] !== undefined
-													);
-													return (
-														<td key={index}>
-															{totalItem ? totalItem['Total des réponses'] : 0}
-														</td>
-													);
-												} else {
-													return (
-														<td key={index}>
-															{matchingItem ? matchingItem.value : 0}{' '}
-															{matchingItem?.['Pourcentage de réponses']
-																? `(${matchingItem?.['Pourcentage de réponses']}%)`
-																: ''}
-														</td>
-													);
-												}
+												return getCellData(groupedData[name], header, index);
 											})}
 										</tr>
 									))}
@@ -241,8 +217,10 @@ const GlobalChart = ({
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
-					<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
-					{totalFormatted && <span>{totalFormatted} réponses</span>}
+					<h6 className={fr.cx('fr-mb-0')}>{title}</h6>
+					{totalFormatted && (
+						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
+					)}
 				</div>
 				<div className={classes.flexAlignCenter}>
 					<button
@@ -252,6 +230,7 @@ const GlobalChart = ({
 							view !== 'chart' && classes.inactiveChartBtn
 						)}
 						onClick={() => setView('chart')}
+						role="tab"
 					>
 						Graphique
 					</button>
@@ -262,13 +241,14 @@ const GlobalChart = ({
 							view !== 'table' && classes.inactiveTableBtn
 						)}
 						onClick={() => setView('table')}
+						role="tab"
 					>
 						Tableau
 					</button>
 				</div>
 			</div>
 			<div className={classes.container}>
-				{view === 'chart' ? children : table()}
+				{view === 'chart' ? children : displayTable()}
 			</div>
 		</div>
 	);

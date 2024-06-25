@@ -79,18 +79,22 @@ const AnswersChart = ({
 	if (!total) return;
 
 	return (
-		<GlobalChart
-			title="Evolution des réponses"
-			total={total}
-			intervalData={intervalData}
-			tableHeaders={intervalData.map(data => data.name)}
-			singleRowLabel="Nombre de réponses"
-		>
-			<LineChart
-				data={countByFieldCodePerMonth}
-				labelAxisY="Nombre de réponses"
-			/>
-		</GlobalChart>
+		<>
+			<GlobalChart
+				title="Evolution des réponses"
+				total={total}
+				intervalData={intervalData}
+				tableHeaders={intervalData.map(data => data.name)}
+				singleRowLabel="Nombre de réponses"
+			>
+				<LineChart
+					data={countByFieldCodePerMonth}
+					labelAxisY="Nombre de réponses"
+				/>
+			</GlobalChart>
+
+			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
+		</>
 	);
 };
 

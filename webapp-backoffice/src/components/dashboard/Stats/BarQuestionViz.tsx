@@ -53,7 +53,7 @@ const BarQuestionViz = ({
 		);
 
 	const formatedFieldCodeData = [
-		{ name: 'incomprehensible', value: 0 },
+		{ name: 'pas clair du tout', value: 0 },
 		...resultFieldCode.data
 			.map(item => ({
 				name: item.answer_text,
@@ -121,6 +121,7 @@ const BarQuestionViz = ({
 		>
 			<GlobalChart
 				title="Répartition des réponses"
+				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeData}
 				singleRowLabel="Nombre de réponses"
 			>

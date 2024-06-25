@@ -121,7 +121,7 @@ const BarMultipleSplitQuestionViz = ({
 	const dataTable = formatedFieldCodeData.flatMap(item => {
 		let total = Object.values(item)
 			.filter(val => typeof val === 'number')
-			.reduce((acc, val) => acc + val, 0);
+			.reduce((acc, val) => (acc as number) + (val as number), 0);
 
 		return Object.entries(item)
 			.filter(([key, value]) => key !== 'name')
@@ -129,8 +129,10 @@ const BarMultipleSplitQuestionViz = ({
 				name: item.name,
 				value: value as number,
 				'Pourcentage de réponses':
-					total !== 0 ? Math.round(((value as number) / total) * 100) : 0,
-				'Total des réponses': total,
+					typeof total === 'number' && total !== 0
+						? Math.round(((value as number) / total) * 100)
+						: 0,
+				'Total des réponses': total as number,
 				type: key
 			}));
 	});
@@ -192,6 +194,7 @@ const BarMultipleSplitQuestionViz = ({
 		>
 			<GlobalChart
 				title="Répartition des réponses"
+				total={resultFieldCode.metadata.total}
 				data={dataTable}
 				tableHeaders={labels}
 			>

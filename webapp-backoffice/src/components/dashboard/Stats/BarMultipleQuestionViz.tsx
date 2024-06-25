@@ -168,6 +168,7 @@ const BarMultipleQuestionViz = ({
 		>
 			<GlobalChart
 				title="Répartition des réponses"
+				total={resultFieldCode.metadata.total}
 				data={dataTable}
 				tableHeaders={['Nombre de réponses', 'Pourcentage de réponses']}
 			>
