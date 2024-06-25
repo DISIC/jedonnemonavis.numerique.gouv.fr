@@ -52,6 +52,13 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
 	created_at: Date;
 }
 
+export interface ElkAnswerDefaults {
+	field_label: string;
+	field_code: string;
+	intention: AnswerIntention;
+	answer_text: string;
+}
+
 export type Hit = {
 	intention: string;
 	label: string;
