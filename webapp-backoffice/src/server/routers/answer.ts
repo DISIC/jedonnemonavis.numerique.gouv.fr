@@ -42,13 +42,15 @@ const queryCountByFieldCode = ({
 	product_id,
 	start_date,
 	end_date,
-	form_id
+	form_id,
+	only_parent_values
 }: {
 	field_code: string;
 	product_id: number;
 	start_date: string;
 	end_date: string;
 	form_id?: number;
+	only_parent_values?: boolean;
 }): QueryDslQueryContainer => {
 	let query: QueryDslQueryContainer = {
 		bool: {
@@ -90,6 +92,14 @@ const queryCountByFieldCode = ({
 				}
 			});
 		}
+	}
+
+	if (only_parent_values && query.bool && query.bool.must) {
+		(query.bool.must as QueryDslQueryContainer[]).push({
+			wildcard: {
+				'answer_text.keyword': '*avec l’administration'
+			}
+		});
 	}
 
 	return query;
@@ -333,10 +343,13 @@ export const answerRouter = router({
 			const parentFieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
-				query: queryCountByFieldCode({
-					...input,
-					field_code: 'contact_tried'
-				}),
+				query: {
+					...queryCountByFieldCode({
+						...input,
+						field_code: 'contact_tried',
+						only_parent_values: true
+					})
+				},
 				aggs: {
 					term: {
 						terms: {
