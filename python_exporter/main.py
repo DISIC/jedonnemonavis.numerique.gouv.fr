@@ -17,6 +17,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
+from datetime import datetime, timedelta
+import calendar
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -252,6 +254,10 @@ def build_filters_query(filters, search_term):
 def fetch_query_with_filters(conn, query, params):
     try:
         with conn.cursor() as cursor:
+            # Format the query with the parameters
+            # formatted_query = cursor.mogrify(query, params).decode('utf-8')
+            # print(f"Requête finale : {formatted_query}")
+
             cursor.execute(query, params)
             results = cursor.fetchall()
             return results
@@ -266,6 +272,19 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     print(f'\r{prefix} |{bar}| {percent}% ({iteration}) {suffix}', end='\r')
     if iteration == total:
         print()
+
+def get_month_ranges(start_date, end_date):
+    """Generate a list of (start, end) tuples for each month between start_date and end_date."""
+    ranges = []
+    current_date = start_date
+    while current_date <= end_date:
+        start_of_month = current_date.replace(day=1)
+        end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
+        if end_of_month > end_date:
+            end_of_month = end_date
+        ranges.append((start_of_month, end_of_month))
+        current_date = end_of_month + timedelta(days=1)
+    return ranges
 
 def main():
     print('------ START EXPORT ------')
@@ -342,8 +361,8 @@ def main():
         {f'AND {filters_query}' if filters_query else ''}
         """
 
-        start_date = filter_params.get('startDate', '1900-01-01')
-        end_date = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
+        start_date = datetime.strptime(filter_params.get('startDate', '1900-01-01'), '%Y-%m-%d')
+        end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')), '%Y-%m-%d')
         count_params = [product_id, start_date, end_date] + filters_values
         total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
         print(f"{total_reviews} avis concernés")
@@ -353,80 +372,83 @@ def main():
 
         all_reviews = []
         field_labels = set()
-                
 
-        offset = 0
+        # Get the month ranges
+        month_ranges = get_month_ranges(start_date, end_date)
         retrieved_reviews = 0
-        while True:
-            select_query_review = f"""
-            SELECT
-                r.id AS review_id,
-                r.form_id,
-                r.product_id,
-                r.button_id,
-                r.xwiki_id,
-                r.user_id,
-                r.created_at AS review_created_at,
-                (
-                    SELECT json_agg(
-                        json_build_object(
-                            'answer_id', a.id,
-                            'field_label', a.field_label,
-                            'field_code', a.field_code,
-                            'answer_item_id', a.answer_item_id,
-                            'answer_text', a.answer_text,
-                            'intention', a.intention,
-                            'kind', a.kind,
-                            'review_id', a.review_id,
-                            'review_created_at', a.review_created_at,
-                            'parent_answer_id', a.parent_answer_id,
-                            'created_at', a.created_at
+
+        for month_start, month_end in month_ranges:
+            print(f"Traitement des avis pour la période {month_start} - {month_end}")
+            offset = 0
+            while True:
+                select_query_review = f"""
+                SELECT
+                    r.id AS review_id,
+                    r.form_id,
+                    r.product_id,
+                    r.button_id,
+                    r.xwiki_id,
+                    r.user_id,
+                    r.created_at AS review_created_at,
+                    (
+                        SELECT json_agg(
+                            json_build_object(
+                                'answer_id', a.id,
+                                'field_label', a.field_label,
+                                'field_code', a.field_code,
+                                'answer_item_id', a.answer_item_id,
+                                'answer_text', a.answer_text,
+                                'intention', a.intention,
+                                'kind', a.kind,
+                                'review_id', a.review_id,
+                                'review_created_at', a.review_created_at,
+                                'parent_answer_id', a.parent_answer_id,
+                                'created_at', a.created_at
+                            )
                         )
-                    )
-                    FROM public."Answer" a
-                    WHERE r.id = a.review_id
-                    AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'
-                    AND a.created_at = review_created_at
-                ) AS answers
-            FROM
-                public."Review" r
-            WHERE
-                r.product_id = %s
-                AND r.created_at BETWEEN %s AND %s
+                        FROM public."Answer" a
+                        WHERE a.review_id = r.id
+                        AND a.review_created_at = r.created_at
+                        AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'
+                    ) AS answers
+                FROM
+                    public."Review" r
+                WHERE
+                    r.product_id = %s
+                    AND r.created_at BETWEEN %s AND %s
+                    {f'AND {filters_query}' if filters_query else ''}
+                GROUP BY
+                    r.id, r.form_id, r.product_id, r.button_id, r.xwiki_id, r.user_id, r.created_at
+                ORDER BY
+                    r.created_at DESC
+                LIMIT %s OFFSET %s;
+                """
 
-                {f'AND {filters_query}' if filters_query else ''}
-            GROUP BY
-                r.id, r.form_id, r.product_id, r.button_id, r.xwiki_id, r.user_id, r.created_at
-            ORDER BY
-                r.created_at ASC
-            LIMIT %s OFFSET %s;
-            """
+                query_params = [product_id, month_start, month_end] + filters_values + [PAGE_SIZE, offset]
+                results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
 
-            query_params = [product_id, start_date, end_date] + filters_values + [PAGE_SIZE, offset]
-            
-            results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
+                if not results_reviews:
+                    break
 
-            if not results_reviews:
-                break
+                for row in results_reviews:
+                    review_id, form_id, product_id, button_id, xwiki_id, user_id, review_created_at, answers = row
+                    review_data = {
+                        'review_id': review_id,
+                        'form_id': form_id,
+                        'product_id': product_id,
+                        'button_id': button_id,
+                        'xwiki_id': xwiki_id,
+                        'review_created_at': review_created_at,
+                        'answers': {answer['field_label']: answer['answer_text'] for answer in answers} if answers else {}
+                    }
+                    all_reviews.append(review_data)
+                    if answers:
+                        field_labels.update(review_data['answers'].keys())
 
-            for row in results_reviews:
-                review_id, form_id, product_id, button_id, xwiki_id, user_id, review_created_at, answers = row
-                review_data = {
-                    'review_id': review_id,
-                    'form_id': form_id,
-                    'product_id': product_id,
-                    'button_id': button_id,
-                    'xwiki_id': xwiki_id,
-                    'review_created_at': review_created_at,
-                    'answers': {answer['field_label']: answer['answer_text'] for answer in answers}
-                }
-                all_reviews.append(review_data)
-                field_labels.update(review_data['answers'].keys())
-
-            retrieved_reviews += len(results_reviews)
-            print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
-
-            offset += PAGE_SIZE
+                retrieved_reviews += len(results_reviews)
+                print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
+                
+                offset += PAGE_SIZE
 
         field_labels = sorted(field_labels)  # Sort field labels for consistent column order
 
