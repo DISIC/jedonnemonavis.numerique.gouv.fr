@@ -100,9 +100,7 @@ const ReviewLineVerbatim = ({
 								setDisplayMoreInfo(!displayMoreInfo);
 							}}
 							style={{
-								boxShadow: getStatsColor({
-									intention: review.satisfaction?.intention ?? 'neutral'
-								}),
+								boxShadow: 'none',
 								border: `solid ${getStatsColor({
 									intention: review.satisfaction?.intention ?? 'neutral'
 								})} 1px`,

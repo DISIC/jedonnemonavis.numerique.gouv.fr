@@ -60,7 +60,7 @@ export const getStatsIcon = ({
 		case AnswerIntention.bad:
 			return 'bad';
 		default:
-			return 'question';
+			return 'neutral';
 	}
 };
 
