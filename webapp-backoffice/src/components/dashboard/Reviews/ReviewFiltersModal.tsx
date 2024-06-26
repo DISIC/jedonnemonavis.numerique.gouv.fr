@@ -13,6 +13,7 @@ import { AnswerIntention } from '@prisma/client';
 import React from 'react';
 import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -69,6 +70,11 @@ const ReviewFiltersModal = (props: Props) => {
 									? tmpFilters.satisfaction.filter(item => item !== intention)
 									: [...tmpFilters.satisfaction, intention]
 							});
+							push([
+								'trackEvent',
+								'Avis',
+								`Filtre-Satisfaction: ${displayIntention(intention ?? 'neutral')}`
+							]);
 						}}
 						priority="tertiary"
 						className={cx(
@@ -120,6 +126,11 @@ const ReviewFiltersModal = (props: Props) => {
 														)
 													: [...tmpFilters.comprehension, rating]
 											});
+											push([
+												'trackEvent',
+												'Avis',
+												`Filtre-Notation: ${rating}/5`
+											]);
 										}}
 									/>
 									<label
@@ -154,6 +165,11 @@ const ReviewFiltersModal = (props: Props) => {
 										...tmpFilters,
 										needVerbatim: !tmpFilters.needVerbatim
 									});
+									push([
+										'trackEvent',
+										'Avis',
+										`Filtre-Complémentaire: Verbatim complété`
+									]);
 								}
 							}
 						}

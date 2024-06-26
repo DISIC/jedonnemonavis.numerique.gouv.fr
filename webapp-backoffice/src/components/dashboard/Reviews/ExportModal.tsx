@@ -7,6 +7,7 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { Loader } from '../../ui/Loader';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -147,7 +148,14 @@ const ExportModal = (props: Props) => {
 							priority: 'primary',
 							disabled: choice === null,
 							onClick: () => {
-								if (choice) validateExport();
+								if (choice) {
+									validateExport();
+									push([
+										'trackEvent',
+										'Avis',
+										`Filtre-Téléchargement: ${choice === 'all' ? 'Tous les avis' : 'En fonction des filtres'}`
+									]);
+								}
 							}
 						}
 					: {
