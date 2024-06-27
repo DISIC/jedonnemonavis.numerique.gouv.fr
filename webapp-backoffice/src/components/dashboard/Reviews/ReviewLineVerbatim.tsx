@@ -157,6 +157,7 @@ const useStyles = tss
 			flexShrink: 0
 		},
 		content: {
+			wordWrap: 'break-word',
 			span: {
 				backgroundColor: 'yellow'
 			}
