@@ -373,6 +373,7 @@ const ProductReviewsPage = (props: Props) => {
 									onSubmit={e => {
 										e.preventDefault();
 										setValidatedSearch(search);
+										setCurrentPage(1);
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>

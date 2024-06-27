@@ -21,13 +21,12 @@ const ReviewLine = ({
 	search: string;
 }) => {
 	const { cx, classes } = useStyles();
-	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(
-		(search !== '' &&
-			review.verbatim?.answer_text
-				?.toLowerCase()
-				.includes(search.toLowerCase())) ||
-			false
-	);
+	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(() => {
+		if (search === '') return false;
+		const searchWords = search.toLowerCase().split(' ');
+		const answerText = review.verbatim?.answer_text?.toLowerCase() || '';
+		return searchWords.every(word => answerText.includes(word));
+	});
 
 	const displayIntention = (intention: string) => {
 		switch (intention) {

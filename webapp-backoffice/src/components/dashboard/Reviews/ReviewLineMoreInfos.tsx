@@ -17,11 +17,13 @@ const ReviewLineMoreInfos = ({
 
 	const createMarkup = () => {
 		if (review.verbatim?.answer_text) {
-			const regex = new RegExp(search, 'gi');
+			const words = search.split(/\s+/).filter(Boolean);
+			const regex = new RegExp(`(${words.join('|')})`, 'gi');
 			const highlightedText = review.verbatim.answer_text.replace(
 				regex,
-				`<span>${search}</span>`
+				`<span>$1</span>`
 			);
+
 			return { __html: highlightedText };
 		}
 		return { __html: '-' };
