@@ -55,7 +55,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								{ answer_text: { search: search.split(' ').join('&') } },
+								{ answer_text: { search: search.split(' ').filter((item: string) => item !== '').join('&') } },
 								{ field_code: 'verbatim' },
 								end_date && {
 									created_at: {
