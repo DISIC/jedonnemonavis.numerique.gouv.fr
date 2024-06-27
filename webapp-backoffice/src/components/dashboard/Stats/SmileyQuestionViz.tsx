@@ -13,7 +13,7 @@ import { AnswerIntention } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import SmileyBarChart from '../../chart/SmileyBarChart';
 import QuestionWrapper from './QuestionWrapper';
-import GlobalChart, { FormattedData } from './GlobalChart';
+import ChartWrapper, { FormattedData } from './ChartWrapper';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -118,7 +118,7 @@ const SmileyQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<GlobalChart title="Répartition des réponses" data={data}>
+			<ChartWrapper title="Répartition des réponses">
 				<div className={classes.distributionContainer}>
 					{resultFieldCode.data
 						.sort(
@@ -183,15 +183,15 @@ const SmileyQuestionViz = ({
 							);
 						})}
 				</div>
-			</GlobalChart>
+			</ChartWrapper>
 
-			<GlobalChart
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={data}
 			>
 				<SmileyBarChart data={data} total={total} />
-			</GlobalChart>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };

@@ -19,11 +19,16 @@ type Props = {
 	children: React.ReactNode;
 	title: string;
 	total?: number;
-	data: FormattedData[];
+	data?: FormattedData[];
 	reverseData?: boolean;
+	singleRowLabel?: string;
+	displayTotal?: 'classic' | 'percentage';
 };
 
-const reverseDataInput = (inputArray: FormattedData[]) => {
+const reverseDataInput = (
+	inputArray: FormattedData[],
+	singleRowLabel?: string
+) => {
 	const outputArray: FormattedData[] = [];
 
 	if (!inputArray.length) return outputArray;
@@ -50,9 +55,10 @@ const reverseDataInput = (inputArray: FormattedData[]) => {
 					}
 				});
 		});
-		console.log(outputArray);
 	} else {
-		let outputObject: FormattedData = { name: 'Nombre de réponses' };
+		let outputObject: FormattedData = {
+			name: singleRowLabel || 'Nombre de réponses'
+		};
 
 		inputArray.forEach(item => {
 			outputObject[item.name] = item.value;
@@ -64,12 +70,20 @@ const reverseDataInput = (inputArray: FormattedData[]) => {
 	return outputArray;
 };
 
-const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
+const ChartWrapper = ({
+	children,
+	title,
+	total,
+	data,
+	reverseData,
+	singleRowLabel,
+	displayTotal
+}: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
 	const { classes, cx } = useStyles({ view });
 
-	if (!data.length) return <>{children}</>;
+	if (!data || !data.length) return <>{children}</>;
 
 	let cleanData = data.filter(
 		item =>
@@ -78,7 +92,7 @@ const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 	);
 
 	if (reverseData) {
-		cleanData = reverseDataInput(cleanData);
+		cleanData = reverseDataInput(cleanData, singleRowLabel);
 	}
 
 	const headers = cleanData.map(item => item.name);
@@ -117,11 +131,50 @@ const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 		return Math.round(value);
 	};
 
+	const getTotalFromKeys = (object: AnyKey, masterKey?: keyof AnyKey) => {
+		return Object.keys(object).reduce(
+			(accKeys, currentKey) =>
+				currentKey !== 'name'
+					? !masterKey || (masterKey && masterKey === currentKey)
+						? isNaN(parseInt(object[currentKey].toString()))
+							? accKeys
+							: parseInt(object[currentKey].toString()) + accKeys
+						: accKeys
+					: accKeys,
+			0
+		);
+	};
+
+	const displayTotalValue = (cells: AnyKey[], currentKey?: keyof AnyKey) => {
+		if (displayTotal === 'classic') {
+			return cells.reduce(
+				(acc, cell) => getTotalFromKeys(cell, currentKey) + acc,
+				0
+			);
+		} else if (displayTotal === 'percentage') {
+			const total = cells.reduce((acc, cell) => {
+				return getTotalFromKeys(cell) + acc;
+			}, 0);
+			return (
+				Math.round(
+					(cells.reduce(
+						(acc, cell) => getTotalFromKeys(cell, currentKey) + acc,
+						0
+					) /
+						total) *
+						10000
+				) /
+					100 +
+				'%'
+			);
+		}
+	};
+
 	const displayRows = () => {
 		if (singleRow) {
 			return (
 				<tr>
-					<td>Nombre de réponses</td>
+					<td>{singleRowLabel || 'Nombre de réponses'}</td>
 					{cells.map((c, index) => (
 						<td key={`${c}_${index}`}>{c.value}</td>
 					))}
@@ -133,10 +186,13 @@ const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 			<tr key={`${r}_${index}`}>
 				<td>{r}</td>
 				{cells.map((c, indexC) => (
-					<td key={`${r}_${index}_${c}_${indexC}`}>
-						{displayCellValue(c, r, indexC)}
-					</td>
+					<>
+						<td key={`${r}_${index}_${c}_${indexC}`}>
+							{displayCellValue(c, r, indexC)}
+						</td>
+					</>
 				))}
+				{displayTotal && <td>{displayTotalValue(cells, r)}</td>}
 			</tr>
 		));
 	};
@@ -146,10 +202,21 @@ const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 			<div className={cx(classes.tableContainer)}>
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
 					<thead>
-						<td></td>
-						{headers.map((h, index) => (
-							<td key={`${h}_${index}`}>{h}</td>
-						))}
+						<tr>
+							<th scope="col"></th>
+							{headers.map((h, index) => (
+								<th scope="col" key={`${h}_${index}`}>
+									{h}
+								</th>
+							))}
+							{displayTotal && (
+								<th>
+									{displayTotal === 'classic'
+										? 'Total des réponses'
+										: 'Pourcentage des réponses'}
+								</th>
+							)}
+						</tr>
 					</thead>
 					<tbody>{displayRows()}</tbody>
 				</table>
@@ -198,7 +265,7 @@ const GlobalChart = ({ children, title, total, data, reverseData }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(GlobalChart.name).create(() => ({
+const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -216,10 +283,13 @@ const useStyles = tss.withName(GlobalChart.name).create(() => ({
 		margin: 0,
 		th: {
 			padding: ' 0 2rem',
-			minWidth: '120px'
+			minWidth: '120px',
+			'&:first-of-type': {
+				minWidth: '12rem'
+			}
 		},
 		thead: {
-			background: '#EEEEEE',
+			background: fr.colors.decisions.background.contrast.grey.default,
 			tr: {
 				borderBottom: '2px solid black'
 			}
@@ -227,10 +297,15 @@ const useStyles = tss.withName(GlobalChart.name).create(() => ({
 		tbody: {
 			tr: {
 				':nth-child(even)': {
-					backgroundColor: '#EEEEEE'
+					backgroundColor: fr.colors.decisions.background.contrast.grey.default
 				},
 				':nth-child(odd)': {
-					backgroundColor: '#F6F6F6'
+					backgroundColor: fr.colors.decisions.background.default.grey.hover
+				},
+				td: {
+					'&:first-of-type': {
+						fontWeight: 'bold'
+					}
 				}
 			}
 		},
@@ -290,4 +365,4 @@ const useStyles = tss.withName(GlobalChart.name).create(() => ({
 	}
 }));
 
-export default GlobalChart;
+export default ChartWrapper;

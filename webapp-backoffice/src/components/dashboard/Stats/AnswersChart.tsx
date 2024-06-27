@@ -2,7 +2,7 @@ import { FieldCodeSmiley } from '@/src/types/custom';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton } from '@mui/material';
-import GlobalChart from './GlobalChart';
+import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 
@@ -52,7 +52,7 @@ const AnswersChart = ({
 
 	return (
 		<>
-			<GlobalChart
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={total}
 				data={countByFieldCodePerMonth}
@@ -61,7 +61,7 @@ const AnswersChart = ({
 					data={countByFieldCodePerMonth}
 					labelAxisY="Nombre de réponses"
 				/>
-			</GlobalChart>
+			</ChartWrapper>
 
 			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
 		</>

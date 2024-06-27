@@ -1,6 +1,6 @@
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
-import GlobalChart from './GlobalChart';
+import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
 import QuestionWrapper from './QuestionWrapper';
@@ -91,17 +91,20 @@ const BarQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<GlobalChart
+			<ChartWrapper
 				title="Répartition des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeData}
 			>
 				<BarChart data={formatedFieldCodeData} />
-			</GlobalChart>
-			<GlobalChart
+			</ChartWrapper>
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={countByFieldCodePerMonth}
+				singleRowLabel={
+					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
+				}
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
@@ -110,7 +113,7 @@ const BarQuestionViz = ({
 					}
 					ticks={fieldCode === 'comprehension' ? [1, 2, 3, 4, 5] : undefined}
 				/>
-			</GlobalChart>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };
