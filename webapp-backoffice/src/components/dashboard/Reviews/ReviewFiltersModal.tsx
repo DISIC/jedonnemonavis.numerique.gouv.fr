@@ -96,7 +96,7 @@ const ReviewFiltersModal = (props: Props) => {
 					Qu'avez-vous pensé des informations et des instructions fournies ?
 				</p>
 				<div className={cx(classes.rating)}>
-					<span>Incompréhensible</span>
+					<span>Pas clair du tout</span>
 					<fieldset className={fr.cx('fr-fieldset')}>
 						<ul>
 							{['1', '2', '3', '4', '5'].map(rating => (

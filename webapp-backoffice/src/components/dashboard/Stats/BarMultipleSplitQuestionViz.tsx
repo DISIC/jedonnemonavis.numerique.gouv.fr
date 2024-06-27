@@ -1,9 +1,9 @@
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
+import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import HeaderChart from './HeaderChart';
 import QuestionWrapper from './QuestionWrapper';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
@@ -133,24 +133,30 @@ const BarMultipleSplitQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<HeaderChart title="Répartition des réponses">
+			<ChartWrapper
+				title="Répartition des réponses"
+				data={formatedFieldCodeData}
+				reverseData
+				displayTotal="classic"
+			>
 				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
 					dataKeys={allFieldCodeKeys}
 					fieldCode={fieldCode}
 					total={total}
 				/>
-			</HeaderChart>
-			<HeaderChart
+			</ChartWrapper>
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
+				data={formatedFieldCodeDataPerInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}
 					dataKeys={allParentFieldCodeKeys}
 					labelAxisY="Nombre de réponses"
 				/>
-			</HeaderChart>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };
