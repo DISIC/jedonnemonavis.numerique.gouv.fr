@@ -18,6 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
 import calendar
+from collections import defaultdict
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -427,6 +428,7 @@ def main():
                     SELECT
                         a.review_id,
                         a.id AS answer_id,
+                        a.parent_answer_id,
                         a.field_label,
                         a.field_code,
                         a.answer_item_id,
@@ -442,30 +444,48 @@ def main():
                     """
                     results_answers = fetch_query(conn, select_query_answers, (review_ids,))
 
-                    answers_dict = {}
+                    answers_dict = defaultdict(list)
                     for answer in results_answers:
                         review_id = answer[0]
-                        if review_id not in answers_dict:
-                            answers_dict[review_id] = []
                         answers_dict[review_id].append(answer)
 
                     for row in results_reviews:
                         review_id, form_id, product_id, button_id, xwiki_id, user_id, review_created_at = row
                         answers = answers_dict.get(review_id, [])
                         review_data = {
-                            'review_id': review_id,
+                            'review_id': hex(review_id),
                             'form_id': form_id,
                             'product_id': product_id,
                             'button_id': button_id,
                             'xwiki_id': xwiki_id,
-                            'review_created_at': review_created_at,
-                            'answers': {answer[2]: answer[5] for answer in answers}
+                            'review_created_at': datetime.strftime(review_created_at, '%d-%m-%Y %H:%M:%S'),
+                            'answers': defaultdict(list)
                         }
+
+                        # Traiter chaque réponse pour cette review
+                        for answer in answers:
+                            field_label = answer[3]
+                            answer_text = answer[6]
+                            parent_answer_id = answer[2]
+
+                            # Si l'answer a un parent, préfixer le texte de l'answer parent
+                            if parent_answer_id is not None:
+                                parent_answer = next((a for a in answers if a[1] == parent_answer_id), None)
+                                if parent_answer:
+                                    parent_text = parent_answer[6]
+                                    answer_text = f"{parent_text} : {answer_text}"
+
+                            # Ajouter le texte de la réponse à la liste des réponses pour ce field_code
+                            review_data['answers'][field_label].append(answer_text)
+
+                        # Convertir les listes de réponses en chaînes de caractères
+                        review_data['answers'] = {k: ', '.join(v) for k, v in review_data['answers'].items()}
+
                         all_reviews.append(review_data)
                         field_labels.update(review_data['answers'].keys())
 
                     retrieved_reviews += len(results_reviews)
-                    # print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
+                    print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
                     offset += PAGE_SIZE
 
