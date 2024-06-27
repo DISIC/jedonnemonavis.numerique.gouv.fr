@@ -4,12 +4,12 @@
     "subtitle_part_1": "Help us improve the service",
     "subtitle_part_2": "by answering a few questions. Your responses are anonymous.",
     "product": "Procedure",
-    "validate": "Send my feedback"
+    "validate": "Submit my feedback"
   },
   "second_block": {
     "title": "Thank You!",
     "subtitle": "Can you tell us more?",
-    "validate": "Validate my feedback"
+    "validate": "Submit my feedback"
   },
   "success_block": {
     "title": "Thank you very much!",
@@ -32,7 +32,7 @@
       "button": "Continue"
     },
     "A_2": {
-      "name": "Aids",
+      "name": "Help",
       "button": "Continue"
     },
     "A_3": {
@@ -41,14 +41,14 @@
     },
     "B_1": {
       "name": "General Experience",
-      "button": "Send my feedback"
+      "button": "Submit my feedback"
     },
     "B_2": {
       "name": "Understanding",
       "button": "Continue"
     },
     "B_3": {
-      "name": "Aids",
+      "name": "Help",
       "button": "Continue"
     },
     "B_4": {
@@ -71,7 +71,7 @@
     },
     "comprehension": {
       "label": "What did you think of the information and instructions provided?",
-      "hint": "On a scale of 1 to 5, 1 is incomprehensible and 5 is very clear.",
+      "hint": "On a scale of 1 to 5; 1 being incomprehensible and 5 being very clear.",
       "hintLeft": "Incomprehensible",
       "hintRight": "Very clear",
       "options": [
@@ -93,11 +93,11 @@
       ]
     },
     "contact_tried": {
-      "label": "During your journey, did you try to get help through any of the following means?",
+      "label": "Along the way, did you try to get help through any of the following means?",
       "hint": "Multiple choices possible",
       "options": [
         {
-          "label": "At the counter with the administration"
+          "label": "At a help desk with the administration"
         },
         {
           "label": "By phone with the administration"
@@ -109,7 +109,7 @@
           "label": "By chat with the administration"
         },
         {
-          "label": "A close person"
+          "label": "Friends or family"
         },
         {
           "label": "An association"
@@ -118,7 +118,7 @@
           "label": "Websites"
         },
         {
-          "label": "Others, specify"
+          "label": "Other, please specify"
         },
         {
           "label": "I did not need help"
@@ -194,7 +194,7 @@
       ]
     },
     "difficulties_details_verbatim": {
-      "label": "Can you specify what other difficulty(ies) you encountered?",
+      "label": "Can you specify what other difficulties you encountered?",
       "hint": "Maximum 250 characters."
     },
     "contact": {
@@ -264,7 +264,7 @@
           "label": "I searched the internet (website, forum)"
         },
         {
-          "label": "I asked for help from a close person (family, friend)"
+          "label": "I asked for help from a family member or friend"
         },
         {
           "label": "I asked for help from an association"
