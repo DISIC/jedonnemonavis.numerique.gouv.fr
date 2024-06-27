@@ -11,7 +11,9 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { AnswerIntention } from '@prisma/client';
 import React from 'react';
+import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -61,9 +63,6 @@ const ReviewFiltersModal = (props: Props) => {
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
 				{['good', 'medium', 'bad'].map(intention => (
 					<Button
-						iconId={getStatsIcon({
-							intention: (intention ?? 'neutral') as AnswerIntention
-						})}
 						onClick={() => {
 							setTmpFilters({
 								...tmpFilters,
@@ -71,6 +70,7 @@ const ReviewFiltersModal = (props: Props) => {
 									? tmpFilters.satisfaction.filter(item => item !== intention)
 									: [...tmpFilters.satisfaction, intention]
 							});
+							push(['trackEvent', 'Avis', 'Filtre-Satisfaction']);
 						}}
 						priority="tertiary"
 						className={cx(
@@ -86,6 +86,14 @@ const ReviewFiltersModal = (props: Props) => {
 							})
 						}}
 					>
+						<Image
+							alt="smiley"
+							src={`/assets/smileys/${getStatsIcon({
+								intention: (intention ?? 'neutral') as AnswerIntention
+							})}.svg`}
+							width={15}
+							height={15}
+						/>
 						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
 					</Button>
 				))}
@@ -114,6 +122,7 @@ const ReviewFiltersModal = (props: Props) => {
 														)
 													: [...tmpFilters.comprehension, rating]
 											});
+											push(['trackEvent', 'Avis', 'Filtre-Notation']);
 										}}
 									/>
 									<label
@@ -148,6 +157,7 @@ const ReviewFiltersModal = (props: Props) => {
 										...tmpFilters,
 										needVerbatim: !tmpFilters.needVerbatim
 									});
+									push(['trackEvent', 'Avis', 'Filtre-Complémentaire']);
 								}
 							}
 						}
@@ -244,7 +254,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 	},
 	badge: {
 		marginRight: 10,
-		cursor: 'pointer'
+		cursor: 'pointer',
+		gap: '0.25rem'
 	},
 	selectedOption: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.hover

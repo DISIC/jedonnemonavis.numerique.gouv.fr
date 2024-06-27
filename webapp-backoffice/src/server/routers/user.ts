@@ -31,8 +31,8 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 		data: {
 			user_id: user.id,
 			code,
-			//15mn validity
-			expiration_date: new Date(now.getTime() + 15 * 60 * 1000)
+			//60mn validity
+			expiration_date: new Date(now.getTime() + 60 * 60 * 1000)
 		}
 	});
 
@@ -40,7 +40,7 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 		'Votre mot de passe temporaire',
 		user.email,
 		getOTPEmailHtml(code),
-		`Votre mot de passe temporaire valable 15 minutes : ${code}`
+		`Votre mot de passe temporaire valable 60 minutes : ${code}`
 	);
 }
 
