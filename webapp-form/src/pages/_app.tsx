@@ -8,6 +8,8 @@ import { createEmotionSsrAdvancedApproach } from "tss-react/next";
 import "@/src/styles/global.css";
 import { trpc } from "@/src/utils/trpc";
 import "../utils/keyframes.css";
+import { init } from "@socialgouv/matomo-next";
+import React from "react";
 
 declare module "@codegouvfr/react-dsfr/next-pagesdir" {
   interface RegisterLink {
@@ -41,10 +43,21 @@ const { withAppEmotionCache, augmentDocumentWithEmotionCache } =
 
 export { augmentDocumentWithEmotionCache };
 
+const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
+const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
+
 function App({ Component, pageProps }: AppProps) {
   const getLayout = (children: ReactNode) => {
     return <PublicLayout>{children}</PublicLayout>;
   };
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === "production")
+      init({
+        url: MATOMO_URL ? MATOMO_URL : "",
+        siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : "",
+      });
+  }, []);
+
   return getLayout(<Component {...pageProps} />);
 }
 

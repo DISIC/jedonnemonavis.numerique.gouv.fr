@@ -332,7 +332,7 @@ const useStyles = tss.create({
 		flexDirection: 'column',
 		gap: '3rem',
 		padding: '2rem',
-		border: '1px solid #E5E5E5'
+		border: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`
 	},
 	container: {
 		position: 'relative'

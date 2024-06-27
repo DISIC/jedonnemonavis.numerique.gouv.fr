@@ -1,6 +1,7 @@
 import { getDatesByShortCut } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { push } from '@socialgouv/matomo-next';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -61,7 +62,7 @@ const Filters = ({
 	return (
 		<div
 			className={cx(
-				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v'),
+				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-4v'),
 				classes.dateShortcuts
 			)}
 		>
@@ -76,8 +77,9 @@ const Filters = ({
 									type="radio"
 									name={ds.name}
 									checked={shortcutDateSelected === ds.name}
-									onClick={() => {
+									onChange={() => {
 										setShortcutDateSelected(ds.name);
+										push(['trackEvent', 'Statistiques', 'Filtre-Date']);
 									}}
 								/>
 								<label
@@ -130,6 +132,12 @@ const Filters = ({
 
 const useStyles = tss.create({
 	dateShortcuts: {
+		position: 'sticky',
+		top: -1,
+		backgroundColor: fr.colors.decisions.background.default.grey.default,
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		zIndex: 99,
+		padding: `1rem 0`,
 		fieldset: {
 			width: '100%',
 			margin: 0,

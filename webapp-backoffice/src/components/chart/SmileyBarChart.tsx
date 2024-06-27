@@ -38,6 +38,7 @@ const renderLegend = (props: any) => {
 				)
 				.map((entry: any, index: number) => (
 					<div
+						key={index}
 						style={{
 							display: 'flex',
 							alignItems: 'center',
@@ -125,7 +126,7 @@ const SmileyBarChart = ({
 										sortOrder[a.dataKey as keyof typeof sortOrder] -
 										sortOrder[b.dataKey as keyof typeof sortOrder]
 								)
-								.map((payloadItem: any) => {
+								.map((payloadItem: any, index: number) => {
 									const itemWithValue = data.find(
 										item =>
 											item.name === label &&
@@ -134,12 +135,13 @@ const SmileyBarChart = ({
 
 									if (itemWithValue) {
 										return (
-											<li style={{ color: payloadItem.color }}>
+											<li key={index} style={{ color: payloadItem.color }}>
 												{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
 											</li>
 										);
 									} else {
 										<li
+											key={index}
 											style={{ color: payloadItem.color }}
 										>{`${payloadItem.name} : ${Math.round(payloadItem.value)}%`}</li>;
 									}
@@ -178,8 +180,9 @@ const SmileyBarChart = ({
 					height={60}
 					content={renderLegend}
 				/>
-				{Array.from(fieldNamesSet).map((fieldName: string) => (
+				{Array.from(fieldNamesSet).map((fieldName: string, index: number) => (
 					<Bar
+						key={index}
 						dataKey={fieldName}
 						fill={getHexaColorFromIntentionText(fieldName)}
 						radius={5}

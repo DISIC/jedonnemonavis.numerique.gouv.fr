@@ -285,7 +285,7 @@ export const getHexaColorFromIntentionText = (intention: string) => {
 		case 'Non':
 			return '#ce0500';
 		case 'Moyen':
-			return '#716043';
+			return '#FF9940';
 		case 'Pas de réponse':
 			return '#929292';
 		case 'Très bien':
@@ -317,3 +317,14 @@ export const newFormFieldCodes = [
 	'contact_reached',
 	'contact_satisfaction'
 ];
+
+export const getKeysFromArrayOfObjects = (arrayOfObjects: any[]): string[] => {
+	return arrayOfObjects.reduce((acc, obj) => {
+		Object.keys(obj).forEach(key => {
+			if (!acc.includes(key)) {
+				acc.push(key);
+			}
+		});
+		return acc;
+	}, []);
+};

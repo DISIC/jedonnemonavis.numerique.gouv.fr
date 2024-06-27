@@ -7,6 +7,7 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { Loader } from '../../ui/Loader';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -85,7 +86,7 @@ const ExportModal = (props: Props) => {
 				<>
 					<Alert
 						description="
-					Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à 24 heures."
+					Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à une heure."
 						severity="info"
 						small
 						className={fr.cx('fr-mt-10v')}
@@ -147,7 +148,10 @@ const ExportModal = (props: Props) => {
 							priority: 'primary',
 							disabled: choice === null,
 							onClick: () => {
-								if (choice) validateExport();
+								if (choice) {
+									validateExport();
+									push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
+								}
 							}
 						}
 					: {
