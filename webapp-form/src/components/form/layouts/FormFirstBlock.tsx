@@ -9,6 +9,7 @@ import { SmileyInput } from "../elements/SmileyInput";
 import { useTranslation } from "next-i18next";
 import { useRouter } from "next/router";
 import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { Loader } from "../../global/Loader";
 
 type Props = {
   product: Product;
@@ -27,6 +28,7 @@ export const FormFirstBlock = (props: Props) => {
     setIsRateLimitReached,
   } = props;
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -47,6 +49,7 @@ export const FormFirstBlock = (props: Props) => {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setIsLoading(true);
           onSubmit(tmpOpinion);
         }}
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
@@ -74,12 +77,20 @@ export const FormFirstBlock = (props: Props) => {
           />
         )}
         <div className={fr.cx("fr-mt-16v")}>
-          <Button
-            type="submit"
-            disabled={!tmpOpinion.satisfaction || isRateLimitReached}
-          >
-            {t("first_block.validate")}
-          </Button>
+          {isLoading ? (
+            <Button type="button" className={classes.loading}>
+              <div>
+                <i className={fr.cx("ri-loader-4-line")} />
+              </div>
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              disabled={!tmpOpinion.satisfaction || isRateLimitReached}
+            >
+              {t("first_block.validate")}
+            </Button>
+          )}
         </div>
       </form>
     </div>
@@ -103,5 +114,16 @@ const useStyles = tss
     },
     field: {
       marginBottom: fr.spacing("14v"),
+    },
+    loading: {
+      i: {
+        display: "inline-block",
+        animation: "spin 1s linear infinite;",
+        color: fr.colors.decisions.background.default.grey.default,
+        width: "8.5rem",
+        ["&::before"]: {
+          "--icon-size": "1.5rem",
+        },
+      },
     },
   }));
