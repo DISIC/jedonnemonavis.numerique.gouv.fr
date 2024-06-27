@@ -372,7 +372,9 @@ const ProductReviewsPage = (props: Props) => {
 									className={cx(classes.searchForm)}
 									onSubmit={e => {
 										e.preventDefault();
-										setValidatedSearch(search.replace(/[^\w\s]/gi, '').trim());
+										setValidatedSearch(
+											search.replace(/[^\w\sÀ-ÿ]/gi, '').trim()
+										);
 										setCurrentPage(1);
 									}}
 								>

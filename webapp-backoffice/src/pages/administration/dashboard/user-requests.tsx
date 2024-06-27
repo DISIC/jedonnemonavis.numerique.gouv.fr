@@ -111,6 +111,9 @@ const DashBoardUserRequestUserRequests = () => {
 			});
 		}
 		onConfirmAcceptModal.close();
+		if ((userRequestsCount - 1) % numberPerPage === 0) {
+			setCurrentPage(currentPage - 1);
+		}
 	};
 
 	const handleOnConfirmRefuse = () => {
@@ -122,6 +125,9 @@ const DashBoardUserRequestUserRequests = () => {
 			});
 		}
 		onConfirmDeleteModal.close();
+		if ((userRequestsCount - 1) % numberPerPage === 0) {
+			setCurrentPage(currentPage - 1);
+		}
 	};
 
 	const handlePageChange = (pageNumber: number) => {
@@ -197,8 +203,9 @@ const DashBoardUserRequestUserRequests = () => {
 									),
 									nativeInputProps: {
 										name: 'createDomainOnAccept',
-										onChange: event =>
-											setCreateDomainOnAccept(event.target.checked)
+										onChange: event => {
+											setCreateDomainOnAccept(event.target.checked);
+										}
 									}
 								}
 							]}
