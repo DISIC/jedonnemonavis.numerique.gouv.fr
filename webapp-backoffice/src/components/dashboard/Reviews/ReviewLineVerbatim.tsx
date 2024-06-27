@@ -63,7 +63,7 @@ const ReviewLineVerbatim = ({
 							<>
 								<Image
 									alt="smiley"
-									src={`/Demarches/assets/smileys/${getStatsIcon({
+									src={`/assets/smileys/${getStatsIcon({
 										intention: review.satisfaction.intention ?? 'neutral'
 									})}.svg`}
 									width={20}
