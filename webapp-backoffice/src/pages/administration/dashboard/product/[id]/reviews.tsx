@@ -375,7 +375,10 @@ const ProductReviewsPage = (props: Props) => {
 									className={cx(classes.searchForm)}
 									onSubmit={e => {
 										e.preventDefault();
-										setValidatedSearch(search);
+										setValidatedSearch(
+											search.replace(/[^\w\sÀ-ÿ]/gi, '').trim()
+										);
+										setCurrentPage(1);
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>
