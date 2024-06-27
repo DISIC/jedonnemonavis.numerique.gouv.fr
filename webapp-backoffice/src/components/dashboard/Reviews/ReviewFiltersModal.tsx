@@ -88,7 +88,7 @@ const ReviewFiltersModal = (props: Props) => {
 					>
 						<Image
 							alt="smiley"
-							src={`/assets/smileys/${getStatsIcon({
+							src={`/Demarches/assets/smileys/${getStatsIcon({
 								intention: (intention ?? 'neutral') as AnswerIntention
 							})}.svg`}
 							width={15}

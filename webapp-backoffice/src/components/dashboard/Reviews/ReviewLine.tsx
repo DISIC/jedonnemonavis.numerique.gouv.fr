@@ -93,7 +93,7 @@ const ReviewLine = ({
 							>
 								<Image
 									alt="smiley"
-									src={`/assets/smileys/${getStatsIcon({
+									src={`/Demarches/assets/smileys/${getStatsIcon({
 										intention: review.satisfaction.intention ?? 'neutral'
 									})}.svg`}
 									width={15}
