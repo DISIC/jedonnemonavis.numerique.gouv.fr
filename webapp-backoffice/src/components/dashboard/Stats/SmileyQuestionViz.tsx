@@ -1,7 +1,6 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
 import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
 import {
-	formatNumberWithSpaces,
 	newFormFieldCodes,
 	oldFormFieldCodes,
 	translateMonthToFrench
@@ -10,10 +9,11 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Skeleton, Tooltip } from '@mui/material';
 import { AnswerIntention } from '@prisma/client';
+import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import SmileyBarChart from '../../chart/SmileyBarChart';
+import ChartWrapper, { FormattedData } from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
-import Image from 'next/image';
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -95,10 +95,7 @@ const SmileyQuestionViz = ({
 		);
 	}
 
-	let data: {
-		name: string;
-		[key: string]: number | string;
-	}[] = [];
+	let data: FormattedData[] = [];
 	for (const [key, value] of Object.entries(resultFieldCodeInterval.data)) {
 		let item: {
 			name: string;
@@ -121,71 +118,75 @@ const SmileyQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<h6 className={fr.cx('fr-mt-10v')}>Répartition des réponses</h6>
-			<div className={classes.distributionContainer}>
-				{resultFieldCode.data
-					.sort(
-						(a, b) =>
-							intentionSortOrder[
-								a.intention as keyof typeof intentionSortOrder
-							] -
-							intentionSortOrder[b.intention as keyof typeof intentionSortOrder]
-					)
-					.map(rfc => {
-						const percentage = Math.round(
-							(rfc.doc_count / resultFieldCode.metadata.total) * 100
-						);
-						const limitToShowTopInfos = 10;
-						const limitToShowBottomInfos = 4;
-						return (
-							<div
-								className={classes.distributionItem}
-								style={{
-									width: `${percentage}%`
-								}}
-							>
-								{percentage >= limitToShowTopInfos ? (
-									<Image
-										alt="smiley"
-										src={`/assets/smileys/${getStatsIcon({
-											intention: rfc.intention as AnswerIntention
-										})}.svg`}
-										width={40}
-										height={40}
-									/>
-								) : (
-									<span className={cx(classes.distributionIcon)}></span>
-								)}
-								<label className={classes.distributionLabel}>
-									{percentage >= limitToShowTopInfos && rfc.answer_text}
-								</label>
-								<Tooltip
-									placement="top-start"
-									title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+			<ChartWrapper title="Répartition des réponses">
+				<div className={classes.distributionContainer}>
+					{resultFieldCode.data
+						.sort(
+							(a, b) =>
+								intentionSortOrder[
+									a.intention as keyof typeof intentionSortOrder
+								] -
+								intentionSortOrder[
+									b.intention as keyof typeof intentionSortOrder
+								]
+						)
+						.map(rfc => {
+							const percentage = Math.round(
+								(rfc.doc_count / resultFieldCode.metadata.total) * 100
+							);
+							const limitToShowTopInfos = 10;
+							const limitToShowBottomInfos = 4;
+							return (
+								<div
+									className={classes.distributionItem}
+									style={{
+										width: `${percentage}%`
+									}}
 								>
-									<div
-										className={classes.progressBar}
-										style={{
-											backgroundColor: getStatsColor({
+									{percentage >= limitToShowTopInfos ? (
+										<Image
+											alt="smiley"
+											src={`/assets/smileys/${getStatsIcon({
 												intention: rfc.intention as AnswerIntention
-											})
-										}}
-									/>
-								</Tooltip>
-								<label className={classes.distributionPercentage}>
-									{percentage >= limitToShowBottomInfos && `${percentage}%`}
-								</label>
-							</div>
-						);
-					})}
-			</div>
-			<h6 className={fr.cx('fr-mt-10v', 'fr-mb-0')}>Évolution des réponses</h6>
-			<div>
-				<p className={fr.cx('fr-hint-text')}>
-					{formatNumberWithSpaces(total)} réponse{total > 1 ? 's' : ''}
-				</p>
+											})}.svg`}
+											width={40}
+											height={40}
+										/>
+									) : (
+										<span className={cx(classes.distributionIcon)}></span>
+									)}
+									<label className={classes.distributionLabel}>
+										{percentage >= limitToShowTopInfos && rfc.answer_text}
+									</label>
+									<Tooltip
+										placement="top-start"
+										title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+									>
+										<div
+											className={classes.progressBar}
+											style={{
+												backgroundColor: getStatsColor({
+													intention: rfc.intention as AnswerIntention
+												})
+											}}
+										/>
+									</Tooltip>
+									<label className={classes.distributionPercentage}>
+										{percentage >= limitToShowBottomInfos && `${percentage}%`}
+									</label>
+								</div>
+							);
+						})}
+				</div>
+			</ChartWrapper>
+
+			<ChartWrapper
+				title="Évolution des réponses"
+				total={resultFieldCode.metadata.total}
+				data={data}
+			>
 				<SmileyBarChart data={data} total={total} />
-			</div>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };
@@ -198,7 +199,8 @@ const useStyles = tss.create({
 	},
 	distributionContainer: {
 		display: 'flex',
-		width: '100%'
+		width: '100%',
+		marginTop: fr.spacing('10v')
 	},
 	distributionItem: {
 		display: 'flex',

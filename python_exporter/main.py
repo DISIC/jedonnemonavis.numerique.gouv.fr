@@ -10,13 +10,15 @@ import os
 from dotenv import load_dotenv
 from io import StringIO
 import csv
-from datetime import datetime
+from datetime import datetime, timedelta
 import re
 import json
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
+import calendar
+from collections import defaultdict
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -124,78 +126,78 @@ def generate_download_link(bucket, object_name, expiration=2592000):
 def sanitize_filename(filename):
     return re.sub(r'[^\w\-]', '_', filename)
 
-def send_email(to_email, download_link):
+def send_email(to_email, download_link, product_name):
     msg = MIMEMultipart('alternative')
     msg['From'] = str(Header(NODEMAILER_FROM, 'utf-8'))
     msg['To'] = to_email
-    msg['Subject'] = str(Header('Votre export est prêt', 'utf-8'))
+    msg['Subject'] = str(Header(f"Votre export est prêt : [{product_name}]", 'utf-8'))
 
-    text = f"Bonjour,\n\nVotre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
+    text = f"Bonjour,\n\nVotre fichier d'export pour le service {product_name} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
     html = f"""\
     <!DOCTYPE html>
-	<html>
-		<head>
-			<style>
-				body {{
-					font-family: Arial, sans-serif;
-				}}
-				.container {{
-					max-width: 640px;
-					margin: 0 auto;
-					padding: 20px;
-				}}
-				.code {{
-					font-size: 24px;
-					font-weight: bold;
-					margin: 20px 0;
-				}}
-				.footer {{
-					font-size: 12px;
-					padding: 16px 32px; 
-					background: #F5F5FE;
-					margin-top: 30px;
-				}}
-				.header {{
-					margin-bottom: 30px;
-				}}
-				.header img {{
-					height: 88px;
-				}}
-				blockquote {{
-					background-color: #f3f3f3;
-					margin: 0;
-					padding: 20px;
-				}}
-			</style>
-		</head>
-		<body>
-			<div class="container">
-				<div class="header">
-					<img src="https://jdma-develop.cleverapps.io/assets/JDMA_Banner.png"/>
-				</div>
-				<div>
+    <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                }}
+                .container {{
+                    max-width: 640px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }}
+                .code {{
+                    font-size: 24px;
+                    font-weight: bold;
+                    margin: 20px 0;
+                }}
+                .footer {{
+                    font-size: 12px;
+                    padding: 16px 32px; 
+                    background: #F5F5FE;
+                    margin-top: 30px;
+                }}
+                .header {{
+                    margin-bottom: 30px;
+                }}
+                .header img {{
+                    height: 88px;
+                }}
+                blockquote {{
+                    background-color: #f3f3f3;
+                    margin: 0;
+                    padding: 20px;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <img src="https://jdma-develop.cleverapps.io/assets/JDMA_Banner.png"/>
+                </div>
+                <div>
                     <p>Bonjour,<br><br>
-                    Votre fichier d'export est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
+                    Votre fichier d'export pour le service "{product_name}" est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
                     <a href="{download_link}">Télécharger le fichier</a><br><br>
                     Ce lien expirera dans 30 jours.<br><br>
                     </p>
                 </div>
-				<p>
-					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
-					La Brigade d'Intervention du Numérique (BIN).
-				</p>
-				<div class="footer">
-					<p>
-						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
-						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>. 
-					</p>
-					<p>
-						Pour toute question, merci de nous contacter à experts@design.numerique.gouv.fr.
-					</p>
-				</div>
-			</div>
-		</body>
-	</html>
+                <p>
+                    Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
+                    La Brigade d'Intervention du Numérique (BIN).
+                </p>
+                <div class="footer">
+                    <p>
+                        Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
+                        propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>. 
+                    </p>
+                    <p>
+                        Pour toute question, merci de nous contacter à experts@design.numerique.gouv.fr.
+                    </p>
+                </div>
+            </div>
+        </body>
+    </html>
     <html>
       <head></head>
       <body>
@@ -226,24 +228,24 @@ def build_filters_query(filters, search_term):
     
     if 'satisfaction' in filters and filters['satisfaction']:
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[%s]::\"AnswerIntention\"[]))"
+            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[%s]::\"AnswerIntention\"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
         values.append(filters['satisfaction'])
 
     if 'comprehension' in filters and filters['comprehension']:
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[%s]::text[]))"
+            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[%s]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
         values.append(filters['comprehension'])
 
     if filters.get('needVerbatim'):
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'verbatim')"
+            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
 
     if search_term:
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.answer_text ILIKE %s)"
+            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.answer_text ILIKE %s AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
         values.append(f'%{search_term}%')
 
@@ -266,6 +268,35 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     print(f'\r{prefix} |{bar}| {percent}% ({iteration}) {suffix}', end='\r')
     if iteration == total:
         print()
+
+def get_month_ranges(start_date, end_date):
+    """Generate a list of (start, end) tuples for each month between start_date and end_date."""
+    ranges = []
+    current_date = start_date
+    while current_date <= end_date:
+        if current_date == start_date:
+            # Start at the actual start_date
+            start_of_month = start_date
+        else:
+            # Start at the first day of the current month
+            start_of_month = current_date.replace(day=1)
+        
+        # Find the end of the current month
+        end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
+        
+        if end_of_month > end_date:
+            # If the calculated end of month is beyond the end_date, use end_date instead
+            end_of_month = end_date
+        
+        ranges.append((start_of_month, end_of_month))
+        
+        # Set the next month's start date
+        current_date = end_of_month + timedelta(days=1)
+        if current_date.day == 1 and current_date > end_date:
+            # If the new month starts but is beyond the end_date, break the loop
+            break
+
+    return ranges
 
 def main():
     print('------ START EXPORT ------')
@@ -342,8 +373,8 @@ def main():
         {f'AND {filters_query}' if filters_query else ''}
         """
 
-        start_date = filter_params.get('startDate', '1900-01-01')
-        end_date = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
+        start_date = datetime.strptime(filter_params.get('startDate', '2018-01-01'), '%Y-%m-%d')
+        end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')), '%Y-%m-%d')
         count_params = [product_id, start_date, end_date] + filters_values
         total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
         print(f"{total_reviews} avis concernés")
@@ -353,80 +384,110 @@ def main():
 
         all_reviews = []
         field_labels = set()
-                
 
-        offset = 0
+        # Get the month ranges
+        month_ranges = get_month_ranges(start_date, end_date)
         retrieved_reviews = 0
-        while True:
-            select_query_review = f"""
-            SELECT
-                r.id AS review_id,
-                r.form_id,
-                r.product_id,
-                r.button_id,
-                r.xwiki_id,
-                r.user_id,
-                r.created_at AS review_created_at,
-                (
-                    SELECT json_agg(
-                        json_build_object(
-                            'answer_id', a.id,
-                            'field_label', a.field_label,
-                            'field_code', a.field_code,
-                            'answer_item_id', a.answer_item_id,
-                            'answer_text', a.answer_text,
-                            'intention', a.intention,
-                            'kind', a.kind,
-                            'review_id', a.review_id,
-                            'review_created_at', a.review_created_at,
-                            'parent_answer_id', a.parent_answer_id,
-                            'created_at', a.created_at
-                        )
-                    )
-                    FROM public."Answer" a
-                    WHERE r.id = a.review_id
-                    AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'
-                    AND a.created_at = review_created_at
-                ) AS answers
-            FROM
-                public."Review" r
-            WHERE
-                r.product_id = %s
-                AND r.created_at BETWEEN %s AND %s
 
-                {f'AND {filters_query}' if filters_query else ''}
-            GROUP BY
-                r.id, r.form_id, r.product_id, r.button_id, r.xwiki_id, r.user_id, r.created_at
-            ORDER BY
-                r.created_at ASC
-            LIMIT %s OFFSET %s;
-            """
+        for month_start, month_end in month_ranges:
+            # print(f"Traitement des avis pour la période {month_start} - {month_end}")
+            offset = 0
+            while True:
+                # Première requête : récupérer les reviews
+                select_query_review = f"""
+                SELECT
+                    r.id AS review_id,
+                    r.form_id,
+                    r.product_id,
+                    r.button_id,
+                    r.xwiki_id,
+                    r.user_id,
+                    r.created_at AS review_created_at
+                FROM
+                    public."Review" r
+                WHERE
+                    r.product_id = %s
+                    AND r.created_at BETWEEN %s AND %s
+                    {f'AND {filters_query}' if filters_query else ''}
+                ORDER BY
+                    r.created_at DESC
+                LIMIT %s OFFSET %s;
+                """
 
-            query_params = [product_id, start_date, end_date] + filters_values + [PAGE_SIZE, offset]
-            
-            results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
+                query_params = [product_id, month_start, month_end] + filters_values + [PAGE_SIZE, offset]
+                results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
 
-            if not results_reviews:
-                break
+                if not results_reviews:
+                    break
 
-            for row in results_reviews:
-                review_id, form_id, product_id, button_id, xwiki_id, user_id, review_created_at, answers = row
-                review_data = {
-                    'review_id': review_id,
-                    'form_id': form_id,
-                    'product_id': product_id,
-                    'button_id': button_id,
-                    'xwiki_id': xwiki_id,
-                    'review_created_at': review_created_at,
-                    'answers': {answer['field_label']: answer['answer_text'] for answer in answers}
-                }
-                all_reviews.append(review_data)
-                field_labels.update(review_data['answers'].keys())
+                review_ids = [row[0] for row in results_reviews]
 
-            retrieved_reviews += len(results_reviews)
-            print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
+                # Deuxième requête : récupérer les answers pour les reviews obtenues
+                if review_ids:
+                    select_query_answers = f"""
+                    SELECT
+                        a.review_id,
+                        a.id AS answer_id,
+                        a.parent_answer_id,
+                        a.field_label,
+                        a.field_code,
+                        a.answer_item_id,
+                        a.answer_text,
+                        a.intention,
+                        a.kind,
+                        a.created_at
+                    FROM
+                        public."Answer" a
+                    WHERE
+                        a.review_id = ANY(%s)
+                        AND a.created_at BETWEEN a.review_created_at - interval '1 day' AND a.review_created_at + interval '1 day'
+                    """
+                    results_answers = fetch_query(conn, select_query_answers, (review_ids,))
 
-            offset += PAGE_SIZE
+                    answers_dict = defaultdict(list)
+                    for answer in results_answers:
+                        review_id = answer[0]
+                        answers_dict[review_id].append(answer)
+
+                    for row in results_reviews:
+                        review_id, form_id, product_id, button_id, xwiki_id, user_id, review_created_at = row
+                        answers = answers_dict.get(review_id, [])
+                        review_data = {
+                            'review_id': hex(review_id),
+                            'form_id': form_id,
+                            'product_id': product_id,
+                            'button_id': button_id,
+                            'xwiki_id': xwiki_id,
+                            'review_created_at': datetime.strftime(review_created_at, '%d-%m-%Y %H:%M:%S'),
+                            'answers': defaultdict(list)
+                        }
+
+                        # Traiter chaque réponse pour cette review
+                        for answer in answers:
+                            field_label = answer[3]
+                            answer_text = answer[6]
+                            parent_answer_id = answer[2]
+
+                            # Si l'answer a un parent, préfixer le texte de l'answer parent
+                            if parent_answer_id is not None:
+                                parent_answer = next((a for a in answers if a[1] == parent_answer_id), None)
+                                if parent_answer:
+                                    parent_text = parent_answer[6]
+                                    answer_text = f"{parent_text} : {answer_text}"
+
+                            # Ajouter le texte de la réponse à la liste des réponses pour ce field_code
+                            review_data['answers'][field_label].append(answer_text)
+
+                        # Convertir les listes de réponses en chaînes de caractères
+                        review_data['answers'] = {k: ', '.join(v) for k, v in review_data['answers'].items()}
+
+                        all_reviews.append(review_data)
+                        field_labels.update(review_data['answers'].keys())
+
+                    retrieved_reviews += len(results_reviews)
+                    # print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
+
+                    offset += PAGE_SIZE
 
         field_labels = sorted(field_labels)  # Sort field labels for consistent column order
 
@@ -459,7 +520,7 @@ def main():
             if download_link:
                 print(f"Le lien de téléchargement est : {download_link}")
                 # Send email to the user with the download link
-                send_email(first_result_export[9], download_link)
+                send_email(first_result_export[9], download_link, first_result_export[10])
 
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """

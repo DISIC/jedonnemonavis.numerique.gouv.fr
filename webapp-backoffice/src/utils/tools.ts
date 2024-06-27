@@ -317,3 +317,14 @@ export const newFormFieldCodes = [
 	'contact_reached',
 	'contact_satisfaction'
 ];
+
+export const getKeysFromArrayOfObjects = (arrayOfObjects: any[]): string[] => {
+	return arrayOfObjects.reduce((acc, obj) => {
+		Object.keys(obj).forEach(key => {
+			if (!acc.includes(key)) {
+				acc.push(key);
+			}
+		});
+		return acc;
+	}, []);
+};

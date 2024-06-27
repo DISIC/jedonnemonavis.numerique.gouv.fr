@@ -62,7 +62,7 @@ const Filters = ({
 	return (
 		<div
 			className={cx(
-				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v'),
+				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-4v'),
 				classes.dateShortcuts
 			)}
 		>
@@ -132,6 +132,12 @@ const Filters = ({
 
 const useStyles = tss.create({
 	dateShortcuts: {
+		position: 'sticky',
+		top: -1,
+		backgroundColor: fr.colors.decisions.background.default.grey.default,
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		zIndex: 99,
+		padding: `1rem 0`,
 		fieldset: {
 			width: '100%',
 			margin: 0,

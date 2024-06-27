@@ -222,13 +222,15 @@ export const fetchAndFormatData = async ({
 	field_codes,
 	product_ids,
 	start_date,
-	end_date
+	end_date,
+	interval
 }: {
 	ctx: Context;
 	field_codes: FieldCodeHelper[];
 	product_ids: string[] | number[];
 	start_date: string;
 	end_date: string;
+	interval?: 'day' | 'week' | 'month' | 'year';
 }) => {
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: 'jdma-answers',

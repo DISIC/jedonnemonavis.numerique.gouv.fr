@@ -33,7 +33,7 @@ const CustomBarChart = ({
 			active &&
 			payload &&
 			payload.length &&
-			!['incomprehensible', 'très clair'].includes(label)
+			!['pas clair du tout', 'très clair'].includes(label)
 		) {
 			return (
 				<div className={classes.customTooltip}>
