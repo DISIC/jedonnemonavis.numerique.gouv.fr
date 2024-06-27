@@ -32,11 +32,10 @@ interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
 	submitFilters: (filters: ReviewFiltersType) => void;
-	productId?: number;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters, productId } = props;
+	const { modal, filters, submitFilters } = props;
 	const { cx, classes } = useStyles();
 
 	const [tmpFilters, setTmpFilters] =

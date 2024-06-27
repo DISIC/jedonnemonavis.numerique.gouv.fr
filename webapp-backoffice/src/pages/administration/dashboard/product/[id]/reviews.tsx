@@ -312,7 +312,6 @@ const ProductReviewsPage = (props: Props) => {
 				modal={filter_modal}
 				filters={filters}
 				submitFilters={handleSubmitfilters}
-				productId={product.id}
 			></ReviewFiltersModal>
 
 			<ProductLayout product={product}>

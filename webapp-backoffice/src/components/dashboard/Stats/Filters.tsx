@@ -9,7 +9,6 @@ type FiltersProps = {
 	onChange: (startDate: string, endDate: string) => void;
 	currentStartDate: string;
 	currentEndDate: string;
-	productId?: number;
 };
 
 const dateShortcuts = [
@@ -32,8 +31,7 @@ const dateShortcuts = [
 const Filters = ({
 	onChange,
 	currentStartDate,
-	currentEndDate,
-	productId
+	currentEndDate
 }: FiltersProps) => {
 	const { classes, cx } = useStyles();
 
