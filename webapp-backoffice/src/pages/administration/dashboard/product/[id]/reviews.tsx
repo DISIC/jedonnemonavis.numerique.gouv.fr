@@ -312,6 +312,7 @@ const ProductReviewsPage = (props: Props) => {
 				modal={filter_modal}
 				filters={filters}
 				submitFilters={handleSubmitfilters}
+				productId={product.id}
 			></ReviewFiltersModal>
 
 			<ProductLayout product={product}>
@@ -345,11 +346,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: startDate,
 										onChange: e => {
 											setStartDate(e.target.value);
-											push([
-												'trackEvent',
-												'Avis',
-												`Filtre-Date-Début: ${e.target.value}`
-											]);
+											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
 										}
 									}}
 								/>
@@ -362,11 +359,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: endDate,
 										onChange: e => {
 											setEndDate(e.target.value);
-											push([
-												'trackEvent',
-												'Avis',
-												`Filtre-Date-Fin: ${e.target.value}`
-											]);
+											push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
 										}
 									}}
 								/>
@@ -399,11 +392,7 @@ const ProductReviewsPage = (props: Props) => {
 														setValidatedSearch('');
 													}
 													setSearch(event.target.value);
-													push([
-														'trackEvent',
-														'Avis',
-														`Filtre-Recherche: ${event.target.value}`
-													]);
+													push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 												}
 											}}
 										/>
@@ -443,7 +432,7 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('reviews');
 												setCurrentPage(1);
-												push(['trackEvent', 'Avis', 'Filtre-Vue: Avis']);
+												push(['trackEvent', 'Avis', 'Filtre-Vue-Avis']);
 											}}
 										>
 											Avis
@@ -455,7 +444,7 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('verbatim');
 												setCurrentPage(1);
-												push(['trackEvent', 'Avis', 'Filtre-Vue: Verbatim']);
+												push(['trackEvent', 'Avis', 'Filtre-Vue-Verbatim']);
 											}}
 										>
 											Verbatims
@@ -475,11 +464,7 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											if (e.target.value !== 'undefined') {
 												setButtonId(parseInt(e.target.value));
-												push([
-													'trackEvent',
-													'Avis',
-													`Filtre-Source: ${e.target.value}`
-												]);
+												push(['trackEvent', 'Avis', 'Filtre-Source']);
 											} else {
 												setButtonId(undefined);
 											}

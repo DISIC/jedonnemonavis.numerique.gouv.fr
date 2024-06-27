@@ -211,6 +211,7 @@ const ProductStatPage = (props: Props) => {
 						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
 					}}
+					productId={product.id}
 				/>
 				<ObservatoireStats
 					productId={product.id}

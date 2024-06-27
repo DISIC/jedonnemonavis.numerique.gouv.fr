@@ -6,6 +6,7 @@ import { Button as PrismaButtonType } from '@prisma/client';
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	button: PrismaButtonType;
@@ -97,7 +98,10 @@ const ProductButtonCard = (props: Props) => {
 							{!button.isTest && (
 								<Button
 									size="small"
-									onClick={() => onButtonClick('install', button)}
+									onClick={() => {
+										onButtonClick('install', button);
+										push(['trackEvent', 'Gestion boutons', 'Installer']);
+									}}
 								>
 									Installer
 								</Button>

@@ -32,10 +32,11 @@ interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
 	submitFilters: (filters: ReviewFiltersType) => void;
+	productId?: number;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters } = props;
+	const { modal, filters, submitFilters, productId } = props;
 	const { cx, classes } = useStyles();
 
 	const [tmpFilters, setTmpFilters] =
@@ -70,11 +71,7 @@ const ReviewFiltersModal = (props: Props) => {
 									? tmpFilters.satisfaction.filter(item => item !== intention)
 									: [...tmpFilters.satisfaction, intention]
 							});
-							push([
-								'trackEvent',
-								'Avis',
-								`Filtre-Satisfaction: ${displayIntention(intention ?? 'neutral')}`
-							]);
+							push(['trackEvent', 'Avis', 'Filtre-Satisfaction']);
 						}}
 						priority="tertiary"
 						className={cx(
@@ -126,11 +123,7 @@ const ReviewFiltersModal = (props: Props) => {
 														)
 													: [...tmpFilters.comprehension, rating]
 											});
-											push([
-												'trackEvent',
-												'Avis',
-												`Filtre-Notation: ${rating}/5`
-											]);
+											push(['trackEvent', 'Avis', 'Filtre-Notation']);
 										}}
 									/>
 									<label
@@ -165,11 +158,7 @@ const ReviewFiltersModal = (props: Props) => {
 										...tmpFilters,
 										needVerbatim: !tmpFilters.needVerbatim
 									});
-									push([
-										'trackEvent',
-										'Avis',
-										`Filtre-Complémentaire: Verbatim complété`
-									]);
+									push(['trackEvent', 'Avis', 'Filtre-Complémentaire']);
 								}
 							}
 						}

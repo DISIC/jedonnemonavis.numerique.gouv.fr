@@ -150,11 +150,7 @@ const ExportModal = (props: Props) => {
 							onClick: () => {
 								if (choice) {
 									validateExport();
-									push([
-										'trackEvent',
-										'Avis',
-										`Filtre-Téléchargement: ${choice === 'all' ? 'Tous les avis' : 'En fonction des filtres'}`
-									]);
+									push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
 								}
 							}
 						}

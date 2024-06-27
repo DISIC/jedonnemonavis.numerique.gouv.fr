@@ -1,6 +1,7 @@
 import { getDatesByShortCut } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { push } from '@socialgouv/matomo-next';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -8,6 +9,7 @@ type FiltersProps = {
 	onChange: (startDate: string, endDate: string) => void;
 	currentStartDate: string;
 	currentEndDate: string;
+	productId?: number;
 };
 
 const dateShortcuts = [
@@ -30,7 +32,8 @@ const dateShortcuts = [
 const Filters = ({
 	onChange,
 	currentStartDate,
-	currentEndDate
+	currentEndDate,
+	productId
 }: FiltersProps) => {
 	const { classes, cx } = useStyles();
 
@@ -78,6 +81,7 @@ const Filters = ({
 									checked={shortcutDateSelected === ds.name}
 									onClick={() => {
 										setShortcutDateSelected(ds.name);
+										push(['trackEvent', 'Statistiques', 'Filtre-Date']);
 									}}
 								/>
 								<label
