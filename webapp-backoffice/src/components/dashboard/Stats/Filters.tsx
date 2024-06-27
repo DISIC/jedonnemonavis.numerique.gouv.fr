@@ -76,7 +76,7 @@ const Filters = ({
 									type="radio"
 									name={ds.name}
 									checked={shortcutDateSelected === ds.name}
-									onClick={() => {
+									onChange={() => {
 										setShortcutDateSelected(ds.name);
 									}}
 								/>

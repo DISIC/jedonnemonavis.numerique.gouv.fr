@@ -297,10 +297,10 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		},
 		tbody: {
 			tr: {
-				':nth-child(even)': {
+				':nth-of-type(even)': {
 					backgroundColor: fr.colors.decisions.background.contrast.grey.default
 				},
-				':nth-child(odd)': {
+				':nth-of-type(odd)': {
 					backgroundColor: fr.colors.decisions.background.default.grey.hover
 				},
 				td: {
