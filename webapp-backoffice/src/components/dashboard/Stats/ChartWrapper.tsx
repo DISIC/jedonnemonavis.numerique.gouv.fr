@@ -177,7 +177,7 @@ const ChartWrapper = ({
 				<tr>
 					<td>{singleRowLabel || 'Nombre de réponses'}</td>
 					{cells.map((c, index) => (
-						<td key={`${c}_${index}`}>{c.value}</td>
+						<td key={`${JSON.stringify(c)}_${index}`}>{c.value}</td>
 					))}
 				</tr>
 			);
@@ -188,7 +188,7 @@ const ChartWrapper = ({
 				<td>{r}</td>
 				{cells.map((c, indexC) => (
 					<>
-						<td key={`${r}_${index}_${c}_${indexC}`}>
+						<td key={`${r}_${index}_${JSON.stringify(c)}_${indexC}`}>
 							{displayCellValue(c, r, indexC)}
 						</td>
 					</>
