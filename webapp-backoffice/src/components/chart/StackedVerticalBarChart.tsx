@@ -38,8 +38,9 @@ const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 		>
 			{payload
 				.sort((a: any, b: any) => sortOrder[a.value] - sortOrder[b.value])
-				.map((entry: any) => (
+				.map((entry: any, index: number) => (
 					<div
+						key={index}
 						style={{
 							display: 'flex',
 							alignItems: 'center',
