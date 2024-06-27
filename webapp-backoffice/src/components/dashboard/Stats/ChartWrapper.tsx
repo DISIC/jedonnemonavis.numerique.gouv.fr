@@ -122,13 +122,14 @@ const ChartWrapper = ({
 		key: keyof FormattedData,
 		dataIndex: number
 	) => {
-		const value = parseInt((cell[key] || 0).toString());
+		const value = parseInt((((cell[key] as number) || 0) * 10).toString()) / 10;
 		const attachedValue = cleanData[dataIndex][`value_${key}`];
 
-		if (attachedValue)
-			return Math.round(value * 10) / 10 + `% (${attachedValue})`;
+		if (attachedValue) {
+			return Math.round(value) + `% (${attachedValue})`;
+		}
 
-		return Math.round(value);
+		return Math.round(value * 100) / 100;
 	};
 
 	const getTotalFromKeys = (object: AnyKey, masterKey?: keyof AnyKey) => {
@@ -283,7 +284,7 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		margin: 0,
 		th: {
 			padding: ' 0 2rem',
-			minWidth: '120px',
+			minWidth: '9rem',
 			'&:first-of-type': {
 				minWidth: '12rem'
 			}
