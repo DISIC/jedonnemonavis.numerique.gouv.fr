@@ -1,4 +1,9 @@
-import { BucketsInside, Buckets, ElkAnswer } from '../../types/custom';
+import {
+	BucketsInside,
+	Buckets,
+	ElkAnswer,
+	ElkAnswerDefaults
+} from '../../types/custom';
 import { z } from 'zod';
 import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
 import { AnswerIntention, PrismaClient } from '@prisma/client';
@@ -10,6 +15,7 @@ import {
 } from '@/src/utils/tools';
 import { Session } from 'next-auth';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { Client } from '@elastic/elasticsearch';
 
 const checkAndGetProduct = async ({
 	ctx,
@@ -36,13 +42,15 @@ const queryCountByFieldCode = ({
 	product_id,
 	start_date,
 	end_date,
-	form_id
+	form_id,
+	only_parent_values
 }: {
 	field_code: string;
 	product_id: number;
 	start_date: string;
 	end_date: string;
 	form_id?: number;
+	only_parent_values?: boolean;
 }): QueryDslQueryContainer => {
 	let query: QueryDslQueryContainer = {
 		bool: {
@@ -86,7 +94,118 @@ const queryCountByFieldCode = ({
 		}
 	}
 
+	if (only_parent_values && query.bool && query.bool.must) {
+		(query.bool.must as QueryDslQueryContainer[]).push({
+			wildcard: {
+				'answer_text.keyword': '*avec l’administration'
+			}
+		});
+	}
+
 	return query;
+};
+
+const getDefaultValues = async ({
+	ctx,
+	input
+}: {
+	ctx: { prisma: PrismaClient; elkClient: Client; session: Session | null };
+	input: {
+		field_code: string;
+		exclude_values: string[];
+		onlyParentValues?: boolean;
+	};
+}) => {
+	const { field_code, exclude_values, onlyParentValues } = input;
+
+	const defaultValues = await ctx.elkClient.search<ElkAnswerDefaults>({
+		index: 'jdma-answers-defaults',
+		query: {
+			bool: {
+				must: [
+					{
+						match: {
+							field_code
+						}
+					}
+				],
+				must_not: exclude_values.map(value => ({
+					match: {
+						answer_text: value
+					}
+				}))
+			}
+		}
+	});
+
+	let tmpHits = defaultValues.hits.hits;
+
+	if (onlyParentValues) {
+		tmpHits = tmpHits.filter(
+			hit =>
+				hit._source && hit._source.answer_text.includes('avec l’administration')
+		);
+	}
+
+	const defaultValuesBuckets = tmpHits.map(hit => {
+		const { answer_text, intention, field_label } =
+			hit._source as ElkAnswerDefaults;
+		let tmpAnswerText = !onlyParentValues
+			? answer_text
+			: answer_text.replace(/\s*avec\s*l’administration/, '');
+		return {
+			key: `${tmpAnswerText}#${intention}#${field_label}`,
+			doc_count: 0
+		};
+	});
+
+	return defaultValuesBuckets;
+};
+
+const getDefaultChildValues = async ({
+	ctx,
+	input
+}: {
+	ctx: { prisma: PrismaClient; elkClient: Client; session: Session | null };
+	input: {
+		field_code: string;
+		parentFieldCode: { key: string; value: string; doc_count: number }[];
+		exclude_values: string[];
+	};
+}) => {
+	const { field_code, parentFieldCode, exclude_values } = input;
+
+	const defaultValues = await ctx.elkClient.search({
+		index: 'jdma-answers-defaults',
+		query: {
+			bool: {
+				must: [
+					{
+						match: {
+							field_code
+						}
+					}
+				]
+			}
+		}
+	});
+
+	let defaultValuesBuckets = parentFieldCode.flatMap(parentFieldCodeBucket => {
+		return defaultValues.hits?.hits.map(hit => {
+			const { answer_text, intention, field_label } = hit._source as any;
+			return {
+				key: `${parentFieldCodeBucket.key}#${answer_text}#${intention}#${field_label}`,
+				doc_count: 0
+			};
+		});
+	});
+
+	defaultValuesBuckets = defaultValuesBuckets.filter(
+		bucket =>
+			!exclude_values.includes(bucket.key.split('#').slice(0, 2).join('#'))
+	);
+
+	return defaultValuesBuckets;
 };
 
 export const answerRouter = router({
@@ -154,7 +273,15 @@ export const answerRouter = router({
 				uniqueCount.aggregations as any
 			).unique_review_ids.value;
 
-			const buckets = tmpBuckets
+			const defaultValues = await getDefaultValues({
+				ctx,
+				input: {
+					field_code: input.field_code,
+					exclude_values: tmpBuckets.map(bucket => bucket.key.split('#')[0])
+				}
+			});
+
+			const buckets = [...tmpBuckets, ...defaultValues]
 				.map(bucket => {
 					const [answerText, intention, fieldLabel] = bucket.key.split('#');
 
@@ -216,10 +343,13 @@ export const answerRouter = router({
 			const parentFieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
-				query: queryCountByFieldCode({
-					...input,
-					field_code: 'contact_tried'
-				}),
+				query: {
+					...queryCountByFieldCode({
+						...input,
+						field_code: 'contact_tried',
+						only_parent_values: true
+					})
+				},
 				aggs: {
 					term: {
 						terms: {
@@ -277,17 +407,28 @@ export const answerRouter = router({
 
 			metadata.total = (fieldCodeAggs.hits?.total as any)?.value;
 
-			const buckets = tmpBuckets
+			const defaultValues = await getDefaultChildValues({
+				ctx,
+				input: {
+					field_code: input.field_code,
+					parentFieldCode,
+					exclude_values: tmpBuckets.flatMap(intervalBucket =>
+						intervalBucket.key.split('#').slice(0, 2).join('#')
+					)
+				}
+			});
+
+			const buckets = [...tmpBuckets, ...defaultValues]
 				.map(bucket => {
-					const [parentAnswerId, answerText, intention, fieldLabel] =
+					const [parentAnswerItemId, answerText, intention, fieldLabel] =
 						bucket.key.split('#');
 
 					if (!metadata.fieldLabel) metadata.fieldLabel = fieldLabel;
 
 					let returnValue = {
-						parent_answer_id: parentAnswerId,
+						parent_answer_id: parentAnswerItemId,
 						parent_answer_text: parentFieldCode.find(
-							({ key }) => key === parentAnswerId
+							({ key }) => key === parentAnswerItemId
 						)?.value as string,
 						answer_text: answerText,
 						intention: intention as AnswerIntention,
@@ -534,24 +675,43 @@ export const answerRouter = router({
 			> = {};
 			let bucketsAverage: number[] = [];
 
+			const defaultValues = await getDefaultValues({
+				ctx,
+				input: {
+					field_code: input.field_code,
+					exclude_values: tmpBuckets.flatMap(intervalBucket =>
+						intervalBucket.term.buckets.map(bucket => bucket.key.split('#')[0])
+					)
+				}
+			});
+
 			tmpBuckets.forEach(bucketInterval => {
 				let currentBucketTotal = 0;
 
 				if (!returnValue[bucketInterval.key_as_string])
 					returnValue[bucketInterval.key_as_string] = [];
 
-				bucketInterval.term.buckets.forEach(bucket => {
-					const [answerText, intention] = bucket.key.split('#');
+				const currentDefaultValues = defaultValues.filter(
+					({ key: defaultValueKey }) =>
+						!bucketInterval.term.buckets.some(
+							({ key: valueKey }) => valueKey === defaultValueKey
+						)
+				);
 
-					metadata.total += bucket.doc_count;
-					currentBucketTotal += bucket.doc_count;
+				[...bucketInterval.term.buckets, ...currentDefaultValues].forEach(
+					bucket => {
+						const [answerText, intention] = bucket.key.split('#');
 
-					returnValue[bucketInterval.key_as_string].push({
-						answer_text: answerText,
-						intention: intention as AnswerIntention,
-						doc_count: bucket.doc_count
-					});
-				});
+						metadata.total += bucket.doc_count;
+						currentBucketTotal += bucket.doc_count;
+
+						returnValue[bucketInterval.key_as_string].push({
+							answer_text: answerText,
+							intention: intention as AnswerIntention,
+							doc_count: bucket.doc_count
+						});
+					}
+				);
 
 				if (currentBucketTotal !== 0) bucketsAverage.push(currentBucketTotal);
 			});
@@ -661,6 +821,15 @@ export const answerRouter = router({
 			> = {};
 			let bucketsAverage: number[] = [];
 
+			let defaultValues = await getDefaultValues({
+				ctx,
+				input: {
+					field_code: 'contact_tried',
+					exclude_values: [],
+					onlyParentValues: true
+				}
+			});
+
 			tmpBuckets.forEach(bucketInterval => {
 				let currentBucketTotal = 0;
 
@@ -693,6 +862,20 @@ export const answerRouter = router({
 						});
 					}
 				});
+
+				defaultValues
+					.filter(value =>
+						returnValue[bucketInterval.key_as_string].every(
+							bucket => bucket.answer_text !== value.key.split('#')[0]
+						)
+					)
+					.forEach(defaultValue => {
+						returnValue[bucketInterval.key_as_string].push({
+							answer_text: defaultValue.key.split('#')[0],
+							intention: 'neutral',
+							doc_count: 0
+						});
+					});
 
 				if (currentBucketTotal !== 0) bucketsAverage.push(currentBucketTotal);
 			});

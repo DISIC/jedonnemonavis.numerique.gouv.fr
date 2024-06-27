@@ -1,12 +1,12 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { tss } from 'tss-react/dsfr';
-import React from 'react';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { Alert } from '@codegouvfr/react-dsfr/Alert';
-import { useSession } from 'next-auth/react';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { useSession } from 'next-auth/react';
+import React from 'react';
+import { Loader } from '../../ui/Loader';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -29,17 +29,40 @@ interface Props {
 	};
 	product_id: number;
 	params: string;
-	action: (choice: 'all' | 'filtered') => void;
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, action, product_id, params } = props;
-	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
-	const [validate, setValidate] = React.useState<boolean>(false);
-	const { cx, classes } = useStyles();
+	const { modal, counts, product_id, params } = props;
 	const { data: session } = useSession({ required: true });
+	const modalOpen = useIsModalOpen(modal);
 
-	const createExport = trpc.export.create.useMutation();
+	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
+
+	const {
+		data: exportCsv,
+		isFetching: isLoadingExport,
+		refetch: refetchExport
+	} = trpc.export.getByUser.useQuery(
+		{
+			user_id: parseInt(session?.user?.id as string),
+			status: ['idle', 'processing'],
+			product_id: product_id
+		},
+		{
+			enabled: modalOpen,
+			initialData: {
+				data: []
+			}
+		}
+	);
+
+	const hasExportsInProgress = exportCsv?.data.length > 0;
+
+	const createExport = trpc.export.create.useMutation({
+		onSuccess: () => {
+			refetchExport();
+		}
+	});
 
 	const validateExport = () => {
 		createExport.mutate({
@@ -47,26 +70,22 @@ const ExportModal = (props: Props) => {
 			params: choice == 'filtered' ? params : '',
 			product_id: product_id
 		});
-		setValidate(true);
 	};
 
-	return (
-		<modal.Component
-			className={fr.cx(
-				'fr-grid-row',
-				'fr-grid-row--center',
-				'fr-grid-row--gutters',
-				'fr-my-0'
-			)}
-			concealingBackdrop={false}
-			title={'Télécharger les avis'}
-			size="large"
-		>
-			{!validate && (
+	const getModalContent = () => {
+		if (isLoadingExport)
+			return (
+				<div className={fr.cx('fr-pb-10v', 'fr-pt-10w')}>
+					<Loader />
+				</div>
+			);
+
+		if (!hasExportsInProgress) {
+			return (
 				<>
 					<Alert
 						description="
-						Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à 24 heures."
+					Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à 24 heures."
 						severity="info"
 						small
 						className={fr.cx('fr-mt-10v')}
@@ -96,55 +115,55 @@ const ExportModal = (props: Props) => {
 						]}
 						className={fr.cx('fr-mt-10v')}
 					/>
-					<div className={cx(classes.buttonWrapper, fr.cx('fr-col-12'))}>
-						<Button
-							priority="primary"
-							type="button"
-							disabled={choice === null}
-							nativeButtonProps={{
-								onClick: () => {
-									if (choice) validateExport();
-								}
-							}}
-							className={fr.cx('fr-mt-10v')}
-						>
-							Valider
-						</Button>
-					</div>
 				</>
-			)}
-			{validate && (
+			);
+		} else {
+			return (
 				<>
 					<p className={fr.cx('fr-mt-10v')}>
-						Votre export est en cours de traitement, vous recevrez un lien de
-						téléchargement par email dès que celui-ci sera terminé.
+						Vous avez un export en cours de traitement sur ce service, vous
+						recevrez un lien de téléchargement par email à l'adresse{' '}
+						<b>{session?.user.email}</b> dès qu'il sera prêt.
 					</p>
-					<div className={cx(classes.buttonWrapper, fr.cx('fr-col-12'))}>
-						<Button
-							priority="secondary"
-							type="button"
-							disabled={choice === null}
-							nativeButtonProps={{
-								onClick: () => {
-									if (choice) action(choice);
-								}
-							}}
-							className={fr.cx('fr-mt-10v')}
-						>
-							Fermer
-						</Button>
-					</div>
 				</>
+			);
+		}
+	};
+
+	return (
+		<modal.Component
+			className={fr.cx(
+				'fr-grid-row',
+				'fr-grid-row--center',
+				'fr-grid-row--gutters',
+				'fr-my-0'
 			)}
+			buttons={[
+				!hasExportsInProgress
+					? {
+							children: 'Valider',
+							type: 'submit',
+							doClosesModal: false,
+							priority: 'primary',
+							disabled: choice === null,
+							onClick: () => {
+								if (choice) validateExport();
+							}
+						}
+					: {
+							children: 'Fermer',
+							type: 'button',
+							doClosesModal: true,
+							priority: 'secondary'
+						}
+			]}
+			concealingBackdrop={false}
+			title={'Télécharger les avis'}
+			size="large"
+		>
+			{getModalContent()}
 		</modal.Component>
 	);
 };
-
-const useStyles = tss.withName(ExportModal.name).create(() => ({
-	buttonWrapper: {
-		display: 'flex',
-		justifyContent: 'flex-end'
-	}
-}));
 
 export default ExportModal;

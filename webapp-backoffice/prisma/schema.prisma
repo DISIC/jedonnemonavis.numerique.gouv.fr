@@ -293,6 +293,7 @@ model Answer {
   @@id([id, created_at])
   @@index([intention, field_code, review_id, review_created_at, created_at])
   @@index([review_id, review_created_at])
+	@@index([review_id, review_created_at, field_code])
   @@index([parent_answer_id, created_at])
   @@index([review_id, field_code])
 }
