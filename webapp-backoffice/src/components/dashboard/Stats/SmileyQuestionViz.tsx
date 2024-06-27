@@ -130,7 +130,7 @@ const SmileyQuestionViz = ({
 									b.intention as keyof typeof intentionSortOrder
 								]
 						)
-						.map(rfc => {
+						.map((rfc, index) => {
 							const percentage = Math.round(
 								(rfc.doc_count / resultFieldCode.metadata.total) * 100
 							);
@@ -138,6 +138,7 @@ const SmileyQuestionViz = ({
 							const limitToShowBottomInfos = 4;
 							return (
 								<div
+									key={index}
 									className={classes.distributionItem}
 									style={{
 										width: `${percentage}%`
