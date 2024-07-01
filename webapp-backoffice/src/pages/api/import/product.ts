@@ -6,6 +6,59 @@ import { ImportProduct } from './types';
 const prisma = new PrismaClient();
 
 export async function importProduct(data: ImportProduct) {
+	const existingProduct = await prisma.product.findFirst({
+		where: {
+			xwiki_id: data.xwiki_id
+		},
+		include: {
+			accessRights: {
+				include: {
+					user: true
+				}
+			}
+		}
+	});
+
+	if (!!existingProduct) {
+		const promises: Promise<any>[] = [];
+		const productUserEmails = existingProduct.accessRights.map(
+			ar => ar.user_email
+		);
+		data.users.forEach(user => {
+			if (!productUserEmails.includes(user.email)) {
+				const promise = prisma.user.upsert({
+					where: {
+						email: user.email
+					},
+					update: {
+						accessRights: {
+							create: {
+								product_id: existingProduct.id
+							}
+						}
+					},
+					create: {
+						...user,
+						entities: {
+							connectOrCreate: user.entities.map(e => ({
+								where: { name: e.name },
+								create: { ...e }
+							}))
+						},
+						accessRights: {
+							create: {
+								product_id: existingProduct.id
+							}
+						}
+					}
+				});
+				promises.push(promise);
+			}
+		});
+		await Promise.all(promises);
+		return existingProduct;
+	}
+
 	const product = await prisma.product.upsert({
 		where: {
 			xwiki_id: data.xwiki_id
