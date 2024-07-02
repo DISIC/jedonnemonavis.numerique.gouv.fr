@@ -50,7 +50,11 @@ const ProductCard = ({
 		isRefetching: isRefetchingStatsObservatoire
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
-			product_id: product.id.toString()
+			product_id: product.id.toString(),
+			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+				.toISOString()
+				.split('T')[0],
+			end_date: new Date().toISOString().split('T')[0]
 		},
 		{
 			trpc: {

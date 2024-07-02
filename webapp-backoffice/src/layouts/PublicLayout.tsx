@@ -180,14 +180,27 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
-							de vos retours depuis{' '}
-							<a href="https://tally.so/r/m6kyyB" target="_blank">
-								ce court formulaire
-							</a>
+							Migration de vos données en cours, certains avis peuvent manquer
+							pendant les prochaines 24 heures.
 						</>
 					}
 				/>
+				// <Notice
+				// 	isClosable
+				// 	onClose={function noRefCheck() {}}
+				// 	style={{
+				// 		marginBottom: '-1rem'
+				// 	}}
+				// 	title={
+				// 		<>
+				// 			Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
+				// 			de vos retours depuis{' '}
+				// 			<a href="https://tally.so/r/m6kyyB" target="_blank">
+				// 				ce court formulaire
+				// 			</a>
+				// 		</>
+				// 	}
+				// />
 			)}
 			{/* END FOR BETA TESTING */}
 			<main id="main" role="main" tabIndex={-1}>

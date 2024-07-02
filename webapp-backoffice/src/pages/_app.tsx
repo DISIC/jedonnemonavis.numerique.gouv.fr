@@ -56,6 +56,8 @@ function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
 	const getLayout = (children: ReactNode) => {
+		if (router.pathname.startsWith('/public/maintenance')) return children;
+
 		const lightMode =
 			router.pathname.startsWith('/public') ||
 			router.pathname.startsWith('/open-api');
