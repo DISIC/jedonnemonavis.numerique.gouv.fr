@@ -8,18 +8,18 @@ interface SecondPart {
   };
 }
 
-interface Block {
-  title?: string;
-  content: string[] | string[][];
-}
-
-interface LegalNoticeSections {
-  [key: string]: Block;
-}
-
 interface LegalNotice {
-  title: string;
-  sections: LegalNoticeSections;
+  [key: string]: {
+    title: string;
+    content: (
+      | string
+      | {
+          text: string;
+          type?: "breakAfter" | "link" | "mailto";
+          href?: string;
+        }
+    )[];
+  };
 }
 
 export const CGU = {
@@ -80,32 +80,82 @@ export const CGU = {
 };
 
 export const LegalNotice: LegalNotice = {
-  title: "Mentions légales",
-  sections: {
-    Éditeur: {
-      content: [
-        "Direction interministérielle du numérique (DINUM)",
-        "20 Avenue de Ségur",
-        "75007 PARIS",
-      ],
-    },
-    "Directrice de la publication": {
-      content: [
-        "Stéphanie Schaer, Directrice Interministérielle du Numérique (DINUM).",
-      ],
-    },
-    "Prestataires d'hébergement": {
-      title: "Clever Cloud",
-      content: [
-        [
-          "RCS Nantes B 524 172 699",
-          "Code APE : 6311Z",
-          "N°TVA : FR 87 524 172 699",
-          "Siège social : 4 rue Voltaire",
-          "44000 Nantes",
-          "France",
-        ],
-      ],
-    },
+  editeur: {
+    title: "Éditeur de la plateforme",
+    content: [
+      {
+        text: "Le formulaire de dépôt d’avis Je donne mon avis est éditée par la Direction interministérielle du numérique de l’Etat (DINUM) située :",
+        type: "breakAfter",
+      },
+      "20 avenue de Ségur",
+      { text: "75007 Paris", type: "breakAfter" },
+      { text: "Tel. Accueil : 01.71.21.01.70", type: "breakAfter" },
+      "SIRET : 12000101100010 (secrétariat général du gouvernement)",
+      "SIREN : 120 001 011",
+    ],
+  },
+  directeurPublication: {
+    title: "Directeur de la publication",
+    content: [
+      "La directrice de la publication est Madame Stéphanie Schaer, Directrice interministérielle du numérique.",
+    ],
+  },
+  hebergement: {
+    title: "Hébergement de la plateforme",
+    content: [
+      {
+        text: "La plateforme est hébergée par Clever Cloud situé :",
+        type: "breakAfter",
+      },
+      "RCS Nantes B 524 172 699",
+      "Code APE : 6311Z",
+      "N°TVA : FR 87 524 172 699",
+      "Siège social : 4 rue Voltaire",
+      "44000 Nantes",
+      "France",
+    ],
+  },
+  accessibilite: {
+    title: "Accessibilité",
+    content: ["L’accessibilité de la plateforme est non conforme."],
+  },
+  moreInfo: {
+    title: "En savoir plus",
+    content: [
+      "Pour en savoir plus sur la politique d’accessibilité numérique de l’État : ",
+      {
+        text: "https://accessibilite.numerique.gouv.fr/",
+        type: "link",
+        href: "https://accessibilite.numerique.gouv.fr/",
+      },
+    ],
+  },
+  securite: {
+    title: "Sécurité",
+    content: [
+      {
+        text: "La plateforme est protégée par un certificat électronique, matérialisé pour la grande majorité des navigateurs par un cadenas. Cette protection participe à la confidentialité des échanges.",
+        type: "breakAfter",
+      },
+      "En aucun cas les services associés à la plateforme ne seront à l’origine d’envoi de courriels pour demander la saisie d’informations personnelles.",
+    ],
+  },
+  service: {
+    title: "Service",
+    content: [
+      "Le suivi éditorial et graphique est assuré par la DINUM.",
+      "Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien (y compris profond) vers les informations diffusées sur le site.",
+    ],
+  },
+  contact: {
+    title: "Contact",
+    content: [
+      "L’adresse courriel de contact est la suivante : ",
+      {
+        text: "contact.jdma@design.numerique.gouv.fr",
+        type: "mailto",
+        href: "mailto:contact.jdma@design.numerique.gouv.fr",
+      },
+    ],
   },
 };
