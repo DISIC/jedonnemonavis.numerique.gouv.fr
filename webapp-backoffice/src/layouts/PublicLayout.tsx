@@ -180,8 +180,8 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Migration de vos données en cours, certains avis peuvent manquer
-							pendant les prochaines 24 heures.
+							Migration en cours : certains avis déposés récemment peuvent
+							mettre jusqu'à 24h avant de s'afficher (03/07/24, à 15h)
 						</>
 					}
 				/>
