@@ -201,6 +201,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							text: 'Données personnelles',
 							linkProps: { href: '/public/cgu' }
 						},
+						{
+							text: 'Modalités d’utilisation',
+							linkProps: { href: '/public/termsOfUse' }
+						},
 						{ text: 'Contact', linkProps: { href: '/public/contact' } }
 					]}
 					termsLinkProps={{

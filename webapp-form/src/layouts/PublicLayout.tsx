@@ -79,6 +79,10 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         accessibility="non compliant"
         bottomItems={[
           { text: "Données personnelles", linkProps: { href: "/cgu" } },
+          {
+            text: "Modalités d’utilisation",
+            linkProps: { href: "/termsOfUse" },
+          },
           { text: "Contact", linkProps: { href: "/contact" } },
         ]}
         termsLinkProps={{

@@ -2,18 +2,21 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { CGU } from '../../utils/content';
+import { TermsOfUse as TOU } from '../../utils/content';
 
-const GeneralConditions = () => {
+const TermsOfUse = () => {
 	const { cx, classes } = useStyles();
 
 	return (
 		<>
 			<Head>
-				<title>Politique de confidentialité | Je donne mon avis</title>
+				<title>
+					Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon
+					avis | Je donne mon avis
+				</title>
 				<meta
 					name="description"
-					content={`Politique de confidentialité | Je donne mon avis`}
+					content={`Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon avis | Je donne mon avis`}
 				/>
 			</Head>
 			<div
@@ -33,26 +36,28 @@ const GeneralConditions = () => {
 				>
 					<div className={'fr-col-lg-12'}>
 						<h1 className={fr.cx('fr-mb-12v')}>
-							Politique de confidentialité du formulaire de dépôt d’avis Je
-							donne mon avis
+							Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon
+							avis
 						</h1>
-						{Object.keys(CGU).map(key => (
+						{Object.keys(TOU).map(key => (
 							<div key={key} className={cx(classes.blockWrapper)}>
-								<h2>{CGU[key].title}</h2>
+								<h2>{TOU[key].title}</h2>
 								<div className={'fr-col-lg-10'}>
-									{CGU[key].content.map((line, index) => {
+									{TOU[key].content.map((line, index) => {
 										const isLink =
 											typeof line === 'object' && line.type === 'link';
-										const isMailto =
-											typeof line === 'object' && line.type === 'mailto';
 										const isList =
 											typeof line === 'object' && line.type === 'list';
+										const isSubtitle =
+											typeof line === 'object' && line.type === 'subtitle';
 										const hasNoSpaces =
 											typeof line === 'object' && line.type === 'noSpaces';
 
 										return (
 											<React.Fragment key={index}>
-												{isLink ? (
+												{isSubtitle ? (
+													<h3 className={classes.subtitle}>{line.text}</h3>
+												) : isLink ? (
 													<>
 														<p>
 															<a
@@ -64,10 +69,6 @@ const GeneralConditions = () => {
 															</a>
 														</p>
 													</>
-												) : isMailto ? (
-													<p>
-														<a href={line.href}>{line.text}</a>
-													</p>
 												) : isList ? (
 													<ul>
 														<li>{line.text}</li>
@@ -106,7 +107,7 @@ const GeneralConditions = () => {
 	);
 };
 
-const useStyles = tss.withName(GeneralConditions.name).create(() => ({
+const useStyles = tss.withName(TermsOfUse.name).create(() => ({
 	blockWrapper: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -119,9 +120,12 @@ const useStyles = tss.withName(GeneralConditions.name).create(() => ({
 			margin: '2rem 0 2rem 2rem'
 		}
 	},
+	subtitle: {
+		...fr.typography[3].style
+	},
 	noSpacesParagraph: {
 		marginBottom: '0 !important'
 	}
 }));
 
-export default GeneralConditions;
+export default TermsOfUse;
