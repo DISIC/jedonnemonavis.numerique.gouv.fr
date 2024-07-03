@@ -161,7 +161,7 @@ export const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
+					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liée à la clé fournie.",
 				example: {
 					request: {
 						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
@@ -224,7 +224,8 @@ export const openAPIRouter = router({
 							)
 						: authorized_products_ids,
 				start_date,
-				end_date
+				end_date,
+				interval: 'year'
 			});
 
 			await ctx.prisma.apiKeyLog.create({

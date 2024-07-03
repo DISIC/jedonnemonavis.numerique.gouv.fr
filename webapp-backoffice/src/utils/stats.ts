@@ -1,6 +1,6 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { AnswerIntention } from '@prisma/client';
-import { Context } from '../server/trpc';
+import { fr } from "@codegouvfr/react-dsfr";
+import { AnswerIntention } from "@prisma/client";
+import { Context } from "../server/trpc";
 import {
 	Buckets,
 	CategoryData,
@@ -8,8 +8,8 @@ import {
 	Hit,
 	OpenProduct,
 	ProductMapEntry
-} from '../types/custom';
-import { FieldCodeHelper } from './helpers';
+} from "../types/custom";
+import { FieldCodeHelper } from "./helpers";
 
 export const getIntentionFromAverage = (average: number): AnswerIntention => {
 	return average >= 8
@@ -22,30 +22,30 @@ export const getIntentionFromAverage = (average: number): AnswerIntention => {
 export const getStatsColor = ({
 	intention,
 	average,
-	kind = 'text'
+	kind = "text"
 }: {
 	intention?: AnswerIntention;
 	average?: number;
-	kind?: 'text' | 'background';
+	kind?: "text" | "background";
 }) => {
 	if (average !== undefined) {
 		intention = getIntentionFromAverage(average);
 	}
 	switch (intention) {
 		case AnswerIntention.good:
-			return kind === 'text'
+			return kind === "text"
 				? fr.colors.decisions.text.default.success.default
 				: fr.colors.decisions.background.contrast.success.default;
 		case AnswerIntention.medium:
-			return kind === 'text'
+			return kind === "text"
 				? fr.colors.decisions.text.label.yellowTournesol.default
 				: fr.colors.decisions.background.alt.yellowTournesol.default;
 		case AnswerIntention.bad:
-			return kind === 'text'
+			return kind === "text"
 				? fr.colors.decisions.text.default.error.default
 				: fr.colors.decisions.background.contrast.error.default;
 		default:
-			return 'transparent';
+			return "transparent";
 	}
 };
 
@@ -56,13 +56,13 @@ export const getStatsIcon = ({
 }) => {
 	switch (intention) {
 		case AnswerIntention.good:
-			return 'ri-emotion-happy-line';
+			return "ri-emotion-happy-line";
 		case AnswerIntention.medium:
-			return 'ri-emotion-normal-line';
+			return "ri-emotion-normal-line";
 		case AnswerIntention.bad:
-			return 'ri-emotion-unhappy-line';
+			return "ri-emotion-unhappy-line";
 		default:
-			return 'ri-question-line';
+			return "ri-question-line";
 	}
 };
 
@@ -77,21 +77,21 @@ export const getStatsAnswerText = ({
 	intention: AnswerIntention;
 }) => {
 	const currentAnswerText =
-		buckets.find(bucket => bucket.intention === intention)?.answer_text || '';
+		buckets.find(bucket => bucket.intention === intention)?.answer_text || "";
 
 	return currentAnswerText.charAt(0).toUpperCase() + currentAnswerText.slice(1);
 };
 
 export const displayIntention = (intention: string) => {
 	switch (intention) {
-		case 'bad':
-			return 'Mauvais';
-		case 'medium':
-			return 'Moyen';
-		case 'good':
-			return 'Très bien';
-		case 'neutral':
-			return 'Neutre';
+		case "bad":
+			return "Mauvais";
+		case "medium":
+			return "Moyen";
+		case "good":
+			return "Très bien";
+		case "neutral":
+			return "Neutre";
 		default:
 			return intention;
 	}
@@ -104,6 +104,7 @@ const handleChildren = (buckets: Buckets) => {
 		const [
 			productId,
 			productName,
+			dateByInterval,
 			fieldCode,
 			parentFieldCode,
 			parentAnswerItemId,
@@ -111,7 +112,7 @@ const handleChildren = (buckets: Buckets) => {
 			intention,
 			answerText,
 			answerItemId
-		] = bucket.key.split('#!#');
+		] = bucket.key.split("#!#");
 		const docCount = bucket.doc_count;
 
 		let categoryIndex = result.findIndex(c => c.category === fieldCode);
@@ -127,7 +128,7 @@ const handleChildren = (buckets: Buckets) => {
 		}
 
 		const children = buckets.filter(b => {
-			const bParentFieldCode = b.key.split('#!#')[3];
+			const bParentFieldCode = b.key.split("#!#")[3];
 			return bParentFieldCode === fieldCode;
 		}) as Buckets;
 
@@ -150,6 +151,7 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 		const [
 			productId,
 			productName,
+			dateByInterval,
 			fieldCode,
 			parentFieldCode,
 			parentAnswerItemId,
@@ -157,7 +159,7 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 			intention,
 			answerText,
 			answerItemId
-		] = bucket.key.split('#!#');
+		] = bucket.key.split("#!#");
 		const docCount = bucket.doc_count;
 
 		if (!productMap.hasOwnProperty(productId)) {
@@ -188,8 +190,8 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 			}
 
 			const children = buckets.filter(b => {
-				const bParentFieldCode = b.key.split('#!#')[3];
-				const bParentFieldAnswerItemId = b.key.split('#!#')[4];
+				const bParentFieldCode = b.key.split("#!#")[3];
+				const bParentFieldAnswerItemId = b.key.split("#!#")[4];
 				return (
 					bParentFieldCode === fieldCode &&
 					bParentFieldAnswerItemId === answerItemId
@@ -224,16 +226,18 @@ export const fetchAndFormatData = async ({
 	field_codes,
 	product_ids,
 	start_date,
-	end_date
+	end_date,
+	interval
 }: {
 	ctx: Context;
 	field_codes: FieldCodeHelper[];
 	product_ids: string[] | number[];
 	start_date: string;
 	end_date: string;
+	interval: "day" | "week" | "month" | "year";
 }) => {
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
-		index: 'jdma-answers',
+		index: "jdma-answers",
 		query: {
 			bool: {
 				must: [
@@ -270,23 +274,47 @@ export const fetchAndFormatData = async ({
 			}
 		},
 		aggs: {
-			term: {
-				terms: {
-					script: {
-						source: `
-						doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value
-						`,
-						lang: 'painless'
-					},
-					size: 10000
+			by_interval: {
+				date_histogram: {
+					field: "created_at",
+					calendar_interval: interval // Utilisation de l"intervalle ici
+				},
+				aggs: {
+					term: {
+						terms: {
+							script: {
+								source: `
+								def intervalStr = "";
+								if (params.interval == "day") {
+									intervalStr = "day: " + doc["created_at"].value.toString("dd-MM-yyyy");
+								} else if (params.interval == "month") {
+									intervalStr = "month: " + doc["created_at"].value.toString("MM-yyyy");
+								} else if (params.interval == "year") {
+									intervalStr = "year: " + doc["created_at"].value.toString("yyyy");
+								} else {
+									intervalStr = "week: " + doc["created_at"].value.toString("ww-yyyy");
+								}
+								return doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value;
+								`,
+								lang: "painless",
+								params: {
+									interval: interval
+								}
+							},
+							size: 10000
+						}
+					}
 				}
 			}
 		},
 		size: 0
 	});
 
-	const tmpBuckets = (fieldCodeAggs?.aggregations?.term as any)
-		?.buckets as Buckets;
+	const intervalBuckets = (fieldCodeAggs?.aggregations?.by_interval as any)?.buckets || [];
+
+	const tmpBuckets = intervalBuckets.flatMap((bucket: any) => bucket.term.buckets);
+
+	console.log("buckets : ", tmpBuckets)
 
 	return handleBucket(
 		tmpBuckets,
