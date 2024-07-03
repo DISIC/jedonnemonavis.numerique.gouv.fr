@@ -107,7 +107,7 @@ const useStyles = tss.withName(GeneralConditions.name).create(() => ({
 			width: 'fit-content'
 		},
 		ul: {
-			margin: '2rem 0'
+			margin: '2rem 0 2rem 2rem'
 		}
 	}
 }));
