@@ -11,12 +11,12 @@ const TermsOfUse = () => {
 		<>
 			<Head>
 				<title>
-					Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon
-					avis | Je donne mon avis
+					Modalités d’utilisation du formulaire de dépôt d’avis | Je donne mon
+					avis
 				</title>
 				<meta
 					name="description"
-					content={`Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon avis | Je donne mon avis`}
+					content={`Modalités d’utilisation du formulaire de dépôt d’avis | Je donne mon avis`}
 				/>
 			</Head>
 			<div
