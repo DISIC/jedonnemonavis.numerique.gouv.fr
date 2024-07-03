@@ -1,16 +1,19 @@
 import { fr } from "@codegouvfr/react-dsfr";
 import Head from "next/head";
 import React from "react";
+import { tss } from "tss-react/dsfr";
 import { CGU } from "../utils/content";
 
 const GeneralConditions = () => {
+  const { cx, classes } = useStyles();
+
   return (
     <>
       <Head>
-        <title>Conditions générales d'utilisation | Je donne mon avis</title>
+        <title>Politique de confidentialité | Je donne mon avis</title>
         <meta
           name="description"
-          content={`Conditions générales d'utilisation | Je donne mon avis`}
+          content={`Politique de confidentialité | Je donne mon avis`}
         />
       </Head>
       <div
@@ -29,51 +32,84 @@ const GeneralConditions = () => {
           )}
         >
           <div className={"fr-col-lg-12"}>
-            <h1 className={fr.cx("fr-mb-12v")}>{CGU.title}</h1>
-            <p>
-              <i>En cours de rédaction...</i>
-            </p>
-            {/* <h2>{CGU.firstPart.subtitle}</h2>
-						<p>{CGU.firstPart.firstBlock}</p>
-						<p>{CGU.firstPart.secondBlock}</p>
-						<p>{CGU.firstPart.thirdBlock.firstBlock}</p>
-						<ul>
-							{CGU.firstPart.thirdBlock.secondBlock.map(el => (
-								<li>{el}</li>
-							))}
-						</ul>
-						<p>{CGU.firstPart.fourthBlock}</p>
-						<p>{CGU.firstPart.fifthBlock.firstBlock}</p>
-						<p>
-							{CGU.firstPart.fifthBlock.firstBlock}{' '}
-							<span>
-								<a href={CGU.firstPart.fifthBlock.url1} target="blank">
-									{CGU.firstPart.fifthBlock.url1}.
-								</a>
-							</span>{' '}
-							{CGU.firstPart.fifthBlock.secondBlock}{' '}
-							<span>
-								{' '}
-								<a href={CGU.firstPart.fifthBlock.url2} target="blank">
-									{CGU.firstPart.fifthBlock.url2}.
-								</a>
-							</span>
-						</p>
-						<h2>{CGU.secondPart.title}</h2>
-						{Object.keys(CGU.secondPart.sections).map(sectionKey => (
-							<div key={sectionKey}>
-								<h3>{sectionKey}</h3>
-								{CGU.secondPart.sections[sectionKey].blocks.map(
-									(block, index) => (
-										<p key={index}>{block}</p>
-									)
-								)}
-							</div>
-						))} */}
+            <h1 className={fr.cx("fr-mb-12v")}>
+              Politique de confidentialité du formulaire de dépôt d’avis Je
+              donne mon avis
+            </h1>
+            {Object.keys(CGU).map((key) => (
+              <div key={key} className={cx(classes.blockWrapper)}>
+                <h2>{CGU[key].title}</h2>
+                <div className={"fr-col-lg-10"}>
+                  {CGU[key].content.map((line, index) => {
+                    const isBreakAfter =
+                      typeof line === "object" && line.type === "breakAfter";
+                    const isBreakBefore =
+                      typeof line === "object" && line.type === "breakBefore";
+                    const isBreakBoth =
+                      typeof line === "object" && line.type === "breakBoth";
+                    const isLink =
+                      typeof line === "object" && line.type === "link";
+                    const isList =
+                      typeof line === "object" && line.type === "list";
+
+                    return (
+                      <React.Fragment key={index}>
+                        {isLink ? (
+                          <>
+                            <br />
+                            <a
+                              href={line.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {line.text}
+                            </a>
+                            <br />
+                          </>
+                        ) : isList ? (
+                          <ul>
+                            <li>{line.text}</li>
+                          </ul>
+                        ) : typeof line === "string" ? (
+                          <>
+                            {(isBreakBefore || isBreakBoth) && <br />}
+                            {line}
+                          </>
+                        ) : (
+                          <>
+                            {(isBreakBefore || isBreakBoth) && <br />}
+                            {line.text}
+                          </>
+                        )}
+                        {(isBreakAfter || isBreakBoth) && <br />}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </>
   );
 };
+
+const useStyles = tss.withName(GeneralConditions.name).create(() => ({
+  blockWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    marginBottom: "2rem",
+    p: {
+      marginBottom: "0 !important",
+    },
+    a: {
+      width: "fit-content",
+    },
+    ul: {
+      margin: "2rem 0",
+    },
+  },
+}));
+
 export default GeneralConditions;
