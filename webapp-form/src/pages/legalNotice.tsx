@@ -4,7 +4,7 @@ import React from "react";
 import { tss } from "tss-react/dsfr";
 import { LegalNotice as LN } from "../utils/content";
 
-const legalNotice = () => {
+const LegalNotice = () => {
   const { cx, classes } = useStyles();
 
   return (
@@ -91,4 +91,4 @@ const useStyles = tss.withName(legalNotice.name).create(() => ({
   },
 }));
 
-export default legalNotice;
+export default LegalNotice;
