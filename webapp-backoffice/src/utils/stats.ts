@@ -11,7 +11,18 @@ import {
 } from '../types/custom';
 import { FieldCodeHelper } from './helpers';
 
-export const getIntentionFromAverage = (average: number): AnswerIntention => {
+export const getIntentionFromAverage = (
+	average: number,
+	slug?: string
+): AnswerIntention => {
+	if (slug && slug === 'contact') {
+		return average >= 8.5
+			? AnswerIntention.good
+			: average >= 7
+				? AnswerIntention.medium
+				: AnswerIntention.bad;
+	}
+
 	return average >= 8
 		? AnswerIntention.good
 		: average >= 5

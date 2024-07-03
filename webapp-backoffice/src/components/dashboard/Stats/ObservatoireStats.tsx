@@ -55,9 +55,15 @@ const ObservatoireStats = ({
 	if (isLoadingStatsObservatoire) return;
 
 	const getLabelFromValue = (value: number, slug: StatField['slug']) => {
-		if (value < 5) return slug === 'contact' ? 'Faible' : 'Pas bien';
+		if (slug === 'contact') {
+			if (value < 7) return 'Faible';
+			if (value < 8.5) return 'Moyen';
+			return 'Optimal';
+		}
+
+		if (value < 5) return 'Pas bien';
 		if (value < 8) return 'Moyen';
-		return slug === 'contact' ? 'Optimal' : 'Bien';
+		return 'Bien';
 	};
 
 	const getClassFromValue = (value: number, slug: StatField['slug']) => {
