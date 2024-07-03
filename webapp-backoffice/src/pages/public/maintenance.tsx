@@ -24,7 +24,8 @@ const useStyles = tss.withName(Maintenance.name).create(() => ({
 		flexDirection: 'column',
 		justifyContent: 'center',
 		alignItems: 'center',
-		minHeight: '100vh'
+		minHeight: '100vh',
+		textAlign: 'center'
 	}
 }));
 
