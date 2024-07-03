@@ -41,6 +41,8 @@ const legalNotice = () => {
 								{LN[key].content.map((line, index) => {
 									const isBreakAfter =
 										typeof line === 'object' && line.type === 'breakAfter';
+									const isBreakBoth =
+										typeof line === 'object' && line.type === 'breakBoth';
 									const isLink =
 										typeof line === 'object' && line.type === 'link';
 									const isMailto =
@@ -49,13 +51,16 @@ const legalNotice = () => {
 									return (
 										<React.Fragment key={index}>
 											{isLink ? (
-												<a
-													href={line.href}
-													target="_blank"
-													rel="noopener noreferrer"
-												>
-													{line.text}
-												</a>
+												<>
+													<br />
+													<a
+														href={line.href}
+														target="_blank"
+														rel="noopener noreferrer"
+													>
+														{line.text}
+													</a>
+												</>
 											) : isMailto ? (
 												<a href={line.href}>{line.text}</a>
 											) : typeof line === 'string' ? (
