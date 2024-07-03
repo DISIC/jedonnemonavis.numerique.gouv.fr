@@ -140,7 +140,7 @@ export default function Home() {
 				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-nous !"}
 				buttonStyle="secondary"
 				buttonText="Contacter notre équipe"
-				buttonLink="/login"
+				buttonLink="/public/contact"
 			/>
 		</div>
 	);
