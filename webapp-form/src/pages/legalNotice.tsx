@@ -77,7 +77,7 @@ const LegalNotice = () => {
   );
 };
 
-const useStyles = tss.withName(legalNotice.name).create(() => ({
+const useStyles = tss.withName(LegalNotice.name).create(() => ({
   blockWrapper: {
     display: "flex",
     flexDirection: "column",
