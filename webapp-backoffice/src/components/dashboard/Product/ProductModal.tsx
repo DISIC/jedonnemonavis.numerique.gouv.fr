@@ -157,7 +157,6 @@ const ProductModal = (props: Props) => {
 		if (product) {
 			reset({ ...product, urls: product.urls.map(url => ({ value: url })) });
 		} else {
-			console.log('reset emptu');
 			reset({ title: '', entity_id: undefined });
 		}
 	}, [product]);
@@ -199,7 +198,6 @@ const ProductModal = (props: Props) => {
 						name="title"
 						rules={{ required: 'Ce champ est obligatoire' }}
 						render={({ field: { onChange, value, name } }) => {
-							console.log(value);
 							return (
 								<Input
 									label={
