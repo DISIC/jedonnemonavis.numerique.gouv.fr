@@ -17,8 +17,10 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.header import Header
-import calendar
+from io import StringIO, BytesIO
 from collections import defaultdict
+import zipfile
+import calendar
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -308,17 +310,9 @@ def main():
     concurrency_check_query = """
     SELECT COUNT(*) FROM public."Export" WHERE status = 'processing'::"StatusExport"
     """
-
-    # Execute the query and fetch the results
     result = fetch_query(conn, concurrency_check_query)
+    concurrency_count = result[0][0] if result else 0
 
-    # Check if the result is not empty
-    if result:
-        concurrency_count = result[0][0]
-    else:
-        concurrency_count = 0  # Or handle it as per your requirement
-
-    # Now you can use concurrency_count
     print(f"Concurrency count: {concurrency_count}")
     
     if concurrency_count >= CONCURRENCY_LIMIT:
@@ -380,9 +374,8 @@ def main():
         print(f"{total_reviews} avis concernés")
 
         current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.csv"
-
-        all_reviews = []
+        
+        all_reviews_by_year = defaultdict(list)
         field_labels = set()
 
         # Get the month ranges
@@ -390,10 +383,8 @@ def main():
         retrieved_reviews = 0
 
         for month_start, month_end in month_ranges:
-            # print(f"Traitement des avis pour la période {month_start} - {month_end}")
             offset = 0
             while True:
-                # Première requête : récupérer les reviews
                 select_query_review = f"""
                 SELECT
                     r.id AS review_id,
@@ -413,7 +404,6 @@ def main():
                     r.created_at DESC
                 LIMIT %s OFFSET %s;
                 """
-
                 query_params = [product_id, month_start, month_end] + filters_values + [PAGE_SIZE, offset]
                 results_reviews = fetch_query_with_filters(conn, select_query_review, query_params)
 
@@ -422,7 +412,6 @@ def main():
 
                 review_ids = [row[0] for row in results_reviews]
 
-                # Deuxième requête : récupérer les answers pour les reviews obtenues
                 if review_ids:
                     select_query_answers = f"""
                     SELECT
@@ -458,68 +447,91 @@ def main():
                             'product_id': product_id,
                             'button_id': button_id,
                             'xwiki_id': xwiki_id,
-                            'review_created_at': datetime.strftime(review_created_at, '%d-%m-%Y %H:%M:%S'),
+                            'review_created_at': datetime.strftime(review_created_at, '%Y-%m-%d %H:%M:%S'),
                             'answers': defaultdict(list)
                         }
 
-                        # Traiter chaque réponse pour cette review
                         for answer in answers:
                             field_label = answer[3]
                             answer_text = answer[6]
                             parent_answer_id = answer[2]
 
-                            # Si l'answer a un parent, préfixer le texte de l'answer parent
                             if parent_answer_id is not None:
                                 parent_answer = next((a for a in answers if a[1] == parent_answer_id), None)
                                 if parent_answer:
                                     parent_text = parent_answer[6]
                                     answer_text = f"{parent_text} : {answer_text}"
 
-                            # Ajouter le texte de la réponse à la liste des réponses pour ce field_code
                             review_data['answers'][field_label].append(answer_text)
 
-                        # Convertir les listes de réponses en chaînes de caractères
-                        review_data['answers'] = {k: ', '.join(v) for k, v in review_data['answers'].items()}
+                        review_data['answers'] = {k: ' / '.join(v) for k, v in review_data['answers'].items()}
 
-                        all_reviews.append(review_data)
+                        year = review_created_at.year
+                        all_reviews_by_year[year].append(review_data)
                         field_labels.update(review_data['answers'].keys())
 
                     retrieved_reviews += len(results_reviews)
-                    # print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
                     offset += PAGE_SIZE
 
-        field_labels = sorted(field_labels)  # Sort field labels for consistent column order
+        # L'ordre spécifique des labels
+        desired_order = [
+                        "De façon générale, comment ça s’est passé ?",
+                        "Qu'avez-vous pensé des informations et des instructions fournies ?",
+                        "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
+                        "Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
+                        "Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
+                        "Souhaitez-vous nous en dire plus ?",
+                        "De façon générale, comment ça s’est passé ? ",
+                        "Était-ce facile à utiliser ?",
+                        "Avez-vous rencontré des difficultés ?",
+                        "Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?",
+                        "De quelle aide avez vous eu besoin ?",
+                        "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?"
+                         ]  # Remplacez cela par l'ordre réel que vous souhaitez
 
-        # Create CSV with all the reviews and answers
-        csv_buffer = StringIO()
-        writer = csv.writer(csv_buffer)
-        # Write header
-        header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
-        writer.writerow(header)
+        def custom_sort(labels, order):
+            order_dict = {label: index for index, label in enumerate(order)}
+            return sorted(labels, key=lambda x: order_dict.get(x, len(order)))
 
-        for review in all_reviews:
-            row = [
-                review['review_id'], 
-                review['form_id'], 
-                review['product_id'], 
-                review['button_id'], 
-                review['xwiki_id'], 
-                review['review_created_at']
-            ]
-            for label in field_labels:
-                row.append(review['answers'].get(label, ''))
-            writer.writerow(row)
+        # Après avoir récupéré tous les field_labels
+        field_labels = custom_sort(field_labels, desired_order)
 
-        # Upload the CSV to S3
-        if upload_to_s3(csv_buffer, BUCKET_NAME, file_name):
-            print(f"Fichier {file_name} uploadé avec succès sur le bucket {BUCKET_NAME}.")
+        # Create a ZIP file
+        zip_buffer = BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for year, reviews in all_reviews_by_year.items():
+                csv_buffer = StringIO()
+                writer = csv.writer(csv_buffer)
+                header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+                writer.writerow(header)
 
-            # Generate a presigned URL for downloading the file
-            download_link = generate_download_link(BUCKET_NAME, file_name)
+                for review in reviews:
+                    row = [
+                        review['review_id'],
+                        review['form_id'],
+                        review['product_id'],
+                        review['button_id'],
+                        review['xwiki_id'],
+                        review['review_created_at']
+                    ]
+                    for label in field_labels:
+                        row.append(review['answers'].get(label, ''))
+                    writer.writerow(row)
+
+                csv_filename = f"Avis_{year}.csv"
+                zip_file.writestr(csv_filename, csv_buffer.getvalue())
+
+        zip_buffer.seek(0)
+        zip_filename = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.zip"
+        
+        # Upload the ZIP to S3
+        if upload_to_s3(zip_buffer, BUCKET_NAME, zip_filename):
+            print(f"Fichier {zip_filename} uploadé avec succès sur le bucket {BUCKET_NAME}.")
+
+            download_link = generate_download_link(BUCKET_NAME, zip_filename)
             if download_link:
                 print(f"Le lien de téléchargement est : {download_link}")
-                # Send email to the user with the download link
                 send_email(first_result_export[9], download_link, first_result_export[10])
 
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
