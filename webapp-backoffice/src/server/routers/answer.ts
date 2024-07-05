@@ -251,7 +251,8 @@ export const answerRouter = router({
 				aggs: {
 					unique_review_ids: {
 						cardinality: {
-							field: 'review_id'
+							field: 'review_id',
+							precision_threshold: 100000
 						}
 					}
 				}
