@@ -113,7 +113,10 @@ const SmileyQuestionViz = ({
 
 	return (
 		<QuestionWrapper
-			totalField={resultFieldCode.metadata.total}
+			totalField={
+				// DUE TO ELK BUG WITH CARDINALITY NOT PRECISE ENOUGH : https://discuss.elastic.co/t/why-the-unique-count-of-some-item-is-larger-than-count-in-table-chart-of-kibana/34374
+				fieldCode === 'satisfaction' ? total : resultFieldCode.metadata.total
+			}
 			fieldLabel={resultFieldCode.metadata.fieldLabel as string}
 			total={total}
 			required={required}
