@@ -7,7 +7,7 @@ import { useDebounce } from 'usehooks-ts';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Product } from '@prisma/client';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import {
 	Controller,
@@ -153,11 +153,13 @@ const ProductModal = (props: Props) => {
 		}, 100);
 	};
 
-	useIsModalOpen(modal, {
-		onConceal: () => {
+	useEffect(() => {
+		if (product) {
+			reset({ ...product, urls: product.urls.map(url => ({ value: url })) });
+		} else {
 			reset({ title: '', entity_id: undefined });
 		}
-	});
+	}, [product]);
 
 	return (
 		<modal.Component
@@ -195,27 +197,29 @@ const ProductModal = (props: Props) => {
 						control={control}
 						name="title"
 						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => (
-							<Input
-								label={
-									<p className={fr.cx('fr-mb-0')}>
-										Nom du service{' '}
-										<span className={cx(classes.asterisk)}>*</span>
-									</p>
-								}
-								nativeInputProps={{
-									onChange: e => {
-										onChange(e);
-										if (onTitleChange) onTitleChange(e.target.value);
-									},
-									defaultValue: value,
-									value,
-									required: true
-								}}
-								state={errors[name] ? 'error' : 'default'}
-								stateRelatedMessage={errors[name]?.message}
-							/>
-						)}
+						render={({ field: { onChange, value, name } }) => {
+							return (
+								<Input
+									label={
+										<p className={fr.cx('fr-mb-0')}>
+											Nom du service{' '}
+											<span className={cx(classes.asterisk)}>*</span>
+										</p>
+									}
+									nativeInputProps={{
+										onChange: e => {
+											onChange(e);
+											if (onTitleChange) onTitleChange(e.target.value);
+										},
+										defaultValue: value,
+										value,
+										required: true
+									}}
+									state={errors[name] ? 'error' : 'default'}
+									stateRelatedMessage={errors[name]?.message}
+								/>
+							);
+						}}
 					/>
 				</div>
 				<div className={fr.cx('fr-input-group')}>

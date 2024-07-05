@@ -39,32 +39,58 @@ const LegalNotice = () => {
               <div key={key} className={cx(classes.blockWrapper)}>
                 <h2>{LN[key].title}</h2>
                 {LN[key].content.map((line, index) => {
-                  const isBreakAfter =
-                    typeof line === "object" && line.type === "breakAfter";
                   const isLink =
                     typeof line === "object" && line.type === "link";
                   const isMailto =
                     typeof line === "object" && line.type === "mailto";
+                  const isList =
+                    typeof line === "object" && line.type === "list";
+                  const hasNoSpaces =
+                    typeof line === "object" && line.type === "noSpaces";
 
                   return (
                     <React.Fragment key={index}>
                       {isLink ? (
-                        <a
-                          href={line.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {line.text}
-                        </a>
+                        <>
+                          <p>
+                            <a
+                              href={line.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {line.text}
+                            </a>
+                          </p>
+                        </>
                       ) : isMailto ? (
-                        <a href={line.href}>{line.text}</a>
+                        <p>
+                          <a href={line.href}>{line.text}</a>
+                        </p>
+                      ) : isList ? (
+                        <ul>
+                          <li>{line.text}</li>
+                        </ul>
                       ) : typeof line === "string" ? (
-                        line
+                        <>
+                          <p
+                            className={cx(
+                              hasNoSpaces ? classes.noSpacesParagraph : ""
+                            )}
+                          >
+                            {line}
+                          </p>
+                        </>
                       ) : (
-                        line.text
+                        <>
+                          <p
+                            className={cx(
+                              hasNoSpaces ? classes.noSpacesParagraph : ""
+                            )}
+                          >
+                            {line.text}
+                          </p>
+                        </>
                       )}
-                      {isMailto ? null : <br />}
-                      {isBreakAfter ? <br /> : null}
                     </React.Fragment>
                   );
                 })}
@@ -81,13 +107,14 @@ const useStyles = tss.withName(LegalNotice.name).create(() => ({
   blockWrapper: {
     display: "flex",
     flexDirection: "column",
-    marginBottom: "2rem",
-    p: {
-      marginBottom: "0 !important",
-    },
+    marginBottom: "1rem",
+
     a: {
       width: "fit-content",
     },
+  },
+  noSpacesParagraph: {
+    marginBottom: "0 !important",
   },
 }));
 
