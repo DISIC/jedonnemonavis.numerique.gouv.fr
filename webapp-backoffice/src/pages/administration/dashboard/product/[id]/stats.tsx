@@ -24,6 +24,7 @@ import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultiple
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { betaTestXwikiIds } from '@/src/utils/tools';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 
 interface Props {
 	product: Product;
@@ -60,6 +61,8 @@ export const SectionWrapper = ({
 	);
 };
 
+const nbMaxReviews = 500000;
+
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
 	const router = useRouter();
@@ -74,6 +77,8 @@ const ProductStatPage = (props: Props) => {
 	const [endDate, setEndDate] = useState<string>(
 		new Date().toISOString().split('T')[0]
 	);
+
+	const [wrongDateRange, setWrongDateRange] = useState<boolean>(false);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
@@ -182,36 +187,22 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	return (
-		<ProductLayout product={product}>
-			<Head>
-				<title>{product.title} | Statistiques | Je donne mon avis</title>
-				<meta
-					name="description"
-					content={`${product.title} Avis | Je donne mon avis`}
-				/>
-			</Head>
-			<PublicDataModal modal={public_modal} product={product} />
-			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string) => {
+		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
+		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+	};
 
-				<Button
-					priority="secondary"
-					type="button"
-					nativeButtonProps={public_modal.buttonProps}
-				>
-					Autoriser le partage public des statistiques
-				</Button>
-			</div>
-			<div className={cx(classes.container)}>
-				<Filters
-					currentStartDate={startDate}
-					currentEndDate={endDate}
-					onChange={(tmpStartDate, tmpEndDate) => {
-						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
-						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
-					}}
-				/>
+	const getStatsDisplay = () => {
+		if (isLoadingReviewsDataWithFilters) {
+			return (
+				<div className={fr.cx('fr-mt-16w')}>
+					<Loader />
+				</div>
+			);
+		}
+
+		return (
+			<>
 				<ObservatoireStats
 					productId={product.id}
 					startDate={debouncedStartDate}
@@ -242,15 +233,15 @@ const ProductStatPage = (props: Props) => {
 							/>
 						</div>
 						{/* <div className={fr.cx('fr-col-4')}>
-							<KPITile
-								title="Formulaires complets"
-								kpi={0}
-								desc="soit 0 % des répondants"
-								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
-								hideLink
-								grey
-							/>
-						</div> */}
+								<KPITile
+									title="Formulaires complets"
+									kpi={0}
+									desc="soit 0 % des répondants"
+									linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+									hideLink
+									grey
+								/>
+							</div> */}
 					</div>
 				</div>
 				<AnswersChart
@@ -321,6 +312,44 @@ const ProductStatPage = (props: Props) => {
 						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
+			</>
+		);
+	};
+
+	return (
+		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} Avis | Je donne mon avis`}
+				/>
+			</Head>
+			<PublicDataModal modal={public_modal} product={product} />
+			<div className={cx(classes.title)}>
+				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+				<Button
+					priority="secondary"
+					type="button"
+					nativeButtonProps={public_modal.buttonProps}
+				>
+					Autoriser le partage public des statistiques
+				</Button>
+			</div>
+			<div className={cx(classes.container)}>
+				<Filters
+					currentStartDate={startDate}
+					currentEndDate={endDate}
+					onChange={onChangeFilters}
+				/>
+				{!isLoadingReviewsDataWithFilters &&
+				nbReviewsWithFilters > nbMaxReviews ? (
+					<div className={fr.cx('fr-mt-10v')}>
+						<Notice title="Cette periode de date contient trop d'avis, veuillez essayer de requêter une période plus courte" />
+					</div>
+				) : (
+					getStatsDisplay()
+				)}
 			</div>
 		</ProductLayout>
 	);

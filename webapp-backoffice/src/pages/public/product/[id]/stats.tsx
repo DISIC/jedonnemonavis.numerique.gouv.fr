@@ -21,12 +21,15 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 
 interface Props {
 	product: Product | null;
 	defaultStartDate: string;
 	defaultEndDate: string;
 }
+
+const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
 	const { product, defaultStartDate, defaultEndDate } = props;
@@ -270,7 +273,14 @@ const ProductStatPage = (props: Props) => {
 					/>
 				</div>
 			</div>
-			{getStatsDisplay()}
+			{!isLoadingReviewsDataWithFilters &&
+			nbReviewsWithFilters > nbMaxReviews ? (
+				<div className={fr.cx('fr-mt-10v')}>
+					<Notice title="Cette periode de date contient trop d'avis, veuillez essayer de requêter une période plus courte" />
+				</div>
+			) : (
+				getStatsDisplay()
+			)}
 		</div>
 	);
 };
