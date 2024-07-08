@@ -475,6 +475,7 @@ def main():
                         field_labels.update(review_data['answers'].keys())
 
                     retrieved_reviews += len(results_reviews)
+                    print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
                     offset += PAGE_SIZE
 
