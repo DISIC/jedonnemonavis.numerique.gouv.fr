@@ -321,6 +321,27 @@ def main():
         print("Le nombre limite d'exports en cours de traitement est atteint.")
         return
     
+    # Reset old exports that have been processing for more than an hour
+    select_old_exports_query = """
+    SELECT e.*, u.email, p.title
+    FROM public."Export" e
+    JOIN public."User" u ON e.user_id = u.id
+    JOIN public."Product" p ON e.product_id = p.id
+    WHERE e.status = 'processing'::"StatusExport"
+    AND e."startDate" < NOW() - INTERVAL '1 hour'
+    ORDER BY e.created_at ASC
+    LIMIT 1
+    """
+    old_exports = fetch_query(conn, select_old_exports_query)
+    if old_exports:
+        for old_export in old_exports:
+            export_id = old_export[0]
+            print(f"Export {export_id} en cours de traitement depuis plus d'une heure. Réinitialisation du statut.")
+            update_status_query = """
+            UPDATE public."Export" SET status = 'idle'::"StatusExport", "startDate" = NULL WHERE id = %s
+            """
+            execute_query(conn, update_status_query, (export_id,))
+    
     # Select the first export with status 'idle'
     select_query_export = """
     SELECT e.*, u.email, p.title
