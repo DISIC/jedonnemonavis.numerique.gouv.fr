@@ -9,6 +9,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import { SectionWrapper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import {
 	betaTestXwikiIds,
+	formatNumberWithSpaces,
 	transformDateToFrenchReadable
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -129,6 +130,7 @@ const ProductStatPage = (props: Props) => {
 								kpi={nbReviewsWithFilters}
 								isLoading={isLoadingReviewsDataWithFilters}
 								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
+								hideLink
 							/>
 						</div>
 						<div className={fr.cx('fr-col-6')}>
@@ -142,6 +144,7 @@ const ProductStatPage = (props: Props) => {
 										: undefined
 								}
 								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
+								hideLink
 							/>
 						</div>
 						{/* <div className={fr.cx('fr-col-4')}>
@@ -245,7 +248,9 @@ const ProductStatPage = (props: Props) => {
 				Données recueillies en ligne, entre le{' '}
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
 				{transformDateToFrenchReadable(debouncedEndDate)}
-				{!!nbReviews ? `, auprès de ${nbReviewsWithFilters} internautes.` : '.'}
+				{!!nbReviews
+					? `, auprès de ${formatNumberWithSpaces(nbReviewsWithFilters)} internautes.`
+					: '.'}
 			</p>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>
