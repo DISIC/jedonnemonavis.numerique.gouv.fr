@@ -59,7 +59,7 @@ const ExportReviews = (props: Props) => {
 				type="button"
 				nativeButtonProps={export_modal.buttonProps}
 			>
-				Télécharger
+				Télécharger les données
 			</Button>
 		</>
 	);
