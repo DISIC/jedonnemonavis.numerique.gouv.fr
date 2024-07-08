@@ -280,7 +280,7 @@ const DashBoard = () => {
 									updateFilters({
 										...filters,
 										currentPage: 1,
-										validatedSearch: search.replace(/[^\w\sÀ-ÿ]/gi, '').trim()
+										validatedSearch: search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
 									});
 								}}
 							>
