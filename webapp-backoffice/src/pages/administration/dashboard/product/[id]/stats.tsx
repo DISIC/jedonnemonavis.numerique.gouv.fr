@@ -1,5 +1,9 @@
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
@@ -7,9 +11,12 @@ import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { betaTestXwikiIds, formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
 import Head from 'next/head';
@@ -18,13 +25,6 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
-import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
-import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
-import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
-import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
-import { betaTestXwikiIds } from '@/src/utils/tools';
-import Notice from '@codegouvfr/react-dsfr/Notice';
 
 interface Props {
 	product: Product;
@@ -77,8 +77,6 @@ const ProductStatPage = (props: Props) => {
 	const [endDate, setEndDate] = useState<string>(
 		new Date().toISOString().split('T')[0]
 	);
-
-	const [wrongDateRange, setWrongDateRange] = useState<boolean>(false);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
@@ -345,7 +343,11 @@ const ProductStatPage = (props: Props) => {
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
 					<div className={fr.cx('fr-mt-10v')}>
-						<Notice title="Cette periode de date contient trop d'avis, veuillez essayer de requêter une période plus courte" />
+						<Alert
+							title=""
+							severity="error"
+							description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(nbMaxReviews)} avis). Réduisez la fenêtre de temps.`}
+						/>
 					</div>
 				) : (
 					getStatsDisplay()

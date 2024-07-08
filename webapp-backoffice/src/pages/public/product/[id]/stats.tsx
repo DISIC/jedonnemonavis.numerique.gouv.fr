@@ -23,6 +23,7 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface Props {
 	product: Product | null;
@@ -33,10 +34,17 @@ interface Props {
 const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
+	const { classes, cx } = useStyles();
 	const { product, defaultStartDate, defaultEndDate } = props;
+
+	const [tmpStartDate, setTmpStartDate] = useState<string>(defaultStartDate);
+	const [tmpEndDate, setTmpEndDate] = useState<string>(defaultEndDate);
 
 	const [startDate, setStartDate] = useState<string>(defaultStartDate);
 	const [endDate, setEndDate] = useState<string>(defaultEndDate);
+
+	const debouncedStartDate = useDebounce<string>(startDate, 200);
+	const debouncedEndDate = useDebounce<string>(endDate, 200);
 
 	if (product === null) {
 		return (
@@ -51,9 +59,6 @@ const ProductStatPage = (props: Props) => {
 			</div>
 		);
 	}
-
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -108,7 +113,7 @@ const ProductStatPage = (props: Props) => {
 					<Alert
 						severity="info"
 						title="Aucun avis sur cette période"
-						description={`Nous n'avons pas trouvé d'avis entre le ${transformDateToFrenchReadable(debouncedStartDate)} et le ${transformDateToFrenchReadable(debouncedEndDate)}, tentez de changer la période de date.`}
+						description={`Nous n'avons pas trouvé d'avis entre le ${transformDateToFrenchReadable(debouncedStartDate)} et le ${transformDateToFrenchReadable(endDate)}, tentez de changer la période de date.`}
 					/>
 				</div>
 			);
@@ -232,6 +237,13 @@ const ProductStatPage = (props: Props) => {
 		);
 	};
 
+	const submit = () => {
+		if (tmpStartDate !== startDate || tmpEndDate !== endDate) {
+			setStartDate(tmpStartDate);
+			setEndDate(tmpEndDate);
+		}
+	};
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-mb-10w')}>
 			<Head>
@@ -252,36 +264,57 @@ const ProductStatPage = (props: Props) => {
 					? `, auprès de ${formatNumberWithSpaces(nbReviewsWithFilters)} internautes.`
 					: '.'}
 			</p>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-6')}>
+			<form
+				className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}
+				onSubmit={e => {
+					e.preventDefault();
+					submit();
+				}}
+			>
+				<div className={fr.cx('fr-col-3')}>
 					<Input
 						label="Date de début"
 						nativeInputProps={{
 							type: 'date',
-							value: startDate,
+							value: tmpStartDate,
 							onChange: e => {
-								setStartDate(e.target.value);
+								setTmpStartDate(e.target.value);
 							}
 						}}
 					/>
 				</div>
-				<div className={fr.cx('fr-col-6')}>
+				<div className={fr.cx('fr-col-3')}>
 					<Input
 						label="Date de fin"
 						nativeInputProps={{
 							type: 'date',
-							value: endDate,
+							value: tmpEndDate,
 							onChange: e => {
-								setEndDate(e.target.value);
+								setTmpEndDate(e.target.value);
 							}
 						}}
 					/>
 				</div>
-			</div>
+				<div className={fr.cx('fr-col-2')}>
+					<div className={cx(classes.applyContainer)}>
+						<Button
+							type="submit"
+							iconId="ri-search-2-line"
+							title="Appliquer le changement de dates"
+						>
+							Appliquer
+						</Button>
+					</div>
+				</div>
+			</form>
 			{!isLoadingReviewsDataWithFilters &&
 			nbReviewsWithFilters > nbMaxReviews ? (
 				<div className={fr.cx('fr-mt-10v')}>
-					<Notice title="Cette periode de date contient trop d'avis, veuillez essayer de requêter une période plus courte" />
+					<Alert
+						title=""
+						severity="error"
+						description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(nbMaxReviews)} avis). Réduisez la fenêtre de temps.`}
+					/>
 				</div>
 			) : (
 				getStatsDisplay()
@@ -291,15 +324,8 @@ const ProductStatPage = (props: Props) => {
 };
 
 const useStyles = tss.create({
-	title: {
-		...fr.spacing('margin', { bottom: '6w' })
-	},
-	wrapperGlobal: {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: '3rem',
-		padding: '2rem',
-		border: '1px solid #E5E5E5'
+	applyContainer: {
+		paddingTop: fr.spacing('8v')
 	}
 });
 

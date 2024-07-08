@@ -145,7 +145,6 @@ const Filters = ({
 						<div className={cx(classes.applyContainer)}>
 							<Button
 								type="submit"
-								onClick={submit}
 								iconId="ri-search-2-line"
 								title="Appliquer le changement de dates"
 							/>
