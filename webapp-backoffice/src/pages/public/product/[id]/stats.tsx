@@ -15,6 +15,7 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
 import Head from 'next/head';
@@ -22,8 +23,6 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import Notice from '@codegouvfr/react-dsfr/Notice';
-import Button from '@codegouvfr/react-dsfr/Button';
 
 interface Props {
 	product: Product | null;
