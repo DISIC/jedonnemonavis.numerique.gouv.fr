@@ -376,7 +376,7 @@ const ProductReviewsPage = (props: Props) => {
 									onSubmit={e => {
 										e.preventDefault();
 										setValidatedSearch(
-											search.replace(/[^\w\sÀ-ÿ]/gi, '').trim()
+											search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
 										);
 										setCurrentPage(1);
 									}}
