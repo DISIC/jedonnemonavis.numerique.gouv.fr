@@ -38,6 +38,7 @@ const ExportModal = (props: Props) => {
 	const modalOpen = useIsModalOpen(modal);
 
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
+	const [format, setFormat] = React.useState<'csv' | 'xlsx' | null>(null);
 
 	const {
 		data: exportCsv,
@@ -93,7 +94,7 @@ const ExportModal = (props: Props) => {
 					/>
 					<RadioButtons
 						legend="Que souhaitez-vous télécharger ?"
-						name="radio"
+						name="choice"
 						options={[
 							{
 								label: `Télécharger tous les avis (${counts.countAll} avis)`,
@@ -110,6 +111,32 @@ const ExportModal = (props: Props) => {
 									value: 'filtered',
 									onClick: () => {
 										setChoice('filtered');
+									}
+								}
+							}
+						]}
+						className={fr.cx('fr-mt-10v')}
+					/>
+					<RadioButtons
+						legend="Sous quel format souhaitez-vous télécharger ?"
+						name="format"
+						options={[
+							{
+								label: `Format CSV`,
+								nativeInputProps: {
+									value: 'csv',
+									onClick: () => {
+										setFormat('csv');
+									}
+								}
+							},
+							{
+								label: `Format XLSX (bientôt disponible)`,
+								nativeInputProps: {
+									value: 'xlsx',
+									disabled: true,
+									onClick: () => {
+										setFormat('xlsx');
 									}
 								}
 							}
@@ -146,7 +173,7 @@ const ExportModal = (props: Props) => {
 							type: 'submit',
 							doClosesModal: false,
 							priority: 'primary',
-							disabled: choice === null,
+							disabled: choice === null || format === null,
 							onClick: () => {
 								if (choice) {
 									validateExport();
