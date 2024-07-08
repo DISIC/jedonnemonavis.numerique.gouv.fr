@@ -29,7 +29,7 @@ load_dotenv()
 required_env_vars = [
     'POSTGRESQL_ADDON_URI', 'PAGE_SIZE', 'CONCURRENCY_LIMIT',
     'CELLAR_ADDON_HOST', 'CELLAR_ADDON_KEY_ID', 'CELLAR_ADDON_KEY_SECRET', 'BUCKET_NAME',
-    'NODEMAILER_HOST', 'NODEMAILER_PORT', 'NODEMAILER_FROM', 'MAILPACE_API_KEY'
+    'NODEMAILER_HOST', 'NODEMAILER_PORT', 'NODEMAILER_FROM', 'MAILPACE_API_KEY', 'MAX_LINES_SWITCH'
 ]
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
@@ -48,6 +48,7 @@ NODEMAILER_HOST = os.getenv('NODEMAILER_HOST')
 NODEMAILER_PORT = int(os.getenv('NODEMAILER_PORT'))
 NODEMAILER_FROM = os.getenv('NODEMAILER_FROM')
 MAILPACE_API_KEY = os.getenv('MAILPACE_API_KEY')
+MAX_LINES_SWITCH = int(os.getenv('MAX_LINES_SWITCH'))
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -128,13 +129,14 @@ def generate_download_link(bucket, object_name, expiration=2592000):
 def sanitize_filename(filename):
     return re.sub(r'[^\w\-]', '_', filename)
 
-def send_email(to_email, download_link, product_name):
+def send_email(to_email, download_link, product_name, switch_to_zip=False):
     msg = MIMEMultipart('alternative')
     msg['From'] = str(Header(NODEMAILER_FROM, 'utf-8'))
     msg['To'] = to_email
     msg['Subject'] = str(Header(f"Votre export est prêt : [{product_name}]", 'utf-8'))
+    message = " Étant donné le volume important d'avis concernés, nous les avons séparés par année et regroupés dans un fichier zip." if switch_to_zip else ""
 
-    text = f"Bonjour,\n\nVotre fichier d'export pour le service {product_name} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
+    text = f"Bonjour,\n\nVotre export pour le service {product_name} est prêt.{message} Vous pouvez le télécharger en utilisant le lien suivant :\n\n{download_link}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA"
     html = f"""\
     <!DOCTYPE html>
     <html>
@@ -179,7 +181,7 @@ def send_email(to_email, download_link, product_name):
                 </div>
                 <div>
                     <p>Bonjour,<br><br>
-                    Votre fichier d'export pour le service "{product_name}" est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
+                    Votre export pour le service "{product_name}" est prêt.{message} Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
                     <a href="{download_link}">Télécharger le fichier</a><br><br>
                     Ce lien expirera dans 30 jours.<br><br>
                     </p>
@@ -375,6 +377,7 @@ def main():
 
         current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         
+        all_reviews = []
         all_reviews_by_year = defaultdict(list)
         field_labels = set()
 
@@ -468,6 +471,7 @@ def main():
 
                         year = review_created_at.year
                         all_reviews_by_year[year].append(review_data)
+                        all_reviews.append(review_data)
                         field_labels.update(review_data['answers'].keys())
 
                     retrieved_reviews += len(results_reviews)
@@ -496,43 +500,72 @@ def main():
 
         # Après avoir récupéré tous les field_labels
         field_labels = custom_sort(field_labels, desired_order)
-
-        # Create a ZIP file
+        csv_buffer = StringIO()
         zip_buffer = BytesIO()
-        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-            for year, reviews in all_reviews_by_year.items():
-                csv_buffer = StringIO()
-                writer = csv.writer(csv_buffer)
-                header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
-                writer.writerow(header)
+        swhitch_to_zip = total_reviews > MAX_LINES_SWITCH
 
-                for review in reviews:
-                    row = [
-                        review['review_id'],
-                        review['form_id'],
-                        review['product_id'],
-                        review['button_id'],
-                        review['xwiki_id'],
-                        review['review_created_at']
-                    ]
-                    for label in field_labels:
-                        row.append(review['answers'].get(label, ''))
-                    writer.writerow(row)
+        if not swhitch_to_zip:
+            # Create CSV with all the reviews and answers
+            writer = csv.writer(csv_buffer)
+            # Write header
+            header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+            writer.writerow(header)
 
-                csv_filename = f"Avis_{year}.csv"
-                zip_file.writestr(csv_filename, csv_buffer.getvalue())
+            for review in all_reviews:
+                row = [
+                    review['review_id'][-7:],
+                    review['form_id'],
+                    review['product_id'],
+                    review['button_id'],
+                    review['xwiki_id'],
+                    review['review_created_at']
+                ]
+                for label in field_labels:
+                    row.append(review['answers'].get(label, ''))
+                writer.writerow(row)
+            csv_buffer.seek(0)
+        else:
+            # Create a ZIP file
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for year, reviews in all_reviews_by_year.items():
+                    csv_buffer = StringIO()
+                    writer = csv.writer(csv_buffer)
+                    header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+                    writer.writerow(header)
 
-        zip_buffer.seek(0)
-        zip_filename = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.zip"
-        
-        # Upload the ZIP to S3
-        if upload_to_s3(zip_buffer, BUCKET_NAME, zip_filename):
-            print(f"Fichier {zip_filename} uploadé avec succès sur le bucket {BUCKET_NAME}.")
+                    for review in reviews:
+                        row = [
+                            review['review_id'][-7:],
+                            review['form_id'],
+                            review['product_id'],
+                            review['button_id'],
+                            review['xwiki_id'],
+                            review['review_created_at']
+                        ]
+                        for label in field_labels:
+                            row.append(review['answers'].get(label, ''))
+                        writer.writerow(row)
 
-            download_link = generate_download_link(BUCKET_NAME, zip_filename)
+                    csv_filename = f"Avis_{year}.csv"
+                    zip_file.writestr(csv_filename, csv_buffer.getvalue())
+                    csv_buffer.close()
+            zip_buffer.seek(0)
+
+        # Upload to S3
+        if swhitch_to_zip:
+            file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.zip"
+            upload_buffer = zip_buffer
+        else:
+            file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.csv"
+            upload_buffer = csv_buffer
+
+        if upload_to_s3(upload_buffer, BUCKET_NAME, file_name):
+            print(f"Fichier {file_name} uploadé avec succès sur le bucket {BUCKET_NAME}.")
+
+            download_link = generate_download_link(BUCKET_NAME, file_name)
             if download_link:
                 print(f"Le lien de téléchargement est : {download_link}")
-                send_email(first_result_export[9], download_link, first_result_export[10])
+                send_email(first_result_export[9], download_link, first_result_export[10], swhitch_to_zip)
 
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """
