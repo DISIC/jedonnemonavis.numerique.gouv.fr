@@ -104,7 +104,8 @@ export const openAPIRouter = router({
 						field_codes: ['satisfaction', 'comprehension'],
 						product_ids: [],
 						start_date: '2023-01-01',
-						end_date: new Date().toISOString().split('T')[0]
+						end_date: new Date().toISOString().split('T')[0],
+						interval: "year"
 					}
 				}
 			}
@@ -114,12 +115,13 @@ export const openAPIRouter = router({
 				field_codes: z.array(z.string()),
 				product_ids: z.array(z.number()),
 				start_date: z.string(),
-				end_date: z.string()
+				end_date: z.string(),
+				interval: z.enum(["day", "week", "month", "year", ""])
 			})
 		)
 		.output(ZOpenApiStatsOutput)
 		.query(async ({ ctx, input }) => {
-			const { field_codes, product_ids, start_date, end_date } = input;
+			const { field_codes, product_ids, start_date, end_date, interval } = input;
 
 			const actual250 = await ctx.prisma.product.findMany({
 				where: {
@@ -147,7 +149,8 @@ export const openAPIRouter = router({
 						? list_250_ids.filter(value => product_ids.includes(value))
 						: list_250_ids,
 				start_date,
-				end_date
+				end_date,
+				interval
 			});
 
 			return { data: result };
@@ -161,14 +164,15 @@ export const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liées au porteur du token fourni.",
+					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour toutes les démarches liée à la clé fournie.",
 				example: {
 					request: {
 						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						product_ids: [],
 						inteval: undefined,
 						start_date: '2023-01-01',
-						end_date: new Date().toISOString().split('T')[0]
+						end_date: new Date().toISOString().split('T')[0],
+						interval: "year"
 					}
 				}
 			}
@@ -179,7 +183,8 @@ export const openAPIRouter = router({
 				product_ids: z.array(z.number()),
 				interval: z.enum(['day', 'week', 'month', 'year']).optional(),
 				start_date: z.string(),
-				end_date: z.string()
+				end_date: z.string(),
+				interval: z.enum(["day", "week", "month", "year", ""])
 			})
 		)
 		.output(ZOpenApiStatsOutput)
