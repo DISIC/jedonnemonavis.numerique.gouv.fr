@@ -181,7 +181,6 @@ export const openAPIRouter = router({
 			z.object({
 				field_codes: z.array(z.string()),
 				product_ids: z.array(z.number()),
-				interval: z.enum(['day', 'week', 'month', 'year']).optional(),
 				start_date: z.string(),
 				end_date: z.string(),
 				interval: z.enum(["day", "week", "month", "year", ""])
