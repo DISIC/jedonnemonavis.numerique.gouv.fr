@@ -72,8 +72,9 @@ export type CategoryData = {
 export type OpenProduct = {
     product_id: string;
     product_name: string;
-    dates: Array<{
+    intervals: Array<{
         date: string;
+        length_interval: string,
         data: CategoryData[];
     }>;
 };
@@ -130,9 +131,10 @@ export const ZOpenApiStatsOutput = z.object({
         z.object({
             product_id: z.string(),
             product_name: z.string(),
-            dates: z.array(
+            intervals: z.array(
                 z.object({
                     date: z.string(),
+                    length_interval: z.string(),
                     data: z.array(ZOpenApiStatsCategory)
                 })
             )

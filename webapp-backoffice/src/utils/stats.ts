@@ -151,7 +151,7 @@ const handleChildren = (buckets: Buckets) => {
 	return result;
 };
 
-const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
+const handleBucket = (buckets: Buckets, field_codes_slugs: string[], interval: string) => {
 	let result: OpenProduct[] = [];
 	let productMap: { [productId: string]: ProductMapEntry } = {};
   
@@ -174,7 +174,7 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 		const newProduct = {
 		  product_id: productId,
 		  product_name: productName,
-		  dates: []
+		  intervals: []
 		};
 		result.push(newProduct);
 		productMap[productId] = {
@@ -188,11 +188,12 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 	  if (!productMap[productId].dateMap.hasOwnProperty(docDate)) {
 		const newDateEntry = {
 		  date: docDate,
+		  length_interval: interval,
 		  data: []
 		};
-		result[productIndex].dates.push(newDateEntry);
+		result[productIndex].intervals.push(newDateEntry);
 		productMap[productId].dateMap[docDate] = {
-		  dateIndex: result[productIndex].dates.length - 1,
+		  dateIndex: result[productIndex].intervals.length - 1,
 		  categories: {}
 		};
 	  }
@@ -206,9 +207,9 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 			label: fieldLabel,
 			number_hits: []
 		  };
-		  result[productIndex].dates[dateIndex].data.push(newCategory);
+		  result[productIndex].intervals[dateIndex].data.push(newCategory);
 		  productMap[productId].dateMap[docDate].categories[fieldCode] =
-			result[productIndex].dates[dateIndex].data.length - 1;
+			result[productIndex].intervals[dateIndex].data.length - 1;
 		}
   
 		const children = buckets.filter(b => {
@@ -221,16 +222,16 @@ const handleBucket = (buckets: Buckets, field_codes_slugs: string[]) => {
 		}) as Buckets;
   
 		const categoryIndex = productMap[productId].dateMap[docDate].categories[fieldCode];
-		const existingHitIndex = result[productIndex].dates[dateIndex].data[
+		const existingHitIndex = result[productIndex].intervals[dateIndex].data[
 		  categoryIndex
 		].number_hits.findIndex(hit => hit.label === answerText);
   
 		if (existingHitIndex !== -1) {
-		  result[productIndex].dates[dateIndex].data[categoryIndex].number_hits[
+		  result[productIndex].intervals[dateIndex].data[categoryIndex].number_hits[
 			existingHitIndex
 		  ].count += docCount;
 		} else {
-		  result[productIndex].dates[dateIndex].data[categoryIndex].number_hits.push({
+		  result[productIndex].intervals[dateIndex].data[categoryIndex].number_hits.push({
 			intention: intention,
 			label: answerText,
 			count: docCount,
@@ -256,7 +257,7 @@ export const fetchAndFormatData = async ({
 	product_ids: string[] | number[];
 	start_date: string;
 	end_date: string;
-	interval: "day" | "week" | "month" | "year" | "";
+	interval: "day" | "week" | "month" | "year" | "none";
 }) => {
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 		index: "jdma-answers",
@@ -299,7 +300,7 @@ export const fetchAndFormatData = async ({
 			by_interval: {
 				date_histogram: {
 					field: "created_at",
-					calendar_interval: interval !== '' ? interval : "year"
+					calendar_interval: interval !== 'none' ? interval : "year"
 				},
 				aggs: {
 					terms_by_field: {
@@ -325,7 +326,7 @@ export const fetchAndFormatData = async ({
 		bucket.terms_by_field.buckets.map((innerBucket: any) => ({
 			key: innerBucket.key,
 			doc_count: innerBucket.doc_count,
-			date: interval !== '' ? bucket.key_as_string : 'all_time'
+			date: interval !== 'none' ? bucket.key_as_string : 'all_time'
 		}))
 	);
 
@@ -333,6 +334,7 @@ export const fetchAndFormatData = async ({
 
 	return handleBucket(
 		tmpBuckets,
-		field_codes.map(fc => fc.slug)
+		field_codes.map(fc => fc.slug),
+		interval
 	);
 };
