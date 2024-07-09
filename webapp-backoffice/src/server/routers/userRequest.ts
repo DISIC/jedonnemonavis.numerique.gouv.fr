@@ -29,6 +29,7 @@ export async function createUserRequest(
 	const createdUser = await prisma.user.create({
 		data: {
 			...user,
+			email: user.email.toLowerCase(),
 			active: false
 		}
 	});
@@ -38,7 +39,7 @@ export async function createUserRequest(
 			reason: userRequest.reason,
 			mode: userRequest.mode,
 			user_id: createdUser.id,
-			user_email_copy: createdUser.email
+			user_email_copy: createdUser.email.toLowerCase()
 		}
 	});
 
@@ -74,7 +75,9 @@ export async function updateUserRequest(
 			});
 
 			if (createDomain) {
-				const newDomain = updatedUserRequest.user.email.split('@')[1];
+				const newDomain = updatedUserRequest.user.email
+					.toLowerCase()
+					.split('@')[1];
 				await prisma.whiteListedDomain.upsert({
 					where: { domain: newDomain },
 					create: { domain: newDomain },
@@ -84,7 +87,7 @@ export async function updateUserRequest(
 
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
-				updatedUser.email,
+				updatedUser.email.toLowerCase(),
 				getUserRequestAcceptedEmailHtml(),
 				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
 			);
@@ -100,7 +103,7 @@ export async function updateUserRequest(
 
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
-				updatedUserRequest.user.email,
+				updatedUserRequest.user.email.toLowerCase(),
 				getUserRequestRefusedEmailHtml(message),
 				`Votre demande d'accès a été refusée${
 					message ? ` pour la raison suivante : ${message}` : '.'
