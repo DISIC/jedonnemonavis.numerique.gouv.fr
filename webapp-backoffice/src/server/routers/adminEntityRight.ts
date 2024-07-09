@@ -18,7 +18,7 @@ export const generateInviteToken = async (
 
 	await prisma.userInviteToken.create({
 		data: {
-			user_email: userEmail,
+			user_email: userEmail.toLowerCase(),
 			token
 		}
 	});
@@ -97,7 +97,10 @@ export const adminEntityRightRouter = router({
 			const adminEntityRightAlreadyExists =
 				await ctx.prisma.adminEntityRight.findFirst({
 					where: {
-						OR: [{ user_email }, { user_email_invite: user_email }],
+						OR: [
+							{ user_email: user_email.toLowerCase() },
+							{ user_email_invite: user_email.toLowerCase() }
+						],
 						entity_id
 					}
 				});
@@ -111,14 +114,14 @@ export const adminEntityRightRouter = router({
 
 			const userExists = await ctx.prisma.user.findUnique({
 				where: {
-					email: user_email
+					email: user_email.toLowerCase()
 				}
 			});
 
 			const newAdminEntityRight = await ctx.prisma.adminEntityRight.create({
 				data: {
-					user_email: userExists ? user_email : null,
-					user_email_invite: !userExists ? user_email : null,
+					user_email: userExists ? user_email.toLowerCase() : null,
+					user_email_invite: !userExists ? user_email.toLowerCase() : null,
 					entity_id
 				},
 				include: {
@@ -183,17 +186,17 @@ export const adminEntityRightRouter = router({
 
 			await sendMail(
 				'Invitation à rejoindre « Je donne mon avis »',
-				user_email,
+				user_email.toLowerCase(),
 				getUserInviteEntityEmailHtml(
 					contextUser,
-					user_email,
+					user_email.toLowerCase(),
 					token,
 					entity.name
 				),
 				`Cliquez sur ce lien pour créer votre compte : ${
 					process.env.NODEMAILER_BASEURL
 				}/register?${new URLSearchParams({
-					email: user_email,
+					email: user_email.toLowerCase(),
 					inviteToken: token
 				})}`
 			);

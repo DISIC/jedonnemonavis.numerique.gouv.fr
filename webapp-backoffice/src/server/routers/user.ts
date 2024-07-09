@@ -38,7 +38,7 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 
 	await sendMail(
 		'Votre mot de passe temporaire',
-		user.email,
+		user.email.toLowerCase(),
 		getOTPEmailHtml(code),
 		`Votre mot de passe temporaire valable 60 minutes : ${code}`
 	);
@@ -60,12 +60,13 @@ export async function registerUserFromOTP(
 
 	if (!userOTP || !userOTP.user) return;
 
-	await prisma.user.update({
+	const updatedUser = await prisma.user.update({
 		where: {
 			id: userOTP.user.id
 		},
 		data: {
-			...user
+			...user,
+			email: user.email.toLowerCase()
 		}
 	});
 
@@ -75,7 +76,7 @@ export async function registerUserFromOTP(
 		}
 	});
 
-	return { ...user, password: 'Nice try!' };
+	return { ...updatedUser, password: 'Nice try!' };
 }
 
 export async function updateUser(
@@ -85,7 +86,7 @@ export async function updateUser(
 ) {
 	const updatedUser = await prisma.user.update({
 		where: { id: userId },
-		data: { ...user }
+		data: { ...user, email: ((user.email || '') as string).toLowerCase() }
 	});
 	return { ...updatedUser, password: 'Nice try!' };
 }
@@ -111,7 +112,7 @@ export async function makeRelationFromUserInvite(
 ) {
 	const userInvites = await prisma.accessRight.findMany({
 		where: {
-			user_email_invite: user.email
+			user_email_invite: user.email.toLowerCase()
 		}
 	});
 
@@ -123,14 +124,14 @@ export async function makeRelationFromUserInvite(
 				}
 			},
 			data: {
-				user_email: user.email
+				user_email: user.email.toLowerCase()
 			}
 		});
 	}
 
 	const userInvitesEntity = await prisma.adminEntityRight.findMany({
 		where: {
-			user_email_invite: user.email
+			user_email_invite: user.email.toLowerCase()
 		}
 	});
 
@@ -142,14 +143,14 @@ export async function makeRelationFromUserInvite(
 				}
 			},
 			data: {
-				user_email: user.email
+				user_email: user.email.toLowerCase()
 			}
 		});
 	}
 }
 
 export async function checkUserDomain(prisma: PrismaClient, email: string) {
-	const domain = extractDomainFromEmail(email);
+	const domain = extractDomainFromEmail(email.toLowerCase());
 	if (!domain) return false;
 
 	const domainWhiteListed = await prisma.whiteListedDomain.findFirst({
@@ -251,7 +252,7 @@ export const userRouter = router({
 		.mutation(async ({ ctx, input: newUser }) => {
 			const userExists = await ctx.prisma.user.findUnique({
 				where: {
-					email: newUser.email
+					email: newUser.email.toLowerCase()
 				}
 			});
 
@@ -271,6 +272,7 @@ export const userRouter = router({
 			const createdUser = await ctx.prisma.user.create({
 				data: {
 					...newUser,
+					email: newUser.email.toLowerCase(),
 					active: true
 				}
 			});
@@ -285,7 +287,7 @@ export const userRouter = router({
 			const { id, user } = input;
 			const updatedUser = await ctx.prisma.user.update({
 				where: { id },
-				data: { ...user }
+				data: { ...user, email: ((user.email || '') as string).toLowerCase() }
 			});
 
 			return { data: updatedUser };
@@ -326,7 +328,12 @@ export const userRouter = router({
 			if (otp != undefined) {
 				const user = await registerUserFromOTP(
 					ctx.prisma,
-					{ ...newUser, active: true, xwiki_account: true },
+					{
+						...newUser,
+						email: newUser.email.toLowerCase(),
+						active: true,
+						xwiki_account: true
+					},
 					otp as string
 				);
 
@@ -334,7 +341,7 @@ export const userRouter = router({
 			} else {
 				const userHasConflict = await ctx.prisma.user.findUnique({
 					where: {
-						email: newUser.email
+						email: newUser.email.toLowerCase()
 					}
 				});
 
@@ -344,7 +351,10 @@ export const userRouter = router({
 						message: 'User already exists'
 					});
 
-				const isWhiteListed = await checkUserDomain(ctx.prisma, newUser.email);
+				const isWhiteListed = await checkUserDomain(
+					ctx.prisma,
+					newUser.email.toLowerCase()
+				);
 
 				if (!isWhiteListed)
 					throw new TRPCError({
@@ -354,7 +364,8 @@ export const userRouter = router({
 
 				let createdUser = await ctx.prisma.user.create({
 					data: {
-						...newUser
+						...newUser,
+						email: newUser.email.toLowerCase()
 					}
 				});
 
@@ -376,7 +387,7 @@ export const userRouter = router({
 
 					await sendMail(
 						'Confirmez votre email',
-						createdUser.email,
+						createdUser.email.toLowerCase(),
 						getRegisterEmailHtml(token),
 						`Cliquez sur ce lien pour valider votre compte : ${
 							process.env.NODEMAILER_BASEURL
@@ -386,7 +397,7 @@ export const userRouter = router({
 					const userInviteToken = await ctx.prisma.userInviteToken.findUnique({
 						where: {
 							token: inviteToken as string,
-							user_email: createdUser.email
+							user_email: createdUser.email.toLowerCase()
 						}
 					});
 
@@ -398,7 +409,7 @@ export const userRouter = router({
 
 					await ctx.prisma.userInviteToken.deleteMany({
 						where: {
-							user_email: createdUser.email
+							user_email: createdUser.email.toLowerCase()
 						}
 					});
 
@@ -429,7 +440,11 @@ export const userRouter = router({
 				const updatedUser = await updateUser(
 					ctx.prisma,
 					userValidationToken.user.id,
-					{ ...userValidationToken.user, active: true }
+					{
+						...userValidationToken.user,
+						email: userValidationToken.user.email.toLowerCase(),
+						active: true
+					}
 				);
 
 				await ctx.prisma.userValidationToken.delete({
@@ -449,7 +464,7 @@ export const userRouter = router({
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
-					email
+					email: email.toLowerCase()
 				}
 			});
 
@@ -543,7 +558,7 @@ export const userRouter = router({
 				where: {
 					code: otp,
 					user: {
-						email: email
+						email: email.toLowerCase()
 					}
 				}
 			});
@@ -578,7 +593,7 @@ export const userRouter = router({
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
-					email
+					email: email.toLowerCase()
 				}
 			});
 
@@ -602,14 +617,14 @@ export const userRouter = router({
 				data: {
 					user_id: user.id,
 					token,
-					user_email: user.email,
+					user_email: user.email.toLowerCase(),
 					expiration_date: new Date(new Date().getTime() + 15 * 60 * 1000)
 				}
 			});
 
 			await sendMail(
 				'Mot de passe oublié',
-				email,
+				email.toLowerCase(),
 				getResetPasswordEmailHtml(token),
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
 					process.env.NODEMAILER_BASEURL

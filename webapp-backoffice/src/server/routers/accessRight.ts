@@ -15,7 +15,7 @@ export const generateInviteToken = async (
 
 	await prisma.userInviteToken.create({
 		data: {
-			user_email: userEmail,
+			user_email: userEmail.toLowerCase(),
 			token
 		}
 	});
@@ -68,7 +68,10 @@ export const accessRightRouter = router({
 
 			const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({
 				where: {
-					OR: [{ user_email }, { user_email_invite: user_email }],
+					OR: [
+						{ user_email: user_email.toLowerCase() },
+						{ user_email_invite: user_email.toLowerCase() }
+					],
 					product_id
 				}
 			});
@@ -85,7 +88,7 @@ export const accessRightRouter = router({
 
 			const userExists = await ctx.prisma.user.findUnique({
 				where: {
-					email: user_email
+					email: user_email.toLowerCase()
 				}
 			});
 
@@ -97,8 +100,8 @@ export const accessRightRouter = router({
 					status: 'carrier'
 				},
 				create: {
-					user_email: userExists ? user_email : null,
-					user_email_invite: !userExists ? user_email : null,
+					user_email: userExists ? user_email.toLowerCase() : null,
+					user_email_invite: !userExists ? user_email.toLowerCase() : null,
 					product_id
 				},
 				include: {
@@ -112,24 +115,24 @@ export const accessRightRouter = router({
 
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
-					user_email,
+					user_email.toLowerCase(),
 					getUserInviteEmailHtml(
 						contextUser,
-						user_email,
+						user_email.toLowerCase(),
 						token,
 						newAccessRight.product.title
 					),
 					`Cliquez sur ce lien pour créer votre compte : ${
 						process.env.NODEMAILER_BASEURL
 					}/register?${new URLSearchParams({
-						email: user_email,
+						email: user_email.toLowerCase(),
 						inviteToken: token
 					})}`
 				);
 			} else {
 				await sendMail(
 					`Accès à la démarche « ${newAccessRight.product.title} » sur la plateforme « Je donne mon avis »`,
-					user_email,
+					user_email.toLowerCase(),
 					getInviteEmailHtml(contextUser, newAccessRight.product.title),
 					`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
 				);
@@ -160,12 +163,17 @@ export const accessRightRouter = router({
 
 			await sendMail(
 				'Invitation à rejoindre « Je donne mon avis »',
-				user_email,
-				getUserInviteEmailHtml(contextUser, user_email, token, product.title),
+				user_email.toLowerCase(),
+				getUserInviteEmailHtml(
+					contextUser,
+					user_email.toLowerCase(),
+					token,
+					product.title
+				),
 				`Cliquez sur ce lien pour créer votre compte : ${
 					process.env.NODEMAILER_BASEURL
 				}/register?${new URLSearchParams({
-					email: user_email,
+					email: user_email.toLowerCase(),
 					inviteToken: token
 				})}`
 			);
