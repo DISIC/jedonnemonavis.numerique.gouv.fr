@@ -1,8 +1,8 @@
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
+import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { tss } from 'tss-react/dsfr';
-import HeaderChart from './HeaderChart';
 import QuestionWrapper from './QuestionWrapper';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
@@ -53,7 +53,7 @@ const BarQuestionViz = ({
 		);
 
 	const formatedFieldCodeData = [
-		{ name: 'incomprehensible', value: 0 },
+		{ name: 'pas clair du tout', value: 0 },
 		...resultFieldCode.data
 			.map(item => ({
 				name: item.answer_text,
@@ -91,12 +91,20 @@ const BarQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<HeaderChart title="Répartition des réponses">
+			<ChartWrapper
+				title="Répartition des réponses"
+				total={resultFieldCode.metadata.total}
+				data={formatedFieldCodeData}
+			>
 				<BarChart data={formatedFieldCodeData} />
-			</HeaderChart>
-			<HeaderChart
+			</ChartWrapper>
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
+				data={countByFieldCodePerMonth}
+				singleRowLabel={
+					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
+				}
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
@@ -105,7 +113,7 @@ const BarQuestionViz = ({
 					}
 					ticks={fieldCode === 'comprehension' ? [1, 2, 3, 4, 5] : undefined}
 				/>
-			</HeaderChart>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };

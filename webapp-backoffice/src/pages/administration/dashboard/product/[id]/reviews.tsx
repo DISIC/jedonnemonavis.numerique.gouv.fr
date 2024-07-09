@@ -28,6 +28,7 @@ import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import { useRouter } from 'next/router';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useDebounce } from 'usehooks-ts';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -321,7 +322,23 @@ const ProductReviewsPage = (props: Props) => {
 						content={`${product.title} Avis | Je donne mon avis`}
 					/>
 				</Head>
-				<h1>Avis</h1>
+				<div className={cx(classes.title)}>
+					<h1 className={fr.cx('fr-mb-0')}>Avis</h1>
+
+					<div className={cx(classes.buttonContainer)}>
+						<ExportReviews
+							product_id={product.id}
+							startDate={startDate}
+							endDate={endDate}
+							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
+							search={search}
+							button_id={buttonId}
+							filters={filters}
+							reviewsCountfiltered={reviewsCountFiltered}
+							reviewsCountAll={reviewsCountAll}
+						></ExportReviews>
+					</div>
+				</div>
 				{isLoadingMetaResults || isLoadingButtons ? (
 					<Loader />
 				) : reviewMetaResults.metadata.countAll === 0 ||
@@ -344,6 +361,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: startDate,
 										onChange: e => {
 											setStartDate(e.target.value);
+											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
 										}
 									}}
 								/>
@@ -356,6 +374,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: endDate,
 										onChange: e => {
 											setEndDate(e.target.value);
+											push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
 										}
 									}}
 								/>
@@ -373,7 +392,7 @@ const ProductReviewsPage = (props: Props) => {
 									onSubmit={e => {
 										e.preventDefault();
 										setValidatedSearch(
-											search.replace(/[^\w\sÀ-ÿ]/gi, '').trim()
+											search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
 										);
 										setCurrentPage(1);
 									}}
@@ -391,6 +410,7 @@ const ProductReviewsPage = (props: Props) => {
 														setValidatedSearch('');
 													}
 													setSearch(event.target.value);
+													push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 												}
 											}}
 										/>
@@ -430,6 +450,7 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('reviews');
 												setCurrentPage(1);
+												push(['trackEvent', 'Avis', 'Filtre-Vue-Avis']);
 											}}
 										>
 											Avis
@@ -441,6 +462,7 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('verbatim');
 												setCurrentPage(1);
+												push(['trackEvent', 'Avis', 'Filtre-Vue-Verbatim']);
 											}}
 										>
 											Verbatims
@@ -460,6 +482,7 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											if (e.target.value !== 'undefined') {
 												setButtonId(parseInt(e.target.value));
+												push(['trackEvent', 'Avis', 'Filtre-Source']);
 											} else {
 												setButtonId(undefined);
 											}
@@ -492,26 +515,6 @@ const ProductReviewsPage = (props: Props) => {
 									>
 										Plus de filtres
 									</Button>
-								</div>
-							</div>
-							<div
-								className={cx(
-									classes.filtersWrapper,
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
-								)}
-							>
-								<div className={cx(classes.buttonContainer)}>
-									<ExportReviews
-										product_id={product.id}
-										startDate={startDate}
-										endDate={endDate}
-										mustHaveVerbatims={displayMode === 'reviews' ? false : true}
-										search={search}
-										button_id={buttonId}
-										filters={filters}
-										reviewsCountfiltered={reviewsCountFiltered}
-										reviewsCountAll={reviewsCountAll}
-									></ExportReviews>
 								</div>
 							</div>
 							<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-mt-8v')}>
@@ -631,6 +634,17 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 			'.fr-input-group': {
 				width: '100%',
 				marginBottom: 0
+			}
+		}
+	},
+	title: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		marginBottom: '1rem',
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'column',
+			'.fr-btn': {
+				marginTop: '1rem'
 			}
 		}
 	},

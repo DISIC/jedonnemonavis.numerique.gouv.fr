@@ -54,13 +54,25 @@ const ObservatoireStats = ({
 
 	if (isLoadingStatsObservatoire) return;
 
-	const getLabelFromValue = (value: number) => {
+	const getLabelFromValue = (value: number, slug: StatField['slug']) => {
+		if (slug === 'contact') {
+			if (value < 7) return 'Faible';
+			if (value < 8.5) return 'Moyen';
+			return 'Optimal';
+		}
+
 		if (value < 5) return 'Pas bien';
 		if (value < 8) return 'Moyen';
 		return 'Bien';
 	};
 
-	const getClassFromValue = (value: number) => {
+	const getClassFromValue = (value: number, slug: StatField['slug']) => {
+		if (slug === 'contact') {
+			if (value < 7) return classes.pasBien;
+			if (value < 8.5) return classes.moyen;
+			return classes.bien;
+		}
+
 		if (value < 5) return classes.pasBien;
 		if (value < 8) return classes.moyen;
 		return classes.bien;
@@ -110,19 +122,22 @@ const ObservatoireStats = ({
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
-								? getClassFromValue(field.value)
+								? getClassFromValue(field.value, field.slug)
 								: undefined
 						)}
 					>
-						{field.slug === 'autonomy'
+						{['autonomy', 'contact'].includes(field.slug)
 							? `${getPercentageFromValue(field.value)}%`
 							: `${getReadableValue(field.value)} / 10`}
 					</div>
 					{field.slug !== 'autonomy' && (
 						<span
-							className={cx(classes.intention, getClassFromValue(field.value))}
+							className={cx(
+								classes.intention,
+								getClassFromValue(field.value, field.slug)
+							)}
 						>
-							{getLabelFromValue(field.value)}
+							{getLabelFromValue(field.value, field.slug)}
 						</span>
 					)}
 				</>

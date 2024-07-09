@@ -4,7 +4,7 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { LegalNotice as LN } from '../../utils/content';
 
-const legalNotice = () => {
+const LegalNotice = () => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -32,34 +32,70 @@ const legalNotice = () => {
 					)}
 				>
 					<div className={'fr-col-lg-12'}>
-						<h1 className={fr.cx('fr-mb-12v')}>{LN.title}</h1>
-						{Object.keys(LN.sections).map(sectionKey => {
-							const section = LN.sections[sectionKey];
-							return (
-								<div key={sectionKey}>
-									<h2>{sectionKey}</h2>
-									{section.title && <p>{section.title}</p>}
-									<div className={cx(classes.blockWrapper)}>
-										{Array.isArray(section.content[0])
-											? (section.content as string[][]).map(
-													(subContent, index) => (
-														<div
-															key={index}
-															className={cx(classes.blockWrapper)}
+						<h1 className={fr.cx('fr-mb-12v')}>
+							Mentions légales du formulaire de dépôt d’avis Je donne mon avis
+						</h1>
+						{Object.keys(LN).map(key => (
+							<div key={key} className={cx(classes.blockWrapper)}>
+								<h2>{LN[key].title}</h2>
+								{LN[key].content.map((line, index) => {
+									const isLink =
+										typeof line === 'object' && line.type === 'link';
+									const isMailto =
+										typeof line === 'object' && line.type === 'mailto';
+									const isList =
+										typeof line === 'object' && line.type === 'list';
+									const hasNoSpaces =
+										typeof line === 'object' && line.type === 'noSpaces';
+
+									return (
+										<React.Fragment key={index}>
+											{isLink ? (
+												<>
+													<p>
+														<a
+															href={line.href}
+															target="_blank"
+															rel="noopener noreferrer"
 														>
-															{subContent.map((block, subIndex) => (
-																<p key={subIndex}>{block}</p>
-															))}
-														</div>
-													)
-												)
-											: (section.content as string[]).map((block, index) => (
-													<p key={index}>{block}</p>
-												))}
-									</div>
-								</div>
-							);
-						})}
+															{line.text}
+														</a>
+													</p>
+												</>
+											) : isMailto ? (
+												<p>
+													<a href={line.href}>{line.text}</a>
+												</p>
+											) : isList ? (
+												<ul>
+													<li>{line.text}</li>
+												</ul>
+											) : typeof line === 'string' ? (
+												<>
+													<p
+														className={cx(
+															hasNoSpaces ? classes.noSpacesParagraph : ''
+														)}
+													>
+														{line}
+													</p>
+												</>
+											) : (
+												<>
+													<p
+														className={cx(
+															hasNoSpaces ? classes.noSpacesParagraph : ''
+														)}
+													>
+														{line.text}
+													</p>
+												</>
+											)}
+										</React.Fragment>
+									);
+								})}
+							</div>
+						))}
 					</div>
 				</div>
 			</div>
@@ -67,15 +103,19 @@ const legalNotice = () => {
 	);
 };
 
-const useStyles = tss.withName(legalNotice.name).create(() => ({
+const useStyles = tss.withName(LegalNotice.name).create(() => ({
 	blockWrapper: {
 		display: 'flex',
 		flexDirection: 'column',
-		marginBottom: '2rem',
-		p: {
-			marginBottom: '0 !important'
+		marginBottom: '1rem',
+
+		a: {
+			width: 'fit-content'
 		}
+	},
+	noSpacesParagraph: {
+		marginBottom: '0 !important'
 	}
 }));
 
-export default legalNotice;
+export default LegalNotice;

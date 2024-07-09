@@ -68,14 +68,14 @@ export default function Home() {
 
 	const references: Reference[] = [
 		{
-			image_path: '/_next/image?url=%2Fassets%2Ftemoignage_1.jpeg&w=640&q=75',
+			image_path: '/assets/temoignage_1.jpeg',
 			description:
 				'Le bouton je donne mon avis, que nous avons installé pour récolter les avis des usagers de la démarche de paiement des impôts en ligne, nous a fournis les pistes pour augmenter le taux de satisfaction de 20% en un an !',
 			author: 'Fabienne D.',
 			job_title: 'Responsable projet à la DGFIP'
 		},
 		{
-			image_path: '/_next/image?url=%2Fassets%2Ftemoignage_2.jpeg&w=640&q=75',
+			image_path: '/assets/temoignage_2.jpeg',
 			description:
 				'Cela nous a pris moins de 2h pour configurer et installer le bouton Je donne mon avis. Le code est extrêmement simple et la procédure bien indiquée.',
 			author: 'Mathilde P.',
@@ -140,7 +140,7 @@ export default function Home() {
 				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-nous !"}
 				buttonStyle="secondary"
 				buttonText="Contacter notre équipe"
-				buttonLink="/login"
+				buttonLink="/public/contact"
 			/>
 		</div>
 	);

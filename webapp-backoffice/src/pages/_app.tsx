@@ -14,6 +14,7 @@ import '../utils/global.css';
 import '../utils/keyframes.css';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import React from 'react';
+import { init } from '@socialgouv/matomo-next';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -48,10 +49,15 @@ const { withAppEmotionCache, augmentDocumentWithEmotionCache } =
 
 export { augmentDocumentWithEmotionCache };
 
+const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
+const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
+
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
 	const getLayout = (children: ReactNode) => {
+		if (router.pathname.startsWith('/public/maintenance')) return children;
+
 		const lightMode =
 			router.pathname.startsWith('/public') ||
 			router.pathname.startsWith('/open-api');
@@ -59,6 +65,11 @@ function App({ Component, pageProps }: AppProps) {
 	};
 
 	React.useEffect(() => {
+		if (process.env.NODE_ENV === 'production')
+			init({
+				url: MATOMO_URL ? MATOMO_URL : '',
+				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
+			});
 		const removeButtonOnLoad = () => {
 			const buttonToRemove = document.getElementById(
 				'fr-theme-modal-hidden-control-button'

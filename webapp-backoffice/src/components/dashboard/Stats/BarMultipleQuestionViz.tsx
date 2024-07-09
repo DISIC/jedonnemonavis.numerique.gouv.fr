@@ -1,9 +1,9 @@
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
+import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import HeaderChart from './HeaderChart';
 import QuestionWrapper from './QuestionWrapper';
 import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 
@@ -105,6 +105,52 @@ const BarMultipleQuestionViz = ({
 		return returnValue;
 	});
 
+	// DATA FOR TABLE
+	const dataTable = formatedFieldCodeData.flatMap(item => {
+		return Object.entries(item)
+			.filter(([key, value]) => key !== 'name')
+			.map(([key, value]) => ({
+				name: item.name,
+				value: value as number,
+				'Pourcentage de réponses':
+					total !== 0 ? Math.round(((value as number) / total) * 100) : 0
+			}));
+	});
+
+	// DATA FOR TABLE INTERVAL
+	interface FormattedData {
+		name: string;
+		data: { name: string; value: number }[];
+	}
+
+	const transformData = (data: any): FormattedData[] => {
+		const formattedData: FormattedData[] = [];
+
+		Object.keys(data).forEach(interval => {
+			const returnValue = {
+				name: interval,
+				data: [] as { name: string; value: number }[]
+			};
+
+			data[interval].forEach((bucket: any) => {
+				const newData = {
+					name: bucket.answer_text,
+					value: bucket.doc_count
+				};
+
+				returnValue.data.push(newData);
+			});
+
+			formattedData.push(returnValue);
+		});
+
+		return formattedData;
+	};
+
+	const tableDataInterval: FormattedData[] = transformData(
+		resultFieldCodeInterval.data
+	);
+
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
 			<div className={classes.mainSection}>
@@ -120,12 +166,19 @@ const BarMultipleQuestionViz = ({
 			total={total}
 			required={required}
 		>
-			<HeaderChart title="Répartition des réponses">
+			<ChartWrapper
+				title="Répartition des réponses"
+				total={resultFieldCode.metadata.total}
+				data={formatedFieldCodeData}
+				reverseData
+				displayTotal="percentage"
+			>
 				<BarVerticalChart data={formatedFieldCodeData} />
-			</HeaderChart>
-			<HeaderChart
+			</ChartWrapper>
+			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
+				data={formatedFieldCodeDataPerInterval}
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}
@@ -134,7 +187,7 @@ const BarMultipleQuestionViz = ({
 						fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 					}
 				/>
-			</HeaderChart>
+			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };

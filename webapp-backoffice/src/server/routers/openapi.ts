@@ -169,6 +169,7 @@ export const openAPIRouter = router({
 					request: {
 						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						product_ids: [],
+						inteval: undefined,
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0],
 						interval: "year"
@@ -180,6 +181,7 @@ export const openAPIRouter = router({
 			z.object({
 				field_codes: z.array(z.string()),
 				product_ids: z.array(z.number()),
+				interval: z.enum(['day', 'week', 'month', 'year']).optional(),
 				start_date: z.string(),
 				end_date: z.string(),
 				interval: z.enum(["day", "week", "month", "year", ""])
@@ -187,7 +189,8 @@ export const openAPIRouter = router({
 		)
 		.output(ZOpenApiStatsOutput)
 		.query(async ({ ctx, input }) => {
-			const { field_codes, product_ids, start_date, end_date, interval } = input;
+			const { field_codes, product_ids, start_date, end_date, interval } =
+				input;
 
 			const getAuthorizedProductIds = async (): Promise<number[]> => {
 				if (ctx.api_key.product_id) {

@@ -1,5 +1,10 @@
 import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { getIntentionFromAverage } from '@/src/utils/stats';
+import {
+	formatNumberWithSpaces,
+	getColorFromIntention,
+	getReadableValue
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
@@ -8,19 +13,14 @@ import { Skeleton } from '@mui/material';
 import { AnswerIntention, Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { tss } from 'tss-react/dsfr';
 import router from 'next/router';
+import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
-import {
-	formatNumberWithSpaces,
-	getColorFromIntention,
-	getReadableValue
-} from '@/src/utils/tools';
 
 interface Indicator {
 	title: string;
+	slug: string;
 	total: number;
 	value: number;
 	color: 'new' | 'success' | 'error' | 'info';
@@ -50,7 +50,11 @@ const ProductCard = ({
 		isRefetching: isRefetchingStatsObservatoire
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
-			product_id: product.id.toString()
+			product_id: product.id.toString(),
+			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+				.toISOString()
+				.split('T')[0],
+			end_date: new Date().toISOString().split('T')[0]
 		},
 		{
 			trpc: {
@@ -98,14 +102,14 @@ const ProductCard = ({
 		}
 	});
 
-	const diplayAppreciation = (appreciation: AnswerIntention) => {
+	const diplayAppreciation = (appreciation: AnswerIntention, slug: string) => {
 		switch (appreciation) {
 			case 'bad':
-				return 'Mauvais';
+				return slug === 'contact' ? 'Faible' : 'Mauvais';
 			case 'medium':
 				return 'Moyen';
 			case 'good':
-				return 'Très bien';
+				return slug === 'contact' ? 'Optimal' : 'Bien';
 		}
 	};
 
@@ -115,6 +119,7 @@ const ProductCard = ({
 	const indicators: Indicator[] = [
 		{
 			title: 'Satisfaction',
+			slug: 'satisfaction',
 			total: resultStatsObservatoire.metadata.satisfaction_count,
 			value: Math.round(satisfaction * 10) / 10 || 0,
 			color:
@@ -125,6 +130,7 @@ const ProductCard = ({
 		},
 		{
 			title: 'Simplicité du langage',
+			slug: 'comprehension',
 			value: Math.round(comprehension * 10) / 10 || 0,
 			total: resultStatsObservatoire.metadata.comprehension_count,
 			color:
@@ -135,13 +141,16 @@ const ProductCard = ({
 		},
 		{
 			title: 'Aide joignable et efficace',
+			slug: 'contact',
 			total: resultStatsObservatoire.metadata.contact_count,
-			value: Math.round(contact * 10) / 10 || 0,
+			value: Math.round(contact * 1000) / 100 || 0,
 			color:
 				contact !== -1
-					? getColorFromIntention(getIntentionFromAverage(contact || 0))
+					? getColorFromIntention(
+							getIntentionFromAverage(contact || 0, 'contact')
+						)
 					: 'info',
-			appreciation: getIntentionFromAverage(contact || 0)
+			appreciation: getIntentionFromAverage(contact || 0, 'contact')
 		}
 	];
 
@@ -256,7 +265,7 @@ const ProductCard = ({
 												className={fr.cx('fr-text--sm')}
 											>
 												{!!indicator.total
-													? `${diplayAppreciation(indicator.appreciation)} ${getReadableValue(indicator.value)}/10`
+													? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
 													: 'Aucune donnée'}
 											</Badge>
 										)}

@@ -1,5 +1,9 @@
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
+import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
+import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
+import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import Filters from '@/src/components/dashboard/Stats/Filters';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
@@ -7,9 +11,12 @@ import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { betaTestXwikiIds, formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product } from '@prisma/client';
 import Head from 'next/head';
@@ -18,12 +25,6 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
-import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
-import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
-import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
-import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
-import { betaTestXwikiIds } from '@/src/utils/tools';
 
 interface Props {
 	product: Product;
@@ -59,6 +60,8 @@ export const SectionWrapper = ({
 		</div>
 	);
 };
+
+const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
 	const { product } = props;
@@ -182,36 +185,22 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	return (
-		<ProductLayout product={product}>
-			<Head>
-				<title>{product.title} | Statistiques | Je donne mon avis</title>
-				<meta
-					name="description"
-					content={`${product.title} Avis | Je donne mon avis`}
-				/>
-			</Head>
-			<PublicDataModal modal={public_modal} product={product} />
-			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string) => {
+		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
+		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+	};
 
-				<Button
-					priority="secondary"
-					type="button"
-					nativeButtonProps={public_modal.buttonProps}
-				>
-					Autoriser le partage public des statistiques
-				</Button>
-			</div>
-			<div className={cx(classes.container)}>
-				<Filters
-					currentStartDate={startDate}
-					currentEndDate={endDate}
-					onChange={(tmpStartDate, tmpEndDate) => {
-						if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
-						if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
-					}}
-				/>
+	const getStatsDisplay = () => {
+		if (isLoadingReviewsDataWithFilters) {
+			return (
+				<div className={fr.cx('fr-mt-16w')}>
+					<Loader />
+				</div>
+			);
+		}
+
+		return (
+			<>
 				<ObservatoireStats
 					productId={product.id}
 					startDate={debouncedStartDate}
@@ -242,15 +231,15 @@ const ProductStatPage = (props: Props) => {
 							/>
 						</div>
 						{/* <div className={fr.cx('fr-col-4')}>
-							<KPITile
-								title="Formulaires complets"
-								kpi={0}
-								desc="soit 0 % des répondants"
-								linkHref={`/administration/dashboard/product/${product.id}/buttons`}
-								hideLink
-								grey
-							/>
-						</div> */}
+								<KPITile
+									title="Formulaires complets"
+									kpi={0}
+									desc="soit 0 % des répondants"
+									linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+									hideLink
+									grey
+								/>
+							</div> */}
 					</div>
 				</div>
 				<AnswersChart
@@ -321,6 +310,48 @@ const ProductStatPage = (props: Props) => {
 						endDate={debouncedEndDate}
 					/>
 				</SectionWrapper>
+			</>
+		);
+	};
+
+	return (
+		<ProductLayout product={product}>
+			<Head>
+				<title>{product.title} | Statistiques | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`${product.title} Avis | Je donne mon avis`}
+				/>
+			</Head>
+			<PublicDataModal modal={public_modal} product={product} />
+			<div className={cx(classes.title)}>
+				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+				<Button
+					priority="secondary"
+					type="button"
+					nativeButtonProps={public_modal.buttonProps}
+				>
+					Autoriser le partage public des statistiques
+				</Button>
+			</div>
+			<div className={cx(classes.container)}>
+				<Filters
+					currentStartDate={startDate}
+					currentEndDate={endDate}
+					onChange={onChangeFilters}
+				/>
+				{!isLoadingReviewsDataWithFilters &&
+				nbReviewsWithFilters > nbMaxReviews ? (
+					<div className={fr.cx('fr-mt-10v')}>
+						<Alert
+							title=""
+							severity="error"
+							description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(nbMaxReviews)} avis). Réduisez la fenêtre de temps.`}
+						/>
+					</div>
+				) : (
+					getStatsDisplay()
+				)}
 			</div>
 		</ProductLayout>
 	);
@@ -332,7 +363,7 @@ const useStyles = tss.create({
 		flexDirection: 'column',
 		gap: '3rem',
 		padding: '2rem',
-		border: '1px solid #E5E5E5'
+		border: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`
 	},
 	container: {
 		position: 'relative'

@@ -1669,6 +1669,11 @@
     "@sentry/types" "6.19.7"
     tslib "^1.9.3"
 
+"@socialgouv/matomo-next@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@socialgouv/matomo-next/-/matomo-next-1.9.0.tgz#84622225bd7074651a92796cb86522a1e8c30e08"
+  integrity sha512-emanE7vFQXkfdqELcoLXnXRVnQrbSNnhqcyu1qnlBR3xt0cmkDMfLoH8Z7phNWgT2msdNFoVnXxp+3I4hAhw7g==
+
 "@swc/helpers@0.5.2":
   version "0.5.2"
   resolved "https://registry.yarnpkg.com/@swc/helpers/-/helpers-0.5.2.tgz#85ea0c76450b61ad7d10a37050289eded783c27d"

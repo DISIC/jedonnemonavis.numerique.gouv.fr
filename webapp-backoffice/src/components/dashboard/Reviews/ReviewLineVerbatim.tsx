@@ -4,6 +4,7 @@ import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import React from 'react';
+import Image from 'next/image';
 import {
 	displayIntention,
 	getStatsColor,
@@ -12,7 +13,13 @@ import {
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
 
-const ReviewLineVerbatim = ({ review, search }: { review: ExtendedReview, search: string }) => {
+const ReviewLineVerbatim = ({
+	review,
+	search
+}: {
+	review: ExtendedReview;
+	search: string;
+}) => {
 	const color = getStatsColor({
 		intention: review.satisfaction?.intention || 'neutral'
 	});
@@ -54,17 +61,13 @@ const ReviewLineVerbatim = ({ review, search }: { review: ExtendedReview, search
 					>
 						{review.satisfaction && review.satisfaction.intention && (
 							<>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									}}
+								<Image
+									alt="smiley"
+									src={`/assets/smileys/${getStatsIcon({
+										intention: review.satisfaction.intention ?? 'neutral'
+									})}.svg`}
+									width={20}
+									height={20}
 								/>
 								{displayIntention(
 									review.satisfaction.intention ?? 'neutral'
@@ -80,9 +83,12 @@ const ReviewLineVerbatim = ({ review, search }: { review: ExtendedReview, search
 							})
 						}}
 					>
-						<p className={cx(classes.content)} dangerouslySetInnerHTML={{ 
-							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}` 
-						}}></p>
+						<p
+							className={cx(classes.content)}
+							dangerouslySetInnerHTML={{
+								__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}`
+							}}
+						></p>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 						<Button
@@ -94,9 +100,7 @@ const ReviewLineVerbatim = ({ review, search }: { review: ExtendedReview, search
 								setDisplayMoreInfo(!displayMoreInfo);
 							}}
 							style={{
-								boxShadow: getStatsColor({
-									intention: review.satisfaction?.intention ?? 'neutral'
-								}),
+								boxShadow: 'none',
 								border: `solid ${getStatsColor({
 									intention: review.satisfaction?.intention ?? 'neutral'
 								})} 1px`,
@@ -140,7 +144,9 @@ const useStyles = tss
 			fontWeight: 'normal'
 		},
 		label: {
-			fontWeight: 'bold'
+			fontWeight: 'bold',
+			display: 'flex',
+			gap: '0.3rem'
 		},
 		verbatim: {
 			flexShrink: 1
@@ -151,7 +157,8 @@ const useStyles = tss
 			flexShrink: 0
 		},
 		content: {
-			'span': {
+			wordWrap: 'break-word',
+			span: {
 				backgroundColor: 'yellow'
 			}
 		}

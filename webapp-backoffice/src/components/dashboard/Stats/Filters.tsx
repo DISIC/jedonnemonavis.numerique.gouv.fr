@@ -1,6 +1,8 @@
 import { getDatesByShortCut } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { push } from '@socialgouv/matomo-next';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -50,18 +52,24 @@ const Filters = ({
 			if (dates.endDate !== endDate) {
 				setEndDate(dates.endDate);
 			}
+
+			if (
+				dates.startDate !== currentStartDate ||
+				dates.endDate !== currentEndDate
+			)
+				onChange(dates.startDate, dates.endDate);
 		}
 	}, [shortcutDateSelected]);
 
-	useEffect(() => {
+	const submit = () => {
 		if (startDate !== currentStartDate || endDate !== currentEndDate)
 			onChange(startDate, endDate);
-	}, [startDate, endDate]);
+	};
 
 	return (
 		<div
 			className={cx(
-				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v'),
+				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-4v'),
 				classes.dateShortcuts
 			)}
 		>
@@ -76,8 +84,9 @@ const Filters = ({
 									type="radio"
 									name={ds.name}
 									checked={shortcutDateSelected === ds.name}
-									onClick={() => {
+									onChange={() => {
 										setShortcutDateSelected(ds.name);
+										push(['trackEvent', 'Statistiques', 'Filtre-Date']);
 									}}
 								/>
 								<label
@@ -98,31 +107,50 @@ const Filters = ({
 					</ul>
 				</fieldset>
 			</div>
-			<div className={fr.cx('fr-col', 'fr-col-3')}>
-				<Input
-					label="Date de début"
-					nativeInputProps={{
-						type: 'date',
-						value: startDate,
-						onChange: e => {
-							setShortcutDateSelected(undefined);
-							setStartDate(e.target.value);
-						}
+			<div className={fr.cx('fr-col', 'fr-col-6')}>
+				<form
+					className={cx(fr.cx('fr-grid-row'), classes.formContainer)}
+					onSubmit={e => {
+						e.preventDefault();
+						submit();
 					}}
-				/>
-			</div>
-			<div className={fr.cx('fr-col', 'fr-col-3')}>
-				<Input
-					label="Date de fin"
-					nativeInputProps={{
-						type: 'date',
-						value: endDate,
-						onChange: e => {
-							setShortcutDateSelected(undefined);
-							setEndDate(e.target.value);
-						}
-					}}
-				/>
+				>
+					<div className={fr.cx('fr-col', 'fr-col-5')}>
+						<Input
+							label="Date de début"
+							nativeInputProps={{
+								type: 'date',
+								value: startDate,
+								onChange: e => {
+									setShortcutDateSelected(undefined);
+									setStartDate(e.target.value);
+								}
+							}}
+						/>
+					</div>
+					<div className={fr.cx('fr-col', 'fr-col-5')}>
+						<Input
+							label="Date de fin"
+							nativeInputProps={{
+								type: 'date',
+								value: endDate,
+								onChange: e => {
+									setShortcutDateSelected(undefined);
+									setEndDate(e.target.value);
+								}
+							}}
+						/>
+					</div>
+					<div className={fr.cx('fr-col', 'fr-col-2')}>
+						<div className={cx(classes.applyContainer)}>
+							<Button
+								type="submit"
+								iconId="ri-search-2-line"
+								title="Appliquer le changement de dates"
+							/>
+						</div>
+					</div>
+				</form>
 			</div>
 		</div>
 	);
@@ -130,6 +158,12 @@ const Filters = ({
 
 const useStyles = tss.create({
 	dateShortcuts: {
+		position: 'sticky',
+		top: -1,
+		backgroundColor: fr.colors.decisions.background.default.grey.default,
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		zIndex: 99,
+		padding: `1rem 0`,
 		fieldset: {
 			width: '100%',
 			margin: 0,
@@ -160,6 +194,17 @@ const useStyles = tss.create({
 	},
 	dateShortcutTagSelected: {
 		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.hover
+	},
+	applyContainer: {
+		paddingTop: fr.spacing('8v')
+	},
+	formContainer: {
+		marginLeft: '-0.4rem',
+		marginRight: '-0.4rem',
+		'& > div': {
+			paddingLeft: '0.4rem',
+			paddingRight: '0.4rem'
+		}
 	}
 });
 

@@ -12,6 +12,7 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
+import Image from 'next/image';
 
 const ReviewLine = ({
 	review,
@@ -90,17 +91,13 @@ const ReviewLine = ({
 								noIcon={true}
 								severity={getSeverity(review.satisfaction.intention || '')}
 							>
-								<i
-									className={fr.cx(
-										getStatsIcon({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									)}
-									style={{
-										color: getStatsColor({
-											intention: review.satisfaction.intention ?? 'neutral'
-										})
-									}}
+								<Image
+									alt="smiley"
+									src={`/assets/smileys/${getStatsIcon({
+										intention: review.satisfaction.intention ?? 'neutral'
+									})}.svg`}
+									width={15}
+									height={15}
 								/>
 								{displayIntention(review.satisfaction.intention ?? 'neutral')}
 							</Badge>
@@ -179,7 +176,10 @@ const useStyles = tss.create({
 	},
 	badge: {
 		fontSize: 11,
-		paddingVertical: 4
+		paddingVertical: 4,
+		display: 'flex',
+		alignItems: 'center',
+		gap: '0.25rem'
 	}
 });
 
