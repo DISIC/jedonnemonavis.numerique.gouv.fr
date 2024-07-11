@@ -204,7 +204,8 @@ const useStyles = tss.create({
 	distributionContainer: {
 		display: 'flex',
 		width: '100%',
-		marginTop: fr.spacing('10v')
+		marginTop: fr.spacing('10v'),
+		gap: 2
 	},
 	distributionItem: {
 		display: 'flex',
@@ -227,7 +228,7 @@ const useStyles = tss.create({
 	progressBar: {
 		width: '100%',
 		height: '1.5rem',
-		borderRadius: '1.5rem'
+		borderRadius: '5px'
 	},
 	distributionPercentage: {
 		marginTop: fr.spacing('2v'),

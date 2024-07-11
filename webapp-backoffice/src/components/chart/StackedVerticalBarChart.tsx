@@ -52,7 +52,7 @@ const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 							style={{
 								width: '24px',
 								height: '24px',
-								borderRadius: 8,
+								borderRadius: 5,
 								backgroundColor: entry.color
 							}}
 						/>
@@ -73,7 +73,15 @@ const CustomBar = (props: any) => {
 					{name}
 				</text>
 			)}
-			<rect x={x} y={y + 5} width={width} height={height} fill={fill} ry={15} />
+			<rect
+				x={x}
+				y={y + 5}
+				width={width}
+				height={height}
+				fill={fill}
+				ry={5}
+				style={{ stroke: '#fff', strokeWidth: 2 }}
+			/>
 		</g>
 	);
 };

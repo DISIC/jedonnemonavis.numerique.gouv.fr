@@ -16,7 +16,7 @@ const CustomBar = (props: any) => {
 
 	return (
 		<g>
-			<rect x={x} y={y} width={width} height={height} fill="#929292" ry={17} />
+			<rect x={x} y={y} width={width} height={height} fill="#929292" ry={5} />
 		</g>
 	);
 };
@@ -85,7 +85,7 @@ const CustomBarChart = ({
 					dataKey="value"
 					fill="#929292"
 					barSize={32}
-					radius={17}
+					radius={5}
 					shape={<CustomBar />}
 				/>
 			</BarChart>

@@ -16,7 +16,7 @@ const CustomBarCell = (props: any) => {
 				y={y + 20}
 				width={width}
 				height={height}
-				rx={15}
+				rx={5}
 				fill="#000091"
 			/>
 			<text
