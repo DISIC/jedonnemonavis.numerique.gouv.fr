@@ -23,7 +23,7 @@ const CustomBar = (props: any) => {
 				width={width}
 				height={height}
 				fill="#929292"
-				ry={15}
+				ry={5}
 			/>
 		</g>
 	);
