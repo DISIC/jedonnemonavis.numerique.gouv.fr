@@ -105,7 +105,7 @@ export const openAPIRouter = router({
 						product_ids: [],
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0],
-						interval: "year"
+						interval: "none"
 					}
 				}
 			}
@@ -116,7 +116,7 @@ export const openAPIRouter = router({
 				product_ids: z.array(z.number()),
 				start_date: z.string(),
 				end_date: z.string(),
-				interval: z.enum(["day", "week", "month", "year", ""])
+				interval: z.enum(["day", "week", "month", "year", "none"])
 			})
 		)
 		.output(ZOpenApiStatsOutput)
@@ -172,7 +172,7 @@ export const openAPIRouter = router({
 						inteval: undefined,
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0],
-						interval: "year"
+						interval: "none"
 					}
 				}
 			}
@@ -183,7 +183,7 @@ export const openAPIRouter = router({
 				product_ids: z.array(z.number()),
 				start_date: z.string(),
 				end_date: z.string(),
-				interval: z.enum(["day", "week", "month", "year", ""])
+				interval: z.enum(["day", "week", "month", "year", "none"])
 			})
 		)
 		.output(ZOpenApiStatsOutput)

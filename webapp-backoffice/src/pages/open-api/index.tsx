@@ -225,7 +225,9 @@ const DocAPI = () => {
 									<b>end_date : </b> Date de fin (format: yyyy-mm-dd).
 								</li>
 								<li>
-									<b>interval : </b> Définit l'intervalle de temps pour afficher les données ('day', 'week', 'month', 'year'). Laissez vide si vous ne souhaitez pas spécifier d'intervalle.
+									<b>interval : </b> Définit l'intervalle de temps pour afficher
+									les données ('day', 'week', 'month', 'year'). Indiquez 'none'
+									si vous ne souhaitez pas spécifier d'intervalle.
 								</li>
 							</ul>
 						</p>
