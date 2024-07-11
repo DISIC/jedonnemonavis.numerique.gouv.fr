@@ -9,6 +9,7 @@ const SwaggerUI = dynamic<SwaggerUIProps>(import('swagger-ui-react') as any, {
 });
 import 'swagger-ui-react/swagger-ui.css';
 import { Loader } from '@/src/components/ui/Loader';
+import Head from 'next/head';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
@@ -60,6 +61,13 @@ const DocAPI = () => {
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-py-6w')}>
+			<Head>
+				<title>API données satisfaction | Je donne mon avis</title>
+				<meta
+					name="description"
+					content={`API données satisfaction | Je donne mon avis`}
+				/>
+			</Head>
 			{docApi === null ? (
 				<Loader></Loader>
 			) : (
@@ -176,8 +184,7 @@ const DocAPI = () => {
 						<h4>4. Point d'accès statistiques de statisfaction des usagers</h4>
 						<p>
 							Ce point d'accès retourne les données de satisfaction des
-							utilisateurs pour toutes les démarches liées au porteur du token
-							fourni.
+							utilisateurs pour toutes les démarches liées à la clé fournie.
 						</p>
 						<p>
 							Il offre les options de filtrage suivantes : <br />
@@ -216,6 +223,11 @@ const DocAPI = () => {
 								</li>
 								<li>
 									<b>end_date : </b> Date de fin (format: yyyy-mm-dd).
+								</li>
+								<li>
+									<b>interval : </b> Définit l'intervalle de temps pour afficher
+									les données ('day', 'week', 'month', 'year'). Indiquez 'none'
+									si vous ne souhaitez pas spécifier d'intervalle.
 								</li>
 							</ul>
 						</p>
