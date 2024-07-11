@@ -166,7 +166,12 @@ export const openAPIRouter = router({
 				interval
 			};
 
-			if (!product_ids.length || product_ids.length > maxNbProducts) {
+			if (
+				!(ctx.api_key.scope !== 'admin' ? authorized_products_ids : product_ids)
+					.length ||
+				(ctx.api_key.scope !== 'admin' ? authorized_products_ids : product_ids)
+					.length > maxNbProducts
+			) {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
 					message: `Veuillez réduire le nombre de services requêtés (max ${maxNbProducts})`
