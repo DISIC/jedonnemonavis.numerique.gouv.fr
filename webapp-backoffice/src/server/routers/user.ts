@@ -86,7 +86,7 @@ export async function updateUser(
 ) {
 	const updatedUser = await prisma.user.update({
 		where: { id: userId },
-		data: { ...user, email: ((user.email || '') as string).toLowerCase() }
+		data: { ...user }
 	});
 	return { ...updatedUser, password: 'Nice try!' };
 }
