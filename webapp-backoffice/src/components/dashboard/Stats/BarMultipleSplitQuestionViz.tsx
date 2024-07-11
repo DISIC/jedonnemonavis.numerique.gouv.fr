@@ -132,6 +132,9 @@ const BarMultipleSplitQuestionViz = ({
 			fieldLabel={resultFieldCode.metadata.fieldLabel || ''}
 			total={total}
 			required={required}
+			hidePercentage={['contact_reached', 'contact_satisfaction'].includes(
+				fieldCode
+			)}
 		>
 			<ChartWrapper
 				title="Répartition des réponses"

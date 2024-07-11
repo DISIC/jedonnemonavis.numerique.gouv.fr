@@ -7,6 +7,7 @@ type QuestionWrapperProps = {
 	fieldLabel: string;
 	total: number;
 	required?: boolean;
+	hidePercentage?: boolean;
 	children: React.ReactNode;
 };
 
@@ -15,6 +16,7 @@ const QuestionWrapper = ({
 	fieldLabel,
 	total,
 	required = false,
+	hidePercentage = false,
 	children
 }: QuestionWrapperProps) => {
 	const { classes } = useStyles();
@@ -31,10 +33,12 @@ const QuestionWrapper = ({
 				<div className={classes.metaInfosTotal}>
 					<div>{formatNumberWithSpaces(totalField)}</div> <span>Réponses</span>
 				</div>
-				<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
-					taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
-					{required && '(question obligatoire)'}
-				</div>
+				{!hidePercentage && (
+					<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
+						taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
+						{required && '(question obligatoire)'}
+					</div>
+				)}
 			</div>
 			<div>{children}</div>
 			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
