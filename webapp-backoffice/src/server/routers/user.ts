@@ -442,7 +442,6 @@ export const userRouter = router({
 					userValidationToken.user.id,
 					{
 						...userValidationToken.user,
-						email: userValidationToken.user.email.toLowerCase(),
 						active: true
 					}
 				);
