@@ -9,10 +9,12 @@ import {
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
-import { fetchAndFormatData } from '@/src/utils/stats';
+import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
 import { AccessRight, Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+
+const maxNbProducts = 10;
 
 export const openAPIRouter = router({
 	infoDemarches: protectedApiProcedure
@@ -90,71 +92,6 @@ export const openAPIRouter = router({
 				})
 			};
 		}),
-	publicData: publicProcedure
-		.meta({
-			openapi: {
-				method: 'POST',
-				path: '/publicData',
-				protect: false,
-				enabled: true,
-				summary:
-					"Point d'accès retourne les données de satisfaction des usagers pour toutes les démarches faisant actuellement partie du Top 250.",
-				example: {
-					request: {
-						field_codes: ['satisfaction', 'comprehension'],
-						product_ids: [],
-						start_date: '2023-01-01',
-						end_date: new Date().toISOString().split('T')[0],
-						interval: "none"
-					}
-				}
-			}
-		})
-		.input(
-			z.object({
-				field_codes: z.array(z.string()),
-				product_ids: z.array(z.number()),
-				start_date: z.string(),
-				end_date: z.string(),
-				interval: z.enum(["day", "week", "month", "year", "none"])
-			})
-		)
-		.output(ZOpenApiStatsOutput)
-		.query(async ({ ctx, input }) => {
-			const { field_codes, product_ids, start_date, end_date, interval } = input;
-
-			const actual250 = await ctx.prisma.product.findMany({
-				where: {
-					isPublic: true
-				}
-			});
-			const list_250_ids: number[] = actual250.map((data: Product) => {
-				return data.id;
-			});
-
-			const allFields = [
-				...FIELD_CODE_BOOLEAN_VALUES,
-				...FIELD_CODE_SMILEY_VALUES,
-				...FIELD_CODE_DETAILS_VALUES
-			];
-
-			const result = await fetchAndFormatData({
-				ctx,
-				field_codes:
-					field_codes.length > 0
-						? allFields.filter(f => field_codes.includes(f.slug))
-						: allFields,
-				product_ids:
-					product_ids.length > 0
-						? list_250_ids.filter(value => product_ids.includes(value))
-						: list_250_ids,
-				start_date,
-				end_date,
-				interval
-			});
-
-			return { data: result };
-		}),
 
 	statsUsagers: protectedApiProcedure
 		.meta({
@@ -172,7 +109,7 @@ export const openAPIRouter = router({
 						inteval: undefined,
 						start_date: '2023-01-01',
 						end_date: new Date().toISOString().split('T')[0],
-						interval: "none"
+						interval: 'none'
 					}
 				}
 			}
@@ -183,7 +120,7 @@ export const openAPIRouter = router({
 				product_ids: z.array(z.number()),
 				start_date: z.string(),
 				end_date: z.string(),
-				interval: z.enum(["day", "week", "month", "year", "none"])
+				interval: z.enum(['day', 'week', 'month', 'year', 'none'])
 			})
 		)
 		.output(ZOpenApiStatsOutput)
@@ -218,22 +155,36 @@ export const openAPIRouter = router({
 				...FIELD_CODE_DETAILS_VALUES
 			];
 
-			const result = await fetchAndFormatData({
+			let fetchParams: FetchAndFormatDataProps = {
 				ctx,
 				field_codes:
 					field_codes.length > 0
 						? allFields.filter(f => field_codes.includes(f.slug))
 						: allFields,
-				product_ids:
+				start_date,
+				end_date,
+				interval
+			};
+
+			if (!product_ids.length || product_ids.length > maxNbProducts) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: `Veuillez réduire le nombre de services requêtés (max ${maxNbProducts})`
+				});
+			}
+
+			if (ctx.api_key.scope !== 'admin') {
+				fetchParams.product_ids =
 					product_ids.length > 0
 						? authorized_products_ids.filter(value =>
 								product_ids.includes(value)
 							)
-						: authorized_products_ids,
-				start_date,
-				end_date,
-				interval
-			});
+						: authorized_products_ids;
+			} else {
+				fetchParams.product_ids = product_ids;
+			}
+
+			const result = await fetchAndFormatData(fetchParams);
 
 			await ctx.prisma.apiKeyLog.create({
 				data: {
