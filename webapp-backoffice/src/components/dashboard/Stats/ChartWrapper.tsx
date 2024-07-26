@@ -20,9 +20,17 @@ type Props = {
 	title: string;
 	total?: number;
 	data?: FormattedData[];
+	sortOrder?: { [key: string]: number };
 	reverseData?: boolean;
 	singleRowLabel?: string;
 	displayTotal?: 'classic' | 'percentage';
+};
+
+const orderData = (
+	inputArray: FormattedData[],
+	sortOrder: { [key: string]: number }
+) => {
+	return inputArray.sort((a, b) => sortOrder[a['name']] - sortOrder[b['name']]);
 };
 
 const reverseDataInput = (
@@ -80,6 +88,7 @@ const ChartWrapper = ({
 	title,
 	total,
 	data,
+	sortOrder,
 	reverseData,
 	singleRowLabel,
 	displayTotal
@@ -98,6 +107,10 @@ const ChartWrapper = ({
 
 	if (reverseData) {
 		cleanData = reverseDataInput(cleanData, singleRowLabel);
+	}
+
+	if (sortOrder) {
+		cleanData = orderData(cleanData, sortOrder);
 	}
 
 	const headers = cleanData.map(item => item.name);
@@ -120,7 +133,7 @@ const ChartWrapper = ({
 				}, {} as AnyKey);
 		});
 
-	const rows = getKeysFromArrayOfObjects(cells);
+	let rows = getKeysFromArrayOfObjects(cells);
 
 	const displayCellValue = (
 		cell: AnyKey,

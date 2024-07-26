@@ -89,29 +89,17 @@ const CustomBar = (props: any) => {
 const StackedVerticalBarChart = ({
 	data,
 	dataKeys,
+	sortOrder,
 	fieldCode
 }: {
 	data: { name: string; [key: string]: number | string }[];
 	dataKeys: string[];
 	fieldCode: 'contact_reached' | 'contact_satisfaction';
+	sortOrder: {
+		[key: string]: number;
+	};
 	total: number;
 }) => {
-	const sortOrder: { [key: string]: number } =
-		fieldCode === 'contact_reached'
-			? {
-					Non: 0,
-					Oui: 1,
-					'Pas de réponse': 2
-				}
-			: {
-					'Très mauvaise': 0,
-					Mauvaise: 1,
-					'Ni bonne, ni mauvaise': 2,
-					Bonne: 3,
-					Excellente: 4,
-					'Ne se prononce pas': 5
-				};
-
 	return (
 		<ResponsiveContainer width="100%" height={300}>
 			<BarChart data={data} layout="vertical">

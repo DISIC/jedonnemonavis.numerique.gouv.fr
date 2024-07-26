@@ -36,6 +36,22 @@ const BarMultipleSplitQuestionViz = ({
 }: Props) => {
 	const { classes } = useStyles();
 
+	const sortOrder: { [key: string]: number } =
+		fieldCode === 'contact_reached'
+			? {
+					Non: 0,
+					Oui: 1,
+					'Pas de réponse': 2
+				}
+			: {
+					'Très mauvaise': 0,
+					Mauvaise: 1,
+					'Ni bonne, ni mauvaise': 2,
+					Bonne: 3,
+					Excellente: 4,
+					'Ne se prononce pas': 5
+				};
+
 	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByChildFieldCode.useQuery(
 			{
@@ -139,6 +155,7 @@ const BarMultipleSplitQuestionViz = ({
 			<ChartWrapper
 				title="Répartition des réponses"
 				data={formatedFieldCodeData}
+				sortOrder={sortOrder}
 				reverseData
 				displayTotal="classic"
 			>
@@ -147,6 +164,7 @@ const BarMultipleSplitQuestionViz = ({
 					dataKeys={allFieldCodeKeys}
 					fieldCode={fieldCode}
 					total={total}
+					sortOrder={sortOrder}
 				/>
 			</ChartWrapper>
 			<ChartWrapper
