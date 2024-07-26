@@ -183,8 +183,8 @@ const SmileyBarChart = ({
 				{Array.from(fieldNamesSet)
 					.sort(
 						(a: any, b: any) =>
-							sortOrder[a as keyof typeof sortOrder] -
-							sortOrder[b as keyof typeof sortOrder]
+							sortOrder[b as keyof typeof sortOrder] -
+							sortOrder[a as keyof typeof sortOrder]
 					)
 					.map((fieldName: string, index: number) => (
 						<Bar
