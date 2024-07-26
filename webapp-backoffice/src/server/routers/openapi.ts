@@ -166,18 +166,6 @@ export const openAPIRouter = router({
 				interval
 			};
 
-			if (
-				!(ctx.api_key.scope !== 'admin' ? authorized_products_ids : product_ids)
-					.length ||
-				(ctx.api_key.scope !== 'admin' ? authorized_products_ids : product_ids)
-					.length > maxNbProducts
-			) {
-				throw new TRPCError({
-					code: 'BAD_REQUEST',
-					message: `Veuillez réduire le nombre de services requêtés (max ${maxNbProducts})`
-				});
-			}
-
 			if (ctx.api_key.scope !== 'admin') {
 				fetchParams.product_ids =
 					product_ids.length > 0
@@ -187,6 +175,26 @@ export const openAPIRouter = router({
 						: authorized_products_ids;
 			} else {
 				fetchParams.product_ids = product_ids;
+			}
+
+			if (ctx.api_key.scope !== 'admin' && !fetchParams.product_ids.length) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message:
+						"Les démarches demandées (product_ids) ne sont pas accessibles avec votre clé d'accès."
+				});
+			}
+
+			if (
+				!(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+					.length ||
+				(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+					.length > maxNbProducts
+			) {
+				throw new TRPCError({
+					code: 'BAD_REQUEST',
+					message: `Veuillez réduire le nombre de services requêtés (max ${maxNbProducts})`
+				});
 			}
 
 			const result = await fetchAndFormatData(fetchParams);
