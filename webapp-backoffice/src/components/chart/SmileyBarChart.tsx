@@ -155,7 +155,6 @@ const SmileyBarChart = ({
 		return null;
 	};
 
-	console.log(fieldNamesSet);
 	return (
 		<ResponsiveContainer width="100%" height={335}>
 			<BarChart data={data}>
