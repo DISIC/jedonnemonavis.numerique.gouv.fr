@@ -136,7 +136,7 @@ const SmileyBarChart = ({
 									if (itemWithValue) {
 										return (
 											<li key={index} style={{ color: payloadItem.color }}>
-												{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
+												{`${payloadItem.name} : ${itemWithValue[`value_${payloadItem.dataKey}`]} (${Math.round(payloadItem.value)}%)`}
 											</li>
 										);
 									} else {
@@ -180,18 +180,24 @@ const SmileyBarChart = ({
 					height={60}
 					content={renderLegend}
 				/>
-				{Array.from(fieldNamesSet).map((fieldName: string, index: number) => (
-					<Bar
-						key={index}
-						dataKey={fieldName}
-						fill={getHexaColorFromIntentionText(fieldName)}
-						radius={5}
-						stackId="a"
-						barSize={25}
-						shape={<CustomBar fieldName={fieldName} />}
-						style={{ stroke: '#fff', strokeWidth: 2 }}
-					/>
-				))}
+				{Array.from(fieldNamesSet)
+					.sort(
+						(a: any, b: any) =>
+							sortOrder[b as keyof typeof sortOrder] -
+							sortOrder[a as keyof typeof sortOrder]
+					)
+					.map((fieldName: string, index: number) => (
+						<Bar
+							key={index}
+							dataKey={fieldName}
+							fill={getHexaColorFromIntentionText(fieldName)}
+							radius={5}
+							stackId="a"
+							barSize={25}
+							shape={<CustomBar fieldName={fieldName} />}
+							style={{ stroke: '#fff', strokeWidth: 2 }}
+						/>
+					))}
 			</BarChart>
 		</ResponsiveContainer>
 	);

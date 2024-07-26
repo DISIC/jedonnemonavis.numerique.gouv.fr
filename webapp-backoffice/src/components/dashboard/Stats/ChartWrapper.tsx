@@ -20,9 +20,17 @@ type Props = {
 	title: string;
 	total?: number;
 	data?: FormattedData[];
+	sortOrder?: { [key: string]: number };
 	reverseData?: boolean;
 	singleRowLabel?: string;
 	displayTotal?: 'classic' | 'percentage';
+};
+
+const orderData = (
+	inputArray: FormattedData[],
+	sortOrder: { [key: string]: number }
+) => {
+	return inputArray.sort((a, b) => sortOrder[a['name']] - sortOrder[b['name']]);
 };
 
 const reverseDataInput = (
@@ -44,13 +52,18 @@ const reverseDataInput = (
 						oaItem => oaItem.name === key
 					);
 					if (targetItemIndex !== -1) {
+						if (!outputArray[targetItemIndex][item.name]) {
+							outputArray[targetItemIndex][item.name] = 0;
+						}
+
 						(outputArray[targetItemIndex][item.name] as number) += parseInt(
 							item[key].toString()
 						);
 					} else {
+						const value = parseInt(item[key].toString());
 						outputArray.push({
 							name: key,
-							[item.name]: item[key]
+							[item.name]: isNaN(value) ? 0 : value
 						});
 					}
 				});
@@ -75,6 +88,7 @@ const ChartWrapper = ({
 	title,
 	total,
 	data,
+	sortOrder,
 	reverseData,
 	singleRowLabel,
 	displayTotal
@@ -93,6 +107,10 @@ const ChartWrapper = ({
 
 	if (reverseData) {
 		cleanData = reverseDataInput(cleanData, singleRowLabel);
+	}
+
+	if (sortOrder) {
+		cleanData = orderData(cleanData, sortOrder);
 	}
 
 	const headers = cleanData.map(item => item.name);
@@ -115,7 +133,7 @@ const ChartWrapper = ({
 				}, {} as AnyKey);
 		});
 
-	const rows = getKeysFromArrayOfObjects(cells);
+	let rows = getKeysFromArrayOfObjects(cells);
 
 	const displayCellValue = (
 		cell: AnyKey,
@@ -177,18 +195,18 @@ const ChartWrapper = ({
 				<tr>
 					<td>{singleRowLabel || 'Nombre de réponses'}</td>
 					{cells.map((c, index) => (
-						<td key={`${JSON.stringify(c)}_${index}`}>{c.value}</td>
+						<td key={`${JSON.stringify(c)}_${index}_${title}`}>{c.value}</td>
 					))}
 				</tr>
 			);
 		}
 
 		return rows.map((r, index) => (
-			<tr key={`${r}_${index}`}>
+			<tr key={`${r}_${index}_${title}`}>
 				<td>{r}</td>
 				{cells.map((c, indexC) => (
 					<>
-						<td key={`${r}_${index}_${JSON.stringify(c)}_${indexC}`}>
+						<td key={`${r}_${index}_${JSON.stringify(c)}_${indexC}_${title}`}>
 							{displayCellValue(c, r, indexC)}
 						</td>
 					</>
@@ -206,7 +224,7 @@ const ChartWrapper = ({
 						<tr>
 							<th scope="col"></th>
 							{headers.map((h, index) => (
-								<th scope="col" key={`${h}_${index}`}>
+								<th scope="col" key={`${h}_${index}_${title}`}>
 									{h}
 								</th>
 							))}
