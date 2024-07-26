@@ -155,6 +155,7 @@ const SmileyBarChart = ({
 		return null;
 	};
 
+	console.log(fieldNamesSet);
 	return (
 		<ResponsiveContainer width="100%" height={335}>
 			<BarChart data={data}>
@@ -180,18 +181,24 @@ const SmileyBarChart = ({
 					height={60}
 					content={renderLegend}
 				/>
-				{Array.from(fieldNamesSet).map((fieldName: string, index: number) => (
-					<Bar
-						key={index}
-						dataKey={fieldName}
-						fill={getHexaColorFromIntentionText(fieldName)}
-						radius={5}
-						stackId="a"
-						barSize={25}
-						shape={<CustomBar fieldName={fieldName} />}
-						style={{ stroke: '#fff', strokeWidth: 2 }}
-					/>
-				))}
+				{Array.from(fieldNamesSet)
+					.sort(
+						(a: any, b: any) =>
+							sortOrder[a as keyof typeof sortOrder] -
+							sortOrder[b as keyof typeof sortOrder]
+					)
+					.map((fieldName: string, index: number) => (
+						<Bar
+							key={index}
+							dataKey={fieldName}
+							fill={getHexaColorFromIntentionText(fieldName)}
+							radius={5}
+							stackId="a"
+							barSize={25}
+							shape={<CustomBar fieldName={fieldName} />}
+							style={{ stroke: '#fff', strokeWidth: 2 }}
+						/>
+					))}
 			</BarChart>
 		</ResponsiveContainer>
 	);
