@@ -136,7 +136,7 @@ const SmileyBarChart = ({
 									if (itemWithValue) {
 										return (
 											<li key={index} style={{ color: payloadItem.color }}>
-												{`${payloadItem.name} : ${itemWithValue[`value_${payload[0].dataKey}`]} (${Math.round(payloadItem.value)}%)`}
+												{`${payloadItem.name} : ${itemWithValue[`value_${payloadItem.dataKey}`]} (${Math.round(payloadItem.value)}%)`}
 											</li>
 										);
 									} else {
