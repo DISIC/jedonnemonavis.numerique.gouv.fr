@@ -205,6 +205,8 @@ model Product {
   favorites       Favorite[]
   reviews         Review[]
   isPublic        Boolean?
+  isTop250        Boolean?
+  hasBeenTop250   Boolean?
   api_keys        ApiKey[]
   Export          Export[]
 }
