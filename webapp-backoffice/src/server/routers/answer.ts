@@ -1012,14 +1012,17 @@ export const answerRouter = router({
 			z.object({
 				product_id: z.string() /* To change to button_id */,
 				start_date: z.string().optional(),
-				end_date: z.string().optional()
+				end_date: z.string().optional(),
+				isXWiki: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, start_date, end_date } = input;
+			const { product_id, start_date, end_date, isXWiki } = input;
 
 			const product = await ctx.prisma.product.findUnique({
-				where: { id: parseInt(product_id) }
+				where: isXWiki
+					? { xwiki_id: parseInt(product_id) }
+					: { id: parseInt(product_id) }
 			});
 
 			if (!product) throw new Error('Product not found');
@@ -1042,7 +1045,7 @@ export const answerRouter = router({
 									]
 								}
 							},
-							{ match: { product_id } },
+							{ match: { product_id: product.id } },
 							{
 								range: {
 									created_at: {
@@ -1073,7 +1076,7 @@ export const answerRouter = router({
 					bool: {
 						must: [
 							{ match: { field_code: 'contact_tried' } },
-							{ match: { product_id } },
+							{ match: { product_id: product.id } },
 							{
 								range: {
 									created_at: {
