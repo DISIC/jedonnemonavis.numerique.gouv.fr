@@ -6,6 +6,7 @@ import requests
 import boto3
 import psycopg2
 from psycopg2 import sql
+import pandas as pd
 import os
 from dotenv import load_dotenv
 from io import StringIO
@@ -21,6 +22,7 @@ from io import StringIO, BytesIO
 from collections import defaultdict
 import zipfile
 import calendar
+import textwrap
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -302,6 +304,57 @@ def get_month_ranges(start_date, end_date):
 
     return ranges
 
+# Fonction pour estimer le nombre de lignes dans une cellule après retour à la ligne
+def estimate_line_count(cell_text, wrap_length=30):
+    lines = cell_text.split('\n')
+    wrapped_lines = sum((len(line) // wrap_length) + 1 for line in lines)
+    return wrapped_lines
+
+def format_excel(writer, df, sheet_name):
+    workbook = writer.book
+    worksheet = writer.sheets[sheet_name]
+
+    # Définir les largeurs de colonne
+    for i, col in enumerate(df.columns):
+        max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2  # Ajouter un peu d'espace
+        worksheet.set_column(i, i, max_len)
+
+    # Ajouter un format d'en-tête
+    header_format = workbook.add_format({
+        'bold': True,
+        'font_size': 12,
+        'border': 1,
+        'bg_color': '#d4d3d3'
+    })
+
+    # Ajouter un format de cellule avec des bordures
+    cell_format = workbook.add_format({
+        'border': 1,
+        'text_wrap': True  # Activer le retour à la ligne automatique
+    })
+
+    # Écrire les en-têtes de colonnes avec le format défini
+    for col_num, value in enumerate(df.columns.values):
+        worksheet.write(0, col_num, value, header_format)
+
+    # Appliquer le format de cellule avec des bordures aux autres cellules
+    for row_num in range(1, len(df) + 1):
+        for col_num in range(len(df.columns)):
+            worksheet.write(row_num, col_num, df.iloc[row_num - 1, col_num], cell_format)
+
+    # Ajustement de la hauteur des lignes
+    for row_num, row in enumerate(df.itertuples(index=False), start=1):
+        max_lines = max(estimate_line_count(str(cell), wrap_length=50) for cell in row)
+        line_height = max(15, 15 * max_lines)  # Ajuster cette formule selon vos besoins
+        worksheet.set_row(row_num, line_height, cell_format)
+
+def format_review_content(content):
+    if isinstance(content, str):
+        # Ajouter le premier tiret et remplacer '/' par '\n- '
+        return '- ' + re.sub(r' ?\/ ?([a-zA-Z])', r'\n- \1', content)
+    return content
+
+
 def main():
     print('------ START EXPORT ------')
     conn = create_connection()
@@ -367,6 +420,10 @@ def main():
         
         product_id = first_result_export[5]
         filter_params_raw = first_result_export[3]
+        export_format = first_result_export[9]
+        name_product = first_result_export[11]
+        email_user = first_result_export[10]
+
 
         filters_query = ""
         filters_values = []
@@ -394,7 +451,7 @@ def main():
         end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')), '%Y-%m-%d')
         count_params = [product_id, start_date, end_date] + filters_values
         total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
-        print(f"{total_reviews} avis concernés")
+        print(f"{total_reviews} avis concernés, format d'export : {export_format}")
 
         current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         
@@ -514,7 +571,7 @@ def main():
                         "Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?",
                         "De quelle aide avez vous eu besoin ?",
                         "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?"
-                         ]  # Remplacez cela par l'ordre réel que vous souhaitez
+                         ]
 
         def custom_sort(labels, order):
             order_dict = {label: index for index, label in enumerate(order)}
@@ -523,71 +580,127 @@ def main():
         # Après avoir récupéré tous les field_labels
         field_labels = custom_sort(field_labels, desired_order)
         csv_buffer = StringIO()
+        xls_buffer = BytesIO()
         zip_buffer = BytesIO()
-        swhitch_to_zip = total_reviews > MAX_LINES_SWITCH
+        switch_to_zip = total_reviews > MAX_LINES_SWITCH
 
-        if not swhitch_to_zip:
-            # Create CSV with all the reviews and answers
-            writer = csv.writer(csv_buffer)
-            # Write header
-            header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
-            writer.writerow(header)
+        if not switch_to_zip:
+            if export_format == 'csv':
+                # Create CSV with all the reviews and answers
+                writer = csv.writer(csv_buffer)
+                # Write header
+                header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+                writer.writerow(header)
 
-            for review in all_reviews:
-                row = [
-                    review['review_id'][-7:],
-                    review['form_id'],
-                    review['product_id'],
-                    review['button_id'],
-                    review['xwiki_id'],
-                    review['review_created_at']
-                ]
+                for review in all_reviews:
+                    row = [
+                        review['review_id'][-7:],
+                        review['form_id'],
+                        review['product_id'],
+                        review['button_id'],
+                        review['xwiki_id'],
+                        review['review_created_at']
+                    ]
+                    for label in field_labels:
+                        row.append(review['answers'].get(label, ''))
+                    writer.writerow(row)
+                csv_buffer.seek(0)
+                file_name = f"Avis_{sanitize_filename(name_product)}_{current_date}.csv"
+                upload_buffer = csv_buffer
+            elif export_format == 'xls':
+                # Create a list of rows similar to the CSV approach
+                rows = []
+                for review in all_reviews:
+                    row = {
+                        'Review ID': review['review_id'][-7:],
+                        'Form ID': review['form_id'],
+                        'Product ID': review['product_id'],
+                        'Button ID': review['button_id'],
+                        'XWiki ID': review['xwiki_id'],
+                        'Review Created At': review['review_created_at']
+                    }
+                    for label in field_labels:
+                        row[label] = review['answers'].get(label, '')
+                    rows.append(row)
+                
+                # Create DataFrame from the rows
+                df = pd.DataFrame(rows)
+
+                # Appliquer le formatage aux colonnes concernées
                 for label in field_labels:
-                    row.append(review['answers'].get(label, ''))
-                writer.writerow(row)
-            csv_buffer.seek(0)
+                    df[label] = df[label].apply(lambda x: format_review_content(x) if ' / ' in x else x)
+                
+                # Write DataFrame to Excel
+                with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
+                    df.to_excel(writer, index=False, sheet_name=f"Avis {name_product}")
+                    format_excel(writer, df, f"Avis {name_product}")
+                xls_buffer.seek(0)
+                file_name = f"Avis_{sanitize_filename(name_product)}_{current_date}.xlsx"
+                upload_buffer = xls_buffer
         else:
             # Create a ZIP file
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
                 for year, reviews in all_reviews_by_year.items():
-                    csv_buffer = StringIO()
-                    writer = csv.writer(csv_buffer)
-                    header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
-                    writer.writerow(header)
+                    if export_format == 'csv':
+                        csv_buffer = StringIO()
+                        writer = csv.writer(csv_buffer)
+                        header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+                        writer.writerow(header)
 
-                    for review in reviews:
-                        row = [
-                            review['review_id'][-7:],
-                            review['form_id'],
-                            review['product_id'],
-                            review['button_id'],
-                            review['xwiki_id'],
-                            review['review_created_at']
-                        ]
-                        for label in field_labels:
-                            row.append(review['answers'].get(label, ''))
-                        writer.writerow(row)
+                        for review in reviews:
+                            row = [
+                                review['review_id'][-7:],
+                                review['form_id'],
+                                review['product_id'],
+                                review['button_id'],
+                                review['xwiki_id'],
+                                review['review_created_at']
+                            ]
+                            for label in field_labels:
+                                row.append(review['answers'].get(label, ''))
+                            writer.writerow(row)
 
-                    csv_filename = f"Avis_{year}.csv"
-                    zip_file.writestr(csv_filename, csv_buffer.getvalue())
-                    csv_buffer.close()
+                        csv_filename = f"Avis_{year}.csv"
+                        zip_file.writestr(csv_filename, csv_buffer.getvalue())
+                        csv_buffer.close()
+                    elif export_format == 'xls':
+                        # Create a list of rows similar to the CSV approach
+                        rows = []
+                        for review in all_reviews:
+                            row = {
+                                'Review ID': review['review_id'][-7:],
+                                'Form ID': review['form_id'],
+                                'Product ID': review['product_id'],
+                                'Button ID': review['button_id'],
+                                'XWiki ID': review['xwiki_id'],
+                                'Review Created At': review['review_created_at']
+                            }
+                            for label in field_labels:
+                                row[label] = review['answers'].get(label, '')
+                            rows.append(row)
+                        
+                        # Create DataFrame from the rows
+                        df = pd.DataFrame(rows)
+                        
+                        # Write DataFrame to Excel
+                        with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
+                            df.to_excel(writer, index=False, sheet_name=f"Avis {name_product}")
+                            format_excel(writer, df, f"Avis {name_product}")
+                        xls_filename = f"Avis_{year}.xlsx"
+                        zip_file.writestr(xls_filename, xls_buffer.getvalue())
+                        xls_buffer.close()
             zip_buffer.seek(0)
+            file_name = f"Avis_{sanitize_filename(name_product)}_{current_date}.zip"
+            upload_buffer = zip_buffer
 
         # Upload to S3
-        if swhitch_to_zip:
-            file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.zip"
-            upload_buffer = zip_buffer
-        else:
-            file_name = f"Avis_{sanitize_filename(first_result_export[10])}_{current_date}.csv"
-            upload_buffer = csv_buffer
-
         if upload_to_s3(upload_buffer, BUCKET_NAME, file_name):
             print(f"Fichier {file_name} uploadé avec succès sur le bucket {BUCKET_NAME}.")
 
             download_link = generate_download_link(BUCKET_NAME, file_name)
             if download_link:
                 print(f"Le lien de téléchargement est : {download_link}")
-                send_email(first_result_export[9], download_link, first_result_export[10], swhitch_to_zip)
+                send_email(email_user, download_link, name_product, switch_to_zip)
 
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """
