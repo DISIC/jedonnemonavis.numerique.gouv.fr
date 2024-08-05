@@ -57,9 +57,11 @@ const t = initTRPC.context<Context>().create({
 const limiter = createTRPCStoreLimiter<typeof t>({
   fingerprint: (ctx) => {
     const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-    const ip = xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req)
+    const xClientIp = ctx.req.headers['x-client-ip'] as string;
+    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor.split(',')[0]
     console.log("default fingerprint : ", defaultFingerPrint(ctx.req));
     console.log("xForwardedFor : ", xForwardedFor);
+    console.log("xClientIp : ", xClientIp);
     return ip;
   },
   windowMs: 60000,
