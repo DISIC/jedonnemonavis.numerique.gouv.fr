@@ -62,6 +62,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     console.log("default fingerprint : ", defaultFingerPrint(ctx.req));
     console.log("xForwardedFor : ", xForwardedFor);
     console.log("xClientIp : ", xClientIp);
+    console.log("all headers : ", ctx.req.headers);
     return ip;
   },
   windowMs: 60000,
