@@ -55,7 +55,7 @@ const t = initTRPC.context<Context>().create({
 });
 
 const limiter = createTRPCStoreLimiter<typeof t>({
-  fingerprint: (ctx) => defaultFingerPrint(ctx.req),
+  fingerprint: (ctx) => {console.log("attempting create review with IP : ", defaultFingerPrint(ctx.req)); return defaultFingerPrint(ctx.req)},
   windowMs: 60000,
   max: 5,
   onLimit: (retryAfter) => {
