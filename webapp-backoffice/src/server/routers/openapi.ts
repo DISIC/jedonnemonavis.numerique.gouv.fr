@@ -226,8 +226,9 @@ export const openAPIRouter = router({
 		.output(
 			z.object({
 				result: z.object({
-					has_down: z.array(z.number()),
-					has_up: z.array(z.number())
+					new_top250: z.array(z.number()),
+					already_top250: z.array(z.number()),
+					down_top250: z.array(z.number())
 				})
 			})
 		)
@@ -243,43 +244,47 @@ export const openAPIRouter = router({
 
 			const actual250 = await ctx.prisma.product.findMany({
 				where: {
-					isPublic: true
+					isTop250: true
 				}
 			});
 
-			const list_actual_250: number[] = actual250.map((data: Product) => {
+			const actual250Ids: number[] = actual250.map((data: Product) => {
 				return data.id;
 			});
 
-			const need_up = product_ids.filter(a => !list_actual_250.includes(a));
-			const need_down = list_actual_250.filter(a => !product_ids.includes(a));
+			const new_top250 = product_ids.filter(a => !actual250Ids.includes(a));
+			const already_top250 = product_ids.filter(a => actual250Ids.includes(a));
+			const down_top250 = actual250Ids.filter(a => !product_ids.includes(a));
 
 			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
-						in: need_down
+						in: new_top250
 					}
 				},
 				data: {
-					isPublic: false
+					isPublic: true,
+					isTop250: true,
+					hasBeenTop250: true
 				}
 			});
 
 			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
-						in: need_up
+						in: down_top250
 					}
 				},
 				data: {
-					isPublic: true
+					isTop250: false
 				}
 			});
 
 			return {
 				result: {
-					has_down: need_down,
-					has_up: need_up
+					new_top250,
+					already_top250,
+					down_top250
 				}
 			};
 		})
