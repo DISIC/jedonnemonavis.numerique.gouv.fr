@@ -55,7 +55,11 @@ const t = initTRPC.context<Context>().create({
 });
 
 const limiter = createTRPCStoreLimiter<typeof t>({
-  fingerprint: (ctx) => defaultFingerPrint(ctx.req),
+  fingerprint: (ctx) => {
+    const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+    const ip = xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req)
+    return ip;
+  },
   windowMs: 60000,
   max: 5,
   onLimit: (retryAfter) => {
