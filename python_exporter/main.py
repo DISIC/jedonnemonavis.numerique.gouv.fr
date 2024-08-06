@@ -369,7 +369,11 @@ def create_xls_buffer(reviews, field_labels, product_name):
         df[label] = df[label].apply(lambda x: format_review_content(x) if ' / ' in x else x)
     
     xls_buffer = BytesIO()
-    with pd.ExcelWriter(xls_buffer, engine='xlsxwriter', options={'nan_inf_to_errors': True}) as writer:
+    with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
+        # Récupérer le classeur xlsxwriter
+        workbook = writer.book
+        # Configurer l'option nan_inf_to_errors
+        workbook.use_nan_inf_to_errors()
         df.to_excel(writer, index=False, sheet_name=f"Avis")
         format_excel(writer, df, f"Avis {product_name}")
     xls_buffer.seek(0)
