@@ -312,7 +312,7 @@ def format_excel(writer, df, sheet_name):
         for col_num in range(len(df.columns)):
             cell_value = df.iloc[row_num - 1, col_num]
             if pd.isna(cell_value) or cell_value == "":
-                worksheet.write(row_num, col_num, cell_value, empty_cell_format)
+                worksheet.write(row_num, col_num, cell_value, cell_format)
             else:
                 worksheet.write(row_num, col_num, cell_value, cell_format)
 
