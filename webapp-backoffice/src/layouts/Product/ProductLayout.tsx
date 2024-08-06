@@ -119,7 +119,9 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				</Button>
 			</div>
 			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-2v')}>{product.title}</h1>
+				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
+					{product.title}
+				</h1>
 				{product.isTop250 && (
 					<Badge severity="info" noIcon>
 						Démarche essentielle
@@ -138,6 +140,18 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
 					{children}
+					<div className={cx(classes.backToTop)}>
+						<a
+							className={fr.cx(
+								'fr-link',
+								'fr-icon-arrow-up-fill',
+								'fr-link--icon-left'
+							)}
+							href="#product-title"
+						>
+							Haut de page
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -159,6 +173,11 @@ const useStyles = tss.create({
 	},
 	copyBtn: {
 		boxShadow: 'none'
+	},
+	backToTop: {
+		position: 'fixed',
+		right: fr.spacing('10v'),
+		bottom: fr.spacing('10v')
 	}
 });
 
