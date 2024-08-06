@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
@@ -27,7 +27,8 @@ interface MenuItems {
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
 
-	const [displayToast, setDisplayToast] = React.useState(false);
+	const [displayToast, setDisplayToast] = useState(false);
+	const [showBackToTop, setShowBackToTop] = useState(false);
 
 	const router = useRouter();
 
@@ -89,6 +90,23 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		}
 	];
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.scrollY > 800) {
+				setShowBackToTop(true);
+			} else {
+				setShowBackToTop(false);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
 			<Toast
@@ -138,20 +156,24 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 						sticky
 					/>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
 					{children}
-					<div className={cx(classes.backToTop)}>
-						<a
-							className={fr.cx(
-								'fr-link',
-								'fr-icon-arrow-up-fill',
-								'fr-link--icon-left'
-							)}
-							href="#product-title"
-						>
-							Haut de page
-						</a>
-					</div>
+					{router.pathname.includes('/stats') && showBackToTop && (
+						<div className={cx(classes.backToTop)}>
+							<div>
+								<a
+									className={fr.cx(
+										'fr-link',
+										'fr-icon-arrow-up-fill',
+										'fr-link--icon-left'
+									)}
+									href="#product-title"
+								>
+									Haut de page
+								</a>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
@@ -175,9 +197,16 @@ const useStyles = tss.create({
 		boxShadow: 'none'
 	},
 	backToTop: {
-		position: 'fixed',
-		right: fr.spacing('10v'),
-		bottom: fr.spacing('10v')
+		position: 'sticky',
+		bottom: fr.spacing('10v'),
+		display: 'flex',
+		justifyContent: 'end',
+		marginTop: fr.spacing('10v'),
+		'& > div': {
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
+			borderRadius: fr.spacing('2v'),
+			padding: fr.spacing('2v')
+		}
 	}
 });
 
