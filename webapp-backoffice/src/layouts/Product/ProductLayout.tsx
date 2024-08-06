@@ -8,6 +8,7 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -118,7 +119,12 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				</Button>
 			</div>
 			<div className={cx(classes.title)}>
-				<h1>{product.title}</h1>
+				<h1 className={fr.cx('fr-mb-2v')}>{product.title}</h1>
+				{product.isTop250 && (
+					<Badge severity="info" noIcon>
+						Démarche essentielle
+					</Badge>
+				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
@@ -140,7 +146,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '6w' })
+		...fr.spacing('margin', { bottom: '7w' })
 	},
 	container: {
 		height: '100%'
