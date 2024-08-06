@@ -312,7 +312,7 @@ def format_excel(writer, df, sheet_name):
         for col_num in range(len(df.columns)):
             cell_value = df.iloc[row_num - 1, col_num]
             if pd.isna(cell_value) or cell_value == "":
-                worksheet.write(row_num, col_num, cell_value, empty_cell_format)
+                worksheet.write(row_num, col_num, cell_value, cell_format)
             else:
                 worksheet.write(row_num, col_num, cell_value, cell_format)
 
@@ -370,7 +370,7 @@ def create_xls_buffer(reviews, field_labels, product_name):
     
     xls_buffer = BytesIO()
     with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name=f"Avis {product_name}")
+        df.to_excel(writer, index=False, sheet_name=f"Avis")
         format_excel(writer, df, f"Avis {product_name}")
     xls_buffer.seek(0)
     return xls_buffer
