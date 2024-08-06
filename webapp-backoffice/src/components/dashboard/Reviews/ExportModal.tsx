@@ -38,7 +38,7 @@ const ExportModal = (props: Props) => {
 	const modalOpen = useIsModalOpen(modal);
 
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
-	const [format, setFormat] = React.useState<'csv' | 'xlsx' | null>(null);
+	const [format, setFormat] = React.useState<'csv' | 'xls' | null>(null);
 
 	const {
 		data: exportCsv,
@@ -70,7 +70,8 @@ const ExportModal = (props: Props) => {
 		createExport.mutate({
 			user_id: parseInt(session?.user?.id as string),
 			params: choice == 'filtered' ? params : '',
-			product_id: product_id
+			product_id: product_id,
+			type: format ?? 'csv'
 		});
 	};
 
@@ -131,12 +132,11 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Format XLSX (bientôt disponible)`,
+								label: `Format XLSX`,
 								nativeInputProps: {
-									value: 'xlsx',
-									disabled: true,
+									value: 'xls',
 									onClick: () => {
-										setFormat('xlsx');
+										setFormat('xls');
 									}
 								}
 							}
