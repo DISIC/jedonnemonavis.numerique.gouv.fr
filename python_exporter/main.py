@@ -276,7 +276,7 @@ def estimate_line_count(cell_text, wrap_length=30):
 
 def format_excel(writer, df, sheet_name):
     workbook = writer.book
-    worksheet = writer.sheets[sheet_name]
+    worksheet = writer.sheets["Avis"]
 
     # Adjust column widths
     for i, col in enumerate(df.columns):
