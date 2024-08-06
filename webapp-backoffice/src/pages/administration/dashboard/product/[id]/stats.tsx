@@ -331,7 +331,7 @@ const ProductStatPage = (props: Props) => {
 					type="button"
 					nativeButtonProps={public_modal.buttonProps}
 				>
-					Autoriser le partage public des statistiques
+					Rendre ces statistiques publiques
 				</Button>
 			</div>
 			<div className={cx(classes.container)}>
