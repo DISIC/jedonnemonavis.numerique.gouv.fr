@@ -276,8 +276,8 @@ const ProductCard = ({
 													!!indicator.total && indicator.color === 'new'
 														? {
 																color:
-																	fr.colors.decisions.background.actionHigh
-																		.yellowMoutarde.default
+																	fr.colors.decisions.background.flat.warning
+																		.default
 															}
 														: undefined
 												}
