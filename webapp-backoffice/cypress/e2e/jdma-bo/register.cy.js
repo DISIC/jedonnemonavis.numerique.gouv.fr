@@ -1,9 +1,14 @@
-const app_url = 'http://localhost:3000/register';
-const verify_url = 'http://localhost:3000/verify-email';
+const app_url = 'http://localhost:3000';
+
+function generateUniqueEmail() {
+	const randomPart = Math.random().toString().slice(2, 12);
+	const datePart = Date.now();
+	return `johndoe.jdma-test${randomPart}${datePart}@beta.gouv.fr`;
+}
 
 describe('jdma-register', () => {
 	beforeEach(() => {
-		cy.visit(app_url);
+		cy.visit(app_url + '/register');
 	});
 
 	it('should display the signup form', () => {
@@ -35,14 +40,13 @@ describe('jdma-register', () => {
 		cy.get('.fr-messages-group').should('contain', '1 chiffre minimum');
 	});
 
-	it('should submit the form with email verification', () => {
+	it('should submit the form WITH NOT whitelisted email', () => {
 		fillForm({
 			password: 'ValidPass123!',
 			email: 'test123num@jdma.com'
 		});
 
 		cy.get('button[type="submit"]').click();
-		cy.wait(2000);
 
 		cy.url().then(currentUrl => {
 			if (!currentUrl.includes('request=whitelist')) {
@@ -55,6 +59,7 @@ describe('jdma-register', () => {
 								'Il y a déjà un compte avec cette adresse email.'
 							);
 					} else {
+						cy.get('h5').contains('Demande de création de compte');
 					}
 				});
 			}
@@ -69,23 +74,48 @@ describe('jdma-register', () => {
 		cy.get('input.fr-password__input').should('have.attr', 'type', 'password');
 	});
 
-	it('should handle existing and new email registrations', () => {
-		const email = 'john.doe@jedonnemonavis.gouv.fr'; // beta.gouv.fr email
+	it('should submit the form WITH whitelisted email', () => {
+		const email = generateUniqueEmail();
+		const password = 'ValidPass123!';
 
-		fillForm({ password: 'ValidPass123!', email });
+		fillForm({ password: password, email });
 
 		cy.get('button[type="submit"]').click();
+		cy.wait(3000);
 
 		cy.url().then(currentUrl => {
-			if (!currentUrl.includes('registered=classic')) {
+			if (currentUrl.includes('registered=classic')) {
+				cy.log('New registration flow.');
+				cy.wait(3000);
+				cy.request('/api/test/lastEmail').then(response => {
+					const { email: responseEmail, link } = response.body;
+
+					expect(responseEmail).to.equal(email);
+
+					cy.visit(link);
+					cy.wait(4000);
+					cy.get('h2').contains('Validation de votre compte');
+
+					// LOGIN
+					cy.visit(app_url + '/login');
+					cy.get('input[name="email"]').type(email);
+					cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
+					cy.get('input[type="password"]').type(password);
+					cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
+					cy.url().should('eq', app_url + '/administration/dashboard/products');
+				});
+			} else {
+				cy.log('Existing email registration detected.');
 				cy.get('body').then(body => {
-					if (body.find('.fr-error-text').length > 0) {
-						cy.get('.fr-error-text')
+					if (body.find('.fr-alert--error').length > 0) {
+						cy.get('.fr-alert--error')
 							.should('exist')
 							.and(
 								'contain',
 								'Il y a déjà un compte avec cette adresse email.'
 							);
+					} else {
+						cy.log('No error message found, possibly a different issue.');
 					}
 				});
 			}
