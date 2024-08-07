@@ -75,7 +75,7 @@ describe('jdma-register', () => {
 		cy.get('input.fr-password__input').should('have.attr', 'type', 'password');
 	});
 
-	it('should submit the form WITH whitelisted email', () => {
+	it.only('should submit the form WITH whitelisted email', () => {
 		const email = generateUniqueEmail();
 		const password = userPassword;
 
@@ -110,6 +110,73 @@ describe('jdma-register', () => {
 					cy.get('input[type="password"]').type(password);
 					cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
 					cy.url().should('eq', app_url + '/administration/dashboard/products');
+
+					// PRODUCT
+					cy.get('h1').contains('Bienvenue !');
+					cy.get('[class*="btnService"]')
+						.contains('Ajouter un service')
+						.click();
+					cy.get('.fr-modal__body')
+						.should('exist')
+						.should('have.attr', 'data-fr-js-modal-body', 'true')
+						.find('form#product-form')
+						.should('exist')
+						.within(() => {
+							cy.get('input[name="title"]').type('Un service test');
+
+							cy.get('input#entity-select-autocomplete').click();
+
+							cy.get('div[role="presentation"]')
+								.should('be.visible')
+								.then(() => {
+									cy.get('input#entity-select-autocomplete').invoke(
+										'attr',
+										'aria-activedescendant',
+										'entity-select-autocomplete-option-0'
+									);
+								});
+						});
+					cy.get('div[role="presentation"]')
+						.find('[id="entity-select-autocomplete-option-0"]')
+						.click();
+
+					cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
+
+					cy.contains('button', 'Ajouter un URL').click();
+
+					cy.get('input[name="urls.1.value"]').type('http://testurl2.com/');
+
+					cy.get('.fr-modal__footer')
+						.contains('button', 'Ajouter ce service')
+						.should('exist')
+						.click();
+					cy.url().should('match', /\/buttons$/);
+
+					cy.get('[class*="ProductButtonsPage-btnContainer"]')
+						.find('button')
+						.contains('Créer un bouton JDMA')
+						.should('exist')
+						.click();
+					cy.get('dialog#button-modal')
+						.should('exist')
+						.within(() => {
+							cy.get('input[name="button-create-title"]')
+								.should('exist')
+								.type('bouton test 1');
+							cy.get('textarea')
+								.should('exist')
+								.type('Description du bouton test 1');
+						});
+
+					cy.get('.fr-modal__footer')
+						.contains('button', 'Créer')
+						.should('exist')
+						.click();
+
+					cy.get('[class*="ProductButtonCard"] p').should(
+						'contain.text',
+						'bouton test 1'
+					);
 
 					//TODO DELETE USER BY EMAIL
 				});
