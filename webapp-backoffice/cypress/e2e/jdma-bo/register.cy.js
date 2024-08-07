@@ -1,11 +1,12 @@
 const app_url = 'http://localhost:3000';
+const userPassword = Cypress.env('user_password');
+const secretPassword = Cypress.env('get_tokenSecret');
 
 function generateUniqueEmail() {
 	const randomPart = Math.random().toString().slice(2, 12);
 	const datePart = Date.now();
-	return `johndoe.jdma-test${randomPart}${datePart}@beta.gouv.fr`;
+	return `e2e-jdma-test${randomPart}${datePart}@beta.gouv.fr`;
 }
-
 describe('jdma-register', () => {
 	beforeEach(() => {
 		cy.visit(app_url + '/register');
@@ -42,7 +43,7 @@ describe('jdma-register', () => {
 
 	it('should submit the form WITH NOT whitelisted email', () => {
 		fillForm({
-			password: 'ValidPass123!',
+			password: userPassword,
 			email: 'test123num@jdma.com'
 		});
 
@@ -76,7 +77,7 @@ describe('jdma-register', () => {
 
 	it('should submit the form WITH whitelisted email', () => {
 		const email = generateUniqueEmail();
-		const password = 'ValidPass123!';
+		const password = userPassword;
 
 		fillForm({ password: password, email });
 
@@ -87,9 +88,15 @@ describe('jdma-register', () => {
 			if (currentUrl.includes('registered=classic')) {
 				cy.log('New registration flow.');
 				cy.wait(3000);
-				cy.request('/api/test/lastEmail').then(response => {
+				cy.request({
+					method: 'GET',
+					url: '/api/test/getValidationEmail',
+					qs: {
+						secretPassword: secretPassword
+					}
+				}).then(response => {
+					cy.wait(4000);
 					const { email: responseEmail, link } = response.body;
-
 					expect(responseEmail).to.equal(email);
 
 					cy.visit(link);
@@ -103,6 +110,8 @@ describe('jdma-register', () => {
 					cy.get('input[type="password"]').type(password);
 					cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
 					cy.url().should('eq', app_url + '/administration/dashboard/products');
+
+					//TODO DELETE USER BY EMAIL
 				});
 			} else {
 				cy.log('Existing email registration detected.');

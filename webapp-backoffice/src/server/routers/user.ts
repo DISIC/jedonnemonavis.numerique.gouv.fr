@@ -17,7 +17,7 @@ import {
 	getRegisterEmailHtml,
 	getResetPasswordEmailHtml
 } from '@/src/utils/emails';
-import { addEmailDetail } from '@/src/pages/api/test/lastEmail';
+import { addEmailDetail } from '@/src/pages/api/test/getValidationEmail';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -386,16 +386,19 @@ export const userRouter = router({
 						createdUser.id
 					);
 
+					const isTest = createdUser.email.includes('e2e-jdma-test');
 					const emailLink = `${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`;
 
-					await sendMail(
-						'Confirmez votre email',
-						createdUser.email.toLowerCase(),
-						getRegisterEmailHtml(token),
-						`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${emailLink}`
-					);
-
-					addEmailDetail(createdUser.email.toLowerCase(), emailLink);
+					if (isTest) {
+						addEmailDetail(createdUser.email.toLowerCase(), emailLink);
+					} else {
+						await sendMail(
+							'Confirmez votre email',
+							createdUser.email.toLowerCase(),
+							getRegisterEmailHtml(token),
+							`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${emailLink}`
+						);
+					}
 				} else {
 					const userInviteToken = await ctx.prisma.userInviteToken.findUnique({
 						where: {
