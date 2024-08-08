@@ -213,6 +213,7 @@ const ProductModal = (props: Props) => {
 										},
 										defaultValue: value,
 										value,
+										name,
 										required: true
 									}}
 									state={errors[name] ? 'error' : 'default'}

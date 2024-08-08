@@ -235,6 +235,8 @@ const ButtonModal = (props: Props) => {
 							}
 							nativeInputProps={{
 								value: currentButton.title || '',
+								name: 'button-create-title',
+
 								onChange: e => {
 									setCurrentButton({
 										...currentButton,

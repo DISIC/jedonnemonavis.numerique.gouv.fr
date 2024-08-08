@@ -121,7 +121,7 @@ const ButtonModal = (props: Props) => {
 							state={errorStatus ? 'error' : 'default'}
 							stateRelatedMessage={
 								errorStatus == 409
-									? "L'utilisateur avec cet email fait déjà partie de ce produit"
+									? "L'utilisateur avec cet email fait déjà partie de ce service"
 									: 'Erreur serveur'
 							}
 							nativeInputProps={{
