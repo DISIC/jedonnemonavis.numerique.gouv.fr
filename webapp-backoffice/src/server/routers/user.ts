@@ -17,7 +17,7 @@ import {
 	getRegisterEmailHtml,
 	getResetPasswordEmailHtml
 } from '@/src/utils/emails';
-import { addEmailDetail } from '@/src/pages/api/test/getValidationEmail';
+import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationEmail';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();

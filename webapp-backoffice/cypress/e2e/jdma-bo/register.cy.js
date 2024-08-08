@@ -90,7 +90,7 @@ describe('jdma-register', () => {
 				cy.wait(3000);
 				cy.request({
 					method: 'GET',
-					url: '/api/test/getValidationEmail',
+					url: '/api/cypress-test/getValidationEmail',
 					qs: {
 						secretPassword: secretPassword
 					},
@@ -216,9 +216,25 @@ describe('jdma-register', () => {
 								.click();
 						});
 
-					cy.get('dialog#button-modal').should('exist');
+					cy.get('dialog#button-modal', { timeout: 10000 })
+						.should('exist')
+						.find('.fr-modal__header')
+						.find('button')
+						.contains('Fermer')
+						.click();
 
-					//TODO DELETE USER BY EMAIL
+					// LOG OUT
+					cy.get('header').find('button').contains('Déconnexion').click();
+
+					//DELETE USERS
+					cy.wait(2000);
+					cy.request({
+						method: 'DELETE',
+						url: '/api/cypress-test/deleteUsersByEmail',
+						failOnStatusCode: false
+					}).then(response => {
+						cy.log(response.body.message);
+					});
 				});
 			} else {
 				cy.log('Existing email registration detected.');
