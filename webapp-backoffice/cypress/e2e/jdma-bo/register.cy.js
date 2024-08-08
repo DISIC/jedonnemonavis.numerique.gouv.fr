@@ -93,9 +93,9 @@ describe('jdma-register', () => {
 					url: '/api/test/getValidationEmail',
 					qs: {
 						secretPassword: secretPassword
-					}
+					},
+					failOnStatusCode: false
 				}).then(response => {
-					cy.wait(4000);
 					const { email: responseEmail, link } = response.body;
 					expect(responseEmail).to.equal(email);
 
@@ -173,10 +173,50 @@ describe('jdma-register', () => {
 						.should('exist')
 						.click();
 
-					cy.get('[class*="ProductButtonCard"] p').should(
-						'contain.text',
-						'bouton test 1'
-					);
+					cy.get('[class*="ProductButtonCard"]')
+						.should('exist')
+						.first()
+						.within(() => {
+							cy.get('p').contains('bouton test 1');
+
+							cy.get('[class*="actionsContainer"]')
+								.find('button#button-options')
+								.click();
+						});
+					cy.get('div#option-menu')
+						.find('li[role="menuitem"]')
+						.contains('Modifier le bouton')
+						.click();
+
+					cy.get('dialog#button-modal')
+						.should('exist')
+						.within(() => {
+							cy.get('input[name="button-create-title"]')
+								.should('exist')
+								.clear()
+								.type('bouton test 2');
+							cy.get('textarea')
+								.should('exist')
+								.clear()
+								.type('Description du bouton test 2');
+						});
+					cy.get('.fr-modal__footer')
+						.contains('button', 'Modifier')
+						.should('exist')
+						.click();
+
+					cy.get('[class*="ProductButtonCard"]')
+						.should('exist')
+						.first()
+						.within(() => {
+							cy.get('p').contains('bouton test 2');
+							cy.get('[class*="actionsContainer"]')
+								.find('button')
+								.contains('Installer')
+								.click();
+						});
+
+					cy.get('dialog#button-modal').should('exist');
 
 					//TODO DELETE USER BY EMAIL
 				});

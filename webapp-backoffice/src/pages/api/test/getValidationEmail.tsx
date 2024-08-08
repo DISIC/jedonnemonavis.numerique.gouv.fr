@@ -7,14 +7,14 @@ let emailDetails: Array<{
 }> = [];
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-	const secretPassword = req.query.secretPassword;
+	const secretPassword = req.query.secretPassword as string;
 	const defaultHashPassword =
 		'c40ed7bca258c7d3b0d3e86832b7f502bdf8a044b352598c3146acaa94d5ba1d';
 
 	if (secretPassword) {
 		const hashedPassword = crypto
 			.createHash('sha256')
-			.update(secretPassword.toString())
+			.update(secretPassword)
 			.digest('hex');
 
 		if (hashedPassword === defaultHashPassword) {
