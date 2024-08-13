@@ -75,7 +75,7 @@ describe('jdma-register', () => {
 		cy.get('input.fr-password__input').should('have.attr', 'type', 'password');
 	});
 
-	it.only('should submit the form WITH whitelisted email', () => {
+	it('should submit the form WITH whitelisted email', () => {
 		//DELETE USERS
 		cy.request({
 			method: 'DELETE',
