@@ -49,6 +49,40 @@ export default async function handler(
 			}
 		});
 
+		const productsTest = await prisma.product.findMany({
+			where: {
+				title: {
+					startsWith: 'e2e-jdma-service-test'
+				}
+			}
+		});
+
+		const productIds = productsTest.map(product => product.id);
+
+		await prisma.accessRight.deleteMany({
+			where: {
+				product_id: {
+					in: productIds
+				}
+			}
+		});
+
+		await prisma.button.deleteMany({
+			where: {
+				product_id: {
+					in: productIds
+				}
+			}
+		});
+
+		await prisma.product.deleteMany({
+			where: {
+				id: {
+					in: productIds
+				}
+			}
+		});
+
 		const deleteResult = await prisma.user.deleteMany({
 			where: {
 				id: {
