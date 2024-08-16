@@ -76,14 +76,8 @@ describe('jdma-register', () => {
 	});
 
 	it.only('should submit the form WITH whitelisted email', () => {
-		//DELETE USERS
-		cy.request({
-			method: 'DELETE',
-			url: '/api/cypress-test/deleteUsersAndProduct',
-			failOnStatusCode: false
-		}).then(response => {
-			cy.log(response.body.message);
-		});
+		//DELETE TEST USERS
+		deleteTestUsers();
 
 		const email = generateUniqueEmail();
 		const password = userPassword;
@@ -315,15 +309,9 @@ describe('jdma-register', () => {
 						.contains('e2e-jdma-service-test');
 				});
 
-				// //DELETE USERS
+				//DELETE TEST USERS
 				cy.wait(2000);
-				cy.request({
-					method: 'DELETE',
-					url: '/api/cypress-test/deleteUsersAndProduct',
-					failOnStatusCode: false
-				}).then(response => {
-					cy.log(response.body.message);
-				});
+				deleteTestUsers();
 			} else {
 				cy.log('Existing email registration detected.');
 				cy.get('body').then(body => {
@@ -353,4 +341,14 @@ function fillForm({
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[name="email"]').type(email);
 	cy.get('input[type="password"]').type(password);
+}
+
+function deleteTestUsers() {
+	cy.request({
+		method: 'DELETE',
+		url: '/api/cypress-test/deleteUsersAndProduct',
+		failOnStatusCode: false
+	}).then(response => {
+		cy.log(response.body.message);
+	});
 }

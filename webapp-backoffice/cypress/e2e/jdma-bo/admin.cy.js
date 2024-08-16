@@ -7,13 +7,7 @@ const invitedEmail = 'e2e-jdma-test-invite@beta.gouv.fr';
 describe('jdma-admin', () => {
 	beforeEach(() => {
 		//DELETE TEST USERS
-		cy.request({
-			method: 'DELETE',
-			url: app_url + '/api/cypress-test/deleteUsersAndProduct',
-			failOnStatusCode: false
-		}).then(response => {
-			cy.log(response.body.message);
-		});
+		deleteTestUsers();
 		cy.request({
 			method: 'GET',
 			url: app_url + '/api/cypress-test/createAdminUser',
@@ -122,13 +116,15 @@ describe('jdma-admin', () => {
 		cy.wait(1500);
 		cy.get('[class*="productTitle"]')
 			.should('exist')
-			.contains('e2e-jdma-service-test');
+			.contains('e2e-jdma-service-test')
+			.should('be.visible');
 
 		//LOGOUT
 		cy.get('header').find('button').contains('Déconnexion').click();
-		cy.wait(3000);
+		cy.url().should('include', '/login');
 		cy.visit(app_url + '/register');
-		cy.wait(2000);
+
+		cy.get('input[name="email"]').should('exist').should('be.visible');
 
 		fillForm({
 			password: userPassword,
@@ -136,22 +132,43 @@ describe('jdma-admin', () => {
 		});
 
 		cy.get('button[type="submit"]').click();
-		cy.wait(3000);
 
-		cy.request({
-			method: 'GET',
-			url: '/api/cypress-test/getValidationEmail',
-			qs: {
-				secretPassword: secretPassword
-			}
-		}).then(response => {
-			cy.wait(2000);
-			const { email: responseEmail, link } = response.body;
-			expect(responseEmail).to.equal(invitedEmail);
+		const tryGetValidationEmail = maxAttempts => {
+			let attempts = 0;
 
+			const requestValidationEmail = () => {
+				attempts += 1;
+				return cy
+					.request({
+						method: 'GET',
+						url: '/api/cypress-test/getValidationEmail',
+						qs: {
+							secretPassword: secretPassword
+						},
+						failOnStatusCode: false // Ne pas échouer automatiquement sur un 404
+					})
+					.then(response => {
+						if (response.status === 200) {
+							const { email, link } = response.body;
+							expect(email).to.equal(invitedEmail);
+							return link;
+						} else if (attempts < maxAttempts) {
+							// Réessayer après une courte pause
+							cy.wait(1000);
+							return requestValidationEmail();
+						} else {
+							throw new Error('Validation email not received');
+						}
+					});
+			};
+
+			return requestValidationEmail();
+		};
+
+		tryGetValidationEmail(10).then(link => {
+			// Visiter le lien de validation après l'avoir récupéré
 			cy.visit(link);
-			cy.wait(4000);
-			cy.get('h2').contains('Validation de votre compte');
+			cy.get('h2').contains('Validation de votre compte').should('be.visible');
 
 			// LOGIN INVITED USER
 			cy.visit(app_url + '/login');
@@ -164,17 +181,15 @@ describe('jdma-admin', () => {
 				.should('exist')
 				.contains('e2e-jdma-service-test');
 			cy.get('nav').find('li').contains('Organisations').click();
-			cy.get('p').contains('e2e-jdma-entity-test');
+			cy.get('p')
+				.contains('e2e-jdma-entity-test')
+				.should('be.visible')
+				.then(() => {
+					// DELETE TEST USERS
+					deleteTestUsers();
+				});
+			cy.visit(app_url);
 		});
-
-		//DELETE TEST USERS
-		// cy.request({
-		// 	method: 'DELETE',
-		// 	url: app_url + '/api/cypress-test/deleteUsersAndProduct',
-		// 	failOnStatusCode: false
-		// }).then(response => {
-		// 	cy.log(response.body.message);
-		// });
 	});
 });
 
@@ -188,4 +203,13 @@ function fillForm({
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[name="email"]').type(email);
 	cy.get('input[type="password"]').type(password);
+}
+
+function deleteTestUsers() {
+	cy.request({
+		method: 'DELETE',
+		url: app_url + '/api/cypress-test/deleteUsersAndProduct'
+	}).then(response => {
+		cy.log(response.body.message);
+	});
 }

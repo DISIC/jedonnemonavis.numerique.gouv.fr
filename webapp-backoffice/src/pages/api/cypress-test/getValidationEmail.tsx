@@ -45,8 +45,9 @@ const waitForEmail = (): Promise<{ email: string; link: string } | null> => {
 			if (emailDetails.length > 0) {
 				clearInterval(interval);
 				resolve(emailDetails[emailDetails.length - 1]);
-			} else if (attempts > 20) {
-				// Attendre jusqu'à 10 secondes (20 tentatives à 500ms d'intervalle)
+			} else if (attempts > 40) {
+				// Augmenter les tentatives à 40
+				// Attendre jusqu'à 20 secondes (40 tentatives à 500ms d'intervalle)
 				clearInterval(interval);
 				resolve(null);
 			}
