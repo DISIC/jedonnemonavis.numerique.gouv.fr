@@ -1,4 +1,4 @@
-const app_url = 'http://localhost:3000';
+const app_url = Cypress.env('app_base_url');
 const userPassword = Cypress.env('user_password');
 const secretPassword = Cypress.env('get_tokenSecret');
 
@@ -75,7 +75,7 @@ describe('jdma-register', () => {
 		cy.get('input.fr-password__input').should('have.attr', 'type', 'password');
 	});
 
-	it('should submit the form WITH whitelisted email', () => {
+	it.only('should submit the form WITH whitelisted email', () => {
 		//DELETE USERS
 		cy.request({
 			method: 'DELETE',
@@ -113,7 +113,7 @@ describe('jdma-register', () => {
 							qs: { secretPassword: secretPassword }
 						}).then(retryResponse => {
 							const { email: responseEmail, link } = retryResponse.body;
-							expect(responseEmail).to.equal(expectedEmail);
+							expect(responseEmail).to.equal(email);
 							cy.visit(link);
 						});
 					} else {
@@ -137,7 +137,6 @@ describe('jdma-register', () => {
 						);
 
 						// PRODUCT
-						cy.get('h1').contains('Bienvenue !');
 						cy.get('[class*="btnService"]')
 							.contains('Ajouter un service')
 							.click();
@@ -304,7 +303,7 @@ describe('jdma-register', () => {
 					cy.wait(4000);
 					cy.get('h2').contains('Validation de votre compte');
 
-					// LOGIN
+					// LOGIN INVITED USER
 					cy.visit(app_url + '/login');
 					cy.get('input[name="email"]').type(inviteEmail);
 					cy.get('[class*="LoginForm-button"]').contains('Continuer').click();

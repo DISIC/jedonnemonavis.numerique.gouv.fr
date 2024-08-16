@@ -33,6 +33,14 @@ export default async function handler(
 			}
 		});
 
+		await prisma.userResetToken.deleteMany({
+			where: {
+				user_id: {
+					in: userIds
+				}
+			}
+		});
+
 		await prisma.apiKey.deleteMany({
 			where: {
 				user_id: {
@@ -83,6 +91,22 @@ export default async function handler(
 			}
 		});
 
+		//DELETE TEST ENTITIES
+		await prisma.adminEntityRight.deleteMany({
+			where: {
+				user_email_invite: {
+					startsWith: 'e2e-jdma-test'
+				}
+			}
+		});
+
+		await prisma.entity.deleteMany({
+			where: {
+				name: {
+					startsWith: 'e2e-jdma-entity-test'
+				}
+			}
+		});
 		const deleteResult = await prisma.user.deleteMany({
 			where: {
 				id: {
