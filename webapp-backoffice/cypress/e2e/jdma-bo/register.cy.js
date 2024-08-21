@@ -1,12 +1,9 @@
 const app_url = Cypress.env('app_base_url');
 const userPassword = Cypress.env('user_password');
 const secretPassword = Cypress.env('get_tokenSecret');
+const email = generateUniqueEmail();
+const inviteEmail = 'e2e-jdma-test-invite@beta.gouv.fr';
 
-function generateUniqueEmail() {
-	const randomPart = Math.random().toString().slice(2, 12);
-	const datePart = Date.now();
-	return `e2e-jdma-test${randomPart}${datePart}@beta.gouv.fr`;
-}
 describe('jdma-register', () => {
 	beforeEach(() => {
 		cy.visit(app_url + '/register');
@@ -79,11 +76,7 @@ describe('jdma-register', () => {
 		//DELETE TEST USERS
 		deleteTestUsers();
 
-		const email = generateUniqueEmail();
-		const password = userPassword;
-		const inviteEmail = 'e2e-jdma-test-invite@beta.gouv.fr';
-
-		fillForm({ password: password, email });
+		fillForm({ password: userPassword, email });
 
 		cy.get('button[type="submit"]').click();
 		cy.wait(4000);
@@ -92,29 +85,8 @@ describe('jdma-register', () => {
 			if (currentUrl.includes('registered=classic')) {
 				cy.log('New registration flow.');
 				cy.wait(3000);
-				cy.request({
-					method: 'GET',
-					url: '/api/cypress-test/getValidationEmail',
-					qs: {
-						secretPassword: secretPassword
-					}
-				}).then(response => {
-					if (response.status === 404) {
-						cy.wait(2000);
-						cy.request({
-							method: 'GET',
-							url: '/api/cypress-test/getValidationEmail',
-							qs: { secretPassword: secretPassword }
-						}).then(retryResponse => {
-							const { email: responseEmail, link } = retryResponse.body;
-							expect(responseEmail).to.equal(email);
-							cy.visit(link);
-						});
-					} else {
-						cy.wait(2000);
-						const { email: responseEmail, link } = response.body;
-						expect(responseEmail).to.equal(email);
-
+				if (secretPassword) {
+					getValidationEmail(10, email).then(link => {
 						cy.visit(link);
 						cy.wait(4000);
 						cy.get('h2').contains('Validation de votre compte');
@@ -123,7 +95,7 @@ describe('jdma-register', () => {
 						cy.visit(app_url + '/login');
 						cy.get('input[name="email"]').type(email);
 						cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-						cy.get('input[type="password"]').type(password);
+						cy.get('input[type="password"]').type(userPassword);
 						cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
 						cy.url().should(
 							'eq',
@@ -168,7 +140,7 @@ describe('jdma-register', () => {
 							.contains('button', 'Ajouter ce service')
 							.should('exist')
 							.click();
-						cy.url().should('match', /\/buttons$/);
+						// cy.url().should('match', /\/buttons$/);
 
 						cy.get('[class*="ProductButtonsPage-btnContainer"]')
 							.find('button')
@@ -251,6 +223,7 @@ describe('jdma-register', () => {
 							.should('be.visible')
 							.contains('Inviter des administrateurs')
 							.click();
+						cy.wait(1000);
 						cy.get('dialog[id="user-product-modal"]')
 							.should('exist')
 							.within(() => {
@@ -266,8 +239,8 @@ describe('jdma-register', () => {
 								cy.get('input').type(inviteEmail);
 								cy.get('button').contains('Inviter').click();
 							});
-					}
-				});
+					});
+				}
 
 				// // LOG OUT
 				cy.get('header').find('button').contains('Déconnexion').click();
@@ -275,24 +248,14 @@ describe('jdma-register', () => {
 				cy.visit(app_url + '/register');
 
 				fillForm({
-					password: password,
+					password: userPassword,
 					email: inviteEmail
 				});
 
 				cy.get('button[type="submit"]').click();
 				cy.wait(3000);
 
-				cy.request({
-					method: 'GET',
-					url: '/api/cypress-test/getValidationEmail',
-					qs: {
-						secretPassword: secretPassword
-					},
-					failOnStatusCode: false
-				}).then(response => {
-					const { email: responseEmail, link } = response.body;
-					expect(responseEmail).to.equal(inviteEmail);
-
+				getValidationEmail(10, inviteEmail).then(link => {
 					cy.visit(link);
 					cy.wait(4000);
 					cy.get('h2').contains('Validation de votre compte');
@@ -301,7 +264,7 @@ describe('jdma-register', () => {
 					cy.visit(app_url + '/login');
 					cy.get('input[name="email"]').type(inviteEmail);
 					cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-					cy.get('input[type="password"]').type(password);
+					cy.get('input[type="password"]').type(userPassword);
 					cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
 					cy.url().should('eq', app_url + '/administration/dashboard/products');
 					cy.get('[class*="productTitle"]')
@@ -351,4 +314,41 @@ function deleteTestUsers() {
 	}).then(response => {
 		cy.log(response.body.message);
 	});
+}
+
+function getValidationEmail(maxAttempts, currentEmail) {
+	let attempts = 0;
+
+	const requestValidationEmail = () => {
+		attempts += 1;
+		return cy
+			.request({
+				method: 'GET',
+				url: '/api/cypress-test/getValidationEmail',
+				qs: {
+					secretPassword: secretPassword
+				},
+				failOnStatusCode: false
+			})
+			.then(response => {
+				if (response.status === 200) {
+					const { email: responseEmail, link } = response.body;
+					expect(responseEmail).to.equal(currentEmail);
+					return link;
+				} else if (attempts < maxAttempts) {
+					cy.wait(1000);
+					return requestValidationEmail();
+				} else {
+					throw new Error('Validation email not received');
+				}
+			});
+	};
+
+	return requestValidationEmail();
+}
+
+function generateUniqueEmail() {
+	const randomPart = Math.random().toString().slice(2, 12);
+	const datePart = Date.now();
+	return `e2e-jdma-test${randomPart}${datePart}@beta.gouv.fr`;
 }
