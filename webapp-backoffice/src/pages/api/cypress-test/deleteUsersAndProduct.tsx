@@ -48,6 +48,21 @@ export default async function handler(
 				}
 			}
 		});
+		await prisma.userRequest.deleteMany({
+			where: {
+				user_email_copy: {
+					startsWith: 'e2e-jdma-test'
+				}
+			}
+		});
+
+		await prisma.userInviteToken.deleteMany({
+			where: {
+				user_email: {
+					startsWith: 'e2e-jdma-test'
+				}
+			}
+		});
 
 		await prisma.accessRight.deleteMany({
 			where: {
