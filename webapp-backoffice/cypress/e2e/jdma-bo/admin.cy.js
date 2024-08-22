@@ -124,8 +124,11 @@ describe('jdma-admin', () => {
 			.within(() => {
 				cy.get('.fr-modal__body')
 					.should('exist')
+					.and('be.visible')
 					.within(() => {
-						cy.get('input[name="title"]').type('e2e-jdma-service-test');
+						cy.get('input[name="title"]')
+							.should('be.visible')
+							.type('e2e-jdma-service-test');
 						cy.get('input#entity-select-autocomplete').click();
 
 						cy.get('div[role="presentation"]')
@@ -156,6 +159,7 @@ describe('jdma-admin', () => {
 
 		//LOGOUT
 		cy.get('header').find('button').contains('Déconnexion').click();
+		cy.wait(2000);
 		cy.url().should('include', '/login');
 		cy.visit(app_url + '/register');
 
