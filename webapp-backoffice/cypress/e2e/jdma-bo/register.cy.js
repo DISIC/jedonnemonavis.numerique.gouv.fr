@@ -79,12 +79,11 @@ describe('jdma-register', () => {
 		fillForm({ password: userPassword, email });
 
 		cy.get('button[type="submit"]').click();
-		cy.wait(4000);
+		cy.wait(20000);
 
 		cy.url().then(currentUrl => {
 			if (currentUrl.includes('registered=classic')) {
 				cy.log('New registration flow.');
-				cy.wait(3000);
 				if (secretPassword) {
 					getValidationEmail(10, email).then(link => {
 						cy.visit(link);
@@ -141,7 +140,7 @@ describe('jdma-register', () => {
 							.should('exist')
 							.click();
 						// cy.url().should('match', /\/buttons$/);
-
+						cy.wait(3000);
 						cy.get('[class*="ProductButtonsPage-btnContainer"]')
 							.find('button')
 							.contains('Créer un bouton JDMA')
@@ -253,7 +252,7 @@ describe('jdma-register', () => {
 				});
 
 				cy.get('button[type="submit"]').click();
-				cy.wait(3000);
+				cy.wait(20000);
 
 				getValidationEmail(10, inviteEmail).then(link => {
 					cy.visit(link);
