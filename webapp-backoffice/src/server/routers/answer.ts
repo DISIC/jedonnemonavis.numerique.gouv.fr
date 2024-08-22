@@ -1141,6 +1141,21 @@ export const answerRouter = router({
 				return sum;
 			}, 0);
 
+			const reachabilityBucket = contactBuckets.filter(sb => {
+				const [field_code] = sb.key.split('#');
+				return field_code === 'contact_reached';
+			});
+
+			const reachability_average =
+				reachabilityBucket.reduce((sum, sb) => {
+					const [, answer_text] = sb.key.split('#');
+					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
+				}, 0) /
+				reachabilityBucket.reduce((sum, sb) => {
+					const [, answer_text] = sb.key.split('#');
+					return sum + ((answer_text === 'Non' && sb.doc_count) || 0);
+				}, 0);
+
 			const contact_average =
 				contactBuckets.reduce((sum, sb) => {
 					const [field_code, , intention] = sb.key.split('#');
@@ -1167,7 +1182,8 @@ export const answerRouter = router({
 				satisfaction: satisfaction_average,
 				comprehension: comprehension_average,
 				contact: isNaN(contact_average) ? 0 : contact_average,
-				autonomy: isNaN(autonomy_average) ? 0 : autonomy_average
+				autonomy: isNaN(autonomy_average) ? 0 : autonomy_average,
+				reachability: isNaN(reachability_average) ? 0 : reachability_average
 			};
 
 			const metadata = {
