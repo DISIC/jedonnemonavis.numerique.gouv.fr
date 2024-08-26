@@ -1,11 +1,21 @@
 const app_url = Cypress.env('app_form_base_url');
+const app_bo_url = Cypress.env('app_base_url');
 
 describe('jdma-form-review', () => {
 	before(() => {
-		cy.visit(app_url + '/Demarches/1');
+		getLastTestServiceID().then(formInfo => {
+			cy.log('formInfo', formInfo);
+			cy.visit(
+				app_url +
+					'/Demarches/' +
+					formInfo.productId +
+					'?button=' +
+					formInfo.lastTestButtonId
+			);
+		});
 	});
 
-	it('First step', () => {
+	it('Fill form', () => {
 		cy.get('[class*="formSection"]').within(() => {
 			cy.get('h1').contains('Je donne mon avis');
 			cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);
@@ -81,5 +91,34 @@ describe('jdma-form-review', () => {
 		cy.wait(4000);
 		cy.url().should('include', 'step=2');
 		cy.get('h1').contains('Merci beaucoup !').should('exist');
+
+		// DELETE ALL TESTS IN BDD
+		deleteTestUsers();
 	});
 });
+
+function deleteTestUsers() {
+	cy.request({
+		method: 'DELETE',
+		url: app_bo_url + '/api/cypress-test/deleteUsersAndProduct'
+	}).then(response => {
+		cy.log(response.body.message);
+	});
+}
+
+function getLastTestServiceID() {
+	return cy
+		.request({
+			method: 'GET',
+			url: app_bo_url + '/api/cypress-test/getLastServiceId',
+			failOnStatusCode: false
+		})
+		.then(response => {
+			if (response.status === 200) {
+				const res = response.body;
+				return res;
+			} else {
+				throw new Error('ID not received');
+			}
+		});
+}

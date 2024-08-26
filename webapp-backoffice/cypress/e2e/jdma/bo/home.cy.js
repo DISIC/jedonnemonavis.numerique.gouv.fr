@@ -1,4 +1,5 @@
-const app_url = 'https://jedonnemonavis.numerique.gouv.fr/';
+const app_url = Cypress.env('app_base_url');
+
 describe('jdma-home', () => {
 	beforeEach(() => {
 		cy.visit(app_url);
@@ -17,14 +18,14 @@ describe('jdma-home', () => {
 	});
 	it('check navbar logo url redirection', () => {
 		cy.get('header').find('.fr-header__brand').click();
-		cy.url().should('eq', app_url);
+		cy.url().should('eq', app_url + '/');
 	});
 	it('check navbar login url redirection', () => {
 		cy.get('header')
 			.find('.fr-header__tools')
 			.contains('Connexion / Inscription')
 			.click();
-		cy.url().should('eq', app_url + 'login');
+		cy.url().should('eq', app_url + '/login');
 	});
 
 	// BODY
@@ -50,7 +51,7 @@ describe('jdma-home', () => {
 			.find('a')
 			.should('contain', 'Commencer')
 			.click();
-		cy.url().should('eq', app_url + 'login');
+		cy.url().should('eq', app_url + '/login');
 	});
 
 	it('check url redirection for users reviews', () => {
@@ -59,7 +60,7 @@ describe('jdma-home', () => {
 			.contains('Prêt à recueillir les avis des usagers ?')
 			.next('a')
 			.click();
-		cy.url().should('eq', app_url + 'login');
+		cy.url().should('eq', app_url + '/login');
 	});
 
 	it('check url redirection for contact', () => {
@@ -68,7 +69,7 @@ describe('jdma-home', () => {
 			.contains("Vous avez d'autres questions ? Des doutes ? Contactez-nous !")
 			.next('a')
 			.click();
-		cy.url().should('eq', app_url + 'public/contact');
+		cy.url().should('eq', app_url + '/public/contact');
 	});
 
 	it('should toggle visibility of accordion content', () => {

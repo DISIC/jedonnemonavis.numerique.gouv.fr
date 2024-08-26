@@ -72,20 +72,20 @@ describe('jdma-register', () => {
 		cy.get('input.fr-password__input').should('have.attr', 'type', 'password');
 	});
 
-	it.only('should submit the form WITH whitelisted email', () => {
+	it('should submit the form WITH whitelisted email', () => {
 		//DELETE TEST USERS
 		deleteTestUsers();
 
 		fillForm({ password: userPassword, email });
 
 		cy.get('button[type="submit"]').click();
-		cy.wait(20000);
+		cy.wait(5000);
 
 		cy.url().then(currentUrl => {
 			if (currentUrl.includes('registered=classic')) {
 				cy.log('New registration flow.');
 				if (secretPassword) {
-					getValidationEmail(10, email).then(link => {
+					getValidationLink().then(link => {
 						cy.visit(link);
 						cy.wait(4000);
 						cy.get('h2').contains('Validation de votre compte');
@@ -183,11 +183,11 @@ describe('jdma-register', () => {
 								cy.get('input[name="button-create-title"]')
 									.should('exist')
 									.clear()
-									.type('bouton test 2');
+									.type('e2e-jdma-button-test');
 								cy.get('textarea')
 									.should('exist')
 									.clear()
-									.type('Description du bouton test 2');
+									.type('Description du bouton e2e-jdma-button-test');
 							});
 						cy.get('.fr-modal__footer')
 							.contains('button', 'Modifier')
@@ -198,7 +198,7 @@ describe('jdma-register', () => {
 							.should('exist')
 							.first()
 							.within(() => {
-								cy.get('p').contains('bouton test 2');
+								cy.get('p').contains('e2e-jdma-button-test');
 								cy.get('[class*="actionsContainer"]')
 									.find('button')
 									.contains('Installer')
@@ -252,9 +252,9 @@ describe('jdma-register', () => {
 				});
 
 				cy.get('button[type="submit"]').click();
-				cy.wait(20000);
+				cy.wait(5000);
 
-				getValidationEmail(10, inviteEmail).then(link => {
+				getValidationLink().then(link => {
 					cy.visit(link);
 					cy.wait(4000);
 					cy.get('h2').contains('Validation de votre compte');
@@ -273,7 +273,7 @@ describe('jdma-register', () => {
 
 				//DELETE TEST USERS
 				cy.wait(2000);
-				deleteTestUsers();
+				// deleteTestUsers();
 			} else {
 				cy.log('Existing email registration detected.');
 				cy.get('body').then(body => {
@@ -315,35 +315,24 @@ function deleteTestUsers() {
 	});
 }
 
-function getValidationEmail(maxAttempts, currentEmail) {
-	let attempts = 0;
-
-	const requestValidationEmail = () => {
-		attempts += 1;
-		return cy
-			.request({
-				method: 'GET',
-				url: '/api/cypress-test/getValidationEmail',
-				qs: {
-					secretPassword: secretPassword
-				},
-				failOnStatusCode: false
-			})
-			.then(response => {
-				if (response.status === 200) {
-					const { email: responseEmail, link } = response.body;
-					expect(responseEmail).to.equal(currentEmail);
-					return link;
-				} else if (attempts < maxAttempts) {
-					cy.wait(1000);
-					return requestValidationEmail();
-				} else {
-					throw new Error('Validation email not received');
-				}
-			});
-	};
-
-	return requestValidationEmail();
+function getValidationLink() {
+	return cy
+		.request({
+			method: 'GET',
+			url: '/api/cypress-test/getValidationLink',
+			qs: {
+				secretPassword: secretPassword
+			},
+			failOnStatusCode: false
+		})
+		.then(response => {
+			if (response.status === 200) {
+				const link = response.body;
+				return link;
+			} else {
+				throw new Error('Validation link not received');
+			}
+		});
 }
 
 function generateUniqueEmail() {

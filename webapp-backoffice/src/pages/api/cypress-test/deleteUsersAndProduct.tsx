@@ -90,10 +90,46 @@ export default async function handler(
 			}
 		});
 
-		await prisma.button.deleteMany({
+		const buttonsTest = await prisma.button.findMany({
 			where: {
 				product_id: {
 					in: productIds
+				}
+			}
+		});
+
+		const buttonsIds = buttonsTest.map(button => button.id);
+
+		const reviewsTest = await prisma.review.findMany({
+			where: {
+				button_id: {
+					in: buttonsIds
+				}
+			}
+		});
+
+		const reviewsTestIds = reviewsTest.map(review => review.id);
+
+		await prisma.answer.deleteMany({
+			where: {
+				review_id: {
+					in: reviewsTestIds
+				}
+			}
+		});
+
+		await prisma.review.deleteMany({
+			where: {
+				button_id: {
+					in: buttonsIds
+				}
+			}
+		});
+
+		await prisma.button.deleteMany({
+			where: {
+				id: {
+					in: buttonsIds
 				}
 			}
 		});

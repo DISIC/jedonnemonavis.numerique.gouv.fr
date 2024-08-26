@@ -17,7 +17,7 @@ import {
 	getRegisterEmailHtml,
 	getResetPasswordEmailHtml
 } from '@/src/utils/emails';
-import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationEmail';
+import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationLink';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -390,7 +390,7 @@ export const userRouter = router({
 					const emailLink = `${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`;
 
 					if (isTest) {
-						addEmailDetail(createdUser.email.toLowerCase(), emailLink);
+						addEmailDetail(emailLink);
 					} else {
 						await sendMail(
 							'Confirmez votre email',

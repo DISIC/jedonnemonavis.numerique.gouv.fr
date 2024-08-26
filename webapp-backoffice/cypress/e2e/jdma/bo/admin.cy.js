@@ -27,6 +27,7 @@ describe('jdma-admin', () => {
 			.contains('Continuer')
 			.click()
 			.then(() => {
+				cy.wait(1000);
 				cy.get('input[type="password"]').type(userPassword);
 			});
 		cy.get('[class*="LoginForm-button"]')
@@ -49,7 +50,7 @@ describe('jdma-admin', () => {
 			.contains('Ajouter une organisation')
 			.click();
 
-		cy.wait(2000);
+		cy.wait(4000);
 		cy.get('dialog#entity-modal')
 			.should('exist')
 			.and('be.visible')
@@ -159,7 +160,7 @@ describe('jdma-admin', () => {
 
 		//LOGOUT
 		cy.get('header').find('button').contains('Déconnexion').click();
-		cy.wait(2000);
+		cy.wait(4000);
 		cy.url().should('include', '/login');
 		cy.visit(app_url + '/register');
 
@@ -173,39 +174,9 @@ describe('jdma-admin', () => {
 		cy.get('button[type="submit"]')
 			.click()
 			.then(() => {
-				cy.wait(20000);
 				if (secretPassword) {
-					const tryGetValidationEmail = maxAttempts => {
-						let attempts = 0;
-
-						const requestValidationEmail = () => {
-							attempts += 1;
-							return cy
-								.request({
-									method: 'GET',
-									url: '/api/cypress-test/getValidationEmail',
-									qs: {
-										secretPassword: secretPassword
-									},
-									failOnStatusCode: false
-								})
-								.then(response => {
-									if (response.status === 200) {
-										const { email, link } = response.body;
-										expect(email).to.equal(invitedEmail);
-										return link;
-									} else if (attempts < maxAttempts) {
-										cy.wait(1000);
-										return requestValidationEmail();
-									} else {
-										throw new Error('Validation email not received');
-									}
-								});
-						};
-
-						return requestValidationEmail();
-					};
-					tryGetValidationEmail(10).then(link => {
+					cy.wait(5000);
+					getValidationLink().then(link => {
 						cy.visit(link);
 						cy.get('h2')
 							.contains('Validation de votre compte')
@@ -259,4 +230,25 @@ function createAdmin() {
 			secretPassword: secretPassword
 		}
 	});
+}
+function getValidationLink() {
+	return cy
+		.request({
+			method: 'GET',
+			url: '/api/cypress-test/getValidationLink',
+			qs: {
+				secretPassword: secretPassword
+			},
+			failOnStatusCode: false
+		})
+		.then(response => {
+			console.log('API Response:', response.body);
+
+			if (response.status === 200) {
+				const link = response.body;
+				return link;
+			} else {
+				throw new Error('Validation link not received');
+			}
+		});
 }
