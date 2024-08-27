@@ -67,6 +67,8 @@ const ProductCard = ({
 					satisfaction: 0,
 					comprehension: 0,
 					contact: 0,
+					contact_reachability: 0,
+					contact_satisfaction: 0,
 					autonomy: 0
 				},
 				metadata: {
