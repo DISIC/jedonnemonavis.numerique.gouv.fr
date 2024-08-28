@@ -23,7 +23,7 @@ export default async function handler(
 
 		if (hashedPassword === defaultHashPassword) {
 			try {
-				const link = await waitForLink(300);
+				const link = await waitForLink(5000);
 				if (link) {
 					res.status(200).json(link);
 				} else {
