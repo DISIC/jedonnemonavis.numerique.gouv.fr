@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 
-let validationLink: string | null = null;
+let validationLink: string;
 
 export default async function handler(
 	req: NextApiRequest,
@@ -23,11 +23,11 @@ export default async function handler(
 
 		if (hashedPassword === defaultHashPassword) {
 			try {
-				const link = await waitForLink(9000);
+				const link = await waitForLink(300);
 				if (link) {
 					res.status(200).json(link);
 				} else {
-					res.status(404).json({ message: 'No emails sent yet' });
+					res.status(404).json({ message: 'No link sent yet' });
 				}
 			} catch (error) {
 				res.status(500).json({ message: 'Server error' });

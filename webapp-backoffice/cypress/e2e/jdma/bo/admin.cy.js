@@ -118,7 +118,7 @@ describe('jdma-admin', () => {
 		cy.get('#product-modal-control-button')
 			.contains('Ajouter un nouveau service')
 			.click();
-		cy.wait(2000);
+		cy.wait(3000);
 
 		cy.get('dialog#product-modal')
 			.should('exist')
@@ -196,13 +196,28 @@ describe('jdma-admin', () => {
 							.should('exist')
 							.contains('e2e-jdma-service-test');
 						cy.get('nav').find('li').contains('Organisations').click();
-						cy.get('p')
-							.contains('e2e-jdma-entity-test')
-							.should('be.visible')
-							.then(() => {
-								// DELETE TEST USERS
-								deleteTestUsers();
+						cy.get('p').contains('e2e-jdma-entity-test').should('be.visible');
+
+						cy.get('button')
+							.contains('Créer un bouton JDMA')
+							.should('exist')
+							.click();
+						cy.get('dialog#button-modal')
+							.should('exist')
+							.within(() => {
+								cy.get('input[name="button-create-title"]')
+									.should('exist')
+									.type('e2e-jdma-button-test');
+								cy.get('textarea')
+									.should('exist')
+									.type('Description du bouton e2e-jdma-button-test');
 							});
+
+						cy.get('.fr-modal__footer')
+							.contains('button', 'Créer')
+							.should('exist')
+							.click();
+
 						cy.visit(app_url);
 					});
 				}

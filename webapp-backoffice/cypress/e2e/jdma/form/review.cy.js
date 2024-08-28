@@ -92,8 +92,8 @@ describe('jdma-form-review', () => {
 		cy.url().should('include', 'step=2');
 		cy.get('h1').contains('Merci beaucoup !').should('exist');
 
-		// DELETE ALL TESTS IN BDD
-		deleteTestUsers();
+		// // DELETE ALL TESTS IN BDD
+		// deleteTestUsers();
 	});
 });
 

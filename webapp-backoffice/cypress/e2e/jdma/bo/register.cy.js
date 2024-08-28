@@ -239,37 +239,40 @@ describe('jdma-register', () => {
 								cy.get('button').contains('Inviter').click();
 							});
 					});
+
+					// // LOG OUT
+					cy.get('header').find('button').contains('Déconnexion').click();
+					cy.wait(3000);
+					cy.visit(app_url + '/register');
+
+					fillForm({
+						password: userPassword,
+						email: inviteEmail
+					});
+
+					cy.get('button[type="submit"]').click();
+					cy.wait(5000);
+
+					getValidationLink().then(link => {
+						cy.visit(link);
+						cy.wait(4000);
+						cy.get('h2').contains('Validation de votre compte');
+
+						// LOGIN INVITED USER
+						cy.visit(app_url + '/login');
+						cy.get('input[name="email"]').type(inviteEmail);
+						cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
+						cy.get('input[type="password"]').type(userPassword);
+						cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
+						cy.url().should(
+							'eq',
+							app_url + '/administration/dashboard/products'
+						);
+						cy.get('[class*="productTitle"]')
+							.should('exist')
+							.contains('e2e-jdma-service-test');
+					});
 				}
-
-				// // LOG OUT
-				cy.get('header').find('button').contains('Déconnexion').click();
-				cy.wait(3000);
-				cy.visit(app_url + '/register');
-
-				fillForm({
-					password: userPassword,
-					email: inviteEmail
-				});
-
-				cy.get('button[type="submit"]').click();
-				cy.wait(5000);
-
-				getValidationLink().then(link => {
-					cy.visit(link);
-					cy.wait(4000);
-					cy.get('h2').contains('Validation de votre compte');
-
-					// LOGIN INVITED USER
-					cy.visit(app_url + '/login');
-					cy.get('input[name="email"]').type(inviteEmail);
-					cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-					cy.get('input[type="password"]').type(userPassword);
-					cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
-					cy.url().should('eq', app_url + '/administration/dashboard/products');
-					cy.get('[class*="productTitle"]')
-						.should('exist')
-						.contains('e2e-jdma-service-test');
-				});
 
 				//DELETE TEST USERS
 				cy.wait(2000);
