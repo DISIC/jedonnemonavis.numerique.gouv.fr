@@ -319,3 +319,14 @@ model Export {
   endDate    DateTime?
   link       String?
 }
+
+model LimiterReporting {
+  id             Int      @id @default(autoincrement())
+  ip_id          String   @unique
+  ip_adress      String
+  product_id     Int
+  button_id      Int
+  total_attempts Int
+  first_attempt  DateTime
+  last_attempt   DateTime
+}
