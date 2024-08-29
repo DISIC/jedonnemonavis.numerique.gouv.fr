@@ -59,6 +59,11 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
     const xClientIp = ctx.req.headers['x-client-ip'] as string;
     const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor.split(',')[0];
+    console.log('---------------------------------');
+    console.log('x-forwarded-for', xForwardedFor);
+    console.log('x-client-ip', xClientIp);
+    console.log('ip', ip);
+    console.log('---------------------------------');
     return ip;
   },
   windowMs: 60000,
