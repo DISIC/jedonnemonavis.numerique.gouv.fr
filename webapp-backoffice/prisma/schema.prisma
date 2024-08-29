@@ -76,6 +76,8 @@ enum Typebloc {
   select
   radio
   checkbox
+  new_page
+  divider
 }
 
 // Next auth
@@ -344,22 +346,30 @@ model Form {
   title      String
   link       String?
   active     Boolean  @default(false)
-  pages      Page[]
-}
-
-model Page {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  form       Form     @relation(fields: [formId], references: [id])
-  formId     Int
   blocks     Block[]
 }
 
 model Block {
+  id         Int            @id @default(autoincrement())
+  created_at DateTime       @default(now())
+  updated_at DateTime       @default(now())
+  form       Form           @relation(fields: [form_id], references: [id])
+  form_id    Int
+  position   Int
+  type_bloc  Typebloc
+  label      String?
+  value      String?
+  content    String?
+  options    OptionsBlock[]
+}
+
+model OptionsBlock {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
-  page       Page     @relation(fields: [pageId], references: [id])
-  pageId     Int
+  label      String?
+  value      String?
+  content    String?
+  Block      Block    @relation(fields: [blockId], references: [id])
+  blockId    Int
 }

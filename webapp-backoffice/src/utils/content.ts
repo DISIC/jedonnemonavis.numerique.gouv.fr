@@ -1,3 +1,6 @@
+import { Typebloc } from "@prisma/client";
+import { TypeBlocsInput } from "../components/dashboard/Form/BlockModal";
+
 interface MainStructure {
 	[key: string]: {
 		title: string;
@@ -11,6 +14,49 @@ interface MainStructure {
 		)[];
 	};
 }
+
+export const TypeBlocksDescription: TypeBlocsInput[] = [
+	{
+		type: 'paragraph',
+		name: 'Paragraphe',
+		description: 'Utilisé pour afficher n\'importe quel type de texte.'
+	},
+	{
+		type: 'heading_1',
+		name: 'Titre 1',
+		description: 'Un grand titre, approprié pour les grandes sections de votre formulaire.'
+	},
+	{
+		type: 'heading_2',
+		name: 'Titre 2',
+		description: 'Un titre de taile moyenne, appropié pour les petiets sections de votre formulaire.'
+	},
+	{
+		type: 'heading_3',
+		name: 'Titre 3',
+		description: 'Petit titer, approprié pour les questions.'
+	},
+	{
+		type: 'input_text',
+		name: 'Réponse courte',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse courte sous forme de texte.'
+	},
+	{
+		type: 'input_text_area',
+		name: 'Réponse longue',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse longue sans limite de caractère.'
+	},
+	{
+		type: 'radio',
+		name: 'Choix multiple',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants ne peuvent choisir qu\'une seule réponse.'
+	},
+	{
+		type: 'checkbox',
+		name: 'Checkbox',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants peuvent choisir plusieurs réponses.'
+	},
+]
 
 export const CGU: MainStructure = {
 	responsable: {

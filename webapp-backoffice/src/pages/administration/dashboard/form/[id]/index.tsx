@@ -61,7 +61,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	return {
 		props: {
-			product: JSON.parse(JSON.stringify(form))
+			form: JSON.parse(JSON.stringify(form))
 		}
 	};
 };

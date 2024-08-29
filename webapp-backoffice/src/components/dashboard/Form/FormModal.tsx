@@ -4,8 +4,6 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Entity } from '@prisma/client';
-import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
@@ -68,12 +66,12 @@ const FormModal = (props: Props) => {
 		let currentForm;
 
 		try {
-			const entity = await saveFormTmp.mutateAsync({
+			const newForm = await saveFormTmp.mutateAsync({
 				...tmpForm,
 				user_id: user_id
 			});
 
-			currentForm = entity.data;
+			currentForm = newForm.data;
 		} catch (e) {
 			console.error(e);
 		}

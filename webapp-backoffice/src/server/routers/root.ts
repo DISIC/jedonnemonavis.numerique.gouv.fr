@@ -7,6 +7,7 @@ import { adminEntityRightRouter } from './adminEntityRight';
 import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { formRouter } from './form';
+import { blockRouter } from './block';
 import { exportRouter } from './export';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
@@ -24,6 +25,7 @@ export const appRouter = router({
 	button: buttonRouter,
 	favorite: favoriteRouter,
 	form: formRouter,
+	block: blockRouter,
 	export: exportRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,

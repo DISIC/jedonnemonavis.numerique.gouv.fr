@@ -3,16 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
-import { Product } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { Form } from '@/prisma/generated/zod';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
-	product: Product;
+	form: Form;
 }
 
 interface MenuItems {
@@ -24,8 +23,8 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const FormLayout = ({ children, product }: ProductLayoutProps) => {
-	const { id } = product;
+const FormLayout = ({ children, form }: ProductLayoutProps) => {
+	const { id } = form;
 
 	const [displayToast, setDisplayToast] = useState(false);
 	const [showBackToTop, setShowBackToTop] = useState(false);
@@ -38,46 +37,44 @@ const FormLayout = ({ children, product }: ProductLayoutProps) => {
 		{
 			text: 'Builder',
 			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/stats`,
+				router.pathname === `/administration/dashboard/form/[id]/builder`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/stats`,
-				alt: 'Statistiques'
+				href: `/administration/dashboard/form/${id}/builder`,
+				alt: 'Builder'
 			}
 		},
 		{
 			text: 'Tester',
 			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/reviews`,
+				router.pathname === `/administration/dashboard/form/[id]/tester`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/reviews`,
-				alt: 'Avis'
+				href: `/administration/dashboard/form/${id}/tester`,
+				alt: 'Tester'
 			}
 		},
 		{
 			text: 'Informations',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/infos`,
+			isActive: router.pathname === `/administration/dashboard/form/[id]/infos`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/infos`,
+				href: `/administration/dashboard/form/${id}/infos`,
 				alt: 'Informations'
 			}
 		},
 		{
 			text: 'Réponses',
 			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/infos`,
+				router.pathname === `/administration/dashboard/form/[id]/answers`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/infos`,
-				alt: 'Informations'
+				href: `/administration/dashboard/form/${id}/answers`,
+				alt: 'Réponses'
 			}
 		},
 		{
 			text: 'Stats',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
+			isActive: router.pathname === `/administration/dashboard/form/[id]/stats`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/api_keys`,
-				alt: 'Gérer les clés API'
+				href: `/administration/dashboard/form/${id}/stats`,
+				alt: 'Statistiques'
 			}
 		}
 	];
@@ -119,7 +116,7 @@ const FormLayout = ({ children, product }: ProductLayoutProps) => {
 						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
 						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
 						onClick: () => {
-							navigator.clipboard.writeText(product.id.toString());
+							navigator.clipboard.writeText(form.id.toString());
 							setDisplayToast(true);
 						}
 					}}
@@ -129,13 +126,8 @@ const FormLayout = ({ children, product }: ProductLayoutProps) => {
 			</div>
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
-					{product.title}
+					{form.title}
 				</h1>
-				{product.isTop250 && (
-					<Badge severity="info" noIcon>
-						Démarche essentielle
-					</Badge>
-				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>

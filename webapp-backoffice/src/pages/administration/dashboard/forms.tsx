@@ -44,7 +44,8 @@ const DashboardForms = () => {
 				metadata: {
 					formCount: 0
 				}
-			}
+			},
+			enabled: session?.user?.id !== undefined
 		}
 	);
 
@@ -204,6 +205,7 @@ const DashboardForms = () => {
 											<FormCard
 												form={form}
 												handleActionForm={handleActionForm}
+												key={index}
 											/>
 										))}
 									</>
