@@ -58,17 +58,23 @@ const limiter = createTRPCStoreLimiter<typeof t>({
   fingerprint: (ctx) => {
     const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
     const xClientIp = ctx.req.headers['x-client-ip'] as string;
-    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor.split(',')[0];
     console.log('---------------------------------');
     console.log('x-forwarded-for', xForwardedFor);
     console.log('x-client-ip', xClientIp);
+    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : '192.168.0.1';
     console.log('ip', ip);
     console.log('---------------------------------');
     return ip;
   },
   windowMs: 60000,
   max: 5,
-  onLimit: (retryAfter) => {
+  onLimit: async (retryAfter, ctx) => {
+
+    const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+    const xClientIp = ctx.req.headers['x-client-ip'] as string;
+    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : '192.168.0.1';
+    const currentTime = new Date();
+
     throw new TRPCError({
       code: "TOO_MANY_REQUESTS",
       message: `Too many requests, please try again later. ${retryAfter}`,
