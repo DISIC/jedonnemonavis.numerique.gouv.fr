@@ -129,6 +129,14 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					'aria-label': `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
+			},
+			{
+				text: 'Form builder',
+				linkProps: {
+					href: '/administration/dashboard/forms',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/forms')
 			}
 		];
 		navigationItems.push(...adminNavigationItems);

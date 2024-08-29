@@ -64,6 +64,20 @@ enum TypeExport {
   xls
 }
 
+enum Typebloc {
+  paragraph
+  heading_1
+  heading_2
+  heading_3
+  input_text
+  input_text_area
+  mark_input
+  smiley_input
+  select
+  radio
+  checkbox
+}
+
 // Next auth
 model User {
   id                   Int                   @id @default(autoincrement())
@@ -85,6 +99,7 @@ model User {
   favorites            Favorite[]
   api_keys             ApiKey[]
   exports              Export[]
+  forms                Form[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -318,4 +333,33 @@ model Export {
   startDate  DateTime?
   endDate    DateTime?
   link       String?
+}
+
+model Form {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  title      String
+  link       String?
+  active     Boolean  @default(false)
+  pages      Page[]
+}
+
+model Page {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  form       Form     @relation(fields: [formId], references: [id])
+  formId     Int
+  blocks     Block[]
+}
+
+model Block {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  page       Page     @relation(fields: [pageId], references: [id])
+  pageId     Int
 }
