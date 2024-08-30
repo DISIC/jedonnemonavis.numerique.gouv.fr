@@ -1,5 +1,4 @@
-import { Typebloc } from "@prisma/client";
-import { TypeBlocsInput } from "../components/dashboard/Form/BlockModal";
+import { TypeBlocsInput } from "../types/custom";
 
 interface MainStructure {
 	[key: string]: {
@@ -19,42 +18,65 @@ export const TypeBlocksDescription: TypeBlocsInput[] = [
 	{
 		type: 'paragraph',
 		name: 'Paragraphe',
-		description: 'Utilisé pour afficher n\'importe quel type de texte.'
+		category: 'Interface',
+		description: 'Utilisé pour afficher n\'importe quel type de texte.',
+		hint: 'Entrez votre texte...'
 	},
 	{
 		type: 'heading_1',
 		name: 'Titre 1',
-		description: 'Un grand titre, approprié pour les grandes sections de votre formulaire.'
+		category: 'Interface',
+		description: 'Un grand titre, approprié pour les grandes sections de votre formulaire.',
+		hint: 'Entrez votre grand titre...'
 	},
 	{
 		type: 'heading_2',
 		name: 'Titre 2',
-		description: 'Un titre de taile moyenne, appropié pour les petiets sections de votre formulaire.'
+		category: 'Interface',
+		description: 'Un titre de taile moyenne, appropié pour les petites sections de votre formulaire.',
+		hint: 'Entrez votre titre moyen...'
 	},
 	{
 		type: 'heading_3',
 		name: 'Titre 3',
-		description: 'Petit titer, approprié pour les questions.'
+		category: 'Interface',
+		description: 'Petit titre, approprié pour les questions.',
+		hint: 'Entrez votre petit titre...'
 	},
 	{
 		type: 'input_text',
 		name: 'Réponse courte',
-		description: 'Utilisez ceci pour insérer une question combinée avec une réponse courte sous forme de texte.'
+		category: 'Questions',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse courte sous forme de texte.',
+		hint: 'Entrez votre question... (réponse courte)'
 	},
 	{
 		type: 'input_text_area',
 		name: 'Réponse longue',
-		description: 'Utilisez ceci pour insérer une question combinée avec une réponse longue sans limite de caractère.'
+		category: 'Questions',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse longue sans limite de caractère.',
+		hint: 'Entrez votre question... (réponse longue)'
 	},
 	{
 		type: 'radio',
 		name: 'Choix multiple',
-		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants ne peuvent choisir qu\'une seule réponse.'
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants ne peuvent choisir qu\'une seule réponse.',
+		hint: 'Entrez votre question... (choix multiple)'
 	},
 	{
 		type: 'checkbox',
 		name: 'Checkbox',
-		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants peuvent choisir plusieurs réponses.'
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants peuvent choisir plusieurs réponses.',
+		hint: 'Entrez votre question... (checkbox)'
+	},
+	{
+		type: 'select',
+		name: 'Menu déroulant',
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec une liste de réponse sous forme de menu déroulant. Les répondants ne peuvent choisir qu\'une seule réponse.',
+		hint: 'Entrez votre question... (menu déroulant)'
 	},
 ]
 

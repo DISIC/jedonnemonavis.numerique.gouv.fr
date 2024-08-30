@@ -8,6 +8,7 @@ import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
 import { formRouter } from './form';
 import { blockRouter } from './block';
+import { optionsRouter } from './options';
 import { exportRouter } from './export';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
@@ -26,6 +27,7 @@ export const appRouter = router({
 	favorite: favoriteRouter,
 	form: formRouter,
 	block: blockRouter,
+	options: optionsRouter,
 	export: exportRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,

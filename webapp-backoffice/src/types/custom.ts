@@ -1,10 +1,11 @@
-import { AnswerIntention, Prisma } from '@prisma/client';
+import { AnswerIntention, Prisma, Typebloc } from '@prisma/client';
 import { z } from 'zod';
 import {
     FIELD_CODE_BOOLEAN_VALUES,
     FIELD_CODE_DETAILS_VALUES,
     FIELD_CODE_SMILEY_VALUES
 } from '../utils/helpers';
+import { EnumTypeblocFilterSchema, TypeblocSchema } from '@/prisma/generated/zod';
 
 export type FieldCodeBoolean =
     (typeof FIELD_CODE_BOOLEAN_VALUES)[number]['slug'];
@@ -109,6 +110,19 @@ export type Condition = {
         };
     };
 };
+
+export const CategorySchema = z.enum(['Interface', 'Questions']);
+
+export const TypeBlocsInputSchema = z.object({
+  type: TypeblocSchema, 
+  name: z.string(),
+  description: z.string(),
+  category: CategorySchema,
+  hint: z.string().optional(),
+  img: z.string().optional(),
+});
+
+export type TypeBlocsInput = z.infer<typeof TypeBlocsInputSchema>;
 
 const ZBaseHitSchema = z.object({
     intention: z.string(),

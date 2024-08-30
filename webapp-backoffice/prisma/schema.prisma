@@ -370,6 +370,6 @@ model OptionsBlock {
   label      String?
   value      String?
   content    String?
-  Block      Block    @relation(fields: [blockId], references: [id])
-  blockId    Int
+  block      Block    @relation(fields: [block_id], references: [id])
+  block_id   Int
 }

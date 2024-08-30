@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
-import { BlockUncheckedCreateInputSchema, FormUncheckedCreateInputSchema } from '@/prisma/generated/zod';
+import { BlockUncheckedCreateInputSchema, BlockUncheckedUpdateInputSchema, BlockUpdateInputSchema, FormUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 
 export const blockRouter = router({
@@ -57,7 +57,7 @@ export const blockRouter = router({
 		}),
 
 	update: protectedProcedure
-		.input(BlockUncheckedCreateInputSchema)
+		.input(BlockUncheckedUpdateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const updatedBlock = await ctx.prisma.block.update({
 				where: {

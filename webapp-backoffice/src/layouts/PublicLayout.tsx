@@ -136,7 +136,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/forms',
 					target: '_self'
 				},
-				isActive: pathname.startsWith('/administration/dashboard/forms')
+				isActive: pathname.startsWith('/administration/dashboard/form')
 			}
 		];
 		navigationItems.push(...adminNavigationItems);

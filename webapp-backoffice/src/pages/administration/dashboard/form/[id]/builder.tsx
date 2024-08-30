@@ -10,6 +10,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import BlockModal from '@/src/components/dashboard/Form/BlockModal';
+import DisplayBlocks from '@/src/components/dashboard/Form/DisplayBlocks';
 
 interface Props {
 	form: Form;
@@ -38,7 +39,6 @@ const FormBuilder = (props: Props) => {
 	const [formLines, setFormLines] = useState<FormLine[]>([
 		{ type: 'paragraph', content: '' }
 	]);
-	const [showModal, setShowModal] = useState(false);
 	const [activeLine, setActiveLine] = useState(0);
 	const inputRefs = useRef<(HTMLDivElement | null)[]>([]);
 	const [hoveredLine, setHoveredLine] = useState<number | null>(null);
@@ -59,6 +59,16 @@ const FormBuilder = (props: Props) => {
 		try {
 			const blockCreated = await createBlock.mutateAsync({
 				...newBlock
+			});
+		} catch (e) {
+			console.error(e);
+		}
+	};
+
+	const handleSaveBlock = async (tmpBlock: Block) => {
+		try {
+			const blockSaved = await saveBlock.mutateAsync({
+				...tmpBlock
 			});
 		} catch (e) {
 			console.error(e);
@@ -125,13 +135,6 @@ const FormBuilder = (props: Props) => {
 		}, 100);
 	};
 
-	const handleAddElement = (type: FormElementType) => {
-		const newFormLines = [...formLines];
-		newFormLines[activeLine] = { type, content: '' };
-		setFormLines(newFormLines);
-		setShowModal(false);
-	};
-
 	const handleKeyDown = async (
 		e: KeyboardEvent<HTMLDivElement>,
 		index: number
@@ -175,7 +178,7 @@ const FormBuilder = (props: Props) => {
 					size="small"
 					title="Supprimer le bloc"
 					className={cx(
-						fr.cx('fr-mr-5v'),
+						fr.cx('fr-mr-2v', 'fr-mt-7v'),
 						classes.iconError,
 						classes.actionButton,
 						hoveredLine === index || activeLine === index ? classes.visible : ''
@@ -188,7 +191,7 @@ const FormBuilder = (props: Props) => {
 					size="small"
 					title="Ajouter un bloc"
 					className={cx(
-						fr.cx('fr-mr-5v'),
+						fr.cx('fr-mr-2v', 'fr-mt-7v'),
 						classes.actionButton,
 						hoveredLine === index || activeLine === index ? classes.visible : ''
 					)}
@@ -200,19 +203,20 @@ const FormBuilder = (props: Props) => {
 					size="small"
 					title="Déplacer le bloc"
 					className={cx(
-						fr.cx('fr-mr-5v'),
+						fr.cx('fr-mr-2v', 'fr-mt-7v'),
 						classes.actionButton,
 						hoveredLine === index || activeLine === index ? classes.visible : ''
 					)}
-					onClick={() => setShowModal(true)}
+					onClick={() => {
+						setActiveLine(index);
+					}}
 				></Button>
-				<div
-					className={classes.formLine}
-					contentEditable
-					suppressContentEditableWarning
-					ref={el => (inputRefs.current[index] = el)}
-				>
-					{line.content || ''}
+				<div className={classes.formLine}>
+					<DisplayBlocks
+						block={line}
+						onAction={handleSaveBlock}
+						ref={el => (inputRefs.current[index] = el)}
+					></DisplayBlocks>
 				</div>
 			</div>
 		);
@@ -230,6 +234,8 @@ const FormBuilder = (props: Props) => {
 			<BlockModal
 				modal={blockModal}
 				onSubmit={newBlock => handleCreateBlock(newBlock)}
+				position={activeLine}
+				form={form}
 			/>
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
@@ -240,20 +246,6 @@ const FormBuilder = (props: Props) => {
 				{formBlocks.map((line, index) => (
 					<div key={index}>{renderLine(line, index)}</div>
 				))}
-				{showModal && (
-					<div className={classes.modalOverlay}>
-						<div className={classes.modalContent}>
-							<button onClick={() => handleAddElement('title')}>Title</button>
-							<button onClick={() => handleAddElement('paragraph')}>
-								Paragraph
-							</button>
-							<button onClick={() => handleAddElement('text')}>
-								Text Input
-							</button>
-							<button onClick={() => handleAddElement('select')}>Select</button>
-						</div>
-					</div>
-				)}
 			</div>
 		</FormLayout>
 	);
@@ -274,14 +266,13 @@ const useStyles = tss.withName(FormBuilder.name).create({
 		gap: fr.spacing('10v')
 	},
 	formBuilder: {
-		maxWidth: '600px',
 		margin: '0 auto',
 		fontFamily: 'Arial, sans-serif'
 	},
 	formLineContainer: {
 		display: 'flex',
 		alignItems: 'center',
-		marginBottom: '10px',
+		marginBottom: '20px',
 		position: 'relative'
 	},
 	actionButton: {
@@ -293,9 +284,7 @@ const useStyles = tss.withName(FormBuilder.name).create({
 	formLine: {
 		flexGrow: 1,
 		padding: '10px',
-		border: '1px solid #ddd',
 		borderRadius: '4px',
-		backgroundColor: '#f9f9f9',
 		position: 'relative',
 		outline: 'none'
 	},
