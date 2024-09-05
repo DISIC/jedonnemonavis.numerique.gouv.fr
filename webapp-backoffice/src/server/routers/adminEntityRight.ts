@@ -1,4 +1,5 @@
 import { AdminEntityRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
+import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationLink';
 import { protectedProcedure, router } from '@/src/server/trpc';
 import {
 	getInviteEntityEmailHtml,
@@ -130,35 +131,40 @@ export const adminEntityRightRouter = router({
 				}
 			});
 
-			if (newAdminEntityRight.user === null) {
-				const token = await generateInviteToken(ctx.prisma, user_email);
+			const isTest = user_email.includes('e2e-jdma-test');
 
-				await sendMail(
-					'Invitation à rejoindre « Je donne mon avis »',
-					user_email,
-					getUserInviteEntityEmailHtml(
-						contextUser,
-						user_email,
-						token,
-						newAdminEntityRight.entity.name
-					),
-					`Cliquez sur ce lien pour créer votre compte : ${
-						process.env.NODEMAILER_BASEURL
-					}/register?${new URLSearchParams({
-						email: user_email,
-						inviteToken: token
-					})}`
-				);
+			if (isTest) {
+				addEmailDetail(user_email);
 			} else {
-				await sendMail(
-					`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
-					user_email,
-					getInviteEntityEmailHtml(
-						contextUser,
-						newAdminEntityRight.entity.name
-					),
-					`Cliquez sur ce lien pour rejoindre l'organisation "${newAdminEntityRight.entity.name}" : ${process.env.NODEMAILER_BASEURL}`
-				);
+				if (newAdminEntityRight.user === null) {
+					const token = await generateInviteToken(ctx.prisma, user_email);
+					await sendMail(
+						'Invitation à rejoindre « Je donne mon avis »',
+						user_email,
+						getUserInviteEntityEmailHtml(
+							contextUser,
+							user_email,
+							token,
+							newAdminEntityRight.entity.name
+						),
+						`Cliquez sur ce lien pour créer votre compte : ${
+							process.env.NODEMAILER_BASEURL
+						}/register?${new URLSearchParams({
+							email: user_email,
+							inviteToken: token
+						})}`
+					);
+				} else {
+					await sendMail(
+						`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
+						user_email,
+						getInviteEntityEmailHtml(
+							contextUser,
+							newAdminEntityRight.entity.name
+						),
+						`Cliquez sur ce lien pour rejoindre l'organisation "${newAdminEntityRight.entity.name}" : ${process.env.NODEMAILER_BASEURL}`
+					);
+				}
 			}
 
 			return { data: newAdminEntityRight };
@@ -183,23 +189,28 @@ export const adminEntityRightRouter = router({
 				});
 
 			const token = await generateInviteToken(ctx.prisma, user_email);
+			const isTest = user_email.includes('e2e-jdma-test');
 
-			await sendMail(
-				'Invitation à rejoindre « Je donne mon avis »',
-				user_email.toLowerCase(),
-				getUserInviteEntityEmailHtml(
-					contextUser,
+			if (isTest) {
+				addEmailDetail(user_email);
+			} else {
+				await sendMail(
+					'Invitation à rejoindre « Je donne mon avis »',
 					user_email.toLowerCase(),
-					token,
-					entity.name
-				),
-				`Cliquez sur ce lien pour créer votre compte : ${
-					process.env.NODEMAILER_BASEURL
-				}/register?${new URLSearchParams({
-					email: user_email.toLowerCase(),
-					inviteToken: token
-				})}`
-			);
+					getUserInviteEntityEmailHtml(
+						contextUser,
+						user_email.toLowerCase(),
+						token,
+						entity.name
+					),
+					`Cliquez sur ce lien pour créer votre compte : ${
+						process.env.NODEMAILER_BASEURL
+					}/register?${new URLSearchParams({
+						email: user_email.toLowerCase(),
+						inviteToken: token
+					})}`
+				);
+			}
 		}),
 
 	update: protectedProcedure
