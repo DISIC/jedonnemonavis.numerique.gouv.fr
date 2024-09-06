@@ -202,6 +202,7 @@ describe('jdma-admin', () => {
 							.contains('Créer un bouton JDMA')
 							.should('exist')
 							.click();
+						cy.wait(2000);
 						cy.get('dialog#button-modal')
 							.should('exist')
 							.within(() => {

@@ -6,6 +6,7 @@ import { sendMail } from '@/src/utils/mailer';
 import { generateRandomString } from '@/src/utils/tools';
 import { AccessRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import { getInviteEmailHtml, getUserInviteEmailHtml } from '@/src/utils/emails';
+import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationLink';
 
 export const generateInviteToken = async (
 	prisma: PrismaClient,
@@ -110,32 +111,38 @@ export const accessRightRouter = router({
 				}
 			});
 
-			if (newAccessRight.user === null) {
-				const token = await generateInviteToken(ctx.prisma, user_email);
+			const isTest = user_email.includes('e2e-jdma-test');
 
-				await sendMail(
-					'Invitation à rejoindre « Je donne mon avis »',
-					user_email.toLowerCase(),
-					getUserInviteEmailHtml(
-						contextUser,
-						user_email.toLowerCase(),
-						token,
-						newAccessRight.product.title
-					),
-					`Cliquez sur ce lien pour créer votre compte : ${
-						process.env.NODEMAILER_BASEURL
-					}/register?${new URLSearchParams({
-						email: user_email.toLowerCase(),
-						inviteToken: token
-					})}`
-				);
+			if (isTest) {
+				addEmailDetail(user_email);
 			} else {
-				await sendMail(
-					`Accès à la démarche « ${newAccessRight.product.title} » sur la plateforme « Je donne mon avis »`,
-					user_email.toLowerCase(),
-					getInviteEmailHtml(contextUser, newAccessRight.product.title),
-					`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
-				);
+				if (newAccessRight.user === null) {
+					const token = await generateInviteToken(ctx.prisma, user_email);
+
+					await sendMail(
+						'Invitation à rejoindre « Je donne mon avis »',
+						user_email.toLowerCase(),
+						getUserInviteEmailHtml(
+							contextUser,
+							user_email.toLowerCase(),
+							token,
+							newAccessRight.product.title
+						),
+						`Cliquez sur ce lien pour créer votre compte : ${
+							process.env.NODEMAILER_BASEURL
+						}/register?${new URLSearchParams({
+							email: user_email.toLowerCase(),
+							inviteToken: token
+						})}`
+					);
+				} else {
+					await sendMail(
+						`Accès à la démarche « ${newAccessRight.product.title} » sur la plateforme « Je donne mon avis »`,
+						user_email.toLowerCase(),
+						getInviteEmailHtml(contextUser, newAccessRight.product.title),
+						`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
+					);
+				}
 			}
 
 			return { data: newAccessRight };
@@ -160,23 +167,28 @@ export const accessRightRouter = router({
 				});
 
 			const token = await generateInviteToken(ctx.prisma, user_email);
+			const isTest = user_email.includes('e2e-jdma-test');
 
-			await sendMail(
-				'Invitation à rejoindre « Je donne mon avis »',
-				user_email.toLowerCase(),
-				getUserInviteEmailHtml(
-					contextUser,
+			if (isTest) {
+				addEmailDetail(user_email);
+			} else {
+				await sendMail(
+					'Invitation à rejoindre « Je donne mon avis »',
 					user_email.toLowerCase(),
-					token,
-					product.title
-				),
-				`Cliquez sur ce lien pour créer votre compte : ${
-					process.env.NODEMAILER_BASEURL
-				}/register?${new URLSearchParams({
-					email: user_email.toLowerCase(),
-					inviteToken: token
-				})}`
-			);
+					getUserInviteEmailHtml(
+						contextUser,
+						user_email.toLowerCase(),
+						token,
+						product.title
+					),
+					`Cliquez sur ce lien pour créer votre compte : ${
+						process.env.NODEMAILER_BASEURL
+					}/register?${new URLSearchParams({
+						email: user_email.toLowerCase(),
+						inviteToken: token
+					})}`
+				);
+			}
 		}),
 
 	update: protectedProcedure
