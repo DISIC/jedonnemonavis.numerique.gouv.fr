@@ -2,7 +2,7 @@ import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 
-const ProductPage = () => {
+const FormPage = () => {
 	return;
 };
 
@@ -66,4 +66,4 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	};
 };
 
-export default ProductPage;
+export default FormPage;

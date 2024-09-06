@@ -24,7 +24,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			displayProcessed: false
 		},
 		{
-			enabled: session?.user.role === 'admin',
+			enabled: session?.user.role.includes('admin'),
 			initialData: {
 				data: [],
 				metadata: {
@@ -79,7 +79,8 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	];
 
 	const navigationItems = session?.user
-		? !!userAdminEntityRights.metadata.count || session.user.role === 'admin'
+		? !!userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
 			? [
 					{
 						text: 'Services',
@@ -101,7 +102,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			: []
 		: [];
 
-	if (session?.user.role === 'admin') {
+	if (session?.user.role.includes('admin')) {
 		const adminNavigationItems = [
 			{
 				text: 'Utilisateurs',
@@ -129,7 +130,13 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					'aria-label': `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
-			},
+			}
+		];
+		navigationItems.push(...adminNavigationItems);
+	}
+
+	if (session?.user.role === 'superadmin') {
+		const superAdminNavigationItems = [
 			{
 				text: 'Form builder',
 				linkProps: {
@@ -139,7 +146,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				isActive: pathname.startsWith('/administration/dashboard/form')
 			}
 		];
-		navigationItems.push(...adminNavigationItems);
+		navigationItems.push(...superAdminNavigationItems);
 	}
 
 	return (

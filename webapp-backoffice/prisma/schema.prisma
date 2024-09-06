@@ -18,6 +18,7 @@ generator zod {
 }
 
 enum UserRole {
+  superadmin
   admin
   user
 }

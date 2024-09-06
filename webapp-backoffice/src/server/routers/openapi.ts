@@ -166,7 +166,7 @@ export const openAPIRouter = router({
 				interval
 			};
 
-			if (ctx.api_key.scope !== 'admin') {
+			if (!ctx.api_key.scope.includes('admin')) {
 				fetchParams.product_ids =
 					product_ids.length > 0
 						? authorized_products_ids.filter(value =>
@@ -177,7 +177,7 @@ export const openAPIRouter = router({
 				fetchParams.product_ids = product_ids;
 			}
 
-			if (ctx.api_key.scope !== 'admin' && !fetchParams.product_ids.length) {
+			if (!ctx.api_key.scope.includes('admin') && !fetchParams.product_ids.length) {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
 					message:
@@ -186,9 +186,9 @@ export const openAPIRouter = router({
 			}
 
 			if (
-				!(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+				!(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
 					.length ||
-				(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+				(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
 					.length > maxNbProducts
 			) {
 				throw new TRPCError({
@@ -235,7 +235,7 @@ export const openAPIRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { product_ids } = input;
 
-			if (ctx.user_api.role !== 'admin') {
+			if (!ctx.user_api.role.includes('admin')) {
 				throw new TRPCError({
 					code: 'UNAUTHORIZED',
 					message: 'You need to be admin to perform this action'
