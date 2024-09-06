@@ -27,15 +27,15 @@ services:
       ES_ADDON_PASSWORD: "ES_ADDON_PASSWORD"
     command: sh -c "yarn build && npx prisma migrate dev && npx prisma db seed && yarn start"
     depends_on:
-      - db
-      - mailhog
+      db:
+        condition: service_healthy
     ports:
       - "3000:3000"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
-      interval: 30s
+      interval: 10s
       retries: 3
-      start_period: 30s
+      start_period: 10s
       timeout: 10s
 
   webapp-form:
@@ -49,15 +49,15 @@ services:
       NODEMAILER_PORT: 1025
     command: sh -c "yarn build && yarn startB"
     depends_on:
-      - db
-      - mailhog
+      db:
+        condition: service_healthy
     ports:
-      - "3002:3002"
+      - "3001:3001"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL", "curl -f http://localhost:3002/ || exit 1"]
+      interval: 10s
       retries: 3
-      start_period: 30s
+      start_period: 10s
       timeout: 10s
 
   db:
@@ -70,6 +70,12 @@ services:
       - pg_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d jdma"]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
 
   mailhog:
     image: mailhog/mailhog:latest

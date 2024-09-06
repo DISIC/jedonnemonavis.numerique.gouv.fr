@@ -1,5 +1,6 @@
 const app_url = Cypress.env('app_base_url');
-const adminEmail = 'e2e-jdma-test-admin@beta.gouv.fr';
+const adminEmail = Cypress.env('admin_user_mail');
+const adminPassword = Cypress.env('admin_user_password');
 const userPassword = Cypress.env('user_password');
 const secretPassword = Cypress.env('get_tokenSecret');
 const invitedEmail = 'e2e-jdma-test-invite@beta.gouv.fr';
@@ -17,7 +18,6 @@ describe('jdma-admin', () => {
 	beforeEach(() => {
 		//DELETE TEST USERS
 		deleteTestUsers();
-		createAdmin();
 		cy.visit(app_url + '/login');
 	});
 
@@ -28,7 +28,7 @@ describe('jdma-admin', () => {
 			.click()
 			.then(() => {
 				cy.wait(1000);
-				cy.get('input[type="password"]').type(userPassword);
+				cy.get('input[type="password"]').type(adminPassword);
 			});
 		cy.get('[class*="LoginForm-button"]')
 			.contains('Confirmer')
@@ -238,15 +238,6 @@ function fillForm({
 	cy.get('input[type="password"]').type(password);
 }
 
-function createAdmin() {
-	cy.request({
-		method: 'GET',
-		url: app_url + '/api/cypress-test/createAdminUser',
-		qs: {
-			secretPassword: secretPassword
-		}
-	});
-}
 function getValidationLink() {
 	return cy
 		.request({

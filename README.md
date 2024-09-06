@@ -114,3 +114,43 @@ Lancez l'application, qui sera accessible sur le port 3001 :
 ```bash
 yarn dev
 ```
+
+## Tests Cypress
+
+Ce dépôt est configuré pour éxécuter des tests via Cypress avant chaque merge sur les branches /clevercloud et /main.
+Un fichier docker-compose est disponible afin de fournir un environnement propice à l'éxécution des tests en local.
+
+### Prérequis
+
+Avant de commencer, assurez-vous que les éléments suivants sont installés :
+
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Containers
+
+Afin de monter l'environnement propice aux tests en local, utilisez la commande suivante :
+
+```bash
+docker compose -f docker-compose.tests.yaml up -d
+```
+
+Afin de supprimer les différents containers, utilisez la commande :
+
+```bash
+docker compose -f docker-compose.tests.yaml down
+```
+
+### Cypress
+
+Pour run les tests cypress en mode headless, tapez :
+
+```bash
+npx cypress run --browser firefox
+```
+
+Pour ouvrir l'utilitaire cypress et run les tests avec l'interface, tapez
+
+```bash
+npx cypress open
+```
