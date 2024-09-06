@@ -12,7 +12,8 @@
 		"format": "prettier --write .",
 		"lhci:audit": "next build && concurrently \"npm run lhci:server\" \"lhci autorun\"",
 		"lhci:wizard": "lhci wizard",
-		"lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql"
+		"lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql",
+		"test:e2e": "cypress run"
 	},
 	"husky": {
 		"hooks": {
