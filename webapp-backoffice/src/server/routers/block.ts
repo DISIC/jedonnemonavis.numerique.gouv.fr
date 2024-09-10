@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
-import { BlockUncheckedCreateInputSchema, BlockUncheckedUpdateInputSchema, BlockUpdateInputSchema, FormUncheckedCreateInputSchema } from '@/prisma/generated/zod';
+import { BlockUncheckedCreateInputSchema, BlockUncheckedUpdateInputSchema, BlockUpdateInputSchema, BlockWithRelationsSchema, FormUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 
 export const blockRouter = router({
@@ -19,6 +19,13 @@ export const blockRouter = router({
 				},
 				orderBy: {
 					position: 'asc'
+				},
+				include: {
+					options: {
+						orderBy: {
+							created_at: 'asc'
+						}
+					}
 				}
 			});
 

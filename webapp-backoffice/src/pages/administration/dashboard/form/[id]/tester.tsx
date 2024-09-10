@@ -30,7 +30,17 @@ const FormBuilder = (props: Props) => {
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Form Tester</h1>
+
 				</div>
+					<div>
+					<iframe
+						src="http://localhost:3001/Demarches/custom/1"
+						width="1000"
+						height="400"
+						style={{ border: 'none' }}
+						title="Example Website"
+					/>
+					</div>
 			</div>
 		</FormLayout>
 	);
