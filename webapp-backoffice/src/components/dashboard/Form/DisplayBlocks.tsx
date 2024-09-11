@@ -1,5 +1,7 @@
-import { Block, Form, OptionsBlock } from '@/prisma/generated/zod';
+import { Block, BlockPartialWithRelations, BlockWithRelations, Form, OptionsBlock, OptionsBlockPartial } from '@/prisma/generated/zod';
+import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
 import { TypeBlocksDescription } from '@/src/utils/content';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -7,16 +9,18 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
-	block: Block;
-	onAction: (block: Block) => void;
+	block: BlockWithOptions;
+	onAction: (block: BlockWithOptions) => void;
 }
+
+export type OptionValues = Omit<OptionsBlock, 'id' | 'label' | 'value' | 'content'>;
 
 const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 	(props: Props, ref) => {
 		const { block, onAction } = props;
 		const { cx, classes } = useStyles();
 		const [content, setContent] = React.useState<string>(block.content || '');
-		const [options, setOptions] = React.useState<OptionsBlock[]>([]);
+		const [options, setOptions] = React.useState<OptionsBlock[]>(block.options || []);
 
 		React.useEffect(() => {
 			setContent(block.content || '');
@@ -35,7 +39,39 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 			};
 		}, [content]);
 
-		const renderBlock = (block: Block) => {
+		const createOption = trpc.options.create.useMutation({
+			onSuccess: (option) => {
+				setOptions([...options, option.data]);
+			}
+		});
+
+		const handleCreateOption = async (newOption: OptionValues) => {
+			try {
+				const optionCreated = await createOption.mutateAsync({
+					...newOption
+				});
+				return optionCreated;
+			} catch (e) {
+				console.error(e);
+			}
+		};
+	
+		const saveOption = trpc.options.update.useMutation({
+		});
+
+		const handleSaveOption = async (tmpOption: OptionsBlock) => {
+			try {
+	
+				const {id, content} = tmpOption;
+				const blockSaved = await saveOption.mutateAsync({
+					id, content
+				});
+			} catch (e) {
+				console.error(e);
+			}
+		};
+
+		const renderBlock = (block: BlockWithOptions) => {
 			switch (block.type_bloc) {
 				case 'paragraph':
 					return <></>;
@@ -53,6 +89,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 						<>
 							{options.map((option, index) => (
 								<div
+									key={option.id}
 									className={cx(
 										fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
 									)}
@@ -76,6 +113,8 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 														...updatedOptions[index],
 														content: e.target.value
 													};
+
+													handleSaveOption(updatedOptions[index]);
 
 													// Mettre à jour l'état avec les options modifiées
 													setOptions(updatedOptions);
@@ -110,19 +149,12 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 								size="small"
 								title="Ajouter une option de réponse"
 								className={fr.cx('fr-mt-5v')}
-								onClick={() => {
-									setOptions([
-										...options,
-										{
-											id: 0,
-											created_at: new Date(),
-											updated_at: new Date(),
-											block_id: block.id,
-											value: '',
-											content: '',
-											label: ''
-										}
-									]);
+								onClick={async () => {
+									const newOption = await handleCreateOption({
+										block_id: block.id,
+										created_at: new Date(),
+										updated_at: new Date(),
+									});
 								}}
 							>
 								Ajouter une option

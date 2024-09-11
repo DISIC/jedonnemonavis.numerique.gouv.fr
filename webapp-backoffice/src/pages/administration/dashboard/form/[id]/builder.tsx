@@ -4,13 +4,15 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { Block, Form } from '@/prisma/generated/zod';
+import { Block, BlockPartialWithRelations, BlockUpdateInputSchema, BlockUpdateWithoutOptionsInputSchema, BlockWithRelations, Form } from '@/prisma/generated/zod';
 import FormLayout from '@/src/layouts/Form/FormLayout';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import BlockModal from '@/src/components/dashboard/Form/BlockModal';
 import DisplayBlocks from '@/src/components/dashboard/Form/DisplayBlocks';
+import { OptionsBlock } from '@prisma/client';
+import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
 
 interface Props {
 	form: Form;
@@ -65,10 +67,12 @@ const FormBuilder = (props: Props) => {
 		}
 	};
 
-	const handleSaveBlock = async (tmpBlock: Block) => {
+	const handleSaveBlock = async (tmpBlock: BlockWithOptions) => {
 		try {
+
+			const {id, content} = tmpBlock;
 			const blockSaved = await saveBlock.mutateAsync({
-				...tmpBlock
+				id, content
 			});
 		} catch (e) {
 			console.error(e);
@@ -163,7 +167,7 @@ const FormBuilder = (props: Props) => {
 		}
 	};
 
-	const renderLine = (line: Block, index: number) => {
+	const renderLine = (line: BlockWithOptions, index: number) => {
 		return (
 			<div
 				className={classes.formLineContainer}
