@@ -226,7 +226,13 @@ const FormBuilder = (props: Props) => {
 					<DisplayBlocks
 						block={line}
 						onAction={handleSaveBlock}
-						page={line.type_bloc === 'new_page' ? 1 : null}
+						page={
+							line.type_bloc === 'new_page'
+								? formBlocks
+										.slice(0, index)
+										.filter(block => block.type_bloc === 'new_page').length + 2
+								: null
+						}
 						ref={el => (inputRefs.current[index] = el)}
 					></DisplayBlocks>
 				</div>
@@ -288,10 +294,10 @@ const useStyles = tss.withName(FormBuilder.name).create({
 		position: 'relative'
 	},
 	actionButton: {
-		visibility: 'hidden' // Hidden by default
+		visibility: 'hidden'
 	},
 	visible: {
-		visibility: 'visible' // Make the button visible when hovered or focused
+		visibility: 'visible'
 	},
 	formLine: {
 		flexGrow: 1,
