@@ -44,6 +44,13 @@ export const TypeBlocksDescription: TypeBlocsInput[] = [
 		hint: 'Entrez votre petit titre...'
 	},
 	{
+		type: 'new_page',
+		name: 'Nouvelle Page',
+		category: 'Interface',
+		description: 'Ajoutez une nouvelle page au formulaire. Utilisez ceci pour créer des formulaires en plusieurs étapes.',
+		hint: 'Saisissez le texte du bouton pour naviguer vers la page suivante.'
+	},
+	{
 		type: 'input_text',
 		name: 'Réponse courte',
 		category: 'Questions',
