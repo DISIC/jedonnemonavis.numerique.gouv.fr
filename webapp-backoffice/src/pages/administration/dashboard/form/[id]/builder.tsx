@@ -4,7 +4,14 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { Block, BlockPartialWithRelations, BlockUpdateInputSchema, BlockUpdateWithoutOptionsInputSchema, BlockWithRelations, Form } from '@/prisma/generated/zod';
+import {
+	Block,
+	BlockPartialWithRelations,
+	BlockUpdateInputSchema,
+	BlockUpdateWithoutOptionsInputSchema,
+	BlockWithRelations,
+	Form
+} from '@/prisma/generated/zod';
 import FormLayout from '@/src/layouts/Form/FormLayout';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
@@ -69,10 +76,10 @@ const FormBuilder = (props: Props) => {
 
 	const handleSaveBlock = async (tmpBlock: BlockWithOptions) => {
 		try {
-
-			const {id, content} = tmpBlock;
+			const { id, content } = tmpBlock;
 			const blockSaved = await saveBlock.mutateAsync({
-				id, content
+				id,
+				content
 			});
 		} catch (e) {
 			console.error(e);
@@ -219,6 +226,7 @@ const FormBuilder = (props: Props) => {
 					<DisplayBlocks
 						block={line}
 						onAction={handleSaveBlock}
+						page={line.type_bloc === 'new_page' ? 1 : null}
 						ref={el => (inputRefs.current[index] = el)}
 					></DisplayBlocks>
 				</div>

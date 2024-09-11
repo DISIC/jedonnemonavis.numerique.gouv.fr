@@ -1,4 +1,11 @@
-import { Block, BlockPartialWithRelations, BlockWithRelations, Form, OptionsBlock, OptionsBlockPartial } from '@/prisma/generated/zod';
+import {
+	Block,
+	BlockPartialWithRelations,
+	BlockWithRelations,
+	Form,
+	OptionsBlock,
+	OptionsBlockPartial
+} from '@/prisma/generated/zod';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
 import { TypeBlocksDescription } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
@@ -10,17 +17,23 @@ import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	block: BlockWithOptions;
+	page: number | null;
 	onAction: (block: BlockWithOptions) => void;
 }
 
-export type OptionValues = Omit<OptionsBlock, 'id' | 'label' | 'value' | 'content'>;
+export type OptionValues = Omit<
+	OptionsBlock,
+	'id' | 'label' | 'value' | 'content'
+>;
 
 const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 	(props: Props, ref) => {
-		const { block, onAction } = props;
+		const { block, onAction, page } = props;
 		const { cx, classes } = useStyles();
 		const [content, setContent] = React.useState<string>(block.content || '');
-		const [options, setOptions] = React.useState<OptionsBlock[]>(block.options || []);
+		const [options, setOptions] = React.useState<OptionsBlock[]>(
+			block.options || []
+		);
 
 		React.useEffect(() => {
 			setContent(block.content || '');
@@ -40,7 +53,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 		}, [content]);
 
 		const createOption = trpc.options.create.useMutation({
-			onSuccess: (option) => {
+			onSuccess: option => {
 				setOptions([...options, option.data]);
 			}
 		});
@@ -55,33 +68,45 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 				console.error(e);
 			}
 		};
-	
-		const saveOption = trpc.options.update.useMutation({
-		});
+
+		const saveOption = trpc.options.update.useMutation({});
 
 		const handleSaveOption = async (tmpOption: OptionsBlock) => {
 			try {
-	
-				const {id, content} = tmpOption;
+				const { id, content } = tmpOption;
 				const blockSaved = await saveOption.mutateAsync({
-					id, content
+					id,
+					content
 				});
 			} catch (e) {
 				console.error(e);
 			}
 		};
 
-		const renderBlock = (block: BlockWithOptions) => {
+		const renderPreInput = (block: BlockWithOptions) => {
 			switch (block.type_bloc) {
-				case 'paragraph':
+				default:
 					return <></>;
-				case 'heading_1':
-				case 'heading_2':
-				case 'heading_3':
-					return <></>;
-				case 'input_text':
-				case 'input_text_area':
-					return <></>;
+			}
+		};
+
+		const renderPostInput = (block: BlockWithOptions) => {
+			switch (block.type_bloc) {
+				case 'new_page':
+					return (
+						<div
+							className={cx(
+								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
+							)}
+						>
+							<div className={fr.cx('fr-col-12')}>
+								<hr className={cx(classes.divider)} />
+							</div>
+							<div className={fr.cx('fr-col-12')}>
+								<h5>Page {page}</h5>
+							</div>
+						</div>
+					);
 				case 'radio':
 				case 'checkbox':
 				case 'select':
@@ -153,7 +178,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 									const newOption = await handleCreateOption({
 										block_id: block.id,
 										created_at: new Date(),
-										updated_at: new Date(),
+										updated_at: new Date()
 									});
 								}}
 							>
@@ -168,6 +193,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 
 		return (
 			<div>
+				{renderPreInput(block)}
 				<Input
 					ref={ref}
 					className={cx(fr.cx('fr-mb-0'), classes.block)}
@@ -182,7 +208,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 						value: content || ''
 					}}
 				/>
-				{renderBlock(block)}
+				{renderPostInput(block)}
 			</div>
 		);
 	}
@@ -212,6 +238,9 @@ const useStyles = tss.withName(DisplayBlocks.name).create(() => ({
 	},
 	optionContainer: {
 		width: '200px'
+	},
+	divider: {
+		marginTop: '2rem'
 	}
 }));
 
