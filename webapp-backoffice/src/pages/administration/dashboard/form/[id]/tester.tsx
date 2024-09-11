@@ -30,17 +30,16 @@ const FormBuilder = (props: Props) => {
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Form Tester</h1>
-
 				</div>
-					<div>
+				<div>
 					<iframe
-						src="http://localhost:3001/Demarches/custom/1"
+						src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/custom/${form.id}`}
 						width="1000"
-						height="400"
+						height="800"
 						style={{ border: 'none' }}
 						title="Example Website"
 					/>
-					</div>
+				</div>
 			</div>
 		</FormLayout>
 	);

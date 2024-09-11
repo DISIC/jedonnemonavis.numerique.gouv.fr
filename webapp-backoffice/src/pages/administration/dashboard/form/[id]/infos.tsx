@@ -128,7 +128,7 @@ const FormBuilder: React.FC<Props> = props => {
 			</Head>
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
-					<h1>Form Informations</h1>
+					<h1>Informations</h1>
 				</div>
 				<DndProvider backend={HTML5Backend}>
 					<div className={classes.droppableArea}>
