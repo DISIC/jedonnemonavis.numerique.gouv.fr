@@ -189,6 +189,19 @@ export const getServerSideProps: GetServerSideProps<{
     },
   });
 
+  const divideArray = (blocks: BlockPartialWithRelations[]): BlockPartialWithRelations[][] => {
+    return blocks.reduce<BlockPartialWithRelations[][]>((acc, objet) => {
+      if (objet.type_bloc === 'new_page') {
+        acc.push([objet]);
+      } else {
+        acc[acc.length - 1].push(objet);
+      }
+      return acc;
+    }, [[]]);
+  }
+
+  console.log('divided blocks : ', divideArray(form?.blocks ?? []));
+
   if (form) {
     return {
       props: {
