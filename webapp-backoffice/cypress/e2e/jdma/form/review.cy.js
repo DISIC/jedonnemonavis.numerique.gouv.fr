@@ -97,14 +97,14 @@ describe('jdma-form-review', () => {
 	});
 });
 
-function deleteTestUsers() {
-	cy.request({
-		method: 'DELETE',
-		url: app_bo_url + '/api/cypress-test/deleteUsersAndProduct'
-	}).then(response => {
-		cy.log(response.body.message);
-	});
-}
+// function deleteTestUsers() {
+// 	cy.request({
+// 		method: 'DELETE',
+// 		url: app_bo_url + '/api/cypress-test/deleteUsersAndProduct'
+// 	}).then(response => {
+// 		cy.log(response.body.message);
+// 	});
+// }
 
 function getLastTestServiceID() {
 	return cy

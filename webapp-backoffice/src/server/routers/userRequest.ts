@@ -13,7 +13,6 @@ import {
 	getUserRequestRefusedEmailHtml
 } from '@/src/utils/emails';
 import { makeRelationFromUserInvite } from './user';
-import { addEmailDetail } from '@/src/pages/api/cypress-test/getValidationLink';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -67,55 +66,49 @@ export async function updateUserRequest(
 	});
 
 	if (updatedUserRequest.user !== null) {
-		const isTest = updatedUserRequest.user.email.includes('e2e-jdma-test');
-
-		if (isTest) {
-			addEmailDetail(updatedUserRequest.user.email);
-		} else {
-			if (updatedUserRequest.status === 'accepted') {
-				const updatedUser = await prisma.user.update({
-					where: { id: updatedUserRequest.user.id },
-					data: {
-						active: true
-					}
-				});
-
-				if (createDomain) {
-					const newDomain = updatedUserRequest.user.email
-						.toLowerCase()
-						.split('@')[1];
-					await prisma.whiteListedDomain.upsert({
-						where: { domain: newDomain },
-						create: { domain: newDomain },
-						update: {}
-					});
+		if (updatedUserRequest.status === 'accepted') {
+			const updatedUser = await prisma.user.update({
+				where: { id: updatedUserRequest.user.id },
+				data: {
+					active: true
 				}
+			});
 
-				await sendMail(
-					`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
-					updatedUser.email.toLowerCase(),
-					getUserRequestAcceptedEmailHtml(),
-					`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
-				);
-			} else if (updatedUserRequest.status === 'refused') {
-				await prisma.userRequest.update({
-					where: { id },
-					data: { user_id: null }
+			if (createDomain) {
+				const newDomain = updatedUserRequest.user.email
+					.toLowerCase()
+					.split('@')[1];
+				await prisma.whiteListedDomain.upsert({
+					where: { domain: newDomain },
+					create: { domain: newDomain },
+					update: {}
 				});
-
-				await prisma.user.delete({
-					where: { id: updatedUserRequest.user.id }
-				});
-
-				await sendMail(
-					`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
-					updatedUserRequest.user.email.toLowerCase(),
-					getUserRequestRefusedEmailHtml(message),
-					`Votre demande d'accès a été refusée${
-						message ? ` pour la raison suivante : ${message}` : '.'
-					}`
-				);
 			}
+
+			await sendMail(
+				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
+				updatedUser.email.toLowerCase(),
+				getUserRequestAcceptedEmailHtml(),
+				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
+			);
+		} else if (updatedUserRequest.status === 'refused') {
+			await prisma.userRequest.update({
+				where: { id },
+				data: { user_id: null }
+			});
+
+			await prisma.user.delete({
+				where: { id: updatedUserRequest.user.id }
+			});
+
+			await sendMail(
+				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
+				updatedUserRequest.user.email.toLowerCase(),
+				getUserRequestRefusedEmailHtml(message),
+				`Votre demande d'accès a été refusée${
+					message ? ` pour la raison suivante : ${message}` : '.'
+				}`
+			);
 		}
 	}
 

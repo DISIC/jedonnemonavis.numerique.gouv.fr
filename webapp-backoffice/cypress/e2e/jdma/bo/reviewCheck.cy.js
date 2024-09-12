@@ -1,5 +1,5 @@
 const app_url = Cypress.env('app_base_url');
-const invitedEmail = 'e2e-jdma-test-invite@beta.gouv.fr';
+const invitedEmail = Cypress.env('admin_guest_mail_bis');
 const userPassword = Cypress.env('user_password');
 
 describe('jdma-answer-check', () => {
@@ -29,22 +29,12 @@ describe('jdma-answer-check', () => {
 			.then(() => {
 				cy.url().should('eq', app_url + '/administration/dashboard/products');
 			});
+		cy.wait(8000);
 		cy.get('p.fr-badge.fr-badge--info')
 			.invoke('text')
 			.then(text => {
 				const value = parseInt(text);
 				expect(value).to.not.equal(0);
 			});
-		deleteTestUsers();
 	});
 });
-
-function deleteTestUsers() {
-	cy.request({
-		method: 'DELETE',
-		url: '/api/cypress-test/deleteUsersAndProduct',
-		failOnStatusCode: false
-	}).then(response => {
-		cy.log(response.body.message);
-	});
-}

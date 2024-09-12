@@ -15,7 +15,7 @@ export default async function handler(
 		const lastTestProduct = await prisma.product.findFirst({
 			where: {
 				title: {
-					startsWith: 'e2e-jdma-service-test'
+					equals: 'e2e-jdma-service-test'
 				}
 			}
 		});
