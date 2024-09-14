@@ -6,10 +6,7 @@ import {
   Block,
   BlockPartialWithRelations,
   Form,
-  BlockWithPartialRelations,
-  FormPartialWithRelations,
   OptionsBlock,
-  OptionsBlockPartialRelations,
 } from "@/prisma/generated/zod";
 import Input from "@codegouvfr/react-dsfr/Input";
 import { Select } from "@codegouvfr/react-dsfr/Select";
@@ -17,12 +14,17 @@ import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import Button from "@codegouvfr/react-dsfr/Button";
 
-type FormWithoutDates = Omit<Form, "created_at" | "updated_at"> & {
-  blocks: Omit<Block, "created_at" | "updated_at">[] &
-    {
-      options: Omit<OptionsBlock, "created_at" | "updated_at">[];
-    }[];
-};
+type FormWithoutDates =
+  | (Omit<Form, "created_at" | "updated_at"> & {
+      sections: {
+        number_section: number;
+        blocks: Omit<Block, "created_at" | "updated_at">[] &
+          {
+            options: Omit<OptionsBlock, "created_at" | "updated_at">[];
+          }[];
+      }[];
+    })
+  | undefined;
 
 type JDMACustumFormProps = {
   form: FormWithoutDates;
@@ -160,77 +162,71 @@ export default function JDMACustomForm({ form }: JDMACustumFormProps) {
 
 export const getServerSideProps: GetServerSideProps<{
   form: FormWithoutDates;
-}> = async ({ params, query, locale, res }) => {
-  if (!params?.id || isNaN(parseInt(params?.id as string))) {
-    return {
-      notFound: true,
-    };
+}> = async ({ params }) => {
+  if (!params?.id || isNaN(parseInt(params.id as string))) {
+    return { notFound: true };
   }
 
   await prisma.$connect();
 
   const form = await prisma.form.findUnique({
-    where: {
-      id: parseInt(params.id as string),
-    },
+    where: { id: parseInt(params.id as string) },
     include: {
       blocks: {
-        orderBy: {
-          position: "asc",
-        },
+        orderBy: { position: "asc" },
         include: {
-          options: {
-            orderBy: {
-              created_at: "asc",
-            },
-          },
+          options: { orderBy: { created_at: "asc" } },
         },
       },
     },
   });
 
-  const divideArray = (blocks: BlockPartialWithRelations[]): BlockPartialWithRelations[][] => {
-    return blocks.reduce<BlockPartialWithRelations[][]>((acc, objet) => {
-      if (objet.type_bloc === 'new_page') {
-        acc.push([objet]);
-      } else {
-        acc[acc.length - 1].push(objet);
-      }
-      return acc;
-    }, [[]]);
-  }
-
-  console.log('divided blocks : ', divideArray(form?.blocks ?? []));
+  const divideArray = (
+    blocks: BlockPartialWithRelations[]
+  ): BlockPartialWithRelations[][] => {
+    return blocks.reduce<BlockPartialWithRelations[][]>(
+      (acc, block) => {
+        if (block.type_bloc === "new_page") {
+          acc[acc.length - 1].push(block);
+          acc.push([]);
+        } else {
+          acc[acc.length - 1].push(block);
+        }
+        return acc;
+      },
+      [[]]
+    );
+  };
 
   if (form) {
     return {
       props: {
         form: {
           ...form,
-          created_at: form.created_at.toISOString(),
-          updated_at: form.updated_at.toISOString(),
-          blocks: form.blocks.map((block) => {
+          created_at: form.created_at?.toISOString(),
+          updated_at: form.updated_at?.toISOString(),
+          sections: divideArray(form.blocks).map((section, index) => {
             return {
-              ...block,
-              created_at: block.created_at.toISOString(),
-              updated_at: block.created_at.toISOString(),
-              options: block.options.map((option) => {
-                return {
-                  ...option,
-                  created_at: option.created_at.toISOString(),
-                  updated_at: option.created_at.toISOString(),
-                };
-              }),
+              number_section: index,
+              blocks: section.map((block) => ({
+                ...block,
+                created_at: block.created_at?.toISOString(),
+                updated_at: block.updated_at?.toISOString(),
+                options:
+                  block.options?.map((option) => ({
+                    ...option,
+                    created_at: option.created_at?.toISOString(),
+                    updated_at: option.updated_at?.toISOString(),
+                  })) ?? [],
+              })),
             };
           }),
         },
       },
     };
-  } else {
-    return {
-      notFound: true,
-    };
   }
+
+  return { notFound: true };
 };
 
 const useStyles = tss
