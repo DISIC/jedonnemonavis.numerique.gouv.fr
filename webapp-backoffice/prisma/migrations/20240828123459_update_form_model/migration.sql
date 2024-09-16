@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Form" ALTER COLUMN "link" DROP NOT NULL,
-ALTER COLUMN "active" SET DEFAULT false;

@@ -85,13 +85,13 @@ export const TypeBlocksDescription: TypeBlocsInput[] = [
 		description: 'Utilisez ceci pour ajouter une question avec une liste de réponse sous forme de menu déroulant. Les répondants ne peuvent choisir qu\'une seule réponse.',
 		hint: 'Entrez votre question... (menu déroulant)'
 	},
-	{
+	/*{
 		type: 'logic',
 		name: 'Logique conditionnelle',
 		category: 'Divers',
 		description: 'Créez des formulaires intelligents basés sur les réponses de vos répondants. Utilisez notamment ceci pour afficher des questions en fonction des réponses précédentes.',
 		hint: 'Renseignez la logique ici : '
-	},
+	},*/
 ]
 
 export const CGU: MainStructure = {
