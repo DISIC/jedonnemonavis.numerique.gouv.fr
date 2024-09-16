@@ -83,6 +83,18 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 			}
 		};
 
+		const deleteOption = trpc.options.delete.useMutation({});
+
+		const handleDeleteOption = async (index: number) => {
+			try {
+				await deleteOption.mutateAsync({
+					id: index
+				});
+			} catch (e) {
+				console.error(e);
+			}
+		};
+
 		const renderPreInput = (block: BlockWithOptions) => {
 			switch (block.type_bloc) {
 				default:
@@ -155,6 +167,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 											size="small"
 											title="Supprimer l'option"
 											onClick={() => {
+												handleDeleteOption(option.id);
 												const updatedOptions = options.filter(
 													(_, indexT) => indexT !== index
 												);

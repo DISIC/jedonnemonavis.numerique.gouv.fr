@@ -371,6 +371,6 @@ model OptionsBlock {
   label      String?
   value      String?
   content    String?
-  block      Block    @relation(fields: [block_id], references: [id])
+  block      Block    @relation(fields: [block_id], references: [id], onDelete: Cascade)
   block_id   Int
 }
