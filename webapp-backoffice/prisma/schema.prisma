@@ -339,6 +339,17 @@ model Export {
   link       String?
 }
 
+model LimiterReporting {
+  id             Int      @id @default(autoincrement())
+  ip_id          String   @unique
+  ip_adress      String
+  product_id     Int
+  button_id      Int
+  total_attempts Int
+  first_attempt  DateTime
+  last_attempt   DateTime
+}
+
 model Form {
   id         Int      @id @default(autoincrement())
   created_at DateTime @default(now())
@@ -375,3 +386,4 @@ model OptionsBlock {
   block      Block    @relation(fields: [block_id], references: [id], onDelete: Cascade)
   block_id   Int
 }
+
