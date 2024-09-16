@@ -156,7 +156,7 @@ export async function checkUserDomain(prisma: PrismaClient, email: string) {
 	const domainWhiteListed = await prisma.whiteListedDomain.findFirst({
 		where: { domain }
 	});
-	return !!domainWhiteListed;
+	return !!domainWhiteListed || domain.endsWith(".gouv.fr");;
 }
 
 export const userRouter = router({
