@@ -88,6 +88,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         termsLinkProps={{
           href: "/legalNotice",
         }}
+        license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
       />
     </>
   );
