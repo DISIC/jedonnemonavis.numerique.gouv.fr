@@ -2,13 +2,13 @@ import prisma from '@/src/utils/db';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 
-const ProductPage = () => {
+const FormPage = () => {
 	return;
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
-	const product = await prisma.product.findUnique({
+	const form = await prisma.form.findUnique({
 		where: {
 			id: parseInt(id as string)
 		}
@@ -48,31 +48,12 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	const hasAccessRightToProduct = await prisma.accessRight.findFirst({
-		where: {
-			user_email: currentUserToken.email as string,
-			product_id: parseInt(id as string),
-			status: 'carrier'
-		}
-	});
-
-	const hasAdminEntityRight = await prisma.adminEntityRight.findFirst({
-		where: {
-			user_email: currentUserToken.email as string,
-			entity_id: product?.entity_id
-		}
-	});
-
 	prisma.$disconnect();
 
-	if (
-		!hasAccessRightToProduct &&
-		!hasAdminEntityRight &&
-		!currentUser.role.includes('admin')
-	) {
+	if (form?.user_id !== currentUser.id) {
 		return {
 			redirect: {
-				destination: '/administration/dashboard/products',
+				destination: '/administration/dashboard/forms',
 				permanent: false
 			}
 		};
@@ -80,9 +61,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	return {
 		props: {
-			product: JSON.parse(JSON.stringify(product))
+			form: JSON.parse(JSON.stringify(form))
 		}
 	};
 };
 
-export default ProductPage;
+export default FormPage;

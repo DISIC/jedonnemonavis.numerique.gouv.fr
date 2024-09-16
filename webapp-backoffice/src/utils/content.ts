@@ -1,3 +1,5 @@
+import { TypeBlocsInput } from "../types/custom";
+
 interface MainStructure {
 	[key: string]: {
 		title: string;
@@ -11,6 +13,86 @@ interface MainStructure {
 		)[];
 	};
 }
+
+export const TypeBlocksDescription: TypeBlocsInput[] = [
+	{
+		type: 'paragraph',
+		name: 'Paragraphe',
+		category: 'Interface',
+		description: 'Utilisé pour afficher n\'importe quel type de texte.',
+		hint: 'Entrez votre texte...'
+	},
+	{
+		type: 'heading_1',
+		name: 'Titre 1',
+		category: 'Interface',
+		description: 'Un grand titre, approprié pour les grandes sections de votre formulaire.',
+		hint: 'Entrez votre grand titre...'
+	},
+	{
+		type: 'heading_2',
+		name: 'Titre 2',
+		category: 'Interface',
+		description: 'Un titre de taile moyenne, appropié pour les petites sections de votre formulaire.',
+		hint: 'Entrez votre titre moyen...'
+	},
+	{
+		type: 'heading_3',
+		name: 'Titre 3',
+		category: 'Interface',
+		description: 'Petit titre, approprié pour les questions.',
+		hint: 'Entrez votre petit titre...'
+	},
+	{
+		type: 'new_page',
+		name: 'Nouvelle Page',
+		category: 'Interface',
+		description: 'Ajoutez une nouvelle page au formulaire. Utilisez ceci pour créer des formulaires en plusieurs étapes.',
+		hint: 'Saisissez le texte du bouton pour naviguer vers la page suivante.'
+	},
+	{
+		type: 'input_text',
+		name: 'Réponse courte',
+		category: 'Questions',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse courte sous forme de texte.',
+		hint: 'Entrez votre question... (réponse courte)'
+	},
+	{
+		type: 'input_text_area',
+		name: 'Réponse longue',
+		category: 'Questions',
+		description: 'Utilisez ceci pour insérer une question combinée avec une réponse longue sans limite de caractère.',
+		hint: 'Entrez votre question... (réponse longue)'
+	},
+	{
+		type: 'radio',
+		name: 'Choix multiple',
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants ne peuvent choisir qu\'une seule réponse.',
+		hint: 'Entrez votre question... (choix multiple)'
+	},
+	{
+		type: 'checkbox',
+		name: 'Checkbox',
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants peuvent choisir plusieurs réponses.',
+		hint: 'Entrez votre question... (checkbox)'
+	},
+	{
+		type: 'select',
+		name: 'Menu déroulant',
+		category: 'Questions',
+		description: 'Utilisez ceci pour ajouter une question avec une liste de réponse sous forme de menu déroulant. Les répondants ne peuvent choisir qu\'une seule réponse.',
+		hint: 'Entrez votre question... (menu déroulant)'
+	},
+	/*{
+		type: 'logic',
+		name: 'Logique conditionnelle',
+		category: 'Divers',
+		description: 'Créez des formulaires intelligents basés sur les réponses de vos répondants. Utilisez notamment ceci pour afficher des questions en fonction des réponses précédentes.',
+		hint: 'Renseignez la logique ici : '
+	},*/
+]
 
 export const CGU: MainStructure = {
 	responsable: {

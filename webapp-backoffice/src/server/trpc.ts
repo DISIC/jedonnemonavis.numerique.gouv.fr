@@ -95,7 +95,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
-	if (meta?.isAdmin && ctx.session?.user?.role !== 'admin') {
+	if (meta?.isAdmin && !ctx.session?.user?.role.includes('admin')) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: 'You are not authorized to perform this action'

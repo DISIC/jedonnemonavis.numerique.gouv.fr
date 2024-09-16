@@ -18,6 +18,7 @@ generator zod {
 }
 
 enum UserRole {
+  superadmin
   admin
   user
 }
@@ -64,6 +65,23 @@ enum TypeExport {
   xls
 }
 
+enum Typebloc {
+  paragraph
+  heading_1
+  heading_2
+  heading_3
+  input_text
+  input_text_area
+  mark_input
+  smiley_input
+  select
+  radio
+  checkbox
+  new_page
+  divider
+  logic
+}
+
 // Next auth
 model User {
   id                   Int                   @id @default(autoincrement())
@@ -85,6 +103,7 @@ model User {
   favorites            Favorite[]
   api_keys             ApiKey[]
   exports              Export[]
+  forms                Form[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -330,3 +349,41 @@ model LimiterReporting {
   first_attempt  DateTime
   last_attempt   DateTime
 }
+
+model Form {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  title      String
+  link       String?
+  active     Boolean  @default(false)
+  blocks     Block[]
+}
+
+model Block {
+  id         Int            @id @default(autoincrement())
+  created_at DateTime       @default(now())
+  updated_at DateTime       @default(now())
+  form       Form           @relation(fields: [form_id], references: [id])
+  form_id    Int
+  position   Int
+  type_bloc  Typebloc
+  label      String?
+  value      String?
+  content    String?
+  options    OptionsBlock[]
+}
+
+model OptionsBlock {
+  id         Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  label      String?
+  value      String?
+  content    String?
+  block      Block    @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  block_id   Int
+}
+

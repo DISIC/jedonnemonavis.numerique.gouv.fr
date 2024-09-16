@@ -13,7 +13,7 @@ export const apiKeyRouter = router({
 		.query(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
 
-			if (input.product_id && ctx_user.role !== 'admin') {
+			if (input.product_id && !ctx_user.role.includes('admin')) {
 				const accessRight = await ctx.prisma.accessRight.findFirst({
 					where: {
 						user_email: ctx.user_api?.email,
@@ -28,7 +28,7 @@ export const apiKeyRouter = router({
 				}
 			}
 
-			if (input.entity_id && ctx_user.role !== 'admin') {
+			if (input.entity_id && !ctx_user.role.includes('admin')) {
 				const adminEntityRights = await ctx.prisma.adminEntityRight.findFirst({
 					where: {
 						user_email: ctx.user_api?.email,
