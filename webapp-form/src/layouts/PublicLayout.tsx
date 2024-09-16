@@ -9,6 +9,7 @@ import { i18n, useTranslation } from "next-i18next";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { ReactNode } from "react";
 import { tss } from "tss-react/dsfr";
 
@@ -28,37 +29,38 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         <title>Je donne mon avis</title>
         <meta name="description" content="Je donne mon avis" />
       </Head>
+      <SkipLinks
+        links={[
+          {
+            anchor: "#main",
+            label: "Contenu",
+          },
+          {
+            anchor: "#footer",
+            label: "Pied de page",
+          },
+        ]}
+      />
       <Header
         brandTop={
           <>
-            REPUBLIQUE
+            République
             <br />
-            FRANCAISE
+            française
           </>
         }
         homeLinkProps={{
           href: "#",
-          title: "Je donne mon avis",
+          title: "Accueil - Je donne mon avis (Services publics +)",
         }}
         id="fr-header-public-header"
-        serviceTitle={
-          <>
-            <Image
-              className={classes.logo}
-              alt="Service public +"
-              src="/Demarches/assets/services-plus.svg"
-              title="Service public + logo"
-              width={830}
-              height={250}
-            />
-          </>
-        }
+        serviceTitle={"Je donne mon avis"}
         quickAccessItems={[
           {
             buttonProps: {
               "aria-controls": "translate-select",
               "aria-expanded": false,
-              title: t("select language"),
+              title: t("Sélectionner une langue"),
               className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
             },
             iconId: "fr-icon-translate-2",
@@ -70,7 +72,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             ),
           },
         ]}
-        serviceTagline=""
+        serviceTagline="La voix de vos usagers"
       />
       <main id="main" role="main">
         {children}
@@ -100,5 +102,8 @@ const useStyles = tss
     logo: {
       maxHeight: fr.spacing("11v"),
       width: "100%",
+    },
+    "button#fr-header-public-header-menu-button": {
+      display: "none !important",
     },
   }));
