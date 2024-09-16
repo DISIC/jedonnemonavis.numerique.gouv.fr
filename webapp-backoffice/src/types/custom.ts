@@ -111,7 +111,7 @@ export type Condition = {
     };
 };
 
-export const CategorySchema = z.enum(['Interface', 'Questions']);
+export const CategorySchema = z.enum(['Interface', 'Questions', 'Divers']);
 
 export const TypeBlocsInputSchema = z.object({
   type: TypeblocSchema, 

@@ -79,6 +79,7 @@ enum Typebloc {
   checkbox
   new_page
   divider
+  logic
 }
 
 // Next auth

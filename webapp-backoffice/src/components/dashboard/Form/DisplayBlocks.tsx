@@ -199,6 +199,18 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 							</Button>
 						</>
 					);
+				case 'logic':
+					return (
+						<div
+							className={cx(
+								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
+							)}
+						>
+							<div className={fr.cx('fr-col-4')}>Quand : </div>
+							<div className={fr.cx('fr-col-4')}>Contient : </div>
+							<div className={fr.cx('fr-col-4')}>Quand : </div>
+						</div>
+					);
 				default:
 					return <></>;
 			}
