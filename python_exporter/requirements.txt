@@ -5,5 +5,5 @@ boto3==1.26.70
 python-dotenv==0.19.2
 requests==2.26.0
 XlsxWriter==3.0.2
-numpy==1.24.0 --only-binary=numpy
+numpy==1.26.0 --only-binary=numpy
 pandas==2.0.3 --only-binary=pandas
