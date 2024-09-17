@@ -197,17 +197,31 @@ export const userRouter = router({
 			};
 
 			if (search) {
-				const [firstName, lastName] = search.toLowerCase().split(' ');
-				where.OR = [
-					{
-						firstName: { contains: firstName, mode: 'insensitive' },
-						lastName: { contains: lastName, mode: 'insensitive' }
-					},
-					{
-						firstName: { contains: lastName, mode: 'insensitive' },
-						lastName: { contains: firstName, mode: 'insensitive' }
-					}
-				];
+				if (search.includes(' ')) {
+					const [firstName, lastName] = search.toLowerCase().split(' ');
+					where.OR = [
+						{
+							firstName: { contains: firstName, mode: 'insensitive' },
+							lastName: { contains: lastName, mode: 'insensitive' }
+						},
+						{
+							firstName: { contains: lastName, mode: 'insensitive' },
+							lastName: { contains: firstName, mode: 'insensitive' }
+						}
+					];
+				} else {
+					where.OR = [
+						{
+							firstName: { contains: search, mode: 'insensitive' },
+						},
+						{
+							lastName: { contains: search, mode: 'insensitive' }
+						},
+						{
+							email: { contains: search, mode: 'insensitive' }
+						}
+					];
+				}
 			}
 
 			if (sort) {
@@ -301,6 +315,19 @@ export const userRouter = router({
 
 			const deletedUser = await ctx.prisma.user.delete({
 				where: { id }
+			});
+
+			return { data: deletedUser };
+		}),
+
+	deleteMany: protectedProcedure
+		.meta({ isAdmin: true })
+		.input(z.object({ ids: z.array(z.number()) }))
+		.mutation(async ({ ctx, input }) => {
+			const { ids } = input;
+
+			const deletedUser = await ctx.prisma.user.deleteMany({
+				where: { id: {in: ids} }
 			});
 
 			return { data: deletedUser };
