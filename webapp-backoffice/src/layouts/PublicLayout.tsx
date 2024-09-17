@@ -225,6 +225,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					termsLinkProps={{
 						href: '/public/legalNotice'
 					}}
+					license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
 				/>
 			</div>
 		</>
