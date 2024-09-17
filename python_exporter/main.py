@@ -258,31 +258,18 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     print(f'\r{prefix} |{bar}| {percent}% ({iteration}) {suffix}', end='\r')
     if iteration == total:
         print()
-        
+
 def get_month_ranges(start_date, end_date):
     ranges = []
     current_date = start_date
-
     while current_date <= end_date:
-        # Début du mois à partir du premier jour du mois, ou de start_date si c'est au milieu d'un mois
         start_of_month = current_date.replace(day=1) if current_date != start_date else current_date
-        
-        # Calculer le dernier jour du mois
         end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
-        
-        # S'assurer que end_of_month inclut bien toute la journée jusqu'à 23:59:59
         end_of_month = datetime.combine(end_of_month, datetime.max.time())
-        
-        # Si la fin du mois dépasse end_date, limiter end_of_month à end_date
         if end_of_month > end_date:
             end_of_month = end_date
-        
-        # Ajouter la plage de dates (début et fin du mois)
         ranges.append((start_of_month, end_of_month))
-        
-        # Passer au mois suivant
         current_date = end_of_month + timedelta(days=1)
-
     return ranges
 
 def estimate_line_count(cell_text, wrap_length=30):
