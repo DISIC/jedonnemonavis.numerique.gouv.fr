@@ -6,4 +6,4 @@ python-dotenv==0.19.2
 requests==2.26.0
 pandas==2.0.3
 XlsxWriter==3.0.2
-numpy==1.24.0
+numpy==2.1.1
