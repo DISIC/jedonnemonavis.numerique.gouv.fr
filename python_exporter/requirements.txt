@@ -1,3 +1,5 @@
+pip==24.2
+setuptools==65.5.0
 psycopg2-binary==2.9.9
 boto3==1.26.70
 python-dotenv==0.19.2
