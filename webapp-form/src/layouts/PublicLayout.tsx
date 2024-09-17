@@ -7,11 +7,14 @@ import { Footer } from "@codegouvfr/react-dsfr/Footer";
 import { Header } from "@codegouvfr/react-dsfr/Header";
 import { i18n, useTranslation } from "next-i18next";
 import Head from "next/head";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
-import { ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 import { tss } from "tss-react/dsfr";
+
+const isReactElement = (element: ReactNode): element is ReactElement => {
+  return typeof element === "object" && element !== null && "props" in element;
+};
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   const { classes, cx } = useStyles();
@@ -23,10 +26,29 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     router.push({ pathname, query }, asPath, { locale: newLocale });
   };
 
+  const getProductTitle = () => {
+    if (isReactElement(children) && children.props?.product?.title) {
+      return children.props.product.title;
+    }
+    return "";
+  };
+
+  const getStepTitle = (step: string | string[] | undefined) => {
+    const titles: { [key: string]: string } = {
+      "0": "Clarté (étape 1 sur 3) |",
+      "1": "Aides (étape 2 sur 3) |",
+      "2": "Informations complémentaires (étape 3 sur 3) |",
+    };
+    return titles[step as string] || "";
+  };
+
   return (
     <>
       <Head>
-        <title>Je donne mon avis</title>
+        <title>
+          {getStepTitle(router.query.step)} Je donne mon avis sur la démarche "
+          {getProductTitle()}"
+        </title>
         <meta name="description" content="Je donne mon avis" />
       </Head>
       <SkipLinks
@@ -102,8 +124,5 @@ const useStyles = tss
     logo: {
       maxHeight: fr.spacing("11v"),
       width: "100%",
-    },
-    "button#fr-header-public-header-menu-button": {
-      display: "none !important",
     },
   }));
