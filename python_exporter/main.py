@@ -263,9 +263,11 @@ def get_month_ranges(start_date, end_date):
     ranges = []
     current_date = start_date
     while current_date <= end_date:
-        start_of_month = current_date.replace(day=1) if current_date != start_date else start_date
+        start_of_month = current_date.replace(day=1) if current_date != start_date else current_date
         end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
-        end_of_month = end_date if end_of_month > end_date else end_of_month
+        end_of_month = datetime.combine(end_of_month, datetime.max.time())
+        if end_of_month > end_date:
+            end_of_month = end_date
         ranges.append((start_of_month, end_of_month))
         current_date = end_of_month + timedelta(days=1)
     return ranges
