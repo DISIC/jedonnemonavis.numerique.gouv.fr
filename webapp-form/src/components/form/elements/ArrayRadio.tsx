@@ -356,6 +356,9 @@ const useStyles = tss
       "th:last-child, td:last-child": {
         width: "10rem",
       },
+      "th:not(:first-of-type):not(:last-child)": {
+        minWidth: "calc((100% - 20rem) / 6)",
+      },
     },
     reviewInputLabel: {
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
