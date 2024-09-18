@@ -20,6 +20,7 @@ import BlockModal from '@/src/components/dashboard/Form/BlockModal';
 import DisplayBlocks from '@/src/components/dashboard/Form/DisplayBlocks';
 import { OptionsBlock } from '@prisma/client';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
+import { TypeBlocksDescription } from '@/src/utils/content';
 
 interface Props {
 	form: Form;
@@ -177,7 +178,7 @@ const FormBuilder = (props: Props) => {
 	const renderLine = (line: BlockWithOptions, index: number) => {
 		return (
 			<div
-				className={classes.formLineContainer}
+				className={cx(fr.cx('fr-mb-5v', 'fr-p-5v'), classes.formLineContainer)}
 				onFocus={() => setActiveLine(index)}
 				onMouseEnter={() => setHoveredLine(index)}
 				onMouseLeave={() => setHoveredLine(null)}
@@ -234,6 +235,13 @@ const FormBuilder = (props: Props) => {
 								: null
 						}
 						ref={el => (inputRefs.current[index] = el)}
+						questionBlocks={formBlocks.filter(block => {
+							return TypeBlocksDescription.filter(
+								t => t.category === 'Questions'
+							)
+								.map(t => t.type)
+								.includes(block.type_bloc);
+						})}
 					></DisplayBlocks>
 				</div>
 			</div>
@@ -261,9 +269,13 @@ const FormBuilder = (props: Props) => {
 				</div>
 			</div>
 			<div className={classes.formBuilder}>
-				{formBlocks.map((line, index) => (
-					<div key={index}>{renderLine(line, index)}</div>
-				))}
+				<div className={fr.cx('fr-grid-row')}>
+					<div className={fr.cx('fr-col-12')}>
+						{formBlocks.map((line, index) => (
+							<div key={index}>{renderLine(line, index)}</div>
+						))}
+					</div>
+				</div>
 			</div>
 		</FormLayout>
 	);
@@ -290,8 +302,8 @@ const useStyles = tss.withName(FormBuilder.name).create({
 	formLineContainer: {
 		display: 'flex',
 		alignItems: 'center',
-		marginBottom: '20px',
-		position: 'relative'
+		position: 'relative',
+		backgroundColor: fr.colors.decisions.background.contrast.blueCumulus.default
 	},
 	actionButton: {
 		visibility: 'hidden'

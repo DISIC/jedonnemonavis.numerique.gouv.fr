@@ -35,6 +35,8 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
 
+  const mode = query.mode;
+
   await prisma.$connect();
 
   const form = await prisma.form.findUnique({
@@ -57,7 +59,7 @@ export const getServerSideProps: GetServerSideProps<{
     },
   });
 
-  if (form) {
+  if (form && (form.active || mode === "test")) {
     return {
       props: {
         form: {
