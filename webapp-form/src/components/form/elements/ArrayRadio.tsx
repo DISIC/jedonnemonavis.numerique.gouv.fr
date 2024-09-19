@@ -357,7 +357,7 @@ const useStyles = tss
         width: "10rem",
       },
       "th:not(:first-of-type):not(:last-child)": {
-        width: "calc((100% - 20rem) / 6)",
+        minWidth: "calc((100% - 20rem) / 6)",
       },
     },
     reviewInputLabel: {
