@@ -46,10 +46,17 @@ export const CustomFormLayout = (props: Props) => {
     );
 
     return (
-      <div className={fr.cx("fr-my-10v")}>
-        <Button type="submit">
-          {newPageBlock ? newPageBlock.content : "Envoyer"}
-        </Button>
+      <div className={fr.cx("fr-grid-row", "fr-my-10v")}>
+        <div className={fr.cx("fr-col-6")}></div>
+        <div className={cx(fr.cx("fr-col-6"), classes.next)}>
+          <Button
+            priority="primary"
+            iconId="fr-icon-arrow-right-fill"
+            iconPosition="right"
+          >
+            {newPageBlock ? newPageBlock.content : "Envoyer"}
+          </Button>
+        </div>
       </div>
     );
   };
@@ -64,26 +71,48 @@ export const CustomFormLayout = (props: Props) => {
           </div>
         </div>
       ) : (
-        <form
-          onSubmit={(e) => {
-            const isLastStep = currentStep + 1 === steps.length;
-            if (!isLastStep) {
-              setCurrentStep(currentStep + 1);
-              window.scrollTo({
-                top: 0,
-                behavior: "smooth",
-              });
-            } else setFormCompleted(true);
-            e.preventDefault();
-          }}
-        >
-          {steps[currentStep]
-            .filter((block) => block.type_bloc !== "new_page")
-            .map((block) => (
-              <DisplayBlocks block={block}></DisplayBlocks>
-            ))}
-          <>{renderActionRow(currentStep)}</>
-        </form>
+        <div className={fr.cx("fr-grid-row")}>
+          <div className={fr.cx("fr-col-12")}>
+            {currentStep > 0 && (
+              <Button
+                priority="tertiary"
+                size="small"
+                iconId="fr-icon-arrow-left-fill"
+                iconPosition="left"
+                className={fr.cx("fr-mt-10v")}
+                nativeButtonProps={{
+                  onClick: () => {
+                    setCurrentStep(currentStep - 1);
+                  },
+                }}
+              >
+                retour
+              </Button>
+            )}
+          </div>
+          <div className={fr.cx("fr-col-12")}>
+            <form
+              onSubmit={(e) => {
+                const isLastStep = currentStep + 1 === steps.length;
+                if (!isLastStep) {
+                  setCurrentStep(currentStep + 1);
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                } else setFormCompleted(true);
+                e.preventDefault();
+              }}
+            >
+              {steps[currentStep]
+                .filter((block) => block.type_bloc !== "new_page")
+                .map((block) => (
+                  <DisplayBlocks block={block}></DisplayBlocks>
+                ))}
+              <>{renderActionRow(currentStep)}</>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -93,5 +122,8 @@ const useStyles = tss
   .withName(CustomFormLayout.name)
   .withParams()
   .create(() => ({
-    actionRow: {},
+    next: {
+      display: "flex",
+      justifyContent: "flex-end",
+    },
   }));

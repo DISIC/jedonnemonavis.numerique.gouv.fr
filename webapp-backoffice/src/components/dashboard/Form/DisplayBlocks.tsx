@@ -12,6 +12,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import Select from '@codegouvfr/react-dsfr/Select';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -19,6 +20,7 @@ interface Props {
 	block: BlockWithOptions;
 	page: number | null;
 	onAction: (block: BlockWithOptions) => void;
+	questionBlocks: BlockWithOptions[];
 }
 
 export type OptionValues = Omit<
@@ -28,7 +30,7 @@ export type OptionValues = Omit<
 
 const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 	(props: Props, ref) => {
-		const { block, onAction, page } = props;
+		const { block, onAction, page, questionBlocks } = props;
 		const { cx, classes } = useStyles();
 		const [content, setContent] = React.useState<string>(block.content || '');
 		const [options, setOptions] = React.useState<OptionsBlock[]>(
@@ -104,26 +106,81 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 
 		const renderPostInput = (block: BlockWithOptions) => {
 			switch (block.type_bloc) {
+				case 'heading_1':
+				case 'heading_2':
+				case 'heading_3':
+				case 'paragraph':
+				case 'input_text':
+				case 'input_text_area':
+					return (
+						<Input
+							ref={ref}
+							className={cx(fr.cx('fr-mb-0'), classes.block)}
+							label=""
+							hintText={
+								TypeBlocksDescription.find(t => t.type === block.type_bloc)
+									?.hint
+							}
+							nativeInputProps={{
+								onChange: e => {
+									setContent(e.target.value);
+								},
+								value: content || ''
+							}}
+						/>
+					);
 				case 'new_page':
 					return (
-						<div
-							className={cx(
-								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
-							)}
-						>
-							<div className={fr.cx('fr-col-12')}>
-								<hr className={cx(classes.divider)} />
+						<>
+							<Input
+								ref={ref}
+								className={cx(fr.cx('fr-mb-0'), classes.block)}
+								label=""
+								hintText={
+									TypeBlocksDescription.find(t => t.type === block.type_bloc)
+										?.hint
+								}
+								nativeInputProps={{
+									onChange: e => {
+										setContent(e.target.value);
+									},
+									value: content || ''
+								}}
+							/>
+							<div
+								className={cx(
+									fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
+								)}
+							>
+								<div className={fr.cx('fr-col-12')}>
+									<hr className={cx(classes.divider)} />
+								</div>
+								<div className={fr.cx('fr-col-12')}>
+									<h5>Page {page}</h5>
+								</div>
 							</div>
-							<div className={fr.cx('fr-col-12')}>
-								<h5>Page {page}</h5>
-							</div>
-						</div>
+						</>
 					);
 				case 'radio':
 				case 'checkbox':
 				case 'select':
 					return (
 						<>
+							<Input
+								ref={ref}
+								className={cx(fr.cx('fr-mb-0'), classes.block)}
+								label=""
+								hintText={
+									TypeBlocksDescription.find(t => t.type === block.type_bloc)
+										?.hint
+								}
+								nativeInputProps={{
+									onChange: e => {
+										setContent(e.target.value);
+									},
+									value: content || ''
+								}}
+							/>
 							{options.map((option, index) => (
 								<div
 									key={option.id}
@@ -142,18 +199,12 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 											hintText={`Option ${index + 1}`}
 											nativeInputProps={{
 												onChange: e => {
-													// Copier les options actuelles
 													const updatedOptions = [...options];
-
-													// Modifier l'option spécifique
 													updatedOptions[index] = {
 														...updatedOptions[index],
 														content: e.target.value
 													};
-
 													handleSaveOption(updatedOptions[index]);
-
-													// Mettre à jour l'état avec les options modifiées
 													setOptions(updatedOptions);
 												},
 												value: option.content || ''
@@ -206,9 +257,43 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
 							)}
 						>
-							<div className={fr.cx('fr-col-4')}>Quand : </div>
-							<div className={fr.cx('fr-col-4')}>Contient : </div>
-							<div className={fr.cx('fr-col-4')}>Quand : </div>
+							<div className={fr.cx('fr-col-4')}>
+								<Select
+									label="Quand"
+									nativeSelectProps={{
+										onChange: e => {
+											console.log(e);
+										}
+									}}
+								>
+									{questionBlocks.map(tmpBlock => {
+										return (
+											<option key={tmpBlock.id} value={tmpBlock.id}>
+												{tmpBlock.content}
+											</option>
+										);
+									})}
+								</Select>
+							</div>
+							<div className={fr.cx('fr-col-4')}>
+								<Select
+									label="Condition"
+									nativeSelectProps={{
+										onChange: e => {
+											console.log(e);
+										}
+									}}
+								>
+									{questionBlocks.map(tmpBlock => {
+										return (
+											<option key={tmpBlock.id} value={tmpBlock.id}>
+												{tmpBlock.content}
+											</option>
+										);
+									})}
+								</Select>
+							</div>
+							<div className={fr.cx('fr-col-4')}></div>
 						</div>
 					);
 				default:
@@ -219,20 +304,6 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 		return (
 			<div>
 				{renderPreInput(block)}
-				<Input
-					ref={ref}
-					className={cx(fr.cx('fr-mb-0'), classes.block)}
-					label=""
-					hintText={
-						TypeBlocksDescription.find(t => t.type === block.type_bloc)?.hint
-					}
-					nativeInputProps={{
-						onChange: e => {
-							setContent(e.target.value);
-						},
-						value: content || ''
-					}}
-				/>
 				{renderPostInput(block)}
 			</div>
 		);
@@ -248,18 +319,6 @@ const useStyles = tss.withName(DisplayBlocks.name).create(() => ({
 	},
 	block: {
 		minHeight: '1.5rem'
-	},
-	heading_1: {
-		fontSize: '2.5rem'
-	},
-	heading_2: {
-		fontSize: '2.rem'
-	},
-	heading_3: {
-		fontSize: '1.5rem'
-	},
-	asterisk: {
-		color: fr.colors.decisions.text.default.error.default
 	},
 	optionContainer: {
 		width: '200px'

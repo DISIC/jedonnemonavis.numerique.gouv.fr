@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
-import { FormUncheckedCreateInputSchema } from '@/prisma/generated/zod';
+import { FormUncheckedCreateInputSchema, FormUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 
 export const formRouter = router({
@@ -58,6 +58,19 @@ export const formRouter = router({
 			});
 
 			return { data: form };
+		}),
+
+	update: protectedProcedure
+		.input(FormUncheckedUpdateInputSchema)
+		.mutation(async ({ ctx, input }) => {
+			const updatedForm = await ctx.prisma.form.update({
+				where: {
+					id: input.id as number
+				},
+				data: input
+			});
+
+			return { data: updatedForm };
 		}),
 
 	delete: protectedProcedure
