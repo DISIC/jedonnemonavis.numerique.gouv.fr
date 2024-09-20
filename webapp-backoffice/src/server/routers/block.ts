@@ -58,8 +58,26 @@ export const blockRouter = router({
 				const block = await prisma.block.create({
 				  data: blockPayLoad
 				});
+
+				if(block.type_bloc === 'logic') {
+					const type_options_logic = ['when', 'condition', 'value', 'then', 'action']
+					await Promise.all(
+						type_options_logic.map(async (type_l) => {
+							await prisma.optionsBlock.create({
+								data: {
+									block_id: block.id,
+									created_at: new Date(),
+									updated_at: new Date(),
+									label: type_l
+								}
+							})
+						})
+					)
+				}
+
 				return block;
 			});
+
 			return { data: block };
 		}),
 

@@ -178,11 +178,11 @@ const FormBuilder = (props: Props) => {
 	const renderLine = (line: BlockWithOptions, index: number) => {
 		return (
 			<div
-				className={cx(fr.cx('fr-mb-5v', 'fr-p-5v'), classes.formLineContainer)}
+				className={cx(fr.cx('fr-mb-5v', 'fr-p-5v'), classes.formLineContainer, line.type_bloc !== 'new_page' ? classes.formColoredLine : '')}
 				onFocus={() => setActiveLine(index)}
 				onMouseEnter={() => setHoveredLine(index)}
 				onMouseLeave={() => setHoveredLine(null)}
-				onKeyDown={e => handleKeyDown(e, index)}
+				/*onKeyDown={e => handleKeyDown(e, index)}*/
 			>
 				<Button
 					iconId="fr-icon-delete-bin-line"
@@ -303,6 +303,8 @@ const useStyles = tss.withName(FormBuilder.name).create({
 		display: 'flex',
 		alignItems: 'center',
 		position: 'relative',
+	},
+	formColoredLine: {
 		backgroundColor: fr.colors.decisions.background.contrast.blueCumulus.default
 	},
 	actionButton: {

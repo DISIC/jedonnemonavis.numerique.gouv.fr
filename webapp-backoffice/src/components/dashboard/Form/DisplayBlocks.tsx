@@ -7,10 +7,11 @@ import {
 	OptionsBlockPartial
 } from '@/prisma/generated/zod';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
-import { TypeBlocksDescription } from '@/src/utils/content';
+import { TypeBlocksDescription, TypeConditions } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Highlight from '@codegouvfr/react-dsfr/Highlight';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Select from '@codegouvfr/react-dsfr/Select';
 import React from 'react';
@@ -109,7 +110,6 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 				case 'heading_1':
 				case 'heading_2':
 				case 'heading_3':
-				case 'paragraph':
 				case 'input_text':
 				case 'input_text_area':
 					return (
@@ -122,6 +122,26 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 									?.hint
 							}
 							nativeInputProps={{
+								onChange: e => {
+									setContent(e.target.value);
+								},
+								value: content || ''
+							}}
+						/>
+					);
+				case 'paragraph':
+					return (
+						<Input
+							ref={ref}
+							className={cx(fr.cx('fr-mb-0'), classes.block)}
+							textArea
+							
+							label=""
+							hintText={
+								TypeBlocksDescription.find(t => t.type === block.type_bloc)
+									?.hint
+							}
+							nativeTextAreaProps={{
 								onChange: e => {
 									setContent(e.target.value);
 								},
@@ -251,7 +271,9 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 						</>
 					);
 				case 'logic':
+					console.log(`block logic has options : `, options)
 					return (
+						<Highlight>
 						<div
 							className={cx(
 								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
@@ -261,6 +283,8 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 								<Select
 									label="Quand"
 									nativeSelectProps={{
+										name: '',
+										value: options.find(o => o.label === 'when')?.value || '',
 										onChange: e => {
 											console.log(e);
 										}
@@ -284,17 +308,30 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 										}
 									}}
 								>
-									{questionBlocks.map(tmpBlock => {
+									{TypeConditions.map(typeC => {
 										return (
-											<option key={tmpBlock.id} value={tmpBlock.id}>
-												{tmpBlock.content}
+											<option key={typeC.value} value={typeC.value}>
+												{typeC.label}
 											</option>
 										);
 									})}
 								</Select>
 							</div>
-							<div className={fr.cx('fr-col-4')}></div>
+							<div className={fr.cx('fr-col-4')}>
+								<Input
+									ref={ref}
+									className={cx(fr.cx('fr-mb-0'), classes.block)}
+									label="Valeur"
+									nativeInputProps={{
+										onChange: e => {
+											console.log(e)
+										},
+										value: content || ''
+									}}
+								/>
+							</div>
 						</div>
+						</Highlight>
 					);
 				default:
 					return <></>;
@@ -302,7 +339,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 		};
 
 		return (
-			<div>
+			<div className={cx(classes.blockInput)}>
 				{renderPreInput(block)}
 				{renderPostInput(block)}
 			</div>
@@ -311,6 +348,11 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 );
 
 const useStyles = tss.withName(DisplayBlocks.name).create(() => ({
+	blockInput: {
+		["textarea"]: {
+			minHeight: '150px'
+		}
+	},
 	errorColor: {
 		color: fr.colors.decisions.text.default.error.default
 	},
