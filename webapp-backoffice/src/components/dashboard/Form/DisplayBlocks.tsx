@@ -1,6 +1,6 @@
 import { OptionsBlock } from '@/prisma/generated/zod';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
-import { TypeBlocksDescription, TypeConditions } from '@/src/utils/content';
+import { TypeActions, TypeBlocksDescription, TypeConditions } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -275,7 +275,6 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 						</>
 					);
 				case 'logic':
-					// console.log(`block logic has options : `, options);
 					return (
 						<Highlight>
 							<div
@@ -424,6 +423,42 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 													</option>
 												);
 											})}
+									</Select>
+								</div>
+								<div className={fr.cx('fr-col-4')}>
+									<Select
+										label="Action"
+										nativeSelectProps={{
+											name: '',
+											value:
+												options.find(o => o.label === 'action')?.content ||
+												'',
+											onChange: e => {
+												const updatedOptions = [...options];
+												const optionIndex = updatedOptions.findIndex(
+													o => o.label === 'action'
+												);
+												if (optionIndex !== -1) {
+													updatedOptions[optionIndex] = {
+														...updatedOptions[optionIndex],
+														content: e.target.value
+													};
+													handleSaveOption(updatedOptions[optionIndex]);
+													setOptions(updatedOptions);
+												}
+											}
+										}}
+									>
+										<option disabled hidden selected value="">
+											Selectionnez une action
+										</option>
+										{TypeActions.map(typeC => {
+											return (
+												<option key={typeC.value} value={typeC.value}>
+													{typeC.label}
+												</option>
+											);
+										})}
 									</Select>
 								</div>
 							</div>
