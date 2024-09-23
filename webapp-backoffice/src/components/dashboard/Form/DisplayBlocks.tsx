@@ -1,16 +1,10 @@
-import {
-	Block,
-	BlockPartialWithRelations,
-	BlockWithRelations,
-	Form,
-	OptionsBlock,
-	OptionsBlockPartial
-} from '@/prisma/generated/zod';
+import { OptionsBlock } from '@/prisma/generated/zod';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
-import { TypeBlocksDescription } from '@/src/utils/content';
+import { TypeBlocksDescription, TypeConditions } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Highlight from '@codegouvfr/react-dsfr/Highlight';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Select from '@codegouvfr/react-dsfr/Select';
 import React from 'react';
@@ -20,7 +14,7 @@ interface Props {
 	block: BlockWithOptions;
 	page: number | null;
 	onAction: (block: BlockWithOptions) => void;
-	questionBlocks: BlockWithOptions[];
+	allBlocks: BlockWithOptions[];
 }
 
 export type OptionValues = Omit<
@@ -30,12 +24,24 @@ export type OptionValues = Omit<
 
 const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 	(props: Props, ref) => {
-		const { block, onAction, page, questionBlocks } = props;
+		const { block, onAction, page, allBlocks } = props;
 		const { cx, classes } = useStyles();
 		const [content, setContent] = React.useState<string>(block.content || '');
 		const [options, setOptions] = React.useState<OptionsBlock[]>(
 			block.options || []
 		);
+
+		const questionBlocks = allBlocks.filter(block => {
+			return TypeBlocksDescription.filter(t => t.category === 'Questions')
+				.map(t => t.type)
+				.includes(block.type_bloc);
+		});
+
+		React.useEffect(() => {
+			if (block.type_bloc === 'logic') {
+				setOptions(block.options);
+			}
+		}, [block]);
 
 		React.useEffect(() => {
 			setContent(block.content || '');
@@ -109,7 +115,6 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 				case 'heading_1':
 				case 'heading_2':
 				case 'heading_3':
-				case 'paragraph':
 				case 'input_text':
 				case 'input_text_area':
 					return (
@@ -122,6 +127,25 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 									?.hint
 							}
 							nativeInputProps={{
+								onChange: e => {
+									setContent(e.target.value);
+								},
+								value: content || ''
+							}}
+						/>
+					);
+				case 'paragraph':
+					return (
+						<Input
+							ref={ref}
+							className={cx(fr.cx('fr-mb-0'), classes.block)}
+							textArea
+							label=""
+							hintText={
+								TypeBlocksDescription.find(t => t.type === block.type_bloc)
+									?.hint
+							}
+							nativeTextAreaProps={{
 								onChange: e => {
 									setContent(e.target.value);
 								},
@@ -251,50 +275,159 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 						</>
 					);
 				case 'logic':
+					// console.log(`block logic has options : `, options);
 					return (
-						<div
-							className={cx(
-								fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
-							)}
-						>
-							<div className={fr.cx('fr-col-4')}>
-								<Select
-									label="Quand"
-									nativeSelectProps={{
-										onChange: e => {
-											console.log(e);
-										}
-									}}
-								>
-									{questionBlocks.map(tmpBlock => {
-										return (
-											<option key={tmpBlock.id} value={tmpBlock.id}>
-												{tmpBlock.content}
-											</option>
-										);
-									})}
-								</Select>
+						<Highlight>
+							<div
+								className={cx(
+									fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
+								)}
+							>
+								<div className={fr.cx('fr-col-4')}>
+									<Select
+										label="Quand"
+										nativeSelectProps={{
+											name: '',
+											value:
+												options.find(o => o.label === 'when')?.content || '',
+											onChange: e => {
+												const updatedOptions = [...options];
+												const optionIndex = updatedOptions.findIndex(
+													o => o.label === 'when'
+												);
+												if (optionIndex !== -1) {
+													updatedOptions[optionIndex] = {
+														...updatedOptions[optionIndex],
+														content: e.target.value
+													};
+													handleSaveOption(updatedOptions[optionIndex]);
+													setOptions(updatedOptions);
+												}
+											}
+										}}
+									>
+										<option disabled hidden selected value="">
+											Selectionnez une question
+										</option>
+										{questionBlocks.map(tmpBlock => {
+											return (
+												<option key={tmpBlock.id} value={tmpBlock.id}>
+													{tmpBlock.content}
+												</option>
+											);
+										})}
+									</Select>
+								</div>
+								<div className={fr.cx('fr-col-4')}>
+									<Select
+										label="Condition"
+										nativeSelectProps={{
+											name: '',
+											value:
+												options.find(o => o.label === 'condition')?.content ||
+												'',
+											onChange: e => {
+												const updatedOptions = [...options];
+												const optionIndex = updatedOptions.findIndex(
+													o => o.label === 'condition'
+												);
+												if (optionIndex !== -1) {
+													updatedOptions[optionIndex] = {
+														...updatedOptions[optionIndex],
+														content: e.target.value
+													};
+													handleSaveOption(updatedOptions[optionIndex]);
+													setOptions(updatedOptions);
+												}
+											}
+										}}
+									>
+										<option disabled hidden selected value="">
+											Selectionnez une condition
+										</option>
+										{TypeConditions.map(typeC => {
+											return (
+												<option key={typeC.value} value={typeC.value}>
+													{typeC.label}
+												</option>
+											);
+										})}
+									</Select>
+								</div>
+								<div className={fr.cx('fr-col-4')}>
+									{['contains', 'notContain'].includes(
+										options.find(o => o.label === 'condition')?.content || ''
+									) && (
+										<Input
+											ref={ref}
+											className={cx(fr.cx('fr-mb-0'), classes.block)}
+											label="Valeur"
+											nativeInputProps={{
+												onChange: e => {
+													const updatedOptions = [...options];
+													const optionIndex = updatedOptions.findIndex(
+														o => o.label === 'value'
+													);
+													if (optionIndex !== -1) {
+														updatedOptions[optionIndex] = {
+															...updatedOptions[optionIndex],
+															content: e.target.value
+														};
+														handleSaveOption(updatedOptions[optionIndex]);
+														setOptions(updatedOptions);
+													}
+												},
+												value:
+													options.find(o => o.label === 'value')?.content || ''
+											}}
+										/>
+									)}
+								</div>
 							</div>
-							<div className={fr.cx('fr-col-4')}>
-								<Select
-									label="Condition"
-									nativeSelectProps={{
-										onChange: e => {
-											console.log(e);
-										}
-									}}
-								>
-									{questionBlocks.map(tmpBlock => {
-										return (
-											<option key={tmpBlock.id} value={tmpBlock.id}>
-												{tmpBlock.content}
-											</option>
-										);
-									})}
-								</Select>
+							<div
+								className={cx(
+									fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-0')
+								)}
+							>
+								<div className={fr.cx('fr-col-4')}>
+									<Select
+										label="Alors"
+										nativeSelectProps={{
+											name: '',
+											value:
+												options.find(o => o.label === 'then')?.content || '',
+											onChange: e => {
+												const updatedOptions = [...options];
+												const optionIndex = updatedOptions.findIndex(
+													o => o.label === 'then'
+												);
+												if (optionIndex !== -1) {
+													updatedOptions[optionIndex] = {
+														...updatedOptions[optionIndex],
+														content: e.target.value
+													};
+													handleSaveOption(updatedOptions[optionIndex]);
+													setOptions(updatedOptions);
+												}
+											}
+										}}
+									>
+										<option disabled hidden selected value="">
+											Selectionnez un bloc
+										</option>
+										{allBlocks
+											.filter(block => block.type_bloc !== 'logic')
+											.map(tmpBlock => {
+												return (
+													<option key={tmpBlock.id} value={tmpBlock.id}>
+														{tmpBlock.content}
+													</option>
+												);
+											})}
+									</Select>
+								</div>
 							</div>
-							<div className={fr.cx('fr-col-4')}></div>
-						</div>
+						</Highlight>
 					);
 				default:
 					return <></>;
@@ -302,7 +435,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 		};
 
 		return (
-			<div>
+			<div className={cx(classes.blockInput)}>
 				{renderPreInput(block)}
 				{renderPostInput(block)}
 			</div>
@@ -311,6 +444,11 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 );
 
 const useStyles = tss.withName(DisplayBlocks.name).create(() => ({
+	blockInput: {
+		['textarea']: {
+			minHeight: '150px'
+		}
+	},
 	errorColor: {
 		color: fr.colors.decisions.text.default.error.default
 	},

@@ -4,23 +4,14 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import {
-	Block,
-	BlockPartialWithRelations,
-	BlockUpdateInputSchema,
-	BlockUpdateWithoutOptionsInputSchema,
-	BlockWithRelations,
-	Form
-} from '@/prisma/generated/zod';
+import { Block, Form } from '@/prisma/generated/zod';
 import FormLayout from '@/src/layouts/Form/FormLayout';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import BlockModal from '@/src/components/dashboard/Form/BlockModal';
 import DisplayBlocks from '@/src/components/dashboard/Form/DisplayBlocks';
-import { OptionsBlock } from '@prisma/client';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
-import { TypeBlocksDescription } from '@/src/utils/content';
 
 interface Props {
 	form: Form;
@@ -178,11 +169,15 @@ const FormBuilder = (props: Props) => {
 	const renderLine = (line: BlockWithOptions, index: number) => {
 		return (
 			<div
-				className={cx(fr.cx('fr-mb-5v', 'fr-p-5v'), classes.formLineContainer)}
+				className={cx(
+					fr.cx('fr-mb-5v', 'fr-p-5v'),
+					classes.formLineContainer,
+					line.type_bloc !== 'new_page' ? classes.formColoredLine : ''
+				)}
 				onFocus={() => setActiveLine(index)}
 				onMouseEnter={() => setHoveredLine(index)}
 				onMouseLeave={() => setHoveredLine(null)}
-				onKeyDown={e => handleKeyDown(e, index)}
+				/*onKeyDown={e => handleKeyDown(e, index)}*/
 			>
 				<Button
 					iconId="fr-icon-delete-bin-line"
@@ -235,13 +230,7 @@ const FormBuilder = (props: Props) => {
 								: null
 						}
 						ref={el => (inputRefs.current[index] = el)}
-						questionBlocks={formBlocks.filter(block => {
-							return TypeBlocksDescription.filter(
-								t => t.category === 'Questions'
-							)
-								.map(t => t.type)
-								.includes(block.type_bloc);
-						})}
+						allBlocks={formBlocks}
 					></DisplayBlocks>
 				</div>
 			</div>
@@ -302,7 +291,9 @@ const useStyles = tss.withName(FormBuilder.name).create({
 	formLineContainer: {
 		display: 'flex',
 		alignItems: 'center',
-		position: 'relative',
+		position: 'relative'
+	},
+	formColoredLine: {
 		backgroundColor: fr.colors.decisions.background.contrast.blueCumulus.default
 	},
 	actionButton: {

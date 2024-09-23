@@ -94,6 +94,25 @@ export const TypeBlocksDescription: TypeBlocsInput[] = [
 	},
 ]
 
+export const TypeConditions = [
+	{
+		label: "est vide",
+		value: 'isEmpty'
+	},
+	{
+		label: "n'est pas vide",
+		value: "notEmpty"
+	},
+	{
+		label: "contient",
+		value: "contains"
+	},
+	{
+		label: "ne contient pas",
+		value: "notContain"
+	}
+]
+
 export const CGU: MainStructure = {
 	responsable: {
 		title:
