@@ -55,7 +55,7 @@ export const SmileyInput = (props: Props) => {
       <div className={cx(classes.smileysContainer)}>
         <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
           <legend className={fr.cx("fr-fieldset__legend")}>
-            {label}
+            {<h6>{label}</h6>}
             {hint && (
               <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hint}</span>
             )}

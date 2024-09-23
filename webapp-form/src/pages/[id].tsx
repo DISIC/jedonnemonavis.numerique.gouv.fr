@@ -350,7 +350,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <Link
                 className={fr.cx("fr-link")}
                 href={
-                  "https://www.plus.transformation.gouv.fr/experience/step_1#breadcrumb"
+                  "https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2"
                 }
                 target="_blank"
               >

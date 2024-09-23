@@ -104,15 +104,27 @@ export const CheckboxInput = (props: Props) => {
   };
 
   if (field.kind === "checkbox") {
+    const uncheckText = "(cette option décoche les autres options)";
     return (
       <div className={fr.cx("fr-grid-row")}>
         <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
           <>
             <Checkbox
-              legend={t(field.label)}
+              legend={<h6>{t(field.label)}</h6>}
               hintText={t(field.hint ?? "")}
               options={field.options.map((opt, index) => ({
-                label: t(opt.label),
+                label: (
+                  <>
+                    {t(opt.label) === "Je n'ai pas eu besoin d'aide" ? (
+                      <>
+                        {t(opt.label)}{" "}
+                        <span className="fr-sr-only">{uncheckText}</span>
+                      </>
+                    ) : (
+                      t(opt.label)
+                    )}
+                  </>
+                ),
                 nativeInputProps: {
                   name: opt.name || `${field.name}-${index}`,
                   checked: opinion[field.name as CheckboxOpinionKeys]?.includes(

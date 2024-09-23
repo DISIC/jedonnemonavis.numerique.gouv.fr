@@ -30,7 +30,7 @@ export const FormStepper = (props: Props) => {
 
   return (
     <div>
-      <div className={cx(classes.step)}>
+      <div>
         {steps.length > 1 && (
           <>
             <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
@@ -104,11 +104,6 @@ const useStyles = tss
   .create(() => ({
     title: {
       [fr.breakpoints.down("md")]: {
-        display: "none",
-      },
-    },
-    step: {
-      ".fr-stepper__title": {
         display: "none",
       },
     },
