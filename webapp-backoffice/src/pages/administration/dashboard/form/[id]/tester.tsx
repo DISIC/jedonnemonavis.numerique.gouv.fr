@@ -33,7 +33,7 @@ const FormBuilder = (props: Props) => {
 				</div>
 				<div>
 					<iframe
-						src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/custom/${form.id}`}
+						src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/custom/${form.id}?mode=test`}
 						width="1000"
 						height="800"
 						style={{ border: 'none' }}
