@@ -5,8 +5,12 @@ import { tss } from "tss-react/dsfr";
 import { useRouter } from "next/router";
 import { FormWithoutDates } from "@/src/pages/custom/[id]";
 import React from "react";
-import { BlockPartialWithRelations } from "@/prisma/generated/zod";
+import {
+  BlockPartialWithRelations,
+  BlockWithPartialRelations,
+} from "@/prisma/generated/zod";
 import { DisplayBlocks } from "../../custom/DisplayBlocks";
+import { applyLogicForm } from "@/src/utils/tools";
 
 type Props = {
   form: FormWithoutDates;
@@ -45,6 +49,19 @@ export const CustomFormLayout = (props: Props) => {
       (block) => block.type_bloc === "new_page"
     );
 
+    const logicPageButton =
+      (form.blocks as BlockWithPartialRelations[]).find(
+        (b) =>
+          b.type_bloc === "logic" &&
+          b.options?.some((o) => parseInt(o.content ?? "") === newPageBlock?.id)
+      ) || null;
+
+    if (logicPageButton)
+      console.log(
+        "found some logic for this button next page : ",
+        logicPageButton
+      );
+
     return (
       <div className={fr.cx("fr-grid-row", "fr-my-10v")}>
         <div className={fr.cx("fr-col-6")}></div>
@@ -53,6 +70,25 @@ export const CustomFormLayout = (props: Props) => {
             priority="primary"
             iconId="fr-icon-arrow-right-fill"
             iconPosition="right"
+            disabled={applyLogicForm(
+              (form.blocks as BlockWithPartialRelations[]).find(
+                (b) =>
+                  b.id ===
+                  parseInt(
+                    logicPageButton?.options?.find((o) => o.label === "when")
+                      ?.content || ""
+                  )
+              ) ?? null,
+              (form.blocks as BlockWithPartialRelations[]).find(
+                (b) =>
+                  b.id ===
+                  parseInt(
+                    logicPageButton?.options?.find((o) => o.label === "then")
+                      ?.content || ""
+                  )
+              ) ?? null,
+              "disable"
+            )}
           >
             {newPageBlock ? newPageBlock.content : "Envoyer"}
           </Button>

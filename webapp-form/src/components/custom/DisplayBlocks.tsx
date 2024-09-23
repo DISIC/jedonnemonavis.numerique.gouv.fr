@@ -30,7 +30,14 @@ export const DisplayBlocks = (props: Props) => {
         return <h3 key={block.id}>{block.content}</h3>;
       }
       case "paragraph": {
-        return <p key={block.id} dangerouslySetInnerHTML={{__html: block.content?.replaceAll('\n', '<br />') || ''}}></p>;
+        return (
+          <p
+            key={block.id}
+            dangerouslySetInnerHTML={{
+              __html: block.content?.replaceAll("\n", "<br />") || "",
+            }}
+          ></p>
+        );
       }
       case "input_text": {
         return (
@@ -57,6 +64,7 @@ export const DisplayBlocks = (props: Props) => {
                 },
               }}
             >
+              <option disabled hidden selected value=""></option>;
               {block.options?.map((option) => {
                 return (
                   <option key={option.id} value={option.value || ""}>
