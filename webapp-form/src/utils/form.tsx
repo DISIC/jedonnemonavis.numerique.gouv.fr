@@ -218,16 +218,19 @@ export const steps_A: Step[] = [
     name: "steps.A_1.name",
     section: firstSectionA,
     button: "steps.A_1.button",
+    buttonBack: "steps.A_1.buttonBack",
   },
   {
     name: "steps.A_2.name",
     section: secondSectionA,
     button: "steps.A_2.button",
+    buttonBack: "steps.A_2.buttonBack",
   },
   {
     name: "steps.A_3.name",
     section: thirdSectionA,
     button: "steps.A_3.button",
+    buttonBack: "steps.A_3.buttonBack",
   },
 ];
 
@@ -236,5 +239,6 @@ export const steps_B: Step[] = [
     name: "steps.B_2.name",
     section: firstSectionA.concat(secondSectionA, thirdSectionA),
     button: "steps.B_2.button",
+    buttonBack: "steps.B_2.buttonBack",
   },
 ];

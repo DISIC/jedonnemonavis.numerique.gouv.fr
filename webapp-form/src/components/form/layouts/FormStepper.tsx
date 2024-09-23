@@ -69,8 +69,27 @@ export const FormStepper = (props: Props) => {
           </div>
         ))}
 
-        <div className={fr.cx("fr-mt-8v")}>
-          <Button type="submit" disabled={!tmpOpinion.satisfaction}>
+        <div className={cx(fr.cx("fr-mt-8v"), classes.buttonContainer)}>
+          <Button
+            priority="secondary"
+            iconId="fr-icon-arrow-left-line"
+            iconPosition="left"
+            type="button"
+            onClick={() => {
+              router.back();
+            }}
+          >
+            {t(`${steps[currentStep].buttonBack}`)}{" "}
+          </Button>
+
+          <Button
+            type="submit"
+            disabled={
+              !tmpOpinion.satisfaction ||
+              (router.query.iframe === "true" &&
+                t(steps[currentStep].name) === "Informations complémentaires")
+            }
+          >
             {t(`${steps[currentStep].button}`)}
           </Button>
         </div>
@@ -95,5 +114,9 @@ const useStyles = tss
     },
     field: {
       marginBottom: fr.spacing("14v"),
+    },
+    buttonContainer: {
+      display: "flex",
+      justifyContent: "space-between",
     },
   }));
