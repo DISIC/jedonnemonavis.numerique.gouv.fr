@@ -113,6 +113,25 @@ export const TypeConditions = [
 	}
 ]
 
+export const TypeActions = [
+	{
+		label: "afficher",
+		value: 'show'
+	},
+	{
+		label: "cacher",
+		value: "hide"
+	},
+	{
+		label: "activer",
+		value: "enable"
+	},
+	{
+		label: "désactiver",
+		value: "disable"
+	}
+]
+
 export const CGU: MainStructure = {
 	responsable: {
 		title:

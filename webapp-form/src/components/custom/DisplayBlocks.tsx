@@ -102,6 +102,7 @@ export const DisplayBlocks = (props: Props) => {
           </div>
         );
       }
+      case "logic":
       case "new_page": {
         return <></>;
       }
