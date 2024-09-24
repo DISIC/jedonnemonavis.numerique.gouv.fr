@@ -387,3 +387,10 @@ model OptionsBlock {
   block_id   Int
 }
 
+model ReviewCustom {
+  id Int @id @default(autoincrement())
+}
+
+model AnswerCustom {
+  id Int @id @default(autoincrement())
+}
