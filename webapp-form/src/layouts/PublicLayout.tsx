@@ -8,6 +8,7 @@ import { Header } from "@codegouvfr/react-dsfr/Header";
 import { i18n, useTranslation } from "next-i18next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import React from "react";
 import { SkipLinks } from "@codegouvfr/react-dsfr/SkipLinks";
 import { ReactElement, ReactNode } from "react";
 import { tss } from "tss-react/dsfr";
@@ -26,6 +27,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     router.push({ pathname, query }, asPath, { locale: newLocale });
   };
 
+  const isInIframe = router.query.iframe;
   const getProductTitle = () => {
     if (isReactElement(children) && children.props?.product?.title) {
       return children.props.product.title;
@@ -63,57 +65,72 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           },
         ]}
       />
-      <Header
-        brandTop={
-          <>
-            République
-            <br />
-            française
-          </>
-        }
-        homeLinkProps={{
-          href: "#",
-          title: "Accueil - Je donne mon avis (Services publics +)",
-        }}
-        id="fr-header-public-header"
-        serviceTitle={"Je donne mon avis"}
-        quickAccessItems={[
-          {
-            buttonProps: {
-              "aria-controls": "translate-select",
-              "aria-expanded": false,
-              title: t("Sélectionner une langue"),
-              className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
+      {!isInIframe && (
+        <Header
+          brandTop={
+            <>
+              République
+              <br />
+              française
+            </>
+          }
+          homeLinkProps={{
+            href: "#",
+            title: "Accueil - Je donne mon avis (Services publics +)",
+          }}
+          id="fr-header-public-header"
+          serviceTitle={"Je donne mon avis"}
+          quickAccessItems={[
+            {
+              buttonProps: {
+                "aria-controls": "translate-select",
+                "aria-expanded": false,
+                title: t("Sélectionner une langue"),
+                className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
+              },
+              iconId: "fr-icon-translate-2",
+              text: (
+                <LanguageSelector
+                  lang={(i18n?.language || "fr") as Language}
+                  setLang={onToggleLanguageClick}
+                />
+              ),
             },
-            iconId: "fr-icon-translate-2",
-            text: (
-              <LanguageSelector
-                lang={(i18n?.language || "fr") as Language}
-                setLang={onToggleLanguageClick}
-              />
-            ),
-          },
-        ]}
-        serviceTagline="La voix de vos usagers"
-      />
+          ]}
+          serviceTagline="La voix de vos usagers"
+        />
+      )}
       <main id="main" role="main">
         {children}
       </main>
-      <Footer
-        accessibility="non compliant"
-        bottomItems={[
-          { text: "Données personnelles", linkProps: { href: "/cgu" } },
-          {
-            text: "Modalités d’utilisation",
-            linkProps: { href: "/termsOfUse" },
-          },
-          { text: "Contact", linkProps: { href: "/contact" } },
-        ]}
-        termsLinkProps={{
-          href: "/legalNotice",
-        }}
-        license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
-      />
+      {!isInIframe && (
+        <Footer
+          accessibility="non compliant"
+          bottomItems={[
+            { text: "Données personnelles", linkProps: { href: "/cgu" } },
+            {
+              text: "Modalités d’utilisation",
+              linkProps: { href: "/termsOfUse" },
+            },
+            { text: "Contact", linkProps: { href: "/contact" } },
+          ]}
+          termsLinkProps={{
+            href: "/legalNotice",
+          }}
+          license={
+            <>
+              Le{" "}
+              <a
+                href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
+                target="_blank"
+              >
+                code source
+              </a>{" "}
+              est disponible en licence libre.
+            </>
+          }
+        />
+      )}
     </>
   );
 }
