@@ -16,10 +16,13 @@ const ProductFormView = (props: Props) => {
 	const { product } = props;
 	const { classes } = useStyles();
 
-	const { data: buttonResult } = trpc.button.getById.useQuery({
-		id: product.id
+	const { data: buttonResult } = trpc.button.getList.useQuery({
+		numberPerPage: 10,
+		page: 1,
+		product_id: product.id,
+		isTest: false
 	});
-	const buttonId = buttonResult?.data?.id;
+	const buttonId = buttonResult?.data[0]?.id;
 
 	return (
 		<ProductLayout product={product}>
