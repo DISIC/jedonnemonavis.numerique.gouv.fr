@@ -319,6 +319,10 @@ describe('jdma-register', () => {
 					}
 				});
 			}
+
+			// // LOG OUT
+			cy.get('header').find('button').contains('Déconnexion').click();
+			cy.wait(3000);
 		});
 	});
 });
