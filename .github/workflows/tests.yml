@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      # Démarrer le service PostgreSQL et MailHog comme services GitHub Actions
       db:
         image: postgres:16-alpine
         env:
@@ -27,36 +26,50 @@ jobs:
           - 1025:1025
 
     steps:
-      # 1. Checkout le code source
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Installer Node.js et Yarn
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
           cache: 'yarn'
 
-      # 3. Construire et démarrer `webapp-backoffice`
+      # Étape de vérification du fichier yarn.lock pour `webapp-backoffice`
+      - name: Verify yarn.lock for webapp-backoffice
+        run: |
+          cd webapp-backoffice
+          if [ ! -f yarn.lock ]; then
+            echo "No yarn.lock file found for webapp-backoffice, generating it..."
+            yarn install
+          fi
+
+      # Étape de vérification du fichier yarn.lock pour `webapp-form`
+      - name: Verify yarn.lock for webapp-form
+        run: |
+          cd webapp-form
+          if [ ! -f yarn.lock ]; then
+            echo "No yarn.lock file found for webapp-form, generating it..."
+            yarn install
+          fi
+
+      # Installation des dépendances et construction de `webapp-backoffice`
       - name: Install dependencies and build webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn install
           yarn build
-          # Démarrer l'application en arrière-plan
           nohup yarn start &
 
-      # 4. Construire et démarrer `webapp-form`
+      # Installation des dépendances et construction de `webapp-form`
       - name: Install dependencies and build webapp-form
         run: |
           cd webapp-form
           yarn install
           yarn build
-          # Démarrer l'application en arrière-plan
           nohup yarn startB &
 
-      # 5. Attendre que les services soient prêts
+      # Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -65,17 +78,17 @@ jobs:
           echo "Waiting for webapp-form to be ready..."
           until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
 
-      # 6. Exécuter les tests Cypress pour `webapp-backoffice`
+      # Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run
 
-      # 7. Exécuter les tests Cypress pour `webapp-form`
+      # Exécuter les tests Cypress pour `webapp-form`
       - name: Run Cypress tests for webapp-form
         working-directory: ./webapp-form
         run: npx cypress run
 
-      # 8. Arrêter les applications démarrées
+      # Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
