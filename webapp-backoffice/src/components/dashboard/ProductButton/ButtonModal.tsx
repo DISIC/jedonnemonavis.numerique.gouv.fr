@@ -133,7 +133,7 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const buttonCode = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}">
+	const buttonCode = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
       <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}.svg" alt="Je donne mon avis" />
 </a>`;
 

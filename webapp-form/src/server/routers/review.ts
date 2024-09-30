@@ -202,7 +202,7 @@ export async function createReview(
 }
 
 export const reviewRouter = router({
-  create: publicProcedure
+  create: limitedProcedure
     .input(
       z.object({
         review: ReviewUncheckedCreateInputSchema,

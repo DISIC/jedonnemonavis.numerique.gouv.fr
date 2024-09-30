@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { router, protectedProcedure } from '@/src/server/trpc';
-import { StatusExportSchema } from '@/prisma/generated/zod';
-import { productRouter } from './product';
+import { StatusExportSchema, TypeExportSchema } from '@/prisma/generated/zod';
 
 export const exportRouter = router({
 
@@ -32,13 +31,14 @@ export const exportRouter = router({
                 user_id: z.number(),
 				params: z.string(),
 				product_id: z.number(),
+				type: TypeExportSchema
             })
         )
 		.mutation(async ({ ctx, input }) => {
 			const exportCsv = await ctx.prisma.export.create({
 				data: {
                     ...input,
-                    status: 'idle', // Ajoute la valeur par défaut du statut
+                    status: 'idle'
                 },
 			});
 

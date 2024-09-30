@@ -41,10 +41,7 @@ const PublicDataModal = (props: Props) => {
 	const URL = `${origin}${asPath}`;
 
 	return (
-		<modal.Component
-			title="Autoriser le partage public des statistiques"
-			size="large"
-		>
+		<modal.Component title="Rendre ces statistiques publiques" size="large">
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-12')}>
 					<p className={fr.cx('fr-my-5v')}>

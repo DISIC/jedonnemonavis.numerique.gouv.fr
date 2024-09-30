@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
@@ -8,6 +8,7 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -26,7 +27,8 @@ interface MenuItems {
 const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 	const { id } = product;
 
-	const [displayToast, setDisplayToast] = React.useState(false);
+	const [displayToast, setDisplayToast] = useState(false);
+	const [showBackToTop, setShowBackToTop] = useState(false);
 
 	const router = useRouter();
 
@@ -49,6 +51,15 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/reviews`,
 				alt: 'Avis'
+			}
+		},
+		{
+			text: 'Aperçu formulaire',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/form-view`,
+			linkProps: {
+				href: `/administration/dashboard/product/${id}/form-view`,
+				alt: 'Aperçu formulaire'
 			}
 		},
 		{
@@ -88,6 +99,23 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		}
 	];
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (window.scrollY > 800) {
+				setShowBackToTop(true);
+			} else {
+				setShowBackToTop(false);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
+
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.container)}>
 			<Toast
@@ -118,7 +146,14 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				</Button>
 			</div>
 			<div className={cx(classes.title)}>
-				<h1>{product.title}</h1>
+				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
+					{product.title}
+				</h1>
+				{product.isTop250 && (
+					<Badge severity="info" noIcon>
+						Démarche essentielle
+					</Badge>
+				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
@@ -130,8 +165,24 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 						sticky
 					/>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-20v')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
 					{children}
+					{router.pathname.includes('/stats') && showBackToTop && (
+						<div className={cx(classes.backToTop)}>
+							<div>
+								<a
+									className={fr.cx(
+										'fr-link',
+										'fr-icon-arrow-up-fill',
+										'fr-link--icon-left'
+									)}
+									href="#product-title"
+								>
+									Haut de page
+								</a>
+							</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>
@@ -140,7 +191,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '6w' })
+		...fr.spacing('margin', { bottom: '7w' })
 	},
 	container: {
 		height: '100%'
@@ -153,6 +204,18 @@ const useStyles = tss.create({
 	},
 	copyBtn: {
 		boxShadow: 'none'
+	},
+	backToTop: {
+		position: 'sticky',
+		bottom: fr.spacing('10v'),
+		display: 'flex',
+		justifyContent: 'end',
+		marginTop: fr.spacing('10v'),
+		'& > div': {
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
+			borderRadius: fr.spacing('2v'),
+			padding: fr.spacing('2v')
+		}
 	}
 });
 

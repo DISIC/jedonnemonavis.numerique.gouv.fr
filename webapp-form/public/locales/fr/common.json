@@ -29,15 +29,18 @@
   "steps": {
     "A_1": {
       "name": "Clarté",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "A_2": {
       "name": "Aides",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "A_3": {
       "name": "Informations complémentaires",
-      "button": "Terminer"
+      "button": "Terminer",
+      "buttonBack": "Précédent"
     },
     "B_1": {
       "name": "Expérience générale",
@@ -45,23 +48,28 @@
     },
     "B_2": {
       "name": "Compréhension",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "B_3": {
       "name": "Aides",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "B_4": {
       "name": "Joignabilité",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "B_5": {
       "name": "Efficacité",
-      "button": "Continuer"
+      "button": "Continuer",
+      "buttonBack": "Précédent"
     },
     "B_6": {
       "name": "Commentaires supplémentaires",
-      "button": "Terminer"
+      "button": "Terminer",
+      "buttonBack": "Précédent"
     }
   },
   "fields": {

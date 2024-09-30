@@ -107,6 +107,7 @@ export type Step = {
   name: string;
   section: FormField[];
   button: string;
+  buttonBack: string;
 };
 
 export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {

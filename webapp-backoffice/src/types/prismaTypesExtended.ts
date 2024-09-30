@@ -21,6 +21,14 @@ export type AdminEntityRightWithUsers = Prisma.AdminEntityRightGetPayload<
 	typeof AdminEntityRightWithUsers
 >;
 
+const BlockWithOptions = Prisma.validator<Prisma.BlockDefaultArgs>()({
+	include: {
+		options: true
+	}
+});
+
+export type BlockWithOptions = Prisma.BlockGetPayload<typeof BlockWithOptions>;
+
 const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
 		buttons: true

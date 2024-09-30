@@ -166,7 +166,7 @@ export const openAPIRouter = router({
 				interval
 			};
 
-			if (ctx.api_key.scope !== 'admin') {
+			if (!ctx.api_key.scope.includes('admin')) {
 				fetchParams.product_ids =
 					product_ids.length > 0
 						? authorized_products_ids.filter(value =>
@@ -177,7 +177,7 @@ export const openAPIRouter = router({
 				fetchParams.product_ids = product_ids;
 			}
 
-			if (ctx.api_key.scope !== 'admin' && !fetchParams.product_ids.length) {
+			if (!ctx.api_key.scope.includes('admin') && !fetchParams.product_ids.length) {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
 					message:
@@ -186,9 +186,9 @@ export const openAPIRouter = router({
 			}
 
 			if (
-				!(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+				!(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
 					.length ||
-				(ctx.api_key.scope !== 'admin' ? fetchParams.product_ids : product_ids)
+				(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
 					.length > maxNbProducts
 			) {
 				throw new TRPCError({
@@ -226,15 +226,16 @@ export const openAPIRouter = router({
 		.output(
 			z.object({
 				result: z.object({
-					has_down: z.array(z.number()),
-					has_up: z.array(z.number())
+					new_top250: z.array(z.number()),
+					already_top250: z.array(z.number()),
+					down_top250: z.array(z.number())
 				})
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
 			const { product_ids } = input;
 
-			if (ctx.user_api.role !== 'admin') {
+			if (!ctx.user_api.role.includes('admin')) {
 				throw new TRPCError({
 					code: 'UNAUTHORIZED',
 					message: 'You need to be admin to perform this action'
@@ -243,43 +244,47 @@ export const openAPIRouter = router({
 
 			const actual250 = await ctx.prisma.product.findMany({
 				where: {
-					isPublic: true
+					isTop250: true
 				}
 			});
 
-			const list_actual_250: number[] = actual250.map((data: Product) => {
+			const actual250Ids: number[] = actual250.map((data: Product) => {
 				return data.id;
 			});
 
-			const need_up = product_ids.filter(a => !list_actual_250.includes(a));
-			const need_down = list_actual_250.filter(a => !product_ids.includes(a));
+			const new_top250 = product_ids.filter(a => !actual250Ids.includes(a));
+			const already_top250 = product_ids.filter(a => actual250Ids.includes(a));
+			const down_top250 = actual250Ids.filter(a => !product_ids.includes(a));
 
 			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
-						in: need_down
+						in: new_top250
 					}
 				},
 				data: {
-					isPublic: false
+					isPublic: true,
+					isTop250: true,
+					hasBeenTop250: true
 				}
 			});
 
 			await ctx.prisma.product.updateMany({
 				where: {
 					id: {
-						in: need_up
+						in: down_top250
 					}
 				},
 				data: {
-					isPublic: true
+					isTop250: false
 				}
 			});
 
 			return {
 				result: {
-					has_down: need_down,
-					has_up: need_up
+					new_top250,
+					already_top250,
+					down_top250
 				}
 			};
 		})

@@ -161,7 +161,7 @@ const DashBoardEntities = () => {
 	};
 
 	useEffect(() => {
-		if (session?.user.role === 'admin') setIsMine(false);
+		if (session?.user.role.includes('admin')) setIsMine(false);
 	}, [session?.user.role]);
 
 	if (!session) return;
@@ -213,7 +213,7 @@ const DashBoardEntities = () => {
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
 						<h1 className={fr.cx('fr-mb-0')}>
-							{session.user.role === 'admin'
+							{session.user.role.includes('admin')
 								? 'Organisations'
 								: 'Vos organisations'}
 						</h1>
@@ -224,7 +224,7 @@ const DashBoardEntities = () => {
 							classes.buttonContainer
 						)}
 					>
-						{session.user.role !== 'admin' ? (
+						{!session.user.role.includes('admin') ? (
 							<Button
 								priority="secondary"
 								iconId="fr-icon-admin-line"
@@ -306,7 +306,7 @@ const DashBoardEntities = () => {
 						</>
 					)}
 
-					{session.user.role !== 'admin' && false && (
+					{!session.user.role.includes('admin') && false && (
 						<div
 							className={fr.cx(
 								'fr-col-12',
@@ -379,7 +379,7 @@ const DashBoardEntities = () => {
 										key={index}
 										onButtonClick={handleModalEntityRightsOpening}
 										isMine={
-											session.user.role === 'admin' ||
+											session.user.role.includes('admin') ||
 											myEntities
 												.map(myEntity => myEntity.id)
 												.includes(entity.id)
