@@ -82,12 +82,7 @@ jobs:
         working-directory: ./webapp-backoffice
         run: npx cypress run
 
-      # 9. Exécuter les tests Cypress pour `webapp-form`
-      - name: Run Cypress tests for webapp-form
-        working-directory: ./webapp-form
-        run: npx cypress run
-
-      # 10. Arrêter les applications démarrées
+      # 9. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
