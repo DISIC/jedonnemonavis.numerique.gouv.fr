@@ -263,9 +263,11 @@ def get_month_ranges(start_date, end_date):
     ranges = []
     current_date = start_date
     while current_date <= end_date:
-        start_of_month = current_date.replace(day=1) if current_date != start_date else start_date
+        start_of_month = current_date.replace(day=1) if current_date != start_date else current_date
         end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
-        end_of_month = end_date if end_of_month > end_date else end_of_month
+        end_of_month = datetime.combine(end_of_month, datetime.max.time())
+        if end_of_month > end_date:
+            end_of_month = end_date
         ranges.append((start_of_month, end_of_month))
         current_date = end_of_month + timedelta(days=1)
     return ranges
@@ -495,7 +497,7 @@ def process_exports(conn):
     """
 
     start_date = datetime.strptime(filter_params.get('startDate', '2018-01-01'), '%Y-%m-%d')
-    end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')), '%Y-%m-%d')
+    end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')) + ' 23:59', '%Y-%m-%d %H:%M')
     count_params = [product_id, start_date, end_date] + filters_values
     total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
     print(f"{total_reviews} avis concernés, format d'export : {export_format}")
