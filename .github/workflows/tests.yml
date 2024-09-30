@@ -85,7 +85,7 @@ jobs:
       # 8. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
-        run: npx cypress run
+        run: npx cypress run --browser firefox
 
       # 9. Arrêter les applications démarrées
       - name: Stop applications
