@@ -17,7 +17,7 @@ describe('jdma-admin', () => {
 			.contains('Continuer')
 			.click()
 			.then(() => {
-				cy.wait(1000);
+				cy.wait(4000);
 				cy.get('input[type="password"]').type(adminPassword);
 			});
 		cy.get('[class*="LoginForm-button"]')
