@@ -13,11 +13,13 @@ import {
 	Controller,
 	SubmitHandler,
 	useFieldArray,
-	useForm
+	useForm,
+	useFormContext
 } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { autocompleteFilterOptions, createFilterOptionsWithArgument } from '@/src/utils/tools';
+import { on } from 'events';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -56,6 +58,7 @@ const ProductModal = (props: Props) => {
 	const router = useRouter();
 	const modalOpen = useIsModalOpen(modal);
 	const [selectedValue, setSelectedValue] = React.useState<number | undefined>(newCreatedEntity?.id);
+	
 
 	const {
 		control,
@@ -119,7 +122,6 @@ const ProductModal = (props: Props) => {
 		} else {
 			const savedProductResponse = await saveProductTmp.mutateAsync({
 				...tmpProduct,
-				entity_id: tmpProduct.entity_id?.value,
 				urls: filteredUrls
 			});
 			productId = savedProductResponse.data.id;
@@ -246,58 +248,61 @@ const ProductModal = (props: Props) => {
 						name="entity_id"
 						control={control}
 						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => (
-							<Autocomplete
-								disablePortal
-								id="entity-select-autocomplete"
-								noOptionsText="Aucune organisation trouvée"
-								sx={{ width: '100%' }}
-								options={entityOptions}
-								filterOptions={createFilterOptionsWithArgument(allowCreateEntity)}
-								onChange={(_, optionSelected) => {
-									if (optionSelected?.value === -1) {
-										  onNewEntity();
-									} else {
-										onChange(optionSelected?.value);
+						render={({ field: { onChange, value, name } }) => {
+							useEffect(() => {
+								onChange(selectedValue);
+							}, [selectedValue]);
+							return (
+								<Autocomplete
+									disablePortal
+									id="entity-select-autocomplete"
+									noOptionsText="Aucune organisation trouvée"
+									sx={{ width: '100%' }}
+									options={entityOptions}
+									filterOptions={createFilterOptionsWithArgument(allowCreateEntity)}
+									onChange={(_, optionSelected) => {
+										if (optionSelected?.value === -1) {
+											onNewEntity();
+										} else {
+											setSelectedValue(optionSelected?.value);
+										}
+									}}
+									isOptionEqualToValue={option => option.value === value}
+									defaultValue={entityOptions.find(
+										option => option.value === selectedValue
+									)}
+									value={
+										selectedValue ? entityOptions.find(option => option.value === selectedValue) : { label: '', value: undefined }
 									}
-								}}
-								isOptionEqualToValue={option => option.value === value}
-								defaultValue={entityOptions.find(
-									option => option.value === value
-								)}
-								value={
-									selectedValue ? entityOptions.find(option => option.value === selectedValue) : value 
-										? entityOptions.find(option => option.value === value)
-										: { label: '', value: undefined }
-								}
-								renderInput={params => (
-									<div
-										ref={params.InputProps.ref}
-										className={fr.cx(
-											'fr-input-group',
-											errors[name] ? 'fr-input-group--error' : undefined
-										)}
-									>
-										<input
-											{...params.inputProps}
-											className={cx(
-												params.inputProps.className,
-												fr.cx('fr-input'),
-												errors[name] ? 'fr-input--error' : undefined
+									renderInput={params => (
+										<div
+											ref={params.InputProps.ref}
+											className={fr.cx(
+												'fr-input-group',
+												errors[name] ? 'fr-input-group--error' : undefined
 											)}
-											placeholder="Rechercher une organisation"
-											type="search"
-											required
-										/>
-										{errors[name] && (
-											<p className={fr.cx('fr-error-text')}>
-												{errors[name]?.message}
-											</p>
-										)}
-									</div>
-								)}
-							/>
-						)}
+										>
+											<input
+												{...params.inputProps}
+												className={cx(
+													params.inputProps.className,
+													fr.cx('fr-input'),
+													errors[name] ? 'fr-input--error' : undefined
+												)}
+												placeholder="Rechercher une organisation"
+												type="search"
+												required
+											/>
+											{errors[name] && (
+												<p className={fr.cx('fr-error-text')}>
+													{errors[name]?.message}
+												</p>
+											)}
+										</div>
+									)}
+								/>
+							)
+						}}
 					/>
 					)}
 				</div>
