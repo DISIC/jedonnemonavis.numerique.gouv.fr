@@ -32,8 +32,6 @@ export type FormStepNames =
   | "contact";
 
 export default function JDMAForm({ product }: JDMAFormProps) {
-  const { classes, cx } = useStyles();
-
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -43,6 +41,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
   const currentSteps =
     process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
+
+  const isInIframe = router.query.iframe === "true";
+
+  const { classes, cx } = useStyles({ isInIframe });
 
   const resetForm = () => {
     setIsLoading(true);
@@ -243,27 +245,31 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }
 
   const handleCreateReview = async (opinion: Partial<Opinion>) => {
-    const answers = formatAnswers(opinion);
+    if (!isInIframe) {
+      const answers = formatAnswers(opinion);
 
-    const userIdExists = localStorage.getItem("userId");
+      const userIdExists = localStorage.getItem("userId");
 
-    if (!userIdExists) {
-      const userId = generateUUID();
 
-      localStorage.setItem("userId", userId);
+      if (!userIdExists) {
+        const userId = crypto.randomUUID();
 
-      await createReview.mutateAsync({
-        review: {
-          product_id: product.id,
-          button_id: product.buttons[0].id,
-          form_id: 2,
-          user_id: userId,
-        },
-        answers,
-      });
-    } else {
-      await handleInsertOrUpdateReview(opinion, "satisfaction");
+        localStorage.setItem("userId", userId);
+
+        await createReview.mutateAsync({
+          review: {
+            product_id: product.id,
+            button_id: product.buttons[0].id,
+            form_id: 2,
+            user_id: userId,
+          },
+          answers,
+        });
+      } else {
+        await handleInsertOrUpdateReview(opinion, "satisfaction");
+      }
     }
+
     router.push({
       pathname: router.pathname,
       query: { ...router.query, step: 0 },
@@ -362,7 +368,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <Link
                 className={fr.cx("fr-link")}
                 href={
-                  "https://www.plus.transformation.gouv.fr/experience/step_1#breadcrumb"
+                  "https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2"
                 }
                 target="_blank"
               >
@@ -560,12 +566,11 @@ export const getServerSideProps: GetServerSideProps<{
     };
   }
 };
-
 const blueSectionPxHeight = 200;
 const useStyles = tss
   .withName(JDMAForm.name)
-  .withParams()
-  .create(() => ({
+  .withParams<{ isInIframe: boolean }>()
+  .create(({ isInIframe }) => ({
     mainContainer: {
       overflow: "inherit",
     },
@@ -582,7 +587,7 @@ const useStyles = tss
         },
       },
       [fr.breakpoints.up("md")]: {
-        height: `${blueSectionPxHeight}px`,
+        height: isInIframe ? 80 : `${blueSectionPxHeight}px`,
       },
     },
     titleSection: {
@@ -611,7 +616,10 @@ const useStyles = tss
     },
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,
-      ...fr.spacing("padding", { topBottom: "4v", rightLeft: "6v" }),
+      ...fr.spacing("padding", {
+        topBottom: !isInIframe ? "4v" : "auto",
+        rightLeft: "6v",
+      }),
       h1: {
         textAlign: "center",
         color: fr.colors.decisions.background.flat.blueFrance.default,

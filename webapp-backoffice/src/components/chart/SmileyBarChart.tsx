@@ -186,18 +186,27 @@ const SmileyBarChart = ({
 							sortOrder[b as keyof typeof sortOrder] -
 							sortOrder[a as keyof typeof sortOrder]
 					)
-					.map((fieldName: string, index: number) => (
-						<Bar
-							key={index}
-							dataKey={fieldName}
-							fill={getHexaColorFromIntentionText(fieldName)}
-							radius={5}
-							stackId="a"
-							barSize={25}
-							shape={<CustomBar fieldName={fieldName} />}
-							style={{ stroke: '#fff', strokeWidth: 2 }}
-						/>
-					))}
+					.map((fieldName: string, index: number) => {
+						const hasValidValues = data.some(item => {
+							const value = item[fieldName];
+							return typeof value === 'number' && !isNaN(value) && value !== 0;
+						});
+
+						if (!hasValidValues) return null;
+
+						return (
+							<Bar
+								key={index}
+								dataKey={fieldName}
+								fill={getHexaColorFromIntentionText(fieldName)}
+								radius={5}
+								stackId="a"
+								barSize={25}
+								shape={<CustomBar fieldName={fieldName} />}
+								style={{ stroke: '#fff', strokeWidth: 2 }}
+							/>
+						);
+					})}
 			</BarChart>
 		</ResponsiveContainer>
 	);

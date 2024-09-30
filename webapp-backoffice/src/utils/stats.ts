@@ -141,12 +141,20 @@ const handleChildren = (buckets: Buckets) => {
 			return bParentFieldCode === fieldCode;
 		}) as Buckets;
 
-		result[categoryIndex].number_hits.push({
-			intention: intention,
-			label: answerText,
-			count: docCount,
-			children: !!children.length ? handleChildren(children) : undefined
-		});
+		const existingHitIndex = result[categoryIndex].number_hits.findIndex(
+			hit => hit.label === answerText && hit.intention === intention
+		);
+
+		if (existingHitIndex !== -1) {
+			result[categoryIndex].number_hits[existingHitIndex].count += docCount;
+		} else {
+			result[categoryIndex].number_hits.push({
+				intention: intention,
+				label: answerText,
+				count: docCount,
+				children: !!children.length ? handleChildren(children) : undefined
+			});
+		}
 	});
 
 	return result;
@@ -234,7 +242,9 @@ const handleBucket = (
 				productMap[productId].dateMap[docDate].categories[fieldCode];
 			const existingHitIndex = result[productIndex].intervals[dateIndex].data[
 				categoryIndex
-			].number_hits.findIndex(hit => hit.label === answerText);
+			].number_hits.findIndex(
+				hit => hit.label === answerText && hit.intention === intention
+			);
 
 			if (existingHitIndex !== -1) {
 				result[productIndex].intervals[dateIndex].data[

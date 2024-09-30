@@ -7,6 +7,7 @@ import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -39,6 +40,8 @@ const DashBoardUsers = () => {
 	const [numberPerPage, _] = React.useState(10);
 
 	const [currentUser, setCurrentUser] = React.useState<User>();
+
+	const [selectedUsers, setSelectedUsers] = React.useState<number[]>([]);
 
 	const { cx, classes } = useStyles();
 
@@ -73,6 +76,10 @@ const DashBoardUsers = () => {
 		onSuccess: () => refetchUsers()
 	});
 
+	const deleteUsers = trpc.user.deleteMany.useMutation({
+		onSuccess: () => refetchUsers()
+	});
+
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
@@ -92,6 +99,26 @@ const DashBoardUsers = () => {
 			onConfirmModal.open();
 		}
 	};
+
+	const handleUserCheckbox = (user: User) => {
+		if (selectedUsers.includes(user.id)) {
+			setSelectedUsers(selectedUsers.filter(id => id !== user.id));
+		} else {
+			setSelectedUsers([...selectedUsers, user.id]);
+		}
+	};
+
+	const handleGeneralCheckbox = () => {
+		if (selectedUsers.length < users.length) {
+			setSelectedUsers(users.map(user => user.id));
+		} else {
+			setSelectedUsers([]);
+		}
+	};
+
+	React.useEffect(() => {
+		console.log('selected users : ', selectedUsers);
+	}, [selectedUsers]);
 
 	return (
 		<>
@@ -195,6 +222,30 @@ const DashBoardUsers = () => {
 							</div>
 						</form>
 					</div>
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-4', 'fr-col--bottom'),
+							classes.deleteCol
+						)}
+					>
+						{selectedUsers.length > 0 && (
+							<Button
+								priority="tertiary"
+								size="small"
+								iconId="fr-icon-delete-bin-line"
+								iconPosition="right"
+								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+								onClick={() => {
+									deleteUsers.mutateAsync({
+										ids: selectedUsers
+									});
+									setSelectedUsers([]);
+								}}
+							>
+								Supprimer tous
+							</Button>
+						)}
+					</div>
 				</div>
 				{isLoadingUsers ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -229,11 +280,28 @@ const DashBoardUsers = () => {
 										fr.cx(
 											'fr-grid-row',
 											'fr-grid-row--gutters',
-											'fr-grid-row--middle'
+											'fr-grid-row--middle',
+											'fr-px-4v'
 										),
 										classes.boldText
 									)}
 								>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
+										<Checkbox
+											options={[
+												{
+													label: '',
+													nativeInputProps: {
+														name: 'checkboxes-1',
+														value: 'value1',
+														onClick: () => {
+															handleGeneralCheckbox();
+														}
+													}
+												}
+											]}
+										></Checkbox>
+									</div>
 									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 										<span>Utilisateur</span>
 									</div>
@@ -255,6 +323,8 @@ const DashBoardUsers = () => {
 										user={user}
 										key={index}
 										onButtonClick={handleModalOpening}
+										onCheckboxClick={handleUserCheckbox}
+										selected={selectedUsers.includes(user.id)}
 									/>
 								))
 							)}
@@ -343,6 +413,13 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 	},
 	boldText: {
 		fontWeight: 'bold'
+	},
+	iconError: {
+		color: fr.colors.decisions.text.default.error.default
+	},
+	deleteCol: {
+		display: 'flex',
+		justifyContent: 'flex-end'
 	}
 }));
 

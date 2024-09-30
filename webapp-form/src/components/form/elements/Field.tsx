@@ -165,28 +165,35 @@ export const Field = (props: Props) => {
       );
     case "input-textarea":
       return (
-        <Input
-          hintText={field.hint ? t(field.hint) : undefined}
-          label={t(field.label)}
-          state="default"
-          stateRelatedMessage="Text de validation / d'explication de l'erreur"
-          nativeTextAreaProps={{
-            value: opinion[field.name],
-            onChange: (e) => {
-              setOpinion({
-                ...opinion,
-                [field.name]: e.target.value,
-              });
-            },
-          }}
-          textArea
-        />
+        <div className={classes.inputContainer}>
+          <Input
+            hintText={field.hint ? t(field.hint) : undefined}
+            label={<h6>{t(field.label)}</h6>}
+            state={
+              (opinion[field.name] || "").length > 250 ? "error" : "default"
+            }
+            stateRelatedMessage="Maximum 250 caractères"
+            nativeTextAreaProps={{
+              value: opinion[field.name]?.slice(0, 250),
+              onChange: (e) => {
+                setOpinion({
+                  ...opinion,
+                  [field.name]: e.target.value.slice(0, 250),
+                });
+              },
+            }}
+            textArea
+          />
+          <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
+            {opinion[field.name]?.length || 0} / 250
+          </div>
+        </div>
       );
     case "input-text":
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
-          label={t(field.label)}
+          label={<h6>{t(field.label)}</h6>}
           state={(opinion[field.name] || "").length > 250 ? "error" : "default"}
           stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{
@@ -267,5 +274,12 @@ const useStyles = tss
           columns: nbItems,
         },
       },
+    },
+    inputContainer: {
+      display: "flex",
+      flexDirection: "column",
+    },
+    textCount: {
+      alignSelf: "flex-end",
     },
   }));

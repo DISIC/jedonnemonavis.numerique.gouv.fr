@@ -64,7 +64,7 @@ export const productRouter = router({
 				OR: [
 					{
 						accessRights:
-							contextUser.role !== 'admin'
+							!contextUser.role.includes('admin')
 								? {
 										some: {
 											user_email: contextUser.email,
@@ -76,7 +76,7 @@ export const productRouter = router({
 					{
 						entity: {
 							adminEntityRights:
-								contextUser.role !== 'admin'
+								!contextUser.role.includes('admin')
 									? {
 											some: {
 												user_email: contextUser.email

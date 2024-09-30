@@ -2,6 +2,7 @@ import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/us
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { tss } from 'tss-react/dsfr';
@@ -9,9 +10,16 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	user: User;
 	onButtonClick: ({ type, user }: OnButtonClickUserParams) => void;
+	onCheckboxClick: (user: User) => void;
+	selected: boolean;
 };
 
-const UserCard = ({ user, onButtonClick }: Props) => {
+const UserCard = ({
+	user,
+	onButtonClick,
+	onCheckboxClick,
+	selected
+}: Props) => {
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
 
@@ -24,6 +32,23 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 					'fr-grid-row--middle'
 				)}
 			>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
+					<Checkbox
+						options={[
+							{
+								label: '',
+								nativeInputProps: {
+									name: user.email,
+									value: user.id,
+									checked: selected,
+									onClick: () => {
+										onCheckboxClick(user);
+									}
+								}
+							}
+						]}
+					></Checkbox>
+				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
 						{user.firstName + ' ' + user.lastName}
@@ -52,7 +77,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 				</div>
 				<div
 					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'),
 						classes.wrapperButtons
 					)}
 				>

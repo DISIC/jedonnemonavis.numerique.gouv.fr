@@ -1122,6 +1122,14 @@ export const answerRouter = router({
 					b.key.startsWith('contact_reached#') ||
 					b.key.startsWith('contact_satisfaction#')
 			);
+			const contactReachabilityBucket = contactBuckets.filter(sb => {
+				const [field_code] = sb.key.split('#');
+				return field_code === 'contact_reached';
+			});
+			const contactSatisfactionBucket = contactBuckets.filter(sb => {
+				const [field_code] = sb.key.split('#');
+				return field_code === 'contact_satisfaction';
+			});
 			const autonomyBuckets = tmpBuckets.filter(b =>
 				b.key.startsWith('contact_tried#')
 			);
@@ -1130,6 +1138,27 @@ export const answerRouter = router({
 				calculateBucketsAverage(satisfactionBuckets, satisfactionMarks);
 			const { count: comprehension_count, average: comprehension_average } =
 				calculateBucketsAverage(comprehensionBuckets, comprehensionMarks);
+
+			const contactReachability_average =
+				(contactReachabilityBucket.reduce((sum, sb) => {
+					const [, answer_text] = sb.key.split('#');
+					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
+				}, 0) /
+					contactReachabilityBucket.reduce(
+						(sum, sb) => sum + (sb.doc_count || 0),
+						0
+					)) *
+				10;
+
+			const contactSatisfaction_count = contactSatisfactionBucket.reduce(
+				(sum, sb) => sum + sb.doc_count,
+				0
+			);
+			const contactSatisfaction_average =
+				contactSatisfactionBucket.reduce((sum, sb) => {
+					const [, , intention] = sb.key.split('#');
+					return sum + ((contactMarks as any)[intention] || 0) * sb.doc_count;
+				}, 0) / contactSatisfaction_count;
 
 			const contact_count = contactBuckets.reduce((sum, sb) => {
 				const [field_code, answer_text] = sb.key.split('#');
@@ -1157,7 +1186,7 @@ export const answerRouter = router({
 				.unique_review_ids.value;
 			const autonomy_average =
 				autonomyBuckets.reduce((sum, sb) => {
-					const [field_code, answer_text, intention] = sb.key.split('#');
+					const [, , intention] = sb.key.split('#');
 					if (intention === 'good') return sum + 10 * sb.doc_count;
 
 					return sum;
@@ -1167,6 +1196,12 @@ export const answerRouter = router({
 				satisfaction: satisfaction_average,
 				comprehension: comprehension_average,
 				contact: isNaN(contact_average) ? 0 : contact_average,
+				contact_reachability: isNaN(contactReachability_average)
+					? 0
+					: contactReachability_average,
+				contact_satisfaction: isNaN(contactSatisfaction_average)
+					? 0
+					: contactSatisfaction_average,
 				autonomy: isNaN(autonomy_average) ? 0 : autonomy_average
 			};
 

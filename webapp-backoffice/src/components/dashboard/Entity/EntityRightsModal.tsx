@@ -187,7 +187,7 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	const displayRightsTable = () => {
-		if (!adminEntityRights.length && session?.user.role !== 'admin') {
+		if (!adminEntityRights.length && !session?.user.role.includes('admin')) {
 			return (
 				<Alert
 					className={fr.cx('fr-mb-16v')}
@@ -324,7 +324,7 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	const isMine =
-		session?.user.role === 'admin' ||
+		session?.user.role.includes('admin') ||
 		adminEntityRights
 			.map(aer => aer.user_email)
 			.includes(session?.user?.email || 'none');

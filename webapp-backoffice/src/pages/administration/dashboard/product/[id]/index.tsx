@@ -68,7 +68,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	if (
 		!hasAccessRightToProduct &&
 		!hasAdminEntityRight &&
-		currentUser.role !== 'admin'
+		!currentUser.role.includes('admin')
 	) {
 		return {
 			redirect: {

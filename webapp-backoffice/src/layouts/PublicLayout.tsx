@@ -24,7 +24,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			displayProcessed: false
 		},
 		{
-			enabled: session?.user.role === 'admin',
+			enabled: session?.user.role.includes('admin'),
 			initialData: {
 				data: [],
 				metadata: {
@@ -79,7 +79,8 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	];
 
 	const navigationItems = session?.user
-		? !!userAdminEntityRights.metadata.count || session.user.role === 'admin'
+		? !!userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
 			? [
 					{
 						text: 'Services',
@@ -101,7 +102,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			: []
 		: [];
 
-	if (session?.user.role === 'admin') {
+	if (session?.user.role.includes('admin')) {
 		const adminNavigationItems = [
 			{
 				text: 'Utilisateurs',
@@ -132,6 +133,20 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		];
 		navigationItems.push(...adminNavigationItems);
+	}
+
+	if (session?.user.role === 'superadmin') {
+		const superAdminNavigationItems = [
+			{
+				text: 'Form builder',
+				linkProps: {
+					href: '/administration/dashboard/forms',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/form')
+			}
+		];
+		navigationItems.push(...superAdminNavigationItems);
 	}
 
 	return (
@@ -210,6 +225,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					termsLinkProps={{
 						href: '/public/legalNotice'
 					}}
+					license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
 				/>
 			</div>
 		</>

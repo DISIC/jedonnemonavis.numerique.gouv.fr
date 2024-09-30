@@ -67,6 +67,8 @@ const ProductCard = ({
 					satisfaction: 0,
 					comprehension: 0,
 					contact: 0,
+					contact_reachability: 0,
+					contact_satisfaction: 0,
 					autonomy: 0
 				},
 				metadata: {
@@ -178,7 +180,14 @@ const ProductCard = ({
 						'fr-grid-row--top'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+					{product.isTop250 && (
+						<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
+							<Badge severity="info" noIcon small>
+								Démarche essentielle
+							</Badge>
+						</div>
+					)}
+					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-6')}>
 						<Link
 							href={`/administration/dashboard/product/${product.id}/stats`}
 							className={cx(classes.productTitle)}
@@ -192,12 +201,7 @@ const ProductCard = ({
 						</p>
 					</div>
 					{showFavoriteButton && (
-						<div
-							className={cx(
-								fr.cx('fr-col', 'fr-col-6', 'fr-col-md-1'),
-								classes.favoriteWrapper
-							)}
-						>
+						<div className={cx(classes.favoriteWrapper)}>
 							<Button
 								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
 								title={
@@ -239,14 +243,20 @@ const ProductCard = ({
 								height={50}
 							/>
 						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
-						  session?.user.role === 'admin' ? (
+						  session?.user.role.includes('admin') ? (
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 								{indicators.map((indicator, index) => (
 									<div
 										className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
 										key={index}
 									>
-										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+										<p
+											className={fr.cx(
+												'fr-text--xs',
+												'fr-mb-0',
+												'fr-hint-text'
+											)}
+										>
 											{indicator.title}
 										</p>
 										{isLoadingStatsObservatoire ? (
@@ -257,17 +267,27 @@ const ProductCard = ({
 												height={25}
 											/>
 										) : (
-											<Badge
-												noIcon
-												severity={
-													!!indicator.total ? indicator.color : undefined
+											<div
+												className={fr.cx(
+													!!indicator.total && indicator.color !== 'new'
+														? `fr-label--${indicator.color}`
+														: 'fr-label--disabled',
+													'fr-text--bold'
+												)}
+												style={
+													!!indicator.total && indicator.color === 'new'
+														? {
+																color:
+																	fr.colors.decisions.background.flat.warning
+																		.default
+															}
+														: undefined
 												}
-												className={fr.cx('fr-text--sm')}
 											>
 												{!!indicator.total
 													? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
 													: 'Aucune donnée'}
-											</Badge>
+											</div>
 										)}
 									</div>
 								))}
@@ -276,9 +296,9 @@ const ProductCard = ({
 										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 											Nombre d'avis
 										</p>
-										<Badge noIcon severity="info">
+										<div className={fr.cx('fr-label--info', 'fr-text--bold')}>
 											{formatNumberWithSpaces(nbReviews)}
-										</Badge>
+										</div>
 									</div>
 								)}
 							</div>
@@ -300,7 +320,10 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	favoriteWrapper: {
 		display: 'flex',
-		justifyContent: 'end'
+		justifyContent: 'end',
+		position: 'absolute',
+		right: fr.spacing('3v'),
+		top: fr.spacing('3v')
 	},
 	badgeSkeleton: {
 		transformOrigin: '0',
