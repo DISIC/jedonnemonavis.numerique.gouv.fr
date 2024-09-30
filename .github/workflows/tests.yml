@@ -33,7 +33,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
 
       # Étape de vérification du fichier yarn.lock pour `webapp-backoffice`
       - name: Verify yarn.lock for webapp-backoffice
