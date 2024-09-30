@@ -6,6 +6,8 @@ import {
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
+import React from 'react';
+import { generateRandomString } from '@/src/utils/tools';
 
 const ReviewCommonVerbatimLine = ({
 	review,
@@ -144,7 +146,7 @@ const ReviewCommonVerbatimLine = ({
 										}
 
 										return (
-											<p key={answer} className={cx(classes.content)}>
+											<p key={`${generateRandomString()}_${answer}`} className={cx(classes.content)}>
 												{row} :{' '}
 												<span
 													key={row}
