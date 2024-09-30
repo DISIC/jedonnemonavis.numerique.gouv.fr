@@ -1,0 +1,100 @@
+name: Run Cypress Tests
+
+on:
+  pull_request:
+    branches:
+      - feat/clevercloud
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 1. Démarrer le service PostgreSQL
+      - name: Start PostgreSQL service
+        run: |
+          docker run -d \
+            --name db \
+            -e POSTGRES_USER=user \
+            -e POSTGRES_PASSWORD=password \
+            -e POSTGRES_DB=jdma \
+            -p 5433:5432 \
+            postgres:16-alpine
+
+      # 2. Démarrer le service MailHog
+      - name: Start MailHog service
+        run: |
+          docker run -d \
+            --name mailhog \
+            -p 8025:8025 \
+            -p 1025:1025 \
+            mailhog/mailhog:latest
+
+      # 3. Démarrer l'application `webapp-backoffice`
+      - name: Start webapp-backoffice
+        run: |
+          docker build -t webapp-backoffice ./webapp-backoffice
+          docker run -d \
+            --name webapp-backoffice \
+            -e POSTGRESQL_ADDON_URI=postgres://user:password@db:5432/jdma \
+            -e NODEMAILER_HOST=mailhog \
+            -e NODEMAILER_PORT=1025 \
+            -e NODEMAILER_USER=contact.jdma@design.numerique.gouv.fr \
+            -e NODEMAILER_PASSWORD="password" \
+            -e NODEMAILER_FROM="Équipe JDMA contact.jdma@design.numerique.gouv.fr" \
+            -e NODEMAILER_BASEURL=http://localhost:3000 \
+            -e NEXTAUTH_SECRET=secretauth \
+            -e NEXTAUTH_URL=http://localhost:3000 \
+            -e JWT_SECRET=mysecret \
+            -e JWT_SIGNING_KEY=mykey \
+            -e JWT_ENCRYPTION_KEY=myencryptionkey \
+            -e JWT_ENCRYPTION_ALGORITHM=HS512 \
+            -e JWT_EXPIRATION_TIME=2592000 \
+            -e NEXT_PUBLIC_BO_APP_URL=http://localhost:3000 \
+            -e ES_ADDON_URI=https://localhost:9200 \
+            -e ES_ADDON_USER="elastic" \
+            -e ES_ADDON_PASSWORD="ES_ADDON_PASSWORD" \
+            -p 3000:3000 \
+            webapp-backoffice
+
+      # 4. Démarrer l'application `webapp-form`
+      - name: Start webapp-form
+        run: |
+          docker build -t webapp-form ./webapp-form
+          docker run -d \
+            --name webapp-form \
+            -e POSTGRESQL_ADDON_URI=postgres://user:password@db:5432/jdma \
+            -e NODEMAILER_HOST=mailhog \
+            -e NODEMAILER_PORT=1025 \
+            -p 3001:3002 \
+            webapp-form
+
+      # 5. Attendre que les services soient prêts
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for PostgreSQL to be ready..."
+          until docker exec db pg_isready -U user -d jdma; do echo "Waiting..."; sleep 5; done
+
+          echo "Waiting for webapp-backoffice to be ready..."
+          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting..."; sleep 5; done
+
+          echo "Waiting for webapp-form to be ready..."
+          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting..."; sleep 5; done
+
+      # 6. Exécuter les tests Cypress pour `webapp-backoffice`
+      - name: Run Cypress tests for webapp-backoffice
+        working-directory: ./webapp-backoffice
+        run: npx cypress run
+
+      # 7. Nettoyage des conteneurs Docker
+      - name: Cleanup
+        run: |
+          docker stop db mailhog webapp-backoffice webapp-form
+          docker rm db mailhog webapp-backoffice webapp-form
