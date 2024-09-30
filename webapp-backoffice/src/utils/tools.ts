@@ -133,13 +133,24 @@ export const removeAccents = (str: string): string => {
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
 
+export const createFilterOptionsWithArgument = (includeCreateOption: boolean) => (
+	options: { label: string; value?: number }[],
+	state: { inputValue: string },
+) => autocompleteFilterOptions(options, state, includeCreateOption);
+
 export const autocompleteFilterOptions = (
-	options: {
-		label: string;
-		value?: number;
-	}[],
-	{ inputValue }: { inputValue: string }
-) => matchSorter(options, inputValue, { keys: [item => item.label] });
+	options: { label: string; value?: number }[],
+	{ inputValue }: { inputValue: string },
+	includeCreateOption: boolean = false,
+) => {
+	const filteredOptions = matchSorter(options, inputValue, { keys: [item => item.label] });
+
+	if (includeCreateOption) {
+		return [...filteredOptions, { label: 'Créer un nouvel élément', value: -1 }];
+	}
+	
+	return filteredOptions;
+};
 
 export const getDatesByShortCut = (shortcutDateSelected: string) => {
 	const now = new Date();

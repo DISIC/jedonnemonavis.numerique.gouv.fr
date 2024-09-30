@@ -1,3 +1,4 @@
+import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
@@ -32,6 +33,11 @@ const api_modal = createModal({
 	isOpenedByDefault: false
 });
 
+const entity_modal = createModal({
+	id: 'entity-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoard = () => {
 	const { filters, updateFilters } = useFilters();
 
@@ -41,6 +47,8 @@ const DashBoard = () => {
 
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+
+	const [entityCreated, setEntityCreated] = React.useState<Entity | undefined>()
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -112,6 +120,11 @@ const DashBoard = () => {
 			: 'Services | Je donne mon avis';
 	};
 
+	const handleSubmit = async (newEntity?: Entity) => {
+		setEntityCreated(newEntity);
+		product_modal.open();
+	}
+
 	const loadModalAndHead = () => {
 		return (
 			<>
@@ -135,6 +148,16 @@ const DashBoard = () => {
 					onTitleChange={title => {
 						setProductTitle(title);
 					}}
+					onNewEntity={() => {
+						product_modal.close();
+						entity_modal.open();
+					}}
+					allowCreateEntity={true}
+					newCreatedEntity={entityCreated}
+				/>
+				<EntityModal
+					modal={entity_modal}
+					onSubmit={newEntity => handleSubmit(newEntity)}
 				/>
 			</>
 		);

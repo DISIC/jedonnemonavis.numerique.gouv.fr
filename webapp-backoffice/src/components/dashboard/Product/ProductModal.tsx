@@ -6,18 +6,20 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Product } from '@prisma/client';
+import { Entity, Product } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import {
 	Controller,
 	SubmitHandler,
 	useFieldArray,
-	useForm
+	useForm,
+	useFormContext
 } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { autocompleteFilterOptions } from '@/src/utils/tools';
+import { autocompleteFilterOptions, createFilterOptionsWithArgument } from '@/src/utils/tools';
+import { on } from 'events';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -38,6 +40,9 @@ interface Props {
 	fromEmptyState?: boolean;
 	onSubmit: () => void;
 	onTitleChange?: (title: string) => void;
+	allowCreateEntity: boolean;
+	onNewEntity: () => void;
+	newCreatedEntity?: Entity;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -45,12 +50,15 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal, product, fromEmptyState, onTitleChange, onSubmit } = props;
+	const { modal, product, fromEmptyState, onTitleChange, onSubmit, onNewEntity, allowCreateEntity, newCreatedEntity } = props;
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const lastUrlRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
+	const modalOpen = useIsModalOpen(modal);
+	const [selectedValue, setSelectedValue] = React.useState<number | undefined>(newCreatedEntity?.id);
+	
 
 	const {
 		control,
@@ -79,6 +87,7 @@ const ProductModal = (props: Props) => {
 				search: debouncedSearch
 			},
 			{
+				enabled: modalOpen,
 				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
 			}
 		);
@@ -161,6 +170,10 @@ const ProductModal = (props: Props) => {
 		}
 	}, [product]);
 
+	useEffect(() => {
+		setSelectedValue(newCreatedEntity?.id);
+	}, [newCreatedEntity]);
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -173,7 +186,7 @@ const ProductModal = (props: Props) => {
 			title={
 				product && product.id
 					? 'Modifier les informations du produit'
-					: 'Ajouter un nouveau service'
+					: 'Ajouter un nouveau serviceeee'
 			}
 			size="large"
 			buttons={[
@@ -232,28 +245,34 @@ const ProductModal = (props: Props) => {
 					</label>
 					{!isLoadingEntities && entityOptions.length > 0 && (
 						<Controller
-							name="entity_id"
-							control={control}
-							rules={{ required: 'Ce champ est obligatoire' }}
-							render={({ field: { onChange, value, name } }) => (
+						name="entity_id"
+						control={control}
+						rules={{ required: 'Ce champ est obligatoire' }}
+						render={({ field: { onChange, value, name } }) => {
+							useEffect(() => {
+								onChange(selectedValue);
+							}, [selectedValue]);
+							return (
 								<Autocomplete
 									disablePortal
 									id="entity-select-autocomplete"
 									noOptionsText="Aucune organisation trouvée"
 									sx={{ width: '100%' }}
 									options={entityOptions}
-									filterOptions={autocompleteFilterOptions}
+									filterOptions={createFilterOptionsWithArgument(allowCreateEntity)}
 									onChange={(_, optionSelected) => {
-										onChange(optionSelected?.value);
+										if (optionSelected?.value === -1) {
+											onNewEntity();
+										} else {
+											setSelectedValue(optionSelected?.value);
+										}
 									}}
 									isOptionEqualToValue={option => option.value === value}
 									defaultValue={entityOptions.find(
-										option => option.value === value
+										option => option.value === selectedValue
 									)}
 									value={
-										value
-											? entityOptions.find(option => option.value === value)
-											: { label: '', value: undefined }
+										selectedValue ? entityOptions.find(option => option.value === selectedValue) : { label: '', value: undefined }
 									}
 									renderInput={params => (
 										<div
@@ -282,8 +301,9 @@ const ProductModal = (props: Props) => {
 										</div>
 									)}
 								/>
-							)}
-						/>
+							)
+						}}
+					/>
 					)}
 				</div>
 
