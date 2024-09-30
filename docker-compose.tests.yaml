@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  webapp-backoffice:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./webapp-backoffice:/app
+    environment:
+      POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
+      NODEMAILER_HOST: mailhog
+      NODEMAILER_PORT: 1025
+      NODEMAILER_USER: contact.jdma@design.numerique.gouv.fr
+      NODEMAILER_PASSWORD: "password"
+      NODEMAILER_FROM: "Équipe JDMA contact.jdma@design.numerique.gouv.fr"
+      NODEMAILER_BASEURL: http://localhost:3000
+      NEXTAUTH_SECRET: secretauth
+      NEXTAUTH_URL: http://localhost:3000
+      JWT_SECRET: mysecret
+      JWT_SIGNING_KEY: mykey
+      JWT_ENCRYPTION_KEY: myencryptionkey
+      JWT_ENCRYPTION_ALGORITHM: HS512
+      JWT_EXPIRATION_TIME: 2592000
+      NEXT_PUBLIC_BO_APP_URL: http://localhost:3000
+      ES_ADDON_URI: https://localhost:9200
+      ES_ADDON_USER: "elastic"
+      ES_ADDON_PASSWORD: "ES_ADDON_PASSWORD"
+    command: sh -c "yarn build && npx prisma db push && npx prisma db seed && yarn start"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/ || exit 1"]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  webapp-form:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./webapp-form:/app
+    environment:
+      POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
+      NODEMAILER_HOST: mailhog
+      NODEMAILER_PORT: 1025
+    command: sh -c "yarn build && npx prisma generate && yarn startB"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3001:3002"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/ || exit 1"]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: jdma
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d jdma"]
+      interval: 10s
+      retries: 3
+      start_period: 10s
+      timeout: 10s
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025" # Interface web de MailHog
+      - "1025:1025" # SMTP
+
+volumes:
+  pg_data:

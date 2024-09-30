@@ -416,9 +416,7 @@ export const userRouter = router({
 						'Confirmez votre email',
 						createdUser.email.toLowerCase(),
 						getRegisterEmailHtml(token),
-						`Cliquez sur ce lien pour valider votre compte : ${
-							process.env.NODEMAILER_BASEURL
-						}/register/validate?${new URLSearchParams({ token })}`
+						`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
 					);
 				} else {
 					const userInviteToken = await ctx.prisma.userInviteToken.findUnique({
