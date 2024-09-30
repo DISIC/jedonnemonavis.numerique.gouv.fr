@@ -26,49 +26,49 @@ jobs:
           - 1025:1025
 
     steps:
+      # 1. Checkout du code
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # 2. Configuration de Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: |
+            webapp-backoffice/yarn.lock
+            webapp-form/yarn.lock
 
-      # Étape de vérification du fichier yarn.lock pour `webapp-backoffice`
-      - name: Verify yarn.lock for webapp-backoffice
-        run: |
-          cd webapp-backoffice
-          if [ ! -f yarn.lock ]; then
-            echo "No yarn.lock file found for webapp-backoffice, generating it..."
-            yarn install
-          fi
-
-      # Étape de vérification du fichier yarn.lock pour `webapp-form`
-      - name: Verify yarn.lock for webapp-form
-        run: |
-          cd webapp-form
-          if [ ! -f yarn.lock ]; then
-            echo "No yarn.lock file found for webapp-form, generating it..."
-            yarn install
-          fi
-
-      # Installation des dépendances et construction de `webapp-backoffice`
-      - name: Install dependencies and build webapp-backoffice
+      # 3. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
+      - name: Install dependencies and generate Prisma client for webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn install
+          npx prisma generate
+
+      # 4. Installer les dépendances et générer le client Prisma pour `webapp-form`
+      - name: Install dependencies and generate Prisma client for webapp-form
+        run: |
+          cd webapp-form
+          yarn install
+          npx prisma generate
+
+      # 5. Construire `webapp-backoffice`
+      - name: Build webapp-backoffice
+        run: |
+          cd webapp-backoffice
           yarn build
           nohup yarn start &
 
-      # Installation des dépendances et construction de `webapp-form`
-      - name: Install dependencies and build webapp-form
+      # 6. Construire `webapp-form`
+      - name: Build webapp-form
         run: |
           cd webapp-form
-          yarn install
           yarn build
           nohup yarn startB &
 
-      # Attendre que les services soient prêts
+      # 7. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -77,17 +77,17 @@ jobs:
           echo "Waiting for webapp-form to be ready..."
           until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
 
-      # Exécuter les tests Cypress pour `webapp-backoffice`
+      # 8. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run
 
-      # Exécuter les tests Cypress pour `webapp-form`
+      # 9. Exécuter les tests Cypress pour `webapp-form`
       - name: Run Cypress tests for webapp-form
         working-directory: ./webapp-form
         run: npx cypress run
 
-      # Arrêter les applications démarrées
+      # 10. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
