@@ -6,13 +6,36 @@ import Input from "@codegouvfr/react-dsfr/Input";
 import Select from "@codegouvfr/react-dsfr/Select";
 import RadioButtons from "@codegouvfr/react-dsfr/RadioButtons";
 import Checkbox from "@codegouvfr/react-dsfr/Checkbox";
+import { ChangeEvent } from "react";
+import { useFormContext } from "@/src/context/Formcontext";
+import { applyLogicForm } from "@/src/utils/tools";
 
 type Props = {
   block: BlockPartialWithRelations;
+  logicBlocks: BlockPartialWithRelations[];
+  onInput: (
+    block_id: number,
+    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
 };
 
 export const DisplayBlocks = (props: Props) => {
-  const { block } = props;
+  const { block, logicBlocks, onInput } = props;
+  const { review, setReview } = useFormContext();
+
+  const show = applyLogicForm(
+    "show",
+    block?.id ?? null,
+    logicBlocks,
+    review ?? {}
+  );
+
+  const disable = applyLogicForm(
+    "disable",
+    block?.id ?? null,
+    logicBlocks,
+    review ?? {}
+  );
 
   const router = useRouter();
 
@@ -42,14 +65,35 @@ export const DisplayBlocks = (props: Props) => {
       case "input_text": {
         return (
           <div key={block.id}>
-            <Input label={block.content} />
+            <Input
+              label={block.content}
+              disabled={disable}
+              nativeInputProps={{
+                onChange: (e) => {
+                  onInput(block.id || 0, e);
+                },
+                value: review?.answers?.find((a) => a.block_id === block.id)
+                  ?.content,
+              }}
+            />
           </div>
         );
       }
       case "input_text_area": {
         return (
           <div key={block.id}>
-            <Input label={block.content} textArea />
+            <Input
+              label={block.content}
+              disabled={disable}
+              textArea
+              nativeTextAreaProps={{
+                onChange: (e) => {
+                  onInput(block.id || 0, e);
+                },
+                value: review?.answers?.find((a) => a.block_id === block.id)
+                  ?.content,
+              }}
+            />
           </div>
         );
       }
@@ -58,16 +102,19 @@ export const DisplayBlocks = (props: Props) => {
           <div key={block.id}>
             <Select
               label={block.content}
+              disabled={disable}
               nativeSelectProps={{
                 onChange: (e) => {
-                  console.log(e);
+                  onInput(block.id || 0, e);
                 },
+                value: review?.answers?.find((a) => a.block_id === block.id)
+                  ?.content,
               }}
             >
-              <option disabled hidden selected value=""></option>;
+              <option disabled hidden value=""></option>;
               {block.options?.map((option) => {
                 return (
-                  <option key={option.id} value={option.value || ""}>
+                  <option key={option.id} value={option.content || ""}>
                     {option.content}
                   </option>
                 );
@@ -81,11 +128,15 @@ export const DisplayBlocks = (props: Props) => {
           <div key={block.id}>
             <RadioButtons
               legend={block.content}
+              disabled={disable}
               options={(block.options ?? []).map((option) => {
                 return {
                   label: option.content || "",
                   nativeInputProps: {
                     value: option.value || "",
+                    onChange: (e) => {
+                      onInput(block.id || 0, e);
+                    },
                   },
                 };
               })}
@@ -98,11 +149,15 @@ export const DisplayBlocks = (props: Props) => {
           <div key={block.id}>
             <Checkbox
               legend={block.content}
+              disabled={disable}
               options={(block.options ?? []).map((option) => {
                 return {
                   label: option.content || "",
                   nativeInputProps: {
                     value: option.value || "",
+                    onChange: (e) => {
+                      onInput(block.id || 0, e);
+                    },
                   },
                 };
               })}
@@ -126,7 +181,13 @@ export const DisplayBlocks = (props: Props) => {
   };
 
   return (
-    <div className={cx(fr.cx("fr-grid-row"), classes.blockContainer)}>
+    <div
+      className={cx(
+        fr.cx("fr-grid-row"),
+        classes.blockContainer,
+        show && classes.notShow
+      )}
+    >
       <div className={fr.cx("fr-col-12")}>{displayBlock(block)}</div>
     </div>
   );
@@ -140,6 +201,9 @@ const useStyles = tss
       [fr.breakpoints.down("md")]: {
         display: "none",
       },
+    },
+    notShow: {
+      display: "none",
     },
     blockContainer: {
       paddingTop: "2rem",

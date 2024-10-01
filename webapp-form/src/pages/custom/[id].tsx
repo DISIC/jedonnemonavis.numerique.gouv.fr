@@ -2,8 +2,15 @@ import prisma from "@/src/utils/db";
 import { GetServerSideProps } from "next/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { tss } from "tss-react/dsfr";
-import { Block, Form, OptionsBlock } from "@/prisma/generated/zod";
+import {
+  Block,
+  Form,
+  OptionsBlock,
+  ReviewCustomWithPartialRelations,
+} from "@/prisma/generated/zod";
 import { CustomFormLayout } from "@/src/components/form/layouts/CustomFormLayout";
+import { FormContextProvider } from "@/src/context/Formcontext";
+import { BlockQuestionsType } from "@/src/utils/tools";
 
 export type FormWithoutDates = Omit<Form, "created_at" | "updated_at"> & {
   blocks: Omit<Block, "created_at" | "updated_at">[] &
@@ -19,9 +26,28 @@ type JDMACustumFormProps = {
 export default function JDMACustomForm({ form }: JDMACustumFormProps) {
   const { classes, cx } = useStyles();
 
+  const initialReview: ReviewCustomWithPartialRelations = {
+    id: 0,
+    created_at: new Date(),
+    updated_at: new Date(),
+    form_id: form.id,
+    answers: form.blocks
+      .filter((b) => BlockQuestionsType.includes(b.type_bloc))
+      .map((b) => {
+        return {
+          block_id: b.id,
+          created_at: new Date(),
+          updated_at: new Date(),
+          content: "",
+        };
+      }),
+  };
+
   return (
     <div className={cx(fr.cx("fr-container"), classes.customFormContainer)}>
-      <CustomFormLayout form={form}></CustomFormLayout>
+      <FormContextProvider initialReview={initialReview}>
+        <CustomFormLayout form={form}></CustomFormLayout>
+      </FormContextProvider>
     </div>
   );
 }
