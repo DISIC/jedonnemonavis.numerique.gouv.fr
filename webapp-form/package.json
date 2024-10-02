@@ -6,7 +6,7 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "startB": "next start -p 3002",
+    "startB": "next start -p 3001",
     "lint": "prettier --check .",
     "predev": "only-include-used-icons",
     "prebuild": "only-include-used-icons",

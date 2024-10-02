@@ -42,5 +42,3 @@ certificates
 # prisma to zod generated types
 prisma/generated
 
-#cypress
-cypress.env.json

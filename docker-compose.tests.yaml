@@ -25,7 +25,7 @@ services:
       ES_ADDON_URI: https://localhost:9200
       ES_ADDON_USER: "elastic"
       ES_ADDON_PASSWORD: "ES_ADDON_PASSWORD"
-    command: sh -c "yarn build && npx prisma db push && npx prisma db seed && yarn start"
+    command: sh -c "yarn install && npx prisma generate && yarn build && npx prisma db push && npx prisma db seed && yarn start"
     depends_on:
       db:
         condition: service_healthy
@@ -47,12 +47,12 @@ services:
       POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
       NODEMAILER_HOST: mailhog
       NODEMAILER_PORT: 1025
-    command: sh -c "yarn build && npx prisma generate && yarn startB"
+    command: sh -c "yarn install && yarn build && npx prisma generate && yarn startB"
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "3001:3002"
+      - "3001:3001"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3001/ || exit 1"]
       interval: 10s
@@ -69,7 +69,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5555:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U user -d jdma"]
       interval: 10s
