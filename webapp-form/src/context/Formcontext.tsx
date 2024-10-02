@@ -1,4 +1,7 @@
-import { ReviewCustomPartialWithRelations } from "@/prisma/generated/zod";
+import {
+  ReviewCustomPartialWithRelations,
+  ReviewCustomWithPartialRelations,
+} from "@/prisma/generated/zod";
 import React, {
   createContext,
   useContext,
@@ -10,8 +13,8 @@ import React, {
 
 // Définir le type de contexte
 interface FormContextType {
-  review: ReviewCustomPartialWithRelations | null;
-  setReview: Dispatch<SetStateAction<ReviewCustomPartialWithRelations | null>>;
+  review: ReviewCustomWithPartialRelations | null;
+  setReview: Dispatch<SetStateAction<ReviewCustomWithPartialRelations | null>>;
 }
 
 // Créer le contexte avec les types appropriés
@@ -23,9 +26,9 @@ export const FormContextProvider = ({
   initialReview,
 }: {
   children: ReactNode;
-  initialReview: ReviewCustomPartialWithRelations | null;
+  initialReview: ReviewCustomWithPartialRelations | null;
 }) => {
-  const [review, setReview] = useState<ReviewCustomPartialWithRelations | null>(
+  const [review, setReview] = useState<ReviewCustomWithPartialRelations | null>(
     initialReview
   );
 

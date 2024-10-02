@@ -4,10 +4,16 @@ import { tss } from "tss-react/dsfr";
 import { useRouter } from "next/router";
 import { FormWithoutDates } from "@/src/pages/custom/[id]";
 import React, { ChangeEvent } from "react";
-import { BlockPartialWithRelations } from "@/prisma/generated/zod";
+import {
+  BlockPartialWithRelations,
+  ReviewCustomWithPartialRelations,
+  ReviewCustomWithRelations,
+  ReviewWithPartialRelations,
+} from "@/prisma/generated/zod";
 import { DisplayBlocks } from "../../custom/DisplayBlocks";
 import { applyLogicForm } from "@/src/utils/tools";
 import { useFormContext } from "@/src/context/Formcontext";
+import { trpc } from "@/src/utils/trpc";
 
 type Props = {
   form: FormWithoutDates;
@@ -53,15 +59,46 @@ export const CustomFormLayout = (props: Props) => {
         ? { ...answer, content: e.target.value }
         : answer
     );
-    setReview((prev) => ({
-      ...prev,
-      answers: updatedAnswerCustom,
-    }));
+    setReview((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          answers: updatedAnswerCustom,
+        };
+      } else {
+        return prev;
+      }
+    });
   };
 
-  React.useEffect(() => {
-    console.log("answers : ", review?.answers);
-  }, [review]);
+  const createBlock = trpc.reviewCustom.create.useMutation({
+    onSuccess: () => {
+      console.log("ok");
+    },
+  });
+
+  const handleSaveReview = async (
+    tmpReview: ReviewCustomWithPartialRelations
+  ) => {
+    try {
+      const { form_id, created_at, updated_at } = tmpReview;
+      const reviewSaved = await createBlock.mutateAsync({
+        reviewPayload: { form_id, created_at, updated_at },
+        answersPayload:
+          tmpReview.answers?.map((a) => {
+            return {
+              review_id: 0,
+              block_id: a.block_id || 0,
+              created_at: a.created_at || new Date(),
+              updated_at: a.updated_at || new Date(),
+              content: a.content || "",
+            };
+          }) ?? [],
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const renderActionRow = (currentStep: number) => {
     const newPageBlock = steps[currentStep].find(
@@ -140,7 +177,10 @@ export const CustomFormLayout = (props: Props) => {
                     top: 0,
                     behavior: "smooth",
                   });
-                } else setFormCompleted(true);
+                } else {
+                  review && handleSaveReview(review);
+                  setFormCompleted(true);
+                }
                 e.preventDefault();
               }}
             >

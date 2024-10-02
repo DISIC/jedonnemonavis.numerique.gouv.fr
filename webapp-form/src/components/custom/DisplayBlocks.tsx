@@ -133,7 +133,7 @@ export const DisplayBlocks = (props: Props) => {
                 return {
                   label: option.content || "",
                   nativeInputProps: {
-                    value: option.value || "",
+                    value: option.content || "",
                     onChange: (e) => {
                       onInput(block.id || 0, e);
                     },
@@ -154,7 +154,7 @@ export const DisplayBlocks = (props: Props) => {
                 return {
                   label: option.content || "",
                   nativeInputProps: {
-                    value: option.value || "",
+                    value: option.content || "",
                     onChange: (e) => {
                       onInput(block.id || 0, e);
                     },
