@@ -10,11 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # Configuration de la concurrence
-    concurrency:
-      group: ${{ github.ref }}-tests
-      cancel-in-progress: true
-
     services:
       db:
         image: postgres:16-alpine
@@ -29,24 +24,17 @@ jobs:
         ports:
           - 8025:8025
           - 1025:1025
-    env:
-      NODE_ENV: test
-      NEXT_PUBLIC_BO_APP_URL: http://localhost:3000
-      NEXT_PUBLIC_FORM_APP_URL: http://localhost:3001
-      POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
-      NODEMAILER_HOST: mailhog
-      NODEMAILER_PORT: 1025
-      NODEMAILER_USER: contact.jdma@design.numerique.gouv.fr
-      NODEMAILER_PASSWORD: "password"
-      NODEMAILER_FROM: "Équipe JDMA contact.jdma@design.numerique.gouv.fr"
-      NODEMAILER_BASEURL: http://localhost:3000
 
     steps:
       # 1. Checkout du code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Configuration de Node.js
+      # 2. Copier le fichier .env.example vers .env
+      - name: Copy .env.example to .env
+        run: cp .env.example .env
+
+      # 3. Configuration de Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -56,35 +44,36 @@ jobs:
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
 
-      # 3. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
+      # 4. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
       - name: Install dependencies and generate Prisma client for webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn install
           npx prisma generate
+          npx prisma db seed
 
-      # 4. Installer les dépendances et générer le client Prisma pour `webapp-form`
+      # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
       - name: Install dependencies and generate Prisma client for webapp-form
         run: |
           cd webapp-form
           yarn install
           npx prisma generate
 
-      # 5. Construire `webapp-backoffice`
+      # 6. Construire `webapp-backoffice`
       - name: Build webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn build
           nohup yarn start &
 
-      # 6. Construire `webapp-form`
+      # 7. Construire `webapp-form`
       - name: Build webapp-form
         run: |
           cd webapp-form
           yarn build
           nohup yarn startB &
 
-      # 7. Attendre que les services soient prêts
+      # 8. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -93,12 +82,12 @@ jobs:
           echo "Waiting for webapp-form to be ready..."
           until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
 
-      # 8. Exécuter les tests Cypress pour `webapp-backoffice`
+      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run
 
-      # 9. Arrêter les applications démarrées
+      # 10. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
