@@ -52,6 +52,7 @@ jobs:
           cd webapp-backoffice
           yarn install
           npx prisma generate
+          npx prisma db push
           npx prisma db seed
 
       # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
