@@ -15,7 +15,6 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
-import crypto from "crypto";
 
 type JDMAFormProps = {
   product: Product;
@@ -228,28 +227,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
     }, [] as Prisma.AnswerCreateInput[]);
   };
 
-  function generateUUID() {
-    const bytes = crypto.randomBytes(16);
-
-    bytes[6] = (bytes[6] & 0x0f) | 0x40;
-    bytes[8] = (bytes[8] & 0x3f) | 0x80;
-
-    const hex = bytes.toString("hex");
-    return [
-      hex.slice(0, 8),
-      hex.slice(8, 12),
-      hex.slice(12, 16),
-      hex.slice(16, 20),
-      hex.slice(20),
-    ].join("-");
-  }
-
   const handleCreateReview = async (opinion: Partial<Opinion>) => {
     if (!isInIframe) {
       const answers = formatAnswers(opinion);
 
       const userIdExists = localStorage.getItem("userId");
-
 
       if (!userIdExists) {
         const userId = crypto.randomUUID();
