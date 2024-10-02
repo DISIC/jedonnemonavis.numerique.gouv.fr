@@ -33,7 +33,13 @@ jobs:
       NODE_ENV: test
       NEXT_PUBLIC_BO_APP_URL: http://localhost:3000
       NEXT_PUBLIC_FORM_APP_URL: http://localhost:3001
-      POSTGRESQL_ADDON_URI: postgresql://user:password@127.0.0.1:5432/jdma
+      POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
+      NODEMAILER_HOST: mailhog
+      NODEMAILER_PORT: 1025
+      NODEMAILER_USER: contact.jdma@design.numerique.gouv.fr
+      NODEMAILER_PASSWORD: "password"
+      NODEMAILER_FROM: "Équipe JDMA contact.jdma@design.numerique.gouv.fr"
+      NODEMAILER_BASEURL: http://localhost:3000
 
     steps:
       # 1. Checkout du code
