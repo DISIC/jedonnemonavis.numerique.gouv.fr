@@ -84,7 +84,10 @@ describe('jdma-register', () => {
 				cy.log('New registration flow.');
 
 				cy.visit(mailer_url);
-				cy.wait(5000);
+				cy.wait(2000);
+
+				cy.get('button.btn-default[title="Refresh"]').click();
+				cy.wait(2000);
 
 				cy.get('div').find('.messages').click();
 				cy.wait(3000);
@@ -271,7 +274,10 @@ describe('jdma-register', () => {
 				cy.wait(3000);
 
 				cy.visit(mailer_url);
-				cy.wait(6000);
+				cy.wait(2000);
+
+				cy.get('button.btn-default[title="Refresh"]').click();
+				cy.wait(2000);
 
 				cy.get('div').find('.messages').click();
 				cy.wait(3000);
