@@ -1,6 +1,10 @@
 import { OptionsBlock } from '@/prisma/generated/zod';
 import { BlockWithOptions } from '@/src/types/prismaTypesExtended';
-import { TypeActions, TypeBlocksDescription, TypeConditions } from '@/src/utils/content';
+import {
+	TypeActions,
+	TypeBlocksDescription,
+	TypeConditions
+} from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -38,9 +42,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 		});
 
 		React.useEffect(() => {
-			if (block.type_bloc === 'logic') {
-				setOptions(block.options);
-			}
+			setOptions(block.options);
 		}, [block]);
 
 		React.useEffect(() => {
@@ -431,8 +433,7 @@ const DisplayBlocks = React.forwardRef<HTMLInputElement, Props>(
 										nativeSelectProps={{
 											name: '',
 											value:
-												options.find(o => o.label === 'action')?.content ||
-												'',
+												options.find(o => o.label === 'action')?.content || '',
 											onChange: e => {
 												const updatedOptions = [...options];
 												const optionIndex = updatedOptions.findIndex(
