@@ -23,12 +23,17 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: jdma
         ports:
-          - 5433:5432
+          - 5432:5432
       mailhog:
         image: mailhog/mailhog
         ports:
           - 8025:8025
           - 1025:1025
+    env:
+      NODE_ENV: test
+      NEXT_PUBLIC_BO_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_FORM_APP_URL: http://localhost:3001
+      POSTGRESQL_ADDON_URI: postgresql://user:password@127.0.0.1:5432/jdma
 
     steps:
       # 1. Checkout du code
