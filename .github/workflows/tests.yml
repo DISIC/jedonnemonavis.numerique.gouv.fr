@@ -32,7 +32,9 @@ jobs:
 
       # 2. Copier le fichier .env.example vers .env
       - name: Copy .env.example to .env
-        run: cp webapp-backoffice/.env.example .env
+        run: |
+          cp webapp-backoffice/.env.example webapp-backoffice/.env
+          cp webapp-form/.env.example webapp-form/.env
 
       # 3. Configuration de Node.js
       - name: Set up Node.js
