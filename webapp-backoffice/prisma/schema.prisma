@@ -111,7 +111,7 @@ model User {
 
 model UserRequest {
   id              Int               @id @default(autoincrement())
-  user            User?             @relation(fields: [user_id], references: [id])
+  user            User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int?              @unique
   user_email_copy String?
   reason          String
@@ -124,7 +124,7 @@ model UserRequest {
 
 model UserOTP {
   id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [user_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
@@ -135,7 +135,7 @@ model UserOTP {
 
 model UserValidationToken {
   id      Int    @id @default(autoincrement())
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id Int    @unique
   token   String @unique
 
@@ -154,7 +154,7 @@ model UserInviteToken {
 
 model UserResetToken {
   id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [user_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int      @unique
   user_email      String
   token           String   @unique
