@@ -143,7 +143,7 @@ export const autocompleteFilterOptions = (
 	{ inputValue }: { inputValue: string },
 	includeCreateOption: boolean = false,
 ) => {
-	const filteredOptions = matchSorter(options, inputValue, { keys: [item => item.label] });
+	const filteredOptions = matchSorter(options, inputValue, { keys: [item => item.label] }).slice(0, 4);
 
 	if (includeCreateOption) {
 		return [...filteredOptions, { label: 'Créer une nouvelle organisation', value: -1 }];

@@ -23,6 +23,7 @@ import {
 	createFilterOptionsWithArgument
 } from '@/src/utils/tools';
 import { on } from 'events';
+import { Icon } from '@mui/material';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -323,6 +324,29 @@ const ProductModal = (props: Props) => {
 												)}
 											</div>
 										)}
+										// Ajoutez renderOption pour personnaliser l'affichage des options
+										renderOption={(props, option) => (
+											<li
+												{...props}
+												style={
+													option.value === -1 ? { fontWeight: 'bold' } : {}
+												}
+											>
+												{option.value === -1 ? (
+													<span className={cx(classes.buttonSelect)}>
+														<span
+															className="fr-icon-add-circle-line"
+															aria-hidden="true"
+														></span>
+														<span className={fr.cx('fr-ml-2v')}>
+															{option.label}
+														</span>
+													</span>
+												) : (
+													option.label
+												)}
+											</li>
+										)}
 									/>
 								);
 							}}
@@ -422,6 +446,9 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 		},
 		border: 'none',
 		padding: 0
+	},
+	buttonSelect: {
+		color: fr.colors.decisions.text.default.info.default
 	}
 }));
 export default ProductModal;

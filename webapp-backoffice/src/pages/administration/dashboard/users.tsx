@@ -153,7 +153,7 @@ const DashBoardUsers = () => {
 								<div className={fr.cx('fr-grid-row')} key={uid}>
 									<span className={classes.boldText}>
 										{users.find(u => u.id === uid)?.firstName}{' '}
-										{users.find(u => u.id === uid)?.firstName}
+										{users.find(u => u.id === uid)?.lastName}
 									</span>{' '}
 								</div>
 							))}
