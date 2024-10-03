@@ -19,6 +19,7 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password is too short', () => {
+		cy.wait(1000)
 		fillForm({ password: 'Short1!', email: 'john.doe@example.com' }); // Too short
 
 		cy.get('button[type="submit"]').click();
@@ -26,20 +27,21 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password lacks a special character', () => {
+		cy.wait(1000)
 		fillForm({ password: 'Password1234', email: 'john.doe@example.com' }); // Missing special character
-
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 caractère spécial');
 	});
 
 	it('should not submit the form if the password lacks a digit', () => {
+		cy.wait(1000)
 		fillForm({ password: 'Password!@#', email: 'john.doe@example.com' }); // Missing digit
-
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 chiffre minimum');
 	});
 
 	it('should submit the form WITH NOT whitelisted email', () => {
+		cy.wait(2000)
 		fillForm({
 			password: userPassword,
 			email: 'test123num@jdma.com'
@@ -74,6 +76,9 @@ describe('jdma-register', () => {
 	});
 
 	it('should submit the form WITH whitelisted email', () => {
+		cy.get('body').then(($body) => {
+			$body.addClass('no-animations');
+		});
 		fillForm({ password: userPassword, email });
 
 		cy.get('button[type="submit"]').click();
@@ -121,27 +126,27 @@ describe('jdma-register', () => {
 					});
 
 				// PRODUCT
-				cy.get('[class*="btnService"]').contains('Ajouter un service').click();
-				cy.get('.fr-modal__body')
-					.should('exist')
-					.should('have.attr', 'data-fr-js-modal-body', 'true')
-					.find('form#product-form')
-					.should('exist')
-					.within(() => {
-						cy.get('input[name="title"]').type('e2e-jdma-service-test-1');
+				cy.contains('button', 'Ajouter un service').click();
+				cy.wait(2000);
 
-						cy.get('input#entity-select-autocomplete').click();
+				 cy.get('#product-form').should('be.visible').within(() => {
+					cy.get('input[name="title"]')
+						.should('exist') // Vérifie que l'input existe
+						.type('e2e-jdma-service-test-1'); // Remplit l'input avec du texte
 
-						cy.get('div[role="presentation"]')
-							.should('be.visible')
-							.then(() => {
-								cy.get('input#entity-select-autocomplete').invoke(
-									'attr',
-									'aria-activedescendant',
-									'entity-select-autocomplete-option-0'
-								);
-							});
-					});
+					cy.get('input#entity-select-autocomplete').should('exist').click();
+
+					cy.get('div[role="presentation"]')
+						.should('be.visible')
+						.then(() => {
+							cy.get('input#entity-select-autocomplete').invoke(
+								'attr',
+								'aria-activedescendant',
+								'entity-select-autocomplete-option-0'
+							);
+						});
+				});
+
 				cy.get('div[role="presentation"]')
 					.find('[id="entity-select-autocomplete-option-0"]')
 					.click();

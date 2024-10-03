@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
@@ -88,7 +88,7 @@ jobs:
       # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
-        run: npx cypress run
+        run: npx cypress run --headed --browser chrome
 
       # 10. Arrêter les applications démarrées
       - name: Stop applications
