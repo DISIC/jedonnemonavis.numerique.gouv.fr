@@ -279,7 +279,10 @@ describe('jdma-register', () => {
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(2000);
 
-				cy.get('div').find('.messages').click();
+				cy.get('div.messages')
+				.find('div.msglist-message')
+				.first()
+				.click();
 				cy.wait(3000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
