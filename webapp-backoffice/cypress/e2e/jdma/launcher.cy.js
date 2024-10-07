@@ -1,4 +1,4 @@
-import './bo/testdb.cy.js';
+// import './bo/testdb.cy.js';
 import './bo/home.cy.js';
 import './bo/register.cy.js';
 import './bo/admin.cy.js';

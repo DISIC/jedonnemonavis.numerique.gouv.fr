@@ -96,7 +96,7 @@ describe('jdma-admin', () => {
 		cy.get('#product-modal-control-button')
 			.contains('Ajouter un nouveau service')
 			.click();
-
+		cy.wait(4000);
 		cy.get('dialog#product-modal')
 			.invoke('css', 'visibility', 'visible')
 			.invoke('css', 'opacity', 1)
@@ -106,6 +106,7 @@ describe('jdma-admin', () => {
 					cy.get('input[name="title"]')
 						.should('be.visible')
 						.type('e2e-jdma-service-test');
+					cy.wait(3000);
 					cy.get('input#entity-select-autocomplete').click();
 
 					cy.get('div[role="presentation"]')
