@@ -37,7 +37,6 @@ const BlockModal = (props: Props) => {
 	);
 
 	const handleOnSubmit = () => {
-		console.log('test add ', selectedBloc.type, 'at position ', position);
 		onSubmit({
 			type_bloc: selectedBloc.type,
 			form_id: form.id,

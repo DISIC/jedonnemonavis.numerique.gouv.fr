@@ -132,7 +132,6 @@ export const adminEntityRightRouter = router({
 
 			if (newAdminEntityRight.user === null) {
 				const token = await generateInviteToken(ctx.prisma, user_email);
-
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
 					user_email,

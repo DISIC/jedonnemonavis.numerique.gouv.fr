@@ -6,7 +6,7 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "startB": "next start -p 3002",
+    "startB": "next start -p 3001",
     "lint": "prettier --check .",
     "predev": "only-include-used-icons",
     "prebuild": "only-include-used-icons",
@@ -57,6 +57,7 @@
     "trpc-openapi": "^1.2.0",
     "tss-react": "^4.9.0",
     "typescript": "5.2.2",
+    "uuid": "^10.0.0",
     "zod": "3.21.1",
     "zod-prisma-types": "^3.1.8"
   },

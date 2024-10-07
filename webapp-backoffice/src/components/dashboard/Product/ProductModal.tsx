@@ -6,18 +6,24 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Autocomplete from '@mui/material/Autocomplete';
-import { Product } from '@prisma/client';
+import { Entity, Product } from '@prisma/client';
 import React, { useEffect, useRef } from 'react';
 import { trpc } from '@/src/utils/trpc';
 import {
 	Controller,
 	SubmitHandler,
 	useFieldArray,
-	useForm
+	useForm,
+	useFormContext
 } from 'react-hook-form';
 import { useRouter } from 'next/router';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { autocompleteFilterOptions } from '@/src/utils/tools';
+import {
+	autocompleteFilterOptions,
+	createFilterOptionsWithArgument
+} from '@/src/utils/tools';
+import { on } from 'events';
+import { Icon } from '@mui/material';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -38,6 +44,9 @@ interface Props {
 	fromEmptyState?: boolean;
 	onSubmit: () => void;
 	onTitleChange?: (title: string) => void;
+	allowCreateEntity: boolean;
+	onNewEntity: () => void;
+	newCreatedEntity?: Entity;
 }
 
 type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -45,12 +54,25 @@ type FormValues = Omit<Product, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
 };
 
 const ProductModal = (props: Props) => {
-	const { modal, product, fromEmptyState, onTitleChange, onSubmit } = props;
+	const {
+		modal,
+		product,
+		fromEmptyState,
+		onTitleChange,
+		onSubmit,
+		onNewEntity,
+		allowCreateEntity,
+		newCreatedEntity
+	} = props;
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const lastUrlRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
+	const modalOpen = useIsModalOpen(modal);
+	const [selectedValue, setSelectedValue] = React.useState<number | undefined>(
+		newCreatedEntity?.id
+	);
 
 	const {
 		control,
@@ -79,6 +101,7 @@ const ProductModal = (props: Props) => {
 				search: debouncedSearch
 			},
 			{
+				enabled: modalOpen,
 				initialData: { data: [], metadata: { count: 0, myEntities: [] } }
 			}
 		);
@@ -119,7 +142,11 @@ const ProductModal = (props: Props) => {
 		}
 
 		if (productId && fromEmptyState) {
-			router.push(`/administration/dashboard/product/${productId}/buttons`);
+			router
+				.push(`/administration/dashboard/product/${productId}/buttons`)
+				.then(() => {
+					window.location.reload();
+				});
 		}
 
 		onSubmit();
@@ -160,6 +187,10 @@ const ProductModal = (props: Props) => {
 			reset({ title: '', entity_id: undefined });
 		}
 	}, [product]);
+
+	useEffect(() => {
+		setSelectedValue(newCreatedEntity?.id);
+	}, [newCreatedEntity]);
 
 	return (
 		<modal.Component
@@ -213,6 +244,7 @@ const ProductModal = (props: Props) => {
 										},
 										defaultValue: value,
 										value,
+										name,
 										required: true
 									}}
 									state={errors[name] ? 'error' : 'default'}
@@ -234,54 +266,90 @@ const ProductModal = (props: Props) => {
 							name="entity_id"
 							control={control}
 							rules={{ required: 'Ce champ est obligatoire' }}
-							render={({ field: { onChange, value, name } }) => (
-								<Autocomplete
-									disablePortal
-									id="entity-select-autocomplete"
-									noOptionsText="Aucune organisation trouvée"
-									sx={{ width: '100%' }}
-									options={entityOptions}
-									filterOptions={autocompleteFilterOptions}
-									onChange={(_, optionSelected) => {
-										onChange(optionSelected?.value);
-									}}
-									isOptionEqualToValue={option => option.value === value}
-									defaultValue={entityOptions.find(
-										option => option.value === value
-									)}
-									value={
-										value
-											? entityOptions.find(option => option.value === value)
-											: { label: '', value: undefined }
-									}
-									renderInput={params => (
-										<div
-											ref={params.InputProps.ref}
-											className={fr.cx(
-												'fr-input-group',
-												errors[name] ? 'fr-input-group--error' : undefined
-											)}
-										>
-											<input
-												{...params.inputProps}
-												className={cx(
-													params.inputProps.className,
-													fr.cx('fr-input'),
-													errors[name] ? 'fr-input--error' : undefined
+							render={({ field: { onChange, value, name } }) => {
+								useEffect(() => {
+									onChange(selectedValue);
+								}, [selectedValue]);
+								return (
+									<Autocomplete
+										disablePortal
+										id="entity-select-autocomplete"
+										noOptionsText="Aucune organisation trouvée"
+										sx={{ width: '100%' }}
+										options={entityOptions}
+										filterOptions={createFilterOptionsWithArgument(
+											allowCreateEntity
+										)}
+										onChange={(_, optionSelected) => {
+											if (optionSelected?.value === -1) {
+												onNewEntity();
+											} else {
+												setSelectedValue(optionSelected?.value);
+											}
+										}}
+										isOptionEqualToValue={option => option.value === value}
+										defaultValue={entityOptions.find(
+											option => option.value === selectedValue
+										)}
+										value={
+											selectedValue
+												? entityOptions.find(
+														option => option.value === selectedValue
+													)
+												: { label: '', value: undefined }
+										}
+										renderInput={params => (
+											<div
+												ref={params.InputProps.ref}
+												className={fr.cx(
+													'fr-input-group',
+													errors[name] ? 'fr-input-group--error' : undefined
 												)}
-												placeholder="Rechercher une organisation"
-												type="search"
-												required
-											/>
-											{errors[name] && (
-												<p className={fr.cx('fr-error-text')}>
-													{errors[name]?.message}
-												</p>
-											)}
-										</div>
-									)}
-								/>
-							)}
+											>
+												<input
+													{...params.inputProps}
+													className={cx(
+														params.inputProps.className,
+														fr.cx('fr-input'),
+														errors[name] ? 'fr-input--error' : undefined
+													)}
+													placeholder="Rechercher une organisation"
+													type="search"
+													required
+												/>
+												{errors[name] && (
+													<p className={fr.cx('fr-error-text')}>
+														{errors[name]?.message}
+													</p>
+												)}
+											</div>
+										)}
+										// Ajoutez renderOption pour personnaliser l'affichage des options
+										renderOption={(props, option) => (
+											<li
+												{...props}
+												style={
+													option.value === -1 ? { fontWeight: 'bold' } : {}
+												}
+											>
+												{option.value === -1 ? (
+													<span className={cx(classes.buttonSelect)}>
+														<span
+															className="fr-icon-add-circle-line"
+															aria-hidden="true"
+														></span>
+														<span className={fr.cx('fr-ml-2v')}>
+															{option.label}
+														</span>
+													</span>
+												) : (
+													option.label
+												)}
+											</li>
+										)}
+									/>
+								);
+							}}
 						/>
 					)}
 				</div>
@@ -378,6 +446,9 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 		},
 		border: 'none',
 		padding: 0
+	},
+	buttonSelect: {
+		color: fr.colors.decisions.text.default.info.default
 	}
 }));
 export default ProductModal;

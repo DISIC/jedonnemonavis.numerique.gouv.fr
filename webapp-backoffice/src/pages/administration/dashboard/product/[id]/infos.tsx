@@ -67,6 +67,8 @@ const ProductInformationPage = (props: Props) => {
 				modal={editProductModal}
 				product={product}
 				onSubmit={() => router.replace(router.asPath)}
+				allowCreateEntity={false}
+				onNewEntity={() => {}}
 			/>
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>

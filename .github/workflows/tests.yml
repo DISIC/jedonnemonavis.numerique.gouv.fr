@@ -1,0 +1,94 @@
+name: Run Cypress Tests
+
+on:
+  pull_request:
+    branches:
+      - feat/clevercloud
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Configuration de la concurrence
+    concurrency:
+      group: ${{ github.ref }}-tests
+      cancel-in-progress: true
+
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: jdma
+        ports:
+          - 5433:5432
+      mailhog:
+        image: mailhog/mailhog
+        ports:
+          - 8025:8025
+          - 1025:1025
+
+    steps:
+      # 1. Checkout du code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Configuration de Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: 'yarn'
+          cache-dependency-path: |
+            webapp-backoffice/yarn.lock
+            webapp-form/yarn.lock
+
+      # 3. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
+      - name: Install dependencies and generate Prisma client for webapp-backoffice
+        run: |
+          cd webapp-backoffice
+          yarn install
+          npx prisma generate
+
+      # 4. Installer les dépendances et générer le client Prisma pour `webapp-form`
+      - name: Install dependencies and generate Prisma client for webapp-form
+        run: |
+          cd webapp-form
+          yarn install
+          npx prisma generate
+
+      # 5. Construire `webapp-backoffice`
+      - name: Build webapp-backoffice
+        run: |
+          cd webapp-backoffice
+          yarn build
+          nohup yarn start &
+
+      # 6. Construire `webapp-form`
+      - name: Build webapp-form
+        run: |
+          cd webapp-form
+          yarn build
+          nohup yarn startB &
+
+      # 7. Attendre que les services soient prêts
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for webapp-backoffice to be ready..."
+          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for webapp-backoffice..."; sleep 5; done
+
+          echo "Waiting for webapp-form to be ready..."
+          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
+
+      # 8. Exécuter les tests Cypress pour `webapp-backoffice`
+      - name: Run Cypress tests for webapp-backoffice
+        working-directory: ./webapp-backoffice
+        run: npx cypress run
+
+      # 9. Arrêter les applications démarrées
+      - name: Stop applications
+        run: |
+          pkill -f "yarn start" || true
+          pkill -f "yarn startB" || true

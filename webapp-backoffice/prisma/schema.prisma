@@ -111,7 +111,7 @@ model User {
 
 model UserRequest {
   id              Int               @id @default(autoincrement())
-  user            User?             @relation(fields: [user_id], references: [id])
+  user            User?             @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int?              @unique
   user_email_copy String?
   reason          String
@@ -124,7 +124,7 @@ model UserRequest {
 
 model UserOTP {
   id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [user_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int      @unique
   code            String   @unique
   expiration_date DateTime
@@ -135,7 +135,7 @@ model UserOTP {
 
 model UserValidationToken {
   id      Int    @id @default(autoincrement())
-  user    User   @relation(fields: [user_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id Int    @unique
   token   String @unique
 
@@ -154,7 +154,7 @@ model UserInviteToken {
 
 model UserResetToken {
   id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [user_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id         Int      @unique
   user_email      String
   token           String   @unique
@@ -351,15 +351,16 @@ model LimiterReporting {
 }
 
 model Form {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  user       User     @relation(fields: [user_id], references: [id])
-  user_id    Int
-  title      String
-  link       String?
-  active     Boolean  @default(false)
-  blocks     Block[]
+  id           Int            @id @default(autoincrement())
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @default(now())
+  user         User           @relation(fields: [user_id], references: [id])
+  user_id      Int
+  title        String
+  link         String?
+  active       Boolean        @default(false)
+  blocks       Block[]
+  ReviewCustom ReviewCustom[]
 }
 
 model Block {
@@ -388,9 +389,20 @@ model OptionsBlock {
 }
 
 model ReviewCustom {
-  id Int @id @default(autoincrement())
+  id         Int            @id @default(autoincrement())
+  form       Form           @relation(fields: [form_id], references: [id])
+  form_id    Int
+  created_at DateTime
+  updated_at DateTime
+  answers    AnswerCustom[]
 }
 
 model AnswerCustom {
-  id Int @id @default(autoincrement())
+  id         Int          @id @default(autoincrement())
+  review     ReviewCustom @relation(fields: [review_id], references: [id])
+  review_id  Int
+  block_id   Int
+  created_at DateTime
+  updated_at DateTime
+  content    String
 }

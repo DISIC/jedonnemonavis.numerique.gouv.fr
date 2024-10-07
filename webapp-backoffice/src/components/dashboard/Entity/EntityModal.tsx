@@ -164,7 +164,8 @@ const EntityModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									defaultValue: value,
-									value
+									value,
+									name
 								}}
 								state={errors[name] ? 'error' : 'default'}
 								stateRelatedMessage={errors[name]?.message}
@@ -188,6 +189,7 @@ const EntityModal = (props: Props) => {
 									onChange,
 									defaultValue: value,
 									value,
+									name,
 									width: '150px'
 								}}
 								state={errors[name] ? 'error' : 'default'}

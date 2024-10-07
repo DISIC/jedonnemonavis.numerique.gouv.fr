@@ -1,16 +1,19 @@
-import { FormField, Opinion, Step } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { tss } from "tss-react/dsfr";
 import { useRouter } from "next/router";
 import { FormWithoutDates } from "@/src/pages/custom/[id]";
-import React from "react";
+import React, { ChangeEvent } from "react";
 import {
   BlockPartialWithRelations,
-  BlockWithPartialRelations,
+  ReviewCustomWithPartialRelations,
+  ReviewCustomWithRelations,
+  ReviewWithPartialRelations,
 } from "@/prisma/generated/zod";
 import { DisplayBlocks } from "../../custom/DisplayBlocks";
 import { applyLogicForm } from "@/src/utils/tools";
+import { useFormContext } from "@/src/context/Formcontext";
+import { trpc } from "@/src/utils/trpc";
 
 type Props = {
   form: FormWithoutDates;
@@ -20,6 +23,7 @@ export const CustomFormLayout = (props: Props) => {
   const [currentStep, setCurrentStep] = React.useState<number>(0);
   const [formCompleted, setFormCompleted] = React.useState<boolean>(false);
   const { form } = props;
+  const { review, setReview } = useFormContext();
 
   const router = useRouter();
 
@@ -44,26 +48,76 @@ export const CustomFormLayout = (props: Props) => {
 
   const steps = divideArray(form.blocks);
 
+  const logicBlocks = form.blocks.filter((b) => b.type_bloc === "logic");
+
+  const handleChange = (
+    block_id: number,
+    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const updatedAnswerCustom = review?.answers?.map((answer) =>
+      answer.block_id === block_id
+        ? { ...answer, content: e.target.value }
+        : answer
+    );
+    setReview((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          answers: updatedAnswerCustom,
+        };
+      } else {
+        return prev;
+      }
+    });
+  };
+
+  const createBlock = trpc.reviewCustom.create.useMutation({
+    onSuccess: () => {
+      console.log("ok");
+    },
+  });
+
+  const handleSaveReview = async (
+    tmpReview: ReviewCustomWithPartialRelations
+  ) => {
+    try {
+      const { form_id, created_at, updated_at } = tmpReview;
+      const reviewSaved = await createBlock.mutateAsync({
+        reviewPayload: { form_id, created_at, updated_at },
+        answersPayload:
+          tmpReview.answers?.map((a) => {
+            return {
+              review_id: 0,
+              block_id: a.block_id || 0,
+              created_at: a.created_at || new Date(),
+              updated_at: a.updated_at || new Date(),
+              content: a.content || "",
+            };
+          }) ?? [],
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const renderActionRow = (currentStep: number) => {
     const newPageBlock = steps[currentStep].find(
       (block) => block.type_bloc === "new_page"
     );
 
-    const logicPageButton =
-      (form.blocks as BlockWithPartialRelations[]).find(
-        (b) =>
-          b.type_bloc === "logic" &&
-          b.options?.some((o) => parseInt(o.content ?? "") === newPageBlock?.id)
-      ) || null;
-
-    if (logicPageButton)
-      console.log(
-        "found some logic for this button next page : ",
-        logicPageButton
-      );
-
     return (
-      <div className={fr.cx("fr-grid-row", "fr-my-10v")}>
+      <div
+        className={fr.cx(
+          "fr-grid-row",
+          "fr-my-10v",
+          applyLogicForm(
+            "show",
+            newPageBlock?.id ?? null,
+            logicBlocks,
+            review ?? {}
+          ) && "fr-hidden"
+        )}
+      >
         <div className={fr.cx("fr-col-6")}></div>
         <div className={cx(fr.cx("fr-col-6"), classes.next)}>
           <Button
@@ -71,23 +125,10 @@ export const CustomFormLayout = (props: Props) => {
             iconId="fr-icon-arrow-right-fill"
             iconPosition="right"
             disabled={applyLogicForm(
-              (form.blocks as BlockWithPartialRelations[]).find(
-                (b) =>
-                  b.id ===
-                  parseInt(
-                    logicPageButton?.options?.find((o) => o.label === "when")
-                      ?.content || ""
-                  )
-              ) ?? null,
-              (form.blocks as BlockWithPartialRelations[]).find(
-                (b) =>
-                  b.id ===
-                  parseInt(
-                    logicPageButton?.options?.find((o) => o.label === "then")
-                      ?.content || ""
-                  )
-              ) ?? null,
-              "disable"
+              "disable",
+              newPageBlock?.id ?? null,
+              logicBlocks,
+              review ?? {}
             )}
           >
             {newPageBlock ? newPageBlock.content : "Envoyer"}
@@ -136,14 +177,27 @@ export const CustomFormLayout = (props: Props) => {
                     top: 0,
                     behavior: "smooth",
                   });
-                } else setFormCompleted(true);
+                } else {
+                  review && handleSaveReview(review);
+                  setFormCompleted(true);
+                }
                 e.preventDefault();
               }}
             >
               {steps[currentStep]
-                .filter((block) => block.type_bloc !== "new_page")
+                .filter(
+                  (block) =>
+                    block.type_bloc !== "new_page" &&
+                    block.type_bloc !== "logic"
+                )
                 .map((block) => (
-                  <DisplayBlocks block={block}></DisplayBlocks>
+                  <div key={block.id}>
+                    <DisplayBlocks
+                      block={block}
+                      logicBlocks={logicBlocks}
+                      onInput={handleChange}
+                    ></DisplayBlocks>
+                  </div>
                 ))}
               <>{renderActionRow(currentStep)}</>
             </form>

@@ -42,6 +42,7 @@ const DashBoardUsers = () => {
 	const [currentUser, setCurrentUser] = React.useState<User>();
 
 	const [selectedUsers, setSelectedUsers] = React.useState<number[]>([]);
+	const [isCheckedAll, setIsCheckedAll] = React.useState<boolean>(false);
 
 	const { cx, classes } = useStyles();
 
@@ -77,7 +78,11 @@ const DashBoardUsers = () => {
 	});
 
 	const deleteUsers = trpc.user.deleteMany.useMutation({
-		onSuccess: () => refetchUsers()
+		onSuccess: () => {
+			setSelectedUsers([]);
+			setIsCheckedAll(false);
+			refetchUsers();
+		}
 	});
 
 	const handlePageChange = (pageNumber: number) => {
@@ -96,6 +101,8 @@ const DashBoardUsers = () => {
 		if (type === 'create') {
 			userModal.open();
 		} else if (type === 'delete') {
+			setSelectedUsers([]);
+			setIsCheckedAll(false);
 			onConfirmModal.open();
 		}
 	};
@@ -111,14 +118,12 @@ const DashBoardUsers = () => {
 	const handleGeneralCheckbox = () => {
 		if (selectedUsers.length < users.length) {
 			setSelectedUsers(users.map(user => user.id));
+			setIsCheckedAll(true);
 		} else {
 			setSelectedUsers([]);
+			setIsCheckedAll(false);
 		}
 	};
-
-	React.useEffect(() => {
-		console.log('selected users : ', selectedUsers);
-	}, [selectedUsers]);
 
 	return (
 		<>
@@ -128,18 +133,40 @@ const DashBoardUsers = () => {
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title="Supprimer un utilisateur"
+				title={`Supprimer ${selectedUsers.length > 0 ? 'des' : 'un'} utilisateur${selectedUsers.length > 0 ? 's' : ''}`}
 				handleOnConfirm={() => {
-					deleteUser.mutate({ id: currentUser?.id as number });
+					if (selectedUsers.length > 0) {
+						deleteUsers.mutateAsync({
+							ids: selectedUsers
+						});
+					} else {
+						deleteUser.mutate({ id: currentUser?.id as number });
+					}
 					onConfirmModal.close();
 				}}
 			>
 				<>
-					Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
-					<span className={classes.boldText}>
-						{currentUser?.firstName} {currentUser?.lastName}
-					</span>{' '}
-					?
+					{selectedUsers.length > 0 ? (
+						<>
+							Vous êtes sûr de vouloir supprimer ces utilisateurs :{' '}
+							{selectedUsers.map(uid => (
+								<div className={fr.cx('fr-grid-row')} key={uid}>
+									<span className={classes.boldText}>
+										{users.find(u => u.id === uid)?.firstName}{' '}
+										{users.find(u => u.id === uid)?.lastName}
+									</span>{' '}
+								</div>
+							))}
+						</>
+					) : (
+						<>
+							Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
+							<span className={classes.boldText}>
+								{currentUser?.firstName} {currentUser?.lastName}
+							</span>{' '}
+							?
+						</>
+					)}
 				</>
 			</OnConfirmModal>
 			<UserModal
@@ -236,10 +263,7 @@ const DashBoardUsers = () => {
 								iconPosition="right"
 								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
 								onClick={() => {
-									deleteUsers.mutateAsync({
-										ids: selectedUsers
-									});
-									setSelectedUsers([]);
+									onConfirmModal.open();
 								}}
 							>
 								Supprimer tous
@@ -292,6 +316,7 @@ const DashBoardUsers = () => {
 												{
 													label: '',
 													nativeInputProps: {
+														checked: isCheckedAll,
 														name: 'checkboxes-1',
 														value: 'value1',
 														onClick: () => {

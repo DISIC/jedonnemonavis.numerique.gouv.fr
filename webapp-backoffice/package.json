@@ -12,7 +12,8 @@
 		"format": "prettier --write .",
 		"lhci:audit": "next build && concurrently \"npm run lhci:server\" \"lhci autorun\"",
 		"lhci:wizard": "lhci wizard",
-		"lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql"
+		"lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql",
+		"test:e2e": "cypress run"
 	},
 	"husky": {
 		"hooks": {
@@ -77,6 +78,7 @@
 		"@babel/preset-typescript": "^7.22.15",
 		"@lhci/cli": "^0.12.0",
 		"@lhci/server": "^0.12.0",
+		"cypress": "^13.13.1",
 		"@types/react-beautiful-dnd": "^13.1.8",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^5.0.0",
