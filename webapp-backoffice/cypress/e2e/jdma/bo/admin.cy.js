@@ -147,7 +147,7 @@ describe('jdma-admin', () => {
 		cy.visit(mailer_url);
 		cy.wait(4000);
 
-		cy.get('div').find('.messages').click();
+		cy.get('div.messages', { timeout: 10000 }).should('be.visible').click();
 		cy.wait(3000);
 
 		cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
