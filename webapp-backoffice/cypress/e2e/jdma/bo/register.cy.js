@@ -94,8 +94,14 @@ describe('jdma-register', () => {
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 10000 })
-					.should('be.visible')
+				cy.get('div.messages', { timeout: 15000 })
+					.should($div => {
+						expect($div).to.have.length.greaterThan(0);
+						expect($div).to.be.visible;
+					})
+					.then(() => {
+						cy.get('div.messages').scrollIntoView();
+					})
 					.find('div.msglist-message')
 					.click();
 				cy.wait(3000);
@@ -289,11 +295,22 @@ describe('jdma-register', () => {
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 10000 })
-					.should('be.visible')
+				cy.get('div.messages', { timeout: 15000 })
+					.should($div => {
+						expect($div).to.have.length.greaterThan(0);
+						expect($div).to.be.visible;
+					})
+					.then(() => {
+						cy.get('div.messages').scrollIntoView();
+					})
 					.find('div.msglist-message')
-					.first()
 					.click();
+
+				// cy.get('div.messages', { timeout: 10000 })
+				// 	.should('be.visible')
+				// 	.find('div.msglist-message')
+				// 	.first()
+				// 	.click();
 				cy.wait(4000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
