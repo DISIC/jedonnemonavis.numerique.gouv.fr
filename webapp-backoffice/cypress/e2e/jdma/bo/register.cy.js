@@ -92,9 +92,12 @@ describe('jdma-register', () => {
 				cy.wait(4000);
 
 				cy.get('button.btn-default[title="Refresh"]').click();
-				cy.wait(4000);
+				cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 10000 }).should('be.visible').click();
+				cy.get('div.messages', { timeout: 10000 })
+					.should('be.visible')
+					.find('div.msglist-message')
+					.click();
 				cy.wait(3000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
