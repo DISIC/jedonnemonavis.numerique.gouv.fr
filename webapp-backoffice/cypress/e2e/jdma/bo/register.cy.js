@@ -19,7 +19,7 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password is too short', () => {
-		cy.wait(1000)
+		cy.wait(1000);
 		fillForm({ password: 'Short1!', email: 'john.doe@example.com' }); // Too short
 
 		cy.get('button[type="submit"]').click();
@@ -27,21 +27,21 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password lacks a special character', () => {
-		cy.wait(1000)
+		cy.wait(1000);
 		fillForm({ password: 'Password1234', email: 'john.doe@example.com' }); // Missing special character
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 caractère spécial');
 	});
 
 	it('should not submit the form if the password lacks a digit', () => {
-		cy.wait(1000)
+		cy.wait(1000);
 		fillForm({ password: 'Password!@#', email: 'john.doe@example.com' }); // Missing digit
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 chiffre minimum');
 	});
 
 	it('should submit the form WITH NOT whitelisted email', () => {
-		cy.wait(2000)
+		cy.wait(2000);
 		fillForm({
 			password: userPassword,
 			email: 'test123num@jdma.com'
@@ -76,7 +76,7 @@ describe('jdma-register', () => {
 	});
 
 	it('should submit the form WITH whitelisted email', () => {
-		cy.get('body').then(($body) => {
+		cy.get('body').then($body => {
 			$body.addClass('no-animations');
 		});
 		fillForm({ password: userPassword, email });
@@ -89,10 +89,10 @@ describe('jdma-register', () => {
 				cy.log('New registration flow.');
 
 				cy.visit(mailer_url);
-				cy.wait(2000);
+				cy.wait(4000);
 
 				cy.get('button.btn-default[title="Refresh"]').click();
-				cy.wait(2000);
+				cy.wait(4000);
 
 				cy.get('div').find('.messages').click();
 				cy.wait(3000);
@@ -129,23 +129,25 @@ describe('jdma-register', () => {
 				cy.contains('button', 'Ajouter un service').click();
 				cy.wait(2000);
 
-				 cy.get('#product-form').should('be.visible').within(() => {
-					cy.get('input[name="title"]')
-						.should('exist') // Vérifie que l'input existe
-						.type('e2e-jdma-service-test-1'); // Remplit l'input avec du texte
+				cy.get('#product-form')
+					.should('be.visible')
+					.within(() => {
+						cy.get('input[name="title"]')
+							.should('exist') // Vérifie que l'input existe
+							.type('e2e-jdma-service-test-1'); // Remplit l'input avec du texte
 
-					cy.get('input#entity-select-autocomplete').should('exist').click();
+						cy.get('input#entity-select-autocomplete').should('exist').click();
 
-					cy.get('div[role="presentation"]')
-						.should('be.visible')
-						.then(() => {
-							cy.get('input#entity-select-autocomplete').invoke(
-								'attr',
-								'aria-activedescendant',
-								'entity-select-autocomplete-option-0'
-							);
-						});
-				});
+						cy.get('div[role="presentation"]')
+							.should('be.visible')
+							.then(() => {
+								cy.get('input#entity-select-autocomplete').invoke(
+									'attr',
+									'aria-activedescendant',
+									'entity-select-autocomplete-option-0'
+								);
+							});
+					});
 
 				cy.get('div[role="presentation"]')
 					.find('[id="entity-select-autocomplete-option-0"]')
@@ -261,7 +263,7 @@ describe('jdma-register', () => {
 						cy.get('button').contains('Inviter').click();
 					});
 
-				// // LOG OUT
+				// LOG OUT
 				cy.get('header').find('button').contains('Déconnexion').click();
 				cy.wait(3000);
 
@@ -279,16 +281,13 @@ describe('jdma-register', () => {
 				cy.wait(3000);
 
 				cy.visit(mailer_url);
-				cy.wait(2000);
+				cy.wait(4000);
 
 				cy.get('button.btn-default[title="Refresh"]').click();
-				cy.wait(2000);
+				cy.wait(8000);
 
-				cy.get('div.messages')
-				.find('div.msglist-message')
-				.first()
-				.click();
-				cy.wait(3000);
+				cy.get('div.messages').find('div.msglist-message').first().click();
+				cy.wait(4000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
 

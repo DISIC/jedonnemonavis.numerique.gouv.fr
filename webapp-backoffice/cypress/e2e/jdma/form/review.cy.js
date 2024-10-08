@@ -16,6 +16,7 @@ describe('jdma-form-review', () => {
 	});
 
 	it('Fill form', () => {
+		cy.wait(4000);
 		cy.get('[class*="formSection"]').within(() => {
 			cy.get('h1').contains('Je donne mon avis');
 			cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);

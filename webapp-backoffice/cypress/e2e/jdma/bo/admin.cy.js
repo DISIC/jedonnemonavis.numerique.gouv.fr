@@ -93,10 +93,11 @@ describe('jdma-admin', () => {
 
 		// PRODUCT
 		cy.visit(app_url + '/administration/dashboard/products');
+		cy.wait(8000);
 		cy.get('#product-modal-control-button')
 			.contains('Ajouter un nouveau service')
 			.click();
-		cy.wait(4000);
+		cy.wait(8000);
 		cy.get('dialog#product-modal')
 			.invoke('css', 'visibility', 'visible')
 			.invoke('css', 'opacity', 1)
@@ -106,9 +107,10 @@ describe('jdma-admin', () => {
 					cy.get('input[name="title"]')
 						.should('be.visible')
 						.type('e2e-jdma-service-test');
-					cy.wait(3000);
-					cy.get('input#entity-select-autocomplete').click();
-
+					cy.wait(2000);
+					cy.get('input#entity-select-autocomplete', { timeout: 10000 })
+						.should('be.visible')
+						.click();
 					cy.get('div[role="presentation"]')
 						.should('be.visible')
 						.then(() => {
@@ -143,6 +145,7 @@ describe('jdma-admin', () => {
 		cy.wait(8000);
 
 		cy.visit(mailer_url);
+		cy.wait(4000);
 
 		cy.get('div').find('.messages').click();
 		cy.wait(3000);
