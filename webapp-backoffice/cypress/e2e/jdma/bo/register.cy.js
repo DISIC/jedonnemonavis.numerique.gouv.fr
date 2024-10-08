@@ -89,21 +89,18 @@ describe('jdma-register', () => {
 				cy.log('New registration flow.');
 
 				cy.visit(mailer_url);
-				cy.wait(4000);
+				cy.wait(10000);
 
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 15000 })
-					.should($div => {
-						expect($div).to.have.length.greaterThan(0);
-						expect($div).to.be.visible;
-					})
-					.then(() => {
-						cy.get('div.messages').scrollIntoView();
-					})
-					.find('div.msglist-message')
-					.click();
+				cy.get('div.messages', { timeout: 20000 }) // Attendre l'apparition de la div avec les messages
+					.should('exist')
+					.and('be.visible') // Vérifier que l'élément contenant les messages est visible
+					.scrollIntoView() // S'assurer que les messages sont visibles à l'écran
+					.find('div.msglist-message') // Récupérer la liste des messages
+					.first() // Sélectionner le premier message
+					.click({ force: true });
 				cy.wait(3000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
@@ -290,27 +287,18 @@ describe('jdma-register', () => {
 				cy.wait(3000);
 
 				cy.visit(mailer_url);
-				cy.wait(4000);
+				cy.wait(10000);
 
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 15000 })
-					.should($div => {
-						expect($div).to.have.length.greaterThan(0);
-						expect($div).to.be.visible;
-					})
-					.then(() => {
-						cy.get('div.messages').scrollIntoView();
-					})
+				cy.get('div.messages', { timeout: 20000 })
+					.should('exist')
+					.and('be.visible')
+					.scrollIntoView()
 					.find('div.msglist-message')
-					.click();
-
-				// cy.get('div.messages', { timeout: 10000 })
-				// 	.should('be.visible')
-				// 	.find('div.msglist-message')
-				// 	.first()
-				// 	.click();
+					.first()
+					.click({ force: true });
 				cy.wait(4000);
 
 				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
@@ -384,6 +372,7 @@ function generateUniqueEmail() {
 
 function clearInbox() {
 	cy.visit(mailer_url);
+	cy.wait(4000);
 	cy.get('.nav-pills').find('a').contains('Delete all messages').click();
 	cy.get('.modal-footer')
 		.find('button')

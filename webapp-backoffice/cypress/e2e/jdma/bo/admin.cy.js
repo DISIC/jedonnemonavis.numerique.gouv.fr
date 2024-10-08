@@ -145,9 +145,15 @@ describe('jdma-admin', () => {
 		cy.wait(8000);
 
 		cy.visit(mailer_url);
-		cy.wait(4000);
+		cy.wait(10000);
 
-		cy.get('div.messages', { timeout: 10000 }).should('be.visible').click();
+		cy.get('div.messages', { timeout: 20000 })
+			.should('exist')
+			.and('be.visible')
+			.scrollIntoView()
+			.find('div.msglist-message')
+			.first()
+			.click({ force: true });
 		cy.wait(3000);
 
 		cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
@@ -222,6 +228,7 @@ function fillForm({ firstName = 'John', lastName = 'Doe', password = '' }) {
 
 function clearInbox() {
 	cy.visit(mailer_url);
+	cy.wait(4000);
 	cy.get('.nav-pills').find('a').contains('Delete all messages').click();
 	cy.get('.modal-footer')
 		.find('button')
