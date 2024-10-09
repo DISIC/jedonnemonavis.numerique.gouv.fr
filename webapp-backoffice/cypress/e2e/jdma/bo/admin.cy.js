@@ -162,28 +162,31 @@ describe('jdma-admin', () => {
 			.should('be.visible');
 
 		//LOGOUT
-		cy.get('header').find('button').contains('Déconnexion').click();
-		cy.wait(10000);
+
+		// cy.get('header').find('button').contains('Déconnexion').click();
+		// cy.wait(10000);
 
 		cy.visit(mailer_url);
-		cy.wait(15000);
+		cy.wait(20000);
 
-		cy.get('button.btn-default[title="Refresh"]').click();
-		cy.wait(8000);
+		// cy.get('button.btn-default[title="Refresh"]').click();
+		// cy.wait(8000);
 
-		cy.get('.col-md-10.col-sm-9.content').then($element => {
-			const htmlContent = $element.html();
+		cy.document().then(doc => {
+			const htmlContent = doc.documentElement.outerHTML;
 			cy.task('log', htmlContent);
 		});
 
 		cy.get('div.messages', { timeout: 20000 })
+			.should('exist')
+			.and('be.visible')
 			.should('be.visible')
 			.and('not.be.empty')
 			.scrollIntoView()
 			.find('div.msglist-message')
 			.first()
 			.click({ force: true });
-		cy.wait(3000);
+		cy.wait(4000);
 
 		cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
 
