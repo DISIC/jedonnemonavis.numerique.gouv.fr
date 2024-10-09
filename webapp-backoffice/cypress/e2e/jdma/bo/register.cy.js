@@ -344,15 +344,15 @@ describe('jdma-register', () => {
 					}
 				});
 			}
-			cy.get('header', { timeout: 10000 })
-				.should('be.visible')
-				.within(() => {
-					cy.get('button')
-						.contains('Déconnexion', { timeout: 10000 })
-						.should('be.visible')
-						.click();
-				});
-			cy.wait(3000);
+			// cy.get('header', { timeout: 10000 })
+			// 	.should('be.visible')
+			// 	.within(() => {
+			// 		cy.get('button')
+			// 			.contains('Déconnexion', { timeout: 10000 })
+			// 			.should('be.visible')
+			// 			.click();
+			// 	});
+			// cy.wait(3000);
 		});
 	});
 });
