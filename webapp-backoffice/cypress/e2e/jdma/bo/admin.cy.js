@@ -65,10 +65,12 @@ describe('jdma-admin', () => {
 					});
 			});
 
-		cy.get('[id*="fr-alert"')
-			.find('span')
-			.contains('Inviter des collègues')
-			.click();
+		cy.get('[id*="fr-alert"]', { timeout: 10000 })
+			.should('exist')
+			.and('be.visible')
+			.within(() => {
+				cy.get('span').contains('Inviter des collègues').click();
+			});
 		cy.get('dialog#entity-rights-modal')
 			.should('exist')
 			.within(() => {
