@@ -168,9 +168,12 @@ describe('jdma-admin', () => {
 		cy.visit(mailer_url);
 		cy.wait(15000);
 
+		cy.get('button.btn-default[title="Refresh"]').click();
+		cy.wait(8000);
+
 		cy.get('div.messages', { timeout: 20000 })
-			.should('exist')
-			.and('be.visible')
+			.should('be.visible')
+			.and('not.be.empty')
 			.scrollIntoView()
 			.find('div.msglist-message')
 			.first()
