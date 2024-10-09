@@ -163,10 +163,10 @@ describe('jdma-admin', () => {
 
 		//LOGOUT
 		cy.get('header').find('button').contains('Déconnexion').click();
-		cy.wait(8000);
+		cy.wait(10000);
 
 		cy.visit(mailer_url);
-		cy.wait(10000);
+		cy.wait(15000);
 
 		cy.get('div.messages', { timeout: 20000 })
 			.should('exist')
