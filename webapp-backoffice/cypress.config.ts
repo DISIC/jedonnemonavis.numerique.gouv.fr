@@ -19,6 +19,7 @@ export default defineConfig({
 				}
 			});
 		},
+		retries: { runMode: 3, openMode: 3 },
 		baseUrl: process.env.NEXTAUTH_URL
 	}
 });
