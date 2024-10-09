@@ -91,14 +91,17 @@ describe('jdma-register', () => {
 				cy.visit(mailer_url);
 				cy.wait(10000);
 
-				console.log('MAILER URL SHOULD BE: ', mailer_url);
-				cy.url().then(url => console.log('1 CURRENT URL IS :', url));
+				cy.task('log', `MAILER URL SHOULD BE : ${mailer_url}`);
+				cy.url().then(url => {
+					cy.task('log', `1 CURRENT URL IS: ${url}`);
+				});
 
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
 
-				console.log('MAILER URL SHOULD BE: ', mailer_url);
-				cy.url().then(url => console.log('2 CURRENT URL IS :', url));
+				cy.url().then(url => {
+					cy.task('log', `2 CURRENT URL IS: ${url}`);
+				});
 
 				cy.get('div.messages', { timeout: 20000 }) // Attendre l'apparition de la div avec les messages
 					.should('exist')
@@ -295,13 +298,8 @@ describe('jdma-register', () => {
 				cy.visit(mailer_url);
 				cy.wait(10000);
 
-				console.log('MAILER URL SHOULD BE: ', mailer_url);
-				cy.url().then(url => console.log('1 CURRENT URL IS :', url));
-
 				cy.get('button.btn-default[title="Refresh"]').click();
 				cy.wait(8000);
-
-				cy.url().then(url => console.log('2 CURRENT URL IS :', url));
 
 				cy.get('div.messages', { timeout: 20000 })
 					.should('exist')

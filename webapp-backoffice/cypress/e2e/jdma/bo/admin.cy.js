@@ -146,8 +146,11 @@ describe('jdma-admin', () => {
 
 		cy.visit(mailer_url);
 		cy.wait(10000);
-		console.log('MAILER URL SHOULD BE: ', mailer_url);
-		cy.url().then(url => console.log('1 CURRENT URL IS :', url));
+
+		cy.task('log', `MAILER URL SHOULD BE : ${mailer_url}`);
+		cy.url().then(url => {
+			cy.task('log', `CURRENT URL IS: ${url}`);
+		});
 
 		cy.get('div.messages', { timeout: 20000 })
 			.should('exist')
