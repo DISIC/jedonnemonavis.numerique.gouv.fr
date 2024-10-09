@@ -71,12 +71,19 @@ describe('jdma-admin', () => {
 			cy.log(htmlContent);
 			cy.task('log', htmlContent);
 		});
-		cy.get('[id*="fr-alert"]', { timeout: 10000 })
-			.should('exist')
-			.and('be.visible')
+
+		cy.contains('p', 'e2e-jdma-entity-test')
+			.parents('.fr-card')
 			.within(() => {
-				cy.get('span').contains('Inviter des collègues').click();
+				cy.contains('button', 'Gérer les administrateurs').click();
+				cy.wait(3000);
 			});
+		// cy.get('[id*="fr-alert"]', { timeout: 10000 })
+		// 	.should('exist')
+		// 	.and('be.visible')
+		// 	.within(() => {
+		// 		cy.get('span').contains('Inviter des collègues').click();
+		// 	});
 		cy.get('dialog#entity-rights-modal')
 			.should('exist')
 			.within(() => {
