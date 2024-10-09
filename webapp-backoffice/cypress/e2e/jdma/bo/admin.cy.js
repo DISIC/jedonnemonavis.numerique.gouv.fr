@@ -162,22 +162,16 @@ describe('jdma-admin', () => {
 			.should('be.visible');
 
 		//LOGOUT
-
-		// cy.get('header').find('button').contains('Déconnexion').click();
-		// cy.wait(10000);
+		cy.get('header').find('button').contains('Déconnexion').click();
+		cy.wait(10000);
 
 		cy.visit(mailer_url);
-		cy.wait(20000);
+		cy.wait(5000);
 
 		// cy.get('button.btn-default[title="Refresh"]').click();
 		// cy.wait(8000);
 
-		cy.document().then(doc => {
-			const htmlContent = doc.documentElement.outerHTML;
-			cy.task('log', htmlContent);
-		});
-
-		cy.get('div.messages', { timeout: 20000 })
+		cy.get('div.messages')
 			.should('exist')
 			.and('be.visible')
 			.should('be.visible')
