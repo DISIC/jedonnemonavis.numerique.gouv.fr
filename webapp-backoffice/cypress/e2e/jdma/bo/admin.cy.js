@@ -171,6 +171,11 @@ describe('jdma-admin', () => {
 		cy.get('button.btn-default[title="Refresh"]').click();
 		cy.wait(8000);
 
+		cy.get('.col-md-10.col-sm-9.content').then($element => {
+			const htmlContent = $element.html();
+			cy.task('log', htmlContent);
+		});
+
 		cy.get('div.messages', { timeout: 20000 })
 			.should('be.visible')
 			.and('not.be.empty')
