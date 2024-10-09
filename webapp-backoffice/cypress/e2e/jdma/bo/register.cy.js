@@ -91,15 +91,15 @@ describe('jdma-register', () => {
 				cy.visit(mailer_url);
 				cy.wait(10000);
 
-				cy.get('button.btn-default[title="Refresh"]').click();
-				cy.wait(8000);
+				// cy.get('button.btn-default[title="Refresh"]').click();
+				// cy.wait(8000);
 
-				cy.get('div.messages', { timeout: 20000 }) // Attendre l'apparition de la div avec les messages
+				cy.get('div.messages', { timeout: 20000 })
 					.should('exist')
-					.and('be.visible') // Vérifier que l'élément contenant les messages est visible
-					.scrollIntoView() // S'assurer que les messages sont visibles à l'écran
-					.find('div.msglist-message') // Récupérer la liste des messages
-					.first() // Sélectionner le premier message
+					.and('be.visible')
+					.scrollIntoView()
+					.find('div.msglist-message')
+					.first()
 					.click({ force: true });
 				cy.wait(3000);
 
@@ -344,7 +344,7 @@ describe('jdma-register', () => {
 					}
 				});
 			}
-
+			cy.wait(3000);
 			// // LOG OUT
 			cy.get('header').find('button').contains('Déconnexion').click();
 			cy.wait(3000);
