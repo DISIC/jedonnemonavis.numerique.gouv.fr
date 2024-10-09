@@ -196,11 +196,11 @@ model ApiKey {
   id           Int         @id @default(autoincrement())
   key          String
   scope        UserRole
-  user         User        @relation(fields: [user_id], references: [id])
+  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      Int
-  product      Product?    @relation(fields: [product_id], references: [id])
+  product      Product?    @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id   Int?
-  entity       Entity?     @relation(fields: [entity_id], references: [id])
+  entity       Entity?     @relation(fields: [entity_id], references: [id], onDelete: Cascade)
   entity_id    Int?
   api_key_logs ApiKeyLog[]
 }
