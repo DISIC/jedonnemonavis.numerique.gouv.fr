@@ -289,8 +289,8 @@ describe('jdma-register', () => {
 				cy.visit(mailer_url);
 				cy.wait(10000);
 
-				cy.get('button.btn-default[title="Refresh"]').click();
-				cy.wait(8000);
+				// cy.get('button.btn-default[title="Refresh"]').click();
+				// cy.wait(8000);
 
 				cy.get('div.messages', { timeout: 20000 })
 					.should('exist')
@@ -346,7 +346,11 @@ describe('jdma-register', () => {
 			}
 			cy.wait(3000);
 			// // LOG OUT
-			cy.get('header').find('button').contains('Déconnexion').click();
+			cy.get('header')
+				.find('button')
+				.contains('Déconnexion', { timeout: 10000 })
+				.should('be.visible')
+				.click();
 			cy.wait(3000);
 		});
 	});
