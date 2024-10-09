@@ -7,7 +7,7 @@ const invitedEmail = Cypress.env('admin_guest_mail_bis');
 
 describe('jdma-admin', () => {
 	beforeEach(() => {
-		clearInbox();
+		// clearInbox();
 		cy.visit(app_url + '/login');
 	});
 
