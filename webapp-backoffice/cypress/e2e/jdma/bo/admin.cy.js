@@ -62,10 +62,15 @@ describe('jdma-admin', () => {
 							.contains('Créer une organisation')
 							.should('be.visible')
 							.click({ force: true });
-						cy.wait(6000);
+						cy.wait(5000);
 					});
 			});
 
+		cy.document().then(doc => {
+			const htmlContent = doc.documentElement.outerHTML;
+			cy.log(htmlContent);
+			cy.task('log', htmlContent);
+		});
 		cy.get('[id*="fr-alert"]', { timeout: 10000 })
 			.should('exist')
 			.and('be.visible')
