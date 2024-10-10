@@ -88,14 +88,14 @@ jobs:
           echo "Waiting for MailHog to be ready..."
           until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
 
-      # 9. Vérifier si MailHog reçoit les emails
-      - name: Check MailHog for received emails
-        run: curl http://localhost:8025/api/v2/messages
-
-      # 10. Exécuter les tests Cypress pour `webapp-backoffice`
+      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run --headed --browser chrome
+
+      # 10. Vérifier si MailHog reçoit les emails
+      - name: Check MailHog for received emails
+        run: curl http://localhost:8025/api/v2/messages
 
       # 11. Arrêter les applications démarrées
       - name: Stop applications
