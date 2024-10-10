@@ -246,6 +246,9 @@ function getEmail() {
 	cy.wait(10000);
 	cy.visit(mailer_url);
 
+	cy.get('button.btn-default[title="Refresh"]').click();
+	cy.wait(1000);
+
 	cy.document().then(doc => {
 		const htmlContent = doc.documentElement.outerHTML;
 		cy.log(htmlContent); // Log dans l'interface Cypress
