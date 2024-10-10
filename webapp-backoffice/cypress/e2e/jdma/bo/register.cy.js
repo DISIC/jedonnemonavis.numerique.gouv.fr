@@ -6,7 +6,6 @@ const mailer_url = Cypress.env('mailer_base_url');
 
 describe('jdma-register', () => {
 	beforeEach(() => {
-		clearInbox();
 		cy.visit(app_url + '/register');
 	});
 
@@ -139,8 +138,8 @@ describe('jdma-register', () => {
 					.should('be.visible')
 					.within(() => {
 						cy.get('input[name="title"]')
-							.should('exist') // Vérifie que l'input existe
-							.type('e2e-jdma-service-test-1'); // Remplit l'input avec du texte
+							.should('exist')
+							.type('e2e-jdma-service-test-1');
 
 						cy.get('input#entity-select-autocomplete').should('exist').click();
 
@@ -319,7 +318,7 @@ describe('jdma-register', () => {
 						cy.url().should('include', '/register');
 					});
 
-				// 	// LOGIN INVITED USER
+				// LOGIN INVITED USER
 				cy.visit(app_url + '/login');
 				cy.get('input[name="email"]').type(invitedEmail);
 				cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
@@ -354,6 +353,8 @@ describe('jdma-register', () => {
 			// 	});
 			// cy.wait(3000);
 		});
+		clearInbox();
+		cy.wait(5000);
 	});
 });
 
