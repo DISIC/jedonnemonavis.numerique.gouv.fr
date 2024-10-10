@@ -25,56 +25,6 @@ describe('jdma-admin', () => {
 		cy.wait(4000);
 	});
 
-	it('create service', () => {
-		cy.get('#product-modal-control-button')
-			.contains('Ajouter un nouveau service')
-			.click();
-		cy.wait(8000);
-		cy.get('dialog#product-modal')
-			.invoke('css', 'visibility', 'visible')
-			.invoke('css', 'opacity', 1)
-			.should('be.visible')
-			.within(() => {
-				cy.get('.fr-modal__body').within(() => {
-					cy.get('input[name="title"]')
-						.should('be.visible')
-						.type('e2e-jdma-service-test');
-					cy.wait(2000);
-					cy.get('input#entity-select-autocomplete', { timeout: 10000 })
-						.should('be.visible')
-						.click();
-					cy.get('div[role="presentation"]')
-						.should('be.visible')
-						.then(() => {
-							cy.get('input#entity-select-autocomplete').invoke(
-								'attr',
-								'aria-activedescendant',
-								'entity-select-autocomplete-option-0'
-							);
-						});
-					cy.get('div[role="presentation"]')
-						.find('[id="entity-select-autocomplete-option-0"]')
-						.click();
-					cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
-				});
-			});
-
-		cy.get('.fr-modal__footer')
-			.contains('button', 'Ajouter ce service')
-			.should('exist')
-			.click();
-		cy.get('dialog#product-modal')
-			.invoke('css', 'visibility', 'hidden')
-			.invoke('css', 'opacity', 0);
-		cy.wait(1500);
-		cy.get('[class*="productTitle"]')
-			.should('exist')
-			.contains('e2e-jdma-service-test')
-			.should('be.visible');
-
-		cy.wait(1000);
-	});
-
 	it('create organisation', () => {
 		clearInbox();
 		cy.wait(5000);
@@ -150,6 +100,56 @@ describe('jdma-admin', () => {
 			});
 
 		logout();
+	});
+
+	it('create service', () => {
+		cy.get('#product-modal-control-button')
+			.contains('Ajouter un nouveau service')
+			.click();
+		cy.wait(8000);
+		cy.get('dialog#product-modal')
+			.invoke('css', 'visibility', 'visible')
+			.invoke('css', 'opacity', 1)
+			.should('be.visible')
+			.within(() => {
+				cy.get('.fr-modal__body').within(() => {
+					cy.get('input[name="title"]')
+						.should('be.visible')
+						.type('e2e-jdma-service-test');
+					cy.wait(2000);
+					cy.get('input#entity-select-autocomplete', { timeout: 10000 })
+						.should('be.visible')
+						.click();
+					cy.get('div[role="presentation"]')
+						.should('be.visible')
+						.then(() => {
+							cy.get('input#entity-select-autocomplete').invoke(
+								'attr',
+								'aria-activedescendant',
+								'entity-select-autocomplete-option-0'
+							);
+						});
+					cy.get('div[role="presentation"]')
+						.find('[id="entity-select-autocomplete-option-0"]')
+						.click();
+					cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
+				});
+			});
+
+		cy.get('.fr-modal__footer')
+			.contains('button', 'Ajouter ce service')
+			.should('exist')
+			.click();
+		cy.get('dialog#product-modal')
+			.invoke('css', 'visibility', 'hidden')
+			.invoke('css', 'opacity', 0);
+		cy.wait(1500);
+		cy.get('[class*="productTitle"]')
+			.should('exist')
+			.contains('e2e-jdma-service-test')
+			.should('be.visible');
+
+		cy.wait(1000);
 	});
 
 	it('invite email', () => {
