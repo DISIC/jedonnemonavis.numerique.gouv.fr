@@ -85,6 +85,9 @@ jobs:
           echo "Waiting for webapp-form to be ready..."
           until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
 
+          echo "Waiting for MailHog to be ready..."
+          until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
+
       # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
