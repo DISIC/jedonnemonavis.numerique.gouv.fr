@@ -243,13 +243,16 @@ function logout() {
 function getEmail() {
 	logout();
 
-	cy.visit(mailer_url);
 	cy.wait(10000);
+	cy.visit(mailer_url);
 
-	cy.reload();
-	cy.wait(5000);
+	cy.document().then(doc => {
+		const htmlContent = doc.documentElement.outerHTML;
+		cy.log(htmlContent); // Log dans l'interface Cypress
+		cy.task('log', htmlContent); // Log dans la console (si vous avez configuré les tâches)
+	});
 
-	cy.get('div.messages')
+	cy.get('div.messages', { timeout: 20000 })
 		.should('exist')
 		.and('be.visible')
 		.should('be.visible')
