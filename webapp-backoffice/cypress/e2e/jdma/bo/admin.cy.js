@@ -8,8 +8,10 @@ const invitedEmail = Cypress.env('admin_guest_mail_bis');
 describe('jdma-admin', () => {
 	beforeEach(() => {
 		cy.visit(app_url + '/login');
-		cy.wait(5000);
-		cy.get('input[name="email"]').type(adminEmail);
+		cy.wait(2000);
+		cy.get('input[name="email"]', { timeout: 10000 })
+			.should('be.visible')
+			.type(adminEmail);
 		cy.get('[class*="LoginForm-button"]')
 			.contains('Continuer')
 			.click()
@@ -181,19 +183,17 @@ describe('jdma-admin', () => {
 		cy.get('input[type="password"]').type(userPassword);
 		cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
 		cy.url().should('eq', app_url + '/administration/dashboard/products');
-	});
-
-	it('check existing service', () => {
+		cy.wait(5000);
 		cy.get('[class*="productTitle"]')
 			.should('exist')
 			.contains('e2e-jdma-service-test');
 
 		cy.get('nav').find('li').contains('Organisations').click();
 		cy.get('p').contains('e2e-jdma-entity-test').should('be.visible');
-	});
+		cy.wait(3000);
 
-	it('create button', () => {
 		cy.get('nav').find('li').contains('Services').click();
+		cy.wait(3000);
 
 		cy.get('[class*="productTitle"]')
 			.should('exist')
@@ -233,6 +233,8 @@ function fillForm({
 }
 
 function logout() {
+	cy.reload();
+	cy.wait(5000);
 	cy.get('header')
 		.find('button')
 		.contains('Déconnexion')
@@ -249,11 +251,11 @@ function getEmail() {
 	cy.get('button.btn-default[title="Refresh"]').click();
 	cy.wait(1000);
 
-	cy.document().then(doc => {
-		const htmlContent = doc.documentElement.outerHTML;
-		cy.log(htmlContent); // Log dans l'interface Cypress
-		cy.task('log', htmlContent); // Log dans la console (si vous avez configuré les tâches)
-	});
+	// cy.document().then(doc => {
+	// 	const htmlContent = doc.documentElement.outerHTML;
+	// 	cy.log(htmlContent); // Log dans l'interface Cypress
+	// 	cy.task('log', htmlContent); // Log dans la console (si vous avez configuré les tâches)
+	// });
 
 	cy.get('div.messages', { timeout: 20000 })
 		.should('exist')
