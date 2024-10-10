@@ -273,8 +273,8 @@ describe('jdma-register', () => {
 				cy.get('header').find('button').contains('Déconnexion').click();
 				cy.wait(3000);
 
-				clearInbox();
-				cy.wait(5000);
+				// clearInbox();
+				// cy.wait(5000);
 
 				cy.visit(app_url + '/register');
 

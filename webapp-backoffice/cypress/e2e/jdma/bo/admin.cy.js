@@ -107,7 +107,13 @@ describe('jdma-admin', () => {
 								cy.get('[class*="entityCardWrapper"]')
 									.find('span')
 									.contains(invitedEmail)
-									.should('be.visible');
+									.should('be.visible')
+									.then($el => {
+										const htmlContent = $el
+											.closest('[class*="entityCardWrapper"]')
+											.html();
+										cy.task('log', htmlContent);
+									});
 							});
 					});
 			});
@@ -163,10 +169,10 @@ describe('jdma-admin', () => {
 
 		//LOGOUT
 		cy.get('header').find('button').contains('Déconnexion').click();
-		cy.wait(10000);
+		cy.wait(5000);
 
 		cy.visit(mailer_url);
-		cy.wait(5000);
+		cy.wait(10000);
 
 		// cy.get('button.btn-default[title="Refresh"]').click();
 		// cy.wait(8000);
