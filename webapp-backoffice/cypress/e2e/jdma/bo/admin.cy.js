@@ -8,6 +8,7 @@ const invitedEmail = Cypress.env('admin_guest_mail_bis');
 describe('jdma-admin', () => {
 	beforeEach(() => {
 		cy.visit(app_url + '/login');
+		cy.wait(5000);
 		cy.get('input[name="email"]').type(adminEmail);
 		cy.get('[class*="LoginForm-button"]')
 			.contains('Continuer')
@@ -159,6 +160,7 @@ describe('jdma-admin', () => {
 	it('register guest admin', () => {
 		logout();
 		cy.visit(app_url + '/register');
+		cy.wait(5000);
 		cy.get('[class*="formContainer"]');
 
 		fillForm({ email: invitedEmail, password: userPassword });
@@ -173,6 +175,7 @@ describe('jdma-admin', () => {
 	it('login guest admin', () => {
 		logout();
 		cy.visit(app_url + '/login');
+		cy.wait(5000);
 		cy.get('input[name="email"]').type(invitedEmail);
 		cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
 		cy.get('input[type="password"]').type(userPassword);
@@ -242,6 +245,9 @@ function getEmail() {
 
 	cy.visit(mailer_url);
 	cy.wait(10000);
+
+	cy.reload();
+	cy.wait(5000);
 
 	cy.get('div.messages')
 		.should('exist')
