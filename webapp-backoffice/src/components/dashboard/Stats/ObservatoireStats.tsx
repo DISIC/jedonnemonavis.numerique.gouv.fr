@@ -156,6 +156,7 @@ const ObservatoireStats = ({
 								fr.cx('ri-question-line', 'fr-icon--lg'),
 								classes.noData
 							)}
+							tabIndex={0}
 						/>
 					</Tooltip>
 				</div>
@@ -188,7 +189,7 @@ const ObservatoireStats = ({
 						<div className={cx(classes.content)}>
 							<label className={cx(classes.label)}>
 								{field.label}
-								<Tooltip placement="top" title={field.tooltip}>
+								<Tooltip placement="top" title={field.tooltip} tabIndex={0}>
 									<span
 										className={fr.cx(
 											'fr-icon-information-line',

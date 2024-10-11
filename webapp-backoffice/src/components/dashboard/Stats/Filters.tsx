@@ -99,6 +99,13 @@ const Filters = ({
 											: undefined
 									)}
 									htmlFor={`radio-${ds.name}`}
+									tabIndex={0}
+									onKeyDown={e => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											setShortcutDateSelected(ds.name);
+											push(['trackEvent', 'Statistiques', 'Filtre-Date']);
+										}
+									}}
 								>
 									{ds.label}
 								</label>

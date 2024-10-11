@@ -164,6 +164,7 @@ const SmileyQuestionViz = ({
 									</label>
 									<Tooltip
 										placement="top-start"
+										tabIndex={0}
 										title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
 									>
 										<div
