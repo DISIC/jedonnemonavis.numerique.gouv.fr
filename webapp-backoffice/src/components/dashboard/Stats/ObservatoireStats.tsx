@@ -150,13 +150,13 @@ const ObservatoireStats = ({
 					<Tooltip
 						placement="top"
 						title="Aucune donnée pour calculer cette note"
+						tabIndex={0}
 					>
 						<span
 							className={cx(
 								fr.cx('ri-question-line', 'fr-icon--lg'),
 								classes.noData
 							)}
-							tabIndex={0}
 						/>
 					</Tooltip>
 				</div>
@@ -193,7 +193,7 @@ const ObservatoireStats = ({
 									<span
 										className={fr.cx(
 											'fr-icon-information-line',
-											'fr-icon--sm',
+											'fr-icon--md',
 											'fr-ml-1v'
 										)}
 									/>
