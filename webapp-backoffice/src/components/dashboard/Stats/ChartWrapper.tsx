@@ -5,6 +5,7 @@ import {
 import { fr } from '@codegouvfr/react-dsfr';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 
 interface AnyKey {
 	[key: string]: string | number;
@@ -245,14 +246,29 @@ const ChartWrapper = ({
 
 	return (
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
+			<div className={classes.container}>
+				<h6 className={fr.cx('fr-mb-2v')}>{title}</h6>
+				{totalFormatted && (
+					<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
+				)}
+			</div>
 			<div className={classes.header}>
-				<div className={classes.container}>
-					<h6 className={fr.cx('fr-mb-0')}>{title}</h6>
-					{totalFormatted && (
-						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
-					)}
-				</div>
-				<div className={classes.flexAlignCenter}>
+				<Tabs
+					label="Name of the tabs system"
+					tabs={[
+						{
+							content: <div className={classes.container}>{children}</div>,
+							label: 'Graphique'
+						},
+						{
+							content: (
+								<div className={classes.container}>{displayTable()}</div>
+							),
+							label: 'Tableau'
+						}
+					]}
+				/>
+				{/* <div className={classes.flexAlignCenter}>
 					<button
 						className={cx(
 							classes.button,
@@ -275,10 +291,7 @@ const ChartWrapper = ({
 					>
 						Tableau
 					</button>
-				</div>
-			</div>
-			<div className={classes.container}>
-				{view === 'chart' ? children : displayTable()}
+				</div> */}
 			</div>
 		</div>
 	);
