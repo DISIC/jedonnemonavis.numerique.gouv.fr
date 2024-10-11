@@ -52,9 +52,13 @@ const ProductInformationPage = (props: Props) => {
 
 	const { data: entity } = entityResult;
 
-	const { classes } = useStyles();
+	const archiveProduct = trpc.product.archive.useMutation({
+		onSuccess: () => {
+			router.push('/dashboard/products');
+		}
+	});
 
-	const archiveProduct = () => {};
+	const { classes } = useStyles();
 
 	return (
 		<ProductLayout product={product}>
@@ -69,7 +73,9 @@ const ProductInformationPage = (props: Props) => {
 				modal={onConfirmModal}
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
-					archiveProduct();
+					archiveProduct.mutate({
+						id: product.id
+					});
 					onConfirmModal.close();
 				}}
 				kind="danger"
