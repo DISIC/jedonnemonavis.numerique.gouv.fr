@@ -501,6 +501,12 @@ const DashBoard = () => {
 											)
 										}
 										showFavoriteButton={countTotalUserScope > 10}
+										onRestoreProduct={() => {
+											updateFilters({
+												...filters,
+												filterOnlyArchived: false
+											});
+										}}
 										key={index}
 									/>
 								))

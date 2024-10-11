@@ -17,6 +17,8 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
 
 interface Indicator {
 	title: string;
@@ -27,18 +29,25 @@ interface Indicator {
 	appreciation: AnswerIntention;
 }
 
+const onConfirmModal = createModal({
+	id: 'restore-on-confirm-modal',
+	isOpenedByDefault: false
+});
+
 const ProductCard = ({
 	product,
 	userId,
 	entity,
 	isFavorite,
-	showFavoriteButton
+	showFavoriteButton,
+	onRestoreProduct
 }: {
 	product: ProductWithButtons;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
+	onRestoreProduct: () => void;
 }) => {
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
@@ -80,6 +89,13 @@ const ProductCard = ({
 			}
 		}
 	);
+
+	const restoreProduct = trpc.product.restore.useMutation({
+		onSuccess: () => {
+			utils.product.getList.invalidate({ filterByStatusArchived: true });
+			onRestoreProduct();
+		}
+	});
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -170,28 +186,59 @@ const ProductCard = ({
 		});
 	};
 
+	const isDisabled = product.status === 'archived';
+	const productLink = isDisabled
+		? ''
+		: `/administration/dashboard/product/${product.id}/stats`;
+
 	return (
-		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
+		<Link
+			href={productLink}
+			className={cx(isDisabled ? classes.disabled : undefined)}
+		>
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title="Restaurer un service"
+				handleOnConfirm={() => {
+					restoreProduct.mutate({
+						id: product.id
+					});
+					onConfirmModal.close();
+				}}
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir restaurer le service{' '}
+						<b>"{product.title}"</b> ?{' '}
+					</p>
+				</div>
+			</OnConfirmModal>
 			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
 						'fr-grid-row--gutters',
-						'fr-grid-row--top'
+						'fr-grid-row--middle'
 					)}
 				>
-					{product.isTop250 && (
+					{(product.isTop250 || isDisabled) && (
 						<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
-							<Badge severity="info" noIcon small>
-								Démarche essentielle
-							</Badge>
+							<div className={classes.badgesContainer}>
+								{product.isTop250 && (
+									<Badge severity="info" noIcon small>
+										Démarche essentielle
+									</Badge>
+								)}
+								{isDisabled && (
+									<Badge noIcon small>
+										Service supprimé
+									</Badge>
+								)}
+							</div>
 						</div>
 					)}
-					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-6')}>
-						<Link
-							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={cx(classes.productTitle)}
-						>
+					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-5')}>
+						<Link href={productLink} className={cx(classes.productTitle)}>
 							{product.title}
 						</Link>
 					</div>
@@ -200,117 +247,148 @@ const ProductCard = ({
 							{entity?.name}
 						</p>
 					</div>
-					{showFavoriteButton && (
-						<div className={cx(classes.favoriteWrapper)}>
+					{isDisabled ? (
+						<div
+							className={cx(
+								classes.buttonsCol,
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+							)}
+						>
 							<Button
-								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-								title={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								aria-label={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								priority="tertiary"
+								iconId={'ri-inbox-unarchive-line'}
+								iconPosition="right"
+								title={`Restaurer le produit « ${product.title} »`}
+								aria-label={`Restaurer le produit « ${product.title} »`}
+								priority="secondary"
 								size="small"
 								onClick={e => {
 									e.preventDefault();
-									if (isFavorite) {
-										deleteFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-									} else {
-										createFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-									}
+									onConfirmModal.open();
 								}}
-							/>
+							>
+								Restaurer
+							</Button>
 						</div>
-					)}
-
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
-						{isLoadingStatsObservatoire || isRefetchingStatsObservatoire ? (
-							<Skeleton
-								className={cx(classes.cardSkeleton)}
-								variant="text"
-								width={'full'}
-								height={50}
-							/>
-						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
-						  session?.user.role.includes('admin') ? (
-							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-								{indicators.map((indicator, index) => (
-									<div
-										className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
-										key={index}
-									>
-										<p
-											className={fr.cx(
-												'fr-text--xs',
-												'fr-mb-0',
-												'fr-hint-text'
-											)}
-										>
-											{indicator.title}
-										</p>
-										{isLoadingStatsObservatoire ? (
-											<Skeleton
-												className={cx(classes.badgeSkeleton)}
-												variant="text"
-												width={130}
-												height={25}
-											/>
-										) : (
+					) : (
+						<>
+							{showFavoriteButton && !isDisabled && (
+								<div className={cx(classes.rightButtonsWrapper)}>
+									<Button
+										iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+										title={
+											isFavorite
+												? `Supprimer le produit « ${product.title} » des favoris`
+												: `Ajouter le produit « ${product.title} » aux favoris`
+										}
+										aria-label={
+											isFavorite
+												? `Supprimer le produit « ${product.title} » des favoris`
+												: `Ajouter le produit « ${product.title} » aux favoris`
+										}
+										priority="tertiary"
+										size="small"
+										onClick={e => {
+											e.preventDefault();
+											if (isFavorite) {
+												deleteFavorite.mutate({
+													product_id: product.id,
+													user_id: userId
+												});
+											} else {
+												createFavorite.mutate({
+													product_id: product.id,
+													user_id: userId
+												});
+											}
+										}}
+									/>
+								</div>
+							)}
+							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+								{isLoadingStatsObservatoire || isRefetchingStatsObservatoire ? (
+									<Skeleton
+										className={cx(classes.cardSkeleton)}
+										variant="text"
+										width={'full'}
+										height={50}
+									/>
+								) : (product.buttons.length > 0 &&
+										nbReviews &&
+										nbReviews > 0) ||
+								  session?.user.role.includes('admin') ? (
+									<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+										{indicators.map((indicator, index) => (
 											<div
-												className={fr.cx(
-													!!indicator.total && indicator.color !== 'new'
-														? `fr-label--${indicator.color}`
-														: 'fr-label--disabled',
-													'fr-text--bold'
-												)}
-												style={
-													!!indicator.total && indicator.color === 'new'
-														? {
-																color:
-																	fr.colors.decisions.background.flat.warning
-																		.default
-															}
-														: undefined
-												}
+												className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+												key={index}
 											>
-												{!!indicator.total
-													? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
-													: 'Aucune donnée'}
+												<p
+													className={fr.cx(
+														'fr-text--xs',
+														'fr-mb-0',
+														'fr-hint-text'
+													)}
+												>
+													{indicator.title}
+												</p>
+												{isLoadingStatsObservatoire ? (
+													<Skeleton
+														className={cx(classes.badgeSkeleton)}
+														variant="text"
+														width={130}
+														height={25}
+													/>
+												) : (
+													<div
+														className={fr.cx(
+															!!indicator.total && indicator.color !== 'new'
+																? `fr-label--${indicator.color}`
+																: 'fr-label--disabled',
+															'fr-text--bold'
+														)}
+														style={
+															!!indicator.total && indicator.color === 'new'
+																? {
+																		color:
+																			fr.colors.decisions.background.flat
+																				.warning.default
+																	}
+																: undefined
+														}
+													>
+														{!!indicator.total
+															? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
+															: 'Aucune donnée'}
+													</div>
+												)}
+											</div>
+										))}
+										{!isLoadingReviewsCount && nbReviews !== undefined && (
+											<div
+												className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+											>
+												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+													Nombre d'avis
+												</p>
+												<div
+													className={fr.cx('fr-label--info', 'fr-text--bold')}
+												>
+													{formatNumberWithSpaces(nbReviews)}
+												</div>
 											</div>
 										)}
 									</div>
-								))}
-								{!isLoadingReviewsCount && nbReviews !== undefined && (
-									<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-											Nombre d'avis
-										</p>
-										<div className={fr.cx('fr-label--info', 'fr-text--bold')}>
-											{formatNumberWithSpaces(nbReviews)}
-										</div>
-									</div>
+								) : product.buttons.length === 0 ? (
+									<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+								) : (
+									<NoReviewsPanel
+										improveBtnClick={() => {}}
+										sendInvitationBtnClick={handleSendInvitation}
+									/>
 								)}
 							</div>
-						) : product.buttons.length === 0 ? (
-							<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
-						) : (
-							<NoReviewsPanel
-								improveBtnClick={() => {}}
-								sendInvitationBtnClick={handleSendInvitation}
-							/>
-						)}
-					</div>
+						</>
+					)}
 				</div>
 			</div>
 		</Link>
@@ -318,7 +396,7 @@ const ProductCard = ({
 };
 
 const useStyles = tss.withName(ProductCard.name).create({
-	favoriteWrapper: {
+	rightButtonsWrapper: {
 		display: 'flex',
 		justifyContent: 'end',
 		position: 'absolute',
@@ -341,6 +419,25 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	entityName: {
 		color: '#666666'
+	},
+	disabled: {
+		cursor: 'default',
+		'.fr-card': {
+			backgroundColor: fr.colors.decisions.background.disabled.grey.default
+		},
+		a: {
+			color: fr.colors.decisions.text.default.grey.default,
+			pointerEvents: 'none',
+			cursor: 'default',
+			textDecoration: 'none'
+		}
+	},
+	badgesContainer: {
+		display: 'flex',
+		gap: fr.spacing('2v')
+	},
+	buttonsCol: {
+		textAlign: 'right'
 	}
 });
 

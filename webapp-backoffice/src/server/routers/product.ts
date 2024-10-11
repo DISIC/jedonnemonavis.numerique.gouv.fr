@@ -338,5 +338,22 @@ export const productRouter = router({
 			});
 
 			return { data: updatedProduct };
+		}),
+
+	restore: protectedProcedure
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+
+			await checkRightToProceed(ctx.prisma, ctx.session, id);
+
+			const updatedProduct = await ctx.prisma.product.update({
+				where: { id },
+				data: {
+					status: 'published'
+				}
+			});
+
+			return { data: updatedProduct };
 		})
 });

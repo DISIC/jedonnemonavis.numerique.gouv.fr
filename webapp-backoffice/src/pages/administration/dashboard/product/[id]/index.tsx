@@ -10,9 +10,19 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const { id } = context.query;
 	const product = await prisma.product.findUnique({
 		where: {
-			id: parseInt(id as string)
+			id: parseInt(id as string),
+			status: 'published'
 		}
 	});
+
+	if (!product) {
+		return {
+			redirect: {
+				destination: '/administration/dashboard/products',
+				permanent: false
+			}
+		};
+	}
 
 	const currentUserToken = await getToken({
 		req: context.req,
