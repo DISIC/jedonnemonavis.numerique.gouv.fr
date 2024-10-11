@@ -9,7 +9,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Skeleton } from '@mui/material';
+import { Icon, Skeleton } from '@mui/material';
 import { AnswerIntention, Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -17,6 +17,9 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
+import Image from 'next/image';
+import starFill from '.././../../../public/assets/star-fill.svg';
+import starOutline from '.././../../../public/assets/star-outline.svg';
 
 interface Indicator {
 	title: string;
@@ -175,7 +178,7 @@ const ProductCard = ({
 			href={`/administration/dashboard/product/${product.id}/stats`}
 			tabIndex={0}
 		>
-			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
@@ -201,7 +204,7 @@ const ProductCard = ({
 					{showFavoriteButton && (
 						<div className={cx(classes.favoriteWrapper)}>
 							<Button
-								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+								// iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
 								title={
 									isFavorite
 										? `Supprimer le produit « ${product.title} » des favoris`
@@ -228,7 +231,13 @@ const ProductCard = ({
 										});
 									}
 								}}
-							/>
+							>
+								{isFavorite ? (
+									<Image alt="favoris ajouté" src={starFill} />
+								) : (
+									<Image alt="favoris retiré" src={starOutline} />
+								)}
+							</Button>
 						</div>
 					)}
 
