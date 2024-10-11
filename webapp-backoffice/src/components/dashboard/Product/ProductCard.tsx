@@ -171,7 +171,10 @@ const ProductCard = ({
 	};
 
 	return (
-		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
+		<Link
+			href={`/administration/dashboard/product/${product.id}/stats`}
+			tabIndex={0}
+		>
 			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 				<div
 					className={fr.cx(
@@ -188,12 +191,7 @@ const ProductCard = ({
 						</div>
 					)}
 					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-6')}>
-						<Link
-							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={cx(classes.productTitle)}
-						>
-							{product.title}
-						</Link>
+						<div className={cx(classes.productTitle)}>{product.title}</div>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
