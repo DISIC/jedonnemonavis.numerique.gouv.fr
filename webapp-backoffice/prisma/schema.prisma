@@ -39,6 +39,11 @@ enum RightAccessStatus {
   removed
 }
 
+enum ProductStatus {
+  published
+  archived
+}
+
 enum AnswerKind {
   text
   checkbox
@@ -217,6 +222,7 @@ model Product {
   id              Int           @id @default(autoincrement())
   title           String
   title_formatted String?
+  status          ProductStatus @default(published)
   entity          Entity        @relation(fields: [entity_id], references: [id])
   entity_id       Int
   created_at      DateTime      @default(now())
