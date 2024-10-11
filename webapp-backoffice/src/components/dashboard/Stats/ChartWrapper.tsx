@@ -366,6 +366,7 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 	activeButton: {
 		color: fr.colors.decisions.background.flat.blueFrance.default,
 		borderTopColor: fr.colors.decisions.background.flat.blueFrance.default,
+		borderBottomColor: fr.colors.decisions.background.flat.blueFrance.default,
 		borderTop: '3px solid',
 		borderLeft: '1px solid',
 		borderRight: '1px solid',
