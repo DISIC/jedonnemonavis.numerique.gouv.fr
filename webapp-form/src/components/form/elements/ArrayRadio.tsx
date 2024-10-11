@@ -302,6 +302,12 @@ const useStyles = tss
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
       },
+      [".fr-radio-group input[type=radio] + label::before"]: {
+        content: "none",
+        outline: "none",
+        boxShadow: "none",
+        border: "none",
+      },
       ["input:focus-visible + label"]: {
         outlineOffset: "2px",
         outline: "2px solid #4D90FE",
