@@ -13,6 +13,8 @@ import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
 import Head from 'next/head';
+import { cx } from '@codegouvfr/react-dsfr/fr/cx';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 
 interface Props {
 	product: Product;
@@ -20,6 +22,11 @@ interface Props {
 
 const editProductModal = createModal({
 	id: 'edit-product-modal',
+	isOpenedByDefault: false
+});
+
+const onConfirmModal = createModal({
+	id: 'archive-on-confirm-modal',
 	isOpenedByDefault: false
 });
 
@@ -45,6 +52,12 @@ const ProductInformationPage = (props: Props) => {
 
 	const { data: entity } = entityResult;
 
+	const archiveProduct = trpc.product.archive.useMutation({
+		onSuccess: () => {
+			router.push('/dashboard/products');
+		}
+	});
+
 	const { classes } = useStyles();
 
 	return (
@@ -53,9 +66,32 @@ const ProductInformationPage = (props: Props) => {
 				<title>{product.title} | Informations | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`${product.title} | Informations | Je donne mon avis`}
+					content={`${product.title} | Informations | Je donne mon avis`}
 				/>
 			</Head>
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title="Supprimer ce service"
+				handleOnConfirm={() => {
+					archiveProduct.mutate({
+						id: product.id
+					});
+					onConfirmModal.close();
+				}}
+				kind="danger"
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir supprimer le service{' '}
+						<b>"{product.title}"</b> ?{' '}
+					</p>
+					<p>
+						En supprimant ce service :<br />
+						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
+						de ce service n’auront plus accès au formulaire.
+					</p>
+				</div>
+			</OnConfirmModal>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -136,6 +172,26 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
+				<div>
+					<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
+					<p className={fr.cx('fr-mb-4v')}>
+						En supprimant ce service :<br />
+						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
+						de ce service n’auront plus accès au formulaire.
+					</p>
+					<Button
+						type="button"
+						iconId="ri-delete-bin-line"
+						iconPosition="right"
+						priority="tertiary"
+						className={classes.buttonError}
+						onClick={() => {
+							onConfirmModal.open();
+						}}
+					>
+						Supprimer ce service
+					</Button>
+				</div>
 			</div>
 		</ProductLayout>
 	);
@@ -159,6 +215,9 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 	},
 	copyBtn: {
 		boxShadow: 'none'
+	},
+	buttonError: {
+		color: fr.colors.decisions.text.default.error.default
 	}
 });
 
