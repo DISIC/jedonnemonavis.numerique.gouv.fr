@@ -25,7 +25,7 @@ services:
       ES_ADDON_URI: https://localhost:9200
       ES_ADDON_USER: "elastic"
       ES_ADDON_PASSWORD: "ES_ADDON_PASSWORD"
-    command: sh -c "npx prisma generate && yarn build && npx prisma db push && npx prisma db seed && yarn start"
+    command: sh -c "npx prisma generate && yarn build && npx prisma migrate reset --force && npx prisma db seed && yarn start"
     depends_on:
       db:
         condition: service_healthy
