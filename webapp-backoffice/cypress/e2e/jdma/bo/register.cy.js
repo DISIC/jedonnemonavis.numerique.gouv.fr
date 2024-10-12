@@ -6,7 +6,6 @@ const mailer_url = Cypress.env('mailer_base_url');
 
 describe('jdma-register', () => {
 	beforeEach(() => {
-		clearInbox();
 		cy.visit(app_url + '/register');
 	});
 
@@ -19,6 +18,7 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password is too short', () => {
+		cy.wait(1000);
 		fillForm({ password: 'Short1!', email: 'john.doe@example.com' }); // Too short
 
 		cy.get('button[type="submit"]').click();
@@ -26,20 +26,21 @@ describe('jdma-register', () => {
 	});
 
 	it('should not submit the form if the password lacks a special character', () => {
+		cy.wait(1000);
 		fillForm({ password: 'Password1234', email: 'john.doe@example.com' }); // Missing special character
-
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 caractère spécial');
 	});
 
 	it('should not submit the form if the password lacks a digit', () => {
+		cy.wait(1000);
 		fillForm({ password: 'Password!@#', email: 'john.doe@example.com' }); // Missing digit
-
 		cy.get('button[type="submit"]').click();
 		cy.get('.fr-messages-group').should('contain', '1 chiffre minimum');
 	});
 
 	it('should submit the form WITH NOT whitelisted email', () => {
+		cy.wait(2000);
 		fillForm({
 			password: userPassword,
 			email: 'test123num@jdma.com'
@@ -74,6 +75,10 @@ describe('jdma-register', () => {
 	});
 
 	it('should submit the form WITH whitelisted email', () => {
+		cy.get('body').then($body => {
+			$body.addClass('no-animations');
+		});
+
 		fillForm({ password: userPassword, email });
 
 		cy.get('button[type="submit"]').click();
@@ -83,51 +88,28 @@ describe('jdma-register', () => {
 			if (currentUrl.includes('registered=classic')) {
 				cy.log('New registration flow.');
 
-				cy.visit(mailer_url);
-				cy.wait(5000);
+				getEmail();
 
-				cy.get('div').find('.messages').click();
-				cy.wait(3000);
-
-				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
-
-				cy.get('ul.nav-tabs')
-					.find('li.active')
-					.should('contain.text', 'Plain text');
-
-				cy.get('#preview-plain')
-					.find('a')
-					.each($link => {
-						const href = $link.attr('href');
-						if (href && href.includes('/register')) {
-							cy.wrap($link).invoke('removeAttr', 'target').click();
-							cy.wait(3000);
-						}
-					})
-					.then(() => {
-						// LOGIN
-						cy.visit(app_url + '/login');
-						cy.get('input[name="email"]').type(email);
-						cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-						cy.get('input[type="password"]').type(userPassword);
-						cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
-						cy.url().should(
-							'eq',
-							app_url + '/administration/dashboard/products'
-						);
-					});
+				// LOGIN
+				cy.visit(app_url + '/login');
+				cy.get('input[name="email"]').type(email);
+				cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
+				cy.get('input[type="password"]').type(userPassword);
+				cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
+				cy.url().should('eq', app_url + '/administration/dashboard/products');
 
 				// PRODUCT
-				cy.get('[class*="btnService"]').contains('Ajouter un service').click();
-				cy.get('.fr-modal__body')
-					.should('exist')
-					.should('have.attr', 'data-fr-js-modal-body', 'true')
-					.find('form#product-form')
-					.should('exist')
-					.within(() => {
-						cy.get('input[name="title"]').type('e2e-jdma-service-test-1');
+				cy.contains('button', 'Ajouter un service').click();
+				cy.wait(2000);
 
-						cy.get('input#entity-select-autocomplete').click();
+				cy.get('#product-form')
+					.should('be.visible')
+					.within(() => {
+						cy.get('input[name="title"]')
+							.should('exist')
+							.type('e2e-jdma-service-test-1');
+
+						cy.get('input#entity-select-autocomplete').should('exist').click();
 
 						cy.get('div[role="presentation"]')
 							.should('be.visible')
@@ -139,6 +121,7 @@ describe('jdma-register', () => {
 								);
 							});
 					});
+
 				cy.get('div[role="presentation"]')
 					.find('[id="entity-select-autocomplete-option-0"]')
 					.click();
@@ -253,15 +236,10 @@ describe('jdma-register', () => {
 						cy.get('button').contains('Inviter').click();
 					});
 
-				// // LOG OUT
-				cy.get('header').find('button').contains('Déconnexion').click();
-				cy.wait(3000);
-
-				clearInbox();
-				cy.wait(5000);
+				// LOG OUT
+				logout();
 
 				cy.visit(app_url + '/register');
-
 				fillForm({
 					password: userPassword,
 					email: invitedEmail
@@ -270,31 +248,9 @@ describe('jdma-register', () => {
 				cy.get('button[type="submit"]').click();
 				cy.wait(3000);
 
-				cy.visit(mailer_url);
-				cy.wait(6000);
+				getEmail();
 
-				cy.get('div').find('.messages').click();
-				cy.wait(3000);
-
-				cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
-
-				cy.get('ul.nav-tabs')
-					.find('li.active')
-					.should('contain.text', 'Plain text');
-
-				cy.get('#preview-plain')
-					.find('a')
-					.each($link => {
-						const href = $link.attr('href');
-						if (href && href.includes('/register')) {
-							cy.wrap($link).invoke('removeAttr', 'target').click();
-						}
-					})
-					.then(() => {
-						cy.url().should('include', '/register');
-					});
-
-				// 	// LOGIN INVITED USER
+				// LOGIN AS INVITED USER
 				cy.visit(app_url + '/login');
 				cy.get('input[name="email"]').type(invitedEmail);
 				cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
@@ -319,11 +275,9 @@ describe('jdma-register', () => {
 					}
 				});
 			}
-
-			// // LOG OUT
-			cy.get('header').find('button').contains('Déconnexion').click();
-			cy.wait(3000);
 		});
+		clearInbox();
+		cy.wait(5000);
 	});
 });
 
@@ -347,9 +301,59 @@ function generateUniqueEmail() {
 
 function clearInbox() {
 	cy.visit(mailer_url);
+	cy.wait(4000);
 	cy.get('.nav-pills').find('a').contains('Delete all messages').click();
 	cy.get('.modal-footer')
 		.find('button')
 		.contains('Delete all messages')
 		.click();
+}
+
+function logout() {
+	cy.reload();
+	cy.wait(5000);
+	cy.get('header')
+		.find('button')
+		.contains('Déconnexion')
+		.click({ force: true });
+	cy.wait(5000);
+}
+
+function getEmail() {
+	logout();
+
+	cy.wait(10000);
+	cy.visit(mailer_url);
+
+	cy.get('button.btn-default[title="Refresh"]').click();
+	cy.wait(1000);
+
+	cy.get('div.messages', { timeout: 20000 })
+		.should('exist')
+		.and('be.visible')
+		.should('be.visible')
+		.and('not.be.empty')
+		.scrollIntoView()
+		.find('div.msglist-message')
+		.first()
+		.click({ force: true });
+	cy.wait(4000);
+
+	cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
+
+	cy.get('ul.nav-tabs').find('li.active').should('contain.text', 'Plain text');
+
+	cy.get('#preview-plain')
+		.find('a')
+		.each($link => {
+			const href = $link.attr('href');
+			if (href && href.includes('/register')) {
+				cy.wrap($link).invoke('removeAttr', 'target').click();
+			}
+		})
+		.then(() => {
+			cy.url().should('include', '/register');
+			cy.wait(2000);
+		});
+	clearInbox();
 }

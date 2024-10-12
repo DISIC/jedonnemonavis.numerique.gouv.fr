@@ -30,7 +30,7 @@ describe('jdma-answer-check', () => {
 				cy.url().should('eq', app_url + '/administration/dashboard/products');
 			});
 		cy.wait(8000);
-		cy.get('p.fr-badge.fr-badge--info')
+		cy.get('div.fr-label--info.fr-text--bold')
 			.invoke('text')
 			.then(text => {
 				const value = parseInt(text);
