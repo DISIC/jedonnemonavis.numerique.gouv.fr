@@ -66,7 +66,9 @@ const ProductCard = ({
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
 	};
-	const handleClose = (event: React.MouseEvent<HTMLButtonElement>) => {
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
 		event.preventDefault();
 		event.stopPropagation();
 		setAnchorEl(null);
