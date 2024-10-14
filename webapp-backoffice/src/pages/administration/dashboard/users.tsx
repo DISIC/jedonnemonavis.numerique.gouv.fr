@@ -343,16 +343,20 @@ const DashBoardUsers = () => {
 									<Loader />
 								</div>
 							) : (
-								users.map((user, index) => (
-									<UserCard
-										user={user}
-										key={index}
-										onButtonClick={handleModalOpening}
-										onCheckboxClick={handleUserCheckbox}
-										selected={selectedUsers.includes(user.id)}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{users.map((user, index) => (
+										<li key={index}>
+											<UserCard
+												user={user}
+												onButtonClick={handleModalOpening}
+												onCheckboxClick={handleUserCheckbox}
+												selected={selectedUsers.includes(user.id)}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
+
 							{!isRefetchingUsers && users.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
@@ -427,6 +431,11 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 			margin: 0,
 			fontWeight: 'bold'
 		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important'
 	},
 	searchForm: {
 		'.fr-search-bar': {
