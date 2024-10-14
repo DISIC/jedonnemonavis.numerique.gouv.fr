@@ -276,7 +276,7 @@ describe('jdma-register', () => {
 				});
 			}
 		});
-		clearInbox();
+		// clearInbox();
 		cy.wait(5000);
 	});
 });
