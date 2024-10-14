@@ -556,30 +556,32 @@ const ProductReviewsPage = (props: Props) => {
 								<div>
 									{reviewsExtended.length > 0 ? (
 										<>
-											<ReviewFilters
-												displayMode={displayMode}
-												sort={sort}
-												onClick={handleSortChange}
-											/>
-											{reviewsExtended.map((review, index) => {
-												if (review && displayMode === 'reviews') {
-													return (
-														<ReviewLine
-															key={index}
-															review={review}
-															search={validatedSearch}
-														/>
-													);
-												} else if (review && displayMode === 'verbatim') {
-													return (
-														<ReviewLineVerbatim
-															key={index}
-															review={review}
-															search={validatedSearch}
-														/>
-													);
-												}
-											})}
+											<table className={cx(classes.tableContainer)}>
+												<ReviewFilters
+													displayMode={displayMode}
+													sort={sort}
+													onClick={handleSortChange}
+												/>
+												{reviewsExtended.map((review, index) => {
+													if (review && displayMode === 'reviews') {
+														return (
+															<ReviewLine
+																key={index}
+																review={review}
+																search={validatedSearch}
+															/>
+														);
+													} else if (review && displayMode === 'verbatim') {
+														return (
+															<ReviewLineVerbatim
+																key={index}
+																review={review}
+																search={validatedSearch}
+															/>
+														);
+													}
+												})}
+											</table>
 										</>
 									) : (
 										<div
@@ -628,6 +630,9 @@ export default ProductReviewsPage;
 const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 	boldText: {
 		fontWeight: 'bold'
+	},
+	tableContainer: {
+		width: '100%'
 	},
 	searchForm: {
 		'.fr-search-bar': {
