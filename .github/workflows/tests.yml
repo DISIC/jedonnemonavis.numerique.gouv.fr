@@ -75,36 +75,7 @@ jobs:
           yarn build
           nohup yarn startB &
 
-      # 8. Vérifier la configuration réseau
-      - name: Check network configuration
-        run: |
-          echo "Checking network configuration..."
-          ip addr show
-          netstat -tuln
-          ping -c 4 localhost
-          nc -zv localhost 1025 || echo "Failed to connect to MailHog SMTP port"
-          nc -zv localhost 8025 || echo "Failed to connect to MailHog HTTP port"
-
-      # 9. Vérifier la configuration Nodemailer
-      - name: Check Nodemailer configuration
-        run: |
-          cd webapp-backoffice
-          node -e "
-          const nodemailer = require('nodemailer');
-          const transporter = nodemailer.createTransport({
-            host: 'localhost',
-            port: 1025,
-          });
-          transporter.verify(function(error, success) {
-            if (error) {
-              console.log('Nodemailer configuration error:', error);
-              process.exit(1);
-            } else {
-              console.log('Nodemailer is configured correctly');
-            }
-          });"
-
-      # 10. Attendre que les services soient prêts
+      # 8. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -116,16 +87,16 @@ jobs:
           echo "Waiting for MailHog to be ready..."
           until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
 
-      # 11. Exécuter les tests Cypress pour `webapp-backoffice`
+      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.js" --headed --browser chrome
 
-      # 12. Vérifier si MailHog reçoit les emails
+      # 10. Vérifier si MailHog reçoit les emails
       - name: Check MailHog for received emails
         run: curl http://localhost:8025/api/v2/messages
 
-      # 13. Arrêter les applications démarrées
+      # 11. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
