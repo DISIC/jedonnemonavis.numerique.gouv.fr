@@ -358,5 +358,5 @@ function getEmail() {
 			cy.url().should('include', '/register');
 			cy.wait(2000);
 		});
-	clearInbox();
+	// clearInbox();
 }
