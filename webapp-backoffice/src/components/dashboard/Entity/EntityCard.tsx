@@ -44,57 +44,67 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 						classes.wrapperButtons
 					)}
 				>
-					{isMine ? (
-						<>
-							<Button
-								priority="secondary"
-								size="small"
-								iconId="fr-icon-admin-line"
-								iconPosition="right"
-								className={classes.button}
-								onClick={() => {
-									onButtonClick({ type: 'rights', entity });
-								}}
-							>
-								Gérer les administrateurs
-							</Button>
-							<Button
-								priority="secondary"
-								size="small"
-								iconId="fr-icon-lock-unlock-line"
-								iconPosition="right"
-								className={classes.button}
-								onClick={() => {
-									onButtonClick({ type: 'api', entity });
-								}}
-							>
-								Clés API
-							</Button>
-							<Button
-								priority="secondary"
-								size="small"
-								iconId="fr-icon-edit-line"
-								iconPosition="right"
-								onClick={() => {
-									onButtonClick({ type: 'edit', entity });
-								}}
-								className={classes.button}
-							>
-								Modifier
-							</Button>
-						</>
-					) : (
-						<Button
-							priority="secondary"
-							size="small"
-							className={classes.button}
-							onClick={() => {
-								onButtonClick({ type: 'rights', entity });
-							}}
-						>
-							{fromSearch ? 'Devenir administrateur' : 'Voir plus'}
-						</Button>
-					)}
+					<ul className={cx(classes.listContainer)}>
+						{isMine ? (
+							<>
+								<li>
+									<Button
+										priority="secondary"
+										size="small"
+										iconId="fr-icon-admin-line"
+										iconPosition="right"
+										className={classes.button}
+										onClick={() => {
+											onButtonClick({ type: 'rights', entity });
+										}}
+									>
+										Gérer les administrateurs
+									</Button>
+								</li>
+								<li>
+									<Button
+										priority="secondary"
+										size="small"
+										iconId="fr-icon-lock-unlock-line"
+										iconPosition="right"
+										className={classes.button}
+										onClick={() => {
+											onButtonClick({ type: 'api', entity });
+										}}
+									>
+										Clés API
+									</Button>
+								</li>
+								<li>
+									<Button
+										priority="secondary"
+										size="small"
+										iconId="fr-icon-edit-line"
+										iconPosition="right"
+										onClick={() => {
+											onButtonClick({ type: 'edit', entity });
+										}}
+										className={classes.button}
+									>
+										Modifier
+									</Button>
+								</li>
+							</>
+						) : (
+							<li>
+								<Button
+									priority="secondary"
+									size="small"
+									className={classes.button}
+									onClick={() => {
+										onButtonClick({ type: 'rights', entity });
+									}}
+								>
+									{fromSearch ? 'Devenir administrateur' : 'Voir plus'}
+								</Button>
+							</li>
+						)}
+					</ul>
 				</div>
 			</div>
 		</div>
@@ -104,6 +114,13 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 const useStyles = tss.withName(EntityCard.name).create(() => ({
 	spanFullName: {
 		fontWeight: 'bold'
+	},
+	listContainer: {
+		display: 'flex',
+		gap: '1rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none'
 	},
 	iconSuccess: {
 		color: 'green'
