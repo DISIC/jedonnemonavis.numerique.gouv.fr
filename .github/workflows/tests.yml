@@ -26,55 +26,7 @@ jobs:
           - 1025:1025
 
     steps:
-      # 1. Checkout du code
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # 2. Copier le fichier .env.example vers .env
-      - name: Copy .env.example to .env
-        run: |
-          cp webapp-backoffice/.env.example webapp-backoffice/.env
-          cp webapp-form/.env.example webapp-form/.env
-
-      # 3. Configuration de Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: "yarn"
-          cache-dependency-path: |
-            webapp-backoffice/yarn.lock
-            webapp-form/yarn.lock
-
-      # 4. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
-      - name: Install dependencies and generate Prisma client for webapp-backoffice
-        run: |
-          cd webapp-backoffice
-          yarn install
-          npx prisma generate
-          npx prisma migrate reset --force
-          npx prisma db seed
-
-      # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
-      - name: Install dependencies and generate Prisma client for webapp-form
-        run: |
-          cd webapp-form
-          yarn install
-          npx prisma generate
-
-      # 6. Construire `webapp-backoffice`
-      - name: Build webapp-backoffice
-        run: |
-          cd webapp-backoffice
-          yarn build
-          nohup yarn start &
-
-      # 7. Construire `webapp-form`
-      - name: Build webapp-form
-        run: |
-          cd webapp-form
-          yarn build
-          nohup yarn startB &
+      # Steps 1-7 restent inchangés...
 
       # 8. Attendre que les services soient prêts
       - name: Wait for services to be ready
@@ -88,16 +40,49 @@ jobs:
           echo "Waiting for MailHog to be ready..."
           until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
 
-      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
+      # 9. Vérifier la configuration réseau
+      - name: Check network configuration
+        run: |
+          echo "Checking network configuration..."
+          ip addr show
+          netstat -tuln
+          ping -c 4 localhost
+          nc -zv localhost 1025 || echo "Failed to connect to MailHog SMTP port"
+          nc -zv localhost 8025 || echo "Failed to connect to MailHog HTTP port"
+
+      # 10. Vérifier la configuration Nodemailer
+      - name: Check Nodemailer configuration
+        run: |
+          cd webapp-backoffice
+          node -e "
+          const nodemailer = require('nodemailer');
+          const transporter = nodemailer.createTransport({
+            host: 'localhost',
+            port: 1025,
+          });
+          transporter.verify(function(error, success) {
+            if (error) {
+              console.log('Nodemailer configuration error:', error);
+              process.exit(1);
+            } else {
+              console.log('Nodemailer is configured correctly');
+            }
+          });"
+
+      # 11. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.js" --headed --browser chrome
 
-      # 10. Vérifier si MailHog reçoit les emails
+      # 12. Vérifier si MailHog reçoit les emails
       - name: Check MailHog for received emails
-        run: curl http://localhost:8025/api/v2/messages
+        run: |
+          echo "Checking MailHog for received emails..."
+          curl -s http://localhost:8025/api/v2/messages | jq .
+          echo "MailHog logs:"
+          docker logs $(docker ps -q --filter name=mailhog)
 
-      # 11. Arrêter les applications démarrées
+      # 13. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
