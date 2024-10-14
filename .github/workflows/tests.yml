@@ -29,7 +29,7 @@ jobs:
       # 3. Set up Docker Compose
       - name: Set up Docker Compose
         run: |
-          docker-compose up -d
+          docker-compose -f docker-compose.tests.yaml up -d
 
       # 4. Attendre que les services soient prêts
       - name: Wait for services to be ready
