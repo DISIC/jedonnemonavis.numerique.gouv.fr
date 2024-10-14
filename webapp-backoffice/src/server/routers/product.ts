@@ -14,6 +14,11 @@ import { Prisma, PrismaClient, Product } from '@prisma/client';
 import { removeAccents } from '@/src/utils/tools';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
+import { sendMail } from '@/src/utils/mailer';
+import {
+	getProductArchivedEmail,
+	getProductRestoredEmail
+} from '@/src/utils/emails';
 
 const checkRightToProceed = async (
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
@@ -27,14 +32,15 @@ const checkRightToProceed = async (
 			status: 'carrier'
 		}
 	});
+	const isAdmin = session.user.role === 'superadmin';
 
-	if (!accessRight)
+	if (!accessRight && !isAdmin)
 		throw new TRPCError({
 			code: 'FORBIDDEN',
 			message: 'You do not have rights to proceed on this product'
 		});
 
-	return !!accessRight;
+	return !!accessRight || isAdmin;
 };
 
 export const productRouter = router({
@@ -337,6 +343,32 @@ export const productRouter = router({
 				}
 			});
 
+			const accessRights = await ctx.prisma.accessRight.findMany({
+				where: {
+					product_id: updatedProduct.id
+				}
+			});
+
+			const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+				where: {
+					entity_id: updatedProduct.entity_id
+				}
+			});
+
+			const emails = [
+				...accessRights.map(ar => ar.user_email),
+				...adminEntityRights.map(aer => aer.user_email)
+			].filter(email => email !== null) as string[];
+
+			emails.forEach((email: string) => {
+				sendMail(
+					`Suppression du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+					email,
+					getProductArchivedEmail(ctx.session.user, updatedProduct.title),
+					`Le produit numérique "${updatedProduct.title}" a été supprimé.`
+				);
+			});
+
 			return { data: updatedProduct };
 		}),
 
@@ -352,6 +384,35 @@ export const productRouter = router({
 				data: {
 					status: 'published'
 				}
+			});
+			const accessRights = await ctx.prisma.accessRight.findMany({
+				where: {
+					product_id: updatedProduct.id
+				}
+			});
+
+			const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+				where: {
+					entity_id: updatedProduct.entity_id
+				}
+			});
+
+			const emails = [
+				...accessRights.map(ar => ar.user_email),
+				...adminEntityRights.map(aer => aer.user_email)
+			].filter(email => email !== null) as string[];
+
+			emails.forEach((email: string) => {
+				sendMail(
+					`Restauration du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+					email,
+					getProductRestoredEmail(
+						ctx.session.user,
+						updatedProduct.title,
+						updatedProduct.id
+					),
+					`Le produit numérique "${updatedProduct.title}" a été restauré.`
+				);
 			});
 
 			return { data: updatedProduct };
