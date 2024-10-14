@@ -276,7 +276,7 @@ describe('jdma-register', () => {
 				});
 			}
 		});
-		clearInbox();
+		// clearInbox();
 		cy.wait(5000);
 	});
 });
@@ -343,9 +343,11 @@ function getEmail() {
 
 	cy.get('ul.nav-tabs').find('li.active').should('contain.text', 'Plain text');
 
+	cy.task('log', 'before clicking link');
 	cy.get('#preview-plain')
 		.find('a')
 		.each($link => {
+			cy.task('log', 'Link');
 			const href = $link.attr('href');
 			if (href && href.includes('/register')) {
 				cy.task('log', href);
@@ -356,5 +358,5 @@ function getEmail() {
 			cy.url().should('include', '/register');
 			cy.wait(2000);
 		});
-	clearInbox();
+	// clearInbox();
 }

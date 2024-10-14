@@ -10,8 +10,8 @@ services:
       POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
       NODEMAILER_HOST: mailhog
       NODEMAILER_PORT: 1025
-      NODEMAILER_USER: contact.jdma@design.numerique.gouv.fr
-      NODEMAILER_PASSWORD: "password"
+      NODEMAILER_USER: null
+      NODEMAILER_PASSWORD: null
       NODEMAILER_FROM: "Équipe JDMA contact.jdma@design.numerique.gouv.fr"
       NODEMAILER_BASEURL: http://localhost:3000
       NEXTAUTH_SECRET: secretauth
@@ -25,7 +25,7 @@ services:
       ES_ADDON_URI: https://localhost:9200
       ES_ADDON_USER: "elastic"
       ES_ADDON_PASSWORD: "ES_ADDON_PASSWORD"
-    command: sh -c "npx prisma generate && yarn build && npx prisma migrate reset --force && npx prisma db seed && yarn start"
+    command: sh -c "npx prisma generate && yarn build && npx prisma migrate reset --force && yarn start"
     depends_on:
       db:
         condition: service_healthy
@@ -37,6 +37,8 @@ services:
       retries: 3
       start_period: 10s
       timeout: 10s
+    networks:
+      - jdma-network
 
   webapp-form:
     image: node:20
@@ -59,6 +61,8 @@ services:
       retries: 3
       start_period: 10s
       timeout: 10s
+    networks:
+      - jdma-network
 
   db:
     image: postgres:16-alpine
@@ -76,12 +80,20 @@ services:
       retries: 3
       start_period: 10s
       timeout: 10s
+    networks:
+      - jdma-network
 
   mailhog:
     image: mailhog/mailhog:latest
     ports:
       - "8025:8025" # Interface web de MailHog
       - "1025:1025" # SMTP
+    networks:
+      - jdma-network
 
 volumes:
   pg_data:
+
+networks:
+  jdma-network:
+    name: jdma-network
