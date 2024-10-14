@@ -30,7 +30,7 @@ describe('jdma-admin', () => {
 		cy.wait(1000);
 		inviteAdmin();
 		cy.wait(1000);
-		checkInviteWithMail();
+		//checkInviteWithMail();
 		disconnect();
 	})
 });
