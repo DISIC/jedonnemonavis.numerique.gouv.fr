@@ -355,10 +355,10 @@ export const productRouter = router({
 				}
 			});
 
-			const emails: string[] = [
+			const emails = [
 				...accessRights.map(ar => ar.user_email),
 				...adminEntityRights.map(aer => aer.user_email)
-			].filter(email => email !== null);
+			].filter(email => email !== null) as string[];
 
 			emails.forEach((email: string) => {
 				sendMail(
@@ -397,10 +397,10 @@ export const productRouter = router({
 				}
 			});
 
-			const emails: string[] = [
+			const emails = [
 				...accessRights.map(ar => ar.user_email),
 				...adminEntityRights.map(aer => aer.user_email)
-			].filter(email => email !== null);
+			].filter(email => email !== null) as string[];
 
 			emails.forEach((email: string) => {
 				sendMail(
