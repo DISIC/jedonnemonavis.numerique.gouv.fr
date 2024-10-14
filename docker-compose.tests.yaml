@@ -10,8 +10,8 @@ services:
       POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
       NODEMAILER_HOST: mailhog
       NODEMAILER_PORT: 1025
-      NODEMAILER_USER: contact.jdma@design.numerique.gouv.fr
-      NODEMAILER_PASSWORD: "password"
+      NODEMAILER_USER: null
+      NODEMAILER_PASSWORD: null
       NODEMAILER_FROM: "Équipe JDMA contact.jdma@design.numerique.gouv.fr"
       NODEMAILER_BASEURL: http://localhost:3000
       NEXTAUTH_SECRET: secretauth
