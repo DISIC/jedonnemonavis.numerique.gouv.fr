@@ -27,14 +27,15 @@ const checkRightToProceed = async (
 			status: 'carrier'
 		}
 	});
+	const isAdmin = session.user.role === 'superadmin';
 
-	if (!accessRight)
+	if (!accessRight && !isAdmin)
 		throw new TRPCError({
 			code: 'FORBIDDEN',
 			message: 'You do not have rights to proceed on this product'
 		});
 
-	return !!accessRight;
+	return !!accessRight || isAdmin;
 };
 
 export const productRouter = router({
