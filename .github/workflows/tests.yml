@@ -34,14 +34,12 @@ jobs:
       # 4. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
-          echo "Waiting for webapp-backoffice to be ready..."
-          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for webapp-backoffice..."; sleep 5; done
-
-          echo "Waiting for webapp-form to be ready..."
-          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
-
-          echo "Waiting for MailHog to be ready..."
           until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
+          echo "Waiting for MailHog to be ready..."
+          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-backoffice..."; sleep 5; done
+          echo "Waiting for webapp-form to be ready..."
+          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
+          echo "Waiting for webapp-backoffice to be ready..."
 
       # 5. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
