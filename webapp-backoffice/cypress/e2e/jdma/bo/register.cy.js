@@ -348,6 +348,7 @@ function getEmail() {
 		.each($link => {
 			const href = $link.attr('href');
 			if (href && href.includes('/register')) {
+				cy.task('log', href);
 				cy.wrap($link).invoke('removeAttr', 'target').click();
 			}
 		})
