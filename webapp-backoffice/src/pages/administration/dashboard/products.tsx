@@ -362,68 +362,61 @@ const DashBoard = () => {
 								</div>
 							</>
 						)}
-						{countTotalUserScope > 10 && (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-mt-4w',
-									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-									'fr-py-0'
-								)}
-							>
-								<Checkbox
-									className={fr.cx('fr-mb-0')}
-									style={{ userSelect: 'none' }}
-									options={[
-										{
-											label: 'Afficher uniquement mes favoris',
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: filters.filterOnlyFavorites,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyFavorites: e.target.checked
-													});
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-mt-4w',
+								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+								'fr-py-0'
+							)}
+						>
+							<div className={cx(classes.checkboxContainer)}>
+								{countTotalUserScope > 10 && !filters.filterOnlyArchived && (
+									<Checkbox
+										className={fr.cx('fr-mb-0')}
+										style={{ userSelect: 'none' }}
+										options={[
+											{
+												label: 'Afficher uniquement mes favoris',
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: filters.filterOnlyFavorites,
+													onChange: e => {
+														updateFilters({
+															...filters,
+															currentPage: 1,
+															filterOnlyFavorites: e.target.checked
+														});
+													}
 												}
 											}
-										}
-									]}
-								/>
-							</div>
-						)}
-						{countArchivedUserScope > 0 && (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-mt-4w',
-									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-									'fr-py-0'
+										]}
+									/>
 								)}
-							>
-								<Checkbox
-									className={fr.cx('fr-mb-0')}
-									style={{ userSelect: 'none' }}
-									options={[
-										{
-											label: 'Afficher uniquement les services supprimés',
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: filters.filterOnlyArchived,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyArchived: e.target.checked
-													});
+								{countArchivedUserScope > 0 && (
+									<Checkbox
+										className={fr.cx('fr-mb-0')}
+										style={{ userSelect: 'none' }}
+										options={[
+											{
+												label: 'Afficher uniquement les services supprimés',
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: filters.filterOnlyArchived,
+													onChange: e => {
+														updateFilters({
+															...filters,
+															currentPage: 1,
+															filterOnlyArchived: e.target.checked
+														});
+													}
 												}
 											}
-										}
-									]}
-								/>
+										]}
+									/>
+								)}
 							</div>
-						)}
+						</div>
 						{!!filters.filterEntity.length && (
 							<div
 								className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
@@ -585,6 +578,10 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	container: {
 		marginTop: '1.5rem'
+	},
+	checkboxContainer: {
+		display: 'flex',
+		gap: fr.spacing('2v')
 	},
 	tagFilter: {
 		marginRight: '0.5rem',
