@@ -53,7 +53,6 @@ jobs:
           yarn install
           npx prisma generate
           npx prisma migrate reset --force
-          npx prisma db seed
 
       # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
       - name: Install dependencies and generate Prisma client for webapp-form
