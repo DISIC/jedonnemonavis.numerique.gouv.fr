@@ -376,29 +376,35 @@ const DashBoard = () => {
 								/>
 							</div>
 						)}
-						<div
-							className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
+						<ul
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom'),
+								classes.tagContainer
+							)}
 						>
-							{filters.filterEntity.map(entity => (
-								<Tag
-									dismissible
-									className={cx(classes.tagFilter)}
-									nativeButtonProps={{
-										onClick: () => {
-											updateFilters({
-												...filters,
-												filterEntity: filters.filterEntity.filter(
-													e => e.value !== entity.value
-												)
-											});
-											setInputValue('');
-										}
-									}}
-								>
-									<p>{entity.label}</p>
-								</Tag>
+							{filters.filterEntity.map((entity, index) => (
+								<li key={index}>
+									<Tag
+										dismissible
+										className={cx(classes.tagFilter)}
+										title={`Retirer ${entity.label}`}
+										nativeButtonProps={{
+											onClick: () => {
+												updateFilters({
+													...filters,
+													filterEntity: filters.filterEntity.filter(
+														e => e.value !== entity.value
+													)
+												});
+												setInputValue('');
+											}
+										}}
+									>
+										<p>{entity.label}</p>
+									</Tag>
+								</li>
 							))}
-						</div>
+						</ul>
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
@@ -526,6 +532,16 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 				marginBottom: '1rem'
 			}
 		}
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
 	},
 	container: {
 		marginTop: '1.5rem'
