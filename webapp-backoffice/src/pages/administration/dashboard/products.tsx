@@ -48,7 +48,9 @@ const DashBoard = () => {
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 
-	const [entityCreated, setEntityCreated] = React.useState<Entity | undefined>()
+	const [entityCreated, setEntityCreated] = React.useState<
+		Entity | undefined
+	>();
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -123,7 +125,7 @@ const DashBoard = () => {
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
 		product_modal.open();
-	}
+	};
 
 	const loadModalAndHead = () => {
 		return (
@@ -187,7 +189,10 @@ const DashBoard = () => {
 	return (
 		<>
 			{isModalSubmitted && (
-				<div className={cx(classes.container, fr.cx('fr-container'))}>
+				<div
+					role="status"
+					className={cx(classes.container, fr.cx('fr-container'))}
+				>
 					<Alert
 						closable
 						onClose={function noRefCheck() {
@@ -404,7 +409,7 @@ const DashBoard = () => {
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
+								<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 									Services de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (filters.currentPage - 1) + 1}
@@ -460,7 +465,7 @@ const DashBoard = () => {
 										)}
 										role="status"
 									>
-										<p>
+										<p aria-live="assertive">
 											{filters.filterOnlyFavorites &&
 											search === '' &&
 											!filters.filterEntity.length
