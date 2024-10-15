@@ -2,17 +2,9 @@ const app_url = Cypress.env('app_form_base_url');
 const app_bo_url = Cypress.env('app_base_url');
 
 describe('jdma-form-review', () => {
-	before(() => {
-		getLastTestServiceID().then(formInfo => {
-			cy.log('formInfo', formInfo);
-			cy.visit(
-				app_url +
-					'/Demarches/4?button=7'
-			);
-		});
-	});
 
 	it('Fill form', () => {
+		cy.visit(app_url + '/Demarches/4?button=7');
 		cy.wait(4000);
 		cy.get('[class*="formSection"]').within(() => {
 			cy.get('h1').contains('Je donne mon avis');
