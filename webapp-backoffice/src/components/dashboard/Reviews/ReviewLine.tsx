@@ -120,8 +120,10 @@ const ReviewLine = ({
 			<td className={cx(classes.cellContainer)}>
 				<Button
 					priority="secondary"
+					title={`Plus d'infos sur l'avis ${review.id}`}
 					iconPosition="right"
 					iconId="fr-icon-arrow-down-s-fill"
+					aria-expanded={displayMoreInfo ? true : false}
 					size="small"
 					onClick={() => {
 						setDisplayMoreInfo(!displayMoreInfo);
