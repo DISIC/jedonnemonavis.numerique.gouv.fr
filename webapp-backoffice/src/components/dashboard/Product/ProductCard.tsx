@@ -9,7 +9,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Skeleton } from '@mui/material';
+import { Menu, MenuItem, Skeleton } from '@mui/material';
 import { AnswerIntention, Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -17,6 +17,9 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
+import { useState } from 'react';
 
 interface Indicator {
 	title: string;
@@ -27,22 +30,49 @@ interface Indicator {
 	appreciation: AnswerIntention;
 }
 
+const onConfirmModalRestore = createModal({
+	id: 'restore-on-confirm-modal',
+	isOpenedByDefault: false
+});
+
+const onConfirmModalArchive = createModal({
+	id: 'archive-on-confirm-modal',
+	isOpenedByDefault: false
+});
+
 const ProductCard = ({
 	product,
 	userId,
 	entity,
 	isFavorite,
-	showFavoriteButton
+	showFavoriteButton,
+	onRestoreProduct
 }: {
 	product: ProductWithButtons;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
+	onRestoreProduct: () => void;
 }) => {
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
+
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(null);
+	};
 
 	const {
 		data: resultStatsObservatoire,
@@ -80,6 +110,19 @@ const ProductCard = ({
 			}
 		}
 	);
+
+	const archiveProduct = trpc.product.archive.useMutation({
+		onSuccess: () => {
+			utils.product.getList.invalidate({});
+		}
+	});
+
+	const restoreProduct = trpc.product.restore.useMutation({
+		onSuccess: () => {
+			utils.product.getList.invalidate({ filterByStatusArchived: true });
+			onRestoreProduct();
+		}
+	});
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -170,156 +213,275 @@ const ProductCard = ({
 		});
 	};
 
-	return (
-		<Link href={`/administration/dashboard/product/${product.id}/stats`}>
-			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
-				<div
-					className={fr.cx(
-						'fr-grid-row',
-						'fr-grid-row--gutters',
-						'fr-grid-row--top'
-					)}
-				>
-					{product.isTop250 && (
-						<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
-							<Badge severity="info" noIcon small>
-								Démarche essentielle
-							</Badge>
-						</div>
-					)}
-					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-6')}>
-						<Link
-							href={`/administration/dashboard/product/${product.id}/stats`}
-							className={cx(classes.productTitle)}
-						>
-							{product.title}
-						</Link>
-					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
-						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
-							{entity?.name}
-						</p>
-					</div>
-					{showFavoriteButton && (
-						<div className={cx(classes.favoriteWrapper)}>
-							<Button
-								iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-								title={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								aria-label={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								priority="tertiary"
-								size="small"
-								onClick={e => {
-									e.preventDefault();
-									if (isFavorite) {
-										deleteFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-									} else {
-										createFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-									}
-								}}
-							/>
-						</div>
-					)}
+	const isDisabled = product.status === 'archived';
+	const productLink = isDisabled
+		? ''
+		: `/administration/dashboard/product/${product.id}/stats`;
 
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
-						{isLoadingStatsObservatoire || isRefetchingStatsObservatoire ? (
-							<Skeleton
-								className={cx(classes.cardSkeleton)}
-								variant="text"
-								width={'full'}
-								height={50}
-							/>
-						) : (product.buttons.length > 0 && nbReviews && nbReviews > 0) ||
-						  session?.user.role.includes('admin') ? (
-							<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-								{indicators.map((indicator, index) => (
-									<div
-										className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
-										key={index}
-									>
-										<p
-											className={fr.cx(
-												'fr-text--xs',
-												'fr-mb-0',
-												'fr-hint-text'
-											)}
-										>
-											{indicator.title}
-										</p>
-										{isLoadingStatsObservatoire ? (
-											<Skeleton
-												className={cx(classes.badgeSkeleton)}
-												variant="text"
-												width={130}
-												height={25}
-											/>
-										) : (
-											<div
-												className={fr.cx(
-													!!indicator.total && indicator.color !== 'new'
-														? `fr-label--${indicator.color}`
-														: 'fr-label--disabled',
-													'fr-text--bold'
-												)}
-												style={
-													!!indicator.total && indicator.color === 'new'
-														? {
-																color:
-																	fr.colors.decisions.background.flat.warning
-																		.default
-															}
-														: undefined
-												}
-											>
-												{!!indicator.total
-													? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
-													: 'Aucune donnée'}
-											</div>
-										)}
-									</div>
-								))}
-								{!isLoadingReviewsCount && nbReviews !== undefined && (
-									<div className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}>
-										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-											Nombre d'avis
-										</p>
-										<div className={fr.cx('fr-label--info', 'fr-text--bold')}>
-											{formatNumberWithSpaces(nbReviews)}
-										</div>
-									</div>
-								)}
+	return (
+		<>
+			<OnConfirmModal
+				modal={onConfirmModalRestore}
+				title="Restaurer un service"
+				handleOnConfirm={() => {
+					restoreProduct.mutate({
+						id: product.id
+					});
+					onConfirmModalRestore.close();
+				}}
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir restaurer le service{' '}
+						<b>"{product.title}"</b> ?{' '}
+					</p>
+				</div>
+			</OnConfirmModal>
+			<OnConfirmModal
+				modal={onConfirmModalArchive}
+				title="Supprimer ce service"
+				handleOnConfirm={() => {
+					archiveProduct.mutate({
+						id: product.id
+					});
+					onConfirmModalArchive.close();
+				}}
+				kind="danger"
+			>
+				<div>
+					<p>
+						Vous êtes sûr de vouloir supprimer le service{' '}
+						<b>"{product.title}"</b> ?{' '}
+					</p>
+					<p>
+						En supprimant ce service :<br />
+						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
+						de ce service n’auront plus accès au formulaire.
+					</p>
+				</div>
+			</OnConfirmModal>
+			<Link
+				href={productLink}
+				className={cx(isDisabled ? classes.disabled : undefined)}
+			>
+				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+					<div
+						className={fr.cx(
+							'fr-grid-row',
+							'fr-grid-row--gutters',
+							'fr-grid-row--middle'
+						)}
+					>
+						{(product.isTop250 || isDisabled) && (
+							<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
+								<div className={classes.badgesContainer}>
+									{product.isTop250 && (
+										<Badge severity="info" noIcon small>
+											Démarche essentielle
+										</Badge>
+									)}
+									{isDisabled && (
+										<Badge noIcon small>
+											Service supprimé
+										</Badge>
+									)}
+								</div>
 							</div>
-						) : product.buttons.length === 0 ? (
-							<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+						)}
+						<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-5')}>
+							<Link href={productLink} className={cx(classes.productTitle)}>
+								{product.title}
+							</Link>
+						</div>
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
+								{entity?.name}
+							</p>
+						</div>
+						{isDisabled ? (
+							<div
+								className={cx(
+									classes.buttonsCol,
+									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+								)}
+							>
+								<Button
+									iconId={'ri-inbox-unarchive-line'}
+									iconPosition="right"
+									title={`Restaurer le produit « ${product.title} »`}
+									aria-label={`Restaurer le produit « ${product.title} »`}
+									priority="secondary"
+									size="small"
+									onClick={e => {
+										e.preventDefault();
+										onConfirmModalRestore.open();
+									}}
+								>
+									Restaurer
+								</Button>
+							</div>
 						) : (
-							<NoReviewsPanel
-								improveBtnClick={() => {}}
-								sendInvitationBtnClick={handleSendInvitation}
-							/>
+							<>
+								<div className={cx(classes.rightButtonsWrapper)}>
+									<Button
+										id="button-options-product"
+										iconId={'ri-more-2-fill'}
+										title={`Ouvrir le menu contextuel du produit « ${product.title} »`}
+										aria-label={`Ouvrir le menu contextuel du produit « ${product.title} »`}
+										priority="tertiary"
+										size="small"
+										onClick={handleMenuClick}
+									/>
+									<Menu
+										id="option-menu"
+										open={menuOpen}
+										anchorEl={anchorEl}
+										onClose={handleClose}
+										MenuListProps={{
+											'aria-labelledby': 'button-options-access-right'
+										}}
+									>
+										<MenuItem
+											onClick={e => {
+												handleClose(e);
+												onConfirmModalArchive.open();
+											}}
+											className={cx(classes.menuItemDanger)}
+										>
+											Supprimer ce service
+										</MenuItem>
+									</Menu>
+									{showFavoriteButton && !isDisabled && (
+										<Button
+											iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+											title={
+												isFavorite
+													? `Supprimer le produit « ${product.title} » des favoris`
+													: `Ajouter le produit « ${product.title} » aux favoris`
+											}
+											aria-label={
+												isFavorite
+													? `Supprimer le produit « ${product.title} » des favoris`
+													: `Ajouter le produit « ${product.title} » aux favoris`
+											}
+											priority="tertiary"
+											size="small"
+											onClick={e => {
+												e.preventDefault();
+												if (isFavorite) {
+													deleteFavorite.mutate({
+														product_id: product.id,
+														user_id: userId
+													});
+												} else {
+													createFavorite.mutate({
+														product_id: product.id,
+														user_id: userId
+													});
+												}
+											}}
+										/>
+									)}
+								</div>
+								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+									{isLoadingStatsObservatoire ||
+									isRefetchingStatsObservatoire ? (
+										<Skeleton
+											className={cx(classes.cardSkeleton)}
+											variant="text"
+											width={'full'}
+											height={50}
+										/>
+									) : (product.buttons.length > 0 &&
+											nbReviews &&
+											nbReviews > 0) ||
+									  session?.user.role.includes('admin') ? (
+										<div
+											className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}
+										>
+											{indicators.map((indicator, index) => (
+												<div
+													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+													key={index}
+												>
+													<p
+														className={fr.cx(
+															'fr-text--xs',
+															'fr-mb-0',
+															'fr-hint-text'
+														)}
+													>
+														{indicator.title}
+													</p>
+													{isLoadingStatsObservatoire ? (
+														<Skeleton
+															className={cx(classes.badgeSkeleton)}
+															variant="text"
+															width={130}
+															height={25}
+														/>
+													) : (
+														<div
+															className={fr.cx(
+																!!indicator.total && indicator.color !== 'new'
+																	? `fr-label--${indicator.color}`
+																	: 'fr-label--disabled',
+																'fr-text--bold'
+															)}
+															style={
+																!!indicator.total && indicator.color === 'new'
+																	? {
+																			color:
+																				fr.colors.decisions.background.flat
+																					.warning.default
+																		}
+																	: undefined
+															}
+														>
+															{!!indicator.total
+																? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
+																: 'Aucune donnée'}
+														</div>
+													)}
+												</div>
+											))}
+											{!isLoadingReviewsCount && nbReviews !== undefined && (
+												<div
+													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+												>
+													<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+														Nombre d'avis
+													</p>
+													<div
+														className={fr.cx('fr-label--info', 'fr-text--bold')}
+													>
+														{formatNumberWithSpaces(nbReviews)}
+													</div>
+												</div>
+											)}
+										</div>
+									) : product.buttons.length === 0 ? (
+										<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+									) : (
+										<NoReviewsPanel
+											improveBtnClick={() => {}}
+											sendInvitationBtnClick={handleSendInvitation}
+										/>
+									)}
+								</div>
+							</>
 						)}
 					</div>
 				</div>
-			</div>
-		</Link>
+			</Link>
+		</>
 	);
 };
 
 const useStyles = tss.withName(ProductCard.name).create({
-	favoriteWrapper: {
+	rightButtonsWrapper: {
 		display: 'flex',
+		gap: fr.spacing('2v'),
 		justifyContent: 'end',
 		position: 'absolute',
 		right: fr.spacing('3v'),
@@ -341,6 +503,28 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	entityName: {
 		color: '#666666'
+	},
+	disabled: {
+		cursor: 'default',
+		'.fr-card': {
+			backgroundColor: fr.colors.decisions.background.disabled.grey.default
+		},
+		a: {
+			color: fr.colors.decisions.text.default.grey.default,
+			pointerEvents: 'none',
+			cursor: 'default',
+			textDecoration: 'none'
+		}
+	},
+	badgesContainer: {
+		display: 'flex',
+		gap: fr.spacing('2v')
+	},
+	menuItemDanger: {
+		color: fr.colors.decisions.text.default.error.default
+	},
+	buttonsCol: {
+		textAlign: 'right'
 	}
 });
 

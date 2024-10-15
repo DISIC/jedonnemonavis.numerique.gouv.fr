@@ -270,7 +270,7 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
-						total={nbReviewsWithFiltersForm2}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}

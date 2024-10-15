@@ -241,3 +241,40 @@ export function getUserRequestRefusedEmailHtml(message?: string) {
 		
 	`);
 }
+
+export function getProductArchivedEmail(
+	contextUser: Session['user'],
+	productTitle: string
+) {
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser.name} vient de supprimer le service « ${productTitle} » sur la plateforme <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a>. 
+			Vous n'avez plus accès aux avis et verbatims de ce service, et les utilisateurs de ce service n'ont plus accès au formulaire.
+		</p>
+
+		<p>
+			Vous pouvez restaurer ce service depuis <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/products" target="_blank">la page services</a> pendant 6 mois. 
+			Après ce délai, le service sera définitivement supprimé.
+		</p>		
+	`);
+}
+
+export function getProductRestoredEmail(
+	contextUser: Session['user'],
+	productTitle: string,
+	productId: number
+) {
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser.name} vient de restaurer le service « ${productTitle} » sur la plateforme <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a>.
+		</p>
+
+		<p>
+			Vous pouvez à nouveau <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/product/${productId.toString()}/stats" target="_blank">accéder aux avis et aux verbatims de ce service</a>.
+		</p>		
+	`);
+}

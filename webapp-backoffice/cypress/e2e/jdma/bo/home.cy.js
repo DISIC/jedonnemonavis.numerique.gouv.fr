@@ -76,8 +76,10 @@ describe('jdma-home', () => {
 		cy.get('.fr-accordions-group .fr-accordion__item').each($accordion => {
 			cy.wrap($accordion).find('.fr-collapse').should('not.be.visible');
 			cy.wrap($accordion).find('.fr-accordion__btn').click();
+			cy.wait(1000);
 			cy.wrap($accordion).find('.fr-collapse').should('be.visible');
 			cy.wrap($accordion).find('.fr-accordion__btn').click();
+			cy.wait(1000);
 			cy.wrap($accordion).find('.fr-collapse').should('not.be.visible');
 		});
 	});
