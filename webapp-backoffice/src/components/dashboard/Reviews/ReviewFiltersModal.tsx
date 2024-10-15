@@ -174,60 +174,54 @@ const ReviewFiltersModal = (props: Props) => {
 					'fr-mt-4w'
 				)}
 			>
-				<div className={fr.cx('fr-col-6', 'fr-col-sm-3')}>
-					<Button
-						priority="secondary"
-						className={fr.cx('fr-mt-1w')}
-						type="button"
-						onClick={() => {
-							setTmpFilters(filters);
-							modal.close();
-						}}
-					>
-						Annuler
-					</Button>
-				</div>
-				<div
-					className={cx(
-						classes.wrapperMobile,
-						fr.cx('fr-col-6', 'fr-col-sm-3')
-					)}
-				>
-					<Button
-						priority="secondary"
-						className={fr.cx('fr-mt-1w')}
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-						type="button"
-						onClick={() =>
-							setTmpFilters({
-								satisfaction: [],
-								comprehension: [],
-								needVerbatim: false,
-								needOtherDifficulties: false,
-								needOtherHelp: false,
-								help: []
-							})
-						}
-					>
-						Réinitialiser
-					</Button>
-				</div>
-				<div
-					className={cx(
-						fr.cx('fr-col-12', 'fr-col-sm-6'),
-						classes.applyWrapper
-					)}
-				>
-					<Button
-						priority="primary"
-						className={fr.cx('fr-mt-1w')}
-						type="button"
-						onClick={() => submitFilters(tmpFilters)}
-					>
-						Appliquer les filtres
-					</Button>
-				</div>
+				<ul className={cx(classes.listContainer)}>
+					<li>
+						<Button
+							priority="secondary"
+							className={fr.cx('fr-mt-1w')}
+							type="button"
+							onClick={() => {
+								setTmpFilters(filters);
+								modal.close();
+							}}
+						>
+							Annuler
+						</Button>
+					</li>
+					<li>
+						<Button
+							priority="secondary"
+							className={fr.cx('fr-mt-1w')}
+							iconId="fr-icon-edit-line"
+							iconPosition="right"
+							type="button"
+							onClick={() =>
+								setTmpFilters({
+									satisfaction: [],
+									comprehension: [],
+									needVerbatim: false,
+									needOtherDifficulties: false,
+									needOtherHelp: false,
+									help: []
+								})
+							}
+						>
+							Réinitialiser
+						</Button>
+					</li>
+					<li>
+						<div className={cx(classes.applyWrapper)}>
+							<Button
+								priority="primary"
+								className={fr.cx('fr-mt-1w')}
+								type="button"
+								onClick={() => submitFilters(tmpFilters)}
+							>
+								Appliquer les filtres
+							</Button>
+						</div>
+					</li>
+				</ul>
 			</div>
 		</modal.Component>
 	);
@@ -243,6 +237,15 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 			display: 'flex',
 			justifyContent: 'end'
 		}
+	},
+	listContainer: {
+		display: 'flex',
+		width: '100%',
+		gap: '1rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'space-between'
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default
