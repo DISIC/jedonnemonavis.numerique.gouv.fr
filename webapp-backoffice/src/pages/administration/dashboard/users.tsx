@@ -435,7 +435,10 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 	ulContainer: {
 		padding: 0,
 		margin: 0,
-		listStyle: 'none !important'
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
+		}
 	},
 	searchForm: {
 		'.fr-search-bar': {
