@@ -591,7 +591,7 @@ const ProductReviewsPage = (props: Props) => {
 												'fr-mt-20v'
 											)}
 										>
-											<p>Aucun avis disponible </p>
+											<p role="status">Aucun avis disponible </p>
 										</div>
 									)}
 								</div>
