@@ -345,40 +345,9 @@ const DashBoard = () => {
 								</div>
 							</form>
 						</div>
-						{countTotalUserScope > 10 && (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-mt-4w',
-									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-									'fr-py-0'
-								)}
-							>
-								<Checkbox
-									className={fr.cx('fr-mb-0')}
-									style={{ userSelect: 'none' }}
-									options={[
-										{
-											label: 'Afficher uniquement mes favoris',
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: filters.filterOnlyFavorites,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyFavorites: e.target.checked
-													});
-												}
-											}
-										}
-									]}
-								/>
-							</div>
-						)}
 						<ul
 							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom'),
+								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
 								classes.tagContainer
 							)}
 						>
@@ -405,6 +374,36 @@ const DashBoard = () => {
 								</li>
 							))}
 						</ul>
+						{countTotalUserScope > 10 && (
+							<div
+								className={fr.cx(
+									'fr-col-12',
+									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+									'fr-py-0'
+								)}
+							>
+								<Checkbox
+									className={fr.cx('fr-mb-0')}
+									style={{ userSelect: 'none' }}
+									options={[
+										{
+											label: 'Afficher uniquement mes favoris',
+											nativeInputProps: {
+												name: 'favorites-products',
+												checked: filters.filterOnlyFavorites,
+												onChange: e => {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														filterOnlyFavorites: e.target.checked
+													});
+												}
+											}
+										}
+									]}
+								/>
+							</div>
+						)}
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
