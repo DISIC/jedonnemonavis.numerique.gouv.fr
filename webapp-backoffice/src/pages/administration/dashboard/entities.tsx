@@ -373,19 +373,22 @@ const DashBoardEntities = () => {
 									<Loader />
 								</div>
 							) : (
-								entities.map((entity, index) => (
-									<EntityCard
-										entity={entity}
-										key={index}
-										onButtonClick={handleModalEntityRightsOpening}
-										isMine={
-											session.user.role.includes('admin') ||
-											myEntities
-												.map(myEntity => myEntity.id)
-												.includes(entity.id)
-										}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{entities.map((entity, index) => (
+										<li key={index}>
+											<EntityCard
+												entity={entity}
+												onButtonClick={handleModalEntityRightsOpening}
+												isMine={
+													session.user.role.includes('admin') ||
+													myEntities
+														.map(myEntity => myEntity.id)
+														.includes(entity.id)
+												}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 							{!isRefetchingEntities && entities.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -457,6 +460,14 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 		p: {
 			margin: 0,
 			fontWeight: 'bold'
+		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
 		}
 	},
 	inviteLink: {
