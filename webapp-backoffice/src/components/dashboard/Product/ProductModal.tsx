@@ -398,6 +398,7 @@ const ProductModal = (props: Props) => {
 											onClick={() => handleRemoveUrl(index)}
 										>
 											<i className="ri-delete-bin-line"></i>
+											<span className="fr-sr-only">Supprimer</span>
 										</Button>
 									)}
 								</div>
