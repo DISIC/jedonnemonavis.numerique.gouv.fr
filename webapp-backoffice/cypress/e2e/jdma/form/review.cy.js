@@ -7,10 +7,7 @@ describe('jdma-form-review', () => {
 			cy.log('formInfo', formInfo);
 			cy.visit(
 				app_url +
-					'/Demarches/' +
-					formInfo.productId +
-					'?button=' +
-					formInfo.lastTestButtonId
+					'/Demarches/4?button=7'
 			);
 		});
 	});
