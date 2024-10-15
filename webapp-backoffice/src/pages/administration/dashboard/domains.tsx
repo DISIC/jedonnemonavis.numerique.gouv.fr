@@ -310,13 +310,16 @@ const DashBoardDomainDomains = () => {
 									<Loader />
 								</div>
 							) : (
-								domains.map((domain, index) => (
-									<DomainCard
-										key={index}
-										domain={domain}
-										setCurrentDomain={handleCurrentDomain}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{domains.map((domain, index) => (
+										<li key={index}>
+											<DomainCard
+												domain={domain}
+												setCurrentDomain={handleCurrentDomain}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 							{domains.length === 0 && !isRefetchingDomains && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -381,6 +384,14 @@ const useStyles = tss.withName(DashBoardDomainDomains.name).create(() => ({
 			'.fr-btn:first-of-type': {
 				marginBottom: '1rem'
 			}
+		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
 		}
 	},
 	domainsContainer: {

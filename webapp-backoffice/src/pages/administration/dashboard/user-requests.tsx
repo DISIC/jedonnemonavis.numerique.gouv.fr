@@ -337,13 +337,16 @@ const DashBoardUserRequestUserRequests = () => {
 									<Loader />
 								</div>
 							) : (
-								userRequests.map((userRequest, index) => (
-									<UserRequestCard
-										key={index}
-										userRequest={userRequest}
-										setCurrentUserRequest={handleCurrentUserRequest}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{userRequests.map((userRequest, index) => (
+										<li key={index}>
+											<UserRequestCard
+												userRequest={userRequest}
+												setCurrentUserRequest={handleCurrentUserRequest}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 							{userRequests.length === 0 && !isRefetchingUserRequests && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -414,6 +417,14 @@ const useStyles = tss
 		},
 		userrequestsContainer: {
 			minHeight: '20rem'
+		},
+		ulContainer: {
+			padding: 0,
+			margin: 0,
+			listStyle: 'none !important',
+			li: {
+				paddingBottom: 0
+			}
 		},
 		textContainer: {
 			textAlign: 'center',
