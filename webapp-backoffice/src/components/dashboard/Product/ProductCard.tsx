@@ -194,7 +194,7 @@ const ProductCard = ({
 						</div>
 					)}
 					<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-6')}>
-						<div className={cx(classes.productTitle)}>{product.title}</div>
+						<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
