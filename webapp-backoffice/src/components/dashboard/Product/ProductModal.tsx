@@ -382,7 +382,8 @@ const ProductModal = (props: Props) => {
 												nativeInputProps={{
 													name,
 													value,
-													onChange
+													onChange,
+													placeholder: 'Ex: https://exemple.com'
 												}}
 												ref={index === urls.length - 1 ? lastUrlRef : null}
 											/>
