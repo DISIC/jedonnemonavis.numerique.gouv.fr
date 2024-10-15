@@ -46,6 +46,7 @@ export const LoginForm = () => {
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 	const [displayToast, setDisplayToast] = useState<boolean>(false);
 
+	const emailRef = useRef(null);
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
 	const checkEmailUser = trpc.user.checkEmail.useMutation({
@@ -140,6 +141,12 @@ export const LoginForm = () => {
 		if (showPassword) passwordRef?.current?.focus();
 	}, [showPassword]);
 
+	useEffect(() => {
+		if (hasErrors() && emailRef.current) {
+			emailRef.current.focus(); // Mettre le focus sur le champ email si l'erreur est présente
+		}
+	}, [hasErrors]);
+
 	return (
 		<div>
 			<Toast
@@ -190,16 +197,22 @@ export const LoginForm = () => {
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
 					nativeInputProps={{
+						ref: emailRef,
 						onChange: e => {
 							setCredentials({ ...credentials, email: e.target.value });
 							setShowPassword(false);
 							resetErrors();
 						},
 						name: 'email',
-						autoComplete: 'email'
+						autoComplete: 'email',
+						role: 'alert'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
-					stateRelatedMessage={getEmailErrorMessage()}
+					stateRelatedMessage={
+						hasErrors() ? (
+							<span role="alert">{getEmailErrorMessage()}</span>
+						) : null
+					}
 				/>
 				{showPassword && (
 					<PasswordInput
@@ -215,7 +228,14 @@ export const LoginForm = () => {
 						}}
 						messages={
 							passwordIncorrect
-								? [{ message: 'Mot de passe incorrect.', severity: 'error' }]
+								? [
+										{
+											message: (
+												<span role="alert">Mot de passe incorrect.</span>
+											),
+											severity: 'error'
+										}
+									]
 								: []
 						}
 						messagesHint=""
