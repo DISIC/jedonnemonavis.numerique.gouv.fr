@@ -9,7 +9,7 @@ import {
 } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
@@ -76,6 +76,10 @@ export const RegisterForm = (props: Props) => {
 	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [registered, setRegistered] = useState<RegisterValidationMessage>();
+	const firstNameRef = useRef<HTMLInputElement>(null);
+	const lastNameRef = useRef<HTMLInputElement>(null);
+	const emailRef = useRef<HTMLInputElement>(null);
+	const passwordRef = useRef<HTMLInputElement>(null);
 
 	const registerUser = trpc.user.register.useMutation({
 		onSuccess: result => {
@@ -196,6 +200,19 @@ export const RegisterForm = (props: Props) => {
 
 		if (formHasErrors(errors)) {
 			setErrors({ ...errors });
+			if (errors.firstName.required) {
+				firstNameRef.current?.focus();
+			} else if (errors.lastName.required) {
+				lastNameRef.current?.focus();
+			} else if (
+				errors.email.required ||
+				errors.email.format ||
+				errors.email.conflict
+			) {
+				emailRef.current?.focus();
+			} else if (errors.password.required || errors.password.format) {
+				passwordRef.current?.focus();
+			}
 			return;
 		}
 
@@ -270,7 +287,8 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('firstName');
 						},
 						value: userInfos.firstName,
-						name: 'firstName'
+						name: 'firstName',
+						ref: firstNameRef
 					}}
 					state={hasErrors('firstName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -287,7 +305,8 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('lastName');
 						},
 						value: userInfos.lastName,
-						name: 'lastName'
+						name: 'lastName',
+						ref: lastNameRef
 					}}
 					state={hasErrors('lastName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -310,7 +329,8 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('email');
 						},
 						value: userInfos.email,
-						name: 'email'
+						name: 'email',
+						ref: emailRef
 					}}
 					state={hasErrors('email') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -328,7 +348,8 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('password');
 						},
 						value: userInfos.password,
-						role: 'alert'
+						role: 'alert',
+						ref: passwordRef
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={
