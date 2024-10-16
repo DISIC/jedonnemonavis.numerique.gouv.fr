@@ -46,7 +46,7 @@ export const LoginForm = () => {
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 	const [displayToast, setDisplayToast] = useState<boolean>(false);
 
-	const emailRef = useRef(null);
+	const emailRef = useRef<HTMLInputElement | null>(null);
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
 	const checkEmailUser = trpc.user.checkEmail.useMutation({
@@ -144,6 +144,8 @@ export const LoginForm = () => {
 	useEffect(() => {
 		if (hasErrors() && emailRef && emailRef.current) {
 			emailRef.current.focus();
+		} else if (passwordIncorrect && passwordRef.current) {
+			passwordRef.current.focus();
 		}
 	}, [hasErrors]);
 
