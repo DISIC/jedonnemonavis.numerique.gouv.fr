@@ -41,6 +41,8 @@ const onConfirmModalArchive = createModal({
 });
 
 const ProductCard = ({
+	currentProduct,
+	setCurrentProduct,
 	product,
 	userId,
 	entity,
@@ -49,6 +51,8 @@ const ProductCard = ({
 	onRestoreProduct
 }: {
 	product: ProductWithButtons;
+	currentProduct: ProductWithButtons | null;
+	setCurrentProduct: (product: ProductWithButtons | null) => void;
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
@@ -225,7 +229,7 @@ const ProductCard = ({
 				title="Restaurer un service"
 				handleOnConfirm={() => {
 					restoreProduct.mutate({
-						id: product.id
+						id: currentProduct?.id as number
 					});
 					onConfirmModalRestore.close();
 				}}
@@ -233,7 +237,7 @@ const ProductCard = ({
 				<div>
 					<p>
 						Vous êtes sûr de vouloir restaurer le service{' '}
-						<b>"{product.title}"</b> ?{' '}
+						<b>"{currentProduct?.title}"</b> ?{' '}
 					</p>
 				</div>
 			</OnConfirmModal>
@@ -242,7 +246,7 @@ const ProductCard = ({
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
-						id: product.id
+						id: currentProduct?.id as number
 					});
 					onConfirmModalArchive.close();
 				}}
@@ -251,7 +255,7 @@ const ProductCard = ({
 				<div>
 					<p>
 						Vous êtes sûr de vouloir supprimer le service{' '}
-						<b>"{product.title}"</b> ?{' '}
+						<b>"{currentProduct?.title}"</b> ?{' '}
 					</p>
 					<p>
 						En supprimant ce service :<br />
@@ -314,6 +318,7 @@ const ProductCard = ({
 									size="small"
 									onClick={e => {
 										e.preventDefault();
+										setCurrentProduct(product);
 										onConfirmModalRestore.open();
 									}}
 								>
@@ -344,6 +349,7 @@ const ProductCard = ({
 										<MenuItem
 											onClick={e => {
 												handleClose(e);
+												setCurrentProduct(product);
 												onConfirmModalArchive.open();
 											}}
 											className={cx(classes.menuItemDanger)}

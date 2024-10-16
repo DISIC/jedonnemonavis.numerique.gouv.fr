@@ -163,6 +163,12 @@ const ProductModal = (props: Props) => {
 		modal.close();
 	};
 
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			reset();
+		}
+	});
+
 	const handleRemoveUrl = (index: number) => {
 		const shouldFocusPreviousUrl = index !== 0;
 		removeUrl(index);
