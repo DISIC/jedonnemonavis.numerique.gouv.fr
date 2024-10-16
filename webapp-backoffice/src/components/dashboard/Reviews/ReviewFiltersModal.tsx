@@ -261,7 +261,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		gap: '0.25rem'
 	},
 	selectedOption: {
-		backgroundColor: fr.colors.decisions.background.alt.grey.hover
+		backgroundColor: fr.colors.decisions.background.active.blueFrance.default,
+		color: 'white'
 	},
 	rating: {
 		display: 'flex',
@@ -299,7 +300,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 						alignItems: 'center',
 						cursor: 'pointer',
 						['&:hover']: {
-							borderColor: fr.colors.decisions.background.alt.grey.active
+							borderColor: fr.colors.decisions.background.alt.grey.active,
+							fontWeight: 'bold'
 						},
 						[fr.breakpoints.down('md')]: {
 							width: '100%'
