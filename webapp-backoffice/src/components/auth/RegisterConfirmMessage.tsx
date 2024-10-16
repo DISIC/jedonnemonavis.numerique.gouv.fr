@@ -17,7 +17,7 @@ export const RegisterValidationMessage = (props: Props) => {
 		<div>
 			<h5>Se créer un compte</h5>
 			{mode === 'classic' ? (
-				<p>
+				<p role="status" tabIndex={-1}>
 					Votre compte a été créé avec succès. <br />
 					<br />
 					{!isUserInvited ? (

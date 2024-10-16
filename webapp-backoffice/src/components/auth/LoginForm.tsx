@@ -142,8 +142,8 @@ export const LoginForm = () => {
 	}, [showPassword]);
 
 	useEffect(() => {
-		if (hasErrors() && emailRef.current) {
-			emailRef.current.focus(); // Mettre le focus sur le champ email si l'erreur est présente
+		if (hasErrors() && emailRef && emailRef.current) {
+			emailRef.current.focus();
 		}
 	}, [hasErrors]);
 
@@ -204,8 +204,7 @@ export const LoginForm = () => {
 							resetErrors();
 						},
 						name: 'email',
-						autoComplete: 'email',
-						role: 'alert'
+						autoComplete: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={

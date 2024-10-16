@@ -134,14 +134,14 @@ export const RegisterForm = (props: Props) => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: 'Veuillez renseigner un mot de passe.',
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
 		}
 
 		messages.push({
-			message: '12 caractères minimum',
+			message: <span role="alert">12 caractères minimum</span>,
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
@@ -150,7 +150,7 @@ export const RegisterForm = (props: Props) => {
 		});
 
 		messages.push({
-			message: '1 caractère spécial',
+			message: <span role="alert">1 caractère spécial</span>,
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
@@ -159,7 +159,7 @@ export const RegisterForm = (props: Props) => {
 		});
 
 		messages.push({
-			message: '1 chiffre minimum',
+			message: <span role="alert">1 chiffre minimum</span>,
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
@@ -238,21 +238,23 @@ export const RegisterForm = (props: Props) => {
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
 			{errors.email.conflict && (
-				<Alert
-					className={fr.cx('fr-mb-4v', 'fr-text--sm')}
-					closable
-					description={
-						<>
-							Il y a déjà un compte avec cette adresse email.{' '}
-							<Link className={fr.cx('fr-link', 'fr-text--sm')} href="/login">
-								Veuillez vous connecter ici.
-							</Link>
-						</>
-					}
-					onClose={function noRefCheck() {}}
-					severity="error"
-					title=""
-				/>
+				<div role="alert">
+					<Alert
+						className={fr.cx('fr-mb-4v', 'fr-text--sm')}
+						closable
+						description={
+							<>
+								Il y a déjà un compte avec cette adresse email.{' '}
+								<Link className={fr.cx('fr-link', 'fr-text--sm')} href="/login">
+									Veuillez vous connecter ici.
+								</Link>
+							</>
+						}
+						onClose={function noRefCheck() {}}
+						severity="error"
+						title=""
+					/>
+				</div>
 			)}
 			<form
 				onSubmit={e => {
@@ -271,7 +273,11 @@ export const RegisterForm = (props: Props) => {
 						name: 'firstName'
 					}}
 					state={hasErrors('firstName') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('firstName')}
+					stateRelatedMessage={
+						hasErrors('firstName') ? (
+							<span role="alert">{getErrorMessage('firstName')}</span>
+						) : null
+					}
 				/>
 				<Input
 					label="Nom"
@@ -284,7 +290,11 @@ export const RegisterForm = (props: Props) => {
 						name: 'lastName'
 					}}
 					state={hasErrors('lastName') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('lastName')}
+					stateRelatedMessage={
+						hasErrors('lastName') ? (
+							<span role="alert">{getErrorMessage('lastName')}</span>
+						) : null
+					}
 				/>
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
@@ -303,7 +313,11 @@ export const RegisterForm = (props: Props) => {
 						name: 'email'
 					}}
 					state={hasErrors('email') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('email')}
+					stateRelatedMessage={
+						hasErrors('email') ? (
+							<span role="alert">{getErrorMessage('email')}</span>
+						) : null
+					}
 				/>
 				<PasswordInput
 					label="Mot de passe"
@@ -313,7 +327,8 @@ export const RegisterForm = (props: Props) => {
 							setUserInfos({ ...userInfos, password: e.target.value });
 							resetErrors('password');
 						},
-						value: userInfos.password
+						value: userInfos.password,
+						role: 'alert'
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={
