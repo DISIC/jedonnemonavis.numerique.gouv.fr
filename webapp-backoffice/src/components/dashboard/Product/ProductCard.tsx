@@ -17,9 +17,9 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Indicator {
 	title: string;
@@ -30,15 +30,19 @@ interface Indicator {
 	appreciation: AnswerIntention;
 }
 
-const onConfirmModalRestore = createModal({
-	id: 'restore-on-confirm-modal',
-	isOpenedByDefault: false
-});
-
-const onConfirmModalArchive = createModal({
-	id: 'archive-on-confirm-modal',
-	isOpenedByDefault: false
-});
+interface CreateModalProps {
+	buttonProps: {
+		/** Only for analytics, feel free to overwrite */
+		id: string;
+		'aria-controls': string;
+		'data-fr-opened': boolean;
+	};
+	Component: (props: ModalProps) => JSX.Element;
+	close: () => void;
+	open: () => void;
+	isOpenedByDefault: boolean;
+	id: string;
+}
 
 const ProductCard = ({
 	product,
@@ -49,12 +53,18 @@ const ProductCard = ({
 	onRestoreProduct
 }: {
 	product: ProductWithButtons;
+
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 }) => {
+	const [onConfirmModalRestore, setOnConfirmModalRestore] =
+		useState<CreateModalProps | null>(null);
+	const [onConfirmModalArchive, setOnConfirmModalArchive] =
+		useState<CreateModalProps | null>(null);
+
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
@@ -212,6 +222,26 @@ const ProductCard = ({
 			query: { autoInvite: true }
 		});
 	};
+
+	React.useEffect(() => {
+		if (product) {
+			setOnConfirmModalRestore(
+				createModal({
+					id: `restore-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+
+			setOnConfirmModalArchive(
+				createModal({
+					id: `archive-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+		}
+	}, [product]);
+
+	if (!onConfirmModalRestore || !onConfirmModalArchive) return;
 
 	const isDisabled = product.status === 'archived';
 	const productLink = isDisabled

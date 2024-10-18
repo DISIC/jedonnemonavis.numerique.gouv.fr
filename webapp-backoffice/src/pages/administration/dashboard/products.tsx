@@ -5,6 +5,7 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -479,8 +480,9 @@ const DashBoard = () => {
 									<Loader />
 								</div>
 							) : (
-								products.map((product, index) => (
+								products.map(product => (
 									<ProductCard
+										key={product.id}
 										product={product}
 										userId={parseInt(session?.user?.id as string)}
 										entity={
@@ -500,7 +502,6 @@ const DashBoard = () => {
 												filterOnlyArchived: false
 											});
 										}}
-										key={index}
 									/>
 								))
 							)}

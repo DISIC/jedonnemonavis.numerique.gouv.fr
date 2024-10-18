@@ -113,8 +113,18 @@ const ProductModal = (props: Props) => {
 		value: entity.id
 	}));
 
-	const saveProductTmp = trpc.product.create.useMutation({});
-	const updateProduct = trpc.product.update.useMutation({});
+	const utils = trpc.useUtils();
+
+	const saveProductTmp = trpc.product.create.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
+	const updateProduct = trpc.product.update.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		const { urls, ...tmpProduct } = data;
@@ -152,6 +162,12 @@ const ProductModal = (props: Props) => {
 		onSubmit();
 		modal.close();
 	};
+
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			reset();
+		}
+	});
 
 	const handleRemoveUrl = (index: number) => {
 		const shouldFocusPreviousUrl = index !== 0;
