@@ -17,9 +17,9 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Indicator {
 	title: string;
@@ -30,19 +30,21 @@ interface Indicator {
 	appreciation: AnswerIntention;
 }
 
-const onConfirmModalRestore = createModal({
-	id: 'restore-on-confirm-modal',
-	isOpenedByDefault: false
-});
-
-const onConfirmModalArchive = createModal({
-	id: 'archive-on-confirm-modal',
-	isOpenedByDefault: false
-});
+interface CreateModalProps {
+	buttonProps: {
+		/** Only for analytics, feel free to overwrite */
+		id: string;
+		'aria-controls': string;
+		'data-fr-opened': boolean;
+	};
+	Component: (props: ModalProps) => JSX.Element;
+	close: () => void;
+	open: () => void;
+	isOpenedByDefault: boolean;
+	id: string;
+}
 
 const ProductCard = ({
-	currentProduct,
-	setCurrentProduct,
 	product,
 	userId,
 	entity,
@@ -51,14 +53,18 @@ const ProductCard = ({
 	onRestoreProduct
 }: {
 	product: ProductWithButtons;
-	currentProduct: ProductWithButtons | null;
-	setCurrentProduct: (product: ProductWithButtons | null) => void;
+
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 }) => {
+	const [onConfirmModalRestore, setOnConfirmModalRestore] =
+		useState<CreateModalProps | null>(null);
+	const [onConfirmModalArchive, setOnConfirmModalArchive] =
+		useState<CreateModalProps | null>(null);
+
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
@@ -217,6 +223,26 @@ const ProductCard = ({
 		});
 	};
 
+	React.useEffect(() => {
+		if (product) {
+			setOnConfirmModalRestore(
+				createModal({
+					id: `restore-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+
+			setOnConfirmModalArchive(
+				createModal({
+					id: `archive-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+		}
+	}, [product]);
+
+	if (!onConfirmModalRestore || !onConfirmModalArchive) return;
+
 	const isDisabled = product.status === 'archived';
 	const productLink = isDisabled
 		? ''
@@ -229,7 +255,7 @@ const ProductCard = ({
 				title="Restaurer un service"
 				handleOnConfirm={() => {
 					restoreProduct.mutate({
-						id: currentProduct?.id as number
+						id: product.id
 					});
 					onConfirmModalRestore.close();
 				}}
@@ -237,7 +263,7 @@ const ProductCard = ({
 				<div>
 					<p>
 						Vous êtes sûr de vouloir restaurer le service{' '}
-						<b>"{currentProduct?.title}"</b> ?{' '}
+						<b>"{product.title}"</b> ?{' '}
 					</p>
 				</div>
 			</OnConfirmModal>
@@ -246,7 +272,7 @@ const ProductCard = ({
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
-						id: currentProduct?.id as number
+						id: product.id
 					});
 					onConfirmModalArchive.close();
 				}}
@@ -255,7 +281,7 @@ const ProductCard = ({
 				<div>
 					<p>
 						Vous êtes sûr de vouloir supprimer le service{' '}
-						<b>"{currentProduct?.title}"</b> ?{' '}
+						<b>"{product.title}"</b> ?{' '}
 					</p>
 					<p>
 						En supprimant ce service :<br />
@@ -318,7 +344,6 @@ const ProductCard = ({
 									size="small"
 									onClick={e => {
 										e.preventDefault();
-										setCurrentProduct(product);
 										onConfirmModalRestore.open();
 									}}
 								>
@@ -349,7 +374,6 @@ const ProductCard = ({
 										<MenuItem
 											onClick={e => {
 												handleClose(e);
-												setCurrentProduct(product);
 												onConfirmModalArchive.open();
 											}}
 											className={cx(classes.menuItemDanger)}

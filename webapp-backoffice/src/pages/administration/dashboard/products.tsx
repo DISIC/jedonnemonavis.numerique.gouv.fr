@@ -53,9 +53,6 @@ const DashBoard = () => {
 		Entity | undefined
 	>();
 
-	const [currentProduct, setCurrentProduct] =
-		React.useState<ProductWithButtons | null>(null);
-
 	const [numberPerPage, _] = React.useState(10);
 
 	const { data: session } = useSession({ required: true });
@@ -486,8 +483,6 @@ const DashBoard = () => {
 								products.map(product => (
 									<ProductCard
 										key={product.id}
-										currentProduct={currentProduct}
-										setCurrentProduct={setCurrentProduct}
 										product={product}
 										userId={parseInt(session?.user?.id as string)}
 										entity={
