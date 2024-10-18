@@ -109,6 +109,7 @@ model User {
   api_keys             ApiKey[]
   exports              Export[]
   forms                Form[]
+  reviewViewLogs       ReviewViewLog[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -297,6 +298,8 @@ model Review {
   xwiki_id   Int?
   user_id    String?
 
+  reviewViewLogs ReviewViewLog[]
+
   answers Answer[]
 
   created_at DateTime @default(now())
@@ -304,6 +307,17 @@ model Review {
   @@id([id, created_at])
   @@index([product_id, created_at])
   @@index([product_id, created_at, button_id])
+}
+
+model ReviewViewLog {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  review     Review   @relation(fields: [review_id, review_created_at], references: [id, created_at])
+  review_id  Int
+  review_created_at DateTime
+
+  created_at DateTime @default(now())
 }
 
 model Answer {
