@@ -15,6 +15,7 @@ const selectors = {
 	dashboard: {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
+		users: '/administration/dashboard/users',
 		nameTestOrga: "e2e-jdma-entity-test-3",
 		nameTestService: "e2e-jdma-service-test-3"
 	},
@@ -32,6 +33,26 @@ describe('jdma-admin', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+	});
+
+	it('create and delete users', () => {
+		cy.visit(`${app_url}${selectors.dashboard.users}`);
+		for(let i = 0; i < 3; i++) {
+			cy.contains('button', 'Ajouter un nouvel utilisateur').click();
+			fillForm({ email: `test${i}@gmail.com`, password: userPassword, firstName: `Prénom ${i}`, lastName: `Nom ${i}` });
+			cy.contains('button', 'Créer').click();
+		}
+		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
+		cy.contains('button', 'Rechercher').click();
+		cy.wait(1000);
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 3);
+		cy.get('input[type="checkbox"][value="value1"]').click({force: true});
+		cy.contains('button', 'Supprimer tous').click();
+		cy.contains('button', 'Oui').click();
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 0);
+		cy.get('input[placeholder="Rechercher un utilisateur"]').clear()
+		cy.contains('button', 'Rechercher').click();
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 5);
 	});
 
 	it('create organisation', () => {
@@ -148,6 +169,9 @@ function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email =
 	cy.get('input[name="firstName"]').type(firstName);
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[type="password"]').type(password);
+	if(email !== '') {
+		cy.get('input[name="email"]').type(email);
+	}
 }
 
 function logout() {
