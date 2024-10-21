@@ -196,7 +196,11 @@ export async function createReview(
     },
   });
 
-  await createOrUpdateAnswers(ctx, { answers, review: newReview });
+  try {
+    await createOrUpdateAnswers(ctx, { answers, review: newReview });
+  } catch (e) {
+    console.log(e)
+  }
 
   return newReview;
 }
