@@ -17,7 +17,7 @@ import { openAPIRouter } from './openapi';
 import { apiKeyRouter } from './apiKey';
 import { reviewRouter } from './review';
 import { reviewCustomRouter } from './reviewCustom';
-
+import { reviewViewLogRouter } from './reviewViewLog';
 export const appRouter = router({
 	user: userRouter,
 	product: productRouter,
@@ -36,7 +36,8 @@ export const appRouter = router({
 	openAPI: openAPIRouter,
 	apiKey: apiKeyRouter,
 	review: reviewRouter,
-	reviewCustom: reviewCustomRouter
+	reviewCustom: reviewCustomRouter,
+	reviewViewLog: reviewViewLogRouter
 });
 
 export type AppRouter = typeof appRouter;

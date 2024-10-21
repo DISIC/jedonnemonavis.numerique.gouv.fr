@@ -29,6 +29,9 @@ const ReviewLine = ({
 		return searchWords.every(word => answerText.includes(word));
 	});
 
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
+
 	const displayIntention = (intention: string) => {
 		switch (intention) {
 			case 'bad':
@@ -125,6 +128,10 @@ const ReviewLine = ({
 						iconId="fr-icon-arrow-down-s-fill"
 						size="small"
 						onClick={() => {
+							createReviewViewLog({
+								review_id: review.id as number,
+								review_created_at: review.created_at as Date
+							});
 							setDisplayMoreInfo(!displayMoreInfo);
 						}}
 					>
