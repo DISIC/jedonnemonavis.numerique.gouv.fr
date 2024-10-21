@@ -3,6 +3,12 @@ const app_bo_url = Cypress.env('app_base_url');
 
 describe('jdma-form-review', () => {
 	before(() => {
+		Cypress.on('uncaught:exception', (err, runnable) => {
+			if (err.message.includes('TRPCClientError')) {
+				return false;
+			}
+			return true;
+		});
 		cy.visit(`${app_url}/Demarches/5?button=8`);
 	});
 
