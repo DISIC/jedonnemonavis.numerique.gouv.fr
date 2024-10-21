@@ -5,294 +5,204 @@ const userPassword = Cypress.env('user_password');
 const mailer_url = Cypress.env('mailer_base_url');
 const invitedEmail = Cypress.env('admin_guest_mail_bis');
 
+// Sélecteurs communs
+const selectors = {
+	loginForm: {
+		email: 'input[name="email"]',
+		password: 'input[type="password"]',
+		continueButton: '[class*="LoginForm-button"]'
+	},
+	dashboard: {
+		products: '/administration/dashboard/products',
+		entities: '/administration/dashboard/entities',
+		nameTestOrga: "e2e-jdma-entity-test-3",
+		nameTestService: "e2e-jdma-service-test-3"
+	},
+	modal: {
+		product: 'dialog#product-modal',
+		entity: 'dialog#entity-modal',
+		button: 'dialog#button-modal'
+	},
+	modalFooter: '.fr-modal__footer',
+	productTitle: '[class*="productTitle"]'
+};
+
 describe('jdma-admin', () => {
 	beforeEach(() => {
-		cy.visit(app_url + '/login');
-		cy.wait(2000);
-		cy.get('input[name="email"]', { timeout: 10000 })
-			.should('be.visible')
-			.type(adminEmail);
-		cy.get('[class*="LoginForm-button"]')
-			.contains('Continuer')
-			.click()
-			.then(() => {
-				cy.wait(4000);
-				cy.get('input[type="password"]').type(adminPassword);
-			});
-		cy.get('[class*="LoginForm-button"]')
-			.contains('Confirmer')
-			.click()
-			.then(() => {
-				cy.url().should('eq', app_url + '/administration/dashboard/products');
-			});
-		cy.wait(4000);
+		cy.visit(`${app_url}/login`);
+		loginAsAdmin();
+		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
 	});
 
 	it('create organisation', () => {
-		clearInbox();
-		cy.wait(5000);
-		cy.visit(app_url + '/administration/dashboard/entities');
+		cy.visit(`${app_url}${selectors.dashboard.entities}`);
 
-		cy.get('nav')
-			.find('li')
-			.contains('Organisations')
-			.click()
-			.then(() => {
-				cy.url().should('eq', app_url + '/administration/dashboard/entities');
-			});
+		cy.get('nav').contains('Organisations').click();
+		cy.url().should('eq', `${app_url}${selectors.dashboard.entities}`);
 
 		cy.get('[class*="DashBoardEntities"]')
-			.find('button')
 			.contains('Ajouter une organisation')
 			.click();
 
-		cy.wait(3000);
-		cy.get('dialog#entity-modal')
-			.should('exist')
-			.and('be.visible')
-			.within(() => {
-				cy.get('.fr-modal__body')
-					.should('exist')
-					.and('be.visible')
-					.within(() => {
-						cy.get('input[name="name"]')
-							.should('be.visible')
-							.type('e2e-jdma-entity-test', { force: true });
+		cy.get(selectors.modal.entity).should('be.visible').within(() => {
+			cy.get('input[name="name"]').type(selectors.dashboard.nameTestOrga, { force: true });
+			cy.get('input[name="acronym"]').type(selectors.dashboard.nameTestOrga, { force: true });
+			cy.get(selectors.modalFooter).contains('Créer une organisation').click();
+		});
 
-						cy.get('input[name="acronym"]')
-							.should('be.visible')
-							.type('e2e-jdma-acronym-test', { force: true });
+		cy.visit(`${app_url}${selectors.dashboard.entities}`);
+		cy.wait(1000);
+		cy.get('.fr-card').contains('p', selectors.dashboard.nameTestOrga).should('exist')
 
-						cy.get('.fr-modal__footer')
-							.find('button')
-							.contains('Créer une organisation')
-							.should('be.visible')
-							.click({ force: true });
-						cy.wait(5000);
-					});
-			});
+		logout();
+	});
 
-		cy.get('.fr-card')
-			.last()
-			.within(() => {
-				cy.contains('button', 'Gérer les administrateurs').click({
-					force: true
-				});
-			});
+	it('invite admin on organisation', () => {
 
-		cy.get('dialog#entity-rights-modal')
-			.should('exist')
-			.within(() => {
-				cy.get('.fr-modal__body')
-					.should('exist')
-					.within(() => {
-						cy.get('input[name="email"]').type(invitedEmail);
-						cy.get('button')
-							.contains('Inviter')
-							.click()
-							.then(() => {
-								// cy.get('[id*="fr-alert"')
-								// 	.find('p')
-								// 	.contains(`Une invitation a été envoyée à ${invitedEmail}`);
-								cy.get('[class*="entityCardWrapper"]')
-									.find('span')
-									.contains(invitedEmail)
-									.should('be.visible');
-							});
-					});
-			});
+		cy.visit(`${app_url}${selectors.dashboard.entities}`);
+		cy.wait(1000);
+		cy.get('.fr-card').contains('p', selectors.dashboard.nameTestOrga).should('exist')
+		.parents('.fr-card')
+		.find('button')
+		.contains('Gérer les administrateurs').click()
 
+		cy.get('dialog#entity-rights-modal').should('exist').within(() => {
+			cy.get('input[name="email"]').type(invitedEmail);
+			cy.get('button').contains('Inviter').click();
+			cy.get('[class*="entityCardWrapper"]').contains(invitedEmail).should('be.visible');
+		});
+		checkInviteWithMail();
+		cy.visit(`${app_url}`);
 		logout();
 	});
 
 	it('create service', () => {
-		cy.get('#product-modal-control-button')
-			.contains('Ajouter un nouveau service')
-			.click();
-		cy.wait(8000);
-		cy.get('dialog#product-modal')
-			.invoke('css', 'visibility', 'visible')
-			.invoke('css', 'opacity', 1)
-			.should('be.visible')
-			.within(() => {
-				cy.get('.fr-modal__body').within(() => {
-					cy.get('input[name="title"]')
-						.should('be.visible')
-						.type('e2e-jdma-service-test');
-					cy.wait(2000);
-					cy.get('input#entity-select-autocomplete', { timeout: 10000 })
-						.should('be.visible')
-						.click();
-					cy.get('div[role="presentation"]')
-						.should('be.visible')
-						.then(() => {
-							cy.get('input#entity-select-autocomplete').invoke(
-								'attr',
-								'aria-activedescendant',
-								'entity-select-autocomplete-option-0'
-							);
-						});
-					cy.get('div[role="presentation"]')
-						.find('[id="entity-select-autocomplete-option-0"]')
-						.click();
-					cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
-				});
-			});
+		cy.get('#product-modal-control-button').contains('Ajouter un nouveau service').click();
 
-		cy.get('.fr-modal__footer')
-			.contains('button', 'Ajouter ce service')
-			.should('exist')
-			.click();
-		cy.get('dialog#product-modal')
-			.invoke('css', 'visibility', 'hidden')
-			.invoke('css', 'opacity', 0);
-		cy.wait(1500);
-		cy.get('[class*="productTitle"]')
-			.should('exist')
-			.contains('e2e-jdma-service-test')
-			.should('be.visible');
+		cy.get(selectors.modal.product).should('be.visible').within(() => {
+			cy.get('input[name="title"]').type(selectors.dashboard.nameTestService);
+			selectEntity();
+			cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
+		});
 
-		cy.wait(1000);
-	});
+		cy.get(selectors.modalFooter).contains('Ajouter ce service').click();
+		cy.visit(`${app_url}`);
+		cy.get(selectors.productTitle)
+		.should('exist')
+		.then($productTitle => {
+			cy.wrap($productTitle).contains(selectors.dashboard.nameTestService);
+  		});
 
-	it('invite email', () => {
-		getEmail();
+		logout();
 	});
 
 	it('register guest admin', () => {
 		logout();
-		cy.visit(app_url + '/register');
-		cy.wait(5000);
-		cy.get('[class*="formContainer"]');
-
-		fillForm({ email: invitedEmail, password: userPassword });
+		checkInviteWithMail(true);
+		fillForm({ password: userPassword });
 		cy.get('button').contains('Valider').click();
-		cy.wait(3000);
-	});
-
-	it('confirm email', () => {
-		getEmail();
 	});
 
 	it('login guest admin', () => {
 		logout();
-		cy.visit(app_url + '/login');
-		cy.wait(5000);
-		cy.get('input[name="email"]').type(invitedEmail);
-		cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-		cy.get('input[type="password"]').type(userPassword);
-		cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
-		cy.url().should('eq', app_url + '/administration/dashboard/products');
-		cy.wait(5000);
-		cy.get('[class*="productTitle"]')
-			.should('exist')
-			.contains('e2e-jdma-service-test');
+		login(invitedEmail, userPassword);
+		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.get(selectors.productTitle).contains('e2e-jdma-service-test');
 
-		cy.get('nav').find('li').contains('Organisations').click();
+		cy.get('nav').contains('Organisations').click();
 		cy.get('p').contains('e2e-jdma-entity-test').should('be.visible');
-		cy.wait(3000);
 
-		cy.get('nav').find('li').contains('Services').click();
-		cy.wait(3000);
+		cy.get('nav').contains('Services').click();
+		cy.get(selectors.productTitle).contains('e2e-jdma-service-test').click();
 
-		cy.get('[class*="productTitle"]')
-			.should('exist')
-			.contains('e2e-jdma-service-test')
-			.click();
+		cy.contains('Créer un bouton JDMA').click();
+		cy.get(selectors.modal.button).within(() => {
+			cy.get('input[name="button-create-title"]').type('e2e-jdma-button-test');
+			cy.get('textarea').type('Description du bouton e2e-jdma-button-test');
+		});
 
-		cy.get('button').contains('Créer un bouton JDMA').should('exist').click();
-		cy.wait(2000);
-		cy.get('dialog#button-modal')
-			.should('exist')
-			.within(() => {
-				cy.get('input[name="button-create-title"]')
-					.should('exist')
-					.type('e2e-jdma-button-test');
-				cy.get('textarea')
-					.should('exist')
-					.type('Description du bouton e2e-jdma-button-test');
-			});
-		cy.get('.fr-modal__footer')
-			.contains('button', 'Créer')
-			.should('exist')
-			.click();
+		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
 	});
 });
 
-function fillForm({
-	firstName = 'John',
-	lastName = 'Doe',
-	password = '',
-	email = ''
-}) {
+// Helpers
+
+function loginAsAdmin() {
+	login(adminEmail, adminPassword);
+}
+
+function login(email, password) {
+	cy.get(selectors.loginForm.email).type(email);
+	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
+	cy.get(selectors.loginForm.password).type(password);
+	cy.get(selectors.loginForm.continueButton).contains('Confirmer').click();
+}
+
+function selectEntity() {
+	cy.get('input#entity-select-autocomplete').click();
+	cy.get('div[role="presentation"]').find('#entity-select-autocomplete-option-0').click();
+}
+
+function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email = '' }) {
 	cy.get('input[name="firstName"]').type(firstName);
 	cy.get('input[name="lastName"]').type(lastName);
-	cy.get('input[name="email"]').type(email);
 	cy.get('input[type="password"]').type(password);
 }
 
 function logout() {
 	cy.reload();
-	cy.wait(5000);
-	cy.get('header')
-		.find('button')
-		.contains('Déconnexion')
-		.click({ force: true });
-	cy.wait(5000);
+	cy.wait(1000);
+	cy.get('header', { timeout: 10000 }).should('be.visible');
+	cy.get('header').contains('Déconnexion').click({ force: true });
+	cy.url().should('include', '/login');
+}
+
+function checkInviteWithMail(click = false) {
+	cy.visit(mailer_url);
+	cy.wait(1000);
+	cy.get('button[ng-click="refresh()"]').click();
+	cy.wait(1000);
+	cy.get('.msglist-message')
+		.contains('span', 'Invitation à rejoindre « Je donne mon avis »') // Trouve la card avec le texte
+		.parents('.msglist-message') // Remonte au conteneur parent
+		.contains('div', invitedEmail) // Cherche l'email dans la card
+		.should('exist')
+		.then($message => {
+			if (click) {
+				cy.wrap($message).click(); // Effectue le clic si click = true
+				cy.get('ul.nav-tabs').contains('Plain text').click();
+				cy.get('#preview-plain')
+					.find('a')
+					.each($link => {
+						const href = $link.attr('href');
+						if (href && href.includes('/register')) {
+							cy.wrap($link).invoke('removeAttr', 'target').click();
+						}
+					});
+			}
+		});
 }
 
 function getEmail() {
-	logout();
-
-	cy.wait(10000);
 	cy.visit(mailer_url);
-
 	cy.get('button.btn-default[title="Refresh"]').click();
-	cy.wait(1000);
 
-	// cy.document().then(doc => {
-	// 	const htmlContent = doc.documentElement.outerHTML;
-	// 	cy.log(htmlContent); // Log dans l'interface Cypress
-	// 	cy.task('log', htmlContent); // Log dans la console (si vous avez configuré les tâches)
-	// });
+	cy.get('div.messages').find('div.msglist-message').first().click({ force: true });
+	cy.get('ul.nav-tabs').contains('Plain text').click();
 
-	cy.get('div.messages', { timeout: 20000 })
-		.should('exist')
-		.and('be.visible')
-		.should('be.visible')
-		.and('not.be.empty')
-		.scrollIntoView()
-		.find('div.msglist-message')
-		.first()
-		.click({ force: true });
-	cy.wait(4000);
+	cy.get('#preview-plain a').each($link => {
+		const href = $link.attr('href');
+		if (href && href.includes('/register')) {
+			cy.wrap($link).invoke('removeAttr', 'target').click();
+		}
+	});
 
-	cy.get('ul.nav-tabs').find('a[href="#preview-plain"]').click();
-
-	cy.get('ul.nav-tabs').find('li.active').should('contain.text', 'Plain text');
-
-	cy.get('#preview-plain')
-		.find('a')
-		.each($link => {
-			const href = $link.attr('href');
-			if (href && href.includes('/register')) {
-				cy.wrap($link).invoke('removeAttr', 'target').click();
-			}
-		})
-		.then(() => {
-			cy.url().should('include', '/register');
-			cy.wait(2000);
-		});
 	clearInbox();
 }
 
 function clearInbox() {
 	cy.visit(mailer_url);
-	cy.wait(4000);
-	cy.get('.nav-pills').find('a').contains('Delete all messages').click();
-	cy.get('.modal-footer')
-		.find('button')
-		.contains('Delete all messages')
-		.click();
+	cy.get('.nav-pills').contains('Delete all messages').click();
+	cy.get('.modal-footer').contains('Delete all messages').click();
 }

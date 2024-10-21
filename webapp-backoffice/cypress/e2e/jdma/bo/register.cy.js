@@ -258,7 +258,6 @@ function logout() {
 }
 
 function getEmail() {
-	logout();
 	cy.wait(5000);
 	cy.visit(mailer_url);
 	cy.get('button.btn-default[title="Refresh"]').click();

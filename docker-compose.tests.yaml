@@ -49,7 +49,7 @@ services:
       POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
       NODEMAILER_HOST: mailhog
       NODEMAILER_PORT: 1025
-    command: sh -c "yarn install && npx prisma generate && yarn build && yarn startB"
+    command: sh -c "yarn install && yarn build && npx prisma generate && yarn startB"
     depends_on:
       db:
         condition: service_healthy
