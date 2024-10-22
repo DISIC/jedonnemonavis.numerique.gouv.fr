@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -9,11 +9,28 @@ import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
+import { Menu, MenuItem, Skeleton } from '@mui/material';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
+
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(null);
+	};
 
 	const { data: session } = useSession();
 
@@ -57,27 +74,97 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		countUserRequests: userRequestsResult.metadata.count
 	});
 
-	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
+	const quickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
 		!session?.user
-			? {
-					iconId: 'fr-icon-account-line',
-					linkProps: {
-						href: '/login',
-						target: '_self'
-					},
-					text: 'Connexion / Inscription'
-				}
-			: {
-					iconId: 'ri-logout-circle-line',
-					buttonProps: {
-						onClick: () => {
-							signOut();
-						}
-					},
-					text: 'Déconnexion'
-				}
-	];
-
+			? [
+					{
+						iconId: 'fr-icon-account-line',
+						linkProps: {
+							href: '/login',
+							target: '_self'
+						},
+						text: 'Connexion / Inscription'
+					}
+				]
+			: [
+					<>
+						<Button
+							id="button-account"
+							iconId={'fr-icon-account-circle-line'}
+							title={`Ouvrir le menu mon compte`}
+							aria-label={`Ouvrir le menu mon compte`}
+							priority="tertiary"
+							size="large"
+							onClick={handleMenuClick}
+						>
+							Compte
+						</Button>
+						<Menu
+							id="option-menu"
+							open={menuOpen}
+							anchorEl={anchorEl}
+							onClose={handleClose}
+							MenuListProps={{
+								'aria-labelledby': 'button-options-access-right'
+							}}
+						>
+							<MenuItem disabled className={cx(classes.item)}>
+								<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+									Nom Prénom
+								</div>
+								<div className={cx(fr.cx(), classes.inMenu)}>
+									adress@gmail.com
+								</div>
+							</MenuItem>
+							<MenuItem
+								onClick={e => {
+									handleClose(e);
+								}}
+								className={cx()}
+							>
+								<span
+									className={fr.cx(
+										'fr-icon-user-line',
+										'fr-icon--sm',
+										'fr-mr-1-5v'
+									)}
+								/>
+								Informations personnelles
+							</MenuItem>
+							<MenuItem
+								onClick={e => {
+									handleClose(e);
+								}}
+								className={cx()}
+							>
+								<span
+									className={fr.cx(
+										'fr-icon-notification-3-line',
+										'fr-icon--sm',
+										'fr-mr-1-5v'
+									)}
+								/>
+								Notifications
+							</MenuItem>
+							<MenuItem
+								onClick={e => {
+									handleClose(e);
+								}}
+								className={cx()}
+							>
+								<Button
+									id="button-account"
+									iconId={'fr-icon-logout-box-r-line'}
+									title={`Déconnexion`}
+									aria-label={`Déconnexion`}
+									priority="tertiary"
+								>
+									Se déconnecter
+								</Button>
+							</MenuItem>
+						</Menu>
+					</>
+				];
 	const navigationItems = session?.user
 		? !!userAdminEntityRights.metadata.count ||
 			session.user.role.includes('admin')
@@ -225,7 +312,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					termsLinkProps={{
 						href: '/public/legalNotice'
 					}}
-					license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
+					license={
+						<>
+							Le{' '}
+							<a
+								href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
+								target="_blank"
+							>
+								code source
+							</a>{' '}
+							est disponible en licence libre.
+						</>
+					}
 				/>
 			</div>
 		</>
@@ -238,6 +336,14 @@ const useStyles = tss
 	.create(({ countUserRequests }) => ({
 		logo: {
 			maxHeight: fr.spacing('11v')
+		},
+		item: {
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start'
+		},
+		inMenu: {
+			display: 'block'
 		},
 		navigation: countUserRequests
 			? {
