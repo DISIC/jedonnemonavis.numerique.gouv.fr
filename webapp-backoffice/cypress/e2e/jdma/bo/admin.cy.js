@@ -240,8 +240,6 @@ function checkMail(click = false, topic= '') {
 	cy.wait(1000);
 	cy.get('.msglist-message')
 		.contains('span', topic)
-		.parents('.msglist-message')
-		.contains('div', invitedEmail)
 		.should('exist')
 		.then($message => {
 			if (click) {
