@@ -527,7 +527,7 @@ export const getServerSideProps: GetServerSideProps<{
     else product.buttons = [product.buttons[0]];
   }
 
-  if (product) {
+  if (product && product.status !== "archived") {
     return {
       props: {
         product: {

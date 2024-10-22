@@ -91,6 +91,21 @@ services:
     networks:
       - jdma-network
 
+  # Service pour reset et reseed la base de données
+  db-reset:
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./webapp-backoffice:/app
+    environment:
+      POSTGRESQL_ADDON_URI: postgres://user:password@db:5432/jdma
+    command: sh -c "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - jdma-network
+
 volumes:
   pg_data:
 

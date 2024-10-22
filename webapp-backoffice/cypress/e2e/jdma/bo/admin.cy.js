@@ -1,4 +1,5 @@
 const app_url = Cypress.env('app_base_url');
+const app_form_url = Cypress.env('app_form_base_url')
 const adminEmail = Cypress.env('admin_user_mail');
 const adminPassword = Cypress.env('admin_user_password');
 const userPassword = Cypress.env('user_password');
@@ -15,8 +16,9 @@ const selectors = {
 	dashboard: {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
-		nameTestOrga: "e2e-jdma-entity-test-3",
-		nameTestService: "e2e-jdma-service-test-3"
+		users: '/administration/dashboard/users',
+		nameTestOrga: "e2e-jdma-entity-test",
+		nameTestService: "e2e-jdma-service-test"
 	},
 	modal: {
 		product: 'dialog#product-modal',
@@ -32,6 +34,27 @@ describe('jdma-admin', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+	});
+
+	it('create and delete users', () => {
+		cy.visit(`${app_url}${selectors.dashboard.users}`);
+		for(let i = 0; i < 3; i++) {
+			cy.contains('button', 'Ajouter un nouvel utilisateur').click();
+			cy.wait(1000)
+			fillForm({ email: `test${i}@gmail.com`, password: userPassword, firstName: `Prénom ${i}`, lastName: `Nom ${i}` });
+			cy.contains('button', 'Créer').click();
+		}
+		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
+		cy.contains('button', 'Rechercher').click();
+		cy.wait(1000);
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 3);
+		cy.get('input[type="checkbox"][value="value1"]').click({force: true});
+		cy.contains('button', 'Supprimer tous').click();
+		cy.contains('button', 'Oui').click();
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 0);
+		cy.get('input[placeholder="Rechercher un utilisateur"]').clear()
+		cy.contains('button', 'Rechercher').click();
+		cy.get('button').filter(':contains("Modifier")').should('have.length', 5);
 	});
 
 	it('create organisation', () => {
@@ -71,7 +94,7 @@ describe('jdma-admin', () => {
 			cy.get('button').contains('Inviter').click();
 			cy.get('[class*="entityCardWrapper"]').contains(invitedEmail).should('be.visible');
 		});
-		checkInviteWithMail();
+		checkMail(false, 'Invitation à rejoindre « Je donne mon avis »');
 		cy.visit(`${app_url}`);
 		logout();
 	});
@@ -98,7 +121,7 @@ describe('jdma-admin', () => {
 
 	it('register guest admin', () => {
 		logout();
-		checkInviteWithMail(true);
+		checkMail(true, 'Invitation à rejoindre « Je donne mon avis »');
 		fillForm({ password: userPassword });
 		cy.get('button').contains('Valider').click();
 	});
@@ -107,13 +130,13 @@ describe('jdma-admin', () => {
 		logout();
 		login(invitedEmail, userPassword);
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
-		cy.get(selectors.productTitle).contains('e2e-jdma-service-test');
+		cy.get(selectors.productTitle).contains(selectors.dashboard.nameTestService);
 
 		cy.get('nav').contains('Organisations').click();
-		cy.get('p').contains('e2e-jdma-entity-test').should('be.visible');
+		cy.get('p').contains(selectors.dashboard.nameTestOrga).should('be.visible');
 
 		cy.get('nav').contains('Services').click();
-		cy.get(selectors.productTitle).contains('e2e-jdma-service-test').click();
+		cy.get(selectors.productTitle).contains(selectors.dashboard.nameTestService).click();
 
 		cy.contains('Créer un bouton JDMA').click();
 		cy.get(selectors.modal.button).within(() => {
@@ -124,6 +147,26 @@ describe('jdma-admin', () => {
 		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
 	});
+
+	it('delete service with guest admin', () => {
+		logout();
+		login(invitedEmail, userPassword);
+		deleteService()
+		checkMail(false, `Suppression du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`)
+		checkform(false)
+		cy.visit(`${app_url}`);
+		cy.contains('div', selectors.dashboard.nameTestService).should('not.exist');
+	});
+
+	it('restore service with guest admin', () => {
+		logout();
+		login(invitedEmail, userPassword);
+		restaureService()
+		cy.get('input[name="favorites-products"]').should('not.exist')
+		cy.contains('div', selectors.dashboard.nameTestService).should('exist');
+		checkMail(false, `Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`)
+		checkform(true)
+	})
 });
 
 // Helpers
@@ -148,29 +191,59 @@ function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email =
 	cy.get('input[name="firstName"]').type(firstName);
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[type="password"]').type(password);
+	if(email !== '') {
+		cy.get('input[name="email"]').type(email);
+	}
+}
+
+function deleteService() {
+	cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+	cy.get(selectors.productTitle).contains(selectors.dashboard.nameTestService);
+	cy.get('#button-options-product').click();
+	cy.contains('li', 'Supprimer ce service').click();
+	cy.get('.fr-modal__body').should('be.visible');
+	cy.contains('button', 'Supprimer').click();
+}
+
+function restaureService () {
+	cy.get('input[name="favorites-products"]')
+		.should('exist')
+		.check({force: true});
+	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
+	cy.contains('button', 'Restaurer').should('exist').click();
+	cy.get('.fr-modal__body').should('be.visible');
+	cy.contains('button', 'Oui').click();
 }
 
 function logout() {
 	cy.reload();
-	cy.wait(1000);
+	cy.wait(2000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
 	cy.get('header').contains('Déconnexion').click({ force: true });
 	cy.url().should('include', '/login');
 }
 
-function checkInviteWithMail(click = false) {
+function checkform(shouldWork = false) {
+	cy.visit(`${app_form_url}/Demarches/4?button=7`, { failOnStatusCode: false });
+	if (shouldWork) {
+		cy.contains('h1', 'Je donne mon avis').should('exist');
+		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
+	} else {
+		cy.contains('h1', 'Formulaire non trouvé').should('exist');
+	}
+}
+
+function checkMail(click = false, topic= '') {
 	cy.visit(mailer_url);
 	cy.wait(1000);
 	cy.get('button[ng-click="refresh()"]').click();
 	cy.wait(1000);
 	cy.get('.msglist-message')
-		.contains('span', 'Invitation à rejoindre « Je donne mon avis »') // Trouve la card avec le texte
-		.parents('.msglist-message') // Remonte au conteneur parent
-		.contains('div', invitedEmail) // Cherche l'email dans la card
+		.contains('span', topic)
 		.should('exist')
 		.then($message => {
 			if (click) {
-				cy.wrap($message).click(); // Effectue le clic si click = true
+				cy.wrap($message).click();
 				cy.get('ul.nav-tabs').contains('Plain text').click();
 				cy.get('#preview-plain')
 					.find('a')

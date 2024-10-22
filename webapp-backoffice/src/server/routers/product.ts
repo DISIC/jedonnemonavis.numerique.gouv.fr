@@ -25,6 +25,11 @@ const checkRightToProceed = async (
 	session: Session,
 	id: number
 ) => {
+	const product = await prisma.product.findUnique({
+		where: {
+			id: id
+		}
+	})
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: id,
@@ -32,9 +37,15 @@ const checkRightToProceed = async (
 			status: 'carrier'
 		}
 	});
-	const isAdmin = session.user.role === 'superadmin';
+	const adminEntityRight = await prisma.adminEntityRight.findFirst({
+		where: {
+			entity_id: product?.entity_id,
+			user_email: session.user.email
+		}
+	});
+	const isAdmin = session.user.role.includes('admin');
 
-	if (!accessRight && !isAdmin)
+	if (!accessRight && !adminEntityRight && !isAdmin)
 		throw new TRPCError({
 			code: 'FORBIDDEN',
 			message: 'You do not have rights to proceed on this product'
