@@ -48,7 +48,7 @@ export const ArrayRadio = (props: Props) => {
           <>
             <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
               <div className={fr.cx("fr-col-12")}>
-                <h6>{t(field.label)}</h6>
+                <h2>{t(field.label)}</h2>
               </div>
               <table
                 className={cx(fr.cx("fr-table"), classes.mainTable)}

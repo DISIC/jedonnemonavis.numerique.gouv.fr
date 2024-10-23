@@ -21,7 +21,7 @@ export const MarkInput = (props: Props) => {
     return (
       <div className={fr.cx("fr-grid-row")}>
         <div className={fr.cx("fr-col-12")}>
-          <h6>{t(field.label)}</h6>
+          <h2>{t(field.label)}</h2>
         </div>
         <div className={fr.cx("fr-col-12")}>
           <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
