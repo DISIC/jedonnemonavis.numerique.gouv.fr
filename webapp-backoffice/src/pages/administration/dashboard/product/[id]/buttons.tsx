@@ -101,10 +101,10 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product}>
 			<Head>
-				<title>{product.title} | Gérer mes boutons | Je donne mon avis</title>
+				<title>{product.title} | Gérer les boutons | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`${product.title} | Gérer mes boutons | Je donne mon avis`}
+					content={`${product.title} | Gérer les boutons | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
@@ -117,7 +117,7 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>
+					<h2 className={fr.cx('fr-mb-2w')}>Gérer les boutons</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
