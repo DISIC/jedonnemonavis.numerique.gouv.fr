@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import { Menu, MenuItem, Skeleton } from '@mui/material';
 import Button from '@codegouvfr/react-dsfr/Button';
+import router from 'next/router';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 
@@ -108,19 +109,23 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								'aria-labelledby': 'button-options-access-right'
 							}}
 						>
-							<MenuItem disabled className={cx(classes.item)}>
+							<MenuItem
+								style={{ pointerEvents: 'none' }}
+								className={cx(classes.firstItem)}
+							>
 								<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
-									Nom Prénom
+									{session?.user.name}
 								</div>
-								<div className={cx(fr.cx(), classes.inMenu)}>
-									adress@gmail.com
+								<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+									{session?.user.email}
 								</div>
 							</MenuItem>
 							<MenuItem
+								className={cx(fr.cx('fr-p-4v'), classes.item)}
 								onClick={e => {
 									handleClose(e);
+									router.push('/administration/dashboard/account/infos');
 								}}
-								className={cx()}
 							>
 								<span
 									className={fr.cx(
@@ -132,10 +137,13 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								Informations personnelles
 							</MenuItem>
 							<MenuItem
+								className={cx(fr.cx('fr-p-4v'), classes.item)}
 								onClick={e => {
 									handleClose(e);
+									router.push(
+										'/administration/dashboard/account/notifications'
+									);
 								}}
-								className={cx()}
 							>
 								<span
 									className={fr.cx(
@@ -147,10 +155,11 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								Notifications
 							</MenuItem>
 							<MenuItem
-								onClick={e => {
-									handleClose(e);
-								}}
-								className={cx()}
+								className={cx(
+									fr.cx('fr-pb-2v', 'fr-pt-4v'),
+									classes.item,
+									classes.lastItem
+								)}
 							>
 								<Button
 									id="button-account"
@@ -158,6 +167,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 									title={`Déconnexion`}
 									aria-label={`Déconnexion`}
 									priority="tertiary"
+									onClick={() => {
+										signOut();
+									}}
 								>
 									Se déconnecter
 								</Button>
@@ -337,13 +349,25 @@ const useStyles = tss
 		logo: {
 			maxHeight: fr.spacing('11v')
 		},
-		item: {
+		firstItem: {
 			display: 'flex',
 			flexDirection: 'column',
-			justifyContent: 'flex-start'
+			justifyContent: 'flex-start',
+			WebkitAlignItems: 'flex-start'
+		},
+		lastItem: {
+			display: 'flex',
+			flexDirection: 'column'
+		},
+		item: {
+			borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
 		},
 		inMenu: {
-			display: 'block'
+			display: 'block',
+			'&:nth-of-type(2)': {
+				fontSize: '0.8rem',
+				color: fr.colors.decisions.text.disabled.grey.default
+			}
 		},
 		navigation: countUserRequests
 			? {
