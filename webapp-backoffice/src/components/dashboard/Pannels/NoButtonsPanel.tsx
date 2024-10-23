@@ -14,16 +14,56 @@ const NoButtonsPanel = (props: Props) => {
 
 	const getTitle = () => {
 		return isSmall ? (
-			<div className={cx(classes.title)}>Obtenez vos premiers avis</div>
+			<div className={cx(classes.smallTitle)}>C'est quoi un bouton JDMA ?</div>
 		) : (
-			<h3>Obtenez vos premiers avis</h3>
+			<h3 className={cx(classes.title)}>C'est quoi un bouton JDMA ?</h3>
 		);
 	};
 
 	return (
 		<div className={cx(classes.container, fr.cx('fr-container'))}>
 			{getTitle()}
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--left',
+					'fr-grid-row--middle',
+					'fr-pb-3v'
+				)}
+			>
+				<div className={fr.cx('fr-col-3')}>
+					<Image
+						src="/assets/chat_picto.svg"
+						alt="C'est quoi un bouton JDMA ?"
+						width={120}
+						height={120}
+					/>
+				</div>
+				<div className={fr.cx('fr-col-9')}>
+					<p className={cx(classes.text)}>
+						Le bouton JDMA se place sur votre service numérique pour récolter
+						l’avis de vos usagers.
+					</p>
+				</div>
+			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-pb-3v')}>
+				<div className={fr.cx('fr-col-3')}>
+					<Image
+						src="/assets/install_picto.svg"
+						alt="C'est quoi un bouton JDMA ?"
+						width={120}
+						height={120}
+					/>
+				</div>
+				<div className={fr.cx('fr-col-9')}>
+					<p className={cx(classes.text)}>
+						Pour installer le bouton sur votre service numérique, insérez le
+						code HTML fourni par la plateforme et commencez à récolter des avis.
+					</p>
+				</div>
+			</div>
 			<Button
+				className={cx(classes.button)}
 				priority="primary"
 				iconId="fr-icon-add-circle-line"
 				iconPosition="right"
@@ -49,13 +89,28 @@ const useStyles = tss.create({
 		background: '#F3F6FE',
 		display: 'flex',
 		flexDirection: 'column',
-		justifyContent: 'center',
-		alignItems: 'center'
+		justifyContent: 'flex-start',
+		alignItems: 'flex-start'
 	},
 	title: {
 		fontWeight: 'bold',
+		fontSize: '28px',
+		color: fr.colors.decisions.text.title.blueFrance.default
+	},
+	smallTitle: {
+		fontWeight: 'bold',
 		fontSize: '16px',
-		paddingBottom: '1.5rem'
+		color: fr.colors.decisions.text.title.blueFrance.default
+	},
+	row: {
+		gap: '24px',
+		paddingBottom: '12px'
+	},
+	text: {
+		fontSize: '18px'
+	},
+	button: {
+		alignSelf: 'center'
 	}
 });
 
