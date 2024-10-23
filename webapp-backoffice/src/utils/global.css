@@ -20,6 +20,11 @@
 	z-index: 9999 !important;
 }
 
+.MuiAutocomplete-popper ul.MuiAutocomplete-listbox .Mui-focused {
+	background-color: #ff6218 !important;
+	color: white !important;
+}
+
 ol.no-bullets-point {
 	counter-reset: steps-counter;
 }
