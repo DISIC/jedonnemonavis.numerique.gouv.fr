@@ -20,6 +20,8 @@ import NoReviewsPanel from '../Pannels/NoReviewsPanel';
 import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
 import React, { useState } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 
 interface Indicator {
 	title: string;
@@ -44,6 +46,10 @@ interface CreateModalProps {
 	id: string;
 }
 
+interface FormValues {
+	product_name: string;
+}
+
 const ProductCard = ({
 	product,
 	userId,
@@ -65,6 +71,8 @@ const ProductCard = ({
 	const [onConfirmModalArchive, setOnConfirmModalArchive] =
 		useState<CreateModalProps | null>(null);
 
+	const [validateDelete, setValidateDelete] = useState(false);
+
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
@@ -76,6 +84,33 @@ const ProductCard = ({
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
 	};
+
+	const {
+		control,
+		register,
+		setError,
+		clearErrors,
+		formState: { errors }
+	} = useForm<FormValues>({
+		defaultValues: {
+			product_name: ''
+		}
+	});
+
+	const verifyProductName = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const normalizedInput = e.target.value.trim().toLowerCase();
+		const normalizedTitle = product.title.trim().toLowerCase();
+		if (normalizedInput !== normalizedTitle) {
+			setError('product_name', {
+				message:
+					'Veuillez saisir le nom du service pour confirmer la suppression'
+			});
+		} else {
+			clearErrors('product_name');
+			setValidateDelete(true);
+		}
+	};
+
 	const handleClose = (
 		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
 	) => {
@@ -271,10 +306,21 @@ const ProductCard = ({
 				modal={onConfirmModalArchive}
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
-					archiveProduct.mutate({
-						id: product.id
-					});
-					onConfirmModalArchive.close();
+					if (nbReviews && nbReviews > 1000) {
+						if (validateDelete) {
+							archiveProduct.mutate({
+								id: product.id
+							});
+							onConfirmModalArchive.close();
+						} else {
+							setValidateDelete(false);
+						}
+					} else {
+						archiveProduct.mutate({
+							id: product.id
+						});
+						onConfirmModalArchive.close();
+					}
 				}}
 				kind="danger"
 			>
@@ -285,9 +331,45 @@ const ProductCard = ({
 					</p>
 					<p>
 						En supprimant ce service :<br />
-						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
-						de ce service n’auront plus accès au formulaire.
+						- vous n’aurez plus accès aux avis du formulaire ;<br />- les
+						utilisateurs de ce service n’auront plus accès au formulaire.
 					</p>
+					{nbReviews && nbReviews > 1000 ? (
+						<form id="delete-product-form">
+							<div className={fr.cx('fr-input-group')}>
+								<Controller
+									control={control}
+									name="product_name"
+									rules={{ required: 'Ce champ est obligatoire' }}
+									render={({ field: { value, onChange, name } }) => (
+										<Input
+											label={
+												<p className={fr.cx('fr-mb-0')}>
+													Veuillez saisir le nom du service pour confirmer la
+													suppression
+													<span className={cx(classes.asterisk)}>*</span>
+												</p>
+											}
+											nativeInputProps={{
+												onChange: e => {
+													onChange(e);
+													verifyProductName(e);
+												},
+												defaultValue: value,
+												value,
+												name,
+												required: true
+											}}
+											state={errors[name] ? 'error' : 'default'}
+											stateRelatedMessage={errors[name]?.message}
+										/>
+									)}
+								/>
+							</div>
+						</form>
+					) : (
+						<></>
+					)}
 				</div>
 			</OnConfirmModal>
 			<Link
@@ -555,6 +637,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	buttonsCol: {
 		textAlign: 'right'
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.default.error.default
 	}
 });
 
