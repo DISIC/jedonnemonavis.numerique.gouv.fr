@@ -206,16 +206,15 @@ export const entityRouter = router({
 			const entity = await ctx.prisma.entity.create({
 				data: {
 					...entityPayload,
-					adminEntityRights:
-						!ctx.session?.user?.role.includes('admin')
-							? {
-									create: [
-										{
-											user_email: userEmail
-										}
-									]
-								}
-							: {}
+					adminEntityRights: !ctx.session?.user?.role.includes('admin')
+						? {
+								create: [
+									{
+										user_email: userEmail
+									}
+								]
+							}
+						: {}
 				}
 			});
 

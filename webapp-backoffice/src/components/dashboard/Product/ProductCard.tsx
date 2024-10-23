@@ -17,9 +17,11 @@ import router from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../Pannels/NoReviewsPanel';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 
 interface Indicator {
 	title: string;
@@ -30,15 +32,23 @@ interface Indicator {
 	appreciation: AnswerIntention;
 }
 
-const onConfirmModalRestore = createModal({
-	id: 'restore-on-confirm-modal',
-	isOpenedByDefault: false
-});
+interface CreateModalProps {
+	buttonProps: {
+		/** Only for analytics, feel free to overwrite */
+		id: string;
+		'aria-controls': string;
+		'data-fr-opened': boolean;
+	};
+	Component: (props: ModalProps) => JSX.Element;
+	close: () => void;
+	open: () => void;
+	isOpenedByDefault: boolean;
+	id: string;
+}
 
-const onConfirmModalArchive = createModal({
-	id: 'archive-on-confirm-modal',
-	isOpenedByDefault: false
-});
+interface FormValues {
+	product_name: string;
+}
 
 const ProductCard = ({
 	product,
@@ -49,12 +59,20 @@ const ProductCard = ({
 	onRestoreProduct
 }: {
 	product: ProductWithButtons;
+
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 }) => {
+	const [onConfirmModalRestore, setOnConfirmModalRestore] =
+		useState<CreateModalProps | null>(null);
+	const [onConfirmModalArchive, setOnConfirmModalArchive] =
+		useState<CreateModalProps | null>(null);
+
+	const [validateDelete, setValidateDelete] = useState(false);
+
 	const utils = trpc.useUtils();
 	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
@@ -66,6 +84,33 @@ const ProductCard = ({
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
 	};
+
+	const {
+		control,
+		register,
+		setError,
+		clearErrors,
+		formState: { errors }
+	} = useForm<FormValues>({
+		defaultValues: {
+			product_name: ''
+		}
+	});
+
+	const verifyProductName = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const normalizedInput = e.target.value.trim().toLowerCase();
+		const normalizedTitle = product.title.trim().toLowerCase();
+		if (normalizedInput !== normalizedTitle) {
+			setError('product_name', {
+				message:
+					'Veuillez saisir le nom du service pour confirmer la suppression'
+			});
+		} else {
+			clearErrors('product_name');
+			setValidateDelete(true);
+		}
+	};
+
 	const handleClose = (
 		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
 	) => {
@@ -213,6 +258,26 @@ const ProductCard = ({
 		});
 	};
 
+	React.useEffect(() => {
+		if (product) {
+			setOnConfirmModalRestore(
+				createModal({
+					id: `restore-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+
+			setOnConfirmModalArchive(
+				createModal({
+					id: `archive-on-confirm-modal-${product.id}`,
+					isOpenedByDefault: false
+				})
+			);
+		}
+	}, [product]);
+
+	if (!onConfirmModalRestore || !onConfirmModalArchive) return;
+
 	const isDisabled = product.status === 'archived';
 	const productLink = isDisabled
 		? ''
@@ -241,10 +306,21 @@ const ProductCard = ({
 				modal={onConfirmModalArchive}
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
-					archiveProduct.mutate({
-						id: product.id
-					});
-					onConfirmModalArchive.close();
+					if (nbReviews && nbReviews > 1000) {
+						if (validateDelete) {
+							archiveProduct.mutate({
+								id: product.id
+							});
+							onConfirmModalArchive.close();
+						} else {
+							setValidateDelete(false);
+						}
+					} else {
+						archiveProduct.mutate({
+							id: product.id
+						});
+						onConfirmModalArchive.close();
+					}
 				}}
 				kind="danger"
 			>
@@ -255,9 +331,45 @@ const ProductCard = ({
 					</p>
 					<p>
 						En supprimant ce service :<br />
-						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
-						de ce service n’auront plus accès au formulaire.
+						- vous n’aurez plus accès aux avis du formulaire ;<br />- les
+						utilisateurs de ce service n’auront plus accès au formulaire.
 					</p>
+					{nbReviews && nbReviews > 1000 ? (
+						<form id="delete-product-form">
+							<div className={fr.cx('fr-input-group')}>
+								<Controller
+									control={control}
+									name="product_name"
+									rules={{ required: 'Ce champ est obligatoire' }}
+									render={({ field: { value, onChange, name } }) => (
+										<Input
+											label={
+												<p className={fr.cx('fr-mb-0')}>
+													Veuillez saisir le nom du service pour confirmer la
+													suppression
+													<span className={cx(classes.asterisk)}>*</span>
+												</p>
+											}
+											nativeInputProps={{
+												onChange: e => {
+													onChange(e);
+													verifyProductName(e);
+												},
+												defaultValue: value,
+												value,
+												name,
+												required: true
+											}}
+											state={errors[name] ? 'error' : 'default'}
+											stateRelatedMessage={errors[name]?.message}
+										/>
+									)}
+								/>
+							</div>
+						</form>
+					) : (
+						<></>
+					)}
 				</div>
 			</OnConfirmModal>
 			<Link
@@ -525,6 +637,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	buttonsCol: {
 		textAlign: 'right'
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.default.error.default
 	}
 });
 

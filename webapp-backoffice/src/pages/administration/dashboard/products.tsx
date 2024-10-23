@@ -5,6 +5,7 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -393,28 +394,6 @@ const DashBoard = () => {
 										]}
 									/>
 								)}
-								{countArchivedUserScope > 0 && (
-									<Checkbox
-										className={fr.cx('fr-mb-0')}
-										style={{ userSelect: 'none' }}
-										options={[
-											{
-												label: 'Afficher uniquement les services supprimés',
-												nativeInputProps: {
-													name: 'favorites-products',
-													checked: filters.filterOnlyArchived,
-													onChange: e => {
-														updateFilters({
-															...filters,
-															currentPage: 1,
-															filterOnlyArchived: e.target.checked
-														});
-													}
-												}
-											}
-										]}
-									/>
-								)}
 							</div>
 						</div>
 						{!!filters.filterEntity.length && (
@@ -479,8 +458,9 @@ const DashBoard = () => {
 									<Loader />
 								</div>
 							) : (
-								products.map((product, index) => (
+								products.map(product => (
 									<ProductCard
+										key={product.id}
 										product={product}
 										userId={parseInt(session?.user?.id as string)}
 										entity={
@@ -500,7 +480,6 @@ const DashBoard = () => {
 												filterOnlyArchived: false
 											});
 										}}
-										key={index}
 									/>
 								))
 							)}
@@ -524,6 +503,30 @@ const DashBoard = () => {
 									</div>
 								</div>
 							)}
+							<div className={cx(classes.checkboxContainer)}>
+								{countArchivedUserScope > 0 && (
+									<Checkbox
+										className={fr.cx('fr-mb-0')}
+										style={{ userSelect: 'none' }}
+										options={[
+											{
+												label: 'Afficher uniquement les services supprimés',
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: filters.filterOnlyArchived,
+													onChange: e => {
+														updateFilters({
+															...filters,
+															currentPage: 1,
+															filterOnlyArchived: e.target.checked
+														});
+													}
+												}
+											}
+										]}
+									/>
+								)}
+							</div>
 						</div>
 						<div
 							className={fr.cx(
