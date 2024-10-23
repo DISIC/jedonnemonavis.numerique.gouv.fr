@@ -261,7 +261,7 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		gap: '0.25rem'
 	},
 	selectedOption: {
-		backgroundColor: fr.colors.decisions.background.active.blueFrance.default,
+		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
 		color: 'white'
 	},
 	rating: {
