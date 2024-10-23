@@ -10,11 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    # Configuration de la concurrence
-    concurrency:
-      group: ${{ github.ref }}-tests
-      cancel-in-progress: true
-
     services:
       db:
         image: postgres:16-alpine
@@ -23,7 +18,7 @@ jobs:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: jdma
         ports:
-          - 5433:5432
+          - 5432:5432
       mailhog:
         image: mailhog/mailhog
         ports:
@@ -35,45 +30,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Configuration de Node.js
+      # 2. Copier le fichier .env.example vers .env
+      - name: Copy .env.example to .env
+        run: |
+          cp webapp-backoffice/.env.example webapp-backoffice/.env
+          cp webapp-form/.env.example webapp-form/.env
+
+      # 3. Configuration de Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
 
-      # 3. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
+      # 4. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
       - name: Install dependencies and generate Prisma client for webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn install
           npx prisma generate
+          npx prisma migrate reset --force
 
-      # 4. Installer les dépendances et générer le client Prisma pour `webapp-form`
+      # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
       - name: Install dependencies and generate Prisma client for webapp-form
         run: |
           cd webapp-form
           yarn install
           npx prisma generate
 
-      # 5. Construire `webapp-backoffice`
+      # 6. Construire `webapp-backoffice`
       - name: Build webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn build
           nohup yarn start &
 
-      # 6. Construire `webapp-form`
+      # 7. Construire `webapp-form`
       - name: Build webapp-form
         run: |
           cd webapp-form
           yarn build
           nohup yarn startB &
 
-      # 7. Attendre que les services soient prêts
+      # 8. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -82,12 +84,19 @@ jobs:
           echo "Waiting for webapp-form to be ready..."
           until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
 
-      # 8. Exécuter les tests Cypress pour `webapp-backoffice`
+          echo "Waiting for MailHog to be ready..."
+          until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
+
+      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
-        run: npx cypress run
+        run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.js" --headed --browser chrome
 
-      # 9. Arrêter les applications démarrées
+      # 10. Vérifier si MailHog reçoit les emails
+      - name: Check MailHog for received emails
+        run: curl http://localhost:8025/api/v2/messages
+
+      # 11. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true

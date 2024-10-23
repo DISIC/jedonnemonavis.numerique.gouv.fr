@@ -142,7 +142,8 @@ const ButtonModal = (props: Props) => {
 								stateRelatedMessage={errors.email?.message}
 								nativeInputProps={{
 									onChange,
-									value
+									value,
+									name:"email"
 								}}
 							/>
 						)}
@@ -173,7 +174,8 @@ const ButtonModal = (props: Props) => {
 									nativeInputProps={{
 										onChange,
 										value,
-										type: 'password'
+										type: 'password',
+										name:"password"
 									}}
 								/>
 							)}
@@ -191,7 +193,8 @@ const ButtonModal = (props: Props) => {
 								stateRelatedMessage={errors.firstName?.message}
 								nativeInputProps={{
 									onChange,
-									value
+									value,
+									name:"firstName"
 								}}
 							/>
 						)}
@@ -208,7 +211,8 @@ const ButtonModal = (props: Props) => {
 								stateRelatedMessage={errors.lastName?.message}
 								nativeInputProps={{
 									onChange,
-									value
+									value,
+									name:"lastName"
 								}}
 							/>
 						)}

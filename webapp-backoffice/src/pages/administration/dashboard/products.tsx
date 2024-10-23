@@ -5,6 +5,7 @@ import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -48,7 +49,9 @@ const DashBoard = () => {
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 
-	const [entityCreated, setEntityCreated] = React.useState<Entity | undefined>()
+	const [entityCreated, setEntityCreated] = React.useState<
+		Entity | undefined
+	>();
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -67,14 +70,16 @@ const DashBoard = () => {
 			page: filters.currentPage,
 			numberPerPage,
 			filterEntityId: filters.filterEntity?.map(e => e.value),
-			filterByUserFavorites: filters.filterOnlyFavorites
+			filterByUserFavorites: filters.filterOnlyFavorites,
+			filterByStatusArchived: filters.filterOnlyArchived
 		},
 		{
 			initialData: {
 				data: [],
 				metadata: {
 					count: 0,
-					countTotalUserScope: 0
+					countTotalUserScope: 0,
+					countArchivedUserScope: 0
 				}
 			}
 		}
@@ -107,6 +112,7 @@ const DashBoard = () => {
 
 	const { data: favorites } = favoritesResult;
 	const countTotalUserScope = productsResult.metadata.countTotalUserScope;
+	const countArchivedUserScope = productsResult.metadata.countArchivedUserScope;
 
 	const handlePageChange = (pageNumber: number) => {
 		updateFilters({ ...filters, currentPage: pageNumber });
@@ -123,7 +129,7 @@ const DashBoard = () => {
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
 		product_modal.open();
-	}
+	};
 
 	const loadModalAndHead = () => {
 		return (
@@ -168,6 +174,7 @@ const DashBoard = () => {
 		filters.filterEntity.length === 0 &&
 		filters.validatedSearch === '' &&
 		!filters.filterOnlyFavorites &&
+		!countArchivedUserScope &&
 		!isLoadingProducts &&
 		!isRefetchingProducts
 	) {
@@ -183,6 +190,12 @@ const DashBoard = () => {
 			</>
 		);
 	}
+
+	const displayFilters =
+		nbPages > 1 ||
+		search !== '' ||
+		filters.filterOnlyFavorites ||
+		!!filters.filterEntity.length;
 
 	return (
 		<>
@@ -230,170 +243,184 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				{(nbPages > 1 ||
-					search !== '' ||
-					filters.filterOnlyFavorites ||
-					!!filters.filterEntity.length) && (
+				{(displayFilters || !!countArchivedUserScope) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-							<Select
-								label="Trier Par"
-								nativeSelectProps={{
-									name: 'my-select',
-									value: filters.filter,
-									onChange: event =>
-										updateFilters({ ...filters, filter: event.target.value })
-								}}
-							>
-								<option value="title:asc">Nom A à Z</option>
-								<option value="entity.name:asc">Organisation A à Z</option>
-								<option value="created_at:desc">Date de création</option>
-								<option value="updated_at:desc">Date de mise à jour</option>
-							</Select>
-						</div>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-							<Autocomplete
-								id="filter-entity"
-								disablePortal
-								sx={{ width: '100%' }}
-								options={entities
-									.map(entity => ({
-										label: `${entity.name} (${entity.acronym})`,
-										value: entity.id
-									}))
-									.filter(
-										entity =>
-											!filters.filterEntity.some(
-												filter => filter.value === entity.value
-											)
-									)}
-								onChange={(_, option) => {
-									if (option)
-										updateFilters({
-											...filters,
-											filterEntity: [...filters.filterEntity, option] ?? null,
-											currentPage: 1
-										});
-								}}
-								noOptionsText="Aucune organisation trouvée"
-								inputValue={inputValue}
-								onInputChange={(event, newInputValue) => {
-									setInputValue(newInputValue);
-								}}
-								renderInput={params => (
-									<div ref={params.InputProps.ref}>
-										<label htmlFor="filter-entity" className="fr-label">
-											Filtrer par organisation
-										</label>
-										<input
-											{...params.inputProps}
-											className={params.inputProps.className + ' fr-input'}
-											placeholder="Sélectionner une option"
-											type="search"
-										/>
-									</div>
-								)}
-							/>
-						</div>
-						<div
-							className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}
-						>
-							<form
-								className={cx(classes.searchForm)}
-								onSubmit={e => {
-									e.preventDefault();
-									updateFilters({
-										...filters,
-										currentPage: 1,
-										validatedSearch: search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
-									});
-								}}
-							>
-								<div role="search" className={fr.cx('fr-search-bar')}>
-									<Input
-										label="Rechercher un service"
-										hideLabel
-										nativeInputProps={{
-											placeholder: 'Rechercher un service',
-											type: 'search',
-											value: search,
-											onChange: event => {
-												if (!event.target.value) {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														validatedSearch: ''
-													});
-												}
-												setSearch(event.target.value);
-											}
+						{displayFilters && (
+							<>
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+									<Select
+										label="Trier Par"
+										nativeSelectProps={{
+											name: 'my-select',
+											value: filters.filter,
+											onChange: event =>
+												updateFilters({
+													...filters,
+													filter: event.target.value
+												})
 										}}
-									/>
-									<Button
-										priority="primary"
-										type="submit"
-										iconId="ri-search-2-line"
-										iconPosition="left"
 									>
-										Rechercher
-									</Button>
+										<option value="title:asc">Nom A à Z</option>
+										<option value="entity.name:asc">Organisation A à Z</option>
+										<option value="created_at:desc">Date de création</option>
+										<option value="updated_at:desc">Date de mise à jour</option>
+									</Select>
 								</div>
-							</form>
-						</div>
-						{countTotalUserScope > 10 && (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-mt-4w',
-									nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-									'fr-py-0'
-								)}
-							>
-								<Checkbox
-									className={fr.cx('fr-mb-0')}
-									style={{ userSelect: 'none' }}
-									options={[
-										{
-											label: 'Afficher uniquement mes favoris',
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: filters.filterOnlyFavorites,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyFavorites: e.target.checked
-													});
-												}
-											}
-										}
-									]}
-								/>
-							</div>
-						)}
-						<div
-							className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
-						>
-							{filters.filterEntity.map(entity => (
-								<Tag
-									dismissible
-									className={cx(classes.tagFilter)}
-									nativeButtonProps={{
-										onClick: () => {
+								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+									<Autocomplete
+										id="filter-entity"
+										disablePortal
+										sx={{ width: '100%' }}
+										options={entities
+											.map(entity => ({
+												label: `${entity.name} (${entity.acronym})`,
+												value: entity.id
+											}))
+											.filter(
+												entity =>
+													!filters.filterEntity.some(
+														filter => filter.value === entity.value
+													)
+											)}
+										onChange={(_, option) => {
+											if (option)
+												updateFilters({
+													...filters,
+													filterEntity: [...filters.filterEntity, option],
+													currentPage: 1
+												});
+										}}
+										noOptionsText="Aucune organisation trouvée"
+										inputValue={inputValue}
+										onInputChange={(event, newInputValue) => {
+											setInputValue(newInputValue);
+										}}
+										renderInput={params => (
+											<div ref={params.InputProps.ref}>
+												<label htmlFor="filter-entity" className="fr-label">
+													Filtrer par organisation
+												</label>
+												<input
+													{...params.inputProps}
+													className={params.inputProps.className + ' fr-input'}
+													placeholder="Sélectionner une option"
+													type="search"
+												/>
+											</div>
+										)}
+									/>
+								</div>
+								<div
+									className={fr.cx(
+										'fr-col-12',
+										'fr-col-md-5',
+										'fr-col--bottom'
+									)}
+								>
+									<form
+										className={cx(classes.searchForm)}
+										onSubmit={e => {
+											e.preventDefault();
 											updateFilters({
 												...filters,
-												filterEntity: filters.filterEntity.filter(
-													e => e.value !== entity.value
-												)
+												currentPage: 1,
+												validatedSearch: search
+													.replace(/[^\w\sÀ-ÿ'"]/gi, '')
+													.trim()
 											});
-											setInputValue('');
-										}
-									}}
-								>
-									<p>{entity.label}</p>
-								</Tag>
-							))}
+										}}
+									>
+										<div role="search" className={fr.cx('fr-search-bar')}>
+											<Input
+												label="Rechercher un service"
+												hideLabel
+												nativeInputProps={{
+													placeholder: 'Rechercher un service',
+													type: 'search',
+													value: search,
+													onChange: event => {
+														if (!event.target.value) {
+															updateFilters({
+																...filters,
+																currentPage: 1,
+																validatedSearch: ''
+															});
+														}
+														setSearch(event.target.value);
+													}
+												}}
+											/>
+											<Button
+												priority="primary"
+												type="submit"
+												iconId="ri-search-2-line"
+												iconPosition="left"
+											>
+												Rechercher
+											</Button>
+										</div>
+									</form>
+								</div>
+							</>
+						)}
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-mt-4w',
+								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+								'fr-py-0'
+							)}
+						>
+							<div className={cx(classes.checkboxContainer)}>
+								{countTotalUserScope > 10 && !filters.filterOnlyArchived && (
+									<Checkbox
+										className={fr.cx('fr-mb-0')}
+										style={{ userSelect: 'none' }}
+										options={[
+											{
+												label: 'Afficher uniquement mes favoris',
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: filters.filterOnlyFavorites,
+													onChange: e => {
+														updateFilters({
+															...filters,
+															currentPage: 1,
+															filterOnlyFavorites: e.target.checked
+														});
+													}
+												}
+											}
+										]}
+									/>
+								)}
+							</div>
 						</div>
+						{!!filters.filterEntity.length && (
+							<div
+								className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
+							>
+								{filters.filterEntity.map(entity => (
+									<Tag
+										dismissible
+										className={cx(classes.tagFilter)}
+										nativeButtonProps={{
+											onClick: () => {
+												updateFilters({
+													...filters,
+													filterEntity: filters.filterEntity.filter(
+														e => e.value !== entity.value
+													)
+												});
+												setInputValue('');
+											}
+										}}
+									>
+										<p>{entity.label}</p>
+									</Tag>
+								))}
+							</div>
+						)}
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
@@ -431,8 +458,9 @@ const DashBoard = () => {
 									<Loader />
 								</div>
 							) : (
-								products.map((product, index) => (
+								products.map(product => (
 									<ProductCard
+										key={product.id}
 										product={product}
 										userId={parseInt(session?.user?.id as string)}
 										entity={
@@ -446,7 +474,12 @@ const DashBoard = () => {
 											)
 										}
 										showFavoriteButton={countTotalUserScope > 10}
-										key={index}
+										onRestoreProduct={() => {
+											updateFilters({
+												...filters,
+												filterOnlyArchived: false
+											});
+										}}
 									/>
 								))
 							)}
@@ -470,6 +503,30 @@ const DashBoard = () => {
 									</div>
 								</div>
 							)}
+							<div className={cx(classes.checkboxContainer)}>
+								{countArchivedUserScope > 0 && (
+									<Checkbox
+										className={fr.cx('fr-mb-0')}
+										style={{ userSelect: 'none' }}
+										options={[
+											{
+												label: 'Afficher uniquement les services supprimés',
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: filters.filterOnlyArchived,
+													onChange: e => {
+														updateFilters({
+															...filters,
+															currentPage: 1,
+															filterOnlyArchived: e.target.checked
+														});
+													}
+												}
+											}
+										]}
+									/>
+								)}
+							</div>
 						</div>
 						<div
 							className={fr.cx(
@@ -524,6 +581,10 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	container: {
 		marginTop: '1.5rem'
+	},
+	checkboxContainer: {
+		display: 'flex',
+		gap: fr.spacing('2v')
 	},
 	tagFilter: {
 		marginRight: '0.5rem',

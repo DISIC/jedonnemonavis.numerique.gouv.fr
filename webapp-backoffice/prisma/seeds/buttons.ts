@@ -1,12 +1,15 @@
 import { Button } from '@prisma/client';
 
 const buttons: Partial<Button>[] = [];
-for (let i = 0; i < 20; i++) {
-	buttons.push({
-		title: `Button ${i}`,
-		description: `Description ${i}`,
-		isTest: i % 2 === 0
-	});
-}
+buttons.push({
+	title: `Button 1`,
+	description: `Description 1`,
+	isTest: false
+});
+buttons.push({
+	title: `Button test 1`,
+	description: `Description test 1`,
+	isTest: true
+});
 
 export { buttons };
