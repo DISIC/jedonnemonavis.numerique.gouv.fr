@@ -110,7 +110,7 @@ export const CheckboxInput = (props: Props) => {
         <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
           <>
             <Checkbox
-              legend={<h2>{t(field.label)}</h2>}
+              legend={<h3>{t(field.label)}</h3>}
               hintText={t(field.hint ?? "")}
               options={field.options.map((opt, index) => ({
                 label: (

@@ -41,3 +41,8 @@
 textarea.fr-input {
   min-height: 7rem;
 }
+
+.fr-table[data-fr-js-table="true"] caption {
+  position: relative !important;
+  margin-bottom: 1rem;
+}
