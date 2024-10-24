@@ -102,9 +102,19 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
+	if (meta?.idAdminOrOwn) {
+		const currentUserId = ctx.session?.user?.id;
+
+		if (ctx.req.query.id !== currentUserId && !ctx.session?.user?.role.includes('admin')) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You are not authorized to perform this action'
+			});
+		}
+	}
+
 	return next({
 		ctx: {
-			// Infers the `session` as non-nullable
 			session: ctx.session as Session
 		}
 	});

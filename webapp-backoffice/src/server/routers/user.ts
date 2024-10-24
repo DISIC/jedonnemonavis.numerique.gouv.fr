@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	UserCreateInputSchema,
+	UserUncheckedUpdateInputSchema,
 	UserUpdateInputSchema
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
@@ -295,20 +296,27 @@ export const userRouter = router({
 		}),
 
 	update: protectedProcedure
-		.meta({ isAdmin: true })
-		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number(), user: UserUncheckedUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
-			const { id, user } = input;
-			const updatedUser = await ctx.prisma.user.update({
-				where: { id },
-				data: { ...user, email: ((user.email || '') as string).toLowerCase() }
-			});
-
-			return { data: updatedUser };
+		  
+		  const { id, user } = input;
+		  const { role, ...userWithoutRole } = user;
+	  
+		  const dataToUpdate = ctx.session?.user?.role.includes('admin')
+			? { ...userWithoutRole, role, email: ((user.email || '') as string).toLowerCase() }
+			: { ...userWithoutRole, email: ((user.email || '') as string).toLowerCase() };
+	  
+		  const updatedUser = await ctx.prisma.user.update({
+			where: { id },
+			data: dataToUpdate,
+		  });
+	  
+		  return { data: updatedUser };
 		}),
 
 	delete: protectedProcedure
-		.meta({ isAdmin: true })
+		.meta({ isAdminOrOwn: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
