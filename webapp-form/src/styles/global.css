@@ -46,3 +46,12 @@ textarea.fr-input {
   position: relative !important;
   margin-bottom: 1rem;
 }
+
+.fr-header__menu-links .fr-collapse:not(.fr-collapse--expanded) {
+  visibility: visible !important;
+}
+
+.fr-header__menu-links .fr-collapse:not(.fr-collapse--expanded).fr-collapse {
+  --collapse-max-height: 1 !important;
+  --collapse: 0 !important;
+}

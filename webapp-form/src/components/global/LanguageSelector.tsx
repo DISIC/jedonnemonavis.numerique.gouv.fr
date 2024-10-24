@@ -72,7 +72,11 @@ const useStyles = tss.withName({ LanguageSelector }).create({
   },
   menuLanguage: {
     right: 0,
+    ul: {
+      display: "flex",
+    },
   },
+
   langShort: {
     textTransform: "uppercase",
   },
