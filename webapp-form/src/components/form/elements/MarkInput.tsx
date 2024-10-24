@@ -24,12 +24,12 @@ export const MarkInput = (props: Props) => {
           <h3>{t(field.label)}</h3>
         </div>
         <div className={fr.cx("fr-col-12")}>
-          <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
-        </div>
-        <div className={fr.cx("fr-col-12")}>
           <div className={cx(classes.radioContainer)}>
             <div>{t(field.hintLeft ?? "")}</div>
             <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
+              <legend>
+                <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
+              </legend>
               <ul>
                 {field.options.map((f) => (
                   <li key={f.value}>
@@ -76,9 +76,11 @@ const useStyles = tss
   .create(({ nbItems }) => ({
     smallText: {
       fontSize: "0.8rem",
+      margin: "0 0 10px 0",
       color: fr.colors.decisions.text.disabled.grey.default,
     },
     radioContainer: {
+      position: "relative",
       display: "flex",
       alignItems: "center",
       marginTop: fr.spacing("4v"),
@@ -118,6 +120,8 @@ const useStyles = tss
     },
     fieldset: {
       width: "100%",
+      position: "initial",
+      justifyContent: "center",
       marginLeft: fr.spacing("4v"),
       marginRight: fr.spacing("4v"),
       ul: {
@@ -132,6 +136,11 @@ const useStyles = tss
           width: "initial",
           columns: nbItems,
         },
+      },
+      legend: {
+        position: "absolute",
+        left: 0,
+        bottom: "35px",
       },
     },
   }));

@@ -74,6 +74,7 @@ const useStyles = tss.withName({ LanguageSelector }).create({
     right: 0,
     ul: {
       display: "flex",
+      flexWrap: "wrap",
     },
   },
 
