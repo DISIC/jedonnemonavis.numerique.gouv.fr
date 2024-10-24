@@ -120,7 +120,7 @@ const ObservatoireStats = ({
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
 				<>
-					<div
+					<h5
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
@@ -131,16 +131,16 @@ const ObservatoireStats = ({
 						{['autonomy', 'contact'].includes(field.slug)
 							? `${getPercentageFromValue(field.value)}%`
 							: `${getReadableValue(field.value)} / 10`}
-					</div>
+					</h5>
 					{field.slug !== 'autonomy' && (
-						<span
+						<h6
 							className={cx(
 								classes.intention,
 								getClassFromValue(field.value, field.slug)
 							)}
 						>
 							{getLabelFromValue(field.value, field.slug)}
-						</span>
+						</h6>
 					)}
 				</>
 			);
@@ -188,7 +188,7 @@ const ObservatoireStats = ({
 					>
 						<div className={cx(classes.content)}>
 							<label className={cx(classes.label)}>
-								{field.label}
+								<h5>{field.label}</h5>
 								<Tooltip placement="top" title={field.tooltip} tabIndex={0}>
 									<span
 										className={fr.cx(
@@ -225,10 +225,14 @@ const useStyles = tss.create({
 		flexDirection: 'column'
 	},
 	label: {
-		display: 'block',
+		display: 'flex',
+		alignItems: 'center',
 		fontWeight: 'bold',
 		marginBottom: '0.5rem',
-		height: '4rem'
+		height: '3rem',
+		h5: {
+			margin: 0
+		}
 	},
 	intention: {
 		...fr.typography[18].style,
@@ -238,7 +242,8 @@ const useStyles = tss.create({
 	},
 	value: {
 		fontSize: '2rem',
-		fontWeight: 'bold'
+		fontWeight: 'bold',
+		marginTop: '2rem'
 	},
 	skeleton: {
 		margin: 'auto'

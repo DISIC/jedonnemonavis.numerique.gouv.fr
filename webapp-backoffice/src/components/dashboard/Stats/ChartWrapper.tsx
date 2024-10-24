@@ -247,7 +247,7 @@ const ChartWrapper = ({
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
-					<h6 className={fr.cx('fr-mb-0')}>{title}</h6>
+					<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
 					{totalFormatted && (
 						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
 					)}
