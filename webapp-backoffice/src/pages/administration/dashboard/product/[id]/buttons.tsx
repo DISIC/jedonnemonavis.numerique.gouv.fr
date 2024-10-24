@@ -228,7 +228,12 @@ const ProductButtonsPage = (props: Props) => {
 					</>
 				)}
 				<div
-					className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mt-6v')}
+					className={fr.cx(
+						'fr-grid-row--center',
+						'fr-grid-row',
+						'fr-mt-6v',
+						'fr-mb-6v'
+					)}
 				>
 					{nbPages > 1 && (
 						<Pagination
