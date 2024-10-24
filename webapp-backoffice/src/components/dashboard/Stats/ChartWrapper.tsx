@@ -222,7 +222,7 @@ const ChartWrapper = ({
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
 					<thead>
 						<tr>
-							<th scope="col"></th>
+							<th scope="row">Critères évalués</th>
 							{headers.map((h, index) => (
 								<th scope="col" key={`${h}_${index}_${title}`}>
 									{h}
