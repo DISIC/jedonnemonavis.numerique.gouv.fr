@@ -18,6 +18,7 @@ import { trpc } from '@/src/utils/trpc';
 import Head from 'next/head';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useRouter } from 'next/router';
+import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
 
 interface Props {
 	product: Product;
@@ -69,6 +70,12 @@ const ProductButtonsPage = (props: Props) => {
 		data: buttons,
 		metadata: { count: buttonsCount }
 	} = buttonsResult;
+
+	const { data: reviewsCount } = trpc.review.getCounts.useQuery({
+		product_id: product.id
+	});
+
+	console.log(reviewsCount);
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
@@ -132,16 +139,24 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				)}
 			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-12')}>
+					<p>
+						Le bouton JDMA se place sur votre service numérique pour récolter
+						l’avis de vos usagers.
+					</p>
+				</div>
+			</div>
 			<div
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--right'
+					'fr-grid-row--left'
 				)}
 			>
 				{buttons && nbPages > 1 && (
 					<div className={fr.cx('fr-col-8')}>
-						<p>
+						<p className={fr.cx('fr-mb-0')}>
 							Boutons de{' '}
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + 1}
@@ -233,6 +248,33 @@ const ProductButtonsPage = (props: Props) => {
 						/>
 					)}
 				</div>
+				{reviewsCount && (
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-12')}>
+							<ProductBottomInfo
+								background={buttons.length > 1 ? '#FFFFFF' : '#F3F6FE'}
+								title={
+									reviewsCount && reviewsCount.countAll > 0
+										? 'Pour aller plus loin avec JDMA ...'
+										: 'En attendant vos premiers avis...'
+								}
+								hasBorder={buttons.length > 1}
+								contents={[
+									{
+										text: 'Nos conseils pour obtenir plus d’avis !',
+										link: 'Améliorer le placement de votre bouton',
+										image: '/assets/chat_picto.svg'
+									},
+									{
+										text: "Vous souhaitez comprendre les différences entre un parcours sur mobile et un parcours sur ordinateur pour le même service? Réaliser un test A/B pour une fonctionnalité?  C'est possible en créant plusieurs boutons sur le même service.",
+										link: 'En savoir plus sur les boutons multiples',
+										image: '/assets/cone_picto.svg'
+									}
+								]}
+							/>
+						</div>
+					</div>
+				)}
 			</div>
 		</ProductLayout>
 	);
