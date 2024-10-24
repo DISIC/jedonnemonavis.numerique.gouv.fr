@@ -7,6 +7,14 @@ const AccountPage = () => {
 };
 
 export const getServerSideProps: GetServerSideProps = async context => {
+	const { id } = context.query;
+
+	const focusedUser = await prisma.user.findUnique({
+		where: {
+			id: parseInt(id as string)
+		}
+	});
+
 	const currentUserToken = await getToken({
 		req: context.req,
 		secret: process.env.JWT_SECRET
@@ -14,9 +22,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	if (
 		!currentUserToken ||
-		(currentUserToken.exp as number) > new Date().getTime()
+		(currentUserToken.exp as number) < new Date().getTime() / 1000
 	) {
-		prisma.$disconnect();
+		await prisma.$disconnect();
 		return {
 			redirect: {
 				destination: '/',
@@ -32,7 +40,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	});
 
 	if (!currentUser) {
-		prisma.$disconnect();
+		await prisma.$disconnect();
 		return {
 			redirect: {
 				destination: '/',
@@ -41,11 +49,24 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	prisma.$disconnect();
+	const isAdmin = currentUser.role.includes('admin');
+
+	if (!isAdmin && currentUser.id !== focusedUser?.id) {
+		await prisma.$disconnect();
+		return {
+			redirect: {
+				destination: '/',
+				permanent: false
+			}
+		};
+	}
+
+	await prisma.$disconnect();
 
 	return {
 		props: {
-			user: JSON.parse(JSON.stringify(currentUser))
+			user: JSON.parse(JSON.stringify(focusedUser || currentUser)),
+			isOwn: focusedUser?.id === currentUser.id
 		}
 	};
 };

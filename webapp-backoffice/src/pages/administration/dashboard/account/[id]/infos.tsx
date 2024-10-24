@@ -5,14 +5,17 @@ import { tss } from 'tss-react/dsfr';
 import Head from 'next/head';
 import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
-import CardIdentity from '@/src/components/dashboard/Account/Informations/cardIdentity';
+import IdentityCard from '@/src/components/dashboard/Account/Informations/identityCard';
+import CredentialsCard from '@/src/components/dashboard/Account/Informations/credentialsCard';
+import DeleteCard from '@/src/components/dashboard/Account/Informations/deleteCard';
 
 interface Props {
 	user: User;
+	isOwn: Boolean;
 }
 
 const InfosAccount: React.FC<Props> = props => {
-	const { user } = props;
+	const { user, isOwn } = props;
 
 	const { classes } = useStyles();
 
@@ -33,28 +36,13 @@ const InfosAccount: React.FC<Props> = props => {
 					<h2>Informations</h2>
 				</div>
 				<div>
-					<CardIdentity user={user} title={'Identité'} modifiable={true}>
-						<>test</>
-					</CardIdentity>
+					<IdentityCard user={user} />
 				</div>
 				<div>
-					<CardIdentity
-						user={user}
-						title={'Identifiants de connexion'}
-						modifiable={true}
-					>
-						<>test</>
-					</CardIdentity>
+					<CredentialsCard user={user} />
 				</div>
 				<div>
-					<CardIdentity
-						user={user}
-						title={'Suppression du compte'}
-						hint={'Cette action est irréversible.'}
-						modifiable={false}
-					>
-						<>test</>
-					</CardIdentity>
+					<DeleteCard user={user} />
 				</div>
 			</div>
 		</AccountLayout>

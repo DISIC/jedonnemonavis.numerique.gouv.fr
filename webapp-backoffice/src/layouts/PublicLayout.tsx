@@ -124,7 +124,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								className={cx(fr.cx('fr-p-4v'), classes.item)}
 								onClick={e => {
 									handleClose(e);
-									router.push('/administration/dashboard/account/infos');
+									router.push(
+										`/administration/dashboard/account/${session?.user.id}/infos`
+									);
 								}}
 							>
 								<span
@@ -141,7 +143,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								onClick={e => {
 									handleClose(e);
 									router.push(
-										'/administration/dashboard/account/notifications'
+										`/administration/dashboard/account/${session?.user.id}/notifications`
 									);
 								}}
 							>

@@ -1,21 +1,30 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import React, { ReactElement } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { User } from '@/prisma/generated/zod';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { useRouter } from 'next/router';
 
 interface Props {
-	user: User;
 	title: string;
 	hint?: string;
 	modifiable: Boolean;
-	children: ReactElement;
+	viewModeContent: ReactElement;
+	editModeContent?: ReactElement;
+	onSubmit?: () => void;
 }
 
-const CardIdentity = (props: Props) => {
-	const { user, title, hint, modifiable, children } = props;
+const GenericCardInfos = (props: Props) => {
+	const {
+		title,
+		hint,
+		modifiable,
+		viewModeContent,
+		editModeContent,
+		onSubmit
+	} = props;
 	const [modifying, setModifying] = React.useState<Boolean>(false);
 	const { cx, classes } = useStyles();
+	const router = useRouter();
 
 	return (
 		<>
@@ -46,7 +55,7 @@ const CardIdentity = (props: Props) => {
 								Modifier
 							</Button>
 						)}
-						{modifiable && modifying && (
+						{modifiable && modifying && onSubmit && (
 							<>
 								<Button
 									priority="secondary"
@@ -59,24 +68,30 @@ const CardIdentity = (props: Props) => {
 									iconId="fr-icon-save-line"
 									iconPosition="right"
 									className={cx(fr.cx('fr-ml-4v'))}
-									onClick={() => console.log('switch mode')}
+									onClick={() => {
+										onSubmit();
+										setModifying(false);
+										router.replace(router.asPath);
+									}}
 								>
 									Sauvegarder
 								</Button>
 							</>
 						)}
 					</div>
-					<div className={cx(fr.cx('fr-col-md-12'))}>
+					<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
 						<hr />
 					</div>
-					<div className={cx(fr.cx('fr-col-md-12'))}>{children}</div>
+					<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-6v'))}>
+						{modifying ? editModeContent : viewModeContent}
+					</div>
 				</div>
 			</div>
 		</>
 	);
 };
 
-const useStyles = tss.withName(CardIdentity.name).create(() => ({
+const useStyles = tss.withName(GenericCardInfos.name).create(() => ({
 	actionContainer: {
 		display: 'flex',
 		justifyContent: 'flex-end'
@@ -84,4 +99,4 @@ const useStyles = tss.withName(CardIdentity.name).create(() => ({
 	tag: {}
 }));
 
-export default CardIdentity;
+export default GenericCardInfos;

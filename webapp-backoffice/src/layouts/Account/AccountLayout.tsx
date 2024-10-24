@@ -5,6 +5,7 @@ import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import { User } from '@/prisma/generated/zod';
+import { useSession } from 'next-auth/react';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -28,23 +29,27 @@ const AccountLayout = ({ children, user }: ProductLayoutProps) => {
 
 	const router = useRouter();
 
+	const { data: session } = useSession();
+
 	const { cx, classes } = useStyles();
 
 	const menuItems: MenuItems[] = [
 		{
 			text: 'Informations',
-			isActive: router.pathname === `/administration/dashboard/account/infos`,
+			isActive:
+				router.pathname === `/administration/dashboard/account/[id]/infos`,
 			linkProps: {
-				href: `/administration/dashboard/account/infos`,
+				href: `/administration/dashboard/account/${session?.user.id}/infos`,
 				alt: 'Informations'
 			}
 		},
 		{
 			text: 'Notifications',
 			isActive:
-				router.pathname === `/administration/dashboard/account/notifications`,
+				router.pathname ===
+				`/administration/dashboard/account/[id]/notifications`,
 			linkProps: {
-				href: `/administration/dashboard/account/notifications`,
+				href: `/administration/dashboard/account/${session?.user.id}/notifications`,
 				alt: 'Notifications'
 			}
 		}
