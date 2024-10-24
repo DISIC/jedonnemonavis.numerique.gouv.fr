@@ -2,6 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
 import { ReactNode } from 'react';
 import { tss } from 'tss-react';
+import Link from 'next/link';
 
 type ProductBottomInfoProps = {
 	background: string;
@@ -67,7 +68,14 @@ const ProductBottomInfo = ({
 						</div>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-9')}>
 							<p className={fr.cx('fr-mb-0')}>{content.text}</p>
-							<a>{content.link}</a>
+							<Link
+								className={fr.cx('fr-link')}
+								href={content.link}
+								role="link"
+								target="_blank"
+							>
+								{content.link}
+							</Link>
 						</div>
 					</div>
 				);
