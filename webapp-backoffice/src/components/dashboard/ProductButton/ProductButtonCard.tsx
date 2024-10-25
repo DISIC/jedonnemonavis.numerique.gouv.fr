@@ -98,8 +98,22 @@ const ProductButtonCard = (props: Props) => {
 								>
 									Voir le code
 								</MenuItem>
-								<MenuItem>Prévisualiser le formulaire</MenuItem>
-								<MenuItem>Copier le lien du formulaire</MenuItem>
+								<MenuItem
+									onClick={() => {
+										onButtonClick('preview', button);
+									}}
+								>
+									Prévisualiser le formulaire
+								</MenuItem>
+								<MenuItem
+									onClick={() => {
+										navigator.clipboard.writeText(
+											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
+										);
+									}}
+								>
+									Copier le lien du formulaire
+								</MenuItem>
 							</Menu>
 							{/* {!button.isTest && (
 								<Button

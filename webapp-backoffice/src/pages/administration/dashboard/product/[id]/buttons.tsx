@@ -75,8 +75,6 @@ const ProductButtonsPage = (props: Props) => {
 		product_id: product.id
 	});
 
-	console.log(reviewsCount);
-
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
 	};
@@ -253,7 +251,7 @@ const ProductButtonsPage = (props: Props) => {
 						/>
 					)}
 				</div>
-				{reviewsCount && (
+				{/* {reviewsCount && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12')}>
 							<ProductBottomInfo
@@ -279,7 +277,7 @@ const ProductButtonsPage = (props: Props) => {
 							/>
 						</div>
 					</div>
-				)}
+				)} */}
 			</div>
 		</ProductLayout>
 	);

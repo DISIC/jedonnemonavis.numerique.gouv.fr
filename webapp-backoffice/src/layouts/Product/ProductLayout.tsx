@@ -54,16 +54,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Aperçu formulaire',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/form-view`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/form-view`,
-				alt: 'Aperçu formulaire'
-			}
-		},
-		{
-			text: 'Gérer vos boutons',
+			text: 'Gérer les boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
