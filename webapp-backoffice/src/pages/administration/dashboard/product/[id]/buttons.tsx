@@ -19,6 +19,8 @@ import Head from 'next/head';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useRouter } from 'next/router';
 import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import Select from '@codegouvfr/react-dsfr/Select';
 
 interface Props {
 	product: Product;
@@ -42,6 +44,7 @@ const ProductButtonsPage = (props: Props) => {
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
+	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
 
 	const {
@@ -54,7 +57,8 @@ const ProductButtonsPage = (props: Props) => {
 			numberPerPage,
 			page: currentPage,
 			product_id: product.id,
-			isTest: testFilter
+			isTest: testFilter,
+			filterByTitle: filters.filter
 		},
 		{
 			initialData: {
@@ -94,6 +98,8 @@ const ProductButtonsPage = (props: Props) => {
 	};
 
 	const nbPages = getNbPages(buttonsCount, numberPerPage);
+
+	const displayFilters = nbPages > 1 || buttons.length > 0;
 
 	React.useEffect(() => {
 		if (router.query.autoCreate === 'true') {
@@ -167,6 +173,7 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
+
 				{/* {buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 						<Checkbox
@@ -201,6 +208,29 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div> */}
 			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				{displayFilters && (
+					<>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+							<Select
+								label="Trier Par"
+								nativeSelectProps={{
+									name: 'my-select',
+									value: filters.filter,
+									onChange: event =>
+										updateFilters({
+											...filters,
+											filter: event.target.value
+										})
+								}}
+							>
+								<option value="title:asc">Nom A à Z</option>
+								<option value="title:desc">Nom Z à A</option>
+							</Select>
+						</div>
+					</>
+				)}
+			</div>
 			<div>
 				{isLoadingButtons ? (
 					<div className={fr.cx('fr-py-10v')}>
@@ -215,7 +245,6 @@ const ProductButtonsPage = (props: Props) => {
 								/>
 							)}
 						</div>
-
 						{buttons?.map((button, index) => (
 							<ProductButtonCard
 								key={index}
