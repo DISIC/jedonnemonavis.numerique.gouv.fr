@@ -208,30 +208,38 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div> */}
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				{displayFilters && (
-					<>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-							<Select
-								label="Trier Par"
-								nativeSelectProps={{
-									name: 'my-select',
-									value: filters.filter,
-									onChange: event =>
-										updateFilters({
-											...filters,
-											filter: event.target.value
-										})
-								}}
-							>
-								<option value="title:asc">Nom A à Z</option>
-								<option value="title:desc">Nom Z à A</option>
-							</Select>
-						</div>
-					</>
-				)}
-			</div>
+
 			<div>
+				{displayFilters && (
+					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+						<p
+							className={fr.cx(
+								'fr-mb-0',
+								'fr-text--bold',
+								'fr-text--sm',
+								'fr-pt-1w'
+							)}
+							onClick={() =>
+								updateFilters({
+									...filters,
+									filter:
+										filters.filter === 'title:asc' ? 'title:desc' : 'title:asc'
+								})
+							}
+						>
+							Nom du bouton{' '}
+							<i
+								className={fr.cx(
+									'fr-icon--sm',
+									'fr-text--bold',
+									filters.filter === 'title:asc'
+										? 'ri-arrow-up-s-line'
+										: 'ri-arrow-down-s-line'
+								)}
+							/>
+						</p>
+					</div>
+				)}
 				{isLoadingButtons ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
@@ -245,6 +253,7 @@ const ProductButtonsPage = (props: Props) => {
 								/>
 							)}
 						</div>
+
 						{buttons?.map((button, index) => (
 							<ProductButtonCard
 								key={index}
@@ -331,7 +340,7 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		btnContainer: {
-			marginTop: '3rem'
+			marginTop: '1rem'
 		}
 	});
 
