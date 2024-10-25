@@ -94,6 +94,7 @@ const ProductButtonCard = (props: Props) => {
 									onClick={() => {
 										onButtonClick('install', button);
 										push(['trackEvent', 'Gestion boutons', 'Installer']);
+										handleClose();
 									}}
 								>
 									Voir le code
@@ -101,6 +102,7 @@ const ProductButtonCard = (props: Props) => {
 								<MenuItem
 									onClick={() => {
 										onButtonClick('preview', button);
+										handleClose();
 									}}
 								>
 									Prévisualiser le formulaire
@@ -110,6 +112,7 @@ const ProductButtonCard = (props: Props) => {
 										navigator.clipboard.writeText(
 											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
 										);
+										handleClose();
 									}}
 								>
 									Copier le lien du formulaire
