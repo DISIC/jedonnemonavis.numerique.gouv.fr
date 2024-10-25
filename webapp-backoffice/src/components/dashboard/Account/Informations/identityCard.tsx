@@ -16,6 +16,7 @@ type FormValues = Omit<User, 'id' | 'created_at' | 'updated_at'>;
 const IdentityCard = (props: Props) => {
 	const { user } = props;
 	const { cx, classes } = useStyles();
+	const utils = trpc.useUtils();
 
 	const {
 		control,
@@ -27,12 +28,22 @@ const IdentityCard = (props: Props) => {
 	});
 
 	const editUser = trpc.user.update.useMutation({
-		onSuccess: () => {}
+		onSuccess: () => {
+			utils.user.getById.invalidate({});	
+		}
 	});
+
+	const onFormSubmit = async () => {
+		let isValid = false;
+		await handleSubmit(async (data) => {
+			await onLocalSubmit(data);
+			isValid = true;
+		})();
+		return isValid;
+	};
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		const { ...updateUser } = data;
-		console.log('updatedUser : ', updateUser);
 		editUser.mutate({
 			id: user.id,
 			user: { ...updateUser }
@@ -44,7 +55,7 @@ const IdentityCard = (props: Props) => {
 			<GenericCardInfos
 				title={'Identité'}
 				modifiable={true}
-				onSubmit={handleSubmit(onLocalSubmit)}
+				onSubmit={onFormSubmit}
 				viewModeContent={
 					<>
 						<div
@@ -94,7 +105,6 @@ const IdentityCard = (props: Props) => {
 												onChange: e => {
 													onChange(e);
 												},
-												defaultValue: value || '',
 												value: value || '',
 												name,
 												required: true
@@ -121,7 +131,6 @@ const IdentityCard = (props: Props) => {
 												onChange: e => {
 													onChange(e);
 												},
-												defaultValue: value || '',
 												value: value || '',
 												name,
 												required: true

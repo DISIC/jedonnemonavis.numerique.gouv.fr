@@ -9,7 +9,6 @@ import { useSession } from 'next-auth/react';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
-	user: User;
 }
 
 interface MenuItems {
@@ -21,8 +20,7 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const AccountLayout = ({ children, user }: ProductLayoutProps) => {
-	const { id } = user;
+const AccountLayout = ({ children }: ProductLayoutProps) => {
 
 	const [displayToast, setDisplayToast] = useState(false);
 	const [showBackToTop, setShowBackToTop] = useState(false);

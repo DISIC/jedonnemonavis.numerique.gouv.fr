@@ -10,7 +10,7 @@ interface Props {
 	modifiable: Boolean;
 	viewModeContent: ReactElement;
 	editModeContent?: ReactElement;
-	onSubmit?: () => void;
+	onSubmit?: () => Promise<boolean>;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -68,10 +68,11 @@ const GenericCardInfos = (props: Props) => {
 									iconId="fr-icon-save-line"
 									iconPosition="right"
 									className={cx(fr.cx('fr-ml-4v'))}
-									onClick={() => {
-										onSubmit();
-										setModifying(false);
-										router.replace(router.asPath);
+									onClick={async() => {
+										const isFormValid = await onSubmit?.();
+										if (isFormValid) {
+											setModifying(false);
+										}
 									}}
 								>
 									Sauvegarder

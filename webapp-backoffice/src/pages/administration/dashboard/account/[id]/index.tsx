@@ -65,8 +65,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	return {
 		props: {
-			user: JSON.parse(JSON.stringify(focusedUser || currentUser)),
-			isOwn: focusedUser?.id === currentUser.id
+			isOwn: focusedUser?.id === currentUser.id,
+			userId: focusedUser?.id
 		}
 	};
 };

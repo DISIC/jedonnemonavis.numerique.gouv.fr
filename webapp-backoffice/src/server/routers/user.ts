@@ -261,6 +261,19 @@ export const userRouter = router({
 			return { data: users, metadata: { count } };
 		}),
 
+	getById: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: { id }
+			});
+
+			return { data: user };
+		}),
+
 	create: protectedProcedure
 		.meta({ isAdmin: true })
 		.input(UserCreateInputSchema)

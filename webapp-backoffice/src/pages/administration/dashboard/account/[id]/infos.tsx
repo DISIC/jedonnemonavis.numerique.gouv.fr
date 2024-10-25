@@ -8,43 +8,76 @@ import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import IdentityCard from '@/src/components/dashboard/Account/Informations/identityCard';
 import CredentialsCard from '@/src/components/dashboard/Account/Informations/credentialsCard';
 import DeleteCard from '@/src/components/dashboard/Account/Informations/deleteCard';
+import { trpc } from '@/src/utils/trpc';
+import { useRouter } from 'next/router';
+import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
-	user: User;
 	isOwn: Boolean;
+	userId: number
 }
 
 const InfosAccount: React.FC<Props> = props => {
-	const { user, isOwn } = props;
-
+	const { isOwn, userId } = props;
 	const { classes } = useStyles();
+	const router = useRouter();
+
+	const {
+		data: userResult,
+		isLoading: isLoadingUser,
+		refetch: refetchUser,
+		isRefetching: isRefetchingUser
+	} = trpc.user.getById.useQuery(
+		{
+			id: userId
+		},
+		{
+			initialData: {
+				data: null
+			},
+			enabled: userId !== undefined
+		}
+	);
+
+	const user = userResult?.data as User;
 
 	return (
-		<AccountLayout user={user}>
+		<AccountLayout>
 			<Head>
-				<title>
-					{`${user.firstName} ${user.lastName}`} | Compte Informations | Je
-					donne mon avis
-				</title>
-				<meta
-					name="description"
-					content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
-				/>
+				{!isLoadingUser && user && (
+					<>
+						<title>
+							{`${user.firstName} ${user.lastName}`} | Compte Informations | Je
+							donne mon avis
+						</title>
+						<meta
+							name="description"
+							content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
+						/>
+					</>
+				)}
 			</Head>
-			<div className={classes.column}>
-				<div className={classes.headerWrapper}>
-					<h2>Informations</h2>
+			{isLoadingUser || isRefetchingUser && 
+					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+						<Loader />
+					</div>
+			}	
+			{!isLoadingUser && !isRefetchingUser && user &&
+				<div className={classes.column}>
+					<div className={classes.headerWrapper}>
+						<h2>Informations</h2>
+					</div>
+					<div>
+						<IdentityCard user={user} />
+					</div>
+					<div>
+						<CredentialsCard user={user} />
+					</div>
+					<div>
+						<DeleteCard user={user} />
+					</div>
 				</div>
-				<div>
-					<IdentityCard user={user} />
-				</div>
-				<div>
-					<CredentialsCard user={user} />
-				</div>
-				<div>
-					<DeleteCard user={user} />
-				</div>
-			</div>
+			}
 		</AccountLayout>
 	);
 };
