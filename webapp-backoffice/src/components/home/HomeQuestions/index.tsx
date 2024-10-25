@@ -22,13 +22,15 @@ const HomeQuestions = (props: HomeQuestionProps) => {
 					<div className={fr.cx('fr-accordions-group')}>
 						{props.questions.map((question, index) => {
 							return (
-								<Accordion
-									key={question.question + index}
-									label={question.question}
-									className={cx(classes.accordion, 'fr-accordion__item')}
-								>
-									{question.answer}
-								</Accordion>
+								<p>
+									<Accordion
+										key={question.question + index}
+										label={question.question}
+										className={cx(classes.accordion, 'fr-accordion__item')}
+									>
+										{question.answer}
+									</Accordion>
+								</p>
 							);
 						})}
 					</div>
