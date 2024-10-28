@@ -16,7 +16,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 	const { classes } = useStyles();
 
 	return (
-		<AccountLayout user={user}>
+		<AccountLayout>
 			<Head>
 				<title>
 					{`${user.firstName} ${user.lastName}`} | Compte Notifications | Je

@@ -41,7 +41,7 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 				alt: 'Informations'
 			}
 		},
-		{
+		/*{
 			text: 'Notifications',
 			isActive:
 				router.pathname ===
@@ -50,7 +50,7 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 				href: `/administration/dashboard/account/${session?.user.id}/notifications`,
 				alt: 'Notifications'
 			}
-		}
+		}*/
 	];
 
 	useEffect(() => {

@@ -138,24 +138,28 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								/>
 								Informations personnelles
 							</MenuItem>
-							<MenuItem
-								className={cx(fr.cx('fr-p-4v'), classes.item)}
-								onClick={e => {
-									handleClose(e);
-									router.push(
-										`/administration/dashboard/account/${session?.user.id}/notifications`
-									);
-								}}
-							>
-								<span
-									className={fr.cx(
-										'fr-icon-notification-3-line',
-										'fr-icon--sm',
-										'fr-mr-1-5v'
-									)}
-								/>
-								Notifications
-							</MenuItem>
+							{
+								/*
+									<MenuItem
+										className={cx(fr.cx('fr-p-4v'), classes.item)}
+										onClick={e => {
+											handleClose(e);
+											router.push(
+												`/administration/dashboard/account/${session?.user.id}/notifications`
+											);
+										}}
+									>
+										<span
+											className={fr.cx(
+												'fr-icon-notification-3-line',
+												'fr-icon--sm',
+												'fr-mr-1-5v'
+											)}
+										/>
+										Notifications
+									</MenuItem>
+								*/
+							}
 							<MenuItem
 								className={cx(
 									fr.cx('fr-pb-2v', 'fr-pt-4v'),
