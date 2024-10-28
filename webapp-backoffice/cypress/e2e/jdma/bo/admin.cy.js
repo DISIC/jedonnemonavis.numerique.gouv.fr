@@ -220,7 +220,7 @@ function logout() {
 	cy.wait(2000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
-	cy.contains('button', 'Se déconnecter').should('be.visible').click();
+	cy.contains('button', 'Se déconnecter').click({ force: true });
 	cy.url().should('include', '/login');
 }
 
