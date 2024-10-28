@@ -219,7 +219,8 @@ function logout() {
 	cy.reload();
 	cy.wait(2000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
-	cy.get('header').contains('Déconnexion').click({ force: true });
+	cy.get('header').contains('Compte').click({ force: true });
+	cy.contains('button', 'Se déconnecter').should('be.visible').click();
 	cy.url().should('include', '/login');
 }
 
