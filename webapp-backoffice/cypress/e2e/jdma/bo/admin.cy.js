@@ -188,7 +188,7 @@ function selectEntity() {
 }
 
 function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email = '' }) {
-	cy.get('input[name="firstName"]').type(firstName);
+	cy.get('input[name="firstName"]').type(firstName, { force: true });
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[type="password"]').type(password);
 	if(email !== '') {
