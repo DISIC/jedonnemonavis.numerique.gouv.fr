@@ -14,7 +14,7 @@ interface Props {
 }
 
 const onConfirmModal = createModal({
-	id: 'user-on-confirm-modal',
+	id: 'user-delete-account-modal',
 	isOpenedByDefault: false
 });
 
