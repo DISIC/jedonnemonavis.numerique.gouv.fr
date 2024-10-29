@@ -22,11 +22,19 @@ interface Props {
 	children: React.ReactNode;
 	handleOnConfirm: () => void;
 	kind?: 'default' | 'danger';
+	disableAction?: boolean;
 }
 
 const OnConfirmModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, title, children, handleOnConfirm, kind = 'default' } = props;
+	const {
+		modal,
+		title,
+		children,
+		handleOnConfirm,
+		kind = 'default',
+		disableAction
+	} = props;
 
 	const getConfirmButtonProps = () => {
 		let confirmButtonProps: ModalProps.ActionAreaButtonProps = {
@@ -46,12 +54,16 @@ const OnConfirmModal = (props: Props) => {
 						</>
 					),
 					priority: 'tertiary',
-					className: classes.dangerButton
+					className: classes.dangerButton,
+					disabled: disableAction ?? false
 				};
 
 				break;
 			case 'default':
-				confirmButtonProps = { children: 'Oui' };
+				confirmButtonProps = {
+					children: 'Oui',
+					disabled: disableAction ?? false
+				};
 				break;
 		}
 
