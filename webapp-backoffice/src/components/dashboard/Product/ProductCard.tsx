@@ -274,12 +274,15 @@ const ProductCard = ({
 												height={25}
 											/>
 										) : (
-											<div
-												className={fr.cx(
-													!!indicator.total && indicator.color !== 'new'
-														? `fr-label--${indicator.color}`
-														: 'fr-label--disabled',
-													'fr-text--bold'
+											<p
+												className={cx(
+													fr.cx(
+														!!indicator.total && indicator.color !== 'new'
+															? `fr-label--${indicator.color}`
+															: 'fr-label--disabled',
+														'fr-text--bold'
+													),
+													classes.indicatorText
 												)}
 												style={
 													!!indicator.total && indicator.color === 'new'
@@ -294,7 +297,7 @@ const ProductCard = ({
 												{!!indicator.total
 													? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
 													: 'Aucune donnée'}
-											</div>
+											</p>
 										)}
 									</div>
 								))}
@@ -348,6 +351,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	entityName: {
 		color: '#666666'
+	},
+	indicatorText: {
+		marginBottom: 0
 	}
 });
 
