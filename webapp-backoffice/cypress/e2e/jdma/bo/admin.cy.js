@@ -188,7 +188,7 @@ function selectEntity() {
 }
 
 function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email = '' }) {
-	cy.get('input[name="firstName"]').type(firstName);
+	cy.get('input[name="firstName"]').type(firstName, { force: true });
 	cy.get('input[name="lastName"]').type(lastName);
 	cy.get('input[type="password"]').type(password);
 	if(email !== '') {
@@ -219,7 +219,8 @@ function logout() {
 	cy.reload();
 	cy.wait(2000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
-	cy.get('header').contains('Déconnexion').click({ force: true });
+	cy.get('header').contains('Compte').click({ force: true });
+	cy.contains('button', 'Se déconnecter').click({ force: true });
 	cy.url().should('include', '/login');
 }
 

@@ -4,9 +4,15 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import Head from 'next/head';
 import { tss } from 'tss-react/dsfr';
+import { signOut, useSession } from 'next-auth/react';
 
 export default function Login() {
 	const { classes, cx } = useStyles();
+	const { data: session } = useSession();
+
+	if (session?.user) {
+		signOut();
+	}
 
 	return (
 		<div className={fr.cx('fr-container')}>
