@@ -56,6 +56,7 @@ const GeneralConditions = () => {
 													<>
 														<p>
 															<a
+																title={`${line.text}, nouvelle fenêtre`}
 																href={line.href}
 																target="_blank"
 																rel="noopener noreferrer"
