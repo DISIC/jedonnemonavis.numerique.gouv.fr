@@ -36,7 +36,7 @@ const BarVerticalChartNew = ({
 }) => {
 	return (
 		<ResponsiveContainer width="100%" height={75 * data.length}>
-			<BarChart data={data} layout="vertical">
+			<BarChart role="img" data={data} layout="vertical">
 				<CartesianGrid horizontal={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}

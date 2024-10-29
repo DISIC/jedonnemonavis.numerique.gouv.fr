@@ -52,7 +52,7 @@ const CustomBarChart = ({
 
 	return (
 		<ResponsiveContainer width="100%" height={275}>
-			<BarChart data={data}>
+			<BarChart role="img" data={data}>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}
