@@ -195,10 +195,14 @@ export const LoginForm = () => {
 					else checkEmail();
 				}}
 			>
+				<p className={cx(classes.instructionsText)}>
+					Tous les champs sont obligatoires
+				</p>
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
 					nativeInputProps={{
+						'aria-required': true,
 						ref: emailRef,
 						onChange: e => {
 							setCredentials({ ...credentials, email: e.target.value });
@@ -220,6 +224,7 @@ export const LoginForm = () => {
 						label="Mot de passe"
 						className={cx(classes.password)}
 						nativeInputProps={{
+							'aria-required': true,
 							ref: passwordRef,
 							onChange: e => {
 								setCredentials({ ...credentials, password: e.target.value });
@@ -293,5 +298,9 @@ const useStyles = tss
 		actionModal: {
 			display: 'flex',
 			justifyContent: 'space-between'
+		},
+		instructionsText: {
+			fontStyle: 'italic',
+			...fr.typography[18].style
 		}
 	}));

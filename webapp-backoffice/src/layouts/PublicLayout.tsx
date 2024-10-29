@@ -211,11 +211,16 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
-							de vos retours depuis{' '}
-							<a href="https://tally.so/r/m6kyyB" target="_blank">
-								ce court formulaire
-							</a>
+							Aidez-nous à améliorer cet outil ! Faites-nous part de vos retours
+							en remplissant{' '}
+							<a
+								title="Le formulaire s'ouvre dans une nouvelle fenêtre"
+								href="https://tally.so/r/m6kyyB"
+								target="_blank"
+							>
+								ce court formulaire.
+							</a>{' '}
+							(ouvre une nouvelle fenêtre)
 						</>
 					}
 				/>
