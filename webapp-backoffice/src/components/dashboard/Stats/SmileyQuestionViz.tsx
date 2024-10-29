@@ -149,7 +149,7 @@ const SmileyQuestionViz = ({
 								>
 									{percentage >= limitToShowTopInfos ? (
 										<Image
-											alt="smiley"
+											alt=""
 											src={`/assets/smileys/${getStatsIcon({
 												intention: rfc.intention as AnswerIntention
 											})}.svg`}
