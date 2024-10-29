@@ -632,9 +632,9 @@ export const userRouter = router({
 		}),
 
 	initResetPwd: publicProcedure
-		.input(z.object({ email: z.string() }))
+		.input(z.object({ email: z.string(), forgot: z.boolean().optional() }))
 		.mutation(async ({ ctx, input }) => {
-			const { email } = input;
+			const { email, forgot } = input;
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
@@ -668,7 +668,7 @@ export const userRouter = router({
 			});
 
 			await sendMail(
-				'Mot de passe oublié',
+				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',
 				email.toLowerCase(),
 				getResetPasswordEmailHtml(token),
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
