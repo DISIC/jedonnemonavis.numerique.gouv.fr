@@ -9,15 +9,16 @@ export const AlertObservatoire = () => {
 			closable
 			description={
 				<>
-					<div style={{ wordWrap: 'break-word', hyphens: 'auto' }}>
+					<p style={{ wordWrap: 'break-word', hyphens: 'auto' }}>
 						Si vous avez déjà un compte sur
 						https://observatoire.numerique.gouv.fr/, vous pouvez maintenant
 						gérer tous les avis récoltés sur vos boutons “Je donne mon avis” sur
 						ce site.
-						<br />
-						<br /> <b>Vous n’avez pas besoin de créer un nouveau compte.</b> Il
-						suffit de verifier votre ancien compte sur la{' '}
-					</div>
+					</p>
+					<p style={{ marginTop: '1.5rem' }}>
+						<b>Vous n’avez pas besoin de créer un nouveau compte.</b> Il suffit
+						de verifier votre ancien compte sur la{' '}
+					</p>
 
 					<Link className={fr.cx('fr-link')} href="/login">
 						page de connexion.
