@@ -3,7 +3,7 @@ import { ExtendedReview } from './interface';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import {
 	displayIntention,
@@ -12,6 +12,7 @@ import {
 } from '@/src/utils/stats';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
+import { trpc } from '@/src/utils/trpc';
 
 const ReviewLineVerbatim = ({
 	review,
@@ -25,6 +26,17 @@ const ReviewLineVerbatim = ({
 	});
 	const { cx, classes } = useStyles({ color: color });
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
+
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
+
+	useEffect(() => {
+		if (displayMoreInfo)
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+	}, [displayMoreInfo]);
 
 	return (
 		<div className={cx(classes.container)}>

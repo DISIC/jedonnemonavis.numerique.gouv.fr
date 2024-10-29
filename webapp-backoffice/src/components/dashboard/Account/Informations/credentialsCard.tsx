@@ -37,7 +37,7 @@ const CredentialsCard = (props: Props) => {
 	const {
 		control,
 		handleSubmit,
-		reset,
+		setError,
 		formState: { errors },
 		watch
 	} = useForm<FormValues>({
@@ -51,27 +51,45 @@ const CredentialsCard = (props: Props) => {
 		},
 		onError: error => {
 			switch (error.data?.httpStatus) {
-				case 500:
-					setDisplayErrorToast(true);
+				case 409:
+					setError('email', {
+						type: 'manual',
+						message: 'Cette adresse mail existe déjà'
+					});
+					break;
+				case 401:
+					setError('email', {
+						type: 'manual',
+						message:
+							'Cette adresse mail ne fait pas partie des domaines autorisés. Veuillez contacter le support si vous souhaitez utiliser cette adresse.'
+					});
+					break;
 			}
 		}
 	});
 
-	const onFormSubmit = async () => {
-		let isValid = false;
-		await handleSubmit(async data => {
-			await onLocalSubmit(data);
-			isValid = true;
-		})();
-		return isValid;
+	const onFormSubmit = (): Promise<boolean> => {
+		return new Promise(resolve => {
+			handleSubmit(async data => {
+				const result = await onLocalSubmit(data);
+				resolve(result as boolean);
+			})();
+		});
 	};
 
-	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
+	const onLocalSubmit: SubmitHandler<FormValues> = async (
+		data
+	): Promise<boolean> => {
 		const { emailConfirmation, ...updateUser } = data;
-		editUser.mutate({
-			id: user.id,
-			user: { ...updateUser }
-		});
+		try {
+			await editUser.mutateAsync({
+				id: user.id,
+				user: { ...updateUser }
+			});
+			return true;
+		} catch (error) {
+			return false;
+		}
 	};
 
 	const emailValue = watch('email');
@@ -113,7 +131,7 @@ const CredentialsCard = (props: Props) => {
 				</>
 			</OnConfirmModal>
 			<GenericCardInfos
-				title={'Identité'}
+				title={'Identifiants de connexion'}
 				modifiable={true}
 				onSubmit={onFormSubmit}
 				viewModeContent={

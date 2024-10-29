@@ -49,7 +49,7 @@ const GenericCardInfos = (props: Props) => {
 						{modifiable && !modifying && (
 							<Button
 								priority="secondary"
-								iconId="fr-icon-settings-5-line"
+								iconId="fr-icon-edit-line"
 								onClick={() => setModifying(true)}
 							>
 								Modifier
@@ -66,9 +66,8 @@ const GenericCardInfos = (props: Props) => {
 								<Button
 									priority="primary"
 									iconId="fr-icon-save-line"
-									iconPosition="right"
 									className={cx(fr.cx('fr-ml-4v'))}
-									onClick={async() => {
+									onClick={async () => {
 										const isFormValid = await onSubmit?.();
 										if (isFormValid) {
 											setModifying(false);

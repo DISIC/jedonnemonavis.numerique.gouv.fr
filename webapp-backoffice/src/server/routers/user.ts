@@ -313,16 +313,39 @@ export const userRouter = router({
 		.input(z.object({ id: z.number(), user: UserUncheckedUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
 		  
-		  const { id, user } = input;
-		  const { role, ...userWithoutRole } = user;
+		  	const { id, user } = input;
+		  	const { role, ...userWithoutRole } = user;
 	  
-		  const dataToUpdate = ctx.session?.user?.role.includes('admin')
-			? { ...userWithoutRole, role, email: ((user.email || '') as string).toLowerCase() }
-			: { ...userWithoutRole, email: ((user.email || '') as string).toLowerCase() };
+		  	const dataToUpdate = ctx.session?.user?.role.includes('admin')
+				? { ...userWithoutRole, role, email: ((user.email || '') as string).toLowerCase() }
+				: { ...userWithoutRole, email: ((user.email || '') as string).toLowerCase() };
+
+			const userHasConflict = await ctx.prisma.user.findUnique({
+				where: {
+					email: dataToUpdate.email.toLowerCase()
+				}
+			});
+
+			if (userHasConflict)
+				throw new TRPCError({
+					code: 'CONFLICT',
+					message: 'User already exists'
+				});
+
+			const isWhiteListed = await checkUserDomain(
+				ctx.prisma,
+				dataToUpdate.email.toLowerCase()
+			);
+
+			if (!isWhiteListed)
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'User email domain not whitelisted'
+				});
 	  
 		  const updatedUser = await ctx.prisma.user.update({
-			where: { id },
-			data: dataToUpdate,
+				where: { id },
+				data: dataToUpdate,
 		  });
 	  
 		  return { data: updatedUser };

@@ -37,6 +37,7 @@ const DeleteCard = (props: Props) => {
 			<OnConfirmModal
 				modal={onConfirmModal}
 				title={`Suppresion de compte`}
+				kind="danger"
 				handleOnConfirm={() => {
 					deleteUser.mutate({ id: user?.id as number });
 					onConfirmModal.close();
@@ -55,7 +56,6 @@ const DeleteCard = (props: Props) => {
 						<Button
 							priority="tertiary"
 							iconId="fr-icon-delete-bin-line"
-							iconPosition="right"
 							className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
 							onClick={() => handleDeletion()}
 						>
