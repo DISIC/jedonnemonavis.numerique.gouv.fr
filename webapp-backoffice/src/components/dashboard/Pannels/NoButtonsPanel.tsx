@@ -24,11 +24,14 @@ const NoButtonsPanel = (props: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-container'))}>
 			{getTitle()}
 			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--left',
-					'fr-grid-row--middle',
-					'fr-pb-3v'
+				className={cx(
+					fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--left',
+						'fr-grid-row--middle',
+						'fr-pb-3v'
+					),
+					classes.maxWidth
 				)}
 			>
 				<div className={fr.cx('fr-col-3')}>
@@ -101,6 +104,9 @@ const useStyles = tss.create({
 		fontWeight: 'bold',
 		fontSize: '16px',
 		color: fr.colors.decisions.text.title.blueFrance.default
+	},
+	maxWidth: {
+		width: '100%'
 	},
 	textContainer: {
 		display: 'flex',
