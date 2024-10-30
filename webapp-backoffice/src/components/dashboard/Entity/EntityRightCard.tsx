@@ -35,7 +35,7 @@ const EntityRightCard = (props: Props) => {
 
 	return (
 		<>
-			<div
+			<li
 				className={cx(
 					fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'),
 					classes.entityCard
@@ -143,7 +143,7 @@ const EntityRightCard = (props: Props) => {
 							))}
 					</div>
 				</div>
-			</div>
+			</li>
 		</>
 	);
 };

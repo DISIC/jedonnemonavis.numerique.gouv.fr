@@ -244,7 +244,7 @@ const EntityRightsModal = (props: Props) => {
 						</div>
 					) : (
 						<>
-							<div className={cx(classes.entitySection)}>
+							<ul className={cx(classes.entitySection)}>
 								{adminEntityRights.map((adminEntityRight, index) => {
 									if (adminEntityRight.user !== null) {
 										return (
@@ -257,7 +257,7 @@ const EntityRightsModal = (props: Props) => {
 										);
 									}
 								})}
-							</div>
+							</ul>
 							<div>
 								{adminEntityRights.some(
 									adminEntityRight => adminEntityRight.user === null
@@ -266,7 +266,7 @@ const EntityRightsModal = (props: Props) => {
 										<div className={cx(classes.inviteTitle)}>
 											Invitations envoyées
 										</div>
-										<div>
+										<ul className={classes.entityList}>
 											{adminEntityRights
 												.filter(
 													adminEntityRight => adminEntityRight.user === null
@@ -279,7 +279,7 @@ const EntityRightsModal = (props: Props) => {
 														withOptions={isMine}
 													/>
 												))}
-										</div>
+										</ul>
 									</>
 								)}
 							</div>
@@ -392,11 +392,15 @@ const useStyles = tss
 			}
 		},
 		entitySection: {
-			marginBottom: '0.75rem'
+			marginBottom: '0.75rem',
+			paddingInlineStart: 0
 		},
 		inviteTitle: {
 			fontWeight: 'bold',
 			padding: '5px 0'
+		},
+		entityList: {
+			paddingInlineStart: 0
 		}
 	}));
 
