@@ -570,7 +570,7 @@ const useStyles = tss
         },
       },
       [fr.breakpoints.up("md")]: {
-        height: isInIframe ? 80 : `${blueSectionPxHeight}px`,
+        height: `${blueSectionPxHeight}px`,
       },
     },
     titleSection: {
@@ -600,7 +600,7 @@ const useStyles = tss
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,
       ...fr.spacing("padding", {
-        topBottom: !isInIframe ? "4v" : "auto",
+        topBottom: "auto",
         rightLeft: "6v",
       }),
       h1: {

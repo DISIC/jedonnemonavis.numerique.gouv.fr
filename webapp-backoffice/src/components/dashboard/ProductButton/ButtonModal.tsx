@@ -103,8 +103,6 @@ const ButtonModal = (props: Props) => {
 				return 'Créer un bouton';
 			case 'edit':
 				return 'Modifier un bouton';
-			case 'preview':
-				return 'Prévisualiser le formulaire';
 			// case 'archive':
 			// 	return 'Archiver un bouton';
 			// case 'merge':
@@ -382,17 +380,6 @@ const ButtonModal = (props: Props) => {
 			// 			</Select>
 			// 		</div>
 			// 	);
-			case 'preview':
-				return (
-					<div>
-						<iframe
-							src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${button?.product_id}?button=${button?.id}&iframe=true`}
-							className={classes.iframe}
-							allowFullScreen
-							title="Aperçu du formulaire"
-						></iframe>
-					</div>
-				);
 			default:
 				return <div></div>;
 		}

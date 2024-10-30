@@ -21,7 +21,6 @@ interface MenuItems {
 }
 
 const AccountLayout = ({ children }: ProductLayoutProps) => {
-
 	const [displayToast, setDisplayToast] = useState(false);
 	const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -40,7 +39,7 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 				href: `/administration/dashboard/account/${session?.user.id}/infos`,
 				alt: 'Informations'
 			}
-		},
+		}
 		/*{
 			text: 'Notifications',
 			isActive:
@@ -79,7 +78,7 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 				message="Identifiant copié dans le presse papier !"
 			/>
 			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-8v')} id="product-title">
+				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-12v')} id="product-title">
 					Compte
 				</h1>
 			</div>

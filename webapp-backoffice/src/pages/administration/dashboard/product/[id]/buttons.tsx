@@ -143,14 +143,27 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				)}
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-12')}>
-					<p>
-						Le bouton JDMA se place sur votre service numérique pour récolter
-						l’avis de vos usagers.
-					</p>
+			{buttonsCount > 0 && (
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-12')}>
+						<p>
+							Le bouton JDMA se place sur votre service numérique pour récolter
+							l’avis de vos usagers.
+						</p>
+						<p>
+							Vous pouvez{' '}
+							<a
+								href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
+								target="_blank"
+							>
+								prévisualiser le formulaire JDMA
+							</a>
+							. Les avis que vous déposerez ne seront pas pris en compte dans
+							les statistiques.
+						</p>
+					</div>
 				</div>
-			</div>
+			)}
 			<div
 				className={fr.cx(
 					'fr-grid-row',

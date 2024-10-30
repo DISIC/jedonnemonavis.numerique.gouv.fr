@@ -101,14 +101,6 @@ const ProductButtonCard = (props: Props) => {
 								</MenuItem>
 								<MenuItem
 									onClick={() => {
-										onButtonClick('preview', button);
-										handleClose();
-									}}
-								>
-									Prévisualiser le formulaire
-								</MenuItem>
-								<MenuItem
-									onClick={() => {
 										navigator.clipboard.writeText(
 											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
 										);
