@@ -323,6 +323,7 @@ const ProductCard = ({
 					}
 				}}
 				kind="danger"
+				disableAction={!validateDelete}
 			>
 				<div>
 					<p>
@@ -573,7 +574,7 @@ const ProductCard = ({
 											)}
 										</div>
 									) : product.buttons.length === 0 ? (
-										<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+										<NoButtonsPanel onButtonClick={handleButtonClick} />
 									) : (
 										<NoReviewsPanel
 											improveBtnClick={() => {}}

@@ -8,7 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
@@ -46,6 +46,14 @@ const ReviewLine = ({
 				return '';
 		}
 	};
+
+	useEffect(() => {
+		if (displayMoreInfo)
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+	}, [displayMoreInfo]);
 
 	return (
 		<div className={cx(classes.container)}>
@@ -128,10 +136,6 @@ const ReviewLine = ({
 						iconId="fr-icon-arrow-down-s-fill"
 						size="small"
 						onClick={() => {
-							createReviewViewLog({
-								review_id: review.id as number,
-								review_created_at: review.created_at as Date
-							});
 							setDisplayMoreInfo(!displayMoreInfo);
 						}}
 					>

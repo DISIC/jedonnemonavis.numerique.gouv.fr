@@ -21,7 +21,7 @@ const NoButtonsPanel = (props: Props) => {
 	};
 
 	return (
-		<div className={cx(classes.container, fr.cx('fr-container'))}>
+		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-12v'))}>
 			{getTitle()}
 			<div
 				className={cx(
@@ -43,7 +43,7 @@ const NoButtonsPanel = (props: Props) => {
 					/>
 				</div>
 				<div className={cx(fr.cx('fr-col-9'), classes.textContainer)}>
-					<p className={cx(classes.text)}>
+					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
 						Le bouton JDMA se place sur votre service numérique pour récolter
 						l’avis de vos usagers.
 					</p>
@@ -59,7 +59,7 @@ const NoButtonsPanel = (props: Props) => {
 					/>
 				</div>
 				<div className={cx(fr.cx('fr-col-9'), classes.textContainer)}>
-					<p className={cx(classes.text)}>
+					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
 						Pour installer le bouton sur votre service numérique, insérez le
 						code HTML fourni par la plateforme et commencez à récolter des avis.
 					</p>
@@ -88,8 +88,7 @@ const NoButtonsPanel = (props: Props) => {
 const useStyles = tss.create({
 	container: {
 		...fr.spacing('padding', {}),
-		padding: '2rem',
-		background: '#F3F6FE',
+		background: fr.colors.decisions.artwork.background.blueCumulus.default,
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'flex-start',
