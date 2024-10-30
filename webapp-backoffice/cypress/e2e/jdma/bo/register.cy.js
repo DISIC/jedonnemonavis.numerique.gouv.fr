@@ -202,7 +202,7 @@ function modifyButton() {
 				.find('button#button-options')
 				.click();
 		});
-	cy.get('div#option-menu').contains('Modifier le bouton').click();
+	cy.get('div#option-menu').contains('Modifier').click();
 	cy.get('dialog#button-modal').within(() => {
 		cy.get('input[name="button-create-title"]')
 			.clear()
