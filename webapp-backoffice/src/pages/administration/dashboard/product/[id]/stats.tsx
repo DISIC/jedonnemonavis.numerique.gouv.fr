@@ -174,7 +174,7 @@ const ProductStatPage = (props: Props) => {
 				</Head>
 				<h1>Statistiques</h1>
 				{buttonsResult.metadata.count === 0 ? (
-					<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
 					<NoReviewsPanel
 						improveBtnClick={() => {}}

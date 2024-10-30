@@ -71,6 +71,23 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		}
 	);
 
+	const { data: userAccessRights, isLoading: isUserAccessRightsLoading } =
+		trpc.accessRight.getUserList.useQuery(
+			{
+				page: 100,
+				numberPerPage: 0
+			},
+			{
+				enabled: !!session?.user,
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
@@ -138,8 +155,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								/>
 								Informations personnelles
 							</MenuItem>
-							{
-								/*
+							{/*
 									<MenuItem
 										className={cx(fr.cx('fr-p-4v'), classes.item)}
 										onClick={e => {
@@ -158,8 +174,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 										/>
 										Notifications
 									</MenuItem>
-								*/
-							}
+								*/}
 							<MenuItem
 								className={cx(
 									fr.cx('fr-pb-2v', 'fr-pt-4v'),
@@ -183,29 +198,39 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						</Menu>
 					</>
 				];
-	const navigationItems = session?.user
-		? !!userAdminEntityRights.metadata.count ||
+
+	const navigationItems = [];
+
+	if (session?.user) {
+		if (
+			userAccessRights.metadata.count ||
+			userAdminEntityRights.metadata.count ||
 			session.user.role.includes('admin')
-			? [
-					{
-						text: 'Services',
-						linkProps: {
-							href: '/administration/dashboard/products',
-							target: '_self'
-						},
-						isActive: pathname.startsWith('/administration/dashboard/product')
-					},
-					{
-						text: 'Organisations',
-						linkProps: {
-							href: '/administration/dashboard/entities',
-							target: '_self'
-						},
-						isActive: pathname.startsWith('/administration/dashboard/entities')
-					}
-				]
-			: []
-		: [];
+		) {
+			navigationItems.push({
+				text: 'Services',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
+			});
+		}
+
+		if (
+			userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
+		) {
+			navigationItems.push({
+				text: 'Organisations',
+				linkProps: {
+					href: '/administration/dashboard/entities',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/entities')
+			});
+		}
+	}
 
 	if (session?.user.role.includes('admin')) {
 		const adminNavigationItems = [
