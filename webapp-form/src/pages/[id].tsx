@@ -324,7 +324,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div>
           <div className={classes.titleSuccess}>
             <Image
-              alt="Service public +"
+              alt=""
               src="/Demarches/assets/icon-check.svg"
               title="Icone - Merci pour votre aide"
               width={40}

@@ -49,6 +49,7 @@ export const LanguageSelector = memo((props: Props) => {
               <a
                 className={fr.cx("fr-translate__language", "fr-nav__link")}
                 href="#"
+                lang={lang_i}
                 aria-current={lang_i === lang ? "true" : undefined}
                 onClick={(e) => {
                   e.preventDefault();

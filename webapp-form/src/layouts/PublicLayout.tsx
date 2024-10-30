@@ -105,6 +105,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       </main>
       {!isInIframe && (
         <Footer
+          id="footer"
           accessibility="non compliant"
           bottomItems={[
             { text: "Données personnelles", linkProps: { href: "/cgu" } },
