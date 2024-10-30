@@ -120,7 +120,7 @@ const ObservatoireStats = ({
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
 				<>
-					<h5
+					<p
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
@@ -131,16 +131,16 @@ const ObservatoireStats = ({
 						{['autonomy', 'contact'].includes(field.slug)
 							? `${getPercentageFromValue(field.value)}%`
 							: `${getReadableValue(field.value)} / 10`}
-					</h5>
+					</p>
 					{field.slug !== 'autonomy' && (
-						<h6
+						<p
 							className={cx(
 								classes.intention,
 								getClassFromValue(field.value, field.slug)
 							)}
 						>
 							{getLabelFromValue(field.value, field.slug)}
-						</h6>
+						</p>
 					)}
 				</>
 			);
