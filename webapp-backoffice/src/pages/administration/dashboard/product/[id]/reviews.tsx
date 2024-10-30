@@ -34,6 +34,16 @@ interface Props {
 	product: Product;
 }
 
+type FormErrors = {
+	startDate: boolean;
+	endDate: boolean;
+};
+
+const defaultErrors = {
+	startDate: false,
+	endDate: false
+};
+
 const ProductReviewsPage = (props: Props) => {
 	const { product } = props;
 	const router = useRouter();
@@ -49,6 +59,7 @@ const ProductReviewsPage = (props: Props) => {
 	);
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
@@ -164,6 +175,11 @@ const ProductReviewsPage = (props: Props) => {
 			};
 		}
 	});
+
+	const validateDateFormat = (date: string) => {
+		const regex = /^\d{4}-\d{2}-\d{2}$/;
+		return regex.test(date);
+	};
 
 	const { cx, classes } = useStyles();
 
@@ -306,6 +322,25 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
+	const submit = () => {
+		const startDateValid = validateDateFormat(startDate);
+		const endDateValid = validateDateFormat(endDate);
+		let newErrors = { startDate: false, endDate: false };
+
+		if (!startDateValid) {
+			newErrors.startDate = true;
+		}
+		if (!endDateValid) {
+			newErrors.endDate = true;
+		}
+		setErrors(newErrors);
+
+		if (startDateValid && endDateValid) {
+			setValidatedSearch(search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim());
+			setCurrentPage(1);
+		}
+	};
+
 	return (
 		<>
 			<ReviewFiltersModal
@@ -353,7 +388,12 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-8v'
 							)}
 						>
-							<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+									classes.errorMsg
+								)}
+							>
 								<Input
 									label="Date de début"
 									nativeInputProps={{
@@ -362,11 +402,23 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											setStartDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
+											submit();
 										}
 									}}
+									state={errors.startDate ? 'error' : 'default'}
+									stateRelatedMessage={
+										errors.startDate ? (
+											<span role="alert">format attendu : JJ/MM/AAAA</span>
+										) : null
+									}
 								/>
 							</div>
-							<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+									classes.errorMsg
+								)}
+							>
 								<Input
 									label="Date de fin"
 									nativeInputProps={{
@@ -375,8 +427,15 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											setEndDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
+											submit();
 										}
 									}}
+									state={errors.endDate ? 'error' : 'default'}
+									stateRelatedMessage={
+										errors.endDate ? (
+											<span role="alert">format attendu : JJ/MM/AAAA</span>
+										) : null
+									}
 								/>
 							</div>
 							<div
@@ -391,10 +450,7 @@ const ProductReviewsPage = (props: Props) => {
 									className={cx(classes.searchForm)}
 									onSubmit={e => {
 										e.preventDefault();
-										setValidatedSearch(
-											search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
-										);
-										setCurrentPage(1);
+										submit();
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>
@@ -431,7 +487,7 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-grid-row',
 								'fr-grid-row--gutters',
 								'fr-grid-row--left',
-								'fr-mt-4v'
+								'fr-mt-6v'
 							)}
 						>
 							<div
@@ -679,6 +735,14 @@ const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
 			'.fr-btn:first-of-type': {
 				marginBottom: '1rem'
 			}
+		}
+	},
+	errorMsg: {
+		'.fr-error-text': {
+			marginTop: '0.5rem'
+		},
+		'p.fr-error-text': {
+			position: 'absolute'
 		}
 	}
 }));
