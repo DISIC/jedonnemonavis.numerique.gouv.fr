@@ -441,24 +441,27 @@ const DashBoard = () => {
 									<Loader />
 								</div>
 							) : (
-								products.map((product, index) => (
-									<ProductCard
-										product={product}
-										userId={parseInt(session?.user?.id as string)}
-										entity={
-											entities.find(
-												entity => product.entity_id === entity.id
-											) as Entity
-										}
-										isFavorite={
-											!!favorites.find(
-												favorite => favorite.product_id === product.id
-											)
-										}
-										showFavoriteButton={countTotalUserScope > 10}
-										key={index}
-									/>
-								))
+								<ul className={classes.buttonList}>
+									{products.map((product, index) => (
+										<li key={index}>
+											<ProductCard
+												product={product}
+												userId={parseInt(session?.user?.id as string)}
+												entity={
+													entities.find(
+														entity => product.entity_id === entity.id
+													) as Entity
+												}
+												isFavorite={
+													!!favorites.find(
+														favorite => favorite.product_id === product.id
+													)
+												}
+												showFavoriteButton={countTotalUserScope > 10}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 
 							{products.length === 0 && !isRefetchingProducts && (
@@ -569,6 +572,13 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	boldText: {
 		fontWeight: 'bold'
+	},
+	buttonList: {
+		paddingInlineStart: 0,
+		listStyleType: 'none',
+		li: {
+			paddingBottom: 0
+		}
 	}
 }));
 

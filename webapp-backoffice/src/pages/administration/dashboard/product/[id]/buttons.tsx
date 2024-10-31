@@ -203,13 +203,16 @@ const ProductButtonsPage = (props: Props) => {
 							)}
 						</div>
 
-						{buttons?.map((button, index) => (
-							<ProductButtonCard
-								key={index}
-								button={button}
-								onButtonClick={handleModalOpening}
-							/>
-						))}
+						<ul className={classes.buttonList}>
+							{buttons?.map((button, index) => (
+								<li key={index}>
+									<ProductButtonCard
+										button={button}
+										onButtonClick={handleModalOpening}
+									/>
+								</li>
+							))}
+						</ul>
 					</>
 				)}
 				<div
@@ -258,6 +261,13 @@ const useStyles = tss
 		},
 		btnContainer: {
 			marginTop: '3rem'
+		},
+		buttonList: {
+			paddingInlineStart: 0,
+			listStyleType: 'none',
+			li: {
+				paddingBottom: 0
+			}
 		}
 	});
 

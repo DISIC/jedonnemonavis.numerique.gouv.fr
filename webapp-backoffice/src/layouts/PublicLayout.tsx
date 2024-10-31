@@ -220,7 +220,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							>
 								ce court formulaire.
 							</a>{' '}
-							(ouvre une nouvelle fenêtre)
 						</>
 					}
 				/>

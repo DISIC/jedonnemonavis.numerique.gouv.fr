@@ -376,9 +376,7 @@ const ProductModal = (props: Props) => {
 												hideLabel={true}
 												label={`URL ${index + 1}`}
 												state={errors['urls']?.[index] ? 'error' : 'default'}
-												stateRelatedMessage={
-													errors['urls']?.[index]?.value?.message
-												}
+												stateRelatedMessage={`${errors['urls']?.[index]?.value?.message}. Format attendu : https://exemple.com `}
 												nativeInputProps={{
 													name,
 													value,

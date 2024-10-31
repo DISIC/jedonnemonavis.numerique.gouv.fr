@@ -51,6 +51,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 									<Button
 										priority="secondary"
 										size="small"
+										title={`Gérer les administrateurs de ${entity.name}`}
 										iconId="fr-icon-admin-line"
 										iconPosition="right"
 										className={classes.button}
@@ -65,6 +66,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 									<Button
 										priority="secondary"
 										size="small"
+										title={`Clés API de ${entity.name}`}
 										iconId="fr-icon-lock-unlock-line"
 										iconPosition="right"
 										className={classes.button}
@@ -79,6 +81,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 									<Button
 										priority="secondary"
 										size="small"
+										title={`Modifier ${entity.name}`}
 										iconId="fr-icon-edit-line"
 										iconPosition="right"
 										onClick={() => {

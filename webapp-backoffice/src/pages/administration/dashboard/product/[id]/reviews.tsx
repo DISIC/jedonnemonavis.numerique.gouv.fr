@@ -210,6 +210,7 @@ const ProductReviewsPage = (props: Props) => {
 				return (
 					<Tag
 						key={index}
+						title={'Retirer le filtre : Verbatim complété'}
 						dismissible
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
@@ -229,27 +230,32 @@ const ProductReviewsPage = (props: Props) => {
 					</Tag>
 				);
 			} else if (Array.isArray(filterValue) && filterValue.length > 0) {
-				return filterValue.map((value, subIndex) => (
-					<Tag
-						key={`${key}-${subIndex}`}
-						dismissible
-						className={cx(classes.tagFilter)}
-						nativeButtonProps={{
-							onClick: () => {
-								setFilters({
-									...filters,
-									[key]: filterValue.filter(item => item !== value)
-								});
-							}
-						}}
-					>
-						{renderLabel(
-							FILTER_LABELS.find(filter => filter.value === key)?.type,
-							key,
-							value
-						)}
-					</Tag>
-				));
+				return filterValue.map((value, subIndex) => {
+					const labelRendered = renderLabel(
+						FILTER_LABELS.find(filter => filter.value === key)?.type,
+						key,
+						value
+					);
+
+					return (
+						<Tag
+							key={`${key}-${subIndex}`}
+							title={`Retirer le filtre ${labelRendered}`}
+							dismissible
+							className={cx(classes.tagFilter)}
+							nativeButtonProps={{
+								onClick: () => {
+									setFilters({
+										...filters,
+										[key]: filterValue.filter(item => item !== value)
+									});
+								}
+							}}
+						>
+							{labelRendered}
+						</Tag>
+					);
+				});
 			} else {
 				return null;
 			}
@@ -265,29 +271,11 @@ const ProductReviewsPage = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return (
-					<>
-						<p>
-							{FILTER_LABELS.find(filter => filter.value === key)?.label}{' '}
-							complété
-						</p>
-					</>
-				);
+				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} complété`;
 			case 'iconbox':
-				return (
-					<>
-						<p>
-							{FILTER_LABELS.find(filter => filter.value === key)?.label} :{' '}
-							{displayIntention((value ?? 'neutral') as AnswerIntention)}
-						</p>
-					</>
-				);
+				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return (
-					<>
-						<p>{value}</p>
-					</>
-				);
+				return `${value}`;
 			default:
 				return '';
 		}
@@ -592,7 +580,10 @@ const ProductReviewsPage = (props: Props) => {
 								>
 									{reviews.length > 0 && nbPages > 0 && (
 										<>
-											<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+											<div
+												role="status"
+												className={fr.cx('fr-col-12', 'fr-mt-8v')}
+											>
 												Avis de{' '}
 												<span className={cx(classes.boldText)}>
 													{numberPerPage * (currentPage - 1) + 1}
