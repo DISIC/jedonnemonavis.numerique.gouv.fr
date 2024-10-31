@@ -7,6 +7,7 @@ const mailer_url = Cypress.env('mailer_base_url');
 const invitedEmail = Cypress.env('admin_guest_mail_bis');
 const firstNameTest = "Stevie";
 const lastNameTest = "Wonder"
+const newEmailTest = "stevie-wonder@beta.gouv.fr"
 
 // Sélecteurs communs
 const selectors = {
@@ -19,7 +20,8 @@ const selectors = {
         firstName: 'input[name="firstName"]',
         lastName: 'input[name="lastName"]',
         email: 'input[name="email"]',
-        emailConfirmation: 'input[name="emailConfirmation"]'
+        emailConfirmation: 'input[name="emailConfirmation"]',
+        confirm: 'input[name="word"]'
     },
     card: {
         identity: 'Identité',
@@ -30,11 +32,14 @@ const selectors = {
     },
     action: {
         save: 'Sauvegarder',
-        modify: 'Modifier'
+        modify: 'Modifier',
+        delete: 'Supprimer le compte',
+        confirmDelete: 'Supprimer'
     }
 };
 
-describe('jdma-admin', () => {
+describe('Account page', () => {
+
 	beforeEach(() => {
 		cy.visit(`${app_url}/login`);
 	});
@@ -54,15 +59,41 @@ describe('jdma-admin', () => {
         logout();
     })
 
-    it('bad emails patterns should not work', () => {
-        login(invitedEmail, userPassword);
-        checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmail)
+    it('change email : bad emails patterns should not work', () => {
+        testEmail({email: 'zrgzgr.gr', confirmationEmail: 'test@gmail.com', expectedMEssage: "Les adresses e-mail ne correspondent pas"});
+    })
+
+    it('change email : different emails should not work', () => {
+        testEmail({email: 'test1@gmail.com', confirmationEmail: 'test@gmail.com', expectedMEssage: "Les adresses e-mail ne correspondent pas"});
+    })
+
+    it('change email : not whitelisted emails should not work', () => {
+        testEmail({email: 'test@gmail.com', confirmationEmail: 'test@gmail.com', expectedMEssage: "Cette adresse mail ne fait pas partie des domaines autorisés. Veuillez contacter le support si vous souhaitez utiliser cette adresse."});
+    })
+
+    it('change email : allready existing emails should not work', () => {
+        testEmail({email: adminEmail, confirmationEmail: adminEmail, expectedMEssage: "Cette adresse mail existe déjà"});
+    })
+
+    it('change email : should work if everything OK', () => {
+        testEmail({email: newEmailTest, confirmationEmail: newEmailTest});
+    })
+
+    it('delete account', () => {
+        login(newEmailTest, userPassword);
+        checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
         cy.contains('li', selectors.menu.account).click({force : true});
-        clickModifyCard(selectors.card.credentials)
-        fillForm({email: 'zrgzgr.gr', emailConfirmation: 'test@gmail.com'})
-        cy.contains('button', selectors.action.save).click()
-        cy.contains('p', "Format d'adresse e-mail invalide").should('exist')
-        cy.contains('button', selectors.action.save).should('exist')
+        cy.contains('button', selectors.action.delete).click({force : true});
+        cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
+        cy.get(selectors.accountForm.confirm).clear().type('blabla');
+        cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
+        cy.contains('p', 'Mot de confirmation incorrect').should('exist')
+        cy.get(selectors.accountForm.confirm).clear().type('supprimer');
+        cy.contains('button', selectors.action.confirmDelete).should('not.be.disabled').click();
+        cy.url().should('include', '/login');
+        cy.get(selectors.loginForm.email).type(newEmailTest);
+        cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
+        cy.contains('p', 'Aucun compte connu avec cette adresse e-mail.').should('exist')
     })
 });
 
@@ -116,5 +147,24 @@ function fillForm({ firstName = '', lastName = '', email = '', emailConfirmation
 	if(emailConfirmation !== '') {
 		cy.get(selectors.accountForm.emailConfirmation).clear().type(emailConfirmation);
 	}
+}
+
+function testEmail({email = '', confirmationEmail = '', expectedMEssage = ''}) {
+    login(invitedEmail, userPassword);
+    checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmail)
+    cy.contains('li', selectors.menu.account).click({force : true});
+    clickModifyCard(selectors.card.credentials)
+    fillForm({email: email, emailConfirmation: confirmationEmail})
+    cy.contains('button', selectors.action.save).click()
+    if (expectedMEssage !== '') {
+        cy.contains('p', expectedMEssage).should('exist')
+        cy.contains('button', selectors.action.save).should('exist')
+    } else {
+        checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest)
+        logout();
+        login(newEmailTest, userPassword);
+        checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest)
+    }
+    logout();
 }
 
