@@ -48,6 +48,10 @@ const DashBoard = () => {
 
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+	const [statusProductState, setStatusProductState] = React.useState<{
+		msg: string;
+		role: 'status' | 'alert';
+	} | null>(null);
 
 	const [entityCreated, setEntityCreated] = React.useState<
 		Entity | undefined
@@ -210,6 +214,24 @@ const DashBoard = () => {
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={`Vous êtes désormais administrateur de ${productTitle}`}
+					/>
+				</div>
+			)}
+			{statusProductState && (
+				<div className={cx(classes.container, fr.cx('fr-container'))}>
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setStatusProductState(null);
+						}}
+						severity={'success'}
+						className={fr.cx('fr-mb-5w')}
+						small
+						description={
+							<>
+								<p role={statusProductState.role}>{statusProductState.msg}</p>
+							</>
+						}
 					/>
 				</div>
 			)}
@@ -474,10 +496,20 @@ const DashBoard = () => {
 											)
 										}
 										showFavoriteButton={countTotalUserScope > 10}
+										onDeleteProduct={() => {
+											setStatusProductState({
+												msg: `Le service "${product.title}" a bien été archivé`,
+												role: 'status'
+											});
+										}}
 										onRestoreProduct={() => {
 											updateFilters({
 												...filters,
 												filterOnlyArchived: false
+											});
+											setStatusProductState({
+												msg: `Le service "${product.title}" a bien été restauré`,
+												role: 'status'
 											});
 										}}
 									/>

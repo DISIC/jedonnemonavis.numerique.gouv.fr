@@ -11,6 +11,7 @@ import { trpc } from '@/src/utils/trpc';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Toast } from '@/src/components/ui/Toast';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	user: User;
@@ -31,8 +32,6 @@ const CredentialsCard = (props: Props) => {
 	const utils = trpc.useUtils();
 	const { data: session, update: refetchSession } = useSession();
 	const [displayToast, setDisplayToast] = React.useState<boolean>(false);
-	const [displayErrorToast, setDisplayErrorToast] =
-		React.useState<boolean>(false);
 
 	const {
 		control,
@@ -98,20 +97,6 @@ const CredentialsCard = (props: Props) => {
 
 	return (
 		<>
-			<Toast
-				isOpen={displayToast}
-				setIsOpen={setDisplayToast}
-				autoHideDuration={4000}
-				severity="success"
-				message="Email envoyé avec succès"
-			/>
-			<Toast
-				isOpen={displayErrorToast}
-				setIsOpen={setDisplayErrorToast}
-				autoHideDuration={4000}
-				severity="error"
-				message="Cette adresse mail existe déjà"
-			/>
 			<OnConfirmModal
 				modal={onConfirmModal}
 				title={`Réinitialiser le mot de passe`}
@@ -136,6 +121,22 @@ const CredentialsCard = (props: Props) => {
 				onSubmit={onFormSubmit}
 				viewModeContent={
 					<>
+						{displayToast && (
+							<div className={cx(fr.cx('fr-mt-4v'))}>
+								<Alert
+									closable
+									onClose={function noRefCheck() {
+										setDisplayToast(false);
+									}}
+									severity={'success'}
+									className={fr.cx('fr-mb-5w')}
+									small
+									description={
+										'Email de réinitialisation du mot de passe envoyé avec succès'
+									}
+								/>
+							</div>
+						)}
 						<div
 							className={fr.cx(
 								'fr-grid-row',
@@ -167,91 +168,114 @@ const CredentialsCard = (props: Props) => {
 					</>
 				}
 				editModeContent={
-					<div
-						className={fr.cx(
-							'fr-grid-row',
-							'fr-grid-row--gutters',
-							'fr-grid-row--middle'
+					<>
+						{displayToast && (
+							<div className={cx(fr.cx('fr-mt-4v'))}>
+								<Alert
+									closable
+									onClose={function noRefCheck() {
+										setDisplayToast(false);
+									}}
+									severity={'success'}
+									className={fr.cx('fr-mb-5w')}
+									small
+									description={
+										<>
+											<p role="status">
+												Email de réinitialisation du mot de passe envoyé avec
+												succès.
+											</p>
+										</>
+									}
+								/>
+							</div>
 						)}
-					>
-						<div className={fr.cx('fr-col-md-6')}>
-							<form id="credentials-form">
-								<div className={fr.cx('fr-input-group')}>
-									<Controller
-										control={control}
-										name="email"
-										rules={{
-											required: 'Ce champ est obligatoire',
-											pattern: {
-												value:
-													/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-												message: "Format d'adresse e-mail invalide"
-											}
-										}}
-										render={({ field: { onChange, value, name } }) => (
-											<Input
-												label={
-													<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-														Adresse e-mail
-													</p>
+						<div
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--middle'
+							)}
+						>
+							<div className={fr.cx('fr-col-md-6')}>
+								<form id="credentials-form">
+									<div className={fr.cx('fr-input-group')}>
+										<Controller
+											control={control}
+											name="email"
+											rules={{
+												required: 'Ce champ est obligatoire',
+												pattern: {
+													value:
+														/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+													message: "Format d'adresse e-mail invalide"
 												}
-												nativeInputProps={{
-													onChange,
-													value: value || '',
-													name,
-													required: true
-												}}
-												state={errors[name] ? 'error' : 'default'}
-												stateRelatedMessage={errors[name]?.message}
-											/>
-										)}
-									/>
-								</div>
-								<div className={fr.cx('fr-input-group')}>
-									<Controller
-										control={control}
-										name="emailConfirmation"
-										rules={{
-											required: 'Ce champ est obligatoire',
-											validate: value =>
-												value === emailValue ||
-												'Les adresses e-mail ne correspondent pas'
-										}}
-										render={({ field: { onChange, value, name } }) => (
-											<Input
-												label={
-													<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-														Vérifiez l'adresse e-mail
-													</p>
-												}
-												nativeInputProps={{
-													onChange,
-													value: value || '',
-													name,
-													required: true
-												}}
-												state={errors[name] ? 'error' : 'default'}
-												stateRelatedMessage={errors[name]?.message}
-											/>
-										)}
-									/>
-								</div>
-							</form>
+											}}
+											render={({ field: { onChange, value, name } }) => (
+												<Input
+													label={
+														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
+															Adresse e-mail
+														</p>
+													}
+													nativeInputProps={{
+														onChange,
+														value: value || '',
+														name,
+														required: true
+													}}
+													state={errors[name] ? 'error' : 'default'}
+													stateRelatedMessage={errors[name]?.message}
+												/>
+											)}
+										/>
+									</div>
+									<div className={fr.cx('fr-input-group')}>
+										<Controller
+											control={control}
+											name="emailConfirmation"
+											rules={{
+												required: 'Ce champ est obligatoire',
+												validate: value =>
+													value === emailValue ||
+													'Les adresses e-mail ne correspondent pas'
+											}}
+											render={({ field: { onChange, value, name } }) => (
+												<Input
+													label={
+														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
+															Vérifiez l'adresse e-mail
+														</p>
+													}
+													nativeInputProps={{
+														onChange,
+														value: value || '',
+														name,
+														required: true
+													}}
+													state={errors[name] ? 'error' : 'default'}
+													stateRelatedMessage={errors[name]?.message}
+												/>
+											)}
+										/>
+									</div>
+								</form>
+							</div>
+							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+								Mot de passe
+							</div>
+							<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
+								<Button
+									priority="secondary"
+									onClick={() => {
+										onConfirmModal.open();
+									}}
+								>
+									Réinitialiser le mot de passe
+								</Button>
+							</div>
 						</div>
-						<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
-							Mot de passe
-						</div>
-						<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
-							<Button
-								priority="secondary"
-								onClick={() => {
-									onConfirmModal.open();
-								}}
-							>
-								Réinitialiser le mot de passe
-							</Button>
-						</div>
-					</div>
+					</>
 				}
 			/>
 		</>
