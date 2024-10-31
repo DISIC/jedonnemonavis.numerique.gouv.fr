@@ -22,6 +22,7 @@ import OnConfirmModal from '../../ui/modal/OnConfirm';
 import React, { useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { Toast } from '../../ui/Toast';
 
 interface Indicator {
 	title: string;
@@ -56,7 +57,8 @@ const ProductCard = ({
 	entity,
 	isFavorite,
 	showFavoriteButton,
-	onRestoreProduct
+	onRestoreProduct,
+	onDeleteProduct
 }: {
 	product: ProductWithButtons;
 
@@ -65,11 +67,13 @@ const ProductCard = ({
 	isFavorite: boolean;
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
+	onDeleteProduct: () => void;
 }) => {
 	const [onConfirmModalRestore, setOnConfirmModalRestore] =
 		useState<CreateModalProps | null>(null);
 	const [onConfirmModalArchive, setOnConfirmModalArchive] =
 		useState<CreateModalProps | null>(null);
+	const [displayToast, setDisplayToast] = React.useState<boolean>(false);
 
 	const [validateDelete, setValidateDelete] = useState(false);
 
@@ -159,6 +163,7 @@ const ProductCard = ({
 	const archiveProduct = trpc.product.archive.useMutation({
 		onSuccess: () => {
 			utils.product.getList.invalidate({});
+			onDeleteProduct();
 		}
 	});
 
@@ -285,6 +290,13 @@ const ProductCard = ({
 
 	return (
 		<>
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={4000}
+				severity="success"
+				message="Le service a été correctement supprimé"
+			/>
 			<OnConfirmModal
 				modal={onConfirmModalRestore}
 				title="Restaurer un service"
