@@ -315,33 +315,37 @@ export const userRouter = router({
 		  
 		  	const { id, user } = input;
 		  	const { role, ...userWithoutRole } = user;
+
+			console.log('user : ', user)
 	  
 		  	const dataToUpdate = ctx.session?.user?.role.includes('admin')
-				? { ...userWithoutRole, role, email: ((user.email || '') as string).toLowerCase() }
-				: { ...userWithoutRole, email: ((user.email || '') as string).toLowerCase() };
+				? { ...userWithoutRole, role }
+				: { ...userWithoutRole };
 
-			const userHasConflict = await ctx.prisma.user.findUnique({
-				where: {
-					email: dataToUpdate.email.toLowerCase()
-				}
-			});
-
-			if (userHasConflict)
-				throw new TRPCError({
-					code: 'CONFLICT',
-					message: 'User already exists'
+			if(dataToUpdate.email) {
+				const userHasConflict = await ctx.prisma.user.findUnique({
+					where: {
+						email: (dataToUpdate.email as string || '').toLowerCase()
+					}
 				});
-
-			const isWhiteListed = await checkUserDomain(
-				ctx.prisma,
-				dataToUpdate.email.toLowerCase()
-			);
-
-			if (!isWhiteListed)
-				throw new TRPCError({
-					code: 'UNAUTHORIZED',
-					message: 'User email domain not whitelisted'
-				});
+	
+				if (userHasConflict)
+					throw new TRPCError({
+						code: 'CONFLICT',
+						message: 'User already exists'
+					});
+	
+				const isWhiteListed = await checkUserDomain(
+					ctx.prisma,
+					(dataToUpdate.email as string || '').toLowerCase()
+				);
+	
+				if (!isWhiteListed)
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'User email domain not whitelisted'
+					});
+			}
 	  
 		  const updatedUser = await ctx.prisma.user.update({
 				where: { id },

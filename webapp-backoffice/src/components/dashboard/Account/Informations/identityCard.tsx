@@ -7,7 +7,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
 import { useRouter } from 'next/router';
-import { signIn, useSession, signOut } from "next-auth/react";
+import { signIn, useSession, signOut } from 'next-auth/react';
 
 interface Props {
 	user: User;
@@ -40,7 +40,7 @@ const IdentityCard = (props: Props) => {
 
 	const onFormSubmit = async () => {
 		let isValid = false;
-		await handleSubmit(async (data) => {
+		await handleSubmit(async data => {
 			await onLocalSubmit(data);
 			isValid = true;
 		})();
@@ -48,7 +48,7 @@ const IdentityCard = (props: Props) => {
 	};
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		const { ...updateUser } = data;
+		const { email, ...updateUser } = data;
 		editUser.mutate({
 			id: user.id,
 			user: { ...updateUser }
@@ -138,7 +138,9 @@ const IdentityCard = (props: Props) => {
 											return (
 												<Input
 													label={
-														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>Nom</p>
+														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
+															Nom
+														</p>
 													}
 													nativeInputProps={{
 														onChange: e => {

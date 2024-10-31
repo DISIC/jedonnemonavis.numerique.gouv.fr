@@ -323,7 +323,7 @@ const ProductCard = ({
 					}
 				}}
 				kind="danger"
-				disableAction={!validateDelete}
+				disableAction={nbReviews && nbReviews > 1000 ? !validateDelete : false}
 			>
 				<div>
 					<p>
