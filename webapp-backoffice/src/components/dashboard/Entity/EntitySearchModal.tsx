@@ -234,25 +234,22 @@ const EntitySearchModal = (props: Props) => {
 									? `Pas de résultats pour la recherche « ${submitedSearch} »`
 									: `Résultats de la recherche « ${submitedSearch} »`}
 							</h6>
-							{nbPages > 1 && (
-								<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
-									<span className={fr.cx('fr-ml-0')}>
-										Organisation de{' '}
-										<span className={cx(classes.boldText)}>
-											{numberPerPage * (currentPage - 1) + 1}
-										</span>{' '}
-										à{' '}
-										<span className={cx(classes.boldText)}>
-											{numberPerPage * (currentPage - 1) +
-												entitiesSearch.length}
-										</span>{' '}
-										sur{' '}
-										<span className={cx(classes.boldText)}>
-											{countEntititesSearch}
-										</span>
+							<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
+								<span className={fr.cx('fr-ml-0')}>
+									Organisation de{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + 1}
+									</span>{' '}
+									à{' '}
+									<span className={cx(classes.boldText)}>
+										{numberPerPage * (currentPage - 1) + entitiesSearch.length}
+									</span>{' '}
+									sur{' '}
+									<span className={cx(classes.boldText)}>
+										{countEntititesSearch}
 									</span>
-								</div>
-							)}
+								</span>
+							</div>
 							<div>
 								{isRefetchingEntitiesSearch ? (
 									<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>

@@ -217,24 +217,24 @@ const EntityRightsModal = (props: Props) => {
 						description={getAlertTitle()}
 					/>
 				)}
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
+				>
 					<div className={fr.cx('fr-col-8')}>
-						{nbPages > 1 && (
-							<span className={fr.cx('fr-ml-0')}>
-								Administrateurs de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + adminEntityRights.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{adminEntityRightsCount}
-								</span>
+						<span className={fr.cx('fr-ml-0')}>
+							Administrateurs de{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + 1}
+							</span>{' '}
+							à{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + adminEntityRights.length}
+							</span>{' '}
+							sur{' '}
+							<span className={cx(classes.boldText)}>
+								{adminEntityRightsCount}
 							</span>
-						)}
+						</span>
 					</div>
 				</div>
 				<div>

@@ -344,24 +344,22 @@ const DashBoardEntities = () => {
 					</div>
 				) : (
 					<div>
-						{nbPages > 1 && (
-							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-								<span className={fr.cx('fr-ml-0')}>
-									Organisation de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + entities.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{entitiesResult.metadata.count}
-									</span>
+						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Organisation de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + entities.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{entitiesResult.metadata.count}
 								</span>
-							</div>
-						)}
+							</span>
+						</div>
 
 						<div
 							className={cx(

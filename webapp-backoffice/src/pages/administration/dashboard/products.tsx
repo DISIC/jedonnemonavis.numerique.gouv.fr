@@ -413,23 +413,20 @@ const DashBoard = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
-								<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-									Services de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (filters.currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (filters.currentPage - 1) +
-											products.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{productsResult.metadata.count}
-									</span>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Services de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (filters.currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (filters.currentPage - 1) + products.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{productsResult.metadata.count}
 								</span>
-							)}
+							</span>
 						</div>
 						<div
 							className={cx(

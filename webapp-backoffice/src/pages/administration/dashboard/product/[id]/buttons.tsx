@@ -139,21 +139,6 @@ const ProductButtonsPage = (props: Props) => {
 					'fr-grid-row--right'
 				)}
 			>
-				{buttons && nbPages > 1 && (
-					<div className={fr.cx('fr-col-8')}>
-						<p>
-							Boutons de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + buttons.length}
-							</span>{' '}
-							sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
-						</p>
-					</div>
-				)}
 				{/* {buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 						<Checkbox
@@ -202,7 +187,19 @@ const ProductButtonsPage = (props: Props) => {
 								/>
 							)}
 						</div>
-
+						{buttons.length > 0 && (
+							<div className={fr.cx('fr-col-12', 'fr-pb-1w')}>
+								Boutons de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + buttons.length}
+								</span>{' '}
+								sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
+							</div>
+						)}
 						<ul className={classes.buttonList}>
 							{buttons?.map((button, index) => (
 								<li key={index}>
