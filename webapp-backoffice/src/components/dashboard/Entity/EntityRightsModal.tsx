@@ -221,7 +221,7 @@ const EntityRightsModal = (props: Props) => {
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
 				>
 					<div className={fr.cx('fr-col-8')}>
-						<span className={fr.cx('fr-ml-0')}>
+						<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 							Administrateurs de{' '}
 							<span className={cx(classes.boldText)}>
 								{numberPerPage * (currentPage - 1) + 1}

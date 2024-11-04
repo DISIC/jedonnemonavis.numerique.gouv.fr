@@ -267,7 +267,7 @@ const DashBoardDomainDomains = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							<span className={fr.cx('fr-ml-0')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 								Domaines de{' '}
 								<span className={cx(classes.boldText)}>
 									{numberPerPage * (currentPage - 1) + 1}

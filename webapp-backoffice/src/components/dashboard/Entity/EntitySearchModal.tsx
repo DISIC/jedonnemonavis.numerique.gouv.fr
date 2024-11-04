@@ -235,7 +235,7 @@ const EntitySearchModal = (props: Props) => {
 									: `Résultats de la recherche « ${submitedSearch} »`}
 							</h6>
 							<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
-								<span className={fr.cx('fr-ml-0')}>
+								<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 									Organisation de{' '}
 									<span className={cx(classes.boldText)}>
 										{numberPerPage * (currentPage - 1) + 1}

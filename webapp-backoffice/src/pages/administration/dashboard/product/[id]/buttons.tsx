@@ -188,7 +188,10 @@ const ProductButtonsPage = (props: Props) => {
 							)}
 						</div>
 						{buttons.length > 0 && (
-							<div className={fr.cx('fr-col-12', 'fr-pb-1w')}>
+							<div
+								aria-live="assertive"
+								className={fr.cx('fr-col-12', 'fr-pb-1w')}
+							>
 								Boutons de{' '}
 								<span className={cx(classes.boldText)}>
 									{numberPerPage * (currentPage - 1) + 1}

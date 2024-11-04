@@ -278,7 +278,7 @@ const DashBoardUsers = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w', 'fr-pb-2w')}>
-							<span className={fr.cx('fr-ml-0')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 								Utilisateurs de{' '}
 								<span className={cx(classes.boldText)}>
 									{numberPerPage * (currentPage - 1) + 1}
