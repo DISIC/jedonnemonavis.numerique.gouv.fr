@@ -129,7 +129,7 @@ const ReviewFiltersModal = (props: Props) => {
 										htmlFor={`radio-rating-${rating}`}
 										className={
 											tmpFilters.comprehension.includes(rating)
-												? classes.selectedOption
+												? classes.selectedNumberOption
 												: undefined
 										}
 									>
@@ -263,6 +263,11 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 	selectedOption: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
 		color: 'white'
+	},
+	selectedNumberOption: {
+		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+		color: 'white',
+		fontWeight: 'bold'
 	},
 	rating: {
 		display: 'flex',
