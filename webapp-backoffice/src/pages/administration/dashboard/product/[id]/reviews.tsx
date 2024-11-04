@@ -181,7 +181,7 @@ const ProductReviewsPage = (props: Props) => {
 		return regex.test(date);
 	};
 
-	const { cx, classes } = useStyles();
+	const { cx, classes } = useStyles({ displayMode });
 
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
@@ -491,6 +491,11 @@ const ProductReviewsPage = (props: Props) => {
 											priority={
 												displayMode === 'reviews' ? 'primary' : 'secondary'
 											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOption
+													: classes.buttonOptionDisabled
+											}
 											onClick={() => {
 												setDisplayMode('reviews');
 												setCurrentPage(1);
@@ -502,6 +507,11 @@ const ProductReviewsPage = (props: Props) => {
 										<Button
 											priority={
 												displayMode === 'reviews' ? 'secondary' : 'primary'
+											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOptionDisabled
+													: classes.buttonOption
 											}
 											onClick={() => {
 												setDisplayMode('verbatim');
@@ -674,68 +684,77 @@ const ProductReviewsPage = (props: Props) => {
 
 export default ProductReviewsPage;
 
-const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
-	boldText: {
-		fontWeight: 'bold'
-	},
-	tableContainer: {
-		width: '100%'
-	},
-	searchForm: {
-		'.fr-search-bar': {
-			'.fr-input-group': {
-				width: '100%',
-				marginBottom: 0
+const useStyles = tss
+	.withName(ProductReviewsPage.name)
+	.withParams<{ displayMode: 'reviews' | 'verbatim' }>()
+	.create(({ displayMode }) => ({
+		boldText: {
+			fontWeight: 'bold'
+		},
+		tableContainer: {
+			width: '100%'
+		},
+		searchForm: {
+			'.fr-search-bar': {
+				'.fr-input-group': {
+					width: '100%',
+					marginBottom: 0
+				}
 			}
-		}
-	},
-	title: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		marginBottom: '1rem',
-		[fr.breakpoints.down('lg')]: {
-			flexDirection: 'column',
-			'.fr-btn': {
-				marginTop: '1rem'
-			}
-		}
-	},
-	filterView: {
-		display: 'flex',
-		flexDirection: 'column'
-	},
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
-	},
-	filtersWrapper: {
-		display: 'flex',
-		alignItems: 'end'
-	},
-	buttonContainer: {
-		width: '100%',
-		[fr.breakpoints.up('lg')]: {
+		},
+		buttonOption: {
+			border: `1px solid ${fr.colors.decisions.border.active.blueFrance.default}`
+		},
+		buttonOptionDisabled: {
+			border: 'none'
+		},
+		title: {
 			display: 'flex',
-			alignSelf: 'flex-end',
-			justifyContent: 'flex-end',
-			'.fr-btn': {
-				justifySelf: 'flex-end'
+			justifyContent: 'space-between',
+			marginBottom: '1rem',
+			[fr.breakpoints.down('lg')]: {
+				flexDirection: 'column',
+				'.fr-btn': {
+					marginTop: '1rem'
+				}
 			}
 		},
-		[fr.breakpoints.down('lg')]: {
-			'.fr-btn:first-of-type': {
-				marginBottom: '1rem'
+		filterView: {
+			display: 'flex',
+			flexDirection: 'column'
+		},
+		tagFilter: {
+			marginRight: '0.5rem',
+			marginBottom: '0.5rem'
+		},
+		filtersWrapper: {
+			display: 'flex',
+			alignItems: 'end'
+		},
+		buttonContainer: {
+			width: '100%',
+			[fr.breakpoints.up('lg')]: {
+				display: 'flex',
+				alignSelf: 'flex-end',
+				justifyContent: 'flex-end',
+				'.fr-btn': {
+					justifySelf: 'flex-end'
+				}
+			},
+			[fr.breakpoints.down('lg')]: {
+				'.fr-btn:first-of-type': {
+					marginBottom: '1rem'
+				}
+			}
+		},
+		errorMsg: {
+			'.fr-error-text': {
+				marginTop: '0.5rem'
+			},
+			'p.fr-error-text': {
+				position: 'absolute'
 			}
 		}
-	},
-	errorMsg: {
-		'.fr-error-text': {
-			marginTop: '0.5rem'
-		},
-		'p.fr-error-text': {
-			position: 'absolute'
-		}
-	}
-}));
+	}));
 
 export { getServerSideProps };
