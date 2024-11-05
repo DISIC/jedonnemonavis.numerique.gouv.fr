@@ -200,7 +200,7 @@ function deleteService() {
 	cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
 	cy.get(selectors.productTitle).contains(selectors.dashboard.nameTestService);
 	cy.get('#button-options-product').click();
-	cy.contains('li', 'Supprimer ce service').click();
+	cy.contains('li', 'Supprimer ce service').click({force: true});
 	cy.get('.fr-modal__body').should('be.visible');
 	cy.contains('button', 'Supprimer').click();
 }
