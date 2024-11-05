@@ -40,7 +40,7 @@ const CredentialsCard = (props: Props) => {
 		formState: { errors },
 		watch
 	} = useForm<FormValues>({
-		defaultValues: { ...user }
+		defaultValues: { ...user, email: '' }
 	});
 
 	const editUser = trpc.user.update.useMutation({
@@ -200,6 +200,21 @@ const CredentialsCard = (props: Props) => {
 							<div className={fr.cx('fr-col-md-6')}>
 								<form id="credentials-form">
 									<div className={fr.cx('fr-input-group')}>
+										<Input
+											label={
+												<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
+													Adresse e-mail acuelle
+												</p>
+											}
+											disabled={true}
+											nativeInputProps={{
+												value: user.email || '',
+												required: true,
+												disabled: true
+											}}
+										/>
+									</div>
+									<div className={fr.cx('fr-input-group')}>
 										<Controller
 											control={control}
 											name="email"
@@ -215,14 +230,15 @@ const CredentialsCard = (props: Props) => {
 												<Input
 													label={
 														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Adresse e-mail
+															Nouvelle adresse e-mail
 														</p>
 													}
 													nativeInputProps={{
 														onChange,
 														value: value || '',
 														name,
-														required: true
+														required: true,
+														placeholder: 'Saisissez votre nouvelle adresse mail'
 													}}
 													state={errors[name] ? 'error' : 'default'}
 													stateRelatedMessage={errors[name]?.message}
@@ -244,14 +260,15 @@ const CredentialsCard = (props: Props) => {
 												<Input
 													label={
 														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Vérifiez l'adresse e-mail
+															Confirmation de la nouvelle adresse e-mail
 														</p>
 													}
 													nativeInputProps={{
 														onChange,
 														value: value || '',
 														name,
-														required: true
+														required: true,
+														placeholder: 'Confirmez votre nouvelle adresse mail'
 													}}
 													state={errors[name] ? 'error' : 'default'}
 													stateRelatedMessage={errors[name]?.message}
