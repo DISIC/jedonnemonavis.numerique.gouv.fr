@@ -374,7 +374,7 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		borderTop: '1px solid',
 		borderBottom: '1px solid',
 		color: 'black',
-		borderColor: 'grey',
+		borderColor: fr.colors.decisions.background.default.grey.active,
 		cursor: 'pointer',
 		padding: '0.2rem 0.5rem'
 	},
@@ -391,13 +391,13 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		borderRight: '1px solid',
 		borderTopRightRadius: '0.25rem',
 		borderBottomRightRadius: '0.25rem',
-		borderColor: 'lightgray'
+		borderColor: fr.colors.decisions.background.default.grey.active
 	},
 	inactiveChartBtn: {
 		borderLeft: '1px solid',
 		borderTopLeftRadius: '0.25rem',
 		borderBottomLeftRadius: '0.25rem',
-		borderColor: 'lightgray'
+		borderColor: fr.colors.decisions.background.default.grey.active
 	}
 }));
 
