@@ -36,7 +36,7 @@ describe('jdma-admin', () => {
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
 	});
 
-	/*it('create and delete users', () => {
+	it('create and delete users', () => {
 		cy.visit(`${app_url}${selectors.dashboard.users}`);
 		cy.reload()
 		for(let i = 0; i < 3; i++) {
@@ -147,7 +147,7 @@ describe('jdma-admin', () => {
 
 		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
-	});*/
+	});
 
 	it('delete service with guest admin', () => {
 		logout();
