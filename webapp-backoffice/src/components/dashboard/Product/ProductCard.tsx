@@ -393,13 +393,7 @@ const ProductCard = ({
 				tabIndex={0}
 			>
 				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
-					<div
-						className={fr.cx(
-							'fr-grid-row',
-							'fr-grid-row--gutters',
-							'fr-grid-row--middle'
-						)}
-					>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{(product.isTop250 || isDisabled) && (
 							<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
 								<div className={classes.badgesContainer}>
@@ -416,8 +410,11 @@ const ProductCard = ({
 								</div>
 							</div>
 						)}
-						<h2 className={cx(classes.productTitle)}>{product.title}</h2>
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
+						</div>
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
 								{entity?.name}
 							</p>

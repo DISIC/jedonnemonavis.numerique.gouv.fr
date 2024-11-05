@@ -551,7 +551,7 @@ const DashBoard = () => {
 											{
 												label: 'Afficher uniquement les services supprimés',
 												nativeInputProps: {
-													name: 'favorites-products',
+													name: 'archived-products',
 													checked: filters.filterOnlyArchived,
 													onChange: e => {
 														updateFilters({
