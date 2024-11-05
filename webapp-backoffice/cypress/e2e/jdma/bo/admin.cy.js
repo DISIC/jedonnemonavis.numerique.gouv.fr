@@ -38,8 +38,9 @@ describe('jdma-admin', () => {
 
 	/*it('create and delete users', () => {
 		cy.visit(`${app_url}${selectors.dashboard.users}`);
+		cy.reload()
 		for(let i = 0; i < 3; i++) {
-			cy.contains('button', 'Ajouter un nouvel utilisateur').click();
+			cy.contains('button', 'Ajouter un nouvel utilisateur').should('be.visible').click();
 			cy.wait(1000)
 			fillForm({ email: `test${i}@gmail.com`, password: userPassword, firstName: `Prénom ${i}`, lastName: `Nom ${i}` });
 			cy.contains('button', 'Créer').click();
