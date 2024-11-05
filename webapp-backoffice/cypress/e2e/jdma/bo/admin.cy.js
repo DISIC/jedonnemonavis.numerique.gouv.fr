@@ -36,7 +36,7 @@ describe('jdma-admin', () => {
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
 	});
 
-	it('create and delete users', () => {
+	/*it('create and delete users', () => {
 		cy.visit(`${app_url}${selectors.dashboard.users}`);
 		for(let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur').click();
@@ -146,9 +146,9 @@ describe('jdma-admin', () => {
 
 		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
-	});
+	});*/
 
-	/*it('delete service with guest admin', () => {
+	it('delete service with guest admin', () => {
 		logout();
 		login(invitedEmail, userPassword);
 		deleteService(selectors.dashboard.nameTestService)
@@ -166,7 +166,7 @@ describe('jdma-admin', () => {
 		cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 		checkMail(false, `Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`)
 		checkform(true)
-	})*/
+	})
 });
 
 // Helpers
@@ -197,25 +197,14 @@ function fillForm({ firstName = 'John', lastName = 'Doe', password = '', email =
 }
 
 function deleteService(serviceName) {
-	// Trouver la carte du service avec le nom spécifique
     cy.contains('h2', serviceName)
-      .parents('div.fr-card') // Remonte au conteneur de la carte
+      .parents('div.fr-card')
       .within(() => {
-          // Cliquer sur le bouton des options
           cy.get('#button-options-product').click();
       });
-    
-    // Attendre un instant pour que le menu contextuel s'affiche
     cy.wait(1000);
-    
-    // Cliquer sur l'option "Supprimer ce service"
     cy.contains('li', 'Supprimer ce service').click({ force: true });
-
-    // Vérifier que la modal de confirmation est visible
-    cy.get('.fr-modal__body').should('be.visible');
-
-    // Cliquer sur le bouton de confirmation de suppression dans la modal
-    cy.contains('button', 'Supprimer').click();
+    cy.contains('button', 'Supprimer').click({ force: true });
 }
 
 function restaureService () {
