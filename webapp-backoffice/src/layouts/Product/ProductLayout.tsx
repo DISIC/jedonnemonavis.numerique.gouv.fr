@@ -148,13 +148,15 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-					<SideMenu
-						align="left"
-						aria-label="Menu latéral"
-						items={menuItems}
-						burgerMenuButtonText="Menu"
-						sticky
-					/>
+					<div role="navigation">
+						<SideMenu
+							align="left"
+							aria-label="Menu latéral"
+							items={menuItems}
+							burgerMenuButtonText="Menu"
+							sticky
+						/>
+					</div>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
 					{children}

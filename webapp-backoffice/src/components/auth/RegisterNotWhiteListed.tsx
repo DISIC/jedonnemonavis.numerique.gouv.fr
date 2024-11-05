@@ -45,7 +45,7 @@ export const RegisterNotWhiteListed = (props: Props) => {
 	if (isSubmitted) {
 		return (
 			<div>
-				<p>
+				<p role="status" tabIndex={-1}>
 					Votre demande de création de compte a été envoyée avec succès. <br />
 				</p>
 			</div>

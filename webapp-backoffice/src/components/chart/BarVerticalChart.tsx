@@ -33,7 +33,7 @@ const CustomBarCell = (props: any) => {
 const CustomBarChart = ({ data }: ChartVerticalBarProps) => {
 	return (
 		<ResponsiveContainer width="100%" height={70 * data.length}>
-			<BarChart data={data} layout="vertical">
+			<BarChart role="img" data={data} layout="vertical">
 				<XAxis hide type="number" />
 				<YAxis hide type="category" dataKey="name" />
 				<Bar dataKey="value" barSize={30} shape={<CustomBarCell />} />

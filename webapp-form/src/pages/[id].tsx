@@ -325,7 +325,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div>
           <div className={classes.titleSuccess}>
             <Image
-              alt="Service public +"
+              alt=""
               src="/Demarches/assets/icon-check.svg"
               title="Icone - Merci pour votre aide"
               width={40}
@@ -335,7 +335,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               {t("success_block.title")}
             </h1>
           </div>
-          <p>{t("success_block.thanks")}</p>
+          <p role="status" aria-live="polite">
+            {t("success_block.thanks")}
+          </p>
           {/* REMOVE UNTIL WE HAVE DATA FOR CONTACTS IN PRODUCTS
                 <Highlight>
                   {t('success_block.question')}<b>{` ${product.title} ?`}</b>{' '}

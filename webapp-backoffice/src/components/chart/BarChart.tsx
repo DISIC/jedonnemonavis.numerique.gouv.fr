@@ -52,7 +52,11 @@ const CustomBarChart = ({
 
 	return (
 		<ResponsiveContainer width="100%" height={275}>
-			<BarChart data={data}>
+			<BarChart
+				title="Graphique: Répartition des réponses"
+				role="img"
+				data={data}
+			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
 					axisLine={false}

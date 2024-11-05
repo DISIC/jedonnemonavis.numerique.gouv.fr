@@ -47,14 +47,15 @@ export const ArrayRadio = (props: Props) => {
         ) ? (
           <>
             <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
-              <div className={fr.cx("fr-col-12")}>
-                <h6>{t(field.label)}</h6>
-              </div>
+              <div className={fr.cx("fr-col-12")}></div>
               <table
                 className={cx(fr.cx("fr-table"), classes.mainTable)}
                 cellSpacing={1}
                 cellPadding={1}
               >
+                <caption>
+                  <h3>{t(field.label)}</h3>
+                </caption>
                 <thead className={cx(classes.bgWhite)}>
                   <tr>
                     <th />
@@ -301,6 +302,12 @@ const useStyles = tss
     reviewContainer: {
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+      },
+      [".fr-radio-group input[type=radio] + label::before"]: {
+        content: "none",
+        outline: "none",
+        boxShadow: "none",
+        border: "none",
       },
       ["input:focus-visible + label"]: {
         outlineOffset: "2px",

@@ -204,7 +204,10 @@ const DashBoard = () => {
 	return (
 		<>
 			{isModalSubmitted && (
-				<div className={cx(classes.container, fr.cx('fr-container'))}>
+				<div
+					role="status"
+					className={cx(classes.container, fr.cx('fr-container'))}
+				>
 					<Alert
 						closable
 						onClose={function noRefCheck() {
@@ -418,14 +421,18 @@ const DashBoard = () => {
 								)}
 							</div>
 						</div>
-						{!!filters.filterEntity.length && (
-							<div
-								className={fr.cx('fr-col-12', 'fr-col-md-12', 'fr-col--bottom')}
-							>
-								{filters.filterEntity.map(entity => (
+						<ul
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+								classes.tagContainer
+							)}
+						>
+							{filters.filterEntity.map((entity, index) => (
+								<li key={index}>
 									<Tag
 										dismissible
 										className={cx(classes.tagFilter)}
+										title={`Retirer ${entity.label}`}
 										nativeButtonProps={{
 											onClick: () => {
 												updateFilters({
@@ -440,9 +447,9 @@ const DashBoard = () => {
 									>
 										<p>{entity.label}</p>
 									</Tag>
-								))}
-							</div>
-						)}
+								</li>
+							))}
+						</ul>
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
@@ -452,23 +459,20 @@ const DashBoard = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
-									Services de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (filters.currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (filters.currentPage - 1) +
-											products.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{productsResult.metadata.count}
-									</span>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Services de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (filters.currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (filters.currentPage - 1) + products.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{productsResult.metadata.count}
 								</span>
-							)}
+							</span>
 						</div>
 						<div
 							className={cx(
@@ -480,40 +484,43 @@ const DashBoard = () => {
 									<Loader />
 								</div>
 							) : (
-								products.map(product => (
-									<ProductCard
-										key={product.id}
-										product={product}
-										userId={parseInt(session?.user?.id as string)}
-										entity={
-											entities.find(
-												entity => product.entity_id === entity.id
-											) as Entity
-										}
-										isFavorite={
-											!!favorites.find(
-												favorite => favorite.product_id === product.id
-											)
-										}
-										showFavoriteButton={countTotalUserScope > 10}
-										onDeleteProduct={() => {
-											setStatusProductState({
-												msg: `Le service "${product.title}" a bien été archivé`,
-												role: 'status'
-											});
-										}}
-										onRestoreProduct={() => {
-											updateFilters({
-												...filters,
-												filterOnlyArchived: false
-											});
-											setStatusProductState({
-												msg: `Le service "${product.title}" a bien été restauré`,
-												role: 'status'
-											});
-										}}
-									/>
-								))
+								<ul className={classes.buttonList}>
+									{products.map((product, index) => (
+										<li key={index}>
+											<ProductCard
+												product={product}
+												userId={parseInt(session?.user?.id as string)}
+												entity={
+													entities.find(
+														entity => product.entity_id === entity.id
+													) as Entity
+												}
+												isFavorite={
+													!!favorites.find(
+														favorite => favorite.product_id === product.id
+													)
+												}
+												showFavoriteButton={countTotalUserScope > 10}
+												onDeleteProduct={() => {
+													setStatusProductState({
+														msg: `Le service "${product.title}" a bien été archivé`,
+														role: 'status'
+													});
+												}}
+												onRestoreProduct={() => {
+													updateFilters({
+														...filters,
+														filterOnlyArchived: false
+													});
+													setStatusProductState({
+														msg: `Le service "${product.title}" a bien été restauré`,
+														role: 'status'
+													});
+												}}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 
 							{products.length === 0 && !isRefetchingProducts && (
@@ -525,7 +532,7 @@ const DashBoard = () => {
 										)}
 										role="status"
 									>
-										<p>
+										<p aria-live="assertive">
 											{filters.filterOnlyFavorites &&
 											search === '' &&
 											!filters.filterEntity.length
@@ -611,6 +618,16 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 			}
 		}
 	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
+	},
 	container: {
 		marginTop: '1.5rem'
 	},
@@ -642,6 +659,13 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	boldText: {
 		fontWeight: 'bold'
+	},
+	buttonList: {
+		paddingInlineStart: 0,
+		listStyleType: 'none',
+		li: {
+			paddingBottom: 0
+		}
 	}
 }));
 

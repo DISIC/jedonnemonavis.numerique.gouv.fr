@@ -61,44 +61,51 @@ const ReviewFilters = (props: Props) => {
 	}, [displayMode]);
 
 	return (
-		<div className={cx(classes.lineContainer)}>
-			{sortList.map((sort, index) => (
-				<div
-					className={cx(
-						displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim,
-						sort.code ? classes.pointer : '',
-						fr.cx('fr-hidden', 'fr-unhidden-lg')
-					)}
-					key={index}
-					onClick={() => {
-						if (sort.code) {
-							onClick(sort.code);
-						}
-					}}
-				>
-					<span>
-						{sort.label}{' '}
-						{props.sort.includes(sort.code || sort.label) && (
-							<i
-								className={
-									props.sort.includes('asc')
-										? 'ri-arrow-drop-down-fill'
-										: 'ri-arrow-drop-up-fill'
-								}
-							></i>
+		<thead className={cx(classes.lineContainer)}>
+			<tr className={cx(classes.trContainer)}>
+				{sortList.map((sort, index) => (
+					<th
+						className={cx(
+							displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim,
+							sort.code ? classes.pointer : '',
+							fr.cx('fr-hidden', 'fr-unhidden-lg'),
+							classes.thContainer
 						)}
-					</span>
-				</div>
-			))}
-			{new Array(displayMode === 'reviews' ? 1 : 3).fill(0).map((i, index) => (
-				<div
-					className={cx(
-						displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim
-					)}
-					key={`fake_div_${index}`}
-				></div>
-			))}
-		</div>
+						key={index}
+						onClick={() => {
+							if (sort.code) {
+								onClick(sort.code);
+							}
+						}}
+					>
+						<span>
+							{sort.label}{' '}
+							{props.sort.includes(sort.code || sort.label) && (
+								<i
+									className={
+										props.sort.includes('asc')
+											? 'ri-arrow-drop-down-fill'
+											: 'ri-arrow-drop-up-fill'
+									}
+								></i>
+							)}
+						</span>
+					</th>
+				))}
+				{new Array(displayMode === 'reviews' ? 1 : 3)
+					.fill(0)
+					.map((i, index) => (
+						<div
+							className={cx(
+								displayMode === 'reviews'
+									? classes.badge
+									: classes.badgeVerbatim
+							)}
+							key={`fake_div_${index}`}
+						></div>
+					))}
+			</tr>
+		</thead>
 	);
 };
 
@@ -110,6 +117,13 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		width: '100%',
 		padding: 12
+	},
+	trContainer: {
+		width: '100%',
+		display: 'flex'
+	},
+	thContainer: {
+		width: 'max-content'
 	},
 	pointer: {
 		cursor: 'pointer'

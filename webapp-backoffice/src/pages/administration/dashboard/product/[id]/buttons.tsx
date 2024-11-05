@@ -186,7 +186,6 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
-
 				{/* {buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 						<Checkbox
@@ -266,14 +265,32 @@ const ProductButtonsPage = (props: Props) => {
 								/>
 							)}
 						</div>
-
-						{buttons?.map((button, index) => (
-							<ProductButtonCard
-								key={index}
-								button={button}
-								onButtonClick={handleModalOpening}
-							/>
-						))}
+						{buttons.length > 0 && (
+							<div
+								aria-live="assertive"
+								className={fr.cx('fr-col-12', 'fr-pb-1w')}
+							>
+								Boutons de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + buttons.length}
+								</span>{' '}
+								sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
+							</div>
+						)}
+						<ul className={classes.buttonList}>
+							{buttons?.map((button, index) => (
+								<li key={index}>
+									<ProductButtonCard
+										button={button}
+										onButtonClick={handleModalOpening}
+									/>
+								</li>
+							))}
+						</ul>
 					</>
 				)}
 				<div
@@ -353,6 +370,14 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		btnContainer: {
+			marginTop: '3rem'
+		},
+		buttonList: {
+			paddingInlineStart: 0,
+			listStyleType: 'none',
+			li: {
+				paddingBottom: 0
+			},
 			marginTop: '1rem'
 		}
 	});

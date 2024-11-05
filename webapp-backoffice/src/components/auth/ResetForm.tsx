@@ -1,7 +1,10 @@
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { PasswordInput, PasswordInputProps } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import {
+	PasswordInput,
+	PasswordInputProps
+} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ReactNode, useState, useEffect } from 'react';
@@ -23,15 +26,17 @@ const regexAtLeastOneNumber = /\d/;
 
 export const ResetForm = () => {
 	const router = useRouter();
-    const defaultErrors = {
+	const defaultErrors = {
 		password: {
 			required: false,
 			format: false
 		}
 	};
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
-    const [successChange, setSuccessChange] = useState<'Ok' | 'Error' | null>(null)
-    const { classes, cx } = useStyles({
+	const [successChange, setSuccessChange] = useState<'Ok' | 'Error' | null>(
+		null
+	);
+	const { classes, cx } = useStyles({
 		errors,
 		successChange
 	});
@@ -40,12 +45,12 @@ export const ResetForm = () => {
 		setErrors({ ...errors, [key]: defaultErrors[key] });
 	};
 
-    const [userInfos, setUserInfos] = useState({
-        password: ''
-    });
-    const [userInfosVerif, setUserInfosVerif] = useState({
-        password: ''
-    });
+	const [userInfos, setUserInfos] = useState({
+		password: ''
+	});
+	const [userInfosVerif, setUserInfosVerif] = useState({
+		password: ''
+	});
 
 	const getPasswordMessages = (): PasswordMessages => {
 		const messages: PasswordMessages = [];
@@ -88,132 +93,161 @@ export const ResetForm = () => {
 		return messages;
 	};
 
-    const { data: testLink, isLoading: loadingCheck, isError: loadingError } = trpc.user.checkToken.useQuery({
-        token: router.query.token as string
-    });
+	const {
+		data: testLink,
+		isLoading: loadingCheck,
+		isError: loadingError
+	} = trpc.user.checkToken.useQuery({
+		token: router.query.token as string
+	});
 
-    useEffect(() => {
-        if (loadingError && !loadingCheck) {
-            setSuccessChange('Error');
-        }
-    }, [loadingError]);
+	useEffect(() => {
+		if (loadingError && !loadingCheck) {
+			setSuccessChange('Error');
+		}
+	}, [loadingError]);
 
-    const resetPassword = trpc.user.changePAssword.useMutation({
-        onSuccess: () => {
-            setSuccessChange('Ok')
-        },
-        onError: () => {
-            setSuccessChange('Error')
-        }
-    });
+	const resetPassword = trpc.user.changePAssword.useMutation({
+		onSuccess: () => {
+			setSuccessChange('Ok');
+		},
+		onError: () => {
+			setSuccessChange('Error');
+		}
+	});
 
-    const sendNewPassword = () => {
-        resetPassword.mutate({
-            token: router.query.token as string,
-            password: userInfos.password
-        });
-    }
+	const sendNewPassword = () => {
+		resetPassword.mutate({
+			token: router.query.token as string,
+			password: userInfos.password
+		});
+	};
 
 	return (
 		<div>
-            {loadingCheck &&
-                <Loader size="md" />
-            }
-            {!successChange && !loadingCheck &&
-                <>
-                    <form
-                        onSubmit={e => {
-                            e.preventDefault();
-                            sendNewPassword();
-                        }}
-                    >
+			{loadingCheck && (
+				<div className={cx(classes.checkLinkContainer)} role="status">
+					<Loader size="md" />
+					<span>Vérification du lien en cours...</span>
+				</div>
+			)}
+			{!successChange && !loadingCheck && (
+				<>
+					<form
+						onSubmit={e => {
+							e.preventDefault();
+							sendNewPassword();
+						}}
+					>
+						<PasswordInput
+							label="Mot de passe"
+							className={cx(classes.password)}
+							nativeInputProps={{
+								onChange: e => {
+									setUserInfos({ ...userInfos, password: e.target.value });
+									resetErrors('password');
+								},
+								value: userInfos.password
+							}}
+							messages={getPasswordMessages()}
+							messagesHint={
+								errors.password.required
+									? ''
+									: 'Votre mot de passe doit contenir au moins :'
+							}
+						/>
 
-                        <PasswordInput
-                            label="Mot de passe"
-                            className={cx(classes.password)}
-                            nativeInputProps={{
-                                onChange: e => {
-                                    setUserInfos({ ...userInfos, password: e.target.value });
-                                    resetErrors('password');
-                                },
-                                value: userInfos.password
-                            }}
-                            messages={getPasswordMessages()}
-                            messagesHint={
-                                errors.password.required
-                                    ? ''
-                                    : 'Votre mot de passe doit contenir au moins :'
-                            }
-                        />
-
-                        <PasswordInput
-                            label="Confirmez votre mot de passe"
-                            className={cx(classes.password, fr.cx('fr-mt-10v'))}
-                            nativeInputProps={{
-                                onChange: e => {
-                                    setUserInfosVerif({ ...userInfosVerif, password: e.target.value });
-                                    resetErrors('password');
-                                },
-                                value: userInfosVerif.password
-                            }}
-                            messages={userInfos.password !== userInfosVerif.password ? [{ message: 'Les mots de passe ne correspondent pas.', severity: 'error' }] : []}
-                            messagesHint={''}
-                        />
-                        <Button type="submit" className={cx(classes.button, fr.cx('fr-mt-10v'))}
-                            disabled={
-                                !userInfos.password ||
-                                !userInfosVerif.password ||
-                                userInfos.password !== userInfosVerif.password ||
-                                getPasswordMessages().some(m => m.severity === 'error')
-                            }>
-                            Confirmer
-                        </Button>
-                    </form>
-                </>
-            }
-			{successChange && !loadingCheck &&
-                <>
-                    {successChange === "Ok" ? 
-                        <Alert
-                            description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
-                            severity="success"
-                            title="Mot de passe réinitilialisé"
-                        />
-                    :
-                        <Alert
-                            description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
-                            severity="error"
-                            title="Lien invalide"
-                        />
-                    }
-                    <Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
-                        Retourner à l'écran de connexion
-                    </Link>
-                </>
-            }
+						<PasswordInput
+							label="Confirmez votre mot de passe"
+							className={cx(classes.password, fr.cx('fr-mt-10v'))}
+							nativeInputProps={{
+								onChange: e => {
+									setUserInfosVerif({
+										...userInfosVerif,
+										password: e.target.value
+									});
+									resetErrors('password');
+								},
+								value: userInfosVerif.password
+							}}
+							messages={
+								userInfos.password !== userInfosVerif.password
+									? [
+											{
+												message: 'Les mots de passe ne correspondent pas.',
+												severity: 'error'
+											}
+										]
+									: []
+							}
+							messagesHint={''}
+						/>
+						<Button
+							type="submit"
+							className={cx(classes.button, fr.cx('fr-mt-10v'))}
+							disabled={
+								!userInfos.password ||
+								!userInfosVerif.password ||
+								userInfos.password !== userInfosVerif.password ||
+								getPasswordMessages().some(m => m.severity === 'error')
+							}
+						>
+							Confirmer
+						</Button>
+					</form>
+				</>
+			)}
+			{successChange && !loadingCheck && (
+				<>
+					<div role="alert">
+						{successChange === 'Ok' ? (
+							<Alert
+								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
+								severity="success"
+								title="Mot de passe réinitilialisé"
+							/>
+						) : (
+							<Alert
+								description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
+								severity="error"
+								title="Lien invalide"
+							/>
+						)}
+					</div>
+					<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
+						Retourner à l'écran de connexion
+					</Link>
+				</>
+			)}
 		</div>
 	);
 };
 
 const useStyles = tss
-    .withName(ResetForm.name)
-    .withParams<{ errors: FormErrors, successChange: string | null }>()
-    .create(({ errors, successChange }) => ({
-        button: {
-            width: '100%',
-            justifyContent: 'center',
-            cursor:'pointer',
-            pointerEvents:'auto'
-        },
-        password: {
-            marginBottom:
-                errors.password.format || errors.password.required
-                    ? fr.spacing('5v')
-                    : 0
-        },
-        result: {
-            color: successChange === 'Ok' 
-                ? fr.colors.decisions.text.default.success.default
-                : fr.colors.decisions.text.default.error.default
-        }
-}));
+	.withName(ResetForm.name)
+	.withParams<{ errors: FormErrors; successChange: string | null }>()
+	.create(({ errors, successChange }) => ({
+		button: {
+			width: '100%',
+			justifyContent: 'center',
+			cursor: 'pointer',
+			pointerEvents: 'auto'
+		},
+		password: {
+			marginBottom:
+				errors.password.format || errors.password.required
+					? fr.spacing('5v')
+					: 0
+		},
+		result: {
+			color:
+				successChange === 'Ok'
+					? fr.colors.decisions.text.default.success.default
+					: fr.colors.decisions.text.default.error.default
+		},
+		checkLinkContainer: {
+			display: 'flex',
+			flexDirection: 'column',
+			alignItems: 'center'
+		}
+	}));

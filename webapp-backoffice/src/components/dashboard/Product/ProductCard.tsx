@@ -23,6 +23,9 @@ import React, { useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Toast } from '../../ui/Toast';
+import Image from 'next/image';
+import starFill from '.././../../../public/assets/star-fill.svg';
+import starOutline from '.././../../../public/assets/star-outline.svg';
 
 interface Indicator {
 	title: string;
@@ -384,12 +387,12 @@ const ProductCard = ({
 						<></>
 					)}
 				</div>
-			</OnConfirmModal>
+			</OnConfirmModal>{' '}
 			<Link
-				href={productLink}
-				className={cx(isDisabled ? classes.disabled : undefined)}
+				href={`/administration/dashboard/product/${product.id}/stats`}
+				tabIndex={0}
 			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
 					<div
 						className={fr.cx(
 							'fr-grid-row',
@@ -413,11 +416,7 @@ const ProductCard = ({
 								</div>
 							</div>
 						)}
-						<div className={fr.cx('fr-col', 'fr-col-11', 'fr-col-md-5')}>
-							<Link href={productLink} className={cx(classes.productTitle)}>
-								{product.title}
-							</Link>
-						</div>
+						<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
 								{entity?.name}
@@ -478,7 +477,7 @@ const ProductCard = ({
 									</Menu>
 									{showFavoriteButton && !isDisabled && (
 										<Button
-											iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+											//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
 											title={
 												isFavorite
 													? `Supprimer le produit « ${product.title} » des favoris`
@@ -505,7 +504,13 @@ const ProductCard = ({
 													});
 												}
 											}}
-										/>
+										>
+											{isFavorite ? (
+												<Image alt="favoris ajouté" src={starFill} />
+											) : (
+												<Image alt="favoris retiré" src={starOutline} />
+											)}
+										</Button>
 									)}
 								</div>
 								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
@@ -546,12 +551,15 @@ const ProductCard = ({
 															height={25}
 														/>
 													) : (
-														<div
-															className={fr.cx(
-																!!indicator.total && indicator.color !== 'new'
-																	? `fr-label--${indicator.color}`
-																	: 'fr-label--disabled',
-																'fr-text--bold'
+														<p
+															className={cx(
+																fr.cx(
+																	!!indicator.total && indicator.color !== 'new'
+																		? `fr-label--${indicator.color}`
+																		: 'fr-label--disabled',
+																	'fr-text--bold'
+																),
+																classes.indicatorText
 															)}
 															style={
 																!!indicator.total && indicator.color === 'new'
@@ -566,7 +574,7 @@ const ProductCard = ({
 															{!!indicator.total
 																? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
 																: 'Aucune donnée'}
-														</div>
+														</p>
 													)}
 												</div>
 											))}
@@ -628,6 +636,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	entityName: {
 		color: '#666666'
+	},
+	indicatorText: {
+		marginBottom: 0
 	},
 	disabled: {
 		cursor: 'default',

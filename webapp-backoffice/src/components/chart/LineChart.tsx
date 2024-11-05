@@ -47,6 +47,8 @@ const CustomLineChart = ({
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<LineChart
+				title="Graphique : Évolution des réponses"
+				role="img"
 				data={data.map(item => ({
 					...item,
 					name: translateMonthToFrench(item.name)

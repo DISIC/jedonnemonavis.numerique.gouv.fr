@@ -49,6 +49,7 @@ export const LanguageSelector = memo((props: Props) => {
               <a
                 className={fr.cx("fr-translate__language", "fr-nav__link")}
                 href="#"
+                lang={lang_i}
                 aria-current={lang_i === lang ? "true" : undefined}
                 onClick={(e) => {
                   e.preventDefault();
@@ -72,7 +73,12 @@ const useStyles = tss.withName({ LanguageSelector }).create({
   },
   menuLanguage: {
     right: 0,
+    ul: {
+      display: "flex",
+      flexWrap: "wrap",
+    },
   },
+
   langShort: {
     textTransform: "uppercase",
   },

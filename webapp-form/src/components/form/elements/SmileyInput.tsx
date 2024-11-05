@@ -55,7 +55,7 @@ export const SmileyInput = (props: Props) => {
       <div className={cx(classes.smileysContainer)}>
         <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
           <legend className={fr.cx("fr-fieldset__legend")}>
-            {<h6>{label}</h6>}
+            {<h3>{label}</h3>}
             {hint && (
               <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hint}</span>
             )}
@@ -76,6 +76,12 @@ export const SmileyInput = (props: Props) => {
                 <label
                   htmlFor={`radio-${name}-${smiley.value}`}
                   className={cx(classes.smileyInput)}
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      setSmileySelected(smiley.value);
+                    }
+                  }}
                 >
                   <Image
                     alt={t(`smileys.${smiley.value}`)}

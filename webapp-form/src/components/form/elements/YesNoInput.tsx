@@ -35,7 +35,7 @@ export const YesNoInput = (props: Props) => {
           (element) => "options" in form[0] && field.needed.includes(element)
         ) && (
           <div className={fr.cx("fr-col-12")}>
-            <h6>{t(field.label)}</h6>
+            <h3>{t(field.label)}</h3>
           </div>
         )}
         {"options" in form[0] &&

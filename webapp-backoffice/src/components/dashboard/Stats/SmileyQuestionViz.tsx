@@ -149,7 +149,7 @@ const SmileyQuestionViz = ({
 								>
 									{percentage >= limitToShowTopInfos ? (
 										<Image
-											alt="smiley"
+											alt=""
 											src={`/assets/smileys/${getStatsIcon({
 												intention: rfc.intention as AnswerIntention
 											})}.svg`}
@@ -164,6 +164,7 @@ const SmileyQuestionViz = ({
 									</label>
 									<Tooltip
 										placement="top-start"
+										tabIndex={0}
 										title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
 									>
 										<div

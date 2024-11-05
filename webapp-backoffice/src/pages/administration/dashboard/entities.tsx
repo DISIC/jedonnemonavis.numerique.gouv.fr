@@ -344,24 +344,22 @@ const DashBoardEntities = () => {
 					</div>
 				) : (
 					<div>
-						{nbPages > 1 && (
-							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-								<span className={fr.cx('fr-ml-0')}>
-									Organisation de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + entities.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{entitiesResult.metadata.count}
-									</span>
+						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Organisation de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + entities.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{entitiesResult.metadata.count}
 								</span>
-							</div>
-						)}
+							</span>
+						</div>
 
 						<div
 							className={cx(
@@ -373,19 +371,22 @@ const DashBoardEntities = () => {
 									<Loader />
 								</div>
 							) : (
-								entities.map((entity, index) => (
-									<EntityCard
-										entity={entity}
-										key={index}
-										onButtonClick={handleModalEntityRightsOpening}
-										isMine={
-											session.user.role.includes('admin') ||
-											myEntities
-												.map(myEntity => myEntity.id)
-												.includes(entity.id)
-										}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{entities.map((entity, index) => (
+										<li key={index}>
+											<EntityCard
+												entity={entity}
+												onButtonClick={handleModalEntityRightsOpening}
+												isMine={
+													session.user.role.includes('admin') ||
+													myEntities
+														.map(myEntity => myEntity.id)
+														.includes(entity.id)
+												}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 							{!isRefetchingEntities && entities.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -457,6 +458,14 @@ const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
 		p: {
 			margin: 0,
 			fontWeight: 'bold'
+		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
 		}
 	},
 	inviteLink: {

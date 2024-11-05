@@ -392,13 +392,12 @@ const ProductModal = (props: Props) => {
 												hideLabel={true}
 												label={`URL ${index + 1}`}
 												state={errors['urls']?.[index] ? 'error' : 'default'}
-												stateRelatedMessage={
-													errors['urls']?.[index]?.value?.message
-												}
+												stateRelatedMessage={`${errors['urls']?.[index]?.value?.message}. Format attendu : https://exemple.com `}
 												nativeInputProps={{
 													name,
 													value,
-													onChange
+													onChange,
+													placeholder: 'Ex: https://exemple.com'
 												}}
 												ref={index === urls.length - 1 ? lastUrlRef : null}
 											/>
@@ -414,6 +413,7 @@ const ProductModal = (props: Props) => {
 											onClick={() => handleRemoveUrl(index)}
 										>
 											<i className="ri-delete-bin-line"></i>
+											<span className="fr-sr-only">Supprimer</span>
 										</Button>
 									)}
 								</div>

@@ -277,23 +277,21 @@ const DashBoardUsers = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
-									Utilisateurs de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + users.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{usersResult.metadata.count}
-									</span>
+						<div className={fr.cx('fr-col-8', 'fr-pt-3w', 'fr-pb-2w')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Utilisateurs de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + users.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{usersResult.metadata.count}
 								</span>
-							)}
+							</span>
 						</div>
 						<div
 							className={cx(users.length === 0 ? classes.usersContainer : '')}
@@ -343,16 +341,20 @@ const DashBoardUsers = () => {
 									<Loader />
 								</div>
 							) : (
-								users.map((user, index) => (
-									<UserCard
-										user={user}
-										key={index}
-										onButtonClick={handleModalOpening}
-										onCheckboxClick={handleUserCheckbox}
-										selected={selectedUsers.includes(user.id)}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{users.map((user, index) => (
+										<li key={index}>
+											<UserCard
+												user={user}
+												onButtonClick={handleModalOpening}
+												onCheckboxClick={handleUserCheckbox}
+												selected={selectedUsers.includes(user.id)}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
+
 							{!isRefetchingUsers && users.length === 0 && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 									<div
@@ -426,6 +428,14 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 		p: {
 			margin: 0,
 			fontWeight: 'bold'
+		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
 		}
 	},
 	searchForm: {

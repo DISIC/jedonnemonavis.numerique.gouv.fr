@@ -14,6 +14,17 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import router from 'next/router';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
+type NavigationItem = {
+	text: string | React.ReactElement;
+	linkProps: {
+		href: string;
+		target: string;
+		id?: string;
+		title?: string;
+		'aria-label'?: string;
+	};
+	isActive: boolean;
+};
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
@@ -199,7 +210,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					</>
 				];
 
-	const navigationItems = [];
+	const navigationItems: NavigationItem[] = [];
 
 	if (session?.user) {
 		if (
@@ -233,7 +244,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	}
 
 	if (session?.user.role.includes('admin')) {
-		const adminNavigationItems = [
+		const adminNavigationItems: NavigationItem[] = [
 			{
 				text: 'Utilisateurs',
 				linkProps: {
@@ -251,7 +262,11 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				isActive: pathname == '/administration/dashboard/domains'
 			},
 			{
-				text: "Demandes d'accès",
+				text: (
+					<div>
+						Demandes d'accès <span>{userRequestsResult.metadata.count}</span>
+					</div>
+				),
 				linkProps: {
 					href: '/administration/dashboard/user-requests',
 					target: '_self',
@@ -325,11 +340,15 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
-							de vos retours depuis{' '}
-							<a href="https://tally.so/r/m6kyyB" target="_blank">
-								ce court formulaire
-							</a>
+							Aidez-nous à améliorer cet outil ! Faites-nous part de vos retours
+							en remplissant{' '}
+							<a
+								title="Le formulaire s'ouvre dans une nouvelle fenêtre"
+								href="https://tally.so/r/m6kyyB"
+								target="_blank"
+							>
+								ce court formulaire.
+							</a>{' '}
 						</>
 					}
 				/>
@@ -400,28 +419,22 @@ const useStyles = tss
 				color: fr.colors.decisions.text.disabled.grey.default
 			}
 		},
-		navigation: countUserRequests
-			? {
-					'.fr-nav__link#fr-header-public-header-main-navigation-link-badge': {
-						position: 'relative',
-						'&::after': {
-							content: `"${countUserRequests.toString()}"`, // displaying the number 2
-							color: fr.colors.decisions.background.default.grey.default,
-							backgroundColor:
-								fr.colors.decisions.background.flat.redMarianne.default,
-							borderRadius: '50%',
-							width: fr.spacing('4v'),
-							height: fr.spacing('4v'),
-							display: 'inline-block',
-							textAlign: 'center',
-							lineHeight: fr.spacing('4v'),
-							marginLeft: '8px',
-							position: 'relative',
-							bottom: '2px',
-							fontSize: '10px',
-							fontWeight: 'bold'
-						}
-					}
-				}
-			: {}
+		navigation: {
+			span: {
+				color: fr.colors.decisions.background.default.grey.default,
+				backgroundColor:
+					fr.colors.decisions.background.flat.redMarianne.default,
+				borderRadius: '50%',
+				width: fr.spacing('4v'),
+				height: fr.spacing('4v'),
+				display: 'inline-block',
+				textAlign: 'center',
+				lineHeight: fr.spacing('4v'),
+				marginLeft: '8px',
+				position: 'relative',
+				bottom: '2px',
+				fontSize: '10px',
+				fontWeight: 'bold'
+			}
+		}
 	}));
