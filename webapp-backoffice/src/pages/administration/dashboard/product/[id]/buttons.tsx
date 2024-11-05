@@ -377,7 +377,7 @@ const useStyles = tss
 			listStyleType: 'none',
 			li: {
 				paddingBottom: 0
-			}
+			},
 			marginTop: '1rem'
 		}
 	});
