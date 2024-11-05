@@ -85,10 +85,10 @@ describe('Account page', () => {
         cy.contains('li', selectors.menu.account).click({force : true});
         cy.contains('button', selectors.action.delete).click({force : true});
         cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
-        cy.get(selectors.accountForm.confirm).clear({force: true}).type('blabla');
+        cy.get(selectors.accountForm.confirm).clear({force: true}).type('blabla', {force: true});
         cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
         cy.contains('p', 'Mot de confirmation incorrect').should('exist')
-        cy.get(selectors.accountForm.confirm).clear({force: true}).type('supprimer');
+        cy.get(selectors.accountForm.confirm).clear({force: true}).type('supprimer', {force: true});
         cy.contains('button', selectors.action.confirmDelete).should('not.be.disabled').click();
         cy.url().should('include', '/login');
         cy.get(selectors.loginForm.email).type(newEmailTest);
