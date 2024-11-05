@@ -297,7 +297,7 @@ const ProductReviewsPage = (props: Props) => {
 
 	const displayEmptyState = () => {
 		if (!buttonResults?.data.length) {
-			return <NoButtonsPanel isSmall onButtonClick={handleButtonClick} />;
+			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
 		}
 
 		if (!reviewsCountAll) {

@@ -8,7 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
@@ -29,6 +29,9 @@ const ReviewLine = ({
 		return searchWords.every(word => answerText.includes(word));
 	});
 
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
+
 	const displayIntention = (intention: string) => {
 		switch (intention) {
 			case 'bad':
@@ -43,6 +46,14 @@ const ReviewLine = ({
 				return '';
 		}
 	};
+
+	useEffect(() => {
+		if (displayMoreInfo)
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+	}, [displayMoreInfo]);
 
 	return (
 		<tr className={cx(classes.container)}>

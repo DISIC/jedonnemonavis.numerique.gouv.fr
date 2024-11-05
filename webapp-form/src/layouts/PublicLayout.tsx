@@ -65,73 +65,69 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           },
         ]}
       />
-      {!isInIframe && (
-        <Header
-          brandTop={
-            <>
-              République
-              <br />
-              française
-            </>
-          }
-          homeLinkProps={{
-            href: "#",
-            title: "Accueil - Je donne mon avis (Services publics +)",
-          }}
-          id="fr-header-public-header"
-          serviceTitle={"Je donne mon avis"}
-          quickAccessItems={[
-            {
-              buttonProps: {
-                "aria-controls": "translate-select",
-                "aria-expanded": false,
-                title: t("Sélectionner une langue"),
-                className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
-              },
-              iconId: "fr-icon-translate-2",
-              text: (
-                <LanguageSelector
-                  lang={(i18n?.language || "fr") as Language}
-                  setLang={onToggleLanguageClick}
-                />
-              ),
+      <Header
+        brandTop={
+          <>
+            République
+            <br />
+            française
+          </>
+        }
+        homeLinkProps={{
+          href: "#",
+          title: "Accueil - Je donne mon avis (Services publics +)",
+        }}
+        id="fr-header-public-header"
+        serviceTitle={"Je donne mon avis"}
+        quickAccessItems={[
+          {
+            buttonProps: {
+              "aria-controls": "translate-select",
+              "aria-expanded": false,
+              title: t("Sélectionner une langue"),
+              className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
             },
-          ]}
-          serviceTagline="La voix de vos usagers"
-        />
-      )}
+            iconId: "fr-icon-translate-2",
+            text: (
+              <LanguageSelector
+                lang={(i18n?.language || "fr") as Language}
+                setLang={onToggleLanguageClick}
+              />
+            ),
+          },
+        ]}
+        serviceTagline="La voix de vos usagers"
+      />
       <main id="main" role="main">
         {children}
       </main>
-      {!isInIframe && (
-        <Footer
-          id="footer"
-          accessibility="non compliant"
-          bottomItems={[
-            { text: "Données personnelles", linkProps: { href: "/cgu" } },
-            {
-              text: "Modalités d’utilisation",
-              linkProps: { href: "/termsOfUse" },
-            },
-            { text: "Contact", linkProps: { href: "/contact" } },
-          ]}
-          termsLinkProps={{
-            href: "/legalNotice",
-          }}
-          license={
-            <>
-              Le{" "}
-              <a
-                href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
-                target="_blank"
-              >
-                code source
-              </a>{" "}
-              est disponible en licence libre.
-            </>
-          }
-        />
-      )}
+      <Footer
+        id="footer"
+        accessibility="non compliant"
+        bottomItems={[
+          { text: "Données personnelles", linkProps: { href: "/cgu" } },
+          {
+            text: "Modalités d’utilisation",
+            linkProps: { href: "/termsOfUse" },
+          },
+          { text: "Contact", linkProps: { href: "/contact" } },
+        ]}
+        termsLinkProps={{
+          href: "/legalNotice",
+        }}
+        license={
+          <>
+            Le{" "}
+            <a
+              href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
+              target="_blank"
+            >
+              code source
+            </a>{" "}
+            est disponible en licence libre.
+          </>
+        }
+      />
     </>
   );
 }

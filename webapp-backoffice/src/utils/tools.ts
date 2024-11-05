@@ -146,8 +146,9 @@ export const autocompleteFilterOptions = (
 	{ inputValue }: { inputValue: string },
 	includeCreateOption: boolean = false
 ) => {
-	const filteredOptions = matchSorter(options, inputValue, {
-		keys: [item => item.label]
+	const filteredOptions = matchSorter(options, inputValue.trim(), {
+		keys: [item => item.label],
+		threshold: matchSorter.rankings.CONTAINS,
 	}).slice(0, 4);
 
 	if (includeCreateOption) {

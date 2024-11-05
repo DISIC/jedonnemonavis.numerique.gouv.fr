@@ -9,6 +9,7 @@ import { tss } from 'tss-react/dsfr';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
 import { trpc } from '@/src/utils/trpc';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -97,7 +98,7 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'install':
-				return 'Code source';
+				return 'Code à copier';
 			case 'create':
 				return 'Créer un bouton';
 			case 'edit':
@@ -143,47 +144,62 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<p>
-							Pour permettre à vos usagers de donner leur avis sur cette
-							démarche, insérez l'un des deux boutons en copiant-collant le code
-							source correspondant. <br />
-							<br /> Choissisez la couleur du bouton qui correspond le mieux à
-							votre charte graphique.
+							Pour installer le bouton JDMA et récolter les avis, copier-coller
+							ce code dans votre service numérique.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
-							<RadioButtons
-								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
-								legend="Couleur du bouton"
-								options={[
-									{
-										label: 'Bleu',
-										nativeInputProps: {
-											defaultChecked: true,
-											value: 'blue',
-											onClick: () => setButtonColor('bleu')
+							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}>
+								<RadioButtons
+									className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
+									legend="Type de bouton"
+									options={[
+										{
+											label: 'Bleu',
+											hintText: (
+												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+													Le bouton par défaut, à placer sur un{' '}
+													<span className="fr-text--bold">
+														fond blanc ou neutre
+													</span>
+													.
+												</p>
+											),
+											nativeInputProps: {
+												defaultChecked: true,
+												value: 'blue',
+												onClick: () => setButtonColor('bleu')
+											}
+										},
+										{
+											label: 'Blanc',
+											hintText: (
+												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+													À placer sur un{' '}
+													<span className="fr-text--bold">fond coloré</span>.
+												</p>
+											),
+											nativeInputProps: {
+												value: 'white',
+												onClick: () => setButtonColor('blanc')
+											}
 										}
-									},
-									{
-										label: 'Blanc',
-										nativeInputProps: {
-											value: 'white',
-											onClick: () => setButtonColor('blanc')
-										}
-									}
-								]}
-							/>
-							<Image
-								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}
-								alt="bouton-je-donne-mon-avis"
-								src={`/assets/bouton-${buttonColor}.svg`}
-								width={150}
-								height={85}
-							/>
+									]}
+								/>
+							</div>
+							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+								<Image
+									alt="bouton-je-donne-mon-avis"
+									src={`/assets/bouton-${buttonColor}.svg`}
+									width={150}
+									height={85}
+								/>
+							</div>
 						</div>
 						<div className={fr.cx('fr-input-group')}>
 							<Input
 								className={classes.textArea}
 								id="button-code"
-								label={`Code à intégrer pour le bouton ${buttonColor}`}
+								label={`Code à intégrer`}
 								textArea
 								nativeTextAreaProps={{
 									name: 'button-code',
@@ -192,7 +208,16 @@ const ButtonModal = (props: Props) => {
 								}}
 							/>
 						</div>
-						<Accordion
+						<Button
+							priority="primary"
+							onClick={() => {
+								navigator.clipboard.writeText(buttonCode);
+								modal.close();
+							}}
+						>
+							Copier le code
+						</Button>
+						{/* <Accordion
 							label="Où placer le bouton ?"
 							className={classes.accordion}
 						>
@@ -219,7 +244,7 @@ const ButtonModal = (props: Props) => {
 								“Aidez-nous à améliorer cette démarche ! Donnez-nous votre avis,
 								cela ne prend que 2 minutes.”
 							</div>
-						</Accordion>
+						</Accordion> */}
 					</div>
 				);
 			case 'create':
@@ -478,6 +503,10 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	iframe: {
+		width: '100%',
+		height: '80vh'
 	}
 }));
 

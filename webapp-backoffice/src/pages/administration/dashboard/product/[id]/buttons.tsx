@@ -18,6 +18,9 @@ import { trpc } from '@/src/utils/trpc';
 import Head from 'next/head';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useRouter } from 'next/router';
+import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import Select from '@codegouvfr/react-dsfr/Select';
 
 interface Props {
 	product: Product;
@@ -41,6 +44,7 @@ const ProductButtonsPage = (props: Props) => {
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
 
+	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
 
 	const {
@@ -53,7 +57,8 @@ const ProductButtonsPage = (props: Props) => {
 			numberPerPage,
 			page: currentPage,
 			product_id: product.id,
-			isTest: testFilter
+			isTest: testFilter,
+			filterByTitle: filters.filter
 		},
 		{
 			initialData: {
@@ -69,6 +74,10 @@ const ProductButtonsPage = (props: Props) => {
 		data: buttons,
 		metadata: { count: buttonsCount }
 	} = buttonsResult;
+
+	const { data: reviewsCount } = trpc.review.getCounts.useQuery({
+		product_id: product.id
+	});
 
 	const handlePageChange = (pageNumber: number) => {
 		setCurrentPage(pageNumber);
@@ -90,6 +99,8 @@ const ProductButtonsPage = (props: Props) => {
 
 	const nbPages = getNbPages(buttonsCount, numberPerPage);
 
+	const displayFilters = nbPages > 1 || buttons.length > 0;
+
 	React.useEffect(() => {
 		if (router.query.autoCreate === 'true') {
 			setTimeout(() => {
@@ -101,10 +112,10 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product}>
 			<Head>
-				<title>{product.title} | Gérer mes boutons | Je donne mon avis</title>
+				<title>{product.title} | Gérer les boutons | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`${product.title} | Gérer mes boutons | Je donne mon avis`}
+					content={`${product.title} | Gérer les boutons | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
@@ -117,7 +128,7 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>Gérer mes boutons</h2>
+					<h2 className={fr.cx('fr-mb-2w')}>Gérer les boutons</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
@@ -132,13 +143,49 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				)}
 			</div>
+			{buttonsCount > 0 && (
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div className={fr.cx('fr-col-12')}>
+						<p>
+							Le bouton JDMA se place sur votre service numérique pour récolter
+							l’avis de vos usagers.
+						</p>
+						<p>
+							Vous pouvez{' '}
+							<a
+								href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
+								target="_blank"
+							>
+								prévisualiser le formulaire JDMA
+							</a>
+							. Les avis que vous déposerez ne seront pas pris en compte dans
+							les statistiques.
+						</p>
+					</div>
+				</div>
+			)}
 			<div
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--right'
+					'fr-grid-row--left'
 				)}
 			>
+				{buttons && nbPages > 1 && (
+					<div className={fr.cx('fr-col-8')}>
+						<p className={fr.cx('fr-mb-0')}>
+							Boutons de{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + 1}
+							</span>{' '}
+							à{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + buttons.length}
+							</span>{' '}
+							sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
+						</p>
+					</div>
+				)}
 				{/* {buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
 						<Checkbox
@@ -173,7 +220,38 @@ const ProductButtonsPage = (props: Props) => {
 					/>
 				</div> */}
 			</div>
+
 			<div>
+				{displayFilters && (
+					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+						<p
+							className={fr.cx(
+								'fr-mb-0',
+								'fr-text--bold',
+								'fr-text--sm',
+								'fr-pt-1w'
+							)}
+							onClick={() =>
+								updateFilters({
+									...filters,
+									filter:
+										filters.filter === 'title:asc' ? 'title:desc' : 'title:asc'
+								})
+							}
+						>
+							Nom du bouton{' '}
+							<i
+								className={fr.cx(
+									'fr-icon--sm',
+									'fr-text--bold',
+									filters.filter === 'title:asc'
+										? 'ri-arrow-up-s-line'
+										: 'ri-arrow-down-s-line'
+								)}
+							/>
+						</p>
+					</div>
+				)}
 				{isLoadingButtons ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
@@ -216,7 +294,12 @@ const ProductButtonsPage = (props: Props) => {
 					</>
 				)}
 				<div
-					className={fr.cx('fr-grid-row--center', 'fr-grid-row', 'fr-mt-6v')}
+					className={fr.cx(
+						'fr-grid-row--center',
+						'fr-grid-row',
+						'fr-mt-6v',
+						'fr-mb-6v'
+					)}
 				>
 					{nbPages > 1 && (
 						<Pagination
@@ -236,6 +319,33 @@ const ProductButtonsPage = (props: Props) => {
 						/>
 					)}
 				</div>
+				{/* {reviewsCount && (
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-12')}>
+							<ProductBottomInfo
+								background={buttons.length > 1 ? '#FFFFFF' : '#F3F6FE'}
+								title={
+									reviewsCount && reviewsCount.countAll > 0
+										? 'Pour aller plus loin avec JDMA ...'
+										: 'En attendant vos premiers avis...'
+								}
+								hasBorder={buttons.length > 1}
+								contents={[
+									{
+										text: 'Nos conseils pour obtenir plus d’avis !',
+										link: 'Améliorer le placement de votre bouton',
+										image: '/assets/chat_picto.svg'
+									},
+									{
+										text: "Vous souhaitez comprendre les différences entre un parcours sur mobile et un parcours sur ordinateur pour le même service? Réaliser un test A/B pour une fonctionnalité?  C'est possible en créant plusieurs boutons sur le même service.",
+										link: 'En savoir plus sur les boutons multiples',
+										image: '/assets/cone_picto.svg'
+									}
+								]}
+							/>
+						</div>
+					</div>
+				)} */}
 			</div>
 		</ProductLayout>
 	);
@@ -268,6 +378,7 @@ const useStyles = tss
 			li: {
 				paddingBottom: 0
 			}
+			marginTop: '1rem'
 		}
 	});
 

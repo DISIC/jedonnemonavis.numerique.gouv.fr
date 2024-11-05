@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -9,6 +9,9 @@ import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
+import { Menu, MenuItem, Skeleton } from '@mui/material';
+import Button from '@codegouvfr/react-dsfr/Button';
+import router from 'next/router';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -25,6 +28,21 @@ type NavigationItem = {
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
+
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(null);
+	};
 
 	const { data: session } = useSession();
 
@@ -64,54 +82,166 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		}
 	);
 
+	const { data: userAccessRights, isLoading: isUserAccessRightsLoading } =
+		trpc.accessRight.getUserList.useQuery(
+			{
+				page: 100,
+				numberPerPage: 0
+			},
+			{
+				enabled: !!session?.user,
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
 
-	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
+	const quickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
 		!session?.user
-			? {
-					iconId: 'fr-icon-account-line',
-					linkProps: {
-						href: '/login',
-						target: '_self'
-					},
-					text: 'Connexion / Inscription'
-				}
-			: {
-					iconId: 'ri-logout-circle-line',
-					buttonProps: {
-						onClick: () => {
-							signOut();
-						}
-					},
-					text: 'Déconnexion'
-				}
-	];
-
-	const navigationItems: NavigationItem[] = session?.user
-		? !!userAdminEntityRights.metadata.count ||
-			session.user.role.includes('admin')
 			? [
 					{
-						text: 'Services',
+						iconId: 'fr-icon-account-line',
 						linkProps: {
-							href: '/administration/dashboard/products',
+							href: '/login',
 							target: '_self'
 						},
-						isActive: pathname.startsWith('/administration/dashboard/product')
-					},
-					{
-						text: 'Organisations',
-						linkProps: {
-							href: '/administration/dashboard/entities',
-							target: '_self'
-						},
-						isActive: pathname.startsWith('/administration/dashboard/entities')
+						text: 'Connexion / Inscription'
 					}
 				]
-			: []
-		: [];
+			: [
+					<>
+						<Button
+							id="button-account"
+							iconId={'fr-icon-account-circle-line'}
+							title={`Ouvrir le menu mon compte`}
+							aria-label={`Ouvrir le menu mon compte`}
+							priority="tertiary"
+							size="large"
+							onClick={handleMenuClick}
+						>
+							Compte
+						</Button>
+						<Menu
+							id="option-menu"
+							open={menuOpen}
+							anchorEl={anchorEl}
+							onClose={handleClose}
+							MenuListProps={{
+								'aria-labelledby': 'button-options-access-right'
+							}}
+						>
+							<MenuItem
+								style={{ pointerEvents: 'none' }}
+								className={cx(classes.firstItem)}
+							>
+								<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+									{session?.user.name}
+								</div>
+								<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+									{session?.user.email}
+								</div>
+							</MenuItem>
+							<MenuItem
+								className={cx(fr.cx('fr-p-4v'), classes.item)}
+								onClick={e => {
+									handleClose(e);
+									router.push(
+										`/administration/dashboard/account/${session?.user.id}/infos`
+									);
+								}}
+							>
+								<span
+									className={fr.cx(
+										'fr-icon-user-line',
+										'fr-icon--sm',
+										'fr-mr-1-5v'
+									)}
+								/>
+								Informations personnelles
+							</MenuItem>
+							{/*
+									<MenuItem
+										className={cx(fr.cx('fr-p-4v'), classes.item)}
+										onClick={e => {
+											handleClose(e);
+											router.push(
+												`/administration/dashboard/account/${session?.user.id}/notifications`
+											);
+										}}
+									>
+										<span
+											className={fr.cx(
+												'fr-icon-notification-3-line',
+												'fr-icon--sm',
+												'fr-mr-1-5v'
+											)}
+										/>
+										Notifications
+									</MenuItem>
+								*/}
+							<MenuItem
+								className={cx(
+									fr.cx('fr-pb-2v', 'fr-pt-4v'),
+									classes.item,
+									classes.lastItem
+								)}
+							>
+								<Button
+									id="button-account"
+									iconId={'fr-icon-logout-box-r-line'}
+									title={`Déconnexion`}
+									aria-label={`Déconnexion`}
+									priority="tertiary"
+									onClick={() => {
+										signOut();
+									}}
+								>
+									Se déconnecter
+								</Button>
+							</MenuItem>
+						</Menu>
+					</>
+				];
+
+	const navigationItems: NavigationItem[] = [];
+
+	if (session?.user) {
+		if (
+			userAccessRights.metadata.count ||
+			userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
+		) {
+			navigationItems.push({
+				text: 'Services',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
+			});
+		}
+
+		if (
+			userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
+		) {
+			navigationItems.push({
+				text: 'Organisations',
+				linkProps: {
+					href: '/administration/dashboard/entities',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/entities')
+			});
+		}
+	}
 
 	if (session?.user.role.includes('admin')) {
 		const adminNavigationItems: NavigationItem[] = [
@@ -147,7 +277,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				isActive: pathname == '/administration/dashboard/user-requests'
 			}
 		];
-
 		navigationItems.push(...adminNavigationItems);
 	}
 
@@ -269,6 +398,26 @@ const useStyles = tss
 	.create(({ countUserRequests }) => ({
 		logo: {
 			maxHeight: fr.spacing('11v')
+		},
+		firstItem: {
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			WebkitAlignItems: 'flex-start'
+		},
+		lastItem: {
+			display: 'flex',
+			flexDirection: 'column'
+		},
+		item: {
+			borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
+		},
+		inMenu: {
+			display: 'block',
+			'&:nth-of-type(2)': {
+				fontSize: '0.8rem',
+				color: fr.colors.decisions.text.disabled.grey.default
+			}
 		},
 		navigation: {
 			span: {

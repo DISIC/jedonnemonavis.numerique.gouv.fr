@@ -21,11 +21,54 @@ interface Props {
 	title: string;
 	children: React.ReactNode;
 	handleOnConfirm: () => void;
+	kind?: 'default' | 'danger';
+	disableAction?: boolean;
 }
 
 const OnConfirmModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, title, children, handleOnConfirm } = props;
+	const {
+		modal,
+		title,
+		children,
+		handleOnConfirm,
+		kind = 'default',
+		disableAction
+	} = props;
+
+	const getConfirmButtonProps = () => {
+		let confirmButtonProps: ModalProps.ActionAreaButtonProps = {
+			children: ''
+		};
+
+		switch (kind) {
+			case 'danger':
+				confirmButtonProps = {
+					children: (
+						<>
+							Supprimer{' '}
+							<span
+								className={cx(classes.dangerIcon, fr.cx('ri-delete-bin-line'))}
+								aria-hidden="true"
+							/>
+						</>
+					),
+					priority: 'tertiary',
+					className: classes.dangerButton,
+					disabled: disableAction ?? false
+				};
+
+				break;
+			case 'default':
+				confirmButtonProps = {
+					children: 'Oui',
+					disabled: disableAction ?? false
+				};
+				break;
+		}
+
+		return confirmButtonProps;
+	};
 
 	return (
 		<modal.Component
@@ -44,7 +87,7 @@ const OnConfirmModal = (props: Props) => {
 					priority: 'secondary'
 				},
 				{
-					children: 'Oui',
+					...getConfirmButtonProps(),
 					doClosesModal: false,
 					onClick: () => handleOnConfirm()
 				}
@@ -58,6 +101,20 @@ const OnConfirmModal = (props: Props) => {
 const useStyles = tss.withName(OnConfirmModal.name).create(() => ({
 	boldText: {
 		fontWeight: 'bold'
+	},
+	dangerButton: {
+		color: fr.colors.decisions.text.default.error.default,
+		boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`
+	},
+	dangerIcon: {
+		width: fr.spacing('4v'),
+		height: fr.spacing('4v'),
+		marginLeft: fr.spacing('1v'),
+		'&::before': {
+			width: fr.spacing('4v'),
+			height: fr.spacing('4v'),
+			verticalAlign: 'top'
+		}
 	}
 }));
 

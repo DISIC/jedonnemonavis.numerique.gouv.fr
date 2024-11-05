@@ -17,14 +17,24 @@ export const authOptions: NextAuthOptions = {
 		error: '/login' // Error code passed in query string as ?error=
 	},
 	callbacks: {
-		session: ({ session, token }) => ({
-			...session,
-			user: {
-				...session.user,
-				id: token.uid,
-				role: token.role
+		async session({ session, token }) {
+			// Récupère les informations utilisateur en base de données
+			if (token.uid) {
+				const user = await prisma.user.findUnique({
+					where: { id: token.uid as number }
+				});
+				if (user) {
+					session.user = {
+						...session.user,
+						id: user.id.toString(),
+						role: user.role,
+						name: `${user.firstName} ${user.lastName}`,
+						email: user.email
+					};
+				}
 			}
-		}),
+			return session;
+		},
 		jwt: ({ user, token }) => {
 			if (user) {
 				token.uid = user.id;

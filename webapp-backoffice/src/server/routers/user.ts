@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	UserCreateInputSchema,
+	UserUncheckedUpdateInputSchema,
 	UserUpdateInputSchema
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
@@ -260,6 +261,19 @@ export const userRouter = router({
 			return { data: users, metadata: { count } };
 		}),
 
+	getById: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: { id }
+			});
+
+			return { data: user };
+		}),
+
 	create: protectedProcedure
 		.meta({ isAdmin: true })
 		.input(UserCreateInputSchema)
@@ -295,20 +309,54 @@ export const userRouter = router({
 		}),
 
 	update: protectedProcedure
-		.meta({ isAdmin: true })
-		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number(), user: UserUncheckedUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
-			const { id, user } = input;
-			const updatedUser = await ctx.prisma.user.update({
-				where: { id },
-				data: { ...user, email: ((user.email || '') as string).toLowerCase() }
-			});
+		  
+		  	const { id, user } = input;
+		  	const { role, ...userWithoutRole } = user;
 
-			return { data: updatedUser };
+			console.log('user : ', user)
+	  
+		  	const dataToUpdate = ctx.session?.user?.role.includes('admin')
+				? { ...userWithoutRole, role }
+				: { ...userWithoutRole };
+
+			if(dataToUpdate.email) {
+				const userHasConflict = await ctx.prisma.user.findUnique({
+					where: {
+						email: (dataToUpdate.email as string || '').toLowerCase()
+					}
+				});
+	
+				if (userHasConflict)
+					throw new TRPCError({
+						code: 'CONFLICT',
+						message: 'User already exists'
+					});
+	
+				const isWhiteListed = await checkUserDomain(
+					ctx.prisma,
+					(dataToUpdate.email as string || '').toLowerCase()
+				);
+	
+				if (!isWhiteListed)
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'User email domain not whitelisted'
+					});
+			}
+	  
+		  const updatedUser = await ctx.prisma.user.update({
+				where: { id },
+				data: dataToUpdate,
+		  });
+	  
+		  return { data: updatedUser };
 		}),
 
 	delete: protectedProcedure
-		.meta({ isAdmin: true })
+		.meta({ isAdminOrOwn: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
@@ -611,9 +659,9 @@ export const userRouter = router({
 		}),
 
 	initResetPwd: publicProcedure
-		.input(z.object({ email: z.string() }))
+		.input(z.object({ email: z.string(), forgot: z.boolean().optional() }))
 		.mutation(async ({ ctx, input }) => {
-			const { email } = input;
+			const { email, forgot } = input;
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
@@ -647,7 +695,7 @@ export const userRouter = router({
 			});
 
 			await sendMail(
-				'Mot de passe oublié',
+				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',
 				email.toLowerCase(),
 				getResetPasswordEmailHtml(token),
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${

@@ -38,17 +38,13 @@ const ProductButtonCard = (props: Props) => {
 						'fr-grid-row--middle'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
 						<p className={fr.cx('fr-mb-0')}>{button.title}</p>
 						<p className={fr.cx('fr-mb-0', 'fr-hint-text')}>
 							{button.description}
 						</p>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-						<p className={fr.cx('fr-mb-0')}>
-							{formatDateToFrenchString(button.created_at.toString())}
-						</p>
-					</div>
+
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
 							{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
@@ -81,7 +77,7 @@ const ProductButtonCard = (props: Props) => {
 										onButtonClick('edit', button), handleClose();
 									}}
 								>
-									Modifier le bouton
+									Modifier
 								</MenuItem>
 								{/* <MenuItem onClick={() => onButtonClick('merge')}>
 								Fusionner avec un autre bouton
@@ -94,8 +90,27 @@ const ProductButtonCard = (props: Props) => {
 							>
 								Archiver bouton
 							</MenuItem> */}
+								<MenuItem
+									onClick={() => {
+										onButtonClick('install', button);
+										push(['trackEvent', 'Gestion boutons', 'Installer']);
+										handleClose();
+									}}
+								>
+									Voir le code
+								</MenuItem>
+								<MenuItem
+									onClick={() => {
+										navigator.clipboard.writeText(
+											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
+										);
+										handleClose();
+									}}
+								>
+									Copier le lien du formulaire
+								</MenuItem>
 							</Menu>
-							{!button.isTest && (
+							{/* {!button.isTest && (
 								<Button
 									size="small"
 									onClick={() => {
@@ -105,7 +120,7 @@ const ProductButtonCard = (props: Props) => {
 								>
 									Installer
 								</Button>
-							)}
+							)} */}
 						</div>
 					</div>
 				</div>
@@ -127,7 +142,7 @@ const useStyles = tss
 			display: 'flex',
 			flexWrap: 'wrap',
 			alignItems: 'center',
-			justifyContent: 'space-between',
+			justifyContent: 'flex-end',
 			paddingLeft: fr.spacing('11v')
 		},
 		tag: {}

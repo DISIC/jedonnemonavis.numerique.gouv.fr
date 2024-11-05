@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
+import { v4 as uuidv4 } from "uuid";
 
 type JDMAFormProps = {
   product: Product;
@@ -234,7 +235,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const userIdExists = localStorage.getItem("userId");
 
       if (!userIdExists) {
-        const userId = crypto.randomUUID();
+        const userId = uuidv4();
 
         localStorage.setItem("userId", userId);
 
@@ -528,7 +529,7 @@ export const getServerSideProps: GetServerSideProps<{
     else product.buttons = [product.buttons[0]];
   }
 
-  if (product) {
+  if (product && product.status !== "archived") {
     return {
       props: {
         product: {
@@ -571,7 +572,7 @@ const useStyles = tss
         },
       },
       [fr.breakpoints.up("md")]: {
-        height: isInIframe ? 80 : `${blueSectionPxHeight}px`,
+        height: `${blueSectionPxHeight}px`,
       },
     },
     titleSection: {
@@ -601,7 +602,7 @@ const useStyles = tss
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,
       ...fr.spacing("padding", {
-        topBottom: !isInIframe ? "4v" : "auto",
+        topBottom: "auto",
         rightLeft: "6v",
       }),
       h1: {
