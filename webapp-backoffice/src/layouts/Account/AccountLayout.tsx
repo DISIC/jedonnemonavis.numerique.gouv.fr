@@ -61,7 +61,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 					isActive:
 						router.pathname === `/administration/dashboard/user/[id]/account`,
 					linkProps: {
-						href: `/administration/dashboard/user/${session?.user.id}/account`,
+						href: `/administration/dashboard/user/${user.id}/account`,
 						alt: 'Informations'
 					}
 				},
@@ -70,7 +70,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 					isActive:
 						router.pathname === `/administration/dashboard/user/[id]/access`,
 					linkProps: {
-						href: `/administration/dashboard/user/${session?.user.id}/access`,
+						href: `/administration/dashboard/user/${user.id}/access`,
 						alt: 'Informations'
 					}
 				}

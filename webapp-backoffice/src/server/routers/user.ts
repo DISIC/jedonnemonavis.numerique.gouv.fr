@@ -294,7 +294,23 @@ export const userRouter = router({
 			const { id } = input;
 
 			const user = await ctx.prisma.user.findUnique({
-				where: { id }
+				where: { id },
+				include: {
+					accessRights: {
+						include: {
+							product: true
+						}
+					},
+					adminEntityRights: {
+						include: {
+							entity: {
+								include: {
+									products: true
+								}
+							}
+						}
+					}
+				}
 			});
 
 			return { data: user };

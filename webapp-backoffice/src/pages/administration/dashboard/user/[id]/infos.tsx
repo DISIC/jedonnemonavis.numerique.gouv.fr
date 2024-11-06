@@ -43,6 +43,13 @@ const UserInfos: React.FC<Props> = props => {
 
 	return (
 		<>
+			{!user ||
+				isLoadingUser ||
+				(isRefetchingUser && (
+					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+						<Loader />
+					</div>
+				))}
 			{!isLoadingUser && !isRefetchingUser && user && (
 				<AccountLayout isOwn={isOwn} user={user}>
 					<Head>

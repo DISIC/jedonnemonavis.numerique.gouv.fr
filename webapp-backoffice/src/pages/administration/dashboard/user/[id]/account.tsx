@@ -5,8 +5,6 @@ import { tss } from 'tss-react/dsfr';
 import Head from 'next/head';
 import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
-import IdentityCard from '@/src/components/dashboard/Account/Informations/identityCard';
-import CredentialsCard from '@/src/components/dashboard/Account/Informations/credentialsCard';
 import DeleteCard from '@/src/components/dashboard/Account/Informations/deleteCard';
 import { trpc } from '@/src/utils/trpc';
 import { useRouter } from 'next/router';
@@ -44,6 +42,13 @@ const UserAccount: React.FC<Props> = props => {
 
 	return (
 		<>
+			{!user ||
+				isLoadingUser ||
+				(isRefetchingUser && (
+					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+						<Loader />
+					</div>
+				))}
 			{!isLoadingUser && !isRefetchingUser && user && (
 				<AccountLayout isOwn={isOwn} user={user}>
 					<Head>
@@ -60,12 +65,6 @@ const UserAccount: React.FC<Props> = props => {
 							</>
 						)}
 					</Head>
-					{isLoadingUser ||
-						(isRefetchingUser && (
-							<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-								<Loader />
-							</div>
-						))}
 					<div className={classes.column}>
 						<div className={classes.headerWrapper}>
 							<h2>Compte</h2>

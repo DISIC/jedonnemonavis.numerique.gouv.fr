@@ -7,16 +7,17 @@ import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
 
 interface Props {
+	isOwn: Boolean;
 	user: User;
 }
 
 const NotificationsAccount: React.FC<Props> = props => {
-	const { user } = props;
+	const { user, isOwn } = props;
 
 	const { classes } = useStyles();
 
 	return (
-		<AccountLayout>
+		<AccountLayout isOwn={isOwn} user={user}>
 			<Head>
 				<title>
 					{`${user.firstName} ${user.lastName}`} | Compte Notifications | Je
