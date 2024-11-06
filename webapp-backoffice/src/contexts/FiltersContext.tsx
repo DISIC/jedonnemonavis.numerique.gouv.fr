@@ -1,6 +1,12 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Filters = {
+	users: {
+		entity: { label: string; value: number }[];
+		currentPage: number;
+		filter: string;
+		validatedSearch: string;
+	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
@@ -26,6 +32,12 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 	children
 }) => {
 	const [filters, setFilters] = useState<Filters>({
+		users: {
+			entity: [],
+			currentPage: 1,
+			filter: 'email:asc',
+			validatedSearch: ''
+		},
 		filterEntity: [],
 		currentPage: 1,
 		filter: 'title',

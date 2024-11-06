@@ -6,8 +6,11 @@ import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import { User } from '@/prisma/generated/zod';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 interface ProductLayoutProps {
+	isOwn?: Boolean;
+	user: User;
 	children: React.ReactNode;
 }
 
@@ -20,7 +23,7 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const AccountLayout = ({ children }: ProductLayoutProps) => {
+const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 	const [displayToast, setDisplayToast] = useState(false);
 	const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -30,27 +33,48 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 
 	const { cx, classes } = useStyles();
 
-	const menuItems: MenuItems[] = [
-		{
-			text: 'Informations',
-			isActive:
-				router.pathname === `/administration/dashboard/account/[id]/infos`,
-			linkProps: {
-				href: `/administration/dashboard/account/${session?.user.id}/infos`,
-				alt: 'Informations'
-			}
-		}
-		/*{
+	const menuItems: MenuItems[] = isOwn
+		? [
+				{
+					text: 'Informations',
+					isActive:
+						router.pathname === `/administration/dashboard/user/[id]/infos`,
+					linkProps: {
+						href: `/administration/dashboard/user/${session?.user.id}/infos`,
+						alt: 'Informations'
+					}
+				}
+				/*{
 			text: 'Notifications',
 			isActive:
 				router.pathname ===
-				`/administration/dashboard/account/[id]/notifications`,
+				`/administration/dashboard/user/[id]/notifications`,
 			linkProps: {
-				href: `/administration/dashboard/account/${session?.user.id}/notifications`,
+				href: `/administration/dashboard/user/${session?.user.id}/notifications`,
 				alt: 'Notifications'
 			}
 		}*/
-	];
+			]
+		: [
+				{
+					text: 'Compte',
+					isActive:
+						router.pathname === `/administration/dashboard/user/[id]/account`,
+					linkProps: {
+						href: `/administration/dashboard/user/${session?.user.id}/account`,
+						alt: 'Informations'
+					}
+				},
+				{
+					text: 'Accès',
+					isActive:
+						router.pathname === `/administration/dashboard/user/[id]/access`,
+					linkProps: {
+						href: `/administration/dashboard/user/${session?.user.id}/access`,
+						alt: 'Informations'
+					}
+				}
+			];
 
 	useEffect(() => {
 		const handleScroll = () => {
@@ -77,9 +101,16 @@ const AccountLayout = ({ children }: ProductLayoutProps) => {
 				severity="info"
 				message="Identifiant copié dans le presse papier !"
 			/>
-			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-12v')} id="product-title">
-					Compte
+			<div className={cx(fr.cx('fr-mt-10v'), classes.title)}>
+				{!isOwn && (
+					<div>
+						<Link href="/administration/dashboard/users">Utilisateurs</Link>
+						<span className={fr.cx('fr-mx-2v')}>{'>'}</span>
+						<span>{`${user.firstName} ${user.lastName}`}</span>
+					</div>
+				)}
+				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-12v')} id="account-title">
+					{isOwn ? 'Compte' : `${user.firstName} ${user.lastName}`}
 				</h1>
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>

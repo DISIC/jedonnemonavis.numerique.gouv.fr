@@ -5,6 +5,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -50,16 +51,30 @@ const UserCard = ({
 					></Checkbox>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<p className={cx(fr.cx('fr-mb-0'), classes.spanFullName)}>
-						{user.firstName + ' ' + user.lastName}
-					</p>
-					<span className={classes.userEmail}>{user.email}</span>
+					<Link href={`/administration/dashboard/user/${user.id}/account`}>
+						<p
+							className={cx(
+								fr.cx('fr-mb-0', 'fr-text--bold'),
+								classes.userName
+							)}
+						>
+							{user.firstName + ' ' + user.lastName}
+						</p>
+					</Link>
+				</div>
+				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+					<p className={cx(fr.cx('fr-m-0'), classes.userEmail)}>{user.email}</p>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<span>{formatDateToFrenchString(user.created_at.toString())}</span>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
-					{user.xwiki_account ? (
+					<span
+						className={cx(fr.cx('fr-mb-0', 'fr-text--bold', 'fr-hidden-md'))}
+					>
+						Superadmin:{' '}
+					</span>
+					{user.role.includes('admin') ? (
 						<i
 							className={cx(
 								fr.cx('fr-icon-checkbox-circle-line'),
@@ -75,41 +90,14 @@ const UserCard = ({
 						/>
 					)}
 				</div>
-				<div
-					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'),
-						classes.wrapperButtons
-					)}
-				>
-					<Button
-						priority="tertiary"
-						size="small"
-						iconId="fr-icon-delete-bin-line"
-						disabled={session?.user.email === user.email}
-						iconPosition="right"
-						className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
-						onClick={() => onButtonClick({ type: 'delete', user })}
-					>
-						Supprimer
-					</Button>
-					<Button
-						priority="secondary"
-						size="small"
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-						onClick={() => onButtonClick({ type: 'create', user })}
-					>
-						Modifier
-					</Button>
-				</div>
 			</div>
 		</div>
 	);
 };
 
 const useStyles = tss.withName(UserCard.name).create(() => ({
-	spanFullName: {
-		fontWeight: 'bold'
+	userName: {
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default
 	},
 	iconSuccess: {
 		color: 'green'
@@ -122,7 +110,8 @@ const useStyles = tss.withName(UserCard.name).create(() => ({
 		justifyContent: 'end'
 	},
 	userEmail: {
-		wordWrap: 'break-word'
+		wordWrap: 'break-word',
+		textDecoration: 'none'
 	}
 }));
 
