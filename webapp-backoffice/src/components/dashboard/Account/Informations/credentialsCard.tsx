@@ -144,10 +144,10 @@ const CredentialsCard = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Adresse e-mail
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
 								{user.email}
 							</div>
 						</div>
@@ -158,10 +158,10 @@ const CredentialsCard = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Mot de passe
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 								*****************
 							</div>
 						</div>

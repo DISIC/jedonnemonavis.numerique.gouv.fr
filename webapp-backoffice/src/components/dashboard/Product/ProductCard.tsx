@@ -345,11 +345,13 @@ const ProductCard = ({
 						Vous êtes sûr de vouloir supprimer le service{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>
-						En supprimant ce service :<br />
-						- vous n’aurez plus accès aux avis du formulaire ;<br />- les
-						utilisateurs de ce service n’auront plus accès au formulaire.
-					</p>
+					<p>En supprimant ce service :</p>
+					<ul className={fr.cx('fr-mb-8v')}>
+						<li>vous n’aurez plus accès aux avis du formulaire,</li>
+						<li>
+							les utilisateurs de ce service n’auront plus accès au formulaire.
+						</li>
+					</ul>
 					{nbReviews && nbReviews > 1000 ? (
 						<form id="delete-product-form">
 							<div className={fr.cx('fr-input-group')}>
@@ -393,7 +395,12 @@ const ProductCard = ({
 				tabIndex={0}
 			>
 				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+					<div
+						className={cx(
+							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+							classes.gridProduct
+						)}
+					>
 						{(product.isTop250 || isDisabled) && (
 							<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
 								<div className={classes.badgesContainer}>
@@ -411,7 +418,7 @@ const ProductCard = ({
 							</div>
 						)}
 
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6')}>
+						<div className={fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6')}>
 							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 						</div>
 						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
@@ -443,16 +450,26 @@ const ProductCard = ({
 							</div>
 						) : (
 							<>
-								<div className={cx(classes.rightButtonsWrapper)}>
+								<div
+									className={cx(
+										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
+										classes.rightButtonsWrapper
+									)}
+								>
 									<Button
-										id="button-options-product"
+										id="button-service-product"
 										iconId={'ri-more-2-fill'}
-										title={`Ouvrir le menu contextuel du produit « ${product.title} »`}
-										aria-label={`Ouvrir le menu contextuel du produit « ${product.title} »`}
+										title={`Ouvrir le menu contextuel du service « ${product.title} »`}
+										aria-label={`Ouvrir le menu contextuel du service « ${product.title} »`}
 										priority="tertiary"
 										size="small"
+										className={cx(classes.buttonWrapper)}
 										onClick={handleMenuClick}
-									/>
+									>
+										<span
+											className={fr.cx('fr-hidden')}
+										>{`Ouvrir le menu contextuel du service « ${product.title} »`}</span>
+									</Button>
 									<Menu
 										id="option-menu"
 										open={menuOpen}
@@ -485,6 +502,7 @@ const ProductCard = ({
 													? `Supprimer le produit « ${product.title} » des favoris`
 													: `Ajouter le produit « ${product.title} » aux favoris`
 											}
+											className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
 											priority="tertiary"
 											size="small"
 											onClick={e => {
@@ -609,13 +627,31 @@ const ProductCard = ({
 };
 
 const useStyles = tss.withName(ProductCard.name).create({
+	gridProduct: {
+		[fr.breakpoints.down('md')]: {
+			'div:nth-child(3)': {
+				order: 1
+			},
+			'div:nth-child(1)': {
+				order: 2
+			},
+			'div:nth-child(2)': {
+				order: 3
+			},
+			'div:nth-child(4)': {
+				order: 4
+			}
+		}
+	},
 	rightButtonsWrapper: {
 		display: 'flex',
-		gap: fr.spacing('2v'),
-		justifyContent: 'end',
-		position: 'absolute',
-		right: fr.spacing('3v'),
-		top: fr.spacing('3v')
+		justifyContent: 'end'
+	},
+	buttonWrapper: {
+		maxHeight: '32px !important',
+		'&::before': {
+			marginRight: '0 !important'
+		}
 	},
 	badgeSkeleton: {
 		transformOrigin: '0',

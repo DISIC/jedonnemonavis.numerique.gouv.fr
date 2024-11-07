@@ -298,7 +298,11 @@ export const userRouter = router({
 				include: {
 					accessRights: {
 						include: {
-							product: true
+							product: {
+								include: {
+									entity: true
+								}
+							}
 						}
 					},
 					adminEntityRights: {

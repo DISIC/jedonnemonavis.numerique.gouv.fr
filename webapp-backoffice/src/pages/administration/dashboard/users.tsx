@@ -283,7 +283,7 @@ const DashBoardUsers = () => {
 									onConfirmModal.open();
 								}}
 							>
-								Supprimer
+								Supprimer tous
 							</Button>
 						)}
 						<Button
@@ -292,6 +292,10 @@ const DashBoardUsers = () => {
 							iconPosition="right"
 							type="button"
 							onClick={() => handleModalOpening({ type: 'create' })}
+							nativeButtonProps={{
+								'aria-label': 'Ajouter un nouvel utilisateur',
+								title: 'Ajouter un nouvel utilisateur'
+							}}
 						>
 							Ajouter un nouvel utilisateur
 						</Button>

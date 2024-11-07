@@ -220,5 +220,19 @@ export const accessRightRouter = router({
 			});
 
 			return accessRight;
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ access_right_id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { access_right_id } = input;
+
+			const accessRightDelete = await ctx.prisma.accessRight.delete({
+				where: {
+					id: access_right_id
+				}
+			});
+
+			return accessRightDelete;
 		})
 });

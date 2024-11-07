@@ -133,6 +133,10 @@ const DeleteCard = (props: Props) => {
 							iconId="fr-icon-delete-bin-line"
 							className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
 							onClick={() => handleDeletion()}
+							nativeButtonProps={{
+								'aria-label': 'Supprimer le compte',
+								title: 'Supprimer le compte'
+							}}
 						>
 							Supprimer le compte
 						</Button>

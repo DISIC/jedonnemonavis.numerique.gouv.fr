@@ -27,10 +27,10 @@ const PersonnalInfos = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Prénom(s)
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
 								{user.firstName}
 							</div>
 						</div>
@@ -41,8 +41,8 @@ const PersonnalInfos = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>Nom</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>Nom</div>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
 								{user.lastName}
 							</div>
 						</div>
@@ -53,10 +53,10 @@ const PersonnalInfos = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Adresse e-mail
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
 								{user.email}
 							</div>
 						</div>
@@ -67,10 +67,10 @@ const PersonnalInfos = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Date de création du compte
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 								{formatDateToFrenchString(user.created_at.toString())}
 							</div>
 						</div>

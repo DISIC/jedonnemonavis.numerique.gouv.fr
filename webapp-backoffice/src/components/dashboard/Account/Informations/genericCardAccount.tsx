@@ -36,13 +36,13 @@ const GenericCardInfos = (props: Props) => {
 						'fr-grid-row--middle'
 					)}
 				>
-					<div className={cx(fr.cx('fr-col-md-8', 'fr-pt-5v'))}>
+					<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'))}>
 						<h4 className={cx(fr.cx('fr-mb-0'))}>{title}</h4>
 						{hint && <p className={cx(fr.cx('fr-mb-0', 'fr-mt-4v'))}>{hint}</p>}
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col-md-4', 'fr-pt-5v'),
+							fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'),
 							classes.actionContainer
 						)}
 					>
