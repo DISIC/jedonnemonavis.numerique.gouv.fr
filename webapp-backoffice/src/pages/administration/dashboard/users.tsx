@@ -3,6 +3,7 @@ import UserModal from '@/src/components/dashboard/User/UserModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
+import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -12,9 +13,12 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import { Autocomplete, useForkRef } from '@mui/material';
 import { User } from '@prisma/client';
 import Head from 'next/head';
 import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickUserParams =
@@ -31,20 +35,35 @@ const onConfirmModal = createModal({
 	isOpenedByDefault: false
 });
 
-const DashBoardUsers = () => {
-	const [filter, setFilter] = React.useState<string>('email:asc');
-	const [search, setSearch] = React.useState<string>('');
-	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+interface FormValues {
+	word: string;
+}
 
-	const [currentPage, setCurrentPage] = React.useState(1);
+const DashBoardUsers = () => {
+	const { filters, updateFilters } = useFilters();
+	const [search, setSearch] = React.useState<string>('');
+
 	const [numberPerPage, _] = React.useState(10);
 
 	const [currentUser, setCurrentUser] = React.useState<User>();
 
 	const [selectedUsers, setSelectedUsers] = React.useState<number[]>([]);
 	const [isCheckedAll, setIsCheckedAll] = React.useState<boolean>(false);
+	const [inputValue, setInputValue] = React.useState<string>('');
+	const [validateDelete, setValidateDelete] = React.useState(false);
 
 	const { cx, classes } = useStyles();
+
+	const {
+		data: entitiesResult,
+		isLoading: isLoadingEntities,
+		refetch: refetchEntities
+	} = trpc.entity.getList.useQuery(
+		{ numberPerPage: 1000, userCanCreateProduct: true },
+		{ initialData: { data: [], metadata: { count: 0, myEntities: [] } } }
+	);
+
+	const { data: entities } = entitiesResult;
 
 	const {
 		data: usersResult,
@@ -53,9 +72,10 @@ const DashBoardUsers = () => {
 		isRefetching: isRefetchingUsers
 	} = trpc.user.getList.useQuery(
 		{
-			search: validatedSearch,
-			sort: filter,
-			page: currentPage,
+			search: filters.users.validatedSearch,
+			sort: filters.users.filter,
+			page: filters.users.currentPage,
+			entities: filters.users.entity.map(e => e.value),
 			numberPerPage
 		},
 		{
@@ -86,7 +106,13 @@ const DashBoardUsers = () => {
 	});
 
 	const handlePageChange = (pageNumber: number) => {
-		setCurrentPage(pageNumber);
+		updateFilters({
+			...filters,
+			users: {
+				...filters.users,
+				currentPage: pageNumber
+			}
+		});
 	};
 
 	const nbPages = getNbPages(usersCount, numberPerPage);
@@ -125,6 +151,31 @@ const DashBoardUsers = () => {
 		}
 	};
 
+	const {
+		control,
+		register,
+		setError,
+		clearErrors,
+		formState: { errors }
+	} = useForm<FormValues>({
+		defaultValues: {
+			word: ''
+		}
+	});
+
+	const verifyProductName = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const normalizedInput = e.target.value.trim().toLowerCase();
+		const normalizedWord = 'supprimer';
+		if (normalizedInput !== normalizedWord) {
+			setError('word', {
+				message: 'Mot de confirmation incorrect'
+			});
+		} else {
+			clearErrors('word');
+			setValidateDelete(true);
+		}
+	};
+
 	return (
 		<>
 			<Head>
@@ -134,6 +185,7 @@ const DashBoardUsers = () => {
 			<OnConfirmModal
 				modal={onConfirmModal}
 				title={`Supprimer ${selectedUsers.length > 0 ? 'des' : 'un'} utilisateur${selectedUsers.length > 0 ? 's' : ''}`}
+				kind={'danger'}
 				handleOnConfirm={() => {
 					if (selectedUsers.length > 0) {
 						deleteUsers.mutateAsync({
@@ -144,11 +196,12 @@ const DashBoardUsers = () => {
 					}
 					onConfirmModal.close();
 				}}
+				disableAction={!validateDelete}
 			>
 				<>
 					{selectedUsers.length > 0 ? (
-						<>
-							Vous êtes sûr de vouloir supprimer ces utilisateurs :{' '}
+						<p>
+							Vous êtes sur le point de supprimer ces utilisateurs :{' '}
 							{selectedUsers.map(uid => (
 								<div className={fr.cx('fr-grid-row')} key={uid}>
 									<span className={classes.boldText}>
@@ -157,7 +210,7 @@ const DashBoardUsers = () => {
 									</span>{' '}
 								</div>
 							))}
-						</>
+						</p>
 					) : (
 						<>
 							Vous êtes sûr de vouloir supprimer l'utilisateur{' '}
@@ -167,6 +220,38 @@ const DashBoardUsers = () => {
 							?
 						</>
 					)}
+					<form id="delete-product-form">
+						<div className={fr.cx('fr-input-group')}>
+							<Controller
+								control={control}
+								name="word"
+								rules={{ required: 'Ce champ est obligatoire' }}
+								render={({ field: { value, onChange, name } }) => (
+									<Input
+										label={
+											<p className={fr.cx('fr-mb-0')}>
+												Veuillez taper le mot "supprimer" pour confirmer la
+												suppression
+												<span className={cx(classes.asterisk)}>*</span>
+											</p>
+										}
+										nativeInputProps={{
+											onChange: e => {
+												onChange(e);
+												verifyProductName(e);
+											},
+											defaultValue: value,
+											value,
+											name,
+											required: true
+										}}
+										state={errors[name] ? 'error' : 'default'}
+										stateRelatedMessage={errors[name]?.message}
+									/>
+								)}
+							/>
+						</div>
+					</form>
 				</>
 			</OnConfirmModal>
 			<UserModal
@@ -188,12 +273,29 @@ const DashBoardUsers = () => {
 							classes.buttonContainer
 						)}
 					>
+						{selectedUsers.length > 0 && (
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-delete-bin-line"
+								iconPosition="right"
+								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+								onClick={() => {
+									onConfirmModal.open();
+								}}
+							>
+								Supprimer tous
+							</Button>
+						)}
 						<Button
 							priority="secondary"
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
 							onClick={() => handleModalOpening({ type: 'create' })}
+							nativeButtonProps={{
+								'aria-label': 'Ajouter un nouvel utilisateur',
+								title: 'Ajouter un nouvel utilisateur'
+							}}
 						>
 							Ajouter un nouvel utilisateur
 						</Button>
@@ -205,21 +307,83 @@ const DashBoardUsers = () => {
 							label="Trier Par"
 							nativeSelectProps={{
 								name: 'my-select',
-								onChange: event => setFilter(event.target.value)
+								onChange: event =>
+									updateFilters({
+										...filters,
+										users: {
+											...filters.users,
+											filter: event.target.value
+										}
+									})
 							}}
 						>
-							<option value="email:asc">Nom A à Z</option>
+							<option value="email:asc">Email de A à Z</option>
+							<option value="lastName:asc">Nom de A à Z</option>
+							<option value="firstName:asc">Prénom de A à Z</option>
 							<option value="created_at:desc">Date de création</option>
 							<option value="updated_at:desc">Date de mise à jour</option>
 						</Select>
+					</div>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+						<Autocomplete
+							id="filter-entity"
+							disablePortal
+							sx={{ width: '100%' }}
+							options={entities
+								.map(entity => ({
+									label: `${entity.name} (${entity.acronym})`,
+									value: entity.id
+								}))
+								.filter(
+									entity =>
+										!filters.users.entity.some(
+											filter => filter.value === entity.value
+										)
+								)}
+							onChange={(_, option) => {
+								if (option)
+									updateFilters({
+										...filters,
+										users: {
+											...filters.users,
+											currentPage: 1,
+											entity: [...filters.users.entity, option]
+										}
+									});
+							}}
+							noOptionsText="Aucune organisation trouvée"
+							inputValue={inputValue}
+							onInputChange={(event, newInputValue) => {
+								setInputValue(newInputValue);
+							}}
+							renderInput={params => (
+								<div ref={params.InputProps.ref}>
+									<label htmlFor="filter-entity" className="fr-label">
+										Filtrer par organisation
+									</label>
+									<input
+										{...params.inputProps}
+										className={params.inputProps.className + ' fr-input'}
+										placeholder="Sélectionner une option"
+										type="search"
+									/>
+								</div>
+							)}
+						/>
 					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5', 'fr-col--bottom')}>
 						<form
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
 								e.preventDefault();
-								setValidatedSearch(search);
-								setCurrentPage(1);
+								updateFilters({
+									...filters,
+									users: {
+										...filters.users,
+										validatedSearch: search,
+										currentPage: 1
+									}
+								});
 							}}
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>
@@ -232,7 +396,13 @@ const DashBoardUsers = () => {
 										value: search,
 										onChange: event => {
 											if (!event.target.value) {
-												setValidatedSearch('');
+												updateFilters({
+													...filters,
+													users: {
+														...filters.users,
+														validatedSearch: ''
+													}
+												});
 											}
 											setSearch(event.target.value);
 										}
@@ -249,27 +419,38 @@ const DashBoardUsers = () => {
 							</div>
 						</form>
 					</div>
-					<div
+					<ul
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-4', 'fr-col--bottom'),
-							classes.deleteCol
+							fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+							classes.tagContainer
 						)}
 					>
-						{selectedUsers.length > 0 && (
-							<Button
-								priority="tertiary"
-								size="small"
-								iconId="fr-icon-delete-bin-line"
-								iconPosition="right"
-								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
-								onClick={() => {
-									onConfirmModal.open();
-								}}
-							>
-								Supprimer tous
-							</Button>
-						)}
-					</div>
+						{filters.users.entity.map((entity, index) => (
+							<li key={index}>
+								<Tag
+									dismissible
+									className={cx(classes.tagFilter)}
+									title={`Retirer ${entity.label}`}
+									nativeButtonProps={{
+										onClick: () => {
+											updateFilters({
+												...filters,
+												users: {
+													...filters.users,
+													entity: filters.users.entity.filter(
+														e => e.value !== entity.value
+													)
+												}
+											});
+											setInputValue('');
+										}
+									}}
+								>
+									<p>{entity.label}</p>
+								</Tag>
+							</li>
+						))}
+					</ul>
 				</div>
 				{isLoadingUsers ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -281,11 +462,12 @@ const DashBoardUsers = () => {
 							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 								Utilisateurs de{' '}
 								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
+									{numberPerPage * (filters.users.currentPage - 1) + 1}
 								</span>{' '}
 								à{' '}
 								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + users.length}
+									{numberPerPage * (filters.users.currentPage - 1) +
+										users.length}
 								</span>{' '}
 								sur{' '}
 								<span className={cx(classes.boldText)}>
@@ -313,9 +495,11 @@ const DashBoardUsers = () => {
 											options={[
 												{
 													label: '',
+
 													nativeInputProps: {
+														'aria-label': 'Tout sélectionner',
 														checked: isCheckedAll,
-														name: 'checkboxes-1',
+														name: 'select_all',
 														value: 'value1',
 														onClick: () => {
 															handleGeneralCheckbox();
@@ -325,14 +509,49 @@ const DashBoardUsers = () => {
 											]}
 										></Checkbox>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+									<div
+										className={fr.cx(
+											'fr-col',
+											'fr-col-12',
+											'fr-col-md-3',
+											'fr-hidden',
+											'fr-unhidden-md'
+										)}
+									>
 										<span>Utilisateur</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+									<div
+										className={fr.cx(
+											'fr-col',
+											'fr-col-12',
+											'fr-col-md-3',
+											'fr-hidden',
+											'fr-unhidden-md'
+										)}
+									>
+										<span>Addresse mail</span>
+									</div>
+									<div
+										className={fr.cx(
+											'fr-col',
+											'fr-col-12',
+											'fr-col-md-3',
+											'fr-hidden',
+											'fr-unhidden-md'
+										)}
+									>
 										<span>Date de création</span>
 									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-										<span>Observatoire</span>
+									<div
+										className={fr.cx(
+											'fr-col',
+											'fr-col-12',
+											'fr-col-md-2',
+											'fr-hidden',
+											'fr-unhidden-md'
+										)}
+									>
+										<span>Superadmin</span>
 									</div>
 								</div>
 							</div>
@@ -380,7 +599,7 @@ const DashBoardUsers = () => {
 								<Pagination
 									showFirstLast
 									count={nbPages}
-									defaultPage={currentPage}
+									defaultPage={filters.users.currentPage}
 									getPageLinkProps={pageNumber => ({
 										onClick: event => {
 											event.preventDefault();
@@ -408,10 +627,7 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 			alignSelf: 'flex-end',
 			justifyContent: 'flex-end',
 			'.fr-btn': {
-				justifySelf: 'flex-end',
-				'&:first-of-type': {
-					marginRight: '1rem'
-				}
+				justifySelf: 'flex-end'
 			}
 		},
 		[fr.breakpoints.down('md')]: {
@@ -438,6 +654,9 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 			paddingBottom: 0
 		}
 	},
+	asterisk: {
+		color: fr.colors.decisions.text.default.error.default
+	},
 	searchForm: {
 		'.fr-search-bar': {
 			'.fr-input-group': {
@@ -455,6 +674,20 @@ const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
 	deleteCol: {
 		display: 'flex',
 		justifyContent: 'flex-end'
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
 	}
 }));
 

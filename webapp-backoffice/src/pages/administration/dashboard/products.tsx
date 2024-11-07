@@ -503,7 +503,7 @@ const DashBoard = () => {
 												showFavoriteButton={countTotalUserScope > 10}
 												onDeleteProduct={() => {
 													setStatusProductState({
-														msg: `Le service "${product.title}" a bien été archivé`,
+														msg: `Le service "${product.title}" a bien été supprimé`,
 														role: 'status'
 													});
 												}}

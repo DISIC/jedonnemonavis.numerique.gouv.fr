@@ -61,7 +61,7 @@ const OnConfirmModal = (props: Props) => {
 				break;
 			case 'default':
 				confirmButtonProps = {
-					children: 'Oui',
+					children: 'Confirmer',
 					disabled: disableAction ?? false
 				};
 				break;

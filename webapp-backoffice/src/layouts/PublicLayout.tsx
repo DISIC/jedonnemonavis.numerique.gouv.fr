@@ -153,7 +153,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								onClick={e => {
 									handleClose(e);
 									router.push(
-										`/administration/dashboard/account/${session?.user.id}/infos`
+										`/administration/dashboard/user/${session?.user.id}/infos`
 									);
 								}}
 							>
@@ -172,7 +172,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 										onClick={e => {
 											handleClose(e);
 											router.push(
-												`/administration/dashboard/account/${session?.user.id}/notifications`
+												`/administration/dashboard/user/${session?.user.id}/notifications`
 											);
 										}}
 									>
@@ -251,7 +251,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/users',
 					target: '_self'
 				},
-				isActive: pathname == '/administration/dashboard/users'
+				isActive: pathname.startsWith('/administration/dashboard/user')
 			},
 			{
 				text: 'Liste blanche des noms de domaines',

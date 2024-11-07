@@ -14,10 +14,10 @@ import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
 	isOwn: Boolean;
-	userId: number
+	userId: number;
 }
 
-const InfosAccount: React.FC<Props> = props => {
+const UserInfos: React.FC<Props> = props => {
 	const { isOwn, userId } = props;
 	const { classes } = useStyles();
 	const router = useRouter();
@@ -42,47 +42,58 @@ const InfosAccount: React.FC<Props> = props => {
 	const user = userResult?.data as User;
 
 	return (
-		<AccountLayout>
-			<Head>
-				{!isLoadingUser && user && (
-					<>
-						<title>
-							{`${user.firstName} ${user.lastName}`} | Compte Informations | Je
-							donne mon avis
-						</title>
-						<meta
-							name="description"
-							content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
-						/>
-					</>
-				)}
-			</Head>
-			{isLoadingUser || isRefetchingUser && 
+		<>
+			{!user ||
+				isLoadingUser ||
+				(isRefetchingUser && (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
-			}	
-			{!isLoadingUser && !isRefetchingUser && user &&
-				<div className={classes.column}>
-					<div className={classes.headerWrapper}>
-						<h2>Informations</h2>
+				))}
+			{!isLoadingUser && !isRefetchingUser && user && (
+				<AccountLayout isOwn={isOwn} user={user}>
+					<Head>
+						{!isLoadingUser && user && (
+							<>
+								<title>
+									{`${user.firstName} ${user.lastName}`} | Compte Informations |
+									Je donne mon avis
+								</title>
+								<meta
+									name="description"
+									content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
+								/>
+							</>
+						)}
+					</Head>
+					{isLoadingUser ||
+						(isRefetchingUser && (
+							<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+								<Loader />
+							</div>
+						))}
+
+					<div className={classes.column}>
+						<div className={classes.headerWrapper}>
+							<h2>Informations</h2>
+						</div>
+						<div>
+							<IdentityCard user={user} />
+						</div>
+						<div>
+							<CredentialsCard user={user} />
+						</div>
+						<div>
+							<DeleteCard user={user} isOwn={isOwn} />
+						</div>
 					</div>
-					<div>
-						<IdentityCard user={user} />
-					</div>
-					<div>
-						<CredentialsCard user={user} />
-					</div>
-					<div>
-						<DeleteCard user={user} />
-					</div>
-				</div>
-			}
-		</AccountLayout>
+				</AccountLayout>
+			)}
+		</>
 	);
 };
 
-const useStyles = tss.withName(InfosAccount.name).create({
+const useStyles = tss.withName(UserInfos.name).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
@@ -105,6 +116,6 @@ const useStyles = tss.withName(InfosAccount.name).create({
 	}
 });
 
-export default InfosAccount;
+export default UserInfos;
 
 export { getServerSideProps };

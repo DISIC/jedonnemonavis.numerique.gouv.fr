@@ -168,11 +168,12 @@ export const userRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				sort: z.string().optional(),
-				search: z.string().optional()
+				search: z.string().optional(),
+				entities: z.array(z.number()).optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, sort, search } = input;
+			const { numberPerPage, page, sort, search, entities } = input;
 
 			let orderBy: Prisma.UserOrderByWithAggregationInput[] = [
 				{
@@ -225,6 +226,31 @@ export const userRouter = router({
 				}
 			}
 
+			if (entities && entities.length > 0) {
+				where.AND = [
+					{
+						OR: [
+							{
+								adminEntityRights: {
+									some: {
+										entity_id: { in: entities }
+									}
+								}
+							},
+							{
+								accessRights: {
+									some: {
+										product: {
+											entity_id: { in: entities }
+										}
+									}
+								}
+							}
+						]
+					}
+				];
+			}
+
 			if (sort) {
 				const values = sort.split(':');
 				if (values.length === 2) {
@@ -269,6 +295,39 @@ export const userRouter = router({
 
 			const user = await ctx.prisma.user.findUnique({
 				where: { id }
+			});
+
+			return { data: user };
+		}),
+
+	getByIdWithRights: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: { id },
+				include: {
+					accessRights: {
+						include: {
+							product: {
+								include: {
+									entity: true
+								}
+							}
+						}
+					},
+					adminEntityRights: {
+						include: {
+							entity: {
+								include: {
+									products: true
+								}
+							}
+						}
+					}
+				}
 			});
 
 			return { data: user };

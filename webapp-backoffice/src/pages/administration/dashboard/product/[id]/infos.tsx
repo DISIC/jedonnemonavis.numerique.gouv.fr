@@ -85,11 +85,13 @@ const ProductInformationPage = (props: Props) => {
 						Vous êtes sûr de vouloir supprimer le service{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>
-						En supprimant ce service :<br />
-						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
-						de ce service n’auront plus accès au formulaire.
-					</p>
+					<p>En supprimant ce service :</p>
+					<ul className={fr.cx('fr-mb-8v')}>
+						<li>vous n’aurez plus accès aux avis du formulaire,</li>
+						<li>
+							les utilisateurs de ce service n’auront plus accès au formulaire.
+						</li>
+					</ul>
 				</div>
 			</OnConfirmModal>
 			<Toast
@@ -174,11 +176,13 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
-					<p className={fr.cx('fr-mb-4v')}>
-						En supprimant ce service :<br />
-						- vous n’aurez plus accès aux commentaires ;<br />- les utilisateurs
-						de ce service n’auront plus accès au formulaire.
-					</p>
+					<p>En supprimant ce service :</p>
+					<ul className={fr.cx('fr-mb-8v')}>
+						<li>vous n’aurez plus accès aux avis du formulaire,</li>
+						<li>
+							les utilisateurs de ce service n’auront plus accès au formulaire.
+						</li>
+					</ul>
 					<Button
 						type="button"
 						iconId="ri-delete-bin-line"

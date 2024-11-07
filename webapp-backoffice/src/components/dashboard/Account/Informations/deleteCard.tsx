@@ -10,9 +10,12 @@ import { trpc } from '@/src/utils/trpc';
 import { signOut } from 'next-auth/react';
 import { Controller, useForm } from 'react-hook-form';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { router } from '@/src/server/trpc';
+import { useRouter } from 'next/router';
 
 interface Props {
 	user: User;
+	isOwn?: Boolean;
 }
 
 interface FormValues {
@@ -25,13 +28,18 @@ const onConfirmModal = createModal({
 });
 
 const DeleteCard = (props: Props) => {
-	const { user } = props;
+	const { user, isOwn } = props;
 	const { cx, classes } = useStyles();
 	const [validateDelete, setValidateDelete] = React.useState(false);
+	const router = useRouter();
 
 	const deleteUser = trpc.user.delete.useMutation({
 		onSuccess: () => {
-			signOut();
+			if (isOwn) {
+				signOut();
+			} else {
+				router.push('/administration/dashboard/users');
+			}
 		}
 	});
 
@@ -79,7 +87,7 @@ const DeleteCard = (props: Props) => {
 				disableAction={!validateDelete}
 			>
 				<>
-					<p>Êtes-vous sûr de vouloir supprimer votre compte ?</p>
+					<p>Êtes-vous sûr de vouloir supprimer le compte ?</p>
 					<form id="delete-product-form">
 						<div className={fr.cx('fr-input-group')}>
 							<Controller
@@ -125,6 +133,10 @@ const DeleteCard = (props: Props) => {
 							iconId="fr-icon-delete-bin-line"
 							className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
 							onClick={() => handleDeletion()}
+							nativeButtonProps={{
+								'aria-label': 'Supprimer le compte',
+								title: 'Supprimer le compte'
+							}}
 						>
 							Supprimer le compte
 						</Button>

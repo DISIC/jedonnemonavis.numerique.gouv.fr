@@ -70,10 +70,10 @@ const IdentityCard = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Prénom(s)
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
 								{user.firstName}
 							</div>
 						</div>
@@ -84,8 +84,8 @@ const IdentityCard = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>Nom</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
+							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>Nom</div>
+							<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 								{user.lastName}
 							</div>
 						</div>
