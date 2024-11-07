@@ -201,7 +201,7 @@ function deleteService(serviceName) {
     cy.contains('h2', serviceName)
       .parents('div.fr-card')
       .within(() => {
-          cy.get('#button-options-product').click();
+          cy.get('#button-options-service').click();
       });
     cy.wait(1000);
     cy.contains('li', 'Supprimer ce service').click({ force: true });

@@ -457,7 +457,7 @@ const ProductCard = ({
 									)}
 								>
 									<Button
-										id="button-service-product"
+										id="button-options-service"
 										iconId={'ri-more-2-fill'}
 										title={`Ouvrir le menu contextuel du service « ${product.title} »`}
 										aria-label={`Ouvrir le menu contextuel du service « ${product.title} »`}
