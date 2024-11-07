@@ -48,14 +48,15 @@ describe('jdma-admin', () => {
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
 		cy.wait(1000);
-		cy.get('button').filter(':contains("Modifier")').should('have.length', 3);
+		cy.get('input[type="checkbox"]').should('have.length', 4);
 		cy.get('input[type="checkbox"][value="value1"]').click({force: true});
 		cy.contains('button', 'Supprimer tous').click();
-		cy.contains('button', 'Oui').click();
-		cy.get('button').filter(':contains("Modifier")').should('have.length', 0);
+		cy.get('input[name="word"]').type('supprimer');
+		cy.contains('button', 'Supprimer').click();
+		cy.get('input[type="checkbox"]').should('have.length', 1);
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear()
 		cy.contains('button', 'Rechercher').click();
-		cy.get('button').filter(':contains("Modifier")').should('have.length', 5);
+		cy.get('input[type="checkbox"]').should('have.length', 6);
 	});
 
 	it('create organisation', () => {
@@ -215,7 +216,7 @@ function restaureService () {
 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 	cy.contains('button', 'Restaurer').should('exist').click();
 	cy.get('.fr-modal__body').should('be.visible');
-	cy.contains('button', 'Oui').click();
+	cy.contains('button', 'Confirmer').click();
 }
 
 function logout() {
