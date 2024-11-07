@@ -48,7 +48,7 @@ const UserAccess: React.FC<Props> = props => {
 		isLoading: isLoadingUser,
 		refetch: refetchUser,
 		isRefetching: isRefetchingUser
-	} = trpc.user.getById.useQuery(
+	} = trpc.user.getByIdWithRights.useQuery(
 		{
 			id: userId
 		},

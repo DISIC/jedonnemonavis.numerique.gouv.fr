@@ -294,6 +294,19 @@ export const userRouter = router({
 			const { id } = input;
 
 			const user = await ctx.prisma.user.findUnique({
+				where: { id }
+			});
+
+			return { data: user };
+		}),
+
+	getByIdWithRights: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
 				where: { id },
 				include: {
 					accessRights: {
