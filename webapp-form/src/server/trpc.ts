@@ -101,9 +101,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
     const xClientIp = ctx.req.headers['x-client-ip'] as string;
     const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
-    if (isIpAllowed(ip)) {
-      return null;
-    }
+    
     return ip;
   },
   windowMs: 60000,
@@ -118,42 +116,44 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const currentTime = new Date();
     const [product_id, button_id] = extractIdsFromUrl(referer as string);
 
-    // check if the hashed ip is already in the database
-    const ipRecord = await prisma.limiterReporting.findFirst({
-      where: {
-        ip_id: hashedIp,
-      },
-    });
-
-    // insert or update database
-    if (ipRecord) {
-      await prisma.limiterReporting.update({
+    if (!isIpAllowed(ip)) {
+      // check if the hashed ip is already in the database
+      const ipRecord = await prisma.limiterReporting.findFirst({
         where: {
-          id: ipRecord.id,
-        },
-        data: {
-          total_attempts: ipRecord.total_attempts + 1,
-          last_attempt: currentTime,
+          ip_id: hashedIp,
         },
       });
-    } else {
-      await prisma.limiterReporting.create({
-        data: {
-          ip_id: hashedIp,
-          ip_adress: transformIp(ip),
-          product_id: parseInt(product_id ?? '0'),
-          button_id: parseInt(button_id ?? '0'),
-          total_attempts: 5,
-          first_attempt: currentTime,
-          last_attempt: currentTime,
-        },
+
+      // insert or update database
+      if (ipRecord) {
+        await prisma.limiterReporting.update({
+          where: {
+            id: ipRecord.id,
+          },
+          data: {
+            total_attempts: ipRecord.total_attempts + 1,
+            last_attempt: currentTime,
+          },
+        });
+      } else {
+        await prisma.limiterReporting.create({
+          data: {
+            ip_id: hashedIp,
+            ip_adress: transformIp(ip),
+            product_id: parseInt(product_id ?? '0'),
+            button_id: parseInt(button_id ?? '0'),
+            total_attempts: 5,
+            first_attempt: currentTime,
+            last_attempt: currentTime,
+          },
+        });
+      }
+
+      throw new TRPCError({
+        code: "TOO_MANY_REQUESTS",
+        message: `Too many requests, please try again later. ${retryAfter}`,
       });
     }
-
-    throw new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message: `Too many requests, please try again later. ${retryAfter}`,
-    });
   },
 });
 
