@@ -84,11 +84,26 @@ const extractIdsFromUrl = (url: string) => {
   return [product_id, button_id];
 }
 
+const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '').split(',');
+
+function isIpAllowed(ip: string): boolean {
+  return allowedIps.some((allowedIp) => {
+    if (allowedIp.includes('-')) {
+      const [startIp, endIp] = allowedIp.split('-');
+      return ip >= startIp && ip <= endIp;
+    }
+    return allowedIp === ip;
+  });
+}
+
 const limiter = createTRPCStoreLimiter<typeof t>({
   fingerprint: (ctx) => {
     const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
     const xClientIp = ctx.req.headers['x-client-ip'] as string;
     const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
+    if (isIpAllowed(ip)) {
+      return null;
+    }
     return ip;
   },
   windowMs: 60000,
