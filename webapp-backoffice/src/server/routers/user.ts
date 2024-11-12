@@ -4,7 +4,7 @@ import {
 	UserCreateInputSchema,
 	UserUpdateInputSchema
 } from '@/prisma/generated/zod';
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import {
@@ -723,10 +723,8 @@ export const userRouter = router({
 				});
 			}
 
-			const hashedPassword = crypto
-				.createHash('sha256')
-				.update(password)
-				.digest('hex');
+			const salt = bcrypt.genSaltSync(10);
+			const hashedPassword = bcrypt.hashSync(password, salt);
 
 			const updatedUser = await ctx.prisma.user.update({
 				where: {
