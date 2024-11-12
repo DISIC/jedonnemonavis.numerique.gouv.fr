@@ -88,6 +88,7 @@ const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '').split(',');
 
 function isIpAllowed(ip: string): boolean {
   return allowedIps.some((allowedIp) => {
+    console.log('checking ip', allowedIp, ip);
     if (allowedIp.includes('-')) {
       const [startIp, endIp] = allowedIp.split('-');
       return ip >= startIp && ip <= endIp;
