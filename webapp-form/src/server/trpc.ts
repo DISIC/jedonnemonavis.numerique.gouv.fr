@@ -88,7 +88,6 @@ const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '').split(',');
 
 function isIpAllowed(ip: string): boolean {
   return allowedIps.some((allowedIp) => {
-    console.log('checking ip', allowedIp, ip);
     if (allowedIp.includes('-')) {
       const [startIp, endIp] = allowedIp.split('-');
       return ip >= startIp && ip <= endIp;
@@ -117,45 +116,55 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const currentTime = new Date();
     const [product_id, button_id] = extractIdsFromUrl(referer as string);
 
-    if (!isIpAllowed(ip)) {
-      // check if the hashed ip is already in the database
-      const ipRecord = await prisma.limiterReporting.findFirst({
+    // check if the hashed ip is already in the database
+    const ipRecord = await prisma.limiterReporting.findFirst({
+      where: {
+        ip_id: hashedIp,
+      },
+    });
+
+    // insert or update database
+    if (ipRecord) {
+      await prisma.limiterReporting.update({
         where: {
-          ip_id: hashedIp,
+          id: ipRecord.id,
+        },
+        data: {
+          total_attempts: ipRecord.total_attempts + 1,
+          last_attempt: currentTime,
         },
       });
-
-      // insert or update database
-      if (ipRecord) {
-        await prisma.limiterReporting.update({
-          where: {
-            id: ipRecord.id,
-          },
-          data: {
-            total_attempts: ipRecord.total_attempts + 1,
-            last_attempt: currentTime,
-          },
-        });
-      } else {
-        await prisma.limiterReporting.create({
-          data: {
-            ip_id: hashedIp,
-            ip_adress: transformIp(ip),
-            product_id: parseInt(product_id ?? '0'),
-            button_id: parseInt(button_id ?? '0'),
-            total_attempts: 5,
-            first_attempt: currentTime,
-            last_attempt: currentTime,
-          },
-        });
-      }
-
-      throw new TRPCError({
-        code: "TOO_MANY_REQUESTS",
-        message: `Too many requests, please try again later. ${retryAfter}`,
+    } else {
+      await prisma.limiterReporting.create({
+        data: {
+          ip_id: hashedIp,
+          ip_adress: transformIp(ip),
+          product_id: parseInt(product_id ?? '0'),
+          button_id: parseInt(button_id ?? '0'),
+          total_attempts: 5,
+          first_attempt: currentTime,
+          last_attempt: currentTime,
+        },
       });
     }
+
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `Too many requests, please try again later. ${retryAfter}`,
+    });
+    
   },
+});
+
+const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
+  const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+  const xClientIp = ctx.req.headers['x-client-ip'] as string;
+  const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
+
+  if (isIpAllowed(ip)) {
+    return next();
+  }
+  return limiter({ ctx, next });
 });
 
 // Base router and middleware helpers
@@ -165,5 +174,4 @@ export const middleware = t.middleware;
 // Unprotected procedure
 export const publicProcedure = t.procedure;
 
-// Limited procedure
-export const limitedProcedure = t.procedure.use(limiter);
+export const limitedProcedure = t.procedure.use(bypassLimiterForAllowedIps);
