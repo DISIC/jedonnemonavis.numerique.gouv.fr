@@ -23,7 +23,6 @@ export default function Login() {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-					<AlertObservatoire />
 					<div
 						className={cx(
 							classes.formContainer,
