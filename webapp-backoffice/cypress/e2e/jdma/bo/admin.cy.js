@@ -48,7 +48,7 @@ describe('jdma-admin', () => {
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
 		cy.wait(1000);
-		cy.get('input[type="checkbox"]').should('have.length', 4);
+		cy.get('input[type="checkbox"]').should('have.length', 5);
 		cy.get('input[type="checkbox"][value="value1"]').click({force: true});
 		cy.contains('button', 'Supprimer tous').click();
 		cy.get('input[name="word"]').type('supprimer');
