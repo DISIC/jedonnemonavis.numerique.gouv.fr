@@ -8,6 +8,7 @@ import {
 } from 'next';
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcrypt';
 
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
@@ -62,13 +63,30 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
-				// Hash the password using SHA-256
-				const hashedPassword = crypto
-					.createHash('sha256')
-					.update(password)
-					.digest('hex');
+				let isPasswordCorrect = false;
 
-				if (hashedPassword !== user.password) {
+				if (user.password.startsWith('$2b$')) {
+					// Check password with bcrypt
+					isPasswordCorrect = bcrypt.compareSync(password, user.password);
+				} else {
+					// Check password with crypto
+					const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+					isPasswordCorrect = hashedPassword === user.password;
+					
+					//Swith to bcrypt with salt
+					const salt = bcrypt.genSaltSync(10);
+					const newHashedPassword = bcrypt.hashSync(password, salt);
+					const updatedUser = await prisma.user.update({
+						where: {
+							id: user.id
+						},
+						data: {
+							password: newHashedPassword
+						}
+					});
+				}
+
+				if (!isPasswordCorrect) {
 					return null;
 				}
 
