@@ -169,11 +169,12 @@ export const userRouter = router({
 				page: z.number().default(1),
 				sort: z.string().optional(),
 				search: z.string().optional(),
-				entities: z.array(z.number()).optional()
+				entities: z.array(z.number()).optional(),
+				onlyAdmins: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, sort, search, entities } = input;
+			const { numberPerPage, page, sort, search, entities, onlyAdmins } = input;
 
 			let orderBy: Prisma.UserOrderByWithAggregationInput[] = [
 				{
@@ -249,6 +250,12 @@ export const userRouter = router({
 						]
 					}
 				];
+			}
+
+			if (onlyAdmins) {
+				where.role = {
+					in: ['admin', 'superadmin']
+				}
 			}
 
 			if (sort) {

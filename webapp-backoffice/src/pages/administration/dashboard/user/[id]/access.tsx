@@ -86,13 +86,13 @@ const UserAccess: React.FC<Props> = props => {
 
 	const removeAdminEntityright = trpc.adminEntityRight.delete.useMutation({
 		onSuccess: async () => {
-			utils.user.getById.invalidate({});
+			utils.user.getByIdWithRights.invalidate({});
 		}
 	});
 
 	const removeAccessRight = trpc.accessRight.delete.useMutation({
 		onSuccess: async () => {
-			utils.user.getById.invalidate({});
+			utils.user.getByIdWithRights.invalidate({});
 		}
 	});
 
@@ -329,7 +329,9 @@ const UserAccess: React.FC<Props> = props => {
 														<hr />
 														<ul className={cx(classes.ulContainer)}>
 															{entity.products.map((product, productIndex) => (
-																<li key={product.title}>
+																<li
+																	key={product.title + '_' + product.modifiable}
+																>
 																	<AccessCard
 																		key={productIndex}
 																		title={product.title}

@@ -104,9 +104,25 @@ export const accessRightRouter = router({
 				}
 			});
 
+			const adminEntityRightExists = await ctx.prisma.adminEntityRight.findFirst({
+				where: {
+					OR: [
+						{ user_email: user_email.toLowerCase() },
+						{ user_email_invite: user_email.toLowerCase() }
+					],
+					entity: {
+						products: {
+							some: {
+								id: product_id
+							}
+						}
+					}
+				}
+			})
+
 			if (
-				accessRightAlreadyExists !== null &&
-				accessRightAlreadyExists.status === 'carrier'
+				(accessRightAlreadyExists !== null &&
+				accessRightAlreadyExists.status === 'carrier') || adminEntityRightExists
 			) {
 				throw new TRPCError({
 					code: 'CONFLICT',
