@@ -6,6 +6,7 @@ type Filters = {
 		currentPage: number;
 		filter: string;
 		validatedSearch: string;
+		filterOnlyAdmins: boolean;
 	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
@@ -36,7 +37,8 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			entity: [],
 			currentPage: 1,
 			filter: 'email:asc',
-			validatedSearch: ''
+			validatedSearch: '',
+			filterOnlyAdmins: false
 		},
 		filterEntity: [],
 		currentPage: 1,

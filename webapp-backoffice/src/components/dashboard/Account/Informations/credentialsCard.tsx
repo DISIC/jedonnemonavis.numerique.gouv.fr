@@ -203,7 +203,7 @@ const CredentialsCard = (props: Props) => {
 										<Input
 											label={
 												<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-													Adresse e-mail acuelle
+													Adresse e-mail actuelle
 												</p>
 											}
 											disabled={true}

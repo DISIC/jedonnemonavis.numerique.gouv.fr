@@ -41,7 +41,9 @@ interface FormValues {
 
 const DashBoardUsers = () => {
 	const { filters, updateFilters } = useFilters();
-	const [search, setSearch] = React.useState<string>('');
+	const [search, setSearch] = React.useState<string>(
+		filters.users.validatedSearch
+	);
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -76,6 +78,7 @@ const DashBoardUsers = () => {
 			sort: filters.users.filter,
 			page: filters.users.currentPage,
 			entities: filters.users.entity.map(e => e.value),
+			onlyAdmins: filters.users.filterOnlyAdmins,
 			numberPerPage
 		},
 		{
@@ -418,6 +421,40 @@ const DashBoardUsers = () => {
 								</Button>
 							</div>
 						</form>
+					</div>
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-mt-4w',
+							nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
+							'fr-py-0'
+						)}
+					>
+						<div>
+							<Checkbox
+								className={fr.cx('fr-mb-0')}
+								style={{ userSelect: 'none' }}
+								options={[
+									{
+										label: 'Afficher uniquement les super admins',
+										nativeInputProps: {
+											name: 'favorites-products',
+											checked: filters.users.filterOnlyAdmins,
+											onChange: e => {
+												updateFilters({
+													...filters,
+													users: {
+														...filters.users,
+														currentPage: 1,
+														filterOnlyAdmins: e.target.checked
+													}
+												});
+											}
+										}
+									}
+								]}
+							/>
+						</div>
 					</div>
 					<ul
 						className={cx(
