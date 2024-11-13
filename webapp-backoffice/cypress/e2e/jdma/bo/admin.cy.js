@@ -53,10 +53,10 @@ describe('jdma-admin', () => {
 		cy.contains('button', 'Supprimer tous').click();
 		cy.get('input[name="word"]').type('supprimer');
 		cy.contains('button', 'Supprimer').click();
-		cy.get('input[type="checkbox"]').should('have.length', 1);
+		cy.get('input[type="checkbox"]').should('have.length', 2);
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear()
 		cy.contains('button', 'Rechercher').click();
-		cy.get('input[type="checkbox"]').should('have.length', 6);
+		cy.get('input[type="checkbox"]').should('have.length', 7);
 	});
 
 	it('create organisation', () => {
