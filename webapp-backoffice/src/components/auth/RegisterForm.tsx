@@ -9,7 +9,7 @@ import {
 } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
@@ -76,6 +76,10 @@ export const RegisterForm = (props: Props) => {
 	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [registered, setRegistered] = useState<RegisterValidationMessage>();
+	const firstNameRef = useRef<HTMLInputElement>(null);
+	const lastNameRef = useRef<HTMLInputElement>(null);
+	const emailRef = useRef<HTMLInputElement>(null);
+	const passwordRef = useRef<HTMLInputElement>(null);
 
 	const registerUser = trpc.user.register.useMutation({
 		onSuccess: result => {
@@ -134,14 +138,14 @@ export const RegisterForm = (props: Props) => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: 'Veuillez renseigner un mot de passe.',
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
 		}
 
 		messages.push({
-			message: '12 caractères minimum',
+			message: <span role="alert">12 caractères minimum</span>,
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
@@ -150,7 +154,7 @@ export const RegisterForm = (props: Props) => {
 		});
 
 		messages.push({
-			message: '1 caractère spécial',
+			message: <span role="alert">1 caractère spécial</span>,
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
@@ -159,7 +163,7 @@ export const RegisterForm = (props: Props) => {
 		});
 
 		messages.push({
-			message: '1 chiffre minimum',
+			message: <span role="alert">1 chiffre minimum</span>,
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
@@ -196,6 +200,19 @@ export const RegisterForm = (props: Props) => {
 
 		if (formHasErrors(errors)) {
 			setErrors({ ...errors });
+			if (errors.firstName.required) {
+				firstNameRef.current?.focus();
+			} else if (errors.lastName.required) {
+				lastNameRef.current?.focus();
+			} else if (
+				errors.email.required ||
+				errors.email.format ||
+				errors.email.conflict
+			) {
+				emailRef.current?.focus();
+			} else if (errors.password.required || errors.password.format) {
+				passwordRef.current?.focus();
+			}
 			return;
 		}
 
@@ -233,26 +250,28 @@ export const RegisterForm = (props: Props) => {
 
 	return (
 		<div>
-			<h5>Se créer un compte</h5>
+			<h2>Se créer un compte</h2>
 			<p className={fr.cx('fr-hint-text')}>
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
 			{errors.email.conflict && (
-				<Alert
-					className={fr.cx('fr-mb-4v', 'fr-text--sm')}
-					closable
-					description={
-						<>
-							Il y a déjà un compte avec cette adresse email.{' '}
-							<Link className={fr.cx('fr-link', 'fr-text--sm')} href="/login">
-								Veuillez vous connecter ici.
-							</Link>
-						</>
-					}
-					onClose={function noRefCheck() {}}
-					severity="error"
-					title=""
-				/>
+				<div role="alert">
+					<Alert
+						className={fr.cx('fr-mb-4v', 'fr-text--sm')}
+						closable
+						description={
+							<>
+								Il y a déjà un compte avec cette adresse email.{' '}
+								<Link className={fr.cx('fr-link', 'fr-text--sm')} href="/login">
+									Veuillez vous connecter ici.
+								</Link>
+							</>
+						}
+						onClose={function noRefCheck() {}}
+						severity="error"
+						title=""
+					/>
+				</div>
 			)}
 			<form
 				onSubmit={e => {
@@ -268,10 +287,15 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('firstName');
 						},
 						value: userInfos.firstName,
-						name: 'firstName'
+						name: 'firstName',
+						ref: firstNameRef
 					}}
 					state={hasErrors('firstName') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('firstName')}
+					stateRelatedMessage={
+						hasErrors('firstName') ? (
+							<span role="alert">{getErrorMessage('firstName')}</span>
+						) : null
+					}
 				/>
 				<Input
 					label="Nom"
@@ -281,10 +305,15 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('lastName');
 						},
 						value: userInfos.lastName,
-						name: 'lastName'
+						name: 'lastName',
+						ref: lastNameRef
 					}}
 					state={hasErrors('lastName') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('lastName')}
+					stateRelatedMessage={
+						hasErrors('lastName') ? (
+							<span role="alert">{getErrorMessage('lastName')}</span>
+						) : null
+					}
 				/>
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
@@ -300,10 +329,15 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('email');
 						},
 						value: userInfos.email,
-						name: 'email'
+						name: 'email',
+						ref: emailRef
 					}}
 					state={hasErrors('email') ? 'error' : 'default'}
-					stateRelatedMessage={getErrorMessage('email')}
+					stateRelatedMessage={
+						hasErrors('email') ? (
+							<span role="alert">{getErrorMessage('email')}</span>
+						) : null
+					}
 				/>
 				<PasswordInput
 					label="Mot de passe"
@@ -313,7 +347,9 @@ export const RegisterForm = (props: Props) => {
 							setUserInfos({ ...userInfos, password: e.target.value });
 							resetErrors('password');
 						},
-						value: userInfos.password
+						value: userInfos.password,
+						role: 'alert',
+						ref: passwordRef
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={

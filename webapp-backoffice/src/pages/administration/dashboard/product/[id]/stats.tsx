@@ -174,7 +174,7 @@ const ProductStatPage = (props: Props) => {
 				</Head>
 				<h1>Statistiques</h1>
 				{buttonsResult.metadata.count === 0 ? (
-					<NoButtonsPanel isSmall onButtonClick={handleButtonClick} />
+					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
 					<NoReviewsPanel
 						improveBtnClick={() => {}}
@@ -270,7 +270,7 @@ const ProductStatPage = (props: Props) => {
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
-						total={nbReviewsWithFiltersForm2}
+						total={nbReviewsWithFilters}
 						productId={product.id}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}

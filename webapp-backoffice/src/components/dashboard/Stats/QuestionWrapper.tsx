@@ -30,9 +30,12 @@ const QuestionWrapper = ({
 				<div className={classes.metaInfosIcon}>
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
-				<div className={classes.metaInfosTotal}>
-					<div>{formatNumberWithSpaces(totalField)}</div> <span>Réponses</span>
-				</div>
+				<p className={classes.metaInfosTotal}>
+					<p className={classes.totalFieldText}>
+						{formatNumberWithSpaces(totalField)}
+					</p>{' '}
+					<span>Réponses</span>
+				</p>
 				{!hidePercentage && (
 					<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
 						taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
@@ -79,6 +82,10 @@ const useStyles = tss.create({
 			...fr.typography[19].style,
 			margin: `0 0 0 ${fr.spacing('4v')}`
 		}
+	},
+	totalFieldText: {
+		marginBottom: 0,
+		fontSize: '2rem'
 	}
 });
 

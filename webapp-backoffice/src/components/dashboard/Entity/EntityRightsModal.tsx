@@ -217,24 +217,24 @@ const EntityRightsModal = (props: Props) => {
 						description={getAlertTitle()}
 					/>
 				)}
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
+				>
 					<div className={fr.cx('fr-col-8')}>
-						{nbPages > 1 && (
-							<span className={fr.cx('fr-ml-0')}>
-								Administrateurs de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + adminEntityRights.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{adminEntityRightsCount}
-								</span>
+						<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+							Administrateurs de{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + 1}
+							</span>{' '}
+							à{' '}
+							<span className={cx(classes.boldText)}>
+								{numberPerPage * (currentPage - 1) + adminEntityRights.length}
+							</span>{' '}
+							sur{' '}
+							<span className={cx(classes.boldText)}>
+								{adminEntityRightsCount}
 							</span>
-						)}
+						</span>
 					</div>
 				</div>
 				<div>
@@ -244,7 +244,7 @@ const EntityRightsModal = (props: Props) => {
 						</div>
 					) : (
 						<>
-							<div className={cx(classes.entitySection)}>
+							<ul className={cx(classes.entitySection)}>
 								{adminEntityRights.map((adminEntityRight, index) => {
 									if (adminEntityRight.user !== null) {
 										return (
@@ -257,7 +257,7 @@ const EntityRightsModal = (props: Props) => {
 										);
 									}
 								})}
-							</div>
+							</ul>
 							<div>
 								{adminEntityRights.some(
 									adminEntityRight => adminEntityRight.user === null
@@ -266,7 +266,7 @@ const EntityRightsModal = (props: Props) => {
 										<div className={cx(classes.inviteTitle)}>
 											Invitations envoyées
 										</div>
-										<div>
+										<ul className={classes.entityList}>
 											{adminEntityRights
 												.filter(
 													adminEntityRight => adminEntityRight.user === null
@@ -279,7 +279,7 @@ const EntityRightsModal = (props: Props) => {
 														withOptions={isMine}
 													/>
 												))}
-										</div>
+										</ul>
 									</>
 								)}
 							</div>
@@ -392,11 +392,15 @@ const useStyles = tss
 			}
 		},
 		entitySection: {
-			marginBottom: '0.75rem'
+			marginBottom: '0.75rem',
+			paddingInlineStart: 0
 		},
 		inviteTitle: {
 			fontWeight: 'bold',
 			padding: '5px 0'
+		},
+		entityList: {
+			paddingInlineStart: 0
 		}
 	}));
 

@@ -168,7 +168,7 @@ export const Field = (props: Props) => {
         <div className={classes.inputContainer}>
           <Input
             hintText={field.hint ? t(field.hint) : undefined}
-            label={<h6>{t(field.label)}</h6>}
+            label={<h3>{t(field.label)}</h3>}
             state={
               (opinion[field.name] || "").length > 250 ? "error" : "default"
             }
@@ -193,7 +193,7 @@ export const Field = (props: Props) => {
       return (
         <Input
           hintText={field.hint ? t(field.hint) : undefined}
-          label={<h6>{t(field.label)}</h6>}
+          label={<h3>{t(field.label)}</h3>}
           state={(opinion[field.name] || "").length > 250 ? "error" : "default"}
           stateRelatedMessage="Maximum 250 caractères"
           nativeInputProps={{

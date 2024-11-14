@@ -46,6 +46,7 @@ export const LoginForm = () => {
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 	const [displayToast, setDisplayToast] = useState<boolean>(false);
 
+	const emailRef = useRef<HTMLInputElement | null>(null);
 	const passwordRef = useRef<HTMLInputElement | null>(null);
 
 	const checkEmailUser = trpc.user.checkEmail.useMutation({
@@ -140,6 +141,14 @@ export const LoginForm = () => {
 		if (showPassword) passwordRef?.current?.focus();
 	}, [showPassword]);
 
+	useEffect(() => {
+		if (hasErrors() && emailRef && emailRef.current) {
+			emailRef.current.focus();
+		} else if (passwordIncorrect && passwordRef.current) {
+			passwordRef.current.focus();
+		}
+	}, [hasErrors]);
+
 	return (
 		<div>
 			<Toast
@@ -186,10 +195,15 @@ export const LoginForm = () => {
 					else checkEmail();
 				}}
 			>
+				<p className={cx(classes.instructionsText)}>
+					Tous les champs sont obligatoires
+				</p>
 				<Input
 					hintText="Format attendu : nom@domaine.fr"
 					label="Adresse email"
 					nativeInputProps={{
+						'aria-required': true,
+						ref: emailRef,
 						onChange: e => {
 							setCredentials({ ...credentials, email: e.target.value });
 							setShowPassword(false);
@@ -199,13 +213,18 @@ export const LoginForm = () => {
 						autoComplete: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
-					stateRelatedMessage={getEmailErrorMessage()}
+					stateRelatedMessage={
+						hasErrors() ? (
+							<span role="alert">{getEmailErrorMessage()}</span>
+						) : null
+					}
 				/>
 				{showPassword && (
 					<PasswordInput
 						label="Mot de passe"
 						className={cx(classes.password)}
 						nativeInputProps={{
+							'aria-required': true,
 							ref: passwordRef,
 							onChange: e => {
 								setCredentials({ ...credentials, password: e.target.value });
@@ -215,7 +234,14 @@ export const LoginForm = () => {
 						}}
 						messages={
 							passwordIncorrect
-								? [{ message: 'Mot de passe incorrect.', severity: 'error' }]
+								? [
+										{
+											message: (
+												<span role="alert">Mot de passe incorrect.</span>
+											),
+											severity: 'error'
+										}
+									]
 								: []
 						}
 						messagesHint=""
@@ -272,5 +298,9 @@ const useStyles = tss
 		actionModal: {
 			display: 'flex',
 			justifyContent: 'space-between'
+		},
+		instructionsText: {
+			fontStyle: 'italic',
+			...fr.typography[18].style
 		}
 	}));

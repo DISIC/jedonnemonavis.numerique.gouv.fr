@@ -133,22 +133,31 @@ export const removeAccents = (str: string): string => {
 	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 };
 
-export const createFilterOptionsWithArgument = (includeCreateOption: boolean) => (
-	options: { label: string; value?: number }[],
-	state: { inputValue: string },
-) => autocompleteFilterOptions(options, state, includeCreateOption);
+export const createFilterOptionsWithArgument =
+	(includeCreateOption: boolean) =>
+	(
+		options: { label: string; value?: number }[],
+		state: { inputValue: string }
+	) =>
+		autocompleteFilterOptions(options, state, includeCreateOption);
 
 export const autocompleteFilterOptions = (
 	options: { label: string; value?: number }[],
 	{ inputValue }: { inputValue: string },
-	includeCreateOption: boolean = false,
+	includeCreateOption: boolean = false
 ) => {
-	const filteredOptions = matchSorter(options, inputValue, { keys: [item => item.label] }).slice(0, 4);
+	const filteredOptions = matchSorter(options, inputValue.trim(), {
+		keys: [item => item.label],
+		threshold: matchSorter.rankings.CONTAINS,
+	}).slice(0, 4);
 
 	if (includeCreateOption) {
-		return [...filteredOptions, { label: 'Créer une nouvelle organisation', value: -1 }];
+		return [
+			...filteredOptions,
+			{ label: 'Créer une nouvelle organisation', value: -1 }
+		];
 	}
-	
+
 	return filteredOptions;
 };
 
@@ -296,7 +305,7 @@ export const getHexaColorFromIntentionText = (intention: string) => {
 		case 'Non':
 			return '#ce0500';
 		case 'Moyen':
-			return '#FF9940';
+			return '#b34000';
 		case 'Pas de réponse':
 			return '#929292';
 		case 'Très bien':

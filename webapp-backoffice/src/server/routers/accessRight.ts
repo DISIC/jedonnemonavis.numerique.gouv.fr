@@ -55,6 +55,34 @@ export const accessRightRouter = router({
 			return { data: entities, metadata: { count } };
 		}),
 
+	getUserList: protectedProcedure
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1)
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { numberPerPage, page } = input;
+
+			let where: Prisma.AccessRightWhereInput = {
+				user_email: ctx.session.user.email
+			};
+
+			const accessRights = await ctx.prisma.accessRight.findMany({
+				where,
+				take: numberPerPage,
+				skip: (page - 1) * numberPerPage,
+				include: {
+					user: true
+				}
+			});
+
+			const count = await ctx.prisma.accessRight.count({ where });
+
+			return { data: accessRights, metadata: { count } };
+		}),
+
 	create: protectedProcedure
 		.input(
 			z.object({
@@ -76,9 +104,25 @@ export const accessRightRouter = router({
 				}
 			});
 
+			const adminEntityRightExists = await ctx.prisma.adminEntityRight.findFirst({
+				where: {
+					OR: [
+						{ user_email: user_email.toLowerCase() },
+						{ user_email_invite: user_email.toLowerCase() }
+					],
+					entity: {
+						products: {
+							some: {
+								id: product_id
+							}
+						}
+					}
+				}
+			})
+
 			if (
-				accessRightAlreadyExists !== null &&
-				accessRightAlreadyExists.status === 'carrier'
+				(accessRightAlreadyExists !== null &&
+				accessRightAlreadyExists.status === 'carrier') || adminEntityRightExists
 			) {
 				throw new TRPCError({
 					code: 'CONFLICT',
@@ -192,5 +236,19 @@ export const accessRightRouter = router({
 			});
 
 			return accessRight;
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ access_right_id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { access_right_id } = input;
+
+			const accessRightDelete = await ctx.prisma.accessRight.delete({
+				where: {
+					id: access_right_id
+				}
+			});
+
+			return accessRightDelete;
 		})
 });

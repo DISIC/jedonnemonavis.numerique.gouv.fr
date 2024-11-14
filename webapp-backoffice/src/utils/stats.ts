@@ -49,7 +49,9 @@ export const getStatsColor = ({
 				? fr.colors.decisions.text.default.success.default
 				: fr.colors.decisions.background.contrast.success.default;
 		case AnswerIntention.medium:
-			return kind === 'text' ? '#FF9940' : '#FFF4EB';
+			return kind === 'text'
+				? fr.colors.decisions.text.default.warning.default
+				: fr.colors.decisions.background.contrast.warning.default;
 		case AnswerIntention.bad:
 			return kind === 'text'
 				? fr.colors.decisions.text.default.error.default

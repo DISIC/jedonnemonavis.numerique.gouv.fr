@@ -10,8 +10,49 @@ import {
 	ProductUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
-import { Prisma, Product } from '@prisma/client';
+import { Prisma, PrismaClient, Product } from '@prisma/client';
 import { removeAccents } from '@/src/utils/tools';
+import { DefaultArgs } from '@prisma/client/runtime/library';
+import { Session } from 'next-auth';
+import { sendMail } from '@/src/utils/mailer';
+import {
+	getProductArchivedEmail,
+	getProductRestoredEmail
+} from '@/src/utils/emails';
+
+const checkRightToProceed = async (
+	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+	session: Session,
+	id: number
+) => {
+	const product = await prisma.product.findUnique({
+		where: {
+			id: id
+		}
+	})
+	const accessRight = await prisma.accessRight.findFirst({
+		where: {
+			product_id: id,
+			user_email: session.user.email,
+			status: 'carrier'
+		}
+	});
+	const adminEntityRight = await prisma.adminEntityRight.findFirst({
+		where: {
+			entity_id: product?.entity_id,
+			user_email: session.user.email
+		}
+	});
+	const isAdmin = session.user.role.includes('admin');
+
+	if (!accessRight && !adminEntityRight && !isAdmin)
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'You do not have rights to proceed on this product'
+		});
+
+	return !!accessRight || isAdmin;
+};
 
 export const productRouter = router({
 	getById: publicProcedure
@@ -40,7 +81,8 @@ export const productRouter = router({
 				sort: z.string().optional(),
 				search: z.string().optional(),
 				filterEntityId: z.array(z.number()),
-				filterByUserFavorites: z.boolean().optional()
+				filterByUserFavorites: z.boolean().optional(),
+				filterByStatusArchived: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -51,7 +93,8 @@ export const productRouter = router({
 				sort,
 				search,
 				filterEntityId,
-				filterByUserFavorites
+				filterByUserFavorites,
+				filterByStatusArchived
 			} = input;
 
 			let orderBy: Prisma.ProductOrderByWithAggregationInput[] = [
@@ -63,32 +106,33 @@ export const productRouter = router({
 			const whereUserScope: Prisma.ProductWhereInput = {
 				OR: [
 					{
-						accessRights:
-							!contextUser.role.includes('admin')
-								? {
-										some: {
-											user_email: contextUser.email,
-											status: 'carrier'
-										}
+						accessRights: !contextUser.role.includes('admin')
+							? {
+									some: {
+										user_email: contextUser.email,
+										status: 'carrier'
 									}
-								: {}
+								}
+							: {}
 					},
 					{
 						entity: {
-							adminEntityRights:
-								!contextUser.role.includes('admin')
-									? {
-											some: {
-												user_email: contextUser.email
-											}
+							adminEntityRights: !contextUser.role.includes('admin')
+								? {
+										some: {
+											user_email: contextUser.email
 										}
-									: {}
+									}
+								: {}
 						}
 					}
 				]
 			};
 
-			let where: Prisma.ProductWhereInput = { ...whereUserScope };
+			let where: Prisma.ProductWhereInput = {
+				...whereUserScope,
+				status: filterByStatusArchived ? 'archived' : 'published'
+			};
 
 			if (search) {
 				let searchWithoutAccents = removeAccents(search);
@@ -175,10 +219,24 @@ export const productRouter = router({
 					where: whereUserScope
 				});
 
-				return { data: products, metadata: { count, countTotalUserScope } };
+				const countArchivedUserScope = await ctx.prisma.product.count({
+					where: { ...whereUserScope, status: 'archived' }
+				});
+
+				return {
+					data: products,
+					metadata: { count, countTotalUserScope, countArchivedUserScope }
+				};
 			} catch (e) {
 				console.log(e);
-				return { data: [], metadata: { count: 0, countTotalUserScope: 0 } };
+				return {
+					data: [],
+					metadata: {
+						count: 0,
+						countTotalUserScope: 0,
+						countArchivedUserScope: 0
+					}
+				};
 			}
 		}),
 
@@ -268,6 +326,8 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { id, product } = input;
 
+			await checkRightToProceed(ctx.prisma, ctx.session, id);
+
 			product.title_formatted = removeAccents(product.title as string);
 
 			const updatedProduct = await ctx.prisma.product.update({
@@ -275,6 +335,95 @@ export const productRouter = router({
 				data: {
 					...product
 				}
+			});
+
+			return { data: updatedProduct };
+		}),
+
+	archive: protectedProcedure
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+
+			await checkRightToProceed(ctx.prisma, ctx.session, id);
+
+			const updatedProduct = await ctx.prisma.product.update({
+				where: { id },
+				data: {
+					status: 'archived'
+				}
+			});
+
+			const accessRights = await ctx.prisma.accessRight.findMany({
+				where: {
+					product_id: updatedProduct.id
+				}
+			});
+
+			const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+				where: {
+					entity_id: updatedProduct.entity_id
+				}
+			});
+
+			const emails = [
+				...accessRights.map(ar => ar.user_email),
+				...adminEntityRights.map(aer => aer.user_email)
+			].filter(email => email !== null) as string[];
+
+			emails.forEach((email: string) => {
+				sendMail(
+					`Suppression du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+					email,
+					getProductArchivedEmail(ctx.session.user, updatedProduct.title),
+					`Le produit numérique "${updatedProduct.title}" a été supprimé.`
+				);
+			});
+
+			return { data: updatedProduct };
+		}),
+
+	restore: protectedProcedure
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id } = input;
+
+			await checkRightToProceed(ctx.prisma, ctx.session, id);
+
+			const updatedProduct = await ctx.prisma.product.update({
+				where: { id },
+				data: {
+					status: 'published'
+				}
+			});
+			const accessRights = await ctx.prisma.accessRight.findMany({
+				where: {
+					product_id: updatedProduct.id
+				}
+			});
+
+			const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+				where: {
+					entity_id: updatedProduct.entity_id
+				}
+			});
+
+			const emails = [
+				...accessRights.map(ar => ar.user_email),
+				...adminEntityRights.map(aer => aer.user_email)
+			].filter(email => email !== null) as string[];
+
+			emails.forEach((email: string) => {
+				sendMail(
+					`Restauration du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+					email,
+					getProductRestoredEmail(
+						ctx.session.user,
+						updatedProduct.title,
+						updatedProduct.id
+					),
+					`Le produit numérique "${updatedProduct.title}" a été restauré.`
+				);
 			});
 
 			return { data: updatedProduct };

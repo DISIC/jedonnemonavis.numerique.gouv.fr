@@ -113,8 +113,18 @@ const ProductModal = (props: Props) => {
 		value: entity.id
 	}));
 
-	const saveProductTmp = trpc.product.create.useMutation({});
-	const updateProduct = trpc.product.update.useMutation({});
+	const utils = trpc.useUtils();
+
+	const saveProductTmp = trpc.product.create.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
+	const updateProduct = trpc.product.update.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		const { urls, ...tmpProduct } = data;
@@ -152,6 +162,12 @@ const ProductModal = (props: Props) => {
 		onSubmit();
 		modal.close();
 	};
+
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			reset();
+		}
+	});
 
 	const handleRemoveUrl = (index: number) => {
 		const shouldFocusPreviousUrl = index !== 0;
@@ -376,13 +392,12 @@ const ProductModal = (props: Props) => {
 												hideLabel={true}
 												label={`URL ${index + 1}`}
 												state={errors['urls']?.[index] ? 'error' : 'default'}
-												stateRelatedMessage={
-													errors['urls']?.[index]?.value?.message
-												}
+												stateRelatedMessage={`${errors['urls']?.[index]?.value?.message}. Format attendu : https://exemple.com `}
 												nativeInputProps={{
 													name,
 													value,
-													onChange
+													onChange,
+													placeholder: 'Ex: https://exemple.com'
 												}}
 												ref={index === urls.length - 1 ? lastUrlRef : null}
 											/>
@@ -398,6 +413,7 @@ const ProductModal = (props: Props) => {
 											onClick={() => handleRemoveUrl(index)}
 										>
 											<i className="ri-delete-bin-line"></i>
+											<span className="fr-sr-only">Supprimer</span>
 										</Button>
 									)}
 								</div>

@@ -21,6 +21,7 @@ export const Toast = ({
 			open={isOpen}
 			autoHideDuration={autoHideDuration}
 			onClose={() => setIsOpen(false)}
+			role={severity === 'success' ? 'status' : 'alert'}
 			sx={{
 				'& .MuiPaper-root': {
 					padding: 0,

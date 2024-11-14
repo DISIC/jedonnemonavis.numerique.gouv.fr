@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -9,11 +9,40 @@ import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
+import { Menu, MenuItem, Skeleton } from '@mui/material';
+import Button from '@codegouvfr/react-dsfr/Button';
+import router from 'next/router';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
+type NavigationItem = {
+	text: string | React.ReactElement;
+	linkProps: {
+		href: string;
+		target: string;
+		id?: string;
+		title?: string;
+		'aria-label'?: string;
+	};
+	isActive: boolean;
+};
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
+
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+	};
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(null);
+	};
 
 	const { data: session } = useSession();
 
@@ -53,64 +82,176 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		}
 	);
 
+	const { data: userAccessRights, isLoading: isUserAccessRightsLoading } =
+		trpc.accessRight.getUserList.useQuery(
+			{
+				page: 100,
+				numberPerPage: 0
+			},
+			{
+				enabled: !!session?.user,
+				initialData: {
+					data: [],
+					metadata: {
+						count: 0
+					}
+				}
+			}
+		);
+
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
 
-	const quickAccessItems: HeaderProps.QuickAccessItem[] = [
+	const quickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
 		!session?.user
-			? {
-					iconId: 'fr-icon-account-line',
-					linkProps: {
-						href: '/login',
-						target: '_self'
-					},
-					text: 'Connexion / Inscription'
-				}
-			: {
-					iconId: 'ri-logout-circle-line',
-					buttonProps: {
-						onClick: () => {
-							signOut();
-						}
-					},
-					text: 'Déconnexion'
-				}
-	];
-
-	const navigationItems = session?.user
-		? !!userAdminEntityRights.metadata.count ||
-			session.user.role.includes('admin')
 			? [
 					{
-						text: 'Services',
+						iconId: 'fr-icon-account-line',
 						linkProps: {
-							href: '/administration/dashboard/products',
+							href: '/login',
 							target: '_self'
 						},
-						isActive: pathname.startsWith('/administration/dashboard/product')
-					},
-					{
-						text: 'Organisations',
-						linkProps: {
-							href: '/administration/dashboard/entities',
-							target: '_self'
-						},
-						isActive: pathname.startsWith('/administration/dashboard/entities')
+						text: 'Connexion / Inscription'
 					}
 				]
-			: []
-		: [];
+			: [
+					<>
+						<Button
+							id="button-account"
+							iconId={'fr-icon-account-circle-line'}
+							title={`Ouvrir le menu mon compte`}
+							aria-label={`Ouvrir le menu mon compte`}
+							priority="tertiary"
+							size="large"
+							onClick={handleMenuClick}
+						>
+							Compte
+						</Button>
+						<Menu
+							id="option-menu"
+							open={menuOpen}
+							anchorEl={anchorEl}
+							onClose={handleClose}
+							MenuListProps={{
+								'aria-labelledby': 'button-options-access-right'
+							}}
+						>
+							<MenuItem
+								style={{ pointerEvents: 'none' }}
+								className={cx(classes.firstItem)}
+							>
+								<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+									{session?.user.name}
+								</div>
+								<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+									{session?.user.email}
+								</div>
+							</MenuItem>
+							<MenuItem
+								className={cx(fr.cx('fr-p-4v'), classes.item)}
+								onClick={e => {
+									handleClose(e);
+									router.push(
+										`/administration/dashboard/user/${session?.user.id}/infos`
+									);
+								}}
+							>
+								<span
+									className={fr.cx(
+										'fr-icon-user-line',
+										'fr-icon--sm',
+										'fr-mr-1-5v'
+									)}
+								/>
+								Informations personnelles
+							</MenuItem>
+							{/*
+									<MenuItem
+										className={cx(fr.cx('fr-p-4v'), classes.item)}
+										onClick={e => {
+											handleClose(e);
+											router.push(
+												`/administration/dashboard/user/${session?.user.id}/notifications`
+											);
+										}}
+									>
+										<span
+											className={fr.cx(
+												'fr-icon-notification-3-line',
+												'fr-icon--sm',
+												'fr-mr-1-5v'
+											)}
+										/>
+										Notifications
+									</MenuItem>
+								*/}
+							<MenuItem
+								className={cx(
+									fr.cx('fr-pb-2v', 'fr-pt-4v'),
+									classes.item,
+									classes.lastItem
+								)}
+							>
+								<Button
+									id="button-account"
+									iconId={'fr-icon-logout-box-r-line'}
+									title={`Déconnexion`}
+									aria-label={`Déconnexion`}
+									priority="tertiary"
+									onClick={() => {
+										signOut();
+									}}
+								>
+									Se déconnecter
+								</Button>
+							</MenuItem>
+						</Menu>
+					</>
+				];
+
+	const navigationItems: NavigationItem[] = [];
+
+	if (session?.user) {
+		if (
+			userAccessRights.metadata.count ||
+			userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
+		) {
+			navigationItems.push({
+				text: 'Services',
+				linkProps: {
+					href: '/administration/dashboard/products',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/product')
+			});
+		}
+
+		if (
+			userAdminEntityRights.metadata.count ||
+			session.user.role.includes('admin')
+		) {
+			navigationItems.push({
+				text: 'Organisations',
+				linkProps: {
+					href: '/administration/dashboard/entities',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/entities')
+			});
+		}
+	}
 
 	if (session?.user.role.includes('admin')) {
-		const adminNavigationItems = [
+		const adminNavigationItems: NavigationItem[] = [
 			{
 				text: 'Utilisateurs',
 				linkProps: {
 					href: '/administration/dashboard/users',
 					target: '_self'
 				},
-				isActive: pathname == '/administration/dashboard/users'
+				isActive: pathname.startsWith('/administration/dashboard/user')
 			},
 			{
 				text: 'Liste blanche des noms de domaines',
@@ -121,7 +262,11 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				isActive: pathname == '/administration/dashboard/domains'
 			},
 			{
-				text: "Demandes d'accès",
+				text: (
+					<div>
+						Demandes d'accès <span>{userRequestsResult.metadata.count}</span>
+					</div>
+				),
 				linkProps: {
 					href: '/administration/dashboard/user-requests',
 					target: '_self',
@@ -195,11 +340,15 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}}
 					title={
 						<>
-							Aidez-nous à améliorer cet outil, n'hésitez pas à nous faire part
-							de vos retours depuis{' '}
-							<a href="https://tally.so/r/m6kyyB" target="_blank">
-								ce court formulaire
-							</a>
+							Aidez-nous à améliorer cet outil ! Faites-nous part de vos retours
+							en remplissant{' '}
+							<a
+								title="Le formulaire s'ouvre dans une nouvelle fenêtre"
+								href="https://tally.so/r/m6kyyB"
+								target="_blank"
+							>
+								ce court formulaire.
+							</a>{' '}
 						</>
 					}
 				/>
@@ -225,7 +374,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					termsLinkProps={{
 						href: '/public/legalNotice'
 					}}
-					license={<>Le{' '}<a href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr" target="_blank">code source</a>{' '} est disponible en licence libre.</>}
+					license={
+						<>
+							Le{' '}
+							<a
+								href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
+								target="_blank"
+							>
+								code source
+							</a>{' '}
+							est disponible en licence libre.
+						</>
+					}
 				/>
 			</div>
 		</>
@@ -239,28 +399,42 @@ const useStyles = tss
 		logo: {
 			maxHeight: fr.spacing('11v')
 		},
-		navigation: countUserRequests
-			? {
-					'.fr-nav__link#fr-header-public-header-main-navigation-link-badge': {
-						position: 'relative',
-						'&::after': {
-							content: `"${countUserRequests.toString()}"`, // displaying the number 2
-							color: fr.colors.decisions.background.default.grey.default,
-							backgroundColor:
-								fr.colors.decisions.background.flat.redMarianne.default,
-							borderRadius: '50%',
-							width: fr.spacing('4v'),
-							height: fr.spacing('4v'),
-							display: 'inline-block',
-							textAlign: 'center',
-							lineHeight: fr.spacing('4v'),
-							marginLeft: '8px',
-							position: 'relative',
-							bottom: '2px',
-							fontSize: '10px',
-							fontWeight: 'bold'
-						}
-					}
-				}
-			: {}
+		firstItem: {
+			display: 'flex',
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			WebkitAlignItems: 'flex-start'
+		},
+		lastItem: {
+			display: 'flex',
+			flexDirection: 'column'
+		},
+		item: {
+			borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
+		},
+		inMenu: {
+			display: 'block',
+			'&:nth-of-type(2)': {
+				fontSize: '0.8rem',
+				color: fr.colors.decisions.text.disabled.grey.default
+			}
+		},
+		navigation: {
+			span: {
+				color: fr.colors.decisions.background.default.grey.default,
+				backgroundColor:
+					fr.colors.decisions.background.flat.redMarianne.default,
+				borderRadius: '50%',
+				width: fr.spacing('4v'),
+				height: fr.spacing('4v'),
+				display: 'inline-block',
+				textAlign: 'center',
+				lineHeight: fr.spacing('4v'),
+				marginLeft: '8px',
+				position: 'relative',
+				bottom: '2px',
+				fontSize: '10px',
+				fontWeight: 'bold'
+			}
+		}
 	}));

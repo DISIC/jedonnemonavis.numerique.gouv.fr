@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
+import { v4 as uuidv4 } from "uuid";
 
 type JDMAFormProps = {
   product: Product;
@@ -234,7 +235,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const userIdExists = localStorage.getItem("userId");
 
       if (!userIdExists) {
-        const userId = crypto.randomUUID();
+        const userId = uuidv4();
 
         localStorage.setItem("userId", userId);
 
@@ -324,7 +325,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div>
           <div className={classes.titleSuccess}>
             <Image
-              alt="Service public +"
+              alt=""
               src="/Demarches/assets/icon-check.svg"
               title="Icone - Merci pour votre aide"
               width={40}
@@ -334,7 +335,9 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               {t("success_block.title")}
             </h1>
           </div>
-          <p>{t("success_block.thanks")}</p>
+          <p role="status" aria-live="polite">
+            {t("success_block.thanks")}
+          </p>
           {/* REMOVE UNTIL WE HAVE DATA FOR CONTACTS IN PRODUCTS
                 <Highlight>
                   {t('success_block.question')}<b>{` ${product.title} ?`}</b>{' '}
@@ -526,7 +529,7 @@ export const getServerSideProps: GetServerSideProps<{
     else product.buttons = [product.buttons[0]];
   }
 
-  if (product) {
+  if (product && product.status !== "archived") {
     return {
       props: {
         product: {
@@ -569,7 +572,7 @@ const useStyles = tss
         },
       },
       [fr.breakpoints.up("md")]: {
-        height: isInIframe ? 80 : `${blueSectionPxHeight}px`,
+        height: `${blueSectionPxHeight}px`,
       },
     },
     titleSection: {
@@ -599,7 +602,7 @@ const useStyles = tss
     formSection: {
       backgroundColor: fr.colors.decisions.background.default.grey.default,
       ...fr.spacing("padding", {
-        topBottom: !isInIframe ? "4v" : "auto",
+        topBottom: "auto",
         rightLeft: "6v",
       }),
       h1: {

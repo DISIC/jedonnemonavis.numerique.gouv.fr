@@ -34,6 +34,16 @@ interface Props {
 	product: Product;
 }
 
+type FormErrors = {
+	startDate: boolean;
+	endDate: boolean;
+};
+
+const defaultErrors = {
+	startDate: false,
+	endDate: false
+};
+
 const ProductReviewsPage = (props: Props) => {
 	const { product } = props;
 	const router = useRouter();
@@ -49,6 +59,7 @@ const ProductReviewsPage = (props: Props) => {
 	);
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
+	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
@@ -165,7 +176,12 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	});
 
-	const { cx, classes } = useStyles();
+	const validateDateFormat = (date: string) => {
+		const regex = /^\d{4}-\d{2}-\d{2}$/;
+		return regex.test(date);
+	};
+
+	const { cx, classes } = useStyles({ displayMode });
 
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
@@ -194,6 +210,7 @@ const ProductReviewsPage = (props: Props) => {
 				return (
 					<Tag
 						key={index}
+						title={'Retirer le filtre : Verbatim complété'}
 						dismissible
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
@@ -213,27 +230,32 @@ const ProductReviewsPage = (props: Props) => {
 					</Tag>
 				);
 			} else if (Array.isArray(filterValue) && filterValue.length > 0) {
-				return filterValue.map((value, subIndex) => (
-					<Tag
-						key={`${key}-${subIndex}`}
-						dismissible
-						className={cx(classes.tagFilter)}
-						nativeButtonProps={{
-							onClick: () => {
-								setFilters({
-									...filters,
-									[key]: filterValue.filter(item => item !== value)
-								});
-							}
-						}}
-					>
-						{renderLabel(
-							FILTER_LABELS.find(filter => filter.value === key)?.type,
-							key,
-							value
-						)}
-					</Tag>
-				));
+				return filterValue.map((value, subIndex) => {
+					const labelRendered = renderLabel(
+						FILTER_LABELS.find(filter => filter.value === key)?.type,
+						key,
+						value
+					);
+
+					return (
+						<Tag
+							key={`${key}-${subIndex}`}
+							title={`Retirer le filtre ${labelRendered}`}
+							dismissible
+							className={cx(classes.tagFilter)}
+							nativeButtonProps={{
+								onClick: () => {
+									setFilters({
+										...filters,
+										[key]: filterValue.filter(item => item !== value)
+									});
+								}
+							}}
+						>
+							{labelRendered}
+						</Tag>
+					);
+				});
 			} else {
 				return null;
 			}
@@ -249,29 +271,11 @@ const ProductReviewsPage = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return (
-					<>
-						<p>
-							{FILTER_LABELS.find(filter => filter.value === key)?.label}{' '}
-							complété
-						</p>
-					</>
-				);
+				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} complété`;
 			case 'iconbox':
-				return (
-					<>
-						<p>
-							{FILTER_LABELS.find(filter => filter.value === key)?.label} :{' '}
-							{displayIntention((value ?? 'neutral') as AnswerIntention)}
-						</p>
-					</>
-				);
+				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return (
-					<>
-						<p>{value}</p>
-					</>
-				);
+				return `${value}`;
 			default:
 				return '';
 		}
@@ -293,7 +297,7 @@ const ProductReviewsPage = (props: Props) => {
 
 	const displayEmptyState = () => {
 		if (!buttonResults?.data.length) {
-			return <NoButtonsPanel isSmall onButtonClick={handleButtonClick} />;
+			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
 		}
 
 		if (!reviewsCountAll) {
@@ -303,6 +307,25 @@ const ProductReviewsPage = (props: Props) => {
 					sendInvitationBtnClick={handleSendInvitation}
 				/>
 			);
+		}
+	};
+
+	const submit = () => {
+		const startDateValid = validateDateFormat(startDate);
+		const endDateValid = validateDateFormat(endDate);
+		let newErrors = { startDate: false, endDate: false };
+
+		if (!startDateValid) {
+			newErrors.startDate = true;
+		}
+		if (!endDateValid) {
+			newErrors.endDate = true;
+		}
+		setErrors(newErrors);
+
+		if (startDateValid && endDateValid) {
+			setValidatedSearch(search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim());
+			setCurrentPage(1);
 		}
 	};
 
@@ -353,7 +376,12 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-8v'
 							)}
 						>
-							<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+									classes.errorMsg
+								)}
+							>
 								<Input
 									label="Date de début"
 									nativeInputProps={{
@@ -362,11 +390,23 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											setStartDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
+											submit();
 										}
 									}}
+									state={errors.startDate ? 'error' : 'default'}
+									stateRelatedMessage={
+										errors.startDate ? (
+											<span role="alert">format attendu : JJ/MM/AAAA</span>
+										) : null
+									}
 								/>
 							</div>
-							<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')}>
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+									classes.errorMsg
+								)}
+							>
 								<Input
 									label="Date de fin"
 									nativeInputProps={{
@@ -375,8 +415,15 @@ const ProductReviewsPage = (props: Props) => {
 										onChange: e => {
 											setEndDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
+											submit();
 										}
 									}}
+									state={errors.endDate ? 'error' : 'default'}
+									stateRelatedMessage={
+										errors.endDate ? (
+											<span role="alert">format attendu : JJ/MM/AAAA</span>
+										) : null
+									}
 								/>
 							</div>
 							<div
@@ -391,10 +438,7 @@ const ProductReviewsPage = (props: Props) => {
 									className={cx(classes.searchForm)}
 									onSubmit={e => {
 										e.preventDefault();
-										setValidatedSearch(
-											search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim()
-										);
-										setCurrentPage(1);
+										submit();
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>
@@ -431,7 +475,7 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-grid-row',
 								'fr-grid-row--gutters',
 								'fr-grid-row--left',
-								'fr-mt-4v'
+								'fr-mt-6v'
 							)}
 						>
 							<div
@@ -447,6 +491,11 @@ const ProductReviewsPage = (props: Props) => {
 											priority={
 												displayMode === 'reviews' ? 'primary' : 'secondary'
 											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOption
+													: classes.buttonOptionDisabled
+											}
 											onClick={() => {
 												setDisplayMode('reviews');
 												setCurrentPage(1);
@@ -458,6 +507,11 @@ const ProductReviewsPage = (props: Props) => {
 										<Button
 											priority={
 												displayMode === 'reviews' ? 'secondary' : 'primary'
+											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOptionDisabled
+													: classes.buttonOption
 											}
 											onClick={() => {
 												setDisplayMode('verbatim');
@@ -536,7 +590,10 @@ const ProductReviewsPage = (props: Props) => {
 								>
 									{reviews.length > 0 && nbPages > 0 && (
 										<>
-											<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+											<div
+												role="status"
+												className={fr.cx('fr-col-12', 'fr-mt-8v')}
+											>
 												Avis de{' '}
 												<span className={cx(classes.boldText)}>
 													{numberPerPage * (currentPage - 1) + 1}
@@ -556,30 +613,32 @@ const ProductReviewsPage = (props: Props) => {
 								<div>
 									{reviewsExtended.length > 0 ? (
 										<>
-											<ReviewFilters
-												displayMode={displayMode}
-												sort={sort}
-												onClick={handleSortChange}
-											/>
-											{reviewsExtended.map((review, index) => {
-												if (review && displayMode === 'reviews') {
-													return (
-														<ReviewLine
-															key={index}
-															review={review}
-															search={validatedSearch}
-														/>
-													);
-												} else if (review && displayMode === 'verbatim') {
-													return (
-														<ReviewLineVerbatim
-															key={index}
-															review={review}
-															search={validatedSearch}
-														/>
-													);
-												}
-											})}
+											<table className={cx(classes.tableContainer)}>
+												<ReviewFilters
+													displayMode={displayMode}
+													sort={sort}
+													onClick={handleSortChange}
+												/>
+												{reviewsExtended.map((review, index) => {
+													if (review && displayMode === 'reviews') {
+														return (
+															<ReviewLine
+																key={index}
+																review={review}
+																search={validatedSearch}
+															/>
+														);
+													} else if (review && displayMode === 'verbatim') {
+														return (
+															<ReviewLineVerbatim
+																key={index}
+																review={review}
+																search={validatedSearch}
+															/>
+														);
+													}
+												})}
+											</table>
 										</>
 									) : (
 										<div
@@ -589,7 +648,7 @@ const ProductReviewsPage = (props: Props) => {
 												'fr-mt-20v'
 											)}
 										>
-											<p>Aucun avis disponible </p>
+											<p role="status">Aucun avis disponible </p>
 										</div>
 									)}
 								</div>
@@ -625,57 +684,77 @@ const ProductReviewsPage = (props: Props) => {
 
 export default ProductReviewsPage;
 
-const useStyles = tss.withName(ProductReviewsPage.name).create(() => ({
-	boldText: {
-		fontWeight: 'bold'
-	},
-	searchForm: {
-		'.fr-search-bar': {
-			'.fr-input-group': {
-				width: '100%',
-				marginBottom: 0
-			}
-		}
-	},
-	title: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		marginBottom: '1rem',
-		[fr.breakpoints.down('lg')]: {
-			flexDirection: 'column',
-			'.fr-btn': {
-				marginTop: '1rem'
-			}
-		}
-	},
-	filterView: {
-		display: 'flex',
-		flexDirection: 'column'
-	},
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
-	},
-	filtersWrapper: {
-		display: 'flex',
-		alignItems: 'end'
-	},
-	buttonContainer: {
-		width: '100%',
-		[fr.breakpoints.up('lg')]: {
-			display: 'flex',
-			alignSelf: 'flex-end',
-			justifyContent: 'flex-end',
-			'.fr-btn': {
-				justifySelf: 'flex-end'
+const useStyles = tss
+	.withName(ProductReviewsPage.name)
+	.withParams<{ displayMode: 'reviews' | 'verbatim' }>()
+	.create(({ displayMode }) => ({
+		boldText: {
+			fontWeight: 'bold'
+		},
+		tableContainer: {
+			width: '100%'
+		},
+		searchForm: {
+			'.fr-search-bar': {
+				'.fr-input-group': {
+					width: '100%',
+					marginBottom: 0
+				}
 			}
 		},
-		[fr.breakpoints.down('lg')]: {
-			'.fr-btn:first-of-type': {
-				marginBottom: '1rem'
+		buttonOption: {
+			border: `1px solid ${fr.colors.decisions.border.active.blueFrance.default}`
+		},
+		buttonOptionDisabled: {
+			border: 'none'
+		},
+		title: {
+			display: 'flex',
+			justifyContent: 'space-between',
+			marginBottom: '1rem',
+			[fr.breakpoints.down('lg')]: {
+				flexDirection: 'column',
+				'.fr-btn': {
+					marginTop: '1rem'
+				}
+			}
+		},
+		filterView: {
+			display: 'flex',
+			flexDirection: 'column'
+		},
+		tagFilter: {
+			marginRight: '0.5rem',
+			marginBottom: '0.5rem'
+		},
+		filtersWrapper: {
+			display: 'flex',
+			alignItems: 'end'
+		},
+		buttonContainer: {
+			width: '100%',
+			[fr.breakpoints.up('lg')]: {
+				display: 'flex',
+				alignSelf: 'flex-end',
+				justifyContent: 'flex-end',
+				'.fr-btn': {
+					justifySelf: 'flex-end'
+				}
+			},
+			[fr.breakpoints.down('lg')]: {
+				'.fr-btn:first-of-type': {
+					marginBottom: '1rem'
+				}
+			}
+		},
+		errorMsg: {
+			'.fr-error-text': {
+				marginTop: '0.5rem'
+			},
+			'p.fr-error-text': {
+				position: 'absolute'
 			}
 		}
-	}
-}));
+	}));
 
 export { getServerSideProps };

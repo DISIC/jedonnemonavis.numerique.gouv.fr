@@ -2,9 +2,10 @@ import { z } from 'zod';
 import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	UserCreateInputSchema,
+	UserUncheckedUpdateInputSchema,
 	UserUpdateInputSchema
 } from '@/prisma/generated/zod';
-import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { Prisma, PrismaClient, User } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import {
@@ -167,11 +168,13 @@ export const userRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				sort: z.string().optional(),
-				search: z.string().optional()
+				search: z.string().optional(),
+				entities: z.array(z.number()).optional(),
+				onlyAdmins: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, sort, search } = input;
+			const { numberPerPage, page, sort, search, entities, onlyAdmins } = input;
 
 			let orderBy: Prisma.UserOrderByWithAggregationInput[] = [
 				{
@@ -224,6 +227,37 @@ export const userRouter = router({
 				}
 			}
 
+			if (entities && entities.length > 0) {
+				where.AND = [
+					{
+						OR: [
+							{
+								adminEntityRights: {
+									some: {
+										entity_id: { in: entities }
+									}
+								}
+							},
+							{
+								accessRights: {
+									some: {
+										product: {
+											entity_id: { in: entities }
+										}
+									}
+								}
+							}
+						]
+					}
+				];
+			}
+
+			if (onlyAdmins) {
+				where.role = {
+					in: ['admin', 'superadmin']
+				}
+			}
+
 			if (sort) {
 				const values = sort.split(':');
 				if (values.length === 2) {
@@ -260,6 +294,52 @@ export const userRouter = router({
 			return { data: users, metadata: { count } };
 		}),
 
+	getById: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: { id }
+			});
+
+			return { data: user };
+		}),
+
+	getByIdWithRights: protectedProcedure
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number() }))
+		.query(async ({ ctx, input }) => {
+			const { id } = input;
+
+			const user = await ctx.prisma.user.findUnique({
+				where: { id },
+				include: {
+					accessRights: {
+						include: {
+							product: {
+								include: {
+									entity: true
+								}
+							}
+						}
+					},
+					adminEntityRights: {
+						include: {
+							entity: {
+								include: {
+									products: true
+								}
+							}
+						}
+					}
+				}
+			});
+
+			return { data: user };
+		}),
+
 	create: protectedProcedure
 		.meta({ isAdmin: true })
 		.input(UserCreateInputSchema)
@@ -276,10 +356,8 @@ export const userRouter = router({
 					message: 'User with email already exists'
 				});
 
-			const hashedPassword = crypto
-				.createHash('sha256')
-				.update(newUser.password)
-				.digest('hex');
+			const salt = bcrypt.genSaltSync(10);
+			const hashedPassword = bcrypt.hashSync(newUser.password, salt);
 
 			newUser.password = hashedPassword;
 
@@ -295,20 +373,54 @@ export const userRouter = router({
 		}),
 
 	update: protectedProcedure
-		.meta({ isAdmin: true })
-		.input(z.object({ id: z.number(), user: UserUpdateInputSchema }))
+		.meta({ isAdminOrOwn: true })
+		.input(z.object({ id: z.number(), user: UserUncheckedUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
-			const { id, user } = input;
-			const updatedUser = await ctx.prisma.user.update({
-				where: { id },
-				data: { ...user, email: ((user.email || '') as string).toLowerCase() }
-			});
+		  
+		  	const { id, user } = input;
+		  	const { role, ...userWithoutRole } = user;
 
-			return { data: updatedUser };
+			console.log('user : ', user)
+	  
+		  	const dataToUpdate = ctx.session?.user?.role.includes('admin')
+				? { ...userWithoutRole, role }
+				: { ...userWithoutRole };
+
+			if(dataToUpdate.email) {
+				const userHasConflict = await ctx.prisma.user.findUnique({
+					where: {
+						email: (dataToUpdate.email as string || '').toLowerCase()
+					}
+				});
+	
+				if (userHasConflict)
+					throw new TRPCError({
+						code: 'CONFLICT',
+						message: 'User already exists'
+					});
+	
+				const isWhiteListed = await checkUserDomain(
+					ctx.prisma,
+					(dataToUpdate.email as string || '').toLowerCase()
+				);
+	
+				if (!isWhiteListed)
+					throw new TRPCError({
+						code: 'UNAUTHORIZED',
+						message: 'User email domain not whitelisted'
+					});
+			}
+	  
+		  const updatedUser = await ctx.prisma.user.update({
+				where: { id },
+				data: dataToUpdate,
+		  });
+	  
+		  return { data: updatedUser };
 		}),
 
 	delete: protectedProcedure
-		.meta({ isAdmin: true })
+		.meta({ isAdminOrOwn: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
@@ -345,10 +457,8 @@ export const userRouter = router({
 			const { otp, inviteToken, user } = input;
 			const { xwiki_account, ...newUser } = user;
 
-			const hashedPassword = crypto
-				.createHash('sha256')
-				.update(newUser.password)
-				.digest('hex');
+			const salt = bcrypt.genSaltSync(10);
+			const hashedPassword = bcrypt.hashSync(newUser.password, salt);
 
 			newUser.password = hashedPassword;
 
@@ -611,9 +721,9 @@ export const userRouter = router({
 		}),
 
 	initResetPwd: publicProcedure
-		.input(z.object({ email: z.string() }))
+		.input(z.object({ email: z.string(), forgot: z.boolean().optional() }))
 		.mutation(async ({ ctx, input }) => {
-			const { email } = input;
+			const { email, forgot } = input;
 
 			const user = await ctx.prisma.user.findUnique({
 				where: {
@@ -647,7 +757,7 @@ export const userRouter = router({
 			});
 
 			await sendMail(
-				'Mot de passe oublié',
+				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',
 				email.toLowerCase(),
 				getResetPasswordEmailHtml(token),
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
@@ -723,10 +833,8 @@ export const userRouter = router({
 				});
 			}
 
-			const hashedPassword = crypto
-				.createHash('sha256')
-				.update(password)
-				.digest('hex');
+			const salt = bcrypt.genSaltSync(10);
+			const hashedPassword = bcrypt.hashSync(password, salt);
 
 			const updatedUser = await ctx.prisma.user.update({
 				where: {

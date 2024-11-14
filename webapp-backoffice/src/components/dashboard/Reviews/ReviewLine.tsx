@@ -8,7 +8,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
@@ -29,6 +29,9 @@ const ReviewLine = ({
 		return searchWords.every(word => answerText.includes(word));
 	});
 
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
+
 	const displayIntention = (intention: string) => {
 		switch (intention) {
 			case 'bad':
@@ -44,118 +47,123 @@ const ReviewLine = ({
 		}
 	};
 
+	useEffect(() => {
+		if (displayMoreInfo)
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+	}, [displayMoreInfo]);
+
 	return (
-		<div className={cx(classes.container)}>
-			<div className={cx(classes.lineContainer)}>
-				<div className={cx(classes.cellContainer)}>
-					<div className={cx(classes.date)}>
-						<span className={fr.cx('fr-hidden-lg')}>Date : </span>
-						{formatDateToFrenchString(
-							review.created_at?.toISOString().split('T')[0] || ''
-						)}
-					</div>
-				</div>
-				<div className={cx(classes.cellContainer)}>
-					<div className={cx(classes.date)}>
-						<span className={fr.cx('fr-hidden-lg')}>Heure : </span>
-						{review.created_at?.toLocaleTimeString('fr-FR')}
-					</div>
-				</div>
-				<div className={cx(classes.cellContainer)}>
-					<div className={cx(classes.date)}>
-						<span className={fr.cx('fr-hidden-lg')}>Id : </span>
-						{review.id?.toString(16)}
-					</div>
-				</div>
-				{review.button_id ? (
-					<div className={cx(classes.cellContainer)}>
-						<div className={cx(classes.badge)}>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-								Source :{' '}
-							</span>
-							{retrieveButtonName(review.button_id)}
-						</div>
-					</div>
-				) : (
-					<div className={cx(classes.cellContainer)}>Pas de source</div>
-				)}
-				<div className={cx(classes.cellContainer)}>
-					{review.satisfaction && (
-						<>
-							<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-								Satisfaction :{' '}
-							</span>
-							<Badge
-								className={cx(classes.badge)}
-								small={true}
-								noIcon={true}
-								severity={getSeverity(review.satisfaction.intention || '')}
-							>
-								<Image
-									alt="smiley"
-									src={`/assets/smileys/${getStatsIcon({
-										intention: review.satisfaction.intention ?? 'neutral'
-									})}.svg`}
-									width={15}
-									height={15}
-								/>
-								{displayIntention(review.satisfaction.intention ?? 'neutral')}
-							</Badge>
-						</>
+		<tr className={cx(classes.container)}>
+			<td className={cx(classes.cellContainer)}>
+				<div className={cx(classes.date)}>
+					<span className={fr.cx('fr-hidden-lg')}>Date : </span>
+					{formatDateToFrenchString(
+						review.created_at?.toISOString().split('T')[0] || ''
 					)}
 				</div>
-				<div className={cx(classes.cellContainer)}>
+			</td>
+			<td className={cx(classes.cellContainer)}>
+				<div className={cx(classes.date)}>
+					<span className={fr.cx('fr-hidden-lg')}>Heure : </span>
+					{review.created_at?.toLocaleTimeString('fr-FR')}
+				</div>
+			</td>
+			<td className={cx(classes.cellContainer)}>
+				<div className={cx(classes.date)}>
+					<span className={fr.cx('fr-hidden-lg')}>Id : </span>
+					{review.id?.toString(16)}
+				</div>
+			</td>
+			{review.button_id ? (
+				<td className={cx(classes.cellContainer)}>
+					<div className={cx(classes.badge)}>
+						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+							Source :{' '}
+						</span>
+						{retrieveButtonName(review.button_id)}
+					</div>
+				</td>
+			) : (
+				<td className={cx(classes.cellContainer)}>Pas de source</td>
+			)}
+			<td className={cx(classes.cellContainer)}>
+				{review.satisfaction && (
 					<>
 						<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-							Verbatim :{' '}
+							Satisfaction :{' '}
 						</span>
 						<Badge
 							className={cx(classes.badge)}
-							noIcon
-							severity={review.verbatim ? 'info' : 'error'}
+							small={true}
+							noIcon={true}
+							severity={getSeverity(review.satisfaction.intention || '')}
 						>
-							{review.verbatim ? 'Verbatim' : 'Non'}
+							<Image
+								alt=""
+								src={`/assets/smileys/${getStatsIcon({
+									intention: review.satisfaction.intention ?? 'neutral'
+								})}.svg`}
+								width={15}
+								height={15}
+							/>
+							{displayIntention(review.satisfaction.intention ?? 'neutral')}
 						</Badge>
 					</>
-				</div>
-				<div className={cx(classes.cellContainer)}>
-					<Button
-						priority="secondary"
-						iconPosition="right"
-						iconId="fr-icon-arrow-down-s-fill"
-						size="small"
-						onClick={() => {
-							setDisplayMoreInfo(!displayMoreInfo);
-						}}
+				)}
+			</td>
+			<td className={cx(classes.cellContainer)}>
+				<>
+					<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
+						Verbatim :{' '}
+					</span>
+					<Badge
+						className={cx(classes.badge)}
+						noIcon
+						severity={review.verbatim ? 'info' : 'error'}
 					>
-						{' '}
-						Plus d'infos
-					</Button>
-				</div>
-			</div>
+						{review.verbatim ? 'Verbatim' : 'Non'}
+					</Badge>
+				</>
+			</td>
+			<td className={cx(classes.cellContainer)}>
+				<Button
+					priority="secondary"
+					title={`Plus d'infos sur l'avis ${review.id}`}
+					iconPosition="right"
+					iconId="fr-icon-arrow-down-s-fill"
+					aria-expanded={displayMoreInfo ? true : false}
+					size="small"
+					onClick={() => {
+						setDisplayMoreInfo(!displayMoreInfo);
+					}}
+				>
+					{' '}
+					Plus d'infos
+				</Button>
+			</td>
 			{displayMoreInfo && (
 				<ReviewLineMoreInfos review={review} search={search} />
 			)}
-		</div>
+		</tr>
 	);
 };
 
 const useStyles = tss.create({
 	container: {
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: 12,
+		flexWrap: 'wrap',
 		border: '1px solid',
 		borderColor: fr.colors.decisions.border.default.grey.default,
 		marginBottom: 12
 	},
-	lineContainer: {
-		display: 'flex',
-		flexWrap: 'wrap',
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		padding: 12
-	},
+
 	date: {
 		fontSize: 12
 	},

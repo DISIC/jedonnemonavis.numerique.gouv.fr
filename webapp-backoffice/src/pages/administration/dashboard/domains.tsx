@@ -267,22 +267,20 @@ const DashBoardDomainDomains = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
-									Domaines de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + domains.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{domainsResult.metadata.count}
-									</span>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Domaines de{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{numberPerPage * (currentPage - 1) + domains.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{domainsResult.metadata.count}
 								</span>
-							)}
+							</span>
 						</div>
 						<div
 							className={cx(
@@ -310,13 +308,16 @@ const DashBoardDomainDomains = () => {
 									<Loader />
 								</div>
 							) : (
-								domains.map((domain, index) => (
-									<DomainCard
-										key={index}
-										domain={domain}
-										setCurrentDomain={handleCurrentDomain}
-									/>
-								))
+								<ul className={cx(classes.ulContainer)}>
+									{domains.map((domain, index) => (
+										<li key={index}>
+											<DomainCard
+												domain={domain}
+												setCurrentDomain={handleCurrentDomain}
+											/>
+										</li>
+									))}
+								</ul>
 							)}
 							{domains.length === 0 && !isRefetchingDomains && (
 								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -381,6 +382,14 @@ const useStyles = tss.withName(DashBoardDomainDomains.name).create(() => ({
 			'.fr-btn:first-of-type': {
 				marginBottom: '1rem'
 			}
+		}
+	},
+	ulContainer: {
+		padding: 0,
+		margin: 0,
+		listStyle: 'none !important',
+		li: {
+			paddingBottom: 0
 		}
 	},
 	domainsContainer: {

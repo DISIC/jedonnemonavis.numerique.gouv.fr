@@ -3,6 +3,7 @@ import {
 	getKeysFromArrayOfObjects
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -222,7 +223,7 @@ const ChartWrapper = ({
 				<table className={cx(fr.cx('fr-table'), classes.table)}>
 					<thead>
 						<tr>
-							<th scope="col"></th>
+							<th scope="row">Critères évalués</th>
 							{headers.map((h, index) => (
 								<th scope="col" key={`${h}_${index}_${title}`}>
 									{h}
@@ -247,34 +248,48 @@ const ChartWrapper = ({
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
-					<h6 className={fr.cx('fr-mb-0')}>{title}</h6>
+					<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
 					{totalFormatted && (
 						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
 					)}
 				</div>
 				<div className={classes.flexAlignCenter}>
-					<button
+					<Button
+						priority="secondary"
+						nativeButtonProps={{ role: 'tab' }}
 						className={cx(
 							classes.button,
 							view === 'chart' && classes.activeButton,
 							view !== 'chart' && classes.inactiveChartBtn
 						)}
 						onClick={() => setView('chart')}
-						role="tab"
 					>
+						{view === 'chart' && (
+							<span
+								className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
+								aria-hidden="true"
+							></span>
+						)}
 						Graphique
-					</button>
-					<button
+					</Button>
+					<Button
+						priority="secondary"
+						nativeButtonProps={{ role: 'tab' }}
 						className={cx(
 							classes.button,
 							view === 'table' && classes.activeButton,
 							view !== 'table' && classes.inactiveTableBtn
 						)}
 						onClick={() => setView('table')}
-						role="tab"
 					>
+						{view === 'table' && (
+							<span
+								className="ri-grid-line fr-mr-1v fr-icon--sm"
+								aria-hidden="true"
+							></span>
+						)}
 						Tableau
-					</button>
+					</Button>
 				</div>
 			</div>
 			<div className={classes.container}>
@@ -359,13 +374,15 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		borderTop: '1px solid',
 		borderBottom: '1px solid',
 		color: 'black',
-		borderColor: 'grey',
+		borderColor: fr.colors.decisions.background.default.grey.active,
 		cursor: 'pointer',
 		padding: '0.2rem 0.5rem'
 	},
 	activeButton: {
 		color: fr.colors.decisions.background.flat.blueFrance.default,
-		borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+		borderTopColor: fr.colors.decisions.background.flat.blueFrance.default,
+		borderBottomColor: fr.colors.decisions.background.flat.blueFrance.default,
+		borderTop: '2px solid',
 		borderLeft: '1px solid',
 		borderRight: '1px solid',
 		borderRadius: '0.25rem'
@@ -374,13 +391,13 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		borderRight: '1px solid',
 		borderTopRightRadius: '0.25rem',
 		borderBottomRightRadius: '0.25rem',
-		borderColor: 'grey'
+		borderColor: fr.colors.decisions.background.default.grey.active
 	},
 	inactiveChartBtn: {
 		borderLeft: '1px solid',
 		borderTopLeftRadius: '0.25rem',
 		borderBottomLeftRadius: '0.25rem',
-		borderColor: 'grey'
+		borderColor: fr.colors.decisions.background.default.grey.active
 	}
 }));
 

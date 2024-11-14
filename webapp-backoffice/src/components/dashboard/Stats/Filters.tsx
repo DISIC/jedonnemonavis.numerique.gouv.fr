@@ -12,6 +12,16 @@ type FiltersProps = {
 	currentEndDate: string;
 };
 
+type FormErrors = {
+	startDate: boolean;
+	endDate: boolean;
+};
+
+const defaultErrors = {
+	startDate: false,
+	endDate: false
+};
+
 const dateShortcuts = [
 	{
 		label: '365 derniers jours',
@@ -37,6 +47,7 @@ const Filters = ({
 	const { classes, cx } = useStyles();
 
 	const [startDate, setStartDate] = useState<string>(currentStartDate);
+	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [endDate, setEndDate] = useState<string>(currentEndDate);
 	const [shortcutDateSelected, setShortcutDateSelected] = useState<
 		(typeof dateShortcuts)[number]['name'] | undefined
@@ -61,9 +72,30 @@ const Filters = ({
 		}
 	}, [shortcutDateSelected]);
 
+	const validateDateFormat = (date: string) => {
+		const regex = /^\d{4}-\d{2}-\d{2}$/;
+		return regex.test(date);
+	};
+
 	const submit = () => {
-		if (startDate !== currentStartDate || endDate !== currentEndDate)
-			onChange(startDate, endDate);
+		const startDateValid = validateDateFormat(startDate);
+		const endDateValid = validateDateFormat(endDate);
+		let newErrors = { startDate: false, endDate: false };
+
+		if (!startDateValid) {
+			newErrors.startDate = true;
+		}
+		if (!endDateValid) {
+			newErrors.endDate = true;
+		}
+
+		setErrors(newErrors);
+
+		if (startDateValid && endDateValid) {
+			if (startDate !== currentStartDate || endDate !== currentEndDate) {
+				onChange(startDate, endDate);
+			}
+		}
 	};
 
 	return (
@@ -99,6 +131,13 @@ const Filters = ({
 											: undefined
 									)}
 									htmlFor={`radio-${ds.name}`}
+									tabIndex={0}
+									onKeyDown={e => {
+										if (e.key === 'Enter' || e.key === ' ') {
+											setShortcutDateSelected(ds.name);
+											push(['trackEvent', 'Statistiques', 'Filtre-Date']);
+										}
+									}}
 								>
 									{ds.label}
 								</label>
@@ -126,6 +165,12 @@ const Filters = ({
 									setStartDate(e.target.value);
 								}
 							}}
+							state={errors.startDate ? 'error' : 'default'}
+							stateRelatedMessage={
+								errors.startDate ? (
+									<span role="alert">format attendu : JJ/MM/AAAA</span>
+								) : null
+							}
 						/>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-5')}>
@@ -139,6 +184,12 @@ const Filters = ({
 									setEndDate(e.target.value);
 								}
 							}}
+							state={errors.endDate ? 'error' : 'default'}
+							stateRelatedMessage={
+								errors.endDate ? (
+									<span role="alert">format attendu : JJ/MM/AAAA</span>
+								) : null
+							}
 						/>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-2')}>
@@ -147,7 +198,11 @@ const Filters = ({
 								type="submit"
 								iconId="ri-search-2-line"
 								title="Appliquer le changement de dates"
-							/>
+							>
+								<span className={fr.cx('fr-sr-only')}>
+									Appliquer le changement de dates
+								</span>
+							</Button>
 						</div>
 					</div>
 				</form>
@@ -196,7 +251,11 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.hover
 	},
 	applyContainer: {
-		paddingTop: fr.spacing('8v')
+		paddingTop: fr.spacing('8v'),
+		".fr-btn--icon-left[class*=' ri-']::before": {
+			'--icon-size': '1.5rem',
+			marginRight: 0
+		}
 	},
 	formContainer: {
 		marginLeft: '-0.4rem',

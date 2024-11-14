@@ -37,7 +37,7 @@ const LegalNotice = () => {
 						</h1>
 						{Object.keys(LN).map(key => (
 							<div key={key} className={cx(classes.blockWrapper)}>
-								<h2>{LN[key].title}</h2>
+								{LN[key].title !== 'En savoir plus' && <h2>{LN[key].title}</h2>}
 								{LN[key].content.map((line, index) => {
 									const isLink =
 										typeof line === 'object' && line.type === 'link';
