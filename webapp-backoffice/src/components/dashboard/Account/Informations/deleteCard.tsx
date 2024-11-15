@@ -12,6 +12,7 @@ import { Controller, useForm } from 'react-hook-form';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { router } from '@/src/server/trpc';
 import { useRouter } from 'next/router';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	user: User;
@@ -45,6 +46,7 @@ const DeleteCard = (props: Props) => {
 
 	const handleDeletion = () => {
 		onConfirmModal.open();
+		push(['trackEvent', 'BO - Account', `Open-Modal-Delete-Account`]);
 	};
 
 	const {
@@ -81,6 +83,7 @@ const DeleteCard = (props: Props) => {
 				handleOnConfirm={() => {
 					if (validateDelete) {
 						deleteUser.mutate({ id: user?.id as number });
+						push(['trackEvent', 'BO - Account', `Validate-Delete-Account`]);
 						onConfirmModal.close();
 					}
 				}}

@@ -4,6 +4,7 @@ import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	title: string;
@@ -61,6 +62,11 @@ const AccessCard = (props: Props) => {
 									action(
 										`L'accès ${link ? 'au service' : "à l'organisation"} ${title} a bien été retiré.`
 									);
+									push([
+										'trackEvent',
+										'BO - Users',
+										`Access-${link ? 'Service' : 'Entity'}-Remove`
+									]);
 								}}
 								nativeButtonProps={{
 									'aria-label': `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`,

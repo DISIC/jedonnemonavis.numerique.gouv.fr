@@ -7,6 +7,7 @@ import { trpc } from '@/src/utils/trpc';
 import { useRouter } from 'next/router';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { Loader } from '../ui/Loader';
+import { push } from '@socialgouv/matomo-next';
 
 type Props = {
 	userInfos: UserInfos;
@@ -58,6 +59,7 @@ export const RegisterNotWhiteListed = (props: Props) => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
+					push(['trackEvent', 'BO - Auth', 'Register-Not Whitelisted']);
 					validateRequest();
 				}}
 			>

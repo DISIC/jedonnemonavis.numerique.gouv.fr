@@ -12,6 +12,7 @@ import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Toast } from '@/src/components/ui/Toast';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	user: User;
@@ -286,6 +287,11 @@ const CredentialsCard = (props: Props) => {
 									priority="secondary"
 									onClick={() => {
 										onConfirmModal.open();
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Credentials-Modal-Open`
+										]);
 									}}
 								>
 									Réinitialiser le mot de passe

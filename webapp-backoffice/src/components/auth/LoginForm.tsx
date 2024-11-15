@@ -13,6 +13,7 @@ import { Loader } from '../ui/Loader';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Toast } from '@/src/components/ui/Toast';
+import { push } from '@socialgouv/matomo-next';
 
 type FormCredentials = {
 	email: string;
@@ -165,7 +166,15 @@ export const LoginForm = () => {
 				</p>
 				<div className={cx(classes.actionModal)}>
 					<Button
-						onClick={() => modal.close()}
+						onClick={() => {
+							modal.close();
+							push([
+								'trackEvent',
+								'BO - Auth',
+								'Send-Mail-Restore-Password',
+								0
+							]);
+						}}
 						priority="secondary"
 						type="button"
 					>
@@ -177,6 +186,12 @@ export const LoginForm = () => {
 								email: credentials.email
 							});
 							setDisplayToast(true);
+							push([
+								'trackEvent',
+								'BO - Auth',
+								'Send-Mail-Restore-Password',
+								1
+							]);
 							modal.close();
 						}}
 						priority="primary"
@@ -193,6 +208,7 @@ export const LoginForm = () => {
 					e.preventDefault();
 					if (showPassword) login();
 					else checkEmail();
+					push(['trackEvent', 'BO - Auth', 'Login']);
 				}}
 			>
 				<p className={cx(classes.instructionsText)}>
@@ -252,6 +268,12 @@ export const LoginForm = () => {
 						<Button
 							onClick={() => {
 								modal.open();
+								push([
+									'trackEvent',
+									'BO - Auth',
+									'Open-Modal-Restore-Password',
+									1
+								]);
 							}}
 							priority="tertiary no outline"
 							type="button"
@@ -275,6 +297,9 @@ export const LoginForm = () => {
 			<Link
 				className={cx(classes.button, fr.cx('fr-btn', 'fr-btn--secondary'))}
 				href="/register"
+				onClick={() => {
+					push(['trackEvent', 'BO - Login', 'Register']);
+				}}
 			>
 				Créer un compte
 			</Link>
