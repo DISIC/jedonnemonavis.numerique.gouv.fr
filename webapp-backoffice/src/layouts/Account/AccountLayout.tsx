@@ -44,17 +44,17 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						href: `/administration/dashboard/user/${session?.user.id}/infos`,
 						alt: 'Informations'
 					}
+				},
+				{
+					text: 'Notifications',
+					isActive:
+						router.pathname ===
+						`/administration/dashboard/user/[id]/notifications`,
+					linkProps: {
+						href: `/administration/dashboard/user/${session?.user.id}/notifications`,
+						alt: 'Notifications'
+					}
 				}
-				/*{
-			text: 'Notifications',
-			isActive:
-				router.pathname ===
-				`/administration/dashboard/user/[id]/notifications`,
-			linkProps: {
-				href: `/administration/dashboard/user/${session?.user.id}/notifications`,
-				alt: 'Notifications'
-			}
-		}*/
 			]
 		: [
 				{
