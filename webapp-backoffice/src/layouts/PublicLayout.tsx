@@ -12,6 +12,7 @@ import { tss } from 'tss-react/dsfr';
 import { Menu, MenuItem, Skeleton } from '@mui/material';
 import Button from '@codegouvfr/react-dsfr/Button';
 import router from 'next/router';
+import { push } from '@socialgouv/matomo-next';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -35,6 +36,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		event.preventDefault();
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'Account', 'Open-Menu']);
 	};
 	const handleClose = (
 		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
@@ -201,6 +203,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 									priority="tertiary"
 									onClick={() => {
 										signOut();
+										push(['trackEvent', 'Account', 'Disconnect']);
 									}}
 								>
 									Se déconnecter
@@ -359,7 +362,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
-					accessibility="partially compliant"
+					accessibility="non compliant"
 					accessibilityLinkProps={{
 						href: '/public/accessibility'
 					}}

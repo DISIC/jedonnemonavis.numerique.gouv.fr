@@ -16,6 +16,7 @@ import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
 import { trpc } from '@/src/utils/trpc';
 import { Prisma } from '@prisma/client';
 import { Loader } from '../ui/Loader';
+import { push } from '@socialgouv/matomo-next';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -276,6 +277,7 @@ export const RegisterForm = (props: Props) => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
+					push(['trackEvent', 'BO - Auth', 'Register-Whitelisted']);
 					register();
 				}}
 			>

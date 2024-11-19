@@ -5,6 +5,7 @@ import { Entity } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import { tss } from 'tss-react/dsfr';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { push } from '@socialgouv/matomo-next';
 
 type Props = {
 	entity: Entity;
@@ -56,6 +57,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										iconPosition="right"
 										className={classes.button}
 										onClick={() => {
+											push(['trackEvent', 'BO - Entities', `Handle-Admins`]);
 											onButtonClick({ type: 'rights', entity });
 										}}
 									>
@@ -71,6 +73,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										iconPosition="right"
 										className={classes.button}
 										onClick={() => {
+											push(['trackEvent', 'BO - Entities', `Handle-ApiKeys`]);
 											onButtonClick({ type: 'api', entity });
 										}}
 									>
@@ -85,6 +88,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										iconId="fr-icon-edit-line"
 										iconPosition="right"
 										onClick={() => {
+											push(['trackEvent', 'BO - Entities', `Handle-Edit`]);
 											onButtonClick({ type: 'edit', entity });
 										}}
 										className={classes.button}
@@ -100,6 +104,11 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 									size="small"
 									className={classes.button}
 									onClick={() => {
+										push([
+											'trackEvent',
+											'BO - Entities',
+											`Handle-Become-Admin`
+										]);
 										onButtonClick({ type: 'rights', entity });
 									}}
 								>

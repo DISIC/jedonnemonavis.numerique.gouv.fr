@@ -4,6 +4,7 @@ import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -57,12 +58,13 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 								iconId="fr-icon-close-line"
 								iconPosition="right"
 								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
-								onClick={() =>
+								onClick={() => {
 									setCurrentUserRequest({
 										...userRequest,
 										type: 'refused-on-confirm'
-									})
-								}
+									});
+									push(['trackEvent', 'Users - Requests', 'Reject']);
+								}}
 							>
 								Rejeter
 							</Button>
@@ -72,12 +74,13 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 								iconId="fr-icon-check-line"
 								iconPosition="right"
 								className={cx(fr.cx('fr-mr-5v'))}
-								onClick={() =>
+								onClick={() => {
 									setCurrentUserRequest({
 										...userRequest,
 										type: 'accept-on-confirm'
-									})
-								}
+									});
+									push(['trackEvent', 'Users - Requests', 'Accept']);
+								}}
 							>
 								Accepter
 							</Button>

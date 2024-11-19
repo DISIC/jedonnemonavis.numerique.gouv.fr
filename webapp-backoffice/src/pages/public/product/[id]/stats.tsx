@@ -23,6 +23,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product | null;
@@ -268,6 +269,7 @@ const ProductStatPage = (props: Props) => {
 				onSubmit={e => {
 					e.preventDefault();
 					submit();
+					push(['trackEvent', 'Product - Stats', 'Apply-Search']);
 				}}
 			>
 				<div className={fr.cx('fr-col-3')}>

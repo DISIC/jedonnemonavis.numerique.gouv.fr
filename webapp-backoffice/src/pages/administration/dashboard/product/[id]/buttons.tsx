@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -136,7 +137,10 @@ const ProductButtonsPage = (props: Props) => {
 							priority="secondary"
 							iconPosition="right"
 							iconId="ri-add-box-line"
-							onClick={() => handleModalOpening('create')}
+							onClick={() => {
+								handleModalOpening('create');
+								push(['trackEvent', 'Product', 'Modal-Create-button']);
+							}}
 						>
 							Créer un bouton
 						</Button>

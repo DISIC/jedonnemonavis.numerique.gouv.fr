@@ -3,6 +3,7 @@ import React, { ReactElement } from 'react';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	title: string;
@@ -50,7 +51,10 @@ const GenericCardInfos = (props: Props) => {
 							<Button
 								priority="secondary"
 								iconId="fr-icon-edit-line"
-								onClick={() => setModifying(true)}
+								onClick={() => {
+									setModifying(true);
+									push(['trackEvent', 'BO - Account', `Modify-${title}`]);
+								}}
 							>
 								Modifier
 							</Button>
@@ -59,7 +63,14 @@ const GenericCardInfos = (props: Props) => {
 							<>
 								<Button
 									priority="secondary"
-									onClick={() => setModifying(false)}
+									onClick={() => {
+										setModifying(false);
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Cancel-Changes-${title}`
+										]);
+									}}
 								>
 									Annuler
 								</Button>
@@ -69,6 +80,11 @@ const GenericCardInfos = (props: Props) => {
 									className={cx(fr.cx('fr-ml-4v'))}
 									onClick={async () => {
 										const isFormValid = await onSubmit?.();
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Validate-Changes-${title}`
+										]);
 										if (isFormValid) {
 											setModifying(false);
 										}

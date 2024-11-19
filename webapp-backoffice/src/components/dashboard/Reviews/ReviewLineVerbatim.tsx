@@ -13,6 +13,7 @@ import {
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
 import { trpc } from '@/src/utils/trpc';
+import { push } from '@socialgouv/matomo-next';
 
 const ReviewLineVerbatim = ({
 	review,
@@ -107,6 +108,7 @@ const ReviewLineVerbatim = ({
 						size="small"
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);
+							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 						}}
 						style={{
 							boxShadow: 'none',

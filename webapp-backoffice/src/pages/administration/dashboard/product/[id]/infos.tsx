@@ -15,6 +15,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -191,6 +192,7 @@ const ProductInformationPage = (props: Props) => {
 						className={classes.buttonError}
 						onClick={() => {
 							onConfirmModal.open();
+							push(['trackEvent', 'Product', 'Modal-Delete']);
 						}}
 					>
 						Supprimer ce service

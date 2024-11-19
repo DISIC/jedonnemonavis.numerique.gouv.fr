@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -49,6 +50,7 @@ const ProductEmptyState = (props: Props) => {
 						nativeButtonProps={{
 							onClick: () => {
 								onButtonClick();
+								push(['trackEvent', 'BO - EmptyState', `Add Product`]);
 							}
 						}}
 					>

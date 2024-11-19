@@ -26,6 +26,7 @@ import { Toast } from '../../ui/Toast';
 import Image from 'next/image';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
+import { push } from '@socialgouv/matomo-next';
 
 interface Indicator {
 	title: string;
@@ -90,6 +91,7 @@ const ProductCard = ({
 		event.preventDefault();
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Product', `Open-Menu`]);
 	};
 
 	const {
@@ -443,6 +445,7 @@ const ProductCard = ({
 									onClick={e => {
 										e.preventDefault();
 										onConfirmModalRestore.open();
+										push(['trackEvent', 'BO - Product', `Restore`]);
 									}}
 								>
 									Restaurer
@@ -512,11 +515,17 @@ const ProductCard = ({
 														product_id: product.id,
 														user_id: userId
 													});
+													push(['trackEvent', 'BO - Product', `Set-Favorite`]);
 												} else {
 													createFavorite.mutate({
 														product_id: product.id,
 														user_id: userId
 													});
+													push([
+														'trackEvent',
+														'BO - Product',
+														`Unset-Favorite`
+													]);
 												}
 											}}
 										>

@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -68,6 +69,7 @@ const NoReviewPanel = (props: Props) => {
 							onClick: event => {
 								event.preventDefault();
 								sendInvitationBtnClick();
+								push(['trackEvent', 'BO - EmptyState', `Send-Invite`]);
 							}
 						}}
 					>

@@ -70,7 +70,7 @@ const ReviewFiltersModal = (props: Props) => {
 									? tmpFilters.satisfaction.filter(item => item !== intention)
 									: [...tmpFilters.satisfaction, intention]
 							});
-							push(['trackEvent', 'Avis', 'Filtre-Satisfaction']);
+							push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
 						}}
 						priority="tertiary"
 						className={cx(
@@ -183,6 +183,7 @@ const ReviewFiltersModal = (props: Props) => {
 							onClick={() => {
 								setTmpFilters(filters);
 								modal.close();
+								push(['trackEvent', 'Product - Avis', 'Cancel-Filters']);
 							}}
 						>
 							Annuler
@@ -195,7 +196,7 @@ const ReviewFiltersModal = (props: Props) => {
 							iconId="fr-icon-edit-line"
 							iconPosition="right"
 							type="button"
-							onClick={() =>
+							onClick={() => {
 								setTmpFilters({
 									satisfaction: [],
 									comprehension: [],
@@ -203,8 +204,9 @@ const ReviewFiltersModal = (props: Props) => {
 									needOtherDifficulties: false,
 									needOtherHelp: false,
 									help: []
-								})
-							}
+								});
+								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
+							}}
 						>
 							Réinitialiser
 						</Button>
@@ -215,7 +217,10 @@ const ReviewFiltersModal = (props: Props) => {
 								priority="primary"
 								className={fr.cx('fr-mt-1w')}
 								type="button"
-								onClick={() => submitFilters(tmpFilters)}
+								onClick={() => {
+									submitFilters(tmpFilters);
+									push(['trackEvent', 'Product - Avis', 'Apply-Filters']);
+								}}
 							>
 								Appliquer les filtres
 							</Button>

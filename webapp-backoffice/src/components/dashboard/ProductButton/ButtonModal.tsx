@@ -10,6 +10,7 @@ import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import Image from 'next/image';
 import { trpc } from '@/src/utils/trpc';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -213,6 +214,7 @@ const ButtonModal = (props: Props) => {
 							onClick={() => {
 								navigator.clipboard.writeText(buttonCode);
 								modal.close();
+								push(['trackEvent', 'BO - Product', `Copy-Code`]);
 							}}
 						>
 							Copier le code

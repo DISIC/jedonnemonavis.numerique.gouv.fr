@@ -7,6 +7,7 @@ import type { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended'
 import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
 import { AdminEntityRightActionType } from './EntityRightsModal';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
@@ -24,6 +25,7 @@ const EntityRightCard = (props: Props) => {
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Entities', `Open-Options`]);
 	};
 	const handleClose = () => {
 		setAnchorEl(null);
@@ -81,6 +83,7 @@ const EntityRightCard = (props: Props) => {
 									onClick={() => {
 										if (onButtonClick)
 											onButtonClick('remove', adminEntityRight);
+										push(['trackEvent', 'BO - Entities', `Remove-Access`]);
 										handleClose();
 									}}
 									disabled={

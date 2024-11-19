@@ -5,6 +5,7 @@ import {
 	PasswordInputProps
 } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import { ReactNode, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -30,7 +31,7 @@ export const OTPForm = (props: Props) => {
 
 	const [otp, setOtp] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
-	const [resend, setResend] = useState<boolean>(false)
+	const [resend, setResend] = useState<boolean>(false);
 
 	const { classes, cx } = useStyles({ errors });
 
@@ -58,10 +59,8 @@ export const OTPForm = (props: Props) => {
 	});
 
 	const checkMail = trpc.user.checkEmail.useMutation({
-		onSuccess: () => {
-
-		}
-	})
+		onSuccess: () => {}
+	});
 
 	const getPasswordInputMessages = (): {
 		severity: PasswordInputProps.Severity;
@@ -91,6 +90,7 @@ export const OTPForm = (props: Props) => {
 			<form
 				onSubmit={e => {
 					e.preventDefault();
+					push(['trackEvent', 'BO - Auth', 'OTP-Validate']);
 					checkOTP.mutate({
 						email,
 						otp
@@ -116,14 +116,15 @@ export const OTPForm = (props: Props) => {
 					<br />
 					<Button
 						onClick={async () => {
-							checkMail.mutate({email: (router.query.email || '') as string});
-							setResend(true)
+							checkMail.mutate({ email: (router.query.email || '') as string });
+							push(['trackEvent', 'BO - Auth', 'OTP-Resend-Mail']);
+							setResend(true);
 						}}
 						priority="tertiary no outline"
 						type="button"
 						className={fr.cx('fr-p-0')}
 						disabled={resend}
-						>
+					>
 						vous pouvez le renvoyer en cliquant ici
 					</Button>
 					.

@@ -11,6 +11,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Loader } from '../ui/Loader';
+import { push } from '@socialgouv/matomo-next';
 
 type FormErrors = {
 	password: { required: boolean; format: boolean };
@@ -136,6 +137,7 @@ export const ResetForm = () => {
 					<form
 						onSubmit={e => {
 							e.preventDefault();
+							push(['trackEvent', 'BO - Auth', 'Reset-Password-Validate']);
 							sendNewPassword();
 						}}
 					>
