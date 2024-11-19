@@ -14,6 +14,7 @@ import { Loader } from '../../ui/Loader';
 import EntityCard from './EntityCard';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Link from 'next/link';
+import { push } from '@socialgouv/matomo-next';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -104,6 +105,7 @@ const EntitySearchModal = (props: Props) => {
 		setsHasSubmitedOnce(true);
 		setSubmitedSearch(search);
 		entitiesSearchRefetch();
+		push(['trackEvent', 'BO - Entities', `Search`]);
 	};
 
 	useEffect(() => {

@@ -19,6 +19,7 @@ import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
 import { Entity } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import React from 'react';
@@ -353,6 +354,7 @@ const DashBoard = () => {
 													.replace(/[^\w\sÀ-ÿ'"]/gi, '')
 													.trim()
 											});
+											push(['trackEvent', 'Product', 'Search']);
 										}}
 									>
 										<div role="search" className={fr.cx('fr-search-bar')}>

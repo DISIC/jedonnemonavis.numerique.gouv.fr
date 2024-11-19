@@ -18,6 +18,7 @@ import Head from 'next/head';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import { push } from '@socialgouv/matomo-next';
 
 export type OnButtonClickEntityParams =
 	| { type: 'rights'; entity?: Entity }
@@ -134,6 +135,7 @@ const DashBoardEntities = () => {
 		setTimeout(() => {
 			entityModal.open();
 		}, 100);
+		push(['trackEvent', 'Oganisations', 'Modal-Create']);
 	};
 
 	const handleSubmit = (newEntity?: Entity) => {
@@ -232,6 +234,7 @@ const DashBoardEntities = () => {
 								type="button"
 								onClick={() => {
 									entitySearchModal.open();
+									push(['trackEvent', 'Oganisations', 'Admin-Search']);
 								}}
 							>
 								Administrer une autre organisation
@@ -274,6 +277,7 @@ const DashBoardEntities = () => {
 										e.preventDefault();
 										setValidatedSearch(search);
 										setCurrentPage(1);
+										push(['trackEvent', 'Oganisations', 'Search']);
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>
@@ -321,6 +325,7 @@ const DashBoardEntities = () => {
 								onClick={() => {
 									setIsMine(true);
 									setCurrentPage(1);
+									push(['trackEvent', 'Oganisations', 'Filter-Mine']);
 								}}
 							>
 								Mes organisations
@@ -331,6 +336,7 @@ const DashBoardEntities = () => {
 								onClick={() => {
 									setIsMine(false);
 									setCurrentPage(1);
+									push(['trackEvent', 'Oganisations', 'Filter-All']);
 								}}
 							>
 								Toutes les organisations

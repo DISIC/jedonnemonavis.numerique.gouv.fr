@@ -439,6 +439,7 @@ const ProductReviewsPage = (props: Props) => {
 									onSubmit={e => {
 										e.preventDefault();
 										submit();
+										push(['trackEvent', 'Product - Reviews', 'Search']);
 									}}
 								>
 									<div role="search" className={fr.cx('fr-search-bar')}>
@@ -499,7 +500,11 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('reviews');
 												setCurrentPage(1);
-												push(['trackEvent', 'Avis', 'Filtre-Vue-Avis']);
+												push([
+													'trackEvent',
+													'Product - Reviews',
+													'Filtre-Vue-Avis'
+												]);
 											}}
 										>
 											Avis
@@ -516,7 +521,11 @@ const ProductReviewsPage = (props: Props) => {
 											onClick={() => {
 												setDisplayMode('verbatim');
 												setCurrentPage(1);
-												push(['trackEvent', 'Avis', 'Filtre-Vue-Verbatim']);
+												push([
+													'trackEvent',
+													'Product - Reviews',
+													'Filtre-Vue-Verbatim'
+												]);
 											}}
 										>
 											Verbatims

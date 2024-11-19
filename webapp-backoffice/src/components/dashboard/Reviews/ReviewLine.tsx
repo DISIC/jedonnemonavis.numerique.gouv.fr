@@ -13,6 +13,7 @@ import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 import Image from 'next/image';
+import { push } from '@socialgouv/matomo-next';
 
 const ReviewLine = ({
 	review,
@@ -138,6 +139,7 @@ const ReviewLine = ({
 					size="small"
 					onClick={() => {
 						setDisplayMoreInfo(!displayMoreInfo);
+						push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 					}}
 				>
 					{' '}

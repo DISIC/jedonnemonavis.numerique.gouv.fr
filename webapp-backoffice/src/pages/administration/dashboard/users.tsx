@@ -16,6 +16,7 @@ import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete, useForkRef } from '@mui/material';
 import { User } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -284,6 +285,7 @@ const DashBoardUsers = () => {
 								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
 								onClick={() => {
 									onConfirmModal.open();
+									push(['trackEvent', 'Users', 'Delete-All']);
 								}}
 							>
 								Supprimer tous
@@ -294,7 +296,10 @@ const DashBoardUsers = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							onClick={() => handleModalOpening({ type: 'create' })}
+							onClick={() => {
+								handleModalOpening({ type: 'create' });
+								push(['trackEvent', 'Users', 'Modal-New-User']);
+							}}
 							nativeButtonProps={{
 								'aria-label': 'Ajouter un nouvel utilisateur',
 								title: 'Ajouter un nouvel utilisateur'
@@ -387,6 +392,7 @@ const DashBoardUsers = () => {
 										currentPage: 1
 									}
 								});
+								push(['trackEvent', 'Users', 'Search']);
 							}}
 						>
 							<div role="search" className={fr.cx('fr-search-bar')}>

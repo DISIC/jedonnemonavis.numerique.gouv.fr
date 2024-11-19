@@ -16,6 +16,7 @@ import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
 import { v4 as uuidv4 } from "uuid";
+import { push } from "@socialgouv/matomo-next";
 
 type JDMAFormProps = {
   product: Product;
@@ -352,6 +353,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               <p>{t("success_block.share")}</p>
               <Link
                 className={fr.cx("fr-link")}
+                onClick={() => {
+                  push([
+                    "trackEvent",
+                    "Form - Sucess",
+                    "Click-Share-Service-Public",
+                  ]);
+                }}
                 href={
                   "https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2"
                 }

@@ -23,6 +23,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
 import { useSession } from 'next-auth/react';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -232,7 +233,10 @@ const AccessManagement = (props: Props) => {
 							priority="secondary"
 							iconPosition="right"
 							iconId="ri-user-add-line"
-							onClick={() => handleModalOpening('add')}
+							onClick={() => {
+								handleModalOpening('add');
+								push(['trackEvent', 'Product', 'Modal-Admin']);
+							}}
 						>
 							Inviter des administrateurs
 						</Button>

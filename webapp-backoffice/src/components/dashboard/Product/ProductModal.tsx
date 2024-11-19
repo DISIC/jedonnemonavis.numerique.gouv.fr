@@ -24,6 +24,7 @@ import {
 } from '@/src/utils/tools';
 import { on } from 'events';
 import { Icon } from '@mui/material';
+import { push } from '@socialgouv/matomo-next';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -181,6 +182,7 @@ const ProductModal = (props: Props) => {
 				previousInputRef.focus();
 			}
 		}
+		push(['trackEvent', 'BO - Product', `Remove-URL`]);
 	};
 
 	const handleAppendUrl = () => {
@@ -194,6 +196,7 @@ const ProductModal = (props: Props) => {
 				newInputRef.focus();
 			}
 		}, 100);
+		push(['trackEvent', 'BO - Product', `Add-URL`]);
 	};
 
 	useEffect(() => {

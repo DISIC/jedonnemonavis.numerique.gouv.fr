@@ -7,6 +7,7 @@ import { trpc } from '@/src/utils/trpc';
 import { Toast } from '@/src/components/ui/Toast';
 import { Loader } from '@/src/components/ui/Loader';
 import { transformDateToFrenchReadable } from '@/src/utils/tools';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product?: Product;
@@ -46,10 +47,12 @@ const ApiKeyHandler = (props: Props) => {
 			...(product && { product_id: product.id }),
 			...(entity && { entity_id: entity.id })
 		});
+		push(['trackEvent', 'BO - ApiKey', `Create-Key`]);
 		RefectchKeys();
 	};
 
 	const handleDeleteKey = async (key: string) => {
+		push(['trackEvent', 'BO - ApiKey', `Delete-Key`]);
 		if (confirm(`Êtes vous sûr de vouloir supprimer la clé « ${key} » ?`)) {
 			await deleteKey.mutateAsync({ key: key });
 			RefectchKeys();
@@ -161,6 +164,7 @@ const ApiKeyHandler = (props: Props) => {
 										iconPosition="right"
 										title={`Copier la clé API « ${item.key} » dans le presse-papier`}
 										onClick={async () => {
+											push(['trackEvent', 'BO - ApiKey', `Copy-Clipboard`]);
 											if ('clipboard' in navigator) {
 												try {
 													await navigator.clipboard.writeText(item.key);

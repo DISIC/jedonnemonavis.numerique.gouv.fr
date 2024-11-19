@@ -11,6 +11,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { WhiteListedDomain } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
 import React from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
@@ -171,7 +172,13 @@ const DashBoardDomainDomains = () => {
 					)}
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-5')}>
-						<form className={classes.formAdd} onSubmit={handleSubmit(onSubmit)}>
+						<form
+							className={classes.formAdd}
+							onSubmit={() => {
+								handleSubmit(onSubmit);
+								push(['trackEvent', 'Domains', 'Add']);
+							}}
+						>
 							<Controller
 								control={control}
 								name="domain"
@@ -217,6 +224,7 @@ const DashBoardDomainDomains = () => {
 								e.preventDefault();
 								setValidatedSearch(search);
 								setCurrentPage(1);
+								push(['trackEvent', 'Domains', 'Search']);
 							}}
 						>
 							<div

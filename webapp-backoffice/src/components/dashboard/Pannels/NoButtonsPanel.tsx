@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -75,6 +76,7 @@ const NoButtonsPanel = (props: Props) => {
 				nativeButtonProps={{
 					onClick: event => {
 						event.preventDefault();
+						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
 						onButtonClick();
 					}
 				}}
