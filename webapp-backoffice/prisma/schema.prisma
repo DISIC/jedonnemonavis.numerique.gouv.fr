@@ -87,6 +87,33 @@ enum Typebloc {
   logic
 }
 
+enum TypeAction {
+  services_list_view
+  service_create
+  service_update
+  service_archive
+  service_restore
+  service_invite
+  service_info_view
+  service_stats_view
+  service_reviews_view
+  service_reviews_report_view
+  service_review_verbatim_view
+  service_buttons_list_view
+  service_button_create
+  service_apikeys_list_view
+  service_apikeys_create
+  organisations_list_view
+  organisation_create
+  organisation_update
+  organisation_invite
+  organisation_apikeys_list_view
+  organisation_apikeys_create
+  user_signin
+  user_signout
+  api_call
+}
+
 // Next auth
 model User {
   id                   Int                   @id @default(autoincrement())
@@ -110,9 +137,27 @@ model User {
   exports              Export[]
   forms                Form[]
   reviewViewLogs       ReviewViewLog[]
+  UserEvent            UserEvent[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model UserEvent {
+  id         Int        @id @default(autoincrement())
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int        @unique
+  action     TypeAction
+  metadata   Json
+  product    Product?   @relation(fields: [productId], references: [id])
+  entity     Entity?    @relation(fields: [entityId], references: [id])
+  apiKey     ApiKey?    @relation(fields: [apiKeyId], references: [id])
+  productId  Int?
+  entityId   Int?
+  apiKeyId   Int?
+  created_at DateTime   @default(now())
+
+  @@index([user_id, action])
 }
 
 model UserRequest {
@@ -181,6 +226,7 @@ model Entity {
   created_at        DateTime           @default(now())
   updated_at        DateTime           @updatedAt
   api_keys          ApiKey[]
+  UserEvent         UserEvent[]
 }
 
 model Button {
@@ -209,6 +255,7 @@ model ApiKey {
   entity       Entity?     @relation(fields: [entity_id], references: [id], onDelete: Cascade)
   entity_id    Int?
   api_key_logs ApiKeyLog[]
+  UserEvent    UserEvent[]
 }
 
 model ApiKeyLog {
@@ -240,6 +287,7 @@ model Product {
   hasBeenTop250   Boolean?
   api_keys        ApiKey[]
   Export          Export[]
+  UserEvent       UserEvent[]
 }
 
 model AdminEntityRight {
@@ -310,11 +358,11 @@ model Review {
 }
 
 model ReviewViewLog {
-  id         Int      @id @default(autoincrement())
-  user       User     @relation(fields: [user_id], references: [id])
-  user_id    Int
-  review     Review   @relation(fields: [review_id, review_created_at], references: [id, created_at])
-  review_id  Int
+  id                Int      @id @default(autoincrement())
+  user              User     @relation(fields: [user_id], references: [id])
+  user_id           Int
+  review            Review   @relation(fields: [review_id, review_created_at], references: [id, created_at])
+  review_id         Int
   review_created_at DateTime
 
   created_at DateTime @default(now())

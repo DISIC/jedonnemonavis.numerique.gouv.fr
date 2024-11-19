@@ -74,6 +74,7 @@ export const productRouter = router({
 		}),
 
 	getList: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),

@@ -1,5 +1,5 @@
 import { Client as ElkClient } from '@elastic/elasticsearch';
-import { ApiKey } from '@prisma/client';
+import { ApiKey, TypeAction } from '@prisma/client';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import fs from 'fs';
@@ -11,11 +11,14 @@ import { ZodError } from 'zod';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
 import prisma from '../utils/db';
+import { actionMapping } from '../utils/tools';
 
 // Metadata for protected procedures
 interface Meta {
 	authRequired?: boolean;
 	isAdmin?: boolean;
+	logEvent?: boolean;
+	eventType?: string;
 }
 
 // Create context with Prisma and NextAuth session
@@ -111,6 +114,14 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 				message: 'You are not authorized to perform this action'
 			});
 		}
+	}
+
+	if(meta?.logEvent) {
+
+		console.log('test : ', ctx.req.query)
+		
+		(ctx.req.query.trpc as string)?.split(',')
+		const action = actionMapping[''];
 	}
 
 	return next({
