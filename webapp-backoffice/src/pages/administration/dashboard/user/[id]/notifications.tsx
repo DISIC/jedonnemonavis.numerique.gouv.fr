@@ -45,7 +45,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 	const handleNotificationsChange = async (
 		notifications: boolean,
 		notificationsFrequency: NotificationFrequency
-	) => {
+	): Promise<void> => {
 		await updateUser({
 			id: userId,
 			user: {
@@ -61,7 +61,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 			{!user ||
 				isLoadingUser ||
 				(isRefetchingUser && (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+					<div className={classes.loaderWrapper}>
 						<Loader />
 					</div>
 				))}
@@ -140,6 +140,12 @@ const NotificationsAccount: React.FC<Props> = props => {
 };
 
 const useStyles = tss.withName(NotificationsAccount.name).create({
+	loaderWrapper: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		minHeight: '100vh'
+	},
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
