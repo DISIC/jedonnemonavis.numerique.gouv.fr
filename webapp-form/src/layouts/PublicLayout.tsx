@@ -103,7 +103,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       </main>
       <Footer
         id="footer"
-        accessibility="partially compliant"
+        accessibility="non compliant"
         accessibilityLinkProps={{
           href: "/accessibility",
         }}
