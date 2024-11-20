@@ -94,6 +94,7 @@ enum TypeAction {
   service_archive
   service_restore
   service_invite
+  service_uninvite
   service_info_view
   service_stats_view
   service_reviews_view
@@ -107,6 +108,7 @@ enum TypeAction {
   organisation_create
   organisation_update
   organisation_invite
+  organisation_uninvite
   organisation_apikeys_list_view
   organisation_apikeys_create
   user_signin
@@ -146,15 +148,15 @@ model User {
 model UserEvent {
   id         Int        @id @default(autoincrement())
   user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id    Int        @unique
+  user_id    Int
   action     TypeAction
   metadata   Json
-  product    Product?   @relation(fields: [productId], references: [id])
-  entity     Entity?    @relation(fields: [entityId], references: [id])
-  apiKey     ApiKey?    @relation(fields: [apiKeyId], references: [id])
-  productId  Int?
-  entityId   Int?
-  apiKeyId   Int?
+  product    Product?   @relation(fields: [product_id], references: [id])
+  entity     Entity?    @relation(fields: [entity_id], references: [id])
+  apiKey     ApiKey?    @relation(fields: [apiKey_id], references: [id])
+  product_id Int?
+  entity_id  Int?
+  apiKey_id  Int?
   created_at DateTime   @default(now())
 
   @@index([user_id, action])

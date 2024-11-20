@@ -84,6 +84,7 @@ export const accessRightRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				user_email: z.string().email(),
@@ -224,6 +225,7 @@ export const accessRightRouter = router({
 		}),
 
 	update: protectedProcedure
+		.meta({ logEvent: true })
 		.input(AccessRightUncheckedUpdateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const { id, ...data } = input;
@@ -239,6 +241,7 @@ export const accessRightRouter = router({
 		}),
 
 	delete: protectedProcedure
+		.meta({ logEvent: true })
 		.input(z.object({ access_right_id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { access_right_id } = input;

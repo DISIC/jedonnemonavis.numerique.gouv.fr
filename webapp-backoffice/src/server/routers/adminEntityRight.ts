@@ -84,6 +84,7 @@ export const adminEntityRightRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				user_email: z.string().email(),
@@ -229,6 +230,7 @@ export const adminEntityRightRouter = router({
 		}),
 
 	delete: protectedProcedure
+		.meta({ logEvent: true })
 		.input(z.object({ admin_entity_right_id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { admin_entity_right_id } = input;

@@ -350,14 +350,16 @@ export const getKeysFromArrayOfObjects = (arrayOfObjects: any[]): string[] => {
 };
 
 export const actionMapping: Record<string, TypeAction> = {
-	'service.list': TypeAction.services_list_view,
-	'service.create': TypeAction.service_create,
-	'service.update': TypeAction.service_update,
-	'service.archive': TypeAction.service_archive,
-	'service.restore': TypeAction.service_restore,
-	'organisation.list': TypeAction.organisations_list_view,
-	'organisation.create': TypeAction.organisation_create,
-	'user.signin': TypeAction.user_signin,
-	'user.signout': TypeAction.user_signout,
-	'api.call': TypeAction.api_call,
+	'product.getList': TypeAction.services_list_view,
+	'product.create': TypeAction.service_create,
+	'product.update': TypeAction.service_update,
+	'accessRight.create': TypeAction.service_invite,
+	'accessRight.update': TypeAction.service_uninvite,
+	'product.archive': TypeAction.service_archive,
+	'product.restore': TypeAction.service_restore,
+	'entity.getList': TypeAction.organisations_list_view,
+	'entity.create': TypeAction.organisation_create,
+	'entity.update': TypeAction.organisation_update,
+	'adminEntityRight.create': TypeAction.organisation_invite,
+	'adminEntityRight.delete': TypeAction.organisation_uninvite,
   };
