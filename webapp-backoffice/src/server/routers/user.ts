@@ -14,6 +14,7 @@ import {
 } from '@/src/utils/tools';
 import { sendMail } from '@/src/utils/mailer';
 import {
+	getEmailNotificationsHtml,
 	getOTPEmailHtml,
 	getRegisterEmailHtml,
 	getResetPasswordEmailHtml
@@ -157,7 +158,7 @@ export async function checkUserDomain(prisma: PrismaClient, email: string) {
 	const domainWhiteListed = await prisma.whiteListedDomain.findFirst({
 		where: { domain }
 	});
-	return !!domainWhiteListed || domain.endsWith(".gouv.fr");;
+	return !!domainWhiteListed || domain.endsWith('.gouv.fr');
 }
 
 export const userRouter = router({
@@ -215,7 +216,7 @@ export const userRouter = router({
 				} else {
 					where.OR = [
 						{
-							firstName: { contains: search, mode: 'insensitive' },
+							firstName: { contains: search, mode: 'insensitive' }
 						},
 						{
 							lastName: { contains: search, mode: 'insensitive' }
@@ -255,7 +256,7 @@ export const userRouter = router({
 			if (onlyAdmins) {
 				where.role = {
 					in: ['admin', 'superadmin']
-				}
+				};
 			}
 
 			if (sort) {
@@ -376,47 +377,67 @@ export const userRouter = router({
 		.meta({ isAdminOrOwn: true })
 		.input(z.object({ id: z.number(), user: UserUncheckedUpdateInputSchema }))
 		.mutation(async ({ ctx, input }) => {
-		  
-		  	const { id, user } = input;
-		  	const { role, ...userWithoutRole } = user;
+			const { id, user } = input;
+			const { role, ...userWithoutRole } = user;
 
-			console.log('user : ', user)
-	  
-		  	const dataToUpdate = ctx.session?.user?.role.includes('admin')
+			console.log('user : ', user);
+
+			const dataToUpdate = ctx.session?.user?.role.includes('admin')
 				? { ...userWithoutRole, role }
 				: { ...userWithoutRole };
 
-			if(dataToUpdate.email) {
+			if (dataToUpdate.email) {
 				const userHasConflict = await ctx.prisma.user.findUnique({
 					where: {
-						email: (dataToUpdate.email as string || '').toLowerCase()
+						email: ((dataToUpdate.email as string) || '').toLowerCase()
 					}
 				});
-	
+
 				if (userHasConflict)
 					throw new TRPCError({
 						code: 'CONFLICT',
 						message: 'User already exists'
 					});
-	
+
 				const isWhiteListed = await checkUserDomain(
 					ctx.prisma,
-					(dataToUpdate.email as string || '').toLowerCase()
+					((dataToUpdate.email as string) || '').toLowerCase()
 				);
-	
+
 				if (!isWhiteListed)
 					throw new TRPCError({
 						code: 'UNAUTHORIZED',
 						message: 'User email domain not whitelisted'
 					});
 			}
-	  
-		  const updatedUser = await ctx.prisma.user.update({
+
+			const email = getEmailNotificationsHtml(ctx.session?.user, 'daily', 213, [
+				{
+					title: "Demande de correction d'état civil auprès de l'insee",
+					id: 1,
+					nbReviews: 234233
+				},
+				{
+					title:
+						'Portail de réponse à certaines enquêtes auprès des entreprises (principalement les enquêtes de conjoncture) (CRPI)',
+					id: 2,
+					nbReviews: 12456
+				}
+			]);
+
+			sendMail(
+				'Notifications JDMA',
+				'brian@numericite.eu',
+				email,
+				'test notif'
+			);
+
+			const updatedUser = await ctx.prisma.user.update({
 				where: { id },
-				data: dataToUpdate,
-		  });
-	  
-		  return { data: updatedUser };
+				data: dataToUpdate
+			});
+
+			return { data: updatedUser };
 		}),
 
 	delete: protectedProcedure
@@ -439,7 +460,7 @@ export const userRouter = router({
 			const { ids } = input;
 
 			const deletedUser = await ctx.prisma.user.deleteMany({
-				where: { id: {in: ids} }
+				where: { id: { in: ids } }
 			});
 
 			return { data: deletedUser };
