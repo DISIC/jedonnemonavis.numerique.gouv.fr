@@ -411,6 +411,7 @@ export const userRouter = router({
 					});
 			}
 
+			// To remove after setting up the python backend
 			const email = getEmailNotificationsHtml(ctx.session?.user, 'daily', 213, [
 				{
 					title: "Demande de correction d'état civil auprès de l'insee",
