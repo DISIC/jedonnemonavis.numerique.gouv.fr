@@ -127,7 +127,8 @@ const ProductReviewsPage = (props: Props) => {
 			end_date: debouncedEndDate,
 			sort: sort,
 			button_id: buttonId,
-			filters: filters
+			filters: filters,
+			needLogging: true
 		},
 		{
 			initialData: {

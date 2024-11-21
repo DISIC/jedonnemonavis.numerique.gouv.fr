@@ -187,6 +187,7 @@ const ProductCard = ({
 		});
 
 	const nbReviews = reviewsData?.metadata.countAll;
+	const nbNewReviews = reviewsData?.metadata.countNew;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -613,6 +614,20 @@ const ProductCard = ({
 														className={fr.cx('fr-label--info', 'fr-text--bold')}
 													>
 														{formatNumberWithSpaces(nbReviews)}
+														{nbNewReviews && nbNewReviews > 0 && (
+															<>
+																<span className={fr.cx('fr-mr-5v')}>
+																	{` (+${nbNewReviews})`}
+																</span>
+																<Link
+																	href={`/administration/dashboard/product/${product.id}/reviews`}
+																	title={`Voir les nouveaux avis pour ${product.title}`}
+																	className={fr.cx('fr-link')}
+																>
+																	Voir les nouveaux avis
+																</Link>
+															</>
+														)}
 													</div>
 												</div>
 											)}

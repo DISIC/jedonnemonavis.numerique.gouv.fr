@@ -32,7 +32,8 @@ const ObservatoireStats = ({
 		{
 			product_id: productId.toString(),
 			start_date: startDate,
-			end_date: endDate
+			end_date: endDate,
+			needLogging: true
 		},
 		{
 			initialData: {

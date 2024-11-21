@@ -115,8 +115,8 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 			});
 		}
 	}
-	console.log('query : ', ctx.req.query)
-	console.log('body : ', ctx.req.body)
+	/*console.log('query : ', ctx.req.query)
+	console.log('body : ', ctx.req.body)*/
 
 	if (meta?.logEvent) {
 		try {
@@ -151,7 +151,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 					product_id = input.json.product.id;
 				}
 	
-				if (user) {
+				if (user && action) {
 					const log = await ctx.prisma.userEvent.create({
 						data: {
 							user_id: user.id,

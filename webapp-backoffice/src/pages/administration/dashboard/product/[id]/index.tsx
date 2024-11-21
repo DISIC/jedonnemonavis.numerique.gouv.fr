@@ -73,15 +73,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		}
 	});
 
-	const log = await prisma.userEvent.create({
-		data: {
-			user_id: currentUser.id,
-			action: 'service_info_view',
-			product_id: parseInt(id as string),
-			metadata: {}
-		}
-	});
-
 	prisma.$disconnect();
 
 	if (

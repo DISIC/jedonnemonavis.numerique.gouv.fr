@@ -99,6 +99,7 @@ enum TypeAction {
   service_stats_view
   service_reviews_view
   service_reviews_report_view
+  service_new_reviews_view
   service_review_verbatim_view
   service_buttons_list_view
   service_button_create

@@ -357,6 +357,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'accessRight.update': TypeAction.service_uninvite,
 	'product.archive': TypeAction.service_archive,
 	'product.restore': TypeAction.service_restore,
+	'review.getList': TypeAction.service_reviews_view,
+	'button.getList': TypeAction.service_buttons_list_view,
 	'entity.getList': TypeAction.organisations_list_view,
 	'entity.create': TypeAction.organisation_create,
 	'entity.update': TypeAction.organisation_update,
