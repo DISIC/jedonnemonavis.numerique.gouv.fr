@@ -29,6 +29,7 @@ import { useRouter } from 'next/router';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useDebounce } from 'usehooks-ts';
 import { push } from '@socialgouv/matomo-next';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 
 interface Props {
 	product: Product;
@@ -62,6 +63,7 @@ const ProductReviewsPage = (props: Props) => {
 	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
+	const [newReviews, setNewReviews] = React.useState(false);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
 	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
 		view === 'verbatim' ? 'verbatim' : 'reviews'
@@ -338,6 +340,8 @@ const ProductReviewsPage = (props: Props) => {
 				modal={filter_modal}
 				filters={filters}
 				submitFilters={handleSubmitfilters}
+				product_id={product.id}
+				setButtonId={setButtonId}
 			></ReviewFiltersModal>
 
 			<ProductLayout product={product}>
@@ -372,6 +376,68 @@ const ProductReviewsPage = (props: Props) => {
 					displayEmptyState()
 				) : (
 					<>
+						<div
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-mt-8v'
+							)}
+						>
+							<div
+								className={cx(
+									classes.filtersWrapper,
+									fr.cx('fr-col-12')
+								)}
+							>
+								<div className={cx(classes.filterView)}>
+									<label>Vue</label>
+									<div className={fr.cx('fr-mt-2v')}>
+										<Button
+											priority={
+												displayMode === 'reviews' ? 'primary' : 'secondary'
+											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOption
+													: classes.buttonOptionDisabled
+											}
+											onClick={() => {
+												setDisplayMode('reviews');
+												setCurrentPage(1);
+												push([
+													'trackEvent',
+													'Product - Reviews',
+													'Filtre-Vue-Avis'
+												]);
+											}}
+										>
+											Avis
+										</Button>
+										<Button
+											priority={
+												displayMode === 'reviews' ? 'secondary' : 'primary'
+											}
+											className={
+												displayMode === 'reviews'
+													? classes.buttonOptionDisabled
+													: classes.buttonOption
+											}
+											onClick={() => {
+												setDisplayMode('verbatim');
+												setCurrentPage(1);
+												push([
+													'trackEvent',
+													'Product - Reviews',
+													'Filtre-Vue-Verbatim'
+												]);
+											}}
+										>
+											Verbatims
+										</Button>
+									</div>
+								</div>
+							</div>
+						</div>
 						<div
 							className={fr.cx(
 								'fr-grid-row',
@@ -482,93 +548,32 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-6v'
 							)}
 						>
-							<div
-								className={cx(
+							<div className={cx(
 									classes.filtersWrapper,
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-6')
 								)}
 							>
-								<div className={cx(classes.filterView)}>
-									<label>Vue</label>
-									<div className={fr.cx('fr-mt-2v')}>
-										<Button
-											priority={
-												displayMode === 'reviews' ? 'primary' : 'secondary'
-											}
-											className={
-												displayMode === 'reviews'
-													? classes.buttonOption
-													: classes.buttonOptionDisabled
-											}
-											onClick={() => {
-												setDisplayMode('reviews');
-												setCurrentPage(1);
-												push([
-													'trackEvent',
-													'Product - Reviews',
-													'Filtre-Vue-Avis'
-												]);
-											}}
-										>
-											Avis
-										</Button>
-										<Button
-											priority={
-												displayMode === 'reviews' ? 'secondary' : 'primary'
-											}
-											className={
-												displayMode === 'reviews'
-													? classes.buttonOptionDisabled
-													: classes.buttonOption
-											}
-											onClick={() => {
-												setDisplayMode('verbatim');
-												setCurrentPage(1);
-												push([
-													'trackEvent',
-													'Product - Reviews',
-													'Filtre-Vue-Verbatim'
-												]);
-											}}
-										>
-											Verbatims
-										</Button>
-									</div>
-								</div>
-							</div>
-							<div
-								className={cx(
-									classes.filtersWrapper,
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
-								)}
-							>
-								<Select
-									label="Sélectionner une source"
-									nativeSelectProps={{
-										onChange: e => {
-											if (e.target.value !== 'undefined') {
-												setButtonId(parseInt(e.target.value));
-												push(['trackEvent', 'Avis', 'Filtre-Source']);
-											} else {
-												setButtonId(undefined);
+								<Checkbox
+									style={{ userSelect: 'none' }}
+									className={fr.cx('fr-mb-0')}
+									options={[
+										{
+											label: 'Afficher uniquement les nouveaux avis',
+											nativeInputProps: {
+												name: 'favorites-products',
+												checked: newReviews,
+												onChange: e => {
+													setNewReviews(e.target.checked);
+												}
 											}
 										}
-									}}
-								>
-									<option value="undefined">Toutes les sources</option>
-									{buttonResults?.data?.map(button => {
-										return (
-											<option key={button.id} value={button.id}>
-												{button.title}
-											</option>
-										);
-									})}
-								</Select>
+									]}
+								/>
 							</div>
 							<div
 								className={cx(
 									classes.filtersWrapper,
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3')
+									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-6')
 								)}
 							>
 								<div className={cx(classes.buttonContainer)}>
