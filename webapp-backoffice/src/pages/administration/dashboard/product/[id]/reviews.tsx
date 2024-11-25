@@ -104,6 +104,7 @@ const ProductReviewsPage = (props: Props) => {
 					metadata: {
 						countFiltered: 0,
 						countAll: 0,
+						countNew: 0,
 						countForm1: 0,
 						countForm2: 0
 					}
@@ -136,6 +137,7 @@ const ProductReviewsPage = (props: Props) => {
 				metadata: {
 					countFiltered: 0,
 					countAll: 0,
+					countNew: 0,
 					countForm1: 0,
 					countForm2: 0
 				}
