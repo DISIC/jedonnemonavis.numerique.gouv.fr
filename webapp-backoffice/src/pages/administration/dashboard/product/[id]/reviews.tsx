@@ -9,7 +9,6 @@ import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
 import { getNbPages } from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
@@ -21,8 +20,6 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
-import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
-import ExportModal from '@/src/components/dashboard/Reviews/ExportModal';
 import Head from 'next/head';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import { useRouter } from 'next/router';
@@ -30,6 +27,7 @@ import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import { useDebounce } from 'usehooks-ts';
 import { push } from '@socialgouv/matomo-next';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
@@ -48,11 +46,15 @@ const defaultErrors = {
 const ProductReviewsPage = (props: Props) => {
 	const { product } = props;
 	const router = useRouter();
+	const { data: session } = useSession();
 	const { view } = router.query;
 	const [startDate, setStartDate] = React.useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
 			.split('T')[0]
+	);
+	const [realStartDate, setRealStartDate] = React.useState<string>(
+		new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
 	);
 	const currentDate = new Date();
 	const [endDate, setEndDate] = React.useState<string>(
@@ -71,6 +73,7 @@ const ProductReviewsPage = (props: Props) => {
 	const [buttonId, setButtonId] = React.useState<number>();
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
+	const debounceRealStartdate = useDebounce<string>(realStartDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const filter_modal = createModal({
@@ -126,11 +129,12 @@ const ProductReviewsPage = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			start_date: debouncedStartDate,
+			start_date: realStartDate,
 			end_date: debouncedEndDate,
 			sort: sort,
 			button_id: buttonId,
 			filters: filters,
+			newReviews: newReviews,
 			needLogging: true
 		},
 		{
@@ -146,6 +150,27 @@ const ProductReviewsPage = (props: Props) => {
 			}
 		}
 	);
+
+	const {
+		data: reviewLogResults,
+		isFetching: isLoadingReviewLog,
+		error: errorReviewLog
+	} = trpc.userEvent.getLastReviewView.useQuery(
+		{
+			product_id: product.id
+		},
+		{
+			initialData: {
+				data: []
+			}
+		}
+	);
+
+	const { data: reviewLog } = reviewLogResults;
+
+	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
+		onSuccess: result => {}
+	});
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
@@ -286,6 +311,49 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
+	const handleNewReviews = (e: boolean) => {
+		setNewReviews(e);
+		if (e) {
+			setStartDate(
+				new Date(
+					reviewLog[0]
+						? reviewLog[0].created_at
+						: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
+								.toISOString()
+								.split('T')[0]
+				)
+					.toISOString()
+					.split('T')[0]
+			);
+			setRealStartDate(
+				new Date(
+					reviewLog[0]
+						? reviewLog[0].created_at
+						: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
+								.toISOString()
+								.split('T')[0]
+				).toISOString()
+			);
+			createReviewLog.mutateAsync({
+				user_id: parseInt(session?.user?.id || '0'),
+				product_id: product.id,
+				action: 'service_new_reviews_view',
+				metadata: {}
+			});
+		} else {
+			setStartDate(
+				new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+					.toISOString()
+					.split('T')[0]
+			);
+			setRealStartDate(
+				new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+					.toISOString()
+					.split('T')[0]
+			);
+		}
+	};
+
 	const handleButtonClick = () => {
 		router.push({
 			pathname: `/administration/dashboard/product/${product.id}/buttons`,
@@ -333,6 +401,13 @@ const ProductReviewsPage = (props: Props) => {
 			setCurrentPage(1);
 		}
 	};
+
+	React.useEffect(() => {
+		const { newReviews } = router.query;
+		if (newReviews) {
+			handleNewReviews(true);
+		}
+	}, []);
 
 	return (
 		<>
@@ -383,12 +458,7 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-8v'
 							)}
 						>
-							<div
-								className={cx(
-									classes.filtersWrapper,
-									fr.cx('fr-col-12')
-								)}
-							>
+							<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12'))}>
 								<div className={cx(classes.filterView)}>
 									<label>Vue</label>
 									<div className={fr.cx('fr-mt-2v')}>
@@ -548,7 +618,8 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-6v'
 							)}
 						>
-							<div className={cx(
+							<div
+								className={cx(
 									classes.filtersWrapper,
 									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-6')
 								)}
@@ -563,7 +634,7 @@ const ProductReviewsPage = (props: Props) => {
 												name: 'favorites-products',
 												checked: newReviews,
 												onChange: e => {
-													setNewReviews(e.target.checked);
+													handleNewReviews(e.target.checked);
 												}
 											}
 										}

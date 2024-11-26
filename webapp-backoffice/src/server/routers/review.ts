@@ -22,6 +22,7 @@ export const reviewRouter = router({
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
 				button_id: z.number().optional(),
+				newReviews: z.boolean().optional(),
 				needLogging: z.boolean().optional().default(false),
 				filters: z
 					.object({
@@ -48,7 +49,7 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, shouldIncludeAnswers, product_id } = input;
+			const { numberPerPage, page, shouldIncludeAnswers, product_id, newReviews } = input;
 
 			const { where, orderBy } = formatWhereAndOrder(input);
 

@@ -614,13 +614,13 @@ const ProductCard = ({
 														className={fr.cx('fr-label--info', 'fr-text--bold')}
 													>
 														{formatNumberWithSpaces(nbReviews)}
-														{nbNewReviews && nbNewReviews > 0 && (
+														{nbNewReviews !== undefined && nbNewReviews > 0 && (
 															<>
 																<span className={fr.cx('fr-mr-5v')}>
 																	{` (+${nbNewReviews})`}
 																</span>
 																<Link
-																	href={`/administration/dashboard/product/${product.id}/reviews`}
+																	href={`/administration/dashboard/product/${product.id}/reviews?newReviews=true`}
 																	title={`Voir les nouveaux avis pour ${product.title}`}
 																	className={fr.cx('fr-link')}
 																>
