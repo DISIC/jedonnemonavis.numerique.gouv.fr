@@ -84,8 +84,7 @@ export const productRouter = router({
 				search: z.string().optional(),
 				filterEntityId: z.array(z.number()),
 				filterByUserFavorites: z.boolean().optional(),
-				filterByStatusArchived: z.boolean().optional(),
-				newReviews: z.boolean().optional()
+				filterByStatusArchived: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -97,8 +96,7 @@ export const productRouter = router({
 				search,
 				filterEntityId,
 				filterByUserFavorites,
-				filterByStatusArchived,
-				newReviews
+				filterByStatusArchived
 			} = input;
 
 			let orderBy: Prisma.ProductOrderByWithAggregationInput[] = [
@@ -232,40 +230,9 @@ export const productRouter = router({
 					where: { ...whereUserScope, status: 'archived' }
 				});
 
-				const countNewReviews = newReviews
-				? await Promise.all(
-					allProducts.map(async (p) => {
-						const lastSeenReview = await ctx.prisma.userEvent.findMany({
-							where: {
-								user_id: parseInt(ctx.session?.user?.id),
-								action: 'service_new_reviews_view',
-								product_id: p.id,
-							},
-							orderBy: {
-								created_at: 'desc',
-							},
-							take: 1,
-						});
-
-						// Compter les nouveaux avis
-						return ctx.prisma.review.count({
-							where: {
-								product_id: p.id,
-								...(lastSeenReview[0] && {
-								created_at: {
-									gte: lastSeenReview[0].created_at,
-								},
-								}),
-							},
-						});
-					})
-					)
-					.then((counts) => counts.reduce((sum, count) => sum + count, 0)) // Additionner les valeurs
-				: 0;
-
 				return {
 					data: products,
-					metadata: { count, countTotalUserScope, countArchivedUserScope, countNewReviews }
+					metadata: { count, countTotalUserScope, countArchivedUserScope }
 				};
 			} catch (e) {
 				console.log(e);

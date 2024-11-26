@@ -21,7 +21,6 @@ export const reviewRouter = router({
 				search: z.string().optional(),
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
-				button_id: z.number().optional(),
 				newReviews: z.boolean().optional(),
 				needLogging: z.boolean().optional().default(false),
 				filters: z
@@ -31,7 +30,8 @@ export const reviewRouter = router({
 						needVerbatim: z.boolean().optional(),
 						needOtherDifficulties: z.boolean().optional(),
 						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional()
+						help: z.array(z.string()).optional(),
+						buttonId: z.array(z.string()).optional()
 					})
 					.optional()
 			})
@@ -62,7 +62,7 @@ export const reviewRouter = router({
 			const lastSeenReview = await ctx.prisma.userEvent.findMany({
 				where: {
 					user_id: parseInt(ctx.session?.user?.id),
-					action: 'service_new_reviews_view',
+					action: 'service_reviews_view',
 					product_id: product_id
 				},
 				orderBy: {

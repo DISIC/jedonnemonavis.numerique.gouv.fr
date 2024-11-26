@@ -160,13 +160,13 @@ const ReviewFiltersModal = (props: Props) => {
 				<Select
 					label="Sélectionner une source"
 					nativeSelectProps={{
+						value: tmpFilters.buttonId[0],
 						onChange: e => {
-							if (e.target.value !== 'undefined') {
-								setButtonId(parseInt(e.target.value));
-								push(['trackEvent', 'Avis', 'Filtre-Source']);
-							} else {
-								setButtonId(undefined);
-							}
+							setTmpFilters({
+								...tmpFilters,
+								buttonId: e.target.value !== 'undefined' ? [e.target.value] : []
+							});
+							push(['trackEvent', 'Avis', 'Sélection-bouton']);
 						}
 					}}
 				>
@@ -241,7 +241,8 @@ const ReviewFiltersModal = (props: Props) => {
 									needVerbatim: false,
 									needOtherDifficulties: false,
 									needOtherHelp: false,
-									help: []
+									help: [],
+									buttonId: []
 								});
 								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
 							}}

@@ -19,7 +19,7 @@ export const userEventRouter = router({
 			if (product_id) {
 				where = {
 					user_id: parseInt(ctx.session?.user?.id),
-					action: 'service_new_reviews_view',
+					action: 'service_reviews_view',
 					product_id: product_id
 				}
 			}
