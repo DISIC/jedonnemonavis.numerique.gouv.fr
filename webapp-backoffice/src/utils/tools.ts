@@ -1,6 +1,6 @@
 import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
-import { AnswerIntention } from '@prisma/client';
+import { AnswerIntention, TypeAction } from '@prisma/client';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -348,3 +348,20 @@ export const getKeysFromArrayOfObjects = (arrayOfObjects: any[]): string[] => {
 		return acc;
 	}, []);
 };
+
+export const actionMapping: Record<string, TypeAction> = {
+	'product.getList': TypeAction.services_list_view,
+	'product.create': TypeAction.service_create,
+	'product.update': TypeAction.service_update,
+	'accessRight.create': TypeAction.service_invite,
+	'accessRight.update': TypeAction.service_uninvite,
+	'product.archive': TypeAction.service_archive,
+	'product.restore': TypeAction.service_restore,
+	'review.getList': TypeAction.service_reviews_view,
+	'button.getList': TypeAction.service_buttons_list_view,
+	'entity.getList': TypeAction.organisations_list_view,
+	'entity.create': TypeAction.organisation_create,
+	'entity.update': TypeAction.organisation_update,
+	'adminEntityRight.create': TypeAction.organisation_invite,
+	'adminEntityRight.delete': TypeAction.organisation_uninvite,
+  };

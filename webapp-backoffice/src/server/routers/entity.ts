@@ -10,6 +10,7 @@ import { removeAccents } from '@/src/utils/tools';
 
 export const entityRouter = router({
 	getList: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -185,6 +186,7 @@ export const entityRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(EntityUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input: entityPayload }) => {
 			const userEmail = ctx.session?.user?.email;
@@ -222,6 +224,7 @@ export const entityRouter = router({
 		}),
 
 	update: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({ id: z.number(), entity: EntityUncheckedUpdateInputSchema })
 		)

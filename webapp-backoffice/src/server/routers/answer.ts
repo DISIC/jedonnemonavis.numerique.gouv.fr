@@ -1013,7 +1013,8 @@ export const answerRouter = router({
 				product_id: z.string() /* To change to button_id */,
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
-				isXWiki: z.boolean().optional()
+				isXWiki: z.boolean().optional(),
+				needLogging: z.boolean().optional().default(false)
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -1211,6 +1212,20 @@ export const answerRouter = router({
 				contact_count,
 				autonomy_count
 			};
+
+			if(input.needLogging) {
+				const user = ctx.session?.user;
+				if(user) {
+					await ctx.prisma.userEvent.create({
+						data: {
+							user_id: parseInt(user.id),
+							action: 'service_stats_view',
+							product_id: parseInt(product_id),
+							metadata: input
+						}
+					});
+				}
+			}
 
 			return { data: returnValue, metadata };
 		})

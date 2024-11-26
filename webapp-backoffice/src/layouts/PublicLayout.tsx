@@ -55,7 +55,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			displayProcessed: false
 		},
 		{
-			enabled: session?.user.role.includes('admin'),
+			enabled: session?.user?.role?.includes('admin') ?? false,
 			initialData: {
 				data: [],
 				metadata: {
