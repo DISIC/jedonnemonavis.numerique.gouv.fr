@@ -7,7 +7,7 @@ import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
-import { getNbPages } from '@/src/utils/tools';
+import { formatDateToFrenchString, getNbPages } from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
@@ -75,7 +75,6 @@ const ProductReviewsPage = (props: Props) => {
 		React.useState<boolean>(false);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debounceRealStartdate = useDebounce<string>(realStartDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const filter_modal = createModal({
@@ -89,7 +88,8 @@ const ProductReviewsPage = (props: Props) => {
 		needVerbatim: false,
 		needOtherDifficulties: false,
 		needOtherHelp: false,
-		help: []
+		help: [],
+		buttonId: []
 	});
 
 	const handleSubmitfilters = (filters: ReviewFiltersType) => {
@@ -134,13 +134,11 @@ const ProductReviewsPage = (props: Props) => {
 			start_date: realStartDate,
 			end_date: debouncedEndDate,
 			sort: sort,
-			button_id: buttonId,
 			filters: filters,
 			newReviews: newReviews,
 			needLogging: true
 		},
 		{
-			enabled: newReviewHandled,
 			initialData: {
 				data: [],
 				metadata: {
@@ -170,8 +168,6 @@ const ProductReviewsPage = (props: Props) => {
 	);
 
 	const { data: reviewLog } = reviewLogResults;
-
-	console.log('reviewViewLog : ', reviewLogResults);
 
 	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
 		onSuccess: result => {}
@@ -310,7 +306,7 @@ const ProductReviewsPage = (props: Props) => {
 			case 'iconbox':
 				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return `${value}`;
+				return `Source : ${buttonResults?.data.find(b => b.id === parseInt(value as string))?.title}`;
 			default:
 				return '';
 		}
@@ -340,12 +336,6 @@ const ProductReviewsPage = (props: Props) => {
 								.split('T')[0]
 				).toISOString()
 			);
-			createReviewLog.mutateAsync({
-				user_id: parseInt(session?.user?.id || '0'),
-				product_id: product.id,
-				action: 'service_new_reviews_view',
-				metadata: {}
-			});
 		} else {
 			setStartDate(
 				new Date(new Date().setFullYear(new Date().getFullYear() - 1))
@@ -407,14 +397,6 @@ const ProductReviewsPage = (props: Props) => {
 			setCurrentPage(1);
 		}
 	};
-
-	React.useEffect(() => {
-		const { newReviews } = router.query;
-		if (newReviews && !newReviewHandled) {
-			handleNewReviews(true);
-		}
-		setNewReviewHandled(true);
-	}, [router.query]);
 
 	return (
 		<>
@@ -631,22 +613,25 @@ const ProductReviewsPage = (props: Props) => {
 									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-6')
 								)}
 							>
-								<Checkbox
-									style={{ userSelect: 'none' }}
-									className={fr.cx('fr-mb-0')}
-									options={[
-										{
-											label: 'Afficher uniquement les nouveaux avis',
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: newReviews,
-												onChange: e => {
-													handleNewReviews(e.target.checked);
+								{reviewLog[0] && (
+									<Checkbox
+										style={{ userSelect: 'none' }}
+										className={fr.cx('fr-mb-0')}
+										options={[
+											{
+												label: 'Afficher uniquement les nouveaux avis',
+												hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchString(reviewLog[0].created_at.toString())})`,
+												nativeInputProps: {
+													name: 'favorites-products',
+													checked: newReviews,
+													onChange: e => {
+														handleNewReviews(e.target.checked);
+													}
 												}
 											}
-										}
-									]}
-								/>
+										]}
+									/>
+								)}
 							</div>
 							<div
 								className={cx(
@@ -824,13 +809,12 @@ const useStyles = tss
 		},
 		filtersWrapper: {
 			display: 'flex',
-			alignItems: 'end'
+			alignItems: 'start'
 		},
 		buttonContainer: {
 			width: '100%',
 			[fr.breakpoints.up('lg')]: {
 				display: 'flex',
-				alignSelf: 'flex-end',
 				justifyContent: 'flex-end',
 				'.fr-btn': {
 					justifySelf: 'flex-end'

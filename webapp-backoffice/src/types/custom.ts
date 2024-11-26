@@ -99,6 +99,7 @@ export type ReviewFiltersType = {
     needOtherDifficulties: boolean;
     needOtherHelp: boolean;
     help: string[];
+    buttonId: string[];
 };
 
 export type Condition = {

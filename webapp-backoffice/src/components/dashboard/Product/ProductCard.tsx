@@ -607,27 +607,65 @@ const ProductCard = ({
 												<div
 													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
 												>
-													<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-														Nombre d'avis
-													</p>
 													<div
-														className={fr.cx('fr-label--info', 'fr-text--bold')}
-													>
-														{formatNumberWithSpaces(nbReviews)}
-														{nbNewReviews !== undefined && nbNewReviews > 0 && (
-															<>
-																<span className={fr.cx('fr-mr-5v')}>
-																	{` (+${nbNewReviews})`}
-																</span>
-																<Link
-																	href={`/administration/dashboard/product/${product.id}/reviews?newReviews=true`}
-																	title={`Voir les nouveaux avis pour ${product.title}`}
-																	className={fr.cx('fr-link')}
-																>
-																	Voir les nouveaux avis
-																</Link>
-															</>
+														className={fr.cx(
+															'fr-grid-row',
+															'fr-grid-row--gutters'
 														)}
+													>
+														<div className={fr.cx('fr-col-12')}>
+															<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+																Nombre d'avis
+															</p>
+														</div>
+													</div>
+													<div
+														className={fr.cx(
+															'fr-grid-row',
+															'fr-grid-row--gutters'
+														)}
+													>
+														<div
+															className={cx(
+																classes.reviewWrapper,
+																fr.cx('fr-col-12', 'fr-pt-0')
+															)}
+														>
+															<div
+																className={fr.cx(
+																	'fr-label--info',
+																	'fr-text--bold'
+																)}
+															>
+																{formatNumberWithSpaces(nbReviews)}
+															</div>
+
+															<div className={fr.cx('fr-label--info')}>
+																{nbNewReviews !== undefined &&
+																	nbNewReviews > 0 && (
+																		<>
+																			<span
+																				className={cx(
+																					classes.notifSpan,
+																					fr.cx('fr-ml-4v')
+																				)}
+																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
+																			>
+																				{`${nbNewReviews <= 9 ? nbNewReviews : '9+'}`}
+																			</span>
+																		</>
+																	)}
+															</div>
+															{nbReviews > 0 && (
+																<Link
+																	href={`/administration/dashboard/product/${product.id}/reviews`}
+																	title={`Voir les nouveaux avis pour ${product.title}`}
+																	className={fr.cx('fr-link', 'fr-ml-4v')}
+																>
+																	Voir les avis
+																</Link>
+															)}
+														</div>
 													</div>
 												</div>
 											)}
@@ -712,6 +750,19 @@ const useStyles = tss.withName(ProductCard.name).create({
 	badgesContainer: {
 		display: 'flex',
 		gap: fr.spacing('2v')
+	},
+	reviewWrapper: {
+		display: 'flex'
+	},
+	notifSpan: {
+		display: 'block',
+		backgroundColor: fr.colors.decisions.background.flat.redMarianne.default,
+		color: fr.colors.decisions.background.default.grey.default,
+		borderRadius: '50%',
+		height: '1.4rem',
+		width: '1.4rem',
+		fontSize: '0.8rem',
+		textAlign: 'center'
 	},
 	menuItemDanger: {
 		color: fr.colors.decisions.text.default.error.default
