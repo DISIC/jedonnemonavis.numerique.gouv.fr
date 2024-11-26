@@ -76,7 +76,8 @@ const DashBoard = () => {
 			numberPerPage,
 			filterEntityId: filters.filterEntity?.map(e => e.value),
 			filterByUserFavorites: filters.filterOnlyFavorites,
-			filterByStatusArchived: filters.filterOnlyArchived
+			filterByStatusArchived: filters.filterOnlyArchived,
+			newReviews: true
 		},
 		{
 			initialData: {
@@ -84,7 +85,8 @@ const DashBoard = () => {
 				metadata: {
 					count: 0,
 					countTotalUserScope: 0,
-					countArchivedUserScope: 0
+					countArchivedUserScope: 0,
+					countNewReviews: 0
 				}
 			}
 		}
@@ -460,6 +462,12 @@ const DashBoard = () => {
 					</div>
 				) : (
 					<div>
+						<div className={fr.cx('fr-col-8')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Vous avez un total de {productsResult.metadata.countNewReviews}{' '}
+								avis non lus.
+							</span>
+						</div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
 								Services de{' '}

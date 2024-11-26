@@ -71,6 +71,8 @@ const ProductReviewsPage = (props: Props) => {
 		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
+	const [newReviewHandled, setNewReviewHandled] =
+		React.useState<boolean>(false);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debounceRealStartdate = useDebounce<string>(realStartDate, 500);
@@ -138,6 +140,7 @@ const ProductReviewsPage = (props: Props) => {
 			needLogging: true
 		},
 		{
+			enabled: newReviewHandled,
 			initialData: {
 				data: [],
 				metadata: {
@@ -167,6 +170,8 @@ const ProductReviewsPage = (props: Props) => {
 	);
 
 	const { data: reviewLog } = reviewLogResults;
+
+	console.log('reviewViewLog : ', reviewLogResults);
 
 	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
 		onSuccess: result => {}
@@ -312,6 +317,7 @@ const ProductReviewsPage = (props: Props) => {
 	};
 
 	const handleNewReviews = (e: boolean) => {
+		console.log('handling new reviews');
 		setNewReviews(e);
 		if (e) {
 			setStartDate(
@@ -404,10 +410,11 @@ const ProductReviewsPage = (props: Props) => {
 
 	React.useEffect(() => {
 		const { newReviews } = router.query;
-		if (newReviews) {
+		if (newReviews && !newReviewHandled) {
 			handleNewReviews(true);
 		}
-	}, []);
+		setNewReviewHandled(true);
+	}, [router.query]);
 
 	return (
 		<>
