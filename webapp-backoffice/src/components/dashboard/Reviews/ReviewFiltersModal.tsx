@@ -14,6 +14,8 @@ import React from 'react';
 import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import { push } from '@socialgouv/matomo-next';
+import Select from '@codegouvfr/react-dsfr/Select';
+import { trpc } from '@/src/utils/trpc';
 
 interface CustomModalProps {
 	buttonProps: {
@@ -31,12 +33,22 @@ interface CustomModalProps {
 interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
+	product_id: number;
+	setButtonId: (buttonId: number | undefined) => void;
 	submitFilters: (filters: ReviewFiltersType) => void;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters } = props;
+	const { modal, filters, submitFilters, setButtonId, product_id } = props;
 	const { cx, classes } = useStyles();
+
+	const { data: buttonResults, isLoading: isLoadingButtons } =
+		trpc.button.getList.useQuery({
+			page: 1,
+			numberPerPage: 1000,
+			product_id: product_id,
+			isTest: true
+		});
 
 	const [tmpFilters, setTmpFilters] =
 		React.useState<ReviewFiltersType>(filters);
@@ -145,6 +157,32 @@ const ReviewFiltersModal = (props: Props) => {
 
 			<div className={fr.cx('fr-mt-4w')}>
 				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
+				<Select
+					label="Sélectionner une source"
+					nativeSelectProps={{
+						value: tmpFilters.buttonId[0],
+						onChange: e => {
+							setTmpFilters({
+								...tmpFilters,
+								buttonId: e.target.value !== 'undefined' ? [e.target.value] : []
+							});
+							push(['trackEvent', 'Avis', 'Sélection-bouton']);
+						}
+					}}
+				>
+					<option value="undefined">Toutes les sources</option>
+					{buttonResults?.data?.map(button => {
+						return (
+							<option key={button.id} value={button.id}>
+								{button.title}
+							</option>
+						);
+					})}
+				</Select>
+			</div>
+
+			<div className={fr.cx('fr-mt-4w')}>
+				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
 				<Checkbox
 					options={[
 						{
@@ -203,7 +241,8 @@ const ReviewFiltersModal = (props: Props) => {
 									needVerbatim: false,
 									needOtherDifficulties: false,
 									needOtherHelp: false,
-									help: []
+									help: [],
+									buttonId: []
 								});
 								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
 							}}

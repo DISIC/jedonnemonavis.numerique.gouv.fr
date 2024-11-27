@@ -133,5 +133,10 @@ export const FILTER_LABELS = [
 		label: 'Verbatim',
 		value: 'needVerbatim',
 		type: 'checkbox'
+	},
+	{
+		label: 'Bouton',
+		value: 'buttonId',
+		type: 'select'
 	}
 ];

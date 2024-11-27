@@ -12,6 +12,7 @@ import { optionsRouter } from './options';
 import { exportRouter } from './export';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
+import { userEventRouter } from './userEvent';
 import { answerRouter } from './answer';
 import { openAPIRouter } from './openapi';
 import { apiKeyRouter } from './apiKey';
@@ -32,6 +33,7 @@ export const appRouter = router({
 	export: exportRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,
+	userEvent: userEventRouter,
 	answer: answerRouter,
 	openAPI: openAPIRouter,
 	apiKey: apiKeyRouter,

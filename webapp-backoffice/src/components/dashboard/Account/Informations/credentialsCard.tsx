@@ -5,7 +5,7 @@ import { User } from '@/prisma/generated/zod';
 import Button from '@codegouvfr/react-dsfr/Button';
 import GenericCardInfos from './genericCardAccount';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { signOut, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';

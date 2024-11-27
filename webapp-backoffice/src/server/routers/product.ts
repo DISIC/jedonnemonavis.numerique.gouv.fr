@@ -56,6 +56,7 @@ const checkRightToProceed = async (
 
 export const productRouter = router({
 	getById: publicProcedure
+		.meta({ logEvent: true })
 		.input(z.object({ id: z.number() }))
 		.query(async ({ ctx, input }) => {
 			const product = await ctx.prisma.product.findUnique({
@@ -74,6 +75,7 @@ export const productRouter = router({
 		}),
 
 	getList: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -213,6 +215,11 @@ export const productRouter = router({
 					}
 				});
 
+				const allProducts = await ctx.prisma.product.findMany({
+					orderBy,
+					where
+				});
+
 				const count = await ctx.prisma.product.count({ where });
 
 				const countTotalUserScope = await ctx.prisma.product.count({
@@ -234,7 +241,8 @@ export const productRouter = router({
 					metadata: {
 						count: 0,
 						countTotalUserScope: 0,
-						countArchivedUserScope: 0
+						countArchivedUserScope: 0,
+						countNewReviews: 0
 					}
 				};
 			}
@@ -296,6 +304,7 @@ export const productRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(ProductUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
@@ -320,6 +329,7 @@ export const productRouter = router({
 		}),
 
 	update: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({ id: z.number(), product: ProductUncheckedUpdateInputSchema })
 		)
@@ -341,6 +351,7 @@ export const productRouter = router({
 		}),
 
 	archive: protectedProcedure
+		.meta({ logEvent: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
@@ -384,6 +395,7 @@ export const productRouter = router({
 		}),
 
 	restore: protectedProcedure
+		.meta({ logEvent: true })
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
