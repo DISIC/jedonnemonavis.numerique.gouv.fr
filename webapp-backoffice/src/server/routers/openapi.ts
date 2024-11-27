@@ -14,6 +14,8 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { startOfYesterday, endOfYesterday, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isMonday, subWeeks, subMonths } from 'date-fns';
 import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
+import { getEmailNotificationsHtml } from '@/src/utils/emails';
+import { sendMail } from '@/src/utils/mailer';
 
 const maxNbProducts = 10;
 
@@ -308,28 +310,31 @@ export const openAPIRouter = router({
 			z.object({
 			result: z.object({
 				results: z.array(
-				z.object({
-					scope: z.enum(['daily', 'weekly', 'monthly']),
-					startDate: z.date(),
-					endDate: z.date(),
-					products: z.array(
-						z.object({
-							productId: z.number(),
-							reviewCount: z.number()
-						})
-					),
-					users: z.array(
-						z.object({
-							userEmail: z.string(),
-							accessibleProducts: z.array(
+					z.object({
+						scope: z.enum(['daily', 'weekly', 'monthly']),
+						startDate: z.date(),
+						endDate: z.date(),
+						products: z.array(
 							z.object({
 								productId: z.number(),
-								reviewCount: z.number()
+								reviewCount: z.number(),
+								title: z.string()
 							})
-							)
-						})
-					).optional()
-				})
+						),
+						users: z.array(
+							z.object({
+								userEmail: z.string(),
+								userId: z.number(),
+								accessibleProducts: z.array(
+								z.object({
+									productId: z.number(),
+									reviewCount: z.number(),
+									title: z.string()
+								})
+								)
+							})
+						).optional()
+					})
 				),
 				message: z.string()
 			})
@@ -383,19 +388,21 @@ export const openAPIRouter = router({
 				scope: 'daily' | 'weekly' | 'monthly';
 				startDate: Date,
 				endDate: Date,
-				products: { productId: number; reviewCount: number }[];
+				products: { productId: number; reviewCount: number, title: string }[];
 				users?: {
 					userEmail: string;
+					userId: number;
 					accessibleProducts: {
 						productId: number;
 						reviewCount: number;
+						title: string;
 					}[];
 				}[]
 			}[] = await getProductsWithReviewCountsByScope(ctx.prisma, scopes);
 
 			// Add user filtering and product matching for each scope
 			for (const scopeResult of results) {
-				const { scope, products } = scopeResult;
+				const { scope, products, startDate, endDate } = scopeResult;
 
 				// Fetch users for the current scope
 				const users = await ctx.prisma.user.findMany({
@@ -409,7 +416,7 @@ export const openAPIRouter = router({
 						include: {
 						entity: {
 							include: {
-							products: true
+								products: true
 							}
 						}
 						}
@@ -417,7 +424,7 @@ export const openAPIRouter = router({
 					}
 				});
 
-				// Associate users with accessible products
+				// Associate users with accessible products and send mails
 				const userProductAssociations = users.map((user) => {
 					const accessibleProductIds = [
 						...user.accessRights.map((ar) => ar.product_id),
@@ -426,8 +433,31 @@ export const openAPIRouter = router({
 
 					const accessibleProducts = products.filter((product) => accessibleProductIds.includes(product.productId));
 
+					const email = getEmailNotificationsHtml(
+						user.id, 
+						scope, 
+						213, 
+						startDate,
+						endDate,
+						accessibleProducts.map((ap) => {
+							return {
+								title: ap.title,
+								id: ap.productId,
+								nbReviews: ap.reviewCount
+							}}
+						)
+					);
+		
+					sendMail(
+						'Nouveaux avis JDMA',
+						user.email,
+						email,
+						'test notif'
+					);
+
 					return {
 						userEmail: user.email,
+						userId: user.id,
 						accessibleProducts
 					};
 				});

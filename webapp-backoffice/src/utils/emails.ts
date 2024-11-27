@@ -1,4 +1,6 @@
+import { NotificationFrequency } from '@prisma/client';
 import { Session } from 'next-auth';
+import { formatDateToFrenchString } from './tools';
 
 function getEmailWithLayout(content: string) {
 	return `
@@ -280,60 +282,29 @@ export function getProductRestoredEmail(
 }
 
 export function getEmailNotificationsHtml(
-	contextUser: Session['user'],
-	frequency: string,
+	userId: number,
+	frequency: NotificationFrequency,
 	totalNbReviews: number,
+	startDate: Date,
+	endDate: Date,
 	products: {
 		title: string;
 		id: number;
 		nbReviews: number;
 	}[]
 ) {
-	const today = new Date();
-	const last7Days = new Date(today.setDate(today.getDate() - 7));
-	const lastMonth = new Date(today.setMonth(today.getMonth() - 1));
-	const firstDayLastMonth = new Date(
-		lastMonth.getFullYear(),
-		lastMonth.getMonth(),
-		1
-	);
-	const lastDayLastMonth = new Date(
-		lastMonth.getFullYear(),
-		lastMonth.getMonth() + 1,
-		0
-	);
-
-	const frequencyLabel =
-		frequency === 'daily'
-			? 'en date du ' +
-				today.toLocaleDateString('fr-FR', {
-					day: '2-digit',
-					month: '2-digit',
-					year: 'numeric'
-				})
-			: frequency === 'weekly'
-				? 'dans les 7 derniers jours' +
-					last7Days.toLocaleDateString('fr-FR', {
-						day: '2-digit',
-						month: '2-digit',
-						year: 'numeric'
-					}) +
-					' au ' +
-					today.toLocaleDateString('fr-FR', {
-						day: '2-digit',
-						month: '2-digit',
-						year: 'numeric'
-					})
-				: 'dans le dernier mois calendaire' +
-					firstDayLastMonth.toLocaleDateString('fr-FR', {
-						month: '2-digit',
-						year: 'numeric'
-					}) +
-					' au ' +
-					lastDayLastMonth.toLocaleDateString('fr-FR', {
-						month: '2-digit',
-						year: 'numeric'
-					});
+	const frequencyLabel = () => {
+		switch(frequency) {
+			case 'daily': 
+				return `en date du ${formatDateToFrenchString(startDate.toString())}`;
+			case 'weekly':
+				return `dans les 7 derniers jours (du ${formatDateToFrenchString(startDate.toString())} au ${formatDateToFrenchString(endDate.toString())})`;
+			case 'monthly':
+				return `dans le dernier mois calendaire (du ${formatDateToFrenchString(startDate.toString())} au ${formatDateToFrenchString(endDate.toString())})`
+			default :
+				return `en date du ${formatDateToFrenchString(startDate.toString())}`;
+		}
+	}
 
 	const displayTableFrequenceLabel =
 		frequency === 'daily'
@@ -352,7 +323,7 @@ export function getEmailNotificationsHtml(
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
     <br />
-    <p>Vous avez eu un total de ${totalNbReviews} avis ${frequencyLabel} sur vos services dans Je donne mon avis.</p>
+    <p>Vous avez eu un total de ${totalNbReviews} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
     <br />
     <div style='margin-top: 64px; margin-bottom: 48px;'>
 
@@ -381,7 +352,7 @@ export function getEmailNotificationsHtml(
 
 		<p>
 			Pour changer la fréquence de cette synthèse ou ne plus la recevoir du tout,
-			<a href="${jdmaUrl}/administration/dashboard/user/${contextUser.id}/notifications" target="_blank">modifiez vos paramètres de notification</a>.
+			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications" target="_blank">modifiez vos paramètres de notification</a>.
 		</p>
 	`);
 }
