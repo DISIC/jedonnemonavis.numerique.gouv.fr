@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "darwin"]
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -87,6 +88,12 @@ enum Typebloc {
   logic
 }
 
+enum NotificationFrequency {
+  daily
+  weekly
+  monthly
+}
+
 enum TypeAction {
   services_list_view
   service_create
@@ -140,6 +147,8 @@ model User {
   exports              Export[]
   forms                Form[]
   reviewViewLogs       ReviewViewLog[]
+  notifications        Boolean           @default(false)
+  notifications_frequency NotificationFrequency @default(daily)
   UserEvent            UserEvent[]
 
   created_at DateTime @default(now())
