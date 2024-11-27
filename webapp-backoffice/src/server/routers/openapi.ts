@@ -1,6 +1,5 @@
 import {
 	protectedApiProcedure,
-	publicProcedure,
 	router
 } from '@/src/server/trpc';
 import { ZOpenApiStatsOutput } from '@/src/types/custom';
@@ -10,9 +9,11 @@ import {
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
 import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
-import { AccessRight, Product } from '@prisma/client';
+import { Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { startOfYesterday, endOfYesterday, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isMonday, subWeeks, subMonths } from 'date-fns';
+import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 
 const maxNbProducts = 10;
 
@@ -285,6 +286,159 @@ export const openAPIRouter = router({
 					new_top250,
 					already_top250,
 					down_top250
+				}
+			};
+		}),
+
+		triggerSendNotifMails: protectedApiProcedure
+		.meta({
+			openapi: {
+			method: 'POST',
+			path: '/triggerMails',
+			protect: true,
+			enabled: true
+			}
+		})
+		.input(
+			z.object({
+			date: z.date()
+			})
+		)
+		.output(
+			z.object({
+			result: z.object({
+				results: z.array(
+				z.object({
+					scope: z.enum(['daily', 'weekly', 'monthly']),
+					startDate: z.date(),
+					endDate: z.date(),
+					products: z.array(
+						z.object({
+							productId: z.number(),
+							reviewCount: z.number()
+						})
+					),
+					users: z.array(
+						z.object({
+							userEmail: z.string(),
+							accessibleProducts: z.array(
+							z.object({
+								productId: z.number(),
+								reviewCount: z.number()
+							})
+							)
+						})
+					).optional()
+				})
+				),
+				message: z.string()
+			})
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { date } = input;
+
+			if (!ctx.api_key.scope.includes('admin')) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You need to be admin to perform this action'
+			});
+			}
+
+			const scopes: { scope: 'daily' | 'weekly' | 'monthly'; startDate: Date; endDate: Date }[] = [];
+
+			// Initiate Daily
+			const dailyStartDate = startOfYesterday();
+			const dailyEndDate = endOfYesterday();
+			scopes.push({
+				scope: 'daily',
+				startDate: dailyStartDate,
+				endDate: dailyEndDate
+			});
+
+			// Initiate Weekly
+			if (isMonday(date)) {
+			const weeklyStartDate = startOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
+			const weeklyEndDate = endOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
+			scopes.push({
+				scope: 'weekly',
+				startDate: weeklyStartDate,
+				endDate: weeklyEndDate
+			});
+			}
+
+			// Initiate Monthly
+			if (isMonday(date) && date.getDate() <= 7) {
+			const monthlyStartDate = startOfMonth(subMonths(date, 1));
+			const monthlyEndDate = endOfMonth(subMonths(date, 1));
+			scopes.push({
+				scope: 'monthly',
+				startDate: monthlyStartDate,
+				endDate: monthlyEndDate
+			});
+			}
+
+			// Count new reviews and group by product
+			const results: {
+				scope: 'daily' | 'weekly' | 'monthly';
+				startDate: Date,
+				endDate: Date,
+				products: { productId: number; reviewCount: number }[];
+				users?: {
+					userEmail: string;
+					accessibleProducts: {
+						productId: number;
+						reviewCount: number;
+					}[];
+				}[]
+			}[] = await getProductsWithReviewCountsByScope(ctx.prisma, scopes);
+
+			// Add user filtering and product matching for each scope
+			for (const scopeResult of results) {
+				const { scope, products } = scopeResult;
+
+				// Fetch users for the current scope
+				const users = await ctx.prisma.user.findMany({
+					where: {
+						notifications: true,
+						notifications_frequency: scope
+					},
+					include: {
+					accessRights: true,
+					adminEntityRights: {
+						include: {
+						entity: {
+							include: {
+							products: true
+							}
+						}
+						}
+					}
+					}
+				});
+
+				// Associate users with accessible products
+				const userProductAssociations = users.map((user) => {
+					const accessibleProductIds = [
+						...user.accessRights.map((ar) => ar.product_id),
+						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id))
+					];
+
+					const accessibleProducts = products.filter((product) => accessibleProductIds.includes(product.productId));
+
+					return {
+						userEmail: user.email,
+						accessibleProducts
+					};
+				});
+
+				scopeResult.users = userProductAssociations;
+			}
+
+			return {
+				result: {
+					results,
+					message: `Scopes processed and users matched successfully`
 				}
 			};
 		})

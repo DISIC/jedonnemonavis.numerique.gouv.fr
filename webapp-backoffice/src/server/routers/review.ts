@@ -49,7 +49,7 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, shouldIncludeAnswers, product_id, newReviews } = input;
+			const { numberPerPage, page, shouldIncludeAnswers, product_id } = input;
 
 			const { where, orderBy } = formatWhereAndOrder(input);
 
@@ -115,7 +115,7 @@ export const reviewRouter = router({
 							product_id: input.product_id
 						}
 					}),
-					ctx.prisma.review.count({
+					lastSeenReview[0] ? ctx.prisma.review.count({
 						where: {
 							product_id: input.product_id,
 							...(lastSeenReview[0] && {
@@ -124,7 +124,7 @@ export const reviewRouter = router({
 								}
 							})
 						}
-					}),
+					}) : 0,
 					ctx.prisma.review.count({
 						where: {
 							...where,

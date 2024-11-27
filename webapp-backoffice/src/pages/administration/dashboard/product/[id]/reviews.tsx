@@ -7,7 +7,10 @@ import React from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
-import { formatDateToFrenchString, getNbPages } from '@/src/utils/tools';
+import {
+	formatDateToFrenchStringWithHour,
+	getNbPages
+} from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
@@ -313,7 +316,6 @@ const ProductReviewsPage = (props: Props) => {
 	};
 
 	const handleNewReviews = (e: boolean) => {
-		console.log('handling new reviews');
 		setNewReviews(e);
 		if (e) {
 			setStartDate(
@@ -620,7 +622,7 @@ const ProductReviewsPage = (props: Props) => {
 										options={[
 											{
 												label: 'Afficher uniquement les nouveaux avis',
-												hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchString(reviewLog[0].created_at.toString())})`,
+												hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(reviewLog[0].created_at.toString())})`,
 												nativeInputProps: {
 													name: 'favorites-products',
 													checked: newReviews,

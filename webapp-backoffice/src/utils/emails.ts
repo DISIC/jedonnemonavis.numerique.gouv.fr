@@ -337,9 +337,9 @@ export function getEmailNotificationsHtml(
 
 	const displayTableFrequenceLabel =
 		frequency === 'daily'
-			? "aujourd'hui"
+			? "hier"
 			: frequency === 'weekly'
-				? 'cette semaine'
+				? 'la semaine dernière'
 				: 'le mois dernier';
 
 	const jdmaUrl = process.env.NODEMAILER_BASEURL;

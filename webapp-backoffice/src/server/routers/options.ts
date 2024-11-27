@@ -59,7 +59,6 @@ export const optionsRouter = router({
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
             const { id } = input;
-			console.log('id: ', id)
 			const deletedBloc = await ctx.prisma.$transaction(async (prisma) => {
 				const deletedBloc = await ctx.prisma.optionsBlock.delete({
 					where: {

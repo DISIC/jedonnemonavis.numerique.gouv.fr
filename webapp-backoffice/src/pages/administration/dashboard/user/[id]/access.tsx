@@ -63,8 +63,6 @@ const UserAccess: React.FC<Props> = props => {
 
 	const user = userResult?.data;
 
-	console.log('user : ', user);
-
 	const editUser = trpc.user.update.useMutation({
 		onSuccess: async () => {
 			utils.user.getByIdWithRights.invalidate({});
