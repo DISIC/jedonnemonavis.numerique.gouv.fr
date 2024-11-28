@@ -340,7 +340,7 @@ export function getEmailNotificationsHtml(
           </div>
           <div style='display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; width: 30%;'>
             <p style='font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px; margin-bottom: 4px; text-align: left;'> +${formatNbReviews(p.nbReviews)}</p>
-            <a style='font-size: 12px; line-height: 20px;' href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/stats" target="_blank">Voir les nouveaux avis</a>
+            <a style='font-size: 12px; line-height: 20px;' href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews" target="_blank">Voir les nouveaux avis</a>
           </div>
         </div>
       </li>`;

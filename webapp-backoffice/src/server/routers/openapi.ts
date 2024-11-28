@@ -353,8 +353,8 @@ export const openAPIRouter = router({
 			const scopes: { scope: 'daily' | 'weekly' | 'monthly'; startDate: Date; endDate: Date }[] = [];
 
 			// Initiate Daily
-			const dailyStartDate = startOfDay(subDays(date, 2));
-			const dailyEndDate = endOfDay(subDays(date, 2));
+			const dailyStartDate = startOfDay(subDays(date, 1));
+			const dailyEndDate = endOfDay(subDays(date, 1));
 			scopes.push({
 				scope: 'daily',
 				startDate: dailyStartDate,

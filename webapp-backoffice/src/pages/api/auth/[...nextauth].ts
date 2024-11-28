@@ -42,7 +42,13 @@ export const authOptions: NextAuthOptions = {
 				token.role = user.role;
 			}
 			return token;
-		}
+		},
+		async redirect({ url, baseUrl }) {
+		  if (url.startsWith(baseUrl)) {
+			return url;
+		  }
+		  return baseUrl;
+		},
 	},
 	providers: [
 		CredentialsProvider({
