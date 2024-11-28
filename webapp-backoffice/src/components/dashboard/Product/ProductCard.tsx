@@ -634,7 +634,8 @@ const ProductCard = ({
 															<div
 																className={fr.cx(
 																	'fr-label--info',
-																	'fr-text--bold'
+																	'fr-text--bold',
+																	'fr-pt-0-5v'
 																)}
 															>
 																{formatNumberWithSpaces(nbReviews)}
@@ -645,13 +646,15 @@ const ProductCard = ({
 																	nbNewReviews > 0 && (
 																		<>
 																			<span
-																				className={cx(
-																					classes.notifSpan,
-																					fr.cx('fr-ml-4v')
-																				)}
 																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
 																			>
-																				{`${nbNewReviews <= 9 ? nbNewReviews : '9+'}`}
+																				<Badge
+																					noIcon
+																					severity="info"
+																					className={cx(fr.cx('fr-ml-4v'))}
+																				>
+																					{`${nbNewReviews <= 9 ? `+${nbNewReviews}` : '9+'}`}
+																				</Badge>
 																			</span>
 																		</>
 																	)}
