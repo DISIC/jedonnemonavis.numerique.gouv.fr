@@ -53,6 +53,25 @@ export function formatDateToFrenchString(tmpDate: string) {
 	return formatter.format(date);
 }
 
+export function formatDateToFrenchStringWithHour(tmpDate: string) {
+	const date = new Date(tmpDate);
+
+	if (!(date instanceof Date)) {
+		throw new Error('Input is not a valid Date object');
+	}
+
+	const formatter = new Intl.DateTimeFormat('fr-FR', {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit'
+	});
+
+	return formatter.format(date);
+}
+
 export function getNbPages(count: number, numberPerPage: number) {
 	return count % numberPerPage === 0
 		? count / numberPerPage

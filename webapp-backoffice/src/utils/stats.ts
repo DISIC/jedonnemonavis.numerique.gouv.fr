@@ -362,8 +362,6 @@ export const fetchAndFormatData = async ({
 		}))
 	);
 
-	//console.log("buckets : ", tmpBuckets);
-
 	return handleBucket(
 		tmpBuckets,
 		field_codes.map(fc => fc.slug),

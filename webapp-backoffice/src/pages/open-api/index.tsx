@@ -232,6 +232,7 @@ const DocAPI = () => {
 							</ul>
 						</p>
 						<SwaggerUI spec={filterDoc('/stats')} />
+						<SwaggerUI spec={filterDoc('/triggerMails')} />
 					</div>
 				</>
 			)}

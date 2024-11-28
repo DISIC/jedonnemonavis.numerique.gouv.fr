@@ -13,8 +13,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		filters
 	} = input;
 
-	console.log('filters : ', filters)
-
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
 		...(filters?.buttonId?.length > 0 && { button_id: parseInt(filters.buttonId[0]) }),
@@ -77,7 +75,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		})
 	};
 
-	console.log('where : ', where)
 
 	let andConditions: Prisma.ReviewWhereInput[] = [];
 

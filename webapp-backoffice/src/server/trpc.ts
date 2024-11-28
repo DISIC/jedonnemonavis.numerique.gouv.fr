@@ -115,8 +115,6 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 			});
 		}
 	}
-	/*console.log('query : ', ctx.req.query)
-	console.log('body : ', ctx.req.body)*/
 
 	if (meta?.logEvent) {
 		try {

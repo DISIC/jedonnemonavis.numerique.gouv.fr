@@ -1,13 +1,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import React, { useState, useEffect } from 'react';
-import { tss } from 'tss-react/dsfr';
+import React from 'react';
 import { User } from '@/prisma/generated/zod';
 import GenericCardInfos from './genericCardAccount';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
-import { useRouter } from 'next/router';
-import { signIn, useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	user: User;
@@ -17,10 +15,8 @@ type FormValues = Omit<User, 'id' | 'created_at' | 'updated_at'>;
 
 const IdentityCard = (props: Props) => {
 	const { user } = props;
-	const { cx, classes } = useStyles();
 	const utils = trpc.useUtils();
-	const { data: session, update: refetchSession } = useSession();
-	const router = useRouter();
+	const { update: refetchSession } = useSession();
 
 	const {
 		control,
@@ -165,12 +161,5 @@ const IdentityCard = (props: Props) => {
 		</>
 	);
 };
-
-const useStyles = tss.withName(IdentityCard.name).create(() => ({
-	actionContainer: {
-		display: 'flex',
-		justifyContent: 'flex-end'
-	}
-}));
 
 export default IdentityCard;
