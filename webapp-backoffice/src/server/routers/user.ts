@@ -411,28 +411,6 @@ export const userRouter = router({
 					});
 			}
 
-			// To remove after setting up the python backend
-			const email = getEmailNotificationsHtml(1, 'daily', 213, [
-				{
-					title: "Demande de correction d'état civil auprès de l'insee",
-					id: 1,
-					nbReviews: 234233
-				},
-				{
-					title:
-						'Portail de réponse à certaines enquêtes auprès des entreprises (principalement les enquêtes de conjoncture) (CRPI)',
-					id: 2,
-					nbReviews: 12456
-				}
-			]);
-
-			sendMail(
-				'Notifications JDMA',
-				'brian@numericite.eu',
-				email,
-				'test notif'
-			);
-
 			const updatedUser = await ctx.prisma.user.update({
 				where: { id },
 				data: dataToUpdate

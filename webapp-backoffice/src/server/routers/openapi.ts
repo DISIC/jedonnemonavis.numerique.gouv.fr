@@ -431,29 +431,36 @@ export const openAPIRouter = router({
 						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id))
 					];
 
-					const accessibleProducts = products.filter((product) => accessibleProductIds.includes(product.productId));
+					const accessibleProducts = products
+						.filter((product) => accessibleProductIds.includes(product.productId))
+						.sort((a, b) => b.reviewCount - a.reviewCount)
+						.slice(0, 10);
 
-					const email = getEmailNotificationsHtml(
-						user.id, 
-						scope, 
-						213, 
-						startDate,
-						endDate,
-						accessibleProducts.map((ap) => {
-							return {
-								title: ap.title,
-								id: ap.productId,
-								nbReviews: ap.reviewCount
-							}}
-						)
-					);
-		
-					sendMail(
-						'Nouveaux avis JDMA',
-						user.email,
-						email,
-						'test notif'
-					);
+					const totalNewReviews = accessibleProducts.reduce((sum, product) => sum + product.reviewCount, 0);
+
+					if(accessibleProducts.length > 0) {
+						const email = getEmailNotificationsHtml(
+							user.id, 
+							scope, 
+							totalNewReviews, 
+							startDate,
+							endDate,
+							accessibleProducts.map((ap) => {
+								return {
+									title: ap.title,
+									id: ap.productId,
+									nbReviews: ap.reviewCount
+								}}
+							)
+						);
+			
+						sendMail(
+							'Nouveaux avis JDMA',
+							user.email,
+							email,
+							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/products" target="_blank">Voir plus de détails sur votre tableau de bord JDMA</a>`
+						);
+					}
 
 					return {
 						userEmail: user.email,
