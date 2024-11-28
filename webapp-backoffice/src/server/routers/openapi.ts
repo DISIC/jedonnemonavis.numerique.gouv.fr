@@ -12,7 +12,7 @@ import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
 import { Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { startOfYesterday, endOfYesterday, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isMonday, subWeeks, subMonths } from 'date-fns';
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isMonday, subWeeks, subDays, subMonths } from 'date-fns';
 import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { getEmailNotificationsHtml } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
@@ -353,8 +353,8 @@ export const openAPIRouter = router({
 			const scopes: { scope: 'daily' | 'weekly' | 'monthly'; startDate: Date; endDate: Date }[] = [];
 
 			// Initiate Daily
-			const dailyStartDate = startOfYesterday();
-			const dailyEndDate = endOfYesterday();
+			const dailyStartDate = startOfDay(subDays(date, 2));
+			const dailyEndDate = endOfDay(subDays(date, 2));
 			scopes.push({
 				scope: 'daily',
 				startDate: dailyStartDate,
