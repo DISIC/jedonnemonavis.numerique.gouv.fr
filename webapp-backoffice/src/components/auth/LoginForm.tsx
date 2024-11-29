@@ -130,7 +130,10 @@ export const LoginForm = () => {
 				if (res?.error) {
 					if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
 				} else {
-					router.push('/administration/dashboard/products');
+					const callbackUrl =
+						router.query.callbackUrl?.toString() ||
+						'/administration/dashboard/products';
+					router.push(callbackUrl);
 				}
 			})
 			.finally(() => {

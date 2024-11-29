@@ -24,7 +24,10 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.next();
 
 	if (request.nextUrl.pathname.startsWith('/administration') && !token) {
-		return NextResponse.redirect(new URL('/login', request.url));
+		const url = request.nextUrl.clone();
+		url.pathname = '/login';
+		url.searchParams.set('callbackUrl', request.nextUrl.pathname);
+		return NextResponse.redirect(url);
 	} else if (
 		!request.nextUrl.pathname.startsWith('/administration') &&
 		!!token
