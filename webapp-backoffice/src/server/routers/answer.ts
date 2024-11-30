@@ -1140,15 +1140,17 @@ export const answerRouter = router({
 			const { count: comprehension_count, average: comprehension_average } =
 				calculateBucketsAverage(comprehensionBuckets, comprehensionMarks);
 
+			const contactReachability_count = contactReachabilityBucket.reduce(
+				(sum, sb) => sum + (sb.doc_count || 0),
+				0
+			);
+
 			const contactReachability_average =
 				(contactReachabilityBucket.reduce((sum, sb) => {
 					const [, answer_text] = sb.key.split('#');
 					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
 				}, 0) /
-					contactReachabilityBucket.reduce(
-						(sum, sb) => sum + (sb.doc_count || 0),
-						0
-					)) *
+					contactReachability_count) *
 				10;
 
 			const contactSatisfaction_count = contactSatisfactionBucket.reduce(
@@ -1210,6 +1212,8 @@ export const answerRouter = router({
 				satisfaction_count,
 				comprehension_count,
 				contact_count,
+				contactReachability_count,
+				contactSatisfaction_count,
 				autonomy_count
 			};
 
