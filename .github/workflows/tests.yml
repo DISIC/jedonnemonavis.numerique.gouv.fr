@@ -24,6 +24,20 @@ jobs:
         ports:
           - 8025:8025
           - 1025:1025
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
+        env:
+          - discovery.type: single-node
+          - xpack.security.enabled: true
+          - ES_JAVA_OPTS: -Xms512m -Xmx512m
+          - ELASTIC_PASSWORD: ${{ secrets.ES_ADDON_PASSWORD }}
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd="curl -s --insecure https://localhost:9200/_cluster/health || exit 1"
+          --health-interval=30s
+          --health-timeout=10s
+          --health-retries=5
 
     steps:
       # 1. Checkout du code
@@ -46,7 +60,13 @@ jobs:
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
 
-      # 4. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
+      #4 Configurer l'environnement ElasticSearch
+      - name: Configure Elasticsearch environment
+        run: |
+          echo "ES_ADDON_URI=${{ secrets.ES_ADDON_URI }}" >> webapp-backoffice/.env
+          echo "ES_ADDON_USER=${{ secrets.ES_ADDON_USER }}" >> webapp-backoffice/.env
+          echo "ES_ADDON_PASSWORD=${{ secrets.ES_ADDON_PASSWORD }}" >> webapp-backoffice/.env
+      # 5. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
       - name: Install dependencies and generate Prisma client for webapp-backoffice
         run: |
           cd webapp-backoffice
@@ -54,28 +74,28 @@ jobs:
           npx prisma generate
           npx prisma migrate reset --force
 
-      # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
+      # 6. Installer les dépendances et générer le client Prisma pour `webapp-form`
       - name: Install dependencies and generate Prisma client for webapp-form
         run: |
           cd webapp-form
           yarn install
           npx prisma generate
 
-      # 6. Construire `webapp-backoffice`
+      # 7. Construire `webapp-backoffice`
       - name: Build webapp-backoffice
         run: |
           cd webapp-backoffice
           yarn build
           nohup yarn start &
 
-      # 7. Construire `webapp-form`
+      # 8. Construire `webapp-form`
       - name: Build webapp-form
         run: |
           cd webapp-form
           yarn build
           nohup yarn startB &
 
-      # 8. Attendre que les services soient prêts
+      # 9. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
@@ -87,16 +107,19 @@ jobs:
           echo "Waiting for MailHog to be ready..."
           until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
 
-      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
+          echo "Waiting for Elasticsearch to be ready..."
+          until curl -s --insecure https://localhost:9200/_cluster/health > /dev/null; do echo "Waiting for Elasticsearch..."; sleep 5; done
+
+      # 10. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.js" --headed --browser chrome
 
-      # 10. Vérifier si MailHog reçoit les emails
+      # 11. Vérifier si MailHog reçoit les emails
       - name: Check MailHog for received emails
         run: curl http://localhost:8025/api/v2/messages
 
-      # 11. Arrêter les applications démarrées
+      # 12. Arrêter les applications démarrées
       - name: Stop applications
         run: |
           pkill -f "yarn start" || true
