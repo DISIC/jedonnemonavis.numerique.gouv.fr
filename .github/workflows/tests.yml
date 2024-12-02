@@ -27,9 +27,6 @@ jobs:
       elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.12.1
         env:
-          - discovery.type: single-node
-          - xpack.security.enabled: true
-          - ES_JAVA_OPTS: -Xms512m -Xmx512m
           - ELASTIC_PASSWORD: ${{ secrets.ES_ADDON_PASSWORD }}
         ports:
           - 9200:9200
