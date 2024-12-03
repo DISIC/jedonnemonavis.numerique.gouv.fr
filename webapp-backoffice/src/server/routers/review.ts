@@ -23,6 +23,7 @@ export const reviewRouter = router({
 				end_date: z.string().optional(),
 				newReviews: z.boolean().optional(),
 				needLogging: z.boolean().optional().default(false),
+				loggingFromMail: z.boolean().optional(),
 				filters: z
 					.object({
 						satisfaction: z.array(z.string()).optional(),
@@ -145,7 +146,7 @@ export const reviewRouter = router({
 					await ctx.prisma.userEvent.create({
 						data: {
 							user_id: parseInt(user.id),
-							action: 'service_reviews_view',
+							action: input.loggingFromMail ? 'service_reviews_report_view' : 'service_reviews_view',
 							product_id: product_id,
 							metadata: input
 						}

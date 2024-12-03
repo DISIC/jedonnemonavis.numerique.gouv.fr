@@ -43,7 +43,7 @@ function getEmailWithLayout(content: string) {
 		<body>
 			<div class="container">
 				<div class="header">
-					<img src="https://jdma-develop.cleverapps.io/assets/JDMA_Banner.png"/>
+					<img src="https://jedonnemonavis.numerique.gouv.fr/assets/JDMA_Banner.png"/>
 				</div>
 				${content}
 				<p>
@@ -333,19 +333,21 @@ export function getEmailNotificationsHtml(
     </div>
     <ul style='list-style: none; margin: 0px; padding: 0px;'>
     ${products.map(p => {
-			return `<li style='border: 1px solid #e0e0e0; padding: 16px;'>
-        <div style='display: flex; flex-direction: row; justify-content: space-between; align-items: center;'>
-          <div style='width: 70%;'>
-            <p style='color:#000091; font-weight: bold; font-size: 16px; line-height: 24px;'>${p.title}</p>
-          </div>
-          <div style='display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; width: 30%;'>
-            <p style='font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px; margin-bottom: 4px; text-align: left;'> +${formatNbReviews(p.nbReviews)}</p>
-            <a style='font-size: 12px; line-height: 20px;' href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews" target="_blank">Voir les nouveaux avis</a>
-          </div>
-        </div>
-      </li>`;
-		})}
-      </ul>
+		return `
+			<li style='border: 1px solid #e0e0e0; padding: 16px; margin-top: 2rem'>
+				<div style='display: flex; flex-direction: row; justify-content: space-between; align-items: center;'>
+				<div style='width: 70%;'>
+					<p style='color:#000091; font-weight: bold; font-size: 16px; line-height: 24px;'>${p.title}</p>
+				</div>
+				<div style='display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; width: 30%;'>
+					<p style='font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px; margin-bottom: 4px; text-align: left;'> +${formatNbReviews(p.nbReviews)}</p>
+					<a style='font-size: 12px; line-height: 20px;' href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true" target="_blank">Voir les avis</a>
+				</div>
+				</div>
+			</li>`;
+		
+	}).join('')}
+	</ul>
     </div>
 
     <a href="${jdmaUrl}/administration/dashboard/products" target="_blank">Voir plus de détails sur votre tableau de bord JDMA</a>

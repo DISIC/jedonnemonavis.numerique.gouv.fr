@@ -425,39 +425,40 @@ export const openAPIRouter = router({
 				});
 
 				// Associate users with accessible products and send mails
-				const userProductAssociations = users.map((user) => {
+				const userProductAssociations = [];
+
+				for (let i = 0; i < users.length; i++) {
+					const user = users[i];
 					const accessibleProductIds = [
 						...user.accessRights.map((ar) => ar.product_id),
-						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id))
+						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id)),
 					];
 
 					const accessibleProducts = user.role.includes("admin")
 						? products
-							.sort((a, b) => b.reviewCount - a.reviewCount)
-							.slice(0, 10)
+								.sort((a, b) => b.reviewCount - a.reviewCount)
+								.slice(0, 10)
 						: products
-							.filter((product) => accessibleProductIds.includes(product.productId))
-							.sort((a, b) => b.reviewCount - a.reviewCount)
-							.slice(0, 10);
+								.filter((product) => accessibleProductIds.includes(product.productId))
+								.sort((a, b) => b.reviewCount - a.reviewCount)
+								.slice(0, 10);
 
 					const totalNewReviews = accessibleProducts.reduce((sum, product) => sum + product.reviewCount, 0);
 
-					if(accessibleProducts.length > 0) {
+					if (accessibleProducts.length > 0) {
 						const email = getEmailNotificationsHtml(
-							user.id, 
-							scope, 
-							totalNewReviews, 
+							user.id,
+							scope,
+							totalNewReviews,
 							startDate,
 							endDate,
-							accessibleProducts.map((ap) => {
-								return {
-									title: ap.title,
-									id: ap.productId,
-									nbReviews: ap.reviewCount
-								}}
-							)
+							accessibleProducts.map((ap) => ({
+								title: ap.title,
+								id: ap.productId,
+								nbReviews: ap.reviewCount,
+							}))
 						);
-			
+
 						sendMail(
 							'Nouveaux avis JDMA',
 							user.email,
@@ -466,12 +467,17 @@ export const openAPIRouter = router({
 						);
 					}
 
-					return {
+					userProductAssociations.push({
 						userEmail: user.email,
 						userId: user.id,
-						accessibleProducts
-					};
-				});
+						accessibleProducts,
+					});
+
+					if ((i + 1) % 10 === 0) {
+						console.log(`Pausing mailing after ${i + 1} users...`);
+						await new Promise((resolve) => setTimeout(resolve, 5000));
+					}
+				}
 
 				scopeResult.users = userProductAssociations;
 			}

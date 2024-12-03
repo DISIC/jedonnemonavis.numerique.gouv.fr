@@ -76,6 +76,8 @@ const ProductReviewsPage = (props: Props) => {
 	const [buttonId, setButtonId] = React.useState<number>();
 	const [newReviewHandled, setNewReviewHandled] =
 		React.useState<boolean>(false);
+	const { fromMail } = router.query;
+	const isFromMail = fromMail === 'true';
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
@@ -139,7 +141,8 @@ const ProductReviewsPage = (props: Props) => {
 			sort: sort,
 			filters: filters,
 			newReviews: newReviews,
-			needLogging: true
+			needLogging: true,
+			loggingFromMail: isFromMail
 		},
 		{
 			initialData: {

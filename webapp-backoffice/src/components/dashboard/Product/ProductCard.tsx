@@ -725,6 +725,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	cardSkeleton: {},
 	productTitle: {
 		fontSize: '18px',
+		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
 		backgroundImage: 'none',
@@ -755,7 +756,8 @@ const useStyles = tss.withName(ProductCard.name).create({
 		gap: fr.spacing('2v')
 	},
 	reviewWrapper: {
-		display: 'flex'
+		display: 'flex',
+		justifyContent: 'space-between'
 	},
 	notifSpan: {
 		display: 'block',
