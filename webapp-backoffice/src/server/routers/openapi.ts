@@ -431,10 +431,14 @@ export const openAPIRouter = router({
 						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id))
 					];
 
-					const accessibleProducts = products
-						.filter((product) => accessibleProductIds.includes(product.productId))
-						.sort((a, b) => b.reviewCount - a.reviewCount)
-						.slice(0, 10);
+					const accessibleProducts = user.role.includes("admin")
+						? products
+							.sort((a, b) => b.reviewCount - a.reviewCount)
+							.slice(0, 10)
+						: products
+							.filter((product) => accessibleProductIds.includes(product.productId))
+							.sort((a, b) => b.reviewCount - a.reviewCount)
+							.slice(0, 10);
 
 					const totalNewReviews = accessibleProducts.reduce((sum, product) => sum + product.reviewCount, 0);
 
