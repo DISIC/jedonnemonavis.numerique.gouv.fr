@@ -49,6 +49,8 @@ const ObservatoireStats = ({
 					satisfaction_count: 0,
 					comprehension_count: 0,
 					contact_count: 0,
+					contactReachability_count: 0,
+					contactSatisfaction_count: 0,
 					autonomy_count: 0
 				}
 			}
