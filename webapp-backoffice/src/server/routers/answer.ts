@@ -1150,8 +1150,7 @@ export const answerRouter = router({
 					const [, answer_text] = sb.key.split('#');
 					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
 				}, 0) /
-					contactReachability_count) *
-				10;
+					contactReachability_count);
 
 			const contactSatisfaction_count = contactSatisfactionBucket.reduce(
 				(sum, sb) => sum + sb.doc_count,
