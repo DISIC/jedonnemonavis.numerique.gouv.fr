@@ -133,6 +133,7 @@ const DashBoard = () => {
 
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
+		console.log('title : ', productTitle);
 		product_modal.open();
 	};
 
@@ -146,6 +147,7 @@ const DashBoard = () => {
 				<ProductModal
 					modal={product_modal}
 					fromEmptyState={fromEmptyState}
+					savedTitle={productTitle}
 					onSubmit={() => {
 						setSearch('');
 						if (filters.filter === 'created_at') {
