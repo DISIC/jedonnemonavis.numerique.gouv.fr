@@ -43,6 +43,7 @@ interface Props {
 	modal: CustomModalProps;
 	product?: Product;
 	fromEmptyState?: boolean;
+	savedTitle?: string;
 	onSubmit: () => void;
 	onTitleChange?: (title: string) => void;
 	allowCreateEntity: boolean;
@@ -59,6 +60,7 @@ const ProductModal = (props: Props) => {
 		modal,
 		product,
 		fromEmptyState,
+		savedTitle,
 		onTitleChange,
 		onSubmit,
 		onNewEntity,
@@ -74,6 +76,9 @@ const ProductModal = (props: Props) => {
 	const [selectedValue, setSelectedValue] = React.useState<number | undefined>(
 		newCreatedEntity?.id
 	);
+	const [selectedTitle, setSelectedTitle] = React.useState<string | undefined>(
+		''
+	);
 
 	const {
 		control,
@@ -83,7 +88,9 @@ const ProductModal = (props: Props) => {
 	} = useForm<FormValues>({
 		defaultValues: product
 			? { ...product, urls: product.urls.map(url => ({ value: url })) }
-			: { urls: [{ value: '' }] }
+			: savedTitle
+				? { title: savedTitle }
+				: { urls: [{ value: '' }] }
 	});
 
 	const {
@@ -152,7 +159,7 @@ const ProductModal = (props: Props) => {
 			productId = savedProductResponse.data.id;
 		}
 
-		if (productId && fromEmptyState) {
+		if (productId) {
 			router
 				.push(`/administration/dashboard/product/${productId}/buttons`)
 				.then(() => {
@@ -211,6 +218,10 @@ const ProductModal = (props: Props) => {
 		setSelectedValue(newCreatedEntity?.id);
 	}, [newCreatedEntity]);
 
+	useEffect(() => {
+		setSelectedTitle(savedTitle);
+	}, [modalOpen]);
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -248,6 +259,9 @@ const ProductModal = (props: Props) => {
 						name="title"
 						rules={{ required: 'Ce champ est obligatoire' }}
 						render={({ field: { onChange, value, name } }) => {
+							useEffect(() => {
+								onChange(selectedTitle);
+							}, [selectedTitle]);
 							return (
 								<Input
 									label={
@@ -261,7 +275,6 @@ const ProductModal = (props: Props) => {
 											onChange(e);
 											if (onTitleChange) onTitleChange(e.target.value);
 										},
-										defaultValue: value,
 										value,
 										name,
 										required: true

@@ -84,28 +84,32 @@ const ApiKeyHandler = (props: Props) => {
 							'fr-mb-1w'
 						)}
 					>
-						<div
-							className={fr.cx(
-								'fr-col',
-								'fr-col-12',
-								'fr-col-md-6',
-								'fr-hidden',
-								'fr-unhidden-lg'
-							)}
-						>
-							<b>Clé</b>
-						</div>
-						<div
-							className={fr.cx(
-								'fr-col',
-								'fr-col-12',
-								'fr-col-md-6',
-								'fr-hidden',
-								'fr-unhidden-lg'
-							)}
-						>
-							<b>Dernière utilisation</b>
-						</div>
+						{apiKeys.length > 0 && (
+							<>
+								<div
+									className={fr.cx(
+										'fr-col',
+										'fr-col-12',
+										'fr-col-md-6',
+										'fr-hidden',
+										'fr-unhidden-lg'
+									)}
+								>
+									<b>Clé</b>
+								</div>
+								<div
+									className={fr.cx(
+										'fr-col',
+										'fr-col-12',
+										'fr-col-md-6',
+										'fr-hidden',
+										'fr-unhidden-lg'
+									)}
+								>
+									<b>Dernière utilisation</b>
+								</div>
+							</>
+						)}
 					</div>
 					{apiKeys.map((item, index) => (
 						<div
