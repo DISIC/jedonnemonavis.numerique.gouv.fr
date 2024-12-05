@@ -45,6 +45,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						alt: 'Informations'
 					}
 				},
+				/*
 				{
 					text: 'Notifications',
 					isActive:
@@ -55,6 +56,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						alt: 'Notifications'
 					}
 				}
+				*/
 			]
 		: [
 				{

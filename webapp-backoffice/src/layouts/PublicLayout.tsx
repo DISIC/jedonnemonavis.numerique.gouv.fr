@@ -168,7 +168,8 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								/>
 								Informations personnelles
 							</MenuItem>
-							{
+							{ 
+							/*
 								<MenuItem
 									className={cx(fr.cx('fr-p-4v'), classes.item)}
 									onClick={e => {
@@ -187,6 +188,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 									/>
 									Notifications
 								</MenuItem>
+							*/
 							}
 							<MenuItem
 								className={cx(
