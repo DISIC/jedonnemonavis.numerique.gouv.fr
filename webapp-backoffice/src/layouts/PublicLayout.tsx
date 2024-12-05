@@ -12,6 +12,7 @@ import { tss } from 'tss-react/dsfr';
 import { Menu, MenuItem, Skeleton } from '@mui/material';
 import Button from '@codegouvfr/react-dsfr/Button';
 import router from 'next/router';
+import { push } from '@socialgouv/matomo-next';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -35,6 +36,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		event.preventDefault();
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'Account', 'Open-Menu']);
 	};
 	const handleClose = (
 		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
@@ -53,7 +55,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			displayProcessed: false
 		},
 		{
-			enabled: session?.user.role.includes('admin'),
+			enabled: session?.user?.role?.includes('admin') ?? false,
 			initialData: {
 				data: [],
 				metadata: {
@@ -166,26 +168,26 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								/>
 								Informations personnelles
 							</MenuItem>
-							{/*
-									<MenuItem
-										className={cx(fr.cx('fr-p-4v'), classes.item)}
-										onClick={e => {
-											handleClose(e);
-											router.push(
-												`/administration/dashboard/user/${session?.user.id}/notifications`
-											);
-										}}
-									>
-										<span
-											className={fr.cx(
-												'fr-icon-notification-3-line',
-												'fr-icon--sm',
-												'fr-mr-1-5v'
-											)}
-										/>
-										Notifications
-									</MenuItem>
-								*/}
+							{
+								<MenuItem
+									className={cx(fr.cx('fr-p-4v'), classes.item)}
+									onClick={e => {
+										handleClose(e);
+										router.push(
+											`/administration/dashboard/user/${session?.user.id}/notifications`
+										);
+									}}
+								>
+									<span
+										className={fr.cx(
+											'fr-icon-notification-3-line',
+											'fr-icon--sm',
+											'fr-mr-1-5v'
+										)}
+									/>
+									Notifications
+								</MenuItem>
+							}
 							<MenuItem
 								className={cx(
 									fr.cx('fr-pb-2v', 'fr-pt-4v'),
@@ -201,6 +203,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 									priority="tertiary"
 									onClick={() => {
 										signOut();
+										push(['trackEvent', 'Account', 'Disconnect']);
 									}}
 								>
 									Se déconnecter
@@ -360,6 +363,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			<div id="footer" tabIndex={-1}>
 				<Footer
 					accessibility="non compliant"
+					accessibilityLinkProps={{
+						href: '/public/accessibility'
+					}}
 					bottomItems={[
 						{
 							text: 'Données personnelles',

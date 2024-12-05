@@ -21,6 +21,7 @@ import { useRouter } from 'next/router';
 import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -136,7 +137,10 @@ const ProductButtonsPage = (props: Props) => {
 							priority="secondary"
 							iconPosition="right"
 							iconId="ri-add-box-line"
-							onClick={() => handleModalOpening('create')}
+							onClick={() => {
+								handleModalOpening('create');
+								push(['trackEvent', 'Product', 'Modal-Create-button']);
+							}}
 						>
 							Créer un bouton
 						</Button>
@@ -222,36 +226,6 @@ const ProductButtonsPage = (props: Props) => {
 			</div>
 
 			<div>
-				{displayFilters && (
-					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<p
-							className={fr.cx(
-								'fr-mb-0',
-								'fr-text--bold',
-								'fr-text--sm',
-								'fr-pt-1w'
-							)}
-							onClick={() =>
-								updateFilters({
-									...filters,
-									filter:
-										filters.filter === 'title:asc' ? 'title:desc' : 'title:asc'
-								})
-							}
-						>
-							Nom du bouton{' '}
-							<i
-								className={fr.cx(
-									'fr-icon--sm',
-									'fr-text--bold',
-									filters.filter === 'title:asc'
-										? 'ri-arrow-up-s-line'
-										: 'ri-arrow-down-s-line'
-								)}
-							/>
-						</p>
-					</div>
-				)}
 				{isLoadingButtons ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />

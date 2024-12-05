@@ -13,6 +13,7 @@ import { tss } from 'tss-react/dsfr';
 import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { push } from '@socialgouv/matomo-next';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -114,6 +115,7 @@ const EntityRightsModal = (props: Props) => {
 			user_email: userAddEmail,
 			entity_id: entity?.id || -1
 		});
+		push(['trackEvent', 'BO - Entities', `Invite-Admin`]);
 	};
 
 	const handleActionsButtons = (

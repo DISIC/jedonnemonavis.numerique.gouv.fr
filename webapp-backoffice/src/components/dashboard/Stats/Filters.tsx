@@ -152,6 +152,7 @@ const Filters = ({
 					onSubmit={e => {
 						e.preventDefault();
 						submit();
+						push(['trackEvent', 'Product - Stats', 'View-Chart']);
 					}}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-5')}>

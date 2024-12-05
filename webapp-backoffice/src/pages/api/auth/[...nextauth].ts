@@ -42,7 +42,13 @@ export const authOptions: NextAuthOptions = {
 				token.role = user.role;
 			}
 			return token;
-		}
+		},
+		async redirect({ url, baseUrl }) {
+		  if (url.startsWith(baseUrl)) {
+			return url;
+		  }
+		  return baseUrl;
+		},
 	},
 	providers: [
 		CredentialsProvider({
@@ -89,6 +95,15 @@ export const authOptions: NextAuthOptions = {
 				if (!isPasswordCorrect) {
 					return null;
 				}
+
+				const logSignIn = await prisma.userEvent.create({
+					data: {
+						user_id : user.id,
+						action: 'user_signin',
+						created_at: new Date(),
+						metadata: {}
+					}
+				})
 
 				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}

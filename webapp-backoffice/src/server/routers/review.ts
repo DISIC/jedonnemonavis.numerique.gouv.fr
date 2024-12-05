@@ -9,7 +9,7 @@ import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
 import { TRPCError } from '@trpc/server';
 
 export const reviewRouter = router({
-	getList: publicProcedure
+	getList: protectedProcedure
 		.input(
 			z.object({
 				numberPerPage: z.number(),
@@ -21,7 +21,9 @@ export const reviewRouter = router({
 				search: z.string().optional(),
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
-				button_id: z.number().optional(),
+				newReviews: z.boolean().optional(),
+				needLogging: z.boolean().optional().default(false),
+				loggingFromMail: z.boolean().optional(),
 				filters: z
 					.object({
 						satisfaction: z.array(z.string()).optional(),
@@ -29,7 +31,8 @@ export const reviewRouter = router({
 						needVerbatim: z.boolean().optional(),
 						needOtherDifficulties: z.boolean().optional(),
 						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional()
+						help: z.array(z.string()).optional(),
+						buttonId: z.array(z.string()).optional()
 					})
 					.optional()
 			})
@@ -40,6 +43,7 @@ export const reviewRouter = router({
 				metadata: z.object({
 					countFiltered: z.number(),
 					countAll: z.number(),
+					countNew: z.number(),
 					countForm1: z.number(),
 					countForm2: z.number()
 				})
@@ -56,6 +60,18 @@ export const reviewRouter = router({
 				}
 			});
 
+			const lastSeenReview = await ctx.prisma.userEvent.findMany({
+				where: {
+					user_id: parseInt(ctx.session?.user?.id),
+					action: 'service_reviews_view',
+					product_id: product_id
+				},
+				orderBy: {
+					created_at: 'desc'
+				},
+				take: 1
+			})
+
 			if (!product?.isPublic && !ctx.session?.user) {
 				throw new TRPCError({
 					code: 'UNAUTHORIZED',
@@ -63,7 +79,7 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [reviews, countFiltered, countAll, countForm1, countForm2] =
+			const [reviews, countFiltered, countAll, countNew, countForm1, countForm2] =
 				await Promise.all([
 					ctx.prisma.review.findMany({
 						where,
@@ -100,6 +116,16 @@ export const reviewRouter = router({
 							product_id: input.product_id
 						}
 					}),
+					lastSeenReview[0] ? ctx.prisma.review.count({
+						where: {
+							product_id: input.product_id,
+							...(lastSeenReview[0] && {
+								created_at: {
+									gte: lastSeenReview[0].created_at
+								}
+							})
+						}
+					}) : 0,
 					ctx.prisma.review.count({
 						where: {
 							...where,
@@ -114,9 +140,23 @@ export const reviewRouter = router({
 					})
 				]);
 
+			if(input.needLogging) {
+				const user = ctx.session?.user;
+				if(user) {
+					await ctx.prisma.userEvent.create({
+						data: {
+							user_id: parseInt(user.id),
+							action: input.loggingFromMail ? 'service_reviews_report_view' : 'service_reviews_view',
+							product_id: product_id,
+							metadata: input
+						}
+					});
+				}
+			}
+
 			return {
 				data: reviews,
-				metadata: { countFiltered, countAll, countForm1, countForm2 }
+				metadata: { countFiltered, countAll, countNew, countForm1, countForm2 }
 			};
 		}),
 

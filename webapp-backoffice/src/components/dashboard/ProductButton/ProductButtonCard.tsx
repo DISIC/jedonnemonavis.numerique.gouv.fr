@@ -19,6 +19,7 @@ const ProductButtonCard = (props: Props) => {
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Product', `Open-Menu`]);
 	};
 	const handleClose = () => {
 		setAnchorEl(null);

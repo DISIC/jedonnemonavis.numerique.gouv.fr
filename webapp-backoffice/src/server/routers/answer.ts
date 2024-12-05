@@ -1013,7 +1013,8 @@ export const answerRouter = router({
 				product_id: z.string() /* To change to button_id */,
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
-				isXWiki: z.boolean().optional()
+				isXWiki: z.boolean().optional(),
+				needLogging: z.boolean().optional().default(false)
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -1139,16 +1140,17 @@ export const answerRouter = router({
 			const { count: comprehension_count, average: comprehension_average } =
 				calculateBucketsAverage(comprehensionBuckets, comprehensionMarks);
 
+			const contactReachability_count = contactReachabilityBucket.reduce(
+				(sum, sb) => sum + (sb.doc_count || 0),
+				0
+			);
+
 			const contactReachability_average =
 				(contactReachabilityBucket.reduce((sum, sb) => {
 					const [, answer_text] = sb.key.split('#');
 					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
 				}, 0) /
-					contactReachabilityBucket.reduce(
-						(sum, sb) => sum + (sb.doc_count || 0),
-						0
-					)) *
-				10;
+					contactReachability_count);
 
 			const contactSatisfaction_count = contactSatisfactionBucket.reduce(
 				(sum, sb) => sum + sb.doc_count,
@@ -1209,8 +1211,24 @@ export const answerRouter = router({
 				satisfaction_count,
 				comprehension_count,
 				contact_count,
+				contactReachability_count,
+				contactSatisfaction_count,
 				autonomy_count
 			};
+
+			if(input.needLogging) {
+				const user = ctx.session?.user;
+				if(user) {
+					await ctx.prisma.userEvent.create({
+						data: {
+							user_id: parseInt(user.id),
+							action: 'service_stats_view',
+							product_id: parseInt(product_id),
+							metadata: input
+						}
+					});
+				}
+			}
 
 			return { data: returnValue, metadata };
 		})

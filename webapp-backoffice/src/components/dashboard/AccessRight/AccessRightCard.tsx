@@ -7,6 +7,7 @@ import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
 import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -23,6 +24,7 @@ const ProductAccessCard = (props: Props) => {
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Product', 'Access-rights-Options']);
 	};
 	const handleClose = () => {
 		setAnchorEl(null);
@@ -73,6 +75,7 @@ const ProductAccessCard = (props: Props) => {
 								priority="tertiary"
 								onClick={() => {
 									onButtonClick('remove', accessRight);
+									push(['trackEvent', 'BO - Product', 'Access-rights-Remove']);
 								}}
 								disabled={accessRight.user_email === session?.user?.email}
 								size="small"
@@ -113,6 +116,11 @@ const ProductAccessCard = (props: Props) => {
 											<MenuItem
 												onClick={() => {
 													onButtonClick('resend-email', accessRight);
+													push([
+														'trackEvent',
+														'BO - Product - Access Rights',
+														'Resend Mail'
+													]);
 													handleClose();
 												}}
 											>
@@ -124,6 +132,11 @@ const ProductAccessCard = (props: Props) => {
 										<MenuItem
 											onClick={() => {
 												onButtonClick('remove', accessRight);
+												push([
+													'trackEvent',
+													'BO - Product - Access Rights',
+													'Remove'
+												]);
 												handleClose();
 											}}
 										>
@@ -134,6 +147,11 @@ const ProductAccessCard = (props: Props) => {
 										<MenuItem
 											onClick={() => {
 												onButtonClick('reintegrate', accessRight);
+												push([
+													'trackEvent',
+													'BO - Product - Access Rights',
+													'Restore'
+												]);
 												handleClose();
 											}}
 										>

@@ -7,6 +7,7 @@ import { Toast } from '@/src/components/ui/Toast';
 import { User } from '@/prisma/generated/zod';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 
 interface ProductLayoutProps {
 	isOwn?: Boolean;
@@ -43,17 +44,17 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						href: `/administration/dashboard/user/${session?.user.id}/infos`,
 						alt: 'Informations'
 					}
+				},
+				{
+					text: 'Notifications',
+					isActive:
+						router.pathname ===
+						`/administration/dashboard/user/[id]/notifications`,
+					linkProps: {
+						href: `/administration/dashboard/user/${session?.user.id}/notifications`,
+						alt: 'Notifications'
+					}
 				}
-				/*{
-			text: 'Notifications',
-			isActive:
-				router.pathname ===
-				`/administration/dashboard/user/[id]/notifications`,
-			linkProps: {
-				href: `/administration/dashboard/user/${session?.user.id}/notifications`,
-				alt: 'Notifications'
-			}
-		}*/
 			]
 		: [
 				{
@@ -103,11 +104,17 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 			/>
 			<div className={cx(fr.cx('fr-mt-10v'), classes.title)}>
 				{!isOwn && (
-					<div>
-						<Link href="/administration/dashboard/users">Utilisateurs</Link>
-						<span className={fr.cx('fr-mx-2v')}>{'>'}</span>
-						<span>{`${user.firstName} ${user.lastName}`}</span>
-					</div>
+					<Breadcrumb
+						currentPageLabel={`${user.firstName} ${user.lastName}`}
+						segments={[
+							{
+								label: 'Utilisateurs',
+								linkProps: {
+									href: '/administration/dashboard/users'
+								}
+							}
+						]}
+					/>
 				)}
 				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-12v')} id="account-title">
 					{isOwn ? 'Compte' : `${user.firstName} ${user.lastName}`}

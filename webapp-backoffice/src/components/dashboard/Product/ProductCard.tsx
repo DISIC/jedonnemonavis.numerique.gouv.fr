@@ -26,6 +26,7 @@ import { Toast } from '../../ui/Toast';
 import Image from 'next/image';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
+import { push } from '@socialgouv/matomo-next';
 
 interface Indicator {
 	title: string;
@@ -90,6 +91,7 @@ const ProductCard = ({
 		event.preventDefault();
 		event.stopPropagation();
 		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Product', `Open-Menu`]);
 	};
 
 	const {
@@ -157,6 +159,8 @@ const ProductCard = ({
 					satisfaction_count: 0,
 					comprehension_count: 0,
 					contact_count: 0,
+					contactReachability_count: 0,
+					contactSatisfaction_count: 0,
 					autonomy_count: 0
 				}
 			}
@@ -185,6 +189,7 @@ const ProductCard = ({
 		});
 
 	const nbReviews = reviewsData?.metadata.countAll;
+	const nbNewReviews = reviewsData?.metadata.countNew;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -443,6 +448,7 @@ const ProductCard = ({
 									onClick={e => {
 										e.preventDefault();
 										onConfirmModalRestore.open();
+										push(['trackEvent', 'BO - Product', `Restore`]);
 									}}
 								>
 									Restaurer
@@ -512,11 +518,17 @@ const ProductCard = ({
 														product_id: product.id,
 														user_id: userId
 													});
+													push(['trackEvent', 'BO - Product', `Set-Favorite`]);
 												} else {
 													createFavorite.mutate({
 														product_id: product.id,
 														user_id: userId
 													});
+													push([
+														'trackEvent',
+														'BO - Product',
+														`Unset-Favorite`
+													]);
 												}
 											}}
 										>
@@ -597,13 +609,68 @@ const ProductCard = ({
 												<div
 													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
 												>
-													<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-														Nombre d'avis
-													</p>
 													<div
-														className={fr.cx('fr-label--info', 'fr-text--bold')}
+														className={fr.cx(
+															'fr-grid-row',
+															'fr-grid-row--gutters'
+														)}
 													>
-														{formatNumberWithSpaces(nbReviews)}
+														<div className={fr.cx('fr-col-12')}>
+															<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+																Nombre d'avis
+															</p>
+														</div>
+													</div>
+													<div
+														className={fr.cx(
+															'fr-grid-row',
+															'fr-grid-row--gutters'
+														)}
+													>
+														<div
+															className={cx(
+																classes.reviewWrapper,
+																fr.cx('fr-col-12', 'fr-pt-0')
+															)}
+														>
+															<div
+																className={fr.cx(
+																	'fr-label--info',
+																	'fr-text--bold',
+																	'fr-pt-0-5v'
+																)}
+															>
+																{formatNumberWithSpaces(nbReviews)}
+															</div>
+
+															<div className={fr.cx('fr-label--info')}>
+																{nbNewReviews !== undefined &&
+																	nbNewReviews > 0 && (
+																		<>
+																			<span
+																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
+																			>
+																				<Badge
+																					noIcon
+																					severity="info"
+																					className={cx(fr.cx('fr-ml-4v'))}
+																				>
+																					{`${nbNewReviews <= 9 ? `+${nbNewReviews}` : '9+'}`}
+																				</Badge>
+																			</span>
+																		</>
+																	)}
+															</div>
+															{nbReviews > 0 && (
+																<Link
+																	href={`/administration/dashboard/product/${product.id}/reviews`}
+																	title={`Voir les nouveaux avis pour ${product.title}`}
+																	className={fr.cx('fr-link', 'fr-ml-4v')}
+																>
+																	Voir les avis
+																</Link>
+															)}
+														</div>
 													</div>
 												</div>
 											)}
@@ -660,6 +727,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	cardSkeleton: {},
 	productTitle: {
 		fontSize: '18px',
+		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
 		backgroundImage: 'none',
@@ -688,6 +756,20 @@ const useStyles = tss.withName(ProductCard.name).create({
 	badgesContainer: {
 		display: 'flex',
 		gap: fr.spacing('2v')
+	},
+	reviewWrapper: {
+		display: 'flex',
+		justifyContent: 'space-between'
+	},
+	notifSpan: {
+		display: 'block',
+		backgroundColor: fr.colors.decisions.background.flat.redMarianne.default,
+		color: fr.colors.decisions.background.default.grey.default,
+		borderRadius: '50%',
+		height: '1.4rem',
+		width: '1.4rem',
+		fontSize: '0.8rem',
+		textAlign: 'center'
 	},
 	menuItemDanger: {
 		color: fr.colors.decisions.text.default.error.default

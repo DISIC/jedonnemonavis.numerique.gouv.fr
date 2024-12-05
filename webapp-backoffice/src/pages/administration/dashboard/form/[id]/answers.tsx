@@ -78,9 +78,7 @@ const FormBuilder = (props: Props) => {
 		metadata: { blockCount: blockCount }
 	} = blocksResult;
 
-	React.useEffect(() => {
-		console.log('formBlocks : ', formBlocks);
-	}, [formBlocks]);
+	React.useEffect(() => {}, [formBlocks]);
 
 	const questionTypes = TypeBlocksDescription.filter(
 		t => t.category === 'Questions'

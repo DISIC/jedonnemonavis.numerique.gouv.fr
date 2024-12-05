@@ -4,6 +4,7 @@ import {
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { push } from '@socialgouv/matomo-next';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -262,7 +263,10 @@ const ChartWrapper = ({
 							view === 'chart' && classes.activeButton,
 							view !== 'chart' && classes.inactiveChartBtn
 						)}
-						onClick={() => setView('chart')}
+						onClick={() => {
+							setView('chart');
+							push(['trackEvent', 'Product - Stats', 'View-Chart']);
+						}}
 					>
 						{view === 'chart' && (
 							<span
@@ -280,7 +284,10 @@ const ChartWrapper = ({
 							view === 'table' && classes.activeButton,
 							view !== 'table' && classes.inactiveTableBtn
 						)}
-						onClick={() => setView('table')}
+						onClick={() => {
+							setView('table');
+							push(['trackEvent', 'Product - Stats', 'View-Table']);
+						}}
 					>
 						{view === 'table' && (
 							<span

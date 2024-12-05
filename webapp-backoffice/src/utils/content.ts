@@ -7,8 +7,9 @@ interface MainStructure {
 			| string
 			| {
 					text: string;
-					type?: 'noSpaces' | 'link' | 'mailto' | 'list' | 'subtitle';
+					type?: 'noSpaces' | 'link' | 'mailto' | 'list' | 'subtitle' | 'bold';
 					href?: string;
+					inLine?: boolean;
 			  }
 		)[];
 	};
@@ -188,6 +189,64 @@ export const CGU: MainStructure = {
 				type: 'link',
 				href: 'https://www.cnil.fr/fr/cookies-les-outils-pour-les-maitriser'
 			}
+		]
+	}
+};
+
+export const Accessibility: MainStructure = {
+	intro: {
+		title: '',
+		content: [
+			'La direction interministérielle du numérique (DINUM) s’engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles (et ses applications mobiles et mobilier urbain numérique) conformément à l’article 47 de la loi n°2005-102 du 11 février 2005.'
+		]
+	},
+	intro_p2: {
+		title: '',
+		content: [
+			{text: `Cette déclaration d'accessibilité s'applique à${' '}`, type: 'noSpaces'},
+			{text: " jedonnemonavis.numerique.gouv.fr", type: 'link', href: 'https://jedonnemonavis.numerique.gouv.fr/'},
+		]
+	},
+	state: {
+		title: 'État de conformité',
+		content: [
+			{text: `Le site est `, type:'noSpaces'},
+			{text: `non conforme `, type:'bold'},
+			{text: `avec le référentiel général d’amélioration de l’accessibilité, RGAA version 4.1, en raison de l’absence d’audit de conformité.`, type:'noSpaces'},
+		]
+	},
+	state_p2: {
+		title: '',
+		content: [
+			{text: `Un audit de conformité est en cours. L’état de conformité sera mis à jour lorsque l’audit sera terminé.`, type:'noSpaces'}
+		]
+	},
+	info_contact: {
+		title: 'Retour d’information et contact',
+		content: [
+			{text: `Si vous n’arrivez pas à accéder à un contenu ou à un service, vous pouvez nous contacter par courriel à l’adresse `, type:'noSpaces'},
+			{text: `contact.jdma@design.numerique.gouv.fr `, type:'bold'},
+			{text: `pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme.`, type:'noSpaces'},
+		]
+	},
+	rights: {
+		title: 'Défenseur des droits',
+		content: [
+			{text: `Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.`, type:'noSpaces'}
+		]
+	},
+	rights_p2: {
+		title: '',
+		content: [
+			{text: `Plusieurs moyens sont à votre disposition :`, type:'noSpaces'}
+		]
+	},
+	rights_p3: {
+		title: '',
+		content: [
+			{text: `Écrire un message au Défenseur des droits (https://www.defenseurdesdroits.fr/nous-contacter-355)`, type:'list'},
+			{text: `Contacter le délégué du Défenseur des droits près de chez vous (https://www.defenseurdesdroits.fr/carte-des-delegues)`, type:'list'},
+			{text: `Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) Défenseur des droits Libre réponse 71120 75342 Paris CEDEX 07`, type:'list'},
 		]
 	}
 };

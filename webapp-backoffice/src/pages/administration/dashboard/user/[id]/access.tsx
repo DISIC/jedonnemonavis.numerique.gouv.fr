@@ -13,6 +13,7 @@ import { UserRole } from '@prisma/client';
 import AccessCard from '@/src/components/dashboard/Account/Informations/accessCard';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	isOwn: Boolean;
@@ -61,8 +62,6 @@ const UserAccess: React.FC<Props> = props => {
 	);
 
 	const user = userResult?.data;
-
-	console.log('user : ', user);
 
 	const editUser = trpc.user.update.useMutation({
 		onSuccess: async () => {
@@ -248,6 +247,7 @@ const UserAccess: React.FC<Props> = props => {
 											type="button"
 											onClick={() => {
 												onConfirmModal.open();
+												push(['trackEvent', 'Users', 'Set-Superadmin']);
 											}}
 											nativeButtonProps={{
 												'aria-label': 'Attribuer le rôle superadmin',
@@ -272,6 +272,7 @@ const UserAccess: React.FC<Props> = props => {
 										type="button"
 										onClick={() => {
 											onConfirmModal.open();
+											push(['trackEvent', 'Users', 'Unset-Superadmin']);
 										}}
 										nativeButtonProps={{
 											'aria-label': 'Retirer le rôle superadmin',
