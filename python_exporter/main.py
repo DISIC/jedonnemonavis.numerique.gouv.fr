@@ -165,7 +165,7 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
         <body>
             <div class="container">
                 <div class="header">
-                    <img src="https://jdma-develop.cleverapps.io/assets/JDMA_Banner.png"/>
+                    <img src="https://jedonnemonavis.numerique.gouv.fr/assets/JDMA_Banner.png"/>
                 </div>
                 <div>
                     <p>Bonjour,<br><br>
