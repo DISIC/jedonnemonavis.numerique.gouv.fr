@@ -82,10 +82,6 @@ const ExportModal = (props: Props) => {
 		setEndDate(JSON.parse(params).endDate || null);
 	}, [params]);
 
-	React.useEffect(() => {
-		console.log('startDate : ', startDate, 'endDate : ', endDate);
-	}, [startDate, endDate]);
-
 	const getModalContent = () => {
 		if (isLoadingExport)
 			return (
