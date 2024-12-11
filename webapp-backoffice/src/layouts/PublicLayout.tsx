@@ -13,6 +13,7 @@ import { Menu, MenuItem, Skeleton } from '@mui/material';
 import Button from '@codegouvfr/react-dsfr/Button';
 import router from 'next/router';
 import { push } from '@socialgouv/matomo-next';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -168,8 +169,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 								/>
 								Informations personnelles
 							</MenuItem>
-							{ 
-							/*
+							{/*
 								<MenuItem
 									className={cx(fr.cx('fr-p-4v'), classes.item)}
 									onClick={e => {
@@ -188,8 +188,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 									/>
 									Notifications
 								</MenuItem>
-							*/
-							}
+							*/}
 							<MenuItem
 								className={cx(
 									fr.cx('fr-pb-2v', 'fr-pt-4v'),
@@ -269,7 +268,22 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			{
 				text: (
 					<div>
-						Demandes d'accès <span>{userRequestsResult.metadata.count}</span>
+						Demandes d'accès
+						<Badge
+							severity="warning"
+							noIcon
+							small={true}
+							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+						>
+							<i
+								className={fr.cx(
+									'fr-icon-notification-3-line',
+									'fr-mr-1v',
+									'fr-p-1v'
+								)}
+							/>
+							{` ${userRequestsResult.metadata.count}`}
+						</Badge>
 					</div>
 				),
 				linkProps: {
@@ -419,6 +433,13 @@ const useStyles = tss
 		},
 		item: {
 			borderTop: `solid ${fr.colors.decisions.border.default.grey.default} 1px`
+		},
+		badgeAccess: {
+			i: {
+				['&::before']: {
+					'--icon-size': '1rem'
+				}
+			}
 		},
 		inMenu: {
 			display: 'block',

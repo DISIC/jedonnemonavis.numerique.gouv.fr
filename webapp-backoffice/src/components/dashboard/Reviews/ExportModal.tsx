@@ -132,7 +132,7 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Format XLSX`,
+								label: `Format XLSX (requis pour excel)`,
 								nativeInputProps: {
 									value: 'xls',
 									onClick: () => {
