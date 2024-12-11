@@ -276,6 +276,14 @@ def estimate_line_count(cell_text, wrap_length=30):
     lines = cell_text.split('\n')
     return sum((len(line) // wrap_length) + 1 for line in lines)
 
+def parse_date(date_str, default_date, date_format='%Y-%m-%d'):
+    try:
+        # Tente de convertir la date
+        return datetime.strptime(date_str, date_format)
+    except (ValueError, TypeError):
+        # Si erreur (mauvais format ou None), retourne la date par défaut
+        return datetime.strptime(default_date, date_format)
+
 def format_excel(writer, df, sheet_name):
     workbook = writer.book
     worksheet = writer.sheets["Avis"]
@@ -496,8 +504,8 @@ def process_exports(conn):
     {f'AND {filters_query}' if filters_query else ''}
     """
 
-    start_date = datetime.strptime(filter_params.get('startDate', '2018-01-01'), '%Y-%m-%d')
-    end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')) + ' 23:59', '%Y-%m-%d %H:%M')
+    start_date = parse_date(filter_params.get('startDate', '2018-01-01'), '2018-01-01')
+    end_date = parse_date(datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')) + ' 23:59', '%Y-%m-%d %H:%M'), datetime.strptime(datetime.now().strftime('%Y-%m-%d') + ' 23:59', '%Y-%m-%d %H:%M'))
     count_params = [product_id, start_date, end_date] + filters_values
     total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
     print(f"{total_reviews} avis concernés, format d'export : {export_format}")
