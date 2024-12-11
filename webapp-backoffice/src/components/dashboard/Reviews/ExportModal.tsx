@@ -39,6 +39,8 @@ const ExportModal = (props: Props) => {
 
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
 	const [format, setFormat] = React.useState<'csv' | 'xls' | null>(null);
+	const [startDate, setStartDate] = React.useState<string | null>(null);
+	const [endDate, setEndDate] = React.useState<string | null>(null);
 
 	const {
 		data: exportCsv,
@@ -75,6 +77,11 @@ const ExportModal = (props: Props) => {
 		});
 	};
 
+	React.useEffect(() => {
+		setStartDate(JSON.parse(params).startDate || null);
+		setEndDate(JSON.parse(params).endDate || null);
+	}, [params]);
+
 	const getModalContent = () => {
 		if (isLoadingExport)
 			return (
@@ -96,6 +103,10 @@ const ExportModal = (props: Props) => {
 					<RadioButtons
 						legend="Que souhaitez-vous télécharger ?"
 						name="choice"
+						hintText={
+							(!startDate || !endDate) &&
+							`Les formats de date de vos filtres sont actuellement invalides`
+						}
 						options={[
 							{
 								label: `Télécharger tous les avis (${counts.countAll} avis)`,
@@ -112,7 +123,8 @@ const ExportModal = (props: Props) => {
 									value: 'filtered',
 									onClick: () => {
 										setChoice('filtered');
-									}
+									},
+									disabled: !startDate || !endDate
 								}
 							}
 						]}
