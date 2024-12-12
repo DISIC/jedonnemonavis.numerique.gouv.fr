@@ -28,6 +28,28 @@ describe('jdma-answer-check', () => {
 				});
 		});
 	});
+
+	it('should navigate to the product stats page and verify the review count matching the review count in the dashboard page', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/5/stats`);
+		cy.get('div.fr-tile')
+			.find('h3.fr-tile__title')
+			.contains('Avis')
+			.siblings('p')
+			.then($el => {
+				const text = $el.text();
+				const value = parseInt(text);
+				expect(value).to.be.equal(2);
+			});
+	});
+
+	it('should navigate to the review page and find the verbatim in the created review', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/5/reviews`);
+		cy.get('.fr-btn').contains("Plus d'infos").click();
+		cy.get('h2')
+			.contains('Souhaitez-vous nous en dire plus ?')
+			.next('p')
+			.should('contain', 'e2e test content');
+	});
 });
 
 function loginAndNavigate() {
