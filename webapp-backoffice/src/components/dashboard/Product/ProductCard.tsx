@@ -558,7 +558,12 @@ const ProductCard = ({
 										>
 											{indicators.map((indicator, index) => (
 												<div
-													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+													className={fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-sm-6',
+														'fr-col-md-3'
+													)}
 													key={index}
 												>
 													<p
@@ -607,7 +612,12 @@ const ProductCard = ({
 											))}
 											{!isLoadingReviewsCount && nbReviews !== undefined && (
 												<div
-													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+													className={fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-sm-6',
+														'fr-col-md-3'
+													)}
 												>
 													<div
 														className={fr.cx(
@@ -629,8 +639,7 @@ const ProductCard = ({
 													>
 														<div
 															className={cx(
-																classes.reviewWrapper,
-																fr.cx('fr-col-12', 'fr-pt-0')
+																fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
 															)}
 														>
 															<div
@@ -642,7 +651,13 @@ const ProductCard = ({
 															>
 																{formatNumberWithSpaces(nbReviews)}
 															</div>
-
+														</div>
+														<div
+															className={cx(
+																classes.reviewWrapper,
+																fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
+															)}
+														>
 															<div className={fr.cx('fr-label--info')}>
 																{nbNewReviews !== undefined &&
 																	nbNewReviews > 0 && (
@@ -651,11 +666,10 @@ const ProductCard = ({
 																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
 																			>
 																				<Badge
-																					noIcon
-																					severity="info"
-																					className={cx(fr.cx('fr-ml-4v'))}
+																					severity="new"
+																					className={fr.cx('fr-mr-4v')}
 																				>
-																					{`${nbNewReviews <= 9 ? `+${nbNewReviews}` : '9+'}`}
+																					{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
 																				</Badge>
 																			</span>
 																		</>
@@ -665,7 +679,7 @@ const ProductCard = ({
 																<Link
 																	href={`/administration/dashboard/product/${product.id}/reviews`}
 																	title={`Voir les nouveaux avis pour ${product.title}`}
-																	className={fr.cx('fr-link', 'fr-ml-4v')}
+																	className={fr.cx('fr-link')}
 																>
 																	Voir les avis
 																</Link>
@@ -759,7 +773,10 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	reviewWrapper: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('xl')]: {
+			justifyContent: 'flex-start'
+		}
 	},
 	notifSpan: {
 		display: 'block',
