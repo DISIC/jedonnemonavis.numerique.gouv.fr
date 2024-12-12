@@ -522,6 +522,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: startDate,
 										onChange: e => {
 											setStartDate(e.target.value);
+											setRealStartDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
 											submit();
 										}
