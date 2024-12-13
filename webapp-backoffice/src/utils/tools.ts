@@ -324,7 +324,7 @@ export const getHexaColorFromIntentionText = (intention: string) => {
 		case 'Non':
 			return '#ce0500';
 		case 'Moyen':
-			return '#b34000';
+			return '#716043';
 		case 'Pas de réponse':
 			return '#929292';
 		case 'Très bien':
