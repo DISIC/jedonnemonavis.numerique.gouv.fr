@@ -14,20 +14,20 @@ const HomeStepper = () => {
 	const steps: Step[] = [
 		{
 			number: 1,
-			title: "Inscrivez-vous ou connectez-vous à l'Observatoire"
+			title:
+				'Inscrivez-vous ou connectez-vous à <b>Je donne mon avis (JDMA)</b>'
 		},
 		{
 			number: 2,
-			title: 'Trouvez ou ajoutez votre démarche'
+			title: 'Ajoutez ou rejoignez votre service'
 		},
 		{
 			number: 3,
-			title: 'Installez le bouton je donne mon avis sur votre site'
+			title: 'Installez le bouton JDMA sur votre site'
 		},
 		{
 			number: 4,
-			title:
-				'Retrouvez des avis et des graphiques pertinents sur la page de votre démarche'
+			title: 'Récoltez les avis et consultez les graphiques pertinents'
 		}
 	];
 
@@ -58,7 +58,13 @@ const HomeStepper = () => {
 									)}
 								>
 									<p className={cx(classes.number)}></p>
-									<div className={cx(classes.title)}>{step.title}</div>
+									<div className={cx(classes.title)}>
+										<span
+											dangerouslySetInnerHTML={{
+												__html: step.title
+											}}
+										></span>
+									</div>
 								</div>
 							</li>
 						))}
@@ -93,7 +99,6 @@ const useStyles = tss
 			backgroundColor: fr.colors.decisions.background.alt.grey.default,
 			display: 'flex',
 			flexDirection: 'column',
-			justifyContent: 'center',
 			alignItems: 'center',
 			[fr.breakpoints.down('md')]: {
 				...fr.spacing('margin', { bottom: '3w' })
@@ -126,7 +131,6 @@ const useStyles = tss
 			textAlign: 'center',
 			fontStyle: 'normal',
 			fontSize: '1rem',
-			fontWeight: 700,
 			lineHeight: '1.5rem'
 		}
 	}));
