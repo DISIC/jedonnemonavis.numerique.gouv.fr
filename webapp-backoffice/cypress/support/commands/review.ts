@@ -1,17 +1,27 @@
+Cypress.on('uncaught:exception', err => {
+	if (err.message.includes('Too many requests')) {
+		return false;
+	}
+	return true;
+});
+
+declare global {
+	namespace Cypress {
+		interface Chainable<Subject> {
+			submitCompleteReview(): Chainable<void>;
+		}
+	}
+}
+
 const app_url = Cypress.env('app_form_base_url');
 const app_bo_url = Cypress.env('app_base_url');
 
-describe('jdma-form-review', () => {
-	before(() => {
-		cy.visit(`${app_url}/Demarches/5?button=8`);
-	});
-
-	it('Fill form', () => {
-		fillFormStep1();
-		fillFormStep2();
-		fillFormStep3();
-		fillFormStep4();
-	});
+Cypress.Commands.add('submitCompleteReview', () => {
+	cy.visit(`${app_url}/Demarches/5?button=8`);
+	fillFormStep1();
+	fillFormStep2();
+	fillFormStep3();
+	fillFormStep4();
 });
 
 function fillFormStep1() {
@@ -110,3 +120,5 @@ function getLastTestServiceID() {
 			}
 		});
 }
+
+export {};
