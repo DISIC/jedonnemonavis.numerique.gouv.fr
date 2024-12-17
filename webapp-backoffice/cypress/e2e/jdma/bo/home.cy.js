@@ -85,11 +85,11 @@ describe('jdma-home', () => {
 			);
 		});
 
-		it('should redirect to contact page', () => {
-			checkUrlRedirection(
-				`${selectors.actionButton} h2:contains("Vous avez d'autres questions ?") + a`,
-				'/public/contact'
-			);
+		it('should have mailto to contact email', () => {
+			cy.contains('a', 'contact.jdma@design.numerique.gouv.fr')
+				.should('have.attr', 'href') // Vérifie que l'attribut href existe
+				.and('include', 'mailto:')   // Vérifie qu'il contient "mailto:"
+				.and('eq', 'mailto:contact.jdma@design.numerique.gouv.fr');
 		});
 
 		it('should toggle accordion content visibility', () => {
