@@ -1,6 +1,7 @@
 import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -167,7 +168,7 @@ export const autocompleteFilterOptions = (
 ) => {
 	const filteredOptions = matchSorter(options, inputValue.trim(), {
 		keys: [item => item.label],
-		threshold: matchSorter.rankings.CONTAINS,
+		threshold: matchSorter.rankings.CONTAINS
 	}).slice(0, 4);
 
 	if (includeCreateOption) {
@@ -383,4 +384,30 @@ export const actionMapping: Record<string, TypeAction> = {
 	'entity.update': TypeAction.organisation_update,
 	'adminEntityRight.create': TypeAction.organisation_invite,
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
-  };
+	'button.create': TypeAction.service_button_create
+};
+
+export const handleActionTypeDisplay = (
+	action: TypeAction,
+	metadata: JsonValue
+) => {
+	console.log(metadata);
+	if (!metadata) return '';
+
+	switch (action) {
+		case TypeAction.service_invite:
+			return `Invitation de l'utilisateur ${metadata.json.user_email} au service`;
+		case TypeAction.service_uninvite:
+			return `Désinvitation de l'utilisateur ${metadata.json.user_email} du service`;
+		case TypeAction.organisation_create:
+			return `Création de l'organisation ${metadata.json.entity_name}`;
+		case TypeAction.organisation_update:
+			return `Modification de l'organisation ${metadata.json.entity_name}`;
+		case TypeAction.organisation_invite:
+			return `Invitation de l'utilisateur ${metadata.json.user_email} à l'organisation ${metadata.json.entity_name}`;
+		case TypeAction.organisation_uninvite:
+			return `Désinvitation de l'utilisateur ${metadata.json.user_email} à l'organisation ${metadata.json.entity_name}`;
+		case TypeAction.service_button_create:
+			return `Création du bouton ${metadata.json.title} `;
+	}
+};
