@@ -586,22 +586,15 @@ const ProductCard = ({
 														<p
 															className={cx(
 																fr.cx(
-																	!!indicator.total && indicator.color !== 'new'
-																		? `fr-label--${indicator.color}`
-																		: 'fr-label--disabled',
+																	!(
+																		!!indicator.total &&
+																		indicator.color !== 'new'
+																	) && 'fr-label--disabled',
 																	'fr-text--bold'
 																),
-																classes.indicatorText
+																classes.indicatorText,
+																!!indicator.total && classes[indicator.color]
 															)}
-															style={
-																!!indicator.total && indicator.color === 'new'
-																	? {
-																			color:
-																				fr.colors.decisions.background.flat
-																					.warning.default
-																		}
-																	: undefined
-															}
 														>
 															{!!indicator.total
 																? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
@@ -796,6 +789,18 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	info: {
+		color: fr.colors.decisions.text.default.info.default
+	},
+	error: {
+		color: fr.colors.decisions.text.default.error.default
+	},
+	new: {
+		color: fr.colors.decisions.background.flat.yellowTournesol.default
+	},
+	success: {
+		color: fr.colors.decisions.text.default.success.default
 	}
 });
 

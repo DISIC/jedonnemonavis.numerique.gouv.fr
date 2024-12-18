@@ -47,7 +47,6 @@ const DashBoard = () => {
 	const [inputValue, setInputValue] = React.useState<string>('');
 	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
-	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const [statusProductState, setStatusProductState] = React.useState<{
 		msg: string;
@@ -57,6 +56,7 @@ const DashBoard = () => {
 	const [entityCreated, setEntityCreated] = React.useState<
 		Entity | undefined
 	>();
+	const [productTitle, setProductTitle] = React.useState<string>('');
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -133,7 +133,6 @@ const DashBoard = () => {
 
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
-		console.log('title : ', productTitle);
 		product_modal.open();
 	};
 
