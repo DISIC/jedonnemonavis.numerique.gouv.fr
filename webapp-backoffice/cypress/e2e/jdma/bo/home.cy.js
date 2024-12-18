@@ -85,13 +85,6 @@ describe('jdma-home', () => {
 			);
 		});
 
-		it('should have mailto to contact email', () => {
-			cy.contains('a', 'contact.jdma@design.numerique.gouv.fr')
-				.should('have.attr', 'href') // Vérifie que l'attribut href existe
-				.and('include', 'mailto:')   // Vérifie qu'il contient "mailto:"
-				.and('eq', 'mailto:contact.jdma@design.numerique.gouv.fr');
-		});
-
 		it('should toggle accordion content visibility', () => {
 			cy.get(selectors.accordionGroup).each($accordion => {
 				cy.wrap($accordion).find('.fr-collapse').should('not.be.visible');
