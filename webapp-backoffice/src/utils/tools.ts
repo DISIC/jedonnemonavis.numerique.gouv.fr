@@ -389,25 +389,35 @@ export const actionMapping: Record<string, TypeAction> = {
 
 export const handleActionTypeDisplay = (
 	action: TypeAction,
-	metadata: JsonValue
+	metadata: JsonValue,
+	productTitle: string
 ) => {
-	console.log(metadata);
 	if (!metadata) return '';
 
+	const metadataTyped = metadata as { json: { [key: string]: any } };
+
 	switch (action) {
+		case TypeAction.service_create:
+			return `Création du service ${productTitle}`;
+		case TypeAction.service_update:
+			return `Modification du service ${productTitle}`;
+		case TypeAction.service_archive:
+			return `Archivage du service ${productTitle}`;
+		case TypeAction.service_restore:
+			return `Restauration du service ${productTitle}`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur ${metadata.json.user_email} au service`;
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
 		case TypeAction.service_uninvite:
-			return `Désinvitation de l'utilisateur ${metadata.json.user_email} du service`;
+			return `Désinvitation de l'utilisateur ${metadataTyped.json.user_email} du service`;
 		case TypeAction.organisation_create:
-			return `Création de l'organisation ${metadata.json.entity_name}`;
+			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
-			return `Modification de l'organisation ${metadata.json.entity_name}`;
+			return `Modification de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur ${metadata.json.user_email} à l'organisation ${metadata.json.entity_name}`;
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_uninvite:
-			return `Désinvitation de l'utilisateur ${metadata.json.user_email} à l'organisation ${metadata.json.entity_name}`;
+			return `Désinvitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
-			return `Création du bouton ${metadata.json.title} `;
+			return `Création du bouton ${metadataTyped.json.title} `;
 	}
 };

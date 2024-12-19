@@ -47,34 +47,99 @@ export const userEventRouter = router({
 	getList: protectedProcedure
 		.input(
 			z.object({
-				product_id: z.number()
+				product_id: z.number().optional(),
+				page: z.number(),
+				limit: z.number()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id } = input;
+			const { product_id, page, limit } = input;
+			const skip = (page - 1) * limit;
+			const userId = ctx.session?.user?.id;
 
-			const userEvents = await ctx.prisma.userEvent.findMany({
-				where: {
-					product_id: product_id,
-					action: {
-						in: [
-							TypeAction.service_invite,
-							TypeAction.service_uninvite,
-							TypeAction.organisation_create,
-							TypeAction.organisation_update,
-							TypeAction.organisation_invite,
-							TypeAction.organisation_uninvite,
-							TypeAction.service_button_create
+			// Conditions communes
+			const baseWhereCondition = {
+				...(userId && { user_id: parseInt(userId) })
+			};
+
+			// Requête unifiée avec Prisma
+			const [events, total] = await ctx.prisma.$transaction([
+				ctx.prisma.userEvent.findMany({
+					where: {
+						OR: [
+							{
+								...baseWhereCondition,
+								action: {
+									in: [
+										TypeAction.service_create,
+										TypeAction.service_update,
+										TypeAction.service_archive,
+										TypeAction.service_restore
+									]
+								}
+							},
+							{
+								...baseWhereCondition,
+								product_id: product_id,
+								action: {
+									in: [
+										TypeAction.service_invite,
+										TypeAction.service_uninvite,
+										TypeAction.organisation_create,
+										TypeAction.organisation_update,
+										TypeAction.organisation_invite,
+										TypeAction.organisation_uninvite,
+										TypeAction.service_button_create
+									]
+								}
+							}
+						]
+					},
+					orderBy: {
+						created_at: 'desc'
+					},
+					skip,
+					take: limit
+				}),
+				ctx.prisma.userEvent.count({
+					where: {
+						OR: [
+							{
+								...baseWhereCondition,
+								action: {
+									in: [
+										TypeAction.service_create,
+										TypeAction.service_update,
+										TypeAction.service_archive,
+										TypeAction.service_restore
+									]
+								}
+							},
+							{
+								...baseWhereCondition,
+								product_id: product_id,
+								action: {
+									in: [
+										TypeAction.service_invite,
+										TypeAction.service_uninvite,
+										TypeAction.organisation_create,
+										TypeAction.organisation_update,
+										TypeAction.organisation_invite,
+										TypeAction.organisation_uninvite,
+										TypeAction.service_button_create
+									]
+								}
+							}
 						]
 					}
-				},
-				orderBy: {
-					created_at: 'desc'
+				})
+			]);
+
+			return {
+				data: events,
+				pagination: {
+					total
 				}
-			});
-
-			console.log(userEvents);
-
-			return { data: userEvents };
+			};
 		})
 });
