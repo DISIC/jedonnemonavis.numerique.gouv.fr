@@ -16,6 +16,8 @@ import Head from 'next/head';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
+import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
+import { Entity } from '@/prisma/generated/zod';
 
 interface Props {
 	product: Product;
@@ -31,12 +33,22 @@ const onConfirmModal = createModal({
 	isOpenedByDefault: false
 });
 
+const entityModal = createModal({
+	id: 'entity-modal',
+	isOpenedByDefault: false
+});
+
 const ProductInformationPage = (props: Props) => {
 	const { product } = props;
 
 	const router = useRouter();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
+
+	const [entityCreated, setEntityCreated] = React.useState<
+		Entity | undefined
+	>();
+	const [productTitle, setProductTitle] = React.useState<string>('');
 
 	const { data: entityResult, isLoading: isLoadingEntity } =
 		trpc.entity.getById.useQuery(
@@ -60,6 +72,11 @@ const ProductInformationPage = (props: Props) => {
 	});
 
 	const { classes } = useStyles();
+
+	const handleSubmit = async (newEntity?: Entity) => {
+		setEntityCreated(newEntity);
+		editProductModal.open();
+	};
 
 	return (
 		<ProductLayout product={product}>
@@ -106,8 +123,16 @@ const ProductInformationPage = (props: Props) => {
 				modal={editProductModal}
 				product={product}
 				onSubmit={() => router.replace(router.asPath)}
-				allowCreateEntity={false}
-				onNewEntity={() => {}}
+				allowCreateEntity={true}
+				onNewEntity={() => {
+					editProductModal.close();
+					entityModal.open();
+				}}
+				newCreatedEntity={entityCreated}
+			/>
+			<EntityModal
+				modal={entityModal}
+				onSubmit={newEntity => handleSubmit(newEntity)}
 			/>
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>

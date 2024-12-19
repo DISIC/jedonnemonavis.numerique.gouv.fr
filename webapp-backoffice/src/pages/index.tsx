@@ -86,22 +86,32 @@ export default function Home() {
 
 	const questions: Question[] = [
 		{
-			question: 'Comment installer le bouton Je donne mon avis ?',
+			question: 'Quelles sont les questions posées aux usagers ?',
 			answer:
-				'Il vous suffit de copier-coller une portion de code HTML dans votre site web. Vous pouvez ensuite le personnaliser à votre guise.'
+				'Le formulaire Je donne mon avis est composé d’une question obligatoire et trois questions facultatives. <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3119" target="_blank">Voir un exemple interactif du formulaire.</a>'
 		},
 		{
-			question: 'Est-ce que l’outil Je donne mon avis est gratuit ?',
+			question:
+				'Faut-il vous contacter pour utiliser l’outil Je donne mon avis ?',
 			answer:
-				'Oui, l’outil Je donne mon avis est gratuit pour toutes les administrations publiques.'
+				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
 		},
 		{
-			question: 'Est-ce que l’outil Je donne mon avis est conforme au RGAA ?',
-			answer: 'Oui, l’outil Je donne mon avis est conforme au RGAA.'
+			question:
+				'Puis-je utiliser l’outil Je donne mon avis si mon service ne fait pas partie de Vos démarches essentielles ?',
+			answer:
+				'Votre service ne doit pas être inclus dans <a href="https://observatoire.numerique.gouv.fr/" target="_blank">Vos démarches essentielles</a>. L’outil <b>Je donne mon avis</b> est disponible pour tous les services publics numériques français.'
 		},
 		{
-			question: 'Est-ce que l’outil Je donne mon avis est conforme au RGPD ?',
-			answer: 'Oui, l’outil Je donne mon avis est conforme au RGPD.'
+			question:
+				'Puis-je utiliser l’outil Je donne mon avis sur plusieurs services en même temps ?',
+			answer:
+				'Oui, le tableau de bord de <b>Je donne mon avis</b> vous permet de suivre plusieurs services en même temps.'
+		},
+		{
+			question: "Existe-t-il un guide pour m'indiquer comment procéder ?",
+			answer:
+				'<a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service. '
 		}
 	];
 
@@ -128,7 +138,7 @@ export default function Home() {
 			<HomeStepper />
 			{displayHomeFeature()}
 			<HomePills pills={pills} />
-			<HomeReferences references={references} />
+			{/*<HomeReferences references={references} />*/}
 			<HomeActionButton
 				title={'Prêt à recueillir les avis des usagers ?'}
 				buttonStyle="primary"
@@ -137,10 +147,10 @@ export default function Home() {
 			/>
 			<HomeQuestions questions={questions} />
 			<HomeActionButton
-				title={"Vous avez d'autres questions ?  Des doutes ? Contactez-nous !"}
-				buttonStyle="secondary"
-				buttonText="Contacter notre équipe"
-				buttonLink="/public/contact"
+				title={'Un problème, une question ? Contactez-nous !'}
+				buttonStyle="link"
+				buttonText="Contactez-nous à l'adresse"
+				buttonLink="contact.jdma@design.numerique.gouv.fr"
 			/>
 		</div>
 	);

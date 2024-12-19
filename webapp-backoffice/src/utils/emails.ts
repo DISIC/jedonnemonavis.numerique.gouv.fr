@@ -322,39 +322,48 @@ export function getEmailNotificationsHtml(
 
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
-    <br />
-    <p>Vous avez eu un total de ${totalNbReviews} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
-    <br />
-    <div style='margin-top: 64px; margin-bottom: 48px;'>
-
-    <div style='display: flex; flex-direction: row; gap: 10px; justify-content: space-between; align-items: center;'>
-      <p style='font-size: 14px;'>Service</p>
-      <p style='font-size: 14px;'>Nouveaux avis ${displayTableFrequenceLabel}</p>
-    </div>
-    <ul style='list-style: none; margin: 0px; padding: 0px;'>
-    ${products.map(p => {
-		return `
-			<li style='border: 1px solid #e0e0e0; padding: 16px; margin-top: 2rem'>
-				<div style='display: flex; flex-direction: row; justify-content: space-between; align-items: center;'>
-				<div style='width: 70%;'>
-					<p style='color:#000091; font-weight: bold; font-size: 16px; line-height: 24px;'>${p.title}</p>
-				</div>
-				<div style='display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-end; width: 30%;'>
-					<p style='font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px; margin-bottom: 4px; text-align: left;'> +${formatNbReviews(p.nbReviews)}</p>
-					<a style='font-size: 12px; line-height: 20px;' href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true" target="_blank">Voir les avis</a>
-				</div>
-				</div>
-			</li>`;
-		
-	}).join('')}
-	</ul>
-    </div>
-
-    <a href="${jdmaUrl}/administration/dashboard/products" target="_blank">Voir plus de détails sur votre tableau de bord JDMA</a>
-
+		<br />
+		<p>Vous avez eu un total de ${totalNbReviews} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
+		<br />
+		<div style="margin-top: 64px; margin-bottom: 48px;">
+			<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+			<thead>
+				<tr>
+				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Service</th>
+				<th style="text-align: right; font-size: 14px; padding: 8px 0;">Nouveaux avis ${displayTableFrequenceLabel}</th>
+				</tr>
+			</thead>
+			<tbody>
+				${products.map(p => `
+				<tr style="border: 1px solid #e0e0e0; margin-top: 10px">
+					<td style="padding: 16px; font-size: 16px; color: #000091; font-weight: bold; line-height: 24px;">
+					${p.title}
+					</td>
+					<td style="padding: 16px; text-align: right;">
+					<p style="margin: 0; font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px;">+${formatNbReviews(p.nbReviews)}</p>
+					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true" 
+						target="_blank" 
+						style="font-size: 12px; line-height: 20px; color: #0063CB; text-decoration: underline;">Voir les avis</a>
+					</td>
+				</tr>
+				<tr>
+				  <td style="height: 16px;"></td> <!-- Espacement -->
+				</tr>
+				`).join('')}
+			</tbody>
+			</table>
+		</div>
+		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank" 
+			style="font-size: 14px; color: #0063CB; text-decoration: underline;">
+			Voir plus de détails sur votre tableau de bord JDMA
+		</a>
 		<p>
 			Pour changer la fréquence de cette synthèse ou ne plus la recevoir du tout,
-			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications" target="_blank">modifiez vos paramètres de notification</a>.
+			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications" 
+			target="_blank" 
+			style="color: #0063CB; text-decoration: underline;">
+			modifiez vos paramètres de notification
+			</a>.
 		</p>
 	`);
 }

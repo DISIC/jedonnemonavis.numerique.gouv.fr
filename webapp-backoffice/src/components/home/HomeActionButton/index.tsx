@@ -6,28 +6,43 @@ interface HomeActionButtonProps {
 	title: string;
 	buttonText: string;
 	buttonLink: string;
-	buttonStyle: 'primary' | 'secondary' | 'tertiary';
+	buttonStyle: 'primary' | 'secondary' | 'tertiary' | 'link';
 }
 
 const HomeActionButton = (props: HomeActionButtonProps) => {
 	const { cx, classes } = useStyles();
 
 	return (
-		<section className={fr.cx('fr-container', 'fr-py-16v')}>
-			<div className={cx(classes.container)}>
+		<section className={cx(classes.mainContainer, fr.cx('fr-py-16v'))}>
+			<div className={cx(classes.container, fr.cx('fr-container'))}>
 				<h2>{props.title}</h2>
-				<Link
-					href={props.buttonLink}
-					className={cx(
-						fr.cx(
-							'fr-my-2v',
-							'fr-btn',
-							props.buttonStyle !== 'primary' && `fr-btn--${props.buttonStyle}`
-						)
-					)}
-				>
-					{props.buttonText}
-				</Link>
+				{props.buttonStyle !== 'link' ? (
+					<Link
+						href={props.buttonLink}
+						className={cx(
+							fr.cx(
+								'fr-my-2v',
+								'fr-btn',
+								props.buttonStyle !== 'primary' &&
+									`fr-btn--${props.buttonStyle}`
+							)
+						)}
+					>
+						{props.buttonText}
+					</Link>
+				) : (
+					<div>
+						<i className={fr.cx('fr-icon-mail-line', 'fr-mr-1v')} />
+						<span>{props.buttonText}</span>{' '}
+						<Link
+							href={`mailto:props.buttonLink`}
+							className={cx(fr.cx('fr-link'))}
+						>
+							{props.buttonLink}
+						</Link>
+						<span>.</span>
+					</div>
+				)}
 			</div>
 		</section>
 	);
@@ -37,10 +52,16 @@ const useStyles = tss
 	.withName(HomeActionButton.name)
 	.withParams()
 	.create(() => ({
+		mainContainer: {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
+		},
 		container: {
 			h2: {
 				color: fr.colors.decisions.text.title.blueFrance.default,
 				textAlign: 'center'
+			},
+			i: {
+				color: fr.colors.decisions.text.title.blueFrance.default
 			},
 			justifyContent: 'center',
 			alignItems: 'center',

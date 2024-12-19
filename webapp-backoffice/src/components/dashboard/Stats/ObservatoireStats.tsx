@@ -255,7 +255,7 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.background.flat.success.default
 	},
 	moyen: {
-		color: fr.colors.decisions.background.flat.warning.default
+		color: fr.colors.decisions.background.flat.yellowTournesol.default
 	},
 	pasBien: {
 		color: fr.colors.decisions.background.flat.error.default

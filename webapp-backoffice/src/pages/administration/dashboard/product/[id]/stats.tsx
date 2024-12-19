@@ -185,7 +185,7 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string) => {
+	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string, buttonId?: number) => {
 		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
 	};
