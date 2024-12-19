@@ -95,7 +95,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 				router.pathname === `/administration/dashboard/product/[id]/logs`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/logs`,
-				alt: 'Consulter les logs'
+				alt: "Consulter le journal d'activité"
 			}
 		}
 	];

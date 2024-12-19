@@ -66,7 +66,9 @@ const UserLogsPage = ({ product }: Props) => {
 			<div className={classes.container}>
 				<h1>Journal d'activité</h1>
 				{fullEvents?.length === 0 ? (
-					<p>Aucun événement trouvé</p>
+					<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+						<p>Aucun événement trouvé</p>
+					</div>
 				) : (
 					<>
 						<Table data={tableData} headers={headers} fixed />
