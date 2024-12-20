@@ -87,9 +87,13 @@ const Filters = ({
 				dates.startDate !== currentStartDate ||
 				dates.endDate !== currentEndDate
 			)
-				onChange(dates.startDate, dates.endDate);
+				onChange(dates.startDate, dates.endDate, buttonId);
 		}
 	}, [shortcutDateSelected]);
+
+	useEffect(() => {
+		onChange(startDate, endDate, buttonId);
+	}, [buttonId])
 
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -112,7 +116,7 @@ const Filters = ({
 
 		if (startDateValid && endDateValid) {
 			if (startDate !== currentStartDate || endDate !== currentEndDate) {
-				onChange(startDate, endDate);
+				onChange(startDate, endDate, buttonId);
 			}
 		}
 	};

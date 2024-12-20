@@ -81,6 +81,8 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
+	const [buttonId, setButtonId] = useState<number | null>(null)
+
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
 			{
@@ -114,12 +116,16 @@ const ProductStatPage = (props: Props) => {
 		page: 1,
 		product_id: product.id,
 		start_date: debouncedStartDate,
-		end_date: debouncedEndDate
+		end_date: debouncedEndDate,
+		filters: {
+			buttonId: buttonId ? [buttonId?.toString()] : []
+		}
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
+			...(buttonId && {button_id: buttonId}),
 			field_code: 'verbatim',
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
@@ -188,6 +194,7 @@ const ProductStatPage = (props: Props) => {
 	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string, buttonId?: number) => {
 		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+		setButtonId(buttonId ?? null)
 	};
 
 	const getStatsDisplay = () => {
@@ -203,6 +210,7 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 				/>
@@ -245,6 +253,7 @@ const ProductStatPage = (props: Props) => {
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 					total={nbReviewsWithFilters}
@@ -257,6 +266,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 						required
@@ -265,6 +275,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -272,6 +283,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -279,6 +291,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -286,6 +299,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -299,6 +313,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -306,6 +321,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
