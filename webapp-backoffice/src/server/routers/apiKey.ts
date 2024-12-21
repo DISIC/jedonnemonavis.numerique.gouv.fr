@@ -61,6 +61,7 @@ export const apiKeyRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				product_id: z.number().optional(),
@@ -96,6 +97,7 @@ export const apiKeyRouter = router({
 		}),
 
 	delete: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				key: z.string()
