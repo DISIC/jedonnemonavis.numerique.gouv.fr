@@ -2,6 +2,7 @@ import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
+import { off } from 'process';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -396,6 +397,10 @@ export const handleActionTypeDisplay = (
 
 	const metadataTyped = metadata as { json: { [key: string]: any } };
 
+	if (action === TypeAction.service_apikeys_create) {
+		console.log(metadataTyped);
+	}
+
 	switch (action) {
 		case TypeAction.service_create:
 			return `Création du service ${productTitle}`;
@@ -419,5 +424,7 @@ export const handleActionTypeDisplay = (
 			return `Désinvitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
 			return `Création du bouton ${metadataTyped.json.title} `;
+		case TypeAction.service_apikeys_create:
+			return `Création de la clé API ${metadataTyped.json.title} `;
 	}
 };

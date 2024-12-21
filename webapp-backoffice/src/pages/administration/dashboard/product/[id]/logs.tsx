@@ -6,11 +6,7 @@ import { getServerSideProps } from '.';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
 import { Table } from '@codegouvfr/react-dsfr/Table';
-import {
-	getLastPage,
-	getNbPages,
-	handleActionTypeDisplay
-} from '@/src/utils/tools';
+import { getNbPages, handleActionTypeDisplay } from '@/src/utils/tools';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -44,7 +40,6 @@ const UserLogsPage = ({ product }: Props) => {
 	const eventsCount = data?.pagination.total;
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
-	const lastPage = getLastPage(eventsCount || 0, 10);
 
 	const headers = ['Action', 'Date'];
 

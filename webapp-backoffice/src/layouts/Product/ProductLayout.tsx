@@ -90,7 +90,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Consulter les logs',
+			text: "Journal d'activité",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/logs`,
 			linkProps: {
