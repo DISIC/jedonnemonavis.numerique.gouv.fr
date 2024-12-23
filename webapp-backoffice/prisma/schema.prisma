@@ -22,6 +22,7 @@ enum UserRole {
   superadmin
   admin
   user
+  viewer
 }
 
 enum RequestMode {
