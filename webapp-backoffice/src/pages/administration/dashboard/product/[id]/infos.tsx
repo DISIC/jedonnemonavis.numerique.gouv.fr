@@ -18,6 +18,7 @@ import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import { Entity } from '@/prisma/generated/zod';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
@@ -45,6 +46,11 @@ const ProductInformationPage = (props: Props) => {
 
 	const [displayToast, setDisplayToast] = React.useState(false);
 
+	const [statusProductState, setStatusProductState] = React.useState<{
+		msg: string;
+		role: 'status' | 'alert';
+	} | null>(null);
+
 	const [entityCreated, setEntityCreated] = React.useState<
 		Entity | undefined
 	>();
@@ -71,7 +77,7 @@ const ProductInformationPage = (props: Props) => {
 		}
 	});
 
-	const { classes } = useStyles();
+	const { cx, classes } = useStyles();
 
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
@@ -134,6 +140,25 @@ const ProductInformationPage = (props: Props) => {
 				modal={entityModal}
 				onSubmit={newEntity => handleSubmit(newEntity)}
 			/>
+
+			{statusProductState && (
+				<div className={cx(classes.container)}>
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setStatusProductState(null);
+						}}
+						severity={statusProductState.role === 'alert' ? 'warning' : 'success'}
+						className={fr.cx('fr-mb-5w')}
+						small
+						description={
+							<>
+								<p role={statusProductState.role}>{statusProductState.msg}</p>
+							</>
+						}
+					/>
+				</div>
+			)}
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
@@ -216,8 +241,19 @@ const ProductInformationPage = (props: Props) => {
 						priority="tertiary"
 						className={classes.buttonError}
 						onClick={() => {
-							onConfirmModal.open();
-							push(['trackEvent', 'Product', 'Modal-Delete']);
+							if(product.isTop250) {
+								setStatusProductState({
+									msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+									role: 'alert'
+								});
+								window.scrollTo({
+									top: 0,
+									behavior: 'smooth', // Scroll avec animation
+								  });
+							} else {
+								onConfirmModal.open();
+								push(['trackEvent', 'Product', 'Modal-Delete']);
+							}
 						}}
 					>
 						Supprimer ce service
@@ -238,6 +274,9 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: fr.spacing('10v')
+	},
+	container: {
+		marginTop: '1.5rem'
 	},
 	urlsWrapper: {
 		display: 'flex',

@@ -229,7 +229,7 @@ const DashBoard = () => {
 						onClose={function noRefCheck() {
 							setStatusProductState(null);
 						}}
-						severity={'success'}
+						severity={statusProductState.role === 'alert' ? 'warning' : 'success'}
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={
@@ -504,6 +504,12 @@ const DashBoard = () => {
 													)
 												}
 												showFavoriteButton={countTotalUserScope > 10}
+												onDeleteEssential={() => {
+													setStatusProductState({
+														msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+														role: 'alert'
+													});
+												}}
 												onDeleteProduct={() => {
 													setStatusProductState({
 														msg: `Le service "${product.title}" a bien été supprimé`,

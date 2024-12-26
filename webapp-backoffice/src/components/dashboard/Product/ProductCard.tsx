@@ -62,7 +62,8 @@ const ProductCard = ({
 	isFavorite,
 	showFavoriteButton,
 	onRestoreProduct,
-	onDeleteProduct
+	onDeleteProduct,
+	onDeleteEssential,
 }: {
 	product: ProductWithButtons;
 
@@ -72,6 +73,7 @@ const ProductCard = ({
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 	onDeleteProduct: () => void;
+	onDeleteEssential: () => void;
 }) => {
 	const [onConfirmModalRestore, setOnConfirmModalRestore] =
 		useState<CreateModalProps | null>(null);
@@ -488,7 +490,15 @@ const ProductCard = ({
 										<MenuItem
 											onClick={e => {
 												handleClose(e);
-												onConfirmModalArchive.open();
+												if(product.isTop250) {
+													onDeleteEssential();
+													window.scrollTo({
+														top: 0,
+														behavior: 'smooth', // Scroll avec animation
+													  });
+												} else {
+													onConfirmModalArchive.open();
+												}
 											}}
 											className={cx(classes.menuItemDanger)}
 										>
