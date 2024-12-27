@@ -1,1 +1,1 @@
-ALTER TYPE "UserRole" ADD VALUE 'viewer';
+ALTER TYPE "RightAccessStatus" ADD VALUE 'admin';
