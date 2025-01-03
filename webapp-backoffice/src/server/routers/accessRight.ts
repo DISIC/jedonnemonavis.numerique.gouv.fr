@@ -38,7 +38,9 @@ export const accessRightRouter = router({
 
 			let where: Prisma.AccessRightWhereInput = {
 				product_id,
-				status: isRemoved ? undefined : 'carrier'
+				status: isRemoved ? undefined : {
+					in: ['carrier', 'admin']
+				}
 			};
 
 			const entities = await ctx.prisma.accessRight.findMany({

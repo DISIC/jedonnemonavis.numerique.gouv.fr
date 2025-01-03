@@ -62,7 +62,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		where: {
 			user_email: currentUserToken.email as string,
 			product_id: parseInt(id as string),
-			status: 'carrier'
+			status: {
+				in: ['carrier', 'admin']
+			}
 		}
 	});
 
@@ -90,7 +92,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	return {
 		props: {
-			product: JSON.parse(JSON.stringify(product))
+			product: JSON.parse(JSON.stringify(product)),
+			ownRight: (currentUser.role.includes('admin') || hasAdminEntityRight || (hasAccessRightToProduct && hasAccessRightToProduct.status === 'admin')) ? 'admin' : 'viewer'
 		}
 	};
 };

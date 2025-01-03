@@ -15,10 +15,11 @@ interface Props {
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
+	ownRight : 'admin' | 'viewer'
 }
 
 const ProductAccessCard = (props: Props) => {
-	const { accessRight, onButtonClick } = props;
+	const { accessRight, onButtonClick, ownRight } = props;
 	const { data: session } = useSession({ required: true });
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -42,8 +43,7 @@ const ProductAccessCard = (props: Props) => {
 			>
 				<div
 					className={cx(
-						fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-grid-row--middle'),
-						classes.rowCard
+						fr.cx('fr-grid-row', 'fr-grid-row--middle')
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
@@ -63,11 +63,27 @@ const ProductAccessCard = (props: Props) => {
 
 					<div
 						className={cx(
-							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
 							classes.optionsDropdown
 						)}
 					>
-						{accessRight.status === 'carrier' && accessRight.user !== null && (
+						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
+							<Button
+								id="button-remove-access-right"
+								aria-haspopup="true"
+								aria-expanded={menuOpen ? 'true' : undefined}
+								priority="tertiary"
+								onClick={() => {
+									onButtonClick('switch', accessRight);
+									push(['trackEvent', 'BO - Product', 'Access-rights-Switch']);
+								}}
+								disabled={accessRight.user_email === session?.user?.email}
+								size="small"
+							>
+								{accessRight.status === "admin" ? 'Retirer admin' : 'Passer admin'}
+							</Button>
+						)}
+						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
 							<Button
 								id="button-remove-access-right"
 								aria-haspopup="true"
@@ -79,11 +95,12 @@ const ProductAccessCard = (props: Props) => {
 								}}
 								disabled={accessRight.user_email === session?.user?.email}
 								size="small"
+								className={fr.cx('fr-ml-4v')}
 							>
 								Retirer l&apos;accès
 							</Button>
 						)}
-						{accessRight.user === null && (
+						{accessRight.user === null && ownRight === 'admin' && (
 							<>
 								<Button
 									id="button-options-access-right"
@@ -171,9 +188,6 @@ const ProductAccessCard = (props: Props) => {
 const useStyles = tss.create({
 	cardStatusRemoved: {
 		backgroundColor: fr.colors.decisions.background.disabled.grey.default
-	},
-	rowCard: {
-		justifyContent: 'space-between'
 	},
 	badge: {
 		display: 'block',

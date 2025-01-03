@@ -10,14 +10,15 @@ import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer'
 }
 
 const ProductApiKeysPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>Gérer les clés API | Je donne mon avis</title>
 				<meta
@@ -32,7 +33,7 @@ const ProductApiKeysPage = (props: Props) => {
 				</Link>
 			</div>
 			<h3 className={fr.cx('fr-mt-10v')}>Clés API</h3>
-			<ApiKeyHandler product={product}></ApiKeyHandler>
+			<ApiKeyHandler product={product} ownRight={ownRight}></ApiKeyHandler>
 		</ProductLayout>
 	);
 };

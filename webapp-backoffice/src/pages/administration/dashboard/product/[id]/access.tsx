@@ -27,11 +27,13 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer';
 }
 
 export type AccessRightModalType =
 	| 'add'
 	| 'remove'
+	| 'switch'
 	| 'resend-email'
 	| 'reintegrate';
 
@@ -43,7 +45,7 @@ const modal = createModal({
 const AccessManagement = (props: Props) => {
 	const { cx, classes } = useStyles();
 
-	const { product } = props;
+	const { product, ownRight } = props;
 
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
@@ -160,6 +162,12 @@ const AccessManagement = (props: Props) => {
 						? currentAccessRight?.user_email
 						: currentAccessRight?.user_email_invite
 				}.`;
+			case 'switch': 
+				if (currentAccessRight?.status === "admin") {
+					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} n'est plus administrateur de ce produit.`
+				} else {
+					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} est désormais administrateur de ce produit.`
+				}
 			case 'remove':
 				return `${
 					currentAccessRight?.user !== null
@@ -205,7 +213,7 @@ const AccessManagement = (props: Props) => {
 				)}
 			</div>
 
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<Head>
 					<title>{product.title} | Gérer l'accès | Je donne mon avis</title>
 					<meta
@@ -226,20 +234,22 @@ const AccessManagement = (props: Props) => {
 
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
-						<h2 className={fr.cx('fr-mb-2w')}>Gérer l'accès</h2>
+						<h2 className={fr.cx('fr-mb-2w')}>{ownRight && ownRight === 'admin' ? "Gérer l'accès" : "Voir l'accès"}</h2>
 					</div>
 					<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
-						<Button
-							priority="secondary"
-							iconPosition="right"
-							iconId="ri-user-add-line"
-							onClick={() => {
-								handleModalOpening('add');
-								push(['trackEvent', 'Product', 'Modal-Admin']);
-							}}
-						>
-							Inviter des utilisateurs
-						</Button>
+						{ownRight === 'admin' &&
+							<Button
+								priority="secondary"
+								iconPosition="right"
+								iconId="ri-user-add-line"
+								onClick={() => {
+									handleModalOpening('add');
+									push(['trackEvent', 'Product', 'Modal-Admin']);
+								}}
+							>
+								Inviter des utilisateurs
+							</Button>
+						}
 					</div>
 				</div>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -286,30 +296,59 @@ const AccessManagement = (props: Props) => {
 					</div>
 				) : (
 					<div>
-						<h2 className={cx(classes.categoryTitle)}>
-							Administrateurs du service
-						</h2>
-						<div>
-							{accessRights.map((accessRight, index) => {
-								if (
-									accessRight.status === 'carrier' &&
-									accessRight.user !== null
-								) {
-									return (
-										<AccessRightCard
-											key={index}
-											accessRight={accessRight}
-											onButtonClick={handleModalOpening}
-										/>
-									);
-								}
-							})}
-						</div>
-						{accessRights.some(accessRight => accessRight.user === null) && (
-							<>
-								<div className={cx(classes.inviteTitle)}>
-									Invitations envoyées
+						{accessRights.some(accessRight => accessRight.status === "admin") && (
+							<div className={fr.cx('fr-mb-10v')}>
+								<h2 className={cx(classes.categoryTitle)}>
+									Administrateurs du service
+								</h2>
+								<div>
+									{accessRights.map((accessRight, index) => {
+										if (
+											accessRight.status === 'admin' &&
+											accessRight.user !== null
+										) {
+											return (
+												<AccessRightCard
+													key={index}
+													accessRight={accessRight}
+													onButtonClick={handleModalOpening}
+													ownRight={ownRight}
+												/>
+											);
+										}
+									})}
 								</div>
+							</div>
+						)}
+						{accessRights.some(accessRight => accessRight.status === "carrier") && (
+							<div className={fr.cx('fr-mb-10v')}>
+								<h2 className={cx(classes.categoryTitle)}>
+									Utilisateurs du service
+								</h2>
+								<div>
+									{accessRights.map((accessRight, index) => {
+										if (
+											accessRight.status === 'carrier' &&
+											accessRight.user !== null
+										) {
+											return (
+												<AccessRightCard
+													key={index}
+													accessRight={accessRight}
+													onButtonClick={handleModalOpening}
+													ownRight={ownRight}
+												/>
+											);
+										}
+									})}
+								</div>
+							</div>
+						)}
+						{accessRights.some(accessRight => accessRight.user === null) && (
+							<div className={fr.cx('fr-mb-10v')}>
+								<h2 className={cx(classes.categoryTitle)}>
+									Invitations envoyées
+								</h2>
 								<div>
 									{accessRights.map((accessRight, index) => {
 										if (accessRight.user === null) {
@@ -318,15 +357,16 @@ const AccessManagement = (props: Props) => {
 													key={index}
 													accessRight={accessRight}
 													onButtonClick={handleModalOpening}
+													ownRight={ownRight}
 												/>
 											);
 										}
 									})}
 								</div>
-							</>
+							</div>
 						)}
 						{accessAdminEntityRights.length > 0 && (
-							<>
+							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.entityWrapper)}>
 									<h2 className={cx(classes.organizationTitle)}>
 										Administrateurs de l'organisation
@@ -345,7 +385,7 @@ const AccessManagement = (props: Props) => {
 										}
 									)}
 								</div>
-							</>
+							</div>
 						)}
 					</div>
 				)}
@@ -415,8 +455,7 @@ const useStyles = tss.create({
 		width: '100%',
 		alignItems: 'center',
 		borderBottom: '1px solid black',
-		paddingBottom: '10px',
-		paddingTop: '3rem'
+		paddingBottom: '10px'
 	},
 	entityName: {
 		...fr.typography[18].style,
