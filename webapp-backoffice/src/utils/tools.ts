@@ -409,9 +409,9 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service ${productTitle}`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
+			return `Invitation d'un utilisateur au service`;
 		case TypeAction.service_uninvite:
-			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} du service`;
+			return `Retrait d'un accès utilisateur au service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
