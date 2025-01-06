@@ -75,7 +75,8 @@ export const userEventRouter = router({
 										TypeAction.service_update,
 										TypeAction.service_archive,
 										TypeAction.service_restore,
-										TypeAction.service_apikeys_create
+										TypeAction.service_apikeys_create,
+										TypeAction.service_apikeys_delete
 									]
 								}
 							},
@@ -91,7 +92,8 @@ export const userEventRouter = router({
 										TypeAction.organisation_invite,
 										TypeAction.organisation_uninvite,
 										TypeAction.service_button_create,
-										TypeAction.service_apikeys_create
+										TypeAction.service_apikeys_create,
+										TypeAction.service_apikeys_delete
 									]
 								}
 							}
