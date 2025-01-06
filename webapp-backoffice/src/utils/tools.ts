@@ -385,7 +385,9 @@ export const actionMapping: Record<string, TypeAction> = {
 	'entity.update': TypeAction.organisation_update,
 	'adminEntityRight.create': TypeAction.organisation_invite,
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
-	'button.create': TypeAction.service_button_create
+	'button.create': TypeAction.service_button_create,
+	'apiKey.create': TypeAction.service_apikeys_create,
+	'apiKey.delete': TypeAction.service_apikeys_delete
 };
 
 export const handleActionTypeDisplay = (
@@ -396,10 +398,6 @@ export const handleActionTypeDisplay = (
 	if (!metadata) return '';
 
 	const metadataTyped = metadata as { json: { [key: string]: any } };
-
-	if (action === TypeAction.service_apikeys_create) {
-		console.log(metadataTyped);
-	}
 
 	switch (action) {
 		case TypeAction.service_create:
@@ -413,7 +411,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_invite:
 			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
 		case TypeAction.service_uninvite:
-			return `Désinvitation de l'utilisateur ${metadataTyped.json.user_email} du service`;
+			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} du service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
@@ -421,10 +419,12 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_invite:
 			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_uninvite:
-			return `Désinvitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
+			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
 			return `Création du bouton ${metadataTyped.json.title} `;
 		case TypeAction.service_apikeys_create:
-			return `Création de la clé API ${metadataTyped.json.title} `;
+			return `Création d'une clé API`;
+		case TypeAction.service_apikeys_delete:
+			return `Suppression d'une clé API`;
 	}
 };

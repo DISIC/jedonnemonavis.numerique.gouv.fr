@@ -30,21 +30,20 @@ const UserLogsPage = ({ product }: Props) => {
 
 	const [currentPage, setCurrentPage] = useState(1);
 
-	const { data } = trpc.userEvent.getList.useQuery({
+	const { data: fullEvents, isLoading } = trpc.userEvent.getList.useQuery({
 		product_id: product.id,
 		limit: 10,
 		page: currentPage
 	});
 
-	const fullEvents = data?.data;
-	const eventsCount = data?.pagination.total;
+	const eventsCount = fullEvents?.pagination.total;
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
 
 	const headers = ['Action', 'Date'];
 
 	const tableData =
-		fullEvents?.map((event: Event) => [
+		fullEvents?.data.map((event: Event) => [
 			handleActionTypeDisplay(event.action, event.metadata, product.title),
 			event.created_at.toLocaleString()
 		]) || [];
@@ -60,7 +59,7 @@ const UserLogsPage = ({ product }: Props) => {
 			</Head>
 			<div className={classes.container}>
 				<h1>Journal d'activité</h1>
-				{fullEvents?.length === 0 ? (
+				{isLoading ? (
 					<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 						<p>Aucun événement trouvé</p>
 					</div>

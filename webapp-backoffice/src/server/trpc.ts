@@ -108,7 +108,10 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 	if (meta?.idAdminOrOwn) {
 		const currentUserId = ctx.session?.user?.id;
 
-		if (ctx.req.query.id !== currentUserId && !ctx.session?.user?.role.includes('admin')) {
+		if (
+			ctx.req.query.id !== currentUserId &&
+			!ctx.session?.user?.role.includes('admin')
+		) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'You are not authorized to perform this action'
@@ -119,48 +122,49 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 	if (meta?.logEvent) {
 		try {
 			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
-	
-			await Promise.all(trpcQueries.map(async (query, index) => {
 
-				const inputObj = query.includes('get')
-					? ctx.req.query.input
-						? JSON.parse(ctx.req.query.input as string)
-						: { defaultKey: "defaultValue" }
-					: ctx.req.body && typeof ctx.req.body === "string"
-						? JSON.parse(ctx.req.body)
-						: ctx.req.body || { defaultKey: "defaultValue" };
+			await Promise.all(
+				trpcQueries.map(async (query, index) => {
+					const inputObj = query.includes('get')
+						? ctx.req.query.input
+							? JSON.parse(ctx.req.query.input as string)
+							: { defaultKey: 'defaultValue' }
+						: ctx.req.body && typeof ctx.req.body === 'string'
+							? JSON.parse(ctx.req.body)
+							: ctx.req.body || { defaultKey: 'defaultValue' };
 
-				const action = actionMapping[query];
-				const input = inputObj[index] !== undefined ? inputObj[index] : {};
-	
-				// Extraire entityId
-				let entity_id: number | null = null;
-				let product_id: number | null = null
-	
-				if (input?.json?.entity_id) {
-					entity_id = input.json.entity_id;
-				} else if (input?.json?.entity?.id) {
-					entity_id = input.json.entity.id;
-				}
-	
-				if (input?.json?.product_id) {
-					product_id = input.json.product_id;
-				} else if (input?.json?.product?.id) {
-					product_id = input.json.product.id;
-				}
-	
-				if (user && action) {
-					const log = await ctx.prisma.userEvent.create({
-						data: {
-							user_id: user.id,
-							action,
-							entity_id,
-							product_id,
-							metadata: input,
-						},
-					});
-				}
-			}));
+					const action = actionMapping[query];
+					const input = inputObj[index] !== undefined ? inputObj[index] : {};
+
+					// Extraire entityId
+					let entity_id: number | null = null;
+					let product_id: number | null = null;
+
+					if (input?.json?.entity_id) {
+						entity_id = input.json.entity_id;
+					} else if (input?.json?.entity?.id) {
+						entity_id = input.json.entity.id;
+					}
+
+					if (input?.json?.product_id) {
+						product_id = input.json.product_id;
+					} else if (input?.json?.product?.id) {
+						product_id = input.json.product.id;
+					}
+
+					if (user && action) {
+						const log = await ctx.prisma.userEvent.create({
+							data: {
+								user_id: user.id,
+								action,
+								entity_id,
+								product_id,
+								metadata: input
+							}
+						});
+					}
+				})
+			);
 		} catch (e) {
 			console.log(e);
 		}
