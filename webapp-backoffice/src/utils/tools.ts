@@ -417,9 +417,9 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_update:
 			return `Modification de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
+			return `Invitation d'un utilisateur à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
+			return `Retrait d'un utilisateur de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
 			return `Création du bouton ${metadataTyped.json.title} `;
 		case TypeAction.service_apikeys_create:
