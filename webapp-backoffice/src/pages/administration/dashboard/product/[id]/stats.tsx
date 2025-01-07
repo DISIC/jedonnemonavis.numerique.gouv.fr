@@ -28,7 +28,7 @@ import { getServerSideProps } from '.';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer'
+	ownRight: 'admin' | 'viewer';
 }
 
 const public_modal = createModal({
@@ -82,7 +82,7 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
-	const [buttonId, setButtonId] = useState<number | null>(null)
+	const [buttonId, setButtonId] = useState<number | null>(null);
 
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -126,7 +126,7 @@ const ProductStatPage = (props: Props) => {
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
-			...(buttonId && {button_id: buttonId}),
+			...(buttonId && { button_id: buttonId }),
 			field_code: 'verbatim',
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
@@ -192,10 +192,14 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string, buttonId?: number) => {
+	const onChangeFilters = (
+		tmpStartDate: string,
+		tmpEndDate: string,
+		buttonId?: number
+	) => {
 		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
-		setButtonId(buttonId ?? null)
+		setButtonId(buttonId ?? null);
 	};
 
 	const getStatsDisplay = () => {
@@ -343,13 +347,15 @@ const ProductStatPage = (props: Props) => {
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
-				<Button
-					priority="secondary"
-					type="button"
-					nativeButtonProps={public_modal.buttonProps}
-				>
-					Rendre ces statistiques publiques
-				</Button>
+				{ownRight === 'admin' && (
+					<Button
+						priority="secondary"
+						type="button"
+						nativeButtonProps={public_modal.buttonProps}
+					>
+						Rendre ces statistiques publiques
+					</Button>
+				)}
 			</div>
 			<div className={cx(classes.container)}>
 				<Filters

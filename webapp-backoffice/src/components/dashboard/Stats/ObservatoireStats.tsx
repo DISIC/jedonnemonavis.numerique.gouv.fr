@@ -6,7 +6,7 @@ import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
 	productId: number;
-	buttonId: number | null
+	buttonId: number | null;
 	startDate: string;
 	endDate: string;
 };
@@ -33,7 +33,7 @@ const ObservatoireStats = ({
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
 			product_id: productId.toString(),
-			...(buttonId && {button_id: buttonId}),
+			...(buttonId && { button_id: buttonId }),
 			start_date: startDate,
 			end_date: endDate,
 			needLogging: true
@@ -120,7 +120,7 @@ const ObservatoireStats = ({
 	const getStatsDisplay = (field: StatField) => {
 		if (isLoadingStatsObservatoire || isRefetchingStatsObservatoire) {
 			return (
-				<Skeleton className={classes.skeleton} height={50} width={'80%'} />
+				<Skeleton className={classes.skeleton} height={145} width={'80%'} />
 			);
 		}
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
