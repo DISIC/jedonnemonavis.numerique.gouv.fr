@@ -25,7 +25,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer';
+	ownRight: 'admin' | 'viewer';
 }
 
 const modal = createModal({
@@ -130,11 +130,15 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>{ownRight && ownRight === 'admin' ? "Gérer l'accès" : "Voir l'accès"}</h2>
+					<h2 className={fr.cx('fr-mb-2w')}>
+						{ownRight && ownRight === 'admin'
+							? 'Gérer les boutons'
+							: 'Voir les boutons'}
+					</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						{ownRight === 'admin' &&
+						{ownRight === 'admin' && (
 							<Button
 								priority="secondary"
 								iconPosition="right"
@@ -146,7 +150,7 @@ const ProductButtonsPage = (props: Props) => {
 							>
 								Créer un bouton
 							</Button>
-						}
+						)}
 					</div>
 				)}
 			</div>

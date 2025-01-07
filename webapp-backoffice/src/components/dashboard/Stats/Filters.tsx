@@ -52,7 +52,7 @@ const Filters = ({
 	const [startDate, setStartDate] = useState<string>(currentStartDate);
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [endDate, setEndDate] = useState<string>(currentEndDate);
-	const [buttonId, setButtonId] = useState<number | undefined>()
+	const [buttonId, setButtonId] = useState<number | undefined>();
 	const [shortcutDateSelected, setShortcutDateSelected] = useState<
 		(typeof dateShortcuts)[number]['name'] | undefined
 	>('one-year');
@@ -60,17 +60,18 @@ const Filters = ({
 	const router = useRouter();
 	const productId = router.query.id;
 
-	const { data: buttonResults, isLoading: isLoadingButtons } = trpc.button.getList.useQuery(
-		{
-			page: 1,
-			numberPerPage: 1000,
-			product_id: parseInt(productId as string),
-			isTest: true,
-		},
-		{
-			enabled: !!productId && !isNaN(parseInt(productId as string)),
-		}
-	);
+	const { data: buttonResults, isLoading: isLoadingButtons } =
+		trpc.button.getList.useQuery(
+			{
+				page: 1,
+				numberPerPage: 1000,
+				product_id: parseInt(productId as string),
+				isTest: true
+			},
+			{
+				enabled: !!productId && !isNaN(parseInt(productId as string))
+			}
+		);
 
 	useEffect(() => {
 		if (shortcutDateSelected) {
@@ -93,7 +94,7 @@ const Filters = ({
 
 	useEffect(() => {
 		onChange(startDate, endDate, buttonId);
-	}, [buttonId])
+	}, [buttonId]);
 
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -231,27 +232,33 @@ const Filters = ({
 					</div>
 				</form>
 			</div>
-			<div className={fr.cx('fr-col', 'fr-col-6')}>
-				<Select
-					label="Sélectionner une source"
-					nativeSelectProps={{
-						value: buttonId,
-						onChange: e => {
-							setButtonId(e.target.value !== 'undefined' ? parseInt(e.target.value) : undefined)
-							push(['trackEvent', 'Stats', 'Sélection-bouton']);
-						}
-					}}
-				>
-					<option value="undefined">Toutes les sources</option>
-					{buttonResults?.data?.map(button => {
-						return (
-							<option key={button.id} value={button.id}>
-								{button.title}
-							</option>
-						);
-					})}
-				</Select>
-			</div>
+			{buttonResults?.data && buttonResults.data.length > 1 && (
+				<div className={fr.cx('fr-col', 'fr-col-6')}>
+					<Select
+						label="Sélectionner une source"
+						nativeSelectProps={{
+							value: buttonId,
+							onChange: e => {
+								setButtonId(
+									e.target.value !== 'undefined'
+										? parseInt(e.target.value)
+										: undefined
+								);
+								push(['trackEvent', 'Stats', 'Sélection-bouton']);
+							}
+						}}
+					>
+						<option value="undefined">Toutes les sources</option>
+						{buttonResults?.data?.map(button => {
+							return (
+								<option key={button.id} value={button.id}>
+									{button.title}
+								</option>
+							);
+						})}
+					</Select>
+				</div>
+			)}
 		</div>
 	);
 };
