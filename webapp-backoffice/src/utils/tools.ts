@@ -398,7 +398,6 @@ export const handleActionTypeDisplay = (
 	if (!metadata) return '';
 
 	const metadataTyped = metadata as { json: { [key: string]: any } };
-
 	switch (action) {
 		case TypeAction.service_create:
 			return `Création du service ${productTitle}`;
@@ -409,17 +408,17 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service ${productTitle}`;
 		case TypeAction.service_invite:
-			return `Invitation d'un utilisateur au service`;
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
 		case TypeAction.service_uninvite:
-			return `Retrait d'un accès utilisateur au service`;
+			return `Retrait de l'accès à l'utilisateur ${metadataTyped.json.user_email} au service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
 			return `Modification de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_invite:
-			return `Invitation d'un utilisateur à l'organisation ${metadataTyped.json.entity_name}`;
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait d'un utilisateur de l'organisation ${metadataTyped.json.entity_name}`;
+			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
 			return `Création du bouton ${metadataTyped.json.title} `;
 		case TypeAction.service_apikeys_create:
@@ -428,3 +427,19 @@ export const handleActionTypeDisplay = (
 			return `Suppression d'une clé API`;
 	}
 };
+
+export const filtersLabel = [
+	{ value: 'service_create', label: 'Création du service' },
+	{ value: 'service_update', label: 'Modification du service' },
+	{ value: 'service_archive', label: 'Archivage du service' },
+	{ value: 'service_restore', label: 'Restauration du service' },
+	{ value: 'service_invite', label: "Invitation de l'utilisateur" },
+	{ value: 'service_uninvite', label: "Retrait de l'utilisateur" },
+	{ value: 'organisation_create', label: "Création de l'organisation" },
+	{ value: 'organisation_update', label: "Modification de l'organisation" },
+	{ value: 'organisation_invite', label: "Invitation de l'utilisateur" },
+	{ value: 'organisation_uninvite', label: "Retrait de l'utilisateur" },
+	{ value: 'service_button_create', label: 'Création du bouton' },
+	{ value: 'service_apikeys_create', label: 'Création de la clé API' },
+	{ value: 'service_apikeys_delete', label: 'Suppression de la clé API' }
+];

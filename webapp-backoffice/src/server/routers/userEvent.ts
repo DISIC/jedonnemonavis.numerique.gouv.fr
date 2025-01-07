@@ -49,20 +49,25 @@ export const userEventRouter = router({
 			z.object({
 				product_id: z.number().optional(),
 				page: z.number(),
-				limit: z.number()
+				limit: z.number(),
+				filterAction: z.nativeEnum(TypeAction).optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, page, limit } = input;
+			const { product_id, page, limit, filterAction } = input;
 			const skip = (page - 1) * limit;
 			const userId = ctx.session?.user?.id;
 
-			// Conditions communes
+			const current_product = await ctx.prisma.product.findUnique({
+				where: {
+					id: product_id
+				}
+			});
+
 			const baseWhereCondition = {
 				...(userId && { user_id: parseInt(userId) })
 			};
 
-			// Requête unifiée avec Prisma
 			const [events, total] = await ctx.prisma.$transaction([
 				ctx.prisma.userEvent.findMany({
 					where: {
@@ -74,7 +79,19 @@ export const userEventRouter = router({
 										TypeAction.service_create,
 										TypeAction.service_update,
 										TypeAction.service_archive,
-										TypeAction.service_restore,
+										TypeAction.service_restore
+									]
+								}
+							},
+							{
+								...baseWhereCondition,
+								product_id: current_product?.id,
+								action: {
+									in: [
+										TypeAction.service_invite,
+										TypeAction.service_uninvite,
+
+										TypeAction.service_button_create,
 										TypeAction.service_apikeys_create,
 										TypeAction.service_apikeys_delete
 									]
@@ -82,22 +99,18 @@ export const userEventRouter = router({
 							},
 							{
 								...baseWhereCondition,
-								product_id: product_id,
+								entity_id: current_product?.entity_id,
 								action: {
 									in: [
-										TypeAction.service_invite,
-										TypeAction.service_uninvite,
 										TypeAction.organisation_create,
 										TypeAction.organisation_update,
 										TypeAction.organisation_invite,
-										TypeAction.organisation_uninvite,
-										TypeAction.service_button_create,
-										TypeAction.service_apikeys_create,
-										TypeAction.service_apikeys_delete
+										TypeAction.organisation_uninvite
 									]
 								}
 							}
-						]
+						],
+						...(filterAction && { action: filterAction })
 					},
 					orderBy: {
 						created_at: 'desc'
@@ -132,11 +145,25 @@ export const userEventRouter = router({
 										TypeAction.organisation_invite,
 										TypeAction.organisation_uninvite,
 										TypeAction.service_button_create,
-										TypeAction.service_apikeys_create
+										TypeAction.service_apikeys_create,
+										TypeAction.service_apikeys_delete
+									]
+								}
+							},
+							{
+								...baseWhereCondition,
+								entity_id: current_product?.entity_id,
+								action: {
+									in: [
+										TypeAction.organisation_create,
+										TypeAction.organisation_update,
+										TypeAction.organisation_invite,
+										TypeAction.organisation_uninvite
 									]
 								}
 							}
-						]
+						],
+						...(filterAction && { action: filterAction })
 					}
 				})
 			]);

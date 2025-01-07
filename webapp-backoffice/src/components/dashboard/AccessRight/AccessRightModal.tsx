@@ -87,7 +87,8 @@ const ButtonModal = (props: Props) => {
 			updateAccessRight.mutate({
 				id: currentAccessRight.id,
 				status: 'removed',
-				product_id: productId
+				product_id: productId,
+				user_email: currentAccessRight.user?.email
 			});
 		} else if (modalType === 'reintegrate') {
 			if (currentAccessRight === undefined) return;
