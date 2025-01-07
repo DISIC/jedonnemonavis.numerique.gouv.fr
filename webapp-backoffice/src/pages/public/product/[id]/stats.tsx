@@ -46,6 +46,8 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 200);
 	const debouncedEndDate = useDebounce<string>(endDate, 200);
 
+	const [buttonId, setButtonId] = useState<number | null>(null)
+
 	if (product === null) {
 		return (
 			<div className={fr.cx('fr-container')}>
@@ -123,6 +125,7 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 				/>
@@ -167,6 +170,7 @@ const ProductStatPage = (props: Props) => {
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 					total={nbReviewsWithFilters}
@@ -179,6 +183,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 						required
@@ -187,6 +192,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -194,6 +200,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -201,6 +208,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -208,6 +216,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -221,6 +230,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 						required
@@ -229,6 +239,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>

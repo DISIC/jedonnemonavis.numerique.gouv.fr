@@ -27,7 +27,11 @@ const HomeQuestions = (props: HomeQuestionProps) => {
 									label={question.question}
 									className={cx(classes.accordion, 'fr-accordion__item')}
 								>
-									{question.answer}
+									<span
+										dangerouslySetInnerHTML={{
+											__html: question.answer
+										}}
+									></span>
 								</Accordion>
 							);
 						})}
@@ -50,7 +54,7 @@ const useStyles = tss
 					...fr.spacing('margin', { bottom: '3w' })
 				}
 			},
-			...fr.spacing('margin', { bottom: '6w' })
+			...fr.spacing('margin', { bottom: '6w', top: '6w' })
 		},
 		accordion: {
 			color: fr.colors.decisions.text.actionHigh.grey.default

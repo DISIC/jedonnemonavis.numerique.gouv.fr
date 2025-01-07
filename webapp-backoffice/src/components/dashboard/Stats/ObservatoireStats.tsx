@@ -6,6 +6,7 @@ import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
 	productId: number;
+	buttonId: number | null
 	startDate: string;
 	endDate: string;
 };
@@ -19,6 +20,7 @@ type StatField = {
 
 const ObservatoireStats = ({
 	productId,
+	buttonId,
 	startDate,
 	endDate
 }: ObservatoireStatsProps) => {
@@ -31,6 +33,7 @@ const ObservatoireStats = ({
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
 			product_id: productId.toString(),
+			...(buttonId && {button_id: buttonId}),
 			start_date: startDate,
 			end_date: endDate,
 			needLogging: true
@@ -255,7 +258,7 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.background.flat.success.default
 	},
 	moyen: {
-		color: fr.colors.decisions.background.flat.warning.default
+		color: fr.colors.decisions.background.flat.yellowTournesol.default
 	},
 	pasBien: {
 		color: fr.colors.decisions.background.flat.error.default

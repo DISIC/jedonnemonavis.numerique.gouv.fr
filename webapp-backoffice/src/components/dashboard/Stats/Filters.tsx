@@ -1,13 +1,16 @@
 import { getDatesByShortCut } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type FiltersProps = {
-	onChange: (startDate: string, endDate: string) => void;
+	onChange: (startDate: string, endDate: string, buttonId?: number) => void;
 	currentStartDate: string;
 	currentEndDate: string;
 };
@@ -49,9 +52,25 @@ const Filters = ({
 	const [startDate, setStartDate] = useState<string>(currentStartDate);
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [endDate, setEndDate] = useState<string>(currentEndDate);
+	const [buttonId, setButtonId] = useState<number | undefined>()
 	const [shortcutDateSelected, setShortcutDateSelected] = useState<
 		(typeof dateShortcuts)[number]['name'] | undefined
 	>('one-year');
+
+	const router = useRouter();
+	const productId = router.query.id;
+
+	const { data: buttonResults, isLoading: isLoadingButtons } = trpc.button.getList.useQuery(
+		{
+			page: 1,
+			numberPerPage: 1000,
+			product_id: parseInt(productId as string),
+			isTest: true,
+		},
+		{
+			enabled: !!productId && !isNaN(parseInt(productId as string)),
+		}
+	);
 
 	useEffect(() => {
 		if (shortcutDateSelected) {
@@ -68,9 +87,13 @@ const Filters = ({
 				dates.startDate !== currentStartDate ||
 				dates.endDate !== currentEndDate
 			)
-				onChange(dates.startDate, dates.endDate);
+				onChange(dates.startDate, dates.endDate, buttonId);
 		}
 	}, [shortcutDateSelected]);
+
+	useEffect(() => {
+		onChange(startDate, endDate, buttonId);
+	}, [buttonId])
 
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -93,7 +116,7 @@ const Filters = ({
 
 		if (startDateValid && endDateValid) {
 			if (startDate !== currentStartDate || endDate !== currentEndDate) {
-				onChange(startDate, endDate);
+				onChange(startDate, endDate, buttonId);
 			}
 		}
 	};
@@ -207,6 +230,27 @@ const Filters = ({
 						</div>
 					</div>
 				</form>
+			</div>
+			<div className={fr.cx('fr-col', 'fr-col-6')}>
+				<Select
+					label="Sélectionner une source"
+					nativeSelectProps={{
+						value: buttonId,
+						onChange: e => {
+							setButtonId(e.target.value !== 'undefined' ? parseInt(e.target.value) : undefined)
+							push(['trackEvent', 'Stats', 'Sélection-bouton']);
+						}
+					}}
+				>
+					<option value="undefined">Toutes les sources</option>
+					{buttonResults?.data?.map(button => {
+						return (
+							<option key={button.id} value={button.id}>
+								{button.title}
+							</option>
+						);
+					})}
+				</Select>
 			</div>
 		</div>
 	);

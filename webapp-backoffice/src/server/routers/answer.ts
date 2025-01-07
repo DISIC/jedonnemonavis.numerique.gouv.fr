@@ -40,6 +40,7 @@ const checkAndGetProduct = async ({
 const queryCountByFieldCode = ({
 	field_code,
 	product_id,
+	button_id,
 	start_date,
 	end_date,
 	form_id,
@@ -47,6 +48,7 @@ const queryCountByFieldCode = ({
 }: {
 	field_code: string;
 	product_id: number;
+	button_id?: number;
 	start_date: string;
 	end_date: string;
 	form_id?: number;
@@ -89,6 +91,13 @@ const queryCountByFieldCode = ({
 			(query.bool.must as QueryDslQueryContainer[]).push({
 				match: {
 					form_id
+				}
+			});
+		}
+		if(button_id) {
+			(query.bool.must as QueryDslQueryContainer[]).push({
+				match: {
+					button_id
 				}
 			});
 		}
@@ -214,13 +223,14 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string(),
 				form_id: z.number().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, form_id } = input;
+			const { product_id, button_id, form_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
 
@@ -332,6 +342,7 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.enum(['contact_reached', 'contact_satisfaction']),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
@@ -510,12 +521,13 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id } = input;
+			const { product_id, button_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
 
@@ -534,12 +546,13 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { field_code, product_id, start_date, end_date } = input;
+			const { field_code, product_id, button_id, start_date, end_date } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
 
@@ -617,6 +630,7 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
@@ -733,6 +747,7 @@ export const answerRouter = router({
 			z.object({
 				field_code: z.string(),
 				product_id: z.number() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
@@ -1011,6 +1026,7 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				product_id: z.string() /* To change to button_id */,
+				button_id: z.number().optional(),
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
 				isXWiki: z.boolean().optional(),
@@ -1018,7 +1034,7 @@ export const answerRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, start_date, end_date, isXWiki } = input;
+			const { product_id, button_id, start_date, end_date, isXWiki } = input;
 
 			const product = await ctx.prisma.product.findUnique({
 				where: isXWiki
@@ -1030,36 +1046,48 @@ export const answerRouter = router({
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
 
-			const fieldCodesCounts = await ctx.elkClient.search<ElkAnswer[]>({
-				index: 'jdma-answers',
-				query: {
-					bool: {
-						must: [
-							{
-								terms: {
-									field_code: [
-										'satisfaction',
-										'comprehension',
-										'contact_tried',
-										'contact_reached',
-										'contact_satisfaction'
-									]
-								}
-							},
-							{ match: { product_id: product.id } },
-							{
-								range: {
-									created_at: {
-										gte: start_date ? start_date : '1970-01-01',
-										lte: end_date
-											? end_date
-											: new Date().toISOString().split('T')[0]
-									}
+			let query: QueryDslQueryContainer = {
+				bool: {
+					must: [
+						{
+							terms: {
+								field_code: [
+									'satisfaction',
+									'comprehension',
+									'contact_tried',
+									'contact_reached',
+									'contact_satisfaction'
+								]
+							}
+						},
+						{ match: { product_id: product.id } },
+						{
+							range: {
+								created_at: {
+									gte: start_date ? start_date : '1970-01-01',
+									lte: end_date
+										? end_date
+										: new Date().toISOString().split('T')[0]
 								}
 							}
-						]
-					}
-				},
+						}
+					]
+				}
+			}
+
+			if (query.bool && query.bool.must) {
+				if(button_id) {
+					(query.bool.must as QueryDslQueryContainer[]).push({
+						match: {
+							button_id
+						}
+					});
+				}
+			}
+
+			const fieldCodesCounts = await ctx.elkClient.search<ElkAnswer[]>({
+				index: 'jdma-answers',
+				query: query,
 				aggs: {
 					count: {
 						terms: {

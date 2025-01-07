@@ -9,7 +9,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		sort,
 		start_date,
 		end_date,
-		button_id,
 		filters
 	} = input;
 

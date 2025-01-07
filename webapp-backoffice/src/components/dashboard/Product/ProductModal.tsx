@@ -360,20 +360,15 @@ const ProductModal = (props: Props) => {
 										renderOption={(props, option) => (
 											<li
 												{...props}
-												style={
-													option.value === -1 ? { fontWeight: 'bold' } : {}
-												}
+												className={fr.cx(option.value === -1 ? 'fr-p-0' : "fr-p-3v")}
 											>
 												{option.value === -1 ? (
-													<span className={cx(classes.buttonSelect)}>
-														<span
-															className="fr-icon-add-circle-line"
-															aria-hidden="true"
-														></span>
-														<span className={fr.cx('fr-ml-2v')}>
+													<div className={cx(classes.buttonSelect, fr.cx('fr-p-3v'))}>
+														<span className={fr.cx('fr-mr-2v')}>
 															{option.label}
 														</span>
-													</span>
+														<i className={fr.cx("fr-icon-add-circle-line")} />
+													</div>
 												) : (
 													option.label
 												)}
@@ -480,7 +475,16 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 		padding: 0
 	},
 	buttonSelect: {
-		color: fr.colors.decisions.text.default.info.default
+		color: 'white',
+		backgroundColor: fr.colors.decisions.background.actionHigh.blueFrance.default,
+		display: 'flex',
+		justifyContent: 'center',
+		cursor: "pointer",
+		i: {
+			['&::before']: {
+				'--icon-size': '1.1rem'
+			}
+		}
 	}
 }));
 export default ProductModal;
