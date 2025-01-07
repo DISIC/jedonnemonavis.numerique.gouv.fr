@@ -37,8 +37,10 @@ const ExportModal = (props: Props) => {
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
 
-	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(null);
-	const [format, setFormat] = React.useState<'csv' | 'xls' | null>(null);
+	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(
+		'filtered'
+	);
+	const [format, setFormat] = React.useState<'csv' | 'xls' | null>('xls');
 	const [startDate, setStartDate] = React.useState<string | null>(null);
 	const [endDate, setEndDate] = React.useState<string | null>(null);
 
@@ -109,22 +111,24 @@ const ExportModal = (props: Props) => {
 						}
 						options={[
 							{
-								label: `Télécharger tous les avis (${counts.countAll} avis)`,
-								nativeInputProps: {
-									value: 'all',
-									onClick: () => {
-										setChoice('all');
-									}
-								}
-							},
-							{
 								label: `Télécharger en fonction des filtres (${counts.countFiltered} avis)`,
 								nativeInputProps: {
 									value: 'filtered',
+									checked: choice === 'filtered',
 									onClick: () => {
 										setChoice('filtered');
 									},
 									disabled: !startDate || !endDate
+								}
+							},
+							{
+								label: `Télécharger tous les avis (${counts.countAll} avis)`,
+								nativeInputProps: {
+									value: 'all',
+									checked: choice === 'all',
+									onClick: () => {
+										setChoice('all');
+									}
 								}
 							}
 						]}
@@ -135,20 +139,22 @@ const ExportModal = (props: Props) => {
 						name="format"
 						options={[
 							{
-								label: `Format CSV`,
+								label: `Format adapté pour Microsoft Excel`,
 								nativeInputProps: {
-									value: 'csv',
+									value: 'xls',
+									checked: format === 'xls',
 									onClick: () => {
-										setFormat('csv');
+										setFormat('xls');
 									}
 								}
 							},
 							{
-								label: `Format XLSX (requis pour excel)`,
+								label: `Format CSV`,
 								nativeInputProps: {
-									value: 'xls',
+									value: 'csv',
+									checked: format === 'csv',
 									onClick: () => {
-										setFormat('xls');
+										setFormat('csv');
 									}
 								}
 							}
