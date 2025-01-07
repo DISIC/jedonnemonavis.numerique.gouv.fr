@@ -10,10 +10,11 @@ import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer'
 }
 
 const ProductFormView = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 	const { classes } = useStyles();
 
 	const { data: buttonResult } = trpc.button.getList.useQuery({
@@ -25,7 +26,7 @@ const ProductFormView = (props: Props) => {
 	const buttonId = buttonResult?.data[0]?.id;
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Aperçu formulaire | Je donne mon avis</title>
 				<meta

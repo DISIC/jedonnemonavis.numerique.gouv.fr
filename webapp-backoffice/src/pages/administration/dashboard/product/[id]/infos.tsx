@@ -22,6 +22,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer'
 }
 
 const editProductModal = createModal({
@@ -40,7 +41,7 @@ const entityModal = createModal({
 });
 
 const ProductInformationPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 
 	const router = useRouter();
 
@@ -85,7 +86,7 @@ const ProductInformationPage = (props: Props) => {
 	};
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Informations | Je donne mon avis</title>
 				<meta
@@ -162,14 +163,16 @@ const ProductInformationPage = (props: Props) => {
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
-					<Button
-						priority="secondary"
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-						nativeButtonProps={editProductModal.buttonProps}
-					>
-						Modifier
-					</Button>
+					{ownRight === "admin" &&
+						<Button
+							priority="secondary"
+							iconId="fr-icon-edit-line"
+							iconPosition="right"
+							nativeButtonProps={editProductModal.buttonProps}
+						>
+							Modifier
+						</Button>
+					}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
@@ -225,40 +228,42 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
-					<p>En supprimant ce service :</p>
-					<ul className={fr.cx('fr-mb-8v')}>
-						<li>vous n’aurez plus accès aux avis du formulaire,</li>
-						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
-						</li>
-					</ul>
-					<Button
-						type="button"
-						iconId="ri-delete-bin-line"
-						iconPosition="right"
-						priority="tertiary"
-						className={classes.buttonError}
-						onClick={() => {
-							if(product.isTop250) {
-								setStatusProductState({
-									msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
-									role: 'alert'
-								});
-								window.scrollTo({
-									top: 0,
-									behavior: 'smooth', // Scroll avec animation
-								  });
-							} else {
-								onConfirmModal.open();
-								push(['trackEvent', 'Product', 'Modal-Delete']);
-							}
-						}}
-					>
-						Supprimer ce service
-					</Button>
-				</div>
+				{ownRight === "admin" &&
+					<div>
+						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
+						<p>En supprimant ce service :</p>
+						<ul className={fr.cx('fr-mb-8v')}>
+							<li>vous n’aurez plus accès aux avis du formulaire,</li>
+							<li>
+								les utilisateurs de ce service n’auront plus accès au formulaire.
+							</li>
+						</ul>
+						<Button
+							type="button"
+							iconId="ri-delete-bin-line"
+							iconPosition="right"
+							priority="tertiary"
+							className={classes.buttonError}
+							onClick={() => {
+								if(product.isTop250) {
+									setStatusProductState({
+										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+										role: 'alert'
+									});
+									window.scrollTo({
+										top: 0,
+										behavior: 'smooth', // Scroll avec animation
+									});
+								} else {
+									onConfirmModal.open();
+									push(['trackEvent', 'Product', 'Modal-Delete']);
+								}
+							}}
+						>
+							Supprimer ce service
+						</Button>
+					</div>
+				}
 			</div>
 		</ProductLayout>
 	);

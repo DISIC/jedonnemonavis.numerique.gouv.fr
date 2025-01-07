@@ -28,6 +28,7 @@ import { getServerSideProps } from '.';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer'
 }
 
 const public_modal = createModal({
@@ -64,7 +65,7 @@ export const SectionWrapper = ({
 const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 	const router = useRouter();
 
 	const { classes, cx } = useStyles();
@@ -159,7 +160,7 @@ const ProductStatPage = (props: Props) => {
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<h1>Statistiques</h1>
 				<div className={fr.cx('fr-mt-20v')}>
 					<Loader />
@@ -170,7 +171,7 @@ const ProductStatPage = (props: Props) => {
 
 	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
 		return (
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<Head>
 					<title>{product.title} | Statistiques | Je donne mon avis</title>
 					<meta
@@ -331,7 +332,7 @@ const ProductStatPage = (props: Props) => {
 	};
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Statistiques | Je donne mon avis</title>
 				<meta

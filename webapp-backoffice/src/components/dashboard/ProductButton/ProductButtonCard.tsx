@@ -11,10 +11,11 @@ import { push } from '@socialgouv/matomo-next';
 interface Props {
 	button: PrismaButtonType;
 	onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
+	ownRight : 'admin' | 'viewer';
 }
 
 const ProductButtonCard = (props: Props) => {
-	const { button, onButtonClick } = props;
+	const { button, onButtonClick, ownRight } = props;
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -73,13 +74,15 @@ const ProductButtonCard = (props: Props) => {
 									'aria-labelledby': 'button-options'
 								}}
 							>
-								<MenuItem
-									onClick={() => {
-										onButtonClick('edit', button), handleClose();
-									}}
-								>
-									Modifier
-								</MenuItem>
+								{ownRight === "admin" &&
+									<MenuItem
+										onClick={() => {
+											onButtonClick('edit', button), handleClose();
+										}}
+									>
+										Modifier
+									</MenuItem>
+								}
 								{/* <MenuItem onClick={() => onButtonClick('merge')}>
 								Fusionner avec un autre bouton
 							</MenuItem>

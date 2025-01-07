@@ -13,6 +13,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 interface ProductLayoutProps {
 	children: React.ReactNode;
 	product: Product;
+	ownRight: 'admin' | 'viewer';
 }
 
 interface MenuItems {
@@ -24,7 +25,7 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const ProductLayout = ({ children, product }: ProductLayoutProps) => {
+const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 	const { id } = product;
 
 	const [displayToast, setDisplayToast] = useState(false);
@@ -54,7 +55,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Gérer les boutons',
+			text: ownRight && ownRight === 'admin' ? 'Gérer les boutons' : 'Voir les boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
@@ -63,7 +64,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: "Gérer l'accès",
+			text: ownRight && ownRight === 'admin' ? "Gérer l'accès" : "Voir l'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
@@ -81,7 +82,7 @@ const ProductLayout = ({ children, product }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Gérer les clés API',
+			text: ownRight && ownRight === 'admin' ? 'Gérer les clés API' : 'Voir les clés API',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {

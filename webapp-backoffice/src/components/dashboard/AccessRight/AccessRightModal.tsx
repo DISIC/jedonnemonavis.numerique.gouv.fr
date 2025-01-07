@@ -82,6 +82,18 @@ const ButtonModal = (props: Props) => {
 				product_id: productId,
 				user_email: email
 			});
+		} else if (modalType === 'switch') {
+			if (currentAccessRight?.status === "admin") {
+				updateAccessRight.mutate({
+					id: currentAccessRight.id,
+					status: 'carrier'
+				});
+			} else if (currentAccessRight?.status === "carrier"){
+				updateAccessRight.mutate({
+					id: currentAccessRight.id,
+					status: 'admin'
+				});
+			}
 		} else if (modalType === 'remove') {
 			if (currentAccessRight === undefined) return;
 			updateAccessRight.mutate({
@@ -101,6 +113,8 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'add':
 				return 'Inviter un utilisateur';
+			case 'switch':
+				return currentAccessRight?.status === "admin" ? 'Retirer admin' : "Passer admin";
 			case 'remove':
 				return "Retirer l'accès";
 			case 'reintegrate':
@@ -131,12 +145,34 @@ const ButtonModal = (props: Props) => {
 						/>
 					</div>
 				);
+			case 'switch':
+				return (
+					<div className={fr.cx('fr-pt-4v')}>
+						{currentAccessRight && currentAccessRight.status === "admin" ? (
+							<p>
+								Souhaitez-vous vraiment retirer les droits d'admin de{' '}
+								<span className={cx(classes.boldText)}>
+									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+								</span>{' '} pour{' '}
+								<span className={cx(classes.boldText)}>{productName}</span> ?
+							</p>
+						) : (
+							<p>
+								Souhaitez-vous vraiment donner les droits d'admin à{' '}
+								<span className={cx(classes.boldText)}>
+									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+								</span>{' '} pour {' '}
+								<span className={cx(classes.boldText)}>{productName}</span> ?
+							</p>
+						)}
+					</div>
+				);
 			case 'remove':
 				return (
 					<div className={fr.cx('fr-pt-4v')}>
 						{currentAccessRight?.user ? (
 							<p>
-								Souhaitez-vous vraiment retirer les droits d’administration de{' '}
+								Souhaitez-vous vraiment retirer les droits d'accès de{' '}
 								<span className={cx(classes.boldText)}>
 									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
 								</span>{' '}
@@ -145,7 +181,7 @@ const ButtonModal = (props: Props) => {
 							</p>
 						) : (
 							<p>
-								Souhaitez-vous vraiment retirer les droits d’administration pour{' '}
+								Souhaitez-vous vraiment retirer les droits d'accès pour{' '}
 								<span className={cx(classes.boldText)}>{productName}</span> ?
 							</p>
 						)}
@@ -187,6 +223,16 @@ const ButtonModal = (props: Props) => {
 						priority: 'primary',
 						doClosesModal: false,
 						onClick: () => handleModalSubmit(email)
+					}
+				];
+			case 'switch':
+				return [
+					...defaultButtons,
+					{
+						children: 'Valider',
+						priority: 'primary',
+						doClosesModal: false,
+						onClick: () => handleModalSubmit()
 					}
 				];
 			case 'remove':
