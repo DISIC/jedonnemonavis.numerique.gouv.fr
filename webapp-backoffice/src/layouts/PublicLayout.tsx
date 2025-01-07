@@ -391,6 +391,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							text: 'Modalités d’utilisation',
 							linkProps: { href: '/public/termsOfUse' }
 						},
+						{
+							text: 'Roadmap',
+							linkProps: { href: '/public/roadmap' }
+						},
 						{ text: 'Contact', linkProps: { href: '/public/contact' } }
 					]}
 					termsLinkProps={{
