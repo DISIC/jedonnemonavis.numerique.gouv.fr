@@ -1,4 +1,5 @@
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
+import EssentialProductModal from '@/src/components/dashboard/Product/EssentialProductModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
@@ -37,6 +38,11 @@ const api_modal = createModal({
 
 const entity_modal = createModal({
 	id: 'entity-modal',
+	isOpenedByDefault: false
+});
+
+const essential_service_modal = createModal({
+	id: 'essential-service-modal',
 	isOpenedByDefault: false
 });
 
@@ -171,6 +177,14 @@ const DashBoard = () => {
 					modal={entity_modal}
 					onSubmit={newEntity => handleSubmit(newEntity)}
 				/>
+				<EssentialProductModal
+					modal={essential_service_modal}
+					productTitle={productTitle}
+					onClose={() => {
+						essential_service_modal.close();
+						product_modal.open();
+					}}
+				/>
 			</>
 		);
 	};
@@ -229,7 +243,9 @@ const DashBoard = () => {
 						onClose={function noRefCheck() {
 							setStatusProductState(null);
 						}}
-						severity={statusProductState.role === 'alert' ? 'warning' : 'success'}
+						severity={
+							statusProductState.role === 'alert' ? 'warning' : 'success'
+						}
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={
@@ -505,10 +521,8 @@ const DashBoard = () => {
 												}
 												showFavoriteButton={countTotalUserScope > 10}
 												onDeleteEssential={() => {
-													setStatusProductState({
-														msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
-														role: 'alert'
-													});
+													setProductTitle(product.title);
+													essential_service_modal.open();
 												}}
 												onDeleteProduct={() => {
 													setStatusProductState({
