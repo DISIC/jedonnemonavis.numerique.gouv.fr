@@ -238,7 +238,7 @@ const AccessManagement = (props: Props) => {
 								push(['trackEvent', 'Product', 'Modal-Admin']);
 							}}
 						>
-							Inviter des administrateurs
+							Inviter des utilisateurs
 						</Button>
 					</div>
 				</div>

@@ -100,7 +100,7 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'add':
-				return 'Inviter un administrateur';
+				return 'Inviter un utilisateur';
 			case 'remove':
 				return "Retirer l'accès";
 			case 'reintegrate':

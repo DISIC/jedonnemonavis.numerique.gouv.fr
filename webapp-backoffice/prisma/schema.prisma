@@ -37,6 +37,7 @@ enum UserRequestStatus {
 }
 
 enum RightAccessStatus {
+  admin
   carrier
   removed
 }
