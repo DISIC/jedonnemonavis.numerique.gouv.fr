@@ -433,13 +433,19 @@ export const filtersLabel = [
 	{ value: 'service_update', label: 'Modification du service' },
 	{ value: 'service_archive', label: 'Archivage du service' },
 	{ value: 'service_restore', label: 'Restauration du service' },
-	{ value: 'service_invite', label: "Invitation de l'utilisateur" },
-	{ value: 'service_uninvite', label: "Retrait de l'utilisateur" },
-	{ value: 'organisation_create', label: "Création de l'organisation" },
-	{ value: 'organisation_update', label: "Modification de l'organisation" },
-	{ value: 'organisation_invite', label: "Invitation de l'utilisateur" },
-	{ value: 'organisation_uninvite', label: "Retrait de l'utilisateur" },
-	{ value: 'service_button_create', label: 'Création du bouton' },
-	{ value: 'service_apikeys_create', label: 'Création de la clé API' },
-	{ value: 'service_apikeys_delete', label: 'Suppression de la clé API' }
+	{ value: 'service_invite', label: "Invitation d'utilisateur au service" },
+	{ value: 'service_uninvite', label: "Retrait d'utilisateur du service" },
+	{ value: 'organisation_create', label: "Création d'une organisation" },
+	{ value: 'organisation_update', label: "Modification d'une organisation" },
+	{
+		value: 'organisation_invite',
+		label: "Invitation d'utilisateur dans une organisation"
+	},
+	{
+		value: 'organisation_uninvite',
+		label: "Retrait d'utilisateur d'une organisation"
+	},
+	{ value: 'service_button_create', label: "Création d'un bouton" },
+	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
+	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" }
 ];

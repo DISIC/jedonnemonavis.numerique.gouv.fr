@@ -34,7 +34,7 @@ interface Event {
 }
 
 const UserLogsPage = ({ product }: Props) => {
-	const { classes } = useStyles();
+	const { classes, cx } = useStyles();
 
 	const { filters, updateFilters } = useFilters();
 
@@ -95,7 +95,6 @@ const UserLogsPage = ({ product }: Props) => {
 										filterAction: option.value as TypeAction
 									});
 							}}
-							noOptionsText="Aucune action trouvée"
 							inputValue={inputValue}
 							onInputChange={(event, newInputValue) => {
 								setInputValue(newInputValue);
@@ -121,7 +120,12 @@ const UserLogsPage = ({ product }: Props) => {
 					</div>
 				</div>
 				{isLoading || fullEvents?.data.length === 0 ? (
-					<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+					<div
+						className={cx(
+							fr.cx('fr-grid-row--center', 'fr-grid-row'),
+							classes.emptyState
+						)}
+					>
 						<p>Aucun événement trouvé</p>
 					</div>
 				) : (
@@ -158,6 +162,15 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: '0.5rem'
+	},
+	emptyState: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: '100%',
+		padding: '1rem',
+		fontSize: '1.2rem',
+		fontWeight: 'bold'
 	}
 });
 
