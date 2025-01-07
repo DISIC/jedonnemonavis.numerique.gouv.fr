@@ -3,6 +3,28 @@ import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import { Prisma, TypeAction } from '@prisma/client';
 import { UserEventUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 
+const SERVICE_ACTIONS: TypeAction[] = [
+	TypeAction.service_create,
+	TypeAction.service_update,
+	TypeAction.service_archive,
+	TypeAction.service_restore
+];
+
+const PRODUCT_ACTIONS: TypeAction[] = [
+	TypeAction.service_invite,
+	TypeAction.service_uninvite,
+	TypeAction.service_button_create,
+	TypeAction.service_apikeys_create,
+	TypeAction.service_apikeys_delete
+];
+
+const ORGANISATION_ACTIONS: TypeAction[] = [
+	TypeAction.organisation_create,
+	TypeAction.organisation_update,
+	TypeAction.organisation_invite,
+	TypeAction.organisation_uninvite
+];
+
 export const userEventRouter = router({
 	getLastReviewView: protectedProcedure
 		.input(
@@ -68,104 +90,34 @@ export const userEventRouter = router({
 				...(userId && { user_id: parseInt(userId) })
 			};
 
+			const whereCondition = {
+				OR: [
+					{
+						...baseWhereCondition,
+						action: { in: SERVICE_ACTIONS }
+					},
+					{
+						...baseWhereCondition,
+						product_id: current_product?.id,
+						action: { in: PRODUCT_ACTIONS }
+					},
+					{
+						...baseWhereCondition,
+						entity_id: current_product?.entity_id,
+						action: { in: ORGANISATION_ACTIONS }
+					}
+				],
+				...(filterAction && { action: filterAction })
+			};
+
 			const [events, total] = await ctx.prisma.$transaction([
 				ctx.prisma.userEvent.findMany({
-					where: {
-						OR: [
-							{
-								...baseWhereCondition,
-								action: {
-									in: [
-										TypeAction.service_create,
-										TypeAction.service_update,
-										TypeAction.service_archive,
-										TypeAction.service_restore
-									]
-								}
-							},
-							{
-								...baseWhereCondition,
-								product_id: current_product?.id,
-								action: {
-									in: [
-										TypeAction.service_invite,
-										TypeAction.service_uninvite,
-
-										TypeAction.service_button_create,
-										TypeAction.service_apikeys_create,
-										TypeAction.service_apikeys_delete
-									]
-								}
-							},
-							{
-								...baseWhereCondition,
-								entity_id: current_product?.entity_id,
-								action: {
-									in: [
-										TypeAction.organisation_create,
-										TypeAction.organisation_update,
-										TypeAction.organisation_invite,
-										TypeAction.organisation_uninvite
-									]
-								}
-							}
-						],
-						...(filterAction && { action: filterAction })
-					},
-					orderBy: {
-						created_at: 'desc'
-					},
+					where: whereCondition,
+					orderBy: { created_at: 'desc' },
 					skip,
 					take: limit
 				}),
-				ctx.prisma.userEvent.count({
-					where: {
-						OR: [
-							{
-								...baseWhereCondition,
-								action: {
-									in: [
-										TypeAction.service_create,
-										TypeAction.service_update,
-										TypeAction.service_archive,
-										TypeAction.service_restore,
-										TypeAction.service_apikeys_create
-									]
-								}
-							},
-							{
-								...baseWhereCondition,
-								product_id: product_id,
-								action: {
-									in: [
-										TypeAction.service_invite,
-										TypeAction.service_uninvite,
-										TypeAction.organisation_create,
-										TypeAction.organisation_update,
-										TypeAction.organisation_invite,
-										TypeAction.organisation_uninvite,
-										TypeAction.service_button_create,
-										TypeAction.service_apikeys_create,
-										TypeAction.service_apikeys_delete
-									]
-								}
-							},
-							{
-								...baseWhereCondition,
-								entity_id: current_product?.entity_id,
-								action: {
-									in: [
-										TypeAction.organisation_create,
-										TypeAction.organisation_update,
-										TypeAction.organisation_invite,
-										TypeAction.organisation_uninvite
-									]
-								}
-							}
-						],
-						...(filterAction && { action: filterAction })
-					}
-				})
+				ctx.prisma.userEvent.count({ where: whereCondition })
 			]);
 
 			return {
