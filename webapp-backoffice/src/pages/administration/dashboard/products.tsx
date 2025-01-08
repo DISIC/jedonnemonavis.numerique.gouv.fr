@@ -182,7 +182,6 @@ const DashBoard = () => {
 					productTitle={productTitle}
 					onClose={() => {
 						essential_service_modal.close();
-						product_modal.open();
 					}}
 				/>
 			</>
