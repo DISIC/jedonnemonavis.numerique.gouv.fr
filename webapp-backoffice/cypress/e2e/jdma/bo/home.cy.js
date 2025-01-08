@@ -111,6 +111,7 @@ describe('jdma-home', () => {
 				'Mentions légales',
 				'Données personnelles',
 				'Modalités d’utilisation',
+				'Roadmap',
 				'Contact'
 			];
 
