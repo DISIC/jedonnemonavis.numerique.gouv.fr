@@ -160,6 +160,75 @@ export const reviewRouter = router({
 			};
 		}),
 
+	countReviews: publicProcedure
+		.input(
+			z.object({
+				numberPerPage: z.number(),
+				page: z.number().default(1),
+				product_id: z.number().optional(),
+				shouldIncludeAnswers: z.boolean().optional().default(false),
+				mustHaveVerbatims: z.boolean().optional().default(false),
+				sort: z.string().optional(),
+				search: z.string().optional(),
+				start_date: z.string().optional(),
+				end_date: z.string().optional(),
+				newReviews: z.boolean().optional(),
+				needLogging: z.boolean().optional().default(false),
+				loggingFromMail: z.boolean().optional(),
+				filters: z
+					.object({
+						satisfaction: z.array(z.string()).optional(),
+						comprehension: z.array(z.string()).optional(),
+						needVerbatim: z.boolean().optional(),
+						needOtherDifficulties: z.boolean().optional(),
+						needOtherHelp: z.boolean().optional(),
+						help: z.array(z.string()).optional(),
+						buttonId: z.array(z.string()).optional()
+					})
+					.optional()
+			})
+		)
+		.output(
+			z.object({
+				metadata: z.object({
+					countFiltered: z.number(),
+					countAll: z.number(),
+					countForm1: z.number(),
+					countForm2: z.number()
+				})
+			})
+		)
+		.query(async ({ ctx, input }) => {
+
+			const { where } = formatWhereAndOrder(input);
+
+			const [countFiltered, countAll, countForm1, countForm2] =
+				await Promise.all([
+					ctx.prisma.review.count({ where }),
+					ctx.prisma.review.count({
+						where: {
+							product_id: input.product_id
+						}
+					}),
+					ctx.prisma.review.count({
+						where: {
+							...where,
+							form_id: 1
+						}
+					}),
+					ctx.prisma.review.count({
+						where: {
+							...where,
+							form_id: 2
+						}
+					})
+				]);
+
+				return {
+					metadata: { countFiltered, countAll, countForm1, countForm2 }
+				};
+		}),
+
 	exportData: protectedProcedure
 		.input(
 			z.object({

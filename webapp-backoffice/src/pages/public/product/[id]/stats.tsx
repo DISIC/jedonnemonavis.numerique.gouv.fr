@@ -46,7 +46,7 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 200);
 	const debouncedEndDate = useDebounce<string>(endDate, 200);
 
-	const [buttonId, setButtonId] = useState<number | null>(null)
+	const [buttonId, setButtonId] = useState<number | null>(null);
 
 	if (product === null) {
 		return (
@@ -63,7 +63,7 @@ const ProductStatPage = (props: Props) => {
 	}
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getList.useQuery({
+		trpc.review.countReviews.useQuery({
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id
@@ -72,7 +72,7 @@ const ProductStatPage = (props: Props) => {
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
-	} = trpc.review.getList.useQuery({
+	} = trpc.review.countReviews.useQuery({
 		numberPerPage: 0,
 		page: 1,
 		product_id: product.id,

@@ -103,7 +103,7 @@ const ProductStatPage = (props: Props) => {
 		);
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getList.useQuery({
+		trpc.review.countReviews.useQuery({
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id
@@ -112,7 +112,7 @@ const ProductStatPage = (props: Props) => {
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
-	} = trpc.review.getList.useQuery({
+	} = trpc.review.countReviews.useQuery({
 		numberPerPage: 0,
 		page: 1,
 		product_id: product.id,
