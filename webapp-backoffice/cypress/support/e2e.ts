@@ -16,19 +16,20 @@
 // Import commands.js using ES2015 syntax:
 import './commands';
 
-Cypress.on('window:before:load', (win) => {
-    cy.stub(win.console, 'log').callsFake((msg) => {
-      console.log('Console log:', msg);
-    });
-  
-    cy.stub(win.console, 'error').callsFake((msg) => {
-      console.error('Console error:', msg);
-    });
-  
-    cy.stub(win.console, 'warn').callsFake((msg) => {
-      console.warn('Console warning:', msg);
-    });
-  });
+Cypress.on('window:before:load', win => {
+	cy.stub(win.console, 'log').callsFake(msg => {
+		console.log('Console log:', msg);
+	});
+
+	cy.stub(win.console, 'error').callsFake(msg => {
+		console.error('Console error:', msg);
+	});
+
+	cy.stub(win.console, 'warn').callsFake(msg => {
+		console.warn('Console warning:', msg);
+	});
+});
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+import './commands/review';
