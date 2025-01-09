@@ -233,7 +233,7 @@ const ProductModal = (props: Props) => {
 			concealingBackdrop={false}
 			title={
 				product && product.id
-					? 'Modifier les informations du produit'
+					? 'Modifier les informations du service'
 					: 'Ajouter un nouveau service'
 			}
 			size="large"
@@ -260,7 +260,9 @@ const ProductModal = (props: Props) => {
 						rules={{ required: 'Ce champ est obligatoire' }}
 						render={({ field: { onChange, value, name } }) => {
 							useEffect(() => {
-								onChange(selectedTitle);
+								if (selectedTitle) {
+									onChange(selectedTitle);
+								}
 							}, [selectedTitle]);
 							return (
 								<Input
@@ -360,14 +362,21 @@ const ProductModal = (props: Props) => {
 										renderOption={(props, option) => (
 											<li
 												{...props}
-												className={fr.cx(option.value === -1 ? 'fr-p-0' : "fr-p-3v")}
+												className={fr.cx(
+													option.value === -1 ? 'fr-p-0' : 'fr-p-3v'
+												)}
 											>
 												{option.value === -1 ? (
-													<div className={cx(classes.buttonSelect, fr.cx('fr-p-3v'))}>
+													<div
+														className={cx(
+															classes.buttonSelect,
+															fr.cx('fr-p-3v')
+														)}
+													>
 														<span className={fr.cx('fr-mr-2v')}>
 															{option.label}
 														</span>
-														<i className={fr.cx("fr-icon-add-circle-line")} />
+														<i className={fr.cx('fr-icon-add-circle-line')} />
 													</div>
 												) : (
 													option.label
@@ -476,10 +485,11 @@ const useStyles = tss.withName(ProductModal.name).create(() => ({
 	},
 	buttonSelect: {
 		color: 'white',
-		backgroundColor: fr.colors.decisions.background.actionHigh.blueFrance.default,
+		backgroundColor:
+			fr.colors.decisions.background.actionHigh.blueFrance.default,
 		display: 'flex',
 		justifyContent: 'center',
-		cursor: "pointer",
+		cursor: 'pointer',
 		i: {
 			['&::before']: {
 				'--icon-size': '1.1rem'
