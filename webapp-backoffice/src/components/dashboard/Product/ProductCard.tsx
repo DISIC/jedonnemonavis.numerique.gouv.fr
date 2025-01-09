@@ -116,6 +116,7 @@ const ProductCard = ({
 				message:
 					'Veuillez saisir le nom du service pour confirmer la suppression'
 			});
+			setValidateDelete(false);
 		} else {
 			clearErrors('product_name');
 			setValidateDelete(true);
@@ -312,7 +313,7 @@ const ProductCard = ({
 				title="Restaurer un service"
 				handleOnConfirm={() => {
 					restoreProduct.mutate({
-						id: product.id
+						product_id: product.id
 					});
 					onConfirmModalRestore.close();
 				}}
@@ -331,7 +332,7 @@ const ProductCard = ({
 					if (nbReviews && nbReviews > 1000) {
 						if (validateDelete) {
 							archiveProduct.mutate({
-								id: product.id
+								product_id: product.id
 							});
 							onConfirmModalArchive.close();
 						} else {
@@ -339,7 +340,7 @@ const ProductCard = ({
 						}
 					} else {
 						archiveProduct.mutate({
-							id: product.id
+							product_id: product.id
 						});
 						onConfirmModalArchive.close();
 					}

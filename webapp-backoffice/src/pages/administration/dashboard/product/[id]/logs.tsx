@@ -11,29 +11,17 @@ import {
 	getNbPages,
 	handleActionTypeDisplay
 } from '@/src/utils/tools';
-import { JsonValue } from '@prisma/client/runtime/library';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Select } from '@codegouvfr/react-dsfr/Select';
 import { Autocomplete } from '@mui/material';
 import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface Props {
 	product: Product;
+	ownRight: 'admin' | 'viewer';
 }
 
-interface Event {
-	id: number;
-	user_id: number;
-	action: TypeAction;
-	metadata: JsonValue;
-	product_id: number | null;
-	entity_id: number | null;
-	apiKey_id: number | null;
-	created_at: Date;
-}
-
-const UserLogsPage = ({ product }: Props) => {
+const UserLogsPage = ({ product, ownRight }: Props) => {
 	const { classes, cx } = useStyles();
 
 	const { filters, updateFilters } = useFilters();
@@ -62,16 +50,17 @@ const UserLogsPage = ({ product }: Props) => {
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
 
-	const headers = ['Date', 'Action'];
+	const headers = ['Date', 'Utilisateur', 'Action'];
 
 	const tableData =
-		fullEvents?.data.map((event: Event) => [
+		fullEvents?.data.map(event => [
 			event.created_at.toLocaleString(),
+			event.user.firstName + ' ' + event.user.lastName,
 			handleActionTypeDisplay(event.action, event.metadata, product.title)
 		]) || [];
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Journal d'activité | Je donne mon avis</title>
 				<meta
@@ -82,7 +71,7 @@ const UserLogsPage = ({ product }: Props) => {
 			<div className={classes.container}>
 				<h1>Journal d'activité</h1>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v')}>
 						<Autocomplete
 							id="filter-action"
 							disablePortal

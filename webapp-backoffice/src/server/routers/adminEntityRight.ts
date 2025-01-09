@@ -236,6 +236,7 @@ export const adminEntityRightRouter = router({
 			z.object({
 				admin_entity_right_id: z.number(),
 				entity_name: z.string().optional(),
+				entity_id: z.number().optional(),
 				user_email: z.string().optional()
 			})
 		)

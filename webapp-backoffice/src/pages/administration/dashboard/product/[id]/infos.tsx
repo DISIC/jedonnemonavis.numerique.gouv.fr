@@ -22,7 +22,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer'
+	ownRight: 'admin' | 'viewer';
 }
 
 const editProductModal = createModal({
@@ -99,7 +99,7 @@ const ProductInformationPage = (props: Props) => {
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
-						id: product.id
+						product_id: product.id
 					});
 					onConfirmModal.close();
 				}}
@@ -149,7 +149,9 @@ const ProductInformationPage = (props: Props) => {
 						onClose={function noRefCheck() {
 							setStatusProductState(null);
 						}}
-						severity={statusProductState.role === 'alert' ? 'warning' : 'success'}
+						severity={
+							statusProductState.role === 'alert' ? 'warning' : 'success'
+						}
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={
@@ -163,7 +165,7 @@ const ProductInformationPage = (props: Props) => {
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
-					{ownRight === "admin" &&
+					{ownRight === 'admin' && (
 						<Button
 							priority="secondary"
 							iconId="fr-icon-edit-line"
@@ -172,7 +174,7 @@ const ProductInformationPage = (props: Props) => {
 						>
 							Modifier
 						</Button>
-					}
+					)}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
@@ -228,14 +230,15 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				{ownRight === "admin" &&
+				{ownRight === 'admin' && (
 					<div>
 						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
 						<p>En supprimant ce service :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
-								les utilisateurs de ce service n’auront plus accès au formulaire.
+								les utilisateurs de ce service n’auront plus accès au
+								formulaire.
 							</li>
 						</ul>
 						<Button
@@ -245,14 +248,14 @@ const ProductInformationPage = (props: Props) => {
 							priority="tertiary"
 							className={classes.buttonError}
 							onClick={() => {
-								if(product.isTop250) {
+								if (product.isTop250) {
 									setStatusProductState({
 										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({
 										top: 0,
-										behavior: 'smooth', // Scroll avec animation
+										behavior: 'smooth' // Scroll avec animation
 									});
 								} else {
 									onConfirmModal.open();
@@ -263,7 +266,7 @@ const ProductInformationPage = (props: Props) => {
 							Supprimer ce service
 						</Button>
 					</div>
-				}
+				)}
 			</div>
 		</ProductLayout>
 	);
