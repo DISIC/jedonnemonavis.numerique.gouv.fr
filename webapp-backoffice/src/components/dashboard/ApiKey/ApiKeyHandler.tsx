@@ -56,7 +56,7 @@ const ApiKeyHandler = (props: Props) => {
 	const handleDeleteKey = async (key: string) => {
 		push(['trackEvent', 'BO - ApiKey', `Delete-Key`]);
 		if (confirm(`Êtes vous sûr de vouloir supprimer la clé « ${key} » ?`)) {
-			await deleteKey.mutateAsync({ key: key });
+			await deleteKey.mutateAsync({ key: key, product_id: product?.id });
 			RefectchKeys();
 		}
 	};

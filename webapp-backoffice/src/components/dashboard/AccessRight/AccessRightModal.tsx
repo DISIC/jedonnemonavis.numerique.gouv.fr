@@ -98,13 +98,16 @@ const ButtonModal = (props: Props) => {
 			if (currentAccessRight === undefined) return;
 			updateAccessRight.mutate({
 				id: currentAccessRight.id,
-				status: 'removed'
+				status: 'removed',
+				product_id: productId,
+				user_email: currentAccessRight.user?.email
 			});
 		} else if (modalType === 'reintegrate') {
 			if (currentAccessRight === undefined) return;
 			updateAccessRight.mutate({
 				id: currentAccessRight.id,
-				status: 'carrier'
+				status: 'carrier',
+				product_id: productId
 			});
 		}
 	}
