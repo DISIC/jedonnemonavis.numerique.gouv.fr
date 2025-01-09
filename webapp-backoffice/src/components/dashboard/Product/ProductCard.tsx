@@ -63,7 +63,7 @@ const ProductCard = ({
 	showFavoriteButton,
 	onRestoreProduct,
 	onDeleteProduct,
-	onDeleteEssential,
+	onDeleteEssential
 }: {
 	product: ProductWithButtons;
 
@@ -490,12 +490,12 @@ const ProductCard = ({
 										<MenuItem
 											onClick={e => {
 												handleClose(e);
-												if(product.isTop250) {
+												if (product.isTop250) {
 													onDeleteEssential();
 													window.scrollTo({
 														top: 0,
-														behavior: 'smooth', // Scroll avec animation
-													  });
+														behavior: 'smooth' // Scroll avec animation
+													});
 												} else {
 													onConfirmModalArchive.open();
 												}
@@ -681,7 +681,7 @@ const ProductCard = ({
 															{nbReviews > 0 && (
 																<Link
 																	href={`/administration/dashboard/product/${product.id}/reviews`}
-																	title={`Voir les nouveaux avis pour ${product.title}`}
+																	title={`Voir les avis pour ${product.title}`}
 																	className={fr.cx('fr-link')}
 																>
 																	Voir les avis

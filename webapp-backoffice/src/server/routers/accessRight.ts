@@ -123,9 +123,18 @@ export const accessRightRouter = router({
 				}
 			})
 
+			const userIsSuperAdmin = await ctx.prisma.user.findFirst( {
+				where: {
+					email: user_email,
+					role: {
+						in: ["admin", "superadmin"]
+					}
+				}
+			})
+
 			if (
 				(accessRightAlreadyExists !== null &&
-				accessRightAlreadyExists.status === 'carrier') || adminEntityRightExists
+				accessRightAlreadyExists.status === 'carrier') || adminEntityRightExists || userIsSuperAdmin !== null
 			) {
 				throw new TRPCError({
 					code: 'CONFLICT',
