@@ -415,9 +415,9 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_create:
 			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
-			return `Modification sur l'organisation ${metadataTyped.json.entity_name}`;
+			return `Modification sur l'organisation du service`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation`;
 		case TypeAction.organisation_uninvite:
 			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
@@ -432,14 +432,12 @@ export const handleActionTypeDisplay = (
 };
 
 export const filtersLabel = [
-	{ value: 'service_create', label: 'Création du service' },
 	{ value: 'service_update', label: 'Modification du service' },
 	{ value: 'service_archive', label: 'Archivage du service' },
 	{ value: 'service_restore', label: 'Restauration du service' },
 	{ value: 'service_invite', label: "Invitation d'utilisateur au service" },
 	{ value: 'service_uninvite', label: "Retrait d'utilisateur du service" },
-	{ value: 'organisation_create', label: "Création d'une organisation" },
-	{ value: 'organisation_update', label: "Modification d'une organisation" },
+	{ value: 'organisation_update', label: "Modification sur l'organisation" },
 	{
 		value: 'organisation_invite',
 		label: "Invitation d'utilisateur dans une organisation"
