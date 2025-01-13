@@ -386,6 +386,7 @@ export const actionMapping: Record<string, TypeAction> = {
 	'adminEntityRight.create': TypeAction.organisation_invite,
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
 	'button.create': TypeAction.service_button_create,
+	'button.update': TypeAction.service_button_update,
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete
 };
@@ -402,11 +403,11 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_create:
 			return `Création du service ${productTitle}`;
 		case TypeAction.service_update:
-			return `Modification du service ${productTitle}`;
+			return `Modification sur le service`;
 		case TypeAction.service_archive:
-			return `Archivage du service ${productTitle}`;
+			return `Archivage du service`;
 		case TypeAction.service_restore:
-			return `Restauration du service ${productTitle}`;
+			return `Restauration du service`;
 		case TypeAction.service_invite:
 			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
 		case TypeAction.service_uninvite:
@@ -414,13 +415,15 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_create:
 			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_update:
-			return `Modification de l'organisation ${metadataTyped.json.entity_name}`;
+			return `Modification sur l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_invite:
 			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.organisation_uninvite:
 			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
 		case TypeAction.service_button_create:
 			return `Création du bouton ${metadataTyped.json.title} `;
+		case TypeAction.service_button_update:
+			return `Modification du bouton ${metadataTyped.json.title} `;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:

@@ -14,16 +14,22 @@ const PRODUCT_ACTIONS: TypeAction[] = [
 	TypeAction.service_invite,
 	TypeAction.service_uninvite,
 	TypeAction.service_button_create,
+	TypeAction.service_button_update,
 	TypeAction.service_apikeys_create,
 	TypeAction.service_apikeys_delete
 ];
 
 const ORGANISATION_ACTIONS: TypeAction[] = [
-	TypeAction.organisation_create,
 	TypeAction.organisation_update,
 	TypeAction.organisation_invite,
 	TypeAction.organisation_uninvite
 ];
+
+const ALL_ACTIONS: TypeAction[] = [
+	...SERVICE_ACTIONS,
+	...PRODUCT_ACTIONS,
+	...ORGANISATION_ACTIONS
+  ];
 
 export const userEventRouter = router({
 	getLastReviewView: protectedProcedure
@@ -78,35 +84,12 @@ export const userEventRouter = router({
 		.query(async ({ ctx, input }) => {
 			const { product_id, page, limit, filterAction } = input;
 			const skip = (page - 1) * limit;
-			const userId = ctx.session?.user?.id;
-
-			const current_product = await ctx.prisma.product.findUnique({
-				where: {
-					id: product_id
-				}
-			});
-
-			const baseWhereCondition = {
-				...(userId && { user_id: parseInt(userId) })
-			};
 
 			const whereCondition = {
-				OR: [
-					{
-						...baseWhereCondition,
-						action: { in: SERVICE_ACTIONS }
-					},
-					{
-						...baseWhereCondition,
-						product_id: current_product?.id,
-						action: { in: PRODUCT_ACTIONS }
-					},
-					{
-						...baseWhereCondition,
-						entity_id: current_product?.entity_id,
-						action: { in: ORGANISATION_ACTIONS }
-					}
-				],
+				product_id,
+				action: {
+					in: ALL_ACTIONS
+				},
 				...(filterAction && { action: filterAction })
 			};
 
@@ -115,7 +98,10 @@ export const userEventRouter = router({
 					where: whereCondition,
 					orderBy: { created_at: 'desc' },
 					skip,
-					take: limit
+					take: limit,
+					include: {
+						user: true
+					}
 				}),
 				ctx.prisma.userEvent.count({ where: whereCondition })
 			]);

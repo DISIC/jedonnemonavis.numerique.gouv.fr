@@ -150,6 +150,8 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						product_id = input.json.product_id;
 					} else if (input?.json?.product?.id) {
 						product_id = input.json.product.id;
+					} else if (input?.json?.product_id) {
+						product_id = input.json.product_id;
 					}
 
 					if (user && action) {
