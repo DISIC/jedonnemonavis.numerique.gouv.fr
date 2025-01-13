@@ -15,7 +15,7 @@ interface Props {
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
-	ownRight : 'admin' | 'viewer'
+	ownRight: 'admin' | 'viewer';
 }
 
 const ProductAccessCard = (props: Props) => {
@@ -41,11 +41,7 @@ const ProductAccessCard = (props: Props) => {
 					accessRight.status === 'removed' ? classes.cardStatusRemoved : ''
 				)}
 			>
-				<div
-					className={cx(
-						fr.cx('fr-grid-row', 'fr-grid-row--middle')
-					)}
-				>
+				<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--middle'))}>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 						<span className={fr.cx('fr-text--bold')}>
 							{accessRight.user
@@ -67,39 +63,75 @@ const ProductAccessCard = (props: Props) => {
 							classes.optionsDropdown
 						)}
 					>
-						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
-							<Button
-								id="button-remove-access-right"
-								aria-haspopup="true"
-								aria-expanded={menuOpen ? 'true' : undefined}
-								priority="tertiary"
-								onClick={() => {
-									onButtonClick('switch', accessRight);
-									push(['trackEvent', 'BO - Product', 'Access-rights-Switch']);
-								}}
-								disabled={accessRight.user_email === session?.user?.email}
-								size="small"
-							>
-								{accessRight.status === "admin" ? 'Retirer admin' : 'Passer admin'}
-							</Button>
-						)}
-						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
-							<Button
-								id="button-remove-access-right"
-								aria-haspopup="true"
-								aria-expanded={menuOpen ? 'true' : undefined}
-								priority="tertiary"
-								onClick={() => {
-									onButtonClick('remove', accessRight);
-									push(['trackEvent', 'BO - Product', 'Access-rights-Remove']);
-								}}
-								disabled={accessRight.user_email === session?.user?.email}
-								size="small"
-								className={fr.cx('fr-ml-4v')}
-							>
-								Retirer l&apos;accès
-							</Button>
-						)}
+						<Button
+							id="button-options-access-right"
+							aria-controls={menuOpen ? 'option-menu' : undefined}
+							aria-haspopup="true"
+							aria-expanded={menuOpen ? 'true' : undefined}
+							priority="secondary"
+							className={menuOpen ? classes.buttonOptionsOpen : ''}
+							onClick={handleClick}
+							disabled={accessRight.user_email === session?.user?.email}
+							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
+							iconPosition="right"
+							size="small"
+						>
+							Options
+						</Button>
+						<Menu
+							id="option-menu"
+							open={menuOpen}
+							anchorEl={anchorEl}
+							onClose={handleClose}
+							MenuListProps={{
+								'aria-labelledby': 'button-options-access-right'
+							}}
+						>
+							{accessRight.status !== 'removed' &&
+								accessRight.user !== null &&
+								ownRight === 'admin' && (
+									<MenuItem
+										style={{ color: '#000091' }}
+										id="button-remove-access-right"
+										aria-haspopup="true"
+										aria-expanded={menuOpen ? 'true' : undefined}
+										onClick={() => {
+											onButtonClick('remove', accessRight);
+											push([
+												'trackEvent',
+												'BO - Product',
+												'Access-rights-Remove'
+											]);
+										}}
+										disabled={accessRight.user_email === session?.user?.email}
+									>
+										Retirer l&apos;accès
+									</MenuItem>
+								)}
+							{accessRight.status !== 'removed' &&
+								accessRight.user !== null &&
+								ownRight === 'admin' && (
+									<MenuItem
+										style={{ color: '#000091' }}
+										id="button-remove-access-right"
+										aria-haspopup="true"
+										aria-expanded={menuOpen ? 'true' : undefined}
+										onClick={() => {
+											onButtonClick('switch', accessRight);
+											push([
+												'trackEvent',
+												'BO - Product',
+												'Access-rights-Switch'
+											]);
+										}}
+										disabled={accessRight.user_email === session?.user?.email}
+									>
+										{accessRight.status === 'admin'
+											? 'Retirer l&apos;accès administrateur'
+											: 'Passer en administrateur du service'}
+									</MenuItem>
+								)}
+						</Menu>
 						{accessRight.user === null && ownRight === 'admin' && (
 							<>
 								<Button
@@ -157,7 +189,7 @@ const ProductAccessCard = (props: Props) => {
 												handleClose();
 											}}
 										>
-											Retirer l'accès
+											Retirer l&apos;accès utilisateur
 										</MenuItem>
 									)}
 									{accessRight.status === 'removed' && (
@@ -172,7 +204,7 @@ const ProductAccessCard = (props: Props) => {
 												handleClose();
 											}}
 										>
-											Rétablir l'accès
+											Rétablir l&apos;accès utilisateur
 										</MenuItem>
 									)}
 								</Menu>
@@ -203,7 +235,8 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default
 	},
 	userEmail: {
-		wordWrap: 'break-word'
+		wordWrap: 'break-word',
+		fontSize: '12px'
 	},
 	optionsDropdown: {
 		display: 'flex',

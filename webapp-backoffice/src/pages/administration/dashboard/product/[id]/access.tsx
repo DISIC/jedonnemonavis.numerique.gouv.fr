@@ -61,6 +61,7 @@ const AccessManagement = (props: Props) => {
 		React.useState(false);
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+
 	const isModalOpen = useIsModalOpen(modal);
 	const { data: session } = useSession();
 
@@ -304,9 +305,15 @@ const AccessManagement = (props: Props) => {
 							accessRight => accessRight.status === 'carrier'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Utilisateurs du service
-								</h2>
+								<div className={cx(classes.titleContainer)}>
+									<h2 className={cx(classes.categoryTitle)}>
+										Utilisateurs du service
+									</h2>
+									<p className={cx(classes.categoryDescription)}>
+										Utilisateurs ayant le droit de voir le service, mais pas de
+										le modifier
+									</p>
+								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
 										if (
@@ -439,11 +446,22 @@ const useStyles = tss.create({
 			justifyContent: 'end'
 		}
 	},
+	titleContainer: {
+		display: 'flex',
+		justifyContent: 'flex-start',
+		alignItems: 'center',
+		gap: '24px',
+		borderBottom: '1px solid black'
+	},
 	categoryTitle: {
 		...fr.typography[20].style,
 		fontWeight: 'bold',
-		paddingBottom: '10px',
-		borderBottom: '1px solid black'
+		marginBottom: '8px'
+	},
+	categoryDescription: {
+		fontSize: '12px',
+		color: '#666666',
+		marginBottom: '8px'
 	},
 	inviteTitle: {
 		fontWeight: 'bold',
