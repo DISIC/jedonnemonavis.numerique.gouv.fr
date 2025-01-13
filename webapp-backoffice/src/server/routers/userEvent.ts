@@ -86,7 +86,18 @@ export const userEventRouter = router({
 			const skip = (page - 1) * limit;
 
 			const whereCondition = {
-				product_id,
+				OR: [
+				  { product_id },
+				  {
+					entity: {
+						products: {
+							some: {
+								id: product_id,
+							},
+						},
+					},
+				  },
+				],
 				action: {
 					in: ALL_ACTIONS
 				},
