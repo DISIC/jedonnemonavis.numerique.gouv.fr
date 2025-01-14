@@ -337,9 +337,15 @@ const AccessManagement = (props: Props) => {
 							accessRight => accessRight.status === 'admin'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Administrateurs du service
-								</h2>
+								<div className={cx(classes.titleContainer)}>
+									<h2 className={cx(classes.categoryTitle)}>
+										Administrateurs du service
+									</h2>
+									<p className={cx(classes.categoryDescription)}>
+										Utilisateurs ayant le droit de modifier tout aspect du
+										service
+									</p>
+								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
 										if (
@@ -383,10 +389,15 @@ const AccessManagement = (props: Props) => {
 						{accessAdminEntityRights.length > 0 && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.entityWrapper)}>
-									<h2 className={cx(classes.organizationTitle)}>
-										Administrateurs de l'organisation
-									</h2>
-									<div className={cx(classes.entityName)}>{entity?.name}</div>
+									<div className={cx(classes.titleContainer)}>
+										<h2 className={cx(classes.categoryTitle)}>
+											Administrateurs de l'organisation
+										</h2>
+										<p className={cx(classes.categoryDescription)}>
+											Utilisateurs ayant le droit de modifier l’organisation (
+											{entity?.name}) et tous ses services associés.
+										</p>
+									</div>
 								</div>
 								<div>
 									{accessAdminEntityRights.map(

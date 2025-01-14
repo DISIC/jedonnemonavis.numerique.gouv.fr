@@ -105,7 +105,7 @@ const ProductAccessCard = (props: Props) => {
 										}}
 										disabled={accessRight.user_email === session?.user?.email}
 									>
-										Retirer l&apos;accès
+										Retirer l'accès
 									</MenuItem>
 								)}
 							{accessRight.status !== 'removed' &&
@@ -127,7 +127,7 @@ const ProductAccessCard = (props: Props) => {
 										disabled={accessRight.user_email === session?.user?.email}
 									>
 										{accessRight.status === 'admin'
-											? 'Retirer l&apos;accès administrateur'
+											? "Retirer l'accès administrateur"
 											: 'Passer en administrateur du service'}
 									</MenuItem>
 								)}
