@@ -348,40 +348,14 @@ const AccessManagement = (props: Props) => {
 								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										if (
-											accessRight.status === 'admin' &&
-											accessRight.user !== null
-										) {
-											return (
-												<AccessRightCard
-													key={index}
-													accessRight={accessRight}
-													onButtonClick={handleModalOpening}
-													ownRight={ownRight}
-												/>
-											);
-										}
-									})}
-								</div>
-							</div>
-						)}
-						{accessRights.some(accessRight => accessRight.user === null) && (
-							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Invitations envoyées
-								</h2>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (accessRight.user === null) {
-											return (
-												<AccessRightCard
-													key={index}
-													accessRight={accessRight}
-													onButtonClick={handleModalOpening}
-													ownRight={ownRight}
-												/>
-											);
-										}
+										return (
+											<AccessRightCard
+												key={index}
+												accessRight={accessRight}
+												onButtonClick={handleModalOpening}
+												ownRight={ownRight}
+											/>
+										);
 									})}
 								</div>
 							</div>

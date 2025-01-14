@@ -31,6 +31,8 @@ const ProductAccessCard = (props: Props) => {
 		setAnchorEl(null);
 	};
 
+	console.log('accessRight', accessRight);
+
 	const { cx, classes } = useStyles();
 
 	return (
@@ -49,12 +51,15 @@ const ProductAccessCard = (props: Props) => {
 								: '-'}
 						</span>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 						<span className={cx(classes.userEmail)}>
 							{accessRight?.user_email
 								? accessRight?.user_email
 								: accessRight?.user_email_invite}
 						</span>
+					</div>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+						{accessRight.user === null && <></>}
 					</div>
 
 					<div
@@ -102,6 +107,7 @@ const ProductAccessCard = (props: Props) => {
 												'BO - Product',
 												'Access-rights-Remove'
 											]);
+											handleClose();
 										}}
 										disabled={accessRight.user_email === session?.user?.email}
 									>
@@ -123,11 +129,12 @@ const ProductAccessCard = (props: Props) => {
 												'BO - Product',
 												'Access-rights-Switch'
 											]);
+											handleClose();
 										}}
 										disabled={accessRight.user_email === session?.user?.email}
 									>
 										{accessRight.status === 'admin'
-											? "Retirer l'accès administrateur"
+											? 'Passer en utilisateur du service'
 											: 'Passer en administrateur du service'}
 									</MenuItem>
 								)}
