@@ -55,7 +55,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 	const tableData =
 		fullEvents?.data.map(event => [
 			event.created_at.toLocaleString(),
-			event.user.firstName + ' ' + event.user.lastName,
+			event.user ? event.user.firstName + ' ' + event.user.lastName : '',
 			handleActionTypeDisplay(event.action, event.metadata, product.title)
 		]) || [];
 

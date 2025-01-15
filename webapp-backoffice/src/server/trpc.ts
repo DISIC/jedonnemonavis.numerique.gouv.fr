@@ -91,7 +91,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		}
 	});
 
-	if (meta?.authRequired && (!ctx.session?.user === undefined || !user)) {
+	if (meta?.authRequired && (!ctx.session?.user || !user)) {
 		throw new TRPCError({
 			code: 'UNAUTHORIZED',
 			message: 'You are not authorized to perform this action'
@@ -119,8 +119,15 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		}
 	}
 
-	if (meta?.logEvent) {
-		try {
+	// Exécute la requête et logue les événements seulement si elle réussit
+	try {
+		const result = await next({
+			ctx: {
+				session: ctx.session as Session
+			}
+		});
+
+		if (meta?.logEvent && result.ok) {
 			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
 
 			await Promise.all(
@@ -136,7 +143,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 					const action = actionMapping[query];
 					const input = inputObj[index] !== undefined ? inputObj[index] : {};
 
-					// Extraire entityId
+					// Extraire entityId et productId
 					let entity_id: number | null = null;
 					let product_id: number | null = null;
 
@@ -150,12 +157,10 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						product_id = input.json.product_id;
 					} else if (input?.json?.product?.id) {
 						product_id = input.json.product.id;
-					} else if (input?.json?.product_id) {
-						product_id = input.json.product_id;
 					}
 
 					if (user && action) {
-						const log = await ctx.prisma.userEvent.create({
+						await ctx.prisma.userEvent.create({
 							data: {
 								user_id: user.id,
 								action,
@@ -167,16 +172,13 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 					}
 				})
 			);
-		} catch (e) {
-			console.log(e);
 		}
-	}
 
-	return next({
-		ctx: {
-			session: ctx.session as Session
-		}
-	});
+		return result;
+	} catch (error) {
+		// En cas d'erreur, rien n'est logué.
+		throw error;
+	}
 });
 
 const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
