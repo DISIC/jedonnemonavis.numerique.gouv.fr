@@ -29,12 +29,12 @@ const checkRightToProceed = async (
 		where: {
 			id: id
 		}
-	})
+	});
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: id,
 			user_email: session.user.email,
-			status: 'carrier'
+			status: 'carrier_admin'
 		}
 	});
 	const adminEntityRight = await prisma.adminEntityRight.findFirst({

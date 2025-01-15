@@ -51,7 +51,7 @@ const ButtonModal = (props: Props) => {
 
 	const [email, setEmail] = React.useState<string>('');
 	const [errorStatus, setErrorStatus] = React.useState<number>();
-	const [role, setRole] = React.useState<'carrier_user' | 'admin'>(
+	const [role, setRole] = React.useState<'carrier_user' | 'carrier_admin'>(
 		'carrier_user'
 	);
 	React.useEffect(() => {
@@ -89,8 +89,6 @@ const ButtonModal = (props: Props) => {
 			});
 		} else if (modalType === 'switch') {
 			const statusMapping = {
-				admin: 'user',
-				user: 'admin',
 				carrier_admin: 'carrier_user',
 				carrier_user: 'carrier_admin'
 			} as const;
@@ -127,7 +125,7 @@ const ButtonModal = (props: Props) => {
 			case 'add':
 				return 'Inviter un utilisateur';
 			case 'switch':
-				return currentAccessRight?.status === 'admin'
+				return currentAccessRight?.status === 'carrier_admin'
 					? 'Passer en utilisateur de service'
 					: 'Passer en administrateur de service';
 			case 'remove':
@@ -173,7 +171,9 @@ const ButtonModal = (props: Props) => {
 											nativeInputProps: {
 												value: 'carrier_user',
 												onChange: e =>
-													setRole(e.target.value as 'carrier_user' | 'admin'),
+													setRole(
+														e.target.value as 'carrier_user' | 'carrier_admin'
+													),
 												checked: role === 'carrier_user'
 											}
 										},
@@ -182,10 +182,12 @@ const ButtonModal = (props: Props) => {
 											hintText:
 												'Utilisateurs ayant le droit de modifier tout aspect du service',
 											nativeInputProps: {
-												value: 'admin',
+												value: 'carrier_admin',
 												onChange: e =>
-													setRole(e.target.value as 'carrier_user' | 'admin'),
-												checked: role === 'admin'
+													setRole(
+														e.target.value as 'carrier_user' | 'carrier_admin'
+													),
+												checked: role === 'carrier_admin'
 											}
 										}
 									]}

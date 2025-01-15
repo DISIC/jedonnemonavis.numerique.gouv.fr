@@ -41,7 +41,7 @@ export const accessRightRouter = router({
 				status: isRemoved
 					? undefined
 					: {
-							in: ['carrier_user', 'carrier_admin', 'admin']
+							in: ['carrier_user', 'carrier_admin']
 						}
 			};
 
@@ -93,7 +93,7 @@ export const accessRightRouter = router({
 			z.object({
 				user_email: z.string().email(),
 				product_id: z.number(),
-				role: z.enum(['carrier_user', 'admin']).optional()
+				role: z.enum(['carrier_user', 'carrier_admin']).optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -159,14 +159,7 @@ export const accessRightRouter = router({
 					id: accessRightAlreadyExists?.id || -1
 				},
 				update: {
-					status:
-						role === 'admin'
-							? userExists
-								? 'admin'
-								: 'carrier_admin'
-							: userExists
-								? 'user'
-								: 'carrier_user'
+					status: role
 				},
 				create: {
 					user_email: userExists ? user_email.toLowerCase() : null,
