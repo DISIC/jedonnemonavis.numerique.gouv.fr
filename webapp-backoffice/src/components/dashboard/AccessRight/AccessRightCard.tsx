@@ -31,8 +31,6 @@ const ProductAccessCard = (props: Props) => {
 		setAnchorEl(null);
 	};
 
-	console.log('accessRight', accessRight);
-
 	const { cx, classes } = useStyles();
 
 	return (
@@ -68,155 +66,255 @@ const ProductAccessCard = (props: Props) => {
 							classes.optionsDropdown
 						)}
 					>
-						<Button
-							id="button-options-access-right"
-							aria-controls={menuOpen ? 'option-menu' : undefined}
-							aria-haspopup="true"
-							aria-expanded={menuOpen ? 'true' : undefined}
-							priority="secondary"
-							className={menuOpen ? classes.buttonOptionsOpen : ''}
-							onClick={handleClick}
-							disabled={accessRight.user_email === session?.user?.email}
-							iconId={menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}
-							iconPosition="right"
-							size="small"
-						>
-							Options
-						</Button>
-						<Menu
-							id="option-menu"
-							open={menuOpen}
-							anchorEl={anchorEl}
-							onClose={handleClose}
-							MenuListProps={{
-								'aria-labelledby': 'button-options-access-right'
-							}}
-						>
-							{accessRight.status !== 'removed' &&
-								accessRight.user !== null &&
-								ownRight === 'admin' && (
-									<MenuItem
-										style={{ color: '#000091' }}
-										id="button-remove-access-right"
+						{accessRight.user !== null &&
+							accessRight.user_email_invite === null && (
+								<>
+									<Button
+										id="button-options-access-right"
+										aria-controls={menuOpen ? 'option-menu' : undefined}
 										aria-haspopup="true"
 										aria-expanded={menuOpen ? 'true' : undefined}
-										onClick={() => {
-											onButtonClick('remove', accessRight);
-											push([
-												'trackEvent',
-												'BO - Product',
-												'Access-rights-Remove'
-											]);
-											handleClose();
-										}}
+										priority="secondary"
+										className={menuOpen ? classes.buttonOptionsOpen : ''}
+										onClick={handleClick}
 										disabled={accessRight.user_email === session?.user?.email}
+										iconId={
+											menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
+										}
+										iconPosition="right"
+										size="small"
 									>
-										Retirer l'accès
-									</MenuItem>
-								)}
-							{accessRight.status !== 'removed' &&
-								accessRight.user !== null &&
-								ownRight === 'admin' && (
-									<MenuItem
-										style={{ color: '#000091' }}
-										id="button-remove-access-right"
-										aria-haspopup="true"
-										aria-expanded={menuOpen ? 'true' : undefined}
-										onClick={() => {
-											onButtonClick('switch', accessRight);
-											push([
-												'trackEvent',
-												'BO - Product',
-												'Access-rights-Switch'
-											]);
-											handleClose();
+										Options
+									</Button>
+									<Menu
+										id="option-menu"
+										open={menuOpen}
+										anchorEl={anchorEl}
+										onClose={handleClose}
+										MenuListProps={{
+											'aria-labelledby': 'button-options-access-right'
 										}}
-										disabled={accessRight.user_email === session?.user?.email}
 									>
-										{accessRight.status === 'admin'
-											? 'Passer en utilisateur du service'
-											: 'Passer en administrateur du service'}
-									</MenuItem>
-								)}
-						</Menu>
-						{accessRight.user === null && ownRight === 'admin' && (
-							<>
-								<Button
-									id="button-options-access-right"
-									aria-controls={menuOpen ? 'option-menu' : undefined}
-									aria-haspopup="true"
-									aria-expanded={menuOpen ? 'true' : undefined}
-									priority="tertiary"
-									className={menuOpen ? classes.buttonOptionsOpen : ''}
-									onClick={handleClick}
-									disabled={accessRight.user_email === session?.user?.email}
-									iconId={
-										menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
-									}
-									iconPosition="right"
-									size="small"
-								>
-									Options
-								</Button>
-								<Menu
-									id="option-menu"
-									open={menuOpen}
-									anchorEl={anchorEl}
-									onClose={handleClose}
-									MenuListProps={{
-										'aria-labelledby': 'button-options-access-right'
-									}}
-								>
-									{accessRight.status === 'carrier' &&
-										accessRight.user === null && (
+										{accessRight.status !== 'removed' &&
+											accessRight.user !== null &&
+											ownRight === 'admin' && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													id="button-remove-access-right"
+													aria-haspopup="true"
+													aria-expanded={menuOpen ? 'true' : undefined}
+													onClick={() => {
+														onButtonClick('remove', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product',
+															'Access-rights-Remove'
+														]);
+														handleClose();
+													}}
+													disabled={
+														accessRight.user_email === session?.user?.email
+													}
+												>
+													Retirer l'accès
+												</MenuItem>
+											)}
+										{accessRight.status !== 'removed' &&
+											accessRight.user !== null &&
+											ownRight === 'admin' && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													id="button-remove-access-right"
+													aria-haspopup="true"
+													aria-expanded={menuOpen ? 'true' : undefined}
+													onClick={() => {
+														onButtonClick('switch', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product',
+															'Access-rights-Switch'
+														]);
+														handleClose();
+													}}
+													disabled={
+														accessRight.user_email === session?.user?.email
+													}
+												>
+													{accessRight.status === 'admin'
+														? 'Passer en utilisateur du service'
+														: 'Passer en administrateur du service'}
+												</MenuItem>
+											)}
+										{accessRight.status === 'carrier_admin' && (
 											<MenuItem
+												style={{ color: '#000091' }}
 												onClick={() => {
-													onButtonClick('resend-email', accessRight);
+													onButtonClick('switch', accessRight);
 													push([
 														'trackEvent',
 														'BO - Product - Access Rights',
-														'Resend Mail'
+														'Switch'
 													]);
 													handleClose();
 												}}
 											>
-												Renvoyer l'invitation
+												Passer en administrateur du service
 											</MenuItem>
 										)}
+									</Menu>
+								</>
+							)}
+						{accessRight.user === null &&
+							ownRight === 'admin' &&
+							accessRight.user_email_invite !== null && (
+								<>
+									<Button
+										id="button-options-access-right"
+										aria-controls={menuOpen ? 'option-menu' : undefined}
+										aria-haspopup="true"
+										aria-expanded={menuOpen ? 'true' : undefined}
+										priority="tertiary"
+										className={menuOpen ? classes.buttonOptionsOpen : ''}
+										onClick={handleClick}
+										disabled={accessRight.user_email === session?.user?.email}
+										iconId={
+											menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
+										}
+										iconPosition="right"
+										size="small"
+									>
+										Options
+									</Button>
+									<Menu
+										id="option-menu"
+										open={menuOpen}
+										anchorEl={anchorEl}
+										onClose={handleClose}
+										MenuListProps={{
+											'aria-labelledby': 'button-options-access-right'
+										}}
+									>
+										{accessRight.status === 'carrier_user' &&
+											accessRight.user === null && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													onClick={() => {
+														onButtonClick('resend-email', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product - Access Rights',
+															'Resend Mail'
+														]);
+														handleClose();
+													}}
+												>
+													Renvoyer l'invitation
+												</MenuItem>
+											)}
 
-									{accessRight.status === 'carrier' && (
-										<MenuItem
-											onClick={() => {
-												onButtonClick('remove', accessRight);
-												push([
-													'trackEvent',
-													'BO - Product - Access Rights',
-													'Remove'
-												]);
-												handleClose();
-											}}
-										>
-											Retirer l&apos;accès utilisateur
-										</MenuItem>
-									)}
-									{accessRight.status === 'removed' && (
-										<MenuItem
-											onClick={() => {
-												onButtonClick('reintegrate', accessRight);
-												push([
-													'trackEvent',
-													'BO - Product - Access Rights',
-													'Restore'
-												]);
-												handleClose();
-											}}
-										>
-											Rétablir l&apos;accès utilisateur
-										</MenuItem>
-									)}
-								</Menu>
-							</>
-						)}
+										{accessRight.status === 'carrier_user' && (
+											<MenuItem
+												style={{ color: '#000091' }}
+												onClick={() => {
+													onButtonClick('remove', accessRight);
+													push([
+														'trackEvent',
+														'BO - Product - Access Rights',
+														'Remove'
+													]);
+													handleClose();
+												}}
+											>
+												Retirer l&apos;accès utilisateur
+											</MenuItem>
+										)}
+										{accessRight.status === 'carrier_user' &&
+											accessRight.user_email_invite !== null && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													onClick={() => {
+														onButtonClick('switch', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product - Access Rights',
+															'Switch'
+														]);
+														handleClose();
+													}}
+												>
+													Passer en administrateur du service
+												</MenuItem>
+											)}
+										{accessRight.status === 'carrier_admin' &&
+											accessRight.user === null && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													onClick={() => {
+														onButtonClick('remove', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product - Access Rights',
+															'Remove'
+														]);
+														handleClose();
+													}}
+												>
+													Retirer l&apos;accès
+												</MenuItem>
+											)}
+										{accessRight.status === 'carrier_admin' &&
+											accessRight.user === null && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													onClick={() => {
+														onButtonClick('switch', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product - Access Rights',
+															'Switch'
+														]);
+														handleClose();
+													}}
+												>
+													Passer en utilisateur du service
+												</MenuItem>
+											)}
+										{accessRight.status === 'carrier_admin' &&
+											accessRight.user === null && (
+												<MenuItem
+													style={{ color: '#000091' }}
+													onClick={() => {
+														onButtonClick('resend-email', accessRight);
+														push([
+															'trackEvent',
+															'BO - Product - Access Rights',
+															'Resend Mail'
+														]);
+														handleClose();
+													}}
+												>
+													Renvoyer l&apos;invitation
+												</MenuItem>
+											)}
+										{accessRight.status === 'removed' && (
+											<MenuItem
+												style={{ color: '#000091' }}
+												onClick={() => {
+													onButtonClick('reintegrate', accessRight);
+													push([
+														'trackEvent',
+														'BO - Product - Access Rights',
+														'Restore'
+													]);
+													handleClose();
+												}}
+											>
+												Rétablir l&apos;accès utilisateur
+											</MenuItem>
+										)}
+									</Menu>
+								</>
+							)}
 					</div>
 				</div>
 			</div>

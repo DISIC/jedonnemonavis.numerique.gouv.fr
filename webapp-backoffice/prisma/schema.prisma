@@ -38,7 +38,10 @@ enum UserRequestStatus {
 
 enum RightAccessStatus {
   admin
+  user
   carrier
+  carrier_admin
+  carrier_user
   removed
 }
 
@@ -324,7 +327,7 @@ model AccessRight {
   product           Product @relation(fields: [product_id], references: [id])
   product_id        Int
 
-  status RightAccessStatus @default(carrier)
+  status RightAccessStatus @default(carrier_user)
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
