@@ -51,9 +51,12 @@ const ButtonModal = (props: Props) => {
 
 	const [email, setEmail] = React.useState<string>('');
 	const [errorStatus, setErrorStatus] = React.useState<number>();
-	const [role, setRole] = React.useState<'carrier' | 'admin'>('carrier');
+	const [role, setRole] = React.useState<'carrier_user' | 'admin'>(
+		'carrier_user'
+	);
 	React.useEffect(() => {
 		setEmail('');
+		setRole('carrier_user');
 		setErrorStatus(undefined);
 	}, [isOpen]);
 
@@ -85,15 +88,23 @@ const ButtonModal = (props: Props) => {
 				role
 			});
 		} else if (modalType === 'switch') {
-			if (currentAccessRight?.status === 'admin') {
+			const statusMapping = {
+				admin: 'user',
+				user: 'admin',
+				carrier_admin: 'carrier_user',
+				carrier_user: 'carrier_admin'
+			} as const;
+
+			if (
+				currentAccessRight?.status &&
+				currentAccessRight.status in statusMapping
+			) {
 				updateAccessRight.mutate({
 					id: currentAccessRight.id,
-					status: 'carrier'
-				});
-			} else if (currentAccessRight?.status === 'carrier') {
-				updateAccessRight.mutate({
-					id: currentAccessRight.id,
-					status: 'admin'
+					status:
+						statusMapping[
+							currentAccessRight.status as keyof typeof statusMapping
+						]
 				});
 			}
 		} else if (modalType === 'remove') {
@@ -112,7 +123,6 @@ const ButtonModal = (props: Props) => {
 				product_id: productId
 			});
 		}
-		setRole('carrier');
 	}
 
 	const displayModalTitle = (): string => {
@@ -164,10 +174,10 @@ const ButtonModal = (props: Props) => {
 											hintText:
 												'Utilisateurs ayant le droit de voir le service, mais pas de le modifier',
 											nativeInputProps: {
-												value: 'carrier',
+												value: 'carrier_user',
 												onChange: e =>
-													setRole(e.target.value as 'carrier' | 'admin'),
-												checked: role === 'carrier'
+													setRole(e.target.value as 'carrier_user' | 'admin'),
+												checked: role === 'carrier_user'
 											}
 										},
 										{
@@ -177,7 +187,7 @@ const ButtonModal = (props: Props) => {
 											nativeInputProps: {
 												value: 'admin',
 												onChange: e =>
-													setRole(e.target.value as 'carrier' | 'admin'),
+													setRole(e.target.value as 'carrier_user' | 'admin'),
 												checked: role === 'admin'
 											}
 										}
@@ -194,7 +204,9 @@ const ButtonModal = (props: Props) => {
 							<p>
 								Êtes-vous sûr de vouloir passer{' '}
 								<span className={cx(classes.boldText)}>
-									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+									{currentAccessRight?.user
+										? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
+										: currentAccessRight?.user_email_invite}
 								</span>{' '}
 								en utilisateur du service ? Cette personne ne va plus pouvoir
 								modifier ce service.
@@ -203,7 +215,9 @@ const ButtonModal = (props: Props) => {
 							<p>
 								Êtes-vous sûr de vouloir passer{' '}
 								<span className={cx(classes.boldText)}>
-									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+									{currentAccessRight?.user
+										? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
+										: currentAccessRight?.user_email_invite}
 								</span>{' '}
 								en administrateur du service ? Cette personne va pouvoir
 								modifier tout aspect de ce service.
@@ -218,7 +232,9 @@ const ButtonModal = (props: Props) => {
 							<p>
 								Souhaitez-vous vraiment retirer les droits d'accès de{' '}
 								<span className={cx(classes.boldText)}>
-									{`${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`}
+									{currentAccessRight?.user
+										? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
+										: currentAccessRight?.user_email_invite}
 								</span>{' '}
 								pour <span className={cx(classes.boldText)}>{productName}</span>{' '}
 								?
@@ -236,8 +252,10 @@ const ButtonModal = (props: Props) => {
 					<div className={fr.cx('fr-pt-4v')}>
 						<p>
 							Vous êtes sûr de vouloir rétablir l'accès à ce produit pour{' '}
-							{currentAccessRight?.user?.firstName}{' '}
-							{currentAccessRight?.user?.lastName} ?
+							{currentAccessRight?.user
+								? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
+								: currentAccessRight?.user_email_invite}
+							?
 						</p>
 					</div>
 				);
@@ -274,7 +292,8 @@ const ButtonModal = (props: Props) => {
 					...defaultButtons,
 					{
 						children:
-							currentAccessRight?.status === 'admin'
+							currentAccessRight?.status === 'admin' ||
+							currentAccessRight?.status === 'carrier_admin'
 								? 'Passer en utilisateur de service'
 								: 'Passer en administrateur de service',
 						priority: 'primary',

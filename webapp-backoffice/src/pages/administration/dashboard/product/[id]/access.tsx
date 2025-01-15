@@ -164,10 +164,18 @@ const AccessManagement = (props: Props) => {
 						: currentAccessRight?.user_email_invite
 				}.`;
 			case 'switch':
-				if (currentAccessRight?.status === 'admin') {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} n'est plus administrateur de ce produit.`;
+				if (currentAccessRight?.user) {
+					if (currentAccessRight?.status === 'admin') {
+						return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} n'est plus administrateur de ce produit.`;
+					} else {
+						return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} est désormais administrateur de ce produit.`;
+					}
 				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} est désormais administrateur de ce produit.`;
+					if (currentAccessRight?.status === 'carrier_admin') {
+						return `${currentAccessRight?.user_email_invite} n'est plus administrateur de ce produit.`;
+					} else {
+						return `${currentAccessRight?.user_email_invite} est désormais administrateur de ce produit.`;
+					}
 				}
 			case 'remove':
 				return `${
@@ -302,7 +310,7 @@ const AccessManagement = (props: Props) => {
 				) : (
 					<div>
 						{accessRights.some(
-							accessRight => accessRight.status === 'carrier'
+							accessRight => accessRight.status === 'carrier_user'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
@@ -316,10 +324,7 @@ const AccessManagement = (props: Props) => {
 								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										if (
-											accessRight.status === 'carrier' &&
-											accessRight.user !== null
-										) {
+										if (accessRight.status === 'carrier_user') {
 											return (
 												<AccessRightCard
 													key={index}
@@ -334,7 +339,9 @@ const AccessManagement = (props: Props) => {
 							</div>
 						)}
 						{accessRights.some(
-							accessRight => accessRight.status === 'admin'
+							accessRight =>
+								accessRight.status === 'admin' ||
+								accessRight.status === 'carrier_admin'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
@@ -348,14 +355,19 @@ const AccessManagement = (props: Props) => {
 								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										return (
-											<AccessRightCard
-												key={index}
-												accessRight={accessRight}
-												onButtonClick={handleModalOpening}
-												ownRight={ownRight}
-											/>
-										);
+										if (
+											accessRight.status === 'admin' ||
+											accessRight.status === 'carrier_admin'
+										) {
+											return (
+												<AccessRightCard
+													key={index}
+													accessRight={accessRight}
+													onButtonClick={handleModalOpening}
+													ownRight={ownRight}
+												/>
+											);
+										}
 									})}
 								</div>
 							</div>
