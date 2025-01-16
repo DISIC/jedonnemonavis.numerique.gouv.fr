@@ -317,9 +317,7 @@ const AccessManagement = (props: Props) => {
 							</div>
 						)}
 						{accessRights.some(
-							accessRight =>
-								accessRight.status === 'admin' ||
-								accessRight.status === 'carrier_admin'
+							accessRight => accessRight.status === 'carrier_admin'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
