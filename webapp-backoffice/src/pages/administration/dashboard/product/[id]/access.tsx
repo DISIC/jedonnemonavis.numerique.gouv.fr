@@ -331,10 +331,7 @@ const AccessManagement = (props: Props) => {
 								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										if (
-											accessRight.status === 'admin' ||
-											accessRight.status === 'carrier_admin'
-										) {
+										if (accessRight.status === 'carrier_admin') {
 											return (
 												<AccessRightCard
 													key={index}
