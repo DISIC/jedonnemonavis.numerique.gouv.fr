@@ -42,7 +42,7 @@ describe('jdma-logs', () => {
 					.eq(1)
 					.should(
 						'contain',
-						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation e2e-jdma-entity-test"
+						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
 					);
 			});
 	});

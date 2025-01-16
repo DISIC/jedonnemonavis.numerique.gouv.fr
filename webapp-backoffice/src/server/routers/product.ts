@@ -318,7 +318,7 @@ export const productRouter = router({
 						create: [
 							{
 								user_email: userEmail,
-								status: 'carrier'
+								status: 'admin'
 							}
 						]
 					}
