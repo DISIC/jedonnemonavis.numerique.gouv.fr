@@ -23,16 +23,16 @@ import {
 const checkRightToProceed = async (
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
 	session: Session,
-	id: number
+	product_id: number
 ) => {
 	const product = await prisma.product.findUnique({
 		where: {
-			id: id
+			id: product_id
 		}
 	})
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
-			product_id: id,
+			product_id: product_id,
 			user_email: session.user.email,
 			status: 'carrier'
 		}
@@ -318,7 +318,7 @@ export const productRouter = router({
 						create: [
 							{
 								user_email: userEmail,
-								status: 'carrier'
+								status: 'admin'
 							}
 						]
 					}
@@ -352,14 +352,14 @@ export const productRouter = router({
 
 	archive: protectedProcedure
 		.meta({ logEvent: true })
-		.input(z.object({ id: z.number() }))
+		.input(z.object({ product_id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
-			const { id } = input;
+			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, id);
+			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
 
 			const updatedProduct = await ctx.prisma.product.update({
-				where: { id },
+				where: { id: product_id },
 				data: {
 					status: 'archived'
 				}
@@ -396,14 +396,14 @@ export const productRouter = router({
 
 	restore: protectedProcedure
 		.meta({ logEvent: true })
-		.input(z.object({ id: z.number() }))
+		.input(z.object({ product_id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
-			const { id } = input;
+			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, id);
+			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
 
 			const updatedProduct = await ctx.prisma.product.update({
-				where: { id },
+				where: { id: product_id },
 				data: {
 					status: 'published'
 				}

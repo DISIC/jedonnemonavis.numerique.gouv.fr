@@ -1,11 +1,11 @@
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
+import EssentialProductModal from '@/src/components/dashboard/Product/EssentialProductModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
-import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -14,7 +14,6 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
@@ -40,6 +39,11 @@ const entity_modal = createModal({
 	isOpenedByDefault: false
 });
 
+const essential_service_modal = createModal({
+	id: 'essential-service-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoard = () => {
 	const { filters, updateFilters } = useFilters();
 
@@ -47,7 +51,6 @@ const DashBoard = () => {
 	const [inputValue, setInputValue] = React.useState<string>('');
 	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
-	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const [statusProductState, setStatusProductState] = React.useState<{
 		msg: string;
@@ -57,6 +60,7 @@ const DashBoard = () => {
 	const [entityCreated, setEntityCreated] = React.useState<
 		Entity | undefined
 	>();
+	const [productTitle, setProductTitle] = React.useState<string>('');
 
 	const [numberPerPage, _] = React.useState(10);
 
@@ -133,7 +137,6 @@ const DashBoard = () => {
 
 	const handleSubmit = async (newEntity?: Entity) => {
 		setEntityCreated(newEntity);
-		console.log('title : ', productTitle);
 		product_modal.open();
 	};
 
@@ -171,6 +174,13 @@ const DashBoard = () => {
 				<EntityModal
 					modal={entity_modal}
 					onSubmit={newEntity => handleSubmit(newEntity)}
+				/>
+				<EssentialProductModal
+					modal={essential_service_modal}
+					productTitle={productTitle}
+					onClose={() => {
+						essential_service_modal.close();
+					}}
 				/>
 			</>
 		);
@@ -230,7 +240,9 @@ const DashBoard = () => {
 						onClose={function noRefCheck() {
 							setStatusProductState(null);
 						}}
-						severity={'success'}
+						severity={
+							statusProductState.role === 'alert' ? 'warning' : 'success'
+						}
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={
@@ -505,6 +517,10 @@ const DashBoard = () => {
 													)
 												}
 												showFavoriteButton={countTotalUserScope > 10}
+												onDeleteEssential={() => {
+													setProductTitle(product.title);
+													essential_service_modal.open();
+												}}
 												onDeleteProduct={() => {
 													setStatusProductState({
 														msg: `Le service "${product.title}" a bien été supprimé`,

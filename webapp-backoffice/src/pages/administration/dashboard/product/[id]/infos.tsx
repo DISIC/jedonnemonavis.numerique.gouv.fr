@@ -16,9 +16,13 @@ import Head from 'next/head';
 import { cx } from '@codegouvfr/react-dsfr/fr/cx';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
+import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
+import { Entity } from '@/prisma/generated/zod';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
+	ownRight: 'admin' | 'viewer';
 }
 
 const editProductModal = createModal({
@@ -31,12 +35,27 @@ const onConfirmModal = createModal({
 	isOpenedByDefault: false
 });
 
+const entityModal = createModal({
+	id: 'entity-modal',
+	isOpenedByDefault: false
+});
+
 const ProductInformationPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 
 	const router = useRouter();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
+
+	const [statusProductState, setStatusProductState] = React.useState<{
+		msg: string;
+		role: 'status' | 'alert';
+	} | null>(null);
+
+	const [entityCreated, setEntityCreated] = React.useState<
+		Entity | undefined
+	>();
+	const [productTitle, setProductTitle] = React.useState<string>('');
 
 	const { data: entityResult, isLoading: isLoadingEntity } =
 		trpc.entity.getById.useQuery(
@@ -59,10 +78,15 @@ const ProductInformationPage = (props: Props) => {
 		}
 	});
 
-	const { classes } = useStyles();
+	const { cx, classes } = useStyles();
+
+	const handleSubmit = async (newEntity?: Entity) => {
+		setEntityCreated(newEntity);
+		editProductModal.open();
+	};
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Informations | Je donne mon avis</title>
 				<meta
@@ -75,7 +99,7 @@ const ProductInformationPage = (props: Props) => {
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
-						id: product.id
+						product_id: product.id
 					});
 					onConfirmModal.close();
 				}}
@@ -106,20 +130,51 @@ const ProductInformationPage = (props: Props) => {
 				modal={editProductModal}
 				product={product}
 				onSubmit={() => router.replace(router.asPath)}
-				allowCreateEntity={false}
-				onNewEntity={() => {}}
+				allowCreateEntity={true}
+				onNewEntity={() => {
+					editProductModal.close();
+					entityModal.open();
+				}}
+				newCreatedEntity={entityCreated}
 			/>
+			<EntityModal
+				modal={entityModal}
+				onSubmit={newEntity => handleSubmit(newEntity)}
+			/>
+
+			{statusProductState && (
+				<div className={cx(classes.container)}>
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setStatusProductState(null);
+						}}
+						severity={
+							statusProductState.role === 'alert' ? 'warning' : 'success'
+						}
+						className={fr.cx('fr-mb-5w')}
+						small
+						description={
+							<>
+								<p role={statusProductState.role}>{statusProductState.msg}</p>
+							</>
+						}
+					/>
+				</div>
+			)}
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
-					<Button
-						priority="secondary"
-						iconId="fr-icon-edit-line"
-						iconPosition="right"
-						nativeButtonProps={editProductModal.buttonProps}
-					>
-						Modifier
-					</Button>
+					{ownRight === 'admin' && (
+						<Button
+							priority="secondary"
+							iconId="fr-icon-edit-line"
+							iconPosition="right"
+							nativeButtonProps={editProductModal.buttonProps}
+						>
+							Modifier
+						</Button>
+					)}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
@@ -175,29 +230,43 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
-					<p>En supprimant ce service :</p>
-					<ul className={fr.cx('fr-mb-8v')}>
-						<li>vous n’aurez plus accès aux avis du formulaire,</li>
-						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
-						</li>
-					</ul>
-					<Button
-						type="button"
-						iconId="ri-delete-bin-line"
-						iconPosition="right"
-						priority="tertiary"
-						className={classes.buttonError}
-						onClick={() => {
-							onConfirmModal.open();
-							push(['trackEvent', 'Product', 'Modal-Delete']);
-						}}
-					>
-						Supprimer ce service
-					</Button>
-				</div>
+				{ownRight === 'admin' && (
+					<div>
+						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
+						<p>En supprimant ce service :</p>
+						<ul className={fr.cx('fr-mb-8v')}>
+							<li>vous n’aurez plus accès aux avis du formulaire,</li>
+							<li>
+								les utilisateurs de ce service n’auront plus accès au
+								formulaire.
+							</li>
+						</ul>
+						<Button
+							type="button"
+							iconId="ri-delete-bin-line"
+							iconPosition="right"
+							priority="tertiary"
+							className={classes.buttonError}
+							onClick={() => {
+								if (product.isTop250) {
+									setStatusProductState({
+										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+										role: 'alert'
+									});
+									window.scrollTo({
+										top: 0,
+										behavior: 'smooth' // Scroll avec animation
+									});
+								} else {
+									onConfirmModal.open();
+									push(['trackEvent', 'Product', 'Modal-Delete']);
+								}
+							}}
+						>
+							Supprimer ce service
+						</Button>
+					</div>
+				)}
 			</div>
 		</ProductLayout>
 	);
@@ -213,6 +282,9 @@ const useStyles = tss.withName(ProductInformationPage.name).create({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: fr.spacing('10v')
+	},
+	container: {
+		marginTop: '1.5rem'
 	},
 	urlsWrapper: {
 		display: 'flex',

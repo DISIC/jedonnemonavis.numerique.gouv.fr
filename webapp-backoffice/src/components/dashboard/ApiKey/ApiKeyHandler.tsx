@@ -12,10 +12,12 @@ import { push } from '@socialgouv/matomo-next';
 interface Props {
 	product?: Product;
 	entity?: Entity;
+	ownRight?: 'admin' | 'viewer';
 }
 
 const ApiKeyHandler = (props: Props) => {
 	const { product, entity } = props;
+	const ownRight = props.ownRight || 'admin'
 	const { cx, classes } = useStyles();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
@@ -54,7 +56,7 @@ const ApiKeyHandler = (props: Props) => {
 	const handleDeleteKey = async (key: string) => {
 		push(['trackEvent', 'BO - ApiKey', `Delete-Key`]);
 		if (confirm(`Êtes vous sûr de vouloir supprimer la clé « ${key} » ?`)) {
-			await deleteKey.mutateAsync({ key: key });
+			await deleteKey.mutateAsync({ key: key, product_id: product?.id });
 			RefectchKeys();
 		}
 	};
@@ -185,17 +187,19 @@ const ApiKeyHandler = (props: Props) => {
 									>
 										{'Copier'}
 									</Button>
-									<Button
-										priority="tertiary"
-										size="small"
-										iconId="fr-icon-delete-bin-line"
-										iconPosition="right"
-										title={`Supprimer la clé API « ${item.key} ».`}
-										className={cx(classes.iconError)}
-										onClick={() => handleDeleteKey(item.key)}
-									>
-										Supprimer
-									</Button>
+									{ownRight === "admin" &&
+										<Button
+											priority="tertiary"
+											size="small"
+											iconId="fr-icon-delete-bin-line"
+											iconPosition="right"
+											title={`Supprimer la clé API « ${item.key} ».`}
+											className={cx(classes.iconError)}
+											onClick={() => handleDeleteKey(item.key)}
+										>
+											Supprimer
+										</Button>
+									}
 								</div>
 							</div>
 						</div>
@@ -203,16 +207,18 @@ const ApiKeyHandler = (props: Props) => {
 				</div>
 			)}
 
-			<Button
-				priority="secondary"
-				iconId="fr-icon-add-line"
-				className={fr.cx('fr-mt-1w')}
-				iconPosition="left"
-				type="button"
-				onClick={() => handleCreateKey()}
-			>
-				Générer une {apiKeys.length !== 0 ? 'nouvelle ' : ''} clé API
-			</Button>
+			{ownRight === 'admin' &&
+				<Button
+					priority="secondary"
+					iconId="fr-icon-add-line"
+					className={fr.cx('fr-mt-1w')}
+					iconPosition="left"
+					type="button"
+					onClick={() => handleCreateKey()}
+				>
+					Générer une {apiKeys.length !== 0 ? 'nouvelle ' : ''} clé API
+				</Button>
+			}
 		</>
 	);
 };

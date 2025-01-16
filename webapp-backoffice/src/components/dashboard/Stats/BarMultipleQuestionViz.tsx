@@ -21,6 +21,7 @@ const BarVerticalChart = dynamic(
 type Props = {
 	fieldCode: string;
 	productId: number;
+	buttonId: number | null;
 	startDate: string;
 	endDate: string;
 	total: number;
@@ -30,6 +31,7 @@ type Props = {
 const BarMultipleQuestionViz = ({
 	fieldCode,
 	productId,
+	buttonId,
 	startDate,
 	endDate,
 	total,
@@ -41,6 +43,7 @@ const BarMultipleQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
+				...(buttonId && {button_id: buttonId}),
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
@@ -69,6 +72,7 @@ const BarMultipleQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			...(buttonId && {button_id: buttonId}),
 			field_code: fieldCode,
 			start_date: startDate,
 			end_date: endDate

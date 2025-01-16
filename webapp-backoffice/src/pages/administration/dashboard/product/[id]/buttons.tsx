@@ -25,6 +25,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
+	ownRight: 'admin' | 'viewer';
 }
 
 const modal = createModal({
@@ -33,7 +34,7 @@ const modal = createModal({
 });
 
 const ProductButtonsPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
@@ -111,7 +112,7 @@ const ProductButtonsPage = (props: Props) => {
 	}, [router.query]);
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Gérer les boutons | Je donne mon avis</title>
 				<meta
@@ -129,21 +130,27 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>Gérer les boutons</h2>
+					<h2 className={fr.cx('fr-mb-2w')}>
+						{ownRight && ownRight === 'admin'
+							? 'Gérer les boutons'
+							: 'Voir les boutons'}
+					</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						<Button
-							priority="secondary"
-							iconPosition="right"
-							iconId="ri-add-box-line"
-							onClick={() => {
-								handleModalOpening('create');
-								push(['trackEvent', 'Product', 'Modal-Create-button']);
-							}}
-						>
-							Créer un bouton
-						</Button>
+						{ownRight === 'admin' && (
+							<Button
+								priority="secondary"
+								iconPosition="right"
+								iconId="ri-add-box-line"
+								onClick={() => {
+									handleModalOpening('create');
+									push(['trackEvent', 'Product', 'Modal-Create-button']);
+								}}
+							>
+								Créer un bouton
+							</Button>
+						)}
 					</div>
 				)}
 			</div>
@@ -261,6 +268,7 @@ const ProductButtonsPage = (props: Props) => {
 									<ProductButtonCard
 										button={button}
 										onButtonClick={handleModalOpening}
+										ownRight={ownRight}
 									/>
 								</li>
 							))}

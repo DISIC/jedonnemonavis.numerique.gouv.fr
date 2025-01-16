@@ -60,7 +60,7 @@ describe('jdma-users', () => {
 
 	it('should invite an administrator', () => {
 		navigateToCreatedProduct();
-		cy.get('button').contains('Inviter des administrateurs').click();
+		cy.get('button').contains('Inviter des utilisateurs').click();
 
 		cy.get('input[class*="fr-input"]').type('user3@example.com');
 

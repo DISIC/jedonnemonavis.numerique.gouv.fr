@@ -34,6 +34,7 @@ import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
+	ownRight : 'admin' | 'viewer';
 }
 
 type FormErrors = {
@@ -47,7 +48,7 @@ const defaultErrors = {
 };
 
 const ProductReviewsPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 	const router = useRouter();
 	const { data: session } = useSession();
 	const { view } = router.query;
@@ -413,7 +414,7 @@ const ProductReviewsPage = (props: Props) => {
 				setButtonId={setButtonId}
 			></ReviewFiltersModal>
 
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<Head>
 					<title>{product.title} | Avis | Je donne mon avis</title>
 					<meta
@@ -522,6 +523,7 @@ const ProductReviewsPage = (props: Props) => {
 										value: startDate,
 										onChange: e => {
 											setStartDate(e.target.value);
+											setRealStartDate(e.target.value);
 											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
 											submit();
 										}

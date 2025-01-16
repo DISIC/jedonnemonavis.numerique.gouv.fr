@@ -85,13 +85,6 @@ describe('jdma-home', () => {
 			);
 		});
 
-		it('should redirect to contact page', () => {
-			checkUrlRedirection(
-				`${selectors.actionButton} h2:contains("Vous avez d'autres questions ?") + a`,
-				'/public/contact'
-			);
-		});
-
 		it('should toggle accordion content visibility', () => {
 			cy.get(selectors.accordionGroup).each($accordion => {
 				cy.wrap($accordion).find('.fr-collapse').should('not.be.visible');
@@ -118,6 +111,7 @@ describe('jdma-home', () => {
 				'Mentions légales',
 				'Données personnelles',
 				'Modalités d’utilisation',
+				'Roadmap',
 				'Contact'
 			];
 

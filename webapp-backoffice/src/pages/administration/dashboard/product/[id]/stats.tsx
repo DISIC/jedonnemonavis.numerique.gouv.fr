@@ -28,6 +28,7 @@ import { getServerSideProps } from '.';
 
 interface Props {
 	product: Product;
+	ownRight: 'admin' | 'viewer';
 }
 
 const public_modal = createModal({
@@ -64,7 +65,7 @@ export const SectionWrapper = ({
 const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
-	const { product } = props;
+	const { product, ownRight } = props;
 	const router = useRouter();
 
 	const { classes, cx } = useStyles();
@@ -80,6 +81,8 @@ const ProductStatPage = (props: Props) => {
 
 	const debouncedStartDate = useDebounce<string>(startDate, 500);
 	const debouncedEndDate = useDebounce<string>(endDate, 500);
+
+	const [buttonId, setButtonId] = useState<number | null>(null);
 
 	const { data: buttonsResult, isFetching: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -100,7 +103,7 @@ const ProductStatPage = (props: Props) => {
 		);
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getList.useQuery({
+		trpc.review.countReviews.useQuery({
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id
@@ -109,17 +112,21 @@ const ProductStatPage = (props: Props) => {
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
-	} = trpc.review.getList.useQuery({
+	} = trpc.review.countReviews.useQuery({
 		numberPerPage: 0,
 		page: 1,
 		product_id: product.id,
 		start_date: debouncedStartDate,
-		end_date: debouncedEndDate
+		end_date: debouncedEndDate,
+		filters: {
+			buttonId: buttonId ? [buttonId?.toString()] : []
+		}
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
+			...(buttonId && { button_id: buttonId }),
 			field_code: 'verbatim',
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
@@ -153,7 +160,7 @@ const ProductStatPage = (props: Props) => {
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<h1>Statistiques</h1>
 				<div className={fr.cx('fr-mt-20v')}>
 					<Loader />
@@ -164,7 +171,7 @@ const ProductStatPage = (props: Props) => {
 
 	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
 		return (
-			<ProductLayout product={product}>
+			<ProductLayout product={product} ownRight={ownRight}>
 				<Head>
 					<title>{product.title} | Statistiques | Je donne mon avis</title>
 					<meta
@@ -185,9 +192,14 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	const onChangeFilters = (tmpStartDate: string, tmpEndDate: string) => {
+	const onChangeFilters = (
+		tmpStartDate: string,
+		tmpEndDate: string,
+		buttonId?: number
+	) => {
 		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
 		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
+		setButtonId(buttonId ?? null);
 	};
 
 	const getStatsDisplay = () => {
@@ -203,6 +215,7 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 				/>
@@ -245,6 +258,7 @@ const ProductStatPage = (props: Props) => {
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
+					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 					total={nbReviewsWithFilters}
@@ -257,6 +271,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 						required
@@ -265,6 +280,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -272,6 +288,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -279,6 +296,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -286,6 +304,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -299,6 +318,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -306,6 +326,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
+						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -315,7 +336,7 @@ const ProductStatPage = (props: Props) => {
 	};
 
 	return (
-		<ProductLayout product={product}>
+		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
 				<title>{product.title} | Statistiques | Je donne mon avis</title>
 				<meta
@@ -326,13 +347,15 @@ const ProductStatPage = (props: Props) => {
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
-				<Button
-					priority="secondary"
-					type="button"
-					nativeButtonProps={public_modal.buttonProps}
-				>
-					Rendre ces statistiques publiques
-				</Button>
+				{ownRight === 'admin' && (
+					<Button
+						priority="secondary"
+						type="button"
+						nativeButtonProps={public_modal.buttonProps}
+					>
+						Rendre ces statistiques publiques
+					</Button>
+				)}
 			</div>
 			<div className={cx(classes.container)}>
 				<Filters

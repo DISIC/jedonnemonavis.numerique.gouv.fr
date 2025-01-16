@@ -27,7 +27,7 @@ export const domainRouter = router({
 			let where: Prisma.WhiteListedDomainWhereInput = search
 				? {
 						domain: {
-							search: search.split(' ').join('&')
+							contains: search.split(' ').join('&')
 						}
 					}
 				: {};

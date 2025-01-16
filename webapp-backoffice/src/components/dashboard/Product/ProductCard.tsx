@@ -62,7 +62,8 @@ const ProductCard = ({
 	isFavorite,
 	showFavoriteButton,
 	onRestoreProduct,
-	onDeleteProduct
+	onDeleteProduct,
+	onDeleteEssential
 }: {
 	product: ProductWithButtons;
 
@@ -72,6 +73,7 @@ const ProductCard = ({
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 	onDeleteProduct: () => void;
+	onDeleteEssential: () => void;
 }) => {
 	const [onConfirmModalRestore, setOnConfirmModalRestore] =
 		useState<CreateModalProps | null>(null);
@@ -114,6 +116,7 @@ const ProductCard = ({
 				message:
 					'Veuillez saisir le nom du service pour confirmer la suppression'
 			});
+			setValidateDelete(false);
 		} else {
 			clearErrors('product_name');
 			setValidateDelete(true);
@@ -310,7 +313,7 @@ const ProductCard = ({
 				title="Restaurer un service"
 				handleOnConfirm={() => {
 					restoreProduct.mutate({
-						id: product.id
+						product_id: product.id
 					});
 					onConfirmModalRestore.close();
 				}}
@@ -329,7 +332,7 @@ const ProductCard = ({
 					if (nbReviews && nbReviews > 1000) {
 						if (validateDelete) {
 							archiveProduct.mutate({
-								id: product.id
+								product_id: product.id
 							});
 							onConfirmModalArchive.close();
 						} else {
@@ -337,7 +340,7 @@ const ProductCard = ({
 						}
 					} else {
 						archiveProduct.mutate({
-							id: product.id
+							product_id: product.id
 						});
 						onConfirmModalArchive.close();
 					}
@@ -488,7 +491,15 @@ const ProductCard = ({
 										<MenuItem
 											onClick={e => {
 												handleClose(e);
-												onConfirmModalArchive.open();
+												if (product.isTop250) {
+													onDeleteEssential();
+													window.scrollTo({
+														top: 0,
+														behavior: 'smooth' // Scroll avec animation
+													});
+												} else {
+													onConfirmModalArchive.open();
+												}
 											}}
 											className={cx(classes.menuItemDanger)}
 										>
@@ -558,7 +569,12 @@ const ProductCard = ({
 										>
 											{indicators.map((indicator, index) => (
 												<div
-													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+													className={fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-sm-6',
+														'fr-col-md-3'
+													)}
 													key={index}
 												>
 													<p
@@ -581,22 +597,15 @@ const ProductCard = ({
 														<p
 															className={cx(
 																fr.cx(
-																	!!indicator.total && indicator.color !== 'new'
-																		? `fr-label--${indicator.color}`
-																		: 'fr-label--disabled',
+																	!(
+																		!!indicator.total &&
+																		indicator.color !== 'new'
+																	) && 'fr-label--disabled',
 																	'fr-text--bold'
 																),
-																classes.indicatorText
+																classes.indicatorText,
+																!!indicator.total && classes[indicator.color]
 															)}
-															style={
-																!!indicator.total && indicator.color === 'new'
-																	? {
-																			color:
-																				fr.colors.decisions.background.flat
-																					.warning.default
-																		}
-																	: undefined
-															}
 														>
 															{!!indicator.total
 																? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
@@ -607,7 +616,12 @@ const ProductCard = ({
 											))}
 											{!isLoadingReviewsCount && nbReviews !== undefined && (
 												<div
-													className={fr.cx('fr-col', 'fr-col-6', 'fr-col-md-3')}
+													className={fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-sm-6',
+														'fr-col-md-3'
+													)}
 												>
 													<div
 														className={fr.cx(
@@ -629,8 +643,7 @@ const ProductCard = ({
 													>
 														<div
 															className={cx(
-																classes.reviewWrapper,
-																fr.cx('fr-col-12', 'fr-pt-0')
+																fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
 															)}
 														>
 															<div
@@ -642,7 +655,13 @@ const ProductCard = ({
 															>
 																{formatNumberWithSpaces(nbReviews)}
 															</div>
-
+														</div>
+														<div
+															className={cx(
+																classes.reviewWrapper,
+																fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
+															)}
+														>
 															<div className={fr.cx('fr-label--info')}>
 																{nbNewReviews !== undefined &&
 																	nbNewReviews > 0 && (
@@ -651,11 +670,10 @@ const ProductCard = ({
 																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
 																			>
 																				<Badge
-																					noIcon
-																					severity="info"
-																					className={cx(fr.cx('fr-ml-4v'))}
+																					severity="new"
+																					className={fr.cx('fr-mr-4v')}
 																				>
-																					{`${nbNewReviews <= 9 ? `+${nbNewReviews}` : '9+'}`}
+																					{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
 																				</Badge>
 																			</span>
 																		</>
@@ -664,8 +682,8 @@ const ProductCard = ({
 															{nbReviews > 0 && (
 																<Link
 																	href={`/administration/dashboard/product/${product.id}/reviews`}
-																	title={`Voir les nouveaux avis pour ${product.title}`}
-																	className={fr.cx('fr-link', 'fr-ml-4v')}
+																	title={`Voir les avis pour ${product.title}`}
+																	className={fr.cx('fr-link')}
 																>
 																	Voir les avis
 																</Link>
@@ -759,7 +777,10 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	reviewWrapper: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('xl')]: {
+			justifyContent: 'flex-start'
+		}
 	},
 	notifSpan: {
 		display: 'block',
@@ -779,6 +800,18 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	info: {
+		color: fr.colors.decisions.text.default.info.default
+	},
+	error: {
+		color: fr.colors.decisions.text.default.error.default
+	},
+	new: {
+		color: fr.colors.decisions.background.flat.yellowTournesol.default
+	},
+	success: {
+		color: fr.colors.decisions.text.default.success.default
 	}
 });
 
