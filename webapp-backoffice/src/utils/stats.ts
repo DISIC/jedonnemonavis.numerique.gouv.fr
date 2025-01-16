@@ -50,8 +50,8 @@ export const getStatsColor = ({
 				: fr.colors.decisions.background.contrast.success.default;
 		case AnswerIntention.medium:
 			return kind === 'text'
-				? fr.colors.decisions.text.label.yellowMoutarde.default
-				: fr.colors.decisions.background.flat.yellowTournesol.default;
+				? fr.colors.decisions.background.flat.yellowTournesol.default
+				: fr.colors.decisions.background.alt.yellowTournesol.default;
 		case AnswerIntention.bad:
 			return kind === 'text'
 				? fr.colors.decisions.text.default.error.default
