@@ -146,50 +146,28 @@ const AccessManagement = (props: Props) => {
 	};
 
 	const getAlertTitle = () => {
-		switch (modalType) {
-			case 'add':
-				if (currentAccessRight?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${
-						currentAccessRight?.user_email
-							? currentAccessRight?.user_email
-							: currentAccessRight?.user_email_invite
-					}.`;
-				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} fait partie de ${product.title}.`;
-				}
-			case 'resend-email':
-				return `Un e-mail d’invitation a été renvoyé à ${
-					currentAccessRight?.user_email
-						? currentAccessRight?.user_email
-						: currentAccessRight?.user_email_invite
-				}.`;
-			case 'switch':
-				if (currentAccessRight?.user) {
-					if (currentAccessRight?.status === 'admin') {
-						return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} n'est plus administrateur de ce produit.`;
-					} else {
-						return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} est désormais administrateur de ce produit.`;
-					}
-				} else {
-					if (currentAccessRight?.status === 'carrier_admin') {
-						return `${currentAccessRight?.user_email_invite} n'est plus administrateur de ce produit.`;
-					} else {
-						return `${currentAccessRight?.user_email_invite} est désormais administrateur de ce produit.`;
-					}
-				}
-			case 'remove':
-				return `${
-					currentAccessRight?.user !== null
-						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
-						: currentAccessRight.user_email_invite
-				} ne fait plus partie de ${product.title}.`;
-			case 'reintegrate':
-				return `${
-					currentAccessRight?.user !== null
-						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
-						: currentAccessRight.user_email_invite
-				} a été réintégré comme administrateur de ce produit numérique.`;
-		}
+		const userName = currentAccessRight?.user
+			? `${currentAccessRight.user.firstName} ${currentAccessRight.user.lastName}`
+			: currentAccessRight?.user_email_invite;
+
+		const userEmail =
+			currentAccessRight?.user_email || currentAccessRight?.user_email_invite;
+
+		const messages = {
+			add:
+				currentAccessRight?.user === null
+					? `Un e-mail d'invitation a été envoyé à ${userEmail}.`
+					: `${userName} fait partie de ${product.title}.`,
+			'resend-email': `Un e-mail d'invitation a été renvoyé à ${userEmail}.`,
+			switch:
+				currentAccessRight?.status === 'carrier_admin'
+					? `${userName} n'est plus administrateur de ce produit.`
+					: `${userName} est désormais administrateur de ce produit.`,
+			remove: `${userName} ne fait plus partie de ${product.title}.`,
+			reintegrate: `${userName} a été réintégré comme administrateur de ce produit numérique.`
+		};
+
+		return messages[modalType];
 	};
 
 	const handlePageChange = (pageNumber: number) => {
@@ -380,7 +358,7 @@ const AccessManagement = (props: Props) => {
 											Administrateurs de l'organisation
 										</h2>
 										<p className={cx(classes.categoryDescription)}>
-											Utilisateurs ayant le droit de modifier l’organisation (
+											Utilisateurs ayant le droit de modifier l'organisation (
 											{entity?.name}) et tous ses services associés.
 										</p>
 									</div>

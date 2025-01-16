@@ -39,6 +39,11 @@ const MENU_ITEMS = {
 	}
 } as const;
 
+const MENU_ITEMS_BY_STATUS = {
+	carrier_admin: ['REMOVE', 'SWITCH_TO_USER', 'RESEND'],
+	carrier_user: ['REMOVE', 'SWITCH_TO_ADMIN', 'RESEND']
+} as const;
+
 export const AccessRightMenuOptions = ({
 	open,
 	anchorEl,
@@ -48,6 +53,8 @@ export const AccessRightMenuOptions = ({
 	onButtonClick,
 	userEmail
 }: MenuOptionProps) => {
+	if (ownRight !== 'admin') return null;
+
 	const handleMenuAction = (
 		action: AccessRightModalType,
 		eventName: string
@@ -57,21 +64,10 @@ export const AccessRightMenuOptions = ({
 		onClose();
 	};
 
-	const renderMenuItem = (
-		item: (typeof MENU_ITEMS)[keyof typeof MENU_ITEMS]
-	) => (
-		<MenuItem
-			style={{ color: '#000091' }}
-			onClick={() =>
-				handleMenuAction(item.action as AccessRightModalType, item.event)
-			}
-			disabled={accessRight.user_email === userEmail}
-		>
-			{item.label}
-		</MenuItem>
-	);
-
-	if (ownRight !== 'admin') return null;
+	const menuItems =
+		MENU_ITEMS_BY_STATUS[
+			accessRight.status as keyof typeof MENU_ITEMS_BY_STATUS
+		] || [];
 
 	return (
 		<Menu
@@ -83,31 +79,24 @@ export const AccessRightMenuOptions = ({
 				'aria-labelledby': 'button-options-access-right'
 			}}
 		>
-			{(() => {
-				switch (accessRight.status) {
-					case 'carrier_admin':
-						return (
-							<>
-								{renderMenuItem(MENU_ITEMS.REMOVE)}
-								{renderMenuItem(MENU_ITEMS.SWITCH_TO_USER)}
-								{accessRight.user_email_invite !== null &&
-									renderMenuItem(MENU_ITEMS.RESEND)}
-							</>
-						);
-					case 'carrier_user':
-						return (
-							<>
-								{renderMenuItem(MENU_ITEMS.REMOVE)}
-								{renderMenuItem(MENU_ITEMS.SWITCH_TO_ADMIN)}
-								{accessRight.user_email_invite !== null &&
-									renderMenuItem(MENU_ITEMS.RESEND)}
-							</>
-						);
-
-					default:
-						return null;
+			{menuItems.map(itemKey => {
+				const item = MENU_ITEMS[itemKey];
+				if (itemKey === 'RESEND' && accessRight.user_email_invite === null) {
+					return null;
 				}
-			})()}
+				return (
+					<MenuItem
+						key={item.action}
+						style={{ color: '#000091' }}
+						onClick={() =>
+							handleMenuAction(item.action as AccessRightModalType, item.event)
+						}
+						disabled={accessRight.user_email === userEmail}
+					>
+						{item.label}
+					</MenuItem>
+				);
+			})}
 		</Menu>
 	);
 };
