@@ -39,10 +39,10 @@ describe('jdma-logs', () => {
 			.last()
 			.within(() => {
 				cy.get('td')
-					.eq(1)
+					.eq(2)
 					.should(
 						'contain',
-						"Création du service e2e-jdma-service-test-1"
+						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
 					);
 			});
 	});
