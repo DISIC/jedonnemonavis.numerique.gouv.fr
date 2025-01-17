@@ -141,7 +141,7 @@ function loginAndCreateProduct(email) {
 	cy.get('input[name="email"]').type(email);
 	cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
 	cy.get('input[type="password"]').type(userPassword);
-	cy.get('[class*="LoginForm-button"]').contains('Confirmer').click();
+	cy.get('[class*="LoginForm-button"]').contains('Se connecter').click();
 	cy.url().should('eq', `${app_url}/administration/dashboard/products`);
 
 	createProduct();

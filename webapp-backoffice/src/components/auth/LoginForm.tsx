@@ -99,7 +99,8 @@ export const LoginForm = () => {
 
 	const getEmailErrorMessage = (): string => {
 		if (errors.emailEmpty) return 'Saisissez une adresse email.';
-		if (errors.emailFormat) return "Format de l'email incorrect.";
+		if (errors.emailFormat)
+			return "Format de l'email incorrect. Exemple : nom@domaine.fr";
 		if (errors.emailNotFound)
 			return 'Aucun compte connu avec cette adresse e-mail.';
 		if (errors.userInactive)
