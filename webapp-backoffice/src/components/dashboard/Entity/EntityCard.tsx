@@ -132,7 +132,14 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 		gap: '1rem',
 		padding: 0,
 		margin: 0,
-		listStyle: 'none'
+		listStyle: 'none',
+		'@media (max-width: 768px)': {
+			flexDirection: 'column',
+			alignItems: 'flex-end'
+		},
+		'@media (min-width: 768px)': {
+			flexDirection: 'row'
+		}
 	},
 	iconSuccess: {
 		color: 'green'
