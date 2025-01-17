@@ -7,19 +7,14 @@ De Janvier à Mars = objectif créer de nouveaux formulaires, voici la roadmap.
 - **Catégorie**: Créer un formulaire personnalisé
   **Titre**: Modifier les réponses
   **Statut**: En cours
-  **Description**: Description de l'élément 1.
+  **Description**: Permettre aux administrateurs de service de masquer/afficher certaines réponses du formulaire de l'Observatoire.
 
 - **Catégorie**: Créer un formulaire personnalisé
   **Titre**: Ajouter une étape au modèle
   **Statut**: A venir
-  **Description**: Description de l'élément 2.
+  **Description**: Permettre aux administrateurs de service de rajouter une étape au formulaire de l'Observatoire.
 
 - **Catégorie**: Créer un formulaire personnalisé
-  **Titre**: Titre 3
+  **Titre**: Pouvoir choisir entre le modèle Observatoire et un autre
   **Statut**: A venir
-  **Description**: Description de l'élément 3.
-
-- **Catégorie**: Créer un formulaire personnalisé
-  **Titre**: Titre 4 de test ...
-  **Statut**: En cours de réalisation
-  **Description**: Description de l'élément 3 lorem ipsum dolor sic amet...
+  **Description**: Permettre aux administrateurs de service de choisir parmis plusieurs modèles proposés afin de publier un formulaire.
