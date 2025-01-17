@@ -34,7 +34,7 @@ import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer';
+	ownRight: 'admin' | 'viewer';
 }
 
 type FormErrors = {
@@ -476,6 +476,12 @@ const ProductReviewsPage = (props: Props) => {
 												]);
 											}}
 										>
+											{displayMode === 'reviews' && (
+												<span
+													className="ri-chat-poll-line fr-mr-1v fr-icon--sm"
+													aria-hidden="true"
+												></span>
+											)}
 											Avis
 										</Button>
 										<Button
@@ -497,6 +503,12 @@ const ProductReviewsPage = (props: Props) => {
 												]);
 											}}
 										>
+											{displayMode === 'verbatim' && (
+												<span
+													className="ri-chat-3-line fr-mr-1v fr-icon--sm"
+													aria-hidden="true"
+												></span>
+											)}
 											Verbatims
 										</Button>
 									</div>
