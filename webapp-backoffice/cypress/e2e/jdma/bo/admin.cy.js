@@ -260,7 +260,7 @@ function restaureService() {
 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 	cy.contains('button', 'Restaurer').should('exist').click();
 	cy.get('.fr-modal__body').should('be.visible');
-	cy.contains('button', 'Se connecter').click();
+	cy.contains('button', 'Confirmer').click();
 }
 
 function logout() {

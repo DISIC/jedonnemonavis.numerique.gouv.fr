@@ -77,7 +77,7 @@ function loginAndNavigate() {
 					cy.get('input[type="password"]').type(userPassword);
 				});
 			cy.get('[class*="LoginForm-button"]')
-				.contains('Confirmer')
+				.contains('Se connecter')
 				.click()
 				.then(() => {
 					cy.url().should('eq', app_url + '/administration/dashboard/products');
