@@ -72,7 +72,46 @@ export const userEventRouter = router({
 			return { data: newButton };
 		}),
 
+	countNewLogs: protectedProcedure
+		.input(
+			z.object({
+				user_id: z.number().optional(),
+				product_id: z.number()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { product_id, user_id } = input;
+
+			const lastSeenLogs = await ctx.prisma.userEvent.findFirst({
+				where: {
+					product_id,
+					user_id,
+					action: "service_logs_view"
+				},
+				orderBy: {
+					created_at: 'desc'
+				},
+			})
+
+			const countNewLogs = await ctx.prisma.userEvent.count({
+				where: {
+					product_id,
+					...(lastSeenLogs && {created_at: {
+						gte: lastSeenLogs?.created_at
+					}}),
+					action: {
+						in: ALL_ACTIONS
+					}
+				}
+			})
+
+			return {
+				count: countNewLogs
+			}
+		}),
+
 	getList: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				product_id: z.number().optional(),

@@ -388,7 +388,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'button.create': TypeAction.service_button_create,
 	'button.update': TypeAction.service_button_update,
 	'apiKey.create': TypeAction.service_apikeys_create,
-	'apiKey.delete': TypeAction.service_apikeys_delete
+	'apiKey.delete': TypeAction.service_apikeys_delete,
+	'userEvent.getList': TypeAction.service_logs_view
 };
 
 export const handleActionTypeDisplay = (
