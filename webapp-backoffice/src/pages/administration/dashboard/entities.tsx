@@ -260,6 +260,7 @@ const DashBoardEntities = () => {
 									label="Trier Par"
 									nativeSelectProps={{
 										name: 'my-select',
+										value: filter,
 										onChange: event => setFilter(event.target.value)
 									}}
 								>
