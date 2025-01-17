@@ -154,7 +154,7 @@ export const ResetForm = () => {
 							messages={getPasswordMessages()}
 							messagesHint={
 								errors.password.required
-									? ''
+									? 'Tous les champs sont obligatoires'
 									: 'Votre mot de passe doit contenir au moins :'
 							}
 						/>
@@ -203,21 +203,17 @@ export const ResetForm = () => {
 				<>
 					<div role="status">
 						{successChange === 'Ok' ? (
-							<div role="status">
-								<Alert
-									description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
-									severity="success"
-									title="Mot de passe réinitilialisé"
-								/>
-							</div>
+							<Alert
+								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
+								severity="success"
+								title="Mot de passe réinitilialisé"
+							/>
 						) : (
-							<div role="status">
-								<Alert
-									description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
-									severity="error"
-									title="Lien invalide"
-								/>
-							</div>
+							<Alert
+								description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
+								severity="error"
+								title="Lien invalide"
+							/>
 						)}
 					</div>
 					<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>

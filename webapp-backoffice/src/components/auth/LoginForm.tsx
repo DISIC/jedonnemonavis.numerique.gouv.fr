@@ -289,7 +289,7 @@ export const LoginForm = () => {
 					{isLoading ? (
 						<Loader size="sm" white />
 					) : showPassword ? (
-						'Confirmer'
+						'Se connecter'
 					) : (
 						'Continuer'
 					)}
