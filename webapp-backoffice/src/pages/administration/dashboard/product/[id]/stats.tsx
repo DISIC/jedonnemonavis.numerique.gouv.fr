@@ -365,7 +365,7 @@ const ProductStatPage = (props: Props) => {
 				/>
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
-					<div className={fr.cx('fr-mt-10v')}>
+					<div className={fr.cx('fr-mt-10v')} role="status">
 						<Alert
 							title=""
 							severity="error"

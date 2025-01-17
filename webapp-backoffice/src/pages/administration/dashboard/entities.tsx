@@ -201,14 +201,16 @@ const DashBoardEntities = () => {
 			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				{newEntity && (
-					<Alert
-						closable
-						onClose={function noRefCheck() {}}
-						severity={'success'}
-						className={fr.cx('fr-mb-4w')}
-						small
-						description={getAlertText()}
-					/>
+					<div role="status">
+						<Alert
+							closable
+							onClose={function noRefCheck() {}}
+							severity={'success'}
+							className={fr.cx('fr-mb-4w')}
+							small
+							description={getAlertText()}
+						/>
+					</div>
 				)}
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}

@@ -193,7 +193,7 @@ const Filters = ({
 							state={errors.startDate ? 'error' : 'default'}
 							stateRelatedMessage={
 								errors.startDate ? (
-									<span role="alert">format attendu : JJ/MM/AAAA</span>
+									<span role="status">format attendu : JJ/MM/AAAA</span>
 								) : null
 							}
 						/>
@@ -212,7 +212,7 @@ const Filters = ({
 							state={errors.endDate ? 'error' : 'default'}
 							stateRelatedMessage={
 								errors.endDate ? (
-									<span role="alert">format attendu : JJ/MM/AAAA</span>
+									<span role="status">format attendu : JJ/MM/AAAA</span>
 								) : null
 							}
 						/>

@@ -201,19 +201,23 @@ export const ResetForm = () => {
 			)}
 			{successChange && !loadingCheck && (
 				<>
-					<div role="alert">
+					<div role="status">
 						{successChange === 'Ok' ? (
-							<Alert
-								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
-								severity="success"
-								title="Mot de passe réinitilialisé"
-							/>
+							<div role="status">
+								<Alert
+									description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
+									severity="success"
+									title="Mot de passe réinitilialisé"
+								/>
+							</div>
 						) : (
-							<Alert
-								description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
-								severity="error"
-								title="Lien invalide"
-							/>
+							<div role="status">
+								<Alert
+									description="Ce lien ne semble plus être valide. Vous pouvez relancer la procédure depuis l'écran de connexion."
+									severity="error"
+									title="Lien invalide"
+								/>
+							</div>
 						)}
 					</div>
 					<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>

@@ -59,22 +59,24 @@ export default function Register() {
 					<h1 className={fr.cx('fr-mb-12v')}>Création de compte</h1>
 					{!registered && !otp && !request && <AlertObservatoire />}
 					{!!request && (
-						<Alert
-							className={fr.cx('fr-mb-16v')}
-							closable
-							description={
-								<>
-									L’outil JDMA est réservé aux établissements publics. Votre
-									adresse e-mail n’est pas reconnue comme une adresse
-									d’administration publique. Si vous pensez qu’il s’agit d’une
-									erreur, merci de nous décrire votre situation. Nous
-									reviendrons vers vous sous 48 heures.
-								</>
-							}
-							onClose={function noRefCheck() {}}
-							severity="info"
-							title=""
-						/>
+						<div role="status">
+							<Alert
+								className={fr.cx('fr-mb-16v')}
+								closable
+								description={
+									<>
+										L’outil JDMA est réservé aux établissements publics. Votre
+										adresse e-mail n’est pas reconnue comme une adresse
+										d’administration publique. Si vous pensez qu’il s’agit d’une
+										erreur, merci de nous décrire votre situation. Nous
+										reviendrons vers vous sous 48 heures.
+									</>
+								}
+								onClose={function noRefCheck() {}}
+								severity="info"
+								title=""
+							/>
+						</div>
 					)}
 					<div
 						className={cx(

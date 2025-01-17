@@ -234,7 +234,7 @@ export const LoginForm = () => {
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={
 						hasErrors() ? (
-							<span role="alert">{getEmailErrorMessage()}</span>
+							<span role="status">{getEmailErrorMessage()}</span>
 						) : null
 					}
 				/>
@@ -256,7 +256,7 @@ export const LoginForm = () => {
 								? [
 										{
 											message: (
-												<span role="alert">Mot de passe incorrect.</span>
+												<span role="status">Mot de passe incorrect.</span>
 											),
 											severity: 'error'
 										}
