@@ -35,7 +35,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 					>
 						{entity.name}{' '}
 						<span className={cx(fr.cx('fr-hint-text'), classes.acronym)}>
-							({entity.acronym})
+							({entity.acronym}) - {entity.created_at.toLocaleDateString()}
 						</span>
 					</p>
 				</div>

@@ -264,6 +264,7 @@ const DashBoardEntities = () => {
 									}}
 								>
 									<option value="name:asc">Nom A à Z</option>
+									<option value="name:desc">Nom Z à A</option>
 									<option value="created_at:desc">Date de création</option>
 									<option value="updated_at:desc">Date de mise à jour</option>
 								</Select>
