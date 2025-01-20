@@ -8,6 +8,9 @@
 -- AlterEnum
 BEGIN;
 CREATE TYPE "RightAccessStatus_new" AS ENUM ('carrier_admin', 'carrier_user', 'removed');
+-- Il faut d'abord supprimer la valeur par défaut existante
+ALTER TABLE "AccessRight" ALTER COLUMN "status" DROP DEFAULT;
+-- Ensuite faire la conversion
 ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USING (
   CASE
     WHEN status::text = 'admin' THEN 'carrier_admin'::text
@@ -20,6 +23,7 @@ ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USI
 ALTER TYPE "RightAccessStatus" RENAME TO "RightAccessStatus_old";
 ALTER TYPE "RightAccessStatus_new" RENAME TO "RightAccessStatus";
 DROP TYPE "RightAccessStatus_old";
+-- Et enfin remettre la nouvelle valeur par défaut
 ALTER TABLE "AccessRight" ALTER COLUMN "status" SET DEFAULT 'carrier_user';
 COMMIT;
 
