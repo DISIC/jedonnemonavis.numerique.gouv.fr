@@ -10,8 +10,9 @@ BEGIN;
 CREATE TYPE "RightAccessStatus_new" AS ENUM ('carrier_admin', 'carrier_user', 'removed');
 ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USING
   CASE
-    WHEN status = 'carrier_admin' THEN 'carrier_admin'
+    WHEN status = 'admin' THEN 'carrier_admin'
     WHEN status = 'user' THEN 'carrier_user'
+    WHEN status = 'carrier' THEN 'carrier_user'
     WHEN status = 'removed' THEN 'removed'
     ELSE 'carrier_user'
   END::text::"RightAccessStatus_new";
