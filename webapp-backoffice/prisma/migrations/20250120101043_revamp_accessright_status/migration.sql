@@ -8,15 +8,11 @@
 -- AlterEnum
 BEGIN;
 CREATE TYPE "RightAccessStatus_new" AS ENUM ('carrier_admin', 'carrier_user', 'removed');
-ALTER TABLE "AccessRight" ALTER COLUMN "status" DROP DEFAULT;
-ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USING (
-  CASE status::text
-    WHEN 'carrier' THEN 'carrier_user'::RightAccessStatus_new
-    WHEN 'user' THEN 'carrier_user'::RightAccessStatus_new
-    WHEN 'admin' THEN 'carrier_admin'::RightAccessStatus_new
-    ELSE 'carrier_user'::RightAccessStatus_new
-  END
-);
+ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USING
+  CASE
+    WHEN status = 'admin' THEN 'carrier_admin'
+    ELSE 'carrier_user'
+  END::text::"RightAccessStatus_new";
 ALTER TYPE "RightAccessStatus" RENAME TO "RightAccessStatus_old";
 ALTER TYPE "RightAccessStatus_new" RENAME TO "RightAccessStatus";
 DROP TYPE "RightAccessStatus_old";
