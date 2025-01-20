@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
-import { Product } from '@prisma/client';
+import { Product, RightAccessStatus } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
@@ -13,7 +13,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 interface ProductLayoutProps {
 	children: React.ReactNode;
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 interface MenuItems {
@@ -55,7 +55,10 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: ownRight && ownRight === 'admin' ? 'Gérer les boutons' : 'Voir les boutons',
+			text:
+				ownRight && ownRight === 'carrier_admin'
+					? 'Gérer les boutons'
+					: 'Voir les boutons',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/buttons`,
 			linkProps: {
@@ -64,7 +67,10 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: ownRight && ownRight === 'admin' ? "Gérer l'accès" : "Voir l'accès",
+			text:
+				ownRight && ownRight === 'carrier_admin'
+					? "Gérer l'accès"
+					: "Voir l'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
@@ -82,7 +88,10 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: ownRight && ownRight === 'admin' ? 'Gérer les clés API' : 'Voir les clés API',
+			text:
+				ownRight && ownRight === 'carrier_admin'
+					? 'Gérer les clés API'
+					: 'Voir les clés API',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {

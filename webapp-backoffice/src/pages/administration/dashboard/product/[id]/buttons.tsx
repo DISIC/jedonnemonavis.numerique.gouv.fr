@@ -3,7 +3,11 @@ import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { Button as PrismaButtonType, Product } from '@prisma/client';
+import {
+	Button as PrismaButtonType,
+	Product,
+	RightAccessStatus
+} from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
@@ -25,7 +29,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const modal = createModal({

@@ -115,7 +115,7 @@ const ButtonModal = (props: Props) => {
 			if (currentAccessRight === undefined) return;
 			updateAccessRight.mutate({
 				id: currentAccessRight.id,
-				status: 'carrier'
+				status: 'carrier_user'
 			});
 		}
 	}
@@ -199,7 +199,8 @@ const ButtonModal = (props: Props) => {
 			case 'switch':
 				return (
 					<div className={fr.cx('fr-pt-4v')}>
-						{currentAccessRight && currentAccessRight.status === 'admin' ? (
+						{currentAccessRight &&
+						currentAccessRight.status === 'carrier_admin' ? (
 							<p>
 								Êtes-vous sûr de vouloir passer{' '}
 								<span className={cx(classes.boldText)}>
@@ -291,7 +292,6 @@ const ButtonModal = (props: Props) => {
 					...defaultButtons,
 					{
 						children:
-							currentAccessRight?.status === 'admin' ||
 							currentAccessRight?.status === 'carrier_admin'
 								? 'Passer en utilisateur de service'
 								: 'Passer en administrateur de service',

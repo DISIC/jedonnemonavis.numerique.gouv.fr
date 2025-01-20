@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product } from '@prisma/client';
+import { Product, RightAccessStatus } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -13,7 +13,6 @@ import { useRouter } from 'next/router';
 import { Toast } from '@/src/components/ui/Toast';
 import Link from 'next/link';
 import Head from 'next/head';
-import { cx } from '@codegouvfr/react-dsfr/fr/cx';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { push } from '@socialgouv/matomo-next';
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
@@ -22,7 +21,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer'
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const editProductModal = createModal({
@@ -149,7 +148,9 @@ const ProductInformationPage = (props: Props) => {
 						onClose={function noRefCheck() {
 							setStatusProductState(null);
 						}}
-						severity={statusProductState.role === 'alert' ? 'warning' : 'success'}
+						severity={
+							statusProductState.role === 'alert' ? 'warning' : 'success'
+						}
 						className={fr.cx('fr-mb-5w')}
 						small
 						description={
@@ -163,7 +164,7 @@ const ProductInformationPage = (props: Props) => {
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
 					<h1>Informations</h1>
-					{ownRight === "admin" &&
+					{ownRight === 'carrier_admin' && (
 						<Button
 							priority="secondary"
 							iconId="fr-icon-edit-line"
@@ -172,7 +173,7 @@ const ProductInformationPage = (props: Props) => {
 						>
 							Modifier
 						</Button>
-					}
+					)}
 				</div>
 				<div>
 					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
@@ -228,14 +229,15 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				{ownRight === "admin" &&
+				{ownRight === 'carrier_admin' && (
 					<div>
 						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
 						<p>En supprimant ce service :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
-								les utilisateurs de ce service n’auront plus accès au formulaire.
+								les utilisateurs de ce service n’auront plus accès au
+								formulaire.
 							</li>
 						</ul>
 						<Button
@@ -245,14 +247,14 @@ const ProductInformationPage = (props: Props) => {
 							priority="tertiary"
 							className={classes.buttonError}
 							onClick={() => {
-								if(product.isTop250) {
+								if (product.isTop250) {
 									setStatusProductState({
 										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({
 										top: 0,
-										behavior: 'smooth', // Scroll avec animation
+										behavior: 'smooth' // Scroll avec animation
 									});
 								} else {
 									onConfirmModal.open();
@@ -263,7 +265,7 @@ const ProductInformationPage = (props: Props) => {
 							Supprimer ce service
 						</Button>
 					</div>
-				}
+				)}
 			</div>
 		</ProductLayout>
 	);

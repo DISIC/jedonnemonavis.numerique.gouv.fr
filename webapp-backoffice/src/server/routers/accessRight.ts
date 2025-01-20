@@ -138,7 +138,7 @@ export const accessRightRouter = router({
 
 			if (
 				(accessRightAlreadyExists !== null &&
-					accessRightAlreadyExists.status === 'carrier') ||
+					accessRightAlreadyExists.status === 'carrier_user') ||
 				adminEntityRightExists ||
 				userIsSuperAdmin !== null
 			) {

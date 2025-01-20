@@ -2,13 +2,14 @@ import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
+import { RightAccessStatus } from '@prisma/client';
 
 interface MenuOptionProps {
 	open: boolean;
 	anchorEl: HTMLElement | null;
 	onClose: () => void;
 	accessRight: AccessRightWithUsers;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	onButtonClick: (
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
@@ -53,7 +54,10 @@ export const AccessRightMenuOptions = ({
 	onButtonClick,
 	userEmail
 }: MenuOptionProps) => {
-	if (ownRight !== 'admin') return null;
+	if (ownRight !== 'carrier_admin') return null;
+
+	console.log('accessRight', accessRight);
+	console.log('ownRight', ownRight);
 
 	const handleMenuAction = (
 		action: AccessRightModalType,

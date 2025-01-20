@@ -22,7 +22,6 @@ enum UserRole {
   superadmin
   admin
   user
-  viewer
 }
 
 enum RequestMode {
@@ -37,9 +36,6 @@ enum UserRequestStatus {
 }
 
 enum RightAccessStatus {
-  admin
-  user
-  carrier
   carrier_admin
   carrier_user
   removed
