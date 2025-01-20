@@ -14,6 +14,7 @@ ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USI
     WHEN 'carrier' THEN 'carrier_user'::RightAccessStatus_new
     WHEN 'user' THEN 'carrier_user'::RightAccessStatus_new
     WHEN 'admin' THEN 'carrier_admin'::RightAccessStatus_new
+    ELSE 'carrier_user'::RightAccessStatus_new
   END
 );
 ALTER TYPE "RightAccessStatus" RENAME TO "RightAccessStatus_old";
