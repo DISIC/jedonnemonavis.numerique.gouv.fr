@@ -35,9 +35,6 @@ const ProductAccessCard = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
-	console.log('accessRight', accessRight);
-	console.log('ownRight', ownRight);
-
 	return (
 		<>
 			<div
