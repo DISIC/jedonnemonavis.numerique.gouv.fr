@@ -56,9 +56,6 @@ export const AccessRightMenuOptions = ({
 }: MenuOptionProps) => {
 	if (ownRight !== 'carrier_admin') return null;
 
-	console.log('accessRight', accessRight);
-	console.log('ownRight', ownRight);
-
 	const handleMenuAction = (
 		action: AccessRightModalType,
 		eventName: string
