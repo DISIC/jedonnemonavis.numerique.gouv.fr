@@ -450,7 +450,6 @@ const useStyles = tss.create({
 		gap: 10,
 		width: '100%',
 		alignItems: 'center',
-		borderBottom: '1px solid black',
 		paddingBottom: '10px'
 	},
 	entityName: {
