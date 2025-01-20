@@ -14,7 +14,6 @@ interface MenuOptionProps {
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
-	userEmail?: string | null;
 }
 
 const MENU_ITEMS = {
@@ -51,8 +50,7 @@ export const AccessRightMenuOptions = ({
 	onClose,
 	accessRight,
 	ownRight,
-	onButtonClick,
-	userEmail
+	onButtonClick
 }: MenuOptionProps) => {
 	if (ownRight !== 'carrier_admin') return null;
 
@@ -92,7 +90,6 @@ export const AccessRightMenuOptions = ({
 						onClick={() =>
 							handleMenuAction(item.action as AccessRightModalType, item.event)
 						}
-						disabled={accessRight.user_email === userEmail}
 					>
 						{item.label}
 					</MenuItem>

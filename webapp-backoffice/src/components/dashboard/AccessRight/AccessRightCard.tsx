@@ -90,7 +90,7 @@ const ProductAccessCard = (props: Props) => {
 									priority={'secondary'}
 									className={menuOpen ? classes.buttonOptionsOpen : ''}
 									onClick={handleClick}
-									disabled={accessRight.user_email === session?.user?.email}
+									disabled={ownRight !== 'carrier_admin'}
 									iconId={
 										menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
 									}
@@ -106,7 +106,6 @@ const ProductAccessCard = (props: Props) => {
 									accessRight={accessRight}
 									ownRight={ownRight}
 									onButtonClick={onButtonClick}
-									userEmail={session?.user?.email}
 								/>
 							</>
 						)}
