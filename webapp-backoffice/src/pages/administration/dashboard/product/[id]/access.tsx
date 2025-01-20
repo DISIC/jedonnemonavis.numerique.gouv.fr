@@ -6,7 +6,7 @@ import { tss } from 'tss-react/dsfr';
 import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightCard';
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import React from 'react';
-import { Product, AccessRight } from '@prisma/client';
+import { Product, AccessRight, RightAccessStatus } from '@prisma/client';
 import {
 	AccessRightWithUsers,
 	AdminEntityRightWithUsers
@@ -27,7 +27,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 export type AccessRightModalType =
@@ -61,6 +61,7 @@ const AccessManagement = (props: Props) => {
 		React.useState(false);
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+
 	const isModalOpen = useIsModalOpen(modal);
 	const { data: session } = useSession();
 
@@ -145,42 +146,28 @@ const AccessManagement = (props: Props) => {
 	};
 
 	const getAlertTitle = () => {
-		switch (modalType) {
-			case 'add':
-				if (currentAccessRight?.user === null) {
-					return `Un e-mail d’invitation a été envoyé à ${
-						currentAccessRight?.user_email
-							? currentAccessRight?.user_email
-							: currentAccessRight?.user_email_invite
-					}.`;
-				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} fait partie de ${product.title}.`;
-				}
-			case 'resend-email':
-				return `Un e-mail d’invitation a été renvoyé à ${
-					currentAccessRight?.user_email
-						? currentAccessRight?.user_email
-						: currentAccessRight?.user_email_invite
-				}.`;
-			case 'switch':
-				if (currentAccessRight?.status === 'admin') {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} n'est plus administrateur de ce produit.`;
-				} else {
-					return `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName} est désormais administrateur de ce produit.`;
-				}
-			case 'remove':
-				return `${
-					currentAccessRight?.user !== null
-						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
-						: currentAccessRight.user_email_invite
-				} ne fait plus partie de ${product.title}.`;
-			case 'reintegrate':
-				return `${
-					currentAccessRight?.user !== null
-						? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
-						: currentAccessRight.user_email_invite
-				} a été réintégré comme administrateur de ce produit numérique.`;
-		}
+		const userName = currentAccessRight?.user
+			? `${currentAccessRight.user.firstName} ${currentAccessRight.user.lastName}`
+			: currentAccessRight?.user_email_invite;
+
+		const userEmail =
+			currentAccessRight?.user_email || currentAccessRight?.user_email_invite;
+
+		const messages = {
+			add:
+				currentAccessRight?.user === null
+					? `Un e-mail d'invitation a été envoyé à ${userEmail}.`
+					: `${userName} fait partie de ${product.title}.`,
+			'resend-email': `Un e-mail d'invitation a été renvoyé à ${userEmail}.`,
+			switch:
+				currentAccessRight?.status === 'carrier_admin'
+					? `${userName} n'est plus administrateur de ce produit.`
+					: `${userName} est désormais administrateur de ce produit.`,
+			remove: `${userName} ne fait plus partie de ${product.title}.`,
+			reintegrate: `${userName} a été réintégré comme administrateur de ce produit numérique.`
+		};
+
+		return messages[modalType];
 	};
 
 	const handlePageChange = (pageNumber: number) => {
@@ -235,13 +222,13 @@ const AccessManagement = (props: Props) => {
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
 						<h2 className={fr.cx('fr-mb-2w')}>
-							{ownRight && ownRight === 'admin'
+							{ownRight && ownRight === 'carrier_admin'
 								? "Gérer l'accès"
 								: "Voir l'accès"}
 						</h2>
 					</div>
 					<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
-						{ownRight === 'admin' && (
+						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
 								iconPosition="right"
@@ -301,18 +288,21 @@ const AccessManagement = (props: Props) => {
 				) : (
 					<div>
 						{accessRights.some(
-							accessRight => accessRight.status === 'carrier'
+							accessRight => accessRight.status === 'carrier_user'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Utilisateurs du service
-								</h2>
+								<div className={cx(classes.titleContainer)}>
+									<h2 className={cx(classes.categoryTitle)}>
+										Utilisateurs du service
+									</h2>
+									<p className={cx(classes.categoryDescription)}>
+										Utilisateurs ayant le droit de voir le service, mais pas de
+										le modifier
+									</p>
+								</div>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										if (
-											accessRight.status === 'carrier' &&
-											accessRight.user !== null
-										) {
+										if (accessRight.status === 'carrier_user') {
 											return (
 												<AccessRightCard
 													key={index}
@@ -327,39 +317,21 @@ const AccessManagement = (props: Props) => {
 							</div>
 						)}
 						{accessRights.some(
-							accessRight => accessRight.status === 'admin'
+							accessRight => accessRight.status === 'carrier_admin'
 						) && (
 							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Administrateurs du service
-								</h2>
-								<div>
-									{accessRights.map((accessRight, index) => {
-										if (
-											accessRight.status === 'admin' &&
-											accessRight.user !== null
-										) {
-											return (
-												<AccessRightCard
-													key={index}
-													accessRight={accessRight}
-													onButtonClick={handleModalOpening}
-													ownRight={ownRight}
-												/>
-											);
-										}
-									})}
+								<div className={cx(classes.titleContainer)}>
+									<h2 className={cx(classes.categoryTitle)}>
+										Administrateurs du service
+									</h2>
+									<p className={cx(classes.categoryDescription)}>
+										Utilisateurs ayant le droit de modifier tout aspect du
+										service
+									</p>
 								</div>
-							</div>
-						)}
-						{accessRights.some(accessRight => accessRight.user === null) && (
-							<div className={fr.cx('fr-mb-10v')}>
-								<h2 className={cx(classes.categoryTitle)}>
-									Invitations envoyées
-								</h2>
 								<div>
 									{accessRights.map((accessRight, index) => {
-										if (accessRight.user === null) {
+										if (accessRight.status === 'carrier_admin') {
 											return (
 												<AccessRightCard
 													key={index}
@@ -376,10 +348,15 @@ const AccessManagement = (props: Props) => {
 						{accessAdminEntityRights.length > 0 && (
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.entityWrapper)}>
-									<h2 className={cx(classes.organizationTitle)}>
-										Administrateurs de l'organisation
-									</h2>
-									<div className={cx(classes.entityName)}>{entity?.name}</div>
+									<div className={cx(classes.titleContainer)}>
+										<h2 className={cx(classes.categoryTitle)}>
+											Administrateurs de l'organisation
+										</h2>
+										<p className={cx(classes.categoryDescription)}>
+											Utilisateurs ayant le droit de modifier l'organisation (
+											{entity?.name}) et tous ses services associés.
+										</p>
+									</div>
 								</div>
 								<div>
 									{accessAdminEntityRights.map(
@@ -439,11 +416,22 @@ const useStyles = tss.create({
 			justifyContent: 'end'
 		}
 	},
+	titleContainer: {
+		display: 'flex',
+		justifyContent: 'flex-start',
+		alignItems: 'center',
+		gap: '24px',
+		borderBottom: '1px solid black'
+	},
 	categoryTitle: {
 		...fr.typography[20].style,
 		fontWeight: 'bold',
-		paddingBottom: '10px',
-		borderBottom: '1px solid black'
+		marginBottom: '8px'
+	},
+	categoryDescription: {
+		fontSize: '12px',
+		color: '#666666',
+		marginBottom: '8px'
 	},
 	inviteTitle: {
 		fontWeight: 'bold',
@@ -462,7 +450,6 @@ const useStyles = tss.create({
 		gap: 10,
 		width: '100%',
 		alignItems: 'center',
-		borderBottom: '1px solid black',
 		paddingBottom: '10px'
 	},
 	entityName: {

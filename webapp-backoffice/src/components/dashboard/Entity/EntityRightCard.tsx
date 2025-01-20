@@ -154,11 +154,7 @@ const EntityRightCard = (props: Props) => {
 const useStyles = tss
 	.withParams<{ withOptions: boolean }>()
 	.create(({ withOptions }) => ({
-		entityCard: {
-			backgroundColor: !withOptions
-				? fr.colors.decisions.background.disabled.grey.default
-				: ''
-		},
+		entityCard: {},
 		entityCardWrapper: {
 			justifyContent: withOptions ? 'space-between' : ''
 		},

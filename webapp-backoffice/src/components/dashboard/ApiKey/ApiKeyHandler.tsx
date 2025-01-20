@@ -1,5 +1,5 @@
 import React from 'react';
-import { Entity, Product } from '@prisma/client';
+import { Entity, Product, RightAccessStatus } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -12,12 +12,12 @@ import { push } from '@socialgouv/matomo-next';
 interface Props {
 	product?: Product;
 	entity?: Entity;
-	ownRight?: 'admin' | 'viewer';
+	ownRight?: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ApiKeyHandler = (props: Props) => {
 	const { product, entity } = props;
-	const ownRight = props.ownRight || 'admin'
+	const ownRight = props.ownRight;
 	const { cx, classes } = useStyles();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
@@ -187,7 +187,7 @@ const ApiKeyHandler = (props: Props) => {
 									>
 										{'Copier'}
 									</Button>
-									{ownRight === "admin" &&
+									{ownRight === 'carrier_admin' && (
 										<Button
 											priority="tertiary"
 											size="small"
@@ -199,7 +199,7 @@ const ApiKeyHandler = (props: Props) => {
 										>
 											Supprimer
 										</Button>
-									}
+									)}
 								</div>
 							</div>
 						</div>
@@ -207,7 +207,7 @@ const ApiKeyHandler = (props: Props) => {
 				</div>
 			)}
 
-			{ownRight === 'admin' &&
+			{ownRight === 'carrier_admin' && (
 				<Button
 					priority="secondary"
 					iconId="fr-icon-add-line"
@@ -218,7 +218,7 @@ const ApiKeyHandler = (props: Props) => {
 				>
 					Générer une {apiKeys.length !== 0 ? 'nouvelle ' : ''} clé API
 				</Button>
-			}
+			)}
 		</>
 	);
 };
