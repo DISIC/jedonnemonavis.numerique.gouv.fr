@@ -61,6 +61,7 @@ export const apiKeyRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
 				product_id: z.number().optional(),
@@ -96,18 +97,23 @@ export const apiKeyRouter = router({
 		}),
 
 	delete: protectedProcedure
+		.meta({ logEvent: true })
 		.input(
 			z.object({
-				key: z.string()
+				key: z.string(),
+				product_id: z.number().optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
 			const ctx_user = ctx.session.user;
-			const { key } = input;
+			const { key, product_id } = input;
 
 			const keyFound = await ctx.prisma.apiKey.findFirst({
 				where: {
-					key: key
+					key: key,
+					...(product_id && {
+						product_id: product_id
+					})
 				},
 				include: {
 					user: true

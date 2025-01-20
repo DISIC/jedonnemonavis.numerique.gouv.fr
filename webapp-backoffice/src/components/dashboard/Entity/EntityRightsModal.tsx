@@ -113,7 +113,8 @@ const EntityRightsModal = (props: Props) => {
 	const handleAddUser = () => {
 		addAdminEntityRight.mutate({
 			user_email: userAddEmail,
-			entity_id: entity?.id || -1
+			entity_id: entity?.id || -1,
+			entity_name: entity?.name || ''
 		});
 		push(['trackEvent', 'BO - Entities', `Invite-Admin`]);
 	};
@@ -127,7 +128,9 @@ const EntityRightsModal = (props: Props) => {
 
 		if (actionType === 'remove') {
 			removeAdminEntityRight.mutate({
-				admin_entity_right_id: adminEntityRight.id
+				admin_entity_right_id: adminEntityRight.id,
+				entity_name: entity?.name || '',
+				user_email: adminEntityRight.user_email || ''
 			});
 			return;
 		}

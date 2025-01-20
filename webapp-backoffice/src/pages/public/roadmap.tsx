@@ -103,7 +103,7 @@ const TermsOfUse: React.FC<HomeProps> = ({ intro, tableData }) => {
 								'Tag / Epic',
 								'Titre de la fonctionnalité',
 								'Statut',
-								'Descrpition'
+								'Descripition'
 							]}
 						></Table>
 					</div>

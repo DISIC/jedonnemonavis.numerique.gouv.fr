@@ -5,7 +5,7 @@ datasource db {
 
 generator client {
   provider        = "prisma-client-js"
-  binaryTargets = ["native", "linux-arm64-openssl-3.0.x", "darwin"]
+  binaryTargets   = ["native", "linux-arm64-openssl-3.0.x", "darwin"]
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
@@ -111,8 +111,10 @@ enum TypeAction {
   service_review_verbatim_view
   service_buttons_list_view
   service_button_create
+  service_button_update
   service_apikeys_list_view
   service_apikeys_create
+  service_apikeys_delete
   organisations_list_view
   organisation_create
   organisation_update
@@ -127,30 +129,30 @@ enum TypeAction {
 
 // Next auth
 model User {
-  id                   Int                   @id @default(autoincrement())
-  firstName            String?
-  lastName             String?
-  active               Boolean               @default(false)
-  xwiki_account        Boolean               @default(false)
-  xwiki_username       String?
-  email                String                @unique
-  password             String
-  role                 UserRole              @default(user)
-  UserOTPs             UserOTP[]
-  UserValidationTokens UserValidationToken[]
-  UserRequests         UserRequest[]
-  UserResetTokens      UserResetToken[]
-  accessRights         AccessRight[]
-  adminEntityRights    AdminEntityRight[]
-  entities             Entity[]
-  favorites            Favorite[]
-  api_keys             ApiKey[]
-  exports              Export[]
-  forms                Form[]
-  reviewViewLogs       ReviewViewLog[]
-  notifications        Boolean           @default(false)
+  id                      Int                   @id @default(autoincrement())
+  firstName               String?
+  lastName                String?
+  active                  Boolean               @default(false)
+  xwiki_account           Boolean               @default(false)
+  xwiki_username          String?
+  email                   String                @unique
+  password                String
+  role                    UserRole              @default(user)
+  UserOTPs                UserOTP[]
+  UserValidationTokens    UserValidationToken[]
+  UserRequests            UserRequest[]
+  UserResetTokens         UserResetToken[]
+  accessRights            AccessRight[]
+  adminEntityRights       AdminEntityRight[]
+  entities                Entity[]
+  favorites               Favorite[]
+  api_keys                ApiKey[]
+  exports                 Export[]
+  forms                   Form[]
+  reviewViewLogs          ReviewViewLog[]
+  notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
-  UserEvent            UserEvent[]
+  UserEvent               UserEvent[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

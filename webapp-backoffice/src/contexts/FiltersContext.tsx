@@ -1,3 +1,4 @@
+import { TypeAction } from '@prisma/client';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 type Filters = {
@@ -14,6 +15,7 @@ type Filters = {
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
+	filterAction: TypeAction | undefined;
 };
 
 interface FiltersContextProps {
@@ -45,7 +47,8 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		filter: 'title',
 		filterOnlyFavorites: false,
 		filterOnlyArchived: false,
-		validatedSearch: ''
+		validatedSearch: '',
+		filterAction: undefined
 	});
 
 	const updateFilters = (newFilters: Partial<Filters>) => {

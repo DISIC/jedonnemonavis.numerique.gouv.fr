@@ -98,7 +98,7 @@ const ProductInformationPage = (props: Props) => {
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
-						id: product.id
+						product_id: product.id
 					});
 					onConfirmModal.close();
 				}}

@@ -88,7 +88,8 @@ export const adminEntityRightRouter = router({
 		.input(
 			z.object({
 				user_email: z.string().email(),
-				entity_id: z.number()
+				entity_id: z.number(),
+				entity_name: z.string().optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -171,7 +172,7 @@ export const adminEntityRightRouter = router({
 						entity_id
 					}
 				}
-			})
+			});
 
 			return { data: newAdminEntityRight };
 		}),
@@ -231,7 +232,14 @@ export const adminEntityRightRouter = router({
 
 	delete: protectedProcedure
 		.meta({ logEvent: true })
-		.input(z.object({ admin_entity_right_id: z.number() }))
+		.input(
+			z.object({
+				admin_entity_right_id: z.number(),
+				entity_name: z.string().optional(),
+				entity_id: z.number().optional(),
+				user_email: z.string().optional()
+			})
+		)
 		.mutation(async ({ ctx, input }) => {
 			const { admin_entity_right_id } = input;
 

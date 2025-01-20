@@ -1,6 +1,8 @@
 import { matchSorter } from 'match-sorter';
 import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
+import { JsonValue } from '@prisma/client/runtime/library';
+import { off } from 'process';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -167,7 +169,7 @@ export const autocompleteFilterOptions = (
 ) => {
 	const filteredOptions = matchSorter(options, inputValue.trim(), {
 		keys: [item => item.label],
-		threshold: matchSorter.rankings.CONTAINS,
+		threshold: matchSorter.rankings.CONTAINS
 	}).slice(0, 4);
 
 	if (includeCreateOption) {
@@ -383,4 +385,68 @@ export const actionMapping: Record<string, TypeAction> = {
 	'entity.update': TypeAction.organisation_update,
 	'adminEntityRight.create': TypeAction.organisation_invite,
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
-  };
+	'button.create': TypeAction.service_button_create,
+	'button.update': TypeAction.service_button_update,
+	'apiKey.create': TypeAction.service_apikeys_create,
+	'apiKey.delete': TypeAction.service_apikeys_delete
+};
+
+export const handleActionTypeDisplay = (
+	action: TypeAction,
+	metadata: JsonValue,
+	productTitle: string
+) => {
+	if (!metadata) return '';
+
+	const metadataTyped = metadata as { json: { [key: string]: any } };
+	switch (action) {
+		case TypeAction.service_create:
+			return `Création du service ${productTitle}`;
+		case TypeAction.service_update:
+			return `Modification sur le service`;
+		case TypeAction.service_archive:
+			return `Archivage du service`;
+		case TypeAction.service_restore:
+			return `Restauration du service`;
+		case TypeAction.service_invite:
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
+		case TypeAction.service_uninvite:
+			return `Retrait de l'accès à l'utilisateur ${metadataTyped.json.user_email} au service`;
+		case TypeAction.organisation_create:
+			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
+		case TypeAction.organisation_update:
+			return `Modification sur l'organisation du service`;
+		case TypeAction.organisation_invite:
+			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation`;
+		case TypeAction.organisation_uninvite:
+			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
+		case TypeAction.service_button_create:
+			return `Création du bouton ${metadataTyped.json.title} `;
+		case TypeAction.service_button_update:
+			return `Modification du bouton ${metadataTyped.json.title} `;
+		case TypeAction.service_apikeys_create:
+			return `Création d'une clé API`;
+		case TypeAction.service_apikeys_delete:
+			return `Suppression d'une clé API`;
+	}
+};
+
+export const filtersLabel = [
+	{ value: 'service_update', label: 'Modification du service' },
+	{ value: 'service_archive', label: 'Archivage du service' },
+	{ value: 'service_restore', label: 'Restauration du service' },
+	{ value: 'service_invite', label: "Invitation d'utilisateur au service" },
+	{ value: 'service_uninvite', label: "Retrait d'utilisateur du service" },
+	{ value: 'organisation_update', label: "Modification sur l'organisation" },
+	{
+		value: 'organisation_invite',
+		label: "Invitation d'utilisateur dans une organisation"
+	},
+	{
+		value: 'organisation_uninvite',
+		label: "Retrait d'utilisateur d'une organisation"
+	},
+	{ value: 'service_button_create', label: "Création d'un bouton" },
+	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
+	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" }
+];

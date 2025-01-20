@@ -59,6 +59,7 @@ export const buttonRouter = router({
 		}),
 
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(ButtonUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const newButton = await ctx.prisma.button.create({
@@ -69,6 +70,7 @@ export const buttonRouter = router({
 		}),
 
 	update: protectedProcedure
+		.meta({ logEvent: true })
 		.input(ButtonUncheckedUpdateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const updatedButton = await ctx.prisma.button.update({
