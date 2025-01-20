@@ -58,8 +58,7 @@ const ProductAccessCard = (props: Props) => {
 						</span>
 					</div>
 
-					{accessRight.user_email_invite &&
-					accessRight.status === 'carrier_admin' ? (
+					{accessRight.user_email_invite ? (
 						<div
 							className={cx(
 								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
