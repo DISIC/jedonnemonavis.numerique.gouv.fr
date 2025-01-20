@@ -164,6 +164,7 @@ export const accessRightRouter = router({
 				create: {
 					user_email: userExists ? user_email.toLowerCase() : null,
 					user_email_invite: !userExists ? user_email.toLowerCase() : null,
+					status: role,
 					product_id
 				},
 				include: {
