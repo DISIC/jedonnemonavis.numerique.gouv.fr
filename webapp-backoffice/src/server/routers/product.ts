@@ -29,7 +29,7 @@ const checkRightToProceed = async (
 		where: {
 			id: product_id
 		}
-	})
+	});
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product_id,
@@ -112,7 +112,7 @@ export const productRouter = router({
 							? {
 									some: {
 										user_email: contextUser.email,
-										status: 'carrier'
+										status: { in: ['carrier', 'admin'] }
 									}
 								}
 							: {}
