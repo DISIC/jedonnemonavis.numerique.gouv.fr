@@ -38,9 +38,11 @@ export const accessRightRouter = router({
 
 			let where: Prisma.AccessRightWhereInput = {
 				product_id,
-				status: isRemoved ? undefined : {
-					in: ['carrier', 'admin']
-				}
+				status: isRemoved
+					? undefined
+					: {
+							in: ['carrier_user', 'carrier_admin']
+						}
 			};
 
 			const entities = await ctx.prisma.accessRight.findMany({
@@ -90,12 +92,13 @@ export const accessRightRouter = router({
 		.input(
 			z.object({
 				user_email: z.string().email(),
-				product_id: z.number()
+				product_id: z.number(),
+				role: z.enum(['carrier_user', 'carrier_admin']).optional()
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
 			const contextUser = ctx.session.user;
-			const { user_email, product_id } = input;
+			const { user_email, product_id, role } = input;
 
 			const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({
 				where: {
@@ -107,34 +110,37 @@ export const accessRightRouter = router({
 				}
 			});
 
-			const adminEntityRightExists = await ctx.prisma.adminEntityRight.findFirst({
-				where: {
-					OR: [
-						{ user_email: user_email.toLowerCase() },
-						{ user_email_invite: user_email.toLowerCase() }
-					],
-					entity: {
-						products: {
-							some: {
-								id: product_id
+			const adminEntityRightExists =
+				await ctx.prisma.adminEntityRight.findFirst({
+					where: {
+						OR: [
+							{ user_email: user_email.toLowerCase() },
+							{ user_email_invite: user_email.toLowerCase() }
+						],
+						entity: {
+							products: {
+								some: {
+									id: product_id
+								}
 							}
 						}
 					}
-				}
-			})
+				});
 
-			const userIsSuperAdmin = await ctx.prisma.user.findFirst( {
+			const userIsSuperAdmin = await ctx.prisma.user.findFirst({
 				where: {
 					email: user_email,
 					role: {
-						in: ["admin", "superadmin"]
+						in: ['admin', 'superadmin']
 					}
 				}
-			})
+			});
 
 			if (
 				(accessRightAlreadyExists !== null &&
-				accessRightAlreadyExists.status === 'carrier') || adminEntityRightExists || userIsSuperAdmin !== null
+					accessRightAlreadyExists.status === 'carrier_user') ||
+				adminEntityRightExists ||
+				userIsSuperAdmin !== null
 			) {
 				throw new TRPCError({
 					code: 'CONFLICT',
@@ -153,11 +159,12 @@ export const accessRightRouter = router({
 					id: accessRightAlreadyExists?.id || -1
 				},
 				update: {
-					status: 'carrier'
+					status: role
 				},
 				create: {
 					user_email: userExists ? user_email.toLowerCase() : null,
 					user_email_invite: !userExists ? user_email.toLowerCase() : null,
+					status: role,
 					product_id
 				},
 				include: {

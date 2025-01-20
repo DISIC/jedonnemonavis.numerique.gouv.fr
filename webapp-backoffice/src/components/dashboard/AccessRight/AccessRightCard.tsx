@@ -8,6 +8,8 @@ import { tss } from 'tss-react/dsfr';
 import { useSession } from 'next-auth/react';
 import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
 import { push } from '@socialgouv/matomo-next';
+import { AccessRightMenuOptions } from './AccessRightMenuOptions';
+import { RightAccessStatus } from '@prisma/client';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -15,7 +17,7 @@ interface Props {
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
-	ownRight : 'admin' | 'viewer'
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductAccessCard = (props: Props) => {
@@ -41,19 +43,15 @@ const ProductAccessCard = (props: Props) => {
 					accessRight.status === 'removed' ? classes.cardStatusRemoved : ''
 				)}
 			>
-				<div
-					className={cx(
-						fr.cx('fr-grid-row', 'fr-grid-row--middle')
-					)}
-				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+				<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--middle'))}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<span className={fr.cx('fr-text--bold')}>
 							{accessRight.user
 								? `${accessRight.user?.firstName} ${accessRight.user?.lastName}`
 								: '-'}
 						</span>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<span className={cx(classes.userEmail)}>
 							{accessRight?.user_email
 								? accessRight?.user_email
@@ -61,56 +59,38 @@ const ProductAccessCard = (props: Props) => {
 						</span>
 					</div>
 
+					{!accessRight.user_email ? (
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
+								classes.badgeStatusInvited
+							)}
+						>
+							<Badge severity="info" noIcon>
+								Invité
+							</Badge>
+						</div>
+					) : (
+						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}></div>
+					)}
+
 					<div
 						className={cx(
-							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
 							classes.optionsDropdown
 						)}
 					>
-						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
-							<Button
-								id="button-remove-access-right"
-								aria-haspopup="true"
-								aria-expanded={menuOpen ? 'true' : undefined}
-								priority="tertiary"
-								onClick={() => {
-									onButtonClick('switch', accessRight);
-									push(['trackEvent', 'BO - Product', 'Access-rights-Switch']);
-								}}
-								disabled={accessRight.user_email === session?.user?.email}
-								size="small"
-							>
-								{accessRight.status === "admin" ? 'Retirer admin' : 'Passer admin'}
-							</Button>
-						)}
-						{accessRight.status !== 'removed' && accessRight.user !== null && ownRight === 'admin' && (
-							<Button
-								id="button-remove-access-right"
-								aria-haspopup="true"
-								aria-expanded={menuOpen ? 'true' : undefined}
-								priority="tertiary"
-								onClick={() => {
-									onButtonClick('remove', accessRight);
-									push(['trackEvent', 'BO - Product', 'Access-rights-Remove']);
-								}}
-								disabled={accessRight.user_email === session?.user?.email}
-								size="small"
-								className={fr.cx('fr-ml-4v')}
-							>
-								Retirer l&apos;accès
-							</Button>
-						)}
-						{accessRight.user === null && ownRight === 'admin' && (
+						{ownRight === 'carrier_admin' && (
 							<>
 								<Button
 									id="button-options-access-right"
 									aria-controls={menuOpen ? 'option-menu' : undefined}
 									aria-haspopup="true"
 									aria-expanded={menuOpen ? 'true' : undefined}
-									priority="tertiary"
+									priority={'secondary'}
 									className={menuOpen ? classes.buttonOptionsOpen : ''}
 									onClick={handleClick}
-									disabled={accessRight.user_email === session?.user?.email}
+									disabled={ownRight !== 'carrier_admin'}
 									iconId={
 										menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
 									}
@@ -119,63 +99,14 @@ const ProductAccessCard = (props: Props) => {
 								>
 									Options
 								</Button>
-								<Menu
-									id="option-menu"
+								<AccessRightMenuOptions
 									open={menuOpen}
 									anchorEl={anchorEl}
 									onClose={handleClose}
-									MenuListProps={{
-										'aria-labelledby': 'button-options-access-right'
-									}}
-								>
-									{accessRight.status === 'carrier' &&
-										accessRight.user === null && (
-											<MenuItem
-												onClick={() => {
-													onButtonClick('resend-email', accessRight);
-													push([
-														'trackEvent',
-														'BO - Product - Access Rights',
-														'Resend Mail'
-													]);
-													handleClose();
-												}}
-											>
-												Renvoyer l'invitation
-											</MenuItem>
-										)}
-
-									{accessRight.status === 'carrier' && (
-										<MenuItem
-											onClick={() => {
-												onButtonClick('remove', accessRight);
-												push([
-													'trackEvent',
-													'BO - Product - Access Rights',
-													'Remove'
-												]);
-												handleClose();
-											}}
-										>
-											Retirer l'accès
-										</MenuItem>
-									)}
-									{accessRight.status === 'removed' && (
-										<MenuItem
-											onClick={() => {
-												onButtonClick('reintegrate', accessRight);
-												push([
-													'trackEvent',
-													'BO - Product - Access Rights',
-													'Restore'
-												]);
-												handleClose();
-											}}
-										>
-											Rétablir l'accès
-										</MenuItem>
-									)}
-								</Menu>
+									accessRight={accessRight}
+									ownRight={ownRight}
+									onButtonClick={onButtonClick}
+								/>
 							</>
 						)}
 					</div>
@@ -194,6 +125,10 @@ const useStyles = tss.create({
 		width: '7.5rem',
 		textAlign: 'center'
 	},
+	badgeStatusInvited: {
+		display: 'flex',
+		justifyContent: 'flex-end'
+	},
 	badgeStatusRemoved: {
 		color: fr.colors.decisions.background.flat.purpleGlycine.default,
 		backgroundColor:
@@ -203,7 +138,8 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.default
 	},
 	userEmail: {
-		wordWrap: 'break-word'
+		wordWrap: 'break-word',
+		fontSize: '12px'
 	},
 	optionsDropdown: {
 		display: 'flex',

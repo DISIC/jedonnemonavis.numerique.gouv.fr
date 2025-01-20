@@ -3,7 +3,11 @@ import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { Button as PrismaButtonType, Product } from '@prisma/client';
+import {
+	Button as PrismaButtonType,
+	Product,
+	RightAccessStatus
+} from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
@@ -25,7 +29,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const modal = createModal({
@@ -131,14 +135,14 @@ const ProductButtonsPage = (props: Props) => {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>
-						{ownRight && ownRight === 'admin'
+						{ownRight && ownRight === 'carrier_admin'
 							? 'Gérer les boutons'
 							: 'Voir les boutons'}
 					</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						{ownRight === 'admin' && (
+						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
 								iconPosition="right"

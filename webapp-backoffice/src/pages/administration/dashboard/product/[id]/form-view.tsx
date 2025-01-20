@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product } from '@prisma/client';
+import { Product, RightAccessStatus } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Head from 'next/head';
@@ -10,7 +10,7 @@ import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer'
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductFormView = (props: Props) => {

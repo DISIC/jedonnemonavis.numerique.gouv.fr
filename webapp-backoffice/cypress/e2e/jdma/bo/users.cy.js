@@ -64,6 +64,8 @@ describe('jdma-users', () => {
 
 		cy.get('input[class*="fr-input"]').type('user3@example.com');
 
+		cy.get('input[value="carrier_admin"]').siblings('label').click();
+
 		cy.get('button').contains('Inviter').click();
 	});
 

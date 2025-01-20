@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ProductLayout from '../../../../../layouts/Product/ProductLayout';
-import { Product, TypeAction } from '@prisma/client';
+import { Product, RightAccessStatus, TypeAction } from '@prisma/client';
 import Head from 'next/head';
 import { getServerSideProps } from '.';
 import { tss } from 'tss-react/dsfr';
@@ -18,7 +18,7 @@ import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const UserLogsPage = ({ product, ownRight }: Props) => {

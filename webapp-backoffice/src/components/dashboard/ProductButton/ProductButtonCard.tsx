@@ -2,7 +2,7 @@ import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
-import { Button as PrismaButtonType } from '@prisma/client';
+import { Button as PrismaButtonType, RightAccessStatus } from '@prisma/client';
 import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
 import { tss } from 'tss-react/dsfr';
@@ -11,7 +11,7 @@ import { push } from '@socialgouv/matomo-next';
 interface Props {
 	button: PrismaButtonType;
 	onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
-	ownRight : 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductButtonCard = (props: Props) => {
@@ -74,7 +74,7 @@ const ProductButtonCard = (props: Props) => {
 									'aria-labelledby': 'button-options'
 								}}
 							>
-								{ownRight === "admin" &&
+								{ownRight === 'carrier_admin' && (
 									<MenuItem
 										onClick={() => {
 											onButtonClick('edit', button), handleClose();
@@ -82,7 +82,7 @@ const ProductButtonCard = (props: Props) => {
 									>
 										Modifier
 									</MenuItem>
-								}
+								)}
 								{/* <MenuItem onClick={() => onButtonClick('merge')}>
 								Fusionner avec un autre bouton
 							</MenuItem>

@@ -1,7 +1,7 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product } from '@prisma/client';
+import { Product, RightAccessStatus } from '@prisma/client';
 import Head from 'next/head';
 import ApiKeyHandler from '@/src/components/dashboard/ApiKey/ApiKeyHandler';
 import Link from 'next/link';
@@ -10,7 +10,7 @@ import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer'
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductApiKeysPage = (props: Props) => {
