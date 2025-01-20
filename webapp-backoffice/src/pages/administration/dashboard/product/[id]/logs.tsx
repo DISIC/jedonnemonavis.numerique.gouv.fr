@@ -15,6 +15,7 @@ import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Autocomplete } from '@mui/material';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
@@ -28,6 +29,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 
 	const [inputValue, setInputValue] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
+	const { data: session } = useSession();
 
 	const { data: fullEvents, isLoading } = trpc.userEvent.getList.useQuery(
 		{
@@ -45,6 +47,20 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			}
 		}
 	);
+
+	const { data: countNewLogs } = trpc.userEvent.countNewLogs.useQuery(
+		{
+			product_id: product.id,
+			user_id: session?.user.id ? parseInt(session?.user.id) : undefined
+		},
+		{
+			initialData: {
+				count: 0
+			}
+		}
+	);
+
+	console.log('count logs : ', countNewLogs);
 
 	const eventsCount = fullEvents?.pagination.total;
 
