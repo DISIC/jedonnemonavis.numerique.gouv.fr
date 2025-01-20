@@ -17,6 +17,7 @@ ALTER TABLE "AccessRight" ALTER COLUMN "status" TYPE "RightAccessStatus_new" USI
     WHEN status::text = 'user' THEN 'carrier_user'::text
     WHEN status::text = 'carrier' THEN 'carrier_user'::text
     WHEN status::text = 'removed' THEN 'removed'::text
+    WHEN status::text = 'carrier_admin' THEN 'carrier_admin'::text
     ELSE 'carrier_user'::text
   END
 )::text::"RightAccessStatus_new";
