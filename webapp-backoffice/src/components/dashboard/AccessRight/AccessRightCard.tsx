@@ -9,6 +9,7 @@ import { useSession } from 'next-auth/react';
 import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
 import { push } from '@socialgouv/matomo-next';
 import { AccessRightMenuOptions } from './AccessRightMenuOptions';
+import { RightAccessStatus } from '@prisma/client';
 
 interface Props {
 	accessRight: AccessRightWithUsers;
@@ -16,7 +17,7 @@ interface Props {
 		modalType: AccessRightModalType,
 		accessRight?: AccessRightWithUsers
 	) => void;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductAccessCard = (props: Props) => {
@@ -33,6 +34,9 @@ const ProductAccessCard = (props: Props) => {
 	};
 
 	const { cx, classes } = useStyles();
+
+	console.log('accessRight', accessRight);
+	console.log('ownRight', ownRight);
 
 	return (
 		<>
@@ -79,8 +83,7 @@ const ProductAccessCard = (props: Props) => {
 							classes.optionsDropdown
 						)}
 					>
-						{(accessRight.user !== null ||
-							accessRight.user_email_invite !== null) && (
+						{ownRight === 'carrier_admin' && (
 							<>
 								<Button
 									id="button-options-access-right"

@@ -18,7 +18,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { Product } from '@prisma/client';
+import { Product, RightAccessStatus } from '@prisma/client';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -28,7 +28,7 @@ import { getServerSideProps } from '.';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const public_modal = createModal({

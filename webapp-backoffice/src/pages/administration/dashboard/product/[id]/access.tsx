@@ -6,7 +6,7 @@ import { tss } from 'tss-react/dsfr';
 import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightCard';
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import React from 'react';
-import { Product, AccessRight } from '@prisma/client';
+import { Product, AccessRight, RightAccessStatus } from '@prisma/client';
 import {
 	AccessRightWithUsers,
 	AdminEntityRightWithUsers
@@ -27,7 +27,7 @@ import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
-	ownRight: 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 export type AccessRightModalType =
@@ -222,13 +222,13 @@ const AccessManagement = (props: Props) => {
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
 						<h2 className={fr.cx('fr-mb-2w')}>
-							{ownRight && ownRight === 'admin'
+							{ownRight && ownRight === 'carrier_admin'
 								? "Gérer l'accès"
 								: "Voir l'accès"}
 						</h2>
 					</div>
 					<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
-						{ownRight === 'admin' && (
+						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
 								iconPosition="right"
