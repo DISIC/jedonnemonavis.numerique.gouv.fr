@@ -57,7 +57,7 @@ export default function Register() {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h1 className={fr.cx('fr-mb-12v')}>Création de compte</h1>
-					{!registered && !otp && !request && <AlertObservatoire />}
+					{/* {!registered && !otp && !request && <AlertObservatoire />} */}
 					{!!request && (
 						<div role="status">
 							<Alert
