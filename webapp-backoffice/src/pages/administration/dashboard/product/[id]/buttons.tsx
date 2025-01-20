@@ -135,14 +135,14 @@ const ProductButtonsPage = (props: Props) => {
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-2w')}>
-						{ownRight && ownRight === 'admin'
+						{ownRight && ownRight === 'carrier_admin'
 							? 'Gérer les boutons'
 							: 'Voir les boutons'}
 					</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						{ownRight === 'admin' && (
+						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
 								iconPosition="right"
