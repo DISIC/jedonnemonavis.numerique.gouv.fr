@@ -56,7 +56,7 @@ function login(email, password) {
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
-	cy.get(selectors.loginForm.continueButton).contains('Confirmer').click();
+	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.url().should('eq', app_url + '/administration/dashboard/products');
 	cy.wait(8000);
 }

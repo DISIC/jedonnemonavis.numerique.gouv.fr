@@ -201,14 +201,16 @@ const DashBoardEntities = () => {
 			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				{newEntity && (
-					<Alert
-						closable
-						onClose={function noRefCheck() {}}
-						severity={'success'}
-						className={fr.cx('fr-mb-4w')}
-						small
-						description={getAlertText()}
-					/>
+					<div role="status">
+						<Alert
+							closable
+							onClose={function noRefCheck() {}}
+							severity={'success'}
+							className={fr.cx('fr-mb-4w')}
+							small
+							description={getAlertText()}
+						/>
+					</div>
 				)}
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
@@ -260,10 +262,12 @@ const DashBoardEntities = () => {
 									label="Trier Par"
 									nativeSelectProps={{
 										name: 'my-select',
+										value: filter,
 										onChange: event => setFilter(event.target.value)
 									}}
 								>
 									<option value="name:asc">Nom A à Z</option>
+									<option value="name:desc">Nom Z à A</option>
 									<option value="created_at:desc">Date de création</option>
 									<option value="updated_at:desc">Date de mise à jour</option>
 								</Select>

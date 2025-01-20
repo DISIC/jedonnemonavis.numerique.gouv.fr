@@ -100,47 +100,51 @@ export const ArrayRadio = (props: Props) => {
                                     colSpan={6}
                                   >
                                     <div className={cx(classes.containerRadio)}>
-                                      <RadioButtons
-                                        legend=""
-                                        name={`radio-${index}`}
-                                        options={field.options.map(
-                                          (opt, index) => ({
-                                            label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
-                                            nativeInputProps: {
-                                              value: `value${index}`,
-                                              checked:
-                                                opinion.contact_satisfaction.includes(
-                                                  escapeRegex(
-                                                    option.value.toString()
-                                                  ) +
-                                                    "_" +
-                                                    opt.value
-                                                ),
-                                              onChange: (event) => {
-                                                setOpinion({
-                                                  ...opinion,
-                                                  contact_satisfaction: [
-                                                    ...opinion.contact_satisfaction.filter(
-                                                      (cs) =>
-                                                        !cs.includes(
-                                                          escapeRegex(
-                                                            option.value.toString()
-                                                          )
-                                                        )
-                                                    ),
+                                      <fieldset
+                                        id={`fieldset-${option.label}-${index}`}
+                                      >
+                                        <legend>{t(field.label)}</legend>
+                                        <RadioButtons
+                                          name={`radio-${index}`}
+                                          options={field.options.map(
+                                            (opt, index) => ({
+                                              label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
+                                              nativeInputProps: {
+                                                value: `value${index}`,
+                                                checked:
+                                                  opinion.contact_satisfaction.includes(
                                                     escapeRegex(
                                                       option.value.toString()
                                                     ) +
                                                       "_" +
-                                                      opt.value,
-                                                  ],
-                                                });
+                                                      opt.value
+                                                  ),
+                                                onChange: (event) => {
+                                                  setOpinion({
+                                                    ...opinion,
+                                                    contact_satisfaction: [
+                                                      ...opinion.contact_satisfaction.filter(
+                                                        (cs) =>
+                                                          !cs.includes(
+                                                            escapeRegex(
+                                                              option.value.toString()
+                                                            )
+                                                          )
+                                                      ),
+                                                      escapeRegex(
+                                                        option.value.toString()
+                                                      ) +
+                                                        "_" +
+                                                        opt.value,
+                                                    ],
+                                                  });
+                                                },
                                               },
-                                            },
-                                          })
-                                        )}
-                                        orientation="horizontal"
-                                      />
+                                            })
+                                          )}
+                                          orientation="horizontal"
+                                        />
+                                      </fieldset>
                                     </div>
                                   </td>
                                 </>

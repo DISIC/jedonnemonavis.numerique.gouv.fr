@@ -99,7 +99,8 @@ export const LoginForm = () => {
 
 	const getEmailErrorMessage = (): string => {
 		if (errors.emailEmpty) return 'Saisissez une adresse email.';
-		if (errors.emailFormat) return "Format de l'email incorrect.";
+		if (errors.emailFormat)
+			return "Format de l'email incorrect. Exemple : nom@domaine.fr";
 		if (errors.emailNotFound)
 			return 'Aucun compte connu avec cette adresse e-mail.';
 		if (errors.userInactive)
@@ -234,7 +235,7 @@ export const LoginForm = () => {
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={
 						hasErrors() ? (
-							<span role="alert">{getEmailErrorMessage()}</span>
+							<span role="status">{getEmailErrorMessage()}</span>
 						) : null
 					}
 				/>
@@ -256,7 +257,7 @@ export const LoginForm = () => {
 								? [
 										{
 											message: (
-												<span role="alert">Mot de passe incorrect.</span>
+												<span role="status">Mot de passe incorrect.</span>
 											),
 											severity: 'error'
 										}
@@ -289,7 +290,7 @@ export const LoginForm = () => {
 					{isLoading ? (
 						<Loader size="sm" white />
 					) : showPassword ? (
-						'Confirmer'
+						'Se connecter'
 					) : (
 						'Continuer'
 					)}

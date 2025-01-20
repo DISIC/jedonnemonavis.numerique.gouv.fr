@@ -261,14 +261,16 @@ const DashBoardDomainDomains = () => {
 					</div>
 				</div>
 				{currentDomain && currentDomain.type !== 'on-confirm' && (
-					<Alert
-						severity={currentDomain.type === 'create' ? 'success' : 'info'}
-						description={getAlertTitle()}
-						className={classes.alert}
-						onClose={() => setCurrentDomain(undefined)}
-						closable
-						small
-					/>
+					<div role="status">
+						<Alert
+							severity={currentDomain.type === 'create' ? 'success' : 'info'}
+							description={getAlertTitle()}
+							className={classes.alert}
+							onClose={() => setCurrentDomain(undefined)}
+							closable
+							small
+						/>
+					</div>
 				)}
 				{isLoadingDomains ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>

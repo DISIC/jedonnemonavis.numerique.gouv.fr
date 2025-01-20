@@ -1,4 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface HomePillsProps {
@@ -11,7 +12,19 @@ export interface Pill {
 }
 
 const HomePills = (props: HomePillsProps) => {
-	const { cx, classes } = useStyles();
+	const [zoomLevel, setZoomLevel] = React.useState(1);
+
+	console.log('zoomLevel', zoomLevel);
+
+	React.useEffect(() => {
+		const handleZoom = () => {
+			setZoomLevel(window.devicePixelRatio);
+		};
+		window.addEventListener('resize', handleZoom);
+		return () => window.removeEventListener('resize', handleZoom);
+	}, []);
+
+	const { cx, classes } = useStyles({ zoomLevel });
 
 	return (
 		<section className={cx(fr.cx('fr-container'), classes.root)}>
@@ -52,8 +65,8 @@ const HomePills = (props: HomePillsProps) => {
 
 const useStyles = tss
 	.withName(HomePills.name)
-	.withParams()
-	.create(() => ({
+	.withParams<{ zoomLevel: number }>()
+	.create(({ zoomLevel }) => ({
 		root: {
 			h2: {
 				color: fr.colors.decisions.text.title.blueFrance.default
@@ -75,13 +88,14 @@ const useStyles = tss
 			...fr.spacing('padding', {
 				topBottom: '1v'
 			}),
-			borderRadius: fr.spacing('3w')
+			borderRadius: fr.spacing('3w'),
+			wordBreak: 'break-word'
 		},
 		badgeIcon: {
 			position: 'absolute',
 			top: '0',
 			right: '0',
-			transform: 'translate(-50%, -50%)',
+			transform: `translate(-50%, -50%) scaleDown(${zoomLevel})`,
 			color: fr.colors.decisions.background.default.grey.default,
 			backgroundColor:
 				fr.colors.decisions.background.actionHigh.success.default,

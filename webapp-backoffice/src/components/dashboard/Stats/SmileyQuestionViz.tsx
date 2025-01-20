@@ -46,7 +46,7 @@ const SmileyQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
-				...(buttonId && {button_id: buttonId}),
+				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
@@ -75,7 +75,7 @@ const SmileyQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
-			...(buttonId && {button_id: buttonId}),
+			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
 			end_date: endDate
@@ -154,6 +154,7 @@ const SmileyQuestionViz = ({
 									{percentage >= limitToShowTopInfos ? (
 										<Image
 											alt=""
+											role="img"
 											src={`/assets/smileys/${getStatsIcon({
 												intention: rfc.intention as AnswerIntention
 											})}.svg`}
