@@ -112,7 +112,7 @@ export const productRouter = router({
 							? {
 									some: {
 										user_email: contextUser.email,
-										status: 'carrier_admin'
+										status: { in: ['carrier_admin', 'carrier_user'] }
 									}
 								}
 							: {}
