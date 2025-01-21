@@ -233,10 +233,6 @@ const DocAPI = () => {
 						</p>
 						<SwaggerUI spec={filterDoc('/stats')} />
 					</div>
-					<div className={fr.cx('fr-container', 'fr-py-6w')}>
-						<h4>Temporaire : Poin d'accès notifs mails</h4>
-						<SwaggerUI spec={filterDoc('/triggerMails')} />
-					</div>
 				</>
 			)}
 		</div>
