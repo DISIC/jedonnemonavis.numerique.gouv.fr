@@ -62,5 +62,5 @@ function App({ Component, pageProps }: AppProps) {
 }
 
 export default trpc.withTRPC(
-  appWithTranslation(withDsfr(withAppEmotionCache(App)))
+  appWithTranslation(withDsfr(withAppEmotionCache(App))),
 );

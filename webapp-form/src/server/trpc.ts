@@ -8,7 +8,7 @@ import path from "path";
 import SuperJSON from "superjson";
 import { ZodError } from "zod";
 import prisma from "../utils/db";
-import crypto from 'crypto';
+import crypto from "crypto";
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
@@ -59,37 +59,37 @@ const hashIp = (ip: string) => {
   // Hash IP with date until hour, and salt
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hour = String(now.getHours()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hour = String(now.getHours()).padStart(2, "0");
   const dateHour = `${year}-${month}-${day}-${hour}`;
   const ipWithDate = `${ip}-${dateHour}`;
-  const hash = crypto.createHash('sha256');
-  hash.update(ipWithDate + process.env.IP_HASH_SALT); 
-  return hash.digest('hex');
+  const hash = crypto.createHash("sha256");
+  hash.update(ipWithDate + process.env.IP_HASH_SALT);
+  return hash.digest("hex");
 };
 
 const transformIp = (ip: string) => {
-  const parts = ip.split('.');
-  parts[3] = '0';
-  const transformedIp = parts.join('.');
+  const parts = ip.split(".");
+  parts[3] = "0";
+  const transformedIp = parts.join(".");
   return transformedIp;
-}
+};
 
 const extractIdsFromUrl = (url: string) => {
   const urlObj = new URL(url);
-  const pathParts = urlObj.pathname.split('/');
+  const pathParts = urlObj.pathname.split("/");
   const product_id = pathParts[2];
-  const button_id = urlObj.searchParams.get('button');
+  const button_id = urlObj.searchParams.get("button");
   return [product_id, button_id];
-}
+};
 
-const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '').split(',');
+const allowedIps = (process.env.LIMITER_ALLOWED_IPS || "").split(",");
 
 function isIpAllowed(ip: string): boolean {
   return allowedIps.some((allowedIp) => {
-    if (allowedIp.includes('-')) {
-      const [startIp, endIp] = allowedIp.split('-');
+    if (allowedIp.includes("-")) {
+      const [startIp, endIp] = allowedIp.split("-");
       return ip >= startIp && ip <= endIp;
     }
     return allowedIp === ip;
@@ -98,20 +98,27 @@ function isIpAllowed(ip: string): boolean {
 
 const limiter = createTRPCStoreLimiter<typeof t>({
   fingerprint: (ctx) => {
-    const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-    const xClientIp = ctx.req.headers['x-client-ip'] as string;
-    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
-    
+    const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
+    const xClientIp = ctx.req.headers["x-client-ip"] as string;
+    const ip = xClientIp
+      ? xClientIp.split(",")[0]
+      : xForwardedFor
+        ? xForwardedFor.split(",")[0]
+        : defaultFingerPrint(ctx.req);
+
     return ip;
   },
   windowMs: 60000,
   max: 5,
   onLimit: async (retryAfter, ctx) => {
-
-    const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-    const xClientIp = ctx.req.headers['x-client-ip'] as string;
-    const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
-    const referer = ctx.req.headers['referer'] || ctx.req.headers['referrer'];
+    const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
+    const xClientIp = ctx.req.headers["x-client-ip"] as string;
+    const ip = xClientIp
+      ? xClientIp.split(",")[0]
+      : xForwardedFor
+        ? xForwardedFor.split(",")[0]
+        : defaultFingerPrint(ctx.req);
+    const referer = ctx.req.headers["referer"] || ctx.req.headers["referrer"];
     const hashedIp = hashIp(ip);
     const currentTime = new Date();
     const [product_id, button_id] = extractIdsFromUrl(referer as string);
@@ -139,8 +146,8 @@ const limiter = createTRPCStoreLimiter<typeof t>({
         data: {
           ip_id: hashedIp,
           ip_adress: transformIp(ip),
-          product_id: parseInt(product_id ?? '0'),
-          button_id: parseInt(button_id ?? '0'),
+          product_id: parseInt(product_id ?? "0"),
+          button_id: parseInt(button_id ?? "0"),
           total_attempts: 5,
           first_attempt: currentTime,
           last_attempt: currentTime,
@@ -152,14 +159,17 @@ const limiter = createTRPCStoreLimiter<typeof t>({
       code: "TOO_MANY_REQUESTS",
       message: `Too many requests, please try again later. ${retryAfter}`,
     });
-    
   },
 });
 
 const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
-  const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-  const xClientIp = ctx.req.headers['x-client-ip'] as string;
-  const ip = xClientIp ? xClientIp.split(',')[0] : xForwardedFor ? xForwardedFor.split(',')[0] : defaultFingerPrint(ctx.req);
+  const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
+  const xClientIp = ctx.req.headers["x-client-ip"] as string;
+  const ip = xClientIp
+    ? xClientIp.split(",")[0]
+    : xForwardedFor
+      ? xForwardedFor.split(",")[0]
+      : defaultFingerPrint(ctx.req);
 
   if (isIpAllowed(ip)) {
     return next();

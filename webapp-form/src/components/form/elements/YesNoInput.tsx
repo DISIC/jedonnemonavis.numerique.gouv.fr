@@ -19,7 +19,7 @@ export const YesNoInput = (props: Props) => {
 
   function containsSpecificVariableNumberPattern(
     array: string[],
-    variable: string
+    variable: string,
   ) {
     let escapedVariable = variable.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 
@@ -32,7 +32,7 @@ export const YesNoInput = (props: Props) => {
     return (
       <div className={fr.cx("fr-grid-row")}>
         {opinion.contact_tried.some(
-          (element) => "options" in form[0] && field.needed.includes(element)
+          (element) => "options" in form[0] && field.needed.includes(element),
         ) && (
           <div className={fr.cx("fr-col-12")}>
             <h3>{t(field.label)}</h3>
@@ -61,7 +61,7 @@ export const YesNoInput = (props: Props) => {
                                 type="radio"
                                 name={`${f.value.toString()}-${index}`}
                                 checked={opinion.contact_reached.includes(
-                                  `${option.value}_${f.value}`
+                                  `${option.value}_${f.value}`,
                                 )}
                                 onChange={() => {
                                   setOpinion((currentOpinion) => {
@@ -69,24 +69,26 @@ export const YesNoInput = (props: Props) => {
                                     let newContactReached;
                                     if (
                                       currentOpinion.contact_reached.includes(
-                                        key
+                                        key,
                                       )
                                     ) {
                                       newContactReached =
                                         currentOpinion.contact_reached.filter(
-                                          (item) => item !== key
+                                          (item) => item !== key,
                                         );
                                     } else {
                                       if (
                                         containsSpecificVariableNumberPattern(
                                           currentOpinion.contact_reached,
-                                          `${option.value}`
+                                          `${option.value}`,
                                         )
                                       ) {
                                         newContactReached = [
                                           ...currentOpinion.contact_reached.filter(
                                             (item) =>
-                                              !item.includes(`${option.value}_`)
+                                              !item.includes(
+                                                `${option.value}_`,
+                                              ),
                                           ),
                                           key,
                                         ];

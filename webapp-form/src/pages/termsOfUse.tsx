@@ -24,14 +24,14 @@ const TermsOfUse = () => {
           "fr-container",
           "fr-col-lg-10",
           "fr-col-xl-8",
-          "fr-py-20v"
+          "fr-py-20v",
         )}
       >
         <div
           className={fr.cx(
             "fr-grid-row",
             "fr-grid-row--gutters",
-            "fr-grid-row--middle"
+            "fr-grid-row--middle",
           )}
         >
           <div className={"fr-col-lg-12"}>
@@ -77,7 +77,7 @@ const TermsOfUse = () => {
                           <>
                             <p
                               className={cx(
-                                hasNoSpaces ? classes.noSpacesParagraph : ""
+                                hasNoSpaces ? classes.noSpacesParagraph : "",
                               )}
                             >
                               {line}
@@ -87,7 +87,7 @@ const TermsOfUse = () => {
                           <>
                             <p
                               className={cx(
-                                hasNoSpaces ? classes.noSpacesParagraph : ""
+                                hasNoSpaces ? classes.noSpacesParagraph : "",
                               )}
                             >
                               {line.text}
