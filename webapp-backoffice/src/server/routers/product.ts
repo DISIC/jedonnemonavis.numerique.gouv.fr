@@ -34,7 +34,7 @@ const checkRightToProceed = async (
 		where: {
 			product_id: product_id,
 			user_email: session.user.email,
-			status: 'carrier'
+			status: 'carrier_admin'
 		}
 	});
 	const adminEntityRight = await prisma.adminEntityRight.findFirst({
@@ -112,7 +112,7 @@ export const productRouter = router({
 							? {
 									some: {
 										user_email: contextUser.email,
-										status: { in: ['carrier', 'admin'] }
+										status: { in: ['carrier_admin', 'carrier_user'] }
 									}
 								}
 							: {}
@@ -318,7 +318,7 @@ export const productRouter = router({
 						create: [
 							{
 								user_email: userEmail,
-								status: 'admin'
+								status: 'carrier_admin'
 							}
 						]
 					}

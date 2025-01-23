@@ -36,7 +36,7 @@ export const Field = (props: Props) => {
   const getChildrenResetObject = () => {
     const children = form.filter(
       (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name),
     );
 
     let opinionPropsObj: {
@@ -56,7 +56,7 @@ export const Field = (props: Props) => {
     key: CheckboxOpinionKeys,
     isolated: boolean,
     e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[]
+    options: CheckboxOption[],
   ) => {
     if (isolated) {
       setOpinion({
@@ -73,7 +73,7 @@ export const Field = (props: Props) => {
         [key]: e.target.checked
           ? [
               ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
+                (sibling) => !isolatedSiblings.includes(sibling),
               ),
               parseInt(e.target.value),
             ]

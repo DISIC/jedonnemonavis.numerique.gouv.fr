@@ -10,7 +10,7 @@ export const productRouter = router({
     .output(
       z.object({
         data: ProductSchema.extend({ buttons: z.array(ButtonSchema) }),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const product = await ctx.prisma.product.findUnique({

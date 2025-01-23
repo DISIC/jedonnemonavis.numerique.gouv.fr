@@ -9,7 +9,7 @@ type Props = {
   setLang: (lang: Language) => void;
 };
 
-const fullNameByLang: Record<Language, string> = {
+export const fullNameByLang: Record<Language, string> = {
   fr: "Français",
   en: "English",
   es: "Español",
@@ -17,7 +17,7 @@ const fullNameByLang: Record<Language, string> = {
   pt: "Português",
 };
 
-const languages: Language[] = ["fr", "en", "es"];
+export const languages: Language[] = ["fr", "en", "es"];
 
 /**
  * The button controlling the component must specify 2 attributes
@@ -78,7 +78,6 @@ const useStyles = tss.withName({ LanguageSelector }).create({
       flexWrap: "wrap",
     },
   },
-
   langShort: {
     textTransform: "uppercase",
   },

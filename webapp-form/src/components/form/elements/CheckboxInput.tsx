@@ -30,19 +30,19 @@ export const CheckboxInput = (props: Props) => {
 
     const children = form.filter(
       (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name),
     );
 
     children.forEach((c) => {
       const subChildren = form.filter(
-        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed)
+        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed),
       );
 
       subChildren.forEach((sc) => {
         opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
           ? value
             ? (opinion[sc.name] as any[]).filter(
-                (field) => !field.startsWith(value + "_")
+                (field) => !field.startsWith(value + "_"),
               )
             : []
           : undefined;
@@ -53,7 +53,7 @@ export const CheckboxInput = (props: Props) => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
         ? value
           ? (opinion[cf.name] as any[]).filter(
-              (field) => !field.startsWith(value + "_")
+              (field) => !field.startsWith(value + "_"),
             )
           : []
         : undefined;
@@ -68,7 +68,7 @@ export const CheckboxInput = (props: Props) => {
     key: CheckboxOpinionKeys,
     isolated: boolean,
     e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[]
+    options: CheckboxOption[],
   ) => {
     const value = parseInt(e.target.value);
 
@@ -88,7 +88,7 @@ export const CheckboxInput = (props: Props) => {
           ...opinion,
           [key]: [
             ...opinion[key].filter((sibling) =>
-              isolatedSiblings.includes(sibling)
+              isolatedSiblings.includes(sibling),
             ),
             value,
           ],
@@ -128,7 +128,7 @@ export const CheckboxInput = (props: Props) => {
                 nativeInputProps: {
                   name: opt.name || `${field.name}-${index}`,
                   checked: opinion[field.name as CheckboxOpinionKeys]?.includes(
-                    opt.value
+                    opt.value,
                   ),
                   value: opt.value,
                   onChange: (e) => {
@@ -136,7 +136,7 @@ export const CheckboxInput = (props: Props) => {
                       field.name as CheckboxOpinionKeys,
                       opt.isolated || false,
                       e,
-                      field.options
+                      field.options,
                     );
                   },
                 },

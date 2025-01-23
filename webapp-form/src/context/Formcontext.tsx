@@ -29,7 +29,7 @@ export const FormContextProvider = ({
   initialReview: ReviewCustomWithPartialRelations | null;
 }) => {
   const [review, setReview] = useState<ReviewCustomWithPartialRelations | null>(
-    initialReview
+    initialReview,
   );
 
   return (

@@ -18,14 +18,14 @@ const Contact = () => {
           "fr-container",
           "fr-col-lg-10",
           "fr-col-xl-8",
-          "fr-py-10v"
+          "fr-py-10v",
         )}
       >
         <div
           className={fr.cx(
             "fr-grid-row",
             "fr-grid-row--gutters",
-            "fr-grid-row--middle"
+            "fr-grid-row--middle",
           )}
         >
           <div

@@ -1,6 +1,6 @@
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { AnswerIntention, Product } from '@prisma/client';
+import { AnswerIntention, Product, RightAccessStatus } from '@prisma/client';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import React from 'react';
@@ -34,7 +34,7 @@ import { useSession } from 'next-auth/react';
 
 interface Props {
 	product: Product;
-	ownRight : 'admin' | 'viewer';
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 type FormErrors = {
