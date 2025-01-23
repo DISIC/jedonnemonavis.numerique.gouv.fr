@@ -12,19 +12,7 @@ export interface Pill {
 }
 
 const HomePills = (props: HomePillsProps) => {
-	const [zoomLevel, setZoomLevel] = React.useState(1);
-
-	console.log('zoomLevel', zoomLevel);
-
-	React.useEffect(() => {
-		const handleZoom = () => {
-			setZoomLevel(window.devicePixelRatio);
-		};
-		window.addEventListener('resize', handleZoom);
-		return () => window.removeEventListener('resize', handleZoom);
-	}, []);
-
-	const { cx, classes } = useStyles({ zoomLevel });
+	const { cx, classes } = useStyles();
 
 	return (
 		<section className={cx(fr.cx('fr-container'), classes.root)}>
@@ -43,7 +31,7 @@ const HomePills = (props: HomePillsProps) => {
 						{props.pills.map((pill, index) => (
 							<div
 								key={index}
-								className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'))}
+								className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-lg-4'))}
 							>
 								<div className={cx(classes.badge)}>
 									<h3 className={cx(classes.title)}>{pill.title}</h3>
@@ -63,55 +51,51 @@ const HomePills = (props: HomePillsProps) => {
 	);
 };
 
-const useStyles = tss
-	.withName(HomePills.name)
-	.withParams<{ zoomLevel: number }>()
-	.create(({ zoomLevel }) => ({
-		root: {
-			h2: {
-				color: fr.colors.decisions.text.title.blueFrance.default
-			}
-		},
-		badge: {
-			...fr.spacing('margin', {
-				rightLeft: '5w'
-			}),
-			position: 'relative',
-			...fr.spacing('padding', {
-				rightLeft: '3w'
-			})
-		},
-		title: {
-			color: fr.colors.decisions.text.title.blueFrance.default,
-			textAlign: 'center',
-			backgroundColor: fr.colors.decisions.background.alt.blueEcume.default,
-			...fr.spacing('padding', {
-				topBottom: '1v'
-			}),
-			borderRadius: fr.spacing('3w'),
-			wordBreak: 'break-word'
-		},
-		badgeIcon: {
-			position: 'absolute',
-			top: '0',
-			right: '0',
-			transform: `translate(-50%, -50%) scaleDown(${zoomLevel})`,
-			color: fr.colors.decisions.background.default.grey.default,
-			backgroundColor:
-				fr.colors.decisions.background.actionHigh.success.default,
-			borderRadius: '50%',
-			...fr.spacing('padding', {
-				topBottom: '1v',
-				rightLeft: '1v'
-			})
-		},
-		paragraph: {
-			...fr.spacing('padding', {
-				rightLeft: '4w'
-			}),
-			textAlign: 'center',
-			fontWeight: fr.typography[0].style.fontWeight
+const useStyles = tss.withName(HomePills.name).create(() => ({
+	root: {
+		h2: {
+			color: fr.colors.decisions.text.title.blueFrance.default
 		}
-	}));
+	},
+	badge: {
+		...fr.spacing('margin', {
+			rightLeft: '5w'
+		}),
+		position: 'relative',
+		...fr.spacing('padding', {
+			rightLeft: '3w'
+		})
+	},
+	title: {
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		textAlign: 'center',
+		backgroundColor: fr.colors.decisions.background.alt.blueEcume.default,
+		...fr.spacing('padding', {
+			topBottom: '1v'
+		}),
+		borderRadius: fr.spacing('3w'),
+		wordBreak: 'break-word'
+	},
+	badgeIcon: {
+		position: 'absolute',
+		top: '0',
+		right: '0',
+		transform: `translate(-50%, -50%)`,
+		color: fr.colors.decisions.background.default.grey.default,
+		backgroundColor: fr.colors.decisions.background.actionHigh.success.default,
+		borderRadius: '50%',
+		...fr.spacing('padding', {
+			topBottom: '1v',
+			rightLeft: '1v'
+		})
+	},
+	paragraph: {
+		...fr.spacing('padding', {
+			rightLeft: '4w'
+		}),
+		textAlign: 'center',
+		fontWeight: fr.typography[0].style.fontWeight
+	}
+}));
 
 export default HomePills;
