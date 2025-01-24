@@ -101,26 +101,17 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					Cette historique existe depuis [date de mise en prod]. Les activités
 					antérieur à cette date ne seront pas affichées.
 				</p>
-				<div
-					className={cx(
-						fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
-						classes.filterContainer
-					)}
-				>
-					<h4>Filtres</h4>
-					<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'))}>
-						<div className={fr.cx('fr-col-12', 'fr-col-md-12')}>
-							<Filters
-								currentStartDate={startDate}
-								currentEndDate={endDate}
-								onChange={(startDate, endDate) => {
-									setStartDate(startDate);
-									setEndDate(endDate);
-								}}
-							/>
-						</div>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v')}>
+				<div className={cx(classes.filterContainer)}>
+					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
+					<Filters
+						currentStartDate={startDate}
+						currentEndDate={endDate}
+						onChange={(startDate, endDate) => {
+							setStartDate(startDate);
+							setEndDate(endDate);
+						}}
+					/>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 						<Autocomplete
 							id="filter-action"
 							disablePortal
@@ -213,14 +204,9 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 	filterContainer: {
 		display: 'flex',
 		flexDirection: 'column',
-		// gap: '0.5rem',
+		gap: '0.5rem',
 		border: '1px solid #e0e0e0',
 		padding: '1rem'
-	},
-	tabContainer: {
-		display: 'flex',
-		flexDirection: 'row',
-		gap: '0.5rem'
 	}
 });
 

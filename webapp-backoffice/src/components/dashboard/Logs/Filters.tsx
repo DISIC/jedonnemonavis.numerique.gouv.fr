@@ -108,7 +108,7 @@ const Filters = ({
 	return (
 		<div
 			className={cx(
-				fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-4v'),
+				fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
 				classes.dateShortcuts
 			)}
 		>
