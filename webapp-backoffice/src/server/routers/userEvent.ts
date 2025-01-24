@@ -29,7 +29,7 @@ const ALL_ACTIONS: TypeAction[] = [
 	...SERVICE_ACTIONS,
 	...PRODUCT_ACTIONS,
 	...ORGANISATION_ACTIONS
-  ];
+];
 
 export const userEventRouter = router({
 	getLastReviewView: protectedProcedure
@@ -86,28 +86,30 @@ export const userEventRouter = router({
 				where: {
 					product_id,
 					user_id,
-					action: "service_logs_view"
+					action: 'service_logs_view'
 				},
 				orderBy: {
 					created_at: 'desc'
-				},
-			})
+				}
+			});
 
 			const countNewLogs = await ctx.prisma.userEvent.count({
 				where: {
 					product_id,
-					...(lastSeenLogs && {created_at: {
-						gte: lastSeenLogs?.created_at
-					}}),
+					...(lastSeenLogs && {
+						created_at: {
+							gte: lastSeenLogs?.created_at
+						}
+					}),
 					action: {
 						in: ALL_ACTIONS
 					}
 				}
-			})
+			});
 
 			return {
 				count: countNewLogs
-			}
+			};
 		}),
 
 	getList: protectedProcedure
@@ -117,31 +119,48 @@ export const userEventRouter = router({
 				product_id: z.number().optional(),
 				page: z.number(),
 				limit: z.number(),
-				filterAction: z.nativeEnum(TypeAction).optional()
+				filterAction: z.nativeEnum(TypeAction).optional(),
+				startDate: z.string().optional(),
+				endDate: z.string().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, page, limit, filterAction } = input;
+			const { product_id, page, limit, filterAction, startDate, endDate } =
+				input;
 			const skip = (page - 1) * limit;
 
-			const whereCondition = {
+			console.log('startDate : ', new Date(startDate || '').toISOString());
+			console.log('endDate : ', new Date(endDate || '').toISOString());
+
+			const whereCondition: Prisma.UserEventWhereInput = {
 				OR: [
-				  { product_id },
-				  {
-					entity: {
-						products: {
-							some: {
-								id: product_id,
-							},
-						},
-					},
-				  },
+					{ product_id },
+					{
+						entity: {
+							products: {
+								some: {
+									id: product_id
+								}
+							}
+						}
+					}
 				],
 				action: {
 					in: ALL_ACTIONS
 				},
 				...(filterAction && { action: filterAction })
 			};
+
+			if (startDate && endDate) {
+				const start = new Date(startDate);
+				start.setHours(0, 0, 0, 0);
+				const end = new Date(endDate);
+				end.setHours(23, 59, 59, 999);
+				whereCondition.created_at = {
+					gte: start,
+					lt: end
+				};
+			}
 
 			const [events, total] = await ctx.prisma.$transaction([
 				ctx.prisma.userEvent.findMany({

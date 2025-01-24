@@ -16,6 +16,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Autocomplete } from '@mui/material';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useSession } from 'next-auth/react';
+import Filters from '@/src/components/dashboard/Logs/Filters';
 
 interface Props {
 	product: Product;
@@ -27,6 +28,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 
 	const { filters, updateFilters } = useFilters();
 
+	const [startDate, setStartDate] = useState('');
+	const [endDate, setEndDate] = useState('');
 	const [inputValue, setInputValue] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const { data: session } = useSession();
@@ -36,7 +39,9 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			product_id: product.id,
 			limit: 10,
 			page: currentPage,
-			filterAction: filters.filterAction
+			filterAction: filters.filterAction,
+			startDate,
+			endDate
 		},
 		{
 			initialData: {
@@ -66,27 +71,55 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
 
-	const headers = ['Date', 'Utilisateur', 'Action'];
+	const headers = ['Date', 'Horaire', 'Activité'];
 
 	const tableData =
 		fullEvents?.data.map(event => [
-			event.created_at.toLocaleString(),
-			event.user ? event.user.firstName + ' ' + event.user.lastName : '',
+			new Intl.DateTimeFormat('fr-FR', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			}).format(event.created_at),
+			event.created_at.toLocaleTimeString(),
 			handleActionTypeDisplay(event.action, event.metadata, product.title)
 		]) || [];
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{product.title} | Journal d'activité | Je donne mon avis</title>
+				<title>
+					{product.title} | Historique d'activité | Je donne mon avis
+				</title>
 				<meta
 					name="description"
-					content={`${product.title} | Journal d'activité | Je donne mon avis`}
+					content={`${product.title} | Historique d'activité | Je donne mon avis`}
 				/>
 			</Head>
 			<div className={classes.container}>
-				<h1>Journal d'activité</h1>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<h1>Historique d'activité</h1>
+				<p>
+					Cette historique existe depuis [date de mise en prod]. Les activités
+					antérieur à cette date ne seront pas affichées.
+				</p>
+				<div
+					className={cx(
+						fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+						classes.filterContainer
+					)}
+				>
+					<h4>Filtres</h4>
+					<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'))}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-12')}>
+							<Filters
+								currentStartDate={startDate}
+								currentEndDate={endDate}
+								onChange={(startDate, endDate) => {
+									setStartDate(startDate);
+									setEndDate(endDate);
+								}}
+							/>
+						</div>
+					</div>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v')}>
 						<Autocomplete
 							id="filter-action"
@@ -116,7 +149,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 									<input
 										{...params.inputProps}
 										className={params.inputProps.className + ' fr-input'}
-										placeholder="Sélectionner une option"
+										placeholder="Toutes les actions"
 										type="search"
 									/>
 								</div>
@@ -176,6 +209,18 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 		padding: '1rem',
 		fontSize: '1.2rem',
 		fontWeight: 'bold'
+	},
+	filterContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		// gap: '0.5rem',
+		border: '1px solid #e0e0e0',
+		padding: '1rem'
+	},
+	tabContainer: {
+		display: 'flex',
+		flexDirection: 'row',
+		gap: '0.5rem'
 	}
 });
 
