@@ -1,7 +1,7 @@
 import { TypeAction } from '@prisma/client';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 
-type Filters = {
+export type Filters = {
 	users: {
 		entity: { label: string; value: number }[];
 		currentPage: number;

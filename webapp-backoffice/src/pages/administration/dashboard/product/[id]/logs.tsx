@@ -6,17 +6,12 @@ import { getServerSideProps } from '.';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
 import { Table } from '@codegouvfr/react-dsfr/Table';
-import {
-	filtersLabel,
-	getNbPages,
-	handleActionTypeDisplay
-} from '@/src/utils/tools';
+import { getNbPages, handleActionTypeDisplay } from '@/src/utils/tools';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Autocomplete } from '@mui/material';
-import { useFilters } from '@/src/contexts/FiltersContext';
 import { useSession } from 'next-auth/react';
-import Filters from '@/src/components/dashboard/Logs/Filters';
+import ActivityFilters from '@/src/components/dashboard/Logs/Filters';
+import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface Props {
 	product: Product;
@@ -25,14 +20,12 @@ interface Props {
 
 const UserLogsPage = ({ product, ownRight }: Props) => {
 	const { classes, cx } = useStyles();
-
-	const { filters, updateFilters } = useFilters();
-
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
-	const [inputValue, setInputValue] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const { data: session } = useSession();
+
+	const { filters, updateFilters } = useFilters();
 
 	const { data: fullEvents, isLoading } = trpc.userEvent.getList.useQuery(
 		{
@@ -112,50 +105,16 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				</p>
 				<div className={cx(classes.filterContainer)}>
 					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
-					<Filters
+					<ActivityFilters
 						currentStartDate={startDate}
 						currentEndDate={endDate}
 						onChange={(startDate, endDate) => {
 							setStartDate(startDate);
 							setEndDate(endDate);
 						}}
+						updateFilters={updateFilters}
+						filters={filters}
 					/>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-						<Autocomplete
-							id="filter-action"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={filtersLabel}
-							onChange={(_, option) => {
-								if (option)
-									updateFilters({
-										...filters,
-										filterAction: option.value as TypeAction
-									});
-							}}
-							inputValue={inputValue}
-							onInputChange={(event, newInputValue) => {
-								setInputValue(newInputValue);
-								updateFilters({
-									...filters,
-									filterAction: undefined
-								});
-							}}
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label htmlFor="filter-action" className="fr-label">
-										Filtrer par action
-									</label>
-									<input
-										{...params.inputProps}
-										className={params.inputProps.className + ' fr-input'}
-										placeholder="Toutes les actions"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
-					</div>
 				</div>
 				{isLoading || fullEvents?.data.length === 0 ? (
 					<div

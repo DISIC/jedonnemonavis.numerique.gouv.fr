@@ -1,9 +1,12 @@
-import { getDatesByShortCut } from '@/src/utils/tools';
+import { Filters, useFilters } from '@/src/contexts/FiltersContext';
+import { filtersLabel, getDatesByShortCut } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { Autocomplete } from '@mui/material';
+import { TypeAction } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -13,6 +16,8 @@ type FiltersProps = {
 	onChange: (startDate: string, endDate: string, buttonId?: number) => void;
 	currentStartDate: string;
 	currentEndDate: string;
+	updateFilters: (filters: Filters) => void;
+	filters: Filters;
 };
 
 type FormErrors = {
@@ -42,10 +47,12 @@ const dateShortcuts = [
 	}
 ];
 
-const Filters = ({
+const ActivityFilters = ({
 	onChange,
 	currentStartDate,
-	currentEndDate
+	currentEndDate,
+	updateFilters,
+	filters
 }: FiltersProps) => {
 	const { classes, cx } = useStyles();
 
@@ -56,9 +63,10 @@ const Filters = ({
 	const [shortcutDateSelected, setShortcutDateSelected] = useState<
 		(typeof dateShortcuts)[number]['name'] | undefined
 	>('one-year');
-
-	const router = useRouter();
-	const productId = router.query.id;
+	const [inputValue, setInputValue] = useState<string | undefined>(
+		filters.filterAction ? filters.filterAction : undefined
+	);
+	const [filterHasChanged, setFilterHasChanged] = useState(false);
 
 	useEffect(() => {
 		if (shortcutDateSelected) {
@@ -98,6 +106,13 @@ const Filters = ({
 
 		setErrors(newErrors);
 
+		if (inputValue) {
+			updateFilters({
+				...filters,
+				filterAction: inputValue as TypeAction
+			});
+		}
+
 		if (startDateValid && endDateValid) {
 			if (startDate !== currentStartDate || endDate !== currentEndDate) {
 				onChange(startDate, endDate, buttonId);
@@ -125,6 +140,7 @@ const Filters = ({
 									checked={shortcutDateSelected === ds.name}
 									onChange={() => {
 										setShortcutDateSelected(ds.name);
+										setFilterHasChanged(true);
 										push(['trackEvent', 'Logs', 'Filtre-Date']);
 									}}
 								/>
@@ -142,6 +158,7 @@ const Filters = ({
 									onKeyDown={e => {
 										if (e.key === 'Enter' || e.key === ' ') {
 											setShortcutDateSelected(ds.name);
+											setFilterHasChanged(true);
 											push(['trackEvent', 'Logs', 'Filtre-Date']);
 										}
 									}}
@@ -171,6 +188,7 @@ const Filters = ({
 								onChange: e => {
 									setShortcutDateSelected(undefined);
 									setStartDate(e.target.value);
+									setFilterHasChanged(true);
 								}
 							}}
 							state={errors.startDate ? 'error' : 'default'}
@@ -190,6 +208,7 @@ const Filters = ({
 								onChange: e => {
 									setShortcutDateSelected(undefined);
 									setEndDate(e.target.value);
+									setFilterHasChanged(true);
 								}
 							}}
 							state={errors.endDate ? 'error' : 'default'}
@@ -215,6 +234,60 @@ const Filters = ({
 					</div>
 				</form>
 			</div>
+			<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-4v')}>
+				<Autocomplete
+					id="filter-action"
+					disablePortal
+					sx={{ width: '100%' }}
+					options={filtersLabel}
+					onChange={(_, option) => {
+						if (option) {
+							setInputValue(option.value as TypeAction);
+							setFilterHasChanged(true);
+						}
+					}}
+					inputValue={inputValue}
+					renderInput={params => (
+						<div ref={params.InputProps.ref}>
+							<label htmlFor="filter-action" className="fr-label">
+								Filtrer par action
+							</label>
+							<input
+								{...params.inputProps}
+								className={params.inputProps.className + ' fr-input'}
+								placeholder="Toutes les actions"
+								type="search"
+							/>
+						</div>
+					)}
+				/>
+			</div>
+			{filterHasChanged ? (
+				<div
+					className={cx(
+						fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mt-8v'),
+						classes.filterActionContainer
+					)}
+				>
+					<Button
+						priority="tertiary no outline"
+						iconPosition="right"
+						iconId="ri-refresh-line"
+						onClick={() => {
+							setShortcutDateSelected('one-year');
+							setStartDate(currentStartDate);
+							setEndDate(currentEndDate);
+							setInputValue('');
+							setFilterHasChanged(false);
+						}}
+					>
+						Réinitialiser les filtres
+					</Button>
+					<Button priority="primary" onClick={submit}>
+						Appliquer les filtres
+					</Button>
+				</div>
+			) : null}
 		</div>
 	);
 };
@@ -271,7 +344,13 @@ const useStyles = tss.create({
 			paddingLeft: '0.4rem',
 			paddingRight: '0.4rem'
 		}
+	},
+	filterActionContainer: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		gap: '1rem',
+		height: '40px'
 	}
 });
 
-export default Filters;
+export default ActivityFilters;
