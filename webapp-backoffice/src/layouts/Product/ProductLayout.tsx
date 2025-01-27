@@ -100,12 +100,12 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: "Journal d'activité",
+			text: "Historique d'activité",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/logs`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/logs`,
-				alt: "Consulter le journal d'activité"
+				alt: "Consulter l'historique d'activité"
 			}
 		}
 	];

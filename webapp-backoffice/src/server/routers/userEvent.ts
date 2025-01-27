@@ -129,9 +129,6 @@ export const userEventRouter = router({
 				input;
 			const skip = (page - 1) * limit;
 
-			console.log('startDate : ', new Date(startDate || '').toISOString());
-			console.log('endDate : ', new Date(endDate || '').toISOString());
-
 			const whereCondition: Prisma.UserEventWhereInput = {
 				OR: [
 					{ product_id },

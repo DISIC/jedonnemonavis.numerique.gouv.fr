@@ -402,7 +402,7 @@ export const handleActionTypeDisplay = (
 	const metadataTyped = metadata as { json: { [key: string]: any } };
 	switch (action) {
 		case TypeAction.service_create:
-			return `Création du service ${productTitle}`;
+			return `Création du service <strong>${productTitle}</strong>`;
 		case TypeAction.service_update:
 			return `Modification sur le service`;
 		case TypeAction.service_archive:
@@ -410,21 +410,21 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} au service`;
+			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email}</strong> au service`;
 		case TypeAction.service_uninvite:
-			return `Retrait de l'accès à l'utilisateur ${metadataTyped.json.user_email} au service`;
+			return `Retrait de l'accès à l'utilisateur <strong>${metadataTyped.json.user_email}</strong> au service`;
 		case TypeAction.organisation_create:
-			return `Création de l'organisation ${metadataTyped.json.entity_name}`;
+			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.organisation_update:
 			return `Modification sur l'organisation du service`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur ${metadataTyped.json.user_email} à l'organisation`;
+			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email}</strong> à l'organisation`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait de l'utilisateur ${metadataTyped.json.user_email} de l'organisation ${metadataTyped.json.entity_name}`;
+			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.service_button_create:
-			return `Création du bouton ${metadataTyped.json.title} `;
+			return `Création du bouton <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
-			return `Modification du bouton ${metadataTyped.json.title} `;
+			return `Modification du bouton <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:

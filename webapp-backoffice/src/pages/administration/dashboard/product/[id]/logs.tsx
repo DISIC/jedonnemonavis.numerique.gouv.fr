@@ -81,7 +81,16 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				year: 'numeric'
 			}).format(event.created_at),
 			event.created_at.toLocaleTimeString(),
-			handleActionTypeDisplay(event.action, event.metadata, product.title)
+			<p
+				dangerouslySetInnerHTML={{
+					__html:
+						handleActionTypeDisplay(
+							event.action,
+							event.metadata,
+							product.title
+						) || ''
+				}}
+			/>
 		]) || [];
 
 	return (
@@ -159,7 +168,28 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					</div>
 				) : (
 					<>
-						<Table data={tableData} headers={headers} fixed />
+						<div className={fr.cx('fr-col-8', 'fr-pt-2w')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Activités de{' '}
+								<span className={cx(classes.boldText)}>
+									{10 * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{10 * (currentPage - 1) + fullEvents.data.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{fullEvents.pagination.total}
+								</span>
+							</span>
+						</div>
+						<Table
+							data={tableData}
+							headers={headers}
+							bordered
+							className={classes.table}
+						/>
 						{nbPages > 1 && (
 							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 								<Pagination
@@ -207,6 +237,32 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 		gap: '0.5rem',
 		border: '1px solid #e0e0e0',
 		padding: '1rem'
+	},
+	boldText: {
+		fontWeight: 'bold'
+	},
+	table: {
+		width: '100%',
+		'& .fr-table table': {
+			border: '1px solid #929292 !important',
+			width: '100%'
+		},
+		'& table tbody tr': {
+			width: '100%',
+			backgroundColor: '#ffffff !important',
+			td: {
+				width: '100%',
+				'&:nth-of-type(1)': {
+					width: '10%'
+				},
+				'&:nth-of-type(2)': {
+					width: '10%'
+				},
+				'&:nth-of-type(3)': {
+					width: '80%'
+				}
+			}
+		}
 	}
 });
 
