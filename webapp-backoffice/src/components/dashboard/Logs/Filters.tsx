@@ -67,6 +67,7 @@ const ActivityFilters = ({
 		filters.filterAction ? filters.filterAction : undefined
 	);
 	const [filterHasChanged, setFilterHasChanged] = useState(false);
+	const [filtersApplied, setFiltersApplied] = useState(false);
 
 	useEffect(() => {
 		if (shortcutDateSelected) {
@@ -118,6 +119,8 @@ const ActivityFilters = ({
 				onChange(startDate, endDate, buttonId);
 			}
 		}
+
+		setFiltersApplied(true);
 	};
 
 	return (
@@ -247,6 +250,17 @@ const ActivityFilters = ({
 						}
 					}}
 					inputValue={inputValue}
+					value={
+						inputValue
+							? {
+									label: filtersLabel.find(f => f.value === inputValue)?.label,
+									value: inputValue
+								}
+							: undefined
+					}
+					onInputChange={(_, newInputValue) => {
+						setInputValue(newInputValue);
+					}}
 					renderInput={params => (
 						<div ref={params.InputProps.ref}>
 							<label htmlFor="filter-action" className="fr-label">
@@ -277,14 +291,18 @@ const ActivityFilters = ({
 							setShortcutDateSelected('one-year');
 							setStartDate(currentStartDate);
 							setEndDate(currentEndDate);
-							setInputValue('');
-							setFilterHasChanged(false);
+							setInputValue(undefined);
+							updateFilters({
+								...filters,
+								filterAction: undefined
+							});
+							setFiltersApplied(false);
 						}}
 					>
 						Réinitialiser les filtres
 					</Button>
-					<Button priority="primary" onClick={submit}>
-						Appliquer les filtres
+					<Button priority="primary" disabled={filtersApplied} onClick={submit}>
+						{filtersApplied ? 'Filtres appliqués' : 'Appliquer les filtres'}
 					</Button>
 				</div>
 			) : null}

@@ -172,6 +172,8 @@ export const userEventRouter = router({
 				ctx.prisma.userEvent.count({ where: whereCondition })
 			]);
 
+			console.log(events);
+
 			return {
 				data: events,
 				pagination: {
