@@ -412,7 +412,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_invite:
 			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service en tant que <strong>${metadataTyped.json.status === 'carrier_admin' ? 'administrateur' : 'utilisateur'}</strong>`;
 		case TypeAction.service_uninvite:
-			return `Retrait de <strong>${metadataTyped.json.status === 'carrier_admin' ? "l'accès administrateur" : "l'accès utilisateur"}</strong> à l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service`;
+			return `Suppression des droits <strong>${metadataTyped.json.status === 'carrier_admin' ? "d'administrateur" : 'utilisateur'}</strong> pour <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> sur le service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.organisation_update:

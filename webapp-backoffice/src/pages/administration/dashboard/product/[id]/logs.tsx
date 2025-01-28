@@ -64,7 +64,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
 
-	const headers = ['Date', 'Horaire', 'Activité'];
+	const headers = ['Date', 'Horaire', 'Utilisateur', 'Activité'];
 
 	const tableData =
 		fullEvents?.data.map(event => [
@@ -73,7 +73,11 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				month: '2-digit',
 				year: 'numeric'
 			}).format(event.created_at),
-			event.created_at.toLocaleTimeString(),
+			event.created_at.toLocaleTimeString('fr-FR', {
+				hour: '2-digit',
+				minute: '2-digit'
+			}),
+			event.user.email,
 			<p
 				dangerouslySetInnerHTML={{
 					__html:
@@ -212,13 +216,16 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 			td: {
 				width: '100%',
 				'&:nth-of-type(1)': {
-					width: '10%'
+					width: '5%'
 				},
 				'&:nth-of-type(2)': {
-					width: '10%'
+					width: '5%'
 				},
 				'&:nth-of-type(3)': {
-					width: '80%'
+					width: '15%'
+				},
+				'&:nth-of-type(4)': {
+					width: '75%'
 				}
 			}
 		}
