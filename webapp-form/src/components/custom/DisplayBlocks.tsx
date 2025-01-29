@@ -15,7 +15,7 @@ type Props = {
   logicBlocks: BlockPartialWithRelations[];
   onInput: (
     block_id: number,
-    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
 };
 
@@ -27,14 +27,14 @@ export const DisplayBlocks = (props: Props) => {
     "show",
     block?.id ?? null,
     logicBlocks,
-    review ?? {}
+    review ?? {},
   );
 
   const disable = applyLogicForm(
     "disable",
     block?.id ?? null,
     logicBlocks,
-    review ?? {}
+    review ?? {},
   );
 
   const router = useRouter();
@@ -185,7 +185,7 @@ export const DisplayBlocks = (props: Props) => {
       className={cx(
         fr.cx("fr-grid-row"),
         classes.blockContainer,
-        show && classes.notShow
+        show && classes.notShow,
       )}
     >
       <div className={fr.cx("fr-col-12")}>{displayBlock(block)}</div>

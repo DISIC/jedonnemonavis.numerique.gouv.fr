@@ -83,7 +83,7 @@ const useStyles = tss
       position: "relative",
       display: "flex",
       alignItems: "center",
-      marginTop: fr.spacing("4v"),
+      marginTop: fr.spacing("10v"),
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
       },
@@ -93,6 +93,9 @@ const useStyles = tss
       },
       [fr.breakpoints.down("md")]: {
         flexDirection: "column",
+      },
+      [fr.breakpoints.up("md")]: {
+        marginTop: fr.spacing("6v"),
       },
     },
     radioInput: {
@@ -139,8 +142,12 @@ const useStyles = tss
       },
       legend: {
         position: "absolute",
-        left: 0,
-        bottom: "35px",
+        top: "-55px",
+        [fr.breakpoints.up("md")]: {
+          left: 0,
+          top: "unset",
+          bottom: "45px",
+        },
       },
     },
   }));

@@ -43,7 +43,7 @@ export const SmileyInput = (props: Props) => {
   const { t } = useTranslation();
 
   const [smileySelected, setSmileySelected] = useState<Feeling | undefined>(
-    value ? smileys[value - 1].value : undefined
+    value ? smileys[value - 1].value : undefined,
   );
 
   useEffect(() => {
