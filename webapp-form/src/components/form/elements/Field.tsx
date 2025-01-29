@@ -36,7 +36,7 @@ export const Field = (props: Props) => {
   const getChildrenResetObject = () => {
     const children = form.filter(
       (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name),
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
     );
 
     let opinionPropsObj: {
@@ -56,7 +56,7 @@ export const Field = (props: Props) => {
     key: CheckboxOpinionKeys,
     isolated: boolean,
     e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[],
+    options: CheckboxOption[]
   ) => {
     if (isolated) {
       setOpinion({
@@ -73,7 +73,7 @@ export const Field = (props: Props) => {
         [key]: e.target.checked
           ? [
               ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling),
+                (sibling) => !isolatedSiblings.includes(sibling)
               ),
               parseInt(e.target.value),
             ]
@@ -170,22 +170,22 @@ export const Field = (props: Props) => {
             hintText={field.hint ? t(field.hint) : undefined}
             label={<h3>{t(field.label)}</h3>}
             state={
-              (opinion[field.name] || "").length > 250 ? "error" : "default"
+              (opinion[field.name] || "").length > 15000 ? "error" : "default"
             }
             stateRelatedMessage="Maximum 250 caractères"
             nativeTextAreaProps={{
-              value: opinion[field.name]?.slice(0, 250),
+              value: opinion[field.name]?.slice(0, 15000),
               onChange: (e) => {
                 setOpinion({
                   ...opinion,
-                  [field.name]: e.target.value.slice(0, 250),
+                  [field.name]: e.target.value.slice(0, 15000),
                 });
               },
             }}
             textArea
           />
           <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
-            {opinion[field.name]?.length || 0} / 250
+            {opinion[field.name]?.length || 0} / 15000
           </div>
         </div>
       );
