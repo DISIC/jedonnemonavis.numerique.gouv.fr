@@ -4,6 +4,7 @@ import {
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Tooltip } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -26,6 +27,7 @@ type Props = {
 	reverseData?: boolean;
 	singleRowLabel?: string;
 	displayTotal?: 'classic' | 'percentage';
+	tooltip?: string;
 };
 
 const orderData = (
@@ -93,7 +95,8 @@ const ChartWrapper = ({
 	sortOrder,
 	reverseData,
 	singleRowLabel,
-	displayTotal
+	displayTotal,
+	tooltip
 }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
@@ -249,7 +252,20 @@ const ChartWrapper = ({
 		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
 			<div className={classes.header}>
 				<div className={classes.container}>
-					<h3 className={fr.cx('fr-mb-0')}>{title}</h3>
+					<label className={cx(classes.label)}>
+						<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
+						{tooltip && (
+							<Tooltip placement="top" title={tooltip} tabIndex={0}>
+								<span
+									className={fr.cx(
+										'fr-icon-information-line',
+										'fr-icon--md',
+										'fr-ml-1v'
+									)}
+								/>
+							</Tooltip>
+						)}
+					</label>
 					{totalFormatted && (
 						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
 					)}
@@ -315,6 +331,16 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 	tableContainer: {
 		overflowX: 'auto',
 		width: '100%'
+	},
+	label: {
+		display: 'flex',
+		alignItems: 'center',
+		fontWeight: 'bold',
+		marginBottom: '0.5rem',
+		height: '3rem',
+		h5: {
+			margin: 0
+		}
 	},
 	table: {
 		textAlign: 'center',
