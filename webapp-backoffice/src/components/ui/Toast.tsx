@@ -32,7 +32,11 @@ export const Toast = ({
 					padding: 0
 				}
 			}}
-			message={<Alert severity={severity} description={message} small />}
+			message={
+				<div role="status">
+					<Alert severity={severity} description={message} small />
+				</div>
+			}
 		/>
 	);
 };

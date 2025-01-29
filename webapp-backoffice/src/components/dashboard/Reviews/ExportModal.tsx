@@ -95,13 +95,15 @@ const ExportModal = (props: Props) => {
 		if (!hasExportsInProgress) {
 			return (
 				<>
-					<Alert
-						description="
+					<div role="status">
+						<Alert
+							description="
 					Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à une heure."
-						severity="info"
-						small
-						className={fr.cx('fr-mt-10v')}
-					/>
+							severity="info"
+							small
+							className={fr.cx('fr-mt-10v')}
+						/>
+					</div>
 					<RadioButtons
 						legend="Que souhaitez-vous télécharger ?"
 						name="choice"

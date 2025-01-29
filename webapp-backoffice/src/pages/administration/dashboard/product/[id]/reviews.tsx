@@ -476,6 +476,12 @@ const ProductReviewsPage = (props: Props) => {
 												]);
 											}}
 										>
+											{displayMode === 'reviews' && (
+												<span
+													className="ri-chat-poll-line fr-mr-1v fr-icon--sm"
+													aria-hidden="true"
+												></span>
+											)}
 											Avis
 										</Button>
 										<Button
@@ -497,6 +503,12 @@ const ProductReviewsPage = (props: Props) => {
 												]);
 											}}
 										>
+											{displayMode === 'verbatim' && (
+												<span
+													className="ri-chat-3-line fr-mr-1v fr-icon--sm"
+													aria-hidden="true"
+												></span>
+											)}
 											Verbatims
 										</Button>
 									</div>
@@ -531,7 +543,7 @@ const ProductReviewsPage = (props: Props) => {
 									state={errors.startDate ? 'error' : 'default'}
 									stateRelatedMessage={
 										errors.startDate ? (
-											<span role="alert">format attendu : JJ/MM/AAAA</span>
+											<span role="status">format attendu : JJ/MM/AAAA</span>
 										) : null
 									}
 								/>
@@ -556,7 +568,7 @@ const ProductReviewsPage = (props: Props) => {
 									state={errors.endDate ? 'error' : 'default'}
 									stateRelatedMessage={
 										errors.endDate ? (
-											<span role="alert">format attendu : JJ/MM/AAAA</span>
+											<span role="status">format attendu : JJ/MM/AAAA</span>
 										) : null
 									}
 								/>

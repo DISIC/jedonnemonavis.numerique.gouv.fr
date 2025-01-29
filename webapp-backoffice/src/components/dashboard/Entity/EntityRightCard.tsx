@@ -56,18 +56,18 @@ const EntityRightCard = (props: Props) => {
 							withOptions ? 'fr-col-md-2' : 'fr-col-md-4'
 						)}
 					>
-						<span className={fr.cx('fr-text--bold')}>
+						<p className={fr.cx('fr-text--bold', 'fr-mb-0')}>
 							{adminEntityRight.user
 								? `${adminEntityRight.user?.firstName} ${adminEntityRight.user?.lastName}`
 								: '-'}
-						</span>
+						</p>
 					</div>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
-						<span className={cx(classes.userEmail)}>
+						<p className={cx(classes.userEmail)}>
 							{adminEntityRight?.user_email
 								? adminEntityRight?.user_email
 								: adminEntityRight?.user_email_invite}
-						</span>
+						</p>
 					</div>
 					<div
 						className={cx(
@@ -176,7 +176,8 @@ const useStyles = tss
 				fr.colors.decisions.background.actionLow.blueFrance.default
 		},
 		userEmail: {
-			wordWrap: 'break-word'
+			wordWrap: 'break-word',
+			marginBottom: '0'
 		},
 		actionBtn: {
 			display: 'flex',

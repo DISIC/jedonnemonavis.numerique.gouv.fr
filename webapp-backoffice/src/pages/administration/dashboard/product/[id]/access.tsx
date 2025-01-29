@@ -187,16 +187,18 @@ const AccessManagement = (props: Props) => {
 		<>
 			<div className={cx(fr.cx('fr-container'), classes.alertContainer)}>
 				{isModalSubmitted && (
-					<Alert
-						closable
-						onClose={function noRefCheck() {
-							setIsModalSubmitted(false);
-						}}
-						severity={'success'}
-						className={fr.cx('fr-mb-5w')}
-						small
-						description={getAlertTitle()}
-					/>
+					<div role="status">
+						<Alert
+							closable
+							onClose={function noRefCheck() {
+								setIsModalSubmitted(false);
+							}}
+							severity={'success'}
+							className={fr.cx('fr-mb-5w')}
+							small
+							description={getAlertTitle()}
+						/>
+					</div>
 				)}
 			</div>
 

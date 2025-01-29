@@ -410,7 +410,12 @@ const ProductCard = ({
 						)}
 					>
 						{(product.isTop250 || isDisabled) && (
-							<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
+							<div
+								className={cx(
+									fr.cx('fr-col', 'fr-col-10', 'fr-pb-0'),
+									classes.badgesSection
+								)}
+							>
 								<div className={classes.badgesContainer}>
 									{product.isTop250 && (
 										<Badge severity="info" noIcon small>
@@ -426,14 +431,26 @@ const ProductCard = ({
 							</div>
 						)}
 
-						<div className={fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6')}>
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6'),
+								classes.titleSection
+							)}
+						>
 							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
+
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+								classes.entitySection
+							)}
+						>
 							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
 								{entity?.name}
 							</p>
 						</div>
+
 						{isDisabled ? (
 							<div
 								className={cx(
@@ -551,7 +568,12 @@ const ProductCard = ({
 										</Button>
 									)}
 								</div>
-								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+								<div
+									className={cx(
+										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
+										classes.statsSection
+									)}
+								>
 									{isLoadingStatsObservatoire ||
 									isRefetchingStatsObservatoire ? (
 										<Skeleton
@@ -714,20 +736,27 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
-			'div:nth-child(3)': {
+			'.rightButtonsWrapper': {
+				order: 0
+			},
+			'.titleSection': {
 				order: 1
 			},
-			'div:nth-child(1)': {
+			'.entitySection': {
 				order: 2
 			},
-			'div:nth-child(2)': {
+			'.badgesSection': {
 				order: 3
 			},
-			'div:nth-child(4)': {
+			'.statsSection': {
 				order: 4
 			}
 		}
 	},
+	titleSection: {},
+	entitySection: {},
+	badgesSection: {},
+	statsSection: {},
 	rightButtonsWrapper: {
 		display: 'flex',
 		justifyContent: 'end'

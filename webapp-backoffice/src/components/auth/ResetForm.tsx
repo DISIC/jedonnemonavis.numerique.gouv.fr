@@ -154,7 +154,7 @@ export const ResetForm = () => {
 							messages={getPasswordMessages()}
 							messagesHint={
 								errors.password.required
-									? ''
+									? 'Tous les champs sont obligatoires'
 									: 'Votre mot de passe doit contenir au moins :'
 							}
 						/>
@@ -201,7 +201,7 @@ export const ResetForm = () => {
 			)}
 			{successChange && !loadingCheck && (
 				<>
-					<div role="alert">
+					<div role="status">
 						{successChange === 'Ok' ? (
 							<Alert
 								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."

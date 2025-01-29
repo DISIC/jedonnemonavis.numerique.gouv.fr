@@ -77,7 +77,7 @@ const useStyles = tss
     smallText: {
       fontSize: "0.8rem",
       margin: "0 0 10px 0",
-      color: fr.colors.decisions.text.disabled.grey.default,
+      color: fr.colors.decisions.text.mention.grey.default,
     },
     radioContainer: {
       position: "relative",

@@ -66,15 +66,17 @@ export const FormFirstBlock = (props: Props) => {
           </div>
         ))}
         {isRateLimitReached && (
-          <Alert
-            closable
-            onClose={function noRefCheck() {
-              setIsRateLimitReached(false);
-            }}
-            severity="error"
-            title=""
-            description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
-          />
+          <div role="status">
+            <Alert
+              closable
+              onClose={function noRefCheck() {
+                setIsRateLimitReached(false);
+              }}
+              severity="error"
+              title=""
+              description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
+            />
+          </div>
         )}
         <div className={fr.cx("fr-mt-16v")}>
           {isLoading ? (

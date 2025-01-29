@@ -360,7 +360,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							Aidez-nous à améliorer cet outil ! Faites-nous part de vos retours
 							en remplissant{' '}
 							<a
-								title="Le formulaire s'ouvre dans une nouvelle fenêtre"
+								title="Formulaire de retour (nouvelle fenêtre)"
 								href="https://tally.so/r/m6kyyB"
 								target="_blank"
 							>

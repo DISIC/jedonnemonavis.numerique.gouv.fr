@@ -194,33 +194,37 @@ const EntityRightsModal = (props: Props) => {
 	const displayRightsTable = () => {
 		if (!adminEntityRights.length && !session?.user.role.includes('admin')) {
 			return (
-				<Alert
-					className={fr.cx('fr-mb-16v')}
-					description={
-						<>
-							Pour devenir administrateur, envoyer un email à [adresse email de
-							contact].
-						</>
-					}
-					severity="info"
-					title=""
-				/>
+				<div role="status">
+					<Alert
+						className={fr.cx('fr-mb-16v')}
+						description={
+							<>
+								Pour devenir administrateur, envoyer un email à [adresse email
+								de contact].
+							</>
+						}
+						severity="info"
+						title=""
+					/>
+				</div>
 			);
 		}
 
 		return (
 			<>
 				{actionType && (
-					<Alert
-						closable
-						onClose={function noRefCheck() {
-							setActionType(null);
-						}}
-						severity={'success'}
-						className={fr.cx('fr-mb-2w')}
-						small
-						description={getAlertTitle()}
-					/>
+					<div role="status">
+						<Alert
+							closable
+							onClose={function noRefCheck() {
+								setActionType(null);
+							}}
+							severity={'success'}
+							className={fr.cx('fr-mb-2w')}
+							small
+							description={getAlertTitle()}
+						/>
+					</div>
 				)}
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}

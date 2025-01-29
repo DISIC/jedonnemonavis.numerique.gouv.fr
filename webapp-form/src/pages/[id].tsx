@@ -376,7 +376,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             >
               <Image
                 className={classes.logo}
-                alt="Service public +"
+                alt=""
                 src="/Demarches/assets/services-plus.svg"
                 title="Service public + logo"
                 width={830}
