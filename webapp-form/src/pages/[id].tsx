@@ -285,6 +285,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const queryParams = new URLSearchParams(url.split("?")[1]);
       const step = parseInt(queryParams.get("step") as string) || 0;
       setCurrentStep(step);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     };
     router.events.on("routeChangeStart", handleRouteChange);
     return () => {
