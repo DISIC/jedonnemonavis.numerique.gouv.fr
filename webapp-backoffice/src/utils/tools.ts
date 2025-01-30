@@ -410,9 +410,9 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service en tant que <strong>${metadataTyped.json.status === 'carrier_admin' ? 'administrateur' : 'utilisateur'}</strong>`;
+			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service en tant que <strong>${metadataTyped.json.status === 'carrier_admin' ? "qu'utilisateur" : "qu'administrateur"}</strong>`;
 		case TypeAction.service_uninvite:
-			return `Suppression des droits <strong>${metadataTyped.json.status === 'carrier_admin' ? "d'administrateur" : 'utilisateur'}</strong> pour <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> sur le service`;
+			return `Suppression des droits <strong>${metadataTyped.json.status === 'carrier_admin' ? "d'utilisateur" : "d'administrateur"}</strong> pour <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> sur le service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.organisation_update:
