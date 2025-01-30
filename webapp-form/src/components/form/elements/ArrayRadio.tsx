@@ -43,7 +43,7 @@ export const ArrayRadio = (props: Props) => {
       <>
         {containsPattern(
           opinion.contact_reached,
-          new RegExp(escapeRegex("".toString()) + "_17"),
+          new RegExp(escapeRegex("".toString()) + "_17")
         ) ? (
           <>
             <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
@@ -86,8 +86,8 @@ export const ArrayRadio = (props: Props) => {
                               {containsPattern(
                                 opinion.contact_reached,
                                 new RegExp(
-                                  escapeRegex(option.value.toString()) + "_17",
-                                ),
+                                  escapeRegex(option.value.toString()) + "_17"
+                                )
                               ) && (
                                 <>
                                   <td>
@@ -100,51 +100,46 @@ export const ArrayRadio = (props: Props) => {
                                     colSpan={6}
                                   >
                                     <div className={cx(classes.containerRadio)}>
-                                      <fieldset
-                                        id={`fieldset-${option.label}-${index}`}
-                                      >
-                                        <legend>{t(field.label)}</legend>
-                                        <RadioButtons
-                                          name={`radio-${index}`}
-                                          options={field.options.map(
-                                            (opt, index) => ({
-                                              label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
-                                              nativeInputProps: {
-                                                value: `value${index}`,
-                                                checked:
-                                                  opinion.contact_satisfaction.includes(
+                                      <RadioButtons
+                                        name={`radio-${index}`}
+                                        options={field.options.map(
+                                          (opt, index) => ({
+                                            label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
+                                            nativeInputProps: {
+                                              value: `value${index}`,
+                                              checked:
+                                                opinion.contact_satisfaction.includes(
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  ) +
+                                                    "_" +
+                                                    opt.value
+                                                ),
+                                              onChange: (event) => {
+                                                setOpinion({
+                                                  ...opinion,
+                                                  contact_satisfaction: [
+                                                    ...opinion.contact_satisfaction.filter(
+                                                      (cs) =>
+                                                        !cs.includes(
+                                                          escapeRegex(
+                                                            option.value.toString()
+                                                          )
+                                                        )
+                                                    ),
                                                     escapeRegex(
-                                                      option.value.toString(),
+                                                      option.value.toString()
                                                     ) +
                                                       "_" +
-                                                      opt.value
-                                                  ),
-                                                onChange: (event) => {
-                                                  setOpinion({
-                                                    ...opinion,
-                                                    contact_satisfaction: [
-                                                      ...opinion.contact_satisfaction.filter(
-                                                        (cs) =>
-                                                          !cs.includes(
-                                                            escapeRegex(
-                                                              option.value.toString()
-                                                            )
-                                                          )
-                                                      ),
-                                                      escapeRegex(
-                                                        option.value.toString()
-                                                      ) +
-                                                        "_" +
-                                                        opt.value,
-                                                    ],
-                                                  });
-                                                },
+                                                      opt.value,
+                                                  ],
+                                                });
                                               },
-                                            })
-                                          )}
-                                          orientation="horizontal"
-                                        />
-                                      </fieldset>
+                                            },
+                                          })
+                                        )}
+                                        orientation="horizontal"
+                                      />
                                     </div>
                                   </td>
                                 </>
@@ -152,7 +147,7 @@ export const ArrayRadio = (props: Props) => {
                             </>
                           )}
                         </tr>
-                      ),
+                      )
                     )}
                 </tbody>
               </table>
@@ -169,8 +164,8 @@ export const ArrayRadio = (props: Props) => {
                           containsPattern(
                             opinion.contact_reached,
                             new RegExp(
-                              escapeRegex(option.value.toString()) + "_17",
-                            ),
+                              escapeRegex(option.value.toString()) + "_17"
+                            )
                           ) && (
                             <>
                               <div className={cx(classes.labelWrapper)}>
@@ -192,7 +187,7 @@ export const ArrayRadio = (props: Props) => {
                                       checked={opinion.contact_satisfaction.includes(
                                         escapeRegex(option.value.toString()) +
                                           "_" +
-                                          opt.value,
+                                          opt.value
                                       )}
                                       onChange={(event) => {
                                         setOpinion({
@@ -202,12 +197,12 @@ export const ArrayRadio = (props: Props) => {
                                               (cs) =>
                                                 !cs.includes(
                                                   escapeRegex(
-                                                    option.value.toString(),
-                                                  ),
-                                                ),
+                                                    option.value.toString()
+                                                  )
+                                                )
                                             ),
                                             escapeRegex(
-                                              option.value.toString(),
+                                              option.value.toString()
                                             ) +
                                               "_" +
                                               opt.value,
@@ -227,7 +222,7 @@ export const ArrayRadio = (props: Props) => {
                             </>
                           )}
                       </div>
-                    ),
+                    )
                   )}
               </div>
             </div>

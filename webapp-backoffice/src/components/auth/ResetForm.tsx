@@ -201,7 +201,7 @@ export const ResetForm = () => {
 			)}
 			{successChange && !loadingCheck && (
 				<>
-					<div role="status">
+					<div role="alert">
 						{successChange === 'Ok' ? (
 							<Alert
 								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
