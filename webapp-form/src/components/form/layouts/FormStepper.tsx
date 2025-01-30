@@ -53,6 +53,7 @@ export const FormStepper = (props: Props) => {
           const isLastStep = currentStep + 1 === steps.length;
           if (!isLastStep) {
             setCurrentStep(currentStep + 1);
+            window.scrollTo({ top: 0, behavior: "smooth" });
           }
           e.preventDefault();
           onSubmit(tmpOpinion, isLastStep);

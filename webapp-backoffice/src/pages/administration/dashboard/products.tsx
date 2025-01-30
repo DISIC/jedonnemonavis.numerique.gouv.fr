@@ -475,7 +475,7 @@ const DashBoard = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+							<div role="status" className={fr.cx('fr-ml-0')}>
 								Services de{' '}
 								<span className={cx(classes.boldText)}>
 									{numberPerPage * (filters.currentPage - 1) + 1}
@@ -488,7 +488,7 @@ const DashBoard = () => {
 								<span className={cx(classes.boldText)}>
 									{productsResult.metadata.count}
 								</span>
-							</span>
+							</div>
 						</div>
 						<div
 							className={cx(
@@ -502,7 +502,7 @@ const DashBoard = () => {
 							) : (
 								<ul className={classes.buttonList}>
 									{products.map((product, index) => (
-										<li key={index}>
+										<li key={index} role="list">
 											<ProductCard
 												product={product}
 												userId={parseInt(session?.user?.id as string)}

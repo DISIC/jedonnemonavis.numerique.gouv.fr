@@ -82,11 +82,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const getSelectedOption = (
     field: FormField,
-    value: number | string,
+    value: number | string
   ): { label: string; intention: AnswerIntention; value: number } => {
     if (field.kind === "radio" || field.kind == "checkbox") {
       const selectedOption = field.options.find(
-        (option) => option.value === value,
+        (option) => option.value === value
       ) as RadioOption;
 
       return {
@@ -119,7 +119,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   };
 
   const formatAnswers = (
-    opinion: Partial<Opinion>,
+    opinion: Partial<Opinion>
   ): Prisma.AnswerCreateInput[] => {
     return Object.entries(opinion).reduce((accumulator, [key, value]) => {
       if (["contact_reached", "contact_satisfaction"].includes(key)) {
@@ -128,11 +128,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             const [parent_id, child_id] = ids.toString().split("_");
 
             const parentFieldInSection = allFields.find(
-              (field) => field.name === "contact_tried",
+              (field) => field.name === "contact_tried"
             ) as FormField;
 
             const childFieldInSection = allFields.find(
-              (field) => field.name === key,
+              (field) => field.name === key
             ) as FormField;
 
             if (
@@ -140,10 +140,10 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               "options" in childFieldInSection
             ) {
               const parentOption = parentFieldInSection.options.find(
-                (o) => o.value === parseInt(parent_id),
+                (o) => o.value === parseInt(parent_id)
               );
               const childOption = childFieldInSection.options.find(
-                (o) => o.value === parseInt(child_id),
+                (o) => o.value === parseInt(child_id)
               );
 
               if (parentOption && childOption) {
@@ -185,7 +185,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         }
       } else {
         const fieldInSection = allFields.find(
-          (field) => field.name === key,
+          (field) => field.name === key
         ) as FormField;
 
         let tmpAnswer = {
@@ -262,7 +262,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   const handleInsertOrUpdateReview = async (
     opinion: Partial<Opinion>,
-    currentStepName: FormStepNames,
+    currentStepName: FormStepNames
   ) => {
     const answers = formatAnswers(opinion);
 
@@ -304,7 +304,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           query: { ...router.query, step: currentStep },
         },
         undefined,
-        { shallow: true },
+        { shallow: true }
       );
     }
   }, [currentStep]);
@@ -332,7 +332,11 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               width={40}
               height={40}
             />
-            <h1 className={fr.cx("fr-mb-0", "fr-ml-5v")}>
+            <h1
+              role="status"
+              aria-live="polite"
+              className={fr.cx("fr-mb-0", "fr-ml-5v")}
+            >
               {t("success_block.title")}
             </h1>
           </div>
@@ -371,7 +375,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
             <div
               className={cx(
                 classes.logoContainer,
-                fr.cx("fr-col-md-4", "fr-mt-4v"),
+                fr.cx("fr-col-md-4", "fr-mt-4v")
               )}
             >
               <Image
@@ -407,18 +411,20 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                     acc[name] = result[name];
                     return acc;
                   },
-                  {} as any,
+                  {} as any
                 );
 
                 handleInsertOrUpdateReview(
                   currentStepValues,
-                  currentStepAnswerNames[0].split("_")[0] as FormStepNames,
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
                 );
 
                 if (isLastStep) {
                   localStorage.removeItem("userId");
                   setIsFormSubmitted(true);
                 }
+
+                console.log("change step");
               }}
             />
           ) : (
@@ -463,7 +469,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div
           className={cx(
             classes.mainContainer,
-            fr.cx("fr-container--fluid", "fr-container"),
+            fr.cx("fr-container--fluid", "fr-container")
           )}
         >
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
@@ -528,7 +534,7 @@ export const getServerSideProps: GetServerSideProps<{
       };
 
     const sameName = product.buttons.find(
-      (b) => b.xwiki_title === xwikiButtonName,
+      (b) => b.xwiki_title === xwikiButtonName
     );
     const nameButton = product.buttons.find((b) => b.xwiki_title === "button");
 

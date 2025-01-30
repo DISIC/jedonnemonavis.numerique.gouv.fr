@@ -30,7 +30,7 @@ export const CustomFormLayout = (props: Props) => {
   const { classes, cx } = useStyles();
 
   const divideArray = (
-    blocks: BlockPartialWithRelations[],
+    blocks: BlockPartialWithRelations[]
   ): BlockPartialWithRelations[][] => {
     return blocks.reduce<BlockPartialWithRelations[][]>(
       (acc, objet) => {
@@ -42,7 +42,7 @@ export const CustomFormLayout = (props: Props) => {
         }
         return acc;
       },
-      [[]],
+      [[]]
     );
   };
 
@@ -52,12 +52,12 @@ export const CustomFormLayout = (props: Props) => {
 
   const handleChange = (
     block_id: number,
-    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLSelectElement | HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const updatedAnswerCustom = review?.answers?.map((answer) =>
       answer.block_id === block_id
         ? { ...answer, content: e.target.value }
-        : answer,
+        : answer
     );
     setReview((prev) => {
       if (prev) {
@@ -78,7 +78,7 @@ export const CustomFormLayout = (props: Props) => {
   });
 
   const handleSaveReview = async (
-    tmpReview: ReviewCustomWithPartialRelations,
+    tmpReview: ReviewCustomWithPartialRelations
   ) => {
     try {
       const { form_id, created_at, updated_at } = tmpReview;
@@ -102,7 +102,7 @@ export const CustomFormLayout = (props: Props) => {
 
   const renderActionRow = (currentStep: number) => {
     const newPageBlock = steps[currentStep].find(
-      (block) => block.type_bloc === "new_page",
+      (block) => block.type_bloc === "new_page"
     );
 
     return (
@@ -114,8 +114,8 @@ export const CustomFormLayout = (props: Props) => {
             "show",
             newPageBlock?.id ?? null,
             logicBlocks,
-            review ?? {},
-          ) && "fr-hidden",
+            review ?? {}
+          ) && "fr-hidden"
         )}
       >
         <div className={fr.cx("fr-col-6")}></div>
@@ -128,7 +128,7 @@ export const CustomFormLayout = (props: Props) => {
               "disable",
               newPageBlock?.id ?? null,
               logicBlocks,
-              review ?? {},
+              review ?? {}
             )}
           >
             {newPageBlock ? newPageBlock.content : "Envoyer"}
@@ -160,6 +160,7 @@ export const CustomFormLayout = (props: Props) => {
                 nativeButtonProps={{
                   onClick: () => {
                     setCurrentStep(currentStep - 1);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   },
                 }}
               >
@@ -188,7 +189,7 @@ export const CustomFormLayout = (props: Props) => {
                 .filter(
                   (block) =>
                     block.type_bloc !== "new_page" &&
-                    block.type_bloc !== "logic",
+                    block.type_bloc !== "logic"
                 )
                 .map((block) => (
                   <div key={block.id}>
