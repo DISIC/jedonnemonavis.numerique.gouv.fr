@@ -474,9 +474,16 @@ const DashBoard = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							<div role="status" className={fr.cx('fr-ml-0')}>
-								Services de{' '}
+						<div className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--right'
+							)}>
+							<div
+								role="status"
+								className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-ml-0')}
+							>
+								Avis de{' '}
 								<span className={cx(classes.boldText)}>
 									{numberPerPage * (filters.currentPage - 1) + 1}
 								</span>{' '}

@@ -13,13 +13,13 @@
   },
   "success_block": {
     "title": "Merci beaucoup !",
-    "thanks": "Votre avis nous permettra d’améliorer la qualité du service. ",
+    "thanks": "Merci. Votre avis nous permettra d’améliorer la qualité du service. ",
     "question": "Des questions pour le service ",
     "support": "Contactez le support.",
     "further": "Vous souhaitez aller plus loin ?",
     "share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
     "link": "Partager mon expérience publiquement",
-    "alert": "Votre avis a bien été transmis au service qui s'occupe de cette démarche."
+    "alert": "Merci. Votre avis a bien été transmis au service qui s'occupe de cette démarche."
   },
   "smileys": {
     "good": "Très bien",

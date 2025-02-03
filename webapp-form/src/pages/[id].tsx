@@ -334,8 +334,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               height={40}
             />
             <h1
-              role="status"
-              aria-live="polite"
               className={fr.cx("fr-mb-0", "fr-ml-5v")}
             >
               {t("success_block.title")}
@@ -456,9 +454,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           {!isFormSubmitted ? (
             opinion.satisfaction ? (
               <h1>
-                {t("second_block.title")}
-                <br />
-                {t("second_block.subtitle")}
+                {t(`${currentSteps[currentStep].name}`)}
               </h1>
             ) : (
               <h1>{t("first_block.title")}</h1>

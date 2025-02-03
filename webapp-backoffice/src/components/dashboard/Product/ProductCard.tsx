@@ -399,10 +399,9 @@ const ProductCard = ({
 				</div>
 			</OnConfirmModal>{' '}
 			<Link
-				href={`/administration/dashboard/product/${product.id}/stats`}
-				tabIndex={0}
+				href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={-1}
 			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
+				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 					<div
 						className={cx(
 							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
@@ -437,7 +436,13 @@ const ProductCard = ({
 								classes.titleSection
 							)}
 						>
-							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
+							<Link
+								href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={0}
+								title={`Voir les statistiques pour le service ${product.title}`}
+								className={cx(classes.productLink, fr.cx('fr-link'))}
+							>
+								<span className={cx(classes.productTitle)}>{product.title}</span>
+							</Link>
 						</div>
 
 						<div
@@ -772,12 +777,14 @@ const useStyles = tss.withName(ProductCard.name).create({
 		transform: 'none'
 	},
 	cardSkeleton: {},
+	productLink: {
+		backgroundImage: 'none'
+	},
 	productTitle: {
 		fontSize: '18px',
 		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
-		backgroundImage: 'none',
 		'&:hover': {
 			textDecoration: 'underline'
 		}
