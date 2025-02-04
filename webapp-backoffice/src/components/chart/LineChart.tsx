@@ -47,7 +47,11 @@ const CustomLineChart = ({
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<LineChart
-				title="Graphique : Évolution des réponses"
+				title={
+					labelAxisY === 'Moyenne satisfaction'
+						? 'Graphique : Évolution de la note moyenne'
+						: 'Graphique : Évolution des réponses'
+				}
 				role="img"
 				data={data.map(item => ({
 					...item,

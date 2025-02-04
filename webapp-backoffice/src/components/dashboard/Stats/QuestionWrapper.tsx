@@ -25,7 +25,7 @@ const QuestionWrapper = ({
 
 	return (
 		<div className={classes.wrapperSection}>
-			<h4 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h4>
+			<h3 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h3>
 			<div className={classes.metaInfos}>
 				<div className={classes.metaInfosIcon}>
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />

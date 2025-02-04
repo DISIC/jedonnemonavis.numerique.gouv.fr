@@ -53,7 +53,7 @@ export const SectionWrapper = ({
 
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
-			<h3>{title}</h3>
+			<h2>{title}</h2>
 			{alert && (
 				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
 			)}
@@ -220,7 +220,7 @@ const ProductStatPage = (props: Props) => {
 					endDate={debouncedEndDate}
 				/>
 				<div className={fr.cx('fr-mt-5w')}>
-					<h3>Participation</h3>
+					<h4>Participation</h4>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-6')}>
 							<KPITile

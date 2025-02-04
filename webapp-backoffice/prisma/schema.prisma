@@ -115,6 +115,7 @@ enum TypeAction {
   service_apikeys_list_view
   service_apikeys_create
   service_apikeys_delete
+  service_logs_view
   organisations_list_view
   organisation_create
   organisation_update

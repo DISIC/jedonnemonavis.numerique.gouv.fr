@@ -14,6 +14,12 @@ import { tss } from 'tss-react/dsfr';
 import SmileyBarChart from '../../chart/SmileyBarChart';
 import ChartWrapper, { FormattedData } from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
+import dynamic from 'next/dynamic';
+import { useMemo } from 'react';
+
+const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
+	ssr: false
+});
 
 type Props = {
 	fieldCode: FieldCodeSmiley;
@@ -90,6 +96,38 @@ const SmileyQuestionViz = ({
 			}
 		}
 	);
+
+	console.log(
+		'resultFieldCodeInterval satisfaction : ',
+		resultFieldCodeInterval
+	);
+
+	const intentionMap: Record<string, number> = {
+		bad: 0,
+		medium: 5,
+		good: 10
+	};
+
+	const dataForChart = useMemo(() => {
+		if (!resultFieldCodeInterval?.data) return [];
+
+		return Object.entries(resultFieldCodeInterval.data).map(
+			([month, responses]) => {
+				if (responses.length === 0) {
+					return { name: month, value: 0 };
+				}
+
+				const total = responses.reduce(
+					(acc, item) => acc + intentionMap[item.intention] * item.doc_count,
+					0
+				);
+				const count = responses.reduce((acc, item) => acc + item.doc_count, 0);
+				const avg = Math.round((total / count) * 10) / 10;
+
+				return { name: month, value: avg };
+			}
+		);
+	}, [resultFieldCodeInterval]);
 
 	if (isLoadingFieldCode || isLoadingFieldCodeInterval || !resultFieldCode) {
 		return (
@@ -196,6 +234,20 @@ const SmileyQuestionViz = ({
 				data={data}
 			>
 				<SmileyBarChart data={data} total={total} />
+			</ChartWrapper>
+
+			<ChartWrapper
+				title="Évolution de la note moyenne par mois"
+				total={resultFieldCode.metadata.total}
+				data={dataForChart}
+				singleRowLabel="Note moyenne"
+				tooltip="Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire."
+			>
+				<LineChart
+					data={dataForChart}
+					labelAxisY="Moyenne satisfaction"
+					ticks={[0, 5, 10]}
+				/>
 			</ChartWrapper>
 		</QuestionWrapper>
 	);

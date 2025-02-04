@@ -29,17 +29,17 @@ describe('jdma-logs', () => {
 	it('should display the logs page with no events', () => {
 		cy.wait(8000);
 		cy.visit(app_url + '/administration/dashboard/product/5/logs');
-		cy.get('.fr-sidemenu__link[alt="Consulter le journal d\'activité"]')
+		cy.get('.fr-sidemenu__link[alt="Consulter l\'historique d\'activité"]')
 			.should('have.attr', 'aria-current', 'page')
-			.and('contain', "Journal d'activité")
+			.and('contain', "Historique d'activité")
 			.click();
-		cy.get('h1').contains("Journal d'activité");
+		cy.get('h1').contains("Historique d'activité");
 		cy.get('table').should('exist');
 		cy.get('table tbody tr')
 			.last()
 			.within(() => {
 				cy.get('td')
-					.eq(2)
+					.last()
 					.should(
 						'contain',
 						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
