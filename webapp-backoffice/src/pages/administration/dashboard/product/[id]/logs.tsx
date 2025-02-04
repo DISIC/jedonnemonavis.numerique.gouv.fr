@@ -104,8 +104,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			<div className={classes.container}>
 				<h1>Historique d'activité</h1>
 				<p>
-					Cette historique existe depuis [date de mise en prod]. Les activités
-					antérieur à cette date ne seront pas affichées.
+					Cet historique existe depuis Novembre 2024. Les activités antérieur à
+					cette date ne seront pas affichées.
 				</p>
 				<div className={cx(classes.filterContainer)}>
 					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
