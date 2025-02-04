@@ -453,13 +453,13 @@ const ProductReviewsPage = (props: Props) => {
 								'fr-mt-8v'
 							)}
 						>
-							<div className={cx(classes.filtersWrapper, fr.cx('fr-col-12'))}>
+							<div className={cx(classes.filtersWrapper, fr.cx('fr-col-6'))}>
 								<div className={cx(classes.filterView)}>
 									<label>Vue</label>
 									<div className={fr.cx('fr-mt-2v')}>
 										<Button
 											priority={
-												displayMode === 'reviews' ? 'primary' : 'secondary'
+												displayMode === 'reviews' ? 'secondary' : 'tertiary'
 											}
 											className={
 												displayMode === 'reviews'
@@ -486,7 +486,7 @@ const ProductReviewsPage = (props: Props) => {
 										</Button>
 										<Button
 											priority={
-												displayMode === 'reviews' ? 'secondary' : 'primary'
+												displayMode === 'reviews' ? 'tertiary' : 'secondary'
 											}
 											className={
 												displayMode === 'reviews'
@@ -514,71 +514,12 @@ const ProductReviewsPage = (props: Props) => {
 									</div>
 								</div>
 							</div>
-						</div>
-						<div
-							className={fr.cx(
-								'fr-grid-row',
-								'fr-grid-row--gutters',
-								'fr-mt-8v'
-							)}
-						>
+
 							<div
 								className={cx(
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
-									classes.errorMsg
-								)}
-							>
-								<Input
-									label="Date de début"
-									nativeInputProps={{
-										type: 'date',
-										value: startDate,
-										onChange: e => {
-											setStartDate(e.target.value);
-											setRealStartDate(e.target.value);
-											push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
-											submit();
-										}
-									}}
-									state={errors.startDate ? 'error' : 'default'}
-									stateRelatedMessage={
-										errors.startDate ? (
-											<span role="status">format attendu : JJ/MM/AAAA</span>
-										) : null
-									}
-								/>
-							</div>
-							<div
-								className={cx(
-									fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
-									classes.errorMsg
-								)}
-							>
-								<Input
-									label="Date de fin"
-									nativeInputProps={{
-										type: 'date',
-										value: endDate,
-										onChange: e => {
-											setEndDate(e.target.value);
-											push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
-											submit();
-										}
-									}}
-									state={errors.endDate ? 'error' : 'default'}
-									stateRelatedMessage={
-										errors.endDate ? (
-											<span role="status">format attendu : JJ/MM/AAAA</span>
-										) : null
-									}
-								/>
-							</div>
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-col-md-6',
-									'fr-col-lg-6',
-									'fr-col--bottom'
+									classes.filtersWrapper,
+									classes.searchWrapper,
+									fr.cx('fr-col-6')
 								)}
 							>
 								<form
@@ -617,6 +558,100 @@ const ProductReviewsPage = (props: Props) => {
 									</div>
 								</form>
 							</div>
+						</div>
+						<div
+							className={fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-mt-8v'
+							)}
+						>
+							<div className={cx(fr.cx('fr-col-12'))}>
+								<div className={cx(fr.cx('fr-card', 'fr-p-3v'))}>
+									<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+										<div className={cx(fr.cx('fr-col-6'))}>
+											<h3>Filtres</h3>
+										</div>
+										<div className={cx(fr.cx('fr-col-6'))}>
+											<div className={cx(classes.buttonContainer)}>
+												<Button
+													priority="tertiary"
+													iconId="fr-icon-filter-line"
+													iconPosition="right"
+													type="button"
+													nativeButtonProps={filter_modal.buttonProps}
+												>
+													Plus de filtres
+												</Button>
+											</div>
+										</div>
+										<div className={cx(fr.cx('fr-col-6'))}></div>
+										<div
+											className={cx(
+												fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+												classes.errorMsg
+											)}
+										>
+											<Input
+												label="Date de début"
+												nativeInputProps={{
+													type: 'date',
+													value: startDate,
+													onChange: e => {
+														setStartDate(e.target.value);
+														setRealStartDate(e.target.value);
+														push(['trackEvent', 'Avis', 'Filtre-Date-Début']);
+														submit();
+													}
+												}}
+												state={errors.startDate ? 'error' : 'default'}
+												stateRelatedMessage={
+													errors.startDate ? (
+														<span role="status">
+															format attendu : JJ/MM/AAAA
+														</span>
+													) : null
+												}
+											/>
+										</div>
+										<div
+											className={cx(
+												fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-lg-3'),
+												classes.errorMsg
+											)}
+										>
+											<Input
+												label="Date de fin"
+												nativeInputProps={{
+													type: 'date',
+													value: endDate,
+													onChange: e => {
+														setEndDate(e.target.value);
+														push(['trackEvent', 'Avis', 'Filtre-Date-Fin']);
+														submit();
+													}
+												}}
+												state={errors.endDate ? 'error' : 'default'}
+												stateRelatedMessage={
+													errors.endDate ? (
+														<span role="status">
+															format attendu : JJ/MM/AAAA
+														</span>
+													) : null
+												}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div
+								className={fr.cx(
+									'fr-col-12',
+									'fr-col-md-6',
+									'fr-col-lg-6',
+									'fr-col--bottom'
+								)}
+							></div>
 						</div>
 						<div
 							className={fr.cx(
@@ -828,7 +863,13 @@ const useStyles = tss
 		},
 		filtersWrapper: {
 			display: 'flex',
-			alignItems: 'start'
+			alignItems: 'end'
+		},
+		searchWrapper: {
+			justifyContent: 'flex-end',
+			input: {
+				minWidth: '300px'
+			}
 		},
 		buttonContainer: {
 			width: '100%',
