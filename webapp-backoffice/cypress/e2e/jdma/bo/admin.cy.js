@@ -243,7 +243,7 @@ function fillForm({
 }
 
 function deleteService(serviceName) {
-	cy.contains('h2', serviceName)
+	cy.contains('a', serviceName)
 		.parents('div.fr-card')
 		.within(() => {
 			cy.get('#button-options-service').click();
