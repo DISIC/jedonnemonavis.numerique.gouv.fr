@@ -5,7 +5,6 @@ import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import { useRouter } from 'next/router';
 import { Product, RightAccessStatus } from '@prisma/client';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Toast } from '@/src/components/ui/Toast';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Badge from '@codegouvfr/react-dsfr/Badge';

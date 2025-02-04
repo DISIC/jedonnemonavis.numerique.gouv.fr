@@ -292,7 +292,7 @@ export const openAPIRouter = router({
 			};
 		}),
 
-		triggerSendNotifMails: protectedApiProcedure
+	triggerSendNotifMails: protectedApiProcedure
 		.meta({
 			openapi: {
 			method: 'POST',
@@ -344,10 +344,10 @@ export const openAPIRouter = router({
 			const { date } = input;
 
 			if (!ctx.api_key.scope.includes('admin')) {
-			throw new TRPCError({
-				code: 'UNAUTHORIZED',
-				message: 'You need to be admin to perform this action'
-			});
+				throw new TRPCError({
+					code: 'UNAUTHORIZED',
+					message: 'You need to be admin to perform this action'
+				});
 			}
 
 			const scopes: { scope: 'daily' | 'weekly' | 'monthly'; startDate: Date; endDate: Date }[] = [];
@@ -363,24 +363,24 @@ export const openAPIRouter = router({
 
 			// Initiate Weekly
 			if (isMonday(date)) {
-			const weeklyStartDate = startOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
-			const weeklyEndDate = endOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
-			scopes.push({
-				scope: 'weekly',
-				startDate: weeklyStartDate,
-				endDate: weeklyEndDate
-			});
+				const weeklyStartDate = startOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
+				const weeklyEndDate = endOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
+				scopes.push({
+					scope: 'weekly',
+					startDate: weeklyStartDate,
+					endDate: weeklyEndDate
+				});
 			}
 
 			// Initiate Monthly
 			if (isMonday(date) && date.getDate() <= 7) {
-			const monthlyStartDate = startOfMonth(subMonths(date, 1));
-			const monthlyEndDate = endOfMonth(subMonths(date, 1));
-			scopes.push({
-				scope: 'monthly',
-				startDate: monthlyStartDate,
-				endDate: monthlyEndDate
-			});
+				const monthlyStartDate = startOfMonth(subMonths(date, 1));
+				const monthlyEndDate = endOfMonth(subMonths(date, 1));
+				scopes.push({
+					scope: 'monthly',
+					startDate: monthlyStartDate,
+					endDate: monthlyEndDate
+				});
 			}
 
 			// Count new reviews and group by product
@@ -463,7 +463,7 @@ export const openAPIRouter = router({
 							'Nouveaux avis JDMA',
 							user.email,
 							email,
-							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/products" target="_blank">Voir plus de détails sur votre tableau de bord JDMA</a>`
+							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
 						);
 					}
 

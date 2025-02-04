@@ -269,25 +269,27 @@ const EntitySearchModal = (props: Props) => {
 									))
 								)}
 								{(lastPage === currentPage || notFound) && (
-									<Alert
-										className={fr.cx('fr-mb-4v')}
-										description={
-											<>
-												Vous ne trouvez pas l'oganisation ?
-												<Link
-													className={fr.cx('fr-link', 'fr-ml-2v')}
-													onClick={() => {
-														onCreate();
-													}}
-													href="#"
-												>
-													Créer une organisation.
-												</Link>
-											</>
-										}
-										severity="info"
-										title=""
-									/>
+									<div role="status">
+										<Alert
+											className={fr.cx('fr-mb-4v')}
+											description={
+												<>
+													Vous ne trouvez pas l'oganisation ?
+													<Link
+														className={fr.cx('fr-link', 'fr-ml-2v')}
+														onClick={() => {
+															onCreate();
+														}}
+														href="#"
+													>
+														Créer une organisation.
+													</Link>
+												</>
+											}
+											severity="info"
+											title=""
+										/>
+									</div>
 								)}
 							</div>
 							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>

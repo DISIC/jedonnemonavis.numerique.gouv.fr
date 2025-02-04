@@ -123,7 +123,7 @@ const CredentialsCard = (props: Props) => {
 				viewModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))}>
+							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
 								<Alert
 									closable
 									onClose={function noRefCheck() {
@@ -171,7 +171,7 @@ const CredentialsCard = (props: Props) => {
 				editModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))}>
+							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
 								<Alert
 									closable
 									onClose={function noRefCheck() {

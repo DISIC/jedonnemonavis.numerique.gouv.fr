@@ -399,10 +399,9 @@ const ProductCard = ({
 				</div>
 			</OnConfirmModal>{' '}
 			<Link
-				href={`/administration/dashboard/product/${product.id}/stats`}
-				tabIndex={0}
+				href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={-1}
 			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')} tabIndex={0}>
+				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 					<div
 						className={cx(
 							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
@@ -410,7 +409,12 @@ const ProductCard = ({
 						)}
 					>
 						{(product.isTop250 || isDisabled) && (
-							<div className={fr.cx('fr-col', 'fr-col-10', 'fr-pb-0')}>
+							<div
+								className={cx(
+									fr.cx('fr-col', 'fr-col-10', 'fr-pb-0'),
+									classes.badgesSection
+								)}
+							>
 								<div className={classes.badgesContainer}>
 									{product.isTop250 && (
 										<Badge severity="info" noIcon small>
@@ -426,14 +430,32 @@ const ProductCard = ({
 							</div>
 						)}
 
-						<div className={fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6')}>
-							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6'),
+								classes.titleSection
+							)}
+						>
+							<Link
+								href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={0}
+								title={`Voir les statistiques pour le service ${product.title}`}
+								className={cx(classes.productLink, fr.cx('fr-link'))}
+							>
+								<span className={cx(classes.productTitle)}>{product.title}</span>
+							</Link>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
+
+						<div
+							className={cx(
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+								classes.entitySection
+							)}
+						>
 							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
 								{entity?.name}
 							</p>
 						</div>
+
 						{isDisabled ? (
 							<div
 								className={cx(
@@ -551,7 +573,12 @@ const ProductCard = ({
 										</Button>
 									)}
 								</div>
-								<div className={fr.cx('fr-col', 'fr-col-12', 'fr-pt-0')}>
+								<div
+									className={cx(
+										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
+										classes.statsSection
+									)}
+								>
 									{isLoadingStatsObservatoire ||
 									isRefetchingStatsObservatoire ? (
 										<Skeleton
@@ -714,20 +741,27 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
-			'div:nth-child(3)': {
+			'.rightButtonsWrapper': {
+				order: 0
+			},
+			'.titleSection': {
 				order: 1
 			},
-			'div:nth-child(1)': {
+			'.entitySection': {
 				order: 2
 			},
-			'div:nth-child(2)': {
+			'.badgesSection': {
 				order: 3
 			},
-			'div:nth-child(4)': {
+			'.statsSection': {
 				order: 4
 			}
 		}
 	},
+	titleSection: {},
+	entitySection: {},
+	badgesSection: {},
+	statsSection: {},
 	rightButtonsWrapper: {
 		display: 'flex',
 		justifyContent: 'end'
@@ -743,12 +777,14 @@ const useStyles = tss.withName(ProductCard.name).create({
 		transform: 'none'
 	},
 	cardSkeleton: {},
+	productLink: {
+		backgroundImage: 'none'
+	},
 	productTitle: {
 		fontSize: '18px',
 		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
-		backgroundImage: 'none',
 		'&:hover': {
 			textDecoration: 'underline'
 		}

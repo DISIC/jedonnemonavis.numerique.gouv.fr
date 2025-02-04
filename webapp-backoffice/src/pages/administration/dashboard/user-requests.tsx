@@ -270,16 +270,18 @@ const DashBoardUserRequestUserRequests = () => {
 				{currentUserRequest &&
 					(currentUserRequest.type === 'refused' ||
 						currentUserRequest.type === 'accept') && (
-						<Alert
-							severity={
-								currentUserRequest.type === 'accept' ? 'success' : 'info'
-							}
-							description={getAlertTitle()}
-							className={classes.alert}
-							onClose={() => setCurrentUserRequest(undefined)}
-							closable
-							small
-						/>
+						<div role="status">
+							<Alert
+								severity={
+									currentUserRequest.type === 'accept' ? 'success' : 'info'
+								}
+								description={getAlertTitle()}
+								className={classes.alert}
+								onClose={() => setCurrentUserRequest(undefined)}
+								closable
+								small
+							/>
+						</div>
 					)}
 				{isLoadingUserRequests ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>

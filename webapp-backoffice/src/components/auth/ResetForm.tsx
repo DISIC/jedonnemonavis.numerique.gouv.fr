@@ -154,7 +154,7 @@ export const ResetForm = () => {
 							messages={getPasswordMessages()}
 							messagesHint={
 								errors.password.required
-									? ''
+									? 'Tous les champs sont obligatoires'
 									: 'Votre mot de passe doit contenir au moins :'
 							}
 						/>

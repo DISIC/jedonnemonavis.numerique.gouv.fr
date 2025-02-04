@@ -52,12 +52,14 @@ const ProductStatPage = (props: Props) => {
 		return (
 			<div className={fr.cx('fr-container')}>
 				<h1 className={fr.cx('fr-mt-20v')}>Statistiques</h1>
-				<Alert
-					severity="info"
-					title="Cette démarche n'existe pas ou n'est pas publique"
-					description="Veuillez vérifier l'identifiant de la démarche ou contacter le porteur."
-					className={fr.cx('fr-mt-20v', 'fr-mb-20v')}
-				/>
+				<div role="status">
+					<Alert
+						severity="info"
+						title="Cette démarche n'existe pas ou n'est pas publique"
+						description="Veuillez vérifier l'identifiant de la démarche ou contacter le porteur."
+						className={fr.cx('fr-mt-20v', 'fr-mb-20v')}
+					/>
+				</div>
 			</div>
 		);
 	}
@@ -111,7 +113,7 @@ const ProductStatPage = (props: Props) => {
 
 		if (nbReviewsWithFilters === 0) {
 			return (
-				<div className={fr.cx('fr-mt-10v')}>
+				<div className={fr.cx('fr-mt-10v')} role="status">
 					<Alert
 						severity="info"
 						title="Aucun avis sur cette période"
@@ -321,7 +323,7 @@ const ProductStatPage = (props: Props) => {
 			</form>
 			{!isLoadingReviewsDataWithFilters &&
 			nbReviewsWithFilters > nbMaxReviews ? (
-				<div className={fr.cx('fr-mt-10v')}>
+				<div className={fr.cx('fr-mt-10v')} role="status">
 					<Alert
 						title=""
 						severity="error"
