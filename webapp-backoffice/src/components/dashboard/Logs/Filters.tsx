@@ -5,6 +5,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Select from '@codegouvfr/react-dsfr/Select';
+import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
 import { TypeAction } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
@@ -66,6 +67,7 @@ const ActivityFilters = ({
 	const [inputValue, setInputValue] = useState<string | undefined>(
 		filters.filterAction ? filters.filterAction : undefined
 	);
+	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
 	const [filterHasChanged, setFilterHasChanged] = useState(false);
 	const [filtersApplied, setFiltersApplied] = useState(false);
 
@@ -247,6 +249,7 @@ const ActivityFilters = ({
 						if (option) {
 							setInputValue(option.value as TypeAction);
 							setFilterHasChanged(true);
+							setActionsFilter([...actionsFilter, option.value]);
 						}
 					}}
 					inputValue={inputValue}
@@ -306,6 +309,32 @@ const ActivityFilters = ({
 					</Button>
 				</div>
 			) : null}
+			{actionsFilter.length > 0 && (
+				<ul
+					className={cx(
+						fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+						classes.tagContainer
+					)}
+				>
+					{actionsFilter.map((action, index) => (
+						<li key={index}>
+							<Tag
+								dismissible
+								className={cx(classes.tagFilter)}
+								title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+								nativeButtonProps={{
+									onClick: () => {
+										setActionsFilter(actionsFilter.filter(e => e !== action));
+										setInputValue('');
+									}
+								}}
+							>
+								<p>{filtersLabel.find(f => f.value === action)?.label}</p>
+							</Tag>
+						</li>
+					))}
+				</ul>
+			)}
 		</div>
 	);
 };
@@ -368,6 +397,20 @@ const useStyles = tss.create({
 		justifyContent: 'flex-end',
 		gap: '1rem',
 		height: '40px'
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
 	}
 });
 

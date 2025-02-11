@@ -237,7 +237,7 @@ const SmileyQuestionViz = ({
 			</ChartWrapper>
 
 			<ChartWrapper
-				title="Évolution de la note moyenne par mois"
+				title="Évolution de la note moyenne"
 				total={resultFieldCode.metadata.total}
 				data={dataForChart}
 				singleRowLabel="Note moyenne"

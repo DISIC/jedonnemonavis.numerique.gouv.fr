@@ -9,13 +9,15 @@ export type Filters = {
 		validatedSearch: string;
 		filterOnlyAdmins: boolean;
 	};
+	activityLog: {
+		filterAction: TypeAction | undefined;
+	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
-	filterAction: TypeAction | undefined;
 };
 
 interface FiltersContextProps {
@@ -42,13 +44,15 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			validatedSearch: '',
 			filterOnlyAdmins: false
 		},
+		activityLog: {
+			filterAction: undefined
+		},
 		filterEntity: [],
 		currentPage: 1,
 		filter: 'title',
 		filterOnlyFavorites: false,
 		filterOnlyArchived: false,
-		validatedSearch: '',
-		filterAction: undefined
+		validatedSearch: ''
 	});
 
 	const updateFilters = (newFilters: Partial<Filters>) => {
