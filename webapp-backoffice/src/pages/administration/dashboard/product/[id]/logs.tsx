@@ -32,7 +32,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			product_id: product.id,
 			limit: 10,
 			page: currentPage,
-			filterAction: filters.filterAction,
+			filterAction: filters.activityLogs.filterAction,
 			startDate,
 			endDate
 		},

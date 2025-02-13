@@ -1,5 +1,6 @@
 import { TypeAction } from '@prisma/client';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { DateShortcutName } from '../components/dashboard/Filters/Filters';
 
 export type Filters = {
 	users: {
@@ -9,8 +10,21 @@ export type Filters = {
 		validatedSearch: string;
 		filterOnlyAdmins: boolean;
 	};
-	activityLog: {
-		filterAction: TypeAction | undefined;
+	productActivityLogs: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
+		actionType: TypeAction[];
+	};
+	productReviews: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
+	};
+	productStats: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
 	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
@@ -44,8 +58,21 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			validatedSearch: '',
 			filterOnlyAdmins: false
 		},
-		activityLog: {
-			filterAction: undefined
+		productActivityLogs: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: undefined,
+			actionType: []
+		},
+		productReviews: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: undefined
+		},
+		productStats: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: undefined
 		},
 		filterEntity: [],
 		currentPage: 1,
