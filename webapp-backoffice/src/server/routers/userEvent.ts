@@ -119,7 +119,7 @@ export const userEventRouter = router({
 				product_id: z.number().optional(),
 				page: z.number(),
 				limit: z.number(),
-				filterAction: z.nativeEnum(TypeAction).optional(),
+				filterAction: z.array(z.nativeEnum(TypeAction)),
 				startDate: z.string().optional(),
 				endDate: z.string().optional()
 			})
@@ -143,9 +143,8 @@ export const userEventRouter = router({
 					}
 				],
 				action: {
-					in: ALL_ACTIONS
-				},
-				...(filterAction && { action: filterAction })
+					in: filterAction?.length > 0 ? filterAction : ALL_ACTIONS
+				}
 			};
 
 			if (startDate && endDate) {

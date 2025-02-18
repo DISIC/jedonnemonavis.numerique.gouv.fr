@@ -25,6 +25,7 @@ export type Filters = {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
+		buttonId: number | undefined;
 	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
@@ -72,7 +73,8 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		productStats: {
 			currentStartDate: '',
 			currentEndDate: '',
-			dateShortcut: undefined
+			dateShortcut: undefined,
+			buttonId: undefined
 		},
 		filterEntity: [],
 		currentPage: 1,

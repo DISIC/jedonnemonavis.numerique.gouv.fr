@@ -25,6 +25,8 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface Props {
 	product: Product;
@@ -78,9 +80,11 @@ const ProductStatPage = (props: Props) => {
 	const [endDate, setEndDate] = useState<string>(
 		new Date().toISOString().split('T')[0]
 	);
+	
+	const { filters, updateFilters } = useFilters();
 
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
+	const debouncedStartDate = useDebounce<string>(filters.productStats.currentStartDate, 500);
+	const debouncedEndDate = useDebounce<string>(filters.productStats.currentEndDate, 500);
 
 	const [buttonId, setButtonId] = useState<number | null>(null);
 
@@ -119,14 +123,14 @@ const ProductStatPage = (props: Props) => {
 		start_date: debouncedStartDate,
 		end_date: debouncedEndDate,
 		filters: {
-			buttonId: buttonId ? [buttonId?.toString()] : []
+			buttonId: filters.productStats.buttonId ? [filters.productStats.buttonId?.toString()] : []
 		}
 	});
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
-			...(buttonId && { button_id: buttonId }),
+			...(filters.productStats.buttonId && { button_id: filters.productStats.buttonId }),
 			field_code: 'verbatim',
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
@@ -358,11 +362,12 @@ const ProductStatPage = (props: Props) => {
 				)}
 			</div>
 			<div className={cx(classes.container)}>
-				<Filters
+				<GenericFilters filterKey='productStats'></GenericFilters>
+				{/* <Filters
 					currentStartDate={startDate}
 					currentEndDate={endDate}
 					onChange={onChangeFilters}
-				/>
+				/> */}
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
 					<div className={fr.cx('fr-mt-10v')} role="status">

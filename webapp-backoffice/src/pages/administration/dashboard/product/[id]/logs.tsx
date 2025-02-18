@@ -12,6 +12,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { useSession } from 'next-auth/react';
 import ActivityFilters from '@/src/components/dashboard/Logs/Filters';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 
 interface Props {
 	product: Product;
@@ -32,9 +33,9 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			product_id: product.id,
 			limit: 10,
 			page: currentPage,
-			filterAction: filters.activityLogs.filterAction,
-			startDate,
-			endDate
+			filterAction: filters.productActivityLogs.actionType,
+			startDate: filters.productActivityLogs.currentStartDate,
+			endDate: filters.productActivityLogs.currentEndDate
 		},
 		{
 			initialData: {
@@ -46,19 +47,19 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 		}
 	);
 
-	const { data: countNewLogs } = trpc.userEvent.countNewLogs.useQuery(
-		{
-			product_id: product.id,
-			user_id: session?.user.id ? parseInt(session?.user.id) : undefined
-		},
-		{
-			initialData: {
-				count: 0
-			}
-		}
-	);
+	// const { data: countNewLogs } = trpc.userEvent.countNewLogs.useQuery(
+	// 	{
+	// 		product_id: product.id,
+	// 		user_id: session?.user.id ? parseInt(session?.user.id) : undefined
+	// 	},
+	// 	{
+	// 		initialData: {
+	// 			count: 0
+	// 		}
+	// 	}
+	// );
 
-	console.log('count logs : ', countNewLogs);
+	//console.log('count logs : ', countNewLogs);
 
 	const eventsCount = fullEvents?.pagination.total;
 
@@ -103,7 +104,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			</Head>
 			<div className={classes.container}>
 				<h1>Historique d'activité</h1>
-				<div className={cx(classes.filterContainer)}>
+				<GenericFilters filterKey='productActivityLogs'></GenericFilters>
+				{/* <div className={cx(classes.filterContainer)}>
 					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
 					<ActivityFilters
 						currentStartDate={startDate}
@@ -115,7 +117,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						updateFilters={updateFilters}
 						filters={filters}
 					/>
-				</div>
+				</div> */}
 				{isLoading || fullEvents?.data.length === 0 ? (
 					<div
 						className={cx(
@@ -171,7 +173,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					</>
 				)}
 				<p>
-					Cet historique existe depuis Novembre 2024. Les activités antérieur à
+					Cet historique existe depuis Novembre 2024. Les activités antérieures à
 					cette date ne seront pas affichées.
 				</p>
 			</div>
