@@ -70,7 +70,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 	const [startDate, setStartDate] = useState<string>(sectionFilters.currentStartDate);
 	const [endDate, setEndDate] = useState<string>(sectionFilters.currentEndDate);
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
-	const [inputValue, setInputValue] = useState<string | undefined>(
+	const [inputValue, setInputValue] = useState<string[] | undefined>(
 		"actionType" in sectionFilters ? sectionFilters.actionType : []
 	);
 	const [filtersApplied, setFiltersApplied] = useState(false);
