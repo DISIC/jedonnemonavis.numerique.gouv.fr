@@ -6,13 +6,17 @@ import { getServerSideProps } from '.';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
 import { Table } from '@codegouvfr/react-dsfr/Table';
-import { getNbPages, handleActionTypeDisplay } from '@/src/utils/tools';
+import {
+	filtersLabel,
+	getNbPages,
+	handleActionTypeDisplay
+} from '@/src/utils/tools';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useSession } from 'next-auth/react';
-import ActivityFilters from '@/src/components/dashboard/Logs/Filters';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { Autocomplete } from '@mui/material';
 
 interface Props {
 	product: Product;
@@ -25,6 +29,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 	const [endDate, setEndDate] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const { data: session } = useSession();
+	const [inputValue, setInputValue] = useState<string | undefined>();
 
 	const { filters, updateFilters } = useFilters();
 
@@ -46,20 +51,6 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			}
 		}
 	);
-
-	// const { data: countNewLogs } = trpc.userEvent.countNewLogs.useQuery(
-	// 	{
-	// 		product_id: product.id,
-	// 		user_id: session?.user.id ? parseInt(session?.user.id) : undefined
-	// 	},
-	// 	{
-	// 		initialData: {
-	// 			count: 0
-	// 		}
-	// 	}
-	// );
-
-	//console.log('count logs : ', countNewLogs);
 
 	const eventsCount = fullEvents?.pagination.total;
 
@@ -103,8 +94,48 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				/>
 			</Head>
 			<div className={classes.container}>
-				<h1>Historique d'activité</h1>
-				<GenericFilters filterKey='productActivityLogs'></GenericFilters>
+				<h1 className={fr.cx('fr-mb-10v')}>Historique d'activité</h1>
+				<GenericFilters filterKey="productActivityLogs">
+					<Autocomplete
+						id="filter-action"
+						disablePortal
+						sx={{ width: '100%' }}
+						options={filtersLabel}
+						onChange={(_, option) => {
+							if (option) {
+								updateFilters({
+									...filters,
+									['productActivityLogs']: {
+										...filters['productActivityLogs'],
+										hasChanged: true,
+										actionType: [
+											...filters['productActivityLogs'].actionType,
+											option.value as TypeAction
+										]
+									}
+								});
+							}
+						}}
+						inputValue={inputValue}
+						value={filtersLabel.find(f => f.value === inputValue) || null}
+						onInputChange={(_, newInputValue) => {
+							setInputValue(newInputValue);
+						}}
+						renderInput={params => (
+							<div ref={params.InputProps.ref}>
+								<label htmlFor="filter-action" className="fr-label">
+									Filtrer par action
+								</label>
+								<input
+									{...params.inputProps}
+									className={params.inputProps.className + ' fr-input'}
+									placeholder="Toutes les actions"
+									type="search"
+								/>
+							</div>
+						)}
+					/>
+				</GenericFilters>
 				{/* <div className={cx(classes.filterContainer)}>
 					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
 					<ActivityFilters
@@ -173,8 +204,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					</>
 				)}
 				<p>
-					Cet historique existe depuis Novembre 2024. Les activités antérieures à
-					cette date ne seront pas affichées.
+					Cet historique existe depuis Novembre 2024. Les activités antérieures
+					à cette date ne seront pas affichées.
 				</p>
 			</div>
 		</ProductLayout>

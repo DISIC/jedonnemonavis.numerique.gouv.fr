@@ -1,6 +1,7 @@
 import { TypeAction } from '@prisma/client';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { DateShortcutName } from '../components/dashboard/Filters/Filters';
+import { ReviewFiltersType } from '../types/custom';
 
 export type Filters = {
 	users: {
@@ -22,6 +23,8 @@ export type Filters = {
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
 		hasChanged: Boolean;
+		displayNew: boolean;
+		filters: ReviewFiltersType;
 	};
 	productStats: {
 		currentStartDate: string;
@@ -73,7 +76,17 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			currentStartDate: '',
 			currentEndDate: '',
 			dateShortcut: 'one-year',
-			hasChanged: false
+			hasChanged: false,
+			displayNew: false,
+			filters: {
+				satisfaction: [],
+				comprehension: [],
+				needVerbatim: false,
+				needOtherDifficulties: false,
+				needOtherHelp: false,
+				help: [],
+				buttonId: []
+			}
 		},
 		productStats: {
 			currentStartDate: '',

@@ -5,14 +5,10 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { TypeAction } from '@prisma/client';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Autocomplete } from '@mui/material';
 import { filtersLabel, getDatesByShortCut } from '@/src/utils/tools';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import { trpc } from '@/src/utils/trpc';
 import { useRouter } from 'next/router';
-import Select from '@codegouvfr/react-dsfr/Select';
 
 const dateShortcuts = [
 	{
@@ -29,20 +25,21 @@ const dateShortcuts = [
 	}
 ] as const;
 
-// Type qui extrait les valeurs de `name`
 export type DateShortcutName =
 	| (typeof dateShortcuts)[number]['name']
 	| undefined;
 
-// Définition des clés valides
 export type FilterSectionKey = keyof Pick<
 	Filters,
 	'productActivityLogs' | 'productReviews' | 'productStats'
 >;
 
-// Définition des props du composant
 type FiltersProps<T extends FilterSectionKey> = {
 	filterKey: T;
+	sticky?: Boolean;
+	children?: React.ReactNode;
+	topRight?: React.ReactNode;
+	renderTags?: () => (React.JSX.Element | null)[] | null;
 };
 
 type FormError = {
@@ -56,17 +53,15 @@ const defaultErrors = {
 };
 
 const GenericFilters = <T extends FilterSectionKey>({
-	filterKey
+	filterKey,
+	sticky,
+	children,
+	topRight,
+	renderTags
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
-	// Récupère le contexte global
 	const { filters, updateFilters } = useFilters();
-	const [shortcutDateSelected, setShortcutDateSelected] = useState<
-		(typeof dateShortcuts)[number]['name'] | undefined
-	>('one-year');
-	const [filterHasChanged, setFilterHasChanged] = useState(false);
 
-	// Récupère la section spécifique en fonction de filterKey
 	const sectionFilters = filters[filterKey];
 	const [localStartDate, setLocalStartDate] = useState(
 		sectionFilters.currentStartDate
@@ -75,26 +70,11 @@ const GenericFilters = <T extends FilterSectionKey>({
 		sectionFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
-	const [inputValue, setInputValue] = useState<string | undefined>();
-	const [filtersApplied, setFiltersApplied] = useState(false);
 	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
 	const [buttonId, setButtonId] = useState<number | undefined>();
 
 	const router = useRouter();
 	const productId = router.query.id;
-
-	const { data: buttonResults, isLoading: isLoadingButtons } =
-		trpc.button.getList.useQuery(
-			{
-				page: 1,
-				numberPerPage: 1000,
-				product_id: parseInt(productId as string),
-				isTest: true
-			},
-			{
-				enabled: !!productId && !isNaN(parseInt(productId as string))
-			}
-		);
 
 	useEffect(() => {
 		if (sectionFilters.dateShortcut) {
@@ -102,23 +82,27 @@ const GenericFilters = <T extends FilterSectionKey>({
 				sectionFilters.dateShortcut
 			);
 
+			console.log('changing shortcut');
+
 			if (
 				startDate !== sectionFilters.currentStartDate ||
 				endDate !== sectionFilters.currentEndDate
 			) {
+				console.log('enter');
 				setLocalStartDate(startDate);
 				setLocalEndDate(endDate);
 
 				updateFilters({
+					...filters,
 					[filterKey]: {
-						...sectionFilters,
+						...filters[filterKey],
 						currentStartDate: startDate,
 						currentEndDate: endDate
 					}
 				});
 			}
 		}
-	}, [sectionFilters.dateShortcut]);
+	}, [sectionFilters.hasChanged, sectionFilters.dateShortcut]);
 
 	const isValidDate = (date: string) => {
 		if (!date) return false;
@@ -170,8 +154,13 @@ const GenericFilters = <T extends FilterSectionKey>({
 	}, [sectionFilters]);
 
 	return (
-		<div className={cx(classes.filterContainer)}>
-			<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
+		<div
+			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
+		>
+			<div className={cx(fr.cx('fr-mb-1v'), classes.titleContainer)}>
+				<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
+				{topRight}
+			</div>
 			<div
 				className={cx(
 					fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
@@ -235,7 +224,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-lg-6')}>
 					<form className={cx(fr.cx('fr-grid-row'), classes.formContainer)}>
-						<div className={fr.cx('fr-col', 'fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de début"
 								nativeInputProps={{
@@ -251,7 +240,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 								}
 							/>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de fin"
 								nativeInputProps={{
@@ -269,96 +258,13 @@ const GenericFilters = <T extends FilterSectionKey>({
 						</div>
 					</form>
 				</div>
-				{filterKey === 'productStats' &&
-					buttonResults?.data &&
-					buttonResults.data.length > 1 && (
-						<div className={fr.cx('fr-col', 'fr-col-6')}>
-							<Select
-								label="Sélectionner une source"
-								nativeSelectProps={{
-									value:
-										'buttonId' in filters[filterKey]
-											? filters[filterKey].buttonId
-											: undefined,
-									onChange: e => {
-										setButtonId(
-											e.target.value !== 'undefined'
-												? parseInt(e.target.value)
-												: undefined
-										);
-										if ('buttonId' in filters[filterKey])
-											updateFilters({
-												...filters,
-												[filterKey]: {
-													...filters[filterKey],
-													buttonId: parseInt(e.target.value)
-												}
-											});
-										push(['trackEvent', 'Stats', 'Sélection-bouton']);
-									}
-								}}
-							>
-								<option value="undefined">Toutes les sources</option>
-								{buttonResults?.data?.map(button => {
-									return (
-										<option key={button.id} value={button.id}>
-											{button.title}
-										</option>
-									);
-								})}
-							</Select>
-						</div>
-					)}
-				{'actionType' in sectionFilters && (
-					<div className={fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-mb-4v')}>
-						<Autocomplete
-							id="filter-action"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={filtersLabel}
-							onChange={(_, option) => {
-								if (option) {
-									setFilterHasChanged(true);
-									setActionsFilter([...actionsFilter, option.value]);
-									if ('actionType' in filters[filterKey])
-										updateFilters({
-											...filters,
-											[filterKey]: {
-												...filters[filterKey],
-												hasChanged: true,
-												actionType: [
-													...filters[filterKey].actionType,
-													option.value
-												]
-											}
-										});
-								}
-							}}
-							inputValue={inputValue}
-							value={filtersLabel.find(f => f.value === inputValue) || null}
-							onInputChange={(_, newInputValue) => {
-								setInputValue(newInputValue);
-							}}
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label htmlFor="filter-action" className="fr-label">
-										Filtrer par action
-									</label>
-									<input
-										{...params.inputProps}
-										className={params.inputProps.className + ' fr-input'}
-										placeholder="Toutes les actions"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
-					</div>
-				)}
+
+				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>{children}</div>
+
 				{sectionFilters.hasChanged ? (
 					<div
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mt-8v'),
+							fr.cx('fr-col-12', 'fr-col-md-6'),
 							classes.filterActionContainer
 						)}
 					>
@@ -367,9 +273,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 							iconPosition="right"
 							iconId="ri-refresh-line"
 							onClick={() => {
-								setShortcutDateSelected('one-year');
 								setErrors({});
-								setInputValue(undefined);
 								updateFilters({
 									...filters,
 									[filterKey]: {
@@ -377,10 +281,23 @@ const GenericFilters = <T extends FilterSectionKey>({
 										hasChanged: false,
 										...('actionType' in filters[filterKey] && {
 											actionType: []
+										}),
+										...('buttonId' in filters[filterKey] && {
+											buttonId: null
+										}),
+										...(filterKey === 'productReviews' && {
+											filters: {
+												satisfaction: [],
+												comprehension: [],
+												needVerbatim: false,
+												needOtherDifficulties: false,
+												needOtherHelp: false,
+												help: [],
+												buttonId: []
+											}
 										})
 									}
 								});
-								setFiltersApplied(false);
 							}}
 						>
 							Réinitialiser les filtres
@@ -406,7 +323,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 												setActionsFilter(
 													actionsFilter.filter(e => e !== action)
 												);
-												setInputValue('');
 												if ('actionType' in filters[filterKey])
 													updateFilters({
 														...filters,
@@ -425,6 +341,11 @@ const GenericFilters = <T extends FilterSectionKey>({
 							))}
 						</ul>
 					)}
+				{'filters' in sectionFilters && renderTags && (
+					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-py-0')}>
+						{renderTags()}
+					</div>
+				)}
 			</div>
 		</div>
 	);
@@ -438,11 +359,20 @@ const useStyles = tss.create({
 		border: '1px solid #e0e0e0',
 		padding: '1rem'
 	},
+	stickyContainer: {
+		[fr.breakpoints.up('md')]: {
+			position: 'sticky',
+			top: -1,
+			zIndex: 99,
+			backgroundColor: fr.colors.decisions.background.default.grey.default
+		}
+	},
+	titleContainer: {
+		display: 'flex',
+		justifyContent: 'space-between'
+	},
 	dateShortcuts: {
-		position: 'sticky',
-		top: -1,
 		backgroundColor: fr.colors.decisions.background.default.grey.default,
-		zIndex: 99,
 		padding: `1rem 0`,
 		fieldset: {
 			width: '100%',
@@ -493,8 +423,8 @@ const useStyles = tss.create({
 	filterActionContainer: {
 		display: 'flex',
 		justifyContent: 'flex-end',
-		gap: '1rem',
-		height: '40px'
+		alignContent: 'flex-end',
+		gap: '1rem'
 	},
 	tagFilter: {
 		marginRight: '0.5rem',

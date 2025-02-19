@@ -24,7 +24,7 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
-	buttonId: number | null;
+	buttonId: number | undefined;
 	startDate: string;
 	endDate: string;
 	total: number;
@@ -95,11 +95,6 @@ const SmileyQuestionViz = ({
 				}
 			}
 		}
-	);
-
-	console.log(
-		'resultFieldCodeInterval satisfaction : ',
-		resultFieldCodeInterval
 	);
 
 	const intentionMap: Record<string, number> = {

@@ -16,7 +16,7 @@ const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
 type Props = {
 	fieldCode: string;
 	productId: number;
-	buttonId: number | null;
+	buttonId: number | undefined;
 	startDate: string;
 	endDate: string;
 	total: number;
@@ -38,7 +38,7 @@ const BarQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
-				...(buttonId && {button_id: buttonId}),
+				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate
@@ -72,7 +72,7 @@ const BarQuestionViz = ({
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
-			...(buttonId && {button_id: buttonId}),
+			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
 			end_date: endDate
