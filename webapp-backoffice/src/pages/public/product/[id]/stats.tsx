@@ -46,7 +46,7 @@ const ProductStatPage = (props: Props) => {
 	const debouncedStartDate = useDebounce<string>(startDate, 200);
 	const debouncedEndDate = useDebounce<string>(endDate, 200);
 
-	const [buttonId, setButtonId] = useState<number | null>(null);
+	const [buttonId, setButtonId] = useState<number | undefined>(undefined);
 
 	if (product === null) {
 		return (
