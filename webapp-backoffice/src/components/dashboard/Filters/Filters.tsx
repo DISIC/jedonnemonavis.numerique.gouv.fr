@@ -47,11 +47,6 @@ type FormError = {
 	endDate?: boolean;
 };
 
-const defaultErrors = {
-	startDate: false,
-	endDate: false
-};
-
 const GenericFilters = <T extends FilterSectionKey>({
 	filterKey,
 	sticky,
@@ -71,10 +66,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 	);
 	const [errors, setErrors] = useState<FormError>({});
 	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
-	const [buttonId, setButtonId] = useState<number | undefined>();
 
 	const router = useRouter();
-	const productId = router.query.id;
 
 	useEffect(() => {
 		if (sectionFilters.dateShortcut) {
@@ -304,45 +297,15 @@ const GenericFilters = <T extends FilterSectionKey>({
 						</Button>
 					</div>
 				) : null}
-				{'actionType' in sectionFilters &&
-					sectionFilters.actionType.length > 0 && (
-						<ul
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
-								classes.tagContainer
-							)}
-						>
-							{sectionFilters.actionType.map((action, index) => (
-								<li key={index}>
-									<Tag
-										dismissible
-										className={cx(classes.tagFilter)}
-										title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
-										nativeButtonProps={{
-											onClick: () => {
-												setActionsFilter(
-													actionsFilter.filter(e => e !== action)
-												);
-												if ('actionType' in filters[filterKey])
-													updateFilters({
-														...filters,
-														[filterKey]: {
-															actionType: filters[filterKey].actionType.filter(
-																e => e !== action
-															)
-														}
-													});
-											}
-										}}
-									>
-										<p>{filtersLabel.find(f => f.value === action)?.label}</p>
-									</Tag>
-								</li>
-							))}
-						</ul>
-					)}
-				{'filters' in sectionFilters && renderTags && (
-					<div className={fr.cx('fr-col-12', 'fr-col--bottom', 'fr-py-0')}>
+				{renderTags && (
+					<div
+						className={fr.cx(
+							'fr-col-12',
+							'fr-col--bottom',
+							'fr-py-0',
+							'fr-mt-2v'
+						)}
+					>
 						{renderTags()}
 					</div>
 				)}

@@ -17,6 +17,7 @@ import { useSession } from 'next-auth/react';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import { Autocomplete } from '@mui/material';
+import Tag from '@codegouvfr/react-dsfr/Tag';
 
 interface Props {
 	product: Product;
@@ -82,6 +83,42 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			/>
 		]) || [];
 
+	const renderTags = () => {
+		return (
+			<ul
+				className={cx(
+					fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+					classes.tagContainer
+				)}
+			>
+				{filters.productActivityLogs.actionType.map((action, index) => (
+					<li key={index}>
+						<Tag
+							dismissible
+							className={cx(classes.tagFilter)}
+							title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+							nativeButtonProps={{
+								onClick: () => {
+									updateFilters({
+										...filters,
+										productActivityLogs: {
+											...filters.productActivityLogs,
+											actionType: filters.productActivityLogs.actionType.filter(
+												e => e !== action
+											)
+										}
+									});
+								}
+							}}
+						>
+							<p>{filtersLabel.find(f => f.value === action)?.label}</p>
+						</Tag>
+					</li>
+				))}
+			</ul>
+		);
+	};
+
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
@@ -95,7 +132,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			</Head>
 			<div className={classes.container}>
 				<h1 className={fr.cx('fr-mb-10v')}>Historique d'activité</h1>
-				<GenericFilters filterKey="productActivityLogs">
+				<GenericFilters filterKey="productActivityLogs" renderTags={renderTags}>
 					<Autocomplete
 						id="filter-action"
 						disablePortal
@@ -262,6 +299,20 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 				}
 			}
 		}
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
 	}
 });
 
