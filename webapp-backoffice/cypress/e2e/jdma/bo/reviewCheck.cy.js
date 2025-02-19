@@ -18,13 +18,16 @@ describe('jdma-answer-check', () => {
 
 	it('should activate the stats public page', () => {
 		cy.get('a[href*="/administration/dashboard/product/5/stats"]')
+			.first()
 			.click()
 			.then(() => {
 				cy.get('button')
 					.contains('Rendre ces statistiques publiques')
+					.first()
 					.click()
 					.then(() => {
 						cy.get('.fr-toggle__label')
+							.first()
 							.click()
 							.then(() => {
 								cy.get('a[href="/public/product/5/stats"]').then($link => {
@@ -43,13 +46,16 @@ describe('jdma-answer-check', () => {
 
 	it('should deactivate the stats public page', () => {
 		cy.get('a[href*="/administration/dashboard/product/5/stats"]')
+			.first()
 			.click()
 			.then(() => {
 				cy.get('button')
 					.contains('Rendre ces statistiques publiques')
+					.first()
 					.click()
 					.then(() => {
 						cy.get('.fr-toggle__label')
+							.first()
 							.click()
 							.then(() => {
 								cy.get('a[href="/public/product/5/stats"]').should('not.exist');
