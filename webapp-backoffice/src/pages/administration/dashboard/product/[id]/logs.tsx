@@ -173,19 +173,6 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						)}
 					/>
 				</GenericFilters>
-				{/* <div className={cx(classes.filterContainer)}>
-					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
-					<ActivityFilters
-						currentStartDate={startDate}
-						currentEndDate={endDate}
-						onChange={(startDate, endDate) => {
-							setStartDate(startDate);
-							setEndDate(endDate);
-						}}
-						updateFilters={updateFilters}
-						filters={filters}
-					/>
-				</div> */}
 				{isLoading || fullEvents?.data.length === 0 ? (
 					<div
 						className={cx(

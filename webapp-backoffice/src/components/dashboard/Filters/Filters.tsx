@@ -39,7 +39,7 @@ type FiltersProps<T extends FilterSectionKey> = {
 	sticky?: Boolean;
 	children?: React.ReactNode;
 	topRight?: React.ReactNode;
-	renderTags?: () => (React.JSX.Element | null)[] | null;
+	renderTags?: () => (React.JSX.Element | null)[] | React.JSX.Element | null;
 };
 
 type FormError = {
