@@ -14,17 +14,20 @@ export type Filters = {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
 		actionType: TypeAction[];
 	};
 	productReviews: {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
 	};
 	productStats: {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
 		buttonId: number | undefined;
 	};
 	filterEntity: { label: string; value: number }[];
@@ -62,18 +65,21 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		productActivityLogs: {
 			currentStartDate: '',
 			currentEndDate: '',
-			dateShortcut: undefined,
+			dateShortcut: 'one-year',
+			hasChanged: false,
 			actionType: []
 		},
 		productReviews: {
 			currentStartDate: '',
 			currentEndDate: '',
-			dateShortcut: undefined
+			dateShortcut: 'one-year',
+			hasChanged: false
 		},
 		productStats: {
 			currentStartDate: '',
 			currentEndDate: '',
-			dateShortcut: undefined,
+			dateShortcut: 'one-year',
+			hasChanged: false,
 			buttonId: undefined
 		},
 		filterEntity: [],

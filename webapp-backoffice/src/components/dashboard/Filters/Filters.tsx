@@ -2,7 +2,8 @@ import { Filters, useFilters } from '@/src/contexts/FiltersContext';
 import { push } from '@socialgouv/matomo-next';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { TypeAction } from '@prisma/client';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -44,9 +45,9 @@ type FiltersProps<T extends FilterSectionKey> = {
 	filterKey: T;
 };
 
-type FormErrors = {
-	startDate: boolean;
-	endDate: boolean;
+type FormError = {
+	startDate?: boolean;
+	endDate?: boolean;
 };
 
 const defaultErrors = {
@@ -67,19 +68,21 @@ const GenericFilters = <T extends FilterSectionKey>({
 
 	// Récupère la section spécifique en fonction de filterKey
 	const sectionFilters = filters[filterKey];
-	const [startDate, setStartDate] = useState<string>(sectionFilters.currentStartDate);
-	const [endDate, setEndDate] = useState<string>(sectionFilters.currentEndDate);
-	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
-	const [inputValue, setInputValue] = useState<string[] | undefined>(
-		"actionType" in sectionFilters ? sectionFilters.actionType : []
+	const [localStartDate, setLocalStartDate] = useState(
+		sectionFilters.currentStartDate
 	);
+	const [localEndDate, setLocalEndDate] = useState(
+		sectionFilters.currentEndDate
+	);
+	const [errors, setErrors] = useState<FormError>({});
+	const [inputValue, setInputValue] = useState<string | undefined>();
 	const [filtersApplied, setFiltersApplied] = useState(false);
 	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
 	const [buttonId, setButtonId] = useState<number | undefined>();
 
 	const router = useRouter();
 	const productId = router.query.id;
-	
+
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery(
 			{
@@ -92,78 +95,79 @@ const GenericFilters = <T extends FilterSectionKey>({
 				enabled: !!productId && !isNaN(parseInt(productId as string))
 			}
 		);
-	
-	useEffect(() => {
-		if (shortcutDateSelected) {
-			const dates = getDatesByShortCut(shortcutDateSelected);
 
-			if (dates.startDate !== startDate) {
-				setStartDate(dates.startDate);
-			}
-			if (dates.endDate !== endDate) {
-				setEndDate(dates.endDate);
-			}
+	useEffect(() => {
+		if (sectionFilters.dateShortcut) {
+			const { startDate, endDate } = getDatesByShortCut(
+				sectionFilters.dateShortcut
+			);
 
 			if (
-				dates.startDate !== sectionFilters.currentStartDate ||
-				dates.endDate !== sectionFilters.currentEndDate
-			)
-			updateFilters({
-				...filters,
-				[filterKey]: {
-					...filters[filterKey],
-					currentStartDate: startDate,
-					currentEndDate: endDate
-				}
-			});
-		}
-	}, [shortcutDateSelected]);
+				startDate !== sectionFilters.currentStartDate ||
+				endDate !== sectionFilters.currentEndDate
+			) {
+				setLocalStartDate(startDate);
+				setLocalEndDate(endDate);
 
-	const validateDateFormat = (date: string) => {
-		const regex = /^\d{4}-\d{2}-\d{2}$/;
-		return regex.test(date);
-	};
-	
-	const submit = () => {
-		const startDateValid = validateDateFormat(startDate);
-		const endDateValid = validateDateFormat(endDate);
-		let newErrors = { startDate: false, endDate: false };
-
-		if (!startDateValid) {
-			newErrors.startDate = true;
-		}
-		if (!endDateValid) {
-			newErrors.endDate = true;
-		}
-
-		setErrors(newErrors);
-
-		if (inputValue) {
-			updateFilters({
-				...filters,
-				[filterKey]: {
-					...filters[filterKey],
-					actionType: inputValue as TypeAction
-				}
-			});
-		}
-
-		if (startDateValid && endDateValid) {
-			if (startDate !== sectionFilters.currentStartDate || endDate !== sectionFilters.currentEndDate) {
 				updateFilters({
-					...filters,
 					[filterKey]: {
-						...filters[filterKey],
+						...sectionFilters,
 						currentStartDate: startDate,
 						currentEndDate: endDate
 					}
 				});
-
 			}
 		}
+	}, [sectionFilters.dateShortcut]);
 
-		setFiltersApplied(true);
+	const isValidDate = (date: string) => {
+		if (!date) return false;
+		return /^\d{4}-\d{2}-\d{2}$/.test(date);
 	};
+
+	const updateDateFilter = useCallback(
+		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
+			updateFilters({
+				[filterKey]: {
+					...filters[filterKey],
+					[key]: value,
+					hasChanged: true,
+					dateShortcut: undefined
+				}
+			});
+		}, 500),
+		[updateFilters, filterKey, filters]
+	);
+
+	const handleDateChange =
+		(key: 'currentStartDate' | 'currentEndDate') =>
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const newDate = e.target.value;
+
+			if (key === 'currentStartDate') {
+				setLocalStartDate(newDate);
+			} else {
+				setLocalEndDate(newDate);
+			}
+
+			if (!isValidDate(newDate)) {
+				setErrors(prev => ({
+					...prev,
+					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
+						'Format attendu : JJ/MM/AAAA'
+				}));
+			} else {
+				setErrors(prev => ({
+					...prev,
+					[key === 'currentStartDate' ? 'startDate' : 'endDate']: undefined
+				}));
+				updateDateFilter(key, newDate);
+			}
+		};
+
+	useEffect(() => {
+		console.log('sectionFilters : ', sectionFilters);
+	}, [sectionFilters]);
 
 	return (
 		<div className={cx(classes.filterContainer)}>
@@ -184,19 +188,25 @@ const GenericFilters = <T extends FilterSectionKey>({
 										id={`radio-${ds.name}`}
 										type="radio"
 										name={ds.name}
-										checked={shortcutDateSelected === ds.name}
+										checked={sectionFilters.dateShortcut === ds.name}
 										onChange={() => {
-											setShortcutDateSelected(ds.name);
-											setFilterHasChanged(true);
+											updateFilters({
+												...filters,
+												[filterKey]: {
+													...filters[filterKey],
+													hasChanged: true,
+													dateShortcut: ds.name
+												}
+											});
 											push(['trackEvent', 'Logs', 'Filtre-Date']);
 										}}
 									/>
 									<label
 										className={cx(
 											fr.cx('fr-tag', 'fr-mt-2v'),
-	
+
 											classes.dateShortcutTag,
-											shortcutDateSelected === ds.name
+											sectionFilters.dateShortcut === ds.name
 												? classes.dateShortcutTagSelected
 												: undefined
 										)}
@@ -204,8 +214,14 @@ const GenericFilters = <T extends FilterSectionKey>({
 										tabIndex={0}
 										onKeyDown={e => {
 											if (e.key === 'Enter' || e.key === ' ') {
-												setShortcutDateSelected(ds.name);
-												setFilterHasChanged(true);
+												updateFilters({
+													...filters,
+													[filterKey]: {
+														...filters[filterKey],
+														hasChanged: true,
+														dateShortcut: ds.name
+													}
+												});
 												push(['trackEvent', 'Logs', 'Filtre-Date']);
 											}
 										}}
@@ -218,86 +234,63 @@ const GenericFilters = <T extends FilterSectionKey>({
 					</fieldset>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-col-lg-6')}>
-					<form
-						className={cx(fr.cx('fr-grid-row'), classes.formContainer)}
-						onSubmit={e => {
-							e.preventDefault();
-							submit();
-							push(['trackEvent', 'Logs', 'Filtre-Date']);
-						}}
-					>
-						<div className={fr.cx('fr-col', 'fr-col-5')}>
+					<form className={cx(fr.cx('fr-grid-row'), classes.formContainer)}>
+						<div className={fr.cx('fr-col', 'fr-col-6')}>
 							<Input
 								label="Date de début"
 								nativeInputProps={{
 									type: 'date',
-									value: startDate,
-									onChange: e => {
-										setShortcutDateSelected(undefined);
-										setStartDate(e.target.value);
-										setFilterHasChanged(true);
-									}
+									value: localStartDate,
+									onChange: handleDateChange('currentStartDate')
 								}}
 								state={errors.startDate ? 'error' : 'default'}
 								stateRelatedMessage={
 									errors.startDate ? (
-										<span role="alert">format attendu : JJ/MM/AAAA</span>
+										<span role="alert">{errors.startDate}</span>
 									) : null
 								}
 							/>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-5')}>
+						<div className={fr.cx('fr-col', 'fr-col-6')}>
 							<Input
 								label="Date de fin"
 								nativeInputProps={{
 									type: 'date',
-									value: endDate,
-									onChange: e => {
-										setShortcutDateSelected(undefined);
-										setEndDate(e.target.value);
-										setFilterHasChanged(true);
-									}
+									value: localEndDate,
+									onChange: handleDateChange('currentEndDate')
 								}}
 								state={errors.endDate ? 'error' : 'default'}
 								stateRelatedMessage={
 									errors.endDate ? (
-										<span role="alert">format attendu : JJ/MM/AAAA</span>
+										<span role="alert">{errors.endDate}</span>
 									) : null
 								}
 							/>
 						</div>
-						<div className={fr.cx('fr-col', 'fr-col-2')}>
-							<div className={cx(classes.applyContainer)}>
-								<Button
-									type="submit"
-									iconId="ri-search-2-line"
-									title="Appliquer le changement de dates"
-								>
-									<span className={fr.cx('fr-sr-only')}>
-										Appliquer le changement de dates
-									</span>
-								</Button>
-							</div>
-						</div>
 					</form>
 				</div>
-				{filterKey === 'productStats' && buttonResults?.data && buttonResults.data.length > 1 &&
-					(
+				{filterKey === 'productStats' &&
+					buttonResults?.data &&
+					buttonResults.data.length > 1 && (
 						<div className={fr.cx('fr-col', 'fr-col-6')}>
 							<Select
 								label="Sélectionner une source"
 								nativeSelectProps={{
-									value: 'buttonId' in filters[filterKey] ? filters[filterKey].buttonId : undefined,
+									value:
+										'buttonId' in filters[filterKey]
+											? filters[filterKey].buttonId
+											: undefined,
 									onChange: e => {
 										setButtonId(
 											e.target.value !== 'undefined'
 												? parseInt(e.target.value)
 												: undefined
 										);
-										if('buttonId' in filters[filterKey])
+										if ('buttonId' in filters[filterKey])
 											updateFilters({
 												...filters,
 												[filterKey]: {
+													...filters[filterKey],
 													buttonId: parseInt(e.target.value)
 												}
 											});
@@ -315,9 +308,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 								})}
 							</Select>
 						</div>
-					)
-				}
-				{'actionType' in sectionFilters &&
+					)}
+				{'actionType' in sectionFilters && (
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-mb-4v')}>
 						<Autocomplete
 							id="filter-action"
@@ -326,16 +318,20 @@ const GenericFilters = <T extends FilterSectionKey>({
 							options={filtersLabel}
 							onChange={(_, option) => {
 								if (option) {
-									setInputValue(option.value as TypeAction);
 									setFilterHasChanged(true);
 									setActionsFilter([...actionsFilter, option.value]);
-									if('actionType' in filters[filterKey])
-									updateFilters({
-										...filters,
-										[filterKey]: {
-											actionType: [...filters[filterKey].actionType, option.value]
-										}
-									});
+									if ('actionType' in filters[filterKey])
+										updateFilters({
+											...filters,
+											[filterKey]: {
+												...filters[filterKey],
+												hasChanged: true,
+												actionType: [
+													...filters[filterKey].actionType,
+													option.value
+												]
+											}
+										});
 								}
 							}}
 							inputValue={inputValue}
@@ -358,8 +354,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 							)}
 						/>
 					</div>
-				}
-				{filterHasChanged ? (
+				)}
+				{sectionFilters.hasChanged ? (
 					<div
 						className={cx(
 							fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mt-8v'),
@@ -372,14 +368,16 @@ const GenericFilters = <T extends FilterSectionKey>({
 							iconId="ri-refresh-line"
 							onClick={() => {
 								setShortcutDateSelected('one-year');
-								setStartDate(sectionFilters.currentStartDate);
-								setEndDate(sectionFilters.currentEndDate);
+								setErrors({});
 								setInputValue(undefined);
 								updateFilters({
 									...filters,
 									[filterKey]: {
-										...filters[filterKey],
-										actionType: []
+										dateShortcut: 'one-year',
+										hasChanged: false,
+										...('actionType' in filters[filterKey] && {
+											actionType: []
+										})
 									}
 								});
 								setFiltersApplied(false);
@@ -387,47 +385,49 @@ const GenericFilters = <T extends FilterSectionKey>({
 						>
 							Réinitialiser les filtres
 						</Button>
-						<Button priority="primary" disabled={filtersApplied} onClick={submit}>
-							{filtersApplied ? 'Filtres appliqués' : 'Appliquer les filtres'}
-						</Button>
 					</div>
 				) : null}
-				{'actionType' in sectionFilters && sectionFilters.actionType.length > 0 && (
-					<ul
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
-							classes.tagContainer
-						)}
-					>
-						{sectionFilters.actionType.map((action, index) => (
-							<li key={index}>
-								<Tag
-									dismissible
-									className={cx(classes.tagFilter)}
-									title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
-									nativeButtonProps={{
-										onClick: () => {
-											setActionsFilter(actionsFilter.filter(e => e !== action));
-											setInputValue('');
-											if('actionType' in filters[filterKey])
-											updateFilters({
-												...filters,
-												[filterKey]: {
-													actionType: filters[filterKey].actionType.filter(e => e !== action)
-												}
-											});
-										}
-									}}
-								>
-									<p>{filtersLabel.find(f => f.value === action)?.label}</p>
-								</Tag>
-							</li>
-						))}
-					</ul>
-				)}
+				{'actionType' in sectionFilters &&
+					sectionFilters.actionType.length > 0 && (
+						<ul
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+								classes.tagContainer
+							)}
+						>
+							{sectionFilters.actionType.map((action, index) => (
+								<li key={index}>
+									<Tag
+										dismissible
+										className={cx(classes.tagFilter)}
+										title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+										nativeButtonProps={{
+											onClick: () => {
+												setActionsFilter(
+													actionsFilter.filter(e => e !== action)
+												);
+												setInputValue('');
+												if ('actionType' in filters[filterKey])
+													updateFilters({
+														...filters,
+														[filterKey]: {
+															actionType: filters[filterKey].actionType.filter(
+																e => e !== action
+															)
+														}
+													});
+											}
+										}}
+									>
+										<p>{filtersLabel.find(f => f.value === action)?.label}</p>
+									</Tag>
+								</li>
+							))}
+						</ul>
+					)}
 			</div>
 		</div>
-	)
+	);
 };
 
 const useStyles = tss.create({

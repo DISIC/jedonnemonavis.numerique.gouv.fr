@@ -129,6 +129,9 @@ export const userEventRouter = router({
 				input;
 			const skip = (page - 1) * limit;
 
+			console.log('startDate : ', startDate)
+			console.log('endDate : ', endDate)
+
 			const whereCondition: Prisma.UserEventWhereInput = {
 				OR: [
 					{ product_id },
@@ -170,8 +173,6 @@ export const userEventRouter = router({
 				}),
 				ctx.prisma.userEvent.count({ where: whereCondition })
 			]);
-
-			console.log(events);
 
 			return {
 				data: events,
