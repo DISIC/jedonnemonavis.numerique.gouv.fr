@@ -285,7 +285,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const queryParams = new URLSearchParams(url.split("?")[1]);
       const step = parseInt(queryParams.get("step") as string) || 0;
       setCurrentStep(step);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const isFirefox = navigator.userAgent.includes("Firefox");
+      if (isFirefox) {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     };
     router.events.on("routeChangeStart", handleRouteChange);
     return () => {
@@ -333,9 +339,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
               width={40}
               height={40}
             />
-            <h1
-              className={fr.cx("fr-mb-0", "fr-ml-5v")}
-            >
+            <h1 className={fr.cx("fr-mb-0", "fr-ml-5v")}>
               {t("success_block.title")}
             </h1>
           </div>
@@ -453,9 +457,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div className={classes.blueSection}>
           {!isFormSubmitted ? (
             opinion.satisfaction ? (
-              <h1>
-                {t(`${currentSteps[currentStep].name}`)}
-              </h1>
+              <h1>{t(`${currentSteps[currentStep].name}`)}</h1>
             ) : (
               <h1>{t("first_block.title")}</h1>
             )
