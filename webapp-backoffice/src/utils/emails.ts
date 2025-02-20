@@ -47,7 +47,7 @@ function getEmailWithLayout(content: string) {
 				</div>
 				${content}
 				<p>
-					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
+					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:contact.jdma@design.numerique.gouv.fr">contact.jdma@design.numerique.gouv.fr</a>.<br/>
 					La Brigade d'Intervention du Numérique (BIN).
 				</p>
 				<div class="footer">
