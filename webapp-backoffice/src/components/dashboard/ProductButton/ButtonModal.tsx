@@ -149,7 +149,7 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<p>
-							Pour installer le bouton JDMA et récolter les avis, copiez-collez
+							Pour installer le bouton JDMA et récolter les avis, copier-collez
 							ce code dans votre service numérique.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
