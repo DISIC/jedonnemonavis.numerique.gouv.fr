@@ -43,6 +43,8 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const currentSteps =
     process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
 
+  const [isMobile, setIsMobile] = useState(false);
+
   const isInIframe = router.query.iframe === "true";
 
   const { classes, cx } = useStyles({ isInIframe });
@@ -285,7 +287,13 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       const queryParams = new URLSearchParams(url.split("?")[1]);
       const step = parseInt(queryParams.get("step") as string) || 0;
       setCurrentStep(step);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      const isFirefox = navigator.userAgent.includes("Firefox");
+      if (isFirefox) {
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     };
     router.events.on("routeChangeStart", handleRouteChange);
     return () => {
@@ -294,6 +302,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }, [router.events]);
 
   React.useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
     resetForm();
   }, [router.isReady]);
 
@@ -325,20 +334,20 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       // LAST SCREEN
       return (
         <div>
-          <div className={classes.titleSuccess}>
-            <Image
-              alt=""
-              src="/Demarches/assets/icon-check.svg"
-              title="Icone - Merci pour votre aide"
-              width={40}
-              height={40}
-            />
-            <h1
-              className={fr.cx("fr-mb-0", "fr-ml-5v")}
-            >
-              {t("success_block.title")}
-            </h1>
-          </div>
+          {!isMobile && (
+            <div className={classes.titleSuccess}>
+              <Image
+                alt=""
+                src="/Demarches/assets/icon-check.svg"
+                title="Icone - Merci pour votre aide"
+                width={40}
+                height={40}
+              />
+              <h1 className={fr.cx("fr-mb-0", "fr-ml-5v")}>
+                {t("success_block.title")}
+              </h1>
+            </div>
+          )}
           <p role="status" aria-live="polite">
             {t("success_block.thanks")}
           </p>
@@ -422,8 +431,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
                   localStorage.removeItem("userId");
                   setIsFormSubmitted(true);
                 }
-
-                console.log("change step");
               }}
             />
           ) : (
@@ -453,9 +460,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <div className={classes.blueSection}>
           {!isFormSubmitted ? (
             opinion.satisfaction ? (
-              <h1>
-                {t(`${currentSteps[currentStep].name}`)}
-              </h1>
+              <h1>{t(`${currentSteps[currentStep].name}`)}</h1>
             ) : (
               <h1>{t("first_block.title")}</h1>
             )
