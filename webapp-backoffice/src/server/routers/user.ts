@@ -366,7 +366,9 @@ export const userRouter = router({
 				data: {
 					...newUser,
 					email: newUser.email.toLowerCase(),
-					active: true
+					active: true,
+					notifications: true,
+					notifications_frequency: 'weekly'
 				}
 			});
 
@@ -502,7 +504,9 @@ export const userRouter = router({
 				let createdUser = await ctx.prisma.user.create({
 					data: {
 						...newUser,
-						email: newUser.email.toLowerCase()
+						email: newUser.email.toLowerCase(),
+						notifications: true,
+						notifications_frequency: 'weekly'
 					}
 				});
 

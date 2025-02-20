@@ -109,7 +109,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 												}
 											},
 											{
-												label: 'Hebdo (tous les lundi à 08h heure de Paris)',
+												label: 'Hebdo (tous les lundis à 08h heure de Paris)',
 												nativeInputProps: {
 													value: user.notifications_frequency,
 													checked: user.notifications_frequency === 'weekly',
@@ -119,7 +119,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 											},
 											{
 												label:
-													'Mensuelle (tous les premiers lundi de chaque mois à 08h heure de Paris)',
+													'Mensuelle (tous les premiers lundis de chaque mois à 08h heure de Paris)',
 												nativeInputProps: {
 													value: user.notifications_frequency,
 													checked: user.notifications_frequency === 'monthly',

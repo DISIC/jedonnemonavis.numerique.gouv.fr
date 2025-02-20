@@ -6,12 +6,18 @@ import { getServerSideProps } from '.';
 import { tss } from 'tss-react/dsfr';
 import { trpc } from '@/src/utils/trpc';
 import { Table } from '@codegouvfr/react-dsfr/Table';
-import { getNbPages, handleActionTypeDisplay } from '@/src/utils/tools';
+import {
+	filtersLabel,
+	getNbPages,
+	handleActionTypeDisplay
+} from '@/src/utils/tools';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useSession } from 'next-auth/react';
-import ActivityFilters from '@/src/components/dashboard/Logs/Filters';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { Autocomplete } from '@mui/material';
+import Tag from '@codegouvfr/react-dsfr/Tag';
 
 interface Props {
 	product: Product;
@@ -24,6 +30,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 	const [endDate, setEndDate] = useState('');
 	const [currentPage, setCurrentPage] = useState(1);
 	const { data: session } = useSession();
+	const [inputValue, setInputValue] = useState<string | undefined>();
 
 	const { filters, updateFilters } = useFilters();
 
@@ -32,9 +39,9 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			product_id: product.id,
 			limit: 10,
 			page: currentPage,
-			filterAction: filters.filterAction,
-			startDate,
-			endDate
+			filterAction: filters.productActivityLogs.actionType,
+			startDate: filters.productActivityLogs.currentStartDate,
+			endDate: filters.productActivityLogs.currentEndDate
 		},
 		{
 			initialData: {
@@ -45,20 +52,6 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			}
 		}
 	);
-
-	const { data: countNewLogs } = trpc.userEvent.countNewLogs.useQuery(
-		{
-			product_id: product.id,
-			user_id: session?.user.id ? parseInt(session?.user.id) : undefined
-		},
-		{
-			initialData: {
-				count: 0
-			}
-		}
-	);
-
-	console.log('count logs : ', countNewLogs);
 
 	const eventsCount = fullEvents?.pagination.total;
 
@@ -90,6 +83,42 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			/>
 		]) || [];
 
+	const renderTags = () => {
+		return (
+			<ul
+				className={cx(
+					fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+					classes.tagContainer
+				)}
+			>
+				{filters.productActivityLogs.actionType.map((action, index) => (
+					<li key={index}>
+						<Tag
+							dismissible
+							className={cx(classes.tagFilter)}
+							title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+							nativeButtonProps={{
+								onClick: () => {
+									updateFilters({
+										...filters,
+										productActivityLogs: {
+											...filters.productActivityLogs,
+											actionType: filters.productActivityLogs.actionType.filter(
+												e => e !== action
+											)
+										}
+									});
+								}
+							}}
+						>
+							<p>{filtersLabel.find(f => f.value === action)?.label}</p>
+						</Tag>
+					</li>
+				))}
+			</ul>
+		);
+	};
+
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
@@ -102,24 +131,48 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				/>
 			</Head>
 			<div className={classes.container}>
-				<h1>Historique d'activité</h1>
-				<p>
-					Cet historique existe depuis Novembre 2024. Les activités antérieur à
-					cette date ne seront pas affichées.
-				</p>
-				<div className={cx(classes.filterContainer)}>
-					<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
-					<ActivityFilters
-						currentStartDate={startDate}
-						currentEndDate={endDate}
-						onChange={(startDate, endDate) => {
-							setStartDate(startDate);
-							setEndDate(endDate);
+				<h1 className={fr.cx('fr-mb-10v')}>Historique d'activité</h1>
+				<GenericFilters filterKey="productActivityLogs" renderTags={renderTags}>
+					<Autocomplete
+						id="filter-action"
+						disablePortal
+						sx={{ width: '100%' }}
+						options={filtersLabel}
+						onChange={(_, option) => {
+							if (option) {
+								updateFilters({
+									...filters,
+									['productActivityLogs']: {
+										...filters['productActivityLogs'],
+										hasChanged: true,
+										actionType: [
+											...filters['productActivityLogs'].actionType,
+											option.value as TypeAction
+										]
+									}
+								});
+							}
 						}}
-						updateFilters={updateFilters}
-						filters={filters}
+						inputValue={inputValue}
+						value={filtersLabel.find(f => f.value === inputValue) || null}
+						onInputChange={(_, newInputValue) => {
+							setInputValue(newInputValue);
+						}}
+						renderInput={params => (
+							<div ref={params.InputProps.ref}>
+								<label htmlFor="filter-action" className="fr-label">
+									Filtrer par action
+								</label>
+								<input
+									{...params.inputProps}
+									className={params.inputProps.className + ' fr-input'}
+									placeholder="Toutes les actions"
+									type="search"
+								/>
+							</div>
+						)}
 					/>
-				</div>
+				</GenericFilters>
 				{isLoading || fullEvents?.data.length === 0 ? (
 					<div
 						className={cx(
@@ -174,6 +227,10 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						)}
 					</>
 				)}
+				<p>
+					Cet historique existe depuis Novembre 2024. Les activités antérieures
+					à cette date ne seront pas affichées.
+				</p>
 			</div>
 		</ProductLayout>
 	);
@@ -229,6 +286,20 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 				}
 			}
 		}
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
 	}
 });
 

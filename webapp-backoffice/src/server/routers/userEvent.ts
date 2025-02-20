@@ -119,7 +119,7 @@ export const userEventRouter = router({
 				product_id: z.number().optional(),
 				page: z.number(),
 				limit: z.number(),
-				filterAction: z.nativeEnum(TypeAction).optional(),
+				filterAction: z.array(z.nativeEnum(TypeAction)),
 				startDate: z.string().optional(),
 				endDate: z.string().optional()
 			})
@@ -128,6 +128,9 @@ export const userEventRouter = router({
 			const { product_id, page, limit, filterAction, startDate, endDate } =
 				input;
 			const skip = (page - 1) * limit;
+
+			console.log('startDate : ', startDate)
+			console.log('endDate : ', endDate)
 
 			const whereCondition: Prisma.UserEventWhereInput = {
 				OR: [
@@ -143,9 +146,8 @@ export const userEventRouter = router({
 					}
 				],
 				action: {
-					in: ALL_ACTIONS
-				},
-				...(filterAction && { action: filterAction })
+					in: filterAction?.length > 0 ? filterAction : ALL_ACTIONS
+				}
 			};
 
 			if (startDate && endDate) {
@@ -171,8 +173,6 @@ export const userEventRouter = router({
 				}),
 				ctx.prisma.userEvent.count({ where: whereCondition })
 			]);
-
-			console.log(events);
 
 			return {
 				data: events,

@@ -149,7 +149,7 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<p>
-							Pour installer le bouton JDMA et récolter les avis, copier-coller
+							Pour installer le bouton JDMA et récolter les avis, copiez-collez
 							ce code dans votre service numérique.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
@@ -191,14 +191,27 @@ const ButtonModal = (props: Props) => {
 									]}
 								/>
 							</div>
-							{['clair', 'sombre'].map((theme) => {
+							{['clair', 'sombre'].map(theme => {
 								return (
 									<>
-										<div className={fr.cx('fr-col', 'fr-col-6', theme === 'clair' ? 'fr-pr-3v' : 'fr-pl-3v')}>
+										<div
+											className={cx(
+												theme === 'clair'
+													? classes.paddingRight
+													: classes.paddingLeft,
+												fr.cx('fr-col-12', 'fr-col-md-6')
+											)}
+										>
 											<div className={fr.cx('fr-grid-row')}>
 												<h5>Thème {theme}</h5>
 												<div className={fr.cx('fr-col', 'fr-col-12')}>
-													<div className={cx(classes.btnImgContainer, theme !== 'clair' && classes.blackContainer, fr.cx('fr-card', 'fr-p-6v'))}>
+													<div
+														className={cx(
+															classes.btnImgContainer,
+															theme !== 'clair' && classes.blackContainer,
+															fr.cx('fr-card', 'fr-p-6v')
+														)}
+													>
 														<Image
 															alt="bouton-je-donne-mon-avis"
 															src={`/assets/bouton-${buttonColor}-${theme}.svg`}
@@ -206,7 +219,15 @@ const ButtonModal = (props: Props) => {
 															width={200}
 															height={85}
 														/>
-														<p className={cx(classes.smallText, theme !== 'clair' && classes.darkerText, fr.cx('fr-mb-0'))}>Prévisualisation du bouton</p>
+														<p
+															className={cx(
+																classes.smallText,
+																theme !== 'clair' && classes.darkerText,
+																fr.cx('fr-mb-0')
+															)}
+														>
+															Prévisualisation du bouton
+														</p>
 													</div>
 												</div>
 												<div className={fr.cx('fr-col', 'fr-col-12')}>
@@ -216,7 +237,11 @@ const ButtonModal = (props: Props) => {
 														iconPosition="right"
 														className={fr.cx('fr-mt-8v')}
 														onClick={() => {
-															navigator.clipboard.writeText(theme === 'clair' ? buttonCodeClair : buttonCodeSombre);
+															navigator.clipboard.writeText(
+																theme === 'clair'
+																	? buttonCodeClair
+																	: buttonCodeSombre
+															);
 															modal.close();
 															push(['trackEvent', 'BO - Product', `Copy-Code`]);
 														}}
@@ -231,7 +256,10 @@ const ButtonModal = (props: Props) => {
 															textArea
 															nativeTextAreaProps={{
 																name: 'button-code',
-																value: theme === 'clair' ? buttonCodeClair : buttonCodeSombre,
+																value:
+																	theme === 'clair'
+																		? buttonCodeClair
+																		: buttonCodeSombre,
 																contentEditable: false
 															}}
 														/>
@@ -240,7 +268,7 @@ const ButtonModal = (props: Props) => {
 											</div>
 										</div>
 									</>
-								)
+								);
 							})}
 						</div>
 					</div>
@@ -490,14 +518,30 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 		alignItems: 'center'
 	},
 	blackContainer: {
-		backgroundColor: fr.colors.getHex({ isDark: true }).decisions.background.default.grey.default
+		backgroundColor: fr.colors.getHex({ isDark: true }).decisions.background
+			.default.grey.default
+	},
+	paddingRight: {
+		paddingRight: '1rem',
+		[fr.breakpoints.down('md')]: {
+			paddingRight: '0'
+		}
+	},
+	paddingLeft: {
+		paddingLeft: '1rem',
+		[fr.breakpoints.down('md')]: {
+			paddingLeft: '0',
+			marginTop: '2rem'
+		}
 	},
 	smallText: {
-		color: fr.colors.getHex({ isDark: true }).decisions.background.alt.grey.active,
+		color: fr.colors.getHex({ isDark: true }).decisions.background.alt.grey
+			.active,
 		fontSize: '0.8rem'
 	},
 	darkerText: {
-		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey.active,
+		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey
+			.active
 	}
 }));
 

@@ -30,7 +30,9 @@ export async function createUserRequest(
 		data: {
 			...user,
 			email: user.email.toLowerCase(),
-			active: false
+			active: false,
+			notifications: true,
+			notifications_frequency: 'weekly'
 		}
 	});
 

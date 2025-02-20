@@ -1,5 +1,7 @@
 import { TypeAction } from '@prisma/client';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { DateShortcutName } from '../components/dashboard/Filters/Filters';
+import { ReviewFiltersType } from '../types/custom';
 
 export type Filters = {
 	users: {
@@ -9,13 +11,34 @@ export type Filters = {
 		validatedSearch: string;
 		filterOnlyAdmins: boolean;
 	};
+	productActivityLogs: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
+		actionType: TypeAction[];
+	};
+	productReviews: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
+		displayNew: boolean;
+		filters: ReviewFiltersType;
+	};
+	productStats: {
+		currentStartDate: string;
+		currentEndDate: string;
+		dateShortcut: DateShortcutName;
+		hasChanged: Boolean;
+		buttonId: number | undefined;
+	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
-	filterAction: TypeAction | undefined;
 };
 
 interface FiltersContextProps {
@@ -42,13 +65,42 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			validatedSearch: '',
 			filterOnlyAdmins: false
 		},
+		productActivityLogs: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: 'one-year',
+			hasChanged: false,
+			actionType: []
+		},
+		productReviews: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: 'one-year',
+			hasChanged: false,
+			displayNew: false,
+			filters: {
+				satisfaction: [],
+				comprehension: [],
+				needVerbatim: false,
+				needOtherDifficulties: false,
+				needOtherHelp: false,
+				help: [],
+				buttonId: []
+			}
+		},
+		productStats: {
+			currentStartDate: '',
+			currentEndDate: '',
+			dateShortcut: 'one-year',
+			hasChanged: false,
+			buttonId: undefined
+		},
 		filterEntity: [],
 		currentPage: 1,
 		filter: 'title',
 		filterOnlyFavorites: false,
 		filterOnlyArchived: false,
-		validatedSearch: '',
-		filterAction: undefined
+		validatedSearch: ''
 	});
 
 	const updateFilters = (newFilters: Partial<Filters>) => {

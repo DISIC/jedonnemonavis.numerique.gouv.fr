@@ -95,25 +95,17 @@ const ExportModal = (props: Props) => {
 		if (!hasExportsInProgress) {
 			return (
 				<>
-					<div role="status">
-						<Alert
-							description="
-					Vous pouvez télécharger l'ensemble des avis relatifs à cette démarche ou uniquement ceux correspondant aux critères spécifiés par les filtres que vous avez sélectionnés. Le délai de traitement des exports volumineux peut nécessiter jusqu'à une heure."
-							severity="info"
-							small
-							className={fr.cx('fr-mt-10v')}
-						/>
-					</div>
 					<RadioButtons
-						legend="Que souhaitez-vous télécharger ?"
+						legend="Mode d'exportation"
 						name="choice"
-						hintText={
-							(!startDate || !endDate) &&
-							`Les formats de date de vos filtres sont actuellement invalides`
-						}
+						hintText={`Le délais des exports volumineux peut prendre jusqu'à une heure. ${
+							!startDate || !endDate
+								? `Les formats de date de vos filtres sont actuellement invalides`
+								: ''
+						}`}
 						options={[
 							{
-								label: `Télécharger en fonction des filtres (${counts.countFiltered} avis)`,
+								label: `En fonction des filtres sélectionnés (${counts.countFiltered} avis)`,
 								nativeInputProps: {
 									value: 'filtered',
 									checked: choice === 'filtered',
@@ -124,7 +116,7 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Télécharger tous les avis (${counts.countAll} avis)`,
+								label: `Tous les avis (${counts.countAll} avis)`,
 								nativeInputProps: {
 									value: 'all',
 									checked: choice === 'all',
@@ -137,11 +129,12 @@ const ExportModal = (props: Props) => {
 						className={fr.cx('fr-mt-10v')}
 					/>
 					<RadioButtons
-						legend="Sous quel format souhaitez-vous télécharger ?"
+						legend="Format de fichier"
 						name="format"
 						options={[
 							{
-								label: `Format adapté pour Microsoft Excel`,
+								label: `Fichier .XLSX`,
+								hintText: `Format Excel`,
 								nativeInputProps: {
 									value: 'xls',
 									checked: format === 'xls',
@@ -151,7 +144,7 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Format CSV`,
+								label: `Fichier .CSV`,
 								nativeInputProps: {
 									value: 'csv',
 									checked: format === 'csv',
@@ -189,7 +182,7 @@ const ExportModal = (props: Props) => {
 			buttons={[
 				!hasExportsInProgress
 					? {
-							children: 'Valider',
+							children: 'Recevoir un lien de téléchargement par e-mail',
 							type: 'submit',
 							doClosesModal: false,
 							priority: 'primary',
@@ -209,7 +202,7 @@ const ExportModal = (props: Props) => {
 						}
 			]}
 			concealingBackdrop={false}
-			title={'Télécharger les avis'}
+			title={'Exporter les avis'}
 			size="large"
 		>
 			{getModalContent()}
