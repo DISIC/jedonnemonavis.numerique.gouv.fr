@@ -43,8 +43,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const currentSteps =
     process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
 
-  const [isMobile, setIsMobile] = useState(false);
-
   const isInIframe = router.query.iframe === "true";
 
   const { classes, cx } = useStyles({ isInIframe });
@@ -302,7 +300,6 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   }, [router.events]);
 
   React.useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
     resetForm();
   }, [router.isReady]);
 
@@ -334,20 +331,18 @@ export default function JDMAForm({ product }: JDMAFormProps) {
       // LAST SCREEN
       return (
         <div>
-          {!isMobile && (
-            <div className={classes.titleSuccess}>
-              <Image
-                alt=""
-                src="/Demarches/assets/icon-check.svg"
-                title="Icone - Merci pour votre aide"
-                width={40}
-                height={40}
-              />
-              <h1 className={fr.cx("fr-mb-0", "fr-ml-5v")}>
-                {t("success_block.title")}
-              </h1>
-            </div>
-          )}
+          <div className={cx(classes.titleSuccess)}>
+            <Image
+              alt=""
+              src="/Demarches/assets/icon-check.svg"
+              title="Icone - Merci pour votre aide"
+              width={40}
+              height={40}
+            />
+            <h1 className={fr.cx("fr-mb-0", "fr-ml-5v")}>
+              {t("success_block.title")}
+            </h1>
+          </div>
           <p role="status" aria-live="polite">
             {t("success_block.thanks")}
           </p>
@@ -605,6 +600,9 @@ const useStyles = tss
       justifyContent: "center",
       marginBottom: "2rem",
       alignItems: "center",
+      [fr.breakpoints.down("md")]: {
+        display: "none",
+      },
     },
     furtherSection: {
       h2: {

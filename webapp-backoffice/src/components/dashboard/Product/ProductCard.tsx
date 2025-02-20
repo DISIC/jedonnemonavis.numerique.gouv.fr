@@ -399,7 +399,8 @@ const ProductCard = ({
 				</div>
 			</OnConfirmModal>{' '}
 			<Link
-				href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={-1}
+				href={`/administration/dashboard/product/${product.id}/stats`}
+				tabIndex={-1}
 			>
 				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 					<div
@@ -432,22 +433,25 @@ const ProductCard = ({
 
 						<div
 							className={cx(
-								fr.cx('fr-col', 'fr-col-8', 'fr-col-md-6'),
+								fr.cx('fr-col-12', 'fr-col-8', 'fr-col-md-6'),
 								classes.titleSection
 							)}
 						>
 							<Link
-								href={`/administration/dashboard/product/${product.id}/stats`} tabIndex={0}
+								href={`/administration/dashboard/product/${product.id}/stats`}
+								tabIndex={0}
 								title={`Voir les statistiques pour le service ${product.title}`}
 								className={cx(classes.productLink, fr.cx('fr-link'))}
 							>
-								<span className={cx(classes.productTitle)}>{product.title}</span>
+								<span className={cx(classes.productTitle)}>
+									{product.title}
+								</span>
 							</Link>
 						</div>
 
 						<div
 							className={cx(
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
+								fr.cx('fr-col-12', 'fr-col-md-4'),
 								classes.entitySection
 							)}
 						>

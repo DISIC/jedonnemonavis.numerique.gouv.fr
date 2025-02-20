@@ -35,15 +35,21 @@ const NoButtonsPanel = (props: Props) => {
 					classes.maxWidth
 				)}
 			>
-				<div className={fr.cx('fr-col-3')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 					<Image
 						src="/assets/chat_picto.svg"
 						alt="C'est quoi un bouton JDMA ?"
 						width={120}
 						height={120}
+						className={cx(classes.image)}
 					/>
 				</div>
-				<div className={cx(fr.cx('fr-col-9'), classes.textContainer)}>
+				<div
+					className={cx(
+						fr.cx('fr-col-12', 'fr-col-md-9'),
+						classes.textContainer
+					)}
+				>
 					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
 						Le bouton JDMA se place sur votre service numérique pour récolter
 						l’avis de vos usagers.
@@ -51,15 +57,21 @@ const NoButtonsPanel = (props: Props) => {
 				</div>
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-pb-3v')}>
-				<div className={fr.cx('fr-col-3')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 					<Image
 						src="/assets/install_picto.svg"
 						alt="C'est quoi un bouton JDMA ?"
 						width={120}
 						height={120}
+						className={cx(classes.image)}
 					/>
 				</div>
-				<div className={cx(fr.cx('fr-col-9'), classes.textContainer)}>
+				<div
+					className={cx(
+						fr.cx('fr-col-12', 'fr-col-md-9'),
+						classes.textContainer
+					)}
+				>
 					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
 						Pour installer le bouton sur votre service numérique, insérez le
 						code HTML fourni par la plateforme et commencez à récolter des avis.
@@ -122,6 +134,13 @@ const useStyles = tss.create({
 	},
 	button: {
 		alignSelf: 'center'
+	},
+	image: {
+		[fr.breakpoints.down('md')]: {
+			alignSelf: 'center',
+			display: 'block',
+			margin: '0 auto'
+		}
 	}
 });
 
