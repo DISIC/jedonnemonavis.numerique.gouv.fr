@@ -95,16 +95,25 @@ describe('jdma-users', () => {
 			.within(() => {
 				cy.get(selectors.sideMenu.menuItem).contains('Accès').click();
 			});
-		//target the organization card under the correct organization and then remove the access from the service previously created
+
 		cy.get('h5')
 			.filter(':contains("e2e-jdma-entity-test")')
 			.should('exist')
-			.get('div.fr-card')
-			.contains('e2e-jdma-service-test-users')
-			.first()
-			.get('button')
-			.contains("Retirer l'accès")
-			.click();
+			.parent('li')
+			.find('.fr-card')
+			.within(() => {
+				cy.get('.fr-text--bold')
+					.contains('e2e-jdma-service-test-users')
+					.parents('.fr-card')
+					.find('button#button-options')
+					.click();
+			});
+		cy.contains("Retirer l'accès").click({ force: true });
+		cy.get('#user-switch-role-modal')
+			.should('be.visible')
+			.within(() => {
+				cy.contains('button', 'Confirmer').click();
+			});
 	});
 
 	it('should have removed the user', () => {
