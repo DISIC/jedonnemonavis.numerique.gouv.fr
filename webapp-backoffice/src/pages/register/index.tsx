@@ -212,7 +212,11 @@ const useStyles = tss
 		},
 		buttonNext: {
 			display: 'flex',
-			justifyContent: 'flex-end'
+			justifyContent: 'flex-end',
+			'& button': {
+				textAlign: 'center',
+				justifyContent: 'center'
+			}
 		},
 		textLead: {
 			textAlign: 'center',
