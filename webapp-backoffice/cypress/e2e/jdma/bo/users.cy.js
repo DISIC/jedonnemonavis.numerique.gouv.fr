@@ -123,6 +123,21 @@ describe('jdma-users', () => {
 			'user3@example.com'
 		);
 	});
+
+	it('should delete a user and check the logs', () => {
+		cy.visit(app_url + '/administration/dashboard/users');
+		cy.get('.fr-card').find('a').contains('John Doe').click();
+		cy.url().should('include', '/administration/dashboard/user/10/account');
+
+		cy.get('button[aria-label="Supprimer le compte"]').click();
+
+		cy.get('#user-delete-account-modal').within(() => {
+			cy.get('input[name="word"]').type('supprimer');
+			cy.get('button').contains('Supprimer').click();
+		});
+
+		cy.visit(app_url + '/administration/dashboard/product/5/logs');
+	});
 });
 
 function navigateToCreatedProduct() {

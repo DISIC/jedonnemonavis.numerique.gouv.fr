@@ -27,14 +27,35 @@ describe('jdma-logs', () => {
 	});
 
 	it('should display the logs page with no events', () => {
-		cy.wait(8000);
-		cy.visit(app_url + '/administration/dashboard/product/5/logs');
-		cy.get('.fr-sidemenu__link[alt="Consulter l\'historique d\'activité"]')
-			.should('have.attr', 'aria-current', 'page')
-			.and('contain', "Historique d'activité")
-			.click();
+		visitLogsPage();
 		cy.get('h1').contains("Historique d'activité");
 		cy.get('table').should('exist');
+		cy.get('table tbody tr')
+			.last()
+			.within(() => {
+				cy.get('td')
+					.last()
+					.should(
+						'contain',
+						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
+					);
+			});
+	});
+
+	it('should filter the logs by invite', () => {
+		visitLogsPage();
+		cy.get('h1').contains("Historique d'activité");
+		cy.get('table').should('exist');
+		cy.get('#filter-action').click();
+
+		cy.get('#filter-action-listbox')
+			.contains("Invitation d'utilisateur dans une organisation")
+			.click({ force: true });
+
+		cy.get('.fr-tag')
+			.find('p')
+			.should('have.text', "Invitation d'utilisateur dans une organisation");
+
 		cy.get('table tbody tr')
 			.last()
 			.within(() => {
@@ -52,6 +73,14 @@ function loginAsAdmin() {
 	login(adminEmail, adminPassword);
 }
 
+function visitLogsPage() {
+	cy.wait(8000);
+	cy.visit(app_url + '/administration/dashboard/product/5/logs');
+	cy.get('.fr-sidemenu__link[alt="Consulter l\'historique d\'activité"]')
+		.should('have.attr', 'aria-current', 'page')
+		.and('contain', "Historique d'activité")
+		.click();
+}
 function login(email, password) {
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
