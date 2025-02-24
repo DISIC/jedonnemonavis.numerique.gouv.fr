@@ -52,7 +52,7 @@ function getEmailWithLayout(content: string) {
 				</p>
 				<div class="footer">
 					<p>
-						Ce message est envoyé automatiquement par le site <a href="https://jdma.numerique.gouv.fr" target="_blank">Je donne mon avis</a>, développé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
+						Ce message est envoyé automatiquement par le site <a href="https://jedonnemonavis.numerique.gouv.fr/" target="_blank">Je donne mon avis</a>, développé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
 						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>.
 					</p>
 					<p>
