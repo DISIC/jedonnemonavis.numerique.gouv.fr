@@ -7,3 +7,4 @@ import './bo/account.cy.js';
 import './bo/users.cy.js';
 import './bo/logs.cy.js';
 import './bo/product.cy.js';
+import './bo/access.cy.js';
