@@ -4,10 +4,13 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
+import Button from '@codegouvfr/react-dsfr/Button';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import Image from 'next/image';
 
 type UserPresetInfos = {
 	firstName?: string;
@@ -21,7 +24,17 @@ export default function Register() {
 
 	const { otp, email, inviteToken, registered, request } = router.query;
 
-	const { classes, cx } = useStyles();
+	const [isAgentPublic, setIsAgentPublic] = useState<boolean>(false);
+	const [redirectForm, setRedirectForm] = useState<boolean>(false);
+	const [showNonAgentMessage, setShowNonAgentMessage] =
+		useState<boolean>(false);
+	const [backgroundColor, setBackgroundColor] = useState<string>(
+		fr.colors.decisions.background.alt.grey.default
+	);
+
+	const { classes, cx } = useStyles({
+		backgroundColor
+	});
 
 	const [userPresetInfos, setUserPresetInfos] = useState<UserPresetInfos>({
 		email: email as string,
@@ -44,7 +57,7 @@ export default function Register() {
 				<title>Création de compte | Je donne mon avis</title>
 				<meta
 					name="description"
-					content={`Création de compte | Je donne mon avis`}
+					content={`Création de compte | Je donne mon avis`}
 				/>
 			</Head>
 			<Breadcrumb
@@ -65,9 +78,9 @@ export default function Register() {
 								closable
 								description={
 									<>
-										L’outil JDMA est réservé aux établissements publics. Votre
-										adresse e-mail n’est pas reconnue comme une adresse
-										d’administration publique. Si vous pensez qu’il s’agit d’une
+										L'outil JDMA est réservé aux établissements publics. Votre
+										adresse e-mail n'est pas reconnue comme une adresse
+										d'administration publique. Si vous pensez qu'il s'agit d'une
 										erreur, merci de nous décrire votre situation. Nous
 										reviendrons vers vous sous 48 heures.
 									</>
@@ -84,7 +97,7 @@ export default function Register() {
 							fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--center',
-								'fr-py-16v',
+								showNonAgentMessage ? 'fr-py-14v' : 'fr-py-16v',
 								'fr-mb-16v'
 							)
 						)}
@@ -97,10 +110,87 @@ export default function Register() {
 								'fr-px-md-0'
 							)}
 						>
-							<RegisterForm
-								userPresetInfos={userPresetInfos}
-								otp={otp as string | undefined}
-							/>
+							{inviteToken ? (
+								<RegisterForm
+									userPresetInfos={userPresetInfos}
+									otp={otp as string | undefined}
+								/>
+							) : !redirectForm ? (
+								<div>
+									<h2>Se créer un compte</h2>
+									<RadioButtons
+										legend="Êtes-vous agent public ou rattaché à une administration ?"
+										name="radio"
+										options={[
+											{
+												label: 'Non',
+												nativeInputProps: {
+													value: 'no',
+													defaultChecked: !isAgentPublic,
+													onChange: () => setIsAgentPublic(false)
+												}
+											},
+											{
+												label: 'Oui',
+												nativeInputProps: {
+													value: 'yes',
+													onChange: () => setIsAgentPublic(true)
+												}
+											}
+										]}
+										state="default"
+									/>
+									<div className={cx(classes.buttonNext)}>
+										<Button
+											className={fr.cx('fr-col-12', 'fr-col-md-4')}
+											priority="primary"
+											onClick={() => {
+												if (!isAgentPublic) {
+													setBackgroundColor('#F5F5FE');
+													setShowNonAgentMessage(true);
+												}
+												setRedirectForm(true);
+											}}
+										>
+											Continuer
+										</Button>
+									</div>
+								</div>
+							) : !isAgentPublic ? (
+								<div
+									className={fr.cx(
+										'fr-grid-row',
+										'fr-grid-row--center',
+										'fr-grid-row--gutters'
+									)}
+								>
+									<Image
+										src="/assets/city-hall.svg"
+										alt="Agent public"
+										width={120}
+										height={120}
+										className={fr.cx('fr-col-12', 'fr-col-md-6')}
+									/>
+									<p className={cx(classes.textLead, fr.cx('fr-text--bold'))}>
+										La création de compte est réservée aux agents public.
+									</p>
+									<p>
+										Bonne nouvelle : vous pouvez tout de même partager votre
+										avis de manière anonyme sur tous les sites administratifs
+										dotés du bouton "Je donne mon avis", sans avoir besoin de
+										créer un compte.{' '}
+									</p>
+									<p>
+										Votre avis est très important. Il permet à l'administration
+										concernée d'améliorer son service.
+									</p>
+								</div>
+							) : (
+								<RegisterForm
+									userPresetInfos={userPresetInfos}
+									otp={otp as string | undefined}
+								/>
+							)}
 						</div>
 					</div>
 				</div>
@@ -111,13 +201,26 @@ export default function Register() {
 
 const useStyles = tss
 	.withName(Register.name)
-	.withParams()
-	.create(() => ({
+	.withParams<{ backgroundColor: string }>()
+	.create(({ backgroundColor }) => ({
 		formContainer: {
-			backgroundColor: fr.colors.decisions.background.alt.grey.default,
+			backgroundColor,
 			[fr.breakpoints.down('md')]: {
 				marginLeft: `-${fr.spacing('4v')}`,
 				marginRight: `-${fr.spacing('4v')}`
 			}
+		},
+		buttonNext: {
+			display: 'flex',
+			justifyContent: 'flex-end',
+			'& button': {
+				textAlign: 'center',
+				justifyContent: 'center'
+			}
+		},
+		textLead: {
+			textAlign: 'center',
+			fontSize: 20,
+			fontWeight: 700
 		}
 	}));

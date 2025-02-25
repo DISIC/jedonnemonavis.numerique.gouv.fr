@@ -13,8 +13,11 @@ import {
 } from '@/src/utils/tools';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Autocomplete } from '@mui/material';
+import { useSession } from 'next-auth/react';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { Autocomplete } from '@mui/material';
+import Tag from '@codegouvfr/react-dsfr/Tag';
 
 interface Props {
 	product: Product;
@@ -23,18 +26,22 @@ interface Props {
 
 const UserLogsPage = ({ product, ownRight }: Props) => {
 	const { classes, cx } = useStyles();
+	const [startDate, setStartDate] = useState('');
+	const [endDate, setEndDate] = useState('');
+	const [currentPage, setCurrentPage] = useState(1);
+	const { data: session } = useSession();
+	const [inputValue, setInputValue] = useState<string | undefined>();
 
 	const { filters, updateFilters } = useFilters();
-
-	const [inputValue, setInputValue] = useState('');
-	const [currentPage, setCurrentPage] = useState(1);
 
 	const { data: fullEvents, isLoading } = trpc.userEvent.getList.useQuery(
 		{
 			product_id: product.id,
 			limit: 10,
 			page: currentPage,
-			filterAction: filters.filterAction
+			filterAction: filters.productActivityLogs.actionType,
+			startDate: filters.productActivityLogs.currentStartDate,
+			endDate: filters.productActivityLogs.currentEndDate
 		},
 		{
 			initialData: {
@@ -50,64 +57,122 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 
 	const nbPages = getNbPages(eventsCount || 0, 10);
 
-	const headers = ['Date', 'Utilisateur', 'Action'];
+	const headers = ['Date', 'Horaire', 'Utilisateur', 'Activité'];
 
 	const tableData =
 		fullEvents?.data.map(event => [
-			event.created_at.toLocaleString(),
-			event.user ? event.user.firstName + ' ' + event.user.lastName : '',
-			handleActionTypeDisplay(event.action, event.metadata, product.title)
+			new Intl.DateTimeFormat('fr-FR', {
+				day: '2-digit',
+				month: '2-digit',
+				year: 'numeric'
+			}).format(event.created_at),
+			event.created_at.toLocaleTimeString('fr-FR', {
+				hour: '2-digit',
+				minute: '2-digit'
+			}),
+			event.user.email,
+			<p
+				dangerouslySetInnerHTML={{
+					__html:
+						handleActionTypeDisplay(
+							event.action,
+							event.metadata,
+							product.title
+						) || ''
+				}}
+			/>
 		]) || [];
+
+	const renderTags = () => {
+		return (
+			<ul
+				className={cx(
+					fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+					classes.tagContainer
+				)}
+			>
+				{filters.productActivityLogs.actionType.map((action, index) => (
+					<li key={index}>
+						<Tag
+							dismissible
+							className={cx(classes.tagFilter)}
+							title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+							nativeButtonProps={{
+								onClick: () => {
+									updateFilters({
+										...filters,
+										productActivityLogs: {
+											...filters.productActivityLogs,
+											actionType: filters.productActivityLogs.actionType.filter(
+												e => e !== action
+											)
+										}
+									});
+								}
+							}}
+						>
+							<p>{filtersLabel.find(f => f.value === action)?.label}</p>
+						</Tag>
+					</li>
+				))}
+			</ul>
+		);
+	};
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{product.title} | Journal d'activité | Je donne mon avis</title>
+				<title>
+					{product.title} | Historique d'activité | Je donne mon avis
+				</title>
 				<meta
 					name="description"
-					content={`${product.title} | Journal d'activité | Je donne mon avis`}
+					content={`${product.title} | Historique d'activité | Je donne mon avis`}
 				/>
 			</Head>
 			<div className={classes.container}>
-				<h1>Journal d'activité</h1>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v')}>
-						<Autocomplete
-							id="filter-action"
-							disablePortal
-							sx={{ width: '100%' }}
-							options={filtersLabel}
-							onChange={(_, option) => {
-								if (option)
-									updateFilters({
-										...filters,
-										filterAction: option.value as TypeAction
-									});
-							}}
-							inputValue={inputValue}
-							onInputChange={(event, newInputValue) => {
-								setInputValue(newInputValue);
+				<h1 className={fr.cx('fr-mb-10v')}>Historique d'activité</h1>
+				<GenericFilters filterKey="productActivityLogs" renderTags={renderTags}>
+					<Autocomplete
+						id="filter-action"
+						disablePortal
+						sx={{ width: '100%' }}
+						options={filtersLabel}
+						onChange={(_, option) => {
+							if (option) {
 								updateFilters({
 									...filters,
-									filterAction: undefined
+									['productActivityLogs']: {
+										...filters['productActivityLogs'],
+										hasChanged: true,
+										actionType: [
+											...filters['productActivityLogs'].actionType,
+											option.value as TypeAction
+										]
+									}
 								});
-							}}
-							renderInput={params => (
-								<div ref={params.InputProps.ref}>
-									<label htmlFor="filter-action" className="fr-label">
-										Filtrer par action
-									</label>
-									<input
-										{...params.inputProps}
-										className={params.inputProps.className + ' fr-input'}
-										placeholder="Sélectionner une option"
-										type="search"
-									/>
-								</div>
-							)}
-						/>
-					</div>
-				</div>
+							}
+						}}
+						inputValue={inputValue}
+						value={filtersLabel.find(f => f.value === inputValue) || null}
+						onInputChange={(_, newInputValue) => {
+							setInputValue(newInputValue);
+						}}
+						renderInput={params => (
+							<div ref={params.InputProps.ref}>
+								<label htmlFor="filter-action" className="fr-label">
+									Filtrer par action
+								</label>
+								<input
+									{...params.inputProps}
+									className={params.inputProps.className + ' fr-input'}
+									placeholder="Toutes les actions"
+									type="search"
+								/>
+							</div>
+						)}
+					/>
+				</GenericFilters>
 				{isLoading || fullEvents?.data.length === 0 ? (
 					<div
 						className={cx(
@@ -119,7 +184,28 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					</div>
 				) : (
 					<>
-						<Table data={tableData} headers={headers} fixed />
+						<div className={fr.cx('fr-col-8', 'fr-pt-2w')}>
+							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
+								Activités de{' '}
+								<span className={cx(classes.boldText)}>
+									{10 * (currentPage - 1) + 1}
+								</span>{' '}
+								à{' '}
+								<span className={cx(classes.boldText)}>
+									{10 * (currentPage - 1) + fullEvents.data.length}
+								</span>{' '}
+								sur{' '}
+								<span className={cx(classes.boldText)}>
+									{fullEvents.pagination.total}
+								</span>
+							</span>
+						</div>
+						<Table
+							data={tableData}
+							headers={headers}
+							bordered
+							className={classes.table}
+						/>
 						{nbPages > 1 && (
 							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 								<Pagination
@@ -141,6 +227,10 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						)}
 					</>
 				)}
+				<p>
+					Cet historique existe depuis Novembre 2024. Les activités antérieures
+					à cette date ne seront pas affichées.
+				</p>
 			</div>
 		</ProductLayout>
 	);
@@ -160,6 +250,56 @@ const useStyles = tss.withName(UserLogsPage.name).create({
 		padding: '1rem',
 		fontSize: '1.2rem',
 		fontWeight: 'bold'
+	},
+	filterContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: '0.5rem',
+		border: '1px solid #e0e0e0',
+		padding: '1rem'
+	},
+	boldText: {
+		fontWeight: 'bold'
+	},
+	table: {
+		width: '100%',
+		'& .fr-table table': {
+			border: '1px solid #929292 !important',
+			width: '100%'
+		},
+		'& table tbody tr': {
+			width: '100%',
+			backgroundColor: '#ffffff !important',
+			td: {
+				width: '100%',
+				'&:nth-of-type(1)': {
+					width: '5%'
+				},
+				'&:nth-of-type(2)': {
+					width: '5%'
+				},
+				'&:nth-of-type(3)': {
+					width: '15%'
+				},
+				'&:nth-of-type(4)': {
+					width: '75%'
+				}
+			}
+		}
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	tagContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		gap: '0.5rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'flex-start'
 	}
 });
 

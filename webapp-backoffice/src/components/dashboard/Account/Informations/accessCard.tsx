@@ -5,19 +5,35 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { push } from '@socialgouv/matomo-next';
+import { RightAccessStatus } from '@prisma/client';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import { Menu, MenuItem } from '@mui/material';
+import { ModalAccessKind } from '@/src/pages/administration/dashboard/user/[id]/access';
 
 interface Props {
+	id?: number;
 	title: string;
 	date?: string;
 	modifiable: Boolean;
 	link?: string;
+	right?: RightAccessStatus;
 	action?: (message: string) => Promise<void>;
+	handleAction?: (kind: ModalAccessKind, id: number) => Promise<void>;
 }
 
 const AccessCard = (props: Props) => {
-	const { title, date, modifiable, link, action } = props;
+	const { id, title, date, modifiable, link, right, action, handleAction } =
+		props;
 	const { cx, classes } = useStyles();
-	const router = useRouter();
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'BO - Product', `Open-Menu`]);
+	};
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	return (
 		<>
@@ -29,7 +45,7 @@ const AccessCard = (props: Props) => {
 						'fr-grid-row--middle'
 					)}
 				>
-					<div className={cx(fr.cx('fr-col-12', 'fr-col-md-6'))}>
+					<div className={cx(fr.cx('fr-col-12', 'fr-col-md-5'))}>
 						{link ? (
 							<Link className={cx(fr.cx('fr-mb-0'))} href={link}>
 								<p
@@ -51,11 +67,107 @@ const AccessCard = (props: Props) => {
 					{modifiable && action && (
 						<div
 							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-3'),
+								fr.cx('fr-col-12', 'fr-col-md-4'),
 								classes.actionContainer
 							)}
 						>
-							<Button
+							{link ? (
+								<>
+									<div className={cx(classes.badgeContainer)}>
+										<Badge
+											noIcon
+											small
+											severity={right === 'carrier_admin' ? 'info' : undefined}
+											className={fr.cx('fr-mr-4v')}
+										>
+											{right === 'carrier_admin'
+												? 'Administrateur'
+												: 'Utilisateur'}
+										</Badge>
+									</div>
+
+									<Button
+										id="button-options"
+										aria-controls={menuOpen ? 'option-menu' : undefined}
+										aria-haspopup="true"
+										aria-expanded={menuOpen ? 'true' : undefined}
+										priority="secondary"
+										size="small"
+										onClick={handleClick}
+										iconId={
+											menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
+										}
+										iconPosition="right"
+										nativeButtonProps={{
+											'aria-label': `Accéder aux options de droits sur le service "${title}"`,
+											title: `Accéder aux options de droits sur le service "${title}"`
+										}}
+									>
+										Options
+									</Button>
+									<Menu
+										id="option-menu"
+										open={menuOpen}
+										anchorEl={anchorEl}
+										onClose={handleClose}
+										MenuListProps={{
+											'aria-labelledby': 'button-options'
+										}}
+									>
+										<MenuItem
+											onClick={() => {
+												if (id && handleAction) {
+													handleAction('removeAccessRight', id);
+													handleClose();
+												}
+											}}
+										>
+											Retirer l'accès
+										</MenuItem>
+										<MenuItem
+											onClick={() => {
+												if (id && handleAction) {
+													handleAction(
+														right === 'carrier_admin'
+															? 'switchAccessRightUser'
+															: 'switchAccessRightAdmin',
+														id
+													);
+													handleClose();
+												}
+											}}
+										>
+											Passer en{' '}
+											{right === 'carrier_admin'
+												? 'utilisateur'
+												: 'administrateur'}{' '}
+											du service
+										</MenuItem>
+									</Menu>
+								</>
+							) : (
+								<>
+									{' '}
+									<Button
+										priority="secondary"
+										type="button"
+										size="small"
+										onClick={() => {
+											if (id && handleAction) {
+												handleAction('removeEntityright', id);
+												handleClose();
+											}
+										}}
+										nativeButtonProps={{
+											'aria-label': `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`,
+											title: `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`
+										}}
+									>
+										Retirer l'accès
+									</Button>
+								</>
+							)}
+							{/* <Button
 								priority="secondary"
 								type="button"
 								onClick={() => {
@@ -74,7 +186,7 @@ const AccessCard = (props: Props) => {
 								}}
 							>
 								Retirer l'accès
-							</Button>
+							</Button> */}
 						</div>
 					)}
 				</div>
@@ -87,6 +199,10 @@ const useStyles = tss.withName(AccessCard.name).create(() => ({
 	actionContainer: {
 		display: 'flex',
 		justifyContent: 'flex-end'
+	},
+	badgeContainer: {
+		display: 'flex',
+		alignItems: 'center'
 	},
 	productName: {
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default

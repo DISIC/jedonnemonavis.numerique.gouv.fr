@@ -6,7 +6,7 @@ import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
 	productId: number;
-	buttonId: number | null;
+	buttonId: number | undefined;
 	startDate: string;
 	endDate: string;
 };

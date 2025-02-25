@@ -217,6 +217,7 @@ export const adminEntityRightRouter = router({
 
 	update: protectedProcedure
 		.input(AdminEntityRightUncheckedUpdateInputSchema)
+		.meta({ logEvent: true })
 		.mutation(async ({ ctx, input }) => {
 			const { id, ...data } = input;
 

@@ -102,7 +102,10 @@ const ButtonModal = (props: Props) => {
 					status:
 						statusMapping[
 							currentAccessRight.status as keyof typeof statusMapping
-						]
+						],
+					product_id: productId,
+					user_email: currentAccessRight.user?.email,
+					user_email_invite: currentAccessRight.user_email_invite
 				});
 			}
 		} else if (modalType === 'remove') {
@@ -111,14 +114,17 @@ const ButtonModal = (props: Props) => {
 				id: currentAccessRight.id,
 				status: 'removed',
 				product_id: productId,
-				user_email: currentAccessRight.user?.email
+				user_email: currentAccessRight.user?.email,
+				user_email_invite: currentAccessRight.user_email_invite
 			});
 		} else if (modalType === 'reintegrate') {
 			if (currentAccessRight === undefined) return;
 			updateAccessRight.mutate({
 				id: currentAccessRight.id,
 				status: 'carrier_user',
-				product_id: productId
+				product_id: productId,
+				user_email: currentAccessRight.user?.email,
+				user_email_invite: currentAccessRight.user_email_invite
 			});
 		}
 	}

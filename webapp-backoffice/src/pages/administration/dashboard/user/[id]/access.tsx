@@ -9,11 +9,12 @@ import { Loader } from '@/src/components/ui/Loader';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
-import { UserRole } from '@prisma/client';
+import { RightAccessStatus, UserRole } from '@prisma/client';
 import AccessCard from '@/src/components/dashboard/Account/Informations/accessCard';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { push } from '@socialgouv/matomo-next';
+import { AccessRightSchema } from '@/prisma/generated/zod';
 
 interface Props {
 	isOwn: Boolean;
@@ -21,10 +22,12 @@ interface Props {
 }
 
 interface Product {
+	id?: number;
 	title: string;
 	date: string;
 	modifiable: boolean;
 	link: string;
+	right?: RightAccessStatus;
 	action?: (message: string) => Promise<void>;
 }
 
@@ -38,11 +41,61 @@ const onConfirmModal = createModal({
 	isOpenedByDefault: false
 });
 
+export const modalAccessContents = [
+	{
+		kind: 'removeAccessRight',
+		title: "Retirer l'accès au service",
+		sentence:
+			"Êtes-vous sûr de vouloir retirer __!NAME!__ de ce service ? Cette personne n'aura plus aucun accès au service.",
+		message: "L'accès au service a bien été retiré pour __!NAME!__."
+	},
+	{
+		kind: 'switchAccessRightAdmin',
+		title: 'Passer en administrateur de service',
+		sentence:
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en administrateur du service ? Cette personne pourra modifier et supprimer le service.',
+		message: ''
+	},
+	{
+		kind: 'switchAccessRightUser',
+		title: 'Passer en utilisateur de service',
+		sentence:
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en utilisateur du service ? Cette personne ne pourra plus modifier le service.',
+		message: ''
+	},
+	{
+		kind: 'removeEntityright',
+		title: "Retirer l'accès à l'organisation",
+		sentence:
+			"Êtes-vous sûr de vouloir retirer __!NAME!__ de cette organisation ? Cette personne n'aura plus aucun accès à cette orgnisation ou aux services associés.",
+		message: ''
+	},
+	{
+		kind: 'addSuperAdmin',
+		title: 'Passer en rôle superadmin',
+		sentence:
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en tant que superadmin ? Cette personne pourra modifier et supprimer tous les services, toutes les organisations et tous les utilisateurs.',
+		message: ''
+	},
+	{
+		kind: 'removeSuperAdmin',
+		title: 'Retirer le rôle superadmin',
+		sentence:
+			"Êtes-vous sûr de vouloir retirer l'accès de __!NAME!__ en tant que superadmin ? Cette personne pourra plus ni modifier ni supprimer les services, les organisations et les utilisateurs.",
+		message: ''
+	}
+];
+
+export type ModalAccessKind = (typeof modalAccessContents)[number]['kind'];
+export type ModalAccessContent = (typeof modalAccessContents)[number];
+
 const UserAccess: React.FC<Props> = props => {
 	const { isOwn, userId } = props;
 	const { classes, cx } = useStyles();
 	const utils = trpc.useUtils();
 	const [displayToast, setDisplayToast] = React.useState<string | null>(null);
+	const [modal, setModal] = React.useState<ModalAccessContent | null>(null);
+	const [idConcerned, setIdConcerned] = React.useState<number | null>(null);
 
 	const {
 		data: userResult,
@@ -69,6 +122,45 @@ const UserAccess: React.FC<Props> = props => {
 		}
 	});
 
+	const updateAccessRight = trpc.accessRight.update.useMutation({
+		onSuccess: () => {
+			utils.user.getByIdWithRights.invalidate({});
+		}
+	});
+
+	const removeAdminEntityright = trpc.adminEntityRight.delete.useMutation({
+		onSuccess: async () => {
+			utils.user.getByIdWithRights.invalidate({});
+		}
+	});
+
+	const removeAccessRight = trpc.accessRight.delete.useMutation({
+		onSuccess: async () => {
+			utils.user.getByIdWithRights.invalidate({});
+		}
+	});
+
+	const handleAction = async (kind: ModalAccessKind, id?: number) => {
+		const modalContent = modalAccessContents.find(item => item.kind === kind);
+		if (modalContent) setModal({ ...modalContent });
+		setIdConcerned(id ?? null);
+		onConfirmModal.open();
+	};
+
+	const handleSwitchStatus = async (id: number) => {
+		const ar = user?.accessRights.find(ar => ar.id === id);
+		let parsedAr = AccessRightSchema.parse(ar);
+		if (ar) {
+			updateAccessRight.mutate({
+				...parsedAr,
+				status: ar.status.includes('admin') ? 'carrier_user' : 'carrier_admin'
+			});
+			setDisplayToast(
+				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${ar.status.includes('admin') ? 'utilisateur' : 'administrateur'} du service "${user?.accessRights.find(aer => aer.id === id)?.product.title}".`
+			);
+		}
+	};
+
 	const handleSwitchrole = async () => {
 		if (user) {
 			setDisplayToast(
@@ -83,27 +175,21 @@ const UserAccess: React.FC<Props> = props => {
 		}
 	};
 
-	const removeAdminEntityright = trpc.adminEntityRight.delete.useMutation({
-		onSuccess: async () => {
-			utils.user.getByIdWithRights.invalidate({});
-		}
-	});
-
-	const removeAccessRight = trpc.accessRight.delete.useMutation({
-		onSuccess: async () => {
-			utils.user.getByIdWithRights.invalidate({});
-		}
-	});
-
 	const handleRemove = async (id: number, type: 'entity' | 'product') => {
 		if (type === 'entity') {
 			removeAdminEntityright.mutate({
 				admin_entity_right_id: id
 			});
+			setDisplayToast(
+				`L'accès à l'organisation "${user?.adminEntityRights.find(aer => aer.id === id)?.entity.name}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+			);
 		} else {
 			removeAccessRight.mutate({
 				access_right_id: id
 			});
+			setDisplayToast(
+				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)?.product.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+			);
 		}
 	};
 
@@ -131,10 +217,12 @@ const UserAccess: React.FC<Props> = props => {
 			groupedEntities[entity.name] = { name: entity.name, products: [] };
 		}
 		groupedEntities[entity.name].products.push({
+			id: ar.id,
 			title: product.title,
 			date: formatDateToFrenchString(ar.created_at.toString()),
 			modifiable: true,
 			link: `/administration/dashboard/product/${product.id}/stats`,
+			right: ar.status,
 			action: async (message: string) => {
 				setDisplayToast(message);
 				handleRemove(ar.id, 'product');
@@ -162,29 +250,53 @@ const UserAccess: React.FC<Props> = props => {
 				))}
 			{!isLoadingUser && !isRefetchingUser && user && (
 				<>
-					<OnConfirmModal
+					{/* <OnConfirmModal
 						modal={onConfirmModal}
-						title={`${user.role.includes('admin') ? 'Retirer' : 'Donner'} le rôle superadmin`}
+						title={`${user.role.includes('admin') ? 'Retirer le' : 'Passer en'} rôle superadmin`}
 						handleOnConfirm={() => {
 							handleSwitchrole();
 						}}
 					>
 						<>
 							<p>
-								Vous êtes sûr de vouloir{' '}
+								Êtes-vous sûr de vouloir{' '}
 								{`${user.role.includes('admin') ? `retirer l'accès de` : 'passer'}`}{' '}
 								{`${user.firstName} ${user.lastName}`} en tant que superadmin ?
 							</p>
 							<p>
 								Cette personne{' '}
 								{`${user.role.includes('admin') ? `ne pourra plus` : 'pourra'}`}{' '}
-								:{' '}
+								modifier et supprimer tous les services, toutes les
+								organisations et tous les utilisateurs.
 							</p>
-							<ul className={fr.cx('fr-ml-4v')}>
-								<li>avoir accès à toutes les organisations</li>
-								<li>avoir accès à tous les services</li>
-								<li>gérer les utilisateurs</li>
-							</ul>
+						</>
+					</OnConfirmModal> */}
+					<OnConfirmModal
+						modal={onConfirmModal}
+						title={`${modal?.title}`}
+						handleOnConfirm={() => {
+							switch (modal?.kind) {
+								case 'addSuperAdmin':
+								case 'removeSuperAdmin':
+									handleSwitchrole();
+									break;
+								case 'removeAccessRight':
+									if (idConcerned) handleRemove(idConcerned, 'product');
+									break;
+								case 'removeEntityright':
+									if (idConcerned) handleRemove(idConcerned, 'entity');
+									break;
+								case 'switchAccessRightAdmin':
+								case 'switchAccessRightUser':
+									if (idConcerned) handleSwitchStatus(idConcerned);
+									break;
+							}
+						}}
+					>
+						<>
+							<p
+								className={fr.cx('fr-mt-8v')}
+							>{`${modal?.sentence.replace('__!NAME!__', `${user.firstName} ${user.lastName}`)}`}</p>
 						</>
 					</OnConfirmModal>
 					<AccountLayout isOwn={isOwn} user={user}>
@@ -245,8 +357,10 @@ const UserAccess: React.FC<Props> = props => {
 										<Button
 											priority="secondary"
 											type="button"
+											iconId="fr-icon-user-star-line"
+											iconPosition="right"
 											onClick={() => {
-												onConfirmModal.open();
+												handleAction('addSuperAdmin');
 												push(['trackEvent', 'Users', 'Set-Superadmin']);
 											}}
 											nativeButtonProps={{
@@ -254,7 +368,7 @@ const UserAccess: React.FC<Props> = props => {
 												title: 'Attribuer le rôle superadmin'
 											}}
 										>
-											Attribuer le rôle superadmin à ce compte
+											Passer en superadmin
 										</Button>
 									)}
 								</div>
@@ -271,7 +385,7 @@ const UserAccess: React.FC<Props> = props => {
 										priority="secondary"
 										type="button"
 										onClick={() => {
-											onConfirmModal.open();
+											handleAction('removeSuperAdmin');
 											push(['trackEvent', 'Users', 'Unset-Superadmin']);
 										}}
 										nativeButtonProps={{
@@ -303,6 +417,7 @@ const UserAccess: React.FC<Props> = props => {
 												.map(aer => (
 													<li key={aer.id}>
 														<AccessCard
+															id={aer.id}
 															title={aer.entity.name}
 															date={formatDateToFrenchString(
 																aer.created_at.toString()
@@ -312,6 +427,7 @@ const UserAccess: React.FC<Props> = props => {
 																setDisplayToast(message);
 																handleRemove(aer.id, 'entity');
 															}}
+															handleAction={handleAction}
 														></AccessCard>
 													</li>
 												))}
@@ -335,10 +451,13 @@ const UserAccess: React.FC<Props> = props => {
 																>
 																	<AccessCard
 																		key={productIndex}
+																		id={product.id}
 																		title={product.title}
 																		date={product.date}
 																		modifiable={product.modifiable}
+																		right={product.right}
 																		action={product.action}
+																		handleAction={handleAction}
 																		link={product.link}
 																	></AccessCard>
 																</li>

@@ -135,9 +135,13 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const buttonCode = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
-      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}.svg" alt="Je donne mon avis" />
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
 </a>`;
+
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
+	</a>`;
 
 	const displayModalContent = (): JSX.Element => {
 		switch (modalType) {
@@ -145,11 +149,11 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<p>
-							Pour installer le bouton JDMA et récolter les avis, copier-coller
+							Pour installer le bouton JDMA et récolter les avis, copier-collez
 							ce code dans votre service numérique.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
-							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}>
+							<div className={fr.cx('fr-col', 'fr-col-12')}>
 								<RadioButtons
 									className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
 									legend="Type de bouton"
@@ -187,66 +191,86 @@ const ButtonModal = (props: Props) => {
 									]}
 								/>
 							</div>
-							<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-								<Image
-									alt="bouton-je-donne-mon-avis"
-									src={`/assets/bouton-${buttonColor}.svg`}
-									width={150}
-									height={85}
-								/>
-							</div>
+							{['clair', 'sombre'].map(theme => {
+								return (
+									<>
+										<div
+											className={cx(
+												theme === 'clair'
+													? classes.paddingRight
+													: classes.paddingLeft,
+												fr.cx('fr-col-12', 'fr-col-md-6')
+											)}
+										>
+											<div className={fr.cx('fr-grid-row')}>
+												<h5>Thème {theme}</h5>
+												<div className={fr.cx('fr-col', 'fr-col-12')}>
+													<div
+														className={cx(
+															classes.btnImgContainer,
+															theme !== 'clair' && classes.blackContainer,
+															fr.cx('fr-card', 'fr-p-6v')
+														)}
+													>
+														<Image
+															alt="bouton-je-donne-mon-avis"
+															src={`/assets/bouton-${buttonColor}-${theme}.svg`}
+															className={fr.cx('fr-my-8v')}
+															width={200}
+															height={85}
+														/>
+														<p
+															className={cx(
+																classes.smallText,
+																theme !== 'clair' && classes.darkerText,
+																fr.cx('fr-mb-0')
+															)}
+														>
+															Prévisualisation du bouton
+														</p>
+													</div>
+												</div>
+												<div className={fr.cx('fr-col', 'fr-col-12')}>
+													<Button
+														priority="secondary"
+														iconId="ri-file-copy-line"
+														iconPosition="right"
+														className={fr.cx('fr-mt-8v')}
+														onClick={() => {
+															navigator.clipboard.writeText(
+																theme === 'clair'
+																	? buttonCodeClair
+																	: buttonCodeSombre
+															);
+															modal.close();
+															push(['trackEvent', 'BO - Product', `Copy-Code`]);
+														}}
+													>
+														Copier le code
+													</Button>
+													<div className={fr.cx('fr-input-group', 'fr-mt-2v')}>
+														<Input
+															className={classes.textArea}
+															id="button-code"
+															label={`Code à intégrer: Thème ${theme}`}
+															textArea
+															nativeTextAreaProps={{
+																name: 'button-code',
+																value:
+																	theme === 'clair'
+																		? buttonCodeClair
+																		: buttonCodeSombre,
+																contentEditable: false
+															}}
+														/>
+													</div>
+												</div>
+											</div>
+										</div>
+									</>
+								);
+							})}
 						</div>
-						<div className={fr.cx('fr-input-group')}>
-							<Input
-								className={classes.textArea}
-								id="button-code"
-								label={`Code à intégrer`}
-								textArea
-								nativeTextAreaProps={{
-									name: 'button-code',
-									value: buttonCode,
-									contentEditable: false
-								}}
-							/>
-						</div>
-						<Button
-							priority="primary"
-							onClick={() => {
-								navigator.clipboard.writeText(buttonCode);
-								modal.close();
-								push(['trackEvent', 'BO - Product', `Copy-Code`]);
-							}}
-						>
-							Copier le code
-						</Button>
-						{/* <Accordion
-							label="Où placer le bouton ?"
-							className={classes.accordion}
-						>
-							<div className={fr.cx('fr-text--xs')}>
-								Afin de récolter les retours ponctuel et pertinent, le bouton
-								est mieux placé :
-								<ul>
-									<li>dans l'écran de fin de démarche;</li>
-									<li>
-										dans un message électronique qui est envoyé à la fin de la
-										démarche
-									</li>
-								</ul>
-							</div>
-						</Accordion>
-						<Accordion
-							label="Comment presenter le bouton aux usagers ?"
-							className={classes.accordion}
-						>
-							<div className={fr.cx('fr-text--xs')}>
-								Ajouter une phrase explicative en dessus du bouton, comme par
-								exemple :<br />
-								<br />
-								“Aidez-nous à améliorer cette démarche ! Donnez-nous votre avis,
-								cela ne prend que 2 minutes.”
-							</div>
-						</Accordion> */}
 					</div>
 				);
 			case 'create':
@@ -289,27 +313,6 @@ const ButtonModal = (props: Props) => {
 								}
 							}}
 						/>
-						{/* {!('id' in currentButton) && (
-							<Checkbox
-								options={[
-									{
-										hintText:
-											'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
-										label: 'Bouton de test',
-										nativeInputProps: {
-											name: 'checkboxes-1',
-											value: 'isTest',
-											onChange: e => {
-												setCurrentButton({
-													...currentButton,
-													isTest: e.target.checked
-												});
-											}
-										}
-									}
-								]}
-							/>
-						)} */}
 					</div>
 				);
 
@@ -476,8 +479,8 @@ const ButtonModal = (props: Props) => {
 const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	textArea: {
 		'.fr-input': {
-			height: '150px',
-			minHeight: '150px'
+			height: '300px',
+			minHeight: '300px'
 		}
 	},
 	topContainer: {
@@ -509,6 +512,36 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	iframe: {
 		width: '100%',
 		height: '80vh'
+	},
+	btnImgContainer: {
+		display: 'flex',
+		alignItems: 'center'
+	},
+	blackContainer: {
+		backgroundColor: fr.colors.getHex({ isDark: true }).decisions.background
+			.default.grey.default
+	},
+	paddingRight: {
+		paddingRight: '1rem',
+		[fr.breakpoints.down('md')]: {
+			paddingRight: '0'
+		}
+	},
+	paddingLeft: {
+		paddingLeft: '1rem',
+		[fr.breakpoints.down('md')]: {
+			paddingLeft: '0',
+			marginTop: '2rem'
+		}
+	},
+	smallText: {
+		color: fr.colors.getHex({ isDark: true }).decisions.background.alt.grey
+			.active,
+		fontSize: '0.8rem'
+	},
+	darkerText: {
+		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey
+			.active
 	}
 }));
 

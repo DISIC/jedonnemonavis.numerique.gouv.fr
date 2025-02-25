@@ -4,7 +4,6 @@ import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
 import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
-import Filters from '@/src/components/dashboard/Stats/Filters';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
@@ -21,10 +20,14 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product, RightAccessStatus } from '@prisma/client';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import Select from '@codegouvfr/react-dsfr/Select';
+import { push } from '@socialgouv/matomo-next';
 
 interface Props {
 	product: Product;
@@ -53,7 +56,7 @@ export const SectionWrapper = ({
 
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
-			<h3>{title}</h3>
+			<h2>{title}</h2>
 			{alert && (
 				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
 			)}
@@ -70,25 +73,20 @@ const ProductStatPage = (props: Props) => {
 
 	const { classes, cx } = useStyles();
 
-	const [startDate, setStartDate] = useState<string>(
-		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-			.toISOString()
-			.split('T')[0]
+	const { filters, updateFilters } = useFilters();
+
+	const [selectedButton, setSelectedButton] = useState<number | undefined>(
+		filters['productStats'].buttonId
 	);
-	const [endDate, setEndDate] = useState<string>(
-		new Date().toISOString().split('T')[0]
-	);
+	useEffect(() => {
+		setSelectedButton(filters['productStats'].buttonId);
+	}, [filters['productStats'].buttonId]);
 
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
-
-	const [buttonId, setButtonId] = useState<number | null>(null);
-
-	const { data: buttonsResult, isFetching: isLoadingButtons } =
+	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery(
 			{
-				numberPerPage: 0,
 				page: 1,
+				numberPerPage: 1000,
 				product_id: product.id,
 				isTest: false
 			},
@@ -98,7 +96,8 @@ const ProductStatPage = (props: Props) => {
 					metadata: {
 						count: 0
 					}
-				}
+				},
+				enabled: !!product.id && !isNaN(product.id)
 			}
 		);
 
@@ -112,25 +111,39 @@ const ProductStatPage = (props: Props) => {
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
-	} = trpc.review.countReviews.useQuery({
-		numberPerPage: 0,
-		page: 1,
-		product_id: product.id,
-		start_date: debouncedStartDate,
-		end_date: debouncedEndDate,
-		filters: {
-			buttonId: buttonId ? [buttonId?.toString()] : []
+	} = trpc.review.countReviews.useQuery(
+		{
+			numberPerPage: 0,
+			page: 1,
+			product_id: product.id,
+			start_date: filters.productStats.currentStartDate,
+			end_date: filters.productStats.currentEndDate,
+			filters: {
+				buttonId: filters.productStats.buttonId
+					? [filters.productStats.buttonId?.toString()]
+					: []
+			}
+		},
+		{
+			enabled: !!filters.productStats.currentEndDate
 		}
-	});
+	);
 
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
-		trpc.answer.countByFieldCode.useQuery({
-			product_id: product.id,
-			...(buttonId && { button_id: buttonId }),
-			field_code: 'verbatim',
-			start_date: debouncedStartDate,
-			end_date: debouncedEndDate
-		});
+		trpc.answer.countByFieldCode.useQuery(
+			{
+				product_id: product.id,
+				...(filters.productStats.buttonId && {
+					button_id: filters.productStats.buttonId
+				}),
+				field_code: 'verbatim',
+				start_date: filters.productStats.currentStartDate,
+				end_date: filters.productStats.currentEndDate
+			},
+			{
+				enabled: !!filters.productStats.currentEndDate
+			}
+		);
 
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
@@ -169,7 +182,7 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
-	if (nbReviews === 0 || buttonsResult.metadata.count === 0) {
+	if (nbReviews === 0 || buttonResults.metadata.count === 0) {
 		return (
 			<ProductLayout product={product} ownRight={ownRight}>
 				<Head>
@@ -180,7 +193,7 @@ const ProductStatPage = (props: Props) => {
 					/>
 				</Head>
 				<h1>Statistiques</h1>
-				{buttonsResult.metadata.count === 0 ? (
+				{buttonResults.metadata.count === 0 ? (
 					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
 					<NoReviewsPanel
@@ -191,16 +204,6 @@ const ProductStatPage = (props: Props) => {
 			</ProductLayout>
 		);
 	}
-
-	const onChangeFilters = (
-		tmpStartDate: string,
-		tmpEndDate: string,
-		buttonId?: number
-	) => {
-		if (tmpStartDate !== startDate) setStartDate(tmpStartDate);
-		if (tmpEndDate !== endDate) setEndDate(tmpEndDate);
-		setButtonId(buttonId ?? null);
-	};
 
 	const getStatsDisplay = () => {
 		if (isLoadingReviewsDataWithFilters) {
@@ -215,12 +218,12 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
-					buttonId={buttonId}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
+					buttonId={filters.productStats.buttonId}
+					startDate={filters.productStats.currentStartDate}
+					endDate={filters.productStats.currentEndDate}
 				/>
 				<div className={fr.cx('fr-mt-5w')}>
-					<h3>Participation</h3>
+					<h4>Participation</h4>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-6')}>
 							<KPITile
@@ -258,9 +261,9 @@ const ProductStatPage = (props: Props) => {
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
-					buttonId={buttonId}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
+					buttonId={filters.productStats.buttonId}
+					startDate={filters.productStats.currentStartDate}
+					endDate={filters.productStats.currentEndDate}
 					total={nbReviewsWithFilters}
 				/>
 				<SectionWrapper
@@ -271,42 +274,42 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 						required
 					/>
 					<BarQuestionViz
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_reached"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 				</SectionWrapper>
 				<SectionWrapper
@@ -318,17 +321,17 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="difficulties"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.productStats.currentStartDate}
+						endDate={filters.productStats.currentEndDate}
 					/>
 				</SectionWrapper>
 			</>
@@ -358,11 +361,40 @@ const ProductStatPage = (props: Props) => {
 				)}
 			</div>
 			<div className={cx(classes.container)}>
-				<Filters
-					currentStartDate={startDate}
-					currentEndDate={endDate}
-					onChange={onChangeFilters}
-				/>
+				<GenericFilters filterKey="productStats" sticky={true}>
+					<Select
+						label="Sélectionner une source"
+						nativeSelectProps={{
+							value: selectedButton ?? 'undefined',
+							onChange: e => {
+								const newValue =
+									e.target.value === 'undefined'
+										? undefined
+										: parseInt(e.target.value);
+
+								setSelectedButton(newValue); // Mise à jour du state local pour refléter la sélection
+
+								updateFilters({
+									...filters,
+									productStats: {
+										...filters['productStats'],
+										hasChanged: true,
+										buttonId: newValue
+									}
+								});
+
+								push(['trackEvent', 'Stats', 'Sélection-bouton']);
+							}
+						}}
+					>
+						<option value="undefined">Toutes les sources</option>
+						{buttonResults?.data?.map(button => (
+							<option key={button.id} value={button.id}>
+								{button.title}
+							</option>
+						))}
+					</Select>
+				</GenericFilters>
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
 					<div className={fr.cx('fr-mt-10v')} role="status">

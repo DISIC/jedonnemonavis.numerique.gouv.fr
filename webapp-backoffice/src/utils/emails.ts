@@ -47,16 +47,16 @@ function getEmailWithLayout(content: string) {
 				</div>
 				${content}
 				<p>
-					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
+					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:contact.jdma@design.numerique.gouv.fr">contact.jdma@design.numerique.gouv.fr</a>.<br/>
 					La Brigade d'Intervention du Numérique (BIN).
 				</p>
 				<div class="footer">
 					<p>
-						Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
+						Ce message est envoyé automatiquement par le site <a href="https://jedonnemonavis.numerique.gouv.fr/" target="_blank">Je donne mon avis</a>, développé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
 						propulsé par la <a href="https://www.numerique.gouv.fr/" target="_blank">Direction interministérielle du numérique</a>.
 					</p>
 					<p>
-						Pour toute question, merci de nous contacter à experts@design.numerique.gouv.fr.
+						Pour toute question, merci de nous contacter à <a href="mailto:contact.jdma@design.numerique.gouv.fr">contact.jdma@design.numerique.gouv.fr</a>.
 					</p>
 				</div>
 			</div>
@@ -294,21 +294,21 @@ export function getEmailNotificationsHtml(
 	}[]
 ) {
 	const frequencyLabel = () => {
-		switch(frequency) {
-			case 'daily': 
+		switch (frequency) {
+			case 'daily':
 				return `en date du ${formatDateToFrenchString(startDate.toString())}`;
 			case 'weekly':
 				return `dans les 7 derniers jours (du ${formatDateToFrenchString(startDate.toString())} au ${formatDateToFrenchString(endDate.toString())})`;
 			case 'monthly':
-				return `dans le dernier mois calendaire (du ${formatDateToFrenchString(startDate.toString())} au ${formatDateToFrenchString(endDate.toString())})`
-			default :
+				return `dans le dernier mois calendaire (du ${formatDateToFrenchString(startDate.toString())} au ${formatDateToFrenchString(endDate.toString())})`;
+			default:
 				return `en date du ${formatDateToFrenchString(startDate.toString())}`;
 		}
-	}
+	};
 
 	const displayTableFrequenceLabel =
 		frequency === 'daily'
-			? "hier"
+			? 'hier'
 			: frequency === 'weekly'
 				? 'la semaine dernière'
 				: 'le mois dernier';
@@ -323,44 +323,48 @@ export function getEmailNotificationsHtml(
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
 		<br />
-		<p>Vous avez eu un total de ${totalNbReviews} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
+		<p>Vous avez eu un total de ${formatNbReviews(totalNbReviews)} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
 		<br />
 		<div style="margin-top: 64px; margin-bottom: 48px;">
 			<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
 			<thead>
 				<tr>
 				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Service</th>
-				<th style="text-align: right; font-size: 14px; padding: 8px 0;">Nouveaux avis ${displayTableFrequenceLabel}</th>
+				<th style="text-align: right; font-size: 14px; padding: 8px 0;">Avis reçu ${displayTableFrequenceLabel}</th>
 				</tr>
 			</thead>
 			<tbody>
-				${products.map(p => `
+				${products
+					.map(
+						p => `
 				<tr style="border: 1px solid #e0e0e0; margin-top: 10px">
-					<td style="padding: 16px; font-size: 16px; color: #000091; font-weight: bold; line-height: 24px;">
+					<td style="padding: 16px; font-size: 16px; color: #161616; font-weight: bold; line-height: 24px;">
 					${p.title}
 					</td>
 					<td style="padding: 16px; text-align: right;">
 					<p style="margin: 0; font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px;">+${formatNbReviews(p.nbReviews)}</p>
-					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true" 
-						target="_blank" 
+					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true"
+						target="_blank"
 						style="font-size: 12px; line-height: 20px; color: #0063CB; text-decoration: underline;">Voir les avis</a>
 					</td>
 				</tr>
 				<tr>
 				  <td style="height: 16px;"></td> <!-- Espacement -->
 				</tr>
-				`).join('')}
+				`
+					)
+					.join('')}
 			</tbody>
 			</table>
 		</div>
-		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank" 
+		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
 			style="font-size: 14px; color: #0063CB; text-decoration: underline;">
-			Voir plus de détails sur votre tableau de bord JDMA
+			Retrouvez tous vos services sur votre tableau de bord JDMA
 		</a>
 		<p>
 			Pour changer la fréquence de cette synthèse ou ne plus la recevoir du tout,
-			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications" 
-			target="_blank" 
+			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications"
+			target="_blank"
 			style="color: #0063CB; text-decoration: underline;">
 			modifiez vos paramètres de notification
 			</a>.

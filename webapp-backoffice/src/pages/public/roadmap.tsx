@@ -70,7 +70,7 @@ export const getStaticProps: GetStaticProps = async () => {
 	};
 };
 
-const TermsOfUse: React.FC<HomeProps> = ({ intro, tableData }) => {
+const Roadmap: React.FC<HomeProps> = ({ intro, tableData }) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -113,7 +113,7 @@ const TermsOfUse: React.FC<HomeProps> = ({ intro, tableData }) => {
 	);
 };
 
-const useStyles = tss.withName(TermsOfUse.name).create(() => ({
+const useStyles = tss.withName(Roadmap.name).create(() => ({
 	blockWrapper: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -134,4 +134,4 @@ const useStyles = tss.withName(TermsOfUse.name).create(() => ({
 	}
 }));
 
-export default TermsOfUse;
+export default Roadmap;
