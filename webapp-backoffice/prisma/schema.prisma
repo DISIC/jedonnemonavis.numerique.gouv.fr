@@ -161,8 +161,8 @@ model User {
 
 model UserEvent {
   id         Int        @id @default(autoincrement())
-  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id    Int
+  user       User?      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int?
   action     TypeAction
   metadata   Json
   product    Product?   @relation(fields: [product_id], references: [id])
@@ -375,9 +375,9 @@ model Review {
 
 model ReviewViewLog {
   id                Int      @id @default(autoincrement())
-  user              User     @relation(fields: [user_id], references: [id])
+  user              User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id           Int
-  review            Review   @relation(fields: [review_id, review_created_at], references: [id, created_at])
+  review            Review   @relation(fields: [review_id, review_created_at], references: [id, created_at], onDelete: Cascade)
   review_id         Int
   review_created_at DateTime
 
