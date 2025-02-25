@@ -6,3 +6,4 @@ import './bo/reviewCheck.cy.js';
 import './bo/account.cy.js';
 import './bo/users.cy.js';
 import './bo/logs.cy.js';
+import './bo/product.cy.js';
