@@ -70,7 +70,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				hour: '2-digit',
 				minute: '2-digit'
 			}),
-			event.user.email,
+			event.user ? event.user.email : 'Utilisateur inconnu',
 			<p
 				dangerouslySetInnerHTML={{
 					__html:
