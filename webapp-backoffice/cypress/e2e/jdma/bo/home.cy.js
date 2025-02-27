@@ -107,10 +107,10 @@ describe('jdma-home', () => {
 
 		it('should display and verify footer internal links', () => {
 			const expectedTexts = [
-				'Accessibilité: non conforme',
+				'Accessibilité : non conforme',
 				'Mentions légales',
 				'Données personnelles',
-				'Modalités d’utilisation',
+				"Modalités d'utilisation",
 				'Roadmap',
 				'Contact'
 			];
