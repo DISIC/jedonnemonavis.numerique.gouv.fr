@@ -75,13 +75,10 @@ const GenericFilters = <T extends FilterSectionKey>({
 				sectionFilters.dateShortcut
 			);
 
-			console.log('changing shortcut');
-
 			if (
 				startDate !== sectionFilters.currentStartDate ||
 				endDate !== sectionFilters.currentEndDate
 			) {
-				console.log('enter');
 				setLocalStartDate(startDate);
 				setLocalEndDate(endDate);
 
@@ -112,7 +109,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					dateShortcut: undefined
 				}
 			});
-		}, 500),
+		}, 1500),
 		[updateFilters, filterKey, filters]
 	);
 
@@ -120,6 +117,29 @@ const GenericFilters = <T extends FilterSectionKey>({
 		(key: 'currentStartDate' | 'currentEndDate') =>
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const newDate = e.target.value;
+
+			if (newDate === '') {
+				if (key === 'currentStartDate') {
+					setLocalStartDate(new Date().toISOString().split('T')[0]);
+					updateFilters({
+						...filters,
+						[filterKey]: {
+							...filters[filterKey],
+							currentStartDate: new Date().toISOString().split('T')[0]
+						}
+					});
+				} else {
+					setLocalEndDate(new Date().toISOString().split('T')[0]);
+					updateFilters({
+						...filters,
+						[filterKey]: {
+							...filters[filterKey],
+							currentEndDate: new Date().toISOString().split('T')[0]
+						}
+					});
+				}
+				return;
+			}
 
 			if (key === 'currentStartDate') {
 				setLocalStartDate(newDate);
@@ -133,6 +153,13 @@ const GenericFilters = <T extends FilterSectionKey>({
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
 						'Format attendu : JJ/MM/AAAA'
 				}));
+				updateFilters({
+					...filters,
+					[filterKey]: {
+						...filters[filterKey],
+						currentStartDate: new Date().toISOString().split('T')[0]
+					}
+				});
 			} else {
 				setErrors(prev => ({
 					...prev,
@@ -220,6 +247,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de début"
+								key={`start-date-${localStartDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localStartDate,
@@ -236,6 +264,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de fin"
+								key={`end-date-${localEndDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localEndDate,
