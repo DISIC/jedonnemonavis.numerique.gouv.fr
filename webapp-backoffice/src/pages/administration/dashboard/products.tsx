@@ -128,10 +128,14 @@ const DashBoard = () => {
 	};
 
 	const nbPages = getNbPages(productsCount, numberPerPage);
+	const firstItemDisplayed = numberPerPage * (filters.currentPage - 1) + 1;
+	const lastItemDisplayed =
+		numberPerPage * (filters.currentPage - 1) + products.length;
+	const totalItems = productsResult.metadata.count;
 
 	const headTitle = () => {
 		return search
-			? `Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`
+			? `Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`
 			: 'Services | Je donne mon avis';
 	};
 
@@ -474,27 +478,32 @@ const DashBoard = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx(
+						<div
+							className={fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
 								'fr-grid-row--right'
-							)}>
+							)}
+						>
 							<div
-								role="status"
 								className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-ml-0')}
+								role="status"
 							>
-								Avis de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + products.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{productsResult.metadata.count}
-								</span>
+								<p id="pagination-description" className="fr-sr-only">
+									Avis de {firstItemDisplayed} à {lastItemDisplayed} sur{' '}
+									{totalItems}
+								</p>
+								<p aria-hidden="true">
+									Avis de{' '}
+									<span className={cx(classes.boldText)}>
+										{firstItemDisplayed}
+									</span>{' '}
+									à{' '}
+									<span className={cx(classes.boldText)}>
+										{lastItemDisplayed}
+									</span>{' '}
+									sur <span className={cx(classes.boldText)}>{totalItems}</span>
+								</p>
 							</div>
 						</div>
 						<div
