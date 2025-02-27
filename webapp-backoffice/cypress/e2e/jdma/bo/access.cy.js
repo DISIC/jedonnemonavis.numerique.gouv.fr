@@ -36,8 +36,10 @@ describe('Access Management - Invite a user to be an admin of the service', () =
 			.contains('Inviter')
 			.click({ force: true });
 
-		cy.get('h2').should('contain', 'Administrateurs du service');
-		cy.get('div.fr-card').should('contain', 'user4@example.com');
+		cy.wait(1000);
+
+		cy.get('h2').contains('Administrateurs du service');
+		cy.get('div.fr-card').contains('user4@example.com');
 	});
 
 	it('should change user4 from admin to user', () => {
@@ -92,11 +94,41 @@ describe('Access Management - Connect as a user', () => {
 
 	it('should not see CRUD options on apiKeys', () => {
 		cy.visit(`${app_url}/administration/dashboard/product/1/api_keys`);
-		cy.get('h2').should('contain', 'Gérer les clés API');
+		cy.get('h1').should('contain', 'Gérer les clés API');
 
 		cy.get('.btn--secondary')
 			.contains('Générer une clé API')
 			.should('not.exist');
+	});
+});
+
+describe('Access Management - Remove access of user4', () => {
+	beforeEach(() => {
+		cy.visit(`${app_url}/login`);
+		loginAsAdmin();
+		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+	});
+	it('should remove the access of user4', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/1/access`);
+		cy.get('h2').should('contain', "Gérer l'accès");
+
+		cy.get('.fr-card')
+			.contains('span', 'user 4')
+			.closest('.fr-card')
+			.find('.fr-btn--secondary')
+			.contains('Options')
+			.click({ force: true });
+
+		cy.get('.MuiMenu-paper .MuiMenuItem-root')
+			.contains("Retirer l'accès")
+			.click({ force: true });
+
+		cy.get('.fr-modal__footer .fr-btn')
+			.contains('Retirer')
+			.click({ force: true });
+
+		cy.get('h2').should('contain', 'Utilisateurs du service');
+		cy.get('.fr-card').should('not.contain', 'user 4');
 	});
 });
 
