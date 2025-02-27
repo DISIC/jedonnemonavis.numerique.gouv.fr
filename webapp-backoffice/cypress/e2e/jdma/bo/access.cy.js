@@ -1,6 +1,8 @@
 const app_url = Cypress.env('app_base_url');
 const adminEmail = Cypress.env('admin_user_mail');
 const adminPassword = Cypress.env('admin_user_password');
+const userEmail = 'user4@example.com';
+const userPassword = 'jdma';
 
 const selectors = {
 	loginForm: {
@@ -13,7 +15,7 @@ const selectors = {
 	}
 };
 
-describe('Access Management', () => {
+describe('Access Management - Invite a user to be an admin of the service', () => {
 	beforeEach(() => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
@@ -59,28 +61,42 @@ describe('Access Management', () => {
 
 		cy.get('h2').should('not.contain', 'Administrateurs du service');
 	});
+});
 
-	it('should remove the access of user4', () => {
-		cy.visit(`${app_url}/administration/dashboard/product/1/access`);
-		cy.get('h2').should('contain', "Gérer l'accès");
+describe('Access Management - Connect as a user', () => {
+	beforeEach(() => {
+		cy.visit(`${app_url}/login`);
+		login(userEmail, userPassword);
+		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+	});
+
+	it('should not have the modify options on button page', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/1/buttons`);
+		cy.get('h2').should('contain', 'Voir les boutons');
+
+		cy.get('button.fr-btn--secondary')
+			.contains('Créer un bouton')
+			.should('not.exist');
 
 		cy.get('.fr-card')
-			.contains('span', 'user 4')
+			.contains('p', 'Button 1')
 			.closest('.fr-card')
-			.find('.fr-btn--secondary')
+			.find('button#button-options')
 			.contains('Options')
-			.click({ force: true });
+			.click();
 
 		cy.get('.MuiMenu-paper .MuiMenuItem-root')
-			.contains("Retirer l'accès")
-			.click({ force: true });
+			.contains('Modifier')
+			.should('not.exist');
+	});
 
-		cy.get('.fr-modal__footer .fr-btn')
-			.contains('Retirer')
-			.click({ force: true });
+	it('should not see CRUD options on apiKeys', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/1/api_keys`);
+		cy.get('h2').should('contain', 'Gérer les clés API');
 
-		cy.get('h2').should('contain', 'Utilisateurs du service');
-		cy.get('.fr-card').should('not.contain', 'user 4');
+		cy.get('.btn--secondary')
+			.contains('Générer une clé API')
+			.should('not.exist');
 	});
 });
 
