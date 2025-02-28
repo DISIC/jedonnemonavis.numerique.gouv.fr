@@ -96,9 +96,12 @@ describe('Access Management - Connect as a user', () => {
 		cy.visit(`${app_url}/administration/dashboard/product/1/api_keys`);
 		cy.get('h1').should('contain', 'Gérer les clés API');
 
-		cy.get('.btn--secondary')
-			.contains('Générer une clé API')
-			.should('not.exist');
+		cy.get('body').then($body => {
+			const buttonExists =
+				$body.find('button:contains("Générer une nouvelle clé API")').length >
+				0;
+			expect(buttonExists).to.be.false;
+		});
 	});
 });
 
