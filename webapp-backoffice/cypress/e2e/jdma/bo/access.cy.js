@@ -36,10 +36,11 @@ describe('Access Management - Invite a user to be an admin of the service', () =
 			.contains('Inviter')
 			.click({ force: true });
 
-		cy.wait(1000);
-
-		cy.get('h2').contains('Administrateurs du service');
-		cy.get('div.fr-card').contains('user4@example.com');
+		cy.get('h2', { timeout: 10000 }).should(
+			'contain',
+			'Administrateurs du service'
+		);
+		cy.get('div.fr-card').should('contain', 'user4@example.com');
 	});
 
 	it('should change user4 from admin to user', () => {
@@ -100,6 +101,17 @@ describe('Access Management - Connect as a user', () => {
 			const buttonExists =
 				$body.find('button:contains("Générer une nouvelle clé API")').length >
 				0;
+			expect(buttonExists).to.be.false;
+		});
+	});
+
+	it('should not be able to delete a service', () => {
+		cy.visit(`${app_url}/administration/dashboard/product/1/infos`);
+		cy.get('h1').should('contain', 'Informations');
+
+		cy.get('body').then($body => {
+			const buttonExists =
+				$body.find('button:contains("Supprimer ce service")').length > 0;
 			expect(buttonExists).to.be.false;
 		});
 	});
