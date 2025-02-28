@@ -118,13 +118,28 @@ describe('jdma-home', () => {
 			cy.get(selectors.footer)
 				.find(selectors.footerLinks)
 				.find('li')
-				.each($el => {
-					cy.wrap($el)
-						.invoke('text')
-						.then(text => {
-							expect(expectedTexts).to.include(text.trim());
-						});
-				});
+				.should('have.length', 6);
+
+			cy.get(selectors.footer)
+				.contains(/Accessibilité\s*:\s*non conforme/i)
+				.should('exist');
+			cy.get(selectors.footer)
+				.contains(/Mentions légales/i)
+				.should('exist');
+			cy.get(selectors.footer)
+				.contains(/Données personnelles/i)
+				.should('exist');
+
+			cy.get(selectors.footer)
+				.find('a[href="/public/termsOfUse"]')
+				.should('exist');
+
+			cy.get(selectors.footer)
+				.contains(/Roadmap/i)
+				.should('exist');
+			cy.get(selectors.footer)
+				.contains(/Contact/i)
+				.should('exist');
 		});
 	});
 });
