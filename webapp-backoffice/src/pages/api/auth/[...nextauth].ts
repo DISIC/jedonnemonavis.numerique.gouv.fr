@@ -162,7 +162,7 @@ export const authOptions: NextAuthOptions = {
 			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
-				params: { scope: 'openid profile email' }
+				params: { scope: 'openid email profile organization' }
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
 			userinfo: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
