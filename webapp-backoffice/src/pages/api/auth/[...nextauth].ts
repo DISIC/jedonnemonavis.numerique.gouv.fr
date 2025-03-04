@@ -47,11 +47,24 @@ export const authOptions: NextAuthOptions = {
 			}
 			return session;
 		},
-		jwt: ({ user, token }) => {
-			if (user) {
+		jwt: ({ user, token, account, profile }) => {
+			console.log('🔗 JWT CALLBACK:', { user, token, account, profile });
+			if (account?.provider === 'openid' && profile) {
+				const proconnectProfile = profile as {
+					email: string;
+					given_name: string;
+					family_name: string;
+				};
+				// Cas ProConnect
+				token.email = profile.email;
+				token.firstName = proconnectProfile.given_name;
+				token.lastName = proconnectProfile.family_name;
+				token.provider = 'proconnect';
+			} else if (user) {
+				// Cas CredentialsProvider (classique)
 				token.uid = user.id;
-				token.email = user.email;
 				token.role = user.role;
+				token.email = user.email;
 			}
 			return token;
 		},
