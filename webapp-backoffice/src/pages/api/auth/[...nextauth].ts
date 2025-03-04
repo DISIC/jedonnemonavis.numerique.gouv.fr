@@ -155,7 +155,7 @@ export const authOptions: NextAuthOptions = {
 
 		// Provider Proconnect (OpenID)
 		{
-			id: 'proconnect',
+			id: 'openid',
 			name: 'ProConnect',
 			type: 'oauth',
 			issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
