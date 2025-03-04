@@ -14,6 +14,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Toast } from '@/src/components/ui/Toast';
 import { push } from '@socialgouv/matomo-next';
+import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
 
 type FormCredentials = {
 	email: string;
@@ -296,6 +297,9 @@ export const LoginForm = () => {
 					)}
 				</Button>
 			</form>
+			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
+			<h5>Se connecter avec ProConnect</h5>
+			<ProConnectButton onClick={() => signIn('proconnect')} />
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
 			<h5>Vous n&apos;avez pas de compte ?</h5>
 			<Link

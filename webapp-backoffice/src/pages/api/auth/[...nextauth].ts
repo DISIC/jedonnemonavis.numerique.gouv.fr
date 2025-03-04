@@ -10,6 +10,17 @@ import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 
+interface ProconnectProfile {
+	sub: string;
+	email: string;
+	given_name: string;
+	family_name: string;
+}
+
+console.log('PROCONNECT_CLIENT_ID', process.env.PROCONNECT_CLIENT_ID)
+console.log('PROCONNECT_CLIENT_SECRET', process.env.PROCONNECT_CLIENT_SECRET)
+console.log('PROCONNECT_DOMAIN', process.env.PROCONNECT_DOMAIN)
+
 export const authOptions: NextAuthOptions = {
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
@@ -49,6 +60,39 @@ export const authOptions: NextAuthOptions = {
 		  }
 		  return baseUrl;
 		},
+
+		async signIn({ account, profile }) {
+			if (account?.provider === 'proconnect') {
+				const proconnectProfile = profile as ProconnectProfile;
+		
+				const email = proconnectProfile.email?.toLowerCase();
+		
+				let user = await prisma.user.findUnique({
+					where: { email }
+				});
+
+				const salt = bcrypt.genSaltSync(10);
+				const newHashedPassword = bcrypt.hashSync('changeme', salt);
+		
+				if (!user) {
+					user = await prisma.user.create({
+						data: {
+							email,
+							firstName: proconnectProfile.given_name,
+							lastName: proconnectProfile.family_name,
+							role: 'user',
+							password: newHashedPassword,
+							notifications: false,
+							notifications_frequency: 'daily',
+							active: true,
+							xwiki_account: false,
+							xwiki_username: null
+						}
+					});
+				}
+			}
+			return true;
+		}
 	},
 	providers: [
 		CredentialsProvider({
@@ -107,7 +151,45 @@ export const authOptions: NextAuthOptions = {
 
 				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}
-		})
+		}),
+
+		// Provider Proconnect (OpenID)
+		{
+			id: 'proconnect',
+			name: 'ProConnect',
+			type: 'oauth',
+			issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
+			authorization: {
+				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
+				params: { scope: 'openid profile email' }
+			},
+			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
+			userinfo: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+			clientId: process.env.PROCONNECT_CLIENT_ID,
+			clientSecret: process.env.PROCONNECT_CLIENT_SECRET,
+			idToken: true,
+			checks: ['pkce', 'state'],
+			profile(profile) {
+				return {
+					id: profile.sub,
+					email: profile.email,
+					name: `${profile.given_name} ${profile.family_name}`.trim(),
+					firstName: profile.given_name,
+					lastName: profile.family_name,
+					active: true,                    // Valeur par défaut
+					xwiki_account: false,             // Si ProConnect ne te le fournit pas
+					xwiki_username: null,            // Idem
+					password: '',
+					role: 'user',    
+					notifications: false,
+					notifications_frequency: 'daily',
+					created_at: new Date(),
+					updated_at: new Date()
+				}
+			}
+		}
+
 	],
 
 	session: {
