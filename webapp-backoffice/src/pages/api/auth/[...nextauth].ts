@@ -33,7 +33,7 @@ export const authOptions: NextAuthOptions = {
 			// Récupère les informations utilisateur en base de données
 			if (token.uid) {
 				const user = await prisma.user.findUnique({
-					where: { id: token.uid as number }
+					where: { email: token.email as string }
 				});
 				if (user) {
 					session.user = {
@@ -50,6 +50,7 @@ export const authOptions: NextAuthOptions = {
 		jwt: ({ user, token }) => {
 			if (user) {
 				token.uid = user.id;
+				token.email = user.email;
 				token.role = user.role;
 			}
 			return token;
