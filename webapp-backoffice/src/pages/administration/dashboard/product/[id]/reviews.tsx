@@ -52,16 +52,13 @@ const defaultErrors = {
 const ProductReviewsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const router = useRouter();
-	const { data: session } = useSession();
 	const { view } = router.query;
 	const [startDate, setStartDate] = React.useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
 			.split('T')[0]
 	);
-	const [realStartDate, setRealStartDate] = React.useState<string>(
-		new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
-	);
+
 	const currentDate = new Date();
 	const [endDate, setEndDate] = React.useState<string>(
 		currentDate.toISOString().split('T')[0]
@@ -71,19 +68,13 @@ const ProductReviewsPage = (props: Props) => {
 	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
-	const [newReviews, setNewReviews] = React.useState(false);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
 	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
 		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
-	const [newReviewHandled, setNewReviewHandled] =
-		React.useState<boolean>(false);
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
-
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const filter_modal = createModal({
 		id: 'filter-modal',
