@@ -163,8 +163,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email profile',
-					nonce: crypto.randomBytes(16).toString('base64') // Génère la nonce
+					scope: 'openid email profile'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
@@ -172,7 +171,7 @@ export const authOptions: NextAuthOptions = {
 			clientId: process.env.PROCONNECT_CLIENT_ID,
 			clientSecret: process.env.PROCONNECT_CLIENT_SECRET,
 			idToken: true,
-			checks: ['state'],
+			checks: ['nonce', 'state'],
 			profile(profile) {
 				return {
 					id: profile.sub,
