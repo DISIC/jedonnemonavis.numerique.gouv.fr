@@ -299,7 +299,7 @@ export const LoginForm = () => {
 			</form>
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
 			<h5>Se connecter avec ProConnect</h5>
-			<ProConnectButton onClick={() => signIn('proconnect')} />
+			<ProConnectButton onClick={() => signIn('openid')} />
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
 			<h5>Vous n&apos;avez pas de compte ?</h5>
 			<Link
