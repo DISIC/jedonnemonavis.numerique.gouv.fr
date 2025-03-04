@@ -162,14 +162,17 @@ export const authOptions: NextAuthOptions = {
 			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
-				params: { scope: 'openid email profile organization' }
+				params: {
+					scope: 'openid email profile',
+					nonce: crypto.randomBytes(16).toString('base64') // Génère la nonce
+				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
 			userinfo: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
 			clientId: process.env.PROCONNECT_CLIENT_ID,
 			clientSecret: process.env.PROCONNECT_CLIENT_SECRET,
 			idToken: true,
-			checks: ['pkce', 'state'],
+			checks: ['state'],
 			profile(profile) {
 				return {
 					id: profile.sub,
