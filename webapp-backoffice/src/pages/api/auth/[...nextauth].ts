@@ -187,6 +187,7 @@ export const authOptions: NextAuthOptions = {
 			idToken: true,
 			checks: ['nonce', 'state'],
 			profile(profile) {
+				console.log('💡 PROFILE FROM PROCONNECT:', profile);
 				return {
 					id: profile.sub,
 					email: profile.email,
