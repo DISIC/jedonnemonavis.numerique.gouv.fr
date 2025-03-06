@@ -22,6 +22,7 @@ console.log('PROCONNECT_CLIENT_SECRET', process.env.PROCONNECT_CLIENT_SECRET)
 console.log('PROCONNECT_DOMAIN', process.env.PROCONNECT_DOMAIN)
 
 export const authOptions: NextAuthOptions = {
+	debug: true,
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
 		signIn: '/login',
