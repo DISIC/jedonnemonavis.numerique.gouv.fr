@@ -182,7 +182,26 @@ export const authOptions: NextAuthOptions = {
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
-			userinfo: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+			userinfo: {
+				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+				async request(context) {
+					console.log('🔗 Je force l’appel à /userinfo !');
+					const userinfoUrl =
+						typeof context.provider.userinfo === 'string'
+							? context.provider.userinfo
+							: context.provider.userinfo?.url;
+
+					const res = await fetch(userinfoUrl!, {
+						headers: {
+							Authorization: `Bearer ${context.tokens.access_token}`
+						}
+					});
+
+					const data = await res.json();
+					console.log('🧵 Réponse de /userinfo :', data);
+					return data;
+				}
+			},
 			clientId: process.env.PROCONNECT_CLIENT_ID,
 			clientSecret: process.env.PROCONNECT_CLIENT_SECRET,
 			idToken: true,
