@@ -177,7 +177,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email'
+					scope: 'email given_name usual_name organizational_unit	chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
@@ -194,9 +194,9 @@ export const authOptions: NextAuthOptions = {
 					name: `${profile.given_name} ${profile.family_name}`.trim(),
 					firstName: profile.given_name,
 					lastName: profile.family_name,
-					active: true,                    // Valeur par défaut
-					xwiki_account: false,             // Si ProConnect ne te le fournit pas
-					xwiki_username: null,            // Idem
+					active: true,
+					xwiki_account: false,
+					xwiki_username: null,            
 					password: '',
 					role: 'user',    
 					notifications: false,
