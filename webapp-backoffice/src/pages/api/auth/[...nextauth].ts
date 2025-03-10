@@ -186,20 +186,24 @@ export const authOptions: NextAuthOptions = {
 			userinfo: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
 				async request({ tokens }): Promise<Record<string, any>> {
+					console.log("🔗 Je force l’appel à /userinfo !");
+					
 					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
 						headers: {
 							Authorization: `Bearer ${tokens.access_token}`
 						}
 					});
 			
+					const responseText = await res.text(); // 🔥 On lit le body UNE SEULE FOIS
+			
 					let data: Record<string, any>;
 			
 					try {
-						data = await res.json();
+						data = JSON.parse(responseText); // 🔍 On essaie de parser en JSON
 						console.log("✅ Réponse JSON correcte de /userinfo :", data);
 					} catch (error) {
 						console.log("⚠️ /userinfo a retourné un JWT, on le décode manuellement.");
-						data = jwt.decode(await res.text()) as Record<string, any> || {};
+						data = jwt.decode(responseText) as Record<string, any> || {}; // 🔥 Décode JWT
 					}
 			
 					console.log("🔍 Données finales après traitement :", data);
