@@ -9,6 +9,7 @@ import {
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 interface ProconnectProfile {
 	sub: string;
@@ -184,21 +185,24 @@ export const authOptions: NextAuthOptions = {
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
 			userinfo: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
-				async request(context) {
-					console.log('🔗 Je force l’appel à /userinfo !');
-					const userinfoUrl =
-						typeof context.provider.userinfo === 'string'
-							? context.provider.userinfo
-							: context.provider.userinfo?.url;
-
-					const res = await fetch(userinfoUrl!, {
+				async request({ tokens }): Promise<Record<string, any>> {
+					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
 						headers: {
-							Authorization: `Bearer ${context.tokens.access_token}`
+							Authorization: `Bearer ${tokens.access_token}`
 						}
 					});
-
-					const data = await res.json();
-					console.log('🧵 Réponse de /userinfo :', data);
+			
+					let data: Record<string, any>;
+			
+					try {
+						data = await res.json();
+						console.log("✅ Réponse JSON correcte de /userinfo :", data);
+					} catch (error) {
+						console.log("⚠️ /userinfo a retourné un JWT, on le décode manuellement.");
+						data = jwt.decode(await res.text()) as Record<string, any> || {};
+					}
+			
+					console.log("🔍 Données finales après traitement :", data);
 					return data;
 				}
 			},
