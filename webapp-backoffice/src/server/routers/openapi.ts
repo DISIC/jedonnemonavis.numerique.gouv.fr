@@ -60,11 +60,22 @@ export const openAPIRouter = router({
 				console.error('ELK health failed', e);
 			}
 
-			return ({
-				status: dbOk && elkOk ? 'ok' : 'degraded',
+			const status = dbOk && elkOk ? 'ok' : 'degraded';
+			const response = {
+				status,
 				database: dbOk ? 'ok' : 'down',
 				elk: elkOk ? 'ok' : 'down'
-			});
+			};
+	
+			if (!dbOk || !elkOk) {
+				throw new TRPCError({
+					code: 'INTERNAL_SERVER_ERROR',
+					message: 'Un ou plusieurs services sont indisponibles',
+					cause: response
+				});
+			}
+
+			return response;
 		}),
 	infoDemarches: protectedApiProcedure
 		.meta({
