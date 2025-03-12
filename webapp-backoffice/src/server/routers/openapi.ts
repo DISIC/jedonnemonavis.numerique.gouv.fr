@@ -1,5 +1,6 @@
 import {
 	protectedApiProcedure,
+	publicProcedure,
 	router
 } from '@/src/server/trpc';
 import { ZOpenApiStatsOutput } from '@/src/types/custom';
@@ -20,6 +21,51 @@ import { sendMail } from '@/src/utils/mailer';
 const maxNbProducts = 10;
 
 export const openAPIRouter = router({
+	health: publicProcedure
+		.meta({
+			openapi: {
+				method: 'GET',
+				path: '/health',
+				protect: true,
+				enabled: true,
+				summary: "Point d'accès santé JDMA.",
+				example: {
+					request: {}
+				}
+			}
+		})
+		.input(z.object({}))
+		.output(
+			z.object({
+				status: z.string(),
+				database: z.string(),
+				elk: z.string(),
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			let dbOk = false;
+			let elkOk = false;
+
+			try {
+				await ctx.prisma.user.count();
+				dbOk = true;
+			} catch (e) {
+				console.error('DB health failed', e);
+			}
+
+			try {
+				const health = await ctx.elkClient.cluster.health();
+				elkOk = health.status === 'green' || health.status === 'yellow';
+			} catch (e) {
+				console.error('ELK health failed', e);
+			}
+
+			return ({
+				status: dbOk && elkOk ? 'ok' : 'degraded',
+				database: dbOk ? 'ok' : 'down',
+				elk: elkOk ? 'ok' : 'down'
+			});
+		}),
 	infoDemarches: protectedApiProcedure
 		.meta({
 			openapi: {
