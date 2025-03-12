@@ -9,6 +9,7 @@ import SuperJSON from "superjson";
 import { ZodError } from "zod";
 import prisma from "../utils/db";
 import crypto from "crypto";
+import ipaddr from "ipaddr.js";
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
@@ -90,10 +91,15 @@ function isIpAllowed(ip: string): boolean {
   return allowedIps.some((allowedIp) => {
     if (allowedIp.includes("-")) {
       const [startIp, endIp] = allowedIp.split("-");
-      return ip >= startIp && ip <= endIp;
+      const ipNum = ipToNumber(ip);
+      return ipNum >= ipToNumber(startIp) && ipNum <= ipToNumber(endIp);
     }
     return allowedIp === ip;
   });
+}
+
+function ipToNumber(ip: string): number {
+  return ipaddr.parse(ip).toByteArray().reduce((acc, byte) => (acc << 8) + byte, 0);
 }
 
 const limiter = createTRPCStoreLimiter<typeof t>({
