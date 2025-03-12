@@ -436,8 +436,8 @@ const ProductReviewsPage = (props: Props) => {
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							product_id={product.id}
-							startDate={startDate}
-							endDate={endDate}
+							startDate={filters.productReviews.currentStartDate}
+							endDate={filters.productReviews.currentEndDate}
 							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 							search={search}
 							button_id={buttonId}
