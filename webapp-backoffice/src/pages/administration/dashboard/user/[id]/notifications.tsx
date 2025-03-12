@@ -14,31 +14,13 @@ import { NotificationFrequency } from '@prisma/client';
 interface Props {
 	isOwn: Boolean;
 	userId: number;
+	user: User;
 }
 
 const NotificationsAccount: React.FC<Props> = props => {
-	const { userId, isOwn } = props;
-
-	const {
-		data: userResult,
-		isLoading: isLoadingUser,
-		refetch: refetchUser,
-		isRefetching: isRefetchingUser
-	} = trpc.user.getById.useQuery(
-		{
-			id: userId
-		},
-		{
-			initialData: {
-				data: null
-			},
-			enabled: userId !== undefined
-		}
-	);
+	const { userId, isOwn, user } = props;
 
 	const { mutateAsync: updateUser } = trpc.user.update.useMutation();
-
-	const user = userResult?.data as User;
 
 	const { classes } = useStyles();
 
@@ -53,88 +35,77 @@ const NotificationsAccount: React.FC<Props> = props => {
 				notifications_frequency: notificationsFrequency
 			}
 		});
-		refetchUser();
 	};
 
 	return (
 		<>
-			{!user ||
-				isLoadingUser ||
-				(isRefetchingUser && (
-					<div className={classes.loaderWrapper}>
-						<Loader />
+			<AccountLayout isOwn={isOwn} user={user}>
+				<Head>
+					<title>
+						{`${user.firstName} ${user.lastName}`} | Compte Notifications | Je
+						donne mon avis
+					</title>
+					<meta
+						name="description"
+						content={`${user.firstName} ${user.lastName} | Form Notifications | Je donne mon avis`}
+					/>
+				</Head>
+				<div className={classes.column}>
+					<div className={classes.headerWrapper}>
+						<h2>Notifications</h2>
 					</div>
-				))}
-			{!isLoadingUser && !isRefetchingUser && user && (
-				<AccountLayout isOwn={isOwn} user={user}>
-					<Head>
-						<title>
-							{`${user.firstName} ${user.lastName}`} | Compte Notifications | Je
-							donne mon avis
-						</title>
-						<meta
-							name="description"
-							content={`${user.firstName} ${user.lastName} | Form Notifications | Je donne mon avis`}
-						/>
-					</Head>
-					<div className={classes.column}>
-						<div className={classes.headerWrapper}>
-							<h2>Notifications</h2>
-						</div>
-						<div className={classes.notificationsWrapper}>
-							<h3>Par e-mail</h3>
-							<div className={classes.divider} />
-							<form className={classes.form}>
-								<ToggleSwitch
-									label="Recevoir une sythèse des nouveaux avis sur les services que vous administrez"
-									inputTitle="notifications"
-									labelPosition="left"
-									showCheckedHint={false}
-									defaultChecked={user.notifications}
-									onChange={e => handleNotificationsChange(e, 'daily')}
-								/>
-								{user.notifications && (
-									<RadioButtons
-										legend="Fréquence de la synthèse"
-										name="notifications-frequency"
-										options={[
-											{
-												label:
-													'Journalière (tous les jours à 08h heure de Paris)',
-												nativeInputProps: {
-													value: user.notifications_frequency,
-													checked: user.notifications_frequency === 'daily',
-													onChange: () =>
-														handleNotificationsChange(true, 'daily')
-												}
-											},
-											{
-												label: 'Hebdo (tous les lundis à 08h heure de Paris)',
-												nativeInputProps: {
-													value: user.notifications_frequency,
-													checked: user.notifications_frequency === 'weekly',
-													onChange: () =>
-														handleNotificationsChange(true, 'weekly')
-												}
-											},
-											{
-												label:
-													'Mensuelle (tous les premiers lundis de chaque mois à 08h heure de Paris)',
-												nativeInputProps: {
-													value: user.notifications_frequency,
-													checked: user.notifications_frequency === 'monthly',
-													onChange: () =>
-														handleNotificationsChange(true, 'monthly')
-												}
+					<div className={classes.notificationsWrapper}>
+						<h3>Par e-mail</h3>
+						<div className={classes.divider} />
+						<form className={classes.form}>
+							<ToggleSwitch
+								label="Recevoir une sythèse des nouveaux avis sur les services que vous administrez"
+								inputTitle="notifications"
+								labelPosition="left"
+								showCheckedHint={false}
+								defaultChecked={user.notifications}
+								onChange={e => handleNotificationsChange(e, 'daily')}
+							/>
+							{user.notifications && (
+								<RadioButtons
+									legend="Fréquence de la synthèse"
+									name="notifications-frequency"
+									options={[
+										{
+											label:
+												'Journalière (tous les jours à 08h heure de Paris)',
+											nativeInputProps: {
+												value: user.notifications_frequency,
+												checked: user.notifications_frequency === 'daily',
+												onChange: () => handleNotificationsChange(true, 'daily')
 											}
-										]}
-									/>
-								)}
-							</form>
-						</div>
+										},
+										{
+											label: 'Hebdo (tous les lundis à 08h heure de Paris)',
+											nativeInputProps: {
+												value: user.notifications_frequency,
+												checked: user.notifications_frequency === 'weekly',
+												onChange: () =>
+													handleNotificationsChange(true, 'weekly')
+											}
+										},
+										{
+											label:
+												'Mensuelle (tous les premiers lundis de chaque mois à 08h heure de Paris)',
+											nativeInputProps: {
+												value: user.notifications_frequency,
+												checked: user.notifications_frequency === 'monthly',
+												onChange: () =>
+													handleNotificationsChange(true, 'monthly')
+											}
+										}
+									]}
+								/>
+							)}
+						</form>
 					</div>
-				</AccountLayout>
-			)}
+				</div>
+			</AccountLayout>
 		</>
 	);
 };

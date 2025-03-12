@@ -9,8 +9,21 @@ import {
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+interface ProconnectProfile {
+	sub: string;
+	email: string;
+	given_name: string;
+	family_name: string;
+}
+
+console.log('PROCONNECT_CLIENT_ID', process.env.PROCONNECT_CLIENT_ID)
+console.log('PROCONNECT_CLIENT_SECRET', process.env.PROCONNECT_CLIENT_SECRET)
+console.log('PROCONNECT_DOMAIN', process.env.PROCONNECT_DOMAIN)
 
 export const authOptions: NextAuthOptions = {
+	debug: true,
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
 		signIn: '/login',
@@ -22,7 +35,7 @@ export const authOptions: NextAuthOptions = {
 			// Récupère les informations utilisateur en base de données
 			if (token.uid) {
 				const user = await prisma.user.findUnique({
-					where: { id: token.uid as number }
+					where: { email: token.email as string }
 				});
 				if (user) {
 					session.user = {
@@ -36,10 +49,24 @@ export const authOptions: NextAuthOptions = {
 			}
 			return session;
 		},
-		jwt: ({ user, token }) => {
-			if (user) {
+		jwt: ({ user, token, account, profile }) => {
+			console.log('🔗 JWT CALLBACK:', { user, token, account, profile });
+			if (account?.provider === 'openid' && profile) {
+				const proconnectProfile = profile as {
+					email: string;
+					given_name: string;
+					family_name: string;
+				};
+				// Cas ProConnect
+				token.email = profile.email;
+				token.firstName = proconnectProfile.given_name;
+				token.lastName = proconnectProfile.family_name;
+				token.provider = 'proconnect';
+			} else if (user) {
+				// Cas CredentialsProvider (classique)
 				token.uid = user.id;
 				token.role = user.role;
+				token.email = user.email;
 			}
 			return token;
 		},
@@ -49,6 +76,39 @@ export const authOptions: NextAuthOptions = {
 		  }
 		  return baseUrl;
 		},
+
+		async signIn({ account, profile }) {
+			if (account?.provider === 'proconnect') {
+				const proconnectProfile = profile as ProconnectProfile;
+		
+				const email = proconnectProfile.email?.toLowerCase();
+		
+				let user = await prisma.user.findUnique({
+					where: { email }
+				});
+
+				const salt = bcrypt.genSaltSync(10);
+				const newHashedPassword = bcrypt.hashSync('changeme', salt);
+		
+				if (!user) {
+					user = await prisma.user.create({
+						data: {
+							email,
+							firstName: proconnectProfile.given_name,
+							lastName: proconnectProfile.family_name,
+							role: 'user',
+							password: newHashedPassword,
+							notifications: false,
+							notifications_frequency: 'daily',
+							active: true,
+							xwiki_account: false,
+							xwiki_username: null
+						}
+					});
+				}
+			}
+			return true;
+		}
 	},
 	providers: [
 		CredentialsProvider({
@@ -107,7 +167,74 @@ export const authOptions: NextAuthOptions = {
 
 				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}
-		})
+		}),
+
+		// Provider Proconnect (OpenID)
+		{
+			id: 'openid',
+			name: 'ProConnect',
+			type: 'oauth',
+			issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
+			authorization: {
+				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
+				params: {
+					scope: 'openid phone organizational_unit chorusdt'
+				}
+			},
+			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
+			userinfo: {
+				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+				async request({ tokens }): Promise<Record<string, any>> {
+					console.log("🔗 Je force l’appel à /userinfo !");
+					
+					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
+						headers: {
+							Authorization: `Bearer ${tokens.access_token}`
+						}
+					});
+			
+					const responseText = await res.text(); // 🔥 On lit le body UNE SEULE FOIS
+			
+					let data: Record<string, any>;
+			
+					try {
+						data = JSON.parse(responseText); // 🔍 On essaie de parser en JSON
+						console.log("✅ Réponse JSON correcte de /userinfo :", data);
+					} catch (error) {
+						console.log("⚠️ /userinfo a retourné un JWT, on le décode manuellement.");
+						data = jwt.decode(responseText) as Record<string, any> || {}; // 🔥 Décode JWT
+					}
+			
+					console.log("🔍 Données finales après traitement :", data);
+					return data;
+				}
+			},
+			clientId: process.env.PROCONNECT_CLIENT_ID,
+			clientSecret: process.env.PROCONNECT_CLIENT_SECRET,
+			idToken: true,
+			checks: ['nonce', 'state'],
+			profile(profile) {
+				console.log('💡 PROFILE FROM PROCONNECT:', profile);
+				return {
+					id: profile.sub,
+					email: profile.email,
+					name: `${profile.given_name} ${profile.family_name}`.trim(),
+					firstName: profile.given_name,
+					lastName: profile.family_name,
+					active: true,
+					xwiki_account: false,
+					xwiki_username: null,            
+					password: '',
+					role: 'user',    
+					notifications: false,
+					notifications_frequency: 'daily',
+					created_at: new Date(),
+					updated_at: new Date()
+				}
+			}
+		}
+
 	],
 
 	session: {

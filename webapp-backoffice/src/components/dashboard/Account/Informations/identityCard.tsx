@@ -1,11 +1,12 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import React from 'react';
-import { User } from '@/prisma/generated/zod';
+import { User, UserSchema } from '@/prisma/generated/zod';
 import GenericCardInfos from './genericCardAccount';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 interface Props {
 	user: User;
@@ -17,6 +18,7 @@ const IdentityCard = (props: Props) => {
 	const { user } = props;
 	const utils = trpc.useUtils();
 	const { update: refetchSession } = useSession();
+	const router = useRouter();
 
 	const {
 		control,
@@ -31,6 +33,7 @@ const IdentityCard = (props: Props) => {
 		onSuccess: async () => {
 			utils.user.getById.invalidate({});
 			await refetchSession();
+			router.replace(router.asPath);
 		}
 	});
 
@@ -44,7 +47,8 @@ const IdentityCard = (props: Props) => {
 	};
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		const { email, ...updateUser } = data;
+		const dataParsed = UserSchema.parse(data);
+		const { email, ...updateUser } = dataParsed;
 		editUser.mutate({
 			id: user.id,
 			user: { ...updateUser }

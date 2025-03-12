@@ -1,11 +1,11 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import React, { ReactElement } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { User } from '@/prisma/generated/zod';
+import { User, UserSchema } from '@/prisma/generated/zod';
 import Button from '@codegouvfr/react-dsfr/Button';
 import GenericCardInfos from './genericCardAccount';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { useSession } from 'next-auth/react';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
@@ -13,6 +13,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Toast } from '@/src/components/ui/Toast';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { push } from '@socialgouv/matomo-next';
+import { useRouter } from 'next/router';
 
 interface Props {
 	user: User;
@@ -33,6 +34,13 @@ const CredentialsCard = (props: Props) => {
 	const utils = trpc.useUtils();
 	const { data: session, update: refetchSession } = useSession();
 	const [displayToast, setDisplayToast] = React.useState<boolean>(false);
+	const router = useRouter();
+	const [resolvePromise, setResolvePromise] = React.useState<
+		((value: boolean) => void) | null
+	>(null);
+	const [modalType, setModalType] = React.useState<
+		'change-mail' | 'change-pwd'
+	>('change-mail');
 
 	const {
 		control,
@@ -47,7 +55,7 @@ const CredentialsCard = (props: Props) => {
 	const editUser = trpc.user.update.useMutation({
 		onSuccess: async () => {
 			utils.user.getById.invalidate({});
-			await refetchSession();
+			signOut();
 		},
 		onError: error => {
 			switch (error.data?.httpStatus) {
@@ -68,27 +76,34 @@ const CredentialsCard = (props: Props) => {
 		}
 	});
 
-	const onFormSubmit = (): Promise<boolean> => {
-		return new Promise(resolve => {
-			handleSubmit(async data => {
-				const result = await onLocalSubmit(data);
-				resolve(result as boolean);
-			})();
-		});
-	};
-
-	const onLocalSubmit: SubmitHandler<FormValues> = async (
-		data
-	): Promise<boolean> => {
-		const { emailConfirmation, ...updateUser } = data;
+	const onLocalSubmit = async (data: FormValues): Promise<boolean> => {
+		const dataParsed = UserSchema.parse(data);
 		try {
 			await editUser.mutateAsync({
 				id: user.id,
-				user: { ...updateUser }
+				user: { ...dataParsed }
 			});
 			return true;
 		} catch (error) {
 			return false;
+		}
+	};
+
+	const onFormSubmit = (): Promise<boolean> => {
+		return new Promise<boolean>(resolve => {
+			setResolvePromise(() => resolve);
+			setModalType('change-mail');
+			onConfirmModal.open();
+		});
+	};
+
+	const handleConfirm = () => {
+		onConfirmModal.close();
+		if (resolvePromise) {
+			handleSubmit(async data => {
+				const result = await onLocalSubmit(data);
+				resolvePromise(result);
+			})();
 		}
 	};
 
@@ -100,20 +115,31 @@ const CredentialsCard = (props: Props) => {
 		<>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`Réinitialiser le mot de passe`}
+				title={`${modalType === 'change-mail' ? "Changer l'adresse mail" : 'Réinitialiser le mot de passe'}`}
 				handleOnConfirm={() => {
-					initResetPwd.mutate({
-						email: session?.user.email || ''
-					});
-					setDisplayToast(true);
-					onConfirmModal.close();
+					if (modalType === 'change-mail') {
+						handleConfirm();
+					} else {
+						initResetPwd.mutate({
+							email: session?.user.email || ''
+						});
+						setDisplayToast(true);
+						onConfirmModal.close();
+					}
 				}}
 			>
 				<>
-					<>
-						Nous enverrons un lien pour réinitialiser votre mot de passe à
-						l'adresse suivante : {session?.user.email}
-					</>
+					{modalType === 'change-mail' ? (
+						<p>
+							Le changement d'adresse email entraînera une déconnexion de la
+							plateforme. Souhaitez-vous continuer?
+						</p>
+					) : (
+						<p>
+							Nous enverrons un lien pour réinitialiser votre mot de passe à
+							l'adresse suivante : {session?.user.email}
+						</p>
+					)}
 				</>
 			</OnConfirmModal>
 			<GenericCardInfos
@@ -286,6 +312,7 @@ const CredentialsCard = (props: Props) => {
 								<Button
 									priority="secondary"
 									onClick={() => {
+										setModalType('change-pwd');
 										onConfirmModal.open();
 										push([
 											'trackEvent',

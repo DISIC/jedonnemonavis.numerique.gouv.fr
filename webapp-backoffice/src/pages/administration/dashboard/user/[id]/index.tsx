@@ -12,6 +12,26 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	const focusedUser = await prisma.user.findUnique({
 		where: {
 			id: parseInt(id as string)
+		},
+		include: {
+			accessRights: {
+				include: {
+					product: {
+						include: {
+							entity: true
+						}
+					}
+				}
+			},
+			adminEntityRights: {
+				include: {
+					entity: {
+						include: {
+							products: true
+						}
+					}
+				}
+			}
 		}
 	});
 
@@ -24,6 +44,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		!currentUserToken ||
 		(currentUserToken.exp as number) < new Date().getTime() / 1000
 	) {
+		console.log("couldn't find token");
 		await prisma.$disconnect();
 		return {
 			redirect: {
@@ -33,6 +54,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
+	console.log('token : ', currentUserToken);
+
 	const currentUser = await prisma.user.findUnique({
 		where: {
 			email: currentUserToken.email as string
@@ -40,6 +63,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	});
 
 	if (!currentUser) {
+		console.log("couldn't find current user");
 		await prisma.$disconnect();
 		return {
 			redirect: {
@@ -66,7 +90,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	return {
 		props: {
 			isOwn: focusedUser?.id === currentUser.id,
-			userId: focusedUser?.id
+			userId: focusedUser?.id,
+			user: JSON.parse(JSON.stringify(focusedUser))
 		}
 	};
 };
