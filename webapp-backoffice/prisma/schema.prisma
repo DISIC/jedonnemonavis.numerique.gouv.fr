@@ -150,6 +150,7 @@ model User {
   api_keys                ApiKey[]
   exports                 Export[]
   form_templates          FormTemplate[]
+  forms                   Form[]
   reviewViewLogs          ReviewViewLog[]
   notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
@@ -296,6 +297,7 @@ model Product {
   xwiki_id        Int?          @unique
   buttons         Button[]
   accessRights    AccessRight[]
+  forms           Form[]
   favorites       Favorite[]
   reviews         Review[]
   isPublic        Boolean?
@@ -444,6 +446,7 @@ model FormTemplate {
   link         String?
   active       Boolean        @default(false)
   blocks       Block[]
+  forms        Form[]
   ReviewCustom ReviewCustom[]
 }
 
@@ -489,4 +492,19 @@ model AnswerCustom {
   created_at DateTime
   updated_at DateTime
   content    String
+}
+
+model Form {
+  id               Int          @id @default(autoincrement())
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @default(now())
+  user             User         @relation(fields: [user_id], references: [id])
+  user_id          Int
+  form_template    FormTemplate @relation(fields: [form_template_id], references: [id])
+  form_template_id Int
+  product          Product      @relation(fields: [product_id], references: [id])
+  product_id       Int
+  title            String
+  link             String?
+  active           Boolean      @default(false)
 }
