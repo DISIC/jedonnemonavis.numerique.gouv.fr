@@ -46,6 +46,12 @@ enum ProductStatus {
   archived
 }
 
+enum FormConfigStatus {
+  draft
+  published
+  archived
+}
+
 enum AnswerKind {
   text
   checkbox
@@ -126,6 +132,12 @@ enum TypeAction {
   user_signin
   user_signout
   api_call
+}
+
+enum FormConfigKind {
+  step
+  block
+  blockOption
 }
 
 // Next auth
@@ -437,41 +449,48 @@ model LimiterReporting {
 }
 
 model FormTemplate {
-  id           Int            @id @default(autoincrement())
-  created_at   DateTime       @default(now())
-  updated_at   DateTime       @default(now())
-  user         User           @relation(fields: [user_id], references: [id])
-  user_id      Int
-  title        String
-  link         String?
-  active       Boolean        @default(false)
-  blocks       Block[]
-  forms        Form[]
-  ReviewCustom ReviewCustom[]
+  id                  Int                @id @default(autoincrement())
+  created_at          DateTime           @default(now())
+  updated_at          DateTime           @default(now())
+  user                User               @relation(fields: [user_id], references: [id])
+  user_id             Int
+  title               String
+  link                String?
+  active              Boolean            @default(false)
+  form_template_steps FormTemplateStep[]
+  forms               Form[]
+  ReviewCustom        ReviewCustom[]
 }
 
-model Block {
-  id         Int            @id @default(autoincrement())
-  created_at DateTime       @default(now())
-  updated_at DateTime       @default(now())
-  form       FormTemplate   @relation(fields: [form_id], references: [id])
-  form_id    Int
-  position   Int
-  type_bloc  Typebloc
+model FormTemplateStep {
+  id                   Int                 @id @default(autoincrement())
+  form_template        FormTemplate        @relation(fields: [form_template_id], references: [id])
+  form_template_id     Int
+  form_template_blocks FormTemplateBlock[]
+}
+
+model FormTemplateBlock {
+  id                    Int                       @id @default(autoincrement())
+  created_at            DateTime                  @default(now())
+  updated_at            DateTime                  @default(now())
+  form_template_step    FormTemplateStep          @relation(fields: [form_template_step_id], references: [id])
+  form_template_step_id Int
+  position              Int
+  type_bloc             Typebloc
+  label                 String?
+  value                 String?
+  content               String?
+  options               FormTemplateBlockOption[]
+}
+
+model FormTemplateBlockOption {
+  id         Int               @id @default(autoincrement())
+  created_at DateTime          @default(now())
+  updated_at DateTime          @default(now())
   label      String?
   value      String?
   content    String?
-  options    OptionsBlock[]
-}
-
-model OptionsBlock {
-  id         Int      @id @default(autoincrement())
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  label      String?
-  value      String?
-  content    String?
-  block      Block    @relation(fields: [block_id], references: [id], onDelete: Cascade)
+  block      FormTemplateBlock @relation(fields: [block_id], references: [id], onDelete: Cascade)
   block_id   Int
 }
 
@@ -496,15 +515,46 @@ model AnswerCustom {
 
 model Form {
   id               Int          @id @default(autoincrement())
-  created_at       DateTime     @default(now())
-  updated_at       DateTime     @default(now())
   user             User         @relation(fields: [user_id], references: [id])
   user_id          Int
   form_template    FormTemplate @relation(fields: [form_template_id], references: [id])
   form_template_id Int
   product          Product      @relation(fields: [product_id], references: [id])
   product_id       Int
-  title            String
-  link             String?
-  active           Boolean      @default(false)
+  form_configs     FormConfig[]
+  created_at       DateTime     @default(now())
+  updated_at       DateTime     @default(now())
+}
+
+model FormConfig {
+  id                   Int                 @id @default(autoincrement())
+  form                 Form                @relation(fields: [form_id], references: [id])
+  form_id              Int
+  status               FormConfigStatus
+  form_config_displays FormConfigDisplay[]
+  form_config_labels   FormConfigLabel[]
+  created_at           DateTime            @default(now())
+  updated_at           DateTime            @default(now())
+}
+
+model FormConfigDisplay {
+  id             Int            @id @default(autoincrement())
+  display        Boolean
+  kind           FormConfigKind
+  parent_id      Int
+  form_config    FormConfig     @relation(fields: [form_config_id], references: [id])
+  form_config_id Int
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now())
+}
+
+model FormConfigLabel {
+  id             Int            @id @default(autoincrement())
+  label          String
+  kind           FormConfigKind
+  parent_id      Int
+  form_config    FormConfig     @relation(fields: [form_config_id], references: [id])
+  form_config_id Int
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @default(now())
 }
