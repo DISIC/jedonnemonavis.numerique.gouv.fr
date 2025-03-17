@@ -149,7 +149,7 @@ model User {
   favorites               Favorite[]
   api_keys                ApiKey[]
   exports                 Export[]
-  forms                   Form[]
+  forms                   FormTemplate[]
   reviewViewLogs          ReviewViewLog[]
   notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
@@ -434,7 +434,7 @@ model LimiterReporting {
   last_attempt   DateTime
 }
 
-model Form {
+model FormTemplate {
   id           Int            @id @default(autoincrement())
   created_at   DateTime       @default(now())
   updated_at   DateTime       @default(now())
@@ -451,7 +451,7 @@ model Block {
   id         Int            @id @default(autoincrement())
   created_at DateTime       @default(now())
   updated_at DateTime       @default(now())
-  form       Form           @relation(fields: [form_id], references: [id])
+  form       FormTemplate           @relation(fields: [form_id], references: [id])
   form_id    Int
   position   Int
   type_bloc  Typebloc
@@ -474,7 +474,7 @@ model OptionsBlock {
 
 model ReviewCustom {
   id         Int            @id @default(autoincrement())
-  form       Form           @relation(fields: [form_id], references: [id])
+  form       FormTemplate           @relation(fields: [form_id], references: [id])
   form_id    Int
   created_at DateTime
   updated_at DateTime
