@@ -18,10 +18,6 @@ interface ProconnectProfile {
 	usual_name: string;
 }
 
-console.log('PROCONNECT_CLIENT_ID', process.env.PROCONNECT_CLIENT_ID)
-console.log('PROCONNECT_CLIENT_SECRET', process.env.PROCONNECT_CLIENT_SECRET)
-console.log('PROCONNECT_DOMAIN', process.env.PROCONNECT_DOMAIN)
-
 export const authOptions: NextAuthOptions = {
 	debug: true,
 	secret: process.env.NEXTAUTH_SECRET,
@@ -55,7 +51,6 @@ export const authOptions: NextAuthOptions = {
 			return session;
 		},
 		jwt: ({ user, token, account, profile }) => {
-			console.log('🔗 JWT CALLBACK:', { user, token, account, profile });
 			if (account?.provider === 'openid' && profile) {
 				const proconnectProfile = profile as {
 					email: string;
@@ -196,7 +191,6 @@ export const authOptions: NextAuthOptions = {
 			userinfo: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
 				async request({ tokens }): Promise<Record<string, any>> {
-					console.log("🔗 Je force l’appel à /userinfo !");
 					
 					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
 						headers: {
@@ -210,13 +204,9 @@ export const authOptions: NextAuthOptions = {
 			
 					try {
 						data = JSON.parse(responseText); // 🔍 On essaie de parser en JSON
-						console.log("✅ Réponse JSON correcte de /userinfo :", data);
 					} catch (error) {
-						console.log("⚠️ /userinfo a retourné un JWT, on le décode manuellement.");
 						data = jwt.decode(responseText) as Record<string, any> || {}; // 🔥 Décode JWT
 					}
-			
-					console.log("🔍 Données finales après traitement :", data);
 					return data;
 				}
 			},
@@ -225,7 +215,6 @@ export const authOptions: NextAuthOptions = {
 			idToken: true,
 			checks: ['nonce', 'state'],
 			profile(profile) {
-				console.log('💡 PROFILE FROM PROCONNECT:', profile);
 				return {
 					id: profile.sub,
 					email: profile.email,
