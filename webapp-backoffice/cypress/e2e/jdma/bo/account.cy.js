@@ -34,7 +34,8 @@ const selectors = {
 		save: 'Sauvegarder',
 		modify: 'Modifier',
 		delete: 'Supprimer le compte',
-		confirmDelete: 'Supprimer'
+		confirmDelete: 'Supprimer',
+		confirm: 'Confirmer'
 	}
 };
 
@@ -189,12 +190,12 @@ function testEmail({
 	clickModifyCard(selectors.card.credentials);
 	fillForm({ email: email, emailConfirmation: confirmationEmail });
 	cy.contains('button', selectors.action.save).click();
+	cy.contains('button', selectors.action.confirm).click();
+
 	if (expectedMEssage !== '') {
 		cy.contains('p', expectedMEssage).should('exist');
 		cy.contains('button', selectors.action.save).should('exist');
 	} else {
-		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
-		logout();
 		login(newEmailTest, userPassword);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 	}
