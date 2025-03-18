@@ -11,7 +11,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
-import Link from 'next/link';
 
 type UserPresetInfos = {
 	firstName?: string;
@@ -27,19 +26,11 @@ export default function Register() {
 
 	const [isAgentPublic, setIsAgentPublic] = useState<boolean>(false);
 	const [redirectForm, setRedirectForm] = useState<boolean>(false);
-	const [isOpenIdFalse, setIsOpenIdFalse] = useState(false);
 	const [showNonAgentMessage, setShowNonAgentMessage] =
 		useState<boolean>(false);
 	const [backgroundColor, setBackgroundColor] = useState<string>(
 		fr.colors.decisions.background.alt.grey.default
 	);
-
-	useEffect(() => {
-	  if (router.isReady) {
-		const openidParam = router.query.openid;
-		setIsOpenIdFalse(openidParam === "false");
-	  }
-	}, [router.isReady, router.query.openid]);
 
 	const { classes, cx } = useStyles({
 		backgroundColor
@@ -80,7 +71,7 @@ export default function Register() {
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<h1 className={fr.cx('fr-mb-12v')}>Création de compte</h1>
 					{/* {!registered && !otp && !request && <AlertObservatoire />} */}
-					{!!request && router.isReady && (
+					{!!request && (
 						<div role="status">
 							<Alert
 								className={fr.cx('fr-mb-16v')}
@@ -119,32 +110,7 @@ export default function Register() {
 								'fr-px-md-0'
 							)}
 						>
-							{ isOpenIdFalse ? (
-								<div
-									className={fr.cx(
-										'fr-grid-row',
-										'fr-grid-row--center',
-										'fr-grid-row--gutters'
-									)}
-								>
-									<Image
-										src="/assets/technical-error.svg"
-										alt="Accès interdit"
-										width={120}
-										height={120}
-										className={fr.cx('fr-col-12', 'fr-col-md-6')}
-									/>
-									<p className={cx(classes.textLead, fr.cx('fr-text--bold', 'fr-mb-12v', 'fr-mt-8v'))}>
-										Vous ne pouvez pas utiliser ProConnect pour vous connecter à Je donne mon avis
-									</p>
-									<p>
-										Veuillez vérifier que votre compte ProConnect est validé.
-									</p>
-									<p>
-										Je donne mon avis est réservé aux agents publics. Votre compte ProConnect doit obligatoirement être associé à une entité publique.
-									</p>
-								</div>
-							) : inviteToken ? (
+							{inviteToken ? (
 								<RegisterForm
 									userPresetInfos={userPresetInfos}
 									otp={otp as string | undefined}

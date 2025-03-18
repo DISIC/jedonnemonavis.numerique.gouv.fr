@@ -26,7 +26,7 @@ export const authOptions: NextAuthOptions = {
 	pages: {
 		signIn: '/login',
 		signOut: '/login',
-		error: '/auth/error' // Error code passed in query string as ?error=
+		error: '/login' // Error code passed in query string as ?error=
 	},
 	callbacks: {
 		async session({ session, token }) {
