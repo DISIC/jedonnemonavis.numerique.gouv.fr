@@ -60,6 +60,16 @@ async function seed_users_products() {
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
 
+	await prisma.formTemplate.upsert({
+		where: { slug: 'root' },
+		update: {},
+		create: {
+			title: 'Formulaire des démarches',
+			slug: 'root',
+			active: true
+		}
+	});
+
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
 			prisma.user.upsert({
@@ -112,6 +122,17 @@ async function seed_users_products() {
 									index % 2
 								].email
 							}
+						},
+						forms: {
+							create: [
+								{
+									form_template: {
+										connect: {
+											slug: 'root'
+										}
+									}
+								}
+							]
 						}
 					}
 				})
