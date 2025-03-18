@@ -88,6 +88,8 @@ export const authOptions: NextAuthOptions = {
 					where: { email }
 				});
 
+				console.log('user found : ', user)
+
 				const salt = bcrypt.genSaltSync(10);
 				const newHashedPassword = bcrypt.hashSync('changeme', salt);
 		
