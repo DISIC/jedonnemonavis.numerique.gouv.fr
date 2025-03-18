@@ -23,6 +23,7 @@ export default function Login() {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+				<h1 className={fr.cx('fr-mb-12v')}>Connexion</h1>
 					<div
 						className={cx(
 							classes.formContainer,

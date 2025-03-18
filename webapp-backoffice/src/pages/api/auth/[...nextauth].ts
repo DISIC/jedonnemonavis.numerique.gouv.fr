@@ -15,7 +15,7 @@ interface ProconnectProfile {
 	sub: string;
 	email: string;
 	given_name: string;
-	family_name: string;
+	usual_name: string;
 }
 
 console.log('PROCONNECT_CLIENT_ID', process.env.PROCONNECT_CLIENT_ID)
@@ -96,7 +96,7 @@ export const authOptions: NextAuthOptions = {
 						data: {
 							email,
 							firstName: proconnectProfile.given_name,
-							lastName: proconnectProfile.family_name,
+							lastName: proconnectProfile.usual_name,
 							role: 'user',
 							password: newHashedPassword,
 							notifications: false,
