@@ -26,11 +26,21 @@ export default function Register() {
 
 	const [isAgentPublic, setIsAgentPublic] = useState<boolean>(false);
 	const [redirectForm, setRedirectForm] = useState<boolean>(false);
+	const [isOpenIdFalse, setIsOpenIdFalse] = useState(false);
 	const [showNonAgentMessage, setShowNonAgentMessage] =
 		useState<boolean>(false);
 	const [backgroundColor, setBackgroundColor] = useState<string>(
 		fr.colors.decisions.background.alt.grey.default
 	);
+
+	useEffect(() => {
+	  if (router.isReady) {
+		const openidParam = router.query.openid;
+		setIsOpenIdFalse(openidParam === "false");
+		setIsAgentPublic(true)
+		setRedirectForm(true)
+	  }
+	}, [router.isReady, router.query.openid]);
 
 	const { classes, cx } = useStyles({
 		backgroundColor
@@ -183,6 +193,31 @@ export default function Register() {
 									<p>
 										Votre avis est très important. Il permet à l'administration
 										concernée d'améliorer son service.
+									</p>
+								</div>
+							) : isOpenIdFalse ? (
+								<div
+									className={fr.cx(
+										'fr-grid-row',
+										'fr-grid-row--center',
+										'fr-grid-row--gutters'
+									)}
+								>
+									<Image
+										src="/assets/city-hall.svg"
+										alt="Agent public"
+										width={120}
+										height={120}
+										className={fr.cx('fr-col-12', 'fr-col-md-6')}
+									/>
+									<p className={cx(classes.textLead, fr.cx('fr-text--bold'))}>
+										Vous ne pouvez pas utiliser ProConnect pour connecter à Je donne mon avis
+									</p>
+									<p>
+										Veuillez vérifier que votre compte ProConnect est validé.
+									</p>
+									<p>
+										Je donne mon avis est réservé aux agents publics. Votre compte ProConnect doit obligatoirement être associé à une entité publique.
 									</p>
 								</div>
 							) : (

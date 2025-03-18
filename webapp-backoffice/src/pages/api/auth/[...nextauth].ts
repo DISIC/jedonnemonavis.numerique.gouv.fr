@@ -33,19 +33,24 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async session({ session, token }) {
 			// Récupère les informations utilisateur en base de données
-			if (token.uid) {
-				const user = await prisma.user.findUnique({
-					where: { email: token.email as string }
-				});
-				if (user) {
-					session.user = {
-						...session.user,
-						id: user.id.toString(),
-						role: user.role,
-						name: `${user.firstName} ${user.lastName}`,
-						email: user.email
-					};
-				}
+			console.log('🟢 SESSION CALLBACK - token reçu:', token);
+			if (token.email) {
+			  const user = await prisma.user.findUnique({
+				where: { email: token.email }
+			  });
+		  
+			  if (user) {
+				console.log('✅ Utilisateur récupéré depuis la base:', user);
+				session.user = {
+				  ...session.user,
+				  id: user.id.toString(),
+				  role: user.role,
+				  name: `${user.firstName} ${user.lastName}`,
+				  email: user.email
+				};
+			  } else {
+				console.log('❌ Utilisateur non trouvé en base');
+			  }
 			}
 			return session;
 		},
@@ -92,6 +97,7 @@ export const authOptions: NextAuthOptions = {
 				const newHashedPassword = bcrypt.hashSync('changeme', salt);
 		
 				if (!user) {
+					console.log('🆕 Utilisateur introuvable, création en base...');
 					user = await prisma.user.create({
 						data: {
 							email,
@@ -106,6 +112,9 @@ export const authOptions: NextAuthOptions = {
 							xwiki_username: null
 						}
 					});
+					console.log('✅ Utilisateur créé avec succès:', user);
+				} else {
+					console.log('🔄 Utilisateur déjà existant:', user);
 				}
 			}
 			return true;
@@ -220,7 +229,7 @@ export const authOptions: NextAuthOptions = {
 				return {
 					id: profile.sub,
 					email: profile.email,
-					name: `${profile.given_name} ${profile.family_name}`.trim(),
+					name: `${profile.given_name} ${profile.usual_name}`.trim(),
 					firstName: profile.given_name,
 					lastName: profile.family_name,
 					active: true,
