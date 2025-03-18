@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
 		},
 
 		async signIn({ account, profile }) {
-			console.log('entering signin with profile : ', profile)
+			console.log('entering signin with profile : ', account, profile)
 			if (account?.provider === 'proconnect') {
 				const proconnectProfile = profile as ProconnectProfile;
 		

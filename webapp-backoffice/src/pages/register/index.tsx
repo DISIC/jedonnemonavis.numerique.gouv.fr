@@ -135,7 +135,7 @@ export default function Register() {
 										className={fr.cx('fr-col-12', 'fr-col-md-6')}
 									/>
 									<p className={cx(classes.textLead, fr.cx('fr-text--bold', 'fr-mb-12v', 'fr-mt-8v'))}>
-										Vous ne pouvez pas utiliser ProConnect pour connecter à Je donne mon avis
+										Vous ne pouvez pas utiliser ProConnect pour vous connecter à Je donne mon avis
 									</p>
 									<p>
 										Veuillez vérifier que votre compte ProConnect est validé.
