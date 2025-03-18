@@ -163,6 +163,7 @@ model User {
   exports                 Export[]
   form_templates          FormTemplate[]
   forms                   Form[]
+  form_configs            FormConfig[]
   reviewViewLogs          ReviewViewLog[]
   notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
@@ -452,10 +453,10 @@ model FormTemplate {
   id                  Int                @id @default(autoincrement())
   created_at          DateTime           @default(now())
   updated_at          DateTime           @default(now())
-  user                User?               @relation(fields: [user_id], references: [id])
+  user                User?              @relation(fields: [user_id], references: [id])
   user_id             Int?
   title               String
-  slug                String
+  slug                String             @unique
   active              Boolean            @default(false)
   form_template_steps FormTemplateStep[]
   forms               Form[]
@@ -515,8 +516,8 @@ model AnswerCustom {
 
 model Form {
   id               Int          @id @default(autoincrement())
-  user             User         @relation(fields: [user_id], references: [id])
-  user_id          Int
+  user             User?        @relation(fields: [user_id], references: [id])
+  user_id          Int?
   form_template    FormTemplate @relation(fields: [form_template_id], references: [id])
   form_template_id Int
   product          Product      @relation(fields: [product_id], references: [id])
@@ -528,6 +529,8 @@ model Form {
 
 model FormConfig {
   id                   Int                 @id @default(autoincrement())
+  user                 User?               @relation(fields: [user_id], references: [id])
+  user_id              Int?
   form                 Form                @relation(fields: [form_id], references: [id])
   form_id              Int
   status               FormConfigStatus
