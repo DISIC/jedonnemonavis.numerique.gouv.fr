@@ -55,12 +55,12 @@ export const authOptions: NextAuthOptions = {
 				const proconnectProfile = profile as {
 					email: string;
 					given_name: string;
-					family_name: string;
+					usual_name: string;
 				};
 				// Cas ProConnect
 				token.email = profile.email;
 				token.firstName = proconnectProfile.given_name;
-				token.lastName = proconnectProfile.family_name;
+				token.lastName = proconnectProfile.usual_name;
 				token.provider = 'proconnect';
 			} else if (user) {
 				// Cas CredentialsProvider (classique)
@@ -180,7 +180,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name phone organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name phone siret siren organizational_unit chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
