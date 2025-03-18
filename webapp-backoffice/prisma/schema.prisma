@@ -452,10 +452,10 @@ model FormTemplate {
   id                  Int                @id @default(autoincrement())
   created_at          DateTime           @default(now())
   updated_at          DateTime           @default(now())
-  user                User               @relation(fields: [user_id], references: [id])
-  user_id             Int
+  user                User?               @relation(fields: [user_id], references: [id])
+  user_id             Int?
   title               String
-  link                String?
+  slug                String
   active              Boolean            @default(false)
   form_template_steps FormTemplateStep[]
   forms               Form[]
