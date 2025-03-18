@@ -207,6 +207,9 @@ export const LoginForm = () => {
 				</div>
 			</modal.Component>
 			<h1>Connexion</h1>
+			<h5>Se connecter avec ProConnect</h5>
+			<ProConnectButton onClick={() => signIn('openid')} />
+			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
 			<h5>Se connecter avec son compte</h5>
 			<form
 				onSubmit={e => {
@@ -297,9 +300,6 @@ export const LoginForm = () => {
 					)}
 				</Button>
 			</form>
-			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-			<h5>Se connecter avec ProConnect</h5>
-			<ProConnectButton onClick={() => signIn('openid')} />
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
 			<h5>Vous n&apos;avez pas de compte ?</h5>
 			<Link
