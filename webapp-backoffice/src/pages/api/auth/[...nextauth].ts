@@ -16,6 +16,8 @@ interface ProconnectProfile {
 	email: string;
 	given_name: string;
 	usual_name: string;
+	chorusdt?: string;
+	organizational_unit?: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -24,7 +26,7 @@ export const authOptions: NextAuthOptions = {
 	pages: {
 		signIn: '/login',
 		signOut: '/login',
-		error: '/login' // Error code passed in query string as ?error=
+		error: '/auth/error' // Error code passed in query string as ?error=
 	},
 	callbacks: {
 		async session({ session, token }) {
@@ -79,7 +81,7 @@ export const authOptions: NextAuthOptions = {
 
 		async signIn({ account, profile }) {
 			console.log('entering signin with profile : ', account, profile)
-			if (account?.provider === 'proconnect') {
+			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
 		
 				const email = proconnectProfile.email?.toLowerCase();
@@ -94,6 +96,9 @@ export const authOptions: NextAuthOptions = {
 				const newHashedPassword = bcrypt.hashSync('changeme', salt);
 		
 				if (!user) {
+					if(!proconnectProfile.organizational_unit) {
+						throw new Error('INVALID_PROVIDER');
+					}
 					console.log('🆕 Utilisateur introuvable, création en base...');
 					user = await prisma.user.create({
 						data: {
@@ -186,7 +191,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name phone siret siren organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
