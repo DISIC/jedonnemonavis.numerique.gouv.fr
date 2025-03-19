@@ -262,7 +262,7 @@ const ProductCard = ({
 
 	const handleButtonClick = () => {
 		router.push({
-			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			pathname: `/administration/dashboard/product/${product.id}/forms`,
 			query: { autoCreate: true }
 		});
 	};

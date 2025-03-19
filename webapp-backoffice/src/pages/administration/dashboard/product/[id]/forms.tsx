@@ -26,6 +26,7 @@ import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductB
 import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
+import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
 
 interface Props {
 	product: Product;
@@ -133,12 +134,34 @@ const ProductButtonsPage = (props: Props) => {
 				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-12')}>
+					<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
+				</div>
+				<div className={fr.cx('fr-col-12')}>
+					<p>
+						Vous pouvez{' '}
+						<a
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
+							target="_blank"
+						>
+							prévisualiser le formulaire JDMA
+						</a>
+						. Les avis que vous déposerez ne seront pas pris en compte dans les
+						statistiques.
+					</p>
+				</div>
+				<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
+					<ProductFormConfigurationInfo onButtonClick={() => {}} />
+				</div>
+			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-12')}>
+					<hr className={fr.cx('fr-mt-12v', 'fr-mb-11v', 'fr-pb-1v')} />
+				</div>
+			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>
-						{ownRight && ownRight === 'carrier_admin'
-							? 'Gérer les boutons'
-							: 'Voir les boutons'}
-					</h2>
+					<h2>Gérer les boutons</h2>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
@@ -165,17 +188,6 @@ const ProductButtonsPage = (props: Props) => {
 							Le bouton JDMA se place sur votre service numérique pour récolter
 							l’avis de vos usagers.
 						</p>
-						<p>
-							Vous pouvez{' '}
-							<a
-								href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
-								target="_blank"
-							>
-								prévisualiser le formulaire JDMA
-							</a>
-							. Les avis que vous déposerez ne seront pas pris en compte dans
-							les statistiques.
-						</p>
 					</div>
 				</div>
 			)}
@@ -201,39 +213,6 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
-				{/* {buttons.length > 0 && (
-					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						<Checkbox
-							style={{ userSelect: 'none' }}
-							options={[
-								{
-									label: 'Afficher les boutons de test',
-									nativeInputProps: {
-										name: 'test-buttons',
-										checked: testFilter,
-										onChange: e => {
-											setTestFilter(e.currentTarget.checked);
-											setCurrentPage(1);
-										}
-									}
-								}
-							]}
-						/>
-					</div>
-				)} */}
-				{/* <div className={fr.cx('fr-col-4')}>
-					<Checkbox
-						options={[
-							{
-								label: 'Afficher les boutons archivés',
-								nativeInputProps: {
-									name: 'archived-buttons',
-									value: 'archived'
-								}
-							}
-						]}
-					/>
-				</div> */}
 			</div>
 
 			<div>
@@ -356,7 +335,7 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		btnContainer: {
-			marginTop: '3rem'
+			marginTop: fr.spacing('4v')
 		},
 		buttonList: {
 			paddingInlineStart: 0,

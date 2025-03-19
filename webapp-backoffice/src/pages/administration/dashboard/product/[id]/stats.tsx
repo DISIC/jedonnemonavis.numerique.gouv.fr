@@ -159,7 +159,7 @@ const ProductStatPage = (props: Props) => {
 
 	const handleButtonClick = () => {
 		router.push({
-			pathname: `/administration/dashboard/product/${product.id}/buttons`,
+			pathname: `/administration/dashboard/product/${product.id}/forms`,
 			query: { autoCreate: true }
 		});
 	};
@@ -251,7 +251,7 @@ const ProductStatPage = (props: Props) => {
 									title="Formulaires complets"
 									kpi={0}
 									desc="soit 0 % des répondants"
-									linkHref={`/administration/dashboard/product/${product.id}/buttons`}
+									linkHref={`/administration/dashboard/product/${product.id}/forms`}
 									hideLink
 									grey
 								/>

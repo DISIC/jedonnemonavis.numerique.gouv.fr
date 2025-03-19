@@ -54,14 +54,11 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les boutons'
-					: 'Voir les boutons',
+			text: 'Formulaires',
 			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/buttons`,
+				router.pathname === `/administration/dashboard/product/[id]/forms`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/buttons`,
+				href: `/administration/dashboard/product/${id}/forms`,
 				alt: 'Gérer mes boutons'
 			}
 		},
