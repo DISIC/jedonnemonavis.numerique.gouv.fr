@@ -31,14 +31,12 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async session({ session, token }) {
 			// Récupère les informations utilisateur en base de données
-			console.log('🟢 SESSION CALLBACK - token reçu:', token);
 			if (token.email) {
 			  const user = await prisma.user.findUnique({
 				where: { email: token.email }
 			  });
 		  
 			  if (user) {
-				console.log('✅ Utilisateur récupéré depuis la base:', user);
 				session.user = {
 				  ...session.user,
 				  id: user.id.toString(),
@@ -80,7 +78,6 @@ export const authOptions: NextAuthOptions = {
 		},
 
 		async signIn({ account, profile }) {
-			console.log('entering signin with profile : ', account, profile)
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
 		
@@ -89,8 +86,6 @@ export const authOptions: NextAuthOptions = {
 				let user = await prisma.user.findUnique({
 					where: { email }
 				});
-
-				console.log('user found : ', user)
 		
 				if (!user) {
 					if(!proconnectProfile.organizational_unit) {
@@ -99,8 +94,7 @@ export const authOptions: NextAuthOptions = {
 
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync('changeme', salt);
-					
-					console.log('🆕 Utilisateur introuvable, création en base...');
+
 					user = await prisma.user.create({
 						data: {
 							email,
