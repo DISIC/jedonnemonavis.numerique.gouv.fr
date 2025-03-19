@@ -116,7 +116,7 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{product.title} | Gérer les boutons | Je donne mon avis</title>
+				<title>{`${product.title} | Gérer les boutons | Je donne mon avis`}</title>
 				<meta
 					name="description"
 					content={`${product.title} | Gérer les boutons | Je donne mon avis`}

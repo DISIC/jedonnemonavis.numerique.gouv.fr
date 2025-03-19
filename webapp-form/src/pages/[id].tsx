@@ -567,6 +567,7 @@ export const getServerSideProps: GetServerSideProps<{
           ...product,
           created_at: product.created_at.toString(),
           updated_at: product.updated_at.toString(),
+          forms: null,
           buttons: product.forms[0].buttons.map((button: Button) => ({
             ...button,
             created_at: button.created_at.toString(),
