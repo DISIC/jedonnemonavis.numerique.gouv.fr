@@ -382,8 +382,6 @@ export const userRouter = router({
 			const { id, user } = input;
 			const { role, ...userWithoutRole } = user;
 
-			console.log('user : ', user);
-
 			const dataToUpdate = ctx.session?.user?.role.includes('admin')
 				? { ...userWithoutRole, role }
 				: { ...userWithoutRole };
