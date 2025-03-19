@@ -1,41 +1,40 @@
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
+import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
+import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
+import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
+import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
+import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
+import { Loader } from '@/src/components/ui/Loader';
+import { Pagination } from '@/src/components/ui/Pagination';
+import { useFilters } from '@/src/contexts/FiltersContext';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
-import { getServerSideProps } from '.';
-import { AnswerIntention, Product, RightAccessStatus } from '@prisma/client';
-import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
-import React, { useEffect } from 'react';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { tss } from 'tss-react/dsfr';
-import { trpc } from '@/src/utils/trpc';
+import { ReviewFiltersType } from '@/src/types/custom';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import { FILTER_LABELS } from '@/src/utils/helpers';
+import { displayIntention } from '@/src/utils/stats';
 import {
 	formatDateToFrenchStringWithHour,
 	getNbPages
 } from '@/src/utils/tools';
-import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
-import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
-import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
-import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import { ReviewFiltersType } from '@/src/types/custom';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { FILTER_LABELS } from '@/src/utils/helpers';
-import { displayIntention } from '@/src/utils/stats';
-import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
-import Head from 'next/head';
-import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
-import { useRouter } from 'next/router';
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import { useDebounce } from 'usehooks-ts';
-import { push } from '@socialgouv/matomo-next';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { useSession } from 'next-auth/react';
-import GenericFilters from '@/src/components/dashboard/Filters/Filters';
-import { useFilters } from '@/src/contexts/FiltersContext';
+import Input from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import { AnswerIntention, RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import React, { useEffect } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -178,7 +177,7 @@ const ProductReviewsPage = (props: Props) => {
 		trpc.button.getList.useQuery({
 			page: 1,
 			numberPerPage: 1000,
-			product_id: product.id,
+			form_id: product.forms[0].id,
 			isTest: true
 		});
 
@@ -418,7 +417,7 @@ const ProductReviewsPage = (props: Props) => {
 				modal={filter_modal}
 				filters={filters.productReviews.filters}
 				submitFilters={handleSubmitfilters}
-				product_id={product.id}
+				form_id={product.forms[0].id}
 				setButtonId={setButtonId}
 			></ReviewFiltersModal>
 

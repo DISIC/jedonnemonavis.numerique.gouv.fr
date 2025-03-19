@@ -28,9 +28,10 @@ import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -87,7 +88,7 @@ const ProductStatPage = (props: Props) => {
 			{
 				page: 1,
 				numberPerPage: 1000,
-				product_id: product.id,
+				form_id: product.forms[0].id,
 				isTest: false
 			},
 			{
