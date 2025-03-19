@@ -500,44 +500,64 @@ export const getServerSideProps: GetServerSideProps<{
     where: isXWikiLink
       ? {
           xwiki_id: parseInt(productId),
-          buttons: {
-            some: {},
+          forms: {
+            some: {
+              buttons: {
+                some: {},
+              },
+            },
           },
         }
       : {
           id: parseInt(productId),
-          buttons: {
+          forms: {
             some: {
-              id: { equals: parseInt(buttonId) },
+              buttons: {
+                some: {
+                  id: { equals: parseInt(buttonId) },
+                },
+              },
             },
           },
         },
     include: {
-      buttons: isXWikiLink
-        ? true
-        : {
-            where: {
-              id: { equals: parseInt(buttonId) },
-            },
-          },
+      forms: {
+        include: {
+          buttons: isXWikiLink
+            ? true
+            : {
+                where: {
+                  id: { equals: parseInt(buttonId) },
+                },
+              },
+        },
+      },
     },
   });
   await prisma.$disconnect();
 
+  if (!product?.forms[0]) {
+    return {
+      notFound: true,
+    };
+  }
+
   if (isXWikiLink) {
-    if (!product?.buttons.length)
+    if (!product.forms[0].buttons.length)
       return {
         notFound: true,
       };
 
-    const sameName = product.buttons.find(
+    const sameName = product.forms[0].buttons.find(
       (b) => b.xwiki_title === xwikiButtonName
     );
-    const nameButton = product.buttons.find((b) => b.xwiki_title === "button");
+    const nameButton = product.forms[0].buttons.find(
+      (b) => b.xwiki_title === "button"
+    );
 
-    if (sameName) product.buttons = [sameName];
-    else if (nameButton) product.buttons = [nameButton];
-    else product.buttons = [product.buttons[0]];
+    if (sameName) product.forms[0].buttons = [sameName];
+    else if (nameButton) product.forms[0].buttons = [nameButton];
+    else product.forms[0].buttons = [product.forms[0].buttons[0]];
   }
 
   if (product && product.status !== "archived") {
@@ -547,7 +567,7 @@ export const getServerSideProps: GetServerSideProps<{
           ...product,
           created_at: product.created_at.toString(),
           updated_at: product.updated_at.toString(),
-          buttons: product.buttons.map((button: Button) => ({
+          buttons: product.forms[0].buttons.map((button: Button) => ({
             ...button,
             created_at: button.created_at.toString(),
             updated_at: button.updated_at.toString(),
