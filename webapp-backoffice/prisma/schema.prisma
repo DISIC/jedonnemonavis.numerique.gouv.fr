@@ -265,8 +265,8 @@ model Button {
   description String?
   xwiki_title String?
   isTest      Boolean? @default(false)
-  product     Product? @relation(fields: [product_id], references: [id])
-  product_id  Int
+  form        Form    @relation(fields: [form_id], references: [id])
+  form_id     Int
 
   reviews Review[]
 
@@ -308,7 +308,6 @@ model Product {
   urls            String[]
   volume          Int?
   xwiki_id        Int?          @unique
-  buttons         Button[]
   accessRights    AccessRight[]
   forms           Form[]
   favorites       Favorite[]
@@ -523,6 +522,7 @@ model Form {
   product          Product      @relation(fields: [product_id], references: [id])
   product_id       Int
   form_configs     FormConfig[]
+  buttons          Button[]
   created_at       DateTime     @default(now())
   updated_at       DateTime     @default(now())
 }

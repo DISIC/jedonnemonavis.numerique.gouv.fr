@@ -12,6 +12,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		where: {
 			id: parseInt(id as string),
 			status: 'published'
+		},
+		include: {
+			forms: true
 		}
 	});
 

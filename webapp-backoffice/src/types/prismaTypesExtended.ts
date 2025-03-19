@@ -21,15 +21,27 @@ export type AdminEntityRightWithUsers = Prisma.AdminEntityRightGetPayload<
 	typeof AdminEntityRightWithUsers
 >;
 
-const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
+const ProductWithForms = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
-		buttons: true
+		forms: {
+			include: {
+				buttons: true
+			}
+		}
 	}
 });
 
-export type ProductWithButtons = Prisma.ProductGetPayload<
-	typeof ProductWithButtons
+export type ProductWithForms = Prisma.ProductGetPayload<
+	typeof ProductWithForms
 >;
+
+const ButtonWithForm = Prisma.validator<Prisma.ButtonDefaultArgs>()({
+	include: {
+		form: true
+	}
+});
+
+export type ButtonWithForm = Prisma.ButtonGetPayload<typeof ButtonWithForm>;
 
 const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {

@@ -1,16 +1,16 @@
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
-import { Button as PrismaButtonType, RightAccessStatus } from '@prisma/client';
-import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
-import { tss } from 'tss-react/dsfr';
+import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
-	button: PrismaButtonType;
-	onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
+	button: ButtonWithForm;
+	onButtonClick: (modalType: string, button?: ButtonWithForm) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -106,7 +106,7 @@ const ProductButtonCard = (props: Props) => {
 								<MenuItem
 									onClick={() => {
 										navigator.clipboard.writeText(
-											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
+											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.form.product_id}?button=${button.id}`
 										);
 										handleClose();
 									}}

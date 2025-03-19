@@ -60,7 +60,7 @@ async function seed_users_products() {
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
 
-	await prisma.formTemplate.upsert({
+	const rootFormTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: {},
 		create: {
@@ -110,12 +110,6 @@ async function seed_users_products() {
 								name: randomEntity.name
 							}
 						},
-						buttons: {
-							create: buttons.map(b => ({
-								...b,
-								product_id: b.product_id
-							})) as Button[]
-						},
 						accessRights: {
 							create: {
 								user_email: users.filter(u => u.active && u?.role !== 'admin')[
@@ -127,10 +121,9 @@ async function seed_users_products() {
 						forms: {
 							create: [
 								{
-									form_template: {
-										connect: {
-											slug: 'root'
-										}
+									form_template_id: rootFormTemplate.id,
+									buttons: {
+										create: buttons as Button[]
 									}
 								}
 							]

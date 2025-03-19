@@ -2,34 +2,31 @@ import ProductButtonCard from '@/src/components/dashboard/ProductButton/ProductB
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import {
-	Button as PrismaButtonType,
-	Product,
-	RightAccessStatus
-} from '@prisma/client';
+import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import { Pagination } from '../../../../../components/ui/Pagination';
 
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
 import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
 import { Loader } from '@/src/components/ui/Loader';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import {
+	ButtonWithForm,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import React, { useEffect } from 'react';
-import { trpc } from '@/src/utils/trpc';
-import Head from 'next/head';
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import { useRouter } from 'next/router';
-import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
-import { useFilters } from '@/src/contexts/FiltersContext';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
-import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import React from 'react';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -46,7 +43,7 @@ const ProductButtonsPage = (props: Props) => {
 	const [modalType, setModalType] = React.useState<string>('');
 
 	const [currentButton, setCurrentButton] =
-		React.useState<PrismaButtonType | null>(null);
+		React.useState<ButtonWithForm | null>(null);
 	const router = useRouter();
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
@@ -63,7 +60,7 @@ const ProductButtonsPage = (props: Props) => {
 		{
 			numberPerPage,
 			page: currentPage,
-			product_id: product.id,
+			form_id: product.forms[0].id,
 			isTest: testFilter,
 			filterByTitle: filters.filter
 		},
@@ -92,7 +89,7 @@ const ProductButtonsPage = (props: Props) => {
 
 	const isModalOpen = useIsModalOpen(modal);
 
-	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
+	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		modal.open();
@@ -126,7 +123,7 @@ const ProductButtonsPage = (props: Props) => {
 				/>
 			</Head>
 			<ButtonModal
-				product_id={product.id}
+				form_id={product.forms[0].id}
 				modal={modal}
 				isOpen={isModalOpen}
 				modalType={modalType}
@@ -141,7 +138,7 @@ const ProductButtonsPage = (props: Props) => {
 					<p>
 						Vous pouvez{' '}
 						<a
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?button=${buttons[0]?.id}&iframe=true`}
 							target="_blank"
 						>
 							prévisualiser le formulaire JDMA

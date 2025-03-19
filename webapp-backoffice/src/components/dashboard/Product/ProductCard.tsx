@@ -1,4 +1,4 @@
-import { ProductWithButtons } from '@/src/types/prismaTypesExtended';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import { getIntentionFromAverage } from '@/src/utils/stats';
 import {
 	formatNumberWithSpaces,
@@ -65,7 +65,7 @@ const ProductCard = ({
 	onDeleteProduct,
 	onDeleteEssential
 }: {
-	product: ProductWithButtons;
+	product: ProductWithForms;
 
 	userId: number;
 	entity: Entity;
@@ -591,7 +591,7 @@ const ProductCard = ({
 											width={'full'}
 											height={50}
 										/>
-									) : (product.buttons.length > 0 &&
+									) : (product.forms[0]?.buttons.length > 0 &&
 											nbReviews &&
 											nbReviews > 0) ||
 									  session?.user.role.includes('admin') ? (
@@ -724,7 +724,7 @@ const ProductCard = ({
 												</div>
 											)}
 										</div>
-									) : product.buttons.length === 0 ? (
+									) : product.forms[0]?.buttons.length === 0 ? (
 										<NoButtonsPanel onButtonClick={handleButtonClick} />
 									) : (
 										<NoReviewsPanel
