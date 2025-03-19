@@ -135,7 +135,7 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-12')}>
-					<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
+					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
 				</div>
 				<div className={fr.cx('fr-col-12')}>
 					<p>

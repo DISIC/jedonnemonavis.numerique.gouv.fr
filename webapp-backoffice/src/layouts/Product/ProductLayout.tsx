@@ -54,7 +54,7 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text: 'Formulaires',
+			text: 'Formulaire',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/forms`,
 			linkProps: {
