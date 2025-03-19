@@ -91,14 +91,15 @@ export const authOptions: NextAuthOptions = {
 				});
 
 				console.log('user found : ', user)
-
-				const salt = bcrypt.genSaltSync(10);
-				const newHashedPassword = bcrypt.hashSync('changeme', salt);
 		
 				if (!user) {
 					if(!proconnectProfile.organizational_unit) {
 						throw new Error('INVALID_PROVIDER');
 					}
+
+					const salt = bcrypt.genSaltSync(10);
+					const newHashedPassword = bcrypt.hashSync('changeme', salt);
+					
 					console.log('🆕 Utilisateur introuvable, création en base...');
 					user = await prisma.user.create({
 						data: {
