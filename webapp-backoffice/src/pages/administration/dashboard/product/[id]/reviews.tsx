@@ -431,20 +431,21 @@ const ProductReviewsPage = (props: Props) => {
 				</Head>
 				<div className={cx(classes.title)}>
 					<h1 className={fr.cx('fr-mb-0')}>Avis</h1>
-
-					<div className={cx(classes.buttonContainer)}>
-						<ExportReviews
-							product_id={product.id}
-							startDate={filters.productReviews.currentStartDate}
-							endDate={filters.productReviews.currentEndDate}
-							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
-							search={search}
-							button_id={buttonId}
-							filters={filters.productReviews.filters}
-							reviewsCountfiltered={reviewsCountFiltered}
-							reviewsCountAll={reviewsCountAll}
-						></ExportReviews>
-					</div>
+					{reviewMetaResults.metadata.countAll > 0 && (
+						<div className={cx(classes.buttonContainer)}>
+							<ExportReviews
+								product_id={product.id}
+								startDate={filters.productReviews.currentStartDate}
+								endDate={filters.productReviews.currentEndDate}
+								mustHaveVerbatims={displayMode === 'reviews' ? false : true}
+								search={search}
+								button_id={buttonId}
+								filters={filters.productReviews.filters}
+								reviewsCountfiltered={reviewsCountFiltered}
+								reviewsCountAll={reviewsCountAll}
+							></ExportReviews>
+						</div>
+					)}
 				</div>
 				{isLoadingMetaResults || isLoadingButtons ? (
 					<Loader />

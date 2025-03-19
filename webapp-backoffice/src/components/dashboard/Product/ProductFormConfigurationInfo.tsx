@@ -1,7 +1,8 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import Button from '@codegouvfr/react-dsfr/Button';
 import { tss } from 'tss-react/dsfr';
+import Image from 'next/image';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface Props {
 	onButtonClick: () => void;
@@ -14,23 +15,52 @@ const ProductFormConfigurationInfo = (props: Props) => {
 		<div className={cx(classes.container)}>
 			<div>
 				<Badge severity="new">Beta</Badge>
-				<h3 className={cx(classes.title, fr.cx('fr-my-2v'))}>
+				<h2 className={cx(classes.title, fr.cx('fr-my-2v'))}>
 					Personnalisez le formulaire du service
-				</h3>
-				<p className={fr.cx('fr-mb-0')}>
-					Ici, un texte qui présente la première fonctionnalité de la solution à
-					qui il faudrait donner un nom.
-					<br />
-					Un lien qui renvoie vers la{' '}
-					<a href="" target="_blank">
-						feuille de route
-					</a>
+				</h2>
+				<p className={fr.cx('fr-mb-1v')}>
+					Désormais, pour adapter vos formulaires à vos besoins spécifiques,
+					vous pouvez :
 				</p>
+				<ul className={cx(classes.infoList)}>
+					<li>✅ Masquer une possibilité de réponse à une question</li>
+					<li>✅ Masquer une question entière </li>
+					<li>✅ Ajouter des questions supplémentaires</li>
+				</ul>
+				<p className={fr.cx('fr-mb-0')}>
+					Pour en savoir plus sur ces fonctionnalités et découvrir celles à
+					venir, vous pouvez{' '}
+					<a href="/roadmap" target="_blank">
+						consulter notre feuille de route
+					</a>
+					.
+				</p>
+				<div>
+					<h3 className={cx(classes.title, fr.cx('fr-mt-8v', 'fr-mb-2v'))}>
+						Prévisualisez et publiez en un clic
+					</h3>
+					<p>
+						Prévisualisez les changements et testez le formulaire, puis publiez
+						le nouveau formulaire, sans changer de lien.
+						<br />
+						Vos usagers auront directement accès au formulaire modifié.
+					</p>
+					<Button
+						iconId="fr-icon-settings-5-line"
+						iconPosition="right"
+						onClick={onButtonClick}
+					>
+						Configurer le formulaire
+					</Button>
+				</div>
 			</div>
 			<div>
-				<Button iconId="fr-icon-settings-5-line" iconPosition="right">
-					Configurer
-				</Button>
+				<Image
+					src="/assets/in-progress.png"
+					alt="Fonctionnalité en construction"
+					width={180}
+					height={180}
+				/>
 			</div>
 		</div>
 	);
@@ -42,10 +72,15 @@ const useStyles = tss.create({
 		padding: fr.spacing('6v'),
 		display: 'flex',
 		alignItems: 'center',
-		gap: fr.spacing('16v')
+		justifyContent: 'space-between',
+		gap: fr.spacing('10v')
 	},
 	title: {
 		...fr.typography[0].style
+	},
+	infoList: {
+		listStyleType: 'none',
+		...fr.typography[19].style
 	}
 });
 

@@ -64,7 +64,7 @@ async function seed_users_products() {
 		where: { slug: 'root' },
 		update: {},
 		create: {
-			title: 'Formulaire des démarches',
+			title: 'Formulaire d’évaluation de la satisfaction usager',
 			slug: 'root',
 			active: true
 		}

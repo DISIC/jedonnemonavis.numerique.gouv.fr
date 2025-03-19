@@ -4,8 +4,8 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '.';
-import { Pagination } from '../../../../../components/ui/Pagination';
+import { getServerSideProps } from '..';
+import { Pagination } from '../../../../../../components/ui/Pagination';
 
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
@@ -116,10 +116,10 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{`${product.title} | Gérer les boutons | Je donne mon avis`}</title>
+				<title>{`${product.title} | Formulaire | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${product.title} | Gérer les boutons | Je donne mon avis`}
+					content={`${product.title} | Formulaire | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
@@ -135,7 +135,7 @@ const ProductButtonsPage = (props: Props) => {
 					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
 				</div>
 				<div className={fr.cx('fr-col-12')}>
-					<p>
+					<p className={ownRight === 'carrier_admin' ? '' : fr.cx('fr-mb-0')}>
 						Vous pouvez{' '}
 						<a
 							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?button=${buttons[0]?.id}&iframe=true`}
@@ -147,18 +147,32 @@ const ProductButtonsPage = (props: Props) => {
 						statistiques.
 					</p>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
-					<ProductFormConfigurationInfo onButtonClick={() => {}} />
-				</div>
+				{ownRight === 'carrier_admin' && (
+					<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
+						<ProductFormConfigurationInfo
+							onButtonClick={() => {
+								router.push(
+									`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`
+								);
+							}}
+						/>
+					</div>
+				)}
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-12')}>
-					<hr className={fr.cx('fr-mt-12v', 'fr-mb-11v', 'fr-pb-1v')} />
+					<hr
+						className={
+							ownRight === 'carrier_admin'
+								? fr.cx('fr-mt-12v', 'fr-mb-11v', 'fr-pb-1v')
+								: fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')
+						}
+					/>
 				</div>
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2>Gérer les boutons</h2>
+					<h3>Gérer les boutons</h3>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>

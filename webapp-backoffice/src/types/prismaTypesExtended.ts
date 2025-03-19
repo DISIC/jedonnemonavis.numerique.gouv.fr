@@ -25,6 +25,7 @@ const ProductWithForms = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
 		forms: {
 			include: {
+				form_template: true,
 				buttons: true
 			}
 		}

@@ -14,7 +14,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
 			status: 'published'
 		},
 		include: {
-			forms: true
+			forms: {
+				include: {
+					form_template: true
+				}
+			}
 		}
 	});
 
