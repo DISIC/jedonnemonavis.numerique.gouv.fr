@@ -71,3 +71,30 @@ const UserWithAccessRight = Prisma.validator<Prisma.UserDefaultArgs>()({
 export type UserWithAccessRight = Prisma.UserGetPayload<
 	typeof UserWithAccessRight
 >;
+
+const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
+	include: {
+		product: true,
+		form_configs: {
+			include: {
+				form_config_displays: true,
+				form_config_labels: true
+			}
+		},
+		form_template: {
+			include: {
+				form_template_steps: {
+					include: {
+						form_template_blocks: {
+							include: {
+								options: true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+});
+
+export type FormWithElements = Prisma.FormGetPayload<typeof FormWithElements>;

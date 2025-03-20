@@ -55,14 +55,15 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label: "Texte d'introduction",
 							content:
-								'Aidez-nous à améliorer le service Demande de logement social en répondant à quelques questions.\nVos réponses sont anonyme',
+								'Aidez-nous à améliorer le service <b>{{title}}</b> en répondant à quelques questions.<br/>Vos réponses sont anonyme.',
 							type_bloc: 'paragraph',
 							position: 0
 						},
 						{
 							label: "De façon générale, comment ça s'est passé ?",
 							type_bloc: 'smiley_input',
-							position: 1
+							position: 1,
+							required: true
 						}
 					]
 				}

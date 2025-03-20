@@ -492,8 +492,9 @@ export const getServerSideProps: GetServerSideProps<{
   const productId = params.id as string;
   const buttonId = query.button as string;
   const xwikiButtonName = query.nd_source as string;
+  const isInIframe = (query.iframe as string) === "true";
 
-  const isXWikiLink = !buttonId;
+  const isXWikiLink = !buttonId && !isInIframe;
 
   await prisma.$connect();
   const product = await prisma.product.findUnique({
@@ -510,26 +511,29 @@ export const getServerSideProps: GetServerSideProps<{
         }
       : {
           id: parseInt(productId),
-          forms: {
-            some: {
-              buttons: {
-                some: {
-                  id: { equals: parseInt(buttonId) },
+          ...(!isInIframe && {
+            forms: {
+              some: {
+                buttons: {
+                  some: {
+                    id: { equals: parseInt(buttonId) },
+                  },
                 },
               },
             },
-          },
+          }),
         },
     include: {
       forms: {
         include: {
-          buttons: isXWikiLink
-            ? true
-            : {
-                where: {
-                  id: { equals: parseInt(buttonId) },
+          buttons:
+            isXWikiLink || isInIframe
+              ? true
+              : {
+                  where: {
+                    id: { equals: parseInt(buttonId) },
+                  },
                 },
-              },
         },
       },
     },

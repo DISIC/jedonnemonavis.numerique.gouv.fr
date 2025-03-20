@@ -138,10 +138,10 @@ const ProductButtonsPage = (props: Props) => {
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
 					<Button priority="secondary">
 						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?button=${buttons[0]?.id}&iframe=true`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
 							target="_blank"
 						>
-							Prévisuliser
+							Prévisualiser
 						</Link>
 					</Button>
 					{ownRight === 'carrier_admin' && (
