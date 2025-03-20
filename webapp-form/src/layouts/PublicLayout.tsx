@@ -94,8 +94,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     <>
       <Head>
         <title>
-          {getStepTitle(router.query.step)} Je donne mon avis sur la démarche "
-          {getProductTitle()}"
+          {`${getStepTitle(router.query.step)} Je donne mon avis sur la démarche "${getProductTitle()}"`}
         </title>
         <meta name="description" content="Je donne mon avis" />
       </Head>

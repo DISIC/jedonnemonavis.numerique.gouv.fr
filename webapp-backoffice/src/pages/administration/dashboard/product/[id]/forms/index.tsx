@@ -2,33 +2,32 @@ import ProductButtonCard from '@/src/components/dashboard/ProductButton/ProductB
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import {
-	Button as PrismaButtonType,
-	Product,
-	RightAccessStatus
-} from '@prisma/client';
+import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '.';
-import { Pagination } from '../../../../../components/ui/Pagination';
+import { getServerSideProps } from '..';
+import { Pagination } from '../../../../../../components/ui/Pagination';
 
+import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
+import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
 import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
 import { Loader } from '@/src/components/ui/Loader';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import {
+	ButtonWithForm,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import React, { useEffect } from 'react';
-import { trpc } from '@/src/utils/trpc';
-import Head from 'next/head';
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import { useRouter } from 'next/router';
-import ProductBottomInfo from '@/src/components/dashboard/ProductButton/ProductBottomInfo';
-import { useFilters } from '@/src/contexts/FiltersContext';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import React from 'react';
+import Link from 'next/link';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -45,7 +44,7 @@ const ProductButtonsPage = (props: Props) => {
 	const [modalType, setModalType] = React.useState<string>('');
 
 	const [currentButton, setCurrentButton] =
-		React.useState<PrismaButtonType | null>(null);
+		React.useState<ButtonWithForm | null>(null);
 	const router = useRouter();
 
 	const [testFilter, setTestFilter] = React.useState<boolean>(false);
@@ -62,7 +61,7 @@ const ProductButtonsPage = (props: Props) => {
 		{
 			numberPerPage,
 			page: currentPage,
-			product_id: product.id,
+			form_id: product.forms[0].id,
 			isTest: testFilter,
 			filterByTitle: filters.filter
 		},
@@ -91,7 +90,7 @@ const ProductButtonsPage = (props: Props) => {
 
 	const isModalOpen = useIsModalOpen(modal);
 
-	const handleModalOpening = (modalType: string, button?: PrismaButtonType) => {
+	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		modal.open();
@@ -118,14 +117,14 @@ const ProductButtonsPage = (props: Props) => {
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{product.title} | Gérer les boutons | Je donne mon avis</title>
+				<title>{`${product.title} | Formulaire | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${product.title} | Gérer les boutons | Je donne mon avis`}
+					content={`${product.title} | Formulaire | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
-				product_id={product.id}
+				form_id={product.forms[0].id}
 				modal={modal}
 				isOpen={isModalOpen}
 				modalType={modalType}
@@ -134,11 +133,69 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>
-						{ownRight && ownRight === 'carrier_admin'
-							? 'Gérer les boutons'
-							: 'Voir les boutons'}
-					</h2>
+					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
+				</div>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+					<Button priority="secondary">
+						<Link
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
+							target="_blank"
+						>
+							Prévisualiser
+						</Link>
+					</Button>
+					{ownRight === 'carrier_admin' && (
+						<Button
+							priority="secondary"
+							iconId="fr-icon-settings-5-line"
+							iconPosition="right"
+						>
+							<Link
+								href={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
+							>
+								Configurer
+							</Link>
+						</Button>
+					)}
+				</div>
+				<div className={fr.cx('fr-col-12')}>
+					<hr />
+				</div>
+				<div className={fr.cx('fr-col-12')}>
+					<h3 className={fr.cx('fr-mb-4v')}>
+						{product.forms[0].form_template.title}
+					</h3>
+					<p className={ownRight === 'carrier_admin' ? '' : fr.cx('fr-mb-0')}>
+						Ici, un texte décrivant brièvement le modèle Évaluation et usager,
+						le type de données récoltées et comment les exploiter.
+					</p>
+				</div>
+				{ownRight === 'carrier_admin' && (
+					<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
+						<ProductFormConfigurationInfo
+							onButtonClick={() => {
+								router.push(
+									`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`
+								);
+							}}
+						/>
+					</div>
+				)}
+			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-12')}>
+					<hr
+						className={
+							ownRight === 'carrier_admin'
+								? fr.cx('fr-mt-12v', 'fr-mb-11v', 'fr-pb-1v')
+								: fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')
+						}
+					/>
+				</div>
+			</div>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={fr.cx('fr-col-8')}>
+					<h3>Gérer les boutons</h3>
 				</div>
 				{buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
@@ -165,17 +222,6 @@ const ProductButtonsPage = (props: Props) => {
 							Le bouton JDMA se place sur votre service numérique pour récolter
 							l’avis de vos usagers.
 						</p>
-						<p>
-							Vous pouvez{' '}
-							<a
-								href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.product_id}?button=${buttons[0]?.id}&iframe=true`}
-								target="_blank"
-							>
-								prévisualiser le formulaire JDMA
-							</a>
-							. Les avis que vous déposerez ne seront pas pris en compte dans
-							les statistiques.
-						</p>
 					</div>
 				</div>
 			)}
@@ -201,39 +247,6 @@ const ProductButtonsPage = (props: Props) => {
 						</p>
 					</div>
 				)}
-				{/* {buttons.length > 0 && (
-					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						<Checkbox
-							style={{ userSelect: 'none' }}
-							options={[
-								{
-									label: 'Afficher les boutons de test',
-									nativeInputProps: {
-										name: 'test-buttons',
-										checked: testFilter,
-										onChange: e => {
-											setTestFilter(e.currentTarget.checked);
-											setCurrentPage(1);
-										}
-									}
-								}
-							]}
-						/>
-					</div>
-				)} */}
-				{/* <div className={fr.cx('fr-col-4')}>
-					<Checkbox
-						options={[
-							{
-								label: 'Afficher les boutons archivés',
-								nativeInputProps: {
-									name: 'archived-buttons',
-									value: 'archived'
-								}
-							}
-						]}
-					/>
-				</div> */}
 			</div>
 
 			<div>
@@ -356,7 +369,7 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		btnContainer: {
-			marginTop: '3rem'
+			marginTop: fr.spacing('4v')
 		},
 		buttonList: {
 			paddingInlineStart: 0,
@@ -365,6 +378,17 @@ const useStyles = tss
 				paddingBottom: 0
 			},
 			marginTop: '1rem'
+		},
+		headerButtons: {
+			display: 'flex',
+			justifyContent: 'end',
+			gap: fr.spacing('4v'),
+			button: {
+				a: {
+					display: 'flex',
+					alignItems: 'center'
+				}
+			}
 		}
 	});
 

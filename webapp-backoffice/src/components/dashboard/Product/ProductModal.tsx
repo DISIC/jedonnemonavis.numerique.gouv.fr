@@ -161,7 +161,7 @@ const ProductModal = (props: Props) => {
 
 		if (productId) {
 			router
-				.push(`/administration/dashboard/product/${productId}/buttons`)
+				.push(`/administration/dashboard/product/${productId}/forms`)
 				.then(() => {
 					window.location.reload();
 				});

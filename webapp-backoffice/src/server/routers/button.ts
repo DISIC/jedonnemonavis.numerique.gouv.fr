@@ -12,13 +12,13 @@ export const buttonRouter = router({
 			z.object({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
-				product_id: z.number().optional(),
+				form_id: z.number().optional(),
 				isTest: z.boolean(),
 				filterByTitle: z.string().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, product_id, isTest, filterByTitle } = input;
+			const { numberPerPage, page, form_id, isTest, filterByTitle } = input;
 
 			let where: Prisma.ButtonWhereInput = {
 				isTest: {
@@ -26,8 +26,8 @@ export const buttonRouter = router({
 				}
 			};
 
-			if (product_id) {
-				where.product_id = product_id;
+			if (form_id) {
+				where.form_id = form_id;
 			}
 
 			const entities = await ctx.prisma.button.findMany({
@@ -36,6 +36,9 @@ export const buttonRouter = router({
 				skip: (page - 1) * numberPerPage,
 				orderBy: {
 					title: filterByTitle === 'title:asc' ? 'asc' : 'desc'
+				},
+				include: {
+					form: true
 				}
 			});
 
