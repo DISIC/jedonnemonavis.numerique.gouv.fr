@@ -90,9 +90,7 @@ enum Typebloc {
   select
   radio
   checkbox
-  new_page
   divider
-  logic
 }
 
 enum NotificationFrequency {
@@ -265,7 +263,7 @@ model Button {
   description String?
   xwiki_title String?
   isTest      Boolean? @default(false)
-  form        Form    @relation(fields: [form_id], references: [id])
+  form        Form     @relation(fields: [form_id], references: [id])
   form_id     Int
 
   reviews Review[]
@@ -464,6 +462,8 @@ model FormTemplate {
 
 model FormTemplateStep {
   id                   Int                 @id @default(autoincrement())
+  title                String
+  position Int
   form_template        FormTemplate        @relation(fields: [form_template_id], references: [id])
   form_template_id     Int
   form_template_blocks FormTemplateBlock[]
@@ -478,8 +478,8 @@ model FormTemplateBlock {
   position              Int
   type_bloc             Typebloc
   label                 String?
-  value                 String?
-  content               String?
+  content                 String?
+  required              Boolean                   @default(false)
   options               FormTemplateBlockOption[]
 }
 
@@ -489,7 +489,6 @@ model FormTemplateBlockOption {
   updated_at DateTime          @default(now())
   label      String?
   value      String?
-  content    String?
   block      FormTemplateBlock @relation(fields: [block_id], references: [id], onDelete: Cascade)
   block_id   Int
 }

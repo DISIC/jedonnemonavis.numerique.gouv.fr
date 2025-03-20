@@ -13,6 +13,7 @@ import { entities } from './seeds/entities';
 import { getRandomObjectFromArray, removeAccents } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { Domain } from 'domain';
+import { createRootForm } from './seeds/form';
 
 const prisma = new PrismaClient();
 
@@ -20,7 +21,11 @@ async function main() {
 	const command = process.argv[2];
 
 	switch (command) {
+		case 'seedRootFormTemplate':
+			await seed_root_form_template();
+			break;
 		case 'seedUsersProducts':
+			await seed_root_form_template();
 			await seed_users_products();
 			break;
 		case 'seedFormattedTitles':
@@ -30,6 +35,7 @@ async function main() {
 			await Promise.all(getWLDPromises());
 			break;
 		default:
+			await seed_root_form_template();
 			await seed_users_products();
 			await formatted_title();
 	}
@@ -55,20 +61,18 @@ function getWLDPromises() {
 	return promisesWLDs;
 }
 
+async function seed_root_form_template() {
+	await prisma.formTemplate.upsert({
+		where: { slug: 'root' },
+		update: createRootForm,
+		create: createRootForm
+	});
+}
+
 async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
-
-	const rootFormTemplate = await prisma.formTemplate.upsert({
-		where: { slug: 'root' },
-		update: {},
-		create: {
-			title: 'Évaluation de la satisfaction usager',
-			slug: 'root',
-			active: true
-		}
-	});
 
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
@@ -120,7 +124,11 @@ async function seed_users_products() {
 						forms: {
 							create: [
 								{
-									form_template_id: rootFormTemplate.id,
+									form_template: {
+										connect: {
+											slug: 'root'
+										}
+									},
 									buttons: {
 										create: buttons as Button[]
 									}

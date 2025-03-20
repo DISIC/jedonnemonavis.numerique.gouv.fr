@@ -1,0 +1,158 @@
+import { Prisma } from '@prisma/client';
+
+const createYesNoOptions =
+	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
+		{ label: 'Oui', value: 'Oui' },
+		{ label: 'Non', value: 'Non' }
+	];
+
+const createQualityRatingOptions =
+	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
+		{ label: 'Très mauvaise', value: 'Très mauvaise' },
+		{ label: 'Mauvaise', value: 'Mauvaise' },
+		{ label: 'Ni bonne, ni mauvaise', value: 'Ni bonne, ni mauvaise' },
+		{ label: 'Bonne', value: 'Bonne' },
+		{ label: 'Excellente', value: 'Excellente' },
+		{ label: 'Ne se prononce pas', value: 'Ne se prononce pas' }
+	];
+
+const createRadioBlock = (
+	label: string,
+	options: Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[],
+	position: number
+): Prisma.FormTemplateBlockUncheckedCreateWithoutForm_template_stepInput => ({
+	label,
+	type_bloc: 'radio',
+	options: { create: options },
+	position
+});
+
+const contactMethods = [
+	"Au guichet avec l'administration",
+	"Par téléphone avec l'administration",
+	"Par e-mail avec l'administration",
+	"Par chat avec l'administration"
+];
+
+const simpleContactMethods = [
+	'Au guichet',
+	'Par téléphone',
+	'Par e-mail',
+	'Par chat'
+];
+
+export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
+	title: 'Évaluation de la satisfaction usager',
+	slug: 'root',
+	active: true,
+	form_template_steps: {
+		create: [
+			{
+				title: 'Expérience générale',
+				position: 0,
+				form_template_blocks: {
+					create: [
+						{
+							label: "Texte d'introduction",
+							content:
+								'Aidez-nous à améliorer le service Demande de logement social en répondant à quelques questions.\nVos réponses sont anonyme',
+							type_bloc: 'paragraph',
+							position: 0
+						},
+						{
+							label: "De façon générale, comment ça s'est passé ?",
+							type_bloc: 'smiley_input',
+							position: 1
+						}
+					]
+				}
+			},
+			{
+				title: 'Clarté',
+				position: 1,
+				form_template_blocks: {
+					create: [
+						{
+							label:
+								"Qu'avez-vous pensé des informations et des instructions fournies ?",
+							content:
+								"Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
+							type_bloc: 'mark_input',
+							position: 0
+						}
+					]
+				}
+			},
+			{
+				title: 'Aides',
+				position: 2,
+				form_template_blocks: {
+					create: [
+						{
+							label:
+								"Durant votre parcours, avez-vous tenté d'obtenir de l'aide par l'un des moyens suivants ?",
+							content: 'Plusieurs choix possibles',
+							type_bloc: 'checkbox',
+							position: 0,
+							options: {
+								create: [
+									...contactMethods.map(method => ({
+										label: method,
+										value: method
+									})),
+									{
+										label: 'Une personne proche',
+										value: 'Une personne proche'
+									},
+									{ label: 'Une association', value: 'Une association' },
+									{ label: 'Des sites internet', value: 'Des sites internet' },
+									{ label: 'Autres, précisez', value: 'Autres, précisez' },
+									{
+										label: "Je n'ai pas eu besoin d'aide",
+										value: "Je n'ai pas eu besoin d'aide"
+									}
+								]
+							}
+						},
+						{
+							label:
+								"Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
+							type_bloc: 'heading_3',
+							position: 1
+						},
+						...contactMethods.map((method, index) =>
+							createRadioBlock(method, createYesNoOptions(), index + 2)
+						),
+						{
+							label:
+								"Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
+							type_bloc: 'heading_3',
+							position: contactMethods.length + 2
+						},
+						...simpleContactMethods.map((method, index) =>
+							createRadioBlock(
+								method,
+								createQualityRatingOptions(),
+								index + contactMethods.length + 3
+							)
+						)
+					]
+				}
+			},
+			{
+				title: 'Informations complémentaires',
+				position: 3,
+				form_template_blocks: {
+					create: [
+						{
+							label: 'Souhaitez-vous nous en dire plus ?',
+							content: "Ne partagez pas d'information personnelle.",
+							type_bloc: 'input_text_area',
+							position: 0
+						}
+					]
+				}
+			}
+		]
+	}
+};
