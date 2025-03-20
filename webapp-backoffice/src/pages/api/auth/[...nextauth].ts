@@ -91,6 +91,7 @@ export const authOptions: NextAuthOptions = {
 				});
 		
 				if (!user) {
+					console.log('user not found, need creation')
 					const response = await fetch(`${process.env.INSEE_API_URL}/${proconnectProfile.siret}`, {
 						method: "GET",
 						headers: {
@@ -104,7 +105,9 @@ export const authOptions: NextAuthOptions = {
 
 					const data = await response.json();
 					const etablissement = data.etablissement;
+					console.log('etablissement : ', etablissement)
 					const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+					console.log('forme juridique : ', formeJuridique)
 
 					if (formeJuridique.startsWith("7") || formeJuridique.startsWith("8")) {
 						console.log("🏢 Structure publique, creation du compte...");
