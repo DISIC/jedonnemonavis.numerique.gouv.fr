@@ -18,6 +18,7 @@ interface ProconnectProfile {
 	usual_name: string;
 	chorusdt?: string;
 	organizational_unit?: string;
+	idp_id?: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -80,6 +81,7 @@ export const authOptions: NextAuthOptions = {
 		async signIn({ account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
+				console.log('profile in signin : ', proconnectProfile)
 		
 				const email = proconnectProfile.email?.toLowerCase();
 		
@@ -186,7 +188,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name phone siret idp_id siren belonging_population organizational_unit chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
@@ -217,6 +219,7 @@ export const authOptions: NextAuthOptions = {
 			idToken: true,
 			checks: ['nonce', 'state'],
 			profile(profile) {
+				console.log('profile received : ', profile)
 				return {
 					id: profile.sub,
 					email: profile.email,
