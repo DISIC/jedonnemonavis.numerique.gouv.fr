@@ -24,6 +24,7 @@ import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React from 'react';
+import Link from 'next/link';
 
 interface Props {
 	product: ProductWithForms;
@@ -131,20 +132,42 @@ const ProductButtonsPage = (props: Props) => {
 				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-12')}>
+				<div className={fr.cx('fr-col-8')}>
 					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
 				</div>
-				<div className={fr.cx('fr-col-12')}>
-					<p className={ownRight === 'carrier_admin' ? '' : fr.cx('fr-mb-0')}>
-						Vous pouvez{' '}
-						<a
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+					<Button priority="secondary">
+						<Link
 							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?button=${buttons[0]?.id}&iframe=true`}
 							target="_blank"
 						>
-							prévisualiser le formulaire JDMA
-						</a>
-						. Les avis que vous déposerez ne seront pas pris en compte dans les
-						statistiques.
+							Prévisuliser
+						</Link>
+					</Button>
+					{ownRight === 'carrier_admin' && (
+						<Button
+							priority="secondary"
+							iconId="fr-icon-settings-5-line"
+							iconPosition="right"
+						>
+							<Link
+								href={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
+							>
+								Configurer
+							</Link>
+						</Button>
+					)}
+				</div>
+				<div className={fr.cx('fr-col-12')}>
+					<hr />
+				</div>
+				<div className={fr.cx('fr-col-12')}>
+					<h3 className={fr.cx('fr-mb-4v')}>
+						{product.forms[0].form_template.title}
+					</h3>
+					<p className={ownRight === 'carrier_admin' ? '' : fr.cx('fr-mb-0')}>
+						Ici, un texte décrivant brièvement le modèle Évaluation et usager,
+						le type de données récoltées et comment les exploiter.
 					</p>
 				</div>
 				{ownRight === 'carrier_admin' && (
@@ -355,6 +378,17 @@ const useStyles = tss
 				paddingBottom: 0
 			},
 			marginTop: '1rem'
+		},
+		headerButtons: {
+			display: 'flex',
+			justifyContent: 'end',
+			gap: fr.spacing('4v'),
+			button: {
+				a: {
+					display: 'flex',
+					alignItems: 'center'
+				}
+			}
 		}
 	});
 

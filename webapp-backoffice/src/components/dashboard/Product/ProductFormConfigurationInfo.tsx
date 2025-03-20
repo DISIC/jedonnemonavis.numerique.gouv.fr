@@ -15,9 +15,9 @@ const ProductFormConfigurationInfo = (props: Props) => {
 		<div className={cx(classes.container)}>
 			<div>
 				<Badge severity="new">Beta</Badge>
-				<h2 className={cx(classes.title, fr.cx('fr-my-2v'))}>
+				<h4 className={cx(classes.title, fr.cx('fr-my-2v'))}>
 					Personnalisez le formulaire du service
-				</h2>
+				</h4>
 				<p className={fr.cx('fr-mb-1v')}>
 					Désormais, pour adapter vos formulaires à vos besoins spécifiques,
 					vous pouvez :
@@ -35,24 +35,22 @@ const ProductFormConfigurationInfo = (props: Props) => {
 					</a>
 					.
 				</p>
-				<div>
-					<h3 className={cx(classes.title, fr.cx('fr-mt-8v', 'fr-mb-2v'))}>
-						Prévisualisez et publiez en un clic
-					</h3>
-					<p>
-						Prévisualisez les changements et testez le formulaire, puis publiez
-						le nouveau formulaire, sans changer de lien.
-						<br />
-						Vos usagers auront directement accès au formulaire modifié.
-					</p>
-					<Button
-						iconId="fr-icon-settings-5-line"
-						iconPosition="right"
-						onClick={onButtonClick}
-					>
-						Configurer le formulaire
-					</Button>
-				</div>
+				<h4 className={cx(classes.title, fr.cx('fr-mt-8v', 'fr-mb-2v'))}>
+					Prévisualisez et publiez en un clic
+				</h4>
+				<p>
+					Prévisualisez les changements et testez le formulaire, puis publiez le
+					nouveau formulaire, sans changer de lien.
+					<br />
+					Vos usagers auront directement accès au formulaire modifié.
+				</p>
+				<Button
+					iconId="fr-icon-settings-5-line"
+					iconPosition="right"
+					onClick={onButtonClick}
+				>
+					Configurer le formulaire
+				</Button>
 			</div>
 			<div>
 				<Image
