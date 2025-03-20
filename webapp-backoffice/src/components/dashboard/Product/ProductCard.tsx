@@ -66,7 +66,6 @@ const ProductCard = ({
 	onDeleteEssential
 }: {
 	product: ProductWithForms;
-
 	userId: number;
 	entity: Entity;
 	isFavorite: boolean;

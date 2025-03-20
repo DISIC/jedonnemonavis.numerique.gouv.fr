@@ -213,7 +213,8 @@ export const productRouter = router({
 					include: {
 						forms: {
 							include: {
-								buttons: true
+								buttons: true,
+								form_template: true
 							}
 						}
 					}
