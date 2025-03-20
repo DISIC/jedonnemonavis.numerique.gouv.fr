@@ -64,7 +64,7 @@ async function seed_users_products() {
 		where: { slug: 'root' },
 		update: {},
 		create: {
-			title: 'Formulaire d’évaluation de la satisfaction usager',
+			title: 'Évaluation de la satisfaction usager',
 			slug: 'root',
 			active: true
 		}

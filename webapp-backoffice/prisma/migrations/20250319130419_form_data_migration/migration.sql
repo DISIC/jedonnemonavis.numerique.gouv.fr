@@ -3,7 +3,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM "FormTemplate" WHERE slug = 'root') THEN
     INSERT INTO "FormTemplate" (title, slug, active, created_at, updated_at)
-    VALUES ('Formulaire d’évaluation de la satisfaction usager', 'root', true, NOW(), NOW());
+    VALUES ('Évaluation de la satisfaction usager', 'root', true, NOW(), NOW());
   END IF;
 END $$;
 
