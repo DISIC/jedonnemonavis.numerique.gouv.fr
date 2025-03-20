@@ -2,17 +2,23 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react';
 import FormBlockDisplay from './FormBlockDisplay';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
 	step: Step;
 	form: FormWithElements;
+	changeStep: (to: 'previous' | 'next') => void;
 }
 
 const FormStepDisplay = (props: Props) => {
-	const { step, form } = props;
+	const { step, form, changeStep } = props;
 
 	const { classes, cx } = useStyles();
+
+	const currentStepIndex = form.form_template.form_template_steps.findIndex(
+		s => s.id === step.id
+	);
 
 	return (
 		<div className={cx(classes.container)}>
@@ -28,6 +34,43 @@ const FormStepDisplay = (props: Props) => {
 					</div>
 				);
 			})}
+			<div className={cx(classes.buttonsContainer)}>
+				{currentStepIndex > 0 ? (
+					<Button
+						priority="secondary"
+						iconId="fr-icon-arrow-left-line"
+						iconPosition="left"
+						onClick={() => {
+							changeStep('previous');
+						}}
+					>
+						Étape précédente
+					</Button>
+				) : (
+					<div />
+				)}
+				{currentStepIndex <
+				form.form_template.form_template_steps.length - 1 ? (
+					<Button
+						priority="primary"
+						iconId="fr-icon-arrow-right-line"
+						iconPosition="right"
+						onClick={() => {
+							changeStep('next');
+						}}
+					>
+						Étape suivante
+					</Button>
+				) : (
+					<Button
+						priority="primary"
+						iconId="fr-icon-computer-line"
+						iconPosition="right"
+					>
+						Publier
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 };
@@ -53,6 +96,10 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 			color: fr.colors.decisions.background.flat.blueFrance.default,
 			marginBottom: 0
 		}
+	},
+	buttonsContainer: {
+		display: 'flex',
+		justifyContent: 'space-between'
 	}
 });
 

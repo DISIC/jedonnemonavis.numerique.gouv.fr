@@ -21,17 +21,35 @@ const FormConfigurator = (props: Props) => {
 		setCurrentStep(step);
 	};
 
+	const steps = form.form_template.form_template_steps;
+
 	return (
 		<div className={fr.cx('fr-grid-row')}>
 			<div className={fr.cx('fr-col-3')}>
 				<FormStepper
-					steps={form.form_template.form_template_steps}
+					steps={steps}
 					onClick={changeStep}
 					currentStep={currentStep}
 				/>
 			</div>
 			<div className={fr.cx('fr-col-9')}>
-				<FormStepDisplay step={currentStep} form={form} />
+				<FormStepDisplay
+					step={currentStep}
+					form={form}
+					changeStep={to => {
+						const currentStepIndex = steps.findIndex(
+							s => s.id === currentStep.id
+						);
+
+						if (to === 'previous' && currentStepIndex - 1 >= 0) {
+							changeStep(steps[currentStepIndex - 1]);
+						}
+
+						if (to === 'next' && currentStepIndex + 1 < steps.length) {
+							changeStep(steps[currentStepIndex + 1]);
+						}
+					}}
+				/>
 			</div>
 		</div>
 	);

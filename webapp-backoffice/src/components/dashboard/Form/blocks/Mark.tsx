@@ -39,7 +39,7 @@ const Mark = (props: Props) => {
 											name="mark"
 											value={option.value || ''}
 											checked={current === option.value}
-											onChange={() => handleChange(option.value)}
+											onChange={() => handleChange(option.value || '')}
 										/>
 										<label
 											htmlFor={`radio-${option.label}-${option.value}`}
