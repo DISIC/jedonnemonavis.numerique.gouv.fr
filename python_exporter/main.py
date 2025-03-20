@@ -7,7 +7,7 @@ import smtplib
 import requests
 import zipfile
 import boto3
-import psycopg2
+import psycopg
 import threading
 import pandas as pd
 import csv
@@ -64,7 +64,7 @@ def call_self_every_minute():
 
 def create_connection():
     try:
-        conn = psycopg2.connect(env_vars['POSTGRESQL_ADDON_URI'])
+        conn = psycopg.connect(env_vars['POSTGRESQL_ADDON_URI'])
         print("Connexion BDD réussie")
         return conn
     except Exception as e:
