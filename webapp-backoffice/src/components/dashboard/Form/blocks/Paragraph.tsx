@@ -1,5 +1,4 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react';
 
 interface Props {
