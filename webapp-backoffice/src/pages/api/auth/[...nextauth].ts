@@ -16,6 +16,7 @@ interface ProconnectProfile {
 	email: string;
 	given_name: string;
 	usual_name: string;
+	siret: string;
 	chorusdt?: string;
 	organizational_unit?: string;
 	idp_id?: string;
@@ -90,30 +91,47 @@ export const authOptions: NextAuthOptions = {
 				});
 		
 				if (!user) {
-					if(!proconnectProfile.organizational_unit) {
+					const response = await fetch(`${process.env.INSEE_API_URL}/${proconnectProfile.siret}`, {
+						method: "GET",
+						headers: {
+							"Authorization": `Bearer ${process.env.API_TOKEN}`
+						}
+					});
+			
+					if (!response.ok) {
 						throw new Error('INVALID_PROVIDER');
 					}
 
-					const salt = bcrypt.genSaltSync(10);
-					const newHashedPassword = bcrypt.hashSync('changeme', salt);
+					const data = await response.json();
+					const etablissement = data.etablissement;
+					const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
 
-					user = await prisma.user.create({
-						data: {
-							email,
-							firstName: proconnectProfile.given_name,
-							lastName: proconnectProfile.usual_name,
-							role: 'user',
-							password: newHashedPassword,
-							notifications: false,
-							notifications_frequency: 'daily',
-							active: true,
-							xwiki_account: false,
-							xwiki_username: null
-						}
-					});
-					console.log('✅ Utilisateur créé avec succès:', user);
-				} else {
-					console.log('🔄 Utilisateur déjà existant:', user);
+					if (formeJuridique.startsWith("7") || formeJuridique.startsWith("8")) {
+						console.log("🏢 Structure publique, creation du compte...");
+
+						const salt = bcrypt.genSaltSync(10);
+						const newHashedPassword = bcrypt.hashSync('changeme', salt);
+	
+						user = await prisma.user.create({
+							data: {
+								email,
+								firstName: proconnectProfile.given_name,
+								lastName: proconnectProfile.usual_name,
+								role: 'user',
+								password: newHashedPassword,
+								notifications: false,
+								notifications_frequency: 'daily',
+								active: true,
+								xwiki_account: false,
+								xwiki_username: null
+							}
+						});
+						console.log('✅ Utilisateur créé avec succès:', user);
+					} else {
+						console.log("🏢 Structure privée, redirection erreur...");
+						throw new Error('INVALID_PROVIDER');
+					}
+
 				}
 			}
 			return true;
