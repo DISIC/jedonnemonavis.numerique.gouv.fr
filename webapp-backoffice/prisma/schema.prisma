@@ -154,6 +154,7 @@ model User {
   notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
   UserEvent               UserEvent[]
+  proconnect_account      Boolean?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt

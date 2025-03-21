@@ -11,6 +11,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getSiretInfo } from '@/src/utils/queries';
+import { generateRandomString } from '@/src/utils/tools';
 
 interface ProconnectProfile {
 	sub: string;
@@ -83,7 +84,6 @@ export const authOptions: NextAuthOptions = {
 		async signIn({ account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
-				console.log('profile in signin : ', proconnectProfile);
 		
 				const email = proconnectProfile.email?.toLowerCase();
 		
@@ -95,17 +95,14 @@ export const authOptions: NextAuthOptions = {
 					console.log('user not found, need creation');
 					try {
 						const data = await getSiretInfo(proconnectProfile.siret);
-						console.log('✔️ Données récupérées :', data);
 		
 						const etablissement = data.etablissement;
 						const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
-						console.log('forme juridique : ', formeJuridique);
 		
 						if (formeJuridique.startsWith('7') || formeJuridique.startsWith('8')) {
-							console.log('🏢 Structure publique, création du compte...');
 		
 							const salt = bcrypt.genSaltSync(10);
-							const newHashedPassword = bcrypt.hashSync('changeme', salt);
+							const newHashedPassword = bcrypt.hashSync(generateRandomString(10), salt);
 		
 							user = await prisma.user.create({
 								data: {
@@ -235,7 +232,6 @@ export const authOptions: NextAuthOptions = {
 			idToken: true,
 			checks: ['nonce', 'state'],
 			profile(profile) {
-				console.log('profile received : ', profile)
 				return {
 					id: profile.sub,
 					email: profile.email,

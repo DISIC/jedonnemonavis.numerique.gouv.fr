@@ -613,6 +613,8 @@ export const userRouter = router({
 				createOTP(ctx.prisma, user);
 
 				return { data: undefined, metadata: { statusCode: 206 } };
+			} else if(user.proconnect_account) {
+				return { data: undefined, metadata: { statusCode: 203 } };
 			} else if (!user.active) {
 				// Code: 423
 				throw new TRPCError({
