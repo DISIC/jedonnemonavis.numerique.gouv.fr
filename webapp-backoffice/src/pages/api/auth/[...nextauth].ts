@@ -92,6 +92,7 @@ export const authOptions: NextAuthOptions = {
 		
 				if (!user) {
 					console.log('user not found, need creation')
+					console.log('asking insee : ', `${process.env.INSEE_API_URL}/${proconnectProfile.siret}`)
 					const response = await fetch(`${process.env.INSEE_API_URL}/${proconnectProfile.siret}`, {
 						method: "GET",
 						headers: {
@@ -100,6 +101,7 @@ export const authOptions: NextAuthOptions = {
 					});
 			
 					if (!response.ok) {
+						console.log('response : ', response)
 						throw new Error('INVALID_PROVIDER');
 					}
 
