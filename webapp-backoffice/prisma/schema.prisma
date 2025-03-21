@@ -463,7 +463,7 @@ model FormTemplate {
 model FormTemplateStep {
   id                   Int                 @id @default(autoincrement())
   title                String
-  position Int
+  position             Int
   form_template        FormTemplate        @relation(fields: [form_template_id], references: [id])
   form_template_id     Int
   form_template_blocks FormTemplateBlock[]
@@ -478,7 +478,9 @@ model FormTemplateBlock {
   position              Int
   type_bloc             Typebloc
   label                 String?
-  content                 String?
+  content               String?
+  downLabel             String?
+  upLabel               String?
   required              Boolean                   @default(false)
   options               FormTemplateBlockOption[]
 }

@@ -76,6 +76,8 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label:
 								"Qu'avez-vous pensé des informations et des instructions fournies ?",
+							downLabel: 'Pas clair du tout',
+							upLabel: 'Très clair',
 							content:
 								"Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
 							type_bloc: 'mark_input',

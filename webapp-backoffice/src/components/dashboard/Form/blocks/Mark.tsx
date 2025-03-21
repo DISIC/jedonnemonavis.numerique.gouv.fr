@@ -22,7 +22,7 @@ const Mark = (props: Props) => {
 			<div className={fr.cx('fr-grid-row')}>
 				<div className={fr.cx('fr-col-12')}>
 					<div className={cx(classes.radioContainer)}>
-						<div>{'Pas clair du tout'}</div>
+						{block.downLabel && <div>{block.downLabel}</div>}
 						<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 							{block.content && (
 								<legend>
@@ -51,7 +51,7 @@ const Mark = (props: Props) => {
 								))}
 							</ul>
 						</fieldset>
-						<div>{'Très clair'}</div>
+						{block.upLabel && <div>{block.upLabel}</div>}
 					</div>
 				</div>
 			</div>
