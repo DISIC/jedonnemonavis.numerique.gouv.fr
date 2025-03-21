@@ -46,14 +46,14 @@ const PublicDataModal = (props: Props) => {
 				<div className={fr.cx('fr-col-12')}>
 					<p className={fr.cx('fr-my-5v')}>
 						En activant le partage public, toutes les personnes disposant du
-						lien peuvent consulter la page de statistiques. Elles ne vont pas
-						avoir accès aux verbatims.
+						lien peuvent consulter la page de statistiques. Elles n’auront pas
+						accès aux verbatims.
 					</p>
 				</div>
 				<div className={fr.cx('fr-col-12')}>
 					<ToggleSwitch
 						inputTitle="the-title"
-						label="Autoriser le partage publique de ces statistiques"
+						label="Autoriser le partage public de ces statistiques"
 						labelPosition="right"
 						showCheckedHint={true}
 						defaultChecked={isPublic}
