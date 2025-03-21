@@ -116,6 +116,7 @@ export const authOptions: NextAuthOptions = {
 									active: true,
 									xwiki_account: false,
 									xwiki_username: null,
+									proconnect_account: true
 								},
 							});
 							console.log('✅ Utilisateur créé avec succès:', user);
@@ -246,7 +247,8 @@ export const authOptions: NextAuthOptions = {
 					notifications: false,
 					notifications_frequency: 'daily',
 					created_at: new Date(),
-					updated_at: new Date()
+					updated_at: new Date(),
+					proconnect_account: false
 				}
 			}
 		}
