@@ -91,7 +91,7 @@ const ProductFormPage = (props: Props) => {
 						le type de données récoltées et comment les exploiter.
 					</p>
 				</div>
-				<div className={fr.cx('fr-col-12')}>
+				<div className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}>
 					<FormConfigurator form={form} />
 				</div>
 			</div>
@@ -114,6 +114,9 @@ const useStyles = tss.withName(ProductFormPage.name).create({
 				alignItems: 'center'
 			}
 		}
+	},
+	configuratorContainer: {
+		minHeight: '75vh'
 	}
 });
 
