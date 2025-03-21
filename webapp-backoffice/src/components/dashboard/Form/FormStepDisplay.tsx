@@ -3,16 +3,18 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react';
 import FormBlockDisplay from './FormBlockDisplay';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
 	step: Step;
 	form: FormWithElements;
 	changeStep: (to: 'previous' | 'next') => void;
+	onConfigChange: (config: { displays: FormConfigDisplayPartial[] }) => void;
 }
 
 const FormStepDisplay = (props: Props) => {
-	const { step, form, changeStep } = props;
+	const { step, form, changeStep, onConfigChange } = props;
 
 	const { classes, cx } = useStyles();
 
@@ -30,7 +32,11 @@ const FormStepDisplay = (props: Props) => {
 					<div key={block.id} className={cx(classes.box)}>
 						<h3>{block.label}</h3>
 						<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
-						<FormBlockDisplay block={block} form={form} />
+						<FormBlockDisplay
+							block={block}
+							form={form}
+							onConfigChange={onConfigChange}
+						/>
 					</div>
 				);
 			})}

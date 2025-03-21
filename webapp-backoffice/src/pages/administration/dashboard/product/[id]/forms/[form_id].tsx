@@ -1,15 +1,16 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { RightAccessStatus } from '@prisma/client';
+import { Prisma, RightAccessStatus } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -21,6 +22,18 @@ const ProductFormPage = (props: Props) => {
 	const { form } = props;
 
 	const { classes, cx } = useStyles();
+
+	const createFormConfig = trpc.formConfig.create.useMutation({
+		onSuccess: response => {
+			alert('Le formulaire a été publié avec succès');
+		}
+	});
+
+	const [createConfig, setCreateConfig] =
+		useState<Prisma.FormConfigUncheckedCreateInput>({
+			form_id: form.id,
+			status: 'draft'
+		});
 
 	const breadcrumbSegments = [
 		{
@@ -36,6 +49,22 @@ const ProductFormPage = (props: Props) => {
 			}
 		}
 	];
+
+	const publish = () => {
+		if (createConfig) {
+			try {
+				createFormConfig.mutate(createConfig);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+	};
+
+	const onChangeConfig = (
+		createConfig: Prisma.FormConfigUncheckedCreateInput
+	) => {
+		setCreateConfig(createConfig);
+	};
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
@@ -69,18 +98,18 @@ const ProductFormPage = (props: Props) => {
 					<h1 className={fr.cx('fr-mb-0')}>{form.form_template.title}</h1>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
-					<Button priority="secondary">
-						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true`}
-							target="_blank"
-						>
-							Prévisualiser
-						</Link>
-					</Button>
+					<Link
+						className={fr.cx('fr-btn', 'fr-btn--secondary')}
+						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true`}
+						target="_blank"
+					>
+						Prévisualiser
+					</Link>
 					<Button
 						priority="primary"
 						iconId="fr-icon-computer-line"
 						iconPosition="right"
+						onClick={publish}
 					>
 						Publier
 					</Button>
@@ -92,7 +121,7 @@ const ProductFormPage = (props: Props) => {
 					</p>
 				</div>
 				<div className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}>
-					<FormConfigurator form={form} />
+					<FormConfigurator form={form} onChange={onChangeConfig} />
 				</div>
 			</div>
 		</div>
@@ -129,6 +158,13 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		include: {
 			product: true,
 			form_configs: {
+				where: {
+					status: 'published'
+				},
+				orderBy: {
+					created_at: 'desc'
+				},
+				take: 10,
 				include: {
 					form_config_displays: true,
 					form_config_labels: true

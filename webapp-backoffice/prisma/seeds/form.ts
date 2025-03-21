@@ -133,10 +133,15 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 									},
 									{ label: 'Une association', value: 'Une association' },
 									{ label: 'Des sites internet', value: 'Des sites internet' },
-									{ label: 'Autres, précisez', value: 'Autres, précisez' },
+									{
+										label: 'Autres, précisez',
+										value: 'Autres, précisez',
+										isOther: true
+									},
 									{
 										label: "Je n'ai pas eu besoin d'aide",
-										value: "Je n'ai pas eu besoin d'aide"
+										value: "Je n'ai pas eu besoin d'aide",
+										isIsolated: true
 									}
 								]
 							}

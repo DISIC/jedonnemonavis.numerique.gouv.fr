@@ -136,26 +136,27 @@ const ProductButtonsPage = (props: Props) => {
 					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
-					<Button priority="secondary">
-						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
-							target="_blank"
-						>
-							Prévisualiser
-						</Link>
-					</Button>
+					<Link
+						className={fr.cx('fr-btn', 'fr-btn--secondary')}
+						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
+						target="_blank"
+					>
+						Prévisualiser
+					</Link>
 					{ownRight === 'carrier_admin' && (
-						<Button
-							priority="secondary"
-							iconId="fr-icon-settings-5-line"
-							iconPosition="right"
+						<Link
+							className={fr.cx('fr-btn')}
+							href={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
 						>
-							<Link
-								href={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
-							>
-								Configurer
-							</Link>
-						</Button>
+							Configurer
+							<span
+								className={fr.cx(
+									'fr-icon-settings-5-line',
+									'fr-icon--sm',
+									'fr-ml-2v'
+								)}
+							/>
+						</Link>
 					)}
 				</div>
 				<div className={fr.cx('fr-col-12')}>
@@ -173,11 +174,7 @@ const ProductButtonsPage = (props: Props) => {
 				{ownRight === 'carrier_admin' && (
 					<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 						<ProductFormConfigurationInfo
-							onButtonClick={() => {
-								router.push(
-									`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`
-								);
-							}}
+							link={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
 						/>
 					</div>
 				)}

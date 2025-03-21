@@ -491,6 +491,8 @@ model FormTemplateBlockOption {
   updated_at DateTime          @default(now())
   label      String?
   value      String?
+  isOther    Boolean           @default(false)
+  isIsolated Boolean           @default(false)
   block      FormTemplateBlock @relation(fields: [block_id], references: [id], onDelete: Cascade)
   block_id   Int
 }
@@ -543,7 +545,7 @@ model FormConfig {
 
 model FormConfigDisplay {
   id             Int            @id @default(autoincrement())
-  display        Boolean
+  hidden        Boolean
   kind           FormConfigKind
   parent_id      Int
   form_config    FormConfig     @relation(fields: [form_config_id], references: [id])

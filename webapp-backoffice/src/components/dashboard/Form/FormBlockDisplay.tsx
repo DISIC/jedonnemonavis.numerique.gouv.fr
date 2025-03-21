@@ -6,14 +6,17 @@ import Image from 'next/image';
 import Paragraph from './blocks/Paragraph';
 import Smiley from './blocks/Smiley';
 import Mark from './blocks/Mark';
+import Checkboxes from './blocks/Checkboxes';
+import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	form: FormWithElements;
+	onConfigChange: (config: { displays: FormConfigDisplayPartial[] }) => void;
 }
 
 const FormBlockDisplay = (props: Props) => {
-	const { block, form } = props;
+	const { block, form, onConfigChange } = props;
 
 	const { classes, cx } = useStyles();
 
@@ -25,6 +28,14 @@ const FormBlockDisplay = (props: Props) => {
 				return <Smiley block={block} />;
 			case 'mark_input':
 				return <Mark block={block} />;
+			case 'checkbox':
+				return (
+					<Checkboxes
+						block={block}
+						onConfigChange={onConfigChange}
+						form={form}
+					/>
+				);
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}

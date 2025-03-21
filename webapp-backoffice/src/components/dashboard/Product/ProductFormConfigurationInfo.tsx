@@ -2,13 +2,13 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
-import Button from '@codegouvfr/react-dsfr/Button';
+import Link from 'next/link';
 
 interface Props {
-	onButtonClick: () => void;
+	link: string;
 }
 const ProductFormConfigurationInfo = (props: Props) => {
-	const { onButtonClick } = props;
+	const { link } = props;
 	const { cx, classes } = useStyles();
 
 	return (
@@ -44,13 +44,16 @@ const ProductFormConfigurationInfo = (props: Props) => {
 					<br />
 					Vos usagers auront directement accès au formulaire modifié.
 				</p>
-				<Button
-					iconId="fr-icon-settings-5-line"
-					iconPosition="right"
-					onClick={onButtonClick}
-				>
+				<Link className={fr.cx('fr-btn')} href={link}>
 					Configurer le formulaire
-				</Button>
+					<span
+						className={fr.cx(
+							'fr-icon-settings-5-line',
+							'fr-icon--sm',
+							'fr-ml-2v'
+						)}
+					/>
+				</Link>
 			</div>
 			<div>
 				<Image

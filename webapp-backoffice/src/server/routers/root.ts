@@ -17,6 +17,8 @@ import { reviewRouter } from './review';
 import { reviewCustomRouter } from './reviewCustom';
 import { reviewViewLogRouter } from './reviewViewLog';
 import { formRouter } from './form';
+import { formConfigRouter } from './formConfig';
+
 export const appRouter = router({
 	user: userRouter,
 	product: productRouter,
@@ -35,7 +37,8 @@ export const appRouter = router({
 	review: reviewRouter,
 	reviewCustom: reviewCustomRouter,
 	reviewViewLog: reviewViewLogRouter,
-	formRouter: reviewViewLogRouter
+	form: formRouter,
+	formConfig: formConfigRouter
 });
 
 export type AppRouter = typeof appRouter;

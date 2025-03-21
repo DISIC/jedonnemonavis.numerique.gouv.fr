@@ -1,22 +1,55 @@
+import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
-import FormStepper from './FormStepper';
-import FormStepDisplay from './FormStepDisplay';
+import { Prisma } from '@prisma/client';
+import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
+import FormStepDisplay from './FormStepDisplay';
+import FormStepper from './FormStepper';
 
 interface Props {
 	form: FormWithElements;
+	onChange: (config: Prisma.FormConfigUncheckedCreateInput) => void;
 }
 
 const FormConfigurator = (props: Props) => {
-	const { form } = props;
+	const { form, onChange } = props;
 
 	const { classes, cx } = useStyles();
 
 	const [currentStep, setCurrentStep] = React.useState(
 		form.form_template.form_template_steps[0]
 	);
+
+	const formConfig = form.form_configs[0];
+
+	const [createConfig, setCreateConfig] =
+		useState<Prisma.FormConfigUncheckedCreateInput>({
+			form_id: form.id,
+			form_config_displays: {
+				create: formConfig ? formConfig.form_config_displays : []
+			},
+			form_config_labels: {
+				create: formConfig ? formConfig.form_config_labels : []
+			},
+			status: 'published'
+		});
+
+	const onConfigChange = (config: { displays: FormConfigDisplayPartial[] }) => {
+		const legitDisplays = config.displays.filter(
+			d =>
+				d.kind !== undefined &&
+				d.hidden !== undefined &&
+				d.parent_id !== undefined
+		);
+
+		setCreateConfig({
+			...createConfig,
+			form_config_displays: {
+				create: legitDisplays
+			} as Prisma.FormConfigCreateArgs['data']['form_config_displays']
+		});
+	};
 
 	const changeStep = (
 		step: FormWithElements['form_template']['form_template_steps'][0]
@@ -36,6 +69,12 @@ const FormConfigurator = (props: Props) => {
 		}
 	};
 
+	useEffect(() => {
+		if (createConfig) {
+			onChange(createConfig);
+		}
+	}, [createConfig]);
+
 	const steps = form.form_template.form_template_steps;
 
 	return (
@@ -52,6 +91,7 @@ const FormConfigurator = (props: Props) => {
 					step={currentStep}
 					form={form}
 					changeStep={goToSibilingStep}
+					onConfigChange={onConfigChange}
 				/>
 			</div>
 		</div>
