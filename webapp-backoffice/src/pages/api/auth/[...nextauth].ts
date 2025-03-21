@@ -83,56 +83,53 @@ export const authOptions: NextAuthOptions = {
 		async signIn({ account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
-				console.log('profile in signin : ', proconnectProfile)
+				console.log('profile in signin : ', proconnectProfile);
 		
 				const email = proconnectProfile.email?.toLowerCase();
 		
 				let user = await prisma.user.findUnique({
-					where: { email }
+					where: { email },
 				});
 		
 				if (!user) {
-					console.log('user not found, need creation')
-					getSiretInfo(proconnectProfile.siret)
-						.then(async (data) => {
-							console.log("✔️ Données récupérées :", data);
-
-							const etablissement = data.etablissement;
-							console.log('etablissement : ', etablissement)
-							const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
-							console.log('forme juridique : ', formeJuridique)
+					console.log('user not found, need creation');
+					try {
+						const data = await getSiretInfo(proconnectProfile.siret);
+						console.log('✔️ Données récupérées :', data);
 		
-							if (formeJuridique.startsWith("7") || formeJuridique.startsWith("8")) {
-								console.log("🏢 Structure publique, creation du compte...");
+						const etablissement = data.etablissement;
+						const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+						console.log('forme juridique : ', formeJuridique);
 		
-								const salt = bcrypt.genSaltSync(10);
-								const newHashedPassword = bcrypt.hashSync('changeme', salt);
-			
-								user = await prisma.user.create({
-									data: {
-										email,
-										firstName: proconnectProfile.given_name,
-										lastName: proconnectProfile.usual_name,
-										role: 'user',
-										password: newHashedPassword,
-										notifications: false,
-										notifications_frequency: 'daily',
-										active: true,
-										xwiki_account: false,
-										xwiki_username: null
-									}
-								});
-								console.log('✅ Utilisateur créé avec succès:', user);
-							} else {
-								console.log("🏢 Structure privée, redirection erreur...");
-								throw new Error('INVALID_PROVIDER');
-							}
-						})
-						.catch((err) => {
-							console.error("❌ Erreur :", err.message);
+						if (formeJuridique.startsWith('7') || formeJuridique.startsWith('8')) {
+							console.log('🏢 Structure publique, création du compte...');
+		
+							const salt = bcrypt.genSaltSync(10);
+							const newHashedPassword = bcrypt.hashSync('changeme', salt);
+		
+							user = await prisma.user.create({
+								data: {
+									email,
+									firstName: proconnectProfile.given_name,
+									lastName: proconnectProfile.usual_name,
+									role: 'user',
+									password: newHashedPassword,
+									notifications: false,
+									notifications_frequency: 'daily',
+									active: true,
+									xwiki_account: false,
+									xwiki_username: null,
+								},
+							});
+							console.log('✅ Utilisateur créé avec succès:', user);
+						} else {
+							console.log('🏢 Structure privée, redirection erreur...');
 							throw new Error('INVALID_PROVIDER');
-						});
-
+						}
+					} catch (err) {
+						console.error('❌ Erreur :', err);
+						throw new Error('INVALID_PROVIDER');
+					}
 				}
 			}
 			return true;
