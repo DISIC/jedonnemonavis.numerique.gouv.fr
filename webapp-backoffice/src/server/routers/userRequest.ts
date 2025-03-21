@@ -12,7 +12,7 @@ import {
 	getUserRequestAcceptedEmailHtml,
 	getUserRequestRefusedEmailHtml
 } from '@/src/utils/emails';
-import { makeRelationFromUserInvite } from './user';
+import { generateValidationToken, makeRelationFromUserInvite } from './user';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -69,12 +69,21 @@ export async function updateUserRequest(
 
 	if (updatedUserRequest.user !== null) {
 		if (updatedUserRequest.status === 'accepted') {
-			const updatedUser = await prisma.user.update({
+			/*const updatedUser = await prisma.user.update({
 				where: { id: updatedUserRequest.user.id },
 				data: {
 					active: true
 				}
-			});
+			});*/
+
+			const foundUser = await prisma.user.findFirst({
+				where: { id: updatedUserRequest.user.id}
+			})
+
+			const token = await generateValidationToken(
+				prisma,
+				updatedUserRequest.user.id
+			);
 
 			if (createDomain) {
 				const newDomain = updatedUserRequest.user.email
@@ -87,11 +96,12 @@ export async function updateUserRequest(
 				});
 			}
 
+			if(foundUser)
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
-				updatedUser.email.toLowerCase(),
-				getUserRequestAcceptedEmailHtml(),
-				`Cliquez sur ce lien pour accédez à votre compte : ${process.env.NODEMAILER_BASEURL}/login`
+				foundUser?.email.toLowerCase(),
+				getUserRequestAcceptedEmailHtml(token),
+				`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
 			);
 		} else if (updatedUserRequest.status === 'refused') {
 			await prisma.userRequest.update({

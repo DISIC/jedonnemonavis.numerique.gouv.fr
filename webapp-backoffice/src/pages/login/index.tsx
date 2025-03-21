@@ -1,11 +1,9 @@
 import { LoginForm } from '@/src/components/auth/LoginForm';
-import { AlertObservatoire } from '@/src/components/ui/AlertObservatoire';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import Head from 'next/head';
 import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import { ProconnectError } from '@/src/components/auth/ProConnectError';
 
 export default function Login() {

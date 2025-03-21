@@ -207,21 +207,23 @@ export function getInviteEntityEmailHtml(
 	`);
 }
 
-export function getUserRequestAcceptedEmailHtml() {
-	const link = `${process.env.NODEMAILER_BASEURL}/login`;
+export function getUserRequestAcceptedEmailHtml(token: string) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/register/validate?${new URLSearchParams({ token })}`;
 
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
 
 		<p>
-			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été acceptée.
-		</p>
-
-		<p>
-			Vous pouvez vous connecter à votre compte en cliquant sur le lien ci-dessous.
+			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été acceptée.  Afin de valider votre compte, veuillez cliquer sur le lien ci-dessous.
 		</p>
 
 		<a href="${link}" target="_blank">${link}</a>
+
+		<p>
+			Cette étape est obligatoire pour pouvoir vous connecter à votre compte. Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.
+		</p>
 	`);
 }
 
