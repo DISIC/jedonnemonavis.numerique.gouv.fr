@@ -10,6 +10,7 @@ import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { getSiretInfo } from '@/src/utils/queries';
 
 interface ProconnectProfile {
 	sub: string;
@@ -92,50 +93,44 @@ export const authOptions: NextAuthOptions = {
 		
 				if (!user) {
 					console.log('user not found, need creation')
-					console.log('asking insee : ', `${process.env.INSEE_API_URL}/${proconnectProfile.siret}`)
-					const response = await fetch(`${process.env.INSEE_API_URL}/${proconnectProfile.siret}`, {
-						method: "GET",
-						headers: {
-							"Authorization": `Bearer ${process.env.API_TOKEN}`
-						}
-					});
+					getSiretInfo(proconnectProfile.siret)
+						.then(async (data) => {
+							console.log("✔️ Données récupérées :", data);
+
+							const etablissement = data.etablissement;
+							console.log('etablissement : ', etablissement)
+							const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+							console.log('forme juridique : ', formeJuridique)
+		
+							if (formeJuridique.startsWith("7") || formeJuridique.startsWith("8")) {
+								console.log("🏢 Structure publique, creation du compte...");
+		
+								const salt = bcrypt.genSaltSync(10);
+								const newHashedPassword = bcrypt.hashSync('changeme', salt);
 			
-					if (!response.ok) {
-						console.log('response : ', response)
-						throw new Error('INVALID_PROVIDER');
-					}
-
-					const data = await response.json();
-					const etablissement = data.etablissement;
-					console.log('etablissement : ', etablissement)
-					const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
-					console.log('forme juridique : ', formeJuridique)
-
-					if (formeJuridique.startsWith("7") || formeJuridique.startsWith("8")) {
-						console.log("🏢 Structure publique, creation du compte...");
-
-						const salt = bcrypt.genSaltSync(10);
-						const newHashedPassword = bcrypt.hashSync('changeme', salt);
-	
-						user = await prisma.user.create({
-							data: {
-								email,
-								firstName: proconnectProfile.given_name,
-								lastName: proconnectProfile.usual_name,
-								role: 'user',
-								password: newHashedPassword,
-								notifications: false,
-								notifications_frequency: 'daily',
-								active: true,
-								xwiki_account: false,
-								xwiki_username: null
+								user = await prisma.user.create({
+									data: {
+										email,
+										firstName: proconnectProfile.given_name,
+										lastName: proconnectProfile.usual_name,
+										role: 'user',
+										password: newHashedPassword,
+										notifications: false,
+										notifications_frequency: 'daily',
+										active: true,
+										xwiki_account: false,
+										xwiki_username: null
+									}
+								});
+								console.log('✅ Utilisateur créé avec succès:', user);
+							} else {
+								console.log("🏢 Structure privée, redirection erreur...");
+								throw new Error('INVALID_PROVIDER');
 							}
+						})
+						.catch((err) => {
+							console.error("❌ Erreur :", err.message);
 						});
-						console.log('✅ Utilisateur créé avec succès:', user);
-					} else {
-						console.log("🏢 Structure privée, redirection erreur...");
-						throw new Error('INVALID_PROVIDER');
-					}
 
 				}
 			}
