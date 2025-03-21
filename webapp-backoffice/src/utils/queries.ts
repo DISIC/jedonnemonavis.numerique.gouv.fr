@@ -12,6 +12,7 @@ async function getInseeAccessToken(): Promise<string> {
 	});
 
 	if (!response.ok) {
+        console.log('response token : ', response)
 		throw new Error(`Impossible d'obtenir un token (HTTP ${response.status})`);
 	}
 

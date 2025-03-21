@@ -130,6 +130,7 @@ export const authOptions: NextAuthOptions = {
 						})
 						.catch((err) => {
 							console.error("❌ Erreur :", err.message);
+							throw new Error('INVALID_PROVIDER');
 						});
 
 				}
