@@ -1,4 +1,7 @@
-import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
+import {
+	FormConfigDisplayPartial,
+	FormConfigLabelPartial
+} from '@/prisma/generated/zod';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -10,7 +13,10 @@ import { tss } from 'tss-react';
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	form: FormWithElements;
-	onConfigChange: (config: { displays: FormConfigDisplayPartial[] }) => void;
+	onConfigChange: (config: {
+		displays: FormConfigDisplayPartial[];
+		labels: FormConfigLabelPartial[];
+	}) => void;
 }
 
 const uncheckText = '(cette option décoche les autres options)';
@@ -85,7 +91,8 @@ const Checkboxes = (props: Props) => {
 	useEffect(() => {
 		if (displayHelper) {
 			onConfigChange({
-				displays: displayHelper.filter(({ hidden }) => !!hidden)
+				displays: displayHelper.filter(({ hidden }) => !!hidden),
+				labels: formConfig?.form_config_labels || []
 			});
 		}
 	}, [displayHelper]);

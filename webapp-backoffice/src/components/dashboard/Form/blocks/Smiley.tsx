@@ -17,7 +17,7 @@ const Smiley = (props: Props) => {
 
 	return (
 		<div className={cx(classes.smileysContainer)}>
-			{block.required && (
+			{block.isRequired && (
 				<span className={fr.cx('fr-hint-text', 'fr-mb-4v')}>
 					Ce champ est obligatoire
 				</span>

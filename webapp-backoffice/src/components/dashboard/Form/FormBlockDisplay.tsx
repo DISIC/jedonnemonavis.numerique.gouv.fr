@@ -1,30 +1,54 @@
+import {
+	FormConfigDisplayPartial,
+	FormConfigLabelPartial
+} from '@/prisma/generated/zod';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { smileys } from '@/src/utils/form';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { useState } from 'react';
 import { tss } from 'tss-react';
-import Image from 'next/image';
+import Checkboxes from './blocks/Checkboxes';
+import Mark from './blocks/Mark';
 import Paragraph from './blocks/Paragraph';
 import Smiley from './blocks/Smiley';
-import Mark from './blocks/Mark';
-import Checkboxes from './blocks/Checkboxes';
-import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
 import Textarea from './blocks/Textarea';
+import dynamic from 'next/dynamic';
+
+const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	form: FormWithElements;
-	onConfigChange: (config: { displays: FormConfigDisplayPartial[] }) => void;
+	onConfigChange: (config: {
+		displays: FormConfigDisplayPartial[];
+		labels: FormConfigLabelPartial[];
+	}) => void;
 }
 
 const FormBlockDisplay = (props: Props) => {
 	const { block, form, onConfigChange } = props;
+
+	const [isUpdating, setIsUpdating] = useState(false);
 
 	const { classes, cx } = useStyles();
 
 	const getBlockFromType = (block: Props['block']) => {
 		switch (block.type_bloc) {
 			case 'paragraph':
-				return <Paragraph block={block} form={form} />;
+				return isUpdating ? (
+					<Editor
+						block={block}
+						form={form}
+						initialValue={block.content}
+						onConfigChange={config => {
+							onConfigChange(config);
+							setIsUpdating(false);
+						}}
+					/>
+				) : (
+					<Paragraph block={block} form={form} />
+				);
+
 			case 'smiley_input':
 				return <Smiley block={block} />;
 			case 'mark_input':
@@ -45,15 +69,49 @@ const FormBlockDisplay = (props: Props) => {
 	};
 
 	return (
-		<div className={cx(classes.container)}>
-			<div>{getBlockFromType(block)}</div>
-		</div>
+		<>
+			<div className={cx(classes.header, fr.cx('fr-grid-row'))}>
+				<div
+					className={
+						block.isUpdatable
+							? fr.cx('fr-col-12', 'fr-col-md-8')
+							: fr.cx('fr-col-12')
+					}
+				>
+					<h3>{block.label}</h3>
+				</div>
+				{block.isUpdatable && (
+					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+						<Button
+							priority="secondary"
+							iconId={
+								isUpdating ? 'ri-arrow-go-back-line' : 'ri-settings-3-line'
+							}
+							iconPosition="left"
+							size="small"
+							onClick={() => setIsUpdating(!isUpdating)}
+						>
+							{isUpdating ? 'Annuler' : 'Modifier'}
+						</Button>
+					</div>
+				)}
+			</div>
+			<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
+			<div className={cx(classes.container)}>
+				<div>{getBlockFromType(block)}</div>
+			</div>
+		</>
 	);
 };
 
 const useStyles = tss.withName(FormBlockDisplay.name).create({
 	container: {
 		color: fr.colors.decisions.text.default.grey.default
+	},
+	header: {
+		'& > div:nth-child(2)': {
+			textAlign: 'right'
+		}
 	}
 });
 

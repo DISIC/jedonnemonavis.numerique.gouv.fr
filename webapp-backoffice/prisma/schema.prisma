@@ -481,7 +481,8 @@ model FormTemplateBlock {
   content               String?
   downLabel             String?
   upLabel               String?
-  required              Boolean                   @default(false)
+  isRequired            Boolean                   @default(false)
+  isUpdatable           Boolean                   @default(false)
   options               FormTemplateBlockOption[]
 }
 
@@ -545,7 +546,7 @@ model FormConfig {
 
 model FormConfigDisplay {
   id             Int            @id @default(autoincrement())
-  hidden        Boolean
+  hidden         Boolean
   kind           FormConfigKind
   parent_id      Int
   form_config    FormConfig     @relation(fields: [form_config_id], references: [id])

@@ -1,4 +1,7 @@
-import { FormConfigDisplayPartial } from '@/prisma/generated/zod';
+import {
+	FormConfigDisplayPartial,
+	FormConfigLabelPartial
+} from '@/prisma/generated/zod';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Prisma } from '@prisma/client';
@@ -35,7 +38,10 @@ const FormConfigurator = (props: Props) => {
 			status: 'published'
 		});
 
-	const onConfigChange = (config: { displays: FormConfigDisplayPartial[] }) => {
+	const onConfigChange = (config: {
+		displays: FormConfigDisplayPartial[];
+		labels: FormConfigLabelPartial[];
+	}) => {
 		const legitDisplays = config.displays.filter(
 			d =>
 				d.kind !== undefined &&
@@ -43,11 +49,18 @@ const FormConfigurator = (props: Props) => {
 				d.parent_id !== undefined
 		);
 
+		const legitLabels = config.labels.filter(
+			l => !!l.kind && !!l.label && !!l.parent_id
+		);
+
 		setCreateConfig({
 			...createConfig,
 			form_config_displays: {
 				create: legitDisplays
-			} as Prisma.FormConfigCreateArgs['data']['form_config_displays']
+			} as Prisma.FormConfigCreateArgs['data']['form_config_displays'],
+			form_config_labels: {
+				create: legitLabels
+			} as Prisma.FormConfigCreateArgs['data']['form_config_labels']
 		});
 	};
 
