@@ -172,7 +172,7 @@ export const Field = (props: Props) => {
             state={
               (opinion[field.name] || "").length > 15000 ? "error" : "default"
             }
-            stateRelatedMessage="Maximum 250 caractères"
+            stateRelatedMessage="Maximum 15000 caractères"
             nativeTextAreaProps={{
               value: opinion[field.name]?.slice(0, 15000),
               onChange: (e) => {
