@@ -37,9 +37,9 @@ const Editor = (props: Props) => {
 			labels: [
 				...configHelper.labels.filter(l => l.parent_id !== block.id),
 				{
-					kind: 'block',
+					label: html,
 					parent_id: block.id,
-					label: html
+					kind: 'block'
 				}
 			]
 		});

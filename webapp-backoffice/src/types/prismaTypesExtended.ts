@@ -98,3 +98,16 @@ const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
 });
 
 export type FormWithElements = Prisma.FormGetPayload<typeof FormWithElements>;
+
+const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
+	{
+		include: {
+			form_config_displays: true,
+			form_config_labels: true
+		}
+	}
+);
+
+export type FormConfigWithChildren = Prisma.FormConfigGetPayload<
+	typeof FormConfigWithChildren
+>;

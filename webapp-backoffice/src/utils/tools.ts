@@ -3,6 +3,8 @@ import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { off } from 'process';
+import { FormConfigWithRelations } from '@/prisma/generated/zod';
+import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -451,3 +453,22 @@ export const filtersLabel = [
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" }
 ];
+
+export const getHelperFromFormConfig = (
+	formConfig: FormConfigWithChildren | undefined
+) => {
+	return {
+		displays:
+			formConfig?.form_config_displays.map(fcd => ({
+				hidden: fcd.hidden,
+				parent_id: fcd.parent_id,
+				kind: fcd.kind
+			})) || [],
+		labels:
+			formConfig?.form_config_labels.map(fcl => ({
+				label: fcl.label,
+				parent_id: fcl.parent_id,
+				kind: fcl.kind
+			})) || []
+	};
+};

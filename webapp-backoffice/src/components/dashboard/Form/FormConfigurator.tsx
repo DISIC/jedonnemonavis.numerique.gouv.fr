@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
 import FormStepDisplay from './FormStepDisplay';
 import FormStepper from './FormStepper';
+import { getHelperFromFormConfig } from '@/src/utils/tools';
 
 interface Props {
 	form: FormWithElements;
@@ -20,20 +21,9 @@ const FormConfigurator = (props: Props) => {
 	const [currentStep, setCurrentStep] = React.useState(
 		form.form_template.form_template_steps[0]
 	);
-	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>({
-		displays:
-			formConfig?.form_config_displays.map(fcd => ({
-				hidden: fcd.hidden,
-				parent_id: fcd.parent_id,
-				kind: fcd.kind
-			})) || [],
-		labels:
-			formConfig?.form_config_labels.map(fcl => ({
-				label: fcl.label,
-				parent_id: fcl.parent_id,
-				kind: fcl.kind
-			})) || []
-	});
+	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>(
+		getHelperFromFormConfig(formConfig)
+	);
 
 	const onConfigChange = (config: FormConfigHelper) => {
 		const legitDisplays = config.displays.filter(

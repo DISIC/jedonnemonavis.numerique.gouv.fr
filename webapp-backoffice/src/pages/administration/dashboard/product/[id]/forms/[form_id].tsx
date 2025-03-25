@@ -1,6 +1,7 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
+import { getHelperFromFormConfig } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -33,6 +34,7 @@ interface Props {
 
 const ProductFormPage = (props: Props) => {
 	const { form } = props;
+	const formConfig = form.form_configs[0];
 
 	const { classes, cx } = useStyles();
 
@@ -42,6 +44,8 @@ const ProductFormPage = (props: Props) => {
 		}
 	});
 
+	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
+	const [hasConfigChanged, setHasConfigChanged] = useState(false);
 	const [createConfig, setCreateConfig] =
 		useState<Prisma.FormConfigUncheckedCreateInput>({
 			form_id: form.id,
@@ -74,6 +78,11 @@ const ProductFormPage = (props: Props) => {
 	};
 
 	const onChangeConfig = (configHelper: FormConfigHelper) => {
+		setTmpConfigHelper(configHelper);
+		setHasConfigChanged(
+			JSON.stringify(configHelper) !==
+				JSON.stringify(getHelperFromFormConfig(formConfig))
+		);
 		setCreateConfig({
 			...createConfig,
 			form_config_displays: { create: configHelper.displays },
@@ -113,18 +122,21 @@ const ProductFormPage = (props: Props) => {
 					<h1 className={fr.cx('fr-mb-0')}>{form.form_template.title}</h1>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
-					<Link
-						className={fr.cx('fr-btn', 'fr-btn--secondary')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true`}
-						target="_blank"
-					>
-						Prévisualiser
-					</Link>
+					{hasConfigChanged && (
+						<Link
+							className={fr.cx('fr-btn', 'fr-btn--secondary')}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true&formConfig=${JSON.stringify(tmpConfigHelper)}`}
+							target={'_blank'}
+						>
+							Prévisualiser
+						</Link>
+					)}
 					<Button
 						priority="primary"
 						iconId="fr-icon-computer-line"
 						iconPosition="right"
 						onClick={publish}
+						disabled={!hasConfigChanged}
 					>
 						Publier
 					</Button>

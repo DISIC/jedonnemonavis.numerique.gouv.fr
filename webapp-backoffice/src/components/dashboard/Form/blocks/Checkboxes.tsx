@@ -24,11 +24,11 @@ const Checkboxes = (props: Props) => {
 		FormConfigHelper['displays']
 	>(
 		block.options.map(opt => ({
-			parent_id: opt.id,
 			hidden:
 				configHelper.displays.some(display => {
 					return display.parent_id === opt.id && display.hidden;
 				}) || false,
+			parent_id: opt.id,
 			kind: 'blockOption'
 		}))
 	);
