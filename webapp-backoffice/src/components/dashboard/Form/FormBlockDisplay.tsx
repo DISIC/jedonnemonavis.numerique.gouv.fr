@@ -1,10 +1,8 @@
-import {
-	FormConfigDisplayPartial,
-	FormConfigLabelPartial
-} from '@/prisma/generated/zod';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react';
 import Checkboxes from './blocks/Checkboxes';
@@ -12,21 +10,18 @@ import Mark from './blocks/Mark';
 import Paragraph from './blocks/Paragraph';
 import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
-import dynamic from 'next/dynamic';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	form: FormWithElements;
-	onConfigChange: (config: {
-		displays: FormConfigDisplayPartial[];
-		labels: FormConfigLabelPartial[];
-	}) => void;
+	configHelper: FormConfigHelper;
+	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const FormBlockDisplay = (props: Props) => {
-	const { block, form, onConfigChange } = props;
+	const { block, form, configHelper, onConfigChange } = props;
 
 	const [isUpdating, setIsUpdating] = useState(false);
 
@@ -38,7 +33,7 @@ const FormBlockDisplay = (props: Props) => {
 				return isUpdating ? (
 					<Editor
 						block={block}
-						form={form}
+						configHelper={configHelper}
 						initialValue={block.content}
 						onConfigChange={config => {
 							onConfigChange(config);
@@ -46,7 +41,7 @@ const FormBlockDisplay = (props: Props) => {
 						}}
 					/>
 				) : (
-					<Paragraph block={block} form={form} />
+					<Paragraph block={block} configHelper={configHelper} form={form} />
 				);
 
 			case 'smiley_input':
@@ -57,8 +52,8 @@ const FormBlockDisplay = (props: Props) => {
 				return (
 					<Checkboxes
 						block={block}
+						configHelper={configHelper}
 						onConfigChange={onConfigChange}
-						form={form}
 					/>
 				);
 			case 'input_text_area':

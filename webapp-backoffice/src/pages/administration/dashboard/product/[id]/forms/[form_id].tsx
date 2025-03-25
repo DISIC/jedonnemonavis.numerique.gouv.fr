@@ -5,13 +5,26 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Prisma, RightAccessStatus } from '@prisma/client';
+import { $Enums, Prisma, RightAccessStatus } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+
+export type FormConfigHelper = {
+	displays: {
+		hidden: boolean;
+		kind: $Enums.FormConfigKind;
+		parent_id: number;
+	}[];
+	labels: {
+		label: string;
+		kind: $Enums.FormConfigKind;
+		parent_id: number;
+	}[];
+};
 
 interface Props {
 	form: FormWithElements;
@@ -32,7 +45,7 @@ const ProductFormPage = (props: Props) => {
 	const [createConfig, setCreateConfig] =
 		useState<Prisma.FormConfigUncheckedCreateInput>({
 			form_id: form.id,
-			status: 'draft'
+			status: 'published'
 		});
 
 	const breadcrumbSegments = [
@@ -60,10 +73,12 @@ const ProductFormPage = (props: Props) => {
 		}
 	};
 
-	const onChangeConfig = (
-		createConfig: Prisma.FormConfigUncheckedCreateInput
-	) => {
-		setCreateConfig(createConfig);
+	const onChangeConfig = (configHelper: FormConfigHelper) => {
+		setCreateConfig({
+			...createConfig,
+			form_config_displays: { create: configHelper.displays },
+			form_config_labels: { create: configHelper.labels }
+		});
 	};
 
 	return (

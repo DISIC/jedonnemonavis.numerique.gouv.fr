@@ -1,7 +1,4 @@
-import {
-	FormConfigDisplayPartial,
-	FormConfigLabelPartial
-} from '@/prisma/generated/zod';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -12,15 +9,13 @@ type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
 	step: Step;
 	form: FormWithElements;
+	configHelper: FormConfigHelper;
 	changeStep: (to: 'previous' | 'next') => void;
-	onConfigChange: (config: {
-		displays: FormConfigDisplayPartial[];
-		labels: FormConfigLabelPartial[];
-	}) => void;
+	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const FormStepDisplay = (props: Props) => {
-	const { step, form, changeStep, onConfigChange } = props;
+	const { step, form, configHelper, changeStep, onConfigChange } = props;
 
 	const { classes, cx } = useStyles();
 
@@ -39,6 +34,7 @@ const FormStepDisplay = (props: Props) => {
 						<FormBlockDisplay
 							block={block}
 							form={form}
+							configHelper={configHelper}
 							onConfigChange={onConfigChange}
 						/>
 					</div>

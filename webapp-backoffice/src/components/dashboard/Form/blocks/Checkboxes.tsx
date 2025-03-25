@@ -1,7 +1,4 @@
-import {
-	FormConfigDisplayPartial,
-	FormConfigLabelPartial
-} from '@/prisma/generated/zod';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -12,29 +9,24 @@ import { tss } from 'tss-react';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-	form: FormWithElements;
-	onConfigChange: (config: {
-		displays: FormConfigDisplayPartial[];
-		labels: FormConfigLabelPartial[];
-	}) => void;
+	configHelper: FormConfigHelper;
+	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const uncheckText = '(cette option décoche les autres options)';
 
 const Checkboxes = (props: Props) => {
-	const { block, form, onConfigChange } = props;
+	const { block, configHelper, onConfigChange } = props;
 	const { classes, cx } = useStyles();
-
-	const formConfig = form.form_configs[0];
 
 	const [selectedValues, setSelectedValues] = useState<string[]>([]);
 	const [displayHelper, setDisplayHelper] = useState<
-		FormConfigDisplayPartial[]
+		FormConfigHelper['displays']
 	>(
 		block.options.map(opt => ({
 			parent_id: opt.id,
 			hidden:
-				formConfig?.form_config_displays.some(display => {
+				configHelper.displays.some(display => {
 					return display.parent_id === opt.id && display.hidden;
 				}) || false,
 			kind: 'blockOption'
@@ -91,8 +83,13 @@ const Checkboxes = (props: Props) => {
 	useEffect(() => {
 		if (displayHelper) {
 			onConfigChange({
-				displays: displayHelper.filter(({ hidden }) => !!hidden),
-				labels: formConfig?.form_config_labels || []
+				displays: [
+					...configHelper.displays.filter(
+						d => !block.options.map(opt => opt.id).includes(d.parent_id)
+					),
+					...displayHelper.filter(({ hidden }) => !!hidden)
+				],
+				labels: configHelper.labels
 			});
 		}
 	}, [displayHelper]);

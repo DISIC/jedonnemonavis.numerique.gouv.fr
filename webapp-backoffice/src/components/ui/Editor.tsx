@@ -1,34 +1,26 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { createEditor, Descendant } from 'slate';
-import { Slate, Editable, withReact } from 'slate-react';
-import { withHistory } from 'slate-history';
-import MarkButton from './editor/MarkButton';
-import Element from './editor/Element';
-import Leaf from './editor/Leaf';
-import { tss } from 'tss-react';
-import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import {
-	FormConfigDisplayPartial,
-	FormConfigLabelPartial
-} from '@/prisma/generated/zod';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { deserialize, serialize } from '@/src/utils/slate';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createEditor, Descendant } from 'slate';
+import { withHistory } from 'slate-history';
+import { Editable, Slate, withReact } from 'slate-react';
+import { tss } from 'tss-react';
+import Element from './editor/Element';
+import Leaf from './editor/Leaf';
+import MarkButton from './editor/MarkButton';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-	form: FormWithElements;
 	initialValue: string | null;
-	onConfigChange: (config: {
-		displays: FormConfigDisplayPartial[];
-		labels: FormConfigLabelPartial[];
-	}) => void;
+	configHelper: FormConfigHelper;
+	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const Editor = (props: Props) => {
-	const { block, form, initialValue, onConfigChange } = props;
-
-	const formConfig = form.form_configs[0];
+	const { block, configHelper, initialValue, onConfigChange } = props;
 
 	const { classes, cx } = useStyles();
 
@@ -41,9 +33,9 @@ const Editor = (props: Props) => {
 	const onSave = () => {
 		const html = serialize({ children: value });
 		onConfigChange({
-			displays: formConfig?.form_config_displays || [],
+			displays: configHelper.displays,
 			labels: [
-				...(formConfig?.form_config_labels || []),
+				...configHelper.labels.filter(l => l.parent_id !== block.id),
 				{
 					kind: 'block',
 					parent_id: block.id,
@@ -55,7 +47,7 @@ const Editor = (props: Props) => {
 
 	useEffect(() => {
 		if (initialValue) {
-			const formConfigLabel = formConfig?.form_config_labels.find(
+			const formConfigLabel = configHelper.labels.find(
 				fcl => fcl.parent_id === block.id
 			);
 			const document = new DOMParser().parseFromString(

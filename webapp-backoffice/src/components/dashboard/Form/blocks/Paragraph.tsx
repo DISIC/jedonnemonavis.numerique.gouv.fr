@@ -1,23 +1,24 @@
 // Paragraph.tsx
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { tss } from 'tss-react';
+import { fr } from '@codegouvfr/react-dsfr';
 import { useEffect, useState } from 'react';
+import { tss } from 'tss-react';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+	configHelper: FormConfigHelper;
 	form: FormWithElements;
 }
 
 const Paragraph = (props: Props) => {
-	const { block, form } = props;
+	const { block, configHelper, form } = props;
 	const { classes, cx } = useStyles();
 	const [content, setContent] = useState<string>('');
 
-	const formConfig = form.form_configs[0];
-
 	useEffect(() => {
 		if (block.content) {
-			const formConfigLabel = formConfig?.form_config_labels?.find(
+			const formConfigLabel = configHelper.labels.find(
 				fcl => fcl.parent_id === block.id
 			);
 			setContent(
@@ -30,7 +31,7 @@ const Paragraph = (props: Props) => {
 	}, [block.content, form.product.title]);
 
 	return (
-		<p
+		<div
 			className={classes.blockParagraph}
 			dangerouslySetInnerHTML={{
 				__html: content
@@ -41,7 +42,10 @@ const Paragraph = (props: Props) => {
 
 const useStyles = tss.withName(Paragraph.name).create({
 	blockParagraph: {
-		marginBottom: 0
+		p: {
+			marginBottom: 0,
+			minHeight: fr.spacing('6v')
+		}
 	}
 });
 
