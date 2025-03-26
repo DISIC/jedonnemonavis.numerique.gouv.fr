@@ -39,6 +39,7 @@ const DeleteCard = (props: Props) => {
 			if (isOwn) {
 				signOut();
 			} else {
+				console.log('ok pushing new route');
 				router.push('/administration/dashboard/users');
 			}
 		}

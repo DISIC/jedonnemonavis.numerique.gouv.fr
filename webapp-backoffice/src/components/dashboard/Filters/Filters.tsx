@@ -6,9 +6,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { filtersLabel, getDatesByShortCut } from '@/src/utils/tools';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { useRouter } from 'next/router';
+import { getDatesByShortCut } from '@/src/utils/tools';
 
 const dateShortcuts = [
 	{
@@ -65,9 +63,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		sectionFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
-	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
-
-	const router = useRouter();
 
 	useEffect(() => {
 		if (sectionFilters.dateShortcut) {
@@ -75,13 +70,10 @@ const GenericFilters = <T extends FilterSectionKey>({
 				sectionFilters.dateShortcut
 			);
 
-			console.log('changing shortcut');
-
 			if (
 				startDate !== sectionFilters.currentStartDate ||
 				endDate !== sectionFilters.currentEndDate
 			) {
-				console.log('enter');
 				setLocalStartDate(startDate);
 				setLocalEndDate(endDate);
 
@@ -112,7 +104,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					dateShortcut: undefined
 				}
 			});
-		}, 500),
+		}, 1000),
 		[updateFilters, filterKey, filters]
 	);
 
@@ -141,10 +133,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 				updateDateFilter(key, newDate);
 			}
 		};
-
-	useEffect(() => {
-		console.log('sectionFilters : ', sectionFilters);
-	}, [sectionFilters]);
 
 	return (
 		<div
