@@ -118,7 +118,8 @@ async function seed_users_products() {
 							create: {
 								user_email: users.filter(u => u.active && u?.role !== 'admin')[
 									index % 2
-								].email
+								].email,
+								status: 'carrier_admin'
 							}
 						},
 						forms: {

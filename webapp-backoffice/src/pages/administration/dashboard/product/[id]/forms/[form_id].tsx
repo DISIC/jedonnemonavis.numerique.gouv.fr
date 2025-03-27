@@ -32,7 +32,6 @@ export type FormConfigHelper = {
 
 interface Props {
 	form: FormWithElements;
-	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductFormPage = (props: Props) => {
@@ -290,7 +289,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	prisma.$disconnect();
 
 	if (
-		!hasAccessRightToProduct &&
+		!(
+			hasAccessRightToProduct &&
+			hasAccessRightToProduct.status === 'carrier_admin'
+		) &&
 		!hasAdminEntityRight &&
 		!currentUser.role.includes('admin')
 	) {
@@ -304,14 +306,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 	return {
 		props: {
-			form: JSON.parse(JSON.stringify(form)),
-			ownRight:
-				currentUser.role.includes('admin') ||
-				hasAdminEntityRight ||
-				(hasAccessRightToProduct &&
-					hasAccessRightToProduct.status === 'carrier_admin')
-					? 'carrier_admin'
-					: 'carrier_user'
+			form: JSON.parse(JSON.stringify(form))
 		}
 	};
 };
