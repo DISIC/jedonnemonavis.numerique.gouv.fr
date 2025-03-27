@@ -1,22 +1,29 @@
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import React from 'react';
 import { tss } from 'tss-react';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
 	steps: Step[];
+	configHelper: FormConfigHelper;
 	onClick: (step: Step) => void;
 	currentStep: Step;
 }
 
 const FormStepper = (props: Props) => {
-	const { steps, onClick, currentStep } = props;
+	const { steps, configHelper, onClick, currentStep } = props;
 	const { classes, cx } = useStyles();
 
 	return (
 		<div className={cx(classes.container)}>
 			{steps.map(step => {
+				const isHidden = configHelper.displays.some(
+					d => d.kind === 'step' && d.parent_id === step.id && d.hidden
+				);
+
 				return (
 					<button
 						title={`Aller à l'étape ${step.title}`}
@@ -24,11 +31,19 @@ const FormStepper = (props: Props) => {
 						key={step.id}
 						className={cx(
 							classes.step,
-							step.id === currentStep.id ? classes.currentStep : ''
+							step.id === currentStep.id ? classes.currentStep : null,
+							isHidden ? classes.hiddenStep : null
 						)}
 						onClick={() => onClick(step)}
 					>
 						{step.title}
+						<br />
+						{isHidden && (
+							<Badge className={cx(classes.hiddenBadge)} small>
+								<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+								Masqué
+							</Badge>
+						)}
 					</button>
 				);
 			})}
@@ -61,7 +76,20 @@ const useStyles = tss.withName(FormStepper.name).create({
 		}
 	},
 	currentStep: {
-		borderLeft: `8px solid ${fr.colors.decisions.background.default.grey.default}`
+		borderLeft: `8px solid ${fr.colors.decisions.background.default.grey.default}`,
+		borderColor: `${fr.colors.decisions.background.default.grey.default} !important`
+	},
+	hiddenStep: {
+		color: `${fr.colors.decisions.background.actionLow.blueFrance.hover} !important`,
+		paddingTop: fr.spacing('1v'),
+		paddingBottom: fr.spacing('1v'),
+		borderLeft: `4px dotted ${fr.colors.decisions.border.default.blueFrance.default}`,
+		'.ri-eye-off-line::before': {
+			'--icon-size': '1rem'
+		}
+	},
+	hiddenBadge: {
+		backgroundColor: fr.colors.decisions.background.alt.grey.active
 	}
 });
 

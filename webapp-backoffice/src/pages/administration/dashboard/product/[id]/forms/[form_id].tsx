@@ -1,7 +1,10 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
-import { getHelperFromFormConfig } from '@/src/utils/tools';
+import {
+	getHasConfigChanged,
+	getHelperFromFormConfig
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -79,10 +82,10 @@ const ProductFormPage = (props: Props) => {
 
 	const onChangeConfig = (configHelper: FormConfigHelper) => {
 		setTmpConfigHelper(configHelper);
-		setHasConfigChanged(
-			JSON.stringify(configHelper) !==
-				JSON.stringify(getHelperFromFormConfig(formConfig))
-		);
+
+		const rootConfigHelper = getHelperFromFormConfig(formConfig);
+		setHasConfigChanged(getHasConfigChanged(configHelper, rootConfigHelper));
+
 		setCreateConfig({
 			...createConfig,
 			form_config_displays: { create: configHelper.displays },

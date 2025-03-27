@@ -17,11 +17,12 @@ interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	form: FormWithElements;
 	configHelper: FormConfigHelper;
+	disabled: boolean;
 	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const FormBlockDisplay = (props: Props) => {
-	const { block, form, configHelper, onConfigChange } = props;
+	const { block, form, configHelper, disabled, onConfigChange } = props;
 
 	const [isUpdating, setIsUpdating] = useState(false);
 
@@ -54,6 +55,7 @@ const FormBlockDisplay = (props: Props) => {
 						block={block}
 						configHelper={configHelper}
 						onConfigChange={onConfigChange}
+						disabled={disabled}
 					/>
 				);
 			case 'input_text_area':
@@ -75,7 +77,7 @@ const FormBlockDisplay = (props: Props) => {
 				>
 					<h3>{block.label}</h3>
 				</div>
-				{block.isUpdatable && (
+				{!disabled && block.isUpdatable && (
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"

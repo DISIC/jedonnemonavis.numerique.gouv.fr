@@ -5,6 +5,7 @@ import { JsonValue } from '@prisma/client/runtime/library';
 import { off } from 'process';
 import { FormConfigWithRelations } from '@/prisma/generated/zod';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
+import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -456,7 +457,7 @@ export const filtersLabel = [
 
 export const getHelperFromFormConfig = (
 	formConfig: FormConfigWithChildren | undefined
-) => {
+): FormConfigHelper => {
 	return {
 		displays:
 			formConfig?.form_config_displays.map(fcd => ({
@@ -471,4 +472,20 @@ export const getHelperFromFormConfig = (
 				kind: fcl.kind
 			})) || []
 	};
+};
+
+export const getHasConfigChanged = (
+	firstConfig: FormConfigHelper,
+	secondConfig: FormConfigHelper
+) => {
+	return (
+		JSON.stringify({
+			displays: firstConfig.displays.sort((a, b) => a.parent_id - b.parent_id),
+			labels: firstConfig.labels.sort((a, b) => a.parent_id - b.parent_id)
+		}) !==
+		JSON.stringify({
+			displays: secondConfig.displays.sort((a, b) => a.parent_id - b.parent_id),
+			labels: secondConfig.labels.sort((a, b) => a.parent_id - b.parent_id)
+		})
+	);
 };

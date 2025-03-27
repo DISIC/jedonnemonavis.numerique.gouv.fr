@@ -1,3 +1,5 @@
+import { Product, Step } from "./types";
+
 export const areArrayEquals = (array1?: any[], array2?: any[]) => {
   if (!array1) return false;
   if (!array2) return false;
@@ -40,4 +42,25 @@ export const serializeData = <T>(obj: T): Serialized<T> => {
   }
 
   return obj as Serialized<T>;
+};
+
+export const filterByFormConfig = (
+  index: number,
+  formTemplate: Product["form"]["form_template"],
+  formConfig?: Product["form"]["form_configs"][0]
+) => {
+  if (!formConfig) return true;
+
+  const formTemplateStep = formTemplate.form_template_steps.find(
+    (fts) => fts.position === index + 1
+  );
+
+  const isHidden = formConfig.form_config_displays.some(
+    (fcd) =>
+      fcd.kind === "step" &&
+      fcd.parent_id === formTemplateStep?.id &&
+      fcd.hidden
+  );
+
+  return !isHidden;
 };

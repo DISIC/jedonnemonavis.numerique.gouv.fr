@@ -10,13 +10,14 @@ import { tss } from 'tss-react';
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	configHelper: FormConfigHelper;
+	disabled: boolean;
 	onConfigChange: (config: FormConfigHelper) => void;
 }
 
 const uncheckText = '(cette option décoche les autres options)';
 
 const Checkboxes = (props: Props) => {
-	const { block, configHelper, onConfigChange } = props;
+	const { block, configHelper, disabled, onConfigChange } = props;
 	const { classes, cx } = useStyles();
 
 	const [selectedValues, setSelectedValues] = useState<string[]>([]);
@@ -85,7 +86,11 @@ const Checkboxes = (props: Props) => {
 			onConfigChange({
 				displays: [
 					...configHelper.displays.filter(
-						d => !block.options.map(opt => opt.id).includes(d.parent_id)
+						d =>
+							!(
+								block.options.map(opt => opt.id).includes(d.parent_id) &&
+								d.kind === 'blockOption'
+							)
 					),
 					...displayHelper.filter(({ hidden }) => !!hidden)
 				],
@@ -102,9 +107,10 @@ const Checkboxes = (props: Props) => {
 						legend={<span className={fr.cx('fr-sr-only')}>{block.label}</span>}
 						hintText={block.content ?? ''}
 						options={block.options.map((opt, index) => {
-							const isHidden = !!displayHelper.find(
-								helper => helper.parent_id === opt.id
-							)?.hidden;
+							const isHidden = disabled
+								? false
+								: !!displayHelper.find(helper => helper.parent_id === opt.id)
+										?.hidden;
 
 							return {
 								label: (
@@ -119,20 +125,26 @@ const Checkboxes = (props: Props) => {
 												opt.label
 											)}
 											{isHidden && (
-												<Badge className={fr.cx('fr-ml-4v')}>Masqué</Badge>
+												<Badge
+													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))}
+												>
+													Masqué
+												</Badge>
 											)}
 										</span>
-										<Button
-											size="small"
-											priority="secondary"
-											iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
-											iconPosition="right"
-											onClick={() => {
-												onChangeDisplay(opt);
-											}}
-										>
-											{isHidden ? 'Afficher' : 'Masquer'}
-										</Button>
+										{!disabled && (
+											<Button
+												size="small"
+												priority="secondary"
+												iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+												iconPosition="right"
+												onClick={() => {
+													onChangeDisplay(opt);
+												}}
+											>
+												{isHidden ? 'Afficher' : 'Masquer'}
+											</Button>
+										)}
 									</>
 								),
 								nativeInputProps: {
@@ -172,6 +184,9 @@ const useStyles = tss.withName(Checkboxes.name).create({
 				}
 			}
 		}
+	},
+	hiddenBadge: {
+		color: fr.colors.decisions.text.actionHigh.grey.default
 	}
 });
 

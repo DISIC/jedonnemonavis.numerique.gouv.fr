@@ -1,23 +1,23 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
 import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
+import { AnswerIntention, Prisma } from "@prisma/client";
+import { push } from "@socialgouv/matomo-next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { GetServerSideProps } from "next/types";
 import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
-import { trpc } from "../utils/trpc";
-import { AnswerIntention, Button, Prisma } from "@prisma/client";
-import { allFields, steps_A, steps_B } from "../utils/form";
+import { v4 as uuidv4 } from "uuid";
 import { FormStepper } from "../components/form/layouts/FormStepper";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
-import { v4 as uuidv4 } from "uuid";
-import { push } from "@socialgouv/matomo-next";
-import { serializeData } from "../utils/tools";
+import { allFields, steps_A, steps_B } from "../utils/form";
+import { filterByFormConfig, serializeData } from "../utils/tools";
+import { trpc } from "../utils/trpc";
 
 type JDMAFormProps = {
   product: Product;
@@ -41,8 +41,15 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
-  const currentSteps =
-    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
+  const currentSteps = (
+    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
+  ).filter((_, index) =>
+    filterByFormConfig(
+      index,
+      product.form.form_template,
+      product.form.form_configs[0]
+    )
+  );
 
   const isInIframe = router.query.iframe === "true";
 

@@ -76,6 +76,7 @@ const FormConfigurator = (props: Props) => {
 					steps={steps}
 					onClick={changeStep}
 					currentStep={currentStep}
+					configHelper={tmpConfigHelper}
 				/>
 			</div>
 			<div className={fr.cx('fr-col-9')}>

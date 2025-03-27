@@ -31,7 +31,7 @@ export const FormStepper = (props: Props) => {
   const { classes, cx } = useStyles();
 
   const formTemplateStep = product.form.form_template.form_template_steps.find(
-    (fts) => fts.position === currentStep + 1
+    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" })
   );
 
   return (
@@ -44,11 +44,7 @@ export const FormStepper = (props: Props) => {
             </h1>
             <Stepper
               currentStep={currentStep + 1}
-              stepCount={
-                process.env.NEXT_PUBLIC_AB_TESTING === "A"
-                  ? steps_A.length
-                  : steps_B.length
-              }
+              stepCount={steps.length}
               title={t(`${steps[currentStep].name}`)}
             />
           </>
