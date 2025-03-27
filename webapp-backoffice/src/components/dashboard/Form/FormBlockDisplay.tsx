@@ -79,10 +79,8 @@ const FormBlockDisplay = (props: Props) => {
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"
-							iconId={
-								isUpdating ? 'ri-arrow-go-back-line' : 'ri-settings-3-line'
-							}
-							iconPosition="left"
+							iconId={isUpdating ? 'ri-arrow-go-back-line' : 'ri-pencil-line'}
+							iconPosition="right"
 							size="small"
 							onClick={() => setIsUpdating(!isUpdating)}
 						>
