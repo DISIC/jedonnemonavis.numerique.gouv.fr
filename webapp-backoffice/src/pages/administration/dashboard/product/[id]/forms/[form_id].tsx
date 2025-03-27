@@ -203,7 +203,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
 						include: {
 							form_template_blocks: {
 								include: {
-									options: true
+									options: {
+										orderBy: {
+											position: 'asc'
+										}
+									}
 								},
 								orderBy: {
 									position: 'asc'

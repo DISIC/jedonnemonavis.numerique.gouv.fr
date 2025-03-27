@@ -2,18 +2,22 @@ import { Prisma } from '@prisma/client';
 
 const createYesNoOptions =
 	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
-		{ label: 'Oui', value: 'Oui' },
-		{ label: 'Non', value: 'Non' }
+		{ label: 'Oui', value: 'Oui', position: 0 },
+		{ label: 'Non', value: 'Non', position: 1 }
 	];
 
 const createQualityRatingOptions =
 	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
-		{ label: 'Très mauvaise', value: 'Très mauvaise' },
-		{ label: 'Mauvaise', value: 'Mauvaise' },
-		{ label: 'Ni bonne, ni mauvaise', value: 'Ni bonne, ni mauvaise' },
-		{ label: 'Bonne', value: 'Bonne' },
-		{ label: 'Excellente', value: 'Excellente' },
-		{ label: 'Ne se prononce pas', value: 'Ne se prononce pas' }
+		{ label: 'Très mauvaise', value: 'Très mauvaise', position: 0 },
+		{ label: 'Mauvaise', value: 'Mauvaise', position: 1 },
+		{
+			label: 'Ni bonne, ni mauvaise',
+			value: 'Ni bonne, ni mauvaise',
+			position: 2
+		},
+		{ label: 'Bonne', value: 'Bonne', position: 3 },
+		{ label: 'Excellente', value: 'Excellente', position: 4 },
+		{ label: 'Ne se prononce pas', value: 'Ne se prononce pas', position: 5 }
 	];
 
 const createRadioBlock = (
@@ -86,23 +90,28 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 								create: [
 									{
 										label: '1',
-										value: '1'
+										value: '1',
+										position: 0
 									},
 									{
 										label: '2',
-										value: '2'
+										value: '2',
+										position: 1
 									},
 									{
 										label: '3',
-										value: '3'
+										value: '3',
+										position: 2
 									},
 									{
 										label: '4',
-										value: '4'
+										value: '4',
+										position: 3
 									},
 									{
 										label: '5',
-										value: '5'
+										value: '5',
+										position: 4
 									}
 								]
 							},
@@ -124,24 +133,36 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							position: 0,
 							options: {
 								create: [
-									...contactMethods.map(method => ({
+									...contactMethods.map((method, index) => ({
 										label: method,
-										value: method
+										value: method,
+										position: index
 									})),
 									{
 										label: 'Une personne proche',
-										value: 'Une personne proche'
+										value: 'Une personne proche',
+										position: contactMethods.length
 									},
-									{ label: 'Une association', value: 'Une association' },
-									{ label: 'Des sites internet', value: 'Des sites internet' },
+									{
+										label: 'Une association',
+										value: 'Une association',
+										position: contactMethods.length + 1
+									},
+									{
+										label: 'Des sites internet',
+										value: 'Des sites internet',
+										position: contactMethods.length + 2
+									},
 									{
 										label: 'Autres, précisez',
 										value: 'Autres, précisez',
+										position: contactMethods.length + 3,
 										isOther: true
 									},
 									{
 										label: "Je n'ai pas eu besoin d'aide",
 										value: "Je n'ai pas eu besoin d'aide",
+										position: contactMethods.length + 4,
 										isIsolated: true
 									}
 								]

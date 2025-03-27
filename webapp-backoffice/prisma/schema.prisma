@@ -490,6 +490,7 @@ model FormTemplateBlockOption {
   id         Int               @id @default(autoincrement())
   created_at DateTime          @default(now())
   updated_at DateTime          @default(now())
+  position   Int
   label      String?
   value      String?
   isOther    Boolean           @default(false)

@@ -40,7 +40,7 @@ export const FormFirstBlock = (props: Props) => {
   const formTemplateBlock = formTemplateStep?.form_template_blocks.find(
     (ftb) => ftb.label === "Texte d'introduction"
   );
-  const formConfgIntro = product.form.form_configs[0].form_config_labels.find(
+  const formConfgIntro = product.form.form_configs[0]?.form_config_labels.find(
     (fcl) => fcl.kind === "block" && fcl.parent_id === formTemplateBlock?.id
   );
 

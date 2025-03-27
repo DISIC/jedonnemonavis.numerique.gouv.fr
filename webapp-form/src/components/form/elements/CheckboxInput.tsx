@@ -17,7 +17,7 @@ type Props = {
   opinion: Opinion;
   form: FormField[];
   formTemplateField?: Product["form"]["form_template"]["form_template_steps"][0]["form_template_blocks"][0];
-  formConfig: Product["form"]["form_configs"][0];
+  formConfig?: Product["form"]["form_configs"][0];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
@@ -110,24 +110,27 @@ export const CheckboxInput = (props: Props) => {
   if (field.kind === "checkbox") {
     const uncheckText = "(cette option décoche les autres options)";
 
-    const displays = formConfig.form_config_displays
-      .filter((fcd) =>
-        formTemplateField?.options.map((opt) => opt.id).includes(fcd.parent_id)
-      )
-      .map((fcd) => {
-        const formTemplateOption = formTemplateField?.options.find(
-          (opt) => opt.id === fcd.parent_id
-        );
-        const fieldOption = field.options.find(
-          (opt) => t(opt.label, { lng: "fr" }) === formTemplateOption?.label
-        );
+    const displays =
+      formConfig?.form_config_displays
+        .filter((fcd) =>
+          formTemplateField?.options
+            .map((opt) => opt.id)
+            .includes(fcd.parent_id)
+        )
+        .map((fcd) => {
+          const formTemplateOption = formTemplateField?.options.find(
+            (opt) => opt.id === fcd.parent_id
+          );
+          const fieldOption = field.options.find(
+            (opt) => t(opt.label, { lng: "fr" }) === formTemplateOption?.label
+          );
 
-        return {
-          ...fcd,
-          option_value: fieldOption?.value,
-        };
-      })
-      .filter((fcd) => fcd.option_value !== undefined);
+          return {
+            ...fcd,
+            option_value: fieldOption?.value,
+          };
+        })
+        .filter((fcd) => fcd.option_value !== undefined) || [];
 
     return (
       <div className={fr.cx("fr-grid-row")}>

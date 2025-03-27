@@ -23,7 +23,7 @@ type Props = {
   field: FormField;
   opinion: Opinion;
   form: FormField[];
-  formConfig: Product["form"]["form_configs"][0];
+  formConfig?: Product["form"]["form_configs"][0];
   formTemplateStep?: Product["form"]["form_template"]["form_template_steps"][0];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
@@ -39,10 +39,10 @@ export const Field = (props: Props) => {
     (ftb) => ftb.label === t(field.label, { lng: "fr" })
   );
 
-  const displayConfig = formConfig.form_config_displays.find(
+  const displayConfig = formConfig?.form_config_displays.find(
     (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
-  const labelConfig = formConfig.form_config_labels.find(
+  const labelConfig = formConfig?.form_config_labels.find(
     (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
 
