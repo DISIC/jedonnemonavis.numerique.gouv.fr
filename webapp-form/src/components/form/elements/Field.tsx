@@ -38,6 +38,7 @@ export const Field = (props: Props) => {
   const templateField = formTemplateStep?.form_template_blocks.find(
     (ftb) => ftb.label === t(field.label, { lng: "fr" })
   );
+
   const displayConfig = formConfig.form_config_displays.find(
     (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
@@ -113,6 +114,8 @@ export const Field = (props: Props) => {
           field={field}
           opinion={opinion}
           form={form}
+          formTemplateField={templateField}
+          formConfig={formConfig}
           setOpinion={setOpinion}
         ></CheckboxInput>
       );

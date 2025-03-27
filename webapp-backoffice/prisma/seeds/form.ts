@@ -28,10 +28,10 @@ const createRadioBlock = (
 });
 
 const contactMethods = [
-	"Au guichet avec l'administration",
-	"Par téléphone avec l'administration",
-	"Par e-mail avec l'administration",
-	"Par chat avec l'administration"
+	'Au guichet avec l’administration',
+	'Par téléphone avec l’administration',
+	'Par e-mail avec l’administration',
+	'Par chat avec l’administration'
 ];
 
 const simpleContactMethods = [
@@ -118,7 +118,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 					create: [
 						{
 							label:
-								"Durant votre parcours, avez-vous tenté d'obtenir de l'aide par l'un des moyens suivants ?",
+								'Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?',
 							content: 'Plusieurs choix possibles',
 							type_bloc: 'checkbox',
 							position: 0,
