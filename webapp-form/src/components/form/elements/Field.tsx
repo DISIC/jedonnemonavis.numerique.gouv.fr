@@ -4,6 +4,7 @@ import {
   Feeling,
   FormField,
   Opinion,
+  Product,
 } from "@/src/utils/types";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
@@ -22,66 +23,27 @@ type Props = {
   field: FormField;
   opinion: Opinion;
   form: FormField[];
+  formConfig: Product["form"]["form_configs"][0];
+  formTemplateStep?: Product["form"]["form_template"]["form_template_steps"][0];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
-type CheckboxOpinionKeys = "contact_tried";
-
 export const Field = (props: Props) => {
-  const { field, opinion, setOpinion, form } = props;
+  const { field, opinion, setOpinion, form, formConfig, formTemplateStep } =
+    props;
   const { classes, cx } = useStyles({ nbItems: 5 });
 
   const { t } = useTranslation("common");
 
-  const getChildrenResetObject = () => {
-    const children = form.filter(
-      (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
-    );
-
-    let opinionPropsObj: {
-      [key in keyof Opinion]?: any;
-    } = {};
-
-    children.forEach((cf) => {
-      opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
-        ? []
-        : undefined;
-    });
-
-    return opinionPropsObj;
-  };
-
-  const onChangeCheckbox = (
-    key: CheckboxOpinionKeys,
-    isolated: boolean,
-    e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[]
-  ) => {
-    if (isolated) {
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked ? [e.target.value] : [],
-        ...getChildrenResetObject(),
-      });
-    } else {
-      const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
-        .map((opt) => opt.value);
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
-    }
-  };
+  const templateField = formTemplateStep?.form_template_blocks.find(
+    (ftb) => ftb.label === t(field.label, { lng: "fr" })
+  );
+  const displayConfig = formConfig.form_config_displays.find(
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
+  );
+  const labelConfig = formConfig.form_config_labels.find(
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
+  );
 
   if (field.conditions) {
     const showField = field.conditions.some((condition) => {

@@ -30,20 +30,42 @@ export const FormFirstBlock = (props: Props) => {
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { t } = useTranslation("common");
-  const router = useRouter();
 
   const { classes, cx } = useStyles();
+
+  const formTemplateStep = product.form.form_template.form_template_steps.find(
+    (fts) => fts.position === 0
+  );
+
+  const formTemplateBlock = formTemplateStep?.form_template_blocks.find(
+    (ftb) => ftb.label === "Texte d'introduction"
+  );
+  const formConfgIntro = product.form.form_configs[0].form_config_labels.find(
+    (fcl) => fcl.kind === "block" && fcl.parent_id === formTemplateBlock?.id
+  );
 
   return (
     <div>
       <h1 className={cx(classes.title)}>{t("first_block.title")}</h1>
       <div className={fr.cx("fr-grid-row")}>
         <div className={cx(classes.notice, fr.cx("fr-col-12", "fr-p-10v"))}>
-          <p className={fr.cx("fr-mb-0")}>
-            <span>{t("first_block.subtitle_part_1")}</span>
-            <span className={cx(classes.bold)}> {product.title}</span>
-            <span> {t("first_block.subtitle_part_2")}</span>
-          </p>
+          {formConfgIntro ? (
+            <span
+              className={cx(classes.customIntro)}
+              dangerouslySetInnerHTML={{
+                __html: formConfgIntro.label.replace(
+                  "{{title}}",
+                  product.title
+                ),
+              }}
+            />
+          ) : (
+            <p className={fr.cx("fr-mb-0")}>
+              <span>{t("first_block.subtitle_part_1")}</span>
+              <span className={cx(classes.bold)}> {product.title}</span>
+              <span> {t("first_block.subtitle_part_2")}</span>
+            </p>
+          )}
         </div>
       </div>
       <form
@@ -62,6 +84,8 @@ export const FormFirstBlock = (props: Props) => {
               opinion={tmpOpinion}
               setOpinion={setTmpOpinion}
               form={primarySection}
+              formConfig={product.form.form_configs[0]}
+              formTemplateStep={formTemplateStep}
             />
           </div>
         ))}
@@ -126,6 +150,12 @@ const useStyles = tss
         ["&::before"]: {
           "--icon-size": "1.5rem",
         },
+      },
+    },
+    customIntro: {
+      p: {
+        marginBottom: 0,
+        minHeight: fr.spacing("6v"),
       },
     },
   }));

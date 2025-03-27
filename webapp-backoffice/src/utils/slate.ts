@@ -19,6 +19,14 @@ export const deserialize = (
 		case 'STRONG':
 		case 'B':
 			nodeAttributes.bold = true;
+			break;
+		case 'EM':
+		case 'I':
+			nodeAttributes.italic = true;
+			break;
+		case 'U':
+			nodeAttributes.underline = true;
+			break;
 	}
 
 	const children = Array.from(el.childNodes)
@@ -52,9 +60,17 @@ export const deserialize = (
 export const serialize = (node: any) => {
 	if (Text.isText(node)) {
 		let string = escapeHtml(node.text);
+
 		if ('bold' in node && node.bold) {
 			string = `<strong>${string}</strong>`;
 		}
+		if ('italic' in node && node.italic) {
+			string = `<em>${string}</em>`;
+		}
+		if ('underline' in node && node.underline) {
+			string = `<u>${string}</u>`;
+		}
+
 		return string;
 	}
 

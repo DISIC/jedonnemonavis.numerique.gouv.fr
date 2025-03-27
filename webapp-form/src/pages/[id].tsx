@@ -17,6 +17,7 @@ import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
 import { v4 as uuidv4 } from "uuid";
 import { push } from "@socialgouv/matomo-next";
+import { serializeData } from "../utils/tools";
 
 type JDMAFormProps = {
   product: Product;
@@ -398,6 +399,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <>
           {router.query.step ? (
             <FormStepper
+              product={product}
               opinion={opinion}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -526,6 +528,29 @@ export const getServerSideProps: GetServerSideProps<{
     include: {
       forms: {
         include: {
+          form_configs: {
+            include: {
+              form_config_displays: true,
+              form_config_labels: true,
+            },
+            take: 1,
+            orderBy: {
+              created_at: "desc",
+            },
+          },
+          form_template: {
+            include: {
+              form_template_steps: {
+                include: {
+                  form_template_blocks: {
+                    include: {
+                      options: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           buttons:
             isXWikiLink || isInIframe
               ? true
@@ -568,15 +593,10 @@ export const getServerSideProps: GetServerSideProps<{
     return {
       props: {
         product: {
-          ...product,
-          created_at: product.created_at.toString(),
-          updated_at: product.updated_at.toString(),
-          forms: null,
-          buttons: product.forms[0].buttons.map((button: Button) => ({
-            ...button,
-            created_at: button.created_at.toString(),
-            updated_at: button.updated_at.toString(),
-          })),
+          id: product.id,
+          title: product.title,
+          buttons: serializeData(product.forms[0]?.buttons || []),
+          form: serializeData(product.forms[0]),
         },
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
