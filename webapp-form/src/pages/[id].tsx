@@ -1,5 +1,11 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
-import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
+import {
+  FormField,
+  FormWithElements,
+  Opinion,
+  Product,
+  RadioOption,
+} from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { AnswerIntention, Prisma } from "@prisma/client";
 import { push } from "@socialgouv/matomo-next";
@@ -500,6 +506,7 @@ export const getServerSideProps: GetServerSideProps<{
 
   const productId = params.id as string;
   const buttonId = query.button as string;
+  const formConfig = query.formConfig as string;
   const xwikiButtonName = query.nd_source as string;
   const isInIframe = (query.iframe as string) === "true";
 
@@ -603,7 +610,17 @@ export const getServerSideProps: GetServerSideProps<{
           id: product.id,
           title: product.title,
           buttons: serializeData(product.forms[0]?.buttons || []),
-          form: serializeData(product.forms[0]),
+          form: {
+            ...serializeData(product.forms[0]),
+            form_configs: formConfig
+              ? [
+                  {
+                    form_config_displays: JSON.parse(formConfig).displays,
+                    form_config_labels: JSON.parse(formConfig).labels,
+                  } as FormWithElements["form_configs"][0],
+                ]
+              : serializeData(product.forms[0].form_configs),
+          },
         },
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },

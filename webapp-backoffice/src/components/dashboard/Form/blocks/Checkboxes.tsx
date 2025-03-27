@@ -153,7 +153,7 @@ const Checkboxes = (props: Props) => {
 									checked: selectedValues.includes(
 										opt.value || opt.label || ''
 									),
-									disabled: isHidden,
+									disabled: isHidden || disabled,
 									onChange: handleChange
 								}
 							};
