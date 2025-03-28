@@ -1,5 +1,4 @@
 import { AnswerIntention, Prisma } from '@prisma/client';
-import { Condition } from '../types/custom';
 
 export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	const {
@@ -14,7 +13,9 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
-		...(filters?.buttonId?.length > 0 && { button_id: parseInt(filters.buttonId[0]) }),
+		...(filters?.buttonId?.length > 0 && {
+			button_id: parseInt(filters.buttonId[0])
+		}),
 		...(end_date && {
 			created_at: {
 				...(start_date && { gte: new Date(start_date) }),
@@ -54,7 +55,14 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								{ answer_text: { search: search.split(' ').filter((item: string) => item !== '').join('&') } },
+								{
+									answer_text: {
+										search: search
+											.split(' ')
+											.filter((item: string) => item !== '')
+											.join('&')
+									}
+								},
 								{ field_code: 'verbatim' },
 								end_date && {
 									created_at: {
@@ -73,7 +81,6 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 			]
 		})
 	};
-
 
 	let andConditions: Prisma.ReviewWhereInput[] = [];
 
