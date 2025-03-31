@@ -51,8 +51,8 @@ const MarkButton = ({
 
 const useStyles = tss.withName(MarkButton.name).create({
 	button: {
-		width: fr.spacing('6v'),
-		height: fr.spacing('6v'),
+		width: fr.spacing('10v'),
+		height: fr.spacing('10v'),
 		justifyContent: 'center',
 		minHeight: 0,
 		padding: 0,

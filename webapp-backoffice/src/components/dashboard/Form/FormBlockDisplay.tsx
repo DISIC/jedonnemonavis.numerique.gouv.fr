@@ -33,6 +33,7 @@ const FormBlockDisplay = (props: Props) => {
 			case 'paragraph':
 				return isUpdating ? (
 					<Editor
+						form={form}
 						block={block}
 						configHelper={configHelper}
 						initialValue={block.content}
@@ -81,12 +82,11 @@ const FormBlockDisplay = (props: Props) => {
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"
-							iconId={isUpdating ? 'ri-arrow-go-back-line' : 'ri-pencil-line'}
+							iconId={isUpdating ? 'ri-close-line' : 'ri-pencil-line'}
 							iconPosition="right"
-							size="small"
 							onClick={() => setIsUpdating(!isUpdating)}
 						>
-							{isUpdating ? 'Annuler' : 'Modifier'}
+							{isUpdating ? 'Annuler' : 'Éditer'}
 						</Button>
 					</div>
 				)}
