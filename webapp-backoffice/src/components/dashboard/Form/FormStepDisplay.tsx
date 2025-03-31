@@ -8,6 +8,9 @@ import FormBlockDisplay from './FormBlockDisplay';
 import { useEffect, useState } from 'react';
 import { FormConfigKind } from '@prisma/client';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import Radios from './blocks/Radios';
+import RootYesNo from './custom/RootYesNo';
+import RootTable from './custom/RootTable';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
@@ -131,6 +134,32 @@ const FormStepDisplay = (props: Props) => {
 				)}
 			</div>
 			{step.form_template_blocks.map(block => {
+				// CUSTOM DISPLAY FOR OBSERVATOIRE WEIRD CONDITIONS
+				if (
+					form.form_template.slug === 'root' &&
+					step.position === 2 &&
+					block.position > 0
+				) {
+					if (block.position === 1) {
+						return (
+							<div key={block.id} className={cx(classes.box)}>
+								<RootYesNo block={block} step={step} />
+							</div>
+						);
+					}
+
+					if (block.position === 6) {
+						return (
+							<div key={block.id} className={cx(classes.box)}>
+								<RootTable block={block} step={step} />
+							</div>
+						);
+					}
+
+					return;
+				}
+				// END CUSTOM DISPLAY
+
 				return (
 					<div key={block.id} className={cx(classes.box)}>
 						<FormBlockDisplay
