@@ -116,6 +116,9 @@ const useStyles = tss.withName(RootTable.name).create({
 					width: 'calc((100% - 20rem) / 6)',
 					label: {
 						backgroundPosition: '50% 50%'
+					},
+					'.fr-radio-group': {
+						marginTop: 0
 					}
 				}
 			}
