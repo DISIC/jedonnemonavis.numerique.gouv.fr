@@ -5,10 +5,11 @@ import { tss } from 'tss-react';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
+	disabled: boolean;
 }
 
 const Radios = (props: Props) => {
-	const { block } = props;
+	const { block, disabled } = props;
 	const { classes, cx } = useStyles();
 
 	const [selectedValue, setSelectedValue] = useState<string>();
@@ -35,6 +36,7 @@ const Radios = (props: Props) => {
 								onChange={e => {
 									setSelectedValue(e.target.value);
 								}}
+								disabled={disabled}
 							/>
 							<label htmlFor={`radio-${block.id}-${opt.id}`}>{opt.label}</label>
 						</li>

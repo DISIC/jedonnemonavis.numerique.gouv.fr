@@ -1,22 +1,22 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import Radios from '../blocks/Radios';
 
 type Props = {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	step: FormWithElements['form_template']['form_template_steps'][0];
+	disabled: boolean;
 };
 
 const RootTable = (props: Props) => {
-	const { block, step } = props;
+	const { block, step, disabled } = props;
 
 	const { classes, cx } = useStyles();
 
 	const exampleBlock = step.form_template_blocks[7];
 
 	return (
-		<div className={cx(classes.container)}>
+		<div className={cx(classes.container, disabled ? classes.disabled : null)}>
 			<h3>{block.label}</h3>
 			<p>
 				Cette question ne s'affiche que si l'utilisateur a coché une des options
@@ -48,6 +48,7 @@ const RootTable = (props: Props) => {
 													id={`radio-${block.id}-${childBlock.id}-${radio}`}
 													type="radio"
 													name={`radio-${block.id}-${childBlock.id}`}
+													disabled={disabled}
 												/>
 												<label
 													className={fr.cx('fr-label')}
@@ -127,6 +128,14 @@ const useStyles = tss.withName(RootTable.name).create({
 	childLabel: {
 		color: fr.colors.decisions.text.default.grey.default,
 		fontWeight: 'bold'
+	},
+	disabled: {
+		p: {
+			marginTop: fr.spacing('4v')
+		},
+		'*': {
+			color: fr.colors.decisions.text.mention.grey.default
+		}
 	}
 });
 

@@ -65,7 +65,7 @@ const FormBlockDisplay = (props: Props) => {
 			case 'input_text_area':
 				return <Textarea block={block} form={form} />;
 			case 'radio':
-				return <Radios block={block} />;
+				return <Radios block={block} disabled={disabled} />;
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
