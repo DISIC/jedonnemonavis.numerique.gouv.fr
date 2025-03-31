@@ -7,6 +7,7 @@ import {
   RadioOption,
 } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
+import { Notice } from "@codegouvfr/react-dsfr/Notice";
 import { AnswerIntention, Prisma } from "@prisma/client";
 import { push } from "@socialgouv/matomo-next";
 import { useTranslation } from "next-i18next";
@@ -27,6 +28,7 @@ import { trpc } from "../utils/trpc";
 
 type JDMAFormProps = {
   product: Product;
+  isPreview: boolean;
 };
 
 export type FormStepNames =
@@ -39,7 +41,7 @@ export type FormStepNames =
     >
   | "contact";
 
-export default function JDMAForm({ product }: JDMAFormProps) {
+export default function JDMAForm({ product, isPreview }: JDMAFormProps) {
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -466,6 +468,22 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   return (
     <div>
+      {isPreview && (
+        <Notice
+          className={cx(classes.notice)}
+          isClosable
+          onClose={function noRefCheck() {}}
+          title={
+            <>
+              <b>Prévisualisation du formulaire</b>
+              <span className={fr.cx("fr-ml-2v")}>
+                Ce formulaire n’est pas encore publié et vos réponses ne sont
+                pas prises en compte.
+              </span>
+            </>
+          }
+        />
+      )}
       <div>
         <div className={classes.blueSection}>
           {!isFormSubmitted ? (
@@ -622,6 +640,7 @@ export const getServerSideProps: GetServerSideProps<{
               : serializeData(product.forms[0].form_configs),
           },
         },
+        isPreview: !!formConfig,
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
     };
@@ -700,6 +719,16 @@ const useStyles = tss
       [fr.breakpoints.up("md")]: {
         transform: `translateY(-${blueSectionPxHeight / 2}px)`,
         ...fr.spacing("padding", { topBottom: "8v", rightLeft: "16v" }),
+      },
+    },
+    notice: {
+      ...fr.typography[19].style,
+      p: {
+        fontWeight: "normal",
+      },
+      ".fr-notice__title": {
+        marginLeft: `-${fr.spacing("2v")}`,
+        paddingTop: "1px",
       },
     },
   }));
