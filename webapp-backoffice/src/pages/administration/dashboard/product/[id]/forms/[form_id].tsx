@@ -16,6 +16,9 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useRouter } from 'next/router';
 
 export type FormConfigHelper = {
 	displays: {
@@ -34,15 +37,23 @@ interface Props {
 	form: FormWithElements;
 }
 
+const onConfirmModal = createModal({
+	id: 'form-publish-modal',
+	isOpenedByDefault: false
+});
+
 const ProductFormPage = (props: Props) => {
 	const { form } = props;
+	const router = useRouter();
 	const formConfig = form.form_configs[0];
 
 	const { classes, cx } = useStyles();
 
 	const createFormConfig = trpc.formConfig.create.useMutation({
 		onSuccess: response => {
-			alert('Le formulaire a été publié avec succès');
+			router.push(
+				`/administration/dashboard/product/${form.product.id}/forms?formPublished=true`
+			);
 		}
 	});
 
@@ -101,6 +112,14 @@ const ProductFormPage = (props: Props) => {
 					content={`${form.product.title} | Configuration du formulaire | Je donne mon avis`}
 				/>
 			</Head>
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title={`Publier le formulaire`}
+				handleOnConfirm={publish}
+			>
+				Vos usagers auront directement accès au formulaire modifié. Vous n’avez
+				pas besoin de changer le lien.
+			</OnConfirmModal>
 			<Breadcrumb
 				currentPageLabel={form.form_template.title}
 				segments={breadcrumbSegments}
@@ -137,7 +156,9 @@ const ProductFormPage = (props: Props) => {
 						priority="primary"
 						iconId="fr-icon-computer-line"
 						iconPosition="right"
-						onClick={publish}
+						onClick={() => {
+							onConfirmModal.open();
+						}}
 						disabled={!hasConfigChanged}
 					>
 						Publier

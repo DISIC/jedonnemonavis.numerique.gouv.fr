@@ -25,6 +25,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React from 'react';
 import Link from 'next/link';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
 	product: ProductWithForms;
@@ -131,17 +132,28 @@ const ProductButtonsPage = (props: Props) => {
 				button={currentButton}
 				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
+			{router.query.formPublished === 'true' && (
+				<div role="alert" className={fr.cx('fr-mb-8v')}>
+					<Alert
+						description="Votre formulaire est publié"
+						severity="success"
+						title=""
+						small
+						closable
+					/>
+				</div>
+			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-6')}>
 					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
 				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
 					<Link
 						className={fr.cx('fr-btn', 'fr-btn--secondary')}
 						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
 						target="_blank"
 					>
-						Prévisualiser
+						Voir le formulaire
 					</Link>
 					{ownRight === 'carrier_admin' && (
 						<Link
