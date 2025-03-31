@@ -51,7 +51,7 @@ const RootYesNo = (props: Props) => {
 									className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
 									small
 								>
-									Parent masqué
+									Réponse parente masquée
 								</Badge>
 							)}
 						</label>

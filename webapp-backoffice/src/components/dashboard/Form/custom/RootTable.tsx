@@ -62,22 +62,28 @@ const RootTable = (props: Props) => {
 								</td>
 								<td colSpan={6}>
 									<fieldset>
-										{Array.from(Array(6).keys()).map(radio => (
-											<div className={fr.cx('fr-fieldset__content')}>
-												<div className={fr.cx('fr-radio-group')}>
-													<input
-														id={`radio-${block.id}-${childBlock.id}-${radio}`}
-														type="radio"
-														name={`radio-${block.id}-${childBlock.id}`}
-														disabled={disabled || isParentHidden}
-													/>
-													<label
-														className={fr.cx('fr-label')}
-														htmlFor={`radio-${block.id}-${childBlock.id}-${radio}`}
-													/>
+										{isParentHidden ? (
+											<Badge className={cx(classes.hiddenBadge)} small>
+												Réponse parente masquée
+											</Badge>
+										) : (
+											Array.from(Array(6).keys()).map(radio => (
+												<div className={fr.cx('fr-fieldset__content')}>
+													<div className={fr.cx('fr-radio-group')}>
+														<input
+															id={`radio-${block.id}-${childBlock.id}-${radio}`}
+															type="radio"
+															name={`radio-${block.id}-${childBlock.id}`}
+															disabled={disabled || isParentHidden}
+														/>
+														<label
+															className={fr.cx('fr-label')}
+															htmlFor={`radio-${block.id}-${childBlock.id}-${radio}`}
+														/>
+													</div>
 												</div>
-											</div>
-										))}
+											))
+										)}
 									</fieldset>
 								</td>
 							</tr>
@@ -165,6 +171,8 @@ const useStyles = tss.withName(RootTable.name).create({
 		}
 	},
 	hiddenBadge: {
+		width: '100%',
+		justifyContent: 'center',
 		backgroundColor: fr.colors.decisions.background.default.grey.active
 	}
 });
