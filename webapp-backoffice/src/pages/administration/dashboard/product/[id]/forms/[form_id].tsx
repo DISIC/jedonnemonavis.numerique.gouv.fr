@@ -14,7 +14,7 @@ import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -37,7 +37,7 @@ interface Props {
 	form: FormWithElements;
 }
 
-const onConfirmModal = createModal({
+const onConfirmPublishModal = createModal({
 	id: 'form-publish-modal',
 	isOpenedByDefault: false
 });
@@ -103,6 +103,47 @@ const ProductFormPage = (props: Props) => {
 		});
 	};
 
+	const handleBeforeUnload = useCallback(
+		(e: BeforeUnloadEvent) => {
+			if (hasConfigChanged) {
+				e.preventDefault();
+			}
+		},
+		[hasConfigChanged]
+	);
+
+	useEffect(() => {
+		if (hasConfigChanged) {
+			window.addEventListener('beforeunload', handleBeforeUnload);
+		} else {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		}
+
+		return () => {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+		};
+	}, [hasConfigChanged, handleBeforeUnload]);
+
+	useEffect(() => {
+		const handleRouteChangeStart = (url: string) => {
+			if (
+				hasConfigChanged &&
+				!window.confirm(
+					'Vous avez des modifications non publiées. Êtes-vous sûr de vouloir quitter la page ?'
+				)
+			) {
+				router.events.emit('routeChangeError');
+				throw 'Navigation aborted by the user';
+			}
+		};
+
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+
+		return () => {
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+		};
+	}, [hasConfigChanged, router]);
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
@@ -113,7 +154,7 @@ const ProductFormPage = (props: Props) => {
 				/>
 			</Head>
 			<OnConfirmModal
-				modal={onConfirmModal}
+				modal={onConfirmPublishModal}
 				title={`Publier le formulaire`}
 				handleOnConfirm={publish}
 			>
@@ -157,7 +198,7 @@ const ProductFormPage = (props: Props) => {
 						iconId="fr-icon-computer-line"
 						iconPosition="right"
 						onClick={() => {
-							onConfirmModal.open();
+							onConfirmPublishModal.open();
 						}}
 						disabled={!hasConfigChanged}
 					>
