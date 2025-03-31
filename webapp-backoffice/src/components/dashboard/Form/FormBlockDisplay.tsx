@@ -10,6 +10,7 @@ import Mark from './blocks/Mark';
 import Paragraph from './blocks/Paragraph';
 import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
+import Radios from './blocks/Radios';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -20,6 +21,8 @@ interface Props {
 	disabled: boolean;
 	onConfigChange: (config: FormConfigHelper) => void;
 }
+
+const NO_FIELD_BLOCKS = ['heading_1', 'heading_2', 'heading_3'];
 
 const FormBlockDisplay = (props: Props) => {
 	const { block, form, configHelper, disabled, onConfigChange } = props;
@@ -61,6 +64,8 @@ const FormBlockDisplay = (props: Props) => {
 				);
 			case 'input_text_area':
 				return <Textarea block={block} form={form} />;
+			case 'radio':
+				return <Radios block={block} />;
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
@@ -91,10 +96,14 @@ const FormBlockDisplay = (props: Props) => {
 					</div>
 				)}
 			</div>
-			<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
-			<div className={cx(classes.container)}>
-				<div>{getBlockFromType(block)}</div>
-			</div>
+			{!NO_FIELD_BLOCKS.includes(block.type_bloc) && (
+				<>
+					<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
+					<div className={cx(classes.container)}>
+						<div>{getBlockFromType(block)}</div>
+					</div>
+				</>
+			)}
 		</>
 	);
 };

@@ -58,6 +58,7 @@ const ProductFormPage = (props: Props) => {
 	});
 
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
+	const [isPublishing, setIsPublishing] = useState(false);
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
 	const [createConfig, setCreateConfig] =
 		useState<Prisma.FormConfigUncheckedCreateInput>({
@@ -83,9 +84,11 @@ const ProductFormPage = (props: Props) => {
 	const publish = () => {
 		if (createConfig) {
 			try {
+				setIsPublishing(true);
 				createFormConfig.mutate(createConfig);
 			} catch (error) {
 				console.error(error);
+				setIsPublishing(false);
 			}
 		}
 	};
@@ -105,15 +108,15 @@ const ProductFormPage = (props: Props) => {
 
 	const handleBeforeUnload = useCallback(
 		(e: BeforeUnloadEvent) => {
-			if (hasConfigChanged) {
+			if (hasConfigChanged && !isPublishing) {
 				e.preventDefault();
 			}
 		},
-		[hasConfigChanged]
+		[hasConfigChanged, isPublishing]
 	);
 
 	useEffect(() => {
-		if (hasConfigChanged) {
+		if (hasConfigChanged && !isPublishing) {
 			window.addEventListener('beforeunload', handleBeforeUnload);
 		} else {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -122,12 +125,13 @@ const ProductFormPage = (props: Props) => {
 		return () => {
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
-	}, [hasConfigChanged, handleBeforeUnload]);
+	}, [hasConfigChanged, isPublishing, handleBeforeUnload]);
 
 	useEffect(() => {
 		const handleRouteChangeStart = (url: string) => {
 			if (
 				hasConfigChanged &&
+				!isPublishing &&
 				!window.confirm(
 					'Vous avez des modifications non publiées. Êtes-vous sûr de vouloir quitter la page ?'
 				)
@@ -142,7 +146,7 @@ const ProductFormPage = (props: Props) => {
 		return () => {
 			router.events.off('routeChangeStart', handleRouteChangeStart);
 		};
-	}, [hasConfigChanged, router]);
+	}, [hasConfigChanged, isPublishing, router]);
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
