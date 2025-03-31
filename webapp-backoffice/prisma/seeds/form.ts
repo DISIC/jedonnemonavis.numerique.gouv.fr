@@ -54,6 +54,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Expérience générale',
 				position: 0,
+				isHideable: false,
 				form_template_blocks: {
 					create: [
 						{
@@ -76,6 +77,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Clarté',
 				position: 1,
+				isHideable: true,
 				form_template_blocks: {
 					create: [
 						{
@@ -123,6 +125,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Aides',
 				position: 2,
+				isHideable: true,
 				form_template_blocks: {
 					create: [
 						{
@@ -136,33 +139,39 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 									...contactMethods.map((method, index) => ({
 										label: method,
 										value: method,
-										position: index
+										position: index,
+										isHideable: true
 									})),
 									{
 										label: 'Une personne proche',
 										value: 'Une personne proche',
-										position: contactMethods.length
+										position: contactMethods.length,
+										isHideable: true
 									},
 									{
 										label: 'Une association',
 										value: 'Une association',
-										position: contactMethods.length + 1
+										position: contactMethods.length + 1,
+										isHideable: true
 									},
 									{
 										label: 'Des sites internet',
 										value: 'Des sites internet',
-										position: contactMethods.length + 2
+										position: contactMethods.length + 2,
+										isHideable: true
 									},
 									{
 										label: 'Autres, précisez',
 										value: 'Autres, précisez',
 										position: contactMethods.length + 3,
+										isHideable: false,
 										isOther: true
 									},
 									{
 										label: "Je n'ai pas eu besoin d'aide",
 										value: "Je n'ai pas eu besoin d'aide",
 										position: contactMethods.length + 4,
+										isHideable: false,
 										isIsolated: true
 									}
 								]
@@ -196,6 +205,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Informations complémentaires',
 				position: 3,
+				isHideable: false,
 				form_template_blocks: {
 					create: [
 						{

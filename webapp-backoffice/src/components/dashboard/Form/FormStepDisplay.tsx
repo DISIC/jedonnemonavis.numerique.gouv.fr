@@ -77,16 +77,18 @@ const FormStepDisplay = (props: Props) => {
 								Masqué
 							</Badge>
 						)}
-						<Button
-							priority="secondary"
-							iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
-							iconPosition="right"
-							onClick={() => {
-								setIsHidden(!isHidden);
-							}}
-						>
-							{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
-						</Button>
+						{step.isHideable && (
+							<Button
+								priority="secondary"
+								iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+								iconPosition="right"
+								onClick={() => {
+									setIsHidden(!isHidden);
+								}}
+							>
+								{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
+							</Button>
+						)}
 					</div>
 				</div>
 				{isHidden && (

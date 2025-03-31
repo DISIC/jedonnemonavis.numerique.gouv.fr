@@ -132,7 +132,7 @@ const Checkboxes = (props: Props) => {
 												</Badge>
 											)}
 										</span>
-										{!disabled && (
+										{!disabled && opt.isHideable && (
 											<Button
 												size="small"
 												priority="secondary"
