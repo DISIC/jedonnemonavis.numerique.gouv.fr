@@ -2,6 +2,7 @@ import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
 import { tss } from 'tss-react';
 import FormBlockDisplay from './FormBlockDisplay';
 import { useEffect, useState } from 'react';
@@ -69,7 +70,27 @@ const FormStepDisplay = (props: Props) => {
 		>
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
-					<h2>{step.title}</h2>
+					<h2>
+						{step.title}{' '}
+						{step.description && (
+							<Tooltip
+								className={classes.tooltip}
+								kind="hover"
+								title={
+									<>
+										<b>Pourquoi cette étape ?</b>
+										<br />
+										<span
+											className={classes.description}
+											dangerouslySetInnerHTML={{
+												__html: step.description.replaceAll('\n', '<br/>')
+											}}
+										/>
+									</>
+								}
+							/>
+						)}
+					</h2>
 					<div>
 						{isHidden && (
 							<Badge className={cx(classes.hiddenBadge)} small>
@@ -214,6 +235,12 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		}
+	},
+	tooltip: {
+		...fr.typography[18].style
+	},
+	description: {
+		fontWeight: 'normal'
 	}
 });
 

@@ -53,6 +53,8 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 		create: [
 			{
 				title: 'Expérience générale',
+				description:
+					'Cette étape évalue la satisfaction usager en proposant une question rapide et peu engageante.',
 				position: 0,
 				isHideable: false,
 				form_template_blocks: {
@@ -76,6 +78,8 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			},
 			{
 				title: 'Clarté',
+				description:
+					'Cette étape évalue la perception par les usagers des informations et instructions fournies.\nLes données récoltées évaluent la simplicité du langage utilisé sur la démarche en ligne.',
 				position: 1,
 				isHideable: true,
 				form_template_blocks: {
@@ -124,6 +128,8 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			},
 			{
 				title: 'Aides',
+				description:
+					'Cette étape permet d’identifier si les usagers ont eu recours à une aide pour formaliser leur démarche en ligne, s’ils ont cherché et réussi à joindre l’administration et ce qu’ils en ont pensé, le cas échéant.\nLes données récoltées permettent d’évaluer si l’aide proposée par l’administration est joignable et efficace.',
 				position: 2,
 				isHideable: true,
 				form_template_blocks: {
@@ -204,6 +210,8 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			},
 			{
 				title: 'Informations complémentaires',
+				description:
+					"Cette étape permet à l'usager d'ajouter des informations.",
 				position: 3,
 				isHideable: false,
 				form_template_blocks: {
