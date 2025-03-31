@@ -579,7 +579,7 @@ export const getServerSideProps: GetServerSideProps<{
   });
   await prisma.$disconnect();
 
-  if (!product?.forms[0]) {
+  if (!product?.forms[0] || (!!formConfig && !isInIframe)) {
     return {
       notFound: true,
     };
