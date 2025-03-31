@@ -14,8 +14,6 @@ const Radios = (props: Props) => {
 
 	const [selectedValue, setSelectedValue] = useState<string>();
 
-	console.log(selectedValue);
-
 	return (
 		<div className={classes.container}>
 			<fieldset>

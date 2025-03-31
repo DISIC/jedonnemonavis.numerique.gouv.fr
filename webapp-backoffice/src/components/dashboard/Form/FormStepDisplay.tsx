@@ -143,7 +143,12 @@ const FormStepDisplay = (props: Props) => {
 					if (block.position === 1) {
 						return (
 							<div key={block.id} className={cx(classes.box)}>
-								<RootYesNo block={block} step={step} disabled={isHidden} />
+								<RootYesNo
+									block={block}
+									step={step}
+									disabled={isHidden}
+									configHelper={configHelper}
+								/>
 							</div>
 						);
 					}
@@ -151,7 +156,12 @@ const FormStepDisplay = (props: Props) => {
 					if (block.position === 6) {
 						return (
 							<div key={block.id} className={cx(classes.box)}>
-								<RootTable block={block} step={step} disabled={isHidden} />
+								<RootTable
+									block={block}
+									step={step}
+									disabled={isHidden}
+									configHelper={configHelper}
+								/>
 							</div>
 						);
 					}

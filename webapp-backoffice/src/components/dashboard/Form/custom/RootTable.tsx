@@ -1,19 +1,35 @@
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 	step: FormWithElements['form_template']['form_template_steps'][0];
+	configHelper: FormConfigHelper;
 	disabled: boolean;
 };
 
 const RootTable = (props: Props) => {
-	const { block, step, disabled } = props;
+	const { block, step, disabled, configHelper } = props;
 
 	const { classes, cx } = useStyles();
 
 	const exampleBlock = step.form_template_blocks[7];
+
+	const getIsParentHidden = (childBlock: typeof block) => {
+		const labelSplitted = childBlock.label?.split(' ') || [];
+		const templateBlockOption = step.form_template_blocks[0].options.find(b =>
+			labelSplitted.length > 1
+				? (b.label || '').includes(labelSplitted[1])
+				: true
+		);
+
+		return configHelper.displays.some(
+			d => d.parent_id === templateBlockOption?.id && d.hidden
+		);
+	};
 
 	return (
 		<div className={cx(classes.container, disabled ? classes.disabled : null)}>
@@ -32,35 +48,41 @@ const RootTable = (props: Props) => {
 					</tr>
 				</thead>
 				<tbody>
-					{step.form_template_blocks.slice(7).map(childBlock => (
-						<tr key={childBlock.id}>
-							<td>
-								<label className={cx(classes.childLabel)}>
-									{childBlock.label}
-								</label>
-							</td>
-							<td colSpan={6}>
-								<fieldset>
-									{Array.from(Array(6).keys()).map(radio => (
-										<div className={fr.cx('fr-fieldset__content')}>
-											<div className={fr.cx('fr-radio-group')}>
-												<input
-													id={`radio-${block.id}-${childBlock.id}-${radio}`}
-													type="radio"
-													name={`radio-${block.id}-${childBlock.id}`}
-													disabled={disabled}
-												/>
-												<label
-													className={fr.cx('fr-label')}
-													htmlFor={`radio-${block.id}-${childBlock.id}-${radio}`}
-												/>
+					{step.form_template_blocks.slice(7).map(childBlock => {
+						const isParentHidden = getIsParentHidden(childBlock);
+						return (
+							<tr
+								key={childBlock.id}
+								className={cx(isParentHidden ? classes.parentHidden : null)}
+							>
+								<td>
+									<label className={cx(classes.childLabel)}>
+										{childBlock.label}
+									</label>
+								</td>
+								<td colSpan={6}>
+									<fieldset>
+										{Array.from(Array(6).keys()).map(radio => (
+											<div className={fr.cx('fr-fieldset__content')}>
+												<div className={fr.cx('fr-radio-group')}>
+													<input
+														id={`radio-${block.id}-${childBlock.id}-${radio}`}
+														type="radio"
+														name={`radio-${block.id}-${childBlock.id}`}
+														disabled={disabled || isParentHidden}
+													/>
+													<label
+														className={fr.cx('fr-label')}
+														htmlFor={`radio-${block.id}-${childBlock.id}-${radio}`}
+													/>
+												</div>
 											</div>
-										</div>
-									))}
-								</fieldset>
-							</td>
-						</tr>
-					))}
+										))}
+									</fieldset>
+								</td>
+							</tr>
+						);
+					})}
 				</tbody>
 			</table>
 		</div>
@@ -136,6 +158,14 @@ const useStyles = tss.withName(RootTable.name).create({
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
 		}
+	},
+	parentHidden: {
+		'*': {
+			color: fr.colors.decisions.text.mention.grey.default
+		}
+	},
+	hiddenBadge: {
+		backgroundColor: fr.colors.decisions.background.default.grey.active
 	}
 });
 
