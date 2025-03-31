@@ -211,7 +211,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Informations complémentaires',
 				description:
-					"Cette étape permet à l'usager d'ajouter des informations.",
+					"Cette étape permet de récolter des verbatims, dans lesquels les usagers expriment des retours personnels et détaillés de l’expérience avec le service.\nLes données récoltées permettent d’améliorer votre connaissance usager et d'identifier des pistes d’amélioration du service en ligne.",
 				position: 3,
 				isHideable: false,
 				form_template_blocks: {
