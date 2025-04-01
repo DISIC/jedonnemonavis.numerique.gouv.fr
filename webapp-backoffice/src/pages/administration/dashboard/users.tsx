@@ -568,7 +568,7 @@ const DashBoardUsers = () => {
 											'fr-unhidden-md'
 										)}
 									>
-										<span>Addresse mail</span>
+										<span>Adresse mail</span>
 									</div>
 									<div
 										className={fr.cx(
