@@ -108,7 +108,7 @@ const FormStepDisplay = (props: Props) => {
 						{isHidden && (
 							<Badge className={cx(classes.hiddenBadge)} small>
 								<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-								Masqué
+								Masquée
 							</Badge>
 						)}
 						{step.isHideable && (
@@ -136,7 +136,7 @@ const FormStepDisplay = (props: Props) => {
 								masquée
 							</p>
 							<p className={fr.cx('fr-mb-0')}>
-								Cette étape est masquée sur le formulaire usagers mais vous
+								Cette étape est masquée sur le formulaire usager mais vous
 								pouvez visualiser son contenu.
 							</p>
 						</div>
