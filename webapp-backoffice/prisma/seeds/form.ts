@@ -62,7 +62,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label: "Texte d'introduction",
 							content:
-								'<p>Aidez-nous à améliorer le service <b>{{title}}</b> en répondant à quelques questions.</p><p>Vos réponses sont anonyme.</p>',
+								'<p>Aidez-nous à améliorer le service <b>{{title}}</b> en répondant à quelques questions.</p><p>Vos réponses sont <b>anonymes</b>.</p>',
 							type_bloc: 'paragraph',
 							position: 0,
 							isUpdatable: true
