@@ -128,7 +128,7 @@ const Checkboxes = (props: Props) => {
 												<Badge
 													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))}
 												>
-													Masqué
+													Masquée
 												</Badge>
 											)}
 										</span>
