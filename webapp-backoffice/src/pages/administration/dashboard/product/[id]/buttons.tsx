@@ -10,7 +10,10 @@ import {
 } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
-import { Pagination } from '../../../../../components/ui/Pagination';
+import {
+	PageItemsCounter,
+	Pagination
+} from '../../../../../components/ui/Pagination';
 
 import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
 import { Loader } from '@/src/components/ui/Loader';
@@ -187,19 +190,14 @@ const ProductButtonsPage = (props: Props) => {
 				)}
 			>
 				{buttons && nbPages > 1 && (
-					<div className={fr.cx('fr-col-8')}>
-						<p className={fr.cx('fr-mb-0')}>
-							Boutons de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + buttons.length}
-							</span>{' '}
-							sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
-						</p>
-					</div>
+					<PageItemsCounter
+						singleLabel="bouton"
+						pluralLabel="Boutons"
+						startItemCount={numberPerPage * (currentPage - 1) + 1}
+						endItemCount={numberPerPage * (currentPage - 1) + buttons.length}
+						totalItemsCount={buttonsCount}
+						additionalClasses={['fr-pb-1w']}
+					/>
 				)}
 				{/* {buttons.length > 0 && (
 					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
@@ -250,22 +248,6 @@ const ProductButtonsPage = (props: Props) => {
 								/>
 							)}
 						</div>
-						{buttons.length > 0 && (
-							<div
-								aria-live="assertive"
-								className={fr.cx('fr-col-12', 'fr-pb-1w')}
-							>
-								Boutons de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + buttons.length}
-								</span>{' '}
-								sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
-							</div>
-						)}
 						<ul className={classes.buttonList}>
 							{buttons?.map((button, index) => (
 								<li key={index}>

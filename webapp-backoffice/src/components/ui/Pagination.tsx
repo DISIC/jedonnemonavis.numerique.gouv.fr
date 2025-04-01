@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { assert } from 'tsafe/assert';
 import type { Equals } from 'tsafe';
-import { fr } from '@codegouvfr/react-dsfr';
+import { fr, FrCxArg } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Link from 'next/link';
 import { RegisterLink } from '@codegouvfr/react-dsfr/next-pagesdir';
@@ -277,4 +277,47 @@ export const Pagination = memo(
 
 Pagination.displayName = 'Pagination';
 
-const useStyles = tss.create({});
+type PageItemsCounterProps = {
+	singleLabel: string;
+	pluralLabel: string;
+	startItemCount: number;
+	endItemCount: number;
+	totalItemsCount: number;
+	additionalClasses?: FrCxArg[];
+};
+
+export const PageItemsCounter = ({
+	singleLabel,
+	pluralLabel,
+	startItemCount,
+	endItemCount,
+	totalItemsCount,
+	additionalClasses = []
+}: PageItemsCounterProps) => {
+	const { cx, classes } = useStyles();
+
+	return (
+		<div
+			aria-live="assertive"
+			role="status"
+			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
+		>
+			{totalItemsCount === 0 ? (
+				`Aucun ${singleLabel} trouvé`
+			) : (
+				<>
+					{pluralLabel} de{' '}
+					<span className={cx(classes.boldText)}>{startItemCount}</span> à{' '}
+					<span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
+					<span className={cx(classes.boldText)}>{totalItemsCount}</span>
+				</>
+			)}
+		</div>
+	);
+};
+
+const useStyles = tss.create({
+	boldText: {
+		fontWeight: 'bold'
+	}
+});

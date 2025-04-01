@@ -4,7 +4,7 @@ import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -474,28 +474,23 @@ const DashBoard = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx(
+						<div
+							className={fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
 								'fr-grid-row--right'
-							)}>
-							<div
-								role="status"
-								className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-ml-0')}
-							>
-								Avis de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + products.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{productsResult.metadata.count}
-								</span>
-							</div>
+							)}
+						>
+							<PageItemsCounter
+								singleLabel="avis"
+								pluralLabel="Avis"
+								startItemCount={numberPerPage * (filters.currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (filters.currentPage - 1) + products.length
+								}
+								totalItemsCount={productsResult.metadata.count}
+								additionalClasses={['fr-pt-3w']}
+							/>
 						</div>
 						<div
 							className={cx(

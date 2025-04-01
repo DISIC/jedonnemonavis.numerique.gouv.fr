@@ -2,7 +2,7 @@ import { Form } from '@/prisma/generated/zod';
 import FormCard from '@/src/components/dashboard/Form/FormCard';
 import FormModal from '@/src/components/dashboard/Form/FormModal';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -134,20 +134,15 @@ const DashboardForms = () => {
 						<div>
 							{nbPages > 1 && (
 								<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-									<span className={fr.cx('fr-ml-0')}>
-										Formulaire de{' '}
-										<span className={cx(classes.boldText)}>
-											{numberPerPage * (currentPage - 1) + 1}
-										</span>{' '}
-										à{' '}
-										<span className={cx(classes.boldText)}>
-											{numberPerPage * (currentPage - 1) + userForms.length}
-										</span>{' '}
-										sur{' '}
-										<span className={cx(classes.boldText)}>
-											{formsResult.metadata.formCount}
-										</span>
-									</span>
+									<PageItemsCounter
+										singleLabel="formulaire"
+										pluralLabel="Formulaire"
+										startItemCount={numberPerPage * (currentPage - 1) + 1}
+										endItemCount={
+											numberPerPage * (currentPage - 1) + userForms.length
+										}
+										totalItemsCount={formsResult.metadata.formCount}
+									/>
 								</div>
 							)}
 							<div className={cx(classes.formsContainer)}>

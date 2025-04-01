@@ -11,7 +11,7 @@ import {
 	AccessRightWithUsers,
 	AdminEntityRightWithUsers
 } from '@/src/types/prismaTypesExtended';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -248,20 +248,15 @@ const AccessManagement = (props: Props) => {
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 					<div className={fr.cx('fr-col-8')}>
 						{nbPages > 1 && (
-							<span className={fr.cx('fr-ml-0')}>
-								Admin de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + accessRights.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{accessRightsCount}
-								</span>
-							</span>
+							<PageItemsCounter
+								singleLabel="admin"
+								pluralLabel="Admin"
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) + accessRights.length
+								}
+								totalItemsCount={accessRightsCount}
+							/>
 						)}
 					</div>
 					{/* <div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>

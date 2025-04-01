@@ -4,7 +4,7 @@ import EntityRightsModal from '@/src/components/dashboard/Entity/EntityRightsMod
 import EntitySearchModal from '@/src/components/dashboard/Entity/EntitySearchModal';
 import ApiKeyModal from '@/src/components/dashboard/ApiKey/ApiKeyModal';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -355,20 +355,15 @@ const DashBoardEntities = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-								Organisation de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + entities.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{entitiesResult.metadata.count}
-								</span>
-							</span>
+							<PageItemsCounter
+								singleLabel="organisation"
+								pluralLabel="Organisation"
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) + entities.length
+								}
+								totalItemsCount={entitiesResult.metadata.count}
+							/>
 						</div>
 
 						<div
