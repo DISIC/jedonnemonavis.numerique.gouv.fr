@@ -21,8 +21,11 @@ interface Props {
 	title: string;
 	children: React.ReactNode;
 	handleOnConfirm: () => void;
+	confirmText?: string;
+	cancelText?: string;
 	kind?: 'default' | 'danger';
 	disableAction?: boolean;
+	priorityReversed?: boolean;
 }
 
 const OnConfirmModal = (props: Props) => {
@@ -32,8 +35,11 @@ const OnConfirmModal = (props: Props) => {
 		title,
 		children,
 		handleOnConfirm,
+		confirmText,
+		cancelText,
 		kind = 'default',
-		disableAction
+		disableAction,
+		priorityReversed
 	} = props;
 
 	const getConfirmButtonProps = () => {
@@ -61,14 +67,31 @@ const OnConfirmModal = (props: Props) => {
 				break;
 			case 'default':
 				confirmButtonProps = {
-					children: 'Confirmer',
-					disabled: disableAction ?? false
+					children: confirmText ? confirmText : 'Confirmer',
+					disabled: disableAction ?? false,
+					priority: priorityReversed ? 'secondary' : 'primary'
 				};
 				break;
 		}
 
 		return confirmButtonProps;
 	};
+
+	const buttons: [
+		ModalProps.ActionAreaButtonProps,
+		...ModalProps.ActionAreaButtonProps[]
+	] = [
+		{
+			children: cancelText ? cancelText : 'Annuler',
+			priority: priorityReversed ? 'primary' : 'secondary'
+		},
+		{
+			...getConfirmButtonProps(),
+			doClosesModal: false,
+			onClick: () => handleOnConfirm()
+		}
+	];
+	const reversedButtons = [...buttons].reverse() as typeof buttons;
 
 	return (
 		<modal.Component
@@ -81,17 +104,7 @@ const OnConfirmModal = (props: Props) => {
 				'fr-grid-row--gutters',
 				'fr-my-0'
 			)}
-			buttons={[
-				{
-					children: 'Annuler',
-					priority: 'secondary'
-				},
-				{
-					...getConfirmButtonProps(),
-					doClosesModal: false,
-					onClick: () => handleOnConfirm()
-				}
-			]}
+			buttons={priorityReversed ? reversedButtons : buttons}
 		>
 			<div>{children}</div>
 		</modal.Component>

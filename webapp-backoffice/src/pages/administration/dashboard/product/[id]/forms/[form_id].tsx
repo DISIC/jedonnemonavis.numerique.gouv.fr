@@ -19,6 +19,7 @@ import { tss } from 'tss-react/dsfr';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 export type FormConfigHelper = {
 	displays: {
@@ -42,6 +43,11 @@ const onConfirmPublishModal = createModal({
 	isOpenedByDefault: false
 });
 
+const onConfirmLeaveModal = createModal({
+	id: 'form-leave-modal',
+	isOpenedByDefault: false
+});
+
 const ProductFormPage = (props: Props) => {
 	const { form } = props;
 	const router = useRouter();
@@ -56,6 +62,8 @@ const ProductFormPage = (props: Props) => {
 			);
 		}
 	});
+
+	const [leaveUrl, setLeaveUrl] = useState<string | null>();
 
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [isPublishing, setIsPublishing] = useState(false);
@@ -80,6 +88,12 @@ const ProductFormPage = (props: Props) => {
 			}
 		}
 	];
+
+	const leave = () => {
+		if (!!leaveUrl) {
+			router.push(leaveUrl);
+		}
+	};
 
 	const publish = () => {
 		if (createConfig) {
@@ -129,13 +143,9 @@ const ProductFormPage = (props: Props) => {
 
 	useEffect(() => {
 		const handleRouteChangeStart = (url: string) => {
-			if (
-				hasConfigChanged &&
-				!isPublishing &&
-				!window.confirm(
-					'Vous avez des modifications non publiées. Êtes-vous sûr de vouloir quitter la page ?'
-				)
-			) {
+			if (hasConfigChanged && !isPublishing && !leaveUrl) {
+				setLeaveUrl(url);
+				onConfirmLeaveModal.open();
 				router.events.emit('routeChangeError');
 				throw 'Navigation aborted by the user';
 			}
@@ -146,7 +156,13 @@ const ProductFormPage = (props: Props) => {
 		return () => {
 			router.events.off('routeChangeStart', handleRouteChangeStart);
 		};
-	}, [hasConfigChanged, isPublishing, router]);
+	}, [hasConfigChanged, isPublishing, leaveUrl, router]);
+
+	useIsModalOpen(onConfirmLeaveModal, {
+		onConceal: () => {
+			setLeaveUrl(null);
+		}
+	});
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
@@ -164,6 +180,19 @@ const ProductFormPage = (props: Props) => {
 			>
 				Vos usagers auront directement accès au formulaire modifié. Vous n’avez
 				pas besoin de changer le lien.
+			</OnConfirmModal>
+			<OnConfirmModal
+				modal={onConfirmLeaveModal}
+				title={`Vos modifications ne sont pas enregistrées`}
+				confirmText="Quitter la page"
+				cancelText="Continuer l’édition du formulaire"
+				handleOnConfirm={leave}
+				priorityReversed
+			>
+				Si vous quittez cette page, vos modifications seront perdues.
+				<br />
+				Vous pouvez publier votre formulaire modifié depuis l’écran de
+				configuration du formulaire.
 			</OnConfirmModal>
 			<Breadcrumb
 				currentPageLabel={form.form_template.title}
