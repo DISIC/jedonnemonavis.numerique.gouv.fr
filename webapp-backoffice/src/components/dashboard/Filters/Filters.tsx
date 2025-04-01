@@ -6,9 +6,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { filtersLabel, getDatesByShortCut } from '@/src/utils/tools';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { useRouter } from 'next/router';
+import { getDatesByShortCut } from '@/src/utils/tools';
 
 const dateShortcuts = [
 	{
@@ -65,9 +63,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		sectionFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
-	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
-
-	const router = useRouter();
 
 	useEffect(() => {
 		if (sectionFilters.dateShortcut) {
@@ -109,7 +104,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					dateShortcut: undefined
 				}
 			});
-		}, 1500),
+		}, 1000),
 		[updateFilters, filterKey, filters]
 	);
 
@@ -117,29 +112,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		(key: 'currentStartDate' | 'currentEndDate') =>
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const newDate = e.target.value;
-
-			if (newDate === '') {
-				if (key === 'currentStartDate') {
-					setLocalStartDate(new Date().toISOString().split('T')[0]);
-					updateFilters({
-						...filters,
-						[filterKey]: {
-							...filters[filterKey],
-							currentStartDate: new Date().toISOString().split('T')[0]
-						}
-					});
-				} else {
-					setLocalEndDate(new Date().toISOString().split('T')[0]);
-					updateFilters({
-						...filters,
-						[filterKey]: {
-							...filters[filterKey],
-							currentEndDate: new Date().toISOString().split('T')[0]
-						}
-					});
-				}
-				return;
-			}
 
 			if (key === 'currentStartDate') {
 				setLocalStartDate(newDate);
@@ -153,13 +125,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
 						'Format attendu : JJ/MM/AAAA'
 				}));
-				updateFilters({
-					...filters,
-					[filterKey]: {
-						...filters[filterKey],
-						currentStartDate: new Date().toISOString().split('T')[0]
-					}
-				});
 			} else {
 				setErrors(prev => ({
 					...prev,
@@ -168,10 +133,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 				updateDateFilter(key, newDate);
 			}
 		};
-
-	useEffect(() => {
-		console.log('sectionFilters : ', sectionFilters);
-	}, [sectionFilters]);
 
 	return (
 		<div
@@ -247,7 +208,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de début"
-								key={`start-date-${localStartDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localStartDate,
@@ -264,7 +224,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de fin"
-								key={`end-date-${localEndDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localEndDate,

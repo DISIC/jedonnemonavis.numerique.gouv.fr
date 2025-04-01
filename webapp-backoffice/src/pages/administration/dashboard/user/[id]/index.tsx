@@ -54,8 +54,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	console.log('token : ', currentUserToken);
-
 	const currentUser = await prisma.user.findUnique({
 		where: {
 			email: currentUserToken.email as string

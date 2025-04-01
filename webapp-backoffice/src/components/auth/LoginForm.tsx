@@ -60,6 +60,9 @@ export const LoginForm = () => {
 						query: { email: credentials.email }
 					});
 					break;
+				case 203:
+					signIn('openid');
+					break;
 				case 200:
 					setShowPassword(true);
 					break;
@@ -206,9 +209,9 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			<h5>Avec ProConnect</h5>
+			{/* <h5>Avec ProConnect</h5>
 			<ProConnectButton onClick={() => signIn('openid')} />
-			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
+			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} /> */}
 			<h5>Avec votre adresse mail</h5>
 			<form
 				onSubmit={e => {

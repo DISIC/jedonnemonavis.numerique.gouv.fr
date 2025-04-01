@@ -10,14 +10,18 @@ import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { getSiretInfo } from '@/src/utils/queries';
+import { generateRandomString } from '@/src/utils/tools';
 
 interface ProconnectProfile {
 	sub: string;
 	email: string;
 	given_name: string;
 	usual_name: string;
+	siret: string;
 	chorusdt?: string;
 	organizational_unit?: string;
+	idp_id?: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -84,34 +88,46 @@ export const authOptions: NextAuthOptions = {
 				const email = proconnectProfile.email?.toLowerCase();
 		
 				let user = await prisma.user.findUnique({
-					where: { email }
+					where: { email },
 				});
 		
 				if (!user) {
-					if(!proconnectProfile.organizational_unit) {
+					console.log('user not found, need creation');
+					try {
+						const data = await getSiretInfo(proconnectProfile.siret);
+		
+						const etablissement = data.etablissement;
+						const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+		
+						if (formeJuridique.startsWith('7') || formeJuridique.startsWith('8')) {
+		
+							const salt = bcrypt.genSaltSync(10);
+							const newHashedPassword = bcrypt.hashSync(generateRandomString(10), salt);
+		
+							user = await prisma.user.create({
+								data: {
+									email,
+									firstName: proconnectProfile.given_name,
+									lastName: proconnectProfile.usual_name,
+									role: 'user',
+									password: newHashedPassword,
+									notifications: true,
+									notifications_frequency: 'weekly',
+									active: true,
+									xwiki_account: false,
+									xwiki_username: null,
+									proconnect_account: true
+								},
+							});
+							console.log('✅ Utilisateur créé avec succès:', user);
+						} else {
+							console.log('🏢 Structure privée, redirection erreur...');
+							throw new Error('INVALID_PROVIDER');
+						}
+					} catch (err) {
+						console.error('❌ Erreur :', err);
 						throw new Error('INVALID_PROVIDER');
 					}
-
-					const salt = bcrypt.genSaltSync(10);
-					const newHashedPassword = bcrypt.hashSync('changeme', salt);
-
-					user = await prisma.user.create({
-						data: {
-							email,
-							firstName: proconnectProfile.given_name,
-							lastName: proconnectProfile.usual_name,
-							role: 'user',
-							password: newHashedPassword,
-							notifications: false,
-							notifications_frequency: 'daily',
-							active: true,
-							xwiki_account: false,
-							xwiki_username: null
-						}
-					});
-					console.log('✅ Utilisateur créé avec succès:', user);
-				} else {
-					console.log('🔄 Utilisateur déjà existant:', user);
 				}
 			}
 			return true;
@@ -186,7 +202,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name phone siret idp_id custom siren belonging_population organizational_unit chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
@@ -231,7 +247,8 @@ export const authOptions: NextAuthOptions = {
 					notifications: false,
 					notifications_frequency: 'daily',
 					created_at: new Date(),
-					updated_at: new Date()
+					updated_at: new Date(),
+					proconnect_account: false
 				}
 			}
 		}

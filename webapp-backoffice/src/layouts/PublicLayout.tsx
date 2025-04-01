@@ -251,7 +251,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/users',
 					target: '_self'
 				},
-				isActive: pathname.startsWith('/administration/dashboard/user')
+				isActive: pathname.startsWith('/administration/dashboard/users')
 			},
 			{
 				text: 'Liste blanche des noms de domaines',
