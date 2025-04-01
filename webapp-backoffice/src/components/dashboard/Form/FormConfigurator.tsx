@@ -9,11 +9,13 @@ import { getHelperFromFormConfig } from '@/src/utils/tools';
 
 interface Props {
 	form: FormWithElements;
+	hasConfigChanged: boolean;
 	onChange: (configHelper: FormConfigHelper) => void;
+	onPublish: () => void;
 }
 
 const FormConfigurator = (props: Props) => {
-	const { form, onChange } = props;
+	const { form, hasConfigChanged, onChange, onPublish } = props;
 	const formConfig = form.form_configs[0];
 
 	const { classes, cx } = useStyles();
@@ -84,8 +86,10 @@ const FormConfigurator = (props: Props) => {
 					step={currentStep}
 					form={form}
 					configHelper={tmpConfigHelper}
+					hasConfigChanged={hasConfigChanged}
 					changeStep={goToSibilingStep}
 					onConfigChange={onConfigChange}
+					onPublish={onPublish}
 				/>
 			</div>
 		</div>

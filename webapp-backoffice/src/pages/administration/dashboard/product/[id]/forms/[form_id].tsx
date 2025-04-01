@@ -216,7 +216,14 @@ const ProductFormPage = (props: Props) => {
 					</p>
 				</div>
 				<div className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}>
-					<FormConfigurator form={form} onChange={onChangeConfig} />
+					<FormConfigurator
+						form={form}
+						onChange={onChangeConfig}
+						onPublish={() => {
+							onConfirmPublishModal.open();
+						}}
+						hasConfigChanged={hasConfigChanged}
+					/>
 				</div>
 			</div>
 		</div>

@@ -17,12 +17,22 @@ interface Props {
 	step: Step;
 	form: FormWithElements;
 	configHelper: FormConfigHelper;
+	hasConfigChanged: boolean;
 	changeStep: (to: 'previous' | 'next') => void;
 	onConfigChange: (config: FormConfigHelper) => void;
+	onPublish: () => void;
 }
 
 const FormStepDisplay = (props: Props) => {
-	const { step, form, configHelper, changeStep, onConfigChange } = props;
+	const {
+		step,
+		form,
+		configHelper,
+		hasConfigChanged,
+		changeStep,
+		onConfigChange,
+		onPublish
+	} = props;
 
 	const { classes, cx } = useStyles();
 
@@ -214,6 +224,8 @@ const FormStepDisplay = (props: Props) => {
 						priority="primary"
 						iconId="fr-icon-computer-line"
 						iconPosition="right"
+						disabled={!hasConfigChanged}
+						onClick={onPublish}
 					>
 						Publier
 					</Button>
