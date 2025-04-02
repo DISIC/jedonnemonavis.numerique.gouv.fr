@@ -218,16 +218,18 @@ def build_filters_query(filters, search_term):
     values = []
     
     if 'satisfaction' in filters and filters['satisfaction']:
+        placeholders = ', '.join(['%s'] * len(filters['satisfaction']))
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[%s]::\"AnswerIntention\"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
+            f"EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[{placeholders}]::\"AnswerIntention\"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
-        values.append(filters['satisfaction'])
+        values.extend(filters['satisfaction'])
 
     if 'comprehension' in filters and filters['comprehension']:
+        placeholders = ', '.join(['%s'] * len(filters['comprehension']))
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[%s]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
+            f"EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[{placeholders}]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
-        values.append(filters['comprehension'])
+        values.extend(filters['comprehension'])
 
     if filters.get('needVerbatim'):
         conditions.append(
