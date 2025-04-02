@@ -280,8 +280,7 @@ const DashBoardDomainDomains = () => {
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							<PageItemsCounter
-								singleLabel="domaine"
-								pluralLabel="Domaines"
+								label="Domaines"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + domains.length

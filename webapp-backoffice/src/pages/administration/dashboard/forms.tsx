@@ -135,8 +135,7 @@ const DashboardForms = () => {
 							{nbPages > 1 && (
 								<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 									<PageItemsCounter
-										singleLabel="formulaire"
-										pluralLabel="Formulaire"
+										label="Formulaire"
 										startItemCount={numberPerPage * (currentPage - 1) + 1}
 										endItemCount={
 											numberPerPage * (currentPage - 1) + userForms.length

@@ -503,8 +503,7 @@ const DashBoardUsers = () => {
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w', 'fr-pb-2w')}>
 							<PageItemsCounter
-								singleLabel="utilisateur"
-								pluralLabel="Utilisateurs"
+								label="Utilisateurs"
 								startItemCount={
 									numberPerPage * (filters.users.currentPage - 1) + 1
 								}

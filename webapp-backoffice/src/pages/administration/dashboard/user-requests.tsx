@@ -292,8 +292,7 @@ const DashBoardUserRequestUserRequests = () => {
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							{nbPages > 1 && (
 								<PageItemsCounter
-									singleLabel="UserRequest"
-									pluralLabel="UserRequestes"
+									label="UserRequestes"
 									startItemCount={numberPerPage * (currentPage - 1) + 1}
 									endItemCount={
 										numberPerPage * (currentPage - 1) + userRequests.length

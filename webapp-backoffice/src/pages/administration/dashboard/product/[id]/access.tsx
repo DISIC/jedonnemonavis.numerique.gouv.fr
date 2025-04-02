@@ -249,8 +249,7 @@ const AccessManagement = (props: Props) => {
 					<div className={fr.cx('fr-col-8')}>
 						{nbPages > 1 && (
 							<PageItemsCounter
-								singleLabel="admin"
-								pluralLabel="Admin"
+								label="Admin"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + accessRights.length

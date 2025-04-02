@@ -232,8 +232,7 @@ const EntityRightsModal = (props: Props) => {
 				>
 					<div className={fr.cx('fr-col-8')}>
 						<PageItemsCounter
-							singleLabel="administrateur"
-							pluralLabel="Administrateurs"
+							label="Administrateurs"
 							startItemCount={numberPerPage * (currentPage - 1) + 1}
 							endItemCount={
 								numberPerPage * (currentPage - 1) + adminEntityRights.length

@@ -278,8 +278,7 @@ export const Pagination = memo(
 Pagination.displayName = 'Pagination';
 
 type PageItemsCounterProps = {
-	singleLabel: string;
-	pluralLabel: string;
+	label: string;
 	startItemCount: number;
 	endItemCount: number;
 	totalItemsCount: number;
@@ -287,8 +286,7 @@ type PageItemsCounterProps = {
 };
 
 export const PageItemsCounter = ({
-	singleLabel,
-	pluralLabel,
+	label,
 	startItemCount,
 	endItemCount,
 	totalItemsCount,
@@ -296,22 +294,16 @@ export const PageItemsCounter = ({
 }: PageItemsCounterProps) => {
 	const { cx, classes } = useStyles();
 
+	if (totalItemsCount === 0) return null;
 	return (
 		<div
 			aria-live="assertive"
 			role="status"
 			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
 		>
-			{totalItemsCount === 0 ? (
-				`Aucun ${singleLabel} trouvé`
-			) : (
-				<>
-					{pluralLabel} de{' '}
-					<span className={cx(classes.boldText)}>{startItemCount}</span> à{' '}
-					<span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
-					<span className={cx(classes.boldText)}>{totalItemsCount}</span>
-				</>
-			)}
+			{label} de <span className={cx(classes.boldText)}>{startItemCount}</span>{' '}
+			à <span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
+			<span className={cx(classes.boldText)}>{totalItemsCount}</span>
 		</div>
 	);
 };

@@ -191,8 +191,7 @@ const ProductButtonsPage = (props: Props) => {
 			>
 				{buttons && nbPages > 1 && (
 					<PageItemsCounter
-						singleLabel="bouton"
-						pluralLabel="Boutons"
+						label="Boutons"
 						startItemCount={numberPerPage * (currentPage - 1) + 1}
 						endItemCount={numberPerPage * (currentPage - 1) + buttons.length}
 						totalItemsCount={buttonsCount}

@@ -482,8 +482,7 @@ const DashBoard = () => {
 							)}
 						>
 							<PageItemsCounter
-								singleLabel="avis"
-								pluralLabel="Avis"
+								label="Avis"
 								startItemCount={numberPerPage * (filters.currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (filters.currentPage - 1) + products.length

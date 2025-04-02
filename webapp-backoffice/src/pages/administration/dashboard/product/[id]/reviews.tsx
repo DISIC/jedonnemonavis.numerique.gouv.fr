@@ -630,8 +630,7 @@ const ProductReviewsPage = (props: Props) => {
 									{reviews.length > 0 && nbPages > 0 && (
 										<>
 											<PageItemsCounter
-												singleLabel="avis"
-												pluralLabel="Avis"
+												label="Avis"
 												startItemCount={numberPerPage * (currentPage - 1) + 1}
 												endItemCount={
 													numberPerPage * (currentPage - 1) + reviews.length

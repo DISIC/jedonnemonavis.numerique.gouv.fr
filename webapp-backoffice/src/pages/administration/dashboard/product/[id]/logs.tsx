@@ -186,8 +186,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 					<>
 						<div className={fr.cx('fr-col-8', 'fr-pt-2w')}>
 							<PageItemsCounter
-								singleLabel="activité"
-								pluralLabel="Activités"
+								label="Activités"
 								startItemCount={10 * (currentPage - 1) + 1}
 								endItemCount={10 * (currentPage - 1) + fullEvents.data.length}
 								totalItemsCount={fullEvents.pagination.total}
