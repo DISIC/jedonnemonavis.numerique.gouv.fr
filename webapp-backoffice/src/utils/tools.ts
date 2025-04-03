@@ -233,7 +233,7 @@ export const calculateBucketsAverage = (
 };
 
 export const getReadableValue = (value: number) => {
-	const readableValue = (Math.floor(value * 10) / 10)
+	const readableValue = (Math.round(value * 10) / 10)
 		.toString()
 		.replace('.', ',');
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
