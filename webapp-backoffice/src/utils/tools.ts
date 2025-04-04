@@ -254,15 +254,14 @@ export const getDiffDaysBetweenTwoDates = (
 };
 
 export const getCalendarInterval = (nbDays: number) => {
-	if (nbDays < 30) return 'day';
-	if (nbDays < 62) return 'week';
+	if (nbDays <= 31) return 'day';
+	if (nbDays <= 62) return 'week';
 
 	return 'month';
 };
 
 export const getCalendarFormat = (nbDays: number) => {
-	if (nbDays < 30) return 'd MMM Y';
-	if (nbDays < 62) return 'd MMM Y';
+	if (nbDays <= 62) return 'd MMM Y';
 
 	return 'MMM Y';
 };
