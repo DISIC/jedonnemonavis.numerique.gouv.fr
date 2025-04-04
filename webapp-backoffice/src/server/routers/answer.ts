@@ -94,7 +94,7 @@ const queryCountByFieldCode = ({
 				}
 			});
 		}
-		if(button_id) {
+		if (button_id) {
 			(query.bool.must as QueryDslQueryContainer[]).push({
 				match: {
 					button_id
@@ -1073,10 +1073,10 @@ export const answerRouter = router({
 						}
 					]
 				}
-			}
+			};
 
 			if (query.bool && query.bool.must) {
-				if(button_id) {
+				if (button_id) {
 					(query.bool.must as QueryDslQueryContainer[]).push({
 						match: {
 							button_id
@@ -1174,11 +1174,10 @@ export const answerRouter = router({
 			);
 
 			const contactReachability_average =
-				(contactReachabilityBucket.reduce((sum, sb) => {
+				contactReachabilityBucket.reduce((sum, sb) => {
 					const [, answer_text] = sb.key.split('#');
 					return sum + ((answer_text === 'Oui' && sb.doc_count) || 0);
-				}, 0) /
-					contactReachability_count);
+				}, 0) / contactReachability_count;
 
 			const contactSatisfaction_count = contactSatisfactionBucket.reduce(
 				(sum, sb) => sum + sb.doc_count,
@@ -1244,9 +1243,9 @@ export const answerRouter = router({
 				autonomy_count
 			};
 
-			if(input.needLogging) {
+			if (input.needLogging) {
 				const user = ctx.session?.user;
-				if(user) {
+				if (user) {
 					await ctx.prisma.userEvent.create({
 						data: {
 							user_id: parseInt(user.id),

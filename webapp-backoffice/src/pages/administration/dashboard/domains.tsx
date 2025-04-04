@@ -1,6 +1,6 @@
 import DomainCard from '@/src/components/dashboard/Domain/DomainCard';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -279,20 +279,14 @@ const DashBoardDomainDomains = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-								Domaines de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + domains.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{domainsResult.metadata.count}
-								</span>
-							</span>
+							<PageItemsCounter
+								label="Domaines"
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) + domains.length
+								}
+								totalItemsCount={domainsResult.metadata.count}
+							/>
 						</div>
 						<div
 							className={cx(

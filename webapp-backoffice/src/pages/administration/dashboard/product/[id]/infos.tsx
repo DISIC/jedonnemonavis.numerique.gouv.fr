@@ -237,8 +237,7 @@ const ProductInformationPage = (props: Props) => {
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
 								les utilisateurs de ce service n’auront plus accès au
-								formulaire. les utilisateurs de ce service n’auront plus accès
-								au formulaire.
+								formulaire.
 							</li>
 						</ul>
 						<Button

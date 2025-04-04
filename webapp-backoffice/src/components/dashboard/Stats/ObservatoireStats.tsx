@@ -235,7 +235,7 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		fontWeight: 'bold',
 		marginBottom: '0.5rem',
-		height: '3rem',
+		minHeight: '3rem',
 		h5: {
 			margin: 0
 		}

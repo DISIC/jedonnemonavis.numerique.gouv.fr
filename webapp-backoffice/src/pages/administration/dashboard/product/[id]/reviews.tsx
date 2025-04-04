@@ -12,7 +12,7 @@ import {
 	getNbPages
 } from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
@@ -629,23 +629,15 @@ const ProductReviewsPage = (props: Props) => {
 								>
 									{reviews.length > 0 && nbPages > 0 && (
 										<>
-											<div
-												role="status"
-												className={fr.cx('fr-col-12', 'fr-mt-8v')}
-											>
-												Avis de{' '}
-												<span className={cx(classes.boldText)}>
-													{numberPerPage * (currentPage - 1) + 1}
-												</span>{' '}
-												à{' '}
-												<span className={cx(classes.boldText)}>
-													{numberPerPage * (currentPage - 1) + reviews.length}
-												</span>{' '}
-												sur{' '}
-												<span className={cx(classes.boldText)}>
-													{reviewsCountFiltered}
-												</span>
-											</div>
+											<PageItemsCounter
+												label="Avis"
+												startItemCount={numberPerPage * (currentPage - 1) + 1}
+												endItemCount={
+													numberPerPage * (currentPage - 1) + reviews.length
+												}
+												totalItemsCount={reviewsCountFiltered}
+												additionalClasses={['fr-mt-8v']}
+											/>
 										</>
 									)}
 								</div>
