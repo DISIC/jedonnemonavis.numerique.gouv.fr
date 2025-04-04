@@ -200,8 +200,8 @@ const EntityRightsModal = (props: Props) => {
 						className={fr.cx('fr-mb-16v')}
 						description={
 							<>
-								Pour devenir administrateur, envoyer un email à [adresse email
-								de contact].
+								Pour devenir administrateur, envoyer un email à
+								contact.jdma@design.numerique.gouv.fr
 							</>
 						}
 						severity="info"
