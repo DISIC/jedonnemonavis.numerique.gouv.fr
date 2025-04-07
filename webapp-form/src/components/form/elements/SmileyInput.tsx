@@ -65,7 +65,7 @@ export const SmileyInput = (props: Props) => {
               <li key={smiley.value}>
                 <input
                   id={`radio-${name}-${smiley.value}`}
-                  className={fr.cx("fr-sr-only")}
+                  className={cx(classes.inputIndicator)}
                   type="radio"
                   name={name}
                   checked={smileySelected === smiley.value}
@@ -123,6 +123,7 @@ const useStyles = tss
       width: "100%",
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
       padding: fr.spacing("3v"),
+      paddingLeft: fr.spacing("12v"),
       display: "flex",
       alignItems: "center",
       cursor: "pointer",
@@ -142,6 +143,19 @@ const useStyles = tss
         },
       },
     },
+    inputIndicator: {
+      position: "absolute",
+      top: "50%",
+      transform: "translateY(-50%)",
+      left: "5%",
+      height: "1rem",
+      width: "1rem",
+      accentColor: fr.colors.decisions.background.flat.blueFrance.default,
+      [fr.breakpoints.up("md")]: {
+        height: ".75rem",
+        width: ".75rem",
+      }
+    },
     fieldset: {
       width: "100%",
       ul: {
@@ -149,6 +163,11 @@ const useStyles = tss
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
         width: "100%",
+        li:{
+          position: "relative",
+          paddingBottom: 0,
+          marginBottom: fr.spacing("1v"),
+        }
       },
       [fr.breakpoints.up("md")]: {
         width: "initial",
