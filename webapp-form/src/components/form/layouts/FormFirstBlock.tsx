@@ -53,7 +53,7 @@ export const FormFirstBlock = (props: Props) => {
           onSubmit(tmpOpinion);
         }}
         // TO REMOVE WHEN UNCOMMENT PRODCT NAME
-        className={fr.cx("fr-mt-14v")}
+        className={fr.cx("fr-mt-12v")}
       >
         {primarySection.map((field: FormField) => (
           <div key={field.name} className={cx(classes.field)}>
@@ -78,9 +78,9 @@ export const FormFirstBlock = (props: Props) => {
             />
           </div>
         )}
-        <div className={fr.cx("fr-mt-16v")}>
+        <div className={cx(fr.cx("fr-mt-12v"), classes.buttonsContainer)}>
           {isLoading ? (
-            <Button type="button" className={classes.loading}>
+            <Button type="button" className={cx(classes.loading, classes.validateButton)}>
               <div>
                 <i className={fr.cx("ri-loader-4-line")} />
               </div>
@@ -89,6 +89,7 @@ export const FormFirstBlock = (props: Props) => {
             <Button
               type="submit"
               disabled={!tmpOpinion.satisfaction || isRateLimitReached}
+              className={classes.validateButton}
             >
               {t("first_block.validate")}
             </Button>
@@ -115,7 +116,22 @@ const useStyles = tss
       },
     },
     field: {
-      marginBottom: fr.spacing("14v"),
+      marginBottom: fr.spacing("12v"),
+    },
+    buttonsContainer:{
+      [fr.breakpoints.up("md")]: {
+        display: "flex",
+        justifyContent: "end",
+      },
+    },
+    validateButton:{
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      ...fr.spacing('padding', {topBottom: "3v", rightLeft: "6v"}),
+      [fr.breakpoints.up("md")]: {
+        width: "initial",
+      },
     },
     loading: {
       i: {

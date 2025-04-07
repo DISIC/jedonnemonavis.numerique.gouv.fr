@@ -55,9 +55,9 @@ export const SmileyInput = (props: Props) => {
       <div className={cx(classes.smileysContainer)}>
         <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
           <legend className={fr.cx("fr-fieldset__legend")}>
-            {<h3>{label}</h3>}
+            {<h3 className={fr.cx("fr-mb-2v")}>{label}</h3>}
             {hint && (
-              <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hint}</span>
+              <span className={fr.cx("fr-hint-text", "fr-my-4v")}>{hint}</span>
             )}
           </legend>
           <ul>
@@ -90,8 +90,8 @@ export const SmileyInput = (props: Props) => {
                         ? smiley.imgSelected
                         : smiley.img
                     }
-                    width={38}
-                    height={38}
+                    width={56}
+                    height={56}
                   />
                   {t(`smileys.${smiley.value}`)}
                 </label>
@@ -122,23 +122,23 @@ const useStyles = tss
     smileyInput: {
       width: "100%",
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      padding: fr.spacing("3v"),
-      paddingLeft: fr.spacing("12v"),
+      padding: fr.spacing("4v"),
       display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      textAlign: "center",
       alignItems: "center",
+      gap: fr.spacing("4v"),
       cursor: "pointer",
-      img: {
-        marginRight: fr.spacing("2v"),
-      },
       ["&:hover"]: {
         borderColor: fr.colors.decisions.background.alt.grey.active,
       },
       [fr.breakpoints.up("md")]: {
         flexDirection: "column",
-        width: "8rem",
-        padding: fr.spacing("1v"),
+        padding: fr.spacing("4v"),
+        paddingLeft: fr.spacing("16v"),
+        paddingRight: fr.spacing("16v"),
         img: {
-          marginTop: fr.spacing("2v"),
           marginRight: 0,
         },
       },
@@ -151,10 +151,7 @@ const useStyles = tss
       height: "1rem",
       width: "1rem",
       accentColor: fr.colors.decisions.background.flat.blueFrance.default,
-      [fr.breakpoints.up("md")]: {
-        height: ".75rem",
-        width: ".75rem",
-      }
+      
     },
     fieldset: {
       width: "100%",
@@ -166,13 +163,14 @@ const useStyles = tss
         li:{
           position: "relative",
           paddingBottom: 0,
-          marginBottom: fr.spacing("1v"),
+          marginBottom: fr.spacing("4v"),
+          ':last-child': {
+            marginBottom: 0,
+          },
         }
       },
       [fr.breakpoints.up("md")]: {
-        width: "initial",
         ul: {
-          width: "initial",
           columns: nbItems,
         },
       },
