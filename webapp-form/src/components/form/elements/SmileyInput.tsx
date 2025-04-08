@@ -151,7 +151,6 @@ const useStyles = tss
       height: "1rem",
       width: "1rem",
       accentColor: fr.colors.decisions.background.flat.blueFrance.default,
-      
     },
     fieldset: {
       width: "100%",
