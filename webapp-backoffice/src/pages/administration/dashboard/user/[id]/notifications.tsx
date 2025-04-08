@@ -10,6 +10,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { NotificationFrequency } from '@prisma/client';
+import { useRouter } from 'next/router';
 
 interface Props {
 	isOwn: Boolean;
@@ -19,8 +20,14 @@ interface Props {
 
 const NotificationsAccount: React.FC<Props> = props => {
 	const { userId, isOwn, user } = props;
+	const utils = trpc.useUtils();
+	const router = useRouter();
 
-	const { mutateAsync: updateUser } = trpc.user.update.useMutation();
+	const { mutateAsync: updateUser } = trpc.user.update.useMutation({
+		onSuccess: async () => {
+			router.replace(router.asPath);
+		}
+	});
 
 	const { classes } = useStyles();
 
