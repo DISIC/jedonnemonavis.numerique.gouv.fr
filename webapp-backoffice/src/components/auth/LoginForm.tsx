@@ -37,6 +37,7 @@ const defaultErrors = {
 
 export const LoginForm = () => {
 	const router = useRouter();
+	const { test } = router.query;
 
 	const [credentials, setCredentials] = useState<FormCredentials>({
 		email: '',
@@ -209,10 +210,14 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			{/* <h5>Avec ProConnect</h5>
-			<ProConnectButton onClick={() => signIn('openid')} />
-			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} /> */}
-			<h5>Avec votre adresse mail</h5>
+			{test && 
+				<>
+					<h5>Avec ProConnect</h5>
+					<ProConnectButton onClick={() => signIn('openid')} />
+					<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
+					<h5>Avec votre adresse mail</h5>
+				</>
+			}
 			<form
 				onSubmit={e => {
 					e.preventDefault();
