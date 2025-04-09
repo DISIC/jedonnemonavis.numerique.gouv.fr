@@ -202,7 +202,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'email given_name usual_name phone siret idp_id custom siren belonging_population organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name phone siren siret'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
