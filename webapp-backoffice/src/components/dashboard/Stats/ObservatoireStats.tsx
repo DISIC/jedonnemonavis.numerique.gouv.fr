@@ -152,7 +152,7 @@ const ObservatoireStats = ({
 			);
 		} else {
 			return (
-				<div>
+				<div className={cx(fr.cx('fr-mb-16v'))}>
 					<Tooltip
 						placement="top"
 						title="Aucune donnée pour calculer cette note"
@@ -179,7 +179,6 @@ const ObservatoireStats = ({
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--top'
 				)}
 			>
 				{statFields.map((field, index) => (
@@ -228,7 +227,9 @@ const useStyles = tss.create({
 		padding: '0 1.7rem',
 		borderRadius: '0.5rem',
 		display: 'flex',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		height: '100%',
+		justifyContent: 'space-between',
 	},
 	label: {
 		display: 'flex',
