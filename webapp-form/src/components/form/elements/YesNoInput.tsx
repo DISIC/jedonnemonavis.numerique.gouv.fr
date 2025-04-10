@@ -44,7 +44,7 @@ export const YesNoInput = (props: Props) => {
               {opinion.contact_tried.includes(option.value) &&
                 !field.excluded.includes(option.value) && (
                   <div>
-                    <label className={cx(classes.label)}>
+                    <label>
                       {t(option.label)}
                     </label>
                     <div className={cx(classes.radioContainer)}>
@@ -105,6 +105,22 @@ export const YesNoInput = (props: Props) => {
                                     };
                                   });
                                 }}
+                                onClick={() => {
+                                  // if the value is already selected, remove it
+                                  if(
+                                    opinion.contact_reached.includes(
+                                      `${option.value}_${f.value}`,
+                                    )
+                                  ) {
+                                    setOpinion((prevOpinion) => ({
+                                      ...prevOpinion,
+                                      contact_reached: prevOpinion.contact_reached.filter(
+                                        (d) =>
+                                          d !== `${option.value}_${f.value}`,
+                                      ),
+                                    }));
+                                  }
+                                }}
                               />
                               <label
                                 htmlFor={`radio-${index}-${fIndex}-${f.label}-${option.label}-${f.value}`}
@@ -134,15 +150,14 @@ const useStyles = tss
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
     },
-    label: {
-      fontWeight: "bold",
-    },
     radioContainer: {
       display: "flex",
       alignItems: "center",
       marginTop: fr.spacing("4v"),
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+        backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+        color: 'white',
       },
       ["input:focus-visible + label"]: {
         outlineOffset: "2px",
@@ -154,10 +169,12 @@ const useStyles = tss
     },
     radioInput: {
       width: "100%",
+      fontWeight: 500,
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
       color: fr.colors.decisions.text.label.blueFrance.default,
       padding: fr.spacing("3v"),
       display: "flex",
+      justifyContent: "center",
       alignItems: "center",
       cursor: "pointer",
       img: {
@@ -168,8 +185,7 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         flexDirection: "column",
-        width: "3.5rem",
-        padding: fr.spacing("1v"),
+        ...fr.spacing("padding", {topBottom: "2v", rightLeft: "4v"}),
         img: {
           marginTop: fr.spacing("2v"),
           marginRight: 0,
@@ -178,12 +194,19 @@ const useStyles = tss
     },
     fieldset: {
       width: "100%",
-      marginBottom: fr.spacing("4v"),
+      marginBottom: fr.spacing("6v"),
       ul: {
         listStyle: "none",
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
         width: "100%",
+        li:{
+          paddingBottom: 0,
+          marginBottom: fr.spacing("3v"),
+          ':last-child': {
+            marginBottom: 0,
+          },
+        }
       },
       [fr.breakpoints.up("md")]: {
         width: "initial",
