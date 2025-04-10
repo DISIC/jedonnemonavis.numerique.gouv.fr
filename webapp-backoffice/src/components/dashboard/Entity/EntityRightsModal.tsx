@@ -14,6 +14,7 @@ import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { push } from '@socialgouv/matomo-next';
+import { PageItemsCounter } from '../../ui/Pagination';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
 
@@ -199,8 +200,8 @@ const EntityRightsModal = (props: Props) => {
 						className={fr.cx('fr-mb-16v')}
 						description={
 							<>
-								Pour devenir administrateur, envoyer un email à [adresse email
-								de contact].
+								Pour devenir administrateur, envoyer un email à
+								contact.jdma@design.numerique.gouv.fr
 							</>
 						}
 						severity="info"
@@ -230,20 +231,14 @@ const EntityRightsModal = (props: Props) => {
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
 				>
 					<div className={fr.cx('fr-col-8')}>
-						<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-							Administrateurs de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + adminEntityRights.length}
-							</span>{' '}
-							sur{' '}
-							<span className={cx(classes.boldText)}>
-								{adminEntityRightsCount}
-							</span>
-						</span>
+						<PageItemsCounter
+							label="Administrateurs"
+							startItemCount={numberPerPage * (currentPage - 1) + 1}
+							endItemCount={
+								numberPerPage * (currentPage - 1) + adminEntityRights.length
+							}
+							totalItemsCount={adminEntityRightsCount}
+						/>
 					</div>
 				</div>
 				<div>
