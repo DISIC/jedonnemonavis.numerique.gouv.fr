@@ -261,9 +261,9 @@ export const getCalendarInterval = (nbDays: number) => {
 };
 
 export const getCalendarFormat = (nbDays: number) => {
-	if (nbDays <= 62) return 'd MMM Y';
+	if (nbDays <= 62) return 'd MMM y';
 
-	return 'MMM Y';
+	return 'MMM y';
 };
 
 export const translateMonthToFrench = (dateStr: string) => {
