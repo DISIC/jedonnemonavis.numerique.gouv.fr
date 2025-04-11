@@ -15,6 +15,7 @@
 
 .fr-fieldset {
   margin: 0;
+  padding: 0;
 }
 
 .fr-fieldset .fr-fieldset__legend {
@@ -54,4 +55,8 @@ textarea.fr-input {
 .fr-header__menu-links .fr-collapse:not(.fr-collapse--expanded).fr-collapse {
   --collapse-max-height: 1 !important;
   --collapse: 0 !important;
+}
+
+.fr-stepper__title {
+  flex-direction: column;
 }

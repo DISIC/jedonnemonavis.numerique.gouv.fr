@@ -21,11 +21,11 @@ export const MarkInput = (props: Props) => {
     return (
       <div className={fr.cx("fr-grid-row")}>
         <div className={fr.cx("fr-col-12")}>
-          <h3>{t(field.label)}</h3>
+          <h3 className={fr.cx("fr-mb-8v")}>{t(field.label)}</h3>
         </div>
         <div className={fr.cx("fr-col-12")}>
           <div className={cx(classes.radioContainer)}>
-            <div>{t(field.hintLeft ?? "")}</div>
+            <div className={classes.hintLeft}>{t(field.hintLeft ?? "")}</div>
             <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
               <legend>
                 <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
@@ -48,7 +48,8 @@ export const MarkInput = (props: Props) => {
                       onClick={() => {
                         setOpinion((prevOpinion) => ({
                           ...prevOpinion,
-                          [field.name]: f.value,
+                          [field.name]:
+                          prevOpinion[field.name] === f.value ? undefined : f.value,
                         }));
                       }}
                     />
@@ -62,7 +63,7 @@ export const MarkInput = (props: Props) => {
                 ))}
               </ul>
             </fieldset>
-            <div>{t(field.hintRight ?? "")}</div>
+            <div className={classes.hintRight}>{t(field.hintRight ?? "")}</div>
           </div>
         </div>
       </div>
@@ -76,8 +77,22 @@ const useStyles = tss
   .create(({ nbItems }) => ({
     smallText: {
       fontSize: "0.8rem",
-      margin: "0 0 10px 0",
       color: fr.colors.decisions.text.mention.grey.default,
+    },
+    hintLeft: {
+      marginTop: fr.spacing("6v"),
+      marginBottom: fr.spacing("3v"),
+      whiteSpace: "nowrap",
+      [fr.breakpoints.up("md")]: {
+        margin: 0,
+      },
+    },
+    hintRight: {
+      whiteSpace: "nowrap",
+      marginTop: fr.spacing("3v"),
+      [fr.breakpoints.up("md")]: {
+        margin: 0,
+      },
     },
     radioContainer: {
       position: "relative",
@@ -86,6 +101,8 @@ const useStyles = tss
       marginTop: fr.spacing("10v"),
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+        backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+        color: 'white',
       },
       ["input:focus-visible + label"]: {
         outlineOffset: "2px",
@@ -101,10 +118,15 @@ const useStyles = tss
     radioInput: {
       width: "100%",
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      padding: fr.spacing("3v"),
+      padding: fr.spacing("2v"),
+      paddingLeft: fr.spacing("4v"),
+      paddingRight: fr.spacing("4v"),
       display: "flex",
+      justifyContent: "center",
       alignItems: "center",
       cursor: "pointer",
+      color: fr.colors.decisions.background.flat.blueFrance.default,
+      fontWeight: 500,
       img: {
         marginRight: fr.spacing("2v"),
       },
@@ -113,8 +135,6 @@ const useStyles = tss
       },
       [fr.breakpoints.up("md")]: {
         flexDirection: "column",
-        width: "3.5rem",
-        padding: fr.spacing("1v"),
         img: {
           marginTop: fr.spacing("2v"),
           marginRight: 0,
@@ -132,11 +152,16 @@ const useStyles = tss
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
         width: "100%",
+        li:{
+          paddingBottom: 0,
+          marginBottom: fr.spacing("3v"),
+          ':last-child': {
+            marginBottom: 0,
+          },
+        }
       },
       [fr.breakpoints.up("md")]: {
-        width: "initial",
         ul: {
-          width: "initial",
           columns: nbItems,
         },
       },

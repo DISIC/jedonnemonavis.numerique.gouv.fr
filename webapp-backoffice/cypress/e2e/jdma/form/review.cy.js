@@ -69,15 +69,15 @@ function fillFormStep3() {
 }
 
 function fillFormStep4() {
-	cy.get("[class*='mainTable']").should('be.visible').within(() => {
+	cy.get("[class*='reviews']").should('be.visible').within(() => {
 		cy.contains('label', 'Au guichet')
-			.parents('tr')
+			.parents("[class*='optionRow']")
 			.within(() => {
 				cy.get('input[type="radio"]').eq(4).check({ force: true }); 
 			});
 
 		cy.contains('label', 'Par téléphone')
-			.parents('tr')
+			.parents("[class*='optionRow']")
 			.within(() => {
 				cy.get('input[type="radio"]').eq(3).check({ force: true }); 
 			});

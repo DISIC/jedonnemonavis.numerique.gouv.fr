@@ -77,6 +77,7 @@ export type FormField =
       kind: "array-radio";
       name: keyof Opinion;
       label: string;
+      hint?: string;
       conditions?: Condition[];
       options: RadioOption[];
       needed: number[];
