@@ -402,7 +402,7 @@ const ProductCard = ({
 				href={`/administration/dashboard/product/${product.id}/stats`}
 				tabIndex={-1}
 			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<div className={cx(fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w'), classes.hoverCard)}>
 					<div
 						className={cx(
 							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
@@ -771,6 +771,11 @@ const useStyles = tss.withName(ProductCard.name).create({
 			'.statsSection': {
 				order: 4
 			}
+		}
+	},
+	hoverCard: {
+		'&:hover': {
+			backgroundColor: fr.colors.decisions.background.disabled.grey.default,
 		}
 	},
 	titleSection: {},
