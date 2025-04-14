@@ -193,7 +193,7 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	const displayRightsTable = () => {
-		if (!adminEntityRights.length && !session?.user.role.includes('admin')) {
+		if (!adminEntityRights.filter(aer => aer.user !== null).length && !session?.user.role.includes('admin')) {
 			return (
 				<div role="status">
 					<Alert
@@ -235,7 +235,7 @@ const EntityRightsModal = (props: Props) => {
 							label="Administrateurs"
 							startItemCount={numberPerPage * (currentPage - 1) + 1}
 							endItemCount={
-								numberPerPage * (currentPage - 1) + adminEntityRights.length
+								numberPerPage * (currentPage - 1) + adminEntityRights.filter(aer => aer.user !== null).length
 							}
 							totalItemsCount={adminEntityRightsCount}
 						/>
