@@ -125,13 +125,13 @@ const ObservatoireStats = ({
 		}
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
-				<>
+				<div>
 					<p
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
 								? getClassFromValue(field.value, field.slug)
-								: undefined
+								: cx(fr.cx('fr-mb-18v'))
 						)}
 					>
 						{['autonomy', 'contact'].includes(field.slug)
@@ -148,7 +148,7 @@ const ObservatoireStats = ({
 							{getLabelFromValue(field.value, field.slug)}
 						</p>
 					)}
-				</>
+				</div>
 			);
 		} else {
 			return (
