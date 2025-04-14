@@ -146,6 +146,7 @@
     },
     "contact_satisfaction": {
       "label": "Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
+      "hint": "Sur une échelle de 1 à 5, 1 est très mauvaise et 5 est excellente.",
       "options": [
         {
           "label": "Très mauvaise"
@@ -161,9 +162,6 @@
         },
         {
           "label": "Excellente"
-        },
-        {
-          "label": "Ne se prononce pas"
         }
       ]
     },
