@@ -51,7 +51,8 @@ const RootYesNo = (props: Props) => {
 									className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
 									small
 								>
-									Réponse parente masquée
+									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />	
+									option parente masquée
 								</Badge>
 							)}
 						</label>
@@ -100,7 +101,10 @@ const useStyles = tss.withName(RootYesNo.name).create({
 		}
 	},
 	hiddenBadge: {
-		backgroundColor: fr.colors.decisions.background.default.grey.active
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		'.ri-eye-off-line::before': {
+			'--icon-size': '1rem'
+		}
 	}
 });
 

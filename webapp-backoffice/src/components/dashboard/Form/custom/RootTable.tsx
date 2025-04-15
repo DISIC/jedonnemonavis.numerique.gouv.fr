@@ -64,7 +64,8 @@ const RootTable = (props: Props) => {
 									<fieldset>
 										{isParentHidden ? (
 											<Badge className={cx(classes.hiddenBadge)} small>
-												Réponse parente masquée
+												<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+												option parente masquée
 											</Badge>
 										) : (
 											Array.from(Array(6).keys()).map(radio => (
@@ -173,7 +174,10 @@ const useStyles = tss.withName(RootTable.name).create({
 	hiddenBadge: {
 		width: '100%',
 		justifyContent: 'center',
-		backgroundColor: fr.colors.decisions.background.default.grey.active
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		'.ri-eye-off-line::before': {
+			'--icon-size': '1rem'
+		}
 	}
 });
 

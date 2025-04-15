@@ -126,9 +126,10 @@ const Checkboxes = (props: Props) => {
 											)}
 											{isHidden && (
 												<Badge
-													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))}
+													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))} small
 												>
-													Masquée
+													<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+													option masquée
 												</Badge>
 											)}
 										</span>
@@ -186,7 +187,10 @@ const useStyles = tss.withName(Checkboxes.name).create({
 		}
 	},
 	hiddenBadge: {
-		color: fr.colors.decisions.text.actionHigh.grey.default
+		color: fr.colors.decisions.text.actionHigh.grey.default,
+		'.ri-eye-off-line::before': {
+			'--icon-size': '1rem'
+		}
 	}
 });
 
