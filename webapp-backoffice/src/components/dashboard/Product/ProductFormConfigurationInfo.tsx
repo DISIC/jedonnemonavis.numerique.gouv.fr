@@ -42,7 +42,7 @@ const ProductFormConfigurationInfo = (props: Props) => {
 					Prévisualisez les changements et testez le formulaire, puis publiez le
 					nouveau formulaire, sans changer de lien.
 					<br />
-					Vos usagers auront directement accès au formulaire modifié.
+					Vos usagers auront directement accès au formulaire modifié, sans nécessité de rééditer le lien d'accès.
 				</p>
 				<Link className={fr.cx('fr-btn')} href={link}>
 					Configurer le formulaire

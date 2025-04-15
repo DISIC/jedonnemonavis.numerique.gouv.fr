@@ -178,8 +178,7 @@ const ProductFormPage = (props: Props) => {
 				title={`Publier le formulaire`}
 				handleOnConfirm={publish}
 			>
-				Vos usagers auront directement accès au formulaire modifié. Vous n’avez
-				pas besoin de changer le lien.
+				Vos usagers auront directement accès au formulaire modifié, sans nécessité de rééditer le lien d'accès.
 			</OnConfirmModal>
 			<OnConfirmModal
 				modal={onConfirmLeaveModal}
