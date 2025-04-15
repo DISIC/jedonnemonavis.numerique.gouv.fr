@@ -11,6 +11,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Radios from './blocks/Radios';
 import RootYesNo from './custom/RootYesNo';
 import RootTable from './custom/RootTable';
+import { normalizeHtml } from '@/src/utils/tools';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
@@ -46,13 +47,48 @@ const FormStepDisplay = (props: Props) => {
 		)
 	);
 
+	const [isModified, setIsModified] = useState(
+		configHelper.displays.some(
+			d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
+		) || configHelper.labels.some(d => {
+			if (d.kind !== 'block') return false;
+		
+			const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
+		
+			const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
+			if (!paragraphContent) return false;
+		
+			const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
+		
+			return isInCorrectBlock &&
+				normalizeHtml(d.label) !== normalizeHtml(replacedContent);
+		})
+	);
+
 	useEffect(() => {
 		setIsHidden(
 			configHelper.displays.some(
 				d => d.kind === 'step' && d.parent_id === step.id
 			)
 		);
-	}, [step]);
+		setIsModified(
+			configHelper.displays.some(
+				d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
+			) || configHelper.labels.some(d => {
+				if (d.kind !== 'block') return false;
+			
+				const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
+			
+				const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
+				if (!paragraphContent) return false;
+			
+				const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
+			
+				return isInCorrectBlock &&
+					normalizeHtml(d.label) !== normalizeHtml(replacedContent);
+			})
+		)
+	}, [step, configHelper]);
 
 	useEffect(() => {
 		onConfigChange({
@@ -83,34 +119,44 @@ const FormStepDisplay = (props: Props) => {
 		>
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
-					<h2>
-						{step.title}{' '}
-						{step.description && (
-							<Tooltip
-								className={classes.tooltip}
-								kind="hover"
-								title={
-									<>
-										<b>Pourquoi cette étape ?</b>
-										<br />
-										<span
-											className={classes.description}
-											dangerouslySetInnerHTML={{
-												__html: step.description.replaceAll('\n', '<br/>')
-											}}
-										/>
-									</>
-								}
-							/>
-						)}
-					</h2>
+					<div className={cx(classes.headerInfo)}>
+						<h2>
+							{step.title}{' '}
+							{step.description && (
+								<Tooltip
+									className={classes.tooltip}
+									kind="hover"
+									title={
+										<>
+											<b>Pourquoi cette étape ?</b>
+											<br />
+											<span
+												className={classes.description}
+												dangerouslySetInnerHTML={{
+													__html: step.description.replaceAll('\n', '<br/>')
+												}}
+											/>
+										</>
+									}
+								/>
+							)}
+						</h2>
+
+						<div  className={cx(classes.badgeContainer)}>
+							{isHidden && (
+								<Badge className={cx(classes.hiddenBadge)} small>
+									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+									étape masquée
+								</Badge>
+							)}
+							{! isHidden && isModified && (
+								<Badge className={cx(classes.modifiedBadge)} small>
+									étape modifiée
+								</Badge>
+							)}
+						</div>
+					</div>
 					<div>
-						{isHidden && (
-							<Badge className={cx(classes.hiddenBadge)} small>
-								<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-								Masquée
-							</Badge>
-						)}
 						{step.isHideable && (
 							<Button
 								priority="secondary"
@@ -130,10 +176,9 @@ const FormStepDisplay = (props: Props) => {
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
 							<p
-								className={cx(classes.disabledAlertMessage, fr.cx('fr-mb-2v'))}
+								className={cx(classes.disabledAlertMessage, fr.cx('fr-mr-2v', 'fr-mb-0'))}
 							>
-								<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} /> Étape
-								masquée
+								<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
 							</p>
 							<p className={fr.cx('fr-mb-0')}>
 								Cette étape est masquée sur le formulaire usager mais vous
@@ -188,6 +233,7 @@ const FormStepDisplay = (props: Props) => {
 							configHelper={configHelper}
 							onConfigChange={onConfigChange}
 							disabled={isHidden}
+							step={step}
 						/>
 					</div>
 				);
@@ -266,26 +312,39 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 	boxDisabled: {
 		padding: fr.spacing('4v'),
 		backgroundColor: fr.colors.decisions.background.default.grey.hover,
-		color: fr.colors.decisions.text.actionHigh.grey.default
+		color: fr.colors.decisions.text.actionHigh.grey.default,
+		display: 'flex',
+		alignItems: 'center'
 	},
 	disabledAlertMessage: {
-		fontWeight: 'bold',
-		color: fr.colors.decisions.background.flat.warning.default
+		color: fr.colors.decisions.background.flat.blueFrance.default
 	},
 	header: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		alignItems: 'center'
+	},
+	headerInfo: {
+		display: 'flex'
 	},
 	buttonsContainer: {
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
+	badgeContainer: {
+		display: 'flex',
+		alignItems: 'center'
+	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,
-		marginRight: fr.spacing('4v'),
+		marginLeft: fr.spacing('4v'),
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		}
+	},
+	modifiedBadge: {
+		backgroundColor: fr.colors.decisions.background.alt.yellowTournesol.hover,
+		marginLeft: fr.spacing('4v'),
 	},
 	tooltip: {
 		...fr.typography[18].style

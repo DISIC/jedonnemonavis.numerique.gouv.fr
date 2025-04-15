@@ -489,3 +489,10 @@ export const getHasConfigChanged = (
 		})
 	);
 };
+
+export const normalizeHtml = (html: string) => {
+	// Utilise un élément DOM temporaire côté client
+	const tmp = document.createElement('div');
+	tmp.innerHTML = html;
+	return tmp.textContent?.trim() ?? '';
+}

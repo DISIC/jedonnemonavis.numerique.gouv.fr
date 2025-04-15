@@ -1,5 +1,6 @@
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { normalizeHtml } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import React from 'react';
@@ -11,10 +12,11 @@ interface Props {
 	configHelper: FormConfigHelper;
 	onClick: (step: Step) => void;
 	currentStep: Step;
+	form: FormWithElements;
 }
 
 const FormStepper = (props: Props) => {
-	const { steps, configHelper, onClick, currentStep } = props;
+	const { steps, configHelper, onClick, currentStep, form } = props;
 	const { classes, cx } = useStyles();
 
 	return (
@@ -23,6 +25,21 @@ const FormStepper = (props: Props) => {
 				const isHidden = configHelper.displays.some(
 					d => d.kind === 'step' && d.parent_id === step.id && d.hidden
 				);
+				const isModified = configHelper.displays.some(
+					d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
+				) || configHelper.labels.some(d => {
+					if (d.kind !== 'block') return false;
+				
+					const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
+				
+					const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
+					if (!paragraphContent) return false;
+				
+					const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
+				
+					return isInCorrectBlock &&
+						normalizeHtml(d.label) !== normalizeHtml(replacedContent);
+				})
 
 				return (
 					<button
@@ -41,7 +58,12 @@ const FormStepper = (props: Props) => {
 						{isHidden && (
 							<Badge className={cx(classes.hiddenBadge)} small>
 								<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-								Masqué
+								étape masquée
+							</Badge>
+						)}
+						{! isHidden && isModified && (
+							<Badge className={cx(classes.modifiedBadge)} small>
+								étape modifiée
 							</Badge>
 						)}
 					</button>
@@ -90,6 +112,9 @@ const useStyles = tss.withName(FormStepper.name).create({
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.active
+	},
+	modifiedBadge: {
+		backgroundColor: fr.colors.decisions.background.alt.yellowTournesol.hover
 	}
 });
 
