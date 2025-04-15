@@ -44,7 +44,7 @@ const HomeFeatureDisplay = (props: Feature) => {
 							alt=""
 							width={448}
 							height={316}
-							style={{ maxWidth: '100%' }}
+							className={classes.image}
 						/>
 					</div>
 				</div>
@@ -61,7 +61,12 @@ const useStyles = tss
 			position: 'relative',
 			...fr.spacing('margin', {
 				topBottom: '32v'
-			})
+			}),
+			[fr.breakpoints.down('md')]: {
+				...fr.spacing('margin', {
+					topBottom: '16v'
+				})
+			}
 		},
 		container: {
 			...fr.spacing('padding', {
@@ -76,7 +81,10 @@ const useStyles = tss
 			[fr.breakpoints.down('md')]: {
 				...fr.spacing('margin', {
 					topBottom: '1v'
-				})
+				}),
+				...fr.spacing('padding', {
+					topBottom: 0
+				}),
 			}
 		},
 		blueBlock: {
@@ -101,6 +109,12 @@ const useStyles = tss
 			[fr.breakpoints.down('md')]: {
 				justifyContent: 'center',
 				flexDirection: 'column'
+			}
+		},
+		image: {
+			maxWidth: '100%',
+			[fr.breakpoints.down('md')]: {
+				height: 'auto',
 			}
 		},
 		textContainer: {

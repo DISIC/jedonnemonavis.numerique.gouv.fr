@@ -70,7 +70,7 @@ const HomeStepper = () => {
 						))}
 					</ol>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-						<Link href="/login" className={fr.cx('fr-my-5w', 'fr-btn')}>
+						<Link href="/login" className={fr.cx('fr-mt-5w', 'fr-btn')}>
 							Commencer
 						</Link>
 					</div>
@@ -91,6 +91,9 @@ const useStyles = tss
 				[fr.breakpoints.down('md')]: {
 					...fr.spacing('margin', { bottom: '3w' })
 				}
+			},
+			[fr.breakpoints.down('md')]: {
+				...fr.spacing('margin', { top: '16v' })
 			}
 		},
 		card: {
@@ -106,7 +109,6 @@ const useStyles = tss
 		},
 		numberContainer: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
-
 			borderRadius: '50%',
 			width: '5rem',
 			height: '5rem',
