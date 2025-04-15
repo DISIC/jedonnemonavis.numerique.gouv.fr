@@ -65,9 +65,5 @@ const useStyles = tss
 	.create(() => ({
 		formContainer: {
 			backgroundColor: fr.colors.decisions.background.alt.grey.default,
-			[fr.breakpoints.down('md')]: {
-				marginLeft: `-${fr.spacing('4v')}`,
-				marginRight: `-${fr.spacing('4v')}`
-			}
 		}
 	}));
