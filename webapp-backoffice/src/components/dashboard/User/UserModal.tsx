@@ -1,6 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
+import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import { Prisma, User, UserRole } from '@prisma/client';
@@ -239,15 +240,25 @@ const ButtonModal = (props: Props) => {
 							</Select>
 						)}
 					/>
+					<div className={classes.buttonsContainer}>
+						{displayModalButtons().map((button, index) => (
+							<Button
+								key={index}
+								priority={button.priority}
+								onClick={button.onClick}
+								className={classes.button}
+							>
+								{button.children}
+							</Button>
+						))}
+					</div>
 				</form>
 			</div>
 		);
 	};
 
 	const displayModalButtons = ():
-		| ModalProps.ActionAreaButtonProps
-		| [ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]]
-		| undefined => {
+		[ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]]=> {
 		return [
 			{
 				children: 'Annuler',
@@ -269,8 +280,8 @@ const ButtonModal = (props: Props) => {
 			title={displayModalTitle()}
 			concealingBackdrop={false}
 			size="large"
+			topAnchor
 			className={fr.cx('fr-my-0')}
-			buttons={displayModalButtons()}
 		>
 			{displayModalContent()}
 		</modal.Component>
@@ -302,6 +313,24 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 			'&:active': {
 				backgroundColor: '#FFF'
 			}
+		}
+	},
+	buttonsContainer: { 
+		display: 'flex', 
+		flexDirection: 'column-reverse', 
+		gap: '1.5rem', 
+		marginTop: '2rem',
+		[fr.breakpoints.up('md')]: {
+			flexDirection: 'row',
+			justifyContent: 'end',
+		} 
+	},
+	button: {
+		display: 'flex', 
+		justifyContent:'center', 
+		width: '100%',
+		[fr.breakpoints.up('md')]: {
+			width: 'initial'
 		}
 	},
 	boldText: {

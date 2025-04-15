@@ -463,6 +463,7 @@ const ButtonModal = (props: Props) => {
 			title={displayModalTitle()}
 			concealingBackdrop={false}
 			size="large"
+			topAnchor
 			className={fr.cx(
 				'fr-grid-row',
 				'fr-grid-row--center',
