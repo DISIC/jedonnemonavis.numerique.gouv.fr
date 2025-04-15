@@ -28,7 +28,8 @@ import { trpc } from "../utils/trpc";
 
 type JDMAFormProps = {
   product: Product;
-  isPreview: boolean;
+  isPreviewPublished: boolean;
+  isPreviewUnpublished: boolean;
 };
 
 export type FormStepNames =
@@ -41,7 +42,7 @@ export type FormStepNames =
     >
   | "contact";
 
-export default function JDMAForm({ product, isPreview }: JDMAFormProps) {
+export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpublished }: JDMAFormProps) {
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -468,17 +469,31 @@ export default function JDMAForm({ product, isPreview }: JDMAFormProps) {
 
   return (
     <div>
-      {isPreview && (
+      {isPreviewUnpublished && (
         <Notice
           className={cx(classes.notice)}
           isClosable
           onClose={function noRefCheck() {}}
           title={
             <>
-              <b>Prévisualisation du formulaire</b>
+              <b>Vous prévisualisez une version non plubliée du formulaire.</b>
               <span className={fr.cx("fr-ml-2v")}>
-                Ce formulaire n’est pas encore publié et vos réponses ne sont
-                pas prises en compte.
+                Vos réponses ne sont pas prises en compte.
+              </span>
+            </>
+          }
+        />
+      )}
+      {isPreviewPublished && (
+        <Notice
+          className={cx(classes.notice)}
+          isClosable
+          onClose={function noRefCheck() {}}
+          title={
+            <>
+              <b>Vous consultez une visualisation du formulaire.</b>
+              <span className={fr.cx("fr-ml-2v")}>
+                Vos réponses ne sont pas prises en compte.
               </span>
             </>
           }
@@ -640,7 +655,8 @@ export const getServerSideProps: GetServerSideProps<{
               : serializeData(product.forms[0].form_configs),
           },
         },
-        isPreview: !!formConfig,
+        isPreviewPublished: !formConfig && isInIframe,
+        isPreviewUnpublished: !!formConfig && isInIframe,
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
     };
