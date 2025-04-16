@@ -13,12 +13,26 @@ const Textarea = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	return (
-		<Input
-			className={cx(classes.blockTextarea)}
-			label={''}
-			hintText={block.content}
-			textArea
-		/>
+		<>
+			{block.upLabel && (
+				<p
+					dangerouslySetInnerHTML={{
+						__html: block.upLabel
+					}}
+				></p>
+			)}
+			<Input
+				className={cx(classes.blockTextarea, fr.cx('fr-mb-2v'))}
+				label={''}
+				textArea
+			/>
+			{block.downLabel && (
+				<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
+					<span className={fr.cx('fr-icon-info-fill', 'fr-mr-1v')} />{' '}
+					{block.downLabel}
+				</p>
+			)}
+		</>
 	);
 };
 
@@ -26,6 +40,13 @@ const useStyles = tss.withName(Textarea.name).create({
 	blockTextarea: {
 		'.fr-input': {
 			minHeight: fr.spacing('28v')
+		}
+	},
+	infoText: {
+		color: fr.colors.decisions.text.default.info.default,
+		fontSize: '0.8rem',
+		'.fr-icon-info-fill::before': {
+			'--icon-size': '1rem'
 		}
 	}
 });

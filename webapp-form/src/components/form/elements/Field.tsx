@@ -39,6 +39,8 @@ export const Field = (props: Props) => {
     (ftb) => ftb.label === t(field.label, { lng: "fr" })
   );
 
+  console.log("template field : ", templateField);
+
   const displayConfig = formConfig?.form_config_displays.find(
     (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
@@ -132,7 +134,15 @@ export const Field = (props: Props) => {
       return (
         <div className={classes.inputContainer}>
           <Input
-            hintText={field.hint ? t(field.hint) : undefined}
+            hintText={
+              templateField?.upLabel ? (
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: templateField.upLabel,
+                  }}
+                ></p>
+              ) : undefined
+            }
             label={<h3>{t(field.label)}</h3>}
             state={
               (opinion[field.name] || "").length > 15000 ? "error" : "default"
@@ -149,6 +159,12 @@ export const Field = (props: Props) => {
             }}
             textArea
           />
+          {templateField?.downLabel && (
+            <p className={cx(classes.infoText, fr.cx("fr-mt-0"))}>
+              <span className={fr.cx("fr-icon-info-fill", "fr-mr-1v")} />{" "}
+              {templateField.downLabel}
+            </p>
+          )}
           <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
             {opinion[field.name]?.length || 0} / 15000
           </div>
@@ -246,5 +262,12 @@ const useStyles = tss
     },
     textCount: {
       alignSelf: "flex-end",
+    },
+    infoText: {
+      color: fr.colors.decisions.text.default.info.default,
+      fontSize: "0.8rem",
+      ".fr-icon-info-fill::before": {
+        "--icon-size": "1rem",
+      },
     },
   }));

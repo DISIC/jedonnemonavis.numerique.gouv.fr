@@ -490,9 +490,15 @@ export const getHasConfigChanged = (
 	);
 };
 
-export const normalizeHtml = (html: string) => {
-	// Utilise un élément DOM temporaire côté client
-	const tmp = document.createElement('div');
-	tmp.innerHTML = html;
-	return tmp.textContent?.trim() ?? '';
-}
+export const normalizeHtml = (html: string): string => {
+	return html
+	  .replace(/<\/?[^>]+(>|$)/g, '') // Retire toutes les balises HTML
+	  .replace(/\s+/g, ' ')           // Normalise les espaces multiples en un seul
+	  .replace(/&nbsp;/g, ' ')        // Remplace les espaces insécables
+	  .replace(/&lt;/g, '<')          // Remplace les entités HTML courantes
+	  .replace(/&gt;/g, '>')
+	  .replace(/&amp;/g, '&')
+	  .replace(/&quot;/g, '"')
+	  .replace(/&#39;/g, "'")
+	  .trim();                         // Supprime les espaces en début et fin
+  };

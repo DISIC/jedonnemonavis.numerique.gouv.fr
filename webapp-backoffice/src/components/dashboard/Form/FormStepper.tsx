@@ -25,21 +25,35 @@ const FormStepper = (props: Props) => {
 				const isHidden = configHelper.displays.some(
 					d => d.kind === 'step' && d.parent_id === step.id && d.hidden
 				);
-				const isModified = configHelper.displays.some(
-					d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
-				) || configHelper.labels.some(d => {
-					if (d.kind !== 'block') return false;
-				
-					const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
-				
-					const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
-					if (!paragraphContent) return false;
-				
-					const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
-				
-					return isInCorrectBlock &&
-						normalizeHtml(d.label) !== normalizeHtml(replacedContent);
-				})
+				const isModified =
+					configHelper.displays.some(
+						d =>
+							d.kind === 'blockOption' &&
+							step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
+							d.hidden
+					) ||
+					configHelper.labels.some(d => {
+						if (d.kind !== 'block') return false;
+
+						const isInCorrectBlock = step.form_template_blocks
+							.map(b => b.id)
+							.includes(d.parent_id);
+
+						const paragraphContent = step.form_template_blocks.find(
+							b => b.type_bloc === 'paragraph'
+						)?.content;
+						if (!paragraphContent) return false;
+
+						const replacedContent = paragraphContent.replace(
+							'{{title}}',
+							form.product.title
+						);
+
+						return (
+							isInCorrectBlock &&
+							normalizeHtml(d.label) !== normalizeHtml(replacedContent)
+						);
+					});
 
 				return (
 					<button
@@ -61,7 +75,7 @@ const FormStepper = (props: Props) => {
 								étape masquée
 							</Badge>
 						)}
-						{! isHidden && isModified && (
+						{!isHidden && isModified && (
 							<Badge className={cx(classes.modifiedBadge)} small>
 								étape modifiée
 							</Badge>
@@ -114,7 +128,8 @@ const useStyles = tss.withName(FormStepper.name).create({
 		backgroundColor: fr.colors.decisions.background.alt.grey.active
 	},
 	modifiedBadge: {
-		backgroundColor: fr.colors.decisions.background.alt.yellowTournesol.hover
+		backgroundColor:
+			fr.colors.decisions.background.contrast.yellowTournesol.default
 	}
 });
 

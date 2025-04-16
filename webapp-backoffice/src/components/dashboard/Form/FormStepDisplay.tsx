@@ -49,20 +49,33 @@ const FormStepDisplay = (props: Props) => {
 
 	const [isModified, setIsModified] = useState(
 		configHelper.displays.some(
-			d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
-		) || configHelper.labels.some(d => {
-			if (d.kind !== 'block') return false;
-		
-			const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
-		
-			const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
-			if (!paragraphContent) return false;
-		
-			const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
-		
-			return isInCorrectBlock &&
-				normalizeHtml(d.label) !== normalizeHtml(replacedContent);
-		})
+			d =>
+				d.kind === 'blockOption' &&
+				step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
+				d.hidden
+		) ||
+			configHelper.labels.some(d => {
+				if (d.kind !== 'block') return false;
+
+				const isInCorrectBlock = step.form_template_blocks
+					.map(b => b.id)
+					.includes(d.parent_id);
+
+				const paragraphContent = step.form_template_blocks.find(
+					b => b.type_bloc === 'paragraph'
+				)?.content;
+				if (!paragraphContent) return false;
+
+				const replacedContent = paragraphContent.replace(
+					'{{title}}',
+					form.product.title
+				);
+
+				return (
+					isInCorrectBlock &&
+					normalizeHtml(d.label) !== normalizeHtml(replacedContent)
+				);
+			})
 	);
 
 	useEffect(() => {
@@ -73,21 +86,34 @@ const FormStepDisplay = (props: Props) => {
 		);
 		setIsModified(
 			configHelper.displays.some(
-				d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
-			) || configHelper.labels.some(d => {
-				if (d.kind !== 'block') return false;
-			
-				const isInCorrectBlock = step.form_template_blocks.map(b => b.id).includes(d.parent_id);
-			
-				const paragraphContent = step.form_template_blocks.find(b => b.type_bloc === 'paragraph')?.content;
-				if (!paragraphContent) return false;
-			
-				const replacedContent = paragraphContent.replace('{{title}}', form.product.title);
-			
-				return isInCorrectBlock &&
-					normalizeHtml(d.label) !== normalizeHtml(replacedContent);
-			})
-		)
+				d =>
+					d.kind === 'blockOption' &&
+					step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
+					d.hidden
+			) ||
+				configHelper.labels.some(d => {
+					if (d.kind !== 'block') return false;
+
+					const isInCorrectBlock = step.form_template_blocks
+						.map(b => b.id)
+						.includes(d.parent_id);
+
+					const paragraphContent = step.form_template_blocks.find(
+						b => b.type_bloc === 'paragraph'
+					)?.content;
+					if (!paragraphContent) return false;
+
+					const replacedContent = paragraphContent.replace(
+						'{{title}}',
+						form.product.title
+					);
+
+					return (
+						isInCorrectBlock &&
+						normalizeHtml(d.label) !== normalizeHtml(replacedContent)
+					);
+				})
+		);
 	}, [step, configHelper]);
 
 	useEffect(() => {
@@ -142,14 +168,14 @@ const FormStepDisplay = (props: Props) => {
 							)}
 						</h2>
 
-						<div  className={cx(classes.badgeContainer)}>
+						<div className={cx(classes.badgeContainer)}>
 							{isHidden && (
 								<Badge className={cx(classes.hiddenBadge)} small>
 									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
 									étape masquée
 								</Badge>
 							)}
-							{! isHidden && isModified && (
+							{!isHidden && isModified && (
 								<Badge className={cx(classes.modifiedBadge)} small>
 									étape modifiée
 								</Badge>
@@ -176,7 +202,10 @@ const FormStepDisplay = (props: Props) => {
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
 							<p
-								className={cx(classes.disabledAlertMessage, fr.cx('fr-mr-2v', 'fr-mb-0'))}
+								className={cx(
+									classes.disabledAlertMessage,
+									fr.cx('fr-mr-2v', 'fr-mb-0')
+								)}
 							>
 								<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
 							</p>
@@ -343,8 +372,9 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 		}
 	},
 	modifiedBadge: {
-		backgroundColor: fr.colors.decisions.background.alt.yellowTournesol.hover,
-		marginLeft: fr.spacing('4v'),
+		backgroundColor:
+			fr.colors.decisions.background.contrast.yellowTournesol.default,
+		marginLeft: fr.spacing('4v')
 	},
 	tooltip: {
 		...fr.typography[18].style
