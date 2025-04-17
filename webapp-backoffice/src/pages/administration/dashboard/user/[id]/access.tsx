@@ -391,14 +391,14 @@ const UserAccess: React.FC<Props> = props => {
 										))}
 								</ul>
 							</div>
-							<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+							<div className={fr.cx('fr-col-12')}>
 								<h3>Services</h3>
 								<p>{`${user.firstName} ${user.lastName} ${sortedEntities.length > 0 ? 'est administrateur des services suivants : ' : "n'est administrateur d'aucun service pour le moment."}`}</p>
 								<ul className={cx(classes.ulContainer)}>
 									{sortedEntities.map((entity, index) => (
 										<li key={entity.name}>
 											<React.Fragment key={index}>
-												<h5 className={fr.cx('fr-mt-12v', 'fr-mb-4v')}>
+												<h5 className={fr.cx('fr-mt-12v')}>
 													{entity.name}
 												</h5>
 												<hr />
@@ -435,12 +435,14 @@ const UserAccess: React.FC<Props> = props => {
 const useStyles = tss.withName(UserAccess.name).create({
 	actionWrapper: {
 		display: 'flex',
-		justifyContent: 'flex-end'
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'flex-start'
+		}
 	},
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('10v')
 	},
 	droppableArea: {
 		padding: '8px',

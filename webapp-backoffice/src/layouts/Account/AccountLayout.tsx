@@ -163,7 +163,10 @@ const useStyles = tss.create({
 		height: '100%'
 	},
 	children: {
-		minHeight: '40rem'
+		minHeight: '40rem',
+		[fr.breakpoints.down('md')]: {
+			minHeight: 'auto'
+		}
 	},
 	backToTop: {
 		position: 'sticky',
