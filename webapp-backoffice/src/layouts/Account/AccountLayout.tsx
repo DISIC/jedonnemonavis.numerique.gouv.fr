@@ -114,14 +114,15 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 								}
 							}
 						]}
+						style={{ marginBottom: fr.spacing('6v') }}
 					/>
 				)}
-				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-12v')} id="account-title">
+				<h1 className={fr.cx('fr-mb-2v', 'fr-mt-6v')} id="account-title">
 					{isOwn ? 'Compte' : `${user.firstName} ${user.lastName}`}
 				</h1>
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3','fr-mb-6v')}>
 					<SideMenu
 						align="left"
 						aria-label="Menu latéral"
@@ -156,7 +157,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '7w' })
+		...fr.spacing('margin', { bottom: '6v' })
 	},
 	container: {
 		height: '100%'
