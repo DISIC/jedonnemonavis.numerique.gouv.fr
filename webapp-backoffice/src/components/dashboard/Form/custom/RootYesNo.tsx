@@ -46,12 +46,12 @@ const RootYesNo = (props: Props) => {
 					>
 						<label className={cx(classes.childLabel)}>
 							{childBlock.label}{' '}
-							{isParentHidden && (
+							{!disabled && isParentHidden && (
 								<Badge
 									className={cx(fr.cx('fr-ml-2v'), classes.hiddenBadge)}
 									small
 								>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />	
+									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
 									option parente masquée
 								</Badge>
 							)}

@@ -72,7 +72,7 @@ const FormBlockDisplay = (props: Props) => {
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
 	};
-		
+
 	const [nbrModified, setNbrModified] = useState(
 		configHelper.displays.filter(
 			d => d.kind === 'blockOption' && block.id === d.parent_id && d.hidden
@@ -82,10 +82,13 @@ const FormBlockDisplay = (props: Props) => {
 	useEffect(() => {
 		setNbrModified(
 			configHelper.displays.filter(
-				d => d.kind === 'blockOption' && step.form_template_blocks.map(b => b.id).includes(d.parent_id) && d.hidden
+				d =>
+					d.kind === 'blockOption' &&
+					step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
+					d.hidden
 			).length
-		)
-	}, [configHelper])
+		);
+	}, [configHelper]);
 
 	return (
 		<>
@@ -115,20 +118,27 @@ const FormBlockDisplay = (props: Props) => {
 			{!NO_FIELD_BLOCKS.includes(block.type_bloc) && (
 				<>
 					<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
-					{nbrModified > 0 &&
+					{!disabled && nbrModified > 0 && (
 						<div>
 							<div className={cx(classes.boxDisabled)}>
 								<p
-									className={cx(classes.disabledAlertMessage, fr.cx('fr-mb-2v'))}
+									className={cx(
+										classes.disabledAlertMessage,
+										fr.cx('fr-mb-2v')
+									)}
 								>
-									<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} /> Vous avez masqué {nbrModified} {`option${nbrModified > 1 ? 's' : ''}`}
+									<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} /> Vous
+									avez masqué {nbrModified}{' '}
+									{`option${nbrModified > 1 ? 's' : ''}`}
 								</p>
 								<p className={fr.cx('fr-mb-0')}>
-									Ces options ne sont pas visibles sur le formulaire usagers. Les questions conditionnelles suivantes, si elles existent, seront également masquées.
+									Ces options ne sont pas visibles sur le formulaire usagers.
+									Les questions conditionnelles suivantes, si elles existent,
+									seront également masquées.
 								</p>
 							</div>
 						</div>
-					}
+					)}
 					<div className={cx(classes.container)}>
 						<div>{getBlockFromType(block)}</div>
 					</div>
@@ -155,7 +165,7 @@ const useStyles = tss.withName(FormBlockDisplay.name).create({
 	disabledAlertMessage: {
 		fontWeight: 'bold',
 		color: fr.colors.decisions.background.flat.blueFrance.default
-	},
+	}
 });
 
 export default FormBlockDisplay;

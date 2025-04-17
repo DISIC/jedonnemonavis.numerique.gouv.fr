@@ -6,6 +6,7 @@ import { tss } from 'tss-react';
 import FormStepDisplay from './FormStepDisplay';
 import FormStepper from './FormStepper';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
+import { useModifiedSteps } from './FormStateStepBlock';
 
 interface Props {
 	form: FormWithElements;
@@ -26,6 +27,12 @@ const FormConfigurator = (props: Props) => {
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>(
 		getHelperFromFormConfig(formConfig)
 	);
+	const { isStepModified, modifiedSteps, recalculateModifiedSteps } =
+		useModifiedSteps(
+			form.form_template.form_template_steps,
+			tmpConfigHelper,
+			form
+		);
 
 	const onConfigChange = (config: FormConfigHelper) => {
 		const legitDisplays = config.displays.filter(
@@ -80,6 +87,7 @@ const FormConfigurator = (props: Props) => {
 					currentStep={currentStep}
 					configHelper={tmpConfigHelper}
 					form={form}
+					isStepModified={isStepModified}
 				/>
 			</div>
 			<div className={fr.cx('fr-col-9')}>
@@ -91,6 +99,7 @@ const FormConfigurator = (props: Props) => {
 					changeStep={goToSibilingStep}
 					onConfigChange={onConfigChange}
 					onPublish={onPublish}
+					isStepModified={isStepModified}
 				/>
 			</div>
 		</div>

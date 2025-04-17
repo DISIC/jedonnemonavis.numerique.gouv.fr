@@ -13,10 +13,12 @@ interface Props {
 	onClick: (step: Step) => void;
 	currentStep: Step;
 	form: FormWithElements;
+	isStepModified: (stepId: number) => boolean;
 }
 
 const FormStepper = (props: Props) => {
-	const { steps, configHelper, onClick, currentStep, form } = props;
+	const { steps, configHelper, onClick, currentStep, form, isStepModified } =
+		props;
 	const { classes, cx } = useStyles();
 
 	return (
@@ -25,35 +27,6 @@ const FormStepper = (props: Props) => {
 				const isHidden = configHelper.displays.some(
 					d => d.kind === 'step' && d.parent_id === step.id && d.hidden
 				);
-				const isModified =
-					configHelper.displays.some(
-						d =>
-							d.kind === 'blockOption' &&
-							step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
-							d.hidden
-					) ||
-					configHelper.labels.some(d => {
-						if (d.kind !== 'block') return false;
-
-						const isInCorrectBlock = step.form_template_blocks
-							.map(b => b.id)
-							.includes(d.parent_id);
-
-						const paragraphContent = step.form_template_blocks.find(
-							b => b.type_bloc === 'paragraph'
-						)?.content;
-						if (!paragraphContent) return false;
-
-						const replacedContent = paragraphContent.replace(
-							'{{title}}',
-							form.product.title
-						);
-
-						return (
-							isInCorrectBlock &&
-							normalizeHtml(d.label) !== normalizeHtml(replacedContent)
-						);
-					});
 
 				return (
 					<button
@@ -75,7 +48,7 @@ const FormStepper = (props: Props) => {
 								étape masquée
 							</Badge>
 						)}
-						{!isHidden && isModified && (
+						{!isHidden && isStepModified(step.id) && (
 							<Badge className={cx(classes.modifiedBadge)} small>
 								étape modifiée
 							</Badge>

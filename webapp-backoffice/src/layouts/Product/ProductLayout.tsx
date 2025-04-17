@@ -63,10 +63,7 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? "Gérer l'accès"
-					: "Voir l'accès",
+			text: "Droits d'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {

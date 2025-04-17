@@ -22,6 +22,7 @@ interface Props {
 	changeStep: (to: 'previous' | 'next') => void;
 	onConfigChange: (config: FormConfigHelper) => void;
 	onPublish: () => void;
+	isStepModified: (stepId: number) => boolean;
 }
 
 const FormStepDisplay = (props: Props) => {
@@ -32,7 +33,8 @@ const FormStepDisplay = (props: Props) => {
 		hasConfigChanged,
 		changeStep,
 		onConfigChange,
-		onPublish
+		onPublish,
+		isStepModified
 	} = props;
 
 	const { classes, cx } = useStyles();
@@ -47,72 +49,11 @@ const FormStepDisplay = (props: Props) => {
 		)
 	);
 
-	const [isModified, setIsModified] = useState(
-		configHelper.displays.some(
-			d =>
-				d.kind === 'blockOption' &&
-				step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
-				d.hidden
-		) ||
-			configHelper.labels.some(d => {
-				if (d.kind !== 'block') return false;
-
-				const isInCorrectBlock = step.form_template_blocks
-					.map(b => b.id)
-					.includes(d.parent_id);
-
-				const paragraphContent = step.form_template_blocks.find(
-					b => b.type_bloc === 'paragraph'
-				)?.content;
-				if (!paragraphContent) return false;
-
-				const replacedContent = paragraphContent.replace(
-					'{{title}}',
-					form.product.title
-				);
-
-				return (
-					isInCorrectBlock &&
-					normalizeHtml(d.label) !== normalizeHtml(replacedContent)
-				);
-			})
-	);
-
 	useEffect(() => {
 		setIsHidden(
 			configHelper.displays.some(
 				d => d.kind === 'step' && d.parent_id === step.id
 			)
-		);
-		setIsModified(
-			configHelper.displays.some(
-				d =>
-					d.kind === 'blockOption' &&
-					step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
-					d.hidden
-			) ||
-				configHelper.labels.some(d => {
-					if (d.kind !== 'block') return false;
-
-					const isInCorrectBlock = step.form_template_blocks
-						.map(b => b.id)
-						.includes(d.parent_id);
-
-					const paragraphContent = step.form_template_blocks.find(
-						b => b.type_bloc === 'paragraph'
-					)?.content;
-					if (!paragraphContent) return false;
-
-					const replacedContent = paragraphContent.replace(
-						'{{title}}',
-						form.product.title
-					);
-
-					return (
-						isInCorrectBlock &&
-						normalizeHtml(d.label) !== normalizeHtml(replacedContent)
-					);
-				})
 		);
 	}, [step, configHelper]);
 
@@ -175,7 +116,7 @@ const FormStepDisplay = (props: Props) => {
 									étape masquée
 								</Badge>
 							)}
-							{!isHidden && isModified && (
+							{!isHidden && isStepModified(step.id) && (
 								<Badge className={cx(classes.modifiedBadge)} small>
 									étape modifiée
 								</Badge>
