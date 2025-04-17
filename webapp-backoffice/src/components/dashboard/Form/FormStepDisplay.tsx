@@ -124,35 +124,35 @@ const FormStepDisplay = (props: Props) => {
 						</div>
 					</div>
 					<div>
-						{step.isHideable && (
-							<Button
-								priority="secondary"
-								iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
-								iconPosition="right"
-								onClick={() => {
-									setIsHidden(!isHidden);
-								}}
-							>
-								{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
-							</Button>
-						)}
+						<Button
+							priority="secondary"
+							iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+							iconPosition="right"
+							onClick={() => {
+								setIsHidden(!isHidden);
+							}}
+							disabled={!step.isHideable}
+						>
+							{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
+						</Button>
 					</div>
 				</div>
-				{isHidden && (
+				{(isHidden || !step.isHideable) && (
 					<>
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
-							<p
-								className={cx(
-									classes.disabledAlertMessage,
-									fr.cx('fr-mr-2v', 'fr-mb-0')
-								)}
-							>
-								<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
-							</p>
+							{isHidden && (
+								<p
+									className={cx(
+										classes.disabledAlertMessage,
+										fr.cx('fr-mr-2v', 'fr-mb-0')
+									)}
+								>
+									<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
+								</p>
+							)}
 							<p className={fr.cx('fr-mb-0')}>
-								Cette étape est masquée sur le formulaire usager mais vous
-								pouvez visualiser son contenu.
+								{`${isHidden ? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.' : "Cette étape n'est pas masquable."}`}
 							</p>
 						</div>
 					</>
