@@ -29,30 +29,23 @@ export function useModifiedSteps(
 			});
 
 			const hasLabelModifications = configHelper.labels.some(d => {
-				if (d.kind === 'block') {
-					const isInCorrectBlock = step.form_template_blocks
-						.map(b => b.id)
-						.includes(d.parent_id);
+				if (d.kind !== 'block') return false;
 
-					const paragraphBlock = step.form_template_blocks.find(
-						b => b.type_bloc === 'paragraph' && b.id === d.parent_id
-					);
+				const paragraphBlock = step.form_template_blocks.find(
+					b => b.id === d.parent_id && b.type_bloc === 'paragraph'
+				);
 
-					if (!paragraphBlock || !paragraphBlock.content || !isInCorrectBlock)
-						return false;
+				if (!paragraphBlock?.content) return false;
 
-					return (
-						normalizeHtml(d.label) !==
-						normalizeHtml(
-							paragraphBlock.content.replace(
-								'{{title}}',
-								form?.product?.title || ''
-							)
+				return (
+					normalizeHtml(d.label) !==
+					normalizeHtml(
+						paragraphBlock.content.replace(
+							'{{title}}',
+							form?.product?.title || ''
 						)
-					);
-				}
-
-				return false;
+					)
+				);
 			});
 
 			if (hasDisplayModifications || hasLabelModifications) {

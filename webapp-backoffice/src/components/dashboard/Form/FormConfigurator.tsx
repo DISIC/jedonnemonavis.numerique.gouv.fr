@@ -6,7 +6,7 @@ import { tss } from 'tss-react';
 import FormStepDisplay from './FormStepDisplay';
 import FormStepper from './FormStepper';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
-import { useModifiedSteps } from './FormStateStepBlock';
+import { useModifiedSteps } from '../../../hooks/dashboard/form/FormStateStepBlock';
 
 interface Props {
 	form: FormWithElements;
