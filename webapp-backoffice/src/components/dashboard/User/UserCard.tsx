@@ -22,6 +22,7 @@ const UserCard = ({
 	selected
 }: Props) => {
 	const { data: session } = useSession({ required: true });
+	const isOwn = session?.user?.id !== undefined && Number(session.user.id) === user.id;
 	const { cx, classes } = useStyles();
 
 	return (
@@ -51,7 +52,7 @@ const UserCard = ({
 					></Checkbox>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<Link href={`/administration/dashboard/user/${user.id}/account`}>
+					<Link href={`/administration/dashboard/user/${user.id}/${isOwn ? 'infos' : 'account'}`}>
 						<p
 							className={cx(
 								fr.cx('fr-mb-0', 'fr-text--bold'),

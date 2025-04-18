@@ -205,10 +205,6 @@ const useStyles = tss
 	.create(({ backgroundColor }) => ({
 		formContainer: {
 			backgroundColor,
-			[fr.breakpoints.down('md')]: {
-				marginLeft: `-${fr.spacing('4v')}`,
-				marginRight: `-${fr.spacing('4v')}`
-			}
 		},
 		buttonNext: {
 			display: 'flex',

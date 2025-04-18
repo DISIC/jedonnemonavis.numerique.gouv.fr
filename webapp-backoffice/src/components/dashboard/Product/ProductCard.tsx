@@ -488,7 +488,7 @@ const ProductCard = ({
 								<div
 									className={cx(
 										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
-										classes.rightButtonsWrapper
+										classes.buttonsWrapper
 									)}
 								>
 									<Button
@@ -579,7 +579,7 @@ const ProductCard = ({
 								</div>
 								<div
 									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
+										fr.cx('fr-col', 'fr-col-12', 'fr-pt-md-0'),
 										classes.statsSection
 									)}
 								>
@@ -756,7 +756,7 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
-			'.rightButtonsWrapper': {
+			'.buttonsWrapper': {
 				order: 0
 			},
 			'.titleSection': {
@@ -782,9 +782,13 @@ const useStyles = tss.withName(ProductCard.name).create({
 	entitySection: {},
 	badgesSection: {},
 	statsSection: {},
-	rightButtonsWrapper: {
+	buttonsWrapper: {
 		display: 'flex',
-		justifyContent: 'end'
+		justifyContent: 'end',
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start',
+			...fr.spacing('margin', {topBottom: '2v'}), 
+		}
 	},
 	buttonWrapper: {
 		maxHeight: '32px !important',

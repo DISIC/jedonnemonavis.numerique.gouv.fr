@@ -102,6 +102,7 @@ const AccessCard = (props: Props) => {
 											'aria-label': `Accéder aux options de droits sur le service "${title}"`,
 											title: `Accéder aux options de droits sur le service "${title}"`
 										}}
+										className={classes.button}
 									>
 										Options
 									</Button>
@@ -162,6 +163,7 @@ const AccessCard = (props: Props) => {
 											'aria-label': `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`,
 											title: `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`
 										}}
+										className={classes.button}
 									>
 										Retirer l'accès
 									</Button>
@@ -198,7 +200,18 @@ const AccessCard = (props: Props) => {
 const useStyles = tss.withName(AccessCard.name).create(() => ({
 	actionContainer: {
 		display: 'flex',
-		justifyContent: 'flex-end'
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			gap: fr.spacing('4v')
+		}
+	},
+	button: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center',
+		}
 	},
 	badgeContainer: {
 		display: 'flex',

@@ -12,6 +12,7 @@ interface Props {
 	viewModeContent: ReactElement;
 	editModeContent?: ReactElement;
 	onSubmit?: () => Promise<boolean>;
+	smallScreenShowHr?: boolean;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -21,7 +22,8 @@ const GenericCardInfos = (props: Props) => {
 		modifiable,
 		viewModeContent,
 		editModeContent,
-		onSubmit
+		onSubmit,
+		smallScreenShowHr = true
 	} = props;
 	const [modifying, setModifying] = React.useState<Boolean>(false);
 	const { cx, classes } = useStyles();
@@ -95,10 +97,12 @@ const GenericCardInfos = (props: Props) => {
 							</>
 						)}
 					</div>
-					<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
-						<hr />
-					</div>
-					<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-6v'))}>
+					{smallScreenShowHr && (
+						<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
+							<hr />
+						</div>
+					)}
+					<div className={cx(fr.cx(smallScreenShowHr? 'fr-col-md-12' : 'fr-col-12', 'fr-pb-6v'))}>
 						{modifying ? editModeContent : viewModeContent}
 					</div>
 				</div>

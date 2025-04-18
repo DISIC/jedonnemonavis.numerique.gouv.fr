@@ -65,7 +65,6 @@ const useStyles = tss.withName(UserInfos.name).create({
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('10v')
 	},
 	droppableArea: {
 		padding: '8px',

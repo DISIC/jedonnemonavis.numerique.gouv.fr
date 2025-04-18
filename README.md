@@ -65,7 +65,7 @@ yarn
 Initialisez la base de données Postgres :
 
 ```bash
-npx prisma db migrate dev
+npx prisma migrate dev
 ```
 
 Effectuez un seeding de la base de données Postgres :
