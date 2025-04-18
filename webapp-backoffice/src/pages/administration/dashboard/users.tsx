@@ -533,7 +533,6 @@ const DashBoardUsers = () => {
 											options={[
 												{
 													label: '',
-
 													nativeInputProps: {
 														'aria-label': 'Tout sélectionner',
 														checked: isCheckedAll,

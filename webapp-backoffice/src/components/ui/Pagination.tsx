@@ -106,13 +106,6 @@ export const Pagination = memo(
 
 		assert<Equals<keyof typeof rest, never>>();
 
-		// const id = useAnalyticsId({
-		// 	defaultIdPrefix: 'fr-pagination',
-		// 	explicitlyProvidedId: id_props
-		// });
-
-		// const { Link } = getLink();
-
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
