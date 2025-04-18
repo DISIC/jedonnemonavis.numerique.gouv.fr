@@ -396,7 +396,7 @@ const UserAccess: React.FC<Props> = props => {
 								<p>{`${user.firstName} ${user.lastName} ${sortedEntities.length > 0 ? 'est administrateur des services suivants : ' : "n'est administrateur d'aucun service pour le moment."}`}</p>
 								<ul className={cx(classes.ulContainer)}>
 									{sortedEntities.map((entity, index) => (
-										<li key={entity.name}>
+										<li key={entity.name} className={fr.cx('fr-mb-12v')}>
 											<React.Fragment key={index}>
 												<h5>
 													{entity.name}
