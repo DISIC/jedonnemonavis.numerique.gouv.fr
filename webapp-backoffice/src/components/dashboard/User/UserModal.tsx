@@ -280,7 +280,6 @@ const ButtonModal = (props: Props) => {
 			title={displayModalTitle()}
 			concealingBackdrop={false}
 			size="large"
-			topAnchor
 			className={fr.cx('fr-my-0')}
 		>
 			{displayModalContent()}

@@ -237,7 +237,6 @@ const ProductModal = (props: Props) => {
 					: 'Ajouter un nouveau service'
 			}
 			size="large"
-			topAnchor
 			buttons={[
 				{
 					children: 'Annuler'

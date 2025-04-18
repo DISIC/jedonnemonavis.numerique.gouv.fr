@@ -131,7 +131,6 @@ const EntityModal = (props: Props) => {
 					: 'Ajouter une organisation'
 			}
 			size="large"
-			topAnchor
 			buttons={[
 				{
 					children: 'Annuler'
