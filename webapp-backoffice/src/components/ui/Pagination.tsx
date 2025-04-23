@@ -3,7 +3,8 @@ import React, {
 	forwardRef,
 	type CSSProperties,
 	AnchorHTMLAttributes,
-	DetailedHTMLProps
+	DetailedHTMLProps,
+	useMemo
 } from 'react';
 import { assert } from 'tsafe/assert';
 import type { Equals } from 'tsafe';
@@ -41,12 +42,14 @@ const getPaginationParts = ({
 	count,
 	defaultPage,
 	maxVisiblePages,
-	slicesSize
+	slicesSize,
+	isMobile
 }: {
 	count: number;
 	defaultPage: number;
 	maxVisiblePages: number;
 	slicesSize: number;
+	isMobile?: boolean;
 }) => {
 	// first n pages
 	if (count <= maxVisiblePages) {
@@ -75,7 +78,7 @@ const getPaginationParts = ({
 			return { number: v + 1, active: defaultPage === v + 1 };
 		}),
 		{ number: null, active: false },
-		...Array.from({ length: slicesSize }, (_, v) => {
+		...Array.from({ length: slicesSize - (isMobile ? 1 : 0) }, (_, v) => {
 			const pageNumber = count - (slicesSize - v) + 1;
 			return {
 				number: pageNumber,
@@ -88,6 +91,8 @@ const getPaginationParts = ({
 /** @see <https://components.react-dsfr.codegouv.studio/?path=/docs/components-pagination> */
 export const Pagination = memo(
 	forwardRef<HTMLDivElement, PaginationProps>((props, ref) => {
+		const isMobile = useMemo(() => window.innerWidth <= fr.breakpoints.getPxValues().sm, []);
+
 		const {
 			id: id_props,
 			className,
@@ -109,8 +114,9 @@ export const Pagination = memo(
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
-			maxVisiblePages,
-			slicesSize
+			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, // If mobile, page size is dynamic based on screen size
+			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize, // If mobile, page size is dynamic based on screen size
+			isMobile
 		});
 
 		return (
@@ -123,7 +129,7 @@ export const Pagination = memo(
 				ref={ref}
 			>
 				<ul className={cx(fr.cx('fr-pagination__list'), classes.list)}>
-					{showFirstLast && (
+					{showFirstLast && !isMobile && (
 						<li>
 							{count > 0 && defaultPage > 1 ? (
 								<Link
@@ -235,7 +241,7 @@ export const Pagination = memo(
 							</a>
 						)}
 					</li>
-					{showFirstLast && (
+					{showFirstLast && !isMobile && (
 						<li>
 							{defaultPage < count ? (
 								<Link
