@@ -137,7 +137,7 @@ const ProductButtonsPage = (props: Props) => {
 			/>
 			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-2w'), classes.titleContainer)}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2  className={fr.cx('fr-mb-0')}>
+					<h2  className={fr.cx('fr-mb-0', 'fr-mb-md-2w')}>
 						{ownRight && ownRight === 'carrier_admin'
 							? 'Gérer les boutons'
 							: 'Voir les boutons'}

@@ -88,7 +88,7 @@ const ProductAccessCard = (props: Props) => {
 									aria-haspopup="true"
 									aria-expanded={menuOpen ? 'true' : undefined}
 									priority={'secondary'}
-									className={menuOpen ? classes.buttonOptionsOpen : ''}
+									className={cx(classes.button, (menuOpen ? classes.buttonOptionsOpen : ''))}
 									onClick={handleClick}
 									disabled={ownRight !== 'carrier_admin'}
 									iconId={
@@ -143,8 +143,17 @@ const useStyles = tss.create({
 	},
 	optionsDropdown: {
 		display: 'flex',
-		justifyContent: 'flex-end'
-	}
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+		}
+	},
+	button: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center',
+		}
+	},
 });
 
 export default ProductAccessCard;
