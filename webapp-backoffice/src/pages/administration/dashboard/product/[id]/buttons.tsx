@@ -135,16 +135,16 @@ const ProductButtonsPage = (props: Props) => {
 				button={currentButton}
 				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+			<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-2w'), classes.titleContainer)}>
 				<div className={fr.cx('fr-col-8')}>
-					<h2 className={fr.cx('fr-mb-2w')}>
+					<h2  className={fr.cx('fr-mb-0')}>
 						{ownRight && ownRight === 'carrier_admin'
 							? 'Gérer les boutons'
 							: 'Voir les boutons'}
 					</h2>
 				</div>
 				{buttons.length > 0 && (
-					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
+					<div className={cx(fr.cx('fr-col-md-4'), classes.titleButton)}>
 						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
@@ -154,6 +154,7 @@ const ProductButtonsPage = (props: Props) => {
 									handleModalOpening('create');
 									push(['trackEvent', 'Product', 'Modal-Create-button']);
 								}}
+								className={classes.titleButton}
 							>
 								Créer un bouton
 							</Button>
@@ -182,56 +183,57 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				</div>
 			)}
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--left'
-				)}
-			>
-				{buttons && nbPages > 1 && (
-					<PageItemsCounter
-						label="Boutons"
-						startItemCount={numberPerPage * (currentPage - 1) + 1}
-						endItemCount={numberPerPage * (currentPage - 1) + buttons.length}
-						totalItemsCount={buttonsCount}
-						additionalClasses={['fr-pb-1w']}
-					/>
-				)}
-				{/* {buttons.length > 0 && (
-					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
+
+			{buttons && nbPages > 1 && (
+				<div
+					className={fr.cx(
+						'fr-grid-row',
+						'fr-grid-row--gutters',
+						'fr-grid-row--left'
+					)}
+				>
+						<PageItemsCounter
+							label="Boutons"
+							startItemCount={numberPerPage * (currentPage - 1) + 1}
+							endItemCount={numberPerPage * (currentPage - 1) + buttons.length}
+							totalItemsCount={buttonsCount}
+							additionalClasses={['fr-pb-1w']}
+						/>
+					{/* {buttons.length > 0 && (
+						<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
+							<Checkbox
+								style={{ userSelect: 'none' }}
+								options={[
+									{
+										label: 'Afficher les boutons de test',
+										nativeInputProps: {
+											name: 'test-buttons',
+											checked: testFilter,
+											onChange: e => {
+												setTestFilter(e.currentTarget.checked);
+												setCurrentPage(1);
+											}
+										}
+									}
+								]}
+							/>
+						</div>
+					)} */}
+					{/* <div className={fr.cx('fr-col-4')}>
 						<Checkbox
-							style={{ userSelect: 'none' }}
 							options={[
 								{
-									label: 'Afficher les boutons de test',
+									label: 'Afficher les boutons archivés',
 									nativeInputProps: {
-										name: 'test-buttons',
-										checked: testFilter,
-										onChange: e => {
-											setTestFilter(e.currentTarget.checked);
-											setCurrentPage(1);
-										}
+										name: 'archived-buttons',
+										value: 'archived'
 									}
 								}
 							]}
 						/>
-					</div>
-				)} */}
-				{/* <div className={fr.cx('fr-col-4')}>
-					<Checkbox
-						options={[
-							{
-								label: 'Afficher les boutons archivés',
-								nativeInputProps: {
-									name: 'archived-buttons',
-									value: 'archived'
-								}
-							}
-						]}
-					/>
-				</div> */}
-			</div>
+					</div> */}
+				</div>
+			)}
 
 			<div>
 				{isLoadingButtons ? (
@@ -240,13 +242,13 @@ const ProductButtonsPage = (props: Props) => {
 					</div>
 				) : (
 					<>
-						<div className={cx(classes.btnContainer)}>
-							{!buttons.length && !isRefetchingButtons && (
-								<NoButtonsPanel
-									onButtonClick={() => handleModalOpening('create')}
-								/>
-							)}
-						</div>
+						{!buttons.length && !isRefetchingButtons && (
+							<div className={cx(classes.btnContainer)}>
+									<NoButtonsPanel
+										onButtonClick={() => handleModalOpening('create')}
+									/>
+							</div>
+						)}
 						<ul className={classes.buttonList}>
 							{buttons?.map((button, index) => (
 								<li key={index}>
@@ -324,11 +326,20 @@ const useStyles = tss
 	.withName(ProductButtonsPage.name)
 	.withParams()
 	.create({
+		titleContainer: {
+			[fr.breakpoints.down('md')]: {
+				flexDirection: 'column'
+			}
+		},
 		boldText: {
 			fontWeight: 'bold'
 		},
-		buttonRight: {
-			textAlign: 'right'
+		titleButton: {
+			textAlign: 'right',
+			[fr.breakpoints.down('md')]: {
+				width: '100%',
+				justifyContent: 'center',
+			}
 		},
 		noResults: {
 			paddingTop: fr.spacing('10v'),
@@ -337,7 +348,10 @@ const useStyles = tss
 			textAlign: 'center'
 		},
 		btnContainer: {
-			marginTop: '3rem'
+			marginTop: '3rem',
+			[fr.breakpoints.down('md')]: {
+				marginTop: '1.5rem',
+			}
 		},
 		buttonList: {
 			paddingInlineStart: 0,

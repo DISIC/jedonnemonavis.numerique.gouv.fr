@@ -62,6 +62,7 @@ const ProductButtonCard = (props: Props) => {
 									menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
 								}
 								iconPosition="right"
+								className={classes.button}
 							>
 								Options
 							</Button>
@@ -147,7 +148,19 @@ const useStyles = tss
 			flexWrap: 'wrap',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
-			paddingLeft: fr.spacing('11v')
+			paddingLeft: fr.spacing('11v'),
+			[fr.breakpoints.down('md')]: {
+				paddingLeft: 0,
+				flexDirection: 'column',
+				justifyContent: 'flex-start',
+				gap: fr.spacing('4v')
+			}
+		},
+		button: {
+			[fr.breakpoints.down('md')]: {
+				width: '100%',
+				justifyContent: 'center',
+			}
 		},
 		tag: {}
 	}));
