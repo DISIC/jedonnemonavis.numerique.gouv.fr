@@ -431,7 +431,7 @@ const ProductReviewsPage = (props: Props) => {
 					/>
 				</Head>
 				<div className={cx(classes.title)}>
-					<h1 className={fr.cx('fr-mb-0')}>Avis</h1>
+					<h2 className={fr.cx('fr-mb-0')}>Avis</h2>
 
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews

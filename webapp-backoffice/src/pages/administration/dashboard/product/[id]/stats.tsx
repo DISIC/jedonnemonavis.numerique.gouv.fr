@@ -349,7 +349,7 @@ const ProductStatPage = (props: Props) => {
 			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
 				{ownRight === 'carrier_admin' && (
 					<Button
 						priority="secondary"
