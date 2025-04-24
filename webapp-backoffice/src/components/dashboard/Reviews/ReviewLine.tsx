@@ -163,13 +163,17 @@ const useStyles = tss.create({
 		flexWrap: 'wrap',
 		border: '1px solid',
 		borderColor: fr.colors.decisions.border.default.grey.default,
-		marginBottom: 12
+		marginBottom: 12,
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'initial',
+		}
 	},
-
 	date: {
 		fontSize: 12
 	},
 	cellContainer: {
+		display: 'flex',
 		flex: '1 1 10%',
 		[fr.breakpoints.down('lg')]: {
 			flex: '50%',
@@ -181,6 +185,14 @@ const useStyles = tss.create({
 			},
 			['&:nth-of-type(9)']: {
 				flex: '1 1 14%'
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'row',
+			gap: fr.spacing('1w'),
+			button: {
+				width: '100%',
+				justifyContent: 'center'
 			}
 		}
 	},

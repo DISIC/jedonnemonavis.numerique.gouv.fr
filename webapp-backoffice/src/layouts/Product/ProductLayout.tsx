@@ -202,7 +202,7 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '12v' })
+		...fr.spacing('margin', { bottom: '6v' })
 	},
 	container: {
 		height: '100%'
