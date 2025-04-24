@@ -14,6 +14,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Toast } from '@/src/components/ui/Toast';
 import { push } from '@socialgouv/matomo-next';
+import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
 
 type FormCredentials = {
 	email: string;
@@ -36,6 +37,7 @@ const defaultErrors = {
 
 export const LoginForm = () => {
 	const router = useRouter();
+	const { test } = router.query;
 
 	const [credentials, setCredentials] = useState<FormCredentials>({
 		email: '',
@@ -58,6 +60,9 @@ export const LoginForm = () => {
 						pathname: 'login/otp',
 						query: { email: credentials.email }
 					});
+					break;
+				case 203:
+					signIn('openid');
 					break;
 				case 200:
 					setShowPassword(true);
@@ -205,8 +210,14 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			<h1>Connexion</h1>
-			<h5>Se connecter avec son compte</h5>
+			{test && 
+				<>
+					<h5>Avec ProConnect</h5>
+					<ProConnectButton onClick={() => signIn('openid')} />
+					<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
+					<h5>Avec votre adresse mail</h5>
+				</>
+			}
 			<form
 				onSubmit={e => {
 					e.preventDefault();

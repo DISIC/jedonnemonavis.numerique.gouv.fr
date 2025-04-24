@@ -7,7 +7,7 @@ import smtplib
 import requests
 import zipfile
 import boto3
-import psycopg2
+import psycopg
 import threading
 import pandas as pd
 import csv
@@ -64,7 +64,7 @@ def call_self_every_minute():
 
 def create_connection():
     try:
-        conn = psycopg2.connect(env_vars['POSTGRESQL_ADDON_URI'])
+        conn = psycopg.connect(env_vars['POSTGRESQL_ADDON_URI'])
         print("Connexion BDD réussie")
         return conn
     except Exception as e:
@@ -174,10 +174,6 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
                     Ce lien expirera dans 30 jours.<br><br>
                     </p>
                 </div>
-                <p>
-                    Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
-                    La Brigade d'Intervention du Numérique (BIN).
-                </p>
                 <div class="footer">
                     <p>
                         Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
@@ -218,16 +214,18 @@ def build_filters_query(filters, search_term):
     values = []
     
     if 'satisfaction' in filters and filters['satisfaction']:
+        placeholders = ', '.join(['%s'] * len(filters['satisfaction']))
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[%s]::\"AnswerIntention\"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
+            f"EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[{placeholders}]::\"AnswerIntention\"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
-        values.append(filters['satisfaction'])
+        values.extend(filters['satisfaction'])
 
     if 'comprehension' in filters and filters['comprehension']:
+        placeholders = ', '.join(['%s'] * len(filters['comprehension']))
         conditions.append(
-            "EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[%s]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
+            f"EXISTS (SELECT 1 FROM public.\"Answer\" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[{placeholders}]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')"
         )
-        values.append(filters['comprehension'])
+        values.extend(filters['comprehension'])
 
     if filters.get('needVerbatim'):
         conditions.append(

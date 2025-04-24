@@ -15,80 +15,43 @@ import { Loader } from '@/src/components/ui/Loader';
 interface Props {
 	isOwn: Boolean;
 	userId: number;
+	user: User;
 }
 
 const UserInfos: React.FC<Props> = props => {
-	const { isOwn, userId } = props;
+	const { isOwn, userId, user } = props;
 	const { classes } = useStyles();
 	const router = useRouter();
 
-	const {
-		data: userResult,
-		isLoading: isLoadingUser,
-		refetch: refetchUser,
-		isRefetching: isRefetchingUser
-	} = trpc.user.getById.useQuery(
-		{
-			id: userId
-		},
-		{
-			initialData: {
-				data: null
-			},
-			enabled: userId !== undefined
-		}
-	);
-
-	const user = userResult?.data as User;
-
 	return (
 		<>
-			{!user ||
-				isLoadingUser ||
-				(isRefetchingUser && (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-						<Loader />
-					</div>
-				))}
-			{!isLoadingUser && !isRefetchingUser && user && (
-				<AccountLayout isOwn={isOwn} user={user}>
-					<Head>
-						{!isLoadingUser && user && (
-							<>
-								<title>
-									{`${user.firstName} ${user.lastName}`} | Compte Informations |
-									Je donne mon avis
-								</title>
-								<meta
-									name="description"
-									content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
-								/>
-							</>
-						)}
-					</Head>
-					{isLoadingUser ||
-						(isRefetchingUser && (
-							<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-								<Loader />
-							</div>
-						))}
+			<AccountLayout isOwn={isOwn} user={user}>
+				<Head>
+					<title>
+						{`${user.firstName} ${user.lastName}`} | Compte Informations | Je
+						donne mon avis
+					</title>
+					<meta
+						name="description"
+						content={`${user.firstName} ${user.lastName} | Form Informations | Je donne mon avis`}
+					/>
+				</Head>
 
-					<div className={classes.column}>
-						<div className={classes.headerWrapper}>
-							<h2>Informations</h2>
-						</div>
-						<div>
-							<IdentityCard user={user} />
-						</div>
-						<div>
-							<CredentialsCard user={user} />
-						</div>
-						<div>
-							<DeleteCard user={user} isOwn={isOwn} />
-						</div>
+				<div className={classes.column}>
+					<div className={classes.headerWrapper}>
+						<h2>Informations</h2>
 					</div>
-				</AccountLayout>
-			)}
+					<div>
+						<IdentityCard user={user} />
+					</div>
+					<div>
+						<CredentialsCard user={user} />
+					</div>
+					<div>
+						<DeleteCard user={user} isOwn={isOwn} />
+					</div>
+				</div>
+			</AccountLayout>
 		</>
 	);
 };

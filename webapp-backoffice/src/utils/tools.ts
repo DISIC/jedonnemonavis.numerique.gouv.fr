@@ -233,7 +233,7 @@ export const calculateBucketsAverage = (
 };
 
 export const getReadableValue = (value: number) => {
-	const readableValue = (Math.floor(value * 10) / 10)
+	const readableValue = (Math.round(value * 10) / 10)
 		.toString()
 		.replace('.', ',');
 	return readableValue.includes(',') ? readableValue : `${readableValue},0`;
@@ -254,17 +254,16 @@ export const getDiffDaysBetweenTwoDates = (
 };
 
 export const getCalendarInterval = (nbDays: number) => {
-	if (nbDays < 30) return 'day';
-	if (nbDays < 62) return 'week';
+	if (nbDays <= 31) return 'day';
+	if (nbDays <= 62) return 'week';
 
 	return 'month';
 };
 
 export const getCalendarFormat = (nbDays: number) => {
-	if (nbDays < 30) return 'd MMM Y';
-	if (nbDays < 62) return 'd MMM Y';
+	if (nbDays <= 62) return 'd MMM y';
 
-	return 'MMM Y';
+	return 'MMM y';
 };
 
 export const translateMonthToFrench = (dateStr: string) => {

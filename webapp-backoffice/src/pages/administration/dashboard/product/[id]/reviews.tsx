@@ -12,7 +12,7 @@ import {
 	getNbPages
 } from '@/src/utils/tools';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
@@ -52,16 +52,13 @@ const defaultErrors = {
 const ProductReviewsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const router = useRouter();
-	const { data: session } = useSession();
 	const { view } = router.query;
 	const [startDate, setStartDate] = React.useState<string>(
 		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 			.toISOString()
 			.split('T')[0]
 	);
-	const [realStartDate, setRealStartDate] = React.useState<string>(
-		new Date(new Date().setFullYear(new Date().getFullYear() - 1)).toISOString()
-	);
+
 	const currentDate = new Date();
 	const [endDate, setEndDate] = React.useState<string>(
 		currentDate.toISOString().split('T')[0]
@@ -71,19 +68,13 @@ const ProductReviewsPage = (props: Props) => {
 	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = React.useState(1);
 	const [numberPerPage, setNumberPerPage] = React.useState(10);
-	const [newReviews, setNewReviews] = React.useState(false);
 	const [sort, setSort] = React.useState<string>('created_at:desc');
 	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
 		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
-	const [newReviewHandled, setNewReviewHandled] =
-		React.useState<boolean>(false);
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
-
-	const debouncedStartDate = useDebounce<string>(startDate, 500);
-	const debouncedEndDate = useDebounce<string>(endDate, 500);
 
 	const filter_modal = createModal({
 		id: 'filter-modal',
@@ -350,15 +341,15 @@ const ProductReviewsPage = (props: Props) => {
 									.toISOString()
 									.split('T')[0]
 					)
-						.toISOString()
-						.split('T')[0],
+						.toISOString(),
 					currentEndDate: new Date(
 						reviewLog[0]
 							? reviewLog[0].created_at
 							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
 									.toISOString()
 									.split('T')[0]
-					).toISOString(),
+					).toISOString()
+					.split('T')[0],
 					dateShortcut: undefined
 				}
 			});
@@ -445,8 +436,8 @@ const ProductReviewsPage = (props: Props) => {
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							product_id={product.id}
-							startDate={startDate}
-							endDate={endDate}
+							startDate={filters.productReviews.currentStartDate}
+							endDate={filters.productReviews.currentEndDate}
 							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 							search={search}
 							button_id={buttonId}
@@ -638,23 +629,15 @@ const ProductReviewsPage = (props: Props) => {
 								>
 									{reviews.length > 0 && nbPages > 0 && (
 										<>
-											<div
-												role="status"
-												className={fr.cx('fr-col-12', 'fr-mt-8v')}
-											>
-												Avis de{' '}
-												<span className={cx(classes.boldText)}>
-													{numberPerPage * (currentPage - 1) + 1}
-												</span>{' '}
-												à{' '}
-												<span className={cx(classes.boldText)}>
-													{numberPerPage * (currentPage - 1) + reviews.length}
-												</span>{' '}
-												sur{' '}
-												<span className={cx(classes.boldText)}>
-													{reviewsCountFiltered}
-												</span>
-											</div>
+											<PageItemsCounter
+												label="Avis"
+												startItemCount={numberPerPage * (currentPage - 1) + 1}
+												endItemCount={
+													numberPerPage * (currentPage - 1) + reviews.length
+												}
+												totalItemsCount={reviewsCountFiltered}
+												additionalClasses={['fr-mt-8v']}
+											/>
 										</>
 									)}
 								</div>

@@ -9,16 +9,32 @@ import { Loader } from '@/src/components/ui/Loader';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
-import { RightAccessStatus, UserRole } from '@prisma/client';
+import {
+	AccessRight,
+	AdminEntityRight,
+	Entity,
+	RightAccessStatus,
+	UserRole
+} from '@prisma/client';
 import AccessCard from '@/src/components/dashboard/Account/Informations/accessCard';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { push } from '@socialgouv/matomo-next';
-import { AccessRightSchema } from '@/prisma/generated/zod';
+import {
+	AccessRightSchema,
+	AccessRightWithRelations,
+	AdminEntityRightWithRelations,
+	User
+} from '@/prisma/generated/zod';
+import { useRouter } from 'next/router';
 
 interface Props {
 	isOwn: Boolean;
 	userId: number;
+	user: User & {
+		accessRights: AccessRightWithRelations[];
+		adminEntityRights: AdminEntityRightWithRelations[];
+	};
 }
 
 interface Product {
@@ -90,31 +106,13 @@ export type ModalAccessKind = (typeof modalAccessContents)[number]['kind'];
 export type ModalAccessContent = (typeof modalAccessContents)[number];
 
 const UserAccess: React.FC<Props> = props => {
-	const { isOwn, userId } = props;
+	const { isOwn, userId, user } = props;
 	const { classes, cx } = useStyles();
 	const utils = trpc.useUtils();
 	const [displayToast, setDisplayToast] = React.useState<string | null>(null);
 	const [modal, setModal] = React.useState<ModalAccessContent | null>(null);
 	const [idConcerned, setIdConcerned] = React.useState<number | null>(null);
-
-	const {
-		data: userResult,
-		isLoading: isLoadingUser,
-		refetch: refetchUser,
-		isRefetching: isRefetchingUser
-	} = trpc.user.getByIdWithRights.useQuery(
-		{
-			id: userId
-		},
-		{
-			initialData: {
-				data: null
-			},
-			enabled: userId !== undefined
-		}
-	);
-
-	const user = userResult?.data;
+	const router = useRouter();
 
 	const editUser = trpc.user.update.useMutation({
 		onSuccess: async () => {
@@ -241,239 +239,195 @@ const UserAccess: React.FC<Props> = props => {
 
 	return (
 		<>
-			{!user ||
-				isLoadingUser ||
-				(isRefetchingUser && (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-						<Loader />
-					</div>
-				))}
-			{!isLoadingUser && !isRefetchingUser && user && (
-				<>
-					{/* <OnConfirmModal
-						modal={onConfirmModal}
-						title={`${user.role.includes('admin') ? 'Retirer le' : 'Passer en'} rôle superadmin`}
-						handleOnConfirm={() => {
+			<OnConfirmModal
+				modal={onConfirmModal}
+				title={`${modal?.title}`}
+				handleOnConfirm={() => {
+					switch (modal?.kind) {
+						case 'addSuperAdmin':
+						case 'removeSuperAdmin':
 							handleSwitchrole();
-						}}
-					>
-						<>
-							<p>
-								Êtes-vous sûr de vouloir{' '}
-								{`${user.role.includes('admin') ? `retirer l'accès de` : 'passer'}`}{' '}
-								{`${user.firstName} ${user.lastName}`} en tant que superadmin ?
-							</p>
-							<p>
-								Cette personne{' '}
-								{`${user.role.includes('admin') ? `ne pourra plus` : 'pourra'}`}{' '}
-								modifier et supprimer tous les services, toutes les
-								organisations et tous les utilisateurs.
-							</p>
-						</>
-					</OnConfirmModal> */}
-					<OnConfirmModal
-						modal={onConfirmModal}
-						title={`${modal?.title}`}
-						handleOnConfirm={() => {
-							switch (modal?.kind) {
-								case 'addSuperAdmin':
-								case 'removeSuperAdmin':
-									handleSwitchrole();
-									break;
-								case 'removeAccessRight':
-									if (idConcerned) handleRemove(idConcerned, 'product');
-									break;
-								case 'removeEntityright':
-									if (idConcerned) handleRemove(idConcerned, 'entity');
-									break;
-								case 'switchAccessRightAdmin':
-								case 'switchAccessRightUser':
-									if (idConcerned) handleSwitchStatus(idConcerned);
-									break;
-							}
-						}}
-					>
-						<>
-							<p
-								className={fr.cx('fr-mt-8v')}
-							>{`${modal?.sentence.replace('__!NAME!__', `${user.firstName} ${user.lastName}`)}`}</p>
-						</>
-					</OnConfirmModal>
-					<AccountLayout isOwn={isOwn} user={user}>
-						<Head>
-							{!isLoadingUser && user && (
-								<>
-									<title>
-										{`${user.firstName} ${user.lastName}`} | Compte Accès
-										services et organisations | Je donne mon avis
-									</title>
-									<meta
-										name="description"
-										content={`${user.firstName} ${user.lastName} | Compte Accès services et organisations | Je donne mon avis`}
-									/>
-								</>
-							)}
-						</Head>
-						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
-								<Alert
-									closable
-									onClose={function noRefCheck() {
-										setDisplayToast(null);
-									}}
-									severity={'success'}
-									className={fr.cx('fr-mb-5w')}
-									small
-									description={displayToast}
-								/>
-							</div>
+							break;
+						case 'removeAccessRight':
+							if (idConcerned) handleRemove(idConcerned, 'product');
+							break;
+						case 'removeEntityright':
+							if (idConcerned) handleRemove(idConcerned, 'entity');
+							break;
+						case 'switchAccessRightAdmin':
+						case 'switchAccessRightUser':
+							if (idConcerned) handleSwitchStatus(idConcerned);
+							break;
+					}
+					onConfirmModal.close();
+					router.replace(router.asPath);
+				}}
+			>
+				<>
+					<p
+						className={fr.cx('fr-mt-8v')}
+					>{`${modal?.sentence.replace('__!NAME!__', `${user.firstName} ${user.lastName}`)}`}</p>
+				</>
+			</OnConfirmModal>
+			<AccountLayout isOwn={isOwn} user={user}>
+				<Head>
+					<title>
+						{`${user.firstName} ${user.lastName}`} | Compte Accès services et
+						organisations | Je donne mon avis
+					</title>
+					<meta
+						name="description"
+						content={`${user.firstName} ${user.lastName} | Compte Accès services et organisations | Je donne mon avis`}
+					/>
+				</Head>
+				{displayToast && (
+					<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+						<Alert
+							closable
+							onClose={function noRefCheck() {
+								setDisplayToast(null);
+							}}
+							severity={'success'}
+							className={fr.cx('fr-mb-5w')}
+							small
+							description={displayToast}
+						/>
+					</div>
+				)}
+				<div className={classes.column}>
+					<div
+						className={cx(
+							fr.cx(
+								'fr-grid-row',
+								'fr-grid-row--gutters',
+								'fr-grid-row--middle'
+							)
 						)}
-						{isLoadingUser ||
-							(isRefetchingUser && (
-								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-									<Loader />
-								</div>
-							))}
-						<div className={classes.column}>
-							<div
-								className={cx(
-									fr.cx(
-										'fr-grid-row',
-										'fr-grid-row--gutters',
-										'fr-grid-row--middle'
-									)
-								)}
-							>
-								<div className={cx(fr.cx('fr-col-12', 'fr-col-md-6'))}>
-									<h2 className={fr.cx('fr-mb-0')}>Accès</h2>
-								</div>
-								<div
-									className={cx(
-										fr.cx('fr-col-12', 'fr-col-md-6'),
-										classes.actionWrapper
-									)}
+					>
+						<div className={cx(fr.cx('fr-col-12', 'fr-col-md-6'))}>
+							<h2 className={fr.cx('fr-mb-0')}>Accès</h2>
+						</div>
+						<div
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-6'),
+								classes.actionWrapper
+							)}
+						>
+							{!user.role.includes('admin') && (
+								<Button
+									priority="secondary"
+									type="button"
+									iconId="fr-icon-user-star-line"
+									iconPosition="right"
+									onClick={() => {
+										handleAction('addSuperAdmin');
+										push(['trackEvent', 'Users', 'Set-Superadmin']);
+									}}
+									nativeButtonProps={{
+										'aria-label': 'Attribuer le rôle superadmin',
+										title: 'Attribuer le rôle superadmin'
+									}}
 								>
-									{!user.role.includes('admin') && (
-										<Button
-											priority="secondary"
-											type="button"
-											iconId="fr-icon-user-star-line"
-											iconPosition="right"
-											onClick={() => {
-												handleAction('addSuperAdmin');
-												push(['trackEvent', 'Users', 'Set-Superadmin']);
-											}}
-											nativeButtonProps={{
-												'aria-label': 'Attribuer le rôle superadmin',
-												title: 'Attribuer le rôle superadmin'
-											}}
-										>
-											Passer en superadmin
-										</Button>
-									)}
-								</div>
-							</div>
-							{user.role.includes('admin') ? (
-								<div>
-									<h3>Superadmin</h3>
-									<p>
-										{`${user.firstName} ${user.lastName}`} est superadmin. Cette
-										personne a accès à toutes les organisations et tous les
-										services, et peut passer les utilisateurs en superadmin.
-									</p>
-									<Button
-										priority="secondary"
-										type="button"
-										onClick={() => {
-											handleAction('removeSuperAdmin');
-											push(['trackEvent', 'Users', 'Unset-Superadmin']);
-										}}
-										nativeButtonProps={{
-											'aria-label': 'Retirer le rôle superadmin',
-											title: 'Retirer le rôle superadmin'
-										}}
-									>
-										Retirer le rôle superadmin à ce compte
-									</Button>
-								</div>
-							) : (
-								<div
-									className={cx(
-										fr.cx(
-											'fr-grid-row',
-											'fr-grid-row--gutters',
-											'fr-grid-row--middle'
-										)
-									)}
-								>
-									<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
-										<h3>Organisations</h3>
-										<p>{`${user.firstName} ${user.lastName} ${user.adminEntityRights.length > 0 ? 'est administrateur des organisations suivantes : ' : "n'est administrateur d'aucune organisation pour le moment."}`}</p>
-										<ul className={cx(classes.ulContainer)}>
-											{user.adminEntityRights
-												.sort((a, b) =>
-													a.entity.name.localeCompare(b.entity.name)
-												)
-												.map(aer => (
-													<li key={aer.id}>
-														<AccessCard
-															id={aer.id}
-															title={aer.entity.name}
-															date={formatDateToFrenchString(
-																aer.created_at.toString()
-															)}
-															modifiable={true}
-															action={async (message: string) => {
-																setDisplayToast(message);
-																handleRemove(aer.id, 'entity');
-															}}
-															handleAction={handleAction}
-														></AccessCard>
-													</li>
-												))}
-										</ul>
-									</div>
-									<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
-										<h3>Services</h3>
-										<p>{`${user.firstName} ${user.lastName} ${sortedEntities.length > 0 ? 'est administrateur des services suivants : ' : "n'est administrateur d'aucun service pour le moment."}`}</p>
-										<ul className={cx(classes.ulContainer)}>
-											{sortedEntities.map((entity, index) => (
-												<li key={entity.name}>
-													<React.Fragment key={index}>
-														<h5 className={fr.cx('fr-mt-12v', 'fr-mb-4v')}>
-															{entity.name}
-														</h5>
-														<hr />
-														<ul className={cx(classes.ulContainer)}>
-															{entity.products.map((product, productIndex) => (
-																<li
-																	key={product.title + '_' + product.modifiable}
-																>
-																	<AccessCard
-																		key={productIndex}
-																		id={product.id}
-																		title={product.title}
-																		date={product.date}
-																		modifiable={product.modifiable}
-																		right={product.right}
-																		action={product.action}
-																		handleAction={handleAction}
-																		link={product.link}
-																	></AccessCard>
-																</li>
-															))}
-														</ul>
-													</React.Fragment>
-												</li>
-											))}
-										</ul>
-									</div>
-								</div>
+									Passer en superadmin
+								</Button>
 							)}
 						</div>
-					</AccountLayout>
-				</>
-			)}
+					</div>
+					{user.role.includes('admin') ? (
+						<div>
+							<h3>Superadmin</h3>
+							<p>
+								{`${user.firstName} ${user.lastName}`} est superadmin. Cette
+								personne a accès à toutes les organisations et tous les
+								services, et peut passer les utilisateurs en superadmin.
+							</p>
+							<Button
+								priority="secondary"
+								type="button"
+								onClick={() => {
+									handleAction('removeSuperAdmin');
+									push(['trackEvent', 'Users', 'Unset-Superadmin']);
+								}}
+								nativeButtonProps={{
+									'aria-label': 'Retirer le rôle superadmin',
+									title: 'Retirer le rôle superadmin'
+								}}
+							>
+								Retirer le rôle superadmin à ce compte
+							</Button>
+						</div>
+					) : (
+						<div
+							className={cx(
+								fr.cx(
+									'fr-grid-row',
+									'fr-grid-row--gutters',
+									'fr-grid-row--middle'
+								)
+							)}
+						>
+							<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+								<h3>Organisations</h3>
+								<p>{`${user.firstName} ${user.lastName} ${user.adminEntityRights.length > 0 ? 'est administrateur des organisations suivantes : ' : "n'est administrateur d'aucune organisation pour le moment."}`}</p>
+								<ul className={cx(classes.ulContainer)}>
+									{user.adminEntityRights
+										.sort((a, b) => a.entity.name.localeCompare(b.entity.name))
+										.map(aer => (
+											<li key={aer.id}>
+												<AccessCard
+													id={aer.id}
+													title={aer.entity.name}
+													date={formatDateToFrenchString(
+														aer.created_at.toString()
+													)}
+													modifiable={true}
+													action={async (message: string) => {
+														setDisplayToast(message);
+														handleRemove(aer.id, 'entity');
+													}}
+													handleAction={handleAction}
+												></AccessCard>
+											</li>
+										))}
+								</ul>
+							</div>
+							<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+								<h3>Services</h3>
+								<p>{`${user.firstName} ${user.lastName} ${sortedEntities.length > 0 ? 'est administrateur des services suivants : ' : "n'est administrateur d'aucun service pour le moment."}`}</p>
+								<ul className={cx(classes.ulContainer)}>
+									{sortedEntities.map((entity, index) => (
+										<li key={entity.name}>
+											<React.Fragment key={index}>
+												<h5 className={fr.cx('fr-mt-12v', 'fr-mb-4v')}>
+													{entity.name}
+												</h5>
+												<hr />
+												<ul className={cx(classes.ulContainer)}>
+													{entity.products.map((product, productIndex) => (
+														<li key={product.title + '_' + product.modifiable}>
+															<AccessCard
+																key={productIndex}
+																id={product.id}
+																title={product.title}
+																date={product.date}
+																modifiable={product.modifiable}
+																right={product.right}
+																action={product.action}
+																handleAction={handleAction}
+																link={product.link}
+															></AccessCard>
+														</li>
+													))}
+												</ul>
+											</React.Fragment>
+										</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					)}
+				</div>
+			</AccountLayout>
 		</>
 	);
 };

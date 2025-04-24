@@ -55,9 +55,9 @@ export const SmileyInput = (props: Props) => {
       <div className={cx(classes.smileysContainer)}>
         <fieldset className={cx(classes.fieldset, fr.cx("fr-fieldset"))}>
           <legend className={fr.cx("fr-fieldset__legend")}>
-            {<h3>{label}</h3>}
+            {<h3 className={fr.cx("fr-mb-2v")}>{label}</h3>}
             {hint && (
-              <span className={fr.cx("fr-hint-text", "fr-mt-2v")}>{hint}</span>
+              <span className={fr.cx("fr-hint-text", "fr-my-4v")}>{hint}</span>
             )}
           </legend>
           <ul>
@@ -65,7 +65,7 @@ export const SmileyInput = (props: Props) => {
               <li key={smiley.value}>
                 <input
                   id={`radio-${name}-${smiley.value}`}
-                  className={fr.cx("fr-sr-only")}
+                  className={cx(classes.inputIndicator)}
                   type="radio"
                   name={name}
                   checked={smileySelected === smiley.value}
@@ -85,13 +85,9 @@ export const SmileyInput = (props: Props) => {
                 >
                   <Image
                     alt={t(`smileys.${smiley.value}`)}
-                    src={
-                      smileySelected === smiley.value
-                        ? smiley.imgSelected
-                        : smiley.img
-                    }
-                    width={38}
-                    height={38}
+                    src={smiley.img}
+                    width={56}
+                    height={56}
                   />
                   {t(`smileys.${smiley.value}`)}
                 </label>
@@ -122,25 +118,35 @@ const useStyles = tss
     smileyInput: {
       width: "100%",
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      padding: fr.spacing("3v"),
+      padding: fr.spacing("4v"),
       display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      textAlign: "center",
       alignItems: "center",
+      gap: fr.spacing("4v"),
       cursor: "pointer",
-      img: {
-        marginRight: fr.spacing("2v"),
-      },
       ["&:hover"]: {
         borderColor: fr.colors.decisions.background.alt.grey.active,
       },
       [fr.breakpoints.up("md")]: {
         flexDirection: "column",
-        width: "8rem",
-        padding: fr.spacing("1v"),
+        padding: fr.spacing("4v"),
+        paddingLeft: fr.spacing("16v"),
+        paddingRight: fr.spacing("16v"),
         img: {
-          marginTop: fr.spacing("2v"),
           marginRight: 0,
         },
       },
+    },
+    inputIndicator: {
+      position: "absolute",
+      top: "50%",
+      transform: "translateY(-50%)",
+      left: "5%",
+      height: "1rem",
+      width: "1rem",
+      accentColor: fr.colors.decisions.background.flat.blueFrance.default,
     },
     fieldset: {
       width: "100%",
@@ -149,11 +155,17 @@ const useStyles = tss
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
         paddingLeft: 0,
         width: "100%",
+        li:{
+          position: "relative",
+          paddingBottom: 0,
+          marginBottom: fr.spacing("4v"),
+          ':last-child': {
+            marginBottom: 0,
+          },
+        }
       },
       [fr.breakpoints.up("md")]: {
-        width: "initial",
         ul: {
-          width: "initial",
           columns: nbItems,
         },
       },

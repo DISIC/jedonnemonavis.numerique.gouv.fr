@@ -106,20 +106,13 @@ describe('jdma-home', () => {
 		});
 
 		it('should display and verify footer internal links', () => {
-			const expectedTexts = [
-				'Accessibilité: non conforme',
-				'Mentions légales',
-				'Données personnelles',
-				'Modalités d’utilisation',
-				'Roadmap',
-				'Contact'
-			];
-
+			// Vérifier la présence de chaque lien individuellement
 			cy.get(selectors.footer)
 				.find(selectors.footerLinks)
 				.find('li')
 				.should('have.length', 6);
 
+			// Utiliser des expressions régulières pour être plus tolérant aux variations de formatage
 			cy.get(selectors.footer)
 				.contains(/Accessibilité\s*:\s*non conforme/i)
 				.should('exist');
@@ -130,6 +123,7 @@ describe('jdma-home', () => {
 				.contains(/Données personnelles/i)
 				.should('exist');
 
+			// Vérifier le lien "Modalités d'utilisation" par son URL
 			cy.get(selectors.footer)
 				.find('a[href="/public/termsOfUse"]')
 				.should('exist');

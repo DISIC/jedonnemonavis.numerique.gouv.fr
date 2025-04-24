@@ -162,6 +162,7 @@ export const secondSectionA: FormField[] = [
     name: "contact_satisfaction",
     kind: "array-radio",
     label: "fields.contact_satisfaction.label",
+    hint: "fields.contact_satisfaction.hint",
     options: [
       {
         label: "fields.contact_satisfaction.options.0.label",
@@ -187,11 +188,6 @@ export const secondSectionA: FormField[] = [
         label: "fields.contact_satisfaction.options.4.label",
         value: 23,
         intention: "very_good",
-      },
-      {
-        label: "fields.contact_satisfaction.options.5.label",
-        value: 24,
-        intention: "neutral",
       },
     ],
     needed: [9, 10, 11, 12],

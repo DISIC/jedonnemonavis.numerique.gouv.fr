@@ -106,7 +106,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		countUserRequests: userRequestsResult.metadata.count
 	});
 
-	const quickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
+	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		!session?.user
 			? [
 					{
@@ -119,97 +119,95 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 				]
 			: [
-					<>
-						<Button
-							id="button-account"
-							iconId={'fr-icon-account-circle-line'}
-							title={`Ouvrir le menu mon compte`}
-							aria-label={`Ouvrir le menu mon compte`}
-							priority="tertiary"
-							size="large"
-							onClick={handleMenuClick}
+					<Button
+						id="button-account"
+						iconId={'fr-icon-account-circle-line'}
+						title={`Ouvrir le menu mon compte`}
+						aria-label={`Ouvrir le menu mon compte`}
+						priority="tertiary"
+						size="large"
+						onClick={handleMenuClick}
+					>
+						Compte
+					</Button>,
+					<Menu
+						id="option-menu"
+						open={menuOpen}
+						anchorEl={anchorEl}
+						onClose={handleClose}
+						MenuListProps={{
+							'aria-labelledby': 'button-options-access-right'
+						}}
+					>
+						<MenuItem
+							style={{ pointerEvents: 'none' }}
+							className={cx(classes.firstItem)}
 						>
-							Compte
-						</Button>
-						<Menu
-							id="option-menu"
-							open={menuOpen}
-							anchorEl={anchorEl}
-							onClose={handleClose}
-							MenuListProps={{
-								'aria-labelledby': 'button-options-access-right'
+							<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+								{session?.user.name}
+							</div>
+							<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+								{session?.user.email}
+							</div>
+						</MenuItem>
+						<MenuItem
+							className={cx(fr.cx('fr-p-4v'), classes.item)}
+							onClick={e => {
+								handleClose(e);
+								router.push(
+									`/administration/dashboard/user/${session?.user.id}/infos`
+								);
 							}}
 						>
-							<MenuItem
-								style={{ pointerEvents: 'none' }}
-								className={cx(classes.firstItem)}
-							>
-								<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
-									{session?.user.name}
-								</div>
-								<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
-									{session?.user.email}
-								</div>
-							</MenuItem>
-							<MenuItem
-								className={cx(fr.cx('fr-p-4v'), classes.item)}
-								onClick={e => {
-									handleClose(e);
-									router.push(
-										`/administration/dashboard/user/${session?.user.id}/infos`
-									);
-								}}
-							>
-								<span
-									className={fr.cx(
-										'fr-icon-user-line',
-										'fr-icon--sm',
-										'fr-mr-1-5v'
-									)}
-								/>
-								Informations personnelles
-							</MenuItem>
-							<MenuItem
-								className={cx(fr.cx('fr-p-4v'), classes.item)}
-								onClick={e => {
-									handleClose(e);
-									router.push(
-										`/administration/dashboard/user/${session?.user.id}/notifications`
-									);
-								}}
-							>
-								<span
-									className={fr.cx(
-										'fr-icon-notification-3-line',
-										'fr-icon--sm',
-										'fr-mr-1-5v'
-									)}
-								/>
-								Notifications
-							</MenuItem>
-							<MenuItem
-								className={cx(
-									fr.cx('fr-pb-2v', 'fr-pt-4v'),
-									classes.item,
-									classes.lastItem
+							<span
+								className={fr.cx(
+									'fr-icon-user-line',
+									'fr-icon--sm',
+									'fr-mr-1-5v'
 								)}
+							/>
+							Informations personnelles
+						</MenuItem>
+						<MenuItem
+							className={cx(fr.cx('fr-p-4v'), classes.item)}
+							onClick={e => {
+								handleClose(e);
+								router.push(
+									`/administration/dashboard/user/${session?.user.id}/notifications`
+								);
+							}}
+						>
+							<span
+								className={fr.cx(
+									'fr-icon-notification-3-line',
+									'fr-icon--sm',
+									'fr-mr-1-5v'
+								)}
+							/>
+							Notifications
+						</MenuItem>
+						<MenuItem
+							className={cx(
+								fr.cx('fr-pb-2v', 'fr-pt-4v'),
+								classes.item,
+								classes.lastItem
+							)}
+						>
+							<Button
+								id="button-account"
+								iconId={'fr-icon-logout-box-r-line'}
+								title={`Déconnexion`}
+								aria-label={`Déconnexion`}
+								priority="tertiary"
+								onClick={() => {
+									signOut();
+									push(['trackEvent', 'Account', 'Disconnect']);
+								}}
 							>
-								<Button
-									id="button-account"
-									iconId={'fr-icon-logout-box-r-line'}
-									title={`Déconnexion`}
-									aria-label={`Déconnexion`}
-									priority="tertiary"
-									onClick={() => {
-										signOut();
-										push(['trackEvent', 'Account', 'Disconnect']);
-									}}
-								>
-									Se déconnecter
-								</Button>
-							</MenuItem>
-						</Menu>
-					</>
+								Se déconnecter
+							</Button>
+						</MenuItem>
+					</Menu>
 				];
 
 	const navigationItems: NavigationItem[] = [];
@@ -253,7 +251,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/users',
 					target: '_self'
 				},
-				isActive: pathname.startsWith('/administration/dashboard/user')
+				isActive: pathname.startsWith('/administration/dashboard/users')
 			},
 			{
 				text: 'Liste blanche des noms de domaines',

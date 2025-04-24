@@ -14,70 +14,41 @@ import PersonnalInfos from '@/src/components/dashboard/Account/Informations/pers
 interface Props {
 	isOwn: Boolean;
 	userId: number;
+	user: User;
 }
 
 const UserAccount: React.FC<Props> = props => {
-	const { isOwn, userId } = props;
+	const { isOwn, userId, user } = props;
 	const { classes } = useStyles();
 	const router = useRouter();
 
-	const {
-		data: userResult,
-		isLoading: isLoadingUser,
-		refetch: refetchUser,
-		isRefetching: isRefetchingUser
-	} = trpc.user.getById.useQuery(
-		{
-			id: userId
-		},
-		{
-			initialData: {
-				data: null
-			},
-			enabled: userId !== undefined
-		}
-	);
-
-	const user = userResult?.data as User;
-
 	return (
 		<>
-			{!user ||
-				isLoadingUser ||
-				(isRefetchingUser && (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-						<Loader />
+			<AccountLayout isOwn={isOwn} user={user}>
+				<Head>
+					<>
+						<title>
+							{`${user.firstName} ${user.lastName}`} | Compte Informations | Je
+							donne mon avis
+						</title>
+						<meta
+							name="description"
+							content={`${user.firstName} ${user.lastName} | Compte Informations | Je donne mon avis`}
+						/>
+					</>
+				</Head>
+				<div className={classes.column}>
+					<div className={classes.headerWrapper}>
+						<h2>Compte</h2>
 					</div>
-				))}
-			{!isLoadingUser && !isRefetchingUser && user && (
-				<AccountLayout isOwn={isOwn} user={user}>
-					<Head>
-						{!isLoadingUser && user && (
-							<>
-								<title>
-									{`${user.firstName} ${user.lastName}`} | Compte Informations |
-									Je donne mon avis
-								</title>
-								<meta
-									name="description"
-									content={`${user.firstName} ${user.lastName} | Compte Informations | Je donne mon avis`}
-								/>
-							</>
-						)}
-					</Head>
-					<div className={classes.column}>
-						<div className={classes.headerWrapper}>
-							<h2>Compte</h2>
-						</div>
-						<div>
-							<PersonnalInfos user={user} />
-						</div>
-						<div>
-							<DeleteCard user={user} isOwn={isOwn} />
-						</div>
+					<div>
+						<PersonnalInfos user={user} />
 					</div>
-				</AccountLayout>
-			)}
+					<div>
+						<DeleteCard user={user} isOwn={isOwn} />
+					</div>
+				</div>
+			</AccountLayout>
 		</>
 	);
 };

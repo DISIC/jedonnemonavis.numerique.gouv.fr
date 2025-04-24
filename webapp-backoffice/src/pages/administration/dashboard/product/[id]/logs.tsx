@@ -11,7 +11,7 @@ import {
 	getNbPages,
 	handleActionTypeDisplay
 } from '@/src/utils/tools';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useSession } from 'next-auth/react';
 import { useFilters } from '@/src/contexts/FiltersContext';
@@ -70,7 +70,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				hour: '2-digit',
 				minute: '2-digit'
 			}),
-			event.user.email,
+			event.user ? event.user.email : 'Utilisateur inconnu',
 			<p
 				dangerouslySetInnerHTML={{
 					__html:
@@ -185,20 +185,12 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 				) : (
 					<>
 						<div className={fr.cx('fr-col-8', 'fr-pt-2w')}>
-							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-								Activités de{' '}
-								<span className={cx(classes.boldText)}>
-									{10 * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{10 * (currentPage - 1) + fullEvents.data.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{fullEvents.pagination.total}
-								</span>
-							</span>
+							<PageItemsCounter
+								label="Activités"
+								startItemCount={10 * (currentPage - 1) + 1}
+								endItemCount={10 * (currentPage - 1) + fullEvents.data.length}
+								totalItemsCount={fullEvents.pagination.total}
+							/>
 						</div>
 						<Table
 							data={tableData}

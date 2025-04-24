@@ -125,13 +125,13 @@ const ObservatoireStats = ({
 		}
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
-				<>
+				<div>
 					<p
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
 								? getClassFromValue(field.value, field.slug)
-								: undefined
+								: cx(fr.cx('fr-mb-18v'))
 						)}
 					>
 						{['autonomy', 'contact'].includes(field.slug)
@@ -148,11 +148,11 @@ const ObservatoireStats = ({
 							{getLabelFromValue(field.value, field.slug)}
 						</p>
 					)}
-				</>
+				</div>
 			);
 		} else {
 			return (
-				<div>
+				<div className={cx(fr.cx('fr-mb-16v'))}>
 					<Tooltip
 						placement="top"
 						title="Aucune donnée pour calculer cette note"
@@ -179,7 +179,6 @@ const ObservatoireStats = ({
 				className={fr.cx(
 					'fr-grid-row',
 					'fr-grid-row--gutters',
-					'fr-grid-row--top'
 				)}
 			>
 				{statFields.map((field, index) => (
@@ -228,14 +227,16 @@ const useStyles = tss.create({
 		padding: '0 1.7rem',
 		borderRadius: '0.5rem',
 		display: 'flex',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		height: '100%',
+		justifyContent: 'space-between',
 	},
 	label: {
 		display: 'flex',
 		alignItems: 'center',
 		fontWeight: 'bold',
 		marginBottom: '0.5rem',
-		height: '3rem',
+		minHeight: '3rem',
 		h5: {
 			margin: 0
 		}

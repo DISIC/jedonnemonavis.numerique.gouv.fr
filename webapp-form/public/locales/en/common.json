@@ -138,6 +138,7 @@
     },
     "contact_satisfaction": {
       "label": "How do you rate the quality of the help you received from the administration?",
+      "hint": "On a scale of 1 to 5, 1 being very bad and 5 being excellent.",
       "options": [
         {
           "label": "Very bad"
@@ -153,9 +154,6 @@
         },
         {
           "label": "Excellent"
-        },
-        {
-          "label": "No comment"
         }
       ]
     },
