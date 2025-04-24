@@ -42,7 +42,11 @@ const useStyles = tss.withName(ProductApiKeysPage.name).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+		}
 	}
 });
 
