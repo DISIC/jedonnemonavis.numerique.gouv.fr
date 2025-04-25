@@ -393,6 +393,26 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
+	const getFormConfigVersionNumberFromDate = (date: Date) => {
+		const formConfig = product.forms[0].form_configs
+			.slice()
+			.reverse()
+			.find(
+				formConfig =>
+					new Date(formConfig.created_at).getTime() < new Date(date).getTime()
+			);
+
+		let formConfigIndex = -1;
+
+		if (formConfig) {
+			formConfigIndex = product.forms[0].form_configs
+				.map(formConfig => formConfig.id)
+				.indexOf(formConfig.id);
+		}
+
+		return formConfigIndex !== -1 ? formConfigIndex + 1 : 0;
+	};
+
 	const submit = () => {
 		const startDateValid = validateDateFormat(startDate);
 		const endDateValid = validateDateFormat(endDate);
@@ -623,7 +643,7 @@ const ProductReviewsPage = (props: Props) => {
 							</div>
 						) : (
 							<>
-								{formConfigs.length && (
+								{!!formConfigs.length && (
 									<div className={fr.cx('fr-mt-8v')}>
 										<FormConfigVersionsDisplay
 											formConfigs={formConfigs}
@@ -668,6 +688,7 @@ const ProductReviewsPage = (props: Props) => {
 													displayMode={displayMode}
 													sort={sort}
 													onClick={handleSortChange}
+													hasManyVersions={formConfigs.length > 0}
 												/>
 												{reviewsExtended.map((review, index) => {
 													if (review && displayMode === 'reviews') {
@@ -676,6 +697,10 @@ const ProductReviewsPage = (props: Props) => {
 																key={index}
 																review={review}
 																search={validatedSearch}
+																versionNumber={getFormConfigVersionNumberFromDate(
+																	review.created_at || new Date()
+																)}
+																hasManyVersions={formConfigs.length > 0}
 															/>
 														);
 													} else if (review && displayMode === 'verbatim') {

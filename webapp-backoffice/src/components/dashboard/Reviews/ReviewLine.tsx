@@ -17,10 +17,14 @@ import { push } from '@socialgouv/matomo-next';
 
 const ReviewLine = ({
 	review,
-	search
+	search,
+	versionNumber,
+	hasManyVersions
 }: {
 	review: ExtendedReview;
 	search: string;
+	versionNumber: number;
+	hasManyVersions: boolean;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(() => {
@@ -72,6 +76,14 @@ const ReviewLine = ({
 					{review.created_at?.toLocaleTimeString('fr-FR')}
 				</div>
 			</td>
+			{hasManyVersions && (
+				<td className={cx(classes.cellContainer)}>
+					<div className={cx(classes.date)}>
+						<span className={fr.cx('fr-hidden-lg')}>Formulaire : </span>
+						Version {versionNumber}
+					</div>
+				</td>
+			)}
 			<td className={cx(classes.cellContainer)}>
 				<div className={cx(classes.date)}>
 					<span className={fr.cx('fr-hidden-lg')}>Id : </span>

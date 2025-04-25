@@ -169,10 +169,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 			}
 		};
 
-	useEffect(() => {
-		console.log('sectionFilters : ', sectionFilters);
-	}, [sectionFilters]);
-
 	return (
 		<div
 			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
