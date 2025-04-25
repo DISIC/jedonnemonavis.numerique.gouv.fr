@@ -132,7 +132,6 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('8v')
 	},
 	droppableArea: {
 		padding: '8px',
