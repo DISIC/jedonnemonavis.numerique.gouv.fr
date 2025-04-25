@@ -3,13 +3,16 @@ import { ExtendedReview } from './interface';
 import { tss } from 'tss-react/dsfr';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
 const ReviewLineMoreInfos = ({
 	review,
-	search
+	search,
+	formConfig
 }: {
 	review: ExtendedReview;
 	search: string;
+	formConfig?: FormConfigWithChildren;
 }) => {
 	const { cx, classes } = useStyles();
 
@@ -41,6 +44,7 @@ const ReviewLineMoreInfos = ({
 					<ReviewCommonVerbatimLine
 						review={review}
 						type={'Line'}
+						formConfig={formConfig}
 					></ReviewCommonVerbatimLine>
 					<div className={fr.cx('fr-col-12')}>
 						<h2 className={cx(classes.subtitle)}>

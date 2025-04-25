@@ -33,6 +33,7 @@ import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
+import { version } from 'os';
 
 interface Props {
 	product: ProductWithForms;
@@ -393,7 +394,7 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
-	const getFormConfigVersionNumberFromDate = (date: Date) => {
+	const getFormConfigHelperFromDate = (date: Date) => {
 		const formConfig = product.forms[0].form_configs
 			.slice()
 			.reverse()
@@ -410,7 +411,7 @@ const ProductReviewsPage = (props: Props) => {
 				.indexOf(formConfig.id);
 		}
 
-		return formConfigIndex !== -1 ? formConfigIndex + 1 : 0;
+		return { formConfig, versionNumber: formConfigIndex + 1 };
 	};
 
 	const submit = () => {
@@ -697,7 +698,7 @@ const ProductReviewsPage = (props: Props) => {
 																key={index}
 																review={review}
 																search={validatedSearch}
-																versionNumber={getFormConfigVersionNumberFromDate(
+																formConfigHelper={getFormConfigHelperFromDate(
 																	review.created_at || new Date()
 																)}
 																hasManyVersions={formConfigs.length > 0}

@@ -14,16 +14,20 @@ import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 import Image from 'next/image';
 import { push } from '@socialgouv/matomo-next';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
 const ReviewLine = ({
 	review,
 	search,
-	versionNumber,
+	formConfigHelper,
 	hasManyVersions
 }: {
 	review: ExtendedReview;
 	search: string;
-	versionNumber: number;
+	formConfigHelper: {
+		formConfig?: FormConfigWithChildren;
+		versionNumber: number;
+	};
 	hasManyVersions: boolean;
 }) => {
 	const { cx, classes } = useStyles();
@@ -80,7 +84,7 @@ const ReviewLine = ({
 				<td className={cx(classes.cellContainer)}>
 					<div className={cx(classes.date)}>
 						<span className={fr.cx('fr-hidden-lg')}>Formulaire : </span>
-						Version {versionNumber}
+						Version {formConfigHelper.versionNumber}
 					</div>
 				</td>
 			)}
@@ -155,11 +159,15 @@ const ReviewLine = ({
 					}}
 				>
 					{' '}
-					Plus d'infos
+					Détails
 				</Button>
 			</td>
 			{displayMoreInfo && (
-				<ReviewLineMoreInfos review={review} search={search} />
+				<ReviewLineMoreInfos
+					review={review}
+					search={search}
+					formConfig={formConfigHelper.formConfig}
+				/>
 			)}
 		</tr>
 	);

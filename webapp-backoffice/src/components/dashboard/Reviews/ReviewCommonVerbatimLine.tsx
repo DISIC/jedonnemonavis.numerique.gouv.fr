@@ -8,15 +8,22 @@ import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import React from 'react';
 import { generateRandomString } from '@/src/utils/tools';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
 const ReviewCommonVerbatimLine = ({
 	review,
-	type
+	type,
+	formConfig
 }: {
 	review: ExtendedReview;
 	type: 'Line' | 'Verbatim';
+	formConfig?: FormConfigWithChildren;
 }) => {
 	const { cx, classes } = useStyles();
+
+	console.log(
+		formConfig?.form_config_displays.filter(fcd => fcd.kind === 'step')
+	);
 
 	if (!review) return null;
 
