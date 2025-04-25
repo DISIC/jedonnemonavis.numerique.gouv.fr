@@ -34,19 +34,19 @@ export const CheckboxInput = (props: Props) => {
 
     const children = form.filter(
       (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
+        f.conditions && f.conditions.map((c) => c.name).includes(field.name),
     );
 
     children.forEach((c) => {
       const subChildren = form.filter(
-        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed)
+        (f) => f.name !== c.name && areArrayEquals(f.needed, c.needed),
       );
 
       subChildren.forEach((sc) => {
         opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
           ? value
             ? (opinion[sc.name] as any[]).filter(
-                (field) => !field.startsWith(value + "_")
+                (field) => !field.startsWith(value + "_"),
               )
             : []
           : undefined;
@@ -57,7 +57,7 @@ export const CheckboxInput = (props: Props) => {
       opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
         ? value
           ? (opinion[cf.name] as any[]).filter(
-              (field) => !field.startsWith(value + "_")
+              (field) => !field.startsWith(value + "_"),
             )
           : []
         : undefined;
@@ -72,7 +72,7 @@ export const CheckboxInput = (props: Props) => {
     key: CheckboxOpinionKeys,
     isolated: boolean,
     e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[]
+    options: CheckboxOption[],
   ) => {
     const value = parseInt(e.target.value);
 
@@ -92,7 +92,7 @@ export const CheckboxInput = (props: Props) => {
           ...opinion,
           [key]: [
             ...opinion[key].filter((sibling) =>
-              isolatedSiblings.includes(sibling)
+              isolatedSiblings.includes(sibling),
             ),
             value,
           ],
@@ -115,14 +115,14 @@ export const CheckboxInput = (props: Props) => {
         .filter((fcd) =>
           formTemplateField?.options
             .map((opt) => opt.id)
-            .includes(fcd.parent_id)
+            .includes(fcd.parent_id),
         )
         .map((fcd) => {
           const formTemplateOption = formTemplateField?.options.find(
-            (opt) => opt.id === fcd.parent_id
+            (opt) => opt.id === fcd.parent_id,
           );
           const fieldOption = field.options.find(
-            (opt) => t(opt.label, { lng: "fr" }) === formTemplateOption?.label
+            (opt) => t(opt.label, { lng: "fr" }) === formTemplateOption?.label,
           );
 
           return {
@@ -143,8 +143,8 @@ export const CheckboxInput = (props: Props) => {
                 .filter(
                   (opt) =>
                     !displays.some(
-                      (d) => d.option_value === opt.value && d.hidden
-                    )
+                      (d) => d.option_value === opt.value && d.hidden,
+                    ),
                 )
                 .map((opt, index) => ({
                   label: (
@@ -170,7 +170,7 @@ export const CheckboxInput = (props: Props) => {
                         field.name as CheckboxOpinionKeys,
                         opt.isolated || false,
                         e,
-                        field.options
+                        field.options,
                       );
                     },
                   },

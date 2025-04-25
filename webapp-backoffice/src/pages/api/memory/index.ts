@@ -4,14 +4,14 @@ import { getToken } from 'next-auth/jwt';
 import { deleteMemoryValue, getMemoryValue } from '@/src/utils/memoryStorage';
 
 export function exportData(req: NextApiRequest, res: NextApiResponse) {
-    const memoryKey = req.query.memoryKey
-	console.log('fetch - memory key : ', memoryKey)
-	const memoryValue = getMemoryValue(memoryKey as string)
-	console.log('fetch - memory value : ', memoryValue)
-	if(memoryValue === 100) {
-		deleteMemoryValue(memoryKey as string)
+	const memoryKey = req.query.memoryKey;
+	console.log('fetch - memory key : ', memoryKey);
+	const memoryValue = getMemoryValue(memoryKey as string);
+	console.log('fetch - memory value : ', memoryValue);
+	if (memoryValue === 100) {
+		deleteMemoryValue(memoryKey as string);
 	}
-    res.status(201).json({progress : memoryValue})
+	res.status(201).json({ progress: memoryValue });
 }
 
 export default async function handler(

@@ -146,7 +146,10 @@ const ReviewCommonVerbatimLine = ({
 										}
 
 										return (
-											<p key={`${generateRandomString()}_${answer}`} className={cx(classes.content)}>
+											<p
+												key={`${generateRandomString()}_${answer}`}
+												className={cx(classes.content)}
+											>
 												{row} :{' '}
 												<span
 													key={row}

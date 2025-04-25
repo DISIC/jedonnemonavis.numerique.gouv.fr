@@ -13,7 +13,18 @@ import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
 import { Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isMonday, subWeeks, subDays, subMonths } from 'date-fns';
+import {
+	startOfDay,
+	endOfDay,
+	startOfWeek,
+	endOfWeek,
+	startOfMonth,
+	endOfMonth,
+	isMonday,
+	subWeeks,
+	subDays,
+	subMonths
+} from 'date-fns';
 import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { getEmailNotificationsHtml } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
@@ -39,7 +50,7 @@ export const openAPIRouter = router({
 			z.object({
 				status: z.string(),
 				database: z.string(),
-				elk: z.string(),
+				elk: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
@@ -66,7 +77,7 @@ export const openAPIRouter = router({
 				database: dbOk ? 'ok' : 'down',
 				elk: elkOk ? 'ok' : 'down'
 			};
-	
+
 			if (!dbOk || !elkOk) {
 				throw new TRPCError({
 					code: 'INTERNAL_SERVER_ERROR',
@@ -237,7 +248,10 @@ export const openAPIRouter = router({
 				fetchParams.product_ids = product_ids;
 			}
 
-			if (!ctx.api_key.scope.includes('admin') && !fetchParams.product_ids.length) {
+			if (
+				!ctx.api_key.scope.includes('admin') &&
+				!fetchParams.product_ids.length
+			) {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
 					message:
@@ -246,10 +260,15 @@ export const openAPIRouter = router({
 			}
 
 			if (
-				!(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
-					.length ||
-				(!ctx.api_key.scope.includes('admin') ? fetchParams.product_ids : product_ids)
-					.length > maxNbProducts
+				!(
+					!ctx.api_key.scope.includes('admin')
+						? fetchParams.product_ids
+						: product_ids
+				).length ||
+				(!ctx.api_key.scope.includes('admin')
+					? fetchParams.product_ids
+					: product_ids
+				).length > maxNbProducts
 			) {
 				throw new TRPCError({
 					code: 'BAD_REQUEST',
@@ -352,49 +371,51 @@ export const openAPIRouter = router({
 	triggerSendNotifMails: protectedApiProcedure
 		.meta({
 			openapi: {
-			method: 'POST',
-			path: '/triggerMails',
-			protect: true,
-			enabled: true
+				method: 'POST',
+				path: '/triggerMails',
+				protect: true,
+				enabled: true
 			}
 		})
 		.input(
 			z.object({
-			date: z.date()
+				date: z.date()
 			})
 		)
 		.output(
 			z.object({
-			result: z.object({
-				results: z.array(
-					z.object({
-						scope: z.enum(['daily', 'weekly', 'monthly']),
-						startDate: z.date(),
-						endDate: z.date(),
-						products: z.array(
-							z.object({
-								productId: z.number(),
-								reviewCount: z.number(),
-								title: z.string()
-							})
-						),
-						users: z.array(
-							z.object({
-								userEmail: z.string(),
-								userId: z.number(),
-								accessibleProducts: z.array(
+				result: z.object({
+					results: z.array(
+						z.object({
+							scope: z.enum(['daily', 'weekly', 'monthly']),
+							startDate: z.date(),
+							endDate: z.date(),
+							products: z.array(
 								z.object({
 									productId: z.number(),
 									reviewCount: z.number(),
 									title: z.string()
 								})
+							),
+							users: z
+								.array(
+									z.object({
+										userEmail: z.string(),
+										userId: z.number(),
+										accessibleProducts: z.array(
+											z.object({
+												productId: z.number(),
+												reviewCount: z.number(),
+												title: z.string()
+											})
+										)
+									})
 								)
-							})
-						).optional()
-					})
-				),
-				message: z.string()
-			})
+								.optional()
+						})
+					),
+					message: z.string()
+				})
 			})
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -407,7 +428,11 @@ export const openAPIRouter = router({
 				});
 			}
 
-			const scopes: { scope: 'daily' | 'weekly' | 'monthly'; startDate: Date; endDate: Date }[] = [];
+			const scopes: {
+				scope: 'daily' | 'weekly' | 'monthly';
+				startDate: Date;
+				endDate: Date;
+			}[] = [];
 
 			// Initiate Daily
 			const dailyStartDate = startOfDay(subDays(date, 1));
@@ -420,7 +445,9 @@ export const openAPIRouter = router({
 
 			// Initiate Weekly
 			if (isMonday(date)) {
-				const weeklyStartDate = startOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
+				const weeklyStartDate = startOfWeek(subWeeks(date, 1), {
+					weekStartsOn: 1
+				});
 				const weeklyEndDate = endOfWeek(subWeeks(date, 1), { weekStartsOn: 1 });
 				scopes.push({
 					scope: 'weekly',
@@ -443,9 +470,9 @@ export const openAPIRouter = router({
 			// Count new reviews and group by product
 			const results: {
 				scope: 'daily' | 'weekly' | 'monthly';
-				startDate: Date,
-				endDate: Date,
-				products: { productId: number; reviewCount: number, title: string }[];
+				startDate: Date;
+				endDate: Date;
+				products: { productId: number; reviewCount: number; title: string }[];
 				users?: {
 					userEmail: string;
 					userId: number;
@@ -454,7 +481,7 @@ export const openAPIRouter = router({
 						reviewCount: number;
 						title: string;
 					}[];
-				}[]
+				}[];
 			}[] = await getProductsWithReviewCountsByScope(ctx.prisma, scopes);
 
 			// Add user filtering and product matching for each scope
@@ -468,16 +495,16 @@ export const openAPIRouter = router({
 						notifications_frequency: scope
 					},
 					include: {
-					accessRights: true,
-					adminEntityRights: {
-						include: {
-						entity: {
+						accessRights: true,
+						adminEntityRights: {
 							include: {
-								products: true
+								entity: {
+									include: {
+										products: true
+									}
+								}
 							}
 						}
-						}
-					}
 					}
 				});
 
@@ -487,20 +514,27 @@ export const openAPIRouter = router({
 				for (let i = 0; i < users.length; i++) {
 					const user = users[i];
 					const accessibleProductIds = [
-						...user.accessRights.map((ar) => ar.product_id),
-						...user.adminEntityRights.flatMap((aer) => aer.entity.products.map((p) => p.id)),
+						...user.accessRights.map(ar => ar.product_id),
+						...user.adminEntityRights.flatMap(aer =>
+							aer.entity.products.map(p => p.id)
+						)
 					];
 
-					const accessibleProducts = user.role.includes("admin")
+					const accessibleProducts = user.role.includes('admin')
 						? products
 								.sort((a, b) => b.reviewCount - a.reviewCount)
 								.slice(0, 10)
 						: products
-								.filter((product) => accessibleProductIds.includes(product.productId))
+								.filter(product =>
+									accessibleProductIds.includes(product.productId)
+								)
 								.sort((a, b) => b.reviewCount - a.reviewCount)
 								.slice(0, 10);
 
-					const totalNewReviews = accessibleProducts.reduce((sum, product) => sum + product.reviewCount, 0);
+					const totalNewReviews = accessibleProducts.reduce(
+						(sum, product) => sum + product.reviewCount,
+						0
+					);
 
 					if (accessibleProducts.length > 0) {
 						const email = getEmailNotificationsHtml(
@@ -509,10 +543,10 @@ export const openAPIRouter = router({
 							totalNewReviews,
 							startDate,
 							endDate,
-							accessibleProducts.map((ap) => ({
+							accessibleProducts.map(ap => ({
 								title: ap.title,
 								id: ap.productId,
-								nbReviews: ap.reviewCount,
+								nbReviews: ap.reviewCount
 							}))
 						);
 
@@ -527,12 +561,12 @@ export const openAPIRouter = router({
 					userProductAssociations.push({
 						userEmail: user.email,
 						userId: user.id,
-						accessibleProducts,
+						accessibleProducts
 					});
 
 					if ((i + 1) % 10 === 0) {
 						console.log(`Pausing mailing after ${i + 1} users...`);
-						await new Promise((resolve) => setTimeout(resolve, 5000));
+						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 				}
 

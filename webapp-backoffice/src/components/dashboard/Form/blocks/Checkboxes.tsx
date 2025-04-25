@@ -126,9 +126,12 @@ const Checkboxes = (props: Props) => {
 											)}
 											{isHidden && (
 												<Badge
-													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))} small
+													className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))}
+													small
 												>
-													<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
+													<span
+														className={fr.cx('ri-eye-off-line', 'fr-mr-1v')}
+													/>
 													option masquée
 												</Badge>
 											)}

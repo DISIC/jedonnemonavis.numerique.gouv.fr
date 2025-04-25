@@ -32,21 +32,21 @@ export const authOptions: NextAuthOptions = {
 		async session({ session, token }) {
 			// Récupère les informations utilisateur en base de données
 			if (token.email) {
-			  const user = await prisma.user.findUnique({
-				where: { email: token.email }
-			  });
-		  
-			  if (user) {
-				session.user = {
-				  ...session.user,
-				  id: user.id.toString(),
-				  role: user.role,
-				  name: `${user.firstName} ${user.lastName}`,
-				  email: user.email
-				};
-			  } else {
-				console.log('❌ Utilisateur non trouvé en base');
-			  }
+				const user = await prisma.user.findUnique({
+					where: { email: token.email }
+				});
+
+				if (user) {
+					session.user = {
+						...session.user,
+						id: user.id.toString(),
+						role: user.role,
+						name: `${user.firstName} ${user.lastName}`,
+						email: user.email
+					};
+				} else {
+					console.log('❌ Utilisateur non trouvé en base');
+				}
 			}
 			return session;
 		},
@@ -71,24 +71,24 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async redirect({ url, baseUrl }) {
-		  if (url.startsWith(baseUrl)) {
-			return url;
-		  }
-		  return baseUrl;
+			if (url.startsWith(baseUrl)) {
+				return url;
+			}
+			return baseUrl;
 		},
 
 		async signIn({ account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
-		
+
 				const email = proconnectProfile.email?.toLowerCase();
-		
+
 				let user = await prisma.user.findUnique({
 					where: { email }
 				});
-		
+
 				if (!user) {
-					if(!proconnectProfile.organizational_unit) {
+					if (!proconnectProfile.organizational_unit) {
 						throw new Error('INVALID_PROVIDER');
 					}
 
@@ -143,9 +143,12 @@ export const authOptions: NextAuthOptions = {
 					isPasswordCorrect = bcrypt.compareSync(password, user.password);
 				} else {
 					// Check password with crypto
-					const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+					const hashedPassword = crypto
+						.createHash('sha256')
+						.update(password)
+						.digest('hex');
 					isPasswordCorrect = hashedPassword === user.password;
-					
+
 					//Swith to bcrypt with salt
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);
@@ -165,12 +168,12 @@ export const authOptions: NextAuthOptions = {
 
 				const logSignIn = await prisma.userEvent.create({
 					data: {
-						user_id : user.id,
+						user_id: user.id,
 						action: 'user_signin',
 						created_at: new Date(),
 						metadata: {}
 					}
-				})
+				});
 
 				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}
@@ -186,28 +189,31 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope: 'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
+					scope:
+						'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
 			userinfo: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
 				async request({ tokens }): Promise<Record<string, any>> {
-					
-					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
-						headers: {
-							Authorization: `Bearer ${tokens.access_token}`
+					const res = await fetch(
+						`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+						{
+							headers: {
+								Authorization: `Bearer ${tokens.access_token}`
+							}
 						}
-					});
-			
+					);
+
 					const responseText = await res.text(); // 🔥 On lit le body UNE SEULE FOIS
-			
+
 					let data: Record<string, any>;
-			
+
 					try {
 						data = JSON.parse(responseText); // 🔍 On essaie de parser en JSON
 					} catch (error) {
-						data = jwt.decode(responseText) as Record<string, any> || {}; // 🔥 Décode JWT
+						data = (jwt.decode(responseText) as Record<string, any>) || {}; // 🔥 Décode JWT
 					}
 					return data;
 				}
@@ -225,17 +231,16 @@ export const authOptions: NextAuthOptions = {
 					lastName: profile.family_name,
 					active: true,
 					xwiki_account: false,
-					xwiki_username: null,            
+					xwiki_username: null,
 					password: '',
-					role: 'user',    
+					role: 'user',
 					notifications: false,
 					notifications_frequency: 'daily',
 					created_at: new Date(),
 					updated_at: new Date()
-				}
+				};
 			}
 		}
-
 	],
 
 	session: {

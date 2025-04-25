@@ -54,34 +54,36 @@ function fillFormStep3() {
 				.eq(0)
 				.find('input[type="radio"]')
 				.eq(0)
-				.check({ force: true }); 
+				.check({ force: true });
 			cy.get('fieldset')
 				.eq(1)
 				.find('input[type="radio"]')
 				.eq(0)
-				.check({ force: true }); 
+				.check({ force: true });
 			cy.get('fieldset')
 				.eq(2)
 				.find('input[type="radio"]')
 				.eq(1)
-				.check({ force: true }); 
+				.check({ force: true });
 		});
 }
 
 function fillFormStep4() {
-	cy.get("[class*='mainTable']").should('be.visible').within(() => {
-		cy.contains('label', 'Au guichet')
-			.parents('tr')
-			.within(() => {
-				cy.get('input[type="radio"]').eq(4).check({ force: true }); 
-			});
+	cy.get("[class*='mainTable']")
+		.should('be.visible')
+		.within(() => {
+			cy.contains('label', 'Au guichet')
+				.parents('tr')
+				.within(() => {
+					cy.get('input[type="radio"]').eq(4).check({ force: true });
+				});
 
-		cy.contains('label', 'Par téléphone')
-			.parents('tr')
-			.within(() => {
-				cy.get('input[type="radio"]').eq(3).check({ force: true }); 
-			});
-	});
+			cy.contains('label', 'Par téléphone')
+				.parents('tr')
+				.within(() => {
+					cy.get('input[type="radio"]').eq(3).check({ force: true });
+				});
+		});
 
 	cy.get('button').contains('Continuer').click();
 	cy.get('h1').contains('Informations complémentaires').should('exist');

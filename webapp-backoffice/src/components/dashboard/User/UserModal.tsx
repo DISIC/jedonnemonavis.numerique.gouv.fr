@@ -143,7 +143,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"email"
+									name: 'email'
 								}}
 							/>
 						)}
@@ -175,7 +175,7 @@ const ButtonModal = (props: Props) => {
 										onChange,
 										value,
 										type: 'password',
-										name:"password"
+										name: 'password'
 									}}
 								/>
 							)}
@@ -194,7 +194,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"firstName"
+									name: 'firstName'
 								}}
 							/>
 						)}
@@ -212,7 +212,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"lastName"
+									name: 'lastName'
 								}}
 							/>
 						)}

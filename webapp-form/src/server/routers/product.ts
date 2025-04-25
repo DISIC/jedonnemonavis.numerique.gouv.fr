@@ -16,7 +16,7 @@ export const productRouter = router({
         data: ProductSchema.extend({
           forms: z.array(FormSchema.extend({ buttons: z.array(ButtonSchema) })),
         }),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const product = await ctx.prisma.product.findUnique({

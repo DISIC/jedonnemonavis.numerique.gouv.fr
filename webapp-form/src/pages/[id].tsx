@@ -42,7 +42,11 @@ export type FormStepNames =
     >
   | "contact";
 
-export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpublished }: JDMAFormProps) {
+export default function JDMAForm({
+  product,
+  isPreviewPublished,
+  isPreviewUnpublished,
+}: JDMAFormProps) {
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -56,8 +60,8 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
     filterByFormConfig(
       index,
       product.form.form_template,
-      product.form.form_configs[0]
-    )
+      product.form.form_configs[0],
+    ),
   );
 
   const isInIframe = router.query.iframe === "true";
@@ -99,11 +103,11 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
 
   const getSelectedOption = (
     field: FormField,
-    value: number | string
+    value: number | string,
   ): { label: string; intention: AnswerIntention; value: number } => {
     if (field.kind === "radio" || field.kind == "checkbox") {
       const selectedOption = field.options.find(
-        (option) => option.value === value
+        (option) => option.value === value,
       ) as RadioOption;
 
       return {
@@ -136,7 +140,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
   };
 
   const formatAnswers = (
-    opinion: Partial<Opinion>
+    opinion: Partial<Opinion>,
   ): Prisma.AnswerCreateInput[] => {
     return Object.entries(opinion).reduce((accumulator, [key, value]) => {
       if (["contact_reached", "contact_satisfaction"].includes(key)) {
@@ -145,11 +149,11 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
             const [parent_id, child_id] = ids.toString().split("_");
 
             const parentFieldInSection = allFields.find(
-              (field) => field.name === "contact_tried"
+              (field) => field.name === "contact_tried",
             ) as FormField;
 
             const childFieldInSection = allFields.find(
-              (field) => field.name === key
+              (field) => field.name === key,
             ) as FormField;
 
             if (
@@ -157,10 +161,10 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
               "options" in childFieldInSection
             ) {
               const parentOption = parentFieldInSection.options.find(
-                (o) => o.value === parseInt(parent_id)
+                (o) => o.value === parseInt(parent_id),
               );
               const childOption = childFieldInSection.options.find(
-                (o) => o.value === parseInt(child_id)
+                (o) => o.value === parseInt(child_id),
               );
 
               if (parentOption && childOption) {
@@ -202,7 +206,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
         }
       } else {
         const fieldInSection = allFields.find(
-          (field) => field.name === key
+          (field) => field.name === key,
         ) as FormField;
 
         let tmpAnswer = {
@@ -279,7 +283,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
 
   const handleInsertOrUpdateReview = async (
     opinion: Partial<Opinion>,
-    currentStepName: FormStepNames
+    currentStepName: FormStepNames,
   ) => {
     const answers = formatAnswers(opinion);
 
@@ -328,7 +332,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
           query: { ...router.query, step: currentStep },
         },
         undefined,
-        { shallow: true }
+        { shallow: true },
       );
     }
   }, [currentStep]);
@@ -395,7 +399,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
             <div
               className={cx(
                 classes.logoContainer,
-                fr.cx("fr-col-md-4", "fr-mt-4v")
+                fr.cx("fr-col-md-4", "fr-mt-4v"),
               )}
             >
               <Image
@@ -432,12 +436,12 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
                     acc[name] = result[name];
                     return acc;
                   },
-                  {} as any
+                  {} as any,
                 );
 
                 handleInsertOrUpdateReview(
                   currentStepValues,
-                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames,
                 );
 
                 if (isLastStep) {
@@ -514,7 +518,7 @@ export default function JDMAForm({ product, isPreviewPublished, isPreviewUnpubli
         <div
           className={cx(
             classes.mainContainer,
-            fr.cx("fr-container--fluid", "fr-container")
+            fr.cx("fr-container--fluid", "fr-container"),
           )}
         >
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
@@ -625,10 +629,10 @@ export const getServerSideProps: GetServerSideProps<{
       };
 
     const sameName = product.forms[0].buttons.find(
-      (b) => b.xwiki_title === xwikiButtonName
+      (b) => b.xwiki_title === xwikiButtonName,
     );
     const nameButton = product.forms[0].buttons.find(
-      (b) => b.xwiki_title === "button"
+      (b) => b.xwiki_title === "button",
     );
 
     if (sameName) product.forms[0].buttons = [sameName];

@@ -32,6 +32,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
+import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 
 interface Props {
 	product: ProductWithForms;
@@ -411,6 +412,8 @@ const ProductReviewsPage = (props: Props) => {
 		}
 	};
 
+	const formConfigs = product.forms[0].form_configs;
+
 	return (
 		<>
 			<ReviewFiltersModal
@@ -620,6 +623,14 @@ const ProductReviewsPage = (props: Props) => {
 							</div>
 						) : (
 							<>
+								{formConfigs.length && (
+									<div className={fr.cx('fr-mt-8v')}>
+										<FormConfigVersionsDisplay
+											formConfigs={formConfigs}
+											product={product}
+										/>
+									</div>
+								)}
 								<div
 									className={fr.cx(
 										'fr-grid-row',

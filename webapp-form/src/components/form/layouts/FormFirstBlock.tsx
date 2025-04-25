@@ -34,14 +34,14 @@ export const FormFirstBlock = (props: Props) => {
   const { classes, cx } = useStyles();
 
   const formTemplateStep = product.form.form_template.form_template_steps.find(
-    (fts) => fts.position === 0
+    (fts) => fts.position === 0,
   );
 
   const formTemplateBlock = formTemplateStep?.form_template_blocks.find(
-    (ftb) => ftb.label === "Texte d'introduction"
+    (ftb) => ftb.label === "Texte d'introduction",
   );
   const formConfgIntro = product.form.form_configs[0]?.form_config_labels.find(
-    (fcl) => fcl.kind === "block" && fcl.parent_id === formTemplateBlock?.id
+    (fcl) => fcl.kind === "block" && fcl.parent_id === formTemplateBlock?.id,
   );
 
   return (
@@ -55,7 +55,7 @@ export const FormFirstBlock = (props: Props) => {
               dangerouslySetInnerHTML={{
                 __html: formConfgIntro.label.replace(
                   "{{title}}",
-                  product.title
+                  product.title,
                 ),
               }}
             />

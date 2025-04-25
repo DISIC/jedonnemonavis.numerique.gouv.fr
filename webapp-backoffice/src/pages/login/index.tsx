@@ -7,10 +7,9 @@ import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 
-
 export default function Login() {
 	const { classes, cx } = useStyles();
-    const router = useRouter();
+	const router = useRouter();
 	const { error } = router.query;
 
 	return (
@@ -28,7 +27,7 @@ export default function Login() {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-				<h1 className={fr.cx('fr-mb-12v')}>Connexion</h1>
+					<h1 className={fr.cx('fr-mb-12v')}>Connexion</h1>
 					<div
 						className={cx(
 							classes.formContainer,
@@ -40,7 +39,7 @@ export default function Login() {
 							)
 						)}
 					>
-						{error === 'INVALID_PROVIDER' ?
+						{error === 'INVALID_PROVIDER' ? (
 							<div
 								className={fr.cx(
 									'fr-col-12',
@@ -56,17 +55,23 @@ export default function Login() {
 									height={120}
 									className={fr.cx('fr-col-12', 'fr-col-md-6')}
 								/>
-								<p className={cx(classes.textLead, fr.cx('fr-text--bold', 'fr-mb-12v', 'fr-mt-8v'))}>
-									Vous ne pouvez pas utiliser ProConnect pour vous connecter à Je donne mon avis
+								<p
+									className={cx(
+										classes.textLead,
+										fr.cx('fr-text--bold', 'fr-mb-12v', 'fr-mt-8v')
+									)}
+								>
+									Vous ne pouvez pas utiliser ProConnect pour vous connecter à
+									Je donne mon avis
 								</p>
+								<p>Veuillez vérifier que votre compte ProConnect est validé.</p>
 								<p>
-									Veuillez vérifier que votre compte ProConnect est validé.
-								</p>
-								<p>
-									Je donne mon avis est réservé aux agents publics. Votre compte ProConnect doit obligatoirement être associé à une entité publique.
+									Je donne mon avis est réservé aux agents publics. Votre compte
+									ProConnect doit obligatoirement être associé à une entité
+									publique.
 								</p>
 							</div>
-						:
+						) : (
 							<div
 								className={fr.cx(
 									'fr-col-12',
@@ -77,7 +82,7 @@ export default function Login() {
 							>
 								<LoginForm />
 							</div>
-						}
+						)}
 					</div>
 				</div>
 			</div>

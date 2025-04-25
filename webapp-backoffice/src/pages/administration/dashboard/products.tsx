@@ -474,11 +474,13 @@ const DashBoard = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx(
+						<div
+							className={fr.cx(
 								'fr-grid-row',
 								'fr-grid-row--gutters',
 								'fr-grid-row--right'
-							)}>
+							)}
+						>
 							<div
 								role="status"
 								className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-ml-0')}

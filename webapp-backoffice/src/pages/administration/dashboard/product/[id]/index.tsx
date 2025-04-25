@@ -16,7 +16,13 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		include: {
 			forms: {
 				include: {
-					form_template: true
+					form_template: true,
+					form_configs: {
+						include: {
+							form_config_displays: true,
+							form_config_labels: true
+						}
+					}
 				}
 			}
 		}

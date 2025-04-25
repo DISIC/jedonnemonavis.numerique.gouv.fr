@@ -31,7 +31,7 @@ export const FormStepper = (props: Props) => {
   const { classes, cx } = useStyles();
 
   const formTemplateStep = product.form.form_template.form_template_steps.find(
-    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" })
+    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" }),
   );
 
   return (

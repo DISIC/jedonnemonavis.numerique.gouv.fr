@@ -70,7 +70,7 @@ export const reviewRouter = router({
 					created_at: 'desc'
 				},
 				take: 1
-			})
+			});
 
 			if (!product?.isPublic && !ctx.session?.user) {
 				throw new TRPCError({
@@ -79,74 +79,84 @@ export const reviewRouter = router({
 				});
 			}
 
-			const [reviews, countFiltered, countAll, countNew, countForm1, countForm2] =
-				await Promise.all([
-					ctx.prisma.review.findMany({
-						where,
-						orderBy: orderBy,
-						take: numberPerPage,
-						skip: (page - 1) * numberPerPage,
-						include: {
-							answers: shouldIncludeAnswers
-								? {
-										include: {
-											parent_answer: true
-										},
-										where: {
-											...(input.end_date && {
-												created_at: {
-													...(input.start_date && {
-														gte: new Date(input.start_date)
-													}),
-													lte: (() => {
-														const adjustedEndDate = new Date(input.end_date);
-														adjustedEndDate.setHours(23, 59, 59);
-														return adjustedEndDate;
-													})()
-												}
-											})
-										}
+			const [
+				reviews,
+				countFiltered,
+				countAll,
+				countNew,
+				countForm1,
+				countForm2
+			] = await Promise.all([
+				ctx.prisma.review.findMany({
+					where,
+					orderBy: orderBy,
+					take: numberPerPage,
+					skip: (page - 1) * numberPerPage,
+					include: {
+						answers: shouldIncludeAnswers
+							? {
+									include: {
+										parent_answer: true
+									},
+									where: {
+										...(input.end_date && {
+											created_at: {
+												...(input.start_date && {
+													gte: new Date(input.start_date)
+												}),
+												lte: (() => {
+													const adjustedEndDate = new Date(input.end_date);
+													adjustedEndDate.setHours(23, 59, 59);
+													return adjustedEndDate;
+												})()
+											}
+										})
 									}
-								: false
-						}
-					}),
-					ctx.prisma.review.count({ where }),
-					ctx.prisma.review.count({
-						where: {
-							product_id: input.product_id
-						}
-					}),
-					lastSeenReview[0] ? ctx.prisma.review.count({
-						where: {
-							product_id: input.product_id,
-							...(lastSeenReview[0] && {
-								created_at: {
-									gte: lastSeenReview[0].created_at
 								}
-							})
-						}
-					}) : 0,
-					ctx.prisma.review.count({
-						where: {
-							...where,
-							form_id: 1
-						}
-					}),
-					ctx.prisma.review.count({
-						where: {
-							...where,
-							form_id: 2
-						}
-					})
-				]);
+							: false
+					}
+				}),
+				ctx.prisma.review.count({ where }),
+				ctx.prisma.review.count({
+					where: {
+						product_id: input.product_id
+					}
+				}),
+				lastSeenReview[0]
+					? ctx.prisma.review.count({
+							where: {
+								product_id: input.product_id,
+								...(lastSeenReview[0] && {
+									created_at: {
+										gte: lastSeenReview[0].created_at
+									}
+								})
+							}
+						})
+					: 0,
+				ctx.prisma.review.count({
+					where: {
+						...where,
+						form_id: 1
+					}
+				}),
+				ctx.prisma.review.count({
+					where: {
+						...where,
+						form_id: 2
+					}
+				})
+			]);
 
-			if(input.needLogging) {
+			if (input.needLogging) {
 				const user = ctx.session?.user;
-				if(user) {
+				if (user) {
 					await ctx.prisma.userEvent.create({
 						data: {
 							user_id: parseInt(user.id),
-							action: input.loggingFromMail ? 'service_reviews_report_view' : 'service_reviews_view',
+							action: input.loggingFromMail
+								? 'service_reviews_report_view'
+								: 'service_reviews_view',
 							product_id: product_id,
 							metadata: input
 						}
@@ -199,7 +209,6 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-
 			const { where } = formatWhereAndOrder(input);
 
 			const [countFiltered, countAll, countForm1, countForm2] =
@@ -224,9 +233,9 @@ export const reviewRouter = router({
 					})
 				]);
 
-				return {
-					metadata: { countFiltered, countAll, countForm1, countForm2 }
-				};
+			return {
+				metadata: { countFiltered, countAll, countForm1, countForm2 }
+			};
 		}),
 
 	exportData: protectedProcedure
