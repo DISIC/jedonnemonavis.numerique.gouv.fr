@@ -114,8 +114,8 @@ export const Pagination = memo(
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
-			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, // If mobile, page size is dynamic based on screen size
-			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize, // If mobile, page size is dynamic based on screen size
+			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, 
+			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize,
 			isMobile
 		});
 
