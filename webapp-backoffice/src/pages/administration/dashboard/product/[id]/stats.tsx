@@ -266,15 +266,13 @@ const ProductStatPage = (props: Props) => {
 
 	const hiddableStepsConfiguration = [
 		{
-			step: 1,
-			hiddenCondition: 'comprehension',
+			stepIndex: 1,
 			component: (props: CommonStepProps) => (
 				<BarQuestionViz fieldCode="comprehension" {...props} />
 			)
 		},
 		{
-			step: 2,
-			hiddenCondition: 'contact_tried',
+			stepIndex: 2,
 			component: (props: CommonStepProps) => (
 				<>
 					<BarMultipleQuestionViz fieldCode="contact_tried" {...props} />
@@ -292,18 +290,18 @@ const ProductStatPage = (props: Props) => {
 		hiddenSteps: number[],
 		props: CommonStepProps
 	) => {
-		return hiddableStepsConfiguration.map(({ step, component }) => {
-			if (!hiddenSteps.includes(step)) {
-				return <Fragment key={step}>{component(props)}</Fragment>;
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (!hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
 			}
 			return null;
 		});
 	};
 
 	const renderHiddenSteps = (hiddenSteps: number[], props: CommonStepProps) => {
-		return hiddableStepsConfiguration.map(({ step, component }) => {
-			if (hiddenSteps.includes(step)) {
-				return <Fragment key={step}>{component(props)}</Fragment>;
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
 			}
 			return null;
 		});
