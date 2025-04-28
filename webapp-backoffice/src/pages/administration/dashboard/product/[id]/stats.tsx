@@ -10,7 +10,11 @@ import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
-import { betaTestXwikiIds, formatNumberWithSpaces } from '@/src/utils/tools';
+import {
+	betaTestXwikiIds,
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -28,8 +32,12 @@ import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
-import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import {
+	FormConfigWithChildren,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	product: ProductWithForms;
@@ -59,10 +67,32 @@ export const SectionWrapper = ({
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
 			<h2>{title}</h2>
-			{alert && (
-				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
-			)}
 			<div>{children}</div>
+		</div>
+	);
+};
+
+export const OldSectionWrapper = ({
+	children,
+	formConfig
+}: {
+	children: React.ReactNode;
+	formConfig?: FormConfigWithChildren;
+}) => {
+	const { classes, cx } = useStyles();
+
+	return (
+		<div>
+			<div className={cx(classes.alertContainer)}>
+				<i className={fr.cx('ri-alert-fill')} /> Cette section présente les
+				résultats des anciennes versions du formulaire, dont la dernière
+				modification date du{' '}
+				{formConfig
+					? formatDateToFrenchString(formConfig.created_at.toString())
+					: '03 juillet 2024'}
+				.
+			</div>
+			{children}
 		</div>
 	);
 };
@@ -77,6 +107,7 @@ const ProductStatPage = (props: Props) => {
 
 	const { filters, updateFilters } = useFilters();
 
+	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
 	const [selectedButton, setSelectedButton] = useState<number | undefined>(
 		filters['productStats'].buttonId
 	);
@@ -316,28 +347,31 @@ const ProductStatPage = (props: Props) => {
 						endDate={filters.productStats.currentEndDate}
 					/>
 				</SectionWrapper>
-				<SectionWrapper
-					title="Détails des anciennes réponses"
-					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
-					total={nbReviewsWithFilters}
+				<Accordion
+					label="Détails des anciennes réponses"
+					onExpandedChange={value => setOldSectionExpanded(!value)}
+					expanded={oldSectionExpanded}
+					className={cx(classes.oldSectionWrapper)}
 				>
-					<SmileyQuestionViz
-						fieldCode="easy"
-						total={nbReviewsWithFiltersForm1}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="difficulties"
-						total={nbReviewsWithFiltersForm1}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
-				</SectionWrapper>
+					<OldSectionWrapper formConfig={formConfigs[formConfigs.length - 1]}>
+						<SmileyQuestionViz
+							fieldCode="easy"
+							total={nbReviewsWithFiltersForm1}
+							productId={product.id}
+							buttonId={filters.productStats.buttonId}
+							startDate={filters.productStats.currentStartDate}
+							endDate={filters.productStats.currentEndDate}
+						/>
+						<BarMultipleQuestionViz
+							fieldCode="difficulties"
+							total={nbReviewsWithFiltersForm1}
+							productId={product.id}
+							buttonId={filters.productStats.buttonId}
+							startDate={filters.productStats.currentStartDate}
+							endDate={filters.productStats.currentEndDate}
+						/>
+					</OldSectionWrapper>
+				</Accordion>
 			</>
 		);
 	};
@@ -431,6 +465,22 @@ const useStyles = tss.create({
 		gap: '3rem',
 		padding: '2rem',
 		border: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`
+	},
+	oldSectionWrapper: {
+		'.fr-collapse': {
+			backgroundColor: fr.colors.decisions.background.default.grey.hover,
+			margin: `0 1px`
+		}
+	},
+	alertContainer: {
+		fontWeight: 'bold',
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		margin: fr.spacing('1v'),
+		padding: fr.spacing('4v'),
+		'.ri-alert-fill': {
+			color: fr.colors.decisions.background.actionHigh.blueFrance.default,
+			marginRight: fr.spacing('1v')
+		}
 	},
 	container: {
 		position: 'relative'
