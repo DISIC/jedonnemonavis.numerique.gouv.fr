@@ -25,6 +25,7 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
+import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -61,18 +62,25 @@ const public_modal = createModal({
 
 export const SectionWrapper = ({
 	title,
+	alert = '',
 	total,
 	children
 }: {
 	title: string;
+	alert?: string;
 	total: number;
 	children: React.ReactNode;
 }) => {
+	const { classes, cx } = useStyles();
+
 	if (!total) return;
 
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
 			<h2>{title}</h2>
+			{alert && (
+				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
+			)}
 			<div>{children}</div>
 		</div>
 	);

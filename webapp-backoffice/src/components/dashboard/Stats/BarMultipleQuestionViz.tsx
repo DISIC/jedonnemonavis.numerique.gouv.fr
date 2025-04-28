@@ -26,7 +26,7 @@ type Props = {
 	startDate: string;
 	endDate: string;
 	total: number;
-	hiddenOptions: HideBlockOptionsHelper;
+	hiddenOptions?: HideBlockOptionsHelper;
 	required?: boolean;
 };
 
