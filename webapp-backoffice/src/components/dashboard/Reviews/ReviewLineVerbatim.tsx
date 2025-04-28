@@ -114,6 +114,7 @@ const ReviewLineVerbatim = ({
 						priority="secondary"
 						iconPosition="right"
 						iconId="fr-icon-arrow-down-s-fill"
+						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 						size="small"
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);

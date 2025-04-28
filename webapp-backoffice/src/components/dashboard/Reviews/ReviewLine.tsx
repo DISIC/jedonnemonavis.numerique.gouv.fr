@@ -148,7 +148,7 @@ const ReviewLine = ({
 			<td className={cx(classes.cellContainer)}>
 				<Button
 					priority="secondary"
-					title={`Plus d'infos sur l'avis ${review.id}`}
+					title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 					iconPosition="right"
 					iconId="fr-icon-arrow-down-s-fill"
 					aria-expanded={displayMoreInfo ? true : false}
