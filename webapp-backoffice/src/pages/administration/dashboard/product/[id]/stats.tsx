@@ -137,7 +137,7 @@ const ProductStatPage = (props: Props) => {
 		currentFormConfig?.form_config_displays.filter(
 			fcd => fcd.kind === 'step'
 		) || [];
-	const formConfigHiddenOptions = currentFormConfig.form_config_displays.filter(
+	const formConfigHiddenOptions = currentFormConfig?.form_config_displays.filter(
 		fcd => fcd.kind === 'blockOption'
 	);
 
@@ -155,7 +155,7 @@ const ProductStatPage = (props: Props) => {
 		},
 		{
 			options: [],
-			date: currentFormConfig.created_at
+			date: currentFormConfig?.created_at
 		} as HideBlockOptionsHelper
 	);
 
