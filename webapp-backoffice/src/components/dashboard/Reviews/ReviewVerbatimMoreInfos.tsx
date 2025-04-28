@@ -3,8 +3,20 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
-const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
+const ReviewVerbatimMoreInfos = ({
+	review,
+	formConfigHelper,
+	hasManyVersions
+}: {
+	review: ExtendedReview;
+	formConfigHelper: {
+		formConfig?: FormConfigWithChildren;
+		versionNumber: number;
+	};
+	hasManyVersions: boolean;
+}) => {
 	const { cx, classes } = useStyles();
 
 	if (!review) return null;
@@ -33,6 +45,14 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 								new Date(review.created_at).getMinutes()}
 					</p>
 				</div>
+				{hasManyVersions && (
+					<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
+						<h2 className={cx(classes.subtitle)}>Formulaire</h2>
+						<p className={cx(classes.content)}>
+							Version {formConfigHelper.versionNumber}
+						</p>
+					</div>
+				)}
 				<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 					<h2 className={cx(classes.subtitle)}>Identifiant</h2>
 					<p className={cx(classes.content)}>{review.form_id && review.id}</p>
@@ -48,6 +68,7 @@ const ReviewVerbatimMoreInfos = ({ review }: { review: ExtendedReview }) => {
 				<ReviewCommonVerbatimLine
 					review={review}
 					type={'Line'}
+					formConfig={formConfigHelper.formConfig}
 				></ReviewCommonVerbatimLine>
 			</div>
 		</div>

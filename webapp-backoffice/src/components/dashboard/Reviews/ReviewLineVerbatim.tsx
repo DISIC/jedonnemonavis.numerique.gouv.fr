@@ -14,13 +14,22 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
 import { trpc } from '@/src/utils/trpc';
 import { push } from '@socialgouv/matomo-next';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import { text } from 'stream/consumers';
 
 const ReviewLineVerbatim = ({
 	review,
-	search
+	search,
+	formConfigHelper,
+	hasManyVersions
 }: {
 	review: ExtendedReview;
 	search: string;
+	formConfigHelper: {
+		formConfig?: FormConfigWithChildren;
+		versionNumber: number;
+	};
+	hasManyVersions: boolean;
 }) => {
 	const color = getStatsColor({
 		intention: review.satisfaction?.intention || 'neutral'
@@ -121,11 +130,17 @@ const ReviewLineVerbatim = ({
 						}}
 					>
 						{' '}
-						Plus d'infos
+						Détails
 					</Button>
 				</td>
 			</div>
-			{displayMoreInfo && <ReviewVerbatimMoreInfos review={review} />}
+			{displayMoreInfo && (
+				<ReviewVerbatimMoreInfos
+					review={review}
+					formConfigHelper={formConfigHelper}
+					hasManyVersions={hasManyVersions}
+				/>
+			)}
 		</tr>
 	);
 };
@@ -141,7 +156,10 @@ const useStyles = tss
 			border: '1px solid',
 			borderColor: color,
 			marginBottom: 12,
-			width: '100%'
+			width: '100%',
+			'td:last-of-type': {
+				textAlign: 'right'
+			}
 		},
 		line: {
 			fontSize: 12,

@@ -33,28 +33,26 @@ const ReviewLineMoreInfos = ({
 
 	return (
 		<div className={cx(fr.cx('fr-p-3v'), classes.container)}>
-			<div className={cx(classes.container)}>
-				<div
-					className={fr.cx(
-						'fr-grid-row',
-						'fr-grid-row--gutters',
-						'fr-grid-row--left'
-					)}
-				>
-					<ReviewCommonVerbatimLine
-						review={review}
-						type={'Line'}
-						formConfig={formConfig}
-					></ReviewCommonVerbatimLine>
-					<div className={fr.cx('fr-col-12')}>
-						<h2 className={cx(classes.subtitle)}>
-							Souhaitez-vous nous en dire plus ?
-						</h2>
-						<p
-							className={cx(classes.content)}
-							dangerouslySetInnerHTML={createMarkup()}
-						/>
-					</div>
+			<div
+				className={fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--gutters',
+					'fr-grid-row--left'
+				)}
+			>
+				<ReviewCommonVerbatimLine
+					review={review}
+					type={'Line'}
+					formConfig={formConfig}
+				></ReviewCommonVerbatimLine>
+				<div className={fr.cx('fr-col-12')}>
+					<h2 className={cx(classes.subtitle)}>
+						Souhaitez-vous nous en dire plus ?
+					</h2>
+					<p
+						className={cx(classes.content)}
+						dangerouslySetInnerHTML={createMarkup()}
+					/>
 				</div>
 			</div>
 		</div>
@@ -67,6 +65,8 @@ const useStyles = tss.create({
 		flexDirection: 'column',
 		justifyContent: 'space-between',
 		height: '100%',
+		width: '100%',
+		marginTop: fr.spacing('2v'),
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	subtitle: {

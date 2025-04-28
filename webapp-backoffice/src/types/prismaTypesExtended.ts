@@ -105,6 +105,25 @@ const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
 
 export type FormWithElements = Prisma.FormGetPayload<typeof FormWithElements>;
 
+const FormTemplateWithElements =
+	Prisma.validator<Prisma.FormTemplateDefaultArgs>()({
+		include: {
+			form_template_steps: {
+				include: {
+					form_template_blocks: {
+						include: {
+							options: true
+						}
+					}
+				}
+			}
+		}
+	});
+
+export type FormTemplateWithElements = Prisma.FormTemplateGetPayload<
+	typeof FormTemplateWithElements
+>;
+
 const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
 	{
 		include: {

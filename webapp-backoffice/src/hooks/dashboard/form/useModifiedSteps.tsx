@@ -4,11 +4,11 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { normalizeHtml } from '@/src/utils/tools';
 import { useState, useEffect, useCallback } from 'react';
 
-export function useModifiedSteps(
+const useModifiedSteps = (
 	formTemplateSteps: FormWithElements['form_template']['form_template_steps'][0][],
 	configHelper: FormConfigHelper,
 	form: FormWithElements
-) {
+) => {
 	const [modifiedSteps, setModifiedSteps] = useState<number[]>([]);
 
 	const recalculateModifiedSteps = useCallback(() => {
@@ -72,4 +72,6 @@ export function useModifiedSteps(
 		isStepModified,
 		recalculateModifiedSteps
 	};
-}
+};
+
+export default useModifiedSteps;

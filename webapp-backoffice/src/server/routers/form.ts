@@ -31,5 +31,26 @@ export const formRouter = router({
 				}
 			});
 			return { data: form };
+		}),
+
+	getFormTemplateBySlug: protectedProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const { slug } = input;
+			const formTemplate = await ctx.prisma.formTemplate.findUnique({
+				where: { slug },
+				include: {
+					form_template_steps: {
+						include: {
+							form_template_blocks: {
+								include: {
+									options: true
+								}
+							}
+						}
+					}
+				}
+			});
+			return { data: formTemplate };
 		})
 });

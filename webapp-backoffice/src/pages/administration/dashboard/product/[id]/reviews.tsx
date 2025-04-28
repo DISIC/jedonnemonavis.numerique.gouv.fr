@@ -710,6 +710,10 @@ const ProductReviewsPage = (props: Props) => {
 																key={index}
 																review={review}
 																search={validatedSearch}
+																formConfigHelper={getFormConfigHelperFromDate(
+																	review.created_at || new Date()
+																)}
+																hasManyVersions={formConfigs.length > 0}
 															/>
 														);
 													}

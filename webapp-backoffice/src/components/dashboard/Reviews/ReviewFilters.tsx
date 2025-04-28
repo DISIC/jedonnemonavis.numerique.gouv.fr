@@ -51,7 +51,6 @@ const ReviewFilters = (props: Props) => {
 				{
 					label: 'Date'
 				},
-
 				{
 					label: 'Satisfaction'
 				},
