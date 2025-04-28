@@ -21,7 +21,7 @@ const BarVerticalChart = dynamic(
 type Props = {
 	fieldCode: string;
 	productId: number;
-	buttonId: number | undefined;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;

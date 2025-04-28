@@ -1,14 +1,13 @@
+import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import { Product, RightAccessStatus } from '@prisma/client';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
-import { useRouter } from 'next/router';
-import { Product, RightAccessStatus } from '@prisma/client';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { Toast } from '@/src/components/ui/Toast';
-import Button from '@codegouvfr/react-dsfr/Button';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { RootFormTemplateProvider } from '@/src/contexts/RootFormTemplateContext';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
@@ -121,81 +120,77 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 	}, []);
 
 	return (
-		<RootFormTemplateProvider>
-			<div className={cx(fr.cx('fr-container'), classes.container)}>
-				<Toast
-					isOpen={displayToast}
-					setIsOpen={setDisplayToast}
-					autoHideDuration={2000}
-					severity="info"
-					message="Identifiant copié dans le presse papier !"
-				/>
-				<div
-					className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}
+		<div className={cx(fr.cx('fr-container'), classes.container)}>
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={2000}
+				severity="info"
+				message="Identifiant copié dans le presse papier !"
+			/>
+			<div className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}>
+				<Tag id="product-id" small>
+					{`# ${id}`}
+				</Tag>
+				<Button
+					priority="tertiary"
+					type="button"
+					className={cx(classes.copyBtn)}
+					nativeButtonProps={{
+						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
+						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
+						onClick: () => {
+							navigator.clipboard.writeText(product.id.toString());
+							setDisplayToast(true);
+						}
+					}}
 				>
-					<Tag id="product-id" small>
-						{`# ${id}`}
-					</Tag>
-					<Button
-						priority="tertiary"
-						type="button"
-						className={cx(classes.copyBtn)}
-						nativeButtonProps={{
-							title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-							'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-							onClick: () => {
-								navigator.clipboard.writeText(product.id.toString());
-								setDisplayToast(true);
-							}
-						}}
-					>
-						Copier dans le presse-papier
-					</Button>
+					Copier dans le presse-papier
+				</Button>
+			</div>
+			<div className={cx(classes.title)}>
+				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
+					{product.title}
+				</h1>
+				{product.isTop250 && (
+					<Badge severity="info" noIcon>
+						Démarche essentielle
+					</Badge>
+				)}
+			</div>
+			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+					<div role="navigation">
+						<SideMenu
+							align="left"
+							aria-label="Menu latéral"
+							items={menuItems}
+							burgerMenuButtonText="Menu"
+							sticky
+						/>
+					</div>
 				</div>
-				<div className={cx(classes.title)}>
-					<h1 className={fr.cx('fr-mb-2v')} id="product-title">
-						{product.title}
-					</h1>
-					{product.isTop250 && (
-						<Badge severity="info" noIcon>
-							Démarche essentielle
-						</Badge>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
+					{children}
+					{router.pathname.includes('/stats') && showBackToTop && (
+						<div className={cx(classes.backToTop)}>
+							<div>
+								<a
+									className={fr.cx(
+										'fr-link',
+										'fr-icon-arrow-up-fill',
+										'fr-link--icon-left'
+									)}
+									href="#product-title"
+								>
+									Haut de page
+								</a>
+							</div>
+						</div>
 					)}
 				</div>
-				<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-						<div role="navigation">
-							<SideMenu
-								align="left"
-								aria-label="Menu latéral"
-								items={menuItems}
-								burgerMenuButtonText="Menu"
-								sticky
-							/>
-						</div>
-					</div>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
-						{children}
-						{router.pathname.includes('/stats') && showBackToTop && (
-							<div className={cx(classes.backToTop)}>
-								<div>
-									<a
-										className={fr.cx(
-											'fr-link',
-											'fr-icon-arrow-up-fill',
-											'fr-link--icon-left'
-										)}
-										href="#product-title"
-									>
-										Haut de page
-									</a>
-								</div>
-							</div>
-						)}
-					</div>
-				</div>
 			</div>
-		</RootFormTemplateProvider>
+		</div>
 	);
 };
 

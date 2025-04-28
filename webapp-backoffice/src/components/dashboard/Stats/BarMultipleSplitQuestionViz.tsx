@@ -20,7 +20,7 @@ const StackedVerticalBarChart = dynamic(
 type Props = {
 	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	productId: number;
-	buttonId: number | undefined;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;

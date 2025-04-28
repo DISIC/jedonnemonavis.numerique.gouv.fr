@@ -15,6 +15,7 @@ import '../utils/keyframes.css';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import React from 'react';
 import { init } from '@socialgouv/matomo-next';
+import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -61,7 +62,14 @@ function App({ Component, pageProps }: AppProps) {
 		const lightMode =
 			router.pathname.startsWith('/public') ||
 			router.pathname.startsWith('/open-api');
-		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
+
+		let layout = <PublicLayout light={lightMode}>{children}</PublicLayout>;
+
+		if (router.pathname.startsWith('/administration/dashboard/product')) {
+			layout = <RootFormTemplateProvider>{layout}</RootFormTemplateProvider>;
+		}
+
+		return layout;
 	};
 
 	React.useEffect(() => {

@@ -24,7 +24,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Product, RightAccessStatus } from '@prisma/client';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
@@ -38,10 +38,19 @@ import {
 } from '@/src/types/prismaTypesExtended';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 
 interface Props {
 	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+}
+
+interface CommonStepProps {
+	total: number;
+	productId: number;
+	buttonId?: number;
+	startDate: string;
+	endDate: string;
 }
 
 const public_modal = createModal({
@@ -51,17 +60,13 @@ const public_modal = createModal({
 
 export const SectionWrapper = ({
 	title,
-	alert = '',
 	total,
 	children
 }: {
 	title: string;
-	alert?: string;
 	total: number;
 	children: React.ReactNode;
 }) => {
-	const { classes, cx } = useStyles();
-
 	if (!total) return;
 
 	return (
@@ -101,6 +106,8 @@ const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
 	const { product, ownRight } = props;
+	const { formTemplate } = useRootFormTemplateContext();
+
 	const router = useRouter();
 
 	const { classes, cx } = useStyles();
@@ -116,6 +123,23 @@ const ProductStatPage = (props: Props) => {
 	}, [filters['productStats'].buttonId]);
 
 	const formConfigs = product.forms[0].form_configs;
+	const currentFormConfig = formConfigs[formConfigs.length - 1];
+	const formConfigHiddenSteps =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'step'
+		) || [];
+
+	const hiddenSteps = formConfigHiddenSteps
+		.map(fcd => {
+			const stepIndex = formTemplate?.form_template_steps.findIndex(
+				f => f.id === fcd.parent_id
+			);
+
+			return stepIndex;
+		})
+		.filter(
+			stepIndex => stepIndex !== undefined && stepIndex !== -1
+		) as number[];
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -240,6 +264,51 @@ const ProductStatPage = (props: Props) => {
 		);
 	}
 
+	const hiddableStepsConfiguration = [
+		{
+			step: 1,
+			hiddenCondition: 'comprehension',
+			component: (props: CommonStepProps) => (
+				<BarQuestionViz fieldCode="comprehension" {...props} />
+			)
+		},
+		{
+			step: 2,
+			hiddenCondition: 'contact_tried',
+			component: (props: CommonStepProps) => (
+				<>
+					<BarMultipleQuestionViz fieldCode="contact_tried" {...props} />
+					<BarMultipleSplitQuestionViz fieldCode="contact_reached" {...props} />
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						{...props}
+					/>
+				</>
+			)
+		}
+	];
+
+	const renderVisibleSteps = (
+		hiddenSteps: number[],
+		props: CommonStepProps
+	) => {
+		return hiddableStepsConfiguration.map(({ step, component }) => {
+			if (!hiddenSteps.includes(step)) {
+				return <Fragment key={step}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
+
+	const renderHiddenSteps = (hiddenSteps: number[], props: CommonStepProps) => {
+		return hiddableStepsConfiguration.map(({ step, component }) => {
+			if (hiddenSteps.includes(step)) {
+				return <Fragment key={step}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
+
 	const getStatsDisplay = () => {
 		if (isLoadingReviewsDataWithFilters) {
 			return (
@@ -314,38 +383,13 @@ const ProductStatPage = (props: Props) => {
 						endDate={filters.productStats.currentEndDate}
 						required
 					/>
-					<BarQuestionViz
-						fieldCode="comprehension"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="contact_tried"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_reached"
-						total={nbReviewsWithFiltersForm2}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_satisfaction"
-						total={nbReviewsWithFiltersForm2}
-						productId={product.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
-					/>
+					{renderVisibleSteps(hiddenSteps, {
+						total: nbReviewsWithFilters,
+						productId: product.id,
+						buttonId: filters.productStats.buttonId,
+						startDate: filters.productStats.currentStartDate,
+						endDate: filters.productStats.currentEndDate
+					})}
 				</SectionWrapper>
 				<Accordion
 					label="Détails des anciennes réponses"
@@ -353,7 +397,14 @@ const ProductStatPage = (props: Props) => {
 					expanded={oldSectionExpanded}
 					className={cx(classes.oldSectionWrapper)}
 				>
-					<OldSectionWrapper formConfig={formConfigs[formConfigs.length - 1]}>
+					<OldSectionWrapper formConfig={currentFormConfig}>
+						{renderHiddenSteps(hiddenSteps, {
+							total: nbReviewsWithFilters,
+							productId: product.id,
+							buttonId: filters.productStats.buttonId,
+							startDate: filters.productStats.currentStartDate,
+							endDate: filters.productStats.currentEndDate
+						})}
 						<SmileyQuestionViz
 							fieldCode="easy"
 							total={nbReviewsWithFiltersForm1}

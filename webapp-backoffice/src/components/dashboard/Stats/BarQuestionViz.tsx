@@ -16,7 +16,7 @@ const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
 type Props = {
 	fieldCode: string;
 	productId: number;
-	buttonId: number | undefined;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
