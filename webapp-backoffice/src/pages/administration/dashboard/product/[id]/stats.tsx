@@ -1,3 +1,5 @@
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
@@ -9,41 +11,31 @@ import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStat
 import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
+import { useFilters } from '@/src/contexts/FiltersContext';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import {
-	betaTestXwikiIds,
+	FormConfigWithChildren,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
+import {
 	formatDateToFrenchString,
 	formatNumberWithSpaces
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import {
-	FormTemplateBlockOption,
-	Product,
-	RightAccessStatus
-} from '@prisma/client';
+import Select from '@codegouvfr/react-dsfr/Select';
+import { FormTemplateBlockOption, RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import GenericFilters from '@/src/components/dashboard/Filters/Filters';
-import { useFilters } from '@/src/contexts/FiltersContext';
-import Select from '@codegouvfr/react-dsfr/Select';
-import { push } from '@socialgouv/matomo-next';
-import {
-	FormConfigWithChildren,
-	FormTemplateWithElements,
-	ProductWithForms
-} from '@/src/types/prismaTypesExtended';
-import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
-import Accordion from '@codegouvfr/react-dsfr/Accordion';
-import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 
 interface Props {
 	product: ProductWithForms;
@@ -99,8 +91,8 @@ export const OldSectionWrapper = ({
 		<div>
 			<div className={cx(classes.alertContainer)}>
 				<i className={fr.cx('ri-alert-fill')} /> Cette section présente les
-				résultats des anciennes versions du formulaire, dont la dernière
-				modification date du{' '}
+				résultats aux questions des anciennes versions du formulaire. La version
+				actuellement en vigueur a été publiée le{' '}
 				{formConfig
 					? formatDateToFrenchString(formConfig.created_at.toString())
 					: '03 juillet 2024'}

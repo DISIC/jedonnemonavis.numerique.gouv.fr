@@ -53,15 +53,13 @@ const QuestionWrapper = ({
 				<div className={cx(classes.hiddenOptionsSection, fr.cx('fr-mt-6v'))}>
 					<i className={fr.cx('ri-alert-fill')} />
 					<b>
-						Dans l'intervalle de dates sélectionné, le formulaire a été modifié
-						:
+						Dans la version actuelle du formulaire, publiée le{' '}
+						{formatDateToFrenchString(hiddenOptions.date.toString())}, les
+						modifications suivantes sont en vigueur :
 					</b>
 					<ul>
 						{hiddenOptions.options.map(option => (
-							<li key={option.id}>
-								L'option "{option.label}" a été supprimée à compter du{' '}
-								{formatDateToFrenchString(hiddenOptions.date.toString())}
-							</li>
+							<li key={option.id}>L'option "{option.label}" a été masquée</li>
 						))}
 					</ul>
 				</div>
