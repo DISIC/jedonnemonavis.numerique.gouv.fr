@@ -1,9 +1,10 @@
+import { HideBlockOptionsHelper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
-import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ChartWrapper from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
@@ -24,6 +25,7 @@ type Props = {
 	startDate: string;
 	endDate: string;
 	total: number;
+	hiddenOptions?: HideBlockOptionsHelper;
 	required?: boolean;
 };
 
@@ -34,6 +36,7 @@ const BarMultipleSplitQuestionViz = ({
 	startDate,
 	endDate,
 	total,
+	hiddenOptions,
 	required = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -155,6 +158,7 @@ const BarMultipleSplitQuestionViz = ({
 			hidePercentage={['contact_reached', 'contact_satisfaction'].includes(
 				fieldCode
 			)}
+			hiddenOptions={hiddenOptions}
 		>
 			<ChartWrapper
 				title="Répartition des réponses"

@@ -36,16 +36,14 @@ export const Field = (props: Props) => {
   const { t } = useTranslation("common");
 
   const templateField = formTemplateStep?.form_template_blocks.find(
-    (ftb) => ftb.label === t(field.label, { lng: "fr" }),
+    (ftb) => ftb.label === t(field.label, { lng: "fr" })
   );
-
-  console.log("template field : ", templateField);
 
   const displayConfig = formConfig?.form_config_displays.find(
-    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id,
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
   const labelConfig = formConfig?.form_config_labels.find(
-    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id,
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
   );
 
   if (field.conditions) {

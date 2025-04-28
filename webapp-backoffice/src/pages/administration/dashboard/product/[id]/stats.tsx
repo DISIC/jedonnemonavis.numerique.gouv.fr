@@ -21,7 +21,11 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { Product, RightAccessStatus } from '@prisma/client';
+import {
+	FormTemplateBlockOption,
+	Product,
+	RightAccessStatus
+} from '@prisma/client';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { Fragment, useEffect, useState } from 'react';
@@ -34,6 +38,7 @@ import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
 import {
 	FormConfigWithChildren,
+	FormTemplateWithElements,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
@@ -46,11 +51,15 @@ interface Props {
 }
 
 interface CommonStepProps {
-	total: number;
 	productId: number;
 	buttonId?: number;
 	startDate: string;
 	endDate: string;
+}
+
+export interface HideBlockOptionsHelper {
+	options: FormTemplateBlockOption[];
+	date: Date;
 }
 
 const public_modal = createModal({
@@ -128,6 +137,27 @@ const ProductStatPage = (props: Props) => {
 		currentFormConfig?.form_config_displays.filter(
 			fcd => fcd.kind === 'step'
 		) || [];
+	const formConfigHiddenOptions = currentFormConfig.form_config_displays.filter(
+		fcd => fcd.kind === 'blockOption'
+	);
+
+	const formTempalteBlockOptionsHidden = (
+		formTemplate?.form_template_steps || []
+	).reduce(
+		(acc, step) => {
+			step.form_template_blocks.forEach(block => {
+				const blockOptions = block.options.filter(option =>
+					formConfigHiddenOptions.map(fcd => fcd.parent_id).includes(option.id)
+				);
+				acc.options = acc.options.concat(blockOptions);
+			});
+			return acc;
+		},
+		{
+			options: [],
+			date: currentFormConfig.created_at
+		} as HideBlockOptionsHelper
+	);
 
 	const hiddenSteps = formConfigHiddenSteps
 		.map(fcd => {
@@ -268,17 +298,33 @@ const ProductStatPage = (props: Props) => {
 		{
 			stepIndex: 1,
 			component: (props: CommonStepProps) => (
-				<BarQuestionViz fieldCode="comprehension" {...props} />
+				<BarQuestionViz
+					fieldCode="comprehension"
+					total={nbReviewsWithFilters}
+					{...props}
+				/>
 			)
 		},
 		{
 			stepIndex: 2,
 			component: (props: CommonStepProps) => (
 				<>
-					<BarMultipleQuestionViz fieldCode="contact_tried" {...props} />
-					<BarMultipleSplitQuestionViz fieldCode="contact_reached" {...props} />
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviewsWithFilters}
+						hiddenOptions={formTempalteBlockOptionsHidden}
+						{...props}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTempalteBlockOptionsHidden}
+						{...props}
+					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTempalteBlockOptionsHidden}
 						{...props}
 					/>
 				</>
@@ -382,7 +428,6 @@ const ProductStatPage = (props: Props) => {
 						required
 					/>
 					{renderVisibleSteps(hiddenSteps, {
-						total: nbReviewsWithFilters,
 						productId: product.id,
 						buttonId: filters.productStats.buttonId,
 						startDate: filters.productStats.currentStartDate,
@@ -397,7 +442,6 @@ const ProductStatPage = (props: Props) => {
 				>
 					<OldSectionWrapper formConfig={currentFormConfig}>
 						{renderHiddenSteps(hiddenSteps, {
-							total: nbReviewsWithFilters,
 							productId: product.id,
 							buttonId: filters.productStats.buttonId,
 							startDate: filters.productStats.currentStartDate,
@@ -418,6 +462,7 @@ const ProductStatPage = (props: Props) => {
 							buttonId={filters.productStats.buttonId}
 							startDate={filters.productStats.currentStartDate}
 							endDate={filters.productStats.currentEndDate}
+							hiddenOptions={formTempalteBlockOptionsHidden}
 						/>
 					</OldSectionWrapper>
 				</Accordion>

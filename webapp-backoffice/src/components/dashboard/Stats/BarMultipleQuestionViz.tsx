@@ -1,11 +1,12 @@
+import { HideBlockOptionsHelper } from '@/src/pages/administration/dashboard/product/[id]/stats';
+import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
-import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ChartWrapper from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
-import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
@@ -25,6 +26,7 @@ type Props = {
 	startDate: string;
 	endDate: string;
 	total: number;
+	hiddenOptions: HideBlockOptionsHelper;
 	required?: boolean;
 };
 
@@ -35,6 +37,7 @@ const BarMultipleQuestionViz = ({
 	startDate,
 	endDate,
 	total,
+	hiddenOptions,
 	required = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -169,6 +172,7 @@ const BarMultipleQuestionViz = ({
 			fieldLabel={resultFieldCode.metadata.fieldLabel || ''}
 			total={total}
 			required={required}
+			hiddenOptions={hiddenOptions}
 		>
 			<ChartWrapper
 				title="Répartition des réponses"
