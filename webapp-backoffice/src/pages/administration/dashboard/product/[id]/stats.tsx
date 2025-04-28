@@ -137,9 +137,10 @@ const ProductStatPage = (props: Props) => {
 		currentFormConfig?.form_config_displays.filter(
 			fcd => fcd.kind === 'step'
 		) || [];
-	const formConfigHiddenOptions = currentFormConfig?.form_config_displays.filter(
-		fcd => fcd.kind === 'blockOption'
-	);
+	const formConfigHiddenOptions =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'blockOption'
+		) || [];
 
 	const formTempalteBlockOptionsHidden = (
 		formTemplate?.form_template_steps || []
