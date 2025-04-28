@@ -29,6 +29,7 @@ import { useFilters } from '@/src/contexts/FiltersContext';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { push } from '@socialgouv/matomo-next';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 
 interface Props {
 	product: ProductWithForms;
@@ -82,6 +83,8 @@ const ProductStatPage = (props: Props) => {
 	useEffect(() => {
 		setSelectedButton(filters['productStats'].buttonId);
 	}, [filters['productStats'].buttonId]);
+
+	const formConfigs = product.forms[0].form_configs;
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -396,6 +399,14 @@ const ProductStatPage = (props: Props) => {
 						))}
 					</Select>
 				</GenericFilters>
+				{!!formConfigs.length && (
+					<div className={fr.cx('fr-mt-8v')}>
+						<FormConfigVersionsDisplay
+							formConfigs={formConfigs}
+							product={product}
+						/>
+					</div>
+				)}
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
 					<div className={fr.cx('fr-mt-10v')} role="status">
