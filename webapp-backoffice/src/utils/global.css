@@ -49,8 +49,3 @@ ol.no-bullets-point > li::marker {
 .recharts-legend-item-text {
 	color: #666666 !important;
 }
-
-.fr-badge--new {
-	color: var(--yellow-tournesol-sun-407-moon-922);
-  background-color: var(--yellow-tournesol-975-75);
-}
