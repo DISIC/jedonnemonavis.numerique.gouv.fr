@@ -35,7 +35,7 @@ const Smiley = (props: Props) => {
 						<li key={smiley.value}>
 							<input
 								id={`radio-${block.id}-${smiley.value}`}
-								className={fr.cx('fr-sr-only')}
+								className={cx(classes.inputIndicator)}
 								checked={smileySelected === smiley.value}
 								onChange={() => {
 									setSmileySelected(smiley.value);
@@ -53,14 +53,10 @@ const Smiley = (props: Props) => {
 								}}
 							>
 								<Image
-									src={
-										smileySelected === smiley.value
-											? smiley.imgSelected
-											: smiley.img
-									}
+									src={smiley.img}
 									alt={smiley.label}
-									width={38}
-									height={38}
+									width={56}
+									height={56}
 								/>
 								{smiley.label}
 							</label>
@@ -88,26 +84,35 @@ const useStyles = tss
 		smileyInput: {
 			width: '100%',
 			border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-			padding: fr.spacing('3v'),
+			padding: fr.spacing('4v'),
 			display: 'flex',
-			alignItems: 'center',
+			flexDirection: "column",
+      justifyContent: "center",
+      textAlign: "center",
+      alignItems: "center",
+      gap: fr.spacing("4v"),
 			cursor: 'pointer',
-			img: {
-				marginRight: fr.spacing('2v')
-			},
 			['&:hover']: {
 				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
-				flexDirection: 'column',
-				width: '8rem',
-				padding: fr.spacing('1v'),
+				padding: fr.spacing("4v"),
+        paddingLeft: fr.spacing("16v"),
+        paddingRight: fr.spacing("16v"),
 				img: {
-					marginTop: fr.spacing('2v'),
 					marginRight: 0
 				}
 			}
 		},
+		inputIndicator: {
+      position: "absolute",
+      top: "50%",
+      transform: "translateY(-50%)",
+      left: "5%",
+      height: "1rem",
+      width: "1rem",
+      accentColor: fr.colors.decisions.background.flat.blueFrance.default,
+    },
 		fieldset: {
 			width: '100%',
 			margin: 0,
@@ -119,12 +124,18 @@ const useStyles = tss
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
-				width: '100%'
+				width: '100%',
+				li:{
+          position: "relative",
+          paddingBottom: 0,
+					marginBottom: fr.spacing("4v"),
+          ':last-child': {
+            marginBottom: 0,
+          },
+        }
 			},
 			[fr.breakpoints.up('md')]: {
-				width: 'initial',
 				ul: {
-					width: 'initial',
 					columns: nbItems
 				}
 			}
