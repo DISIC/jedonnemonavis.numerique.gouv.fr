@@ -178,9 +178,11 @@ const ProductButtonsPage = (props: Props) => {
 					<h3 className={fr.cx('fr-mb-4v')}>
 						{product.forms[0].form_template.title}
 					</h3>
-					<p className={ownRight === 'carrier_admin' ? '' : fr.cx('fr-mb-0')}>
-						Ici, un texte décrivant brièvement le modèle Évaluation et usager,
-						le type de données récoltées et comment les exploiter.
+					<p className={fr.cx('fr-mb-0')}>
+						Évaluez le niveau de satisfaction de votre service numérique et identifiez les problèmes rencontrés par vos usagers.
+					</p>
+					<p>
+						Récoltez des données sur les indicateurs clés définis par la plateforme Vos démarches essentielles.
 					</p>
 				</div>
 				{ownRight === 'carrier_admin' && (

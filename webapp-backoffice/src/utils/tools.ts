@@ -392,7 +392,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'button.update': TypeAction.service_button_update,
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete,
-	'userEvent.getList': TypeAction.service_logs_view
+	'userEvent.getList': TypeAction.service_logs_view,
+	'formConfig.create': TypeAction.form_config_create
 };
 
 export const handleActionTypeDisplay = (
@@ -432,6 +433,8 @@ export const handleActionTypeDisplay = (
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
 			return `Suppression d'une clé API`;
+		case TypeAction.form_config_create:
+			return `Modifications apportées au formulaire`;
 	}
 };
 
@@ -452,7 +455,8 @@ export const filtersLabel = [
 	},
 	{ value: 'service_button_create', label: "Création d'un bouton" },
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
-	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" }
+	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
+	{ value: 'form_config_create', label: "Modification du formulaire" }
 ];
 
 export const getHelperFromFormConfig = (

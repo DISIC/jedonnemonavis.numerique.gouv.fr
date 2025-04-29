@@ -130,6 +130,7 @@ enum TypeAction {
   user_signin
   user_signout
   api_call
+  form_config_create
 }
 
 enum FormConfigKind {
@@ -180,9 +181,11 @@ model UserEvent {
   product    Product?   @relation(fields: [product_id], references: [id])
   entity     Entity?    @relation(fields: [entity_id], references: [id])
   apiKey     ApiKey?    @relation(fields: [apiKey_id], references: [id])
+  form       Form?       @relation(fields: [form_id], references: [id])
   product_id Int?
   entity_id  Int?
   apiKey_id  Int?
+  form_id    Int?
   created_at DateTime   @default(now())
 
   @@index([user_id, action])
@@ -532,6 +535,7 @@ model Form {
   product_id       Int
   form_configs     FormConfig[]
   buttons          Button[]
+  UserEvent        UserEvent[]
   created_at       DateTime     @default(now())
   updated_at       DateTime     @default(now())
 }
@@ -545,6 +549,7 @@ model FormConfig {
   status               FormConfigStatus
   form_config_displays FormConfigDisplay[]
   form_config_labels   FormConfigLabel[]
+  version              Int?
   created_at           DateTime            @default(now())
   updated_at           DateTime            @default(now())
 }

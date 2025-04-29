@@ -16,7 +16,8 @@ const PRODUCT_ACTIONS: TypeAction[] = [
 	TypeAction.service_button_create,
 	TypeAction.service_button_update,
 	TypeAction.service_apikeys_create,
-	TypeAction.service_apikeys_delete
+	TypeAction.service_apikeys_delete,
+	TypeAction.form_config_create
 ];
 
 const ORGANISATION_ACTIONS: TypeAction[] = [
@@ -141,6 +142,13 @@ export const userEventRouter = router({
 								some: {
 									id: product_id
 								}
+							}
+						}
+					},
+					{
+						form: {
+							is: {
+								product_id: product_id
 							}
 						}
 					}

@@ -3,6 +3,7 @@ import { protectedProcedure, router } from '@/src/server/trpc';
 
 export const formConfigRouter = router({
 	create: protectedProcedure
+		.meta({ logEvent: true })
 		.input(FormConfigUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const createdFormConfig = await ctx.prisma.formConfig.create({

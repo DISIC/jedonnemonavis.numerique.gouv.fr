@@ -239,9 +239,11 @@ const ProductFormPage = (props: Props) => {
 					</Button>
 				</div>
 				<div className={fr.cx('fr-col-12')}>
+					<p className={fr.cx('fr-mb-0')}>
+						Évaluez le niveau de satisfaction de votre service numérique et identifiez les problèmes rencontrés par vos usagers.
+					</p>
 					<p>
-						Ici, un texte décrivant brièvement le modèle Évaluation et usager,
-						le type de données récoltées et comment les exploiter.
+						Récoltez des données sur les indicateurs clés définis par la plateforme Vos démarches essentielles.
 					</p>
 				</div>
 				<div className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}>
