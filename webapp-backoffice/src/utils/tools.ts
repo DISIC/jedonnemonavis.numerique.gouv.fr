@@ -434,7 +434,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_apikeys_delete:
 			return `Suppression d'une clé API`;
 		case TypeAction.form_config_create:
-			return `Modifications apportées au formulaire`;
+			return `Mise en place du formulaire version ${metadataTyped.json.version}`;
 	}
 };
 

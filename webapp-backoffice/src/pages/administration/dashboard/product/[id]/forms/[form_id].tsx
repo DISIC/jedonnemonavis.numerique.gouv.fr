@@ -99,7 +99,7 @@ const ProductFormPage = (props: Props) => {
 		if (createConfig) {
 			try {
 				setIsPublishing(true);
-				createFormConfig.mutate(createConfig);
+				createFormConfig.mutate({...createConfig, version: form.form_configs.length + 1});
 			} catch (error) {
 				console.error(error);
 				setIsPublishing(false);
@@ -297,7 +297,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 				orderBy: {
 					created_at: 'desc'
 				},
-				take: 10,
+				take: 100,
 				include: {
 					form_config_displays: true,
 					form_config_labels: true
