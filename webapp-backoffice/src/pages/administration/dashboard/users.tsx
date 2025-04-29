@@ -1,7 +1,7 @@
 import UserCard from '@/src/components/dashboard/User/UserCard';
 import UserModal from '@/src/components/dashboard/User/UserModal';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
@@ -502,21 +502,16 @@ const DashBoardUsers = () => {
 				) : (
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w', 'fr-pb-2w')}>
-							<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-								Utilisateurs de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.users.currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.users.currentPage - 1) +
-										users.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{usersResult.metadata.count}
-								</span>
-							</span>
+							<PageItemsCounter
+								label="Utilisateurs"
+								startItemCount={
+									numberPerPage * (filters.users.currentPage - 1) + 1
+								}
+								endItemCount={
+									numberPerPage * (filters.users.currentPage - 1) + users.length
+								}
+								totalItemsCount={usersResult.metadata.count}
+							/>
 						</div>
 						<div
 							className={cx(users.length === 0 ? classes.usersContainer : '')}
@@ -538,7 +533,6 @@ const DashBoardUsers = () => {
 											options={[
 												{
 													label: '',
-
 													nativeInputProps: {
 														'aria-label': 'Tout sélectionner',
 														checked: isCheckedAll,
@@ -572,7 +566,7 @@ const DashBoardUsers = () => {
 											'fr-unhidden-md'
 										)}
 									>
-										<span>Addresse mail</span>
+										<span>Adresse mail</span>
 									</div>
 									<div
 										className={fr.cx(

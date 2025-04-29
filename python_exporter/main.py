@@ -174,10 +174,6 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
                     Ce lien expirera dans 30 jours.<br><br>
                     </p>
                 </div>
-                <p>
-                    Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:experts@design.numerique.gouv.fr">experts@design.numerique.gouv.fr</a>.<br/>
-                    La Brigade d'Intervention du Numérique (BIN).
-                </p>
                 <div class="footer">
                     <p>
                         Ce message a ete envoyé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,

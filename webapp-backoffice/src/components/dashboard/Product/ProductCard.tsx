@@ -402,7 +402,7 @@ const ProductCard = ({
 				href={`/administration/dashboard/product/${product.id}/stats`}
 				tabIndex={-1}
 			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<div className={cx(fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w'), classes.hoverCard)}>
 					<div
 						className={cx(
 							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
@@ -488,7 +488,7 @@ const ProductCard = ({
 								<div
 									className={cx(
 										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
-										classes.rightButtonsWrapper
+										classes.buttonsWrapper
 									)}
 								>
 									<Button
@@ -579,7 +579,7 @@ const ProductCard = ({
 								</div>
 								<div
 									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
+										fr.cx('fr-col', 'fr-col-12', 'fr-pt-md-0'),
 										classes.statsSection
 									)}
 								>
@@ -654,73 +654,84 @@ const ProductCard = ({
 														'fr-col-md-3'
 													)}
 												>
-													<div
-														className={fr.cx(
-															'fr-grid-row',
-															'fr-grid-row--gutters'
-														)}
-													>
-														<div className={fr.cx('fr-col-12')}>
-															<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-																Nombre d'avis
-															</p>
-														</div>
-													</div>
-													<div
-														className={fr.cx(
-															'fr-grid-row',
-															'fr-grid-row--gutters'
-														)}
+													<Link
+														href={`/administration/dashboard/product/${product.id}/reviews`}
+														title={`Voir les avis pour ${product.title}`}
 													>
 														<div
-															className={cx(
-																fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
+															className={fr.cx(
+																'fr-grid-row',
+																'fr-grid-row--gutters'
+															)}
+														>
+															<div className={fr.cx('fr-col-12')}>
+																<p
+																	className={fr.cx(
+																		'fr-text--xs',
+																		'fr-mb-0',
+																		'fr-hint-text'
+																	)}
+																>
+																	Nombre d'avis
+																</p>
+															</div>
+														</div>
+														<div
+															className={fr.cx(
+																'fr-grid-row',
+																'fr-grid-row--gutters'
 															)}
 														>
 															<div
-																className={fr.cx(
-																	'fr-label--info',
-																	'fr-text--bold',
-																	'fr-pt-0-5v'
+																className={cx(
+																	fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
 																)}
 															>
-																{formatNumberWithSpaces(nbReviews)}
-															</div>
-														</div>
-														<div
-															className={cx(
-																classes.reviewWrapper,
-																fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
-															)}
-														>
-															<div className={fr.cx('fr-label--info')}>
-																{nbNewReviews !== undefined &&
-																	nbNewReviews > 0 && (
-																		<>
-																			<span
-																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
-																			>
-																				<Badge
-																					severity="new"
-																					className={fr.cx('fr-mr-4v')}
-																				>
-																					{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
-																				</Badge>
-																			</span>
-																		</>
+																<div
+																	className={fr.cx(
+																		'fr-label--info',
+																		'fr-text--bold',
+																		'fr-pt-0-5v'
 																	)}
-															</div>
-															{nbReviews > 0 && (
-																<Link
-																	href={`/administration/dashboard/product/${product.id}/reviews`}
-																	title={`Voir les avis pour ${product.title}`}
-																	className={fr.cx('fr-link')}
 																>
-																	Voir les avis
-																</Link>
-															)}
+																	{formatNumberWithSpaces(nbReviews)}
+																</div>
+															</div>
+															<div
+																className={cx(
+																	classes.reviewWrapper,
+																	fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
+																)}
+															>
+																<div className={fr.cx('fr-label--info')}>
+																	{nbNewReviews !== undefined &&
+																		nbNewReviews > 0 && (
+																			<>
+																				<span
+																					title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
+																				>
+																					<Badge
+																						severity="new"
+																						className={fr.cx('fr-mr-4v')}
+																					>
+																						{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
+																					</Badge>
+																				</span>
+																			</>
+																		)}
+																</div>
+																{nbReviews > 0 && (
+																	<Link
+																		href={`/administration/dashboard/product/${product.id}/reviews`}
+																		title={`Voir les avis pour ${product.title}`}
+																		className={fr.cx('fr-link')}
+																	>
+																		Voir les avis
+																	</Link>
+																)}
+															</div>
 														</div>
-													</div>
+													</Link>
 												</div>
 											)}
 										</div>
@@ -745,7 +756,7 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
-			'.rightButtonsWrapper': {
+			'.buttonsWrapper': {
 				order: 0
 			},
 			'.titleSection': {
@@ -762,13 +773,22 @@ const useStyles = tss.withName(ProductCard.name).create({
 			}
 		}
 	},
+	hoverCard: {
+		'&:hover': {
+			backgroundColor: fr.colors.decisions.background.disabled.grey.default,
+		}
+	},
 	titleSection: {},
 	entitySection: {},
 	badgesSection: {},
 	statsSection: {},
-	rightButtonsWrapper: {
+	buttonsWrapper: {
 		display: 'flex',
-		justifyContent: 'end'
+		justifyContent: 'end',
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start',
+			...fr.spacing('margin', {topBottom: '2v'}), 
+		}
 	},
 	buttonWrapper: {
 		maxHeight: '32px !important',

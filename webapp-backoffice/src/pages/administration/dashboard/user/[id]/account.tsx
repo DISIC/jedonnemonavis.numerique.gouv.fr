@@ -57,12 +57,11 @@ const useStyles = tss.withName(UserAccount.name).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
 	},
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('10v')
 	},
 	droppableArea: {
 		padding: '8px',
