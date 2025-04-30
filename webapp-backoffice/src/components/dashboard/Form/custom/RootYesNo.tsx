@@ -56,7 +56,7 @@ const RootYesNo = (props: Props) => {
 								</Badge>
 							)}
 						</label>
-						<Radios block={childBlock} disabled={disabled || isParentHidden} />
+						<Radios block={childBlock} disabled={disabled || isParentHidden} nbItems={2} />
 					</div>
 				);
 			})}
