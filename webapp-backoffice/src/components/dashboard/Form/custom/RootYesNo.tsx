@@ -84,7 +84,6 @@ const useStyles = tss.withName(RootYesNo.name).create({
 	childLabel: {
 		display: 'block',
 		color: fr.colors.decisions.text.default.grey.default,
-		fontWeight: 'bold',
 		marginBottom: fr.spacing('3v')
 	},
 	disabled: {

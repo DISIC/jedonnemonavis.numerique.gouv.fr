@@ -17,7 +17,6 @@ const createQualityRatingOptions =
 		},
 		{ label: 'Bonne', value: 'Bonne', position: 3 },
 		{ label: 'Excellente', value: 'Excellente', position: 4 },
-		{ label: 'Ne se prononce pas', value: 'Ne se prononce pas', position: 5 }
 	];
 
 const createRadioBlock = (

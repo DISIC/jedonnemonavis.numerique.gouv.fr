@@ -12,6 +12,7 @@ import Radios from './blocks/Radios';
 import RootYesNo from './custom/RootYesNo';
 import RootTable from './custom/RootTable';
 import { normalizeHtml } from '@/src/utils/tools';
+import RootScales from './custom/RootScales';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {
@@ -181,7 +182,7 @@ const FormStepDisplay = (props: Props) => {
 					if (block.position === 6) {
 						return (
 							<div key={block.id} className={cx(classes.box)}>
-								<RootTable
+								<RootScales
 									block={block}
 									step={step}
 									disabled={isHidden}
