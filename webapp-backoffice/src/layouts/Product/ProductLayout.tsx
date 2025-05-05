@@ -81,15 +81,12 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les clés API'
-					: 'Voir les clés API',
+			text: ownRight && ownRight === 'carrier_admin' ? 'Clés API' : 'Clés API',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/api_keys`,
-				alt: 'Gérer les clés API'
+				alt: 'Clés API'
 			}
 		},
 		{
