@@ -88,27 +88,25 @@ const FormStepDisplay = (props: Props) => {
 			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
-						<h2>
-							{step.title}{' '}
-							{step.description && (
-								<Tooltip
-									className={classes.tooltip}
-									kind="hover"
-									title={
-										<>
-											<b>Pourquoi cette étape ?</b>
-											<br />
-											<span
-												className={classes.description}
-												dangerouslySetInnerHTML={{
-													__html: step.description.replaceAll('\n', '<br/>')
-												}}
-											/>
-										</>
-									}
-								/>
-							)}
-						</h2>
+						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
+						{step.description && (
+							<Tooltip
+								className={classes.tooltip}
+								kind="hover"
+								title={
+									<>
+										<b>Pourquoi cette étape ?</b>
+										<br />
+										<span
+											className={classes.description}
+											dangerouslySetInnerHTML={{
+												__html: step.description.replaceAll('\n', '<br/>')
+											}}
+										/>
+									</>
+								}
+							/>
+						)}
 
 						<div className={cx(classes.badgeContainer)}>
 							{isHidden && (
@@ -296,7 +294,8 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 		alignItems: 'center'
 	},
 	headerInfo: {
-		display: 'flex'
+		display: 'flex',
+		alignItems: 'center'
 	},
 	buttonsContainer: {
 		display: 'flex',
