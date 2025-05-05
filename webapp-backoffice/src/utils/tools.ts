@@ -192,21 +192,21 @@ export const getDatesByShortCut = (shortcutDateSelected: string) => {
 			newStartDate = new Date(
 				now.getFullYear() - 1,
 				now.getMonth(),
-				now.getDate() + 1
+				now.getDate() + 2
 			);
 			break;
 		case 'one-month':
 			newStartDate = new Date(
 				now.getFullYear(),
 				now.getMonth() - 1,
-				now.getDate() + 1
+				now.getDate() + 2
 			);
 			break;
 		case 'one-week':
 			newStartDate = new Date(
 				now.getFullYear(),
 				now.getMonth(),
-				now.getDate() - 6
+				now.getDate() - 5
 			);
 			break;
 		default:
