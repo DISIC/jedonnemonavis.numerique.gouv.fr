@@ -361,7 +361,7 @@ const ProductStatPage = (props: Props) => {
 				)}
 			</div>
 			<div className={cx(classes.container)}>
-				<GenericFilters filterKey="productStats" sticky={true}>
+				<GenericFilters filterKey="productStats" >
 					<Select
 						label="Sélectionner une source"
 						nativeSelectProps={{
