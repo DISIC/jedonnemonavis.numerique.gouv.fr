@@ -13,7 +13,7 @@ type ObservatoireStatsProps = {
 
 type StatField = {
 	label: string;
-	slug: 'satisfaction' | 'comprehension' | 'contact' | 'autonomy';
+	slug: 'satisfaction' | 'comprehension' | 'contactReachability' | 'contactSatisfaction' | 'autonomy';
 	value: number;
 	tooltip: string;
 };
@@ -63,7 +63,7 @@ const ObservatoireStats = ({
 	if (isLoadingStatsObservatoire) return;
 
 	const getLabelFromValue = (value: number, slug: StatField['slug']) => {
-		if (slug === 'contact') {
+		if (slug === 'contactSatisfaction') {
 			if (value < 7) return 'Faible';
 			if (value < 8.5) return 'Moyen';
 			return 'Optimal';
@@ -75,7 +75,7 @@ const ObservatoireStats = ({
 	};
 
 	const getClassFromValue = (value: number, slug: StatField['slug']) => {
-		if (slug === 'contact') {
+		if (slug === 'contactSatisfaction') {
 			if (value < 7) return classes.pasBien;
 			if (value < 8.5) return classes.moyen;
 			return classes.bien;
@@ -102,9 +102,16 @@ const ObservatoireStats = ({
 				"Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Qu'avez-vous pensé des informations et des instructions fournies ? » en attribuant une note sur 10 aux cinq réponses proposées dans le questionnaire."
 		},
 		{
-			label: 'Aide joignable et efficace',
-			slug: 'contact',
-			value: resultStatsObservatoire.data.contact,
+			label: 'Aide joignable',
+			slug: 'contactReachability',
+			value: resultStatsObservatoire.data.contact_reachability,
+			tooltip:
+				'Cette évaluation correspond à la somme des usagers ayant répondu, avoir eu l’intention de contacter le service mais qui n’aurait , soit pas réussi à trouver le moyen de le joindre ou pas pu faire aboutir cette prise de contact, cela sur le nombre total d’usagers ayant répondu au questionnaire.'
+		},
+		{
+			label: 'Aide efficace',
+			slug: 'contactSatisfaction',
+			value: resultStatsObservatoire.data.contact_satisfaction,
 			tooltip:
 				'Cette évaluation correspond à la somme des usagers ayant répondu, avoir eu l’intention de contacter le service mais qui n’aurait , soit pas réussi à trouver le moyen de le joindre ou pas pu faire aboutir cette prise de contact, cela sur le nombre total d’usagers ayant répondu au questionnaire.'
 		},
@@ -130,22 +137,22 @@ const ObservatoireStats = ({
 						className={cx(
 							classes.value,
 							field.slug !== 'autonomy'
-								? getClassFromValue(field.value, field.slug)
+								? getClassFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1), field.slug)
 								: cx(fr.cx('fr-mb-18v'))
 						)}
 					>
-						{['autonomy', 'contact'].includes(field.slug)
-							? `${getPercentageFromValue(field.value)}%`
+						{['autonomy', 'contactReachability'].includes(field.slug)
+							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))}%`
 							: `${getReadableValue(field.value)} / 10`}
 					</p>
 					{field.slug !== 'autonomy' && (
 						<p
 							className={cx(
 								classes.intention,
-								getClassFromValue(field.value, field.slug)
+								getClassFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1), field.slug)
 							)}
 						>
-							{getLabelFromValue(field.value, field.slug)}
+							{getLabelFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1), field.slug)}
 						</p>
 					)}
 				</div>
