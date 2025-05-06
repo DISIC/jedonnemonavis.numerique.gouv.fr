@@ -63,7 +63,7 @@ const ObservatoireStats = ({
 	if (isLoadingStatsObservatoire) return;
 
 	const getLabelFromValue = (value: number, slug: StatField['slug']) => {
-		if (slug === 'contactSatisfaction') {
+		if (slug === 'contactReachability') {
 			if (value < 7) return 'Faible';
 			if (value < 8.5) return 'Moyen';
 			return 'Optimal';
@@ -75,7 +75,7 @@ const ObservatoireStats = ({
 	};
 
 	const getClassFromValue = (value: number, slug: StatField['slug']) => {
-		if (slug === 'contactSatisfaction') {
+		if (slug === 'contactReachability') {
 			if (value < 7) return classes.pasBien;
 			if (value < 8.5) return classes.moyen;
 			return classes.bien;
@@ -106,14 +106,14 @@ const ObservatoireStats = ({
 			slug: 'contactReachability',
 			value: resultStatsObservatoire.data.contact_reachability,
 			tooltip:
-				'Cette évaluation correspond à la part d’usagers qui a réussi à joindre l’administration pour l’aider dans la réalisation de sa démarche.'
+				'Cette évaluation correspond à la part d’usagers en pourcentage ayant réussi à joindre l’administration pour l’aider dans la réalisation de sa démarche. La part est calculée grâce aux réponses obtenues à la question  « Quand vous avez cherché de l’aide, avez-vous réussi à joindre l’administration ? ». '
 		},
 		{
 			label: 'Aide efficace',
 			slug: 'contactSatisfaction',
 			value: resultStatsObservatoire.data.contact_satisfaction,
 			tooltip:
-				'Cette évaluation correspond à la qualité de l’aide obtenue de la part de l’administration'
+				'Cette évaluation correspond à la qualité de l’aide obtenue de la part de l’administration. Nous réalisons une moyenne des réponses données à la question « Comment évaluez-vous la qualité de l’aide que vous avez obtenue de la part de l’administration ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire.'
 		},
 		{
 			label: "Niveau d'autonomie",
