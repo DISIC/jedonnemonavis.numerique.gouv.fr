@@ -106,14 +106,14 @@ const ObservatoireStats = ({
 			slug: 'contactReachability',
 			value: resultStatsObservatoire.data.contact_reachability,
 			tooltip:
-				'Cette évaluation correspond à la somme des usagers ayant répondu, avoir eu l’intention de contacter le service mais qui n’aurait , soit pas réussi à trouver le moyen de le joindre ou pas pu faire aboutir cette prise de contact, cela sur le nombre total d’usagers ayant répondu au questionnaire.'
+				'Cette évaluation correspond à la part d’usagers qui a réussi à joindre l’administration pour l’aider dans la réalisation de sa démarche.'
 		},
 		{
 			label: 'Aide efficace',
 			slug: 'contactSatisfaction',
 			value: resultStatsObservatoire.data.contact_satisfaction,
 			tooltip:
-				'Cette évaluation correspond à la somme des usagers ayant répondu, avoir eu l’intention de contacter le service mais qui n’aurait , soit pas réussi à trouver le moyen de le joindre ou pas pu faire aboutir cette prise de contact, cela sur le nombre total d’usagers ayant répondu au questionnaire.'
+				'Cette évaluation correspond à la qualité de l’aide obtenue de la part de l’administration'
 		},
 		{
 			label: "Niveau d'autonomie",
