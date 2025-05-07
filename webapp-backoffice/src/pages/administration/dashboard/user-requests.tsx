@@ -289,8 +289,8 @@ const DashBoardUserRequestUserRequests = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
+						{nbPages > 1 && (
+							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 								<PageItemsCounter
 									label="UserRequestes"
 									startItemCount={numberPerPage * (currentPage - 1) + 1}
@@ -299,14 +299,14 @@ const DashBoardUserRequestUserRequests = () => {
 									}
 									totalItemsCount={userrequestsResult.metadata.count}
 								/>
-							)}
-						</div>
+							</div>
+						)}
 						<div
 							className={cx(
 								userRequests.length === 0 ? classes.userrequestsContainer : ''
 							)}
 						>
-							<div className={fr.cx('fr-mt-2v')}>
+							<div className={fr.cx('fr-mt-2v', 'fr-hidden', 'fr-unhidden-md')}>
 								<div
 									className={cx(
 										fr.cx(

@@ -22,7 +22,7 @@ const NoButtonsPanel = (props: Props) => {
 	};
 
 	return (
-		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-12v'))}>
+		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-8v', 'fr-p-md-12v'))}>
 			{getTitle()}
 			<div
 				className={cx(
@@ -35,7 +35,7 @@ const NoButtonsPanel = (props: Props) => {
 					classes.maxWidth
 				)}
 			>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col-3')}>
 					<Image
 						src="/assets/chat_picto.svg"
 						alt="C'est quoi un bouton JDMA ?"
@@ -46,7 +46,7 @@ const NoButtonsPanel = (props: Props) => {
 				</div>
 				<div
 					className={cx(
-						fr.cx('fr-col-12', 'fr-col-md-9'),
+						fr.cx('fr-col-9', 'fr-pl-2v', 'fr-pl-md-0'),
 						classes.textContainer
 					)}
 				>
@@ -57,7 +57,7 @@ const NoButtonsPanel = (props: Props) => {
 				</div>
 			</div>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-pb-3v')}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col-3')}>
 					<Image
 						src="/assets/install_picto.svg"
 						alt="C'est quoi un bouton JDMA ?"
@@ -68,7 +68,7 @@ const NoButtonsPanel = (props: Props) => {
 				</div>
 				<div
 					className={cx(
-						fr.cx('fr-col-12', 'fr-col-md-9'),
+						fr.cx('fr-col-9', 'fr-pl-2v', 'fr-pl-md-0'),
 						classes.textContainer
 					)}
 				>
@@ -111,7 +111,10 @@ const useStyles = tss.create({
 	title: {
 		fontWeight: 'bold',
 		fontSize: '28px',
-		color: fr.colors.decisions.text.title.blueFrance.default
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		[fr.breakpoints.down('sm')]: {
+			marginBottom: fr.spacing('4v'),
+		}
 	},
 	smallTitle: {
 		fontWeight: 'bold',
@@ -130,16 +133,25 @@ const useStyles = tss.create({
 		paddingBottom: '12px'
 	},
 	text: {
-		fontSize: '18px'
+		fontSize: '18px',
+		[fr.breakpoints.down('sm')]: {
+			fontSize: '16px'
+		}
 	},
 	button: {
-		alignSelf: 'center'
+		alignSelf: 'center',
+		marginTop: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	},
 	image: {
 		[fr.breakpoints.down('md')]: {
 			alignSelf: 'center',
 			display: 'block',
-			margin: '0 auto'
+			margin: '0 auto',
+			width: '100%',
 		}
 	}
 });

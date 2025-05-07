@@ -57,6 +57,7 @@ const GenericCardInfos = (props: Props) => {
 									setModifying(true);
 									push(['trackEvent', 'BO - Account', `Modify-${title}`]);
 								}}
+								className={classes.button}
 							>
 								Modifier
 							</Button>
@@ -73,13 +74,14 @@ const GenericCardInfos = (props: Props) => {
 											`Cancel-Changes-${title}`
 										]);
 									}}
+									className={cx(classes.button)}
 								>
 									Annuler
 								</Button>
 								<Button
 									priority="primary"
 									iconId="fr-icon-save-line"
-									className={cx(fr.cx('fr-ml-4v'))}
+									className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
 									onClick={async () => {
 										const isFormValid = await onSubmit?.();
 										push([
@@ -97,12 +99,12 @@ const GenericCardInfos = (props: Props) => {
 							</>
 						)}
 					</div>
-					{smallScreenShowHr && (
+					{smallScreenShowHr || modifying && (
 						<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
 							<hr />
 						</div>
 					)}
-					<div className={cx(fr.cx(smallScreenShowHr? 'fr-col-md-12' : 'fr-col-12', 'fr-pb-6v'))}>
+					<div className={cx(fr.cx(smallScreenShowHr || modifying ? 'fr-col-md-12' : 'fr-col-12', 'fr-pb-6v'), (smallScreenShowHr || modifying ? classes.mobileFullWidth : '') )}>
 						{modifying ? editModeContent : viewModeContent}
 					</div>
 				</div>
@@ -114,9 +116,25 @@ const GenericCardInfos = (props: Props) => {
 const useStyles = tss.withName(GenericCardInfos.name).create(() => ({
 	actionContainer: {
 		display: 'flex',
-		justifyContent: 'flex-end'
+		justifyContent: 'flex-end',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			marginBottom: fr.spacing('2v'),
+		}
 	},
-	tag: {}
+	mobileFullWidth: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%'
+		}
+	},
+	tag: {},
+	button: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center',
+		}
+	}
 }));
 
 export default GenericCardInfos;

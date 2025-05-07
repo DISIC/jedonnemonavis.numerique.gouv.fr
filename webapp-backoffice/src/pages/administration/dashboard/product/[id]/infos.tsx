@@ -163,7 +163,7 @@ const ProductInformationPage = (props: Props) => {
 			)}
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
-					<h1>Informations</h1>
+					<h2>Informations</h2>
 					{ownRight === 'carrier_admin' && (
 						<Button
 							priority="secondary"

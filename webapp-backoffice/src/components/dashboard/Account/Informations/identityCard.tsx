@@ -7,6 +7,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { trpc } from '@/src/utils/trpc';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	user: User;
@@ -16,6 +17,7 @@ type FormValues = Omit<User, 'id' | 'created_at' | 'updated_at'>;
 
 const IdentityCard = (props: Props) => {
 	const { user } = props;
+	const { cx, classes } = useStyles();
 	const utils = trpc.useUtils();
 	const { update: refetchSession } = useSession();
 	const router = useRouter();
@@ -99,7 +101,7 @@ const IdentityCard = (props: Props) => {
 							'fr-grid-row--middle'
 						)}
 					>
-						<div className={fr.cx('fr-col-md-6')}>
+						<div className={cx(fr.cx('fr-col-md-6'), classes.formContainer)}>
 							<form id="identity-form">
 								<div className={fr.cx('fr-input-group')}>
 									<Controller
@@ -165,5 +167,13 @@ const IdentityCard = (props: Props) => {
 		</>
 	);
 };
+
+const useStyles = tss.withName(IdentityCard.name).create(() => ({
+	formContainer: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%'
+		}
+	}
+}));
 
 export default IdentityCard;

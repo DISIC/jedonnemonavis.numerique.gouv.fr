@@ -165,7 +165,7 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3', 'fr-mb-6v')}>
 					<div role="navigation">
 						<SideMenu
 							align="left"
@@ -202,13 +202,16 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '7w' })
+		...fr.spacing('margin', { bottom: '6v' })
 	},
 	container: {
 		height: '100%'
 	},
 	children: {
-		minHeight: '40rem'
+		minHeight: '40rem',
+		[fr.breakpoints.down('md')]: {
+			minHeight: 'auto'
+		}
 	},
 	tagContainer: {
 		display: 'flex'

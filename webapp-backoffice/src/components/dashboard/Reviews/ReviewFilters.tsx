@@ -62,7 +62,7 @@ const ReviewFilters = (props: Props) => {
 
 	return (
 		<thead className={cx(classes.lineContainer)}>
-			<tr className={cx(classes.trContainer)}>
+			<tr className={cx(classes.trContainer, fr.cx('fr-hidden', 'fr-unhidden-lg'))}>
 				{sortList.map((sort, index) => (
 					<th
 						className={cx(

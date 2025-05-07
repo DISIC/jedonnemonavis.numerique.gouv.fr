@@ -251,6 +251,15 @@ const useStyles = tss.withName(ApiKeyHandler.name).create({
 		justifyContent: 'end',
 		button: {
 			marginLeft: '1rem'
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+			button: {
+				marginLeft: 0,
+				width: '100%',
+				justifyContent: 'center'
+			}
 		}
 	},
 	iconError: {

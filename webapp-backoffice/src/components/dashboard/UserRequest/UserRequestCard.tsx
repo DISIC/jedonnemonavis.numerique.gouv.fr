@@ -57,7 +57,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 								size="small"
 								iconId="fr-icon-close-line"
 								iconPosition="right"
-								className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+								className={cx(fr.cx('fr-mr-md-5v'), classes.iconError, classes.button)}
 								onClick={() => {
 									setCurrentUserRequest({
 										...userRequest,
@@ -73,7 +73,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 								size="small"
 								iconId="fr-icon-check-line"
 								iconPosition="right"
-								className={cx(fr.cx('fr-mr-5v'))}
+								className={cx(fr.cx('fr-mr-md-5v'), classes.button)}
 								onClick={() => {
 									setCurrentUserRequest({
 										...userRequest,
@@ -131,7 +131,17 @@ const useStyles = tss.withName(UserRequestCard.name).create(() => ({
 	},
 	wrapperButtons: {
 		display: 'flex',
-		justifyContent: 'end'
+		justifyContent: 'end',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v'),
+		}
+	},
+	button: {
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'center',
+			width: '100%'
+		}
 	}
 }));
 

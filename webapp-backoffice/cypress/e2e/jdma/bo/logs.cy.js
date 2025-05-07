@@ -33,7 +33,7 @@ describe('jdma-logs', () => {
 			.should('have.attr', 'aria-current', 'page')
 			.and('contain', "Historique d'activité")
 			.click();
-		cy.get('h1').contains("Historique d'activité");
+		cy.get('h2').contains("Historique d'activité");
 		cy.get('table').should('exist');
 		cy.get('table tbody tr')
 			.last()
