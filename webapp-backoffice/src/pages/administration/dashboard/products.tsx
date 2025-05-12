@@ -14,6 +14,7 @@ import { Button } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
@@ -191,6 +192,7 @@ const DashBoard = () => {
 		filters.filterEntity.length === 0 &&
 		filters.validatedSearch === '' &&
 		!filters.filterOnlyFavorites &&
+		!filters.filterOnlyArchived &&
 		!countArchivedUserScope &&
 		!isLoadingProducts &&
 		!isRefetchingProducts
@@ -212,6 +214,7 @@ const DashBoard = () => {
 		nbPages > 1 ||
 		search !== '' ||
 		filters.filterOnlyFavorites ||
+		filters.filterOnlyArchived ||
 		!!filters.filterEntity.length;
 
 	return (
@@ -413,7 +416,7 @@ const DashBoard = () => {
 							)}
 						>
 							<div className={cx(classes.checkboxContainer)}>
-								{countTotalUserScope > 10 && !filters.filterOnlyArchived && (
+								{/* {countTotalUserScope > 10 && !filters.filterOnlyArchived && (
 									<Checkbox
 										className={fr.cx('fr-mb-0')}
 										style={{ userSelect: 'none' }}
@@ -434,7 +437,57 @@ const DashBoard = () => {
 											}
 										]}
 									/>
-								)}
+								)} */}
+								<RadioButtons
+									legend="Vue"
+									options={[
+										{
+											label: 'Mes services',
+											nativeInputProps: {
+												checked:
+													!filters.filterOnlyFavorites &&
+													!filters.filterOnlyArchived,
+												onChange: e => {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														filterOnlyFavorites: false,
+														filterOnlyArchived: false
+													});
+												}
+											}
+										},
+										{
+											label: 'Mes favoris',
+											nativeInputProps: {
+												checked: filters.filterOnlyFavorites,
+												onChange: e => {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														filterOnlyFavorites: e.target.checked,
+														filterOnlyArchived: false
+													});
+												}
+											}
+										},
+										{
+											label: 'Services supprimés',
+											nativeInputProps: {
+												checked: filters.filterOnlyArchived,
+												onChange: e => {
+													updateFilters({
+														...filters,
+														currentPage: 1,
+														filterOnlyArchived: e.target.checked,
+														filterOnlyFavorites: false
+													});
+												}
+											}
+										}
+									]}
+									orientation="horizontal"
+								/>
 							</div>
 						</div>
 						<ul
