@@ -141,7 +141,7 @@ const ObservatoireStats = ({
 		}
 		if (!!resultStatsObservatoire.metadata[`${field.slug}_count`]) {
 			return (
-				<div className={classes.statsDisplay}>
+				<div className={cx(classes.statsDisplay, (field.slug === 'autonomy' ? fr.cx('fr-pb-12v') :'' ))}>
 					<p className={cx(classes.value)}>
 						{['autonomy', 'contactReachability'].includes(field.slug)
 							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))} %`
@@ -186,7 +186,7 @@ const ObservatoireStats = ({
 			<div className={classes.contentContainer}>
 				{statFields.map((field, index) => (
 					<div key={index} className={cx(classes.content)}>
-						<div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-6v')))}>
+						<div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}>
 							<i className={cx(fr.cx(field.icon), classes.icon)} />
 						</div>
 						<label className={cx(classes.label)}>
@@ -231,33 +231,50 @@ const useStyles = tss.create({
 		height: '100%',
 		justifyContent: 'space-between',
 		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+		}
 	},
 	label: {
-		flex: 2,
+		flex: 3,
 		display: 'flex',
 		alignItems: 'center',
 		fontWeight: 'bold',
 		minHeight: '3rem',
 		h5: {
 			margin: 0
+		},
+		[fr.breakpoints.down('md')]: {
+			...fr.spacing('margin', {bottom: '3v'}),
 		}
 	},
 	statsDisplay: {
-		flex: 1,
+		flex: 2,
 		display: 'flex',
 		height: '100%',
 		alignItems: 'center',
 		justifyContent: 'space-between',
 		gap: fr.spacing('8v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('6v'),
+		},
+		[fr.breakpoints.up('md')]: {
+			paddingBottom: '0!important',
+		}
 	},
 	intention: {
-		minWidth: '7rem',
+		minWidth: '7.25rem',
 		justifyContent: 'center',
+		[fr.breakpoints.down('md')]: {
+			minWidth: '10rem',
+		},
 	},
 	value: {
 		fontSize: '2rem',
 		fontWeight: 'bold',
 		margin: 0,
+		textWrap:'nowrap'
 	},
 	indicatorIcon: {
 		width: '4rem',
@@ -275,7 +292,8 @@ const useStyles = tss.create({
 		}
 	},
 	skeleton: {
-		margin: 'auto'
+		margin: 'auto',
+		minWidth: '10rem'
 	},
 	bien: {
 		color: fr.colors.decisions.background.flat.success.default
