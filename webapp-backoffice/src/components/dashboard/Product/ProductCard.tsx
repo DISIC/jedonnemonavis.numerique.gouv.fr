@@ -408,31 +408,9 @@ const ProductCard = ({
 							classes.gridProduct
 						)}
 					>
-						{(product.isTop250 || isDisabled) && (
-							<div
-								className={cx(
-									fr.cx('fr-col', 'fr-col-10', 'fr-pb-0'),
-									classes.badgesSection
-								)}
-							>
-								<div className={classes.badgesContainer}>
-									{product.isTop250 && (
-										<Badge severity="info" noIcon small>
-											Démarche essentielle
-										</Badge>
-									)}
-									{isDisabled && (
-										<Badge noIcon small>
-											Service supprimé
-										</Badge>
-									)}
-								</div>
-							</div>
-						)}
-
 						<div
 							className={cx(
-								fr.cx('fr-col-12', 'fr-col-8', 'fr-col-md-6'),
+								fr.cx('fr-col-12', 'fr-col-6', 'fr-col-md-6', 'fr-pb-1v'),
 								classes.titleSection
 							)}
 						>
@@ -447,10 +425,131 @@ const ProductCard = ({
 								</span>
 							</Link>
 						</div>
-
 						<div
 							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-4'),
+								fr.cx('fr-col', 'fr-col-6', 'fr-pb-1v'),
+								classes.badgesSection
+							)}
+						>
+							{(product.isTop250 || isDisabled) && (
+								<div className={classes.badgesContainer}>
+									{product.isTop250 && (
+										<Badge severity="info" noIcon small>
+											Démarche essentielle
+										</Badge>
+									)}
+									{isDisabled && (
+										<Badge noIcon small>
+											Service supprimé
+										</Badge>
+									)}
+								</div>
+							)}
+							<Button
+								id="button-options-service"
+								iconId={
+									menuOpen
+										? 'fr-icon-arrow-up-s-line'
+										: 'fr-icon-arrow-down-s-line'
+								}
+								title={`Ouvrir le menu contextuel du service « ${product.title} »`}
+								aria-label={`Ouvrir le menu contextuel du service « ${product.title} »`}
+								priority="tertiary"
+								size="small"
+								className={cx(classes.buttonWrapper, fr.cx('fr-mr-2v'))}
+								onClick={handleMenuClick}
+								iconPosition="right"
+							>
+								<span
+									className={fr.cx('fr-hidden')}
+								>{`Ouvrir le menu contextuel du service « ${product.title} »`}</span>
+								Options
+							</Button>
+							<Menu
+								id="option-menu"
+								open={menuOpen}
+								anchorEl={anchorEl}
+								onClose={handleClose}
+								MenuListProps={{
+									'aria-labelledby': 'button-options-access-right'
+								}}
+							>
+								<MenuItem
+									onClick={e => {
+										handleClose(e);
+										router.push(
+											`/administration/dashboard/product/${product.id}/access`
+										);
+									}}
+									className={cx(classes.menuItem)}
+								>
+									<span
+										className={fr.cx('fr-icon-user-setting-line', 'fr-mr-1v')}
+									/>
+									Droits d'accès
+								</MenuItem>
+								<MenuItem
+									onClick={e => {
+										handleClose(e);
+										if (product.isTop250) {
+											onDeleteEssential();
+											window.scrollTo({
+												top: 0,
+												behavior: 'smooth' // Scroll avec animation
+											});
+										} else {
+											onConfirmModalArchive.open();
+										}
+									}}
+									className={cx(classes.menuItemDanger)}
+								>
+									Supprimer ce service
+								</MenuItem>
+							</Menu>
+							{showFavoriteButton && !isDisabled && (
+								<Button
+									//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+									title={
+										isFavorite
+											? `Supprimer le produit « ${product.title} » des favoris`
+											: `Ajouter le produit « ${product.title} » aux favoris`
+									}
+									aria-label={
+										isFavorite
+											? `Supprimer le produit « ${product.title} » des favoris`
+											: `Ajouter le produit « ${product.title} » aux favoris`
+									}
+									className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
+									priority="tertiary"
+									size="small"
+									onClick={e => {
+										e.preventDefault();
+										if (isFavorite) {
+											deleteFavorite.mutate({
+												product_id: product.id,
+												user_id: userId
+											});
+											push(['trackEvent', 'BO - Product', `Set-Favorite`]);
+										} else {
+											createFavorite.mutate({
+												product_id: product.id,
+												user_id: userId
+											});
+											push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
+										}
+									}}
+								>
+									{isFavorite ? (
+										<Image alt="favoris ajouté" src={starFill} />
+									) : (
+										<Image alt="favoris retiré" src={starOutline} />
+									)}
+								</Button>
+							)}
+						</div>
+						<div
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-md-6', 'fr-pt-1v'),
 								classes.entitySection
 							)}
 						>
@@ -489,93 +588,7 @@ const ProductCard = ({
 										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
 										classes.rightButtonsWrapper
 									)}
-								>
-									<Button
-										id="button-options-service"
-										iconId={'ri-more-2-fill'}
-										title={`Ouvrir le menu contextuel du service « ${product.title} »`}
-										aria-label={`Ouvrir le menu contextuel du service « ${product.title} »`}
-										priority="tertiary"
-										size="small"
-										className={cx(classes.buttonWrapper)}
-										onClick={handleMenuClick}
-									>
-										<span
-											className={fr.cx('fr-hidden')}
-										>{`Ouvrir le menu contextuel du service « ${product.title} »`}</span>
-									</Button>
-									<Menu
-										id="option-menu"
-										open={menuOpen}
-										anchorEl={anchorEl}
-										onClose={handleClose}
-										MenuListProps={{
-											'aria-labelledby': 'button-options-access-right'
-										}}
-									>
-										<MenuItem
-											onClick={e => {
-												handleClose(e);
-												if (product.isTop250) {
-													onDeleteEssential();
-													window.scrollTo({
-														top: 0,
-														behavior: 'smooth' // Scroll avec animation
-													});
-												} else {
-													onConfirmModalArchive.open();
-												}
-											}}
-											className={cx(classes.menuItemDanger)}
-										>
-											Supprimer ce service
-										</MenuItem>
-									</Menu>
-									{showFavoriteButton && !isDisabled && (
-										<Button
-											//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-											title={
-												isFavorite
-													? `Supprimer le produit « ${product.title} » des favoris`
-													: `Ajouter le produit « ${product.title} » aux favoris`
-											}
-											aria-label={
-												isFavorite
-													? `Supprimer le produit « ${product.title} » des favoris`
-													: `Ajouter le produit « ${product.title} » aux favoris`
-											}
-											className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
-											priority="tertiary"
-											size="small"
-											onClick={e => {
-												e.preventDefault();
-												if (isFavorite) {
-													deleteFavorite.mutate({
-														product_id: product.id,
-														user_id: userId
-													});
-													push(['trackEvent', 'BO - Product', `Set-Favorite`]);
-												} else {
-													createFavorite.mutate({
-														product_id: product.id,
-														user_id: userId
-													});
-													push([
-														'trackEvent',
-														'BO - Product',
-														`Unset-Favorite`
-													]);
-												}
-											}}
-										>
-											{isFavorite ? (
-												<Image alt="favoris ajouté" src={starFill} />
-											) : (
-												<Image alt="favoris retiré" src={starOutline} />
-											)}
-										</Button>
-									)}
-								</div>
+								></div>
 								<div
 									className={cx(
 										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
@@ -763,7 +776,11 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	titleSection: {},
 	entitySection: {},
-	badgesSection: {},
+	badgesSection: {
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'end'
+	},
 	statsSection: {},
 	rightButtonsWrapper: {
 		display: 'flex',
@@ -792,6 +809,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 			textDecoration: 'underline'
 		}
 	},
+	menuItem: {},
 	entityName: {
 		color: '#666666'
 	},
@@ -812,7 +830,8 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	badgesContainer: {
 		display: 'flex',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		marginRight: '1rem'
 	},
 	reviewWrapper: {
 		display: 'flex',

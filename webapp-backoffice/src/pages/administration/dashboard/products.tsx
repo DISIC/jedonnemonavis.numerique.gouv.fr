@@ -407,14 +407,7 @@ const DashBoard = () => {
 								</div>
 							</>
 						)}
-						<div
-							className={fr.cx(
-								'fr-col-12',
-								'fr-mt-4w',
-								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-								'fr-py-0'
-							)}
-						>
+						<div className={fr.cx('fr-col-12', 'fr-mt-4w', 'fr-py-0')}>
 							<div className={cx(classes.checkboxContainer)}>
 								{/* {countTotalUserScope > 10 && !filters.filterOnlyArchived && (
 									<Checkbox
@@ -490,35 +483,37 @@ const DashBoard = () => {
 								/>
 							</div>
 						</div>
-						<ul
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
-								classes.tagContainer
-							)}
-						>
-							{filters.filterEntity.map((entity, index) => (
-								<li key={index}>
-									<Tag
-										dismissible
-										className={cx(classes.tagFilter)}
-										title={`Retirer ${entity.label}`}
-										nativeButtonProps={{
-											onClick: () => {
-												updateFilters({
-													...filters,
-													filterEntity: filters.filterEntity.filter(
-														e => e.value !== entity.value
-													)
-												});
-												setInputValue('');
-											}
-										}}
-									>
-										<p>{entity.label}</p>
-									</Tag>
-								</li>
-							))}
-						</ul>
+						{filters.filterEntity.length > 0 && (
+							<ul
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+									classes.tagContainer
+								)}
+							>
+								{filters.filterEntity.map((entity, index) => (
+									<li key={index}>
+										<Tag
+											dismissible
+											className={cx(classes.tagFilter)}
+											title={`Retirer ${entity.label}`}
+											nativeButtonProps={{
+												onClick: () => {
+													updateFilters({
+														...filters,
+														filterEntity: filters.filterEntity.filter(
+															e => e.value !== entity.value
+														)
+													});
+													setInputValue('');
+												}
+											}}
+										>
+											<p>{entity.label}</p>
+										</Tag>
+									</li>
+								))}
+							</ul>
+						)}
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
