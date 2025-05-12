@@ -484,11 +484,69 @@ const ProductCard = ({
 									className={cx(classes.menuItem)}
 								>
 									<span
-										className={fr.cx('fr-icon-user-setting-line', 'fr-mr-1v')}
+										className={fr.cx(
+											'fr-icon-user-setting-line',
+											'fr-icon--sm',
+											'fr-mr-1v'
+										)}
 									/>
 									Droits d'accès
 								</MenuItem>
 								<MenuItem
+									onClick={e => {
+										handleClose(e);
+										router.push(
+											`/administration/dashboard/product/${product.id}/access`
+										);
+									}}
+									className={cx(classes.menuItem)}
+								>
+									<span
+										className={fr.cx(
+											'fr-icon-code-box-line',
+											'fr-icon--sm',
+											'fr-mr-1v'
+										)}
+									/>
+									Clés API
+								</MenuItem>
+								<MenuItem
+									onClick={e => {
+										handleClose(e);
+										router.push(
+											`/administration/dashboard/product/${product.id}/access`
+										);
+									}}
+									className={cx(classes.menuItem)}
+								>
+									<span
+										className={fr.cx(
+											'fr-icon-time-line',
+											'fr-icon--sm',
+											'fr-mr-1v'
+										)}
+									/>
+									Historique d'activité
+								</MenuItem>
+								<MenuItem
+									onClick={e => {
+										handleClose(e);
+										router.push(
+											`/administration/dashboard/product/${product.id}/access`
+										);
+									}}
+									className={cx(classes.menuItem)}
+								>
+									<span
+										className={fr.cx(
+											'fr-icon-info-line',
+											'fr-icon--sm',
+											'fr-mr-1v'
+										)}
+									/>
+									Informations
+								</MenuItem>
+								{/* <MenuItem
 									onClick={e => {
 										handleClose(e);
 										if (product.isTop250) {
@@ -504,7 +562,7 @@ const ProductCard = ({
 									className={cx(classes.menuItemDanger)}
 								>
 									Supprimer ce service
-								</MenuItem>
+								</MenuItem> */}
 							</Menu>
 							{showFavoriteButton && !isDisabled && (
 								<Button
@@ -809,7 +867,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 			textDecoration: 'underline'
 		}
 	},
-	menuItem: {},
+	menuItem: {
+		color: fr.colors.decisions.text.title.blueFrance.default
+	},
 	entityName: {
 		color: '#666666'
 	},
