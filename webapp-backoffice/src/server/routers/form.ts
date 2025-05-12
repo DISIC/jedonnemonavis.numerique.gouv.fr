@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from '@/src/server/trpc';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { z } from 'zod';
 
 export const formRouter = router({
@@ -33,7 +33,7 @@ export const formRouter = router({
 			return { data: form };
 		}),
 
-	getFormTemplateBySlug: protectedProcedure
+	getFormTemplateBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const { slug } = input;

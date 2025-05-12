@@ -63,13 +63,7 @@ function App({ Component, pageProps }: AppProps) {
 			router.pathname.startsWith('/public') ||
 			router.pathname.startsWith('/open-api');
 
-		let layout = <PublicLayout light={lightMode}>{children}</PublicLayout>;
-
-		if (router.pathname.startsWith('/administration/dashboard/product')) {
-			layout = <RootFormTemplateProvider>{layout}</RootFormTemplateProvider>;
-		}
-
-		return layout;
+		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
 	};
 
 	React.useEffect(() => {
@@ -95,7 +89,9 @@ function App({ Component, pageProps }: AppProps) {
 				<AuthProvider>
 					<StatsTotalsProvider>
 						<FiltersContextProvider>
-							{getLayout(<Component {...pageProps} />)}
+							<RootFormTemplateProvider>
+								{getLayout(<Component {...pageProps} />)}
+							</RootFormTemplateProvider>
 						</FiltersContextProvider>
 					</StatsTotalsProvider>
 				</AuthProvider>
