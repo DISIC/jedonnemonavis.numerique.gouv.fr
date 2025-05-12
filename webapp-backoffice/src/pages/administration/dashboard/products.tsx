@@ -464,20 +464,24 @@ const DashBoard = () => {
 												}
 											}
 										},
-										{
-											label: 'Services supprimés',
-											nativeInputProps: {
-												checked: filters.filterOnlyArchived,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyArchived: e.target.checked,
-														filterOnlyFavorites: false
-													});
-												}
-											}
-										}
+										...(countArchivedUserScope > 0
+											? [
+													{
+														label: 'Services supprimés',
+														nativeInputProps: {
+															checked: filters.filterOnlyArchived,
+															onChange: e => {
+																updateFilters({
+																	...filters,
+																	currentPage: 1,
+																	filterOnlyArchived: e.target.checked,
+																	filterOnlyFavorites: false
+																});
+															}
+														}
+													}
+												]
+											: [])
 									]}
 									orientation="horizontal"
 								/>
@@ -619,30 +623,6 @@ const DashBoard = () => {
 									</div>
 								</div>
 							)}
-							<div className={cx(classes.checkboxContainer)}>
-								{countArchivedUserScope > 0 && (
-									<Checkbox
-										className={fr.cx('fr-mb-0')}
-										style={{ userSelect: 'none' }}
-										options={[
-											{
-												label: 'Afficher uniquement les services supprimés',
-												nativeInputProps: {
-													name: 'archived-products',
-													checked: filters.filterOnlyArchived,
-													onChange: e => {
-														updateFilters({
-															...filters,
-															currentPage: 1,
-															filterOnlyArchived: e.target.checked
-														});
-													}
-												}
-											}
-										]}
-									/>
-								)}
-							</div>
 						</div>
 						<div
 							className={fr.cx(
