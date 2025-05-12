@@ -225,7 +225,7 @@ const ProductStatPage = (props: Props) => {
 				<div className={fr.cx('fr-mt-5w')}>
 					<h4>Participation</h4>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Avis"
 								kpi={nbReviewsWithFilters}
@@ -233,7 +233,7 @@ const ProductStatPage = (props: Props) => {
 								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
 							/>
 						</div>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Verbatims"
 								kpi={nbVerbatims}
