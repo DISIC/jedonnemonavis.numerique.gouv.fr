@@ -39,66 +39,68 @@ const GenericCardInfos = (props: Props) => {
 						'fr-grid-row--middle'
 					)}
 				>
-					<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'))}>
+					<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v', 'fr-mb-3v', 'fr-mb-md-0'))}>
 						<h4 className={cx(fr.cx('fr-mb-0'))}>{title}</h4>
 						{hint && <p className={cx(fr.cx('fr-mb-0', 'fr-mt-4v'))}>{hint}</p>}
 					</div>
-					<div
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'),
-							classes.actionContainer
-						)}
-					>
-						{modifiable && !modifying && (
-							<Button
-								priority="secondary"
-								iconId="fr-icon-edit-line"
-								onClick={() => {
-									setModifying(true);
-									push(['trackEvent', 'BO - Account', `Modify-${title}`]);
-								}}
-								className={classes.button}
-							>
-								Modifier
-							</Button>
-						)}
-						{modifiable && modifying && onSubmit && (
-							<>
+					{modifiable && (
+						<div
+							className={cx(
+								fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'),
+								classes.actionContainer
+							)}
+						>
+							{modifiable && !modifying && (
 								<Button
 									priority="secondary"
+									iconId="fr-icon-edit-line"
 									onClick={() => {
-										setModifying(false);
-										push([
-											'trackEvent',
-											'BO - Account',
-											`Cancel-Changes-${title}`
-										]);
+										setModifying(true);
+										push(['trackEvent', 'BO - Account', `Modify-${title}`]);
 									}}
-									className={cx(classes.button)}
+									className={classes.button}
 								>
-									Annuler
+									Modifier
 								</Button>
-								<Button
-									priority="primary"
-									iconId="fr-icon-save-line"
-									className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
-									onClick={async () => {
-										const isFormValid = await onSubmit?.();
-										push([
-											'trackEvent',
-											'BO - Account',
-											`Validate-Changes-${title}`
-										]);
-										if (isFormValid) {
+							)}
+							{modifiable && modifying && onSubmit && (
+								<>
+									<Button
+										priority="secondary"
+										onClick={() => {
 											setModifying(false);
-										}
-									}}
-								>
-									Sauvegarder
-								</Button>
-							</>
-						)}
-					</div>
+											push([
+												'trackEvent',
+												'BO - Account',
+												`Cancel-Changes-${title}`
+											]);
+										}}
+										className={cx(classes.button)}
+									>
+										Annuler
+									</Button>
+									<Button
+										priority="primary"
+										iconId="fr-icon-save-line"
+										className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
+										onClick={async () => {
+											const isFormValid = await onSubmit?.();
+											push([
+												'trackEvent',
+												'BO - Account',
+												`Validate-Changes-${title}`
+											]);
+											if (isFormValid) {
+												setModifying(false);
+											}
+										}}
+									>
+										Sauvegarder
+									</Button>
+								</>
+							)}
+						</div>
+					)}
 					{smallScreenShowHr || modifying && (
 						<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
 							<hr />
