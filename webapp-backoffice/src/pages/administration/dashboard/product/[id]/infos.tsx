@@ -229,7 +229,7 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				{ownRight === 'carrier_admin' && (
+				{ownRight === 'carrier_admin' && !product.isTop250 && (
 					<div>
 						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
 						<p>En supprimant ce service :</p>
