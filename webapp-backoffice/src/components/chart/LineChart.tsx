@@ -79,7 +79,7 @@ const CustomLineChart = ({
 						position: 'insideLeft',
 						fontSize: '0.75rem',
 						dy: -60,
-						dx: 10
+						dx: 15
 					}}
 				/>
 				{!dataKeys ? (

@@ -56,6 +56,7 @@ const CustomBarChart = ({
 				title="Graphique: Répartition des réponses"
 				role="img"
 				data={data}
+				margin={{ top: 20, left: -10 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
@@ -77,7 +78,7 @@ const CustomBarChart = ({
 						position="insideLeft"
 						fontSize="0.75rem"
 						dy={-25}
-						dx={-5}
+						dx={15}
 					/>
 				</YAxis>
 				<Tooltip

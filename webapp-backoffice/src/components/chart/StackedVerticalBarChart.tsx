@@ -33,7 +33,8 @@ const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 		<div
 			style={{
 				display: 'flex',
-				gap: '25px'
+				gap: '25px',
+				marginLeft: '25px'
 			}}
 		>
 			{payload
@@ -107,6 +108,7 @@ const StackedVerticalBarChart = ({
 				title="Graphique: Répartition des réponses"
 				data={data}
 				layout="vertical"
+				margin={{ left: -25, bottom: 5 }}
 			>
 				<CartesianGrid horizontal={false} strokeDasharray="3 3" />
 				<XAxis
