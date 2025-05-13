@@ -1,6 +1,7 @@
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import { getIntentionFromAverage } from '@/src/utils/stats';
 import {
+	formatDateToFrenchString,
 	formatNumberWithSpaces,
 	getColorFromIntention,
 	getReadableValue
@@ -496,7 +497,7 @@ const ProductCard = ({
 									onClick={e => {
 										handleClose(e);
 										router.push(
-											`/administration/dashboard/product/${product.id}/access`
+											`/administration/dashboard/product/${product.id}/api_keys`
 										);
 									}}
 									className={cx(classes.menuItem)}
@@ -514,7 +515,7 @@ const ProductCard = ({
 									onClick={e => {
 										handleClose(e);
 										router.push(
-											`/administration/dashboard/product/${product.id}/access`
+											`/administration/dashboard/product/${product.id}/logs`
 										);
 									}}
 									className={cx(classes.menuItem)}
@@ -532,7 +533,7 @@ const ProductCard = ({
 									onClick={e => {
 										handleClose(e);
 										router.push(
-											`/administration/dashboard/product/${product.id}/access`
+											`/administration/dashboard/product/${product.id}/infos`
 										);
 									}}
 									className={cx(classes.menuItem)}
@@ -607,7 +608,7 @@ const ProductCard = ({
 						</div>
 						<div
 							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-6', 'fr-pt-1v'),
+								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-pt-1v'),
 								classes.entitySection
 							)}
 						>
@@ -620,7 +621,7 @@ const ProductCard = ({
 							<div
 								className={cx(
 									classes.buttonsCol,
-									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12')
 								)}
 							>
 								<Button
@@ -641,13 +642,59 @@ const ProductCard = ({
 							</div>
 						) : (
 							<>
-								<div
+								{/* <div
 									className={cx(
 										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
 										classes.rightButtonsWrapper
 									)}
-								></div>
-								<div
+								></div> */}
+								{!isLoadingReviewsCount && nbReviews !== undefined && (
+									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
+										{product.forms.map((form) => (
+												<div>
+													<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
+														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
+															<span className={cx(classes.productTitle)}>
+																Nom du formulaire
+															</span>
+														</div>
+														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-pb-0'), classes.rightButtonsWrapper)}> 
+															<Badge severity="new" noIcon small>
+																SATISFACTION USAGER
+															</Badge>
+														</div>
+														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+															<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+																Réponses déposées
+															</span>
+															<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+															<Badge severity="success" noIcon small>
+																{nbNewReviews} NOUVELLES RÉPONSES
+															</Badge>
+															{nbReviews > 0 && (
+																<Link
+																	href={`/administration/dashboard/product/${product.id}/reviews`}
+																	title={`Voir les avis pour ${product.title}`}
+																	className={fr.cx('fr-link', 'fr-ml-4v')}
+																>
+																	Voir les réponses
+																</Link>
+															)}
+														</div>
+														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'), classes.rightButtonsWrapper)}>
+															<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+																Modifié le 
+															</span>
+															<span className={fr.cx('fr-text--bold')}>
+																{formatDateToFrenchString(form.updated_at.toString())}
+															</span>
+														</div>
+													</div>
+												</div>
+										))}
+									</div>
+								)}
+								{/* <div
 									className={cx(
 										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
 										classes.statsSection
@@ -802,7 +849,7 @@ const ProductCard = ({
 											sendInvitationBtnClick={handleSendInvitation}
 										/>
 									)}
-								</div>
+								</div> */}
 							</>
 						)}
 					</div>
@@ -899,6 +946,20 @@ const useStyles = tss.withName(ProductCard.name).create({
 		[fr.breakpoints.down('xl')]: {
 			justifyContent: 'flex-start'
 		}
+	},
+	formCard: {
+		backgroundColor: fr.colors.decisions.background.contrast.info.default,
+		display: 'flex',
+		flexWrap: 'wrap',
+		width: '100%',
+		maxWidth: '100%',
+		marginLeft: 0,
+		marginRight: 0,
+		marginBottom: "0.5rem"
+	},
+	smallText: {
+		color: fr.colors.decisions.text.default.grey.default,
+		fontSize: "0.8rem"
 	},
 	notifSpan: {
 		display: 'block',
