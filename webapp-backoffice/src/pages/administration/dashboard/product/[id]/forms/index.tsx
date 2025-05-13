@@ -16,7 +16,7 @@ import {
 	ButtonWithForm,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
-import { getNbPages } from '@/src/utils/tools';
+import { formatDateToFrenchString, formatNumberWithSpaces, getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -26,6 +26,8 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import Link from 'next/link';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 
 interface Props {
 	product: ProductWithForms;
@@ -39,131 +41,41 @@ const modal = createModal({
 
 const ProductButtonsPage = (props: Props) => {
 	const { product, ownRight } = props;
-
-	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, setNumberPerPage] = React.useState(10);
-	const [modalType, setModalType] = React.useState<string>('');
-
-	const [currentButton, setCurrentButton] =
-		React.useState<ButtonWithForm | null>(null);
-	const router = useRouter();
-
-	const [testFilter, setTestFilter] = React.useState<boolean>(false);
-
-	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
+	
+	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
+		trpc.review.getList.useQuery({
+			numberPerPage: 0,
+			page: 1,
+			product_id: product.id
+		});
 
-	const {
-		data: buttonsResult,
-		isLoading: isLoadingButtons,
-		isRefetching: isRefetchingButtons,
-		refetch: refetchButtons
-	} = trpc.button.getList.useQuery(
-		{
-			numberPerPage,
-			page: currentPage,
-			form_id: product.forms[0].id,
-			isTest: testFilter,
-			filterByTitle: filters.filter
-		},
-		{
-			initialData: {
-				data: [],
-				metadata: {
-					count: 0
-				}
-			}
-		}
-	);
-
-	const {
-		data: buttons,
-		metadata: { count: buttonsCount }
-	} = buttonsResult;
-
-	const { data: reviewsCount } = trpc.review.getCounts.useQuery({
-		product_id: product.id
-	});
-
-	const handlePageChange = (pageNumber: number) => {
-		setCurrentPage(pageNumber);
-	};
-
-	const isModalOpen = useIsModalOpen(modal);
-
-	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
-		setCurrentButton(button ? button : null);
-		setModalType(modalType);
-		modal.open();
-	};
-
-	const onButtonCreatedOrUpdated = (isTest: boolean) => {
-		if (isTest) setTestFilter(true);
-		refetchButtons();
-		modal.close();
-	};
-
-	const nbPages = getNbPages(buttonsCount, numberPerPage);
-
-	const displayFilters = nbPages > 1 || buttons.length > 0;
-
-	React.useEffect(() => {
-		if (router.query.autoCreate === 'true') {
-			setTimeout(() => {
-				handleModalOpening('create');
-			}, 100);
-		}
-	}, [router.query]);
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbNewReviews = reviewsData?.metadata.countNew || 0;
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
-				<title>{`${product.title} | Formulaire | Je donne mon avis`}</title>
+				<title>{`${product.title} | Formulaires | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${product.title} | Formulaire | Je donne mon avis`}
+					content={`${product.title} | Formulaires | Je donne mon avis`}
 				/>
 			</Head>
-			<ButtonModal
-				form_id={product.forms[0].id}
-				modal={modal}
-				isOpen={isModalOpen}
-				modalType={modalType}
-				button={currentButton}
-				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
-			/>
-			{router.query.formPublished === 'true' && (
-				<div role="alert" className={fr.cx('fr-mb-8v')}>
-					<Alert
-						description="Votre formulaire est publié"
-						severity="success"
-						title=""
-						small
-						closable
-					/>
-				</div>
-			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>
-					<h2 className={fr.cx('fr-mb-0')}>Formulaire</h2>
+					<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
-					<Link
-						className={fr.cx('fr-btn', 'fr-btn--secondary')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${buttons[0]?.form.product_id}?iframe=true`}
-						target="_blank"
-					>
-						Voir le formulaire
-					</Link>
 					{ownRight === 'carrier_admin' && (
 						<Link
 							className={fr.cx('fr-btn')}
-							href={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
+							href={`/administration/dashboard/product/${product.id}/forms/create`}
 						>
-							Configurer
+							Créer un nouveau formulaire
 							<span
 								className={fr.cx(
-									'fr-icon-settings-5-line',
+									'fr-icon-file-add-line',
 									'fr-icon--sm',
 									'fr-ml-2v'
 								)}
@@ -171,192 +83,65 @@ const ProductButtonsPage = (props: Props) => {
 						</Link>
 					)}
 				</div>
-				<div className={fr.cx('fr-col-12')}>
-					<hr />
-				</div>
-				<div className={fr.cx('fr-col-12')}>
-					<h3 className={fr.cx('fr-mb-4v')}>
-						{product.forms[0].form_template.title}
-					</h3>
-					<p className={fr.cx('fr-mb-0')}>
-						Évaluez le niveau de satisfaction de votre service numérique et identifiez les problèmes rencontrés par vos usagers.
-					</p>
-					<p>
-						Récoltez des données sur les indicateurs clés définis par la plateforme Vos démarches essentielles.
-					</p>
-				</div>
-				{ownRight === 'carrier_admin' && (
-					<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
-						<ProductFormConfigurationInfo
-							link={`/administration/dashboard/product/${product.id}/forms/${product.forms[0].id}`}
-						/>
-					</div>
-				)}
-			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-12')}>
-					<hr
-						className={
-							ownRight === 'carrier_admin'
-								? fr.cx('fr-mt-12v', 'fr-mb-11v', 'fr-pb-1v')
-								: fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')
+				<div className={cx(fr.cx('fr-col-12'))}>
+				<Checkbox
+					options={[
+						{
+						label: 'Afficher les formulaires supprimés',
+						nativeInputProps: {
+							name: 'checkboxes-1',
+							value: 'value1'
 						}
+						}
+					]}
 					/>
 				</div>
-			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-8')}>
-					<h3>Gérer les boutons</h3>
-				</div>
-				{buttons.length > 0 && (
-					<div className={cx(fr.cx('fr-col-4'), classes.buttonRight)}>
-						{ownRight === 'carrier_admin' && (
-							<Button
-								priority="secondary"
-								iconPosition="right"
-								iconId="ri-add-box-line"
-								onClick={() => {
-									handleModalOpening('create');
-									push(['trackEvent', 'Product', 'Modal-Create-button']);
-								}}
-							>
-								Créer un bouton
-							</Button>
-						)}
-					</div>
-				)}
-			</div>
-			{buttonsCount > 0 && (
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-12')}>
-						<p>
-							Le bouton JDMA se place sur votre service numérique pour récolter
-							l’avis de vos usagers.
-						</p>
-					</div>
-				</div>
-			)}
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--gutters',
-					'fr-grid-row--left'
-				)}
-			>
-				{buttons && nbPages > 1 && (
-					<div className={fr.cx('fr-col-8')}>
-						<p className={fr.cx('fr-mb-0')}>
-							Boutons de{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + 1}
-							</span>{' '}
-							à{' '}
-							<span className={cx(classes.boldText)}>
-								{numberPerPage * (currentPage - 1) + buttons.length}
-							</span>{' '}
-							sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
-						</p>
-					</div>
-				)}
-			</div>
-
-			<div>
-				{isLoadingButtons ? (
-					<div className={fr.cx('fr-py-10v')}>
-						<Loader />
-					</div>
-				) : (
-					<>
-						<div className={cx(classes.btnContainer)}>
-							{!buttons.length && !isRefetchingButtons && (
-								<NoButtonsPanel
-									onButtonClick={() => handleModalOpening('create')}
-								/>
-							)}
-						</div>
-						{buttons.length > 0 && (
-							<div
-								aria-live="assertive"
-								className={fr.cx('fr-col-12', 'fr-pb-1w')}
-							>
-								Boutons de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + buttons.length}
-								</span>{' '}
-								sur <span className={cx(classes.boldText)}>{buttonsCount}</span>
+				<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
+					{product.forms.map((form) => (
+						<div>
+							<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
+								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
+									<span className={cx(classes.productTitle)}>
+										Nom du formulaire
+									</span>
+								</div>
+								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-pb-0'), classes.rightButtonsWrapper)}> 
+									<Badge severity="new" noIcon small>
+										SATISFACTION USAGER
+									</Badge>
+								</div>
+								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+									<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+										Réponses déposées
+									</span>
+									<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+									<Badge severity="success" noIcon small>
+										{nbNewReviews} NOUVELLES RÉPONSES
+									</Badge>
+									{nbReviews > 0 && (
+										<Link
+											href={`/administration/dashboard/product/${product.id}/reviews`}
+											title={`Voir les avis pour ${product.title}`}
+											className={fr.cx('fr-link', 'fr-ml-4v')}
+										>
+											Voir les réponses
+										</Link>
+									)}
+								</div>
+								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'), classes.rightButtonsWrapper)}>
+									<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+										Modifié le 
+									</span>
+									<span className={fr.cx('fr-text--bold')}>
+										{formatDateToFrenchString(form.updated_at.toString())}
+									</span>
+								</div>
 							</div>
-						)}
-						<ul className={classes.buttonList}>
-							{buttons?.map((button, index) => (
-								<li key={index}>
-									<ProductButtonCard
-										button={button}
-										onButtonClick={handleModalOpening}
-										ownRight={ownRight}
-									/>
-								</li>
-							))}
-						</ul>
-					</>
-				)}
-				<div
-					className={fr.cx(
-						'fr-grid-row--center',
-						'fr-grid-row',
-						'fr-mt-6v',
-						'fr-mb-6v'
-					)}
-				>
-					{nbPages > 1 && (
-						<Pagination
-							showFirstLast
-							count={nbPages}
-							defaultPage={currentPage}
-							getPageLinkProps={pageNumber => ({
-								onClick: event => {
-									event.preventDefault();
-									handlePageChange(pageNumber);
-								},
-								href: '#',
-								classes: { link: fr.cx('fr-pagination__link') },
-								key: `pagination-link-${pageNumber}`
-							})}
-							className={fr.cx('fr-mt-1w')}
-						/>
-					)}
-				</div>
-				{/* {reviewsCount && (
-					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-12')}>
-							<ProductBottomInfo
-								background={buttons.length > 1 ? '#FFFFFF' : '#F3F6FE'}
-								title={
-									reviewsCount && reviewsCount.countAll > 0
-										? 'Pour aller plus loin avec JDMA ...'
-										: 'En attendant vos premiers avis...'
-								}
-								hasBorder={buttons.length > 1}
-								contents={[
-									{
-										text: 'Nos conseils pour obtenir plus d’avis !',
-										link: 'Améliorer le placement de votre bouton',
-										image: '/assets/chat_picto.svg'
-									},
-									{
-										text: "Vous souhaitez comprendre les différences entre un parcours sur mobile et un parcours sur ordinateur pour le même service? Réaliser un test A/B pour une fonctionnalité?  C'est possible en créant plusieurs boutons sur le même service.",
-										link: 'En savoir plus sur les boutons multiples',
-										image: '/assets/cone_picto.svg'
-									}
-								]}
-							/>
 						</div>
-					</div>
-				)} */}
+					))}
+				</div>
 			</div>
+			
 		</ProductLayout>
 	);
 };
@@ -367,28 +152,19 @@ const useStyles = tss
 	.withName(ProductButtonsPage.name)
 	.withParams()
 	.create({
-		boldText: {
-			fontWeight: 'bold'
+		formCard: {
+			backgroundColor: fr.colors.decisions.background.contrast.info.default,
+			display: 'flex',
+			flexWrap: 'wrap',
+			width: '100%',
+			maxWidth: '100%',
+			marginLeft: 0,
+			marginRight: 0,
+			marginBottom: "0.5rem"
 		},
-		buttonRight: {
-			textAlign: 'right'
-		},
-		noResults: {
-			paddingTop: fr.spacing('10v'),
-			paddingBottom: fr.spacing('10v'),
-			fontWeight: 'bold',
-			textAlign: 'center'
-		},
-		btnContainer: {
-			marginTop: fr.spacing('4v')
-		},
-		buttonList: {
-			paddingInlineStart: 0,
-			listStyleType: 'none',
-			li: {
-				paddingBottom: 0
-			},
-			marginTop: '1rem'
+		smallText: {
+			color: fr.colors.decisions.text.default.grey.default,
+			fontSize: "0.8rem"
 		},
 		headerButtons: {
 			display: 'flex',
@@ -400,7 +176,20 @@ const useStyles = tss
 					alignItems: 'center'
 				}
 			}
-		}
+		},
+		rightButtonsWrapper: {
+			display: 'flex',
+			justifyContent: 'end'
+		},
+		productTitle: {
+			fontSize: '18px',
+			lineHeight: '1.5rem',
+			fontWeight: 'bold',
+			color: fr.colors.decisions.text.title.blueFrance.default,
+			'&:hover': {
+				textDecoration: 'underline'
+			}
+		},
 	});
 
 export { getServerSideProps };

@@ -399,7 +399,7 @@ const ProductCard = ({
 				</div>
 			</OnConfirmModal>{' '}
 			<Link
-				href={`/administration/dashboard/product/${product.id}/stats`}
+				href={`/administration/dashboard/product/${product.id}/forms`}
 				tabIndex={-1}
 			>
 				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
@@ -416,7 +416,7 @@ const ProductCard = ({
 							)}
 						>
 							<Link
-								href={`/administration/dashboard/product/${product.id}/stats`}
+								href={`/administration/dashboard/product/${product.id}/forms`}
 								tabIndex={0}
 								title={`Voir les statistiques pour le service ${product.title}`}
 								className={cx(classes.productLink, fr.cx('fr-link'))}
