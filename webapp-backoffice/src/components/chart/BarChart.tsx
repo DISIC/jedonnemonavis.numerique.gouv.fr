@@ -50,12 +50,14 @@ const CustomBarChart = ({
 		return null;
 	};
 
+	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
 	return (
 		<ResponsiveContainer width="100%" height={275}>
 			<BarChart
 				title="Graphique: Répartition des réponses"
 				role="img"
-				data={data}
+				data={data.filter(item => isMobile ? !item.name.includes('clair') : true)}
 				margin={{ top: 20, left: -10 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -64,7 +66,6 @@ const CustomBarChart = ({
 					dataKey="name"
 					fontSize="0.75rem"
 					tickLine={false}
-					padding={{ left: 50, right: 50 }}
 				/>
 				<YAxis
 					axisLine={false}

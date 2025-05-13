@@ -44,8 +44,12 @@ const CustomLineChart = ({
 	labelAxisY: string;
 	ticks?: number[];
 }) => {
+	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
 	return (
-		<ResponsiveContainer width="100%" height={275}>
+		<ResponsiveContainer width="100%" height={dataKeys && isMobile
+					? 300 + Math.floor((dataKeys.length - 1) / 4) * 50
+					: 275}>
 			<LineChart
 				title={
 					labelAxisY === 'Moyenne satisfaction'
@@ -57,7 +61,7 @@ const CustomLineChart = ({
 					...item,
 					name: translateMonthToFrench(item.name)
 				}))}
-				margin={{ top: 20, left: -10 }}
+				margin={{ top: 20, left: -10}}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
@@ -102,7 +106,8 @@ const CustomLineChart = ({
 							iconSize={16}
 							wrapperStyle={{
 								paddingBottom: '20px',
-								fontSize: '0.75rem'
+								fontSize: '0.75rem',
+								left: 0
 							}}
 						/>
 						{dataKeys.map((key, index) => (
