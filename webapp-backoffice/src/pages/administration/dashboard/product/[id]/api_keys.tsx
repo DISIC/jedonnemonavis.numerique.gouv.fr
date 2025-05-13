@@ -27,7 +27,7 @@ const ProductApiKeysPage = (props: Props) => {
 				/>
 			</Head>
 			<div className={classes.headerWrapper}>
-				<h1>Gérer les clés API</h1>
+				<h2>Gérer les clés API</h2>
 				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
 					Voir la documentation de l'API
 				</Link>
@@ -42,7 +42,11 @@ const useStyles = tss.withName(ProductApiKeysPage.name).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+		}
 	}
 });
 

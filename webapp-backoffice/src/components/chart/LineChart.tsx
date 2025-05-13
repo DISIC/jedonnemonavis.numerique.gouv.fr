@@ -57,6 +57,7 @@ const CustomLineChart = ({
 					...item,
 					name: translateMonthToFrench(item.name)
 				}))}
+				margin={{ top: 20, left: -10 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
@@ -77,7 +78,8 @@ const CustomLineChart = ({
 						angle: 90,
 						position: 'insideLeft',
 						fontSize: '0.75rem',
-						dy: -60
+						dy: -60,
+						dx: 10
 					}}
 				/>
 				{!dataKeys ? (

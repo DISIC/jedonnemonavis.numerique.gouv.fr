@@ -225,7 +225,7 @@ const ProductStatPage = (props: Props) => {
 				<div className={fr.cx('fr-mt-5w')}>
 					<h4>Participation</h4>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Avis"
 								kpi={nbReviewsWithFilters}
@@ -233,7 +233,7 @@ const ProductStatPage = (props: Props) => {
 								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
 							/>
 						</div>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Verbatims"
 								kpi={nbVerbatims}
@@ -349,7 +349,7 @@ const ProductStatPage = (props: Props) => {
 			</Head>
 			<PublicDataModal modal={public_modal} product={product} />
 			<div className={cx(classes.title)}>
-				<h1 className={fr.cx('fr-mb-0')}>Statistiques</h1>
+				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
 				{ownRight === 'carrier_admin' && (
 					<Button
 						priority="secondary"
