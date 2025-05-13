@@ -470,7 +470,7 @@ const DashBoard = () => {
 														label: 'Services supprimés',
 														nativeInputProps: {
 															checked: filters.filterOnlyArchived,
-															onChange: e => {
+															onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
 																updateFilters({
 																	...filters,
 																	currentPage: 1,
