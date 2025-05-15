@@ -1049,7 +1049,7 @@
   resolved "https://registry.npmjs.org/@braintree/sanitize-url/-/sanitize-url-7.0.0.tgz"
   integrity sha512-GMu2OJiTd1HSe74bbJYQnVvELANpYiGFZELyyTM1CR0sdv5ReQAcJ/c/8pIrPab3lO11+D+EpuGLUxqz+y832g==
 
-"@codegouvfr/react-dsfr@^1.20.0":
+"@codegouvfr/react-dsfr@1.20.0":
   version "1.20.0"
   resolved "https://registry.yarnpkg.com/@codegouvfr/react-dsfr/-/react-dsfr-1.20.0.tgz#a2bf6a59be02682e7e2ab9b881f68095b00ad877"
   integrity sha512-7JqcqPnPrzKhoOAT0WshiyaG/hZkfuHTFjoqSmhlQ1wMEJ/HztcZV1mnbVZ/3CYLtStjohFI6QLpJ/FPXujqSw==
@@ -8995,9 +8995,9 @@ undici-types@~5.26.4:
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
 undici@^5.22.1, undici@^5.24.0:
-  version "5.28.2"
-  resolved "https://registry.npmjs.org/undici/-/undici-5.28.2.tgz"
-  integrity sha512-wh1pHJHnUeQV5Xa8/kyQhO7WFa8M34l026L5P/+2TYiakvGy5Rdc8jWZVyG7ieht/0WgJLEd3kcU5gKx+6GC8w==
+  version "5.29.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.29.0.tgz#419595449ae3f2cdcba3580a2e8903399bd1f5a3"
+  integrity sha512-raqeBD6NQK4SkWhQzeYKd1KmIG6dllBOTt55Rmkt4HtI9mwdWtJljnrXjAFUBLTSN67HWrOIZ3EPF4kjUw80Bg==
   dependencies:
     "@fastify/busboy" "^2.0.0"
 
