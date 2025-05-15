@@ -27,7 +27,8 @@ const renderLegend = (props: any) => {
 		<div
 			style={{
 				display: 'flex',
-				gap: '25px'
+				gap: '25px',
+				marginLeft: '20px'
 			}}
 		>
 			{payload
@@ -161,6 +162,7 @@ const SmileyBarChart = ({
 				role="img"
 				title="Graphique: Évolution des réponses"
 				data={data}
+				margin={{ left: -20 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
@@ -168,6 +170,7 @@ const SmileyBarChart = ({
 					dataKey="name"
 					fontSize="0.75rem"
 					tickLine={false}
+					padding={{ left: 20, }}
 				/>
 				<YAxis
 					axisLine={false}
