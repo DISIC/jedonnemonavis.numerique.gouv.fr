@@ -47,8 +47,8 @@ const CustomLineChart = ({
 	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
 
 	return (
-		<ResponsiveContainer width="100%" height={dataKeys && isMobile
-					? 300 + Math.floor((dataKeys.length - 1) / 4) * 50
+		<ResponsiveContainer width="100%" height={dataKeys
+					? 300 + Math.floor((dataKeys.length - 1) / 4) * (isMobile ? 75 : 10)
 					: 275}>
 			<LineChart
 				title={
@@ -61,7 +61,7 @@ const CustomLineChart = ({
 					...item,
 					name: translateMonthToFrench(item.name)
 				}))}
-				margin={{ top: 20, left: -10}}
+				margin={{ top: dataKeys ? 0 : 20, left: -10}}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis

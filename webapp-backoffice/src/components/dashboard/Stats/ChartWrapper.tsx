@@ -399,8 +399,8 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: '1rem',
 		[fr.breakpoints.down('md')]: {
+			marginBottom: '1rem',
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			justifyContent: 'flex-start',
