@@ -160,7 +160,7 @@ const ObservatoireStats = ({
 			);
 		} else {
 			return (
-				<div className={cx(fr.cx('fr-mb-16v'))}>
+				<div className={cx(fr.cx('fr-mb-3v', 'fr-mb-md-0'))}>
 					<Tooltip
 						placement="top"
 						title="Aucune donnée pour calculer cette note"
@@ -190,7 +190,7 @@ const ObservatoireStats = ({
 							<i className={cx(fr.cx(field.icon), classes.icon)} />
 						</div>
 						<label className={cx(classes.label)}>
-							<h5>{field.label}</h5>
+							<span className={classes.indicatorTitle}>{field.label}</span>
 							<Tooltip placement="top" title={field.tooltip} tabIndex={0}>
 								<span
 									className={fr.cx(
@@ -275,6 +275,17 @@ const useStyles = tss.create({
 		fontWeight: 'bold',
 		margin: 0,
 		textWrap:'nowrap'
+	},
+	indicatorTitle: {
+		fontSize: '1.25rem',
+		lineHeight: '1.75rem',
+		fontWeight: 'bold',
+		margin: 0,
+		textWrap:'nowrap',
+		color: fr.colors.decisions.text.title.grey.default,
+		[fr.breakpoints.up('md')]: {
+			fontSize: '1.375rem',
+		}
 	},
 	indicatorIcon: {
 		width: '4rem',
