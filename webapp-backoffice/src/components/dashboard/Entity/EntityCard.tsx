@@ -70,7 +70,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										priority="secondary"
 										size="small"
 										title={`Clés API de ${entity.name}`}
-										iconId="fr-icon-lock-unlock-line"
+										iconId="ri-key-2-line"
 										iconPosition="right"
 										className={classes.button}
 										onClick={() => {
@@ -81,7 +81,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										Clés API
 									</Button>
 								</li>
-								<li>
+								<li> 
 									<Button
 										priority="secondary"
 										size="small"
