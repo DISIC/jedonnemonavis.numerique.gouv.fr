@@ -88,10 +88,13 @@ const ProductReviewsPage = (props: Props) => {
 			...filters,
 			productReviews: {
 				...filters.productReviews,
-				hasChanged: true,
 				filters: {
 					...filtersT
 				}
+			},
+			sharedFilters: {
+				...filters.sharedFilters,
+				hasChanged: true,
 			}
 		});
 		filter_modal.close();
@@ -131,8 +134,8 @@ const ProductReviewsPage = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			start_date: filters.productReviews.currentStartDate,
-			end_date: filters.productReviews.currentEndDate,
+			start_date: filters.sharedFilters.currentStartDate,
+			end_date: filters.sharedFilters.currentEndDate,
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
@@ -334,6 +337,9 @@ const ProductReviewsPage = (props: Props) => {
 				...filters,
 				productReviews: {
 					...filters.productReviews,
+				},
+				sharedFilters: {
+					...filters.sharedFilters,
 					currentStartDate: new Date(
 						reviewLog[0]
 							? reviewLog[0].created_at
@@ -358,7 +364,10 @@ const ProductReviewsPage = (props: Props) => {
 				...filters,
 				productReviews: {
 					...filters.productReviews,
-					dateShortcut: 'one-year'
+				},
+				sharedFilters: {
+					...filters.sharedFilters,
+					dateShortcut: filters.sharedFilters.dateShortcut ? filters.sharedFilters.dateShortcut :  'one-year'
 				}
 			});
 		}
@@ -437,8 +446,8 @@ const ProductReviewsPage = (props: Props) => {
 						<div className={cx(classes.buttonContainer)}>
 							<ExportReviews
 								product_id={product.id}
-								startDate={filters.productReviews.currentStartDate}
-								endDate={filters.productReviews.currentEndDate}
+								startDate={filters.sharedFilters.currentStartDate}
+								endDate={filters.sharedFilters.currentEndDate}
 								mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 								search={search}
 								button_id={buttonId}
@@ -604,8 +613,11 @@ const ProductReviewsPage = (props: Props) => {
 															...filters,
 															productReviews: {
 																...filters.productReviews,
-																hasChanged: true,
 																displayNew: e.target.checked
+															},
+															sharedFilters: {
+																...filters.sharedFilters,
+																hasChanged: true
 															}
 														});
 													}
