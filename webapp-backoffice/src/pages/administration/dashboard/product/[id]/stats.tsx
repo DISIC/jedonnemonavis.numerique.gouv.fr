@@ -116,8 +116,8 @@ const ProductStatPage = (props: Props) => {
 			numberPerPage: 0,
 			page: 1,
 			product_id: product.id,
-			start_date: filters.productStats.currentStartDate,
-			end_date: filters.productStats.currentEndDate,
+			start_date: filters.sharedFilters.currentStartDate,
+			end_date: filters.sharedFilters.currentEndDate,
 			filters: {
 				buttonId: filters.productStats.buttonId
 					? [filters.productStats.buttonId?.toString()]
@@ -125,7 +125,7 @@ const ProductStatPage = (props: Props) => {
 			}
 		},
 		{
-			enabled: !!filters.productStats.currentEndDate
+			enabled: !!filters.sharedFilters.currentEndDate
 		}
 	);
 
@@ -137,11 +137,11 @@ const ProductStatPage = (props: Props) => {
 					button_id: filters.productStats.buttonId
 				}),
 				field_code: 'verbatim',
-				start_date: filters.productStats.currentStartDate,
-				end_date: filters.productStats.currentEndDate
+				start_date: filters.sharedFilters.currentStartDate,
+				end_date: filters.sharedFilters.currentEndDate
 			},
 			{
-				enabled: !!filters.productStats.currentEndDate
+				enabled: !!filters.sharedFilters.currentEndDate
 			}
 		);
 
@@ -219,8 +219,8 @@ const ProductStatPage = (props: Props) => {
 				<ObservatoireStats
 					productId={product.id}
 					buttonId={filters.productStats.buttonId}
-					startDate={filters.productStats.currentStartDate}
-					endDate={filters.productStats.currentEndDate}
+					startDate={filters.sharedFilters.currentStartDate}
+					endDate={filters.sharedFilters.currentEndDate}
 				/>
 				<div className={fr.cx('fr-mt-5w')}>
 					<h4>Participation</h4>
@@ -262,8 +262,8 @@ const ProductStatPage = (props: Props) => {
 					fieldCode="satisfaction"
 					productId={product.id}
 					buttonId={filters.productStats.buttonId}
-					startDate={filters.productStats.currentStartDate}
-					endDate={filters.productStats.currentEndDate}
+					startDate={filters.sharedFilters.currentStartDate}
+					endDate={filters.sharedFilters.currentEndDate}
 					total={nbReviewsWithFilters}
 				/>
 				<SectionWrapper
@@ -275,8 +275,8 @@ const ProductStatPage = (props: Props) => {
 						total={nbReviewsWithFilters}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 						required
 					/>
 					<BarQuestionViz
@@ -284,32 +284,32 @@ const ProductStatPage = (props: Props) => {
 						total={nbReviewsWithFilters}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_reached"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 					<BarMultipleSplitQuestionViz
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFiltersForm2}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 				</SectionWrapper>
 				<SectionWrapper
@@ -322,16 +322,16 @@ const ProductStatPage = (props: Props) => {
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 					<BarMultipleQuestionViz
 						fieldCode="difficulties"
 						total={nbReviewsWithFiltersForm1}
 						productId={product.id}
 						buttonId={filters.productStats.buttonId}
-						startDate={filters.productStats.currentStartDate}
-						endDate={filters.productStats.currentEndDate}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
 					/>
 				</SectionWrapper>
 			</>
@@ -378,8 +378,11 @@ const ProductStatPage = (props: Props) => {
 									...filters,
 									productStats: {
 										...filters['productStats'],
-										hasChanged: true,
 										buttonId: newValue
+									},
+									sharedFilters: {
+										...filters['sharedFilters'],
+										hasChanged: true
 									}
 								});
 

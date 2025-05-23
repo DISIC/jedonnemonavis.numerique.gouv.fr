@@ -531,7 +531,6 @@ export const openAPIRouter = router({
 					});
 
 					if ((i + 1) % 10 === 0) {
-						console.log(`Pausing mailing after ${i + 1} users...`);
 						await new Promise((resolve) => setTimeout(resolve, 5000));
 					}
 				}

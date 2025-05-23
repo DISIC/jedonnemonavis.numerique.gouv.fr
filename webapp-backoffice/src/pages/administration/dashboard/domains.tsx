@@ -53,7 +53,6 @@ const DashBoardDomainDomains = () => {
 
 	const createDomain = trpc.domain.create.useMutation({
 		onSuccess: result => {
-			console.log('result : ', result);
 			refectDomains();
 			reset({ domain: '' });
 			setCurrentDomain({ ...result.data, type: 'create' });
@@ -84,7 +83,6 @@ const DashBoardDomainDomains = () => {
 	} = useForm<FormValues>();
 
 	const onSubmit: SubmitHandler<FormValues> = data => {
-		console.log('data : ', data);
 		if (data.domain) {
 			data.domain = data.domain.replace('@', '');
 			createDomain.mutate(data);

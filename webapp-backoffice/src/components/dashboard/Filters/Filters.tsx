@@ -29,7 +29,7 @@ export type DateShortcutName =
 
 export type FilterSectionKey = keyof Pick<
 	Filters,
-	'productActivityLogs' | 'productReviews' | 'productStats'
+	'productActivityLogs' | 'productReviews' | 'productStats' 
 >;
 
 type FiltersProps<T extends FilterSectionKey> = {
@@ -56,23 +56,25 @@ const GenericFilters = <T extends FilterSectionKey>({
 	const { filters, updateFilters } = useFilters();
 
 	const sectionFilters = filters[filterKey];
+	const sharedFilters = filters['sharedFilters'];
+
 	const [localStartDate, setLocalStartDate] = useState(
-		sectionFilters.currentStartDate
+		sharedFilters.currentStartDate
 	);
 	const [localEndDate, setLocalEndDate] = useState(
-		sectionFilters.currentEndDate
+		sharedFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
 
 	useEffect(() => {
-		if (sectionFilters.dateShortcut) {
+		if (sharedFilters.dateShortcut) {
 			const { startDate, endDate } = getDatesByShortCut(
-				sectionFilters.dateShortcut
+				sharedFilters.dateShortcut
 			);
 
 			if (
-				startDate !== sectionFilters.currentStartDate ||
-				endDate !== sectionFilters.currentEndDate
+				startDate !== sharedFilters.currentStartDate ||
+				endDate !== sharedFilters.currentEndDate
 			) {
 				setLocalStartDate(startDate);
 				setLocalEndDate(endDate);
@@ -81,13 +83,18 @@ const GenericFilters = <T extends FilterSectionKey>({
 					...filters,
 					[filterKey]: {
 						...filters[filterKey],
+					},
+					sharedFilters: {
+						...filters['sharedFilters'],
 						currentStartDate: startDate,
 						currentEndDate: endDate
 					}
 				});
 			}
 		}
-	}, [sectionFilters.hasChanged, sectionFilters.dateShortcut]);
+	}, [sharedFilters.hasChanged, sharedFilters.dateShortcut]);
+
+
 
 	const isValidDate = (date: string) => {
 		if (!date) return false;
@@ -101,6 +108,9 @@ const GenericFilters = <T extends FilterSectionKey>({
 				currentPage: 1,
 				[filterKey]: {
 					...filters[filterKey],
+				},
+				sharedFilters: {
+					...filters['sharedFilters'],
 					[key]: value,
 					hasChanged: true,
 					dateShortcut: undefined
@@ -160,15 +170,18 @@ const GenericFilters = <T extends FilterSectionKey>({
 										id={`radio-${ds.name}`}
 										type="radio"
 										name={ds.name}
-										checked={sectionFilters.dateShortcut === ds.name}
+										checked={sharedFilters.dateShortcut === ds.name}
 										onChange={() => {
 											updateFilters({
 												...filters,
 												currentPage: 1,
 												[filterKey]: {
 													...filters[filterKey],
+												},
+												sharedFilters: {
+													...filters['sharedFilters'],
 													hasChanged: true,
-													dateShortcut: ds.name
+													dateShortcut: ds.name,
 												}
 											});
 											push(['trackEvent', 'Logs', 'Filtre-Date']);
@@ -179,7 +192,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 											fr.cx('fr-tag', 'fr-mt-2v'),
 
 											classes.dateShortcutTag,
-											sectionFilters.dateShortcut === ds.name
+											sharedFilters.dateShortcut === ds.name
 												? classes.dateShortcutTagSelected
 												: undefined
 										)}
@@ -192,6 +205,9 @@ const GenericFilters = <T extends FilterSectionKey>({
 													currentPage: 1,
 													[filterKey]: {
 														...filters[filterKey],
+													},
+													sharedFilters: {
+														...filters['sharedFilters'],
 														hasChanged: true,
 														dateShortcut: ds.name
 													}
@@ -246,7 +262,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>{children}</div>
 
-				{sectionFilters.hasChanged ? (
+				{sharedFilters.hasChanged ? (
 					<div
 						className={cx(
 							fr.cx('fr-col-12', 'fr-col-md-6'),
@@ -263,8 +279,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 									...filters,
 									currentPage: 1,
 									[filterKey]: {
-										dateShortcut: 'one-year',
-										hasChanged: false,
 										...('actionType' in filters[filterKey] && {
 											actionType: []
 										}),
@@ -282,6 +296,11 @@ const GenericFilters = <T extends FilterSectionKey>({
 												buttonId: []
 											}
 										})
+									},
+									sharedFilters: {
+										...filters['sharedFilters'],
+										dateShortcut: 'one-year',
+										hasChanged: false,
 									}
 								});
 							}}

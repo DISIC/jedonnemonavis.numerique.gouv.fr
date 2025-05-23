@@ -12,26 +12,20 @@ export type Filters = {
 		filterOnlyAdmins: boolean;
 	};
 	productActivityLogs: {
-		currentStartDate: string;
-		currentEndDate: string;
-		dateShortcut: DateShortcutName;
-		hasChanged: Boolean;
 		actionType: TypeAction[];
 	};
 	productReviews: {
-		currentStartDate: string;
-		currentEndDate: string;
-		dateShortcut: DateShortcutName;
-		hasChanged: Boolean;
 		displayNew: boolean;
 		filters: ReviewFiltersType;
 	};
 	productStats: {
+		buttonId: number | undefined;
+	};
+	sharedFilters: {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
 		hasChanged: Boolean;
-		buttonId: number | undefined;
 	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
@@ -66,17 +60,9 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			filterOnlyAdmins: false
 		},
 		productActivityLogs: {
-			currentStartDate: '',
-			currentEndDate: '',
-			dateShortcut: 'one-year',
-			hasChanged: false,
 			actionType: []
 		},
 		productReviews: {
-			currentStartDate: '',
-			currentEndDate: '',
-			dateShortcut: 'one-year',
-			hasChanged: false,
 			displayNew: false,
 			filters: {
 				satisfaction: [],
@@ -89,11 +75,13 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			}
 		},
 		productStats: {
+			buttonId: undefined
+		},
+		sharedFilters: {
 			currentStartDate: '',
 			currentEndDate: '',
 			dateShortcut: 'one-year',
-			hasChanged: false,
-			buttonId: undefined
+			hasChanged: false
 		},
 		filterEntity: [],
 		currentPage: 1,

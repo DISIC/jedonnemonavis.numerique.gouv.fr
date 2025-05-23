@@ -115,7 +115,6 @@ const FormBuilder = (props: Props) => {
 	useEffect(() => {
 		if (!hasCheckedFirstLoad && isBlocksFetched) {
 			if (!formBlocks || formBlocks.length === 0) {
-				console.log('Aucun bloc trouvé, effectuez une action ici');
 				handleCreateBlock({
 					form_id: form.id,
 					created_at: new Date(),

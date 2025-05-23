@@ -40,8 +40,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			limit: 10,
 			page: currentPage,
 			filterAction: filters.productActivityLogs.actionType,
-			startDate: filters.productActivityLogs.currentStartDate,
-			endDate: filters.productActivityLogs.currentEndDate
+			startDate: filters.sharedFilters.currentStartDate,
+			endDate: filters.sharedFilters.currentEndDate
 		},
 		{
 			initialData: {
@@ -144,11 +144,14 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 									...filters,
 									['productActivityLogs']: {
 										...filters['productActivityLogs'],
-										hasChanged: true,
 										actionType: [
 											...filters['productActivityLogs'].actionType,
 											option.value as TypeAction
 										]
+									},
+									sharedFilters: {
+										...filters['sharedFilters'],
+										hasChanged: true
 									}
 								});
 							}

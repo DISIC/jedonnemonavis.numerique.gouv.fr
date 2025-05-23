@@ -44,7 +44,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		!currentUserToken ||
 		(currentUserToken.exp as number) < new Date().getTime() / 1000
 	) {
-		console.log("couldn't find token");
 		await prisma.$disconnect();
 		return {
 			redirect: {
@@ -61,7 +60,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	});
 
 	if (!currentUser) {
-		console.log("couldn't find current user");
 		await prisma.$disconnect();
 		return {
 			redirect: {
