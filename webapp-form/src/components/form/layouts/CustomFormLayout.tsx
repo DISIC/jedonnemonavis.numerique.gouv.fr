@@ -72,9 +72,7 @@ export const CustomFormLayout = (props: Props) => {
   };
 
   const createBlock = trpc.reviewCustom.create.useMutation({
-    onSuccess: () => {
-      console.log("ok");
-    },
+    onSuccess: () => {},
   });
 
   const handleSaveReview = async (
