@@ -57,7 +57,7 @@ const CustomBarChart = ({
 			<BarChart
 				title="Graphique: Répartition des réponses"
 				role="img"
-				data={data.filter(item => isMobile ? !item.name.includes('clair') : true)}
+				data={isMobile ? data.slice(1, -1) : data}
 				margin={{ top: 20, left: -10 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />

@@ -150,7 +150,6 @@ const StackedVerticalBarChart = ({
 				<Legend
 					verticalAlign="top"
 					align="left"
-					// height={60}
 					content={payload => renderLegend(payload, sortOrder)}
 				/>
 				{dataKeys
