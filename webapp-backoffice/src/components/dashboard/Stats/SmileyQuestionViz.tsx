@@ -278,7 +278,8 @@ const useStyles = tss.create({
 	distributionLabel: {
 		marginTop: fr.spacing('2v'),
 		marginBottom: fr.spacing('2v'),
-		height: '1.5rem'
+		height: '1.5rem',
+		textWrap: 'nowrap',
 	},
 	progressBar: {
 		width: '100%',
