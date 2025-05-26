@@ -97,6 +97,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 	const updateDateFilter = useCallback(
 		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
 			updateFilters({
+				...filters,
+				currentPage: 1,
 				[filterKey]: {
 					...filters[filterKey],
 					[key]: value,
@@ -162,6 +164,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 										onChange={() => {
 											updateFilters({
 												...filters,
+												currentPage: 1,
 												[filterKey]: {
 													...filters[filterKey],
 													hasChanged: true,
@@ -186,6 +189,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 											if (e.key === 'Enter' || e.key === ' ') {
 												updateFilters({
 													...filters,
+													currentPage: 1,
 													[filterKey]: {
 														...filters[filterKey],
 														hasChanged: true,
@@ -257,6 +261,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 								setErrors({});
 								updateFilters({
 									...filters,
+									currentPage: 1,
 									[filterKey]: {
 										dateShortcut: 'one-year',
 										hasChanged: false,

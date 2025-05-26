@@ -43,7 +43,7 @@ const ApiKeyModal = (props: Props) => {
 					Voir la documentation de l'API
 				</Link>
 			</p>
-			<ApiKeyHandler entity={entity}></ApiKeyHandler>
+			<ApiKeyHandler entity={entity} ownRight={'carrier_admin'}></ApiKeyHandler>
 		</modal.Component>
 	);
 };

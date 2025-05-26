@@ -1,6 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -14,67 +15,72 @@ const NoReviewPanel = (props: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
-		<div
-			className={cx(classes.container, classes.boldText, fr.cx('fr-container'))}
-		>
-			<div className={cx(classes.boldText, classes.subtitle)}>
+		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-12v'))}>
+			<h3 className={cx(classes.title)}>
 				En attendant vos premiers avis...
-			</div>
+			</h3>
 			<div
 				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--center'),
+					fr.cx(
+						'fr-grid-row', 
+						'fr-grid-row--left',
+						'fr-grid-row--middle',
+					),
 					classes.rowContainer
 				)}
 			>
-				{/* <div
-					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4'),
-						classes.blocs
-					)}
-				>
-					<div className={cx(fr.cx('fr-pb-5v'))}>
-						Nos conseil pour obtenir plus d'avis !
-					</div>
-					<Button
-						priority="secondary"
-						className={cx(classes.btnService)}
-						type="button"
-						size="medium"
-						nativeButtonProps={{
-							onClick: event => {
-								event.preventDefault();
-								improveBtnClick();
-							}
-						}}
+				<div className={fr.cx('fr-col-md-3')}>
+					<Image
+						src="/assets/chat_picto.svg"
+						alt="Picto bulles de discussion"
+						width={120}
+						height={120}
+					/>
+				</div>
+				<div className={cx(fr.cx('fr-col-md-9'))}>
+					<p className={cx(fr.cx('fr-mb-3v'))}>
+						Nos conseils pour obtenir plus d’avis !
+					</p>
+					<a
+						title="Améliorer le placement de votre bouton"
+						href="#"
+						target="_blank"
+						className='fr-link'
 					>
 						Améliorer le placement de votre bouton
-					</Button>
+					</a>
 				</div>
-				<div className={cx(classes.divider)} /> */}
-				<div
-					className={cx(
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'),
-						classes.blocs
-					)}
-				>
-					<div className={cx(fr.cx('fr-pb-5v'))}>
-						Invitez de nouveaux administrateurs.
-					</div>
-					<Button
-						priority="secondary"
-						className={cx(classes.btnService)}
-						type="button"
-						size="medium"
-						nativeButtonProps={{
-							onClick: event => {
-								event.preventDefault();
-								sendInvitationBtnClick();
-								push(['trackEvent', 'BO - EmptyState', `Send-Invite`]);
-							}
-						}}
+			</div>
+			<div
+				className={cx(
+					fr.cx(
+						'fr-grid-row', 
+						'fr-grid-row--left',
+						'fr-grid-row--middle',
+					),
+					classes.rowContainer
+				)}
+			>
+				<div className={fr.cx('fr-col-md-3')}>
+					<Image
+						src="/assets/cone_picto.svg"
+						alt="Picto bulles de discussion"
+						width={120}
+						height={120}
+					/>
+				</div>
+				<div className={cx(fr.cx('fr-col-md-9'))}>
+					<p className={cx(fr.cx('fr-mb-3v'))}>
+					Besoin de tester un parcours sur mobile vs. sur ordinateur ? Faire un test A/B suite à une modification de parcours ? Vous pouvez en créer plusieurs boutons JDMA.
+					</p>
+					<a
+						title="En savoir plus sur les boutons multiples"
+						href="#"
+						target="_blank"
+						className='fr-link'
 					>
-						Envoyer une invitation
-					</Button>
+						En savoir plus sur les boutons multiples
+					</a>
 				</div>
 			</div>
 		</div>
@@ -83,43 +89,44 @@ const NoReviewPanel = (props: Props) => {
 
 const useStyles = tss.create({
 	container: {
-		...fr.spacing('padding', {
-			topBottom: '16v'
-		}),
-		padding: '1.5rem',
 		background: '#F3F6FE',
 		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		flexDirection: 'column'
+		justifyContent: 'start',
+		alignItems: 'start',
+		flexDirection: 'column',
 	},
 	rowContainer: {
-		width: '100%'
+		width: '100%',
+		':not(:last-child)': {
+			marginBottom: fr.spacing('3v'),
+			[fr.breakpoints.down('md')]: {
+				marginBottom: fr.spacing('6v'),
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'start'
+		}
 	},
-
 	blocs: {
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
 		padding: '0 !important'
 	},
-	subtitle: {
-		fontSize: '18px',
-		paddingBottom: '2rem'
+	title: {
+		fontWeight: 'bold',
+		fontSize: '28px',
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		[fr.breakpoints.down('sm')]: {
+			marginBottom: fr.spacing('4v'),
+			fontSize: '24px',
+		}
 	},
-
 	divider: {
 		borderLeft: '1px solid gray;',
 		margin: '0 3rem'
 	},
-	boldText: {
-		fontWeight: 'bold'
-	},
-	btnService: {
-		[fr.breakpoints.down('md')]: {
-			marginBottom: '2rem'
-		}
-	}
 });
 
 export default NoReviewPanel;

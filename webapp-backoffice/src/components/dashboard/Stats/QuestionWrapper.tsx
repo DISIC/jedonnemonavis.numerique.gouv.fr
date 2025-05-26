@@ -25,23 +25,27 @@ const QuestionWrapper = ({
 
 	return (
 		<div className={classes.wrapperSection}>
-			<h3 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h3>
+			{fieldLabel !== '' && (
+				<h3 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h3>
+			)}
 			<div className={classes.metaInfos}>
 				<div className={classes.metaInfosIcon}>
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
-				<p className={classes.metaInfosTotal}>
-					<p className={classes.totalFieldText}>
-						{formatNumberWithSpaces(totalField)}
-					</p>{' '}
-					<span>Réponses</span>
-				</p>
-				{!hidePercentage && (
-					<div className={fr.cx('fr-hint-text', 'fr-ml-4v', 'fr-mt-0-5v')}>
-						taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
-						{required && '(question obligatoire)'}
-					</div>
-				)}
+				<div className={classes.metaInfosTitleWithHint}>
+					<p className={classes.metaInfosTotal}>
+						<p className={classes.totalFieldText}>
+							{formatNumberWithSpaces(totalField)}
+						</p>{' '}
+						<span>Réponses</span>
+					</p>
+					{!hidePercentage && (
+						<div className={fr.cx('fr-hint-text', 'fr-ml-md-4v', 'fr-mt-0-5v')}>
+							taux de réponse : {Math.round((totalField / total) * 100)} %{' '}
+							{required && '(question obligatoire)'}
+						</div>
+					)}
+				</div>
 			</div>
 			<div>{children}</div>
 			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
@@ -71,6 +75,16 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.decisions.background.contrast.blueFrance.default,
 		color: fr.colors.decisions.background.flat.blueFrance.default,
 		marginRight: fr.spacing('4v')
+	},
+	metaInfosTitleWithHint: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: '1rem',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: 0
+		}
 	},
 	metaInfosTotal: {
 		display: 'flex',

@@ -122,7 +122,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 				</h1>
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3','fr-mb-6v')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-3', 'fr-mb-6v')}>
 					<SideMenu
 						align="left"
 						aria-label="Menu latéral"

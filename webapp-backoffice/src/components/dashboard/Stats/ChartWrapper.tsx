@@ -340,6 +340,9 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		height: '3rem',
 		h5: {
 			margin: 0
+		},
+		[fr.breakpoints.down('md')]: {
+			height: 'auto'	
 		}
 	},
 	table: {
@@ -396,7 +399,12 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: '1rem'
+		marginBottom: '1rem',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			justifyContent: 'flex-start',
+		}
 	},
 	flexAlignCenter: {
 		display: 'flex',
