@@ -255,7 +255,7 @@ const ChartWrapper = ({
 					<label className={cx(classes.label)}>
 						<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
 						{tooltip && (
-							<Tooltip placement="top" title={tooltip} tabIndex={0}>
+							<Tooltip placement="top" title={tooltip} tabIndex={0} enterTouchDelay={0}>
 								<span
 									className={fr.cx(
 										'fr-icon-information-line',
@@ -399,8 +399,8 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: '1rem',
 		[fr.breakpoints.down('md')]: {
+			marginBottom: '1rem',
 			flexDirection: 'column',
 			alignItems: 'flex-start',
 			justifyContent: 'flex-start',
