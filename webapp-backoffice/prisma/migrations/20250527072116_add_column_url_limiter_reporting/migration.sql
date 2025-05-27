@@ -5,4 +5,4 @@
 
 */
 -- AlterTable
-ALTER TABLE "LimiterReporting" ADD COLUMN     "url" TEXT NOT NULL;
+ALTER TABLE "LimiterReporting" ADD COLUMN     "url" TEXT;
