@@ -47,8 +47,6 @@ export const authOptions: NextAuthOptions = {
 				  name: `${user.firstName} ${user.lastName}`,
 				  email: user.email
 				};
-			  } else {
-				console.log('❌ Utilisateur non trouvé en base');
 			  }
 			}
 			return session;
@@ -91,7 +89,6 @@ export const authOptions: NextAuthOptions = {
 				});
 		
 				if (!user) {
-					console.log('user not found, need creation');
 					try {
 						const data = await getSiretInfo(proconnectProfile.siret);
 		
@@ -118,9 +115,7 @@ export const authOptions: NextAuthOptions = {
 									proconnect_account: true
 								},
 							});
-							console.log('✅ Utilisateur créé avec succès:', user);
 						} else {
-							console.log('🏢 Structure privée, redirection erreur...');
 							throw new Error('INVALID_PROVIDER');
 						}
 					} catch (err) {
