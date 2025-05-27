@@ -73,6 +73,7 @@ const ProductReviewsPage = (props: Props) => {
 		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
 	const [buttonId, setButtonId] = React.useState<number>();
+
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
 
@@ -82,6 +83,13 @@ const ProductReviewsPage = (props: Props) => {
 	});
 
 	const { filters, updateFilters } = useFilters();
+
+	const [initialDateState, setInitialDateState] = React.useState({
+		startDate: filters.sharedFilters.currentStartDate, 
+		endDate: filters.sharedFilters.currentEndDate, 
+		dateShortcut: filters.sharedFilters.dateShortcut
+	});
+
 
 	const handleSubmitfilters = (filtersT: ReviewFiltersType) => {
 		updateFilters({
@@ -333,6 +341,12 @@ const ProductReviewsPage = (props: Props) => {
 
 	useEffect(() => {
 		if (filters.productReviews.displayNew) {
+			setInitialDateState({
+				startDate: filters.sharedFilters.currentStartDate,
+				endDate: filters.sharedFilters.currentEndDate,
+				dateShortcut: filters.sharedFilters.dateShortcut
+			});
+
 			updateFilters({
 				...filters,
 				productReviews: {
@@ -367,7 +381,9 @@ const ProductReviewsPage = (props: Props) => {
 				},
 				sharedFilters: {
 					...filters.sharedFilters,
-					dateShortcut: filters.sharedFilters.dateShortcut ? filters.sharedFilters.dateShortcut :  'one-year'
+					dateShortcut: initialDateState.dateShortcut,
+					currentStartDate: initialDateState.startDate,
+					currentEndDate: initialDateState.endDate
 				}
 			});
 		}
