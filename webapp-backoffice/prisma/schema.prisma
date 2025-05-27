@@ -430,6 +430,7 @@ model LimiterReporting {
   ip_adress      String
   product_id     Int
   button_id      Int
+  url            String
   total_attempts Int
   first_attempt  DateTime
   last_attempt   DateTime
