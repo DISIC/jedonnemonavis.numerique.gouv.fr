@@ -36,6 +36,7 @@ export type Filters = {
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
+	view: string
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
@@ -98,6 +99,7 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		filterEntity: [],
 		currentPage: 1,
 		filter: 'title',
+		view: 'all',
 		filterOnlyFavorites: false,
 		filterOnlyArchived: false,
 		validatedSearch: ''

@@ -309,7 +309,7 @@ const DashBoard = () => {
 										<option value="updated_at:desc">Date de mise à jour</option>
 									</Select>
 								</div>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 									<Autocomplete
 										id="filter-entity"
 										disablePortal
@@ -356,7 +356,7 @@ const DashBoard = () => {
 								<div
 									className={fr.cx(
 										'fr-col-12',
-										'fr-col-md-5',
+										'fr-col-md-4',
 										'fr-col--bottom'
 									)}
 								>
@@ -405,88 +405,34 @@ const DashBoard = () => {
 										</div>
 									</form>
 								</div>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-2')}>
+									<Select
+										label="Vue"
+										nativeSelectProps={{
+											name: 'select-view',
+											value: filters.view,
+											onChange: event => {
+												const value = event.target.value;
+
+												// On traduit la sélection en états booléens
+												updateFilters({
+													...filters,
+													currentPage: 1,
+													view: value,
+													filterOnlyFavorites: value === 'favorites',
+													filterOnlyArchived: value === 'archived',
+												});
+											}
+										}}
+									>
+										<option value="all">Services actifs</option>
+										<option value="favorites">Mes favoris</option>
+										<option value="archived">Services archivés</option>
+									</Select>
+								</div>
 							</>
 						)}
-						<div className={fr.cx('fr-col-12', 'fr-mt-4w', 'fr-py-0')}>
-							<div className={cx(classes.checkboxContainer)}>
-								{/* {countTotalUserScope > 10 && !filters.filterOnlyArchived && (
-									<Checkbox
-										className={fr.cx('fr-mb-0')}
-										style={{ userSelect: 'none' }}
-										options={[
-											{
-												label: 'Afficher uniquement mes favoris',
-												nativeInputProps: {
-													name: 'favorites-products',
-													checked: filters.filterOnlyFavorites,
-													onChange: e => {
-														updateFilters({
-															...filters,
-															currentPage: 1,
-															filterOnlyFavorites: e.target.checked
-														});
-													}
-												}
-											}
-										]}
-									/>
-								)} */}
-								<RadioButtons
-									legend="Vue"
-									options={[
-										{
-											label: 'Mes services',
-											nativeInputProps: {
-												checked:
-													!filters.filterOnlyFavorites &&
-													!filters.filterOnlyArchived,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyFavorites: false,
-														filterOnlyArchived: false
-													});
-												}
-											}
-										},
-										{
-											label: 'Mes favoris',
-											nativeInputProps: {
-												checked: filters.filterOnlyFavorites,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														currentPage: 1,
-														filterOnlyFavorites: e.target.checked,
-														filterOnlyArchived: false
-													});
-												}
-											}
-										},
-										...(countArchivedUserScope > 0
-											? [
-													{
-														label: 'Services supprimés',
-														nativeInputProps: {
-															checked: filters.filterOnlyArchived,
-															onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-																updateFilters({
-																	...filters,
-																	currentPage: 1,
-																	filterOnlyArchived: e.target.checked,
-																	filterOnlyFavorites: false
-																});
-															}
-														}
-													}
-												]
-											: [])
-									]}
-									orientation="horizontal"
-								/>
-							</div>
-						</div>
 						{filters.filterEntity.length > 0 && (
 							<ul
 								className={cx(
