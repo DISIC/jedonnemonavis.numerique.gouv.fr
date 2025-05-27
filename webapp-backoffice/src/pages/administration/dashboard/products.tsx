@@ -45,7 +45,7 @@ const essential_service_modal = createModal({
 });
 
 const DashBoard = () => {
-	const { filters, updateFilters } = useFilters();
+	const { filters, updateFilters, clearFilters } = useFilters();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -503,7 +503,7 @@ const DashBoard = () => {
 							) : (
 								<ul className={classes.buttonList}>
 									{products.map((product, index) => (
-										<li key={index} role="list">
+										<li key={index} role="list" onClick={() => clearFilters()}>
 											<ProductCard
 												product={product}
 												userId={parseInt(session?.user?.id as string)}
