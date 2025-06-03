@@ -165,6 +165,7 @@ const ObservatoireStats = ({
 						placement="top"
 						title="Aucune donnée pour calculer cette note"
 						tabIndex={0}
+						enterTouchDelay={0}
 					>
 						<span
 							className={cx(
@@ -191,7 +192,7 @@ const ObservatoireStats = ({
 						</div>
 						<label className={cx(classes.label)}>
 							<span className={classes.indicatorTitle}>{field.label}</span>
-							<Tooltip placement="top" title={field.tooltip} tabIndex={0}>
+							<Tooltip placement="top" title={field.tooltip} tabIndex={0} enterTouchDelay={0}>
 								<span
 									className={fr.cx(
 										'fr-icon-information-line',
