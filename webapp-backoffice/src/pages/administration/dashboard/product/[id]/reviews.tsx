@@ -371,7 +371,8 @@ const ProductReviewsPage = (props: Props) => {
 					).toISOString()
 					.split('T')[0],
 					dateShortcut: undefined
-				}
+				},
+				currentPage: 1
 			});
 		} else {
 			updateFilters({

@@ -88,7 +88,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 						...filters['sharedFilters'],
 						currentStartDate: startDate,
 						currentEndDate: endDate
-					}
+					},
+					currentPage: 1
 				});
 			}
 		}
