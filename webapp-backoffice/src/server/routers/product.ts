@@ -326,15 +326,6 @@ export const productRouter = router({
 
 			productPayload.title_formatted = removeAccents(productPayload.title);
 
-			const rootTemplate = await ctx.prisma.formTemplate.findUnique({
-				where: { slug: 'root' },
-				select: { id: true }
-			});
-	
-			if (!rootTemplate) {
-				throw new Error('Le FormTemplate "root" est introuvable.');
-			}
-
 			const product = await ctx.prisma.product.create({
 				data: {
 					...productPayload,
@@ -349,12 +340,6 @@ export const productRouter = router({
 				}
 			});
 			
-			await ctx.prisma.form.create({
-				data: {
-					form_template_id: rootTemplate.id,
-					product_id: product.id // ou { connect: { id: product.id } }
-				}
-			});
 
 			return { data: product };
 		}),
