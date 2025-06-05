@@ -523,28 +523,17 @@ const ProductCard = ({
 							</div>
 						) : (
 							<>
-								{/* <div
-									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2'),
-										classes.rightButtonsWrapper
-									)}
-								></div> */}
 								{!isLoadingReviewsCount && nbReviews !== undefined && (
 									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
-										{product.forms.map((form) => (
-												<div>
-													<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
-														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
-															<span className={cx(classes.productTitle)}>
-																Nom du formulaire
-															</span>
-														</div>
-														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-pb-0'), classes.rightButtonsWrapper)}> 
-															<Badge severity="new" noIcon small>
-																SATISFACTION USAGER
-															</Badge>
-														</div>
-														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+										{product.forms.slice(0, 2).map((form) => (
+												<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
+													<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
+														<span className={cx(classes.productTitle)}>
+															Nom du formulaire
+														</span>
+													</div>
+													<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
+														<div className={classes.formStatsContent}>
 															<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
 																Réponses déposées
 															</span>
@@ -552,27 +541,19 @@ const ProductCard = ({
 															<Badge severity="success" noIcon small>
 																{nbNewReviews} NOUVELLES RÉPONSES
 															</Badge>
-															{nbReviews > 0 && (
-																<Link
-																	href={`/administration/dashboard/product/${product.id}/reviews`}
-																	title={`Voir les avis pour ${product.title}`}
-																	className={fr.cx('fr-link', 'fr-ml-4v')}
-																>
-																	Voir les réponses
-																</Link>
-															)}
-														</div>
-														<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'), classes.rightButtonsWrapper)}>
-															<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-																Modifié le 
-															</span>
-															<span className={fr.cx('fr-text--bold')}>
-																{formatDateToFrenchString(form.updated_at.toString())}
-															</span>
 														</div>
 													</div>
 												</div>
 										))}
+										{product.forms.length > 2 && (
+											<Link
+												href={`/administration/dashboard/product/${product.id}/forms`}
+												title={`Voir les formulaires pour ${product.title}`}
+												className={fr.cx('fr-link')}
+											>
+												Voir tous les formulaires ({product.forms.length})
+											</Link>
+										)}
 									</div>
 								)}
 								{/* <div
@@ -836,7 +817,20 @@ const useStyles = tss.withName(ProductCard.name).create({
 		maxWidth: '100%',
 		marginLeft: 0,
 		marginRight: 0,
-		marginBottom: "0.5rem"
+		marginBottom: '1.5rem',
+		':nth-child(2), :last-child': {
+			marginBottom: '0.5rem'
+		}
+	},
+	formStatsWrapper: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		alignItems: 'center'
+	},
+	formStatsContent: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('1v')
 	},
 	smallText: {
 		color: fr.colors.decisions.text.default.grey.default,

@@ -69,7 +69,7 @@ const ProductButtonsPage = (props: Props) => {
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
 					{ownRight === 'carrier_admin' && (
 						<Link
-							className={fr.cx('fr-btn')}
+							className={fr.cx('fr-btn', 'fr-btn--secondary')}
 							href={`/administration/dashboard/product/${product.id}/forms/create`}
 						>
 							Créer un nouveau formulaire
@@ -98,44 +98,37 @@ const ProductButtonsPage = (props: Props) => {
 				</div>
 				<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
 					{product.forms.map((form) => (
-						<div>
-							<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
-								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
-									<span className={cx(classes.productTitle)}>
-										Nom du formulaire
-									</span>
-								</div>
-								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-pb-0'), classes.rightButtonsWrapper)}> 
-									<Badge severity="new" noIcon small>
-										SATISFACTION USAGER
-									</Badge>
-								</div>
-								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
-									<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-										Réponses déposées
-									</span>
-									<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-									<Badge severity="success" noIcon small>
-										{nbNewReviews} NOUVELLES RÉPONSES
-									</Badge>
-									{nbReviews > 0 && (
-										<Link
-											href={`/administration/dashboard/product/${product.id}/reviews`}
-											title={`Voir les avis pour ${product.title}`}
-											className={fr.cx('fr-link', 'fr-ml-4v')}
-										>
-											Voir les réponses
-										</Link>
-									)}
-								</div>
-								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3'), classes.rightButtonsWrapper)}>
-									<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-										Modifié le 
-									</span>
-									<span className={fr.cx('fr-text--bold')}>
-										{formatDateToFrenchString(form.updated_at.toString())}
-									</span>
-								</div>
+						<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
+							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
+								<span className={cx(classes.productTitle)}>
+									Nom du formulaire
+								</span>
+							</div>
+							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+								<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+									Réponses déposées
+								</span>
+								<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+								<Badge severity="success" noIcon small>
+									{nbNewReviews} NOUVELLES RÉPONSES
+								</Badge>
+								{nbReviews > 0 && (
+									<Link
+										href={`/administration/dashboard/product/${product.id}/reviews`}
+										title={`Voir les avis pour ${product.title}`}
+										className={fr.cx('fr-link', 'fr-ml-4v')}
+									>
+										Voir les réponses
+									</Link>
+								)}
+							</div>
+							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-p-4v', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
+								<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+									Modifié le 
+								</span>
+								<span className={fr.cx('fr-text--bold')}>
+									{formatDateToFrenchString(form.updated_at.toString())}
+								</span>
 							</div>
 						</div>
 					))}
@@ -160,7 +153,10 @@ const useStyles = tss
 			maxWidth: '100%',
 			marginLeft: 0,
 			marginRight: 0,
-			marginBottom: "0.5rem"
+			marginBottom: "0.5rem",
+			div: {
+				padding: fr.spacing('4v'),
+			}
 		},
 		smallText: {
 			color: fr.colors.decisions.text.default.grey.default,
