@@ -526,24 +526,25 @@ const ProductCard = ({
 								{!isLoadingReviewsCount && nbReviews !== undefined && (
 									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
 										{product.forms.slice(0, 2).map((form) => (
-												<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
-													<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
+											<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
+												<Link href={`/administration/dashboard/product/${product.id}/forms/${form.id}`} className={classes.formLink} />	
+												<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
 														<span className={cx(classes.productTitle)}>
-															Nom du formulaire
+															{form.title || form.form_template.title}
 														</span>
-													</div>
-													<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
-														<div className={classes.formStatsContent}>
-															<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-																Réponses déposées
-															</span>
-															<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-															<Badge severity="success" noIcon small>
-																{nbNewReviews} NOUVELLES RÉPONSES
-															</Badge>
-														</div>
+												</div>
+												<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
+													<div className={classes.formStatsContent}>
+														<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+															Réponses déposées
+														</span>
+														<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+														<Badge severity="success" noIcon small>
+															{nbNewReviews} NOUVELLES RÉPONSES
+														</Badge>
 													</div>
 												</div>
+											</div>
 										))}
 										{product.forms.length > 2 && (
 											<Link
@@ -767,6 +768,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	productLink: {
 		backgroundImage: 'none'
 	},
+	formLink: {},
 	productTitle: {
 		fontSize: '18px',
 		lineHeight: '1.5rem',

@@ -20,7 +20,7 @@ import {
 	getProductRestoredEmail
 } from '@/src/utils/emails';
 
-const checkRightToProceed = async (
+export const checkRightToProceed = async (
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
 	session: Session,
 	product_id: number

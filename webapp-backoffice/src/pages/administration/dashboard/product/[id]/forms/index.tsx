@@ -28,6 +28,7 @@ import Link from 'next/link';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 
 interface Props {
 	product: ProductWithForms;
@@ -36,6 +37,11 @@ interface Props {
 
 const modal = createModal({
 	id: 'button-modal',
+	isOpenedByDefault: false
+});
+
+const new_form_modal = createModal({
+	id: 'new-form-modal',
 	isOpenedByDefault: false
 });
 
@@ -62,16 +68,14 @@ const ProductButtonsPage = (props: Props) => {
 					content={`${product.title} | Formulaires | Je donne mon avis`}
 				/>
 			</Head>
+			<FormCreationModal modal={new_form_modal} productId={product.id}  />
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 				<div className={fr.cx('fr-col-6')}>
 					<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
 					{ownRight === 'carrier_admin' && (
-						<Link
-							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`/administration/dashboard/product/${product.id}/forms/create`}
-						>
+						<Button priority='secondary' onClick={new_form_modal.open}>
 							Créer un nouveau formulaire
 							<span
 								className={fr.cx(
@@ -80,7 +84,7 @@ const ProductButtonsPage = (props: Props) => {
 									'fr-ml-2v'
 								)}
 							/>
-						</Link>
+						</Button>
 					)}
 				</div>
 				<div className={cx(fr.cx('fr-col-12'))}>
@@ -98,7 +102,7 @@ const ProductButtonsPage = (props: Props) => {
 				</div>
 				<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
 					{product.forms.map((form) => (
-						<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
+						<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
 							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
 								<span className={cx(classes.productTitle)}>
 									Nom du formulaire

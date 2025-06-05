@@ -527,6 +527,7 @@ model AnswerCustom {
 
 model Form {
   id               Int          @id @default(autoincrement())
+  title            String?
   user             User?        @relation(fields: [user_id], references: [id])
   user_id          Int?
   form_template    FormTemplate @relation(fields: [form_template_id], references: [id])
