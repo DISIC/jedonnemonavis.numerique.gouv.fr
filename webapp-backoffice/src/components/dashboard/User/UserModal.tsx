@@ -11,19 +11,8 @@ import Image from 'next/image';
 import { trpc } from '@/src/utils/trpc';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { CustomModalProps } from '@/src/types/custom';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	isOpen: boolean;

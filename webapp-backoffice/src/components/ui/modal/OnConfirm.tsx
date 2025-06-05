@@ -1,20 +1,9 @@
+import { CustomModalProps } from '@/src/types/custom';
 import { fr } from '@codegouvfr/react-dsfr';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;

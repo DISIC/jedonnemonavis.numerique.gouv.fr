@@ -14,21 +14,9 @@ import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { push } from '@socialgouv/matomo-next';
+import { CustomModalProps } from '@/src/types/custom';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;

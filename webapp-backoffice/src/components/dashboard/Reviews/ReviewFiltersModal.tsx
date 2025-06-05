@@ -1,4 +1,4 @@
-import { ReviewFiltersType } from '@/src/types/custom';
+import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
 import {
 	displayIntention,
 	getStatsColor,
@@ -17,18 +17,6 @@ import { push } from '@socialgouv/matomo-next';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { trpc } from '@/src/utils/trpc';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;

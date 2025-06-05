@@ -1,3 +1,4 @@
+import { CustomModalProps } from '@/src/types/custom';
 import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -11,19 +12,6 @@ import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	isOpen: boolean;

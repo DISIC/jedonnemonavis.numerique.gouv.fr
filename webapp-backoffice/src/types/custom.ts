@@ -9,6 +9,7 @@ import {
 	EnumTypeblocFilterSchema,
 	TypeblocSchema
 } from '@/prisma/generated/zod';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 
 export type FieldCodeBoolean =
 	(typeof FIELD_CODE_BOOLEAN_VALUES)[number]['slug'];
@@ -136,3 +137,16 @@ export const ZOpenApiStatsOutput = z.object({
 		})
 	)
 });
+
+export interface CustomModalProps {
+	buttonProps: {
+		id: string;
+		'aria-controls': string;
+		'data-fr-opened': boolean;
+	};
+	Component: (props: ModalProps) => JSX.Element;
+	close: () => void;
+	open: () => void;
+	isOpenedByDefault: boolean;
+	id: string;
+}

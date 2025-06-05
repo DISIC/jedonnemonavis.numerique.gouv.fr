@@ -1,3 +1,4 @@
+import { CustomModalProps } from '@/src/types/custom';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -9,18 +10,6 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;
