@@ -29,6 +29,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
+import NoFormsPanel from '@/src/components/dashboard/Pannels/NoFormsPanel';
 
 interface Props {
 	product: ProductWithForms;
@@ -68,82 +69,87 @@ const ProductButtonsPage = (props: Props) => {
 					content={`${product.title} | Formulaires | Je donne mon avis`}
 				/>
 			</Head>
-			<FormCreationModal modal={new_form_modal} productId={product.id}  />
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-				<div className={fr.cx('fr-col-6')}>
-					<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
-				</div>
-				<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
-					{ownRight === 'carrier_admin' && (
-						<Button priority='secondary' onClick={new_form_modal.open}>
-							Créer un nouveau formulaire
-							<span
-								className={fr.cx(
-									'fr-icon-file-add-line',
-									'fr-icon--sm',
-									'fr-ml-2v'
-								)}
-							/>
-						</Button>
-					)}
-				</div>
-				<div className={cx(fr.cx('fr-col-12'))}>
-				<Checkbox
-					options={[
-						{
-						label: 'Afficher les formulaires supprimés',
-						nativeInputProps: {
-							name: 'checkboxes-1',
-							value: 'value1'
-						}
-						}
-					]}
-					/>
-				</div>
-				<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
-					{product.forms.map((form) => (
-						<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
-							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
-								<Link 
-									href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-									className={cx(classes.productTitle)}
-								>
-									<span>
-										{form.title || form.form_template.title}
-									</span>
-								</Link>	
-							</div>
-							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
-								<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-									Réponses déposées
-								</span>
-								<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-								<Badge severity="success" noIcon small>
-									{nbNewReviews} NOUVELLES RÉPONSES
-								</Badge>
-								{nbReviews > 0 && (
-									<Link
-										href={`/administration/dashboard/product/${product.id}/reviews`}
-										title={`Voir les avis pour ${product.title}`}
-										className={fr.cx('fr-link', 'fr-ml-4v')}
-									>
-										Voir les réponses
-									</Link>
-								)}
-							</div>
-							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-p-4v', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
-								<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-									Modifié le 
-								</span>
-								<span className={fr.cx('fr-text--bold')}>
-									{formatDateToFrenchString(form.updated_at.toString())}
-								</span>
-							</div>
+			{product.forms.length === 0 ? (
+				<NoFormsPanel product={product} />
+			) : (
+				<>
+					<FormCreationModal modal={new_form_modal} productId={product.id} />
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-6')}>
+							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 						</div>
-					))}
-				</div>
-			</div>
-			
+						<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
+							{ownRight === 'carrier_admin' && (
+								<Button priority='secondary' onClick={new_form_modal.open}>
+									Créer un nouveau formulaire
+									<span
+										className={fr.cx(
+											'fr-icon-file-add-line',
+											'fr-icon--sm',
+											'fr-ml-2v'
+										)}
+									/>
+								</Button>
+							)}
+						</div>
+						<div className={cx(fr.cx('fr-col-12'))}>
+							<Checkbox
+								options={[
+									{
+									label: 'Afficher les formulaires supprimés',
+									nativeInputProps: {
+										name: 'checkboxes-1',
+										value: 'value1'
+									}
+									}
+								]}
+								/>
+						</div>
+						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
+							{product.forms.map((form) => (
+								<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
+									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
+										<Link 
+											href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+											className={cx(classes.productTitle)}
+										>
+											<span>
+												{form.title || form.form_template.title}
+											</span>
+										</Link>	
+									</div>
+									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+										<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+											Réponses déposées
+										</span>
+										<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+										<Badge severity="success" noIcon small>
+											{nbNewReviews} NOUVELLES RÉPONSES
+										</Badge>
+										{nbReviews > 0 && (
+											<Link
+												href={`/administration/dashboard/product/${product.id}/reviews`}
+												title={`Voir les avis pour ${product.title}`}
+												className={fr.cx('fr-link', 'fr-ml-4v')}
+											>
+												Voir les réponses
+											</Link>
+										)}
+									</div>
+									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-p-4v', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
+										<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+											Modifié le 
+										</span>
+										<span className={fr.cx('fr-text--bold')}>
+											{formatDateToFrenchString(form.updated_at.toString())}
+										</span>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
+				</>
+			)}
 		</ProductLayout>
 	);
 };
