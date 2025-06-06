@@ -550,7 +550,7 @@ const ProductCard = ({
 											<Link
 												href={`/administration/dashboard/product/${product.id}/forms`}
 												title={`Voir les formulaires pour ${product.title}`}
-												className={fr.cx('fr-link')}
+												className={cx(classes.productLink, fr.cx('fr-link'))}
 											>
 												Voir tous les formulaires ({product.forms.length})
 											</Link>
@@ -766,9 +766,17 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	cardSkeleton: {},
 	productLink: {
-		backgroundImage: 'none'
+		backgroundImage: 'none',
+		'&:hover': {
+			textDecoration: 'underline'
+		}
 	},
-	formLink: {},
+	formLink: {
+		backgroundImage: 'none',
+		position: 'absolute',
+		width: '100%',
+		height: '100%',
+	},
 	productTitle: {
 		fontSize: '18px',
 		lineHeight: '1.5rem',
@@ -814,6 +822,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	formCard: {
 		backgroundColor: fr.colors.decisions.background.contrast.info.default,
 		display: 'flex',
+		position: 'relative',
 		flexWrap: 'wrap',
 		width: '100%',
 		maxWidth: '100%',

@@ -104,9 +104,14 @@ const ProductButtonsPage = (props: Props) => {
 					{product.forms.map((form) => (
 						<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
 							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
-								<span className={cx(classes.productTitle)}>
-									Nom du formulaire
-								</span>
+								<Link 
+									href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+									className={cx(classes.productTitle)}
+								>
+									<span>
+										{form.title || form.form_template.title}
+									</span>
+								</Link>	
 							</div>
 							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
 								<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
@@ -182,6 +187,7 @@ const useStyles = tss
 			justifyContent: 'end'
 		},
 		productTitle: {
+			backgroundImage: 'none',
 			fontSize: '18px',
 			lineHeight: '1.5rem',
 			fontWeight: 'bold',

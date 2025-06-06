@@ -24,6 +24,11 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
   const modalOpen = useIsModalOpen(modal);
   const [displayToast, setDisplayToast] = React.useState(false);
   
+  const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({ slug: 'root' },
+    {
+      enabled: modalOpen
+    }
+  );
 
   const {
     control,
@@ -32,15 +37,10 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
     formState: { errors }
   } = useForm<FormValues>({
     defaultValues: {
-      title: '',
+      title: rootFormTemplate?.data?.title || '',
     }
   });
 
-  const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({ slug: 'root' },
-    {
-      enabled: modalOpen
-    }
-  );
 
   const utils = trpc.useUtils();
 
@@ -133,7 +133,13 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
                     onChange,
                     value: value || '',
                     name,
-                    required: true
+                    required: true,
+                    onKeyDown: e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSubmit(onLocalSubmit)();
+                      }
+                    }
                   }}
                   state={errors[name] ? 'error' : 'default'}
                   stateRelatedMessage={errors[name]?.message}
