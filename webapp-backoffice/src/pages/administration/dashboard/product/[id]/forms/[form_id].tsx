@@ -214,7 +214,7 @@ const ProductFormPage = (props: Props) => {
 			</Link>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h1 className={fr.cx('fr-mb-0')}>{form.form_template.title}</h1>
+					<h1 className={fr.cx('fr-mb-0')}>{form.title || form.form_template.title}</h1>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
 					{hasConfigChanged && (

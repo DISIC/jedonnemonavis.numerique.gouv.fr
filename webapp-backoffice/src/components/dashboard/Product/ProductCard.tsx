@@ -28,6 +28,7 @@ import Image from 'next/image';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
 import { push } from '@socialgouv/matomo-next';
+import NoFormsPanel from '../Pannels/NoFormsPanel';
 
 interface Indicator {
 	title: string;
@@ -398,326 +399,325 @@ const ProductCard = ({
 					)}
 				</div>
 			</OnConfirmModal>{' '}
-			<Link
-				href={`/administration/dashboard/product/${product.id}/forms`}
-				tabIndex={-1}
-			>
-				<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+			
+			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+				<div
+					className={cx(
+						fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+						classes.gridProduct
+					)}
+				>
 					<div
 						className={cx(
-							fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
-							classes.gridProduct
+							fr.cx('fr-col-12', 'fr-col-6', 'fr-col-md-6', 'fr-pb-1v'),
+							classes.titleSection
 						)}
 					>
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-6', 'fr-col-md-6', 'fr-pb-1v'),
-								classes.titleSection
-							)}
+						<Link
+							href={`/administration/dashboard/product/${product.id}/forms`}
+							tabIndex={0}
+							title={`Voir les statistiques pour le service ${product.title}`}
+							className={cx(classes.productLink, fr.cx('fr-link'))}
 						>
-							<Link
-								href={`/administration/dashboard/product/${product.id}/forms`}
-								tabIndex={0}
-								title={`Voir les statistiques pour le service ${product.title}`}
-								className={cx(classes.productLink, fr.cx('fr-link'))}
+							<span className={cx(classes.productTitle)}>
+								{product.title}
+							</span>
+						</Link>
+					</div>
+					<div
+						className={cx(
+							fr.cx('fr-col', 'fr-col-6', 'fr-pb-1v'),
+							classes.badgesSection
+						)}
+					>
+						{(product.isTop250 || isDisabled) && (
+							<div className={classes.badgesContainer}>
+								{product.isTop250 && (
+									<Badge severity="info" noIcon small>
+										Démarche essentielle
+									</Badge>
+								)}
+								{isDisabled && (
+									<Badge noIcon small>
+										Service supprimé
+									</Badge>
+								)}
+							</div>
+						)}
+						{showFavoriteButton && !isDisabled && (
+							<Button
+								//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+								title={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
+								aria-label={
+									isFavorite
+										? `Supprimer le produit « ${product.title} » des favoris`
+										: `Ajouter le produit « ${product.title} » aux favoris`
+								}
+								className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
+								priority="tertiary"
+								size="small"
+								onClick={e => {
+									e.preventDefault();
+									if (isFavorite) {
+										deleteFavorite.mutate({
+											product_id: product.id,
+											user_id: userId
+										});
+										push(['trackEvent', 'BO - Product', `Set-Favorite`]);
+									} else {
+										createFavorite.mutate({
+											product_id: product.id,
+											user_id: userId
+										});
+										push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
+									}
+								}}
 							>
-								<span className={cx(classes.productTitle)}>
-									{product.title}
-								</span>
-							</Link>
-						</div>
+								{isFavorite ? (
+									<Image alt="favoris ajouté" src={starFill} />
+								) : (
+									<Image alt="favoris retiré" src={starOutline} />
+								)}
+							</Button>
+						)}
+					</div>
+					<div
+						className={cx(
+							fr.cx('fr-col-12', 'fr-col-md-12', 'fr-pt-1v'),
+							classes.entitySection
+						)}
+					>
+						<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
+							{entity?.name}
+						</p>
+					</div>
+
+					{isDisabled ? (
 						<div
 							className={cx(
-								fr.cx('fr-col', 'fr-col-6', 'fr-pb-1v'),
-								classes.badgesSection
+								classes.buttonsCol,
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12')
 							)}
 						>
-							{(product.isTop250 || isDisabled) && (
-								<div className={classes.badgesContainer}>
-									{product.isTop250 && (
-										<Badge severity="info" noIcon small>
-											Démarche essentielle
-										</Badge>
+							<Button
+								iconId={'ri-inbox-unarchive-line'}
+								iconPosition="right"
+								title={`Restaurer le produit « ${product.title} »`}
+								aria-label={`Restaurer le produit « ${product.title} »`}
+								priority="secondary"
+								size="small"
+								onClick={e => {
+									e.preventDefault();
+									onConfirmModalRestore.open();
+									push(['trackEvent', 'BO - Product', `Restore`]);
+								}}
+							>
+								Restaurer
+							</Button>
+						</div>
+					) : (
+						<>
+							{!isLoadingReviewsCount && nbReviews !== undefined && (
+								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
+									{product.forms.length === 0 && (
+										<NoFormsPanel isSmall product={product} />
 									)}
-									{isDisabled && (
-										<Badge noIcon small>
-											Service supprimé
-										</Badge>
+									{product.forms.slice(0, 2).map((form) => (
+										<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
+											<Link href={`/administration/dashboard/product/${product.id}/forms/${form.id}`} className={classes.formLink} />	
+											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
+													<span className={cx(classes.productTitle)}>
+														{form.title || form.form_template.title}
+													</span>
+											</div>
+											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
+												<div className={classes.formStatsContent}>
+													<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+														Réponses déposées
+													</span>
+													<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+													<Badge severity="success" noIcon small>
+														{nbNewReviews} NOUVELLES RÉPONSES
+													</Badge>
+												</div>
+											</div>
+										</div>
+									))}
+									{product.forms.length > 2 && (
+										<Link
+											href={`/administration/dashboard/product/${product.id}/forms`}
+											title={`Voir les formulaires pour ${product.title}`}
+											className={cx(classes.productLink, fr.cx('fr-link'))}
+										>
+											Voir tous les formulaires ({product.forms.length})
+										</Link>
 									)}
 								</div>
 							)}
-							{showFavoriteButton && !isDisabled && (
-								<Button
-									//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
-									title={
-										isFavorite
-											? `Supprimer le produit « ${product.title} » des favoris`
-											: `Ajouter le produit « ${product.title} » aux favoris`
-									}
-									aria-label={
-										isFavorite
-											? `Supprimer le produit « ${product.title} » des favoris`
-											: `Ajouter le produit « ${product.title} » aux favoris`
-									}
-									className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
-									priority="tertiary"
-									size="small"
-									onClick={e => {
-										e.preventDefault();
-										if (isFavorite) {
-											deleteFavorite.mutate({
-												product_id: product.id,
-												user_id: userId
-											});
-											push(['trackEvent', 'BO - Product', `Set-Favorite`]);
-										} else {
-											createFavorite.mutate({
-												product_id: product.id,
-												user_id: userId
-											});
-											push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
-										}
-									}}
-								>
-									{isFavorite ? (
-										<Image alt="favoris ajouté" src={starFill} />
-									) : (
-										<Image alt="favoris retiré" src={starOutline} />
-									)}
-								</Button>
-							)}
-						</div>
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-pt-1v'),
-								classes.entitySection
-							)}
-						>
-							<p className={cx(fr.cx('fr-mb-0'), classes.entityName)}>
-								{entity?.name}
-							</p>
-						</div>
-
-						{isDisabled ? (
-							<div
+							{/* <div
 								className={cx(
-									classes.buttonsCol,
-									fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12')
+									fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
+									classes.statsSection
 								)}
 							>
-								<Button
-									iconId={'ri-inbox-unarchive-line'}
-									iconPosition="right"
-									title={`Restaurer le produit « ${product.title} »`}
-									aria-label={`Restaurer le produit « ${product.title} »`}
-									priority="secondary"
-									size="small"
-									onClick={e => {
-										e.preventDefault();
-										onConfirmModalRestore.open();
-										push(['trackEvent', 'BO - Product', `Restore`]);
-									}}
-								>
-									Restaurer
-								</Button>
-							</div>
-						) : (
-							<>
-								{!isLoadingReviewsCount && nbReviews !== undefined && (
-									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
-										{product.forms.slice(0, 2).map((form) => (
-											<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
-												<Link href={`/administration/dashboard/product/${product.id}/forms/${form.id}`} className={classes.formLink} />	
-												<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
-														<span className={cx(classes.productTitle)}>
-															{form.title || form.form_template.title}
-														</span>
+								{isLoadingStatsObservatoire ||
+								isRefetchingStatsObservatoire ? (
+									<Skeleton
+										className={cx(classes.cardSkeleton)}
+										variant="text"
+										width={'full'}
+										height={50}
+									/>
+								) : (product.forms[0]?.buttons.length > 0 &&
+										nbReviews &&
+										nbReviews > 0) ||
+									session?.user.role.includes('admin') ? (
+									<div
+										className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}
+									>
+										{indicators.map((indicator, index) => (
+											<div
+												className={fr.cx(
+													'fr-col',
+													'fr-col-12',
+													'fr-col-sm-6',
+													'fr-col-md-3'
+												)}
+												key={index}
+											>
+												<p
+													className={fr.cx(
+														'fr-text--xs',
+														'fr-mb-0',
+														'fr-hint-text'
+													)}
+												>
+													{indicator.title}
+												</p>
+												{isLoadingStatsObservatoire ? (
+													<Skeleton
+														className={cx(classes.badgeSkeleton)}
+														variant="text"
+														width={130}
+														height={25}
+													/>
+												) : (
+													<p
+														className={cx(
+															fr.cx(
+																!(
+																	!!indicator.total &&
+																	indicator.color !== 'new'
+																) && 'fr-label--disabled',
+																'fr-text--bold'
+															),
+															classes.indicatorText,
+															!!indicator.total && classes[indicator.color]
+														)}
+													>
+														{!!indicator.total
+															? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
+															: 'Aucune donnée'}
+													</p>
+												)}
+											</div>
+										))}
+										{!isLoadingReviewsCount && nbReviews !== undefined && (
+											<div
+												className={fr.cx(
+													'fr-col',
+													'fr-col-12',
+													'fr-col-sm-6',
+													'fr-col-md-3'
+												)}
+											>
+												<div
+													className={fr.cx(
+														'fr-grid-row',
+														'fr-grid-row--gutters'
+													)}
+												>
+													<div className={fr.cx('fr-col-12')}>
+														<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
+															Nombre d'avis
+														</p>
+													</div>
 												</div>
-												<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
-													<div className={classes.formStatsContent}>
-														<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-															Réponses déposées
-														</span>
-														<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-														<Badge severity="success" noIcon small>
-															{nbNewReviews} NOUVELLES RÉPONSES
-														</Badge>
+												<div
+													className={fr.cx(
+														'fr-grid-row',
+														'fr-grid-row--gutters'
+													)}
+												>
+													<div
+														className={cx(
+															fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
+														)}
+													>
+														<div
+															className={fr.cx(
+																'fr-label--info',
+																'fr-text--bold',
+																'fr-pt-0-5v'
+															)}
+														>
+															{formatNumberWithSpaces(nbReviews)}
+														</div>
+													</div>
+													<div
+														className={cx(
+															classes.reviewWrapper,
+															fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
+														)}
+													>
+														<div className={fr.cx('fr-label--info')}>
+															{nbNewReviews !== undefined &&
+																nbNewReviews > 0 && (
+																	<>
+																		<span
+																			title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
+																		>
+																			<Badge
+																				severity="new"
+																				className={fr.cx('fr-mr-4v')}
+																			>
+																				{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
+																			</Badge>
+																		</span>
+																	</>
+																)}
+														</div>
+														{nbReviews > 0 && (
+															<Link
+																href={`/administration/dashboard/product/${product.id}/reviews`}
+																title={`Voir les avis pour ${product.title}`}
+																className={fr.cx('fr-link')}
+															>
+																Voir les avis
+															</Link>
+														)}
 													</div>
 												</div>
 											</div>
-										))}
-										{product.forms.length > 2 && (
-											<Link
-												href={`/administration/dashboard/product/${product.id}/forms`}
-												title={`Voir les formulaires pour ${product.title}`}
-												className={cx(classes.productLink, fr.cx('fr-link'))}
-											>
-												Voir tous les formulaires ({product.forms.length})
-											</Link>
 										)}
 									</div>
+								) : product.forms[0]?.buttons.length === 0 ? (
+									<NoButtonsPanel onButtonClick={handleButtonClick} />
+								) : (
+									<NoReviewsPanel
+										improveBtnClick={() => {}}
+										sendInvitationBtnClick={handleSendInvitation}
+									/>
 								)}
-								{/* <div
-									className={cx(
-										fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
-										classes.statsSection
-									)}
-								>
-									{isLoadingStatsObservatoire ||
-									isRefetchingStatsObservatoire ? (
-										<Skeleton
-											className={cx(classes.cardSkeleton)}
-											variant="text"
-											width={'full'}
-											height={50}
-										/>
-									) : (product.forms[0]?.buttons.length > 0 &&
-											nbReviews &&
-											nbReviews > 0) ||
-									  session?.user.role.includes('admin') ? (
-										<div
-											className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}
-										>
-											{indicators.map((indicator, index) => (
-												<div
-													className={fr.cx(
-														'fr-col',
-														'fr-col-12',
-														'fr-col-sm-6',
-														'fr-col-md-3'
-													)}
-													key={index}
-												>
-													<p
-														className={fr.cx(
-															'fr-text--xs',
-															'fr-mb-0',
-															'fr-hint-text'
-														)}
-													>
-														{indicator.title}
-													</p>
-													{isLoadingStatsObservatoire ? (
-														<Skeleton
-															className={cx(classes.badgeSkeleton)}
-															variant="text"
-															width={130}
-															height={25}
-														/>
-													) : (
-														<p
-															className={cx(
-																fr.cx(
-																	!(
-																		!!indicator.total &&
-																		indicator.color !== 'new'
-																	) && 'fr-label--disabled',
-																	'fr-text--bold'
-																),
-																classes.indicatorText,
-																!!indicator.total && classes[indicator.color]
-															)}
-														>
-															{!!indicator.total
-																? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
-																: 'Aucune donnée'}
-														</p>
-													)}
-												</div>
-											))}
-											{!isLoadingReviewsCount && nbReviews !== undefined && (
-												<div
-													className={fr.cx(
-														'fr-col',
-														'fr-col-12',
-														'fr-col-sm-6',
-														'fr-col-md-3'
-													)}
-												>
-													<div
-														className={fr.cx(
-															'fr-grid-row',
-															'fr-grid-row--gutters'
-														)}
-													>
-														<div className={fr.cx('fr-col-12')}>
-															<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-																Nombre d'avis
-															</p>
-														</div>
-													</div>
-													<div
-														className={fr.cx(
-															'fr-grid-row',
-															'fr-grid-row--gutters'
-														)}
-													>
-														<div
-															className={cx(
-																fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
-															)}
-														>
-															<div
-																className={fr.cx(
-																	'fr-label--info',
-																	'fr-text--bold',
-																	'fr-pt-0-5v'
-																)}
-															>
-																{formatNumberWithSpaces(nbReviews)}
-															</div>
-														</div>
-														<div
-															className={cx(
-																classes.reviewWrapper,
-																fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
-															)}
-														>
-															<div className={fr.cx('fr-label--info')}>
-																{nbNewReviews !== undefined &&
-																	nbNewReviews > 0 && (
-																		<>
-																			<span
-																				title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
-																			>
-																				<Badge
-																					severity="new"
-																					className={fr.cx('fr-mr-4v')}
-																				>
-																					{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
-																				</Badge>
-																			</span>
-																		</>
-																	)}
-															</div>
-															{nbReviews > 0 && (
-																<Link
-																	href={`/administration/dashboard/product/${product.id}/reviews`}
-																	title={`Voir les avis pour ${product.title}`}
-																	className={fr.cx('fr-link')}
-																>
-																	Voir les avis
-																</Link>
-															)}
-														</div>
-													</div>
-												</div>
-											)}
-										</div>
-									) : product.forms[0]?.buttons.length === 0 ? (
-										<NoButtonsPanel onButtonClick={handleButtonClick} />
-									) : (
-										<NoReviewsPanel
-											improveBtnClick={() => {}}
-											sendInvitationBtnClick={handleSendInvitation}
-										/>
-									)}
-								</div> */}
-							</>
-						)}
-					</div>
+							</div> */}
+						</>
+					)}
 				</div>
-			</Link>
+			</div>
 		</>
 	);
 };
@@ -820,7 +820,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		}
 	},
 	formCard: {
-		backgroundColor: fr.colors.decisions.background.contrast.info.default,
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 		display: 'flex',
 		position: 'relative',
 		flexWrap: 'wrap',
@@ -831,6 +831,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginBottom: '1.5rem',
 		':nth-child(2), :last-child': {
 			marginBottom: '0.5rem'
+		},
+		'&:hover > div:first-of-type span:first-of-type': {
+			textDecoration: 'underline'
 		}
 	},
 	formStatsWrapper: {
