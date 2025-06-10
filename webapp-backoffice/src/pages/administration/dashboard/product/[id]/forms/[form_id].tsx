@@ -14,12 +14,14 @@ import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
+import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
 
 export type FormConfigHelper = {
 	displays: {
@@ -45,6 +47,11 @@ const onConfirmPublishModal = createModal({
 
 const onConfirmLeaveModal = createModal({
 	id: 'form-leave-modal',
+	isOpenedByDefault: false
+});
+
+const rename_form_modal = createModal({
+	id: 'rename-form-modal',
 	isOpenedByDefault: false
 });
 
@@ -164,6 +171,9 @@ const ProductFormPage = (props: Props) => {
 		}
 	});
 
+	const isMobile = useMemo(() => typeof window !== 'undefined' && window.innerWidth <= fr.breakpoints.getPxValues().md, []);
+
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
@@ -194,6 +204,11 @@ const ProductFormPage = (props: Props) => {
 				Vous pouvez publier votre formulaire modifié depuis l’écran de
 				configuration du formulaire.
 			</OnConfirmModal>
+			<FormCreationModal 
+				form={form} 
+				productId={form.product.id} 
+				modal={rename_form_modal}  
+			/>
 			<Breadcrumb
 				currentPageLabel={form.form_template.title}
 				segments={breadcrumbSegments}
@@ -209,17 +224,43 @@ const ProductFormPage = (props: Props) => {
 					priority="tertiary"
 					size="small"
 				>
-					Annuler et retourner au service
+					Retourner à la liste des formulaires
 				</Button>
 			</Link>
+			{!isMobile && (
+				<CustomFormHelpPanel />
+			)}
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h1 className={fr.cx('fr-mb-0')}>{form.title || form.form_template.title}</h1>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
+					<Button
+						priority="secondary"
+						iconId="fr-icon-edit-line"
+						iconPosition="right"
+						onClick={() => rename_form_modal.open()}
+						size='small'
+					>
+						Renommer
+					</Button>
+				</div>
+				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
+					<p className={fr.cx('fr-mb-0')}>
+						Évaluez le niveau de satisfaction de votre service numérique et identifiez les problèmes rencontrés par vos usagers.
+					</p>
+					<p>
+						Récoltez des données sur les indicateurs clés définis par la plateforme Vos démarches essentielles.
+					</p>
+					<hr className={fr.cx('fr-hr')} />
+				</div>
+				<div className={fr.cx('fr-col-8')}>
+					<h2 className={fr.cx('fr-mb-0')}>Personnaliser le formulaire</h2>
+				</div>
+				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
 					{hasConfigChanged && (
 						<Link
-							className={fr.cx('fr-btn', 'fr-btn--secondary')}
+							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
 							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
 							target={'_blank'}
 						>
@@ -234,17 +275,10 @@ const ProductFormPage = (props: Props) => {
 							onConfirmPublishModal.open();
 						}}
 						disabled={!hasConfigChanged}
+						size='large'
 					>
 						Publier
 					</Button>
-				</div>
-				<div className={fr.cx('fr-col-12')}>
-					<p className={fr.cx('fr-mb-0')}>
-						Évaluez le niveau de satisfaction de votre service numérique et identifiez les problèmes rencontrés par vos usagers.
-					</p>
-					<p>
-						Récoltez des données sur les indicateurs clés définis par la plateforme Vos démarches essentielles.
-					</p>
 				</div>
 				<div className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}>
 					<FormConfigurator

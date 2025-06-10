@@ -37,7 +37,7 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
     formState: { errors }
   } = useForm<FormValues>({
     defaultValues: {
-      title: rootFormTemplate?.data?.title || '',
+      title: form?.title || rootFormTemplate?.data?.title || '',
     }
   });
 
@@ -61,7 +61,10 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
     if (form && form.id) {
       await updateForm.mutateAsync({
         id: form.id,
-        form: { ...data }
+        form: { 
+          ...data,
+          product_id: productId,
+        }
       });
     } else {
       if(!rootFormTemplate?.data?.id) return setDisplayToast(true);
@@ -73,9 +76,9 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
       formId = savedFormResponse.data.id;
     }
 
-    if (formId) {
+    if ((form && form.id) || formId) {
       router
-        .push(`/administration/dashboard/product/${productId}/forms/${formId}`)
+        .push(`/administration/dashboard/product/${productId}/forms/${(form && form.id) || formId}`)
         .then(() => {
           window.location.reload();
         });
@@ -101,7 +104,7 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
         'fr-my-0'
       )}
       concealingBackdrop={false}
-      title={'Créer un nouveau formulaire'}
+      title={form ? 'Modifier le formulaire existant' : 'Créer un nouveau formulaire'}
       size="large"
       buttons={[
         {
@@ -110,7 +113,7 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
         {
           doClosesModal: false,
           onClick: handleSubmit(onLocalSubmit),
-          children: 'Créer'
+          children: form ? 'Modifier' : 'Créer'
         }
       ]}
     >
