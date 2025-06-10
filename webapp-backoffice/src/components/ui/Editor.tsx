@@ -18,6 +18,7 @@ interface Props {
 	initialValue: string | null;
 	configHelper: FormConfigHelper;
 	onConfigChange: (config: FormConfigHelper) => void;
+	onCancel?: () => void;
 }
 
 const MAX_LENGTH = 250;
@@ -34,7 +35,7 @@ const getTextLength = (editor: BaseEditor) => {
 };
 
 const Editor = (props: Props) => {
-	const { form, block, configHelper, initialValue, onConfigChange } = props;
+	const { form, block, configHelper, initialValue, onConfigChange, onCancel } = props;
 
 	const { classes, cx } = useStyles();
 
@@ -142,6 +143,14 @@ const Editor = (props: Props) => {
 			)}
 			<div className={cx(classes.submit)}>
 				<div>
+					<Button
+						priority="secondary"
+						onClick={onCancel}
+					>
+						Annuler
+					</Button>
+				</div>
+				<div className={classes.rightButtonsWrapper}>
 					{hasConfig && (
 						<Button
 							priority="secondary"
@@ -152,8 +161,6 @@ const Editor = (props: Props) => {
 							Réinitialiser
 						</Button>
 					)}
-				</div>
-				<div>
 					<Button
 						disabled={hasReachedMaxLength || !textLength}
 						priority="primary"
@@ -194,6 +201,10 @@ const useStyles = tss.withName(MarkButton.name).create({
 		marginTop: fr.spacing('4v'),
 		display: 'flex',
 		justifyContent: 'space-between'
+	},
+	rightButtonsWrapper: {
+		display: 'flex',
+		gap: fr.spacing('4v'),
 	},
 	nbCharsHint: {
 		textAlign: 'right',

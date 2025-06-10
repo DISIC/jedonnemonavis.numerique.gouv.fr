@@ -46,6 +46,7 @@ const FormBlockDisplay = (props: Props) => {
 							onConfigChange(config);
 							setIsUpdating(false);
 						}}
+						onCancel={() => setIsUpdating(false)}
 					/>
 				) : (
 					<Paragraph block={block} configHelper={configHelper} form={form} />
@@ -102,15 +103,15 @@ const FormBlockDisplay = (props: Props) => {
 				>
 					<h3>{block.label}</h3>
 				</div>
-				{!disabled && block.isUpdatable && (
+				{!disabled && block.isUpdatable && !isUpdating && (
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<Button
 							priority="secondary"
-							iconId={isUpdating ? 'ri-close-line' : 'ri-pencil-line'}
+							iconId={'ri-pencil-line'}
 							iconPosition="right"
-							onClick={() => setIsUpdating(!isUpdating)}
+							onClick={() => setIsUpdating(true)}
 						>
-							{isUpdating ? 'Annuler' : 'Éditer'}
+							Éditer
 						</Button>
 					</div>
 				)}
