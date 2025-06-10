@@ -13,6 +13,7 @@ import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
 import FormTab from '@/src/components/dashboard/Form/tabs/form';
+import { trpc } from '@/src/utils/trpc';
 
 interface Props {
   form: FormWithElements;
@@ -37,6 +38,16 @@ const ProductFormPage = (props: Props) => {
     }
   ];
 
+  const { data: reviewsData, isLoading: isLoadingReviewsCount } =
+    trpc.review.countReviews.useQuery({
+      numberPerPage: 0,
+      page: 1,
+      product_id: form.product_id,
+      
+    });
+
+	const nbReviews = reviewsData?.metadata.countAll || 0;
+  
   return (
     <div className={fr.cx('fr-container', 'fr-my-4w')}>
       <Head>
@@ -83,7 +94,7 @@ const ProductFormPage = (props: Props) => {
         <div className={fr.cx('fr-col-12', 'fr-mt-4v')}>
           <Tabs
             tabs={[
-                { label: "Tableau de bord", content: <DashboardTab /> },
+                { label: "Tableau de bord", content: <DashboardTab hasNoReviews={nbReviews === 0} isLoading={isLoadingReviewsCount} /> },
                 { label: "Réponses", content: <ReviewsTab /> },
                 { label: "Statistiques", content: <StatsTab />},
                 { label: "Formulaire", content: <FormTab /> }
