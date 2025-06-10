@@ -3,7 +3,7 @@ setuptools==65.5.0
 psycopg[binary]
 boto3==1.26.70
 python-dotenv==0.19.2
-requests==2.26.0
+requests==2.32.4
 XlsxWriter==3.0.2
 numpy
 pandas
