@@ -78,7 +78,7 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
 
     if ((form && form.id) || formId) {
       router
-        .push(`/administration/dashboard/product/${productId}/forms/${(form && form.id) || formId}`)
+        .push(`/administration/dashboard/product/${productId}/forms/${(form && form.id) || formId}/edit`)
         .then(() => {
           window.location.reload();
         });
