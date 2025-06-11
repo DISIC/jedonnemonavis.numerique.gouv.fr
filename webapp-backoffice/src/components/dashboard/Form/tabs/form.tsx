@@ -88,13 +88,15 @@ const FormTab = ({form, ownRight}: Props) => {
 		modal.open();
 	};
 
-  const onButtonCreatedOrUpdated = (isTest:boolean, finalButton: ButtonCreationPayload | ButtonWithForm) => {
+  const onButtonCreatedOrUpdated = async (isTest:boolean, finalButton: ButtonWithForm) => {
+		modal.close();
+		await refetchButtons();
+
     if(modalType === 'create') {
       setAlertText(`L\'emplacement "${finalButton.title}" a été créé avec succès.`);
       setIsAlertShown(true);
+      handleModalOpening('install', finalButton);
     }
-		refetchButtons();
-		modal.close();
 	};
 
   return (

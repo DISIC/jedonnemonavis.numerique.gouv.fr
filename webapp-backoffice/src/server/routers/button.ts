@@ -66,7 +66,10 @@ export const buttonRouter = router({
 		.input(ButtonUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {
 			const newButton = await ctx.prisma.button.create({
-				data: input
+				data: input,
+				include: {
+					form: true
+				}
 			});
 
 			return { data: newButton };
@@ -80,7 +83,10 @@ export const buttonRouter = router({
 				where: {
 					id: input.id as number
 				},
-				data: input
+				data: input,
+				include: {
+					form: true
+				}
 			});
 
 			return { data: updatedButton };

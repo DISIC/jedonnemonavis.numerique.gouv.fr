@@ -18,7 +18,7 @@ interface Props {
 	modal: CustomModalProps;
 	modalType: string;
 	button?: ButtonWithForm | null;
-	onButtonCreatedOrUpdated: (isTest: boolean, button: ButtonCreationPayload) => void;
+	onButtonCreatedOrUpdated: (isTest: boolean, button: ButtonWithForm) => void;
 	form_id: number;
 }
 
@@ -101,7 +101,7 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const handleModalClose = (createdOrUpdatedButton: ButtonCreationPayload) => {
+	const handleModalClose = (createdOrUpdatedButton: ButtonWithForm) => {
 		resetErrors('title');
 		onButtonCreatedOrUpdated(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
