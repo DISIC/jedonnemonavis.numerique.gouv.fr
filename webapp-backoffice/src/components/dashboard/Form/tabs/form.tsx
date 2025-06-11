@@ -11,9 +11,11 @@ import { trpc } from '@/src/utils/trpc';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 import { RightAccessStatus } from '@prisma/client';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ButtonModal from '../../ProductButton/ButtonModal';
+import ButtonModal, { ButtonCreationPayload } from '../../ProductButton/ButtonModal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import { Loader } from '@/src/components/ui/Loader';
 
 const modal = createModal({
 	id: 'button-modal',
@@ -38,7 +40,7 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string; }[] =
     iconId: 'ri-play-list-add-line',
     text: 'Ajouter des questions supplémentaires'
   }
-]
+];
 
 const FormTab = ({form, ownRight}: Props) => {
   const router = useRouter();
@@ -47,6 +49,8 @@ const FormTab = ({form, ownRight}: Props) => {
   const [modalType, setModalType] = React.useState<string>('');
 	const [currentButton, setCurrentButton] =
 		React.useState<ButtonWithForm | null>(null);
+  const [isAlertShown, setIsAlertShown] = React.useState<boolean>(false);
+  const [alertText, setAlertText] = React.useState<string>('');
 
 	const isModalOpen = useIsModalOpen(modal);
 
@@ -84,7 +88,11 @@ const FormTab = ({form, ownRight}: Props) => {
 		modal.open();
 	};
 
-  const onButtonCreatedOrUpdated = () => {
+  const onButtonCreatedOrUpdated = (isTest:boolean, finalButton: ButtonCreationPayload | ButtonWithForm) => {
+    if(modalType === 'create') {
+      setAlertText(`L\'emplacement "${finalButton.title}" a été créé avec succès.`);
+      setIsAlertShown(true);
+    }
 		refetchButtons();
 		modal.close();
 	};
@@ -99,40 +107,55 @@ const FormTab = ({form, ownRight}: Props) => {
         button={currentButton}
         onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
       />
+      <Alert
+        className={fr.cx('fr-col-12', 'fr-mb-6v')}
+        description={alertText}
+        severity="success"
+        small
+        closable
+        isClosed={!isAlertShown}
+        onClose={() => setIsAlertShown(false)}
+      />
       <h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Formulaire</h2>
       <div className={fr.cx('fr-col-8')}>
         <h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
       </div>
-      <div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
-				{ownRight === 'carrier_admin' && (
-          <Button
-            priority="secondary"
-            iconId="fr-icon-add-line"
-            iconPosition="right"
-            onClick={() => {
-							handleModalOpening('create');
-            }}
-          >
-            Créer un emplacement
-          </Button>
-        )}
-      </div>
-      <p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
-        Lors de la création d’un emplacement, un code HTML est généré. Il vous suffit de le copier-coller dans le code de la page où vous voulez faire apparaître le bouton d’avis. Vous pouvez créer plusieurs emplacements pour chaque formulaire.&nbsp;
-        <Link 
-          href='#'
-          style={{color:fr.colors.decisions.text.title.blueFrance.default}}
-        >
-          Pourquoi créer plusieurs emplacements ?
-        </Link>
-      </p>
-      <div className={fr.cx('fr-col-12')}>
-        {buttonsCount === 0 && (
+      {buttonsCount > 0 && (
+        <>
+          <div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+            {ownRight === 'carrier_admin' && (
+              <Button
+                priority="secondary"
+                iconId="fr-icon-add-line"
+                iconPosition="right"
+                onClick={() => {
+                  handleModalOpening('create');
+                }}
+              >
+                Créer un emplacement
+              </Button>
+            )}
+          </div>
+          <p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
+            Lors de la création d’un emplacement, un code HTML est généré. Il vous suffit de le copier-coller dans le code de la page où vous voulez faire apparaître le bouton d’avis. Vous pouvez créer plusieurs emplacements pour chaque formulaire.&nbsp;
+            <Link 
+              href='#'
+              style={{color:fr.colors.decisions.text.title.blueFrance.default}}
+              target='_blank'
+            >
+              Pourquoi créer plusieurs emplacements ?
+            </Link>
+          </p>
+        </>
+      )}
+      <div className={fr.cx('fr-col-12', buttonsCount === 0 && 'fr-mt-6v')}>
+        {(isLoadingButtons || isRefetchingButtons) && <Loader />}
+        {!(isLoadingButtons || isRefetchingButtons) && buttonsCount === 0 && (
           <NoButtonsPanel 
             onButtonClick={() => handleModalOpening('create')}
           />
         )}
-        {buttons?.map((button, index) => (
+        {!(isLoadingButtons || isRefetchingButtons) && buttons?.map((button, index) => (
           <ProductButtonCard
             key={index}
             button={button}
@@ -237,8 +260,8 @@ const useStyles = tss.withName(FormTab.name).create({
 	},
   containerTitle: {
     fontWeight: 'bold',
-    fontSize: '24px',
-    lineHeight: '32px',
+    fontSize: '1.5rem',
+    lineHeight: '2rem',
   }
 });
 
