@@ -14,13 +14,15 @@ import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
 import FormTab from '@/src/components/dashboard/Form/tabs/form';
 import { trpc } from '@/src/utils/trpc';
+import { RightAccessStatus } from '@prisma/client';
 
 interface Props {
   form: FormWithElements;
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductFormPage = (props: Props) => {
-  const { form } = props;
+  const { form, ownRight } = props;
   const { classes, cx } = useStyles();
 
   const breadcrumbSegments = [
@@ -97,7 +99,7 @@ const ProductFormPage = (props: Props) => {
                 { label: "Tableau de bord", content: <DashboardTab hasNoReviews={nbReviews === 0} isLoading={isLoadingReviewsCount} /> },
                 { label: "Réponses", content: <ReviewsTab /> },
                 { label: "Statistiques", content: <StatsTab />},
-                { label: "Formulaire", content: <FormTab form={form} /> }
+                { label: "Formulaire", content: <FormTab form={form} ownRight={ownRight} /> }
             ]}
           />
         </div>
@@ -255,7 +257,12 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
   return {
     props: {
-      form: JSON.parse(JSON.stringify(form))
+      form: JSON.parse(JSON.stringify(form)),
+      ownRight: currentUser.role.includes('admin') || 
+                hasAdminEntityRight || 
+                (hasAccessRightToProduct && 
+                  hasAccessRightToProduct.status === 'carrier_admin')
+                  ? 'carrier_admin' : 'carrier_user'
     }
   };
 };

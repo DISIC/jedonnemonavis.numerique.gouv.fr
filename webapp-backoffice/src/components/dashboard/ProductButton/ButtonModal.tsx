@@ -51,7 +51,7 @@ const ButtonModal = (props: Props) => {
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = React.useState<
-		ButtonCreationPayload | PrismaButtonType
+		ButtonCreationPayload | ButtonWithForm
 	>(defaultButton);
 
 	React.useEffect(() => {
@@ -117,7 +117,8 @@ const ButtonModal = (props: Props) => {
 		currentButton.form_id = props.form_id;
 
 		if ('id' in currentButton) {
-			updateButton.mutate(currentButton);
+			const { form, ...buttonWithoutForm } = currentButton;
+			updateButton.mutate(buttonWithoutForm);
 		} else {
 			createButton.mutate(currentButton);
 		}
@@ -397,7 +398,7 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Créer',
-						onClick: handleButtonCreateOrEdit,
+						onClick: handleButtonCreateOrEdit, 
 						doClosesModal: false
 					}
 				];

@@ -41,29 +41,44 @@ const ProductButtonCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-						<p className={fr.cx('fr-mb-0')}>{button.title}</p>
-						<p className={fr.cx('fr-mb-0', 'fr-hint-text')}>
-							{button.description}
-						</p>
+						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>{button.title}</p>
+						{button.description && (
+							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
+								{button.description}
+							</p>
+						)}
 					</div>
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
 							{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
 							<Button
+								priority="secondary"
+								size="small"
+								onClick={() => {
+									onButtonClick('install', button);
+									push(['trackEvent', 'Gestion boutons', 'Installer']);
+									handleClose();
+								}}
+								className='fr-mr-2v'
+							>
+								Voir le code
+							</Button>
+							<Button
 								id="button-options"
 								aria-controls={menuOpen ? 'option-menu' : undefined}
 								aria-haspopup="true"
 								aria-expanded={menuOpen ? 'true' : undefined}
+								title={`Ouvrir le menu contextuel du bouton « ${button.title} »`}
 								priority="secondary"
 								size="small"
 								onClick={handleClick}
-								iconId={
-									menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
-								}
-								iconPosition="right"
+								iconId={'ri-more-2-fill'}
+								className={cx(classes.buttonWrapper)}
 							>
-								Options
+								<span
+									className={fr.cx('fr-hidden')}
+								>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
 							</Button>
 							<Menu
 								id="option-menu"
@@ -94,15 +109,6 @@ const ProductButtonCard = (props: Props) => {
 							>
 								Archiver bouton
 							</MenuItem> */}
-								<MenuItem
-									onClick={() => {
-										onButtonClick('install', button);
-										push(['trackEvent', 'Gestion boutons', 'Installer']);
-										handleClose();
-									}}
-								>
-									Voir le code
-								</MenuItem>
 								<MenuItem
 									onClick={() => {
 										navigator.clipboard.writeText(
@@ -140,7 +146,12 @@ const useStyles = tss
 		card: {
 			backgroundColor: isTest
 				? fr.colors.decisions.border.default.grey.default
-				: fr.colors.decisions.background.default.grey.default
+				: fr.colors.decisions.background.alt.blueFrance.default,
+			height: 'auto!important',
+			backgroundImage: 'none!important',
+		},
+		title: {
+			fontWeight: 'bold',
 		},
 		actionsContainer: {
 			display: 'flex',
@@ -148,6 +159,11 @@ const useStyles = tss
 			alignItems: 'center',
 			justifyContent: 'flex-end',
 			paddingLeft: fr.spacing('11v')
+		},
+		buttonWrapper: {
+			'&::before': {
+				marginRight: '0 !important'
+			}
 		},
 		tag: {}
 	}));

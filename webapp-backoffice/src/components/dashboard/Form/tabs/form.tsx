@@ -6,10 +6,23 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { ButtonWithForm, FormWithElements } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
+import ProductButtonCard from '../../ProductButton/ProductButtonCard';
+import { RightAccessStatus } from '@prisma/client';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import ButtonModal from '../../ProductButton/ButtonModal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
+
+const modal = createModal({
+	id: 'button-modal',
+	isOpenedByDefault: false
+});
 
 interface Props {
   form: FormWithElements;
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const contents: { iconId: FrIconClassName | RiIconClassName; text: string; }[] = [
@@ -27,28 +40,84 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string; }[] =
   }
 ]
 
-const FormTab = ({form}: Props) => {
+const FormTab = ({form, ownRight}: Props) => {
   const router = useRouter();
 	const { cx, classes } = useStyles();
 
+  const [modalType, setModalType] = React.useState<string>('');
+	const [currentButton, setCurrentButton] =
+		React.useState<ButtonWithForm | null>(null);
+
+	const isModalOpen = useIsModalOpen(modal);
+
+  const { 
+    data: buttonResults, 
+    isLoading: isLoadingButtons,
+    isRefetching: isRefetchingButtons,
+		refetch: refetchButtons     
+  } =
+      trpc.button.getList.useQuery(
+        {
+          page: 1,
+          numberPerPage: 1000,
+          form_id: form.id,
+          isTest: false
+        },
+        {
+          initialData: {
+            data: [],
+            metadata: {
+              count: 0
+            }
+          },
+        }
+      );
+
+  const {
+		data: buttons,
+		metadata: { count: buttonsCount }
+	} = buttonResults;
+
+  const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
+		setCurrentButton(button ? button : null);
+		setModalType(modalType);
+		modal.open();
+	};
+
+  const onButtonCreatedOrUpdated = () => {
+		refetchButtons();
+		modal.close();
+	};
+
   return (
-    <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-      <h2 className={fr.cx('fr-col-12', 'fr-mb-4v', 'fr-px-0')}>Formulaire</h2>
-      <div className={fr.cx('fr-col-8', 'fr-px-0')}>
+    <div className={fr.cx('fr-grid-row')}>
+      <ButtonModal
+        form_id={form.id}
+        modal={modal}
+        isOpen={isModalOpen}
+        modalType={modalType}
+        button={currentButton}
+        onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
+      />
+      <h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Formulaire</h2>
+      <div className={fr.cx('fr-col-8')}>
         <h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
       </div>
       <div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
-        <Button
-          priority="secondary"
-          iconId="fr-icon-add-line"
-          iconPosition="right"
-          onClick={() => {
-          }}
-        >
-          Créer un emplacement
-        </Button>
+				{ownRight === 'carrier_admin' && (
+          <Button
+            priority="secondary"
+            iconId="fr-icon-add-line"
+            iconPosition="right"
+            onClick={() => {
+							handleModalOpening('create');
+            }}
+          >
+            Créer un emplacement
+          </Button>
+        )}
       </div>
-      <p className={fr.cx('fr-col-12', 'fr-px-0')}>
+      <p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
         Lors de la création d’un emplacement, un code HTML est généré. Il vous suffit de le copier-coller dans le code de la page où vous voulez faire apparaître le bouton d’avis. Vous pouvez créer plusieurs emplacements pour chaque formulaire.&nbsp;
         <Link 
           href='#'
@@ -57,11 +126,26 @@ const FormTab = ({form}: Props) => {
           Pourquoi créer plusieurs emplacements ?
         </Link>
       </p>
-      <hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v', 'fr-pb-0')} />
-      <div className={fr.cx('fr-col-8', 'fr-px-0')}>
-        <h3 className={fr.cx('fr-mb-0')}>Gérer le formulaire</h3>
+      <div className={fr.cx('fr-col-12')}>
+        {buttonsCount === 0 && (
+          <NoButtonsPanel 
+            onButtonClick={() => handleModalOpening('create')}
+          />
+        )}
+        {buttons?.map((button, index) => (
+          <ProductButtonCard
+            key={index}
+            button={button}
+            onButtonClick={handleModalOpening}
+            ownRight={ownRight}
+          />
+        ))}
       </div>
-      <div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v', 'fr-mt-3v'))}>
+      <hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
+      <div className={fr.cx('fr-col-8')}>
+        <h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
+      </div>
+      <div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}>
         <div className={fr.cx('fr-grid-row',  'fr-grid-row--middle')}>
           <div className={fr.cx('fr-col-8')}>
             <span className={classes.containerTitle}>
