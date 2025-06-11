@@ -1,5 +1,4 @@
 import React from 'react';
-import NoReviewPanel from '../../Pannels/NoReviewsPanel';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';

@@ -1,11 +1,163 @@
+import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 
-const FormTab = () => {
-  return (
-    <div>
-      
-    </div>
-  );
+interface Props {
+  form: FormWithElements;
 }
 
+const contents: { iconId: FrIconClassName | RiIconClassName; text: string; }[] = [
+  {
+    iconId: 'ri-eye-off-line',
+    text: 'Masquer une possibilité de réponse à une question'
+  },
+  {
+    iconId: 'ri-list-check-3',
+    text: 'Masquer une question entière'
+  },
+  {
+    iconId: 'ri-play-list-add-line',
+    text: 'Ajouter des questions supplémentaires'
+  }
+]
+
+const FormTab = ({form}: Props) => {
+  const router = useRouter();
+	const { cx, classes } = useStyles();
+
+  return (
+    <div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+      <h2 className={fr.cx('fr-col-12', 'fr-mb-4v', 'fr-px-0')}>Formulaire</h2>
+      <div className={fr.cx('fr-col-8', 'fr-px-0')}>
+        <h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
+      </div>
+      <div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+        <Button
+          priority="secondary"
+          iconId="fr-icon-add-line"
+          iconPosition="right"
+          onClick={() => {
+          }}
+        >
+          Créer un emplacement
+        </Button>
+      </div>
+      <p className={fr.cx('fr-col-12', 'fr-px-0')}>
+        Lors de la création d’un emplacement, un code HTML est généré. Il vous suffit de le copier-coller dans le code de la page où vous voulez faire apparaître le bouton d’avis. Vous pouvez créer plusieurs emplacements pour chaque formulaire.&nbsp;
+        <Link 
+          href='#'
+          style={{color:fr.colors.decisions.text.title.blueFrance.default}}
+        >
+          Pourquoi créer plusieurs emplacements ?
+        </Link>
+      </p>
+      <hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v', 'fr-pb-0')} />
+      <div className={fr.cx('fr-col-8', 'fr-px-0')}>
+        <h3 className={fr.cx('fr-mb-0')}>Gérer le formulaire</h3>
+      </div>
+      <div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v', 'fr-mt-3v'))}>
+        <div className={fr.cx('fr-grid-row',  'fr-grid-row--middle')}>
+          <div className={fr.cx('fr-col-8')}>
+            <span className={classes.containerTitle}>
+              Éditer le formulaire 
+            </span>
+            <Badge severity="new" className={fr.cx('fr-ml-4v')} small>Beta</Badge>
+          </div>
+          <div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+            <Button
+              priority="secondary"
+              iconId="fr-icon-settings-5-line"
+              iconPosition="right"
+              onClick={() => {
+                router.push(`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`);
+              }}
+            >
+              Éditer le formulaire
+            </Button>
+          </div>
+          <p className={fr.cx('fr-col-12', 'fr-mb-3v', 'fr-mt-6v')}>Désormais, pour adapter vos formulaires à vos besoins spécifiques, vous pouvez  :</p>
+          
+          {contents.map((content, index) => (
+            <div key={index} className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}>
+              <div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}>
+                <i className={cx(fr.cx(content.iconId), classes.icon)} />
+              </div>
+              <p>{content.text}</p>
+            </div>
+          ))}
+
+          <p className={fr.cx('fr-col-12', 'fr-mb-0')}>Pour en savoir plus sur ces fonctionnalités et découvrir celles à venir, vous pouvez&nbsp;
+            <a href="/public/roadmap" target="_blank">
+						  consulter notre feuille de route
+					  </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const useStyles = tss.withName(FormTab.name).create({
+  container: {
+    ...fr.spacing('padding', {}),
+    background: fr.colors.decisions.artwork.decorative.blueFrance.default,
+    a: {
+      color: fr.colors.decisions.text.title.blueFrance.default,
+    }
+  },
+  buttonsGroup: {
+    display: 'flex',
+    justifyContent: 'end',
+    gap: fr.spacing('4v'),
+    alignSelf: 'center',
+    button: {
+      a: {
+        display: 'flex',
+        alignItems: 'center'
+      }
+    }
+  },
+  content: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: fr.spacing('3v'),
+    p: {
+      margin: 0,
+    },
+    [fr.breakpoints.down('md')]: {
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      marginBottom: fr.spacing('6v'),
+    }
+  },
+  indicatorIcon: {
+		width: fr.spacing('12v'),
+		height: fr.spacing('12v'),
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius: '50%',
+		backgroundColor: 'white',
+	},
+	icon: {
+		color: fr.colors.decisions.background.flat.blueFrance.default,
+		'::before': {
+			'--icon-size': fr.spacing('7v'),
+		}
+	},
+  containerTitle: {
+    fontWeight: 'bold',
+    fontSize: '24px',
+    lineHeight: '32px',
+  }
+});
+
 export default FormTab;
+
+export { getServerSideProps }; 
