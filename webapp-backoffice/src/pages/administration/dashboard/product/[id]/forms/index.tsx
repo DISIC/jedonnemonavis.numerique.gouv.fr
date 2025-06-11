@@ -30,6 +30,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import NoFormsPanel from '@/src/components/dashboard/Pannels/NoFormsPanel';
+import ServiceFormsNoButtonsPanel from '@/src/components/dashboard/Pannels/ServiceFormsNoButtonsPanel';
 
 interface Props {
 	product: ProductWithForms;
@@ -49,6 +50,7 @@ const new_form_modal = createModal({
 const ProductButtonsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
+	const router = useRouter();
 	
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
 		trpc.review.getList.useQuery({
@@ -107,8 +109,8 @@ const ProductButtonsPage = (props: Props) => {
 						</div>
 						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
 							{product.forms.map((form) => (
-								<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v', 'fr-grid-row--middle'), classes.formCard)}>
-									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0'))}> 
+								<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-mb-6v', 'fr-p-4v', 'fr-grid-row--middle'), classes.formCard)}>
+									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0', 'fr-pt-1v', 'fr-mb-6v'))}> 
 										<Link 
 											href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
 											className={cx(classes.productTitle)}
@@ -118,32 +120,36 @@ const ProductButtonsPage = (props: Props) => {
 											</span>
 										</Link>	
 									</div>
-									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
-										<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-											Réponses déposées
-										</span>
-										<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-										<Badge severity="success" noIcon small>
-											{nbNewReviews} NOUVELLES RÉPONSES
-										</Badge>
-										{nbReviews > 0 && (
-											<Link
-												href={`/administration/dashboard/product/${product.id}/reviews`}
-												title={`Voir les avis pour ${product.title}`}
-												className={fr.cx('fr-link', 'fr-ml-4v')}
-											>
-												Voir les réponses
-											</Link>
-										)}
-									</div>
-									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-p-4v', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
-										<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-											Modifié le 
-										</span>
-										<span className={fr.cx('fr-text--bold')}>
-											{formatDateToFrenchString(form.updated_at.toString())}
-										</span>
-									</div>
+									{form.buttons.length > 0 ? (
+										<>
+											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
+												<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+													Réponses déposées
+												</span>
+												<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
+												<Badge severity="success" noIcon small>
+													{nbNewReviews} NOUVELLES RÉPONSES
+												</Badge>
+												{nbReviews > 0 && (
+													<Link
+														href={`/administration/dashboard/product/${product.id}/reviews`}
+														title={`Voir les avis pour ${product.title}`}
+														className={fr.cx('fr-link', 'fr-ml-4v')}
+													>
+														Voir les réponses
+													</Link>
+												)}
+											</div>
+											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
+												<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+													Modifié le 
+												</span>
+												<span className={fr.cx('fr-text--bold')}>
+													{formatDateToFrenchString(form.updated_at.toString())}
+												</span>
+											</div>
+										</>
+									) : <ServiceFormsNoButtonsPanel onButtonClick={() => {router.push(`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=form`)}} />}
 								</div>
 							))}
 						</div>
@@ -169,9 +175,6 @@ const useStyles = tss
 			marginLeft: 0,
 			marginRight: 0,
 			marginBottom: "0.5rem",
-			div: {
-				padding: fr.spacing('4v'),
-			}
 		},
 		smallText: {
 			color: fr.colors.decisions.text.default.grey.default,

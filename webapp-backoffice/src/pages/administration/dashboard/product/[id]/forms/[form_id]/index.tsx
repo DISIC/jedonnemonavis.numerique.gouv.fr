@@ -15,6 +15,7 @@ import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
 import FormTab from '@/src/components/dashboard/Form/tabs/form';
 import { trpc } from '@/src/utils/trpc';
 import { RightAccessStatus } from '@prisma/client';
+import { useRouter } from 'next/router';
 
 interface Props {
   form: FormWithElements;
@@ -22,6 +23,7 @@ interface Props {
 }
 
 const ProductFormPage = (props: Props) => {
+  const router = useRouter();
   const { form, ownRight } = props;
   const { classes, cx } = useStyles();
 
@@ -99,7 +101,7 @@ const ProductFormPage = (props: Props) => {
                 { label: "Tableau de bord", content: <DashboardTab hasNoReviews={nbReviews === 0} isLoading={isLoadingReviewsCount} /> },
                 { label: "Réponses", content: <ReviewsTab /> },
                 { label: "Statistiques", content: <StatsTab />},
-                { label: "Formulaire", content: <FormTab form={form} ownRight={ownRight} /> }
+                { label: "Formulaire", content: <FormTab form={form} ownRight={ownRight} />, isDefault: router.query.tab === 'form' }
             ]}
           />
         </div>

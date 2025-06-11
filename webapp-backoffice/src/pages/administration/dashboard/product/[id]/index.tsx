@@ -22,7 +22,8 @@ export const getServerSideProps: GetServerSideProps = async context => {
 							form_config_displays: true,
 							form_config_labels: true
 						}
-					}
+					},
+					buttons: true
 				}
 			}
 		}
