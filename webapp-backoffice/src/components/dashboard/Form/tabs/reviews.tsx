@@ -139,7 +139,7 @@ const ReviewsTab = (props: Props) => {
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
 			needLogging: false, // On ne veut pas créer l'événement service_reviews_view ici
-			loggingFromMail: false
+			loggingFromMail: isFromMail
 		},
 		{
 			initialData: {
@@ -325,12 +325,45 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	useEffect(() => {
-		if (!filters.productReviews.displayNew) {
+		if (filters.productReviews.displayNew) {
+			setInitialDateState({
+				startDate: filters.sharedFilters.currentStartDate,
+				endDate: filters.sharedFilters.currentEndDate,
+				dateShortcut: filters.sharedFilters.dateShortcut
+			});
+
 			updateFilters({
 				...filters,
 				sharedFilters: {
 					...filters.sharedFilters,
-					dateShortcut: 'one-year'
+					currentStartDate: new Date(
+						reviewLog[0]
+							? reviewLog[0].created_at
+							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
+									.toISOString()
+									.split('T')[0]
+					).toISOString(),
+					currentEndDate: new Date(
+						reviewLog[0]
+							? reviewLog[0].created_at
+							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
+									.toISOString()
+									.split('T')[0]
+					)
+						.toISOString()
+						.split('T')[0],
+					dateShortcut: undefined
+				},
+				currentPage: 1
+			});
+		} else {
+			updateFilters({
+				...filters,
+				sharedFilters: {
+					...filters.sharedFilters,
+					dateShortcut: initialDateState.dateShortcut,
+					currentStartDate: initialDateState.startDate,
+					currentEndDate: initialDateState.endDate
 				}
 			});
 		}

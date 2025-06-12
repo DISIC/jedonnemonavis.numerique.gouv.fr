@@ -54,10 +54,10 @@ const ProductFormPage = (props: Props) => {
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | Configuration du formulaire | Je donne mon avis`}</title>
+				<title>{`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${form.product.title} | Configuration du formulaire | Je donne mon avis`}
+					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
 				/>
 			</Head>
 			<Breadcrumb
