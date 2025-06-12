@@ -14,6 +14,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
+		...(form_id && { form_id }),
 		...(filters?.buttonId?.length > 0 && {
 			button_id: parseInt(filters.buttonId[0])
 		}),

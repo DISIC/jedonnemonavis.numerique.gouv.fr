@@ -185,15 +185,17 @@ const ProductCard = ({
 		}
 	});
 
-	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getList.useQuery({
-			numberPerPage: 0,
-			page: 1,
+	const { data: reviewsCountData, isLoading: isLoadingReviewsCount } =
+		trpc.review.getCountsByForm.useQuery({
 			product_id: product.id
 		});
 
-	const nbReviews = reviewsData?.metadata.countAll;
-	const nbNewReviews = reviewsData?.metadata.countNew;
+	const totalReviews = reviewsCountData?.totalCount ?? 0;
+	const nbNewReviews = reviewsCountData?.newCount ?? 0;
+	const getFormReviewCount = (formId: number) =>
+		reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+	const getFormNewReviewCount = (formId: number) =>
+		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -330,7 +332,7 @@ const ProductCard = ({
 				modal={onConfirmModalArchive}
 				title="Supprimer ce service"
 				handleOnConfirm={() => {
-					if (nbReviews && nbReviews > 1000) {
+					if (totalReviews && totalReviews > 1000) {
 						if (validateDelete) {
 							archiveProduct.mutate({
 								product_id: product.id
@@ -347,7 +349,9 @@ const ProductCard = ({
 					}
 				}}
 				kind="danger"
-				disableAction={nbReviews && nbReviews > 1000 ? !validateDelete : false}
+				disableAction={
+					totalReviews && totalReviews > 1000 ? !validateDelete : false
+				}
 			>
 				<div>
 					<p>
@@ -361,7 +365,7 @@ const ProductCard = ({
 							les utilisateurs de ce service n’auront plus accès au formulaire.
 						</li>
 					</ul>
-					{nbReviews && nbReviews > 1000 ? (
+					{totalReviews && totalReviews > 1000 ? (
 						<form id="delete-product-form">
 							<div className={fr.cx('fr-input-group')}>
 								<Controller
@@ -399,7 +403,6 @@ const ProductCard = ({
 					)}
 				</div>
 			</OnConfirmModal>{' '}
-			
 			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
 				<div
 					className={cx(
@@ -419,9 +422,7 @@ const ProductCard = ({
 							title={`Voir les statistiques pour le service ${product.title}`}
 							className={cx(classes.productLink, fr.cx('fr-link'))}
 						>
-							<span className={cx(classes.productTitle)}>
-								{product.title}
-							</span>
+							<span className={cx(classes.productTitle)}>{product.title}</span>
 						</Link>
 					</div>
 					<div
@@ -521,28 +522,68 @@ const ProductCard = ({
 						</div>
 					) : (
 						<>
-							{!isLoadingReviewsCount && nbReviews !== undefined && (
-								<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
+							{!isLoadingReviewsCount && totalReviews !== undefined && (
+								<div
+									className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}
+								>
 									{product.forms.length === 0 && (
 										<NoFormsPanel isSmall product={product} />
 									)}
-									{product.forms.slice(0, 2).map((form) => (
-										<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters'), classes.formCard)}>
-											<Link href={`/administration/dashboard/product/${product.id}/forms/${form.id}`} className={classes.formLink} />	
-											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0', 'fr-p-4v'))}> 
-													<span className={cx(classes.productTitle)}>
-														{form.title || form.form_template.title}
-													</span>
+									{product.forms.slice(0, 2).map(form => (
+										<div
+											key={form.id}
+											className={cx(
+												fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+												classes.formCard
+											)}
+										>
+											<Link
+												href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+												className={classes.formLink}
+											/>
+											<div
+												className={cx(
+													fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-md-6',
+														'fr-pb-0',
+														'fr-p-4v'
+													)
+												)}
+											>
+												<span className={cx(classes.productTitle)}>
+													{form.title || form.form_template.title}
+												</span>
 											</div>
-											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'), classes.formStatsWrapper)}> 
+											<div
+												className={cx(
+													fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-md-6',
+														'fr-p-4v'
+													),
+													classes.formStatsWrapper
+												)}
+											>
 												<div className={classes.formStatsContent}>
-													<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+													<span
+														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+													>
 														Réponses déposées
 													</span>
-													<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-													<Badge severity="success" noIcon small>
-														{nbNewReviews} NOUVELLES RÉPONSES
-													</Badge>
+													<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
+														{formatNumberWithSpaces(
+															getFormReviewCount(form.id)
+														)}
+													</span>
+													{getFormNewReviewCount(form.id) > 0 && (
+														<Badge severity="success" noIcon small>
+															{getFormNewReviewCount(form.id)} NOUVELLES
+															RÉPONSES
+														</Badge>
+													)}
 												</div>
 											</div>
 										</div>
@@ -775,7 +816,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		backgroundImage: 'none',
 		position: 'absolute',
 		width: '100%',
-		height: '100%',
+		height: '100%'
 	},
 	productTitle: {
 		fontSize: '18px',
@@ -848,7 +889,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	smallText: {
 		color: fr.colors.decisions.text.default.grey.default,
-		fontSize: "0.8rem"
+		fontSize: '0.8rem'
 	},
 	notifSpan: {
 		display: 'block',

@@ -430,5 +430,94 @@ export const reviewRouter = router({
 			});
 
 			return { countFiltered, countAll };
+		}),
+
+	getCountsByForm: protectedProcedure
+		.input(
+			z.object({
+				product_id: z.number()
+			})
+		)
+		.output(
+			z.object({
+				countsByForm: z.record(z.string(), z.number()),
+				newCountsByForm: z.record(z.string(), z.number()),
+				totalCount: z.number(),
+				newCount: z.number()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { product_id } = input;
+
+			// Compter les avis groupés par form_id
+			const countsByFormRaw = await ctx.prisma.review.groupBy({
+				by: ['form_id'],
+				where: { product_id },
+				_count: { id: true }
+			});
+
+			// Conversion en objet { [form_id]: count }
+			const countsByForm = countsByFormRaw.reduce((acc, curr) => {
+				acc[curr.form_id.toString()] = curr._count.id;
+				return acc;
+			}, {} as Record<string, number>);
+
+			// Total count
+			const totalCount = await ctx.prisma.review.count({
+				where: { product_id }
+			});
+
+			// New count (logique existante)
+			const lastSeenReview = await ctx.prisma.userEvent.findMany({
+				where: {
+					user_id: parseInt(ctx.session?.user?.id),
+					action: 'service_reviews_view',
+					product_id: product_id
+				},
+				orderBy: { created_at: 'desc' },
+				take: 1
+			});
+
+			const newCount = lastSeenReview[0]
+				? await ctx.prisma.review.count({
+					where: {
+						product_id: product_id,
+						created_at: { gte: lastSeenReview[0].created_at }
+					}
+				})
+				: 0;
+
+			// New counts par formulaire
+			const newCountsByForm: Record<string, number> = {};
+			
+			if (lastSeenReview[0]) {
+				const newCountsByFormRaw = await ctx.prisma.review.groupBy({
+					by: ['form_id'],
+					where: { 
+						product_id,
+						created_at: { gte: lastSeenReview[0].created_at }
+					},
+					_count: { id: true }
+				});
+
+				// Conversion en objet { [form_id]: newCount }
+				newCountsByFormRaw.forEach(form => {
+					newCountsByForm[form.form_id.toString()] = form._count.id;
+				});
+			}
+
+			// S'assurer que tous les formulaires ont une entrée (même avec 0)
+			countsByFormRaw.forEach(form => {
+				if (!newCountsByForm[form.form_id.toString()]) {
+					newCountsByForm[form.form_id.toString()] = 0;
+				}
+			});
+
+			return {
+				countsByForm,
+				newCountsByForm,
+				totalCount,
+				newCount
+			};
 		})
 });
