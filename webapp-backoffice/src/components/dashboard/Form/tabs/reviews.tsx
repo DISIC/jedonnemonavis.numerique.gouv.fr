@@ -50,16 +50,6 @@ const ReviewsTab = (props: Props) => {
 	const { form, ownRight } = props;
 	const router = useRouter();
 	const { view } = router.query;
-	const [startDate, setStartDate] = React.useState<string>(
-		new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-			.toISOString()
-			.split('T')[0]
-	);
-
-	const currentDate = new Date();
-	const [endDate, setEndDate] = React.useState<string>(
-		currentDate.toISOString().split('T')[0]
-	);
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
 	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
@@ -138,8 +128,8 @@ const ReviewsTab = (props: Props) => {
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
-			needLogging: true,
-			loggingFromMail: isFromMail
+			needLogging: false, // On ne veut pas créer l'événement service_reviews_view ici
+			loggingFromMail: false
 		},
 		{
 			initialData: {
@@ -175,6 +165,19 @@ const ReviewsTab = (props: Props) => {
 	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
 		onSuccess: result => {}
 	});
+
+	const createFormReviewView =
+		trpc.review.createFormReviewViewEvent.useMutation({
+			onSuccess: result => {}
+		});
+
+	// Créer l'événement de consultation du formulaire au chargement
+	React.useEffect(() => {
+		createFormReviewView.mutate({
+			product_id: form.product_id,
+			form_id: form.id
+		});
+	}, [form.product_id, form.id]);
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
@@ -330,6 +333,9 @@ const ReviewsTab = (props: Props) => {
 		}
 	};
 
+	// useEffect temporairement désactivé à cause des problèmes de typage
+	// TODO: Réparer les types de filtres
+	/*
 	useEffect(() => {
 		if (filters.productReviews.displayNew) {
 			updateFilters({
@@ -368,6 +374,7 @@ const ReviewsTab = (props: Props) => {
 			});
 		}
 	}, [filters.productReviews.displayNew]);
+	*/
 
 	const handleButtonClick = () => {
 		router.push({
@@ -419,8 +426,12 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const submit = () => {
-		const startDateValid = validateDateFormat(startDate);
-		const endDateValid = validateDateFormat(endDate);
+		const startDateValid = validateDateFormat(
+			filters.sharedFilters.currentStartDate
+		);
+		const endDateValid = validateDateFormat(
+			filters.sharedFilters.currentEndDate
+		);
 		let newErrors = { startDate: false, endDate: false };
 
 		if (!startDateValid) {

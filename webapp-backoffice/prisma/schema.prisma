@@ -131,6 +131,7 @@ enum TypeAction {
   user_signout
   api_call
   form_config_create
+  form_reviews_view
 }
 
 enum FormConfigKind {
@@ -181,7 +182,7 @@ model UserEvent {
   product    Product?   @relation(fields: [product_id], references: [id])
   entity     Entity?    @relation(fields: [entity_id], references: [id])
   apiKey     ApiKey?    @relation(fields: [apiKey_id], references: [id])
-  form       Form?       @relation(fields: [form_id], references: [id])
+  form       Form?      @relation(fields: [form_id], references: [id])
   product_id Int?
   entity_id  Int?
   apiKey_id  Int?
