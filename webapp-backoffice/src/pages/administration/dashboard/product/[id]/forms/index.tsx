@@ -1,40 +1,25 @@
-import ProductButtonCard from '@/src/components/dashboard/ProductButton/ProductButtonCard';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
-import { Pagination } from '../../../../../../components/ui/Pagination';
 
-import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
-import ProductFormConfigurationInfo from '@/src/components/dashboard/Product/ProductFormConfigurationInfo';
-import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
-import { Loader } from '@/src/components/ui/Loader';
-import { useFilters } from '@/src/contexts/FiltersContext';
-import {
-	ButtonWithForm,
-	ProductWithForms
-} from '@/src/types/prismaTypesExtended';
-import {
-	formatDateToFrenchString,
-	formatNumberWithSpaces,
-	getNbPages
-} from '@/src/utils/tools';
-import { trpc } from '@/src/utils/trpc';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { push } from '@socialgouv/matomo-next';
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import React from 'react';
-import Link from 'next/link';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import NoFormsPanel from '@/src/components/dashboard/Pannels/NoFormsPanel';
 import ServiceFormsNoButtonsPanel from '@/src/components/dashboard/Pannels/ServiceFormsNoButtonsPanel';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import {
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 interface Props {
 	product: ProductWithForms;
@@ -56,17 +41,22 @@ const ProductButtonsPage = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const router = useRouter();
 
-	const { data: reviewsCountData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getCountsByForm.useQuery({
-			product_id: product.id
-		});
+	const { data: reviewsCountData } = trpc.review.getCountsByForm.useQuery({
+		product_id: product.id
+	});
 
-	const totalReviews = reviewsCountData?.totalCount ?? 0;
-	const nbNewReviews = reviewsCountData?.newCount ?? 0;
-	const getFormReviewCount = (formId: number) =>
-		reviewsCountData?.countsByForm[formId.toString()] ?? 0;
-	const getFormNewReviewCount = (formId: number) =>
-		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
+	const getFormReviewCount = (formId: number, legacy: boolean) =>
+		legacy
+			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
+				(reviewsCountData?.countsByForm['1'] ?? 0) +
+				(reviewsCountData?.countsByForm['2'] ?? 0)
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
+		legacy
+			? (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0) +
+				(reviewsCountData?.newCountsByForm['1'] ?? 0) +
+				(reviewsCountData?.newCountsByForm['2'] ?? 0)
+			: (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0);
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
@@ -159,14 +149,17 @@ const ProductButtonsPage = (props: Props) => {
 													Réponses déposées
 												</span>
 												<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
-													{formatNumberWithSpaces(getFormReviewCount(form.id))}
+													{formatNumberWithSpaces(
+														getFormReviewCount(form.id, form.legacy)
+													)}
 												</span>
-												{getFormNewReviewCount(form.id) > 0 && (
+												{getFormNewReviewCount(form.id, form.legacy) > 0 && (
 													<Badge severity="success" noIcon small>
-														{getFormNewReviewCount(form.id)} NOUVELLES RÉPONSES
+														{getFormNewReviewCount(form.id, form.legacy)}{' '}
+														NOUVELLES RÉPONSES
 													</Badge>
 												)}
-												{getFormReviewCount(form.id) > 0 && (
+												{getFormReviewCount(form.id, form.legacy) > 0 && (
 													<Link
 														href={`/administration/dashboard/product/${product.id}/reviews`}
 														title={`Voir les avis pour ${product.title}`}
