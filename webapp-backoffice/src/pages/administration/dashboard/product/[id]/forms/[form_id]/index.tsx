@@ -82,9 +82,14 @@ const ProductFormPage = (props: Props) => {
 			</Link>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h1 className={fr.cx('fr-mb-0')}>
-						{form.title || form.form_template.title}
-					</h1>
+					<h1>{form.title || form.form_template.title}</h1>
+					{form.product.isTop250 && (
+						<p className={fr.cx('fr-mb-0')}>
+							Ce service est référencé comme démarche essentielle dans
+							l’Observatoire des démarches essentielles. Le formulaire ne peut
+							être modifié.
+						</p>
+					)}
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
 					<p className={fr.cx('fr-mb-0')}>

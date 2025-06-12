@@ -87,7 +87,7 @@ const ProductButtonsPage = (props: Props) => {
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 						</div>
 						<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
-							{ownRight === 'carrier_admin' && (
+							{ownRight === 'carrier_admin' && !product.isTop250 && (
 								<Button priority="secondary" onClick={new_form_modal.open}>
 									Créer un nouveau formulaire
 									<span
