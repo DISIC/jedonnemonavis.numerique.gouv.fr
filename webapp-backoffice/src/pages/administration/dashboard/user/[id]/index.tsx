@@ -44,7 +44,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		!currentUserToken ||
 		(currentUserToken.exp as number) < new Date().getTime() / 1000
 	) {
-		console.log("couldn't find token");
 		await prisma.$disconnect();
 		return {
 			redirect: {
@@ -54,8 +53,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	console.log('token : ', currentUserToken);
-
 	const currentUser = await prisma.user.findUnique({
 		where: {
 			email: currentUserToken.email as string
@@ -63,7 +60,6 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	});
 
 	if (!currentUser) {
-		console.log("couldn't find current user");
 		await prisma.$disconnect();
 		return {
 			redirect: {

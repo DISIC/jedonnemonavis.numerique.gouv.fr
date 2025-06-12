@@ -1,43 +1,23 @@
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
-import { getIntentionFromAverage } from '@/src/utils/stats';
-import {
-	formatDateToFrenchString,
-	formatNumberWithSpaces,
-	getColorFromIntention,
-	getReadableValue
-} from '@/src/utils/tools';
+import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Menu, MenuItem, Skeleton } from '@mui/material';
-import { AnswerIntention, Entity } from '@prisma/client';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
-import router from 'next/router';
-import { tss } from 'tss-react/dsfr';
-import NoButtonsPanel from '../Pannels/NoButtonsPanel';
-import NoReviewsPanel from '../Pannels/NoReviewsPanel';
-import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import OnConfirmModal from '../../ui/modal/OnConfirm';
-import React, { useState } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Toast } from '../../ui/Toast';
+import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { AnswerIntention, Entity } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
+import Link from 'next/link';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { tss } from 'tss-react/dsfr';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
+import { Toast } from '../../ui/Toast';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
-import { push } from '@socialgouv/matomo-next';
 import NoFormsPanel from '../Pannels/NoFormsPanel';
-
-interface Indicator {
-	title: string;
-	slug: string;
-	total: number;
-	value: number;
-	color: 'new' | 'success' | 'error' | 'info';
-	appreciation: AnswerIntention;
-}
 
 interface CreateModalProps {
 	buttonProps: {
@@ -64,8 +44,7 @@ const ProductCard = ({
 	isFavorite,
 	showFavoriteButton,
 	onRestoreProduct,
-	onDeleteProduct,
-	onDeleteEssential
+	onDeleteProduct
 }: {
 	product: ProductWithForms;
 	userId: number;
@@ -74,7 +53,6 @@ const ProductCard = ({
 	showFavoriteButton: boolean;
 	onRestoreProduct: () => void;
 	onDeleteProduct: () => void;
-	onDeleteEssential: () => void;
 }) => {
 	const [onConfirmModalRestore, setOnConfirmModalRestore] =
 		useState<CreateModalProps | null>(null);
@@ -85,21 +63,10 @@ const ProductCard = ({
 	const [validateDelete, setValidateDelete] = useState(false);
 
 	const utils = trpc.useUtils();
-	const { data: session } = useSession();
 	const { classes, cx } = useStyles();
-
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const menuOpen = Boolean(anchorEl);
-	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		event.preventDefault();
-		event.stopPropagation();
-		setAnchorEl(event.currentTarget);
-		push(['trackEvent', 'BO - Product', `Open-Menu`]);
-	};
 
 	const {
 		control,
-		register,
 		setError,
 		clearErrors,
 		formState: { errors }
@@ -124,53 +91,6 @@ const ProductCard = ({
 		}
 	};
 
-	const handleClose = (
-		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
-	) => {
-		event.preventDefault();
-		event.stopPropagation();
-		setAnchorEl(null);
-	};
-
-	const {
-		data: resultStatsObservatoire,
-		isLoading: isLoadingStatsObservatoire,
-		isRefetching: isRefetchingStatsObservatoire
-	} = trpc.answer.getObservatoireStats.useQuery(
-		{
-			product_id: product.id.toString(),
-			start_date: new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-				.toISOString()
-				.split('T')[0],
-			end_date: new Date().toISOString().split('T')[0]
-		},
-		{
-			trpc: {
-				context: {
-					skipBatch: true
-				}
-			},
-			initialData: {
-				data: {
-					satisfaction: 0,
-					comprehension: 0,
-					contact: 0,
-					contact_reachability: 0,
-					contact_satisfaction: 0,
-					autonomy: 0
-				},
-				metadata: {
-					satisfaction_count: 0,
-					comprehension_count: 0,
-					contact_count: 0,
-					contactReachability_count: 0,
-					contactSatisfaction_count: 0,
-					autonomy_count: 0
-				}
-			}
-		}
-	);
-
 	const archiveProduct = trpc.product.archive.useMutation({
 		onSuccess: () => {
 			utils.product.getList.invalidate({});
@@ -191,7 +111,6 @@ const ProductCard = ({
 		});
 
 	const totalReviews = reviewsCountData?.totalCount ?? 0;
-	const nbNewReviews = reviewsCountData?.newCount ?? 0;
 	const getFormReviewCount = (formId: number) =>
 		reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 	const getFormNewReviewCount = (formId: number) =>
@@ -210,72 +129,6 @@ const ProductCard = ({
 			utils.favorite.getByUser.invalidate({ user_id: result.data.user_id });
 		}
 	});
-
-	const diplayAppreciation = (appreciation: AnswerIntention, slug: string) => {
-		switch (appreciation) {
-			case 'bad':
-				return slug === 'contact' ? 'Faible' : 'Mauvais';
-			case 'medium':
-				return 'Moyen';
-			case 'good':
-				return slug === 'contact' ? 'Optimal' : 'Bien';
-		}
-	};
-
-	const { satisfaction, comprehension, contact, autonomy } =
-		resultStatsObservatoire.data;
-
-	const indicators: Indicator[] = [
-		{
-			title: 'Satisfaction',
-			slug: 'satisfaction',
-			total: resultStatsObservatoire.metadata.satisfaction_count,
-			value: Math.round(satisfaction * 10) / 10 || 0,
-			color:
-				satisfaction !== -1
-					? getColorFromIntention(getIntentionFromAverage(satisfaction || 0))
-					: 'info',
-			appreciation: getIntentionFromAverage(satisfaction || 0)
-		},
-		{
-			title: 'Simplicité du langage',
-			slug: 'comprehension',
-			value: Math.round(comprehension * 10) / 10 || 0,
-			total: resultStatsObservatoire.metadata.comprehension_count,
-			color:
-				comprehension !== -1
-					? getColorFromIntention(getIntentionFromAverage(comprehension || 0))
-					: 'info',
-			appreciation: getIntentionFromAverage(comprehension || 0)
-		},
-		{
-			title: 'Aide joignable et efficace',
-			slug: 'contact',
-			total: resultStatsObservatoire.metadata.contact_count,
-			value: Math.round(contact * 1000) / 100 || 0,
-			color:
-				contact !== -1
-					? getColorFromIntention(
-							getIntentionFromAverage(contact || 0, 'contact')
-						)
-					: 'info',
-			appreciation: getIntentionFromAverage(contact || 0, 'contact')
-		}
-	];
-
-	const handleButtonClick = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${product.id}/forms`,
-			query: { autoCreate: true }
-		});
-	};
-
-	const handleSendInvitation = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${product.id}/access`,
-			query: { autoInvite: true }
-		});
-	};
 
 	React.useEffect(() => {
 		if (product) {
@@ -298,9 +151,6 @@ const ProductCard = ({
 	if (!onConfirmModalRestore || !onConfirmModalArchive) return;
 
 	const isDisabled = product.status === 'archived';
-	const productLink = isDisabled
-		? ''
-		: `/administration/dashboard/product/${product.id}/stats`;
 
 	return (
 		<>
@@ -599,162 +449,6 @@ const ProductCard = ({
 									)}
 								</div>
 							)}
-							{/* <div
-								className={cx(
-									fr.cx('fr-col', 'fr-col-12', 'fr-pt-0'),
-									classes.statsSection
-								)}
-							>
-								{isLoadingStatsObservatoire ||
-								isRefetchingStatsObservatoire ? (
-									<Skeleton
-										className={cx(classes.cardSkeleton)}
-										variant="text"
-										width={'full'}
-										height={50}
-									/>
-								) : (product.forms[0]?.buttons.length > 0 &&
-										nbReviews &&
-										nbReviews > 0) ||
-									session?.user.role.includes('admin') ? (
-									<div
-										className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}
-									>
-										{indicators.map((indicator, index) => (
-											<div
-												className={fr.cx(
-													'fr-col',
-													'fr-col-12',
-													'fr-col-sm-6',
-													'fr-col-md-3'
-												)}
-												key={index}
-											>
-												<p
-													className={fr.cx(
-														'fr-text--xs',
-														'fr-mb-0',
-														'fr-hint-text'
-													)}
-												>
-													{indicator.title}
-												</p>
-												{isLoadingStatsObservatoire ? (
-													<Skeleton
-														className={cx(classes.badgeSkeleton)}
-														variant="text"
-														width={130}
-														height={25}
-													/>
-												) : (
-													<p
-														className={cx(
-															fr.cx(
-																!(
-																	!!indicator.total &&
-																	indicator.color !== 'new'
-																) && 'fr-label--disabled',
-																'fr-text--bold'
-															),
-															classes.indicatorText,
-															!!indicator.total && classes[indicator.color]
-														)}
-													>
-														{!!indicator.total
-															? `${diplayAppreciation(indicator.appreciation, indicator.slug)} ${getReadableValue(indicator.value)}${indicator.slug === 'contact' ? '%' : '/10'}`
-															: 'Aucune donnée'}
-													</p>
-												)}
-											</div>
-										))}
-										{!isLoadingReviewsCount && nbReviews !== undefined && (
-											<div
-												className={fr.cx(
-													'fr-col',
-													'fr-col-12',
-													'fr-col-sm-6',
-													'fr-col-md-3'
-												)}
-											>
-												<div
-													className={fr.cx(
-														'fr-grid-row',
-														'fr-grid-row--gutters'
-													)}
-												>
-													<div className={fr.cx('fr-col-12')}>
-														<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-															Nombre d'avis
-														</p>
-													</div>
-												</div>
-												<div
-													className={fr.cx(
-														'fr-grid-row',
-														'fr-grid-row--gutters'
-													)}
-												>
-													<div
-														className={cx(
-															fr.cx('fr-col-12', 'fr-col-xl-4', 'fr-pt-0')
-														)}
-													>
-														<div
-															className={fr.cx(
-																'fr-label--info',
-																'fr-text--bold',
-																'fr-pt-0-5v'
-															)}
-														>
-															{formatNumberWithSpaces(nbReviews)}
-														</div>
-													</div>
-													<div
-														className={cx(
-															classes.reviewWrapper,
-															fr.cx('fr-col-12', 'fr-col-xl-8', 'fr-pt-0')
-														)}
-													>
-														<div className={fr.cx('fr-label--info')}>
-															{nbNewReviews !== undefined &&
-																nbNewReviews > 0 && (
-																	<>
-																		<span
-																			title={`${nbNewReviews <= 9 ? nbNewReviews : 'Plus de 9'} ${nbNewReviews === 1 ? 'nouvel' : 'nouveaux'} avis pour ${product.title}`}
-																		>
-																			<Badge
-																				severity="new"
-																				className={fr.cx('fr-mr-4v')}
-																			>
-																				{`${nbNewReviews <= 9 ? `${nbNewReviews}` : '9+'}`}
-																			</Badge>
-																		</span>
-																	</>
-																)}
-														</div>
-														{nbReviews > 0 && (
-															<Link
-																href={`/administration/dashboard/product/${product.id}/reviews`}
-																title={`Voir les avis pour ${product.title}`}
-																className={fr.cx('fr-link')}
-															>
-																Voir les avis
-															</Link>
-														)}
-													</div>
-												</div>
-											</div>
-										)}
-									</div>
-								) : product.forms[0]?.buttons.length === 0 ? (
-									<NoButtonsPanel onButtonClick={handleButtonClick} />
-								) : (
-									<NoReviewsPanel
-										improveBtnClick={() => {}}
-										sendInvitationBtnClick={handleSendInvitation}
-									/>
-								)}
-							</div> */}
 						</>
 					)}
 				</div>
@@ -766,7 +460,7 @@ const ProductCard = ({
 const useStyles = tss.withName(ProductCard.name).create({
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
-			'.rightButtonsWrapper': {
+			'.buttonsWrapper': {
 				order: 0
 			},
 			'.titleSection': {
@@ -790,22 +484,12 @@ const useStyles = tss.withName(ProductCard.name).create({
 		alignItems: 'center',
 		justifyContent: 'end'
 	},
-	statsSection: {},
-	rightButtonsWrapper: {
-		display: 'flex',
-		justifyContent: 'end'
-	},
 	buttonWrapper: {
 		maxHeight: '32px !important',
 		'&::before': {
 			marginRight: '0 !important'
 		}
 	},
-	badgeSkeleton: {
-		transformOrigin: '0',
-		transform: 'none'
-	},
-	cardSkeleton: {},
 	productLink: {
 		backgroundImage: 'none',
 		'&:hover': {
@@ -827,38 +511,13 @@ const useStyles = tss.withName(ProductCard.name).create({
 			textDecoration: 'underline'
 		}
 	},
-	menuItem: {
-		color: fr.colors.decisions.text.title.blueFrance.default
-	},
 	entityName: {
 		color: '#666666'
-	},
-	indicatorText: {
-		marginBottom: 0
-	},
-	disabled: {
-		cursor: 'default',
-		'.fr-card': {
-			backgroundColor: fr.colors.decisions.background.disabled.grey.default
-		},
-		a: {
-			color: fr.colors.decisions.text.default.grey.default,
-			pointerEvents: 'none',
-			cursor: 'default',
-			textDecoration: 'none'
-		}
 	},
 	badgesContainer: {
 		display: 'flex',
 		gap: fr.spacing('2v'),
 		marginRight: '1rem'
-	},
-	reviewWrapper: {
-		display: 'flex',
-		justifyContent: 'flex-end',
-		[fr.breakpoints.down('xl')]: {
-			justifyContent: 'flex-start'
-		}
 	},
 	formCard: {
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
@@ -891,36 +550,11 @@ const useStyles = tss.withName(ProductCard.name).create({
 		color: fr.colors.decisions.text.default.grey.default,
 		fontSize: '0.8rem'
 	},
-	notifSpan: {
-		display: 'block',
-		backgroundColor: fr.colors.decisions.background.flat.redMarianne.default,
-		color: fr.colors.decisions.background.default.grey.default,
-		borderRadius: '50%',
-		height: '1.4rem',
-		width: '1.4rem',
-		fontSize: '0.8rem',
-		textAlign: 'center'
-	},
-	menuItemDanger: {
-		color: fr.colors.decisions.text.default.error.default
-	},
 	buttonsCol: {
 		textAlign: 'right'
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
-	},
-	info: {
-		color: fr.colors.decisions.text.default.info.default
-	},
-	error: {
-		color: fr.colors.decisions.text.default.error.default
-	},
-	new: {
-		color: fr.colors.decisions.background.flat.yellowTournesol.default
-	},
-	success: {
-		color: fr.colors.decisions.text.default.success.default
 	}
 });
 

@@ -61,42 +61,44 @@ const ReviewFiltersModal = (props: Props) => {
 		>
 			<div className={fr.cx('fr-mt-4w')}>
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
-				{['good', 'medium', 'bad'].map(intention => (
-					<Button
-						onClick={() => {
-							setTmpFilters({
-								...tmpFilters,
-								satisfaction: tmpFilters.satisfaction.includes(intention)
-									? tmpFilters.satisfaction.filter(item => item !== intention)
-									: [...tmpFilters.satisfaction, intention]
-							});
-							push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
-						}}
-						priority="tertiary"
-						className={cx(
-							classes.badge,
-							tmpFilters.satisfaction.includes(intention)
-								? classes.selectedOption
-								: undefined
-						)}
-						key={`satisfaction_${intention}`}
-						style={{
-							color: getStatsColor({
-								intention: (intention ?? 'neutral') as AnswerIntention
-							})
-						}}
-					>
-						<Image
-							alt=""
-							src={`/assets/smileys/${getStatsIcon({
-								intention: (intention ?? 'neutral') as AnswerIntention
-							})}.svg`}
-							width={15}
-							height={15}
-						/>
-						{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-					</Button>
-				))}
+				<div className={classes.badgeContainer}>
+					{['good', 'medium', 'bad'].map(intention => (
+						<Button
+							onClick={() => {
+								setTmpFilters({
+									...tmpFilters,
+									satisfaction: tmpFilters.satisfaction.includes(intention)
+										? tmpFilters.satisfaction.filter(item => item !== intention)
+										: [...tmpFilters.satisfaction, intention]
+								});
+								push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
+							}}
+							priority="tertiary"
+							className={cx(
+								classes.badge,
+								tmpFilters.satisfaction.includes(intention)
+									? classes.selectedOption
+									: undefined
+							)}
+							key={`satisfaction_${intention}`}
+							style={{
+								color: getStatsColor({
+									intention: (intention ?? 'neutral') as AnswerIntention
+								})
+							}}
+						>
+							<Image
+								alt=""
+								src={`/assets/smileys/${getStatsIcon({
+									intention: (intention ?? 'neutral') as AnswerIntention
+								})}.svg`}
+								width={15}
+								height={15}
+							/>
+							{displayIntention((intention ?? 'neutral') as AnswerIntention)}
+						</Button>
+					))}
+				</div>
 			</div>
 
 			<div className={fr.cx('fr-mt-4w')}>
@@ -195,7 +197,6 @@ const ReviewFiltersModal = (props: Props) => {
 			<div
 				className={fr.cx(
 					'fr-grid-row',
-					'fr-grid-row--gutters',
 					'fr-grid-row--left',
 					'fr-mt-4w'
 				)}
@@ -277,7 +278,14 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		padding: 0,
 		margin: 0,
 		listStyle: 'none',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column-reverse',
+			button: {
+				width: '100%',
+				justifyContent: 'center',
+			},
+		}
 	},
 	iconError: {
 		color: fr.colors.decisions.text.default.error.default
@@ -287,10 +295,20 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		marginBottom: 10,
 		fontWeight: 'bold'
 	},
+	badgeContainer: {
+		display: 'flex',
+		gap:10,
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'space-between',
+		}
+	},
 	badge: {
-		marginRight: 10,
+		justifyContent: 'center',
 		cursor: 'pointer',
-		gap: '0.25rem'
+		gap: '0.25rem',
+		[fr.breakpoints.down('md')]: {
+			flex: '1 1 100%',
+		}
 	},
 	selectedOption: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
@@ -325,7 +343,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 				overflow: 'hidden',
 				[fr.breakpoints.down('md')]: {
 					columns: 'auto',
-					width: '100%'
+					width: '100%',
+					margin: 0
 				},
 				li: {
 					label: {

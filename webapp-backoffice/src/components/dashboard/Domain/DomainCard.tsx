@@ -38,8 +38,8 @@ const DomainCard = ({ domain, setCurrentDomain }: Props) => {
 						size="small"
 						title="Supprimer le domaine"
 						onClick={() => setCurrentDomain({ ...domain, type: 'on-confirm' })}
-						className={cx(fr.cx('fr-mr-5v'), classes.errorColor)}
-					/>
+						className={cx(fr.cx('fr-mr-md-5v'), classes.deleteButton)}
+					>Supprimer</Button>
 				</div>
 			</div>
 		</div>
@@ -50,8 +50,12 @@ const useStyles = tss.withName(DomainCard.name).create(() => ({
 	spanDomainName: {
 		fontWeight: 'bold'
 	},
-	errorColor: {
-		color: fr.colors.decisions.text.default.error.default
+	deleteButton: {
+		color: fr.colors.decisions.text.default.error.default,
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'center',
+			width: '100%'
+		}
 	},
 	wrapperButtons: {
 		display: 'flex',

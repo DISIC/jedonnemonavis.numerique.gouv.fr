@@ -10,14 +10,18 @@ import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { getSiretInfo } from '@/src/utils/queries';
+import { generateRandomString } from '@/src/utils/tools';
 
 interface ProconnectProfile {
 	sub: string;
 	email: string;
 	given_name: string;
 	usual_name: string;
+	siret: string;
 	chorusdt?: string;
 	organizational_unit?: string;
+	idp_id?: string;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -26,11 +30,10 @@ export const authOptions: NextAuthOptions = {
 	pages: {
 		signIn: '/login',
 		signOut: '/login',
-		error: '/login' // Error code passed in query string as ?error=
+		error: '/login'
 	},
 	callbacks: {
 		async session({ session, token }) {
-			// Récupère les informations utilisateur en base de données
 			if (token.email) {
 				const user = await prisma.user.findUnique({
 					where: { email: token.email }
@@ -44,8 +47,6 @@ export const authOptions: NextAuthOptions = {
 						name: `${user.firstName} ${user.lastName}`,
 						email: user.email
 					};
-				} else {
-					console.log('❌ Utilisateur non trouvé en base');
 				}
 			}
 			return session;
@@ -88,30 +89,45 @@ export const authOptions: NextAuthOptions = {
 				});
 
 				if (!user) {
-					if (!proconnectProfile.organizational_unit) {
+					try {
+						const data = await getSiretInfo(proconnectProfile.siret);
+
+						const etablissement = data.etablissement;
+						const formeJuridique =
+							etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+
+						if (
+							formeJuridique.startsWith('7') ||
+							formeJuridique.startsWith('8')
+						) {
+							const salt = bcrypt.genSaltSync(10);
+							const newHashedPassword = bcrypt.hashSync(
+								generateRandomString(10),
+								salt
+							);
+
+							user = await prisma.user.create({
+								data: {
+									email,
+									firstName: proconnectProfile.given_name,
+									lastName: proconnectProfile.usual_name,
+									role: 'user',
+									password: newHashedPassword,
+									notifications: true,
+									notifications_frequency: 'weekly',
+									active: true,
+									xwiki_account: false,
+									xwiki_username: null,
+									proconnect_account: true
+								}
+							});
+						} else {
+							throw new Error('INVALID_PROVIDER');
+						}
+					} catch (err) {
+						console.error('❌ Erreur :', err);
 						throw new Error('INVALID_PROVIDER');
 					}
-
-					const salt = bcrypt.genSaltSync(10);
-					const newHashedPassword = bcrypt.hashSync('changeme', salt);
-
-					user = await prisma.user.create({
-						data: {
-							email,
-							firstName: proconnectProfile.given_name,
-							lastName: proconnectProfile.usual_name,
-							role: 'user',
-							password: newHashedPassword,
-							notifications: false,
-							notifications_frequency: 'daily',
-							active: true,
-							xwiki_account: false,
-							xwiki_username: null
-						}
-					});
-					console.log('✅ Utilisateur créé avec succès:', user);
-				} else {
-					console.log('🔄 Utilisateur déjà existant:', user);
 				}
 			}
 			return true;
@@ -119,9 +135,7 @@ export const authOptions: NextAuthOptions = {
 	},
 	providers: [
 		CredentialsProvider({
-			credentials: {
-				// You can leave this empty if you don't need any additional fields
-			},
+			credentials: {},
 			async authorize(credentials: Record<string, string> | undefined) {
 				if (!credentials) {
 					throw new Error('Missing credentials');
@@ -139,20 +153,17 @@ export const authOptions: NextAuthOptions = {
 				let isPasswordCorrect = false;
 
 				if (user.password.startsWith('$2b$')) {
-					// Check password with bcrypt
 					isPasswordCorrect = bcrypt.compareSync(password, user.password);
 				} else {
-					// Check password with crypto
 					const hashedPassword = crypto
 						.createHash('sha256')
 						.update(password)
 						.digest('hex');
 					isPasswordCorrect = hashedPassword === user.password;
 
-					//Swith to bcrypt with salt
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);
-					const updatedUser = await prisma.user.update({
+					await prisma.user.update({
 						where: {
 							id: user.id
 						},
@@ -166,7 +177,7 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
-				const logSignIn = await prisma.userEvent.create({
+				await prisma.userEvent.create({
 					data: {
 						user_id: user.id,
 						action: 'user_signin',
@@ -189,8 +200,7 @@ export const authOptions: NextAuthOptions = {
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
 				params: {
-					scope:
-						'openid email given_name usual_name phone siret siren belonging_population organizational_unit chorusdt'
+					scope: 'openid email given_name usual_name siret'
 				}
 			},
 			token: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/token`,
@@ -206,12 +216,12 @@ export const authOptions: NextAuthOptions = {
 						}
 					);
 
-					const responseText = await res.text(); // 🔥 On lit le body UNE SEULE FOIS
+					const responseText = await res.text();
 
 					let data: Record<string, any>;
 
 					try {
-						data = JSON.parse(responseText); // 🔍 On essaie de parser en JSON
+						data = JSON.parse(responseText);
 					} catch (error) {
 						data = (jwt.decode(responseText) as Record<string, any>) || {}; // 🔥 Décode JWT
 					}
@@ -237,7 +247,8 @@ export const authOptions: NextAuthOptions = {
 					notifications: false,
 					notifications_frequency: 'daily',
 					created_at: new Date(),
-					updated_at: new Date()
+					updated_at: new Date(),
+					proconnect_account: false
 				};
 			}
 		}

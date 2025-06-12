@@ -31,7 +31,7 @@ export const FormStepper = (props: Props) => {
   const { classes, cx } = useStyles();
 
   const formTemplateStep = product.form.form_template.form_template_steps.find(
-    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" }),
+    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" })
   );
 
   return (
@@ -39,13 +39,14 @@ export const FormStepper = (props: Props) => {
       <div>
         {steps.length > 1 && (
           <>
-            <h1 className={cx(classes.title, fr.cx("fr-mb-14v"))}>
+            <h1 className={cx(classes.title, fr.cx("fr-mb-12v"))}>
               {t(`${steps[currentStep].name}`)}
             </h1>
             <Stepper
               currentStep={currentStep + 1}
               stepCount={steps.length}
               title={t(`${steps[currentStep].name}`)}
+              className={fr.cx("fr-mb-12v")}
             />
           </>
         )}
@@ -77,6 +78,7 @@ export const FormStepper = (props: Props) => {
         <div className={cx(fr.cx("fr-mt-8v"), classes.buttonContainer)}>
           <Button
             priority="secondary"
+            className={classes.stepButton}
             iconId="fr-icon-arrow-left-line"
             iconPosition="left"
             type="button"
@@ -94,6 +96,7 @@ export const FormStepper = (props: Props) => {
               (router.query.iframe === "true" &&
                 t(steps[currentStep].name) === "Informations complémentaires")
             }
+            className={classes.stepButton}
           >
             {t(`${steps[currentStep].button}`)}
           </Button>
@@ -113,10 +116,25 @@ const useStyles = tss
       },
     },
     field: {
-      marginBottom: fr.spacing("14v"),
+      marginBottom: fr.spacing("12v"),
     },
     buttonContainer: {
       display: "flex",
-      justifyContent: "space-between",
+      flexDirection: "column-reverse",
+      gap: fr.spacing("4v"),
+      [fr.breakpoints.up("md")]: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      },
+    },
+    stepButton: {
+      width: "100%",
+      display: "flex",
+      justifyContent: "center",
+      ...fr.spacing("padding", { topBottom: "3v", rightLeft: "6v" }),
+      [fr.breakpoints.up("md")]: {
+        width: "initial",
+      },
     },
   }));

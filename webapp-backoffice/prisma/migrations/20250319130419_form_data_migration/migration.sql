@@ -17,7 +17,7 @@ BEGIN
 
   -- Create a form for each product if it doesn't already have one linked to the root template
   INSERT INTO "Form" (product_id, form_template_id, created_at, updated_at, legacy)
-  SELECT p.id, root_template_id, NOW(), NOW(), false
+  SELECT p.id, root_template_id, NOW(), NOW(), true
   FROM "Product" p
   WHERE NOT EXISTS (
     SELECT 1 

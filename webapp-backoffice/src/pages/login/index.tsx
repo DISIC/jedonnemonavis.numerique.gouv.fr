@@ -1,11 +1,10 @@
 import { LoginForm } from '@/src/components/auth/LoginForm';
-import { AlertObservatoire } from '@/src/components/ui/AlertObservatoire';
+import { ProconnectError } from '@/src/components/auth/ProConnectError';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import Head from 'next/head';
-import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
+import { tss } from 'tss-react/dsfr';
 
 export default function Login() {
 	const { classes, cx } = useStyles();
@@ -39,50 +38,20 @@ export default function Login() {
 							)
 						)}
 					>
-						{error === 'INVALID_PROVIDER' ? (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-col-md-8',
-									'fr-px-4v',
-									'fr-px-md-0'
-								)}
-							>
-								<Image
-									src="/assets/technical-error.svg"
-									alt="Accès interdit"
-									width={120}
-									height={120}
-									className={fr.cx('fr-col-12', 'fr-col-md-6')}
-								/>
-								<p
-									className={cx(
-										classes.textLead,
-										fr.cx('fr-text--bold', 'fr-mb-12v', 'fr-mt-8v')
-									)}
-								>
-									Vous ne pouvez pas utiliser ProConnect pour vous connecter à
-									Je donne mon avis
-								</p>
-								<p>Veuillez vérifier que votre compte ProConnect est validé.</p>
-								<p>
-									Je donne mon avis est réservé aux agents publics. Votre compte
-									ProConnect doit obligatoirement être associé à une entité
-									publique.
-								</p>
-							</div>
-						) : (
-							<div
-								className={fr.cx(
-									'fr-col-12',
-									'fr-col-md-8',
-									'fr-px-4v',
-									'fr-px-md-0'
-								)}
-							>
+						<div
+							className={fr.cx(
+								'fr-col-12',
+								'fr-col-md-8',
+								'fr-px-4v',
+								'fr-px-md-0'
+							)}
+						>
+							{error === 'INVALID_PROVIDER' ? (
+								<ProconnectError />
+							) : (
 								<LoginForm />
-							</div>
-						)}
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
@@ -95,15 +64,6 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		formContainer: {
-			backgroundColor: fr.colors.decisions.background.alt.grey.default,
-			[fr.breakpoints.down('md')]: {
-				marginLeft: `-${fr.spacing('4v')}`,
-				marginRight: `-${fr.spacing('4v')}`
-			}
-		},
-		textLead: {
-			textAlign: 'center',
-			fontSize: 20,
-			fontWeight: 700
+			backgroundColor: fr.colors.decisions.background.alt.grey.default
 		}
 	}));

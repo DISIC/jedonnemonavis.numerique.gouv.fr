@@ -60,6 +60,9 @@ export const LoginForm = () => {
 						query: { email: credentials.email }
 					});
 					break;
+				case 203:
+					signIn('openid');
+					break;
 				case 200:
 					setShowPassword(true);
 					break;

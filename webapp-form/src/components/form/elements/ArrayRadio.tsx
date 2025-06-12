@@ -43,116 +43,14 @@ export const ArrayRadio = (props: Props) => {
       <>
         {containsPattern(
           opinion.contact_reached,
-          new RegExp(escapeRegex("".toString()) + "_17"),
+          new RegExp(escapeRegex("".toString()) + "_17")
         ) ? (
           <>
             <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
-              <div className={fr.cx("fr-col-12")}></div>
-              <table
-                className={cx(fr.cx("fr-table"), classes.mainTable)}
-                cellSpacing={1}
-                cellPadding={1}
-              >
-                <caption>
-                  <h3>{t(field.label)}</h3>
-                </caption>
-                <thead className={cx(classes.bgWhite)}>
-                  <tr>
-                    <th />
-                    {field.options.map((option, index) => (
-                      <th
-                        key={`theader-${index}`}
-                        scope="col"
-                        className={cx(classes.headerLabels)}
-                      >
-                        {t(option.label)}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className={cx(classes.bgWhite)}>
-                  {"options" in form[0] &&
-                    form[0].options &&
-                    form[0].options.map(
-                      (option: RadioOption, index: number) => (
-                        <tr
-                          className={cx(classes.optionRow)}
-                          key={option.value}
-                        >
-                          {(field.needed.includes(option.value) ||
-                            (opinion.contact_tried.includes(option.value) &&
-                              !field.excluded.includes(option.value))) && (
-                            <>
-                              {containsPattern(
-                                opinion.contact_reached,
-                                new RegExp(
-                                  escapeRegex(option.value.toString()) + "_17",
-                                ),
-                              ) && (
-                                <>
-                                  <td>
-                                    <label className={cx(classes.label)}>
-                                      {getFirstTwoWords(t(option.label))}
-                                    </label>
-                                  </td>
-                                  <td
-                                    className={cx(classes.radioWrapper)}
-                                    colSpan={6}
-                                  >
-                                    <div className={cx(classes.containerRadio)}>
-                                      <RadioButtons
-                                        name={`radio-${index}`}
-                                        options={field.options.map(
-                                          (opt, index) => ({
-                                            label: `${getFirstTwoWords(t(option.label))}, ${t(field.options[index].label)}`,
-                                            nativeInputProps: {
-                                              value: `value${index}`,
-                                              checked:
-                                                opinion.contact_satisfaction.includes(
-                                                  escapeRegex(
-                                                    option.value.toString(),
-                                                  ) +
-                                                    "_" +
-                                                    opt.value,
-                                                ),
-                                              onChange: (event) => {
-                                                setOpinion({
-                                                  ...opinion,
-                                                  contact_satisfaction: [
-                                                    ...opinion.contact_satisfaction.filter(
-                                                      (cs) =>
-                                                        !cs.includes(
-                                                          escapeRegex(
-                                                            option.value.toString(),
-                                                          ),
-                                                        ),
-                                                    ),
-                                                    escapeRegex(
-                                                      option.value.toString(),
-                                                    ) +
-                                                      "_" +
-                                                      opt.value,
-                                                  ],
-                                                });
-                                              },
-                                            },
-                                          }),
-                                        )}
-                                        orientation="horizontal"
-                                      />
-                                    </div>
-                                  </td>
-                                </>
-                              )}
-                            </>
-                          )}
-                        </tr>
-                      ),
-                    )}
-                </tbody>
-              </table>
-              <div className={cx(classes.mobileReviews)}>
+              <div className={cx(classes.reviews)}>
                 <h3>{t(field.label)}</h3>
+                <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
+
                 {"options" in form[0] &&
                   form[0].options &&
                   form[0].options.map(
@@ -164,8 +62,8 @@ export const ArrayRadio = (props: Props) => {
                           containsPattern(
                             opinion.contact_reached,
                             new RegExp(
-                              escapeRegex(option.value.toString()) + "_17",
-                            ),
+                              escapeRegex(option.value.toString()) + "_17"
+                            )
                           ) && (
                             <>
                               <div className={cx(classes.labelWrapper)}>
@@ -187,7 +85,7 @@ export const ArrayRadio = (props: Props) => {
                                       checked={opinion.contact_satisfaction.includes(
                                         escapeRegex(option.value.toString()) +
                                           "_" +
-                                          opt.value,
+                                          opt.value
                                       )}
                                       onChange={(event) => {
                                         setOpinion({
@@ -197,17 +95,43 @@ export const ArrayRadio = (props: Props) => {
                                               (cs) =>
                                                 !cs.includes(
                                                   escapeRegex(
-                                                    option.value.toString(),
-                                                  ),
-                                                ),
+                                                    option.value.toString()
+                                                  )
+                                                )
                                             ),
                                             escapeRegex(
-                                              option.value.toString(),
+                                              option.value.toString()
                                             ) +
                                               "_" +
                                               opt.value,
                                           ],
                                         });
+                                      }}
+                                      onClick={() => {
+                                        // if the value is already selected, remove it
+                                        if (
+                                          opinion.contact_satisfaction.includes(
+                                            escapeRegex(
+                                              option.value.toString()
+                                            ) +
+                                              "_" +
+                                              opt.value
+                                          )
+                                        ) {
+                                          setOpinion({
+                                            ...opinion,
+                                            contact_satisfaction:
+                                              opinion.contact_satisfaction.filter(
+                                                (cs) =>
+                                                  cs !==
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  ) +
+                                                    "_" +
+                                                    opt.value
+                                              ),
+                                          });
+                                        }
                                       }}
                                     />
                                     <label
@@ -222,7 +146,7 @@ export const ArrayRadio = (props: Props) => {
                             </>
                           )}
                       </div>
-                    ),
+                    )
                   )}
               </div>
             </div>
@@ -243,11 +167,9 @@ const useStyles = tss
       fontSize: "0.8rem",
       color: fr.colors.decisions.text.disabled.grey.default,
     },
-
     bgWhite: {
       background: "white !important",
     },
-
     headerLabels: {
       fontWeight: "normal !important",
       ...fr.typography[17].style,
@@ -256,12 +178,9 @@ const useStyles = tss
       },
     },
     labelWrapper: {
-      [fr.breakpoints.down("sm")]: {
-        padding: "1rem 0",
-      },
+      paddingBottom: fr.spacing("4v"),
     },
     label: {
-      fontWeight: "bold",
       ...fr.typography[19].style,
     },
     radioWrapper: {
@@ -302,6 +221,8 @@ const useStyles = tss
     reviewContainer: {
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+        backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+        color: "white",
       },
       [".fr-radio-group input[type=radio] + label::before"]: {
         content: "none",
@@ -317,21 +238,24 @@ const useStyles = tss
     optionRow: {
       background: "white !important",
     },
-    mobileReviews: {
-      display: "none",
-      [fr.breakpoints.down("sm")]: {
-        display: "block",
-      },
+    reviews: {
       ul: {
         display: "flex",
-        overflowX: "auto",
+        flexDirection: "row",
         flexWrap: "wrap",
-        gap: "1rem",
         listStyle: "none",
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
+        marginBottom: fr.spacing("6v"),
         paddingLeft: 0,
         li: {
+          flex: 1,
+          paddingBottom: 0,
+          marginBottom: fr.spacing("3v"),
+
           minWidth: "100%",
+          ":last-child": {
+            marginBottom: 0,
+          },
           input: {
             position: "absolute",
             opacity: 0,
@@ -341,6 +265,17 @@ const useStyles = tss
         },
         "::-webkit-scrollbar": {
           display: "none",
+        },
+        [fr.breakpoints.up("md")]: {
+          flexWrap: "nowrap",
+          li: {
+            minWidth: "initial",
+            marginBottom: 0,
+            marginRight: fr.spacing("3v"),
+            ":last-child": {
+              marginRight: 0,
+            },
+          },
         },
       },
     },
@@ -369,9 +304,15 @@ const useStyles = tss
     },
     reviewInputLabel: {
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      padding: fr.spacing("3v"),
+      ...fr.spacing("padding", { topBottom: "2v", rightLeft: "4v" }),
       display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
       cursor: "pointer",
+      height: "100%",
+      fontWeight: 500,
+      color: fr.colors.decisions.background.flat.blueFrance.default,
       ["&:hover"]: {
         borderColor: fr.colors.decisions.background.alt.grey.active,
       },

@@ -70,6 +70,12 @@ const ReviewsTab = (props: Props) => {
 
 	const { filters, updateFilters } = useFilters();
 
+	const [initialDateState, setInitialDateState] = React.useState({
+		startDate: filters.sharedFilters.currentStartDate,
+		endDate: filters.sharedFilters.currentEndDate,
+		dateShortcut: filters.sharedFilters.dateShortcut
+	});
+
 	const handleSubmitfilters = (filtersT: ReviewFiltersType) => {
 		updateFilters({
 			...filters,

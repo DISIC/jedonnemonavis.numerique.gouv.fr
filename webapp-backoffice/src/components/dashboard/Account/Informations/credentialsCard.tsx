@@ -174,7 +174,10 @@ const CredentialsCard = (props: Props) => {
 							<div className={fr.cx('fr-col-12', 'fr-text--bold')}>
 								Adresse e-mail
 							</div>
-							<div className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}>
+							<div
+								className={fr.cx('fr-col-12', 'fr-pt-0', 'fr-mb-4v')}
+								style={{ wordBreak: 'break-all' }}
+							>
 								{user.email}
 							</div>
 						</div>
@@ -224,7 +227,7 @@ const CredentialsCard = (props: Props) => {
 								'fr-grid-row--middle'
 							)}
 						>
-							<div className={fr.cx('fr-col-md-6')}>
+							<div className={cx(fr.cx('fr-col-md-6'), classes.formContainer)}>
 								<form id="credentials-form">
 									<div className={fr.cx('fr-input-group')}>
 										<Input
@@ -308,7 +311,7 @@ const CredentialsCard = (props: Props) => {
 							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
 								Mot de passe
 							</div>
-							<div className={fr.cx('fr-col-md-12', 'fr-pt-0')}>
+							<div className={cx(fr.cx('fr-col-md-12', 'fr-pt-0'), classes.buttonContainer)}>
 								<Button
 									priority="secondary"
 									onClick={() => {
@@ -320,6 +323,7 @@ const CredentialsCard = (props: Props) => {
 											`Credentials-Modal-Open`
 										]);
 									}}
+									className={classes.buttonContainer}
 								>
 									Réinitialiser le mot de passe
 								</Button>
@@ -333,9 +337,16 @@ const CredentialsCard = (props: Props) => {
 };
 
 const useStyles = tss.withName(CredentialsCard.name).create(() => ({
-	actionContainer: {
-		display: 'flex',
-		justifyContent: 'flex-end'
+	formContainer: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%'
+		}
+	},
+	buttonContainer: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center',
+		}
 	}
 }));
 

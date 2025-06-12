@@ -1,6 +1,6 @@
 import UserRequestCard from '@/src/components/dashboard/UserRequest/UserRequestCard';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { UserRequestWithUser } from '@/src/types/prismaTypesExtended';
 import { extractDomainFromEmail, getNbPages } from '@/src/utils/tools';
@@ -289,30 +289,24 @@ const DashBoardUserRequestUserRequests = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-							{nbPages > 1 && (
-								<span className={fr.cx('fr-ml-0')}>
-									UserRequestes de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + userRequests.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{userrequestsResult.metadata.count}
-									</span>
-								</span>
-							)}
-						</div>
+						{nbPages > 1 && (
+							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+								<PageItemsCounter
+									label="Demandes d’accès"
+									startItemCount={numberPerPage * (currentPage - 1) + 1}
+									endItemCount={
+										numberPerPage * (currentPage - 1) + userRequests.length
+									}
+									totalItemsCount={userrequestsResult.metadata.count}
+								/>
+							</div>
+						)}
 						<div
 							className={cx(
 								userRequests.length === 0 ? classes.userrequestsContainer : ''
 							)}
 						>
-							<div className={fr.cx('fr-mt-2v')}>
+							<div className={fr.cx('fr-mt-2v', 'fr-hidden', 'fr-unhidden-md')}>
 								<div
 									className={cx(
 										fr.cx(

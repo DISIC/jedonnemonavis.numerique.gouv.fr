@@ -130,7 +130,22 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const referer = ctx.req.headers["referer"] || ctx.req.headers["referrer"];
     const hashedIp = hashIp(ip);
     const currentTime = new Date();
-    const [product_id, button_id] = extractIdsFromUrl(referer as string);
+    let [product_id, button_id] = extractIdsFromUrl(referer as string);
+
+    // Si l'URL est du type "clé", product_id est en fait le xwiki_id
+    if (referer?.includes("key=")) {
+      const xwikiId = parseInt(product_id ?? "0");
+
+      const matchedProduct = await prisma.product.findFirst({
+        where: {
+          xwiki_id: xwikiId,
+        },
+      });
+
+      if (matchedProduct) {
+        product_id = matchedProduct.id.toString();
+      }
+    }
 
     // check if the hashed ip is already in the database
     const ipRecord = await prisma.limiterReporting.findFirst({
@@ -160,6 +175,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
           total_attempts: 5,
           first_attempt: currentTime,
           last_attempt: currentTime,
+          url: referer as string
         },
       });
     }

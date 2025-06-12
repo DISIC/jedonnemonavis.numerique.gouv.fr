@@ -46,10 +46,6 @@ function getEmailWithLayout(content: string) {
 					<img src="https://jedonnemonavis.numerique.gouv.fr/assets/JDMA_Banner.png"/>
 				</div>
 				${content}
-				<p>
-					Besoin d’aide ? Vous pouvez nous écrire à l'adresse <a href="mailto:contact.jdma@design.numerique.gouv.fr">contact.jdma@design.numerique.gouv.fr</a>.<br/>
-					La Brigade d'Intervention du Numérique (BIN).
-				</p>
 				<div class="footer">
 					<p>
 						Ce message est envoyé automatiquement par le site <a href="https://jedonnemonavis.numerique.gouv.fr/" target="_blank">Je donne mon avis</a>, développé par <a href="https://design.numerique.gouv.fr/" target="_blank">la Brigade d'Intervention Numérique</a>,
@@ -207,21 +203,23 @@ export function getInviteEntityEmailHtml(
 	`);
 }
 
-export function getUserRequestAcceptedEmailHtml() {
-	const link = `${process.env.NODEMAILER_BASEURL}/login`;
+export function getUserRequestAcceptedEmailHtml(token: string) {
+	const link = `${
+		process.env.NODEMAILER_BASEURL
+	}/register/validate?${new URLSearchParams({ token })}`;
 
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
 
 		<p>
-			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été acceptée.
-		</p>
-
-		<p>
-			Vous pouvez vous connecter à votre compte en cliquant sur le lien ci-dessous.
+			Votre demande d'accès à la plateforme « <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a> » a été acceptée.  Afin de valider votre compte, veuillez cliquer sur le lien ci-dessous.
 		</p>
 
 		<a href="${link}" target="_blank">${link}</a>
+
+		<p>
+			Cette étape est obligatoire pour pouvoir vous connecter à votre compte. Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet e-mail.
+		</p>
 	`);
 }
 

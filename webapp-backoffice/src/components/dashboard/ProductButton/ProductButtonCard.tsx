@@ -41,7 +41,9 @@ const ProductButtonCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>{button.title}</p>
+						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>
+							{button.title}
+						</p>
 						{button.description && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.description}
@@ -60,7 +62,7 @@ const ProductButtonCard = (props: Props) => {
 									push(['trackEvent', 'Gestion boutons', 'Installer']);
 									handleClose();
 								}}
-								className='fr-mr-2v'
+								className="fr-mr-2v"
 							>
 								Voir le code
 							</Button>
@@ -98,17 +100,6 @@ const ProductButtonCard = (props: Props) => {
 										Modifier
 									</MenuItem>
 								)}
-								{/* <MenuItem onClick={() => onButtonClick('merge')}>
-								Fusionner avec un autre bouton
-							</MenuItem>
-							<MenuItem
-								onClick={() => onButtonClick('archive', button)}
-								style={{
-									color: fr.colors.decisions.background.flat.error.default
-								}}
-							>
-								Archiver bouton
-							</MenuItem> */}
 								<MenuItem
 									onClick={() => {
 										navigator.clipboard.writeText(
@@ -120,17 +111,6 @@ const ProductButtonCard = (props: Props) => {
 									Copier le lien du formulaire
 								</MenuItem>
 							</Menu>
-							{/* {!button.isTest && (
-								<Button
-									size="small"
-									onClick={() => {
-										onButtonClick('install', button);
-										push(['trackEvent', 'Gestion boutons', 'Installer']);
-									}}
-								>
-									Installer
-								</Button>
-							)} */}
 						</div>
 					</div>
 				</div>
@@ -148,17 +128,23 @@ const useStyles = tss
 				? fr.colors.decisions.border.default.grey.default
 				: fr.colors.decisions.background.alt.blueFrance.default,
 			height: 'auto!important',
-			backgroundImage: 'none!important',
+			backgroundImage: 'none!important'
 		},
 		title: {
-			fontWeight: 'bold',
+			fontWeight: 'bold'
 		},
 		actionsContainer: {
 			display: 'flex',
 			flexWrap: 'wrap',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
-			paddingLeft: fr.spacing('11v')
+			paddingLeft: fr.spacing('11v'),
+			[fr.breakpoints.down('md')]: {
+				paddingLeft: 0,
+				flexDirection: 'column',
+				justifyContent: 'flex-start',
+				gap: fr.spacing('4v')
+			}
 		},
 		buttonWrapper: {
 			'&::before': {

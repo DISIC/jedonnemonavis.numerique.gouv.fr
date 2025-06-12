@@ -1,4 +1,4 @@
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { getLastPage, getNbPages, removeAccents } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -226,20 +226,14 @@ const EntitySearchModal = (props: Props) => {
 									: `Résultats de la recherche « ${submitedSearch} »`}
 							</h6>
 							<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
-								<span aria-live="assertive" className={fr.cx('fr-ml-0')}>
-									Organisation de{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + 1}
-									</span>{' '}
-									à{' '}
-									<span className={cx(classes.boldText)}>
-										{numberPerPage * (currentPage - 1) + entitiesSearch.length}
-									</span>{' '}
-									sur{' '}
-									<span className={cx(classes.boldText)}>
-										{countEntititesSearch}
-									</span>
-								</span>
+								<PageItemsCounter
+									label="Organisation"
+									startItemCount={numberPerPage * (currentPage - 1) + 1}
+									endItemCount={
+										numberPerPage * (currentPage - 1) + entitiesSearch.length
+									}
+									totalItemsCount={countEntititesSearch}
+								/>
 							</div>
 							<div>
 								{isRefetchingEntitiesSearch ? (

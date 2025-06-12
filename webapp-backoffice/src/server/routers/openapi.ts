@@ -514,7 +514,9 @@ export const openAPIRouter = router({
 				for (let i = 0; i < users.length; i++) {
 					const user = users[i];
 					const accessibleProductIds = [
-						...user.accessRights.map(ar => ar.product_id),
+						...user.accessRights
+							.filter(ar => ar.status !== 'removed')
+							.map(ar => ar.product_id),
 						...user.adminEntityRights.flatMap(aer =>
 							aer.entity.products.map(p => p.id)
 						)
@@ -565,7 +567,6 @@ export const openAPIRouter = router({
 					});
 
 					if ((i + 1) % 10 === 0) {
-						console.log(`Pausing mailing after ${i + 1} users...`);
 						await new Promise(resolve => setTimeout(resolve, 5000));
 					}
 				}

@@ -13,7 +13,7 @@ interface ProductLayoutProps {
 	children: React.ReactNode;
 	product: Product;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	hideMenu?: Boolean
+	hideMenu?: Boolean;
 }
 
 interface MenuItems {
@@ -25,7 +25,12 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const ProductLayout = ({ children, product, ownRight, hideMenu }: ProductLayoutProps) => {
+const ProductLayout = ({
+	children,
+	product,
+	ownRight,
+	hideMenu
+}: ProductLayoutProps) => {
 	const { id } = product;
 
 	const [displayToast, setDisplayToast] = useState(false);
@@ -36,24 +41,6 @@ const ProductLayout = ({ children, product, ownRight, hideMenu }: ProductLayoutP
 	const { cx, classes } = useStyles();
 
 	const menuItems: MenuItems[] = [
-		/*{
-			text: 'Statistiques',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/stats`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/stats`,
-				alt: 'Statistiques'
-			}
-		},
-		{
-			text: 'Avis',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/reviews`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/reviews`,
-				alt: 'Avis'
-			}
-		},*/
 		{
 			text: 'Formulaires',
 			isActive:
@@ -157,7 +144,12 @@ const ProductLayout = ({ children, product, ownRight, hideMenu }: ProductLayoutP
 				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', !hideMenu ? 'fr-col-md-3' : 'fr-hidden')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-3' : 'fr-hidden'
+					)}
+				>
 					<div role="navigation">
 						<SideMenu
 							align="left"
@@ -168,7 +160,13 @@ const ProductLayout = ({ children, product, ownRight, hideMenu }: ProductLayoutP
 						/>
 					</div>
 				</div>
-				<div className={fr.cx('fr-col-12', !hideMenu ? 'fr-col-md-9' : 'fr-col-md-12', 'fr-mb-12v')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-9' : 'fr-col-md-12',
+						'fr-mb-12v'
+					)}
+				>
 					{children}
 					{router.pathname.includes('/stats') && showBackToTop && (
 						<div className={cx(classes.backToTop)}>
@@ -194,13 +192,16 @@ const ProductLayout = ({ children, product, ownRight, hideMenu }: ProductLayoutP
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '7w' })
+		...fr.spacing('margin', { bottom: '6v' })
 	},
 	container: {
 		height: '100%'
 	},
 	children: {
-		minHeight: '40rem'
+		minHeight: '40rem',
+		[fr.breakpoints.down('md')]: {
+			minHeight: 'auto'
+		}
 	},
 	tagContainer: {
 		display: 'flex'

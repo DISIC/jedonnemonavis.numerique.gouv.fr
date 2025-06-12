@@ -33,7 +33,10 @@ const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 		<div
 			style={{
 				display: 'flex',
-				gap: '25px'
+				gap: '20px',
+				marginLeft: '25px',
+				marginBottom: fr.spacing("6v"),
+				flexWrap: 'wrap',
 			}}
 		>
 			{payload
@@ -100,13 +103,16 @@ const StackedVerticalBarChart = ({
 	};
 	total: number;
 }) => {
+	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
 	return (
-		<ResponsiveContainer width="100%" height={300}>
+		<ResponsiveContainer width="100%" height={isMobile ? 400 : 350}>
 			<BarChart
 				role="img"
 				title="Graphique: Répartition des réponses"
 				data={data}
 				layout="vertical"
+				margin={{ left: -25, bottom: 5, top: 20 }}
 			>
 				<CartesianGrid horizontal={false} strokeDasharray="3 3" />
 				<XAxis
@@ -144,7 +150,6 @@ const StackedVerticalBarChart = ({
 				<Legend
 					verticalAlign="top"
 					align="left"
-					height={60}
 					content={payload => renderLegend(payload, sortOrder)}
 				/>
 				{dataKeys

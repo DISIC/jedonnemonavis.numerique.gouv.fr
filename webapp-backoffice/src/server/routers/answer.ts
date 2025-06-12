@@ -1,21 +1,21 @@
-import {
-	BucketsInside,
-	Buckets,
-	ElkAnswer,
-	ElkAnswerDefaults
-} from '../../types/custom';
-import { z } from 'zod';
-import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
-import { AnswerIntention, PrismaClient } from '@prisma/client';
+import { publicProcedure, router } from '@/src/server/trpc';
 import {
 	calculateBucketsAverage,
 	getCalendarFormat,
 	getCalendarInterval,
 	getDiffDaysBetweenTwoDates
 } from '@/src/utils/tools';
-import { Session } from 'next-auth';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Client } from '@elastic/elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { AnswerIntention, PrismaClient } from '@prisma/client';
+import { Session } from 'next-auth';
+import { z } from 'zod';
+import {
+	Buckets,
+	BucketsInside,
+	ElkAnswer,
+	ElkAnswerDefaults
+} from '../../types/custom';
 
 const checkAndGetProduct = async ({
 	ctx,

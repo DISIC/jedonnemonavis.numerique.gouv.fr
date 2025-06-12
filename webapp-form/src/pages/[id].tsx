@@ -670,7 +670,7 @@ const useStyles = tss
   .create(({ isInIframe }) => ({
     mainContainer: {
       overflow: "inherit",
-      padding: `${fr.spacing("10v")} 0`,
+      padding: `${fr.spacing("12v")} 0`,
       [fr.breakpoints.up("md")]: {
         padding: `0`,
       },

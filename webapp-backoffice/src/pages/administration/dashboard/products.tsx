@@ -4,17 +4,15 @@ import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
@@ -30,11 +28,6 @@ const product_modal = createModal({
 	isOpenedByDefault: false
 });
 
-const api_modal = createModal({
-	id: 'api-modal',
-	isOpenedByDefault: false
-});
-
 const entity_modal = createModal({
 	id: 'entity-modal',
 	isOpenedByDefault: false
@@ -46,7 +39,7 @@ const essential_service_modal = createModal({
 });
 
 const DashBoard = () => {
-	const { filters, updateFilters } = useFilters();
+	const { filters, updateFilters, clearFilters } = useFilters();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -481,23 +474,15 @@ const DashBoard = () => {
 								'fr-grid-row--right'
 							)}
 						>
-							<div
-								role="status"
-								className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-ml-0')}
-							>
-								Avis de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (filters.currentPage - 1) + products.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{productsResult.metadata.count}
-								</span>
-							</div>
+							<PageItemsCounter
+								label="Services"
+								startItemCount={numberPerPage * (filters.currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (filters.currentPage - 1) + products.length
+								}
+								totalItemsCount={productsResult.metadata.count}
+								additionalClasses={['fr-pt-3w']}
+							/>
 						</div>
 						<div
 							className={cx(
@@ -511,7 +496,7 @@ const DashBoard = () => {
 							) : (
 								<ul className={classes.buttonList}>
 									{products.map((product, index) => (
-										<li key={index} role="list">
+										<li key={index} role="list" onClick={() => clearFilters()}>
 											<ProductCard
 												product={product}
 												userId={parseInt(session?.user?.id as string)}
@@ -526,10 +511,6 @@ const DashBoard = () => {
 													)
 												}
 												showFavoriteButton={countTotalUserScope > 10}
-												onDeleteEssential={() => {
-													setProductTitle(product.title);
-													essential_service_modal.open();
-												}}
 												onDeleteProduct={() => {
 													setStatusProductState({
 														msg: `Le service "${product.title}" a bien été supprimé`,

@@ -129,6 +129,7 @@ const ReviewLineVerbatim = ({
 								intention: review.satisfaction?.intention ?? 'neutral'
 							})
 						}}
+						className={classes.button}
 					>
 						{' '}
 						Détails
@@ -189,6 +190,12 @@ const useStyles = tss
 			wordWrap: 'break-word',
 			span: {
 				backgroundColor: 'yellow'
+			}
+		},
+		button: {
+			[fr.breakpoints.down('md')]: {
+				width: '100%',
+				justifyContent: 'center'
 			}
 		}
 	}));

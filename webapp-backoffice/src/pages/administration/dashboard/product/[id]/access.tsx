@@ -11,7 +11,7 @@ import {
 	AccessRightWithUsers,
 	AdminEntityRightWithUsers
 } from '@/src/types/prismaTypesExtended';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { getNbPages } from '@/src/utils/tools';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -221,15 +221,15 @@ const AccessManagement = (props: Props) => {
 					setCurrentAccessRight={setCurrentAccessRight}
 				/>
 
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+				<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v'), classes.headerContainer)}>
 					<div className={fr.cx('fr-col-8')}>
-						<h2 className={fr.cx('fr-mb-2w')}>
+						<h2 className={fr.cx('fr-mb-0', 'fr-mb-md-2w')}>
 							{ownRight && ownRight === 'carrier_admin'
 								? "Gérer l'accès"
 								: "Voir l'accès"}
 						</h2>
 					</div>
-					<div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
+					<div className={cx(fr.cx('fr-col-md-4'), classes.headerButton)}>
 						{ownRight === 'carrier_admin' && (
 							<Button
 								priority="secondary"
@@ -239,50 +239,47 @@ const AccessManagement = (props: Props) => {
 									handleModalOpening('add');
 									push(['trackEvent', 'Product', 'Modal-Admin']);
 								}}
+								className={classes.headerButton}
 							>
 								Inviter des utilisateurs
 							</Button>
 						)}
 					</div>
 				</div>
-				<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-					<div className={fr.cx('fr-col-8')}>
-						{nbPages > 1 && (
-							<span className={fr.cx('fr-ml-0')}>
-								Admin de{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + 1}
-								</span>{' '}
-								à{' '}
-								<span className={cx(classes.boldText)}>
-									{numberPerPage * (currentPage - 1) + accessRights.length}
-								</span>{' '}
-								sur{' '}
-								<span className={cx(classes.boldText)}>
-									{accessRightsCount}
-								</span>
-							</span>
-						)}
-					</div>
-					{/* <div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
-					<Checkbox
-						className={cx(fr.cx('fr-ml-auto'), classes.checkbox)}
-						style={{ userSelect: 'none' }}
-						options={[
-							{
-								label: 'Afficher les admins retirés',
-								nativeInputProps: {
-									name: 'carriers-removed',
-									onChange: () => {
-										setCarriersRemovedFilter(!carriersRemovedFilter);
-										setCurrentPage(1);
+				{nbPages > 1 && (
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
+						<div className={fr.cx('fr-col-8')}>
+								<PageItemsCounter
+									label="Admin"
+									startItemCount={numberPerPage * (currentPage - 1) + 1}
+									endItemCount={
+										numberPerPage * (currentPage - 1) + accessRights.length
+									}
+									totalItemsCount={accessRightsCount}
+								/>
+						</div>
+
+						{/* <div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
+						<Checkbox
+							className={cx(fr.cx('fr-ml-auto'), classes.checkbox)}
+							style={{ userSelect: 'none' }}
+							options={[
+								{
+									label: 'Afficher les admins retirés',
+									nativeInputProps: {
+										name: 'carriers-removed',
+										onChange: () => {
+											setCarriersRemovedFilter(!carriersRemovedFilter);
+											setCurrentPage(1);
+										}
 									}
 								}
-							}
-						]}
-					/>
-				</div> */}
-				</div>
+							]}
+						/>
+					</div> */}
+					</div>
+				)}
+
 				{isLoadingAccessRights ? (
 					<div className={fr.cx('fr-py-10v')}>
 						<Loader />
@@ -409,8 +406,17 @@ const useStyles = tss.create({
 	boldText: {
 		fontWeight: 'bold'
 	},
-	alignRight: {
-		textAlign: 'right'
+	headerContainer: {
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column'
+		}
+	},
+	headerButton: {
+		textAlign: 'right',
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center',
+		}
 	},
 	checkbox: {
 		'.fr-checkbox-group': {
@@ -423,7 +429,13 @@ const useStyles = tss.create({
 		justifyContent: 'flex-start',
 		alignItems: 'center',
 		gap: '24px',
-		borderBottom: '1px solid black'
+		width: '100%',
+		borderBottom: '1px solid black',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: 0,
+		}
 	},
 	categoryTitle: {
 		...fr.typography[20].style,

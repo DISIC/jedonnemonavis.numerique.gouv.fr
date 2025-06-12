@@ -138,6 +138,7 @@
     },
     "contact_satisfaction": {
       "label": "Como avalia a qualidade da ajuda que recebeu da administração?",
+      "hint": "Numa escala de 1 a 5, onde 1 é muito má e 5 é excelente.",
       "options": [
         {
           "label": "Muito má"
@@ -153,9 +154,6 @@
         },
         {
           "label": "Excelente"
-        },
-        {
-          "label": "Não quero opinar"
         }
       ]
     },

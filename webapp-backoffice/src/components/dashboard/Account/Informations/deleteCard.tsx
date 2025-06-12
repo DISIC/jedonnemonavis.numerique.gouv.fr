@@ -39,7 +39,6 @@ const DeleteCard = (props: Props) => {
 			if (isOwn) {
 				signOut();
 			} else {
-				console.log('ok pushing new route');
 				router.push('/administration/dashboard/users');
 			}
 		}
@@ -130,12 +129,13 @@ const DeleteCard = (props: Props) => {
 				title={'Suppression du compte'}
 				hint={'Cette action est irréversible.'}
 				modifiable={false}
+				smallScreenShowHr={false}
 				viewModeContent={
 					<>
 						<Button
 							priority="tertiary"
 							iconId="fr-icon-delete-bin-line"
-							className={cx(fr.cx('fr-mr-5v'), classes.iconError)}
+							className={cx(fr.cx('fr-mr-5v'), classes.deleteButton)}
 							onClick={() => handleDeletion()}
 							nativeButtonProps={{
 								'aria-label': 'Supprimer le compte',
@@ -152,8 +152,12 @@ const DeleteCard = (props: Props) => {
 };
 
 const useStyles = tss.withName(DeleteCard.name).create(() => ({
-	iconError: {
-		color: fr.colors.decisions.text.default.error.default
+	deleteButton: {
+		color: fr.colors.decisions.text.default.error.default,
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'center',
+			width: '100%'
+		}
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default

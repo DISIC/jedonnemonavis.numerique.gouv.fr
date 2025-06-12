@@ -70,7 +70,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										priority="secondary"
 										size="small"
 										title={`Clés API de ${entity.name}`}
-										iconId="fr-icon-lock-unlock-line"
+										iconId="ri-key-2-line"
 										iconPosition="right"
 										className={classes.button}
 										onClick={() => {
@@ -81,7 +81,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										Clés API
 									</Button>
 								</li>
-								<li>
+								<li> 
 									<Button
 										priority="secondary"
 										size="small"
@@ -136,7 +136,7 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 		listStyle: 'none',
 		'@media (max-width: 768px)': {
 			flexDirection: 'column',
-			alignItems: 'flex-end'
+			width: '100%',
 		},
 		'@media (min-width: 768px)': {
 			flexDirection: 'row'
@@ -150,7 +150,7 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 	},
 	wrapperButtons: {
 		display: 'flex',
-		justifyContent: 'end'
+		justifyContent: 'end',
 	},
 	entityEmail: {
 		wordWrap: 'break-word'
@@ -158,6 +158,10 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 	button: {
 		'&:not(:last-of-type)': {
 			marginRight: fr.spacing('4v')
+		},
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'center',
+			width: '100%'
 		}
 	},
 	acronym: {

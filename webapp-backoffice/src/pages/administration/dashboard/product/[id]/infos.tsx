@@ -163,7 +163,7 @@ const ProductInformationPage = (props: Props) => {
 			)}
 			<div className={classes.column}>
 				<div className={classes.headerWrapper}>
-					<h1>Informations</h1>
+					<h2>Informations</h2>
 					{ownRight === 'carrier_admin' && (
 						<Button
 							priority="secondary"
@@ -237,8 +237,7 @@ const ProductInformationPage = (props: Props) => {
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
 								les utilisateurs de ce service n’auront plus accès au
-								formulaire. les utilisateurs de ce service n’auront plus accès
-								au formulaire.
+								formulaire.
 							</li>
 						</ul>
 						<Button
