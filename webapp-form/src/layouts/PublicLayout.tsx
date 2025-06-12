@@ -60,7 +60,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           },
           className: cx(
             classes.langButton,
-            fr.cx("fr-translate__language", "fr-nav__link"),
+            fr.cx("fr-translate__language", "fr-nav__link")
           ),
         },
         iconId: "fr-icon-translate-2",
@@ -87,7 +87,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       ];
 
   useEffect(() => {
-    setIsMobile(window.innerWidth <= fr.breakpoints.getBreakpointsValues().md);
+    setIsMobile(window.innerWidth <= fr.breakpoints.getPxValues().md);
   }, []);
 
   return (
