@@ -85,7 +85,7 @@ export const reviewRouter = router({
 						}
 					},
 					orderBy: { created_at: 'desc' },
-					take: 1
+					take: 2
 				});
 
 				if (lastSeenFormReview.length === 0) {
@@ -96,11 +96,19 @@ export const reviewRouter = router({
 							product_id: product_id
 						},
 						orderBy: { created_at: 'desc' },
-						take: 1
+						take: 2
 					});
-					lastSeenDate = lastSeenProductReview[0]?.created_at;
+					const relevantLog =
+						lastSeenProductReview.length > 1
+							? lastSeenProductReview[1]
+							: lastSeenProductReview[0];
+					lastSeenDate = relevantLog?.created_at;
 				} else {
-					lastSeenDate = lastSeenFormReview[0]?.created_at;
+					const relevantLog =
+						lastSeenFormReview.length > 1
+							? lastSeenFormReview[1]
+							: lastSeenFormReview[0];
+					lastSeenDate = relevantLog?.created_at;
 				}
 			}
 
@@ -479,7 +487,6 @@ export const reviewRouter = router({
 		.query(async ({ ctx, input }) => {
 			const { product_id } = input;
 
-			// Compter les avis groupés par form_id
 			const countsByFormRaw = await ctx.prisma.review.groupBy({
 				by: ['form_id'],
 				where: { product_id },
@@ -533,11 +540,14 @@ export const reviewRouter = router({
 						}
 					},
 					orderBy: { created_at: 'desc' },
-					take: 1
+					take: 2
 				});
-
-				const lastSeenDate = lastSeenFormReview[0]
-					? lastSeenFormReview[0].created_at
+				const relevantFormLog =
+					lastSeenFormReview.length > 1
+						? lastSeenFormReview[1]
+						: lastSeenFormReview[0];
+				const lastSeenDate = relevantFormLog
+					? relevantFormLog.created_at
 					: lastSeenReview[0]
 						? lastSeenReview[0].created_at
 						: null;
