@@ -609,8 +609,6 @@ export const getServerSideProps: GetServerSideProps<{
   });
   await prisma.$disconnect();
 
-  console.log("product : ", product);
-
   if (!product?.forms[0] || (!!formConfig && !isInIframe)) {
     return {
       notFound: true,
