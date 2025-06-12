@@ -116,7 +116,8 @@ export const userEventRouter = router({
 				});
 			}
 
-			return { data: lastLog };
+			const logToReturn = lastLog.length > 1 ? [lastLog[1]] : lastLog;
+			return { data: logToReturn };
 		}),
 
 	createReviewView: protectedProcedure
