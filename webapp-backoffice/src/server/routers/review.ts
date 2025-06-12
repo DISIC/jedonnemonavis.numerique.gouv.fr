@@ -297,7 +297,9 @@ export const reviewRouter = router({
 					ctx.prisma.review.count({
 						where: {
 							...where,
-							form_id: 2
+							form_id: {
+								not: 1
+							}
 						}
 					})
 				]);
