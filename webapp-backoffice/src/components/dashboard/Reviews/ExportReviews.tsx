@@ -4,7 +4,8 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ExportModal from './ExportModal';
 
 interface Props {
-	product_id: number;
+	product_id?: number;
+	form_id?: number;
 	startDate: string;
 	endDate: string;
 	mustHaveVerbatims: boolean;
@@ -18,6 +19,7 @@ interface Props {
 const ExportReviews = (props: Props) => {
 	const {
 		product_id,
+		form_id,
 		startDate,
 		endDate,
 		mustHaveVerbatims,
@@ -41,7 +43,7 @@ const ExportReviews = (props: Props) => {
 					countFiltered: reviewsCountfiltered,
 					countAll: reviewsCountAll
 				}}
-				product_id={product_id}
+				product_id={product_id!}
 				params={JSON.stringify({
 					startDate,
 					endDate,
