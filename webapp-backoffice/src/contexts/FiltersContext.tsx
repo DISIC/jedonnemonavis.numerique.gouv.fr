@@ -12,31 +12,24 @@ export type Filters = {
 		filterOnlyAdmins: boolean;
 	};
 	productActivityLogs: {
-		currentStartDate: string;
-		currentEndDate: string;
-		dateShortcut: DateShortcutName;
-		hasChanged: Boolean;
 		actionType: TypeAction[];
 	};
 	productReviews: {
-		currentStartDate: string;
-		currentEndDate: string;
-		dateShortcut: DateShortcutName;
-		hasChanged: Boolean;
 		displayNew: boolean;
 		filters: ReviewFiltersType;
 	};
 	productStats: {
+		buttonId: number | undefined;
+	};
+	sharedFilters: {
 		currentStartDate: string;
 		currentEndDate: string;
 		dateShortcut: DateShortcutName;
 		hasChanged: Boolean;
-		buttonId: number | undefined;
 	};
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
-	view: string
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
@@ -45,6 +38,7 @@ export type Filters = {
 interface FiltersContextProps {
 	filters: Filters;
 	updateFilters: (newFilters: Partial<Filters>) => void;
+	clearFilters: () => void;
 }
 
 const FiltersContext = createContext<FiltersContextProps | undefined>(
@@ -55,55 +49,50 @@ interface FiltersContextProviderProps {
 	children: ReactNode;
 }
 
+const initialState: Filters = {
+	users: {
+		entity: [],
+		currentPage: 1,
+		filter: 'email:asc',
+		validatedSearch: '',
+		filterOnlyAdmins: false
+	},
+	productActivityLogs: {
+		actionType: []
+	},
+	productReviews: {
+		displayNew: false,
+		filters: {
+			satisfaction: [],
+			comprehension: [],
+			needVerbatim: false,
+			needOtherDifficulties: false,
+			needOtherHelp: false,
+			help: [],
+			buttonId: []
+		}
+	},
+	productStats: {
+		buttonId: undefined
+	},
+	sharedFilters: {
+		currentStartDate: '',
+		currentEndDate: '',
+		dateShortcut: 'one-year',
+		hasChanged: false
+	},
+	filterEntity: [],
+	currentPage: 1,
+	filter: 'title',
+	filterOnlyFavorites: false,
+	filterOnlyArchived: false,
+	validatedSearch: ''
+};
+
 export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 	children
 }) => {
-	const [filters, setFilters] = useState<Filters>({
-		users: {
-			entity: [],
-			currentPage: 1,
-			filter: 'email:asc',
-			validatedSearch: '',
-			filterOnlyAdmins: false
-		},
-		productActivityLogs: {
-			currentStartDate: '',
-			currentEndDate: '',
-			dateShortcut: 'one-year',
-			hasChanged: false,
-			actionType: []
-		},
-		productReviews: {
-			currentStartDate: '',
-			currentEndDate: '',
-			dateShortcut: 'one-year',
-			hasChanged: false,
-			displayNew: false,
-			filters: {
-				satisfaction: [],
-				comprehension: [],
-				needVerbatim: false,
-				needOtherDifficulties: false,
-				needOtherHelp: false,
-				help: [],
-				buttonId: []
-			}
-		},
-		productStats: {
-			currentStartDate: '',
-			currentEndDate: '',
-			dateShortcut: 'one-year',
-			hasChanged: false,
-			buttonId: undefined
-		},
-		filterEntity: [],
-		currentPage: 1,
-		filter: 'title',
-		view: 'all',
-		filterOnlyFavorites: false,
-		filterOnlyArchived: false,
-		validatedSearch: ''
-	});
+	const [filters, setFilters] = useState<Filters>(initialState);
 
 	const updateFilters = (newFilters: Partial<Filters>) => {
 		setFilters(prevFilters => ({
@@ -112,8 +101,10 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		}));
 	};
 
+	const clearFilters = () => setFilters(initialState);
+
 	return (
-		<FiltersContext.Provider value={{ filters, updateFilters }}>
+		<FiltersContext.Provider value={{ filters, updateFilters, clearFilters }}>
 			{children}
 		</FiltersContext.Provider>
 	);

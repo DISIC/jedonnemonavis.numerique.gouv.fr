@@ -6,9 +6,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { filtersLabel, getDatesByShortCut } from '@/src/utils/tools';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { useRouter } from 'next/router';
+import { getDatesByShortCut } from '@/src/utils/tools';
 
 const dateShortcuts = [
 	{
@@ -31,7 +29,7 @@ export type DateShortcutName =
 
 export type FilterSectionKey = keyof Pick<
 	Filters,
-	'productActivityLogs' | 'productReviews' | 'productStats'
+	'productActivityLogs' | 'productReviews' | 'productStats' 
 >;
 
 type FiltersProps<T extends FilterSectionKey> = {
@@ -58,26 +56,25 @@ const GenericFilters = <T extends FilterSectionKey>({
 	const { filters, updateFilters } = useFilters();
 
 	const sectionFilters = filters[filterKey];
+	const sharedFilters = filters['sharedFilters'];
+
 	const [localStartDate, setLocalStartDate] = useState(
-		sectionFilters.currentStartDate
+		sharedFilters.currentStartDate
 	);
 	const [localEndDate, setLocalEndDate] = useState(
-		sectionFilters.currentEndDate
+		sharedFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
-	const [actionsFilter, setActionsFilter] = useState<string[]>([]);
-
-	const router = useRouter();
 
 	useEffect(() => {
-		if (sectionFilters.dateShortcut) {
+		if (sharedFilters.dateShortcut) {
 			const { startDate, endDate } = getDatesByShortCut(
-				sectionFilters.dateShortcut
+				sharedFilters.dateShortcut
 			);
 
 			if (
-				startDate !== sectionFilters.currentStartDate ||
-				endDate !== sectionFilters.currentEndDate
+				startDate !== sharedFilters.currentStartDate ||
+				endDate !== sharedFilters.currentEndDate
 			) {
 				setLocalStartDate(startDate);
 				setLocalEndDate(endDate);
@@ -86,13 +83,19 @@ const GenericFilters = <T extends FilterSectionKey>({
 					...filters,
 					[filterKey]: {
 						...filters[filterKey],
+					},
+					sharedFilters: {
+						...filters['sharedFilters'],
 						currentStartDate: startDate,
 						currentEndDate: endDate
-					}
+					},
+					currentPage: 1
 				});
 			}
 		}
-	}, [sectionFilters.hasChanged, sectionFilters.dateShortcut]);
+	}, [sharedFilters.hasChanged, sharedFilters.dateShortcut]);
+
+
 
 	const isValidDate = (date: string) => {
 		if (!date) return false;
@@ -102,14 +105,19 @@ const GenericFilters = <T extends FilterSectionKey>({
 	const updateDateFilter = useCallback(
 		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
 			updateFilters({
+				...filters,
+				currentPage: 1,
 				[filterKey]: {
 					...filters[filterKey],
+				},
+				sharedFilters: {
+					...filters['sharedFilters'],
 					[key]: value,
 					hasChanged: true,
 					dateShortcut: undefined
 				}
 			});
-		}, 1500),
+		}, 1000),
 		[updateFilters, filterKey, filters]
 	);
 
@@ -117,29 +125,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		(key: 'currentStartDate' | 'currentEndDate') =>
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const newDate = e.target.value;
-
-			if (newDate === '') {
-				if (key === 'currentStartDate') {
-					setLocalStartDate(new Date().toISOString().split('T')[0]);
-					updateFilters({
-						...filters,
-						[filterKey]: {
-							...filters[filterKey],
-							currentStartDate: new Date().toISOString().split('T')[0]
-						}
-					});
-				} else {
-					setLocalEndDate(new Date().toISOString().split('T')[0]);
-					updateFilters({
-						...filters,
-						[filterKey]: {
-							...filters[filterKey],
-							currentEndDate: new Date().toISOString().split('T')[0]
-						}
-					});
-				}
-				return;
-			}
 
 			if (key === 'currentStartDate') {
 				setLocalStartDate(newDate);
@@ -153,13 +138,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
 						'Format attendu : JJ/MM/AAAA'
 				}));
-				updateFilters({
-					...filters,
-					[filterKey]: {
-						...filters[filterKey],
-						currentStartDate: new Date().toISOString().split('T')[0]
-					}
-				});
 			} else {
 				setErrors(prev => ({
 					...prev,
@@ -193,14 +171,18 @@ const GenericFilters = <T extends FilterSectionKey>({
 										id={`radio-${ds.name}`}
 										type="radio"
 										name={ds.name}
-										checked={sectionFilters.dateShortcut === ds.name}
+										checked={sharedFilters.dateShortcut === ds.name}
 										onChange={() => {
 											updateFilters({
 												...filters,
+												currentPage: 1,
 												[filterKey]: {
 													...filters[filterKey],
+												},
+												sharedFilters: {
+													...filters['sharedFilters'],
 													hasChanged: true,
-													dateShortcut: ds.name
+													dateShortcut: ds.name,
 												}
 											});
 											push(['trackEvent', 'Logs', 'Filtre-Date']);
@@ -211,7 +193,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 											fr.cx('fr-tag', 'fr-mt-2v'),
 
 											classes.dateShortcutTag,
-											sectionFilters.dateShortcut === ds.name
+											sharedFilters.dateShortcut === ds.name
 												? classes.dateShortcutTagSelected
 												: undefined
 										)}
@@ -221,8 +203,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 											if (e.key === 'Enter' || e.key === ' ') {
 												updateFilters({
 													...filters,
+													currentPage: 1,
 													[filterKey]: {
 														...filters[filterKey],
+													},
+													sharedFilters: {
+														...filters['sharedFilters'],
 														hasChanged: true,
 														dateShortcut: ds.name
 													}
@@ -243,7 +229,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de début"
-								key={`start-date-${localStartDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localStartDate,
@@ -260,7 +245,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
 							<Input
 								label="Date de fin"
-								key={`end-date-${localEndDate}`}
 								nativeInputProps={{
 									type: 'date',
 									value: localEndDate,
@@ -279,7 +263,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>{children}</div>
 
-				{sectionFilters.hasChanged ? (
+				{sharedFilters.hasChanged ? (
 					<div
 						className={cx(
 							fr.cx('fr-col-12', 'fr-col-md-6'),
@@ -294,9 +278,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 								setErrors({});
 								updateFilters({
 									...filters,
+									currentPage: 1,
 									[filterKey]: {
-										dateShortcut: 'one-year',
-										hasChanged: false,
 										...('actionType' in filters[filterKey] && {
 											actionType: []
 										}),
@@ -314,6 +297,11 @@ const GenericFilters = <T extends FilterSectionKey>({
 												buttonId: []
 											}
 										})
+									},
+									sharedFilters: {
+										...filters['sharedFilters'],
+										dateShortcut: 'one-year',
+										hasChanged: false,
 									}
 								});
 							}}
