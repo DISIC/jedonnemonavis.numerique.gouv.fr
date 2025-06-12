@@ -432,7 +432,7 @@ export const reviewRouter = router({
 			return { countFiltered, countAll };
 		}),
 
-	getCountsByForm: protectedProcedure
+		getCountsByForm: protectedProcedure
 		.input(
 			z.object({
 				product_id: z.number()
@@ -467,7 +467,7 @@ export const reviewRouter = router({
 				where: { product_id }
 			});
 
-			// New count (logique existante)
+			// New count global (logique existante pour le niveau produit)
 			const lastSeenReview = await ctx.prisma.userEvent.findMany({
 				where: {
 					user_id: parseInt(ctx.session?.user?.id),
@@ -487,31 +487,48 @@ export const reviewRouter = router({
 				})
 				: 0;
 
-			// New counts par formulaire
+			// New counts par formulaire (basé sur les consultations spécifiques par formulaire)
 			const newCountsByForm: Record<string, number> = {};
 			
-			if (lastSeenReview[0]) {
-				const newCountsByFormRaw = await ctx.prisma.review.groupBy({
-					by: ['form_id'],
-					where: { 
-						product_id,
-						created_at: { gte: lastSeenReview[0].created_at }
+			// Pour chaque formulaire, récupérer la dernière consultation spécifique
+			for (const formData of countsByFormRaw) {
+				const formId = formData.form_id;
+				
+				// Chercher la dernière consultation spécifique de ce formulaire
+				const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
+					where: {
+						user_id: parseInt(ctx.session?.user?.id),
+						action: 'form_reviews_view',
+						product_id: product_id,
+						metadata: {
+							path: ['form_id'],
+							equals: formId
+						}
 					},
-					_count: { id: true }
+					orderBy: { created_at: 'desc' },
+					take: 1
 				});
 
-				// Conversion en objet { [form_id]: newCount }
-				newCountsByFormRaw.forEach(form => {
-					newCountsByForm[form.form_id.toString()] = form._count.id;
-				});
-			}
+				// Si aucune consultation spécifique du formulaire, utiliser la consultation du produit
+				const lastSeenDate = lastSeenFormReview[0] 
+					? lastSeenFormReview[0].created_at 
+					: lastSeenReview[0] 
+						? lastSeenReview[0].created_at 
+						: null;
 
-			// S'assurer que tous les formulaires ont une entrée (même avec 0)
-			countsByFormRaw.forEach(form => {
-				if (!newCountsByForm[form.form_id.toString()]) {
-					newCountsByForm[form.form_id.toString()] = 0;
+				if (lastSeenDate) {
+					const newCountForForm = await ctx.prisma.review.count({
+						where: {
+							form_id: formId,
+							created_at: { gte: lastSeenDate }
+						}
+					});
+					newCountsByForm[formId.toString()] = newCountForForm;
+				} else {
+					// Si aucune consultation, tous les avis sont nouveaux
+					newCountsByForm[formId.toString()] = formData._count.id;
 				}
-			});
+			}
 
 			return {
 				countsByForm,
@@ -519,5 +536,29 @@ export const reviewRouter = router({
 				totalCount,
 				newCount
 			};
+		}),
+
+	createFormReviewViewEvent: protectedProcedure
+		.input(
+			z.object({
+				product_id: z.number(),
+				form_id: z.number()
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const user = ctx.session?.user;
+			if (user) {
+				await ctx.prisma.userEvent.create({
+					data: {
+						user_id: parseInt(user.id),
+						action: 'form_reviews_view' as any, // Cast temporaire en attendant la génération Prisma
+						product_id: input.product_id,
+						metadata: {
+							form_id: input.form_id
+						}
+					}
+				});
+			}
+			return { success: true };
 		})
 });

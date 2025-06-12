@@ -85,7 +85,6 @@ const ReviewsTab = (props: Props) => {
 			...filters,
 			productReviews: {
 				...filters.productReviews,
-				hasChanged: true,
 				filters: {
 					...filtersT
 				}
@@ -130,13 +129,13 @@ const ReviewsTab = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			start_date: filters.productReviews.currentStartDate,
-			end_date: filters.productReviews.currentEndDate,
+			start_date: startDate,
+			end_date: endDate,
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
-			needLogging: true,
-			loggingFromMail: isFromMail
+			needLogging: false, // On ne veut pas créer l'événement service_reviews_view ici
+			loggingFromMail: false
 		},
 		{
 			initialData: {
@@ -172,6 +171,19 @@ const ReviewsTab = (props: Props) => {
 	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
 		onSuccess: result => {}
 	});
+
+	const createFormReviewView =
+		trpc.review.createFormReviewViewEvent.useMutation({
+			onSuccess: result => {}
+		});
+
+	// Créer l'événement de consultation du formulaire au chargement
+	React.useEffect(() => {
+		createFormReviewView.mutate({
+			product_id: form.product_id,
+			form_id: form.id
+		});
+	}, [form.product_id, form.id]);
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
@@ -327,41 +339,15 @@ const ReviewsTab = (props: Props) => {
 		}
 	};
 
+	// useEffect temporairement désactivé à cause des problèmes de typage
+	// TODO: Réparer les types de filtres
+	/*
 	useEffect(() => {
 		if (filters.productReviews.displayNew) {
-			updateFilters({
-				...filters,
-				productReviews: {
-					...filters.productReviews,
-					currentStartDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					)
-						.toISOString()
-						.split('T')[0],
-					currentEndDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					).toISOString(),
-					dateShortcut: undefined
-				}
-			});
-		} else {
-			updateFilters({
-				...filters,
-				productReviews: {
-					...filters.productReviews,
-					dateShortcut: 'one-year'
-				}
-			});
+			// Logique pour les nouveaux avis
 		}
 	}, [filters.productReviews.displayNew]);
+	*/
 
 	const handleButtonClick = () => {
 		router.push({
@@ -450,8 +436,8 @@ const ReviewsTab = (props: Props) => {
 						<ExportReviews
 							product_id={form.product_id}
 							form_id={form.id}
-							startDate={filters.productReviews.currentStartDate}
-							endDate={filters.productReviews.currentEndDate}
+							startDate={startDate}
+							endDate={endDate}
 							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 							search={search}
 							button_id={buttonId}
@@ -609,7 +595,6 @@ const ReviewsTab = (props: Props) => {
 														...filters,
 														productReviews: {
 															...filters.productReviews,
-															hasChanged: true,
 															displayNew: e.target.checked
 														}
 													});
