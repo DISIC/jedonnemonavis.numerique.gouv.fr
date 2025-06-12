@@ -1,31 +1,21 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-interface Props {
-	improveBtnClick: () => void;
-	sendInvitationBtnClick: () => void;
-}
-
-const NoReviewPanel = (props: Props) => {
-	const { improveBtnClick, sendInvitationBtnClick } = props;
+const NoReviewsPanel = () => {
 	const { cx, classes } = useStyles();
 
 	return (
-		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-12v'))}>
-			<h3 className={cx(classes.title)}>
-				En attendant vos premiers avis...
-			</h3>
+		<div
+			className={cx(
+				classes.container,
+				fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-12v')
+			)}
+		>
+			<h3 className={cx(classes.title)}>En attendant vos premiers avis...</h3>
 			<div
 				className={cx(
-					fr.cx(
-						'fr-grid-row', 
-						'fr-grid-row--left',
-						'fr-grid-row--middle',
-					),
+					fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-grid-row--middle'),
 					classes.rowContainer
 				)}
 			>
@@ -45,7 +35,7 @@ const NoReviewPanel = (props: Props) => {
 						title="Améliorer le placement de votre bouton"
 						href="#"
 						target="_blank"
-						className='fr-link'
+						className="fr-link"
 					>
 						Améliorer le placement de votre bouton
 					</a>
@@ -53,11 +43,7 @@ const NoReviewPanel = (props: Props) => {
 			</div>
 			<div
 				className={cx(
-					fr.cx(
-						'fr-grid-row', 
-						'fr-grid-row--left',
-						'fr-grid-row--middle',
-					),
+					fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-grid-row--middle'),
 					classes.rowContainer
 				)}
 			>
@@ -71,13 +57,15 @@ const NoReviewPanel = (props: Props) => {
 				</div>
 				<div className={cx(fr.cx('fr-col-md-9'))}>
 					<p className={cx(fr.cx('fr-mb-3v'))}>
-					Besoin de tester un parcours sur mobile vs. sur ordinateur ? Faire un test A/B suite à une modification de parcours ? Vous pouvez en créer plusieurs boutons JDMA.
+						Besoin de tester un parcours sur mobile vs. sur ordinateur ? Faire
+						un test A/B suite à une modification de parcours ? Vous pouvez en
+						créer plusieurs boutons JDMA.
 					</p>
 					<a
 						title="En savoir plus sur les boutons multiples"
 						href="#"
 						target="_blank"
-						className='fr-link'
+						className="fr-link"
 					>
 						En savoir plus sur les boutons multiples
 					</a>
@@ -93,14 +81,14 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'start',
 		alignItems: 'start',
-		flexDirection: 'column',
+		flexDirection: 'column'
 	},
 	rowContainer: {
 		width: '100%',
 		':not(:last-child)': {
 			marginBottom: fr.spacing('3v'),
 			[fr.breakpoints.down('md')]: {
-				marginBottom: fr.spacing('6v'),
+				marginBottom: fr.spacing('6v')
 			}
 		},
 		[fr.breakpoints.down('md')]: {
@@ -120,13 +108,13 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.text.title.blueFrance.default,
 		[fr.breakpoints.down('sm')]: {
 			marginBottom: fr.spacing('4v'),
-			fontSize: '24px',
+			fontSize: '24px'
 		}
 	},
 	divider: {
 		borderLeft: '1px solid gray;',
 		margin: '0 3rem'
-	},
+	}
 });
 
-export default NoReviewPanel;
+export default NoReviewsPanel;

@@ -174,7 +174,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<div className={cx(fr.cx('fr-container'), classes.container)}>
-				<h1>Statistiques</h1>
+				<h2>Statistiques</h2>
 				<div className={fr.cx('fr-mt-20v')}>
 					<Loader />
 				</div>
@@ -185,14 +185,11 @@ const StatsTab = ({ form, ownRight }: Props) => {
 	if (nbReviews === 0 || buttonResults.metadata.count === 0) {
 		return (
 			<div className={cx(fr.cx('fr-container'), classes.container)}>
-				<h1>Statistiques</h1>
+				<h2>Statistiques</h2>
 				{buttonResults.metadata.count === 0 ? (
 					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
-					<NoReviewsPanel
-						improveBtnClick={() => {}}
-						sendInvitationBtnClick={handleSendInvitation}
-					/>
+					<NoReviewsPanel />
 				)}
 			</div>
 		);

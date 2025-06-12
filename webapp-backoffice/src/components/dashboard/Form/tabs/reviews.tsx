@@ -356,12 +356,7 @@ const ReviewsTab = (props: Props) => {
 		}
 
 		if (!reviewsCountAll) {
-			return (
-				<NoReviewsPanel
-					improveBtnClick={() => {}}
-					sendInvitationBtnClick={handleSendInvitation}
-				/>
-			);
+			return <NoReviewsPanel />;
 		}
 	};
 
@@ -762,7 +757,7 @@ const useStyles = tss
 		title: {
 			display: 'flex',
 			justifyContent: 'space-between',
-			marginBottom: '1rem',
+			marginBottom: '1.5rem',
 			[fr.breakpoints.down('lg')]: {
 				flexDirection: 'column',
 				'.fr-btn': {
