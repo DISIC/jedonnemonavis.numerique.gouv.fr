@@ -543,7 +543,7 @@ export const answerRouter = router({
 				query: queryCountByFieldCode({
 					...input,
 					...(form?.legacy
-						? { OR: [{ form_id: form_id }, { form_id: null }] }
+						? { OR: [{ form_id: form_id }, { form_id: 2 }] }
 						: { form_id })
 				})
 			});
