@@ -60,8 +60,8 @@ export default function JDMAForm({
     filterByFormConfig(
       index,
       product.form.form_template,
-      product.form.form_configs[0],
-    ),
+      product.form.form_configs[0]
+    )
   );
 
   const isInIframe = router.query.iframe === "true";
@@ -103,11 +103,11 @@ export default function JDMAForm({
 
   const getSelectedOption = (
     field: FormField,
-    value: number | string,
+    value: number | string
   ): { label: string; intention: AnswerIntention; value: number } => {
     if (field.kind === "radio" || field.kind == "checkbox") {
       const selectedOption = field.options.find(
-        (option) => option.value === value,
+        (option) => option.value === value
       ) as RadioOption;
 
       return {
@@ -140,7 +140,7 @@ export default function JDMAForm({
   };
 
   const formatAnswers = (
-    opinion: Partial<Opinion>,
+    opinion: Partial<Opinion>
   ): Prisma.AnswerCreateInput[] => {
     return Object.entries(opinion).reduce((accumulator, [key, value]) => {
       if (["contact_reached", "contact_satisfaction"].includes(key)) {
@@ -149,11 +149,11 @@ export default function JDMAForm({
             const [parent_id, child_id] = ids.toString().split("_");
 
             const parentFieldInSection = allFields.find(
-              (field) => field.name === "contact_tried",
+              (field) => field.name === "contact_tried"
             ) as FormField;
 
             const childFieldInSection = allFields.find(
-              (field) => field.name === key,
+              (field) => field.name === key
             ) as FormField;
 
             if (
@@ -161,10 +161,10 @@ export default function JDMAForm({
               "options" in childFieldInSection
             ) {
               const parentOption = parentFieldInSection.options.find(
-                (o) => o.value === parseInt(parent_id),
+                (o) => o.value === parseInt(parent_id)
               );
               const childOption = childFieldInSection.options.find(
-                (o) => o.value === parseInt(child_id),
+                (o) => o.value === parseInt(child_id)
               );
 
               if (parentOption && childOption) {
@@ -206,7 +206,7 @@ export default function JDMAForm({
         }
       } else {
         const fieldInSection = allFields.find(
-          (field) => field.name === key,
+          (field) => field.name === key
         ) as FormField;
 
         let tmpAnswer = {
@@ -265,7 +265,7 @@ export default function JDMAForm({
           review: {
             product_id: product.id,
             button_id: product.buttons[0].id,
-            form_id: 2,
+            form_id: product.form.id,
             user_id: userId,
           },
           answers,
@@ -283,7 +283,7 @@ export default function JDMAForm({
 
   const handleInsertOrUpdateReview = async (
     opinion: Partial<Opinion>,
-    currentStepName: FormStepNames,
+    currentStepName: FormStepNames
   ) => {
     const answers = formatAnswers(opinion);
 
@@ -332,7 +332,7 @@ export default function JDMAForm({
           query: { ...router.query, step: currentStep },
         },
         undefined,
-        { shallow: true },
+        { shallow: true }
       );
     }
   }, [currentStep]);
@@ -399,7 +399,7 @@ export default function JDMAForm({
             <div
               className={cx(
                 classes.logoContainer,
-                fr.cx("fr-col-md-4", "fr-mt-4v"),
+                fr.cx("fr-col-md-4", "fr-mt-4v")
               )}
             >
               <Image
@@ -436,12 +436,12 @@ export default function JDMAForm({
                     acc[name] = result[name];
                     return acc;
                   },
-                  {} as any,
+                  {} as any
                 );
 
                 handleInsertOrUpdateReview(
                   currentStepValues,
-                  currentStepAnswerNames[0].split("_")[0] as FormStepNames,
+                  currentStepAnswerNames[0].split("_")[0] as FormStepNames
                 );
 
                 if (isLastStep) {
@@ -518,7 +518,7 @@ export default function JDMAForm({
         <div
           className={cx(
             classes.mainContainer,
-            fr.cx("fr-container--fluid", "fr-container"),
+            fr.cx("fr-container--fluid", "fr-container")
           )}
         >
           <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
@@ -550,44 +550,37 @@ export const getServerSideProps: GetServerSideProps<{
   const isXWikiLink = !buttonId && !isInIframe;
 
   await prisma.$connect();
+  let buttonFormId: number | undefined = undefined;
+
+  if (buttonId) {
+    const button = await prisma.button.findUnique({
+      where: { id: parseInt(buttonId) },
+      select: { form_id: true },
+    });
+
+    buttonFormId = button?.form_id;
+  }
+
   const product = await prisma.product.findUnique({
     where: isXWikiLink
-      ? {
-          xwiki_id: parseInt(productId),
-          forms: {
-            some: {
-              buttons: {
-                some: {},
-              },
-            },
-          },
-        }
-      : {
-          id: parseInt(productId),
-          ...(!isInIframe && {
-            forms: {
-              some: {
-                buttons: {
-                  some: {
-                    id: { equals: parseInt(buttonId) },
-                  },
-                },
-              },
-            },
-          }),
-        },
+      ? { xwiki_id: parseInt(productId) }
+      : { id: parseInt(productId) },
     include: {
       forms: {
+        // Si buttonFormId est défini, on filtre les forms, sinon on les laisse tous
+        where: buttonFormId ? { id: buttonFormId } : undefined,
         include: {
           form_configs: {
+            // Pareil ici : si on a un formId ciblé via le bouton, on le filtre
+            where: buttonFormId ? { form_id: buttonFormId } : undefined,
             include: {
               form_config_displays: true,
               form_config_labels: true,
             },
-            take: 1,
             orderBy: {
               created_at: "desc",
             },
+            take: 1,
           },
           form_template: {
             include: {
@@ -607,7 +600,7 @@ export const getServerSideProps: GetServerSideProps<{
               ? true
               : {
                   where: {
-                    id: { equals: parseInt(buttonId) },
+                    id: parseInt(buttonId),
                   },
                 },
         },
@@ -615,6 +608,8 @@ export const getServerSideProps: GetServerSideProps<{
     },
   });
   await prisma.$disconnect();
+
+  console.log("product : ", product);
 
   if (!product?.forms[0] || (!!formConfig && !isInIframe)) {
     return {
@@ -629,10 +624,10 @@ export const getServerSideProps: GetServerSideProps<{
       };
 
     const sameName = product.forms[0].buttons.find(
-      (b) => b.xwiki_title === xwikiButtonName,
+      (b) => b.xwiki_title === xwikiButtonName
     );
     const nameButton = product.forms[0].buttons.find(
-      (b) => b.xwiki_title === "button",
+      (b) => b.xwiki_title === "button"
     );
 
     if (sameName) product.forms[0].buttons = [sameName];

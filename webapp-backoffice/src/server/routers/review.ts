@@ -15,6 +15,7 @@ export const reviewRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				product_id: z.number().optional(),
+				form_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
 				mustHaveVerbatims: z.boolean().optional().default(false),
 				sort: z.string().optional(),
@@ -50,7 +51,7 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, shouldIncludeAnswers, product_id } = input;
+			const { numberPerPage, page, shouldIncludeAnswers, product_id, form_id } = input;
 
 			const { where, orderBy } = formatWhereAndOrder(input);
 

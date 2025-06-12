@@ -3,6 +3,7 @@ import { AnswerIntention, Prisma } from '@prisma/client';
 export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	const {
 		product_id,
+		form_id,
 		mustHaveVerbatims,
 		search,
 		sort,
