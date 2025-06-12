@@ -9,6 +9,7 @@ CREATE TABLE "Form" (
     "title" TEXT NOT NULL,
     "link" TEXT,
     "active" BOOLEAN NOT NULL DEFAULT false,
+    "legacy" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Form_pkey" PRIMARY KEY ("id")
 );

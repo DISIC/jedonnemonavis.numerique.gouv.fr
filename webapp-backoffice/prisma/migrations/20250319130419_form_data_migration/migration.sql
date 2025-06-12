@@ -16,8 +16,8 @@ BEGIN
   SELECT id INTO root_template_id FROM "FormTemplate" WHERE slug = 'root';
 
   -- Create a form for each product if it doesn't already have one linked to the root template
-  INSERT INTO "Form" (product_id, form_template_id, created_at, updated_at)
-  SELECT p.id, root_template_id, NOW(), NOW()
+  INSERT INTO "Form" (product_id, form_template_id, created_at, updated_at, legacy)
+  SELECT p.id, root_template_id, NOW(), NOW(), false
   FROM "Product" p
   WHERE NOT EXISTS (
     SELECT 1 

@@ -538,6 +538,7 @@ model Form {
   form_configs     FormConfig[]
   buttons          Button[]
   UserEvent        UserEvent[]
+  legacy           Boolean      @default(false)
   created_at       DateTime     @default(now())
   updated_at       DateTime     @default(now())
 }
