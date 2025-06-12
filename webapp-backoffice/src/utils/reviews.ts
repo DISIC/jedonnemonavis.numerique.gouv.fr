@@ -1,6 +1,9 @@
 import { AnswerIntention, Prisma } from '@prisma/client';
 
-export const formatWhereAndOrder = (input: { [key: string]: any }) => {
+export const formatWhereAndOrder = (
+	input: { [key: string]: any },
+	isLegacy: boolean
+) => {
 	const {
 		product_id,
 		form_id,
@@ -16,27 +19,30 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
-		...(form_id && { form_id }),
+		...(form_id &&
+			(isLegacy ? { OR: [{ form_id }, { form_id: null }] } : { form_id })),
 		...(filters?.buttonId?.length > 0 && {
 			button_id: parseInt(filters.buttonId[0])
 		}),
-		...(newReviews && lastSeenDate && {
-			created_at: {
-				gt: new Date(lastSeenDate)
-			}
-		}),
-		...(!newReviews && (start_date || end_date) && {
-			created_at: {
-				...(start_date && { gte: new Date(start_date) }),
-				...(end_date && {
-					lte: (() => {
-						const adjustedend_date = new Date(end_date);
-						adjustedend_date.setHours(23, 59, 59);
-						return adjustedend_date;
-					})()
-				})
-			}
-		}),
+		...(newReviews &&
+			lastSeenDate && {
+				created_at: {
+					gt: new Date(lastSeenDate)
+				}
+			}),
+		...(!newReviews &&
+			(start_date || end_date) && {
+				created_at: {
+					...(start_date && { gte: new Date(start_date) }),
+					...(end_date && {
+						lte: (() => {
+							const adjustedend_date = new Date(end_date);
+							adjustedend_date.setHours(23, 59, 59);
+							return adjustedend_date;
+						})()
+					})
+				}
+			}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [
 				{
@@ -44,16 +50,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
-								!newReviews && end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
 									}
-								}
 							].filter(Boolean)
 						}
 					}
@@ -75,16 +82,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 									}
 								},
 								{ field_code: 'verbatim' },
-								!newReviews && end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
 									}
-								}
 							].filter(Boolean)
 						}
 					}
@@ -113,16 +121,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								!newReviews && end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
-									}
-								},
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
+									},
 								{
 									field_code: fields.find(field => field.key === key)
 										?.field as string,

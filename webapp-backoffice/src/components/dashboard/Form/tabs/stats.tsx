@@ -105,7 +105,8 @@ const StatsTab = ({ form, ownRight }: Props) => {
 		trpc.review.countReviews.useQuery({
 			numberPerPage: 0,
 			page: 1,
-			product_id: form.product.id
+			product_id: form.product.id,
+			form_id: form.id
 		});
 
 	const {
@@ -116,6 +117,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 			numberPerPage: 0,
 			page: 1,
 			product_id: form.product.id,
+			form_id: form.id,
 			start_date: filters.sharedFilters.currentStartDate,
 			end_date: filters.sharedFilters.currentEndDate,
 			filters: {
@@ -133,6 +135,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 		trpc.answer.countByFieldCode.useQuery(
 			{
 				product_id: form.product.id,
+				form_id: form.id,
 				...(filters.productStats.buttonId && {
 					button_id: filters.productStats.buttonId
 				}),

@@ -46,7 +46,8 @@ const ProductFormPage = (props: Props) => {
 		trpc.review.countReviews.useQuery({
 			numberPerPage: 0,
 			page: 1,
-			product_id: form.product_id
+			product_id: form.product_id,
+			form_id: form.id
 		});
 
 	const nbReviews = reviewsData?.metadata.countAll || 0;

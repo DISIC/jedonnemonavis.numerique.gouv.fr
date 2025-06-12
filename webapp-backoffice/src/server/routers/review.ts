@@ -51,11 +51,24 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, shouldIncludeAnswers, product_id, form_id, newReviews } = input;
+			const {
+				numberPerPage,
+				page,
+				shouldIncludeAnswers,
+				product_id,
+				form_id,
+				newReviews
+			} = input;
 
 			const product = await ctx.prisma.product.findUnique({
 				where: {
 					id: product_id
+				}
+			});
+
+			const form = await ctx.prisma.form.findUnique({
+				where: {
+					id: form_id
 				}
 			});
 
@@ -91,10 +104,13 @@ export const reviewRouter = router({
 				}
 			}
 
-			const { where, orderBy } = formatWhereAndOrder({
-				...input,
-				lastSeenDate
-			});
+			const { where, orderBy } = formatWhereAndOrder(
+				{
+					...input,
+					lastSeenDate
+				},
+				!!form?.legacy
+			);
 
 			const lastSeenReview = await ctx.prisma.userEvent.findMany({
 				where: {
@@ -212,6 +228,7 @@ export const reviewRouter = router({
 				numberPerPage: z.number(),
 				page: z.number().default(1),
 				product_id: z.number().optional(),
+				form_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
 				mustHaveVerbatims: z.boolean().optional().default(false),
 				sort: z.string().optional(),
@@ -245,7 +262,15 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { where } = formatWhereAndOrder(input);
+			const { form_id } = input;
+
+			const form = await ctx.prisma.form.findUnique({
+				where: {
+					id: form_id
+				}
+			});
+
+			const { where } = formatWhereAndOrder(input, !!form?.legacy);
 
 			const [countFiltered, countAll, countForm1, countForm2] =
 				await Promise.all([
@@ -278,6 +303,7 @@ export const reviewRouter = router({
 		.input(
 			z.object({
 				product_id: z.number().optional(),
+				form_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
 				mustHaveVerbatims: z.boolean().optional().default(false),
 				sort: z.string().optional(),
@@ -325,7 +351,15 @@ export const reviewRouter = router({
 				OpinionLabels.map(o => o.label)
 			);
 
-			const { where, orderBy } = formatWhereAndOrder(input);
+			const { form_id } = input;
+
+			const form = await ctx.prisma.form.findUnique({
+				where: {
+					id: form_id
+				}
+			});
+
+			const { where, orderBy } = formatWhereAndOrder(input, !!form?.legacy);
 
 			const totalRows = await ctx.prisma.review.count({ where });
 			let processedRows = 0;
@@ -428,46 +462,7 @@ export const reviewRouter = router({
 			return { progress: getMemoryValue(input.memoryKey) || 0 };
 		}),
 
-	getCounts: protectedProcedure
-		.input(
-			z.object({
-				product_id: z.number().optional(),
-				start_date: z.string().optional(),
-				end_date: z.string().optional(),
-				button_id: z.number().optional(),
-				filters: z
-					.object({
-						satisfaction: z.array(z.string()).optional(),
-						comprehension: z.array(z.string()).optional(),
-						needVerbatim: z.boolean().optional(),
-						needOtherDifficulties: z.boolean().optional(),
-						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional()
-					})
-					.optional()
-			})
-		)
-		.output(
-			z.object({
-				countFiltered: z.number(),
-				countAll: z.number()
-			})
-		)
-		.query(async ({ ctx, input }) => {
-			const { where, orderBy } = formatWhereAndOrder(input);
-
-			const countFiltered = await ctx.prisma.review.count({ where });
-
-			const countAll = await ctx.prisma.review.count({
-				where: {
-					product_id: input.product_id
-				}
-			});
-
-			return { countFiltered, countAll };
-		}),
-
-		getCountsByForm: protectedProcedure
+	getCountsByForm: protectedProcedure
 		.input(
 			z.object({
 				product_id: z.number()
@@ -491,18 +486,18 @@ export const reviewRouter = router({
 				_count: { id: true }
 			});
 
-			// Conversion en objet { [form_id]: count }
-			const countsByForm = countsByFormRaw.reduce((acc, curr) => {
-				acc[curr.form_id.toString()] = curr._count.id;
-				return acc;
-			}, {} as Record<string, number>);
+			const countsByForm = countsByFormRaw.reduce(
+				(acc, curr) => {
+					acc[curr.form_id.toString()] = curr._count.id;
+					return acc;
+				},
+				{} as Record<string, number>
+			);
 
-			// Total count
 			const totalCount = await ctx.prisma.review.count({
 				where: { product_id }
 			});
 
-			// New count global (logique existante pour le niveau produit)
 			const lastSeenReview = await ctx.prisma.userEvent.findMany({
 				where: {
 					user_id: parseInt(ctx.session?.user?.id),
@@ -515,21 +510,18 @@ export const reviewRouter = router({
 
 			const newCount = lastSeenReview[0]
 				? await ctx.prisma.review.count({
-					where: {
-						product_id: product_id,
-						created_at: { gte: lastSeenReview[0].created_at }
-					}
-				})
+						where: {
+							product_id: product_id,
+							created_at: { gte: lastSeenReview[0].created_at }
+						}
+					})
 				: 0;
 
-			// New counts par formulaire (basé sur les consultations spécifiques par formulaire)
 			const newCountsByForm: Record<string, number> = {};
-			
-			// Pour chaque formulaire, récupérer la dernière consultation spécifique
+
 			for (const formData of countsByFormRaw) {
 				const formId = formData.form_id;
-				
-				// Chercher la dernière consultation spécifique de ce formulaire
+
 				const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
 					where: {
 						user_id: parseInt(ctx.session?.user?.id),
@@ -544,11 +536,10 @@ export const reviewRouter = router({
 					take: 1
 				});
 
-				// Si aucune consultation spécifique du formulaire, utiliser la consultation du produit
-				const lastSeenDate = lastSeenFormReview[0] 
-					? lastSeenFormReview[0].created_at 
-					: lastSeenReview[0] 
-						? lastSeenReview[0].created_at 
+				const lastSeenDate = lastSeenFormReview[0]
+					? lastSeenFormReview[0].created_at
+					: lastSeenReview[0]
+						? lastSeenReview[0].created_at
 						: null;
 
 				if (lastSeenDate) {
@@ -560,7 +551,6 @@ export const reviewRouter = router({
 					});
 					newCountsByForm[formId.toString()] = newCountForForm;
 				} else {
-					// Si aucune consultation, tous les avis sont nouveaux
 					newCountsByForm[formId.toString()] = formData._count.id;
 				}
 			}

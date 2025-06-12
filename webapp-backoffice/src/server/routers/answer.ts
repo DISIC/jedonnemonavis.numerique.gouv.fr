@@ -520,21 +520,31 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number().optional(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, button_id } = input;
+			const { product_id, form_id, button_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+
+			const form = await ctx.prisma.form.findUnique({
+				where: {
+					id: form_id
+				}
+			});
 
 			const data = await ctx.elkClient.count({
 				index: 'jdma-answers',
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					...(form?.legacy
+						? { OR: [{ form_id: form_id }, { form_id: null }] }
+						: { form_id })
 				})
 			});
 
