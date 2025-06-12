@@ -36,6 +36,23 @@ const checkAndGetProduct = async ({
 
 	return product;
 };
+const checkAndGetForm = async ({
+	ctx,
+	form_id
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	form_id: number;
+}) => {
+	const form = await ctx.prisma.form.findUnique({
+		where: {
+			id: form_id
+		}
+	});
+
+	if (!form) throw new Error('Form not found');
+
+	return form;
+};
 
 const queryCountByFieldCode = ({
 	field_code,
@@ -44,7 +61,8 @@ const queryCountByFieldCode = ({
 	start_date,
 	end_date,
 	form_id,
-	only_parent_values
+	only_parent_values,
+	legacy
 }: {
 	field_code: string;
 	product_id: number;
@@ -53,55 +71,66 @@ const queryCountByFieldCode = ({
 	end_date: string;
 	form_id?: number;
 	only_parent_values?: boolean;
+	legacy: boolean
 }): QueryDslQueryContainer => {
 	let query: QueryDslQueryContainer = {
 		bool: {
-			must: [
-				{
-					match: {
-						field_code
-					}
-				},
-				{
-					match: {
-						product_id
-					}
-				},
-				{
-					range: {
-						created_at: {
-							gte: start_date,
-							lte: end_date
-						}
-					}
+		  must: [
+			{
+			  match: {
+				field_code
+			  }
+			},
+			{
+			  match: {
+				product_id
+			  }
+			},
+			{
+			  range: {
+				created_at: {
+				  gte: start_date,
+				  lte: end_date
 				}
-			]
+			  }
+			}
+		  ]
 		}
-	};
-
-	// SPECIFIC CODE BECAUSE FORM_ID DOES NOT EXIST IN THE MIGRATED DATA
-	if (query.bool && query.bool.must) {
-		if (form_id && form_id === 1) {
+	  };
+	  
+	  if (query.bool && query.bool.must) {
+		
+		if (form_id) {
+		  if (legacy) {
+			(query.bool.must as QueryDslQueryContainer[]).push({
+			  terms: {
+				form_id: [form_id, 2]
+			  }
+			});
+		  } else if (form_id === 1) {
+			
 			query.bool.must_not = {
-				exists: {
-					field: 'form_id'
-				}
+			  exists: {
+				field: 'form_id'
+			  }
 			};
-		} else if (form_id) {
+		  } else {
 			(query.bool.must as QueryDslQueryContainer[]).push({
-				match: {
-					form_id
-				}
+			  match: {
+				form_id
+			  }
 			});
+		  }
 		}
+	  
 		if (button_id) {
-			(query.bool.must as QueryDslQueryContainer[]).push({
-				match: {
-					button_id
-				}
-			});
+		  (query.bool.must as QueryDslQueryContainer[]).push({
+			match: {
+			  button_id
+			}
+		  });
 		}
-	}
+	  }
 
 	if (only_parent_values && query.bool && query.bool.must) {
 		(query.bool.must as QueryDslQueryContainer[]).push({
@@ -226,19 +255,21 @@ export const answerRouter = router({
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string(),
-				form_id: z.number().optional()
+				form_id: z.number(),
 			})
 		)
 		.query(async ({ ctx, input }) => {
 			const { product_id, button_id, form_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					term: {
@@ -256,7 +287,8 @@ export const answerRouter = router({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					unique_review_ids: {

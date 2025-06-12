@@ -284,6 +284,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}
@@ -322,6 +323,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFiltersForm1}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}

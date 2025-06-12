@@ -22,6 +22,7 @@ const BarVerticalChart = dynamic(
 type Props = {
 	fieldCode: string;
 	productId: number;
+	formId: number;
 	buttonId?: number;
 	startDate: string;
 	endDate: string;
@@ -33,6 +34,7 @@ type Props = {
 const BarMultipleQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -50,12 +52,11 @@ const BarMultipleQuestionViz = ({
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
-				...(oldFormFieldCodes.includes(fieldCode) && {
-					form_id: 1
-				}),
-				...(newFormFieldCodes.includes(fieldCode) && {
-					form_id: 2
-				})
+				form_id: oldFormFieldCodes.includes(fieldCode)
+					? 1
+					: newFormFieldCodes.includes(fieldCode)
+						? formId
+						: -1
 			},
 			{
 				initialData: {
