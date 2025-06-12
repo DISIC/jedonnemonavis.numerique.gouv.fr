@@ -16,7 +16,11 @@ import {
 	ButtonWithForm,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
-import { formatDateToFrenchString, formatNumberWithSpaces, getNbPages } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	formatNumberWithSpaces,
+	getNbPages
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -51,16 +55,18 @@ const ProductButtonsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 	const router = useRouter();
-	
-	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.getList.useQuery({
-			numberPerPage: 0,
-			page: 1,
+
+	const { data: reviewsCountData, isLoading: isLoadingReviewsCount } =
+		trpc.review.getCountsByForm.useQuery({
 			product_id: product.id
 		});
 
-	const nbReviews = reviewsData?.metadata.countAll || 0;
-	const nbNewReviews = reviewsData?.metadata.countNew || 0;
+	const totalReviews = reviewsCountData?.totalCount ?? 0;
+	const nbNewReviews = reviewsCountData?.newCount ?? 0;
+	const getFormReviewCount = (formId: number) =>
+		reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+	const getFormNewReviewCount = (formId: number) =>
+		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
@@ -82,7 +88,7 @@ const ProductButtonsPage = (props: Props) => {
 						</div>
 						<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
 							{ownRight === 'carrier_admin' && (
-								<Button priority='secondary' onClick={new_form_modal.open}>
+								<Button priority="secondary" onClick={new_form_modal.open}>
 									Créer un nouveau formulaire
 									<span
 										className={fr.cx(
@@ -98,39 +104,69 @@ const ProductButtonsPage = (props: Props) => {
 							<Checkbox
 								options={[
 									{
-									label: 'Afficher les formulaires supprimés',
-									nativeInputProps: {
-										name: 'checkboxes-1',
-										value: 'value1'
-									}
+										label: 'Afficher les formulaires supprimés',
+										nativeInputProps: {
+											name: 'checkboxes-1',
+											value: 'value1'
+										}
 									}
 								]}
-								/>
+							/>
 						</div>
-						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}> 
-							{product.forms.map((form) => (
-								<div key={form.id} className={cx(fr.cx('fr-grid-row', 'fr-mb-6v', 'fr-p-4v', 'fr-grid-row--middle'), classes.formCard)}>
-									<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9', 'fr-pb-0', 'fr-pt-1v', 'fr-mb-6v'))}> 
-										<Link 
+						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
+							{product.forms.map(form => (
+								<div
+									key={form.id}
+									className={cx(
+										fr.cx(
+											'fr-grid-row',
+											'fr-mb-6v',
+											'fr-p-4v',
+											'fr-grid-row--middle'
+										),
+										classes.formCard
+									)}
+								>
+									<div
+										className={cx(
+											fr.cx(
+												'fr-col',
+												'fr-col-12',
+												'fr-col-md-9',
+												'fr-pb-0',
+												'fr-pt-1v',
+												'fr-mb-6v'
+											)
+										)}
+									>
+										<Link
 											href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
 											className={cx(classes.productTitle)}
 										>
-											<span>
-												{form.title || form.form_template.title}
-											</span>
-										</Link>	
+											<span>{form.title || form.form_template.title}</span>
+										</Link>
 									</div>
 									{form.buttons.length > 0 ? (
 										<>
-											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9'))}> 
-												<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
+											<div
+												className={cx(
+													fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')
+												)}
+											>
+												<span
+													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+												>
 													Réponses déposées
 												</span>
-												<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>{formatNumberWithSpaces(nbReviews)}</span>
-												<Badge severity="success" noIcon small>
-													{nbNewReviews} NOUVELLES RÉPONSES
-												</Badge>
-												{nbReviews > 0 && (
+												<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
+													{formatNumberWithSpaces(getFormReviewCount(form.id))}
+												</span>
+												{getFormNewReviewCount(form.id) > 0 && (
+													<Badge severity="success" noIcon small>
+														{getFormNewReviewCount(form.id)} NOUVELLES RÉPONSES
+													</Badge>
+												)}
+												{getFormReviewCount(form.id) > 0 && (
 													<Link
 														href={`/administration/dashboard/product/${product.id}/reviews`}
 														title={`Voir les avis pour ${product.title}`}
@@ -140,16 +176,36 @@ const ProductButtonsPage = (props: Props) => {
 													</Link>
 												)}
 											</div>
-											<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3', 'fr-mt-auto'), classes.rightButtonsWrapper)}>
-												<span className={cx(fr.cx('fr-mr-2v'), classes.smallText)}>
-													Modifié le 
+											<div
+												className={cx(
+													fr.cx(
+														'fr-col',
+														'fr-col-12',
+														'fr-col-md-3',
+														'fr-mt-auto'
+													),
+													classes.rightButtonsWrapper
+												)}
+											>
+												<span
+													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+												>
+													Modifié le
 												</span>
 												<span className={fr.cx('fr-text--bold')}>
 													{formatDateToFrenchString(form.updated_at.toString())}
 												</span>
 											</div>
 										</>
-									) : <ServiceFormsNoButtonsPanel onButtonClick={() => {router.push(`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=form`)}} />}
+									) : (
+										<ServiceFormsNoButtonsPanel
+											onButtonClick={() => {
+												router.push(
+													`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=form`
+												);
+											}}
+										/>
+									)}
 								</div>
 							))}
 						</div>
@@ -174,11 +230,11 @@ const useStyles = tss
 			maxWidth: '100%',
 			marginLeft: 0,
 			marginRight: 0,
-			marginBottom: "0.5rem",
+			marginBottom: '0.5rem'
 		},
 		smallText: {
 			color: fr.colors.decisions.text.default.grey.default,
-			fontSize: "0.8rem"
+			fontSize: '0.8rem'
 		},
 		headerButtons: {
 			display: 'flex',
@@ -204,7 +260,7 @@ const useStyles = tss
 			'&:hover': {
 				textDecoration: 'underline'
 			}
-		},
+		}
 	});
 
 export { getServerSideProps };
