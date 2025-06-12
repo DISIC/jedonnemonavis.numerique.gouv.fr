@@ -27,7 +27,7 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import { AnswerIntention, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 
@@ -50,16 +50,16 @@ const ReviewsTab = (props: Props) => {
 	const { form, ownRight } = props;
 	const router = useRouter();
 	const { view } = router.query;
-	const [search, setSearch] = React.useState<string>('');
-	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
-	const [errors, setErrors] = React.useState<FormErrors>(defaultErrors);
-	const [currentPage, setCurrentPage] = React.useState(1);
-	const [numberPerPage, setNumberPerPage] = React.useState(10);
-	const [sort, setSort] = React.useState<string>('created_at:desc');
-	const [displayMode, setDisplayMode] = React.useState<'reviews' | 'verbatim'>(
+	const [search, setSearch] = useState<string>('');
+	const [validatedSearch, setValidatedSearch] = useState<string>('');
+	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [numberPerPage, setNumberPerPage] = useState(10);
+	const [sort, setSort] = useState<string>('created_at:desc');
+	const [displayMode, setDisplayMode] = useState<'reviews' | 'verbatim'>(
 		view === 'verbatim' ? 'verbatim' : 'reviews'
 	);
-	const [buttonId, setButtonId] = React.useState<number>();
+	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
 
@@ -145,11 +145,7 @@ const ReviewsTab = (props: Props) => {
 		}
 	);
 
-	const {
-		data: reviewLogResults,
-		isFetching: isLoadingReviewLog,
-		error: errorReviewLog
-	} = trpc.userEvent.getLastReviewView.useQuery(
+	const { data: reviewLogResults } = trpc.userEvent.getLastReviewView.useQuery(
 		{
 			product_id: form.product_id
 		},
@@ -171,8 +167,7 @@ const ReviewsTab = (props: Props) => {
 			onSuccess: result => {}
 		});
 
-	// Créer l'événement de consultation du formulaire au chargement
-	React.useEffect(() => {
+	useEffect(() => {
 		createFormReviewView.mutate({
 			product_id: form.product_id,
 			form_id: form.id
@@ -333,9 +328,6 @@ const ReviewsTab = (props: Props) => {
 		}
 	};
 
-	// useEffect temporairement désactivé à cause des problèmes de typage
-	// TODO: Réparer les types de filtres
-	/*
 	useEffect(() => {
 		if (filters.productReviews.displayNew) {
 			updateFilters({
@@ -374,7 +366,6 @@ const ReviewsTab = (props: Props) => {
 			});
 		}
 	}, [filters.productReviews.displayNew]);
-	*/
 
 	const handleButtonClick = () => {
 		router.push({
