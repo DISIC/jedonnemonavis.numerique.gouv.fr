@@ -9,7 +9,9 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		sort,
 		start_date,
 		end_date,
-		filters
+		filters,
+		newReviews,
+		lastSeenDate
 	} = input;
 
 	let where: Prisma.ReviewWhereInput = {
@@ -18,14 +20,21 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 		...(filters?.buttonId?.length > 0 && {
 			button_id: parseInt(filters.buttonId[0])
 		}),
-		...(end_date && {
+		...(newReviews && lastSeenDate && {
+			created_at: {
+				gt: new Date(lastSeenDate)
+			}
+		}),
+		...(!newReviews && (start_date || end_date) && {
 			created_at: {
 				...(start_date && { gte: new Date(start_date) }),
-				lte: (() => {
-					const adjustedend_date = new Date(end_date);
-					adjustedend_date.setHours(23, 59, 59);
-					return adjustedend_date;
-				})()
+				...(end_date && {
+					lte: (() => {
+						const adjustedend_date = new Date(end_date);
+						adjustedend_date.setHours(23, 59, 59);
+						return adjustedend_date;
+					})()
+				})
 			}
 		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
@@ -35,7 +44,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
-								end_date && {
+								!newReviews && end_date && {
 									created_at: {
 										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
@@ -45,7 +54,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 										})()
 									}
 								}
-							]
+							].filter(Boolean)
 						}
 					}
 				}
@@ -66,7 +75,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 									}
 								},
 								{ field_code: 'verbatim' },
-								end_date && {
+								!newReviews && end_date && {
 									created_at: {
 										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
@@ -76,7 +85,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 										})()
 									}
 								}
-							]
+							].filter(Boolean)
 						}
 					}
 				}
@@ -104,7 +113,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								end_date && {
+								!newReviews && end_date && {
 									created_at: {
 										...(start_date && { gte: new Date(start_date) }),
 										lte: (() => {
@@ -128,7 +137,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 										}
 									})
 								}
-							]
+							].filter(Boolean)
 						}
 					}
 				};

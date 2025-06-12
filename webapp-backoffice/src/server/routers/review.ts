@@ -51,14 +51,49 @@ export const reviewRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { numberPerPage, page, shouldIncludeAnswers, product_id, form_id } = input;
-
-			const { where, orderBy } = formatWhereAndOrder(input);
+			const { numberPerPage, page, shouldIncludeAnswers, product_id, form_id, newReviews } = input;
 
 			const product = await ctx.prisma.product.findUnique({
 				where: {
 					id: product_id
 				}
+			});
+
+			let lastSeenDate = null;
+			if (newReviews && form_id) {
+				const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
+					where: {
+						user_id: parseInt(ctx.session?.user?.id),
+						action: 'form_reviews_view',
+						product_id: product_id,
+						metadata: {
+							path: ['form_id'],
+							equals: form_id
+						}
+					},
+					orderBy: { created_at: 'desc' },
+					take: 1
+				});
+
+				if (lastSeenFormReview.length === 0) {
+					const lastSeenProductReview = await ctx.prisma.userEvent.findMany({
+						where: {
+							user_id: parseInt(ctx.session?.user?.id),
+							action: 'service_reviews_view',
+							product_id: product_id
+						},
+						orderBy: { created_at: 'desc' },
+						take: 1
+					});
+					lastSeenDate = lastSeenProductReview[0]?.created_at;
+				} else {
+					lastSeenDate = lastSeenFormReview[0]?.created_at;
+				}
+			}
+
+			const { where, orderBy } = formatWhereAndOrder({
+				...input,
+				lastSeenDate
 			});
 
 			const lastSeenReview = await ctx.prisma.userEvent.findMany({

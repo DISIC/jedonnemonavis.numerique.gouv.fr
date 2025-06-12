@@ -123,8 +123,12 @@ const ReviewsTab = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			start_date: filters.sharedFilters.currentStartDate,
-			end_date: filters.sharedFilters.currentEndDate,
+			start_date: filters.productReviews.displayNew
+				? undefined
+				: filters.sharedFilters.currentStartDate,
+			end_date: filters.productReviews.displayNew
+				? undefined
+				: filters.sharedFilters.currentEndDate,
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
@@ -145,34 +149,20 @@ const ReviewsTab = (props: Props) => {
 		}
 	);
 
-	const { data: reviewLogResults } = trpc.userEvent.getLastReviewView.useQuery(
-		{
-			product_id: form.product_id
-		},
-		{
-			initialData: {
-				data: []
+	const { data: reviewLogResults } =
+		trpc.userEvent.getLastFormReviewView.useQuery(
+			{
+				product_id: form.product_id,
+				form_id: form.id
+			},
+			{
+				initialData: {
+					data: []
+				}
 			}
-		}
-	);
+		);
 
 	const { data: reviewLog } = reviewLogResults;
-
-	const createReviewLog = trpc.userEvent.createReviewView.useMutation({
-		onSuccess: result => {}
-	});
-
-	const createFormReviewView =
-		trpc.review.createFormReviewViewEvent.useMutation({
-			onSuccess: result => {}
-		});
-
-	useEffect(() => {
-		createFormReviewView.mutate({
-			product_id: form.product_id,
-			form_id: form.id
-		});
-	}, [form.product_id, form.id]);
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
@@ -329,34 +319,7 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	useEffect(() => {
-		if (filters.productReviews.displayNew) {
-			updateFilters({
-				...filters,
-				productReviews: {
-					...filters.productReviews
-				},
-				sharedFilters: {
-					...filters.sharedFilters,
-					currentStartDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					)
-						.toISOString()
-						.split('T')[0],
-					currentEndDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					).toISOString(),
-					dateShortcut: undefined
-				}
-			});
-		} else {
+		if (!filters.productReviews.displayNew) {
 			updateFilters({
 				...filters,
 				sharedFilters: {
