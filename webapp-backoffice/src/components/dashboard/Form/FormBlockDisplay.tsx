@@ -1,4 +1,3 @@
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -11,6 +10,7 @@ import Paragraph from './blocks/Paragraph';
 import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 

@@ -1,18 +1,15 @@
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
-import { tss } from 'tss-react';
-import FormBlockDisplay from './FormBlockDisplay';
-import { useEffect, useState } from 'react';
 import { FormConfigKind } from '@prisma/client';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import Radios from './blocks/Radios';
-import RootYesNo from './custom/RootYesNo';
-import RootTable from './custom/RootTable';
-import { normalizeHtml } from '@/src/utils/tools';
+import { useEffect, useState } from 'react';
+import { tss } from 'tss-react';
 import RootScales from './custom/RootScales';
+import RootYesNo from './custom/RootYesNo';
+import FormBlockDisplay from './FormBlockDisplay';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
 interface Props {

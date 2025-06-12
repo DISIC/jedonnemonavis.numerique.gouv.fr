@@ -1,5 +1,4 @@
-// src/hooks/useModifiedSteps.ts
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { normalizeHtml } from '@/src/utils/tools';
 import { useState, useEffect, useCallback } from 'react';

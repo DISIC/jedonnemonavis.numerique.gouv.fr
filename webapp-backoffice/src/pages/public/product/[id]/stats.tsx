@@ -6,7 +6,6 @@ import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
-import { SectionWrapper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import {
 	betaTestXwikiIds,
 	formatNumberWithSpaces,
@@ -24,6 +23,7 @@ import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import { push } from '@socialgouv/matomo-next';
+import { SectionWrapper } from '@/src/components/dashboard/Form/tabs/stats';
 
 interface Props {
 	product: Product | null;

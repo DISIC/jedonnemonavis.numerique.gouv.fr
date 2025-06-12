@@ -1,4 +1,3 @@
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { deserialize, serialize } from '@/src/utils/slate';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -11,6 +10,7 @@ import { tss } from 'tss-react';
 import Element from './editor/Element';
 import Leaf from './editor/Leaf';
 import MarkButton from './editor/MarkButton';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 interface Props {
 	form: FormWithElements;
@@ -35,7 +35,8 @@ const getTextLength = (editor: BaseEditor) => {
 };
 
 const Editor = (props: Props) => {
-	const { form, block, configHelper, initialValue, onConfigChange, onCancel } = props;
+	const { form, block, configHelper, initialValue, onConfigChange, onCancel } =
+		props;
 
 	const { classes, cx } = useStyles();
 
@@ -143,10 +144,7 @@ const Editor = (props: Props) => {
 			)}
 			<div className={cx(classes.submit)}>
 				<div>
-					<Button
-						priority="secondary"
-						onClick={onCancel}
-					>
+					<Button priority="secondary" onClick={onCancel}>
 						Annuler
 					</Button>
 				</div>
@@ -204,7 +202,7 @@ const useStyles = tss.withName(MarkButton.name).create({
 	},
 	rightButtonsWrapper: {
 		display: 'flex',
-		gap: fr.spacing('4v'),
+		gap: fr.spacing('4v')
 	},
 	nbCharsHint: {
 		textAlign: 'right',

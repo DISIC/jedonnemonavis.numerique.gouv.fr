@@ -1,10 +1,10 @@
-import { HideBlockOptionsHelper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import {
 	formatDateToFrenchString,
 	formatNumberWithSpaces
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
+import { HideBlockOptionsHelper } from '../Form/tabs/stats';
 
 type QuestionWrapperProps = {
 	totalField: number;

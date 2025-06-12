@@ -1,9 +1,7 @@
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { normalizeHtml } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import React from 'react';
 import { tss } from 'tss-react';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];

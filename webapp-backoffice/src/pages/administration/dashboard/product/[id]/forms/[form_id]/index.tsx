@@ -120,19 +120,7 @@ const ProductFormPage = (props: Props) => {
 							},
 							{
 								label: 'Statistiques',
-								content: (
-									<StatsTab
-										form={form}
-										defaultStartDate={
-											new Date(
-												new Date().setFullYear(new Date().getFullYear() - 1)
-											)
-												.toISOString()
-												.split('T')[0]
-										}
-										defaultEndDate={new Date().toISOString().split('T')[0]}
-									/>
-								)
+								content: <StatsTab form={form} ownRight={ownRight} />
 							},
 							{
 								label: 'Formulaire',

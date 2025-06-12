@@ -1,4 +1,3 @@
-import { HideBlockOptionsHelper } from '@/src/pages/administration/dashboard/product/[id]/stats';
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
 import dynamic from 'next/dynamic';
@@ -6,6 +5,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ChartWrapper from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
+import { HideBlockOptionsHelper } from '../Form/tabs/stats';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false

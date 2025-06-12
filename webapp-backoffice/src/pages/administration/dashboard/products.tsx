@@ -413,15 +413,17 @@ const DashBoard = () => {
 											name: 'select-view',
 											value: filters.view,
 											onChange: event => {
-												const value = event.target.value;
+												const value = event.target.value as
+													| 'all'
+													| 'favorites'
+													| 'archived';
 
-												// On traduit la sélection en états booléens
 												updateFilters({
 													...filters,
 													currentPage: 1,
 													view: value,
 													filterOnlyFavorites: value === 'favorites',
-													filterOnlyArchived: value === 'archived',
+													filterOnlyArchived: value === 'archived'
 												});
 											}
 										}}

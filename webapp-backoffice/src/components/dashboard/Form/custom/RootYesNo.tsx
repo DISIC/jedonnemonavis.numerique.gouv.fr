@@ -2,8 +2,8 @@ import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Radios from '../blocks/Radios';
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 type Props = {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -56,7 +56,11 @@ const RootYesNo = (props: Props) => {
 								</Badge>
 							)}
 						</label>
-						<Radios block={childBlock} disabled={disabled || isParentHidden} nbItems={2} />
+						<Radios
+							block={childBlock}
+							disabled={disabled || isParentHidden}
+							nbItems={2}
+						/>
 					</div>
 				);
 			})}

@@ -85,10 +85,13 @@ const ReviewsTab = (props: Props) => {
 			...filters,
 			productReviews: {
 				...filters.productReviews,
-				hasChanged: true,
 				filters: {
 					...filtersT
 				}
+			},
+			sharedFilters: {
+				...filters.sharedFilters,
+				hasChanged: true
 			}
 		});
 		filter_modal.close();
@@ -130,8 +133,8 @@ const ReviewsTab = (props: Props) => {
 			shouldIncludeAnswers: true,
 			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
 			search: validatedSearch,
-			start_date: filters.productReviews.currentStartDate,
-			end_date: filters.productReviews.currentEndDate,
+			start_date: filters.sharedFilters.currentStartDate,
+			end_date: filters.sharedFilters.currentEndDate,
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
@@ -332,7 +335,10 @@ const ReviewsTab = (props: Props) => {
 			updateFilters({
 				...filters,
 				productReviews: {
-					...filters.productReviews,
+					...filters.productReviews
+				},
+				sharedFilters: {
+					...filters.sharedFilters,
 					currentStartDate: new Date(
 						reviewLog[0]
 							? reviewLog[0].created_at
@@ -355,8 +361,8 @@ const ReviewsTab = (props: Props) => {
 		} else {
 			updateFilters({
 				...filters,
-				productReviews: {
-					...filters.productReviews,
+				sharedFilters: {
+					...filters.sharedFilters,
 					dateShortcut: 'one-year'
 				}
 			});
@@ -450,8 +456,8 @@ const ReviewsTab = (props: Props) => {
 						<ExportReviews
 							product_id={form.product_id}
 							form_id={form.id}
-							startDate={filters.productReviews.currentStartDate}
-							endDate={filters.productReviews.currentEndDate}
+							startDate={filters.sharedFilters.currentStartDate}
+							endDate={filters.sharedFilters.currentEndDate}
 							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
 							search={search}
 							button_id={buttonId}
@@ -609,8 +615,11 @@ const ReviewsTab = (props: Props) => {
 														...filters,
 														productReviews: {
 															...filters.productReviews,
-															hasChanged: true,
 															displayNew: e.target.checked
+														},
+														sharedFilters: {
+															...filters.sharedFilters,
+															hasChanged: true
 														}
 													});
 												}
