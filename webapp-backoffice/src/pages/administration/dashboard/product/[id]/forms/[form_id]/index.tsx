@@ -54,10 +54,10 @@ const ProductFormPage = (props: Props) => {
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | Configuration du formulaire | Je donne mon avis`}</title>
+				<title>{`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${form.product.title} | Configuration du formulaire | Je donne mon avis`}
+					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
 				/>
 			</Head>
 			<Breadcrumb
@@ -114,18 +114,20 @@ const ProductFormPage = (props: Props) => {
 								label: 'Tableau de bord',
 								content: (
 									<DashboardTab
-										hasNoReviews={nbReviews === 0}
+										hasReviews={nbReviews > 0}
 										isLoading={isLoadingReviewsCount}
 									/>
 								)
 							},
 							{
 								label: 'Réponses',
-								content: <ReviewsTab form={form} ownRight={ownRight} />
+								content: <ReviewsTab form={form} ownRight={ownRight} />,
+								isDefault: router.query.tab === 'reviews'
 							},
 							{
 								label: 'Statistiques',
-								content: <StatsTab form={form} ownRight={ownRight} />
+								content: <StatsTab form={form} ownRight={ownRight} />,
+								isDefault: router.query.tab === 'stats'
 							},
 							{
 								label: 'Formulaire',
