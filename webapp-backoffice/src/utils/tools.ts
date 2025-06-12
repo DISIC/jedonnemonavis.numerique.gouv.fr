@@ -1,11 +1,9 @@
-import { matchSorter } from 'match-sorter';
-import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
-import { off } from 'process';
-import { FormConfigWithRelations } from '@/prisma/generated/zod';
+import { matchSorter } from 'match-sorter';
+import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
-import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -456,7 +454,7 @@ export const filtersLabel = [
 	{ value: 'service_button_create', label: "Création d'un bouton" },
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
-	{ value: 'form_config_create', label: "Modification du formulaire" }
+	{ value: 'form_config_create', label: 'Modification du formulaire' }
 ];
 
 export const getHelperFromFormConfig = (
