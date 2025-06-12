@@ -6,7 +6,7 @@ import { Badge } from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { AnswerIntention, Entity } from '@prisma/client';
+import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -111,10 +111,18 @@ const ProductCard = ({
 		});
 
 	const totalReviews = reviewsCountData?.totalCount ?? 0;
-	const getFormReviewCount = (formId: number) =>
-		reviewsCountData?.countsByForm[formId.toString()] ?? 0;
-	const getFormNewReviewCount = (formId: number) =>
-		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
+	const getFormReviewCount = (formId: number, legacy: boolean) =>
+		legacy
+			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
+				(reviewsCountData?.countsByForm['1'] ?? 0) +
+				(reviewsCountData?.countsByForm['2'] ?? 0)
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
+		legacy
+			? (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0) +
+				(reviewsCountData?.newCountsByForm['1'] ?? 0) +
+				(reviewsCountData?.newCountsByForm['2'] ?? 0)
+			: (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0);
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -425,13 +433,13 @@ const ProductCard = ({
 													</span>
 													<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
 														{formatNumberWithSpaces(
-															getFormReviewCount(form.id)
+															getFormReviewCount(form.id, form.legacy)
 														)}
 													</span>
-													{getFormNewReviewCount(form.id) > 0 && (
+													{getFormNewReviewCount(form.id, form.legacy) > 0 && (
 														<Badge severity="success" noIcon small>
-															{getFormNewReviewCount(form.id)} NOUVELLES
-															RÉPONSES
+															{getFormNewReviewCount(form.id, form.legacy)}{' '}
+															NOUVELLES RÉPONSES
 														</Badge>
 													)}
 												</div>

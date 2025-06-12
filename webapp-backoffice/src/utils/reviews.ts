@@ -20,7 +20,9 @@ export const formatWhereAndOrder = (
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
 		...(form_id &&
-			(isLegacy ? { OR: [{ form_id }, { form_id: null }] } : { form_id })),
+			(isLegacy
+				? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+				: { form_id })),
 		...(filters?.buttonId?.length > 0 && {
 			button_id: parseInt(filters.buttonId[0])
 		}),
