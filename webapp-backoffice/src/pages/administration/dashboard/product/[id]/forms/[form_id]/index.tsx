@@ -115,6 +115,7 @@ const ProductFormPage = (props: Props) => {
 								label: 'Tableau de bord',
 								content: (
 									<DashboardTab
+										form={form}
 										hasReviews={nbReviews > 0}
 										isLoading={isLoadingReviewsCount}
 									/>

@@ -4,19 +4,44 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Loader } from '@/src/components/ui/Loader';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import ObservatoireStats from '../../Stats/ObservatoireStats';
 
 interface Props {
 	hasReviews: boolean;
 	isLoading: boolean;
+	form: FormWithElements;
 }
 
-const DashboardTab = ({ hasReviews, isLoading }: Props) => {
+const DashboardTab = ({ hasReviews, isLoading, form }: Props) => {
 	const { cx, classes } = useStyles();
 
 	if (isLoading) return <Loader />;
 
 	return hasReviews ? (
-		<div className={cx(classes.mainContainer, fr.cx('fr-container'))}></div>
+		<div className={fr.cx('fr-grid-row')}>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-8v')}>Tableau de bord</h2>
+			<div className={fr.cx('fr-col-4')}>
+				<ObservatoireStats
+					productId={form.product_id}
+					startDate={
+						new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+							.toISOString()
+							.split('T')[0]
+					}
+					endDate={new Date().toISOString().split('T')[0]}
+					slugsToDisplay={[
+						'satisfaction',
+						'comprehension',
+						'contactReachability',
+						'contactSatisfaction'
+					]}
+					title="Dernières évolutions"
+					view="form-dashboard"
+				/>
+			</div>
+			<div className={fr.cx('fr-col-8')}></div>
+		</div>
 	) : (
 		<div className={cx(classes.mainContainer, fr.cx('fr-container'))}>
 			<Image
