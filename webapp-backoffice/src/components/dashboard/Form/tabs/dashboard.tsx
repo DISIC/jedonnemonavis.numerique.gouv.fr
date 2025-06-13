@@ -26,6 +26,7 @@ const DashboardTab = ({ nbReviews, isLoading, form }: Props) => {
 			<div className={fr.cx('fr-col-4')}>
 				<ObservatoireStats
 					productId={form.product_id}
+					formId={form.id}
 					startDate={
 						new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 							.toISOString()
@@ -47,6 +48,7 @@ const DashboardTab = ({ nbReviews, isLoading, form }: Props) => {
 					<AnswersChart
 						fieldCode="satisfaction"
 						productId={form.product.id}
+						formId={form.id}
 						startDate={
 							new Date(new Date().setFullYear(new Date().getFullYear() - 1))
 								.toISOString()

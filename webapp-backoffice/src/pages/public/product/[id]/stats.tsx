@@ -85,6 +85,7 @@ const ProductStatPage = (props: Props) => {
 	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
 		trpc.answer.countByFieldCode.useQuery({
 			product_id: product.id,
+			form_id: 0, // TODO: CHANGER
 			field_code: 'verbatim',
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
@@ -127,6 +128,7 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
+					formId={0} // TODO: CHANGER
 					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
@@ -172,6 +174,7 @@ const ProductStatPage = (props: Props) => {
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
+					formId={0} // TODO: CHANGER
 					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
@@ -185,6 +188,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -194,6 +198,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -202,6 +207,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -210,6 +216,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -218,6 +225,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -232,6 +240,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -241,6 +250,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFilters}
 						productId={product.id}
+						formId={0} // TODO: CHANGER
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
