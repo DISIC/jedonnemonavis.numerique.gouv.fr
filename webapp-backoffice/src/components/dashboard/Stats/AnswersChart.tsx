@@ -14,10 +14,13 @@ type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
 	formId: number;
-	buttonId: number | undefined;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
+	displayLine?: boolean;
+	isFormDashboardType?: boolean;
+	customHeight?: number;
 };
 
 const AnswersChart = ({
@@ -27,7 +30,10 @@ const AnswersChart = ({
 	buttonId,
 	startDate,
 	endDate,
-	total
+	total,
+	displayLine = true,
+	isFormDashboardType = false,
+	customHeight
 }: Props) => {
 	const { classes, cx } = useStyles();
 
@@ -62,14 +68,16 @@ const AnswersChart = ({
 				title="Évolution des réponses"
 				total={total}
 				data={countByFieldCodePerMonth}
+				isFormDashboardType={isFormDashboardType}
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
 					labelAxisY="Nombre de réponses"
+					customHeight={customHeight}
 				/>
 			</ChartWrapper>
 
-			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
+			{displayLine && <hr className={fr.cx('fr-hr', 'fr-mt-16v')} />}
 		</>
 	);
 };

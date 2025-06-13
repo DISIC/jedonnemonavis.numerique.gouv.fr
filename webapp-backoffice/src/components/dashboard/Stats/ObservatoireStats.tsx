@@ -14,7 +14,7 @@ type ObservatoireStatsProps = {
 	startDate: string;
 	endDate: string;
 	slugsToDisplay?: StatField['slug'][];
-	title?: string;
+	noTitle?: boolean;
 	view?: 'default' | 'form-dashboard';
 };
 
@@ -39,7 +39,7 @@ const ObservatoireStats = ({
 	startDate,
 	endDate,
 	slugsToDisplay,
-	title = 'Les indicateurs de vos démarches essentielles',
+	noTitle = false,
 	view = 'default'
 }: ObservatoireStatsProps) => {
 	const { cx, classes } = useStyles();
@@ -290,7 +290,12 @@ const ObservatoireStats = ({
 
 	return (
 		<div className={cx(view === 'default' && classes.card)}>
-			<h3 className={classes.title}>{title}</h3>
+			{!noTitle && (
+				<h3 className={classes.title}>
+					Les indicateurs de vos démarches essentielles
+				</h3>
+			)}
+
 			<div className={classes.contentContainer}>
 				{statFields
 					.filter(

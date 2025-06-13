@@ -6,21 +6,23 @@ import Link from 'next/link';
 import { Loader } from '@/src/components/ui/Loader';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
+import AnswersChart from '../../Stats/AnswersChart';
 
 interface Props {
-	hasReviews: boolean;
+	nbReviews: number;
 	isLoading: boolean;
 	form: FormWithElements;
 }
 
-const DashboardTab = ({ hasReviews, isLoading, form }: Props) => {
+const DashboardTab = ({ nbReviews, isLoading, form }: Props) => {
 	const { cx, classes } = useStyles();
 
 	if (isLoading) return <Loader />;
 
-	return hasReviews ? (
+	return nbReviews > 0 ? (
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-8v')}>Tableau de bord</h2>
+			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
 			<div className={fr.cx('fr-col-4')}>
 				<ObservatoireStats
 					productId={form.product_id}
@@ -36,11 +38,28 @@ const DashboardTab = ({ hasReviews, isLoading, form }: Props) => {
 						'contactReachability',
 						'contactSatisfaction'
 					]}
-					title="Dernières évolutions"
+					noTitle
 					view="form-dashboard"
 				/>
 			</div>
-			<div className={fr.cx('fr-col-8')}></div>
+			<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-ml-4v')} style={{ height: '100%' }}>
+					<AnswersChart
+						fieldCode="satisfaction"
+						productId={form.product.id}
+						startDate={
+							new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+								.toISOString()
+								.split('T')[0]
+						}
+						endDate={new Date().toISOString().split('T')[0]}
+						total={nbReviews}
+						displayLine={false}
+						isFormDashboardType
+						customHeight={350}
+					/>
+				</div>
+			</div>
 		</div>
 	) : (
 		<div className={cx(classes.mainContainer, fr.cx('fr-container'))}>
