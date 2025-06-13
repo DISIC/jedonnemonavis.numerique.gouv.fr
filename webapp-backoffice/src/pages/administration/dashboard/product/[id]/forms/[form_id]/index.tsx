@@ -116,7 +116,7 @@ const ProductFormPage = (props: Props) => {
 								content: (
 									<DashboardTab
 										form={form}
-										hasReviews={nbReviews > 0}
+										nbReviews={nbReviews}
 										isLoading={isLoadingReviewsCount}
 									/>
 								)
