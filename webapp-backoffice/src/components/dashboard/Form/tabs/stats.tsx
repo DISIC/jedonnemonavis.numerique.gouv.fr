@@ -211,6 +211,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 			<>
 				<ObservatoireStats
 					productId={form.product.id}
+					formId={form.id}
 					buttonId={filters.productStats.buttonId}
 					startDate={filters.sharedFilters.currentStartDate}
 					endDate={filters.sharedFilters.currentEndDate}
@@ -239,21 +240,12 @@ const StatsTab = ({ form, ownRight }: Props) => {
 								linkHref={`/administration/dashboard/product/${form.product.id}/reviews?view=verbatim`}
 							/>
 						</div>
-						{/* <div className={fr.cx('fr-col-4')}>
-                <KPITile
-                  title="Formulaires complets"
-                  kpi={0}
-                  desc="soit 0 % des répondants"
-                  linkHref={`/administration/dashboard/product/${form.product.id}/buttons`}
-                  hideLink
-                  grey
-                />
-              </div> */}
 					</div>
 				</div>
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={form.product.id}
+					formId={form.id}
 					buttonId={filters.productStats.buttonId}
 					startDate={filters.sharedFilters.currentStartDate}
 					endDate={filters.sharedFilters.currentEndDate}
@@ -267,6 +259,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}
@@ -276,6 +269,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}
@@ -293,6 +287,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFiltersForm2}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}
@@ -301,6 +296,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFiltersForm2}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}
@@ -315,6 +311,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFiltersForm1}
 						productId={form.product.id}
+						formId={form.id}
 						buttonId={filters.productStats.buttonId}
 						startDate={filters.sharedFilters.currentStartDate}
 						endDate={filters.sharedFilters.currentEndDate}

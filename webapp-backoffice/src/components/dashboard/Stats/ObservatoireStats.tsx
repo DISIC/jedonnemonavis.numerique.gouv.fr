@@ -9,6 +9,7 @@ import { tss } from 'tss-react';
 
 type ObservatoireStatsProps = {
 	productId: number;
+	formId: number;
 	buttonId?: number;
 	startDate: string;
 	endDate: string;
@@ -33,6 +34,7 @@ export type StatField = {
 
 const ObservatoireStats = ({
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -48,7 +50,8 @@ const ObservatoireStats = ({
 		isRefetching: isRefetchingStatsObservatoire
 	} = trpc.answer.getObservatoireStats.useQuery(
 		{
-			product_id: productId.toString(),
+			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			start_date: startDate,
 			end_date: endDate,
@@ -79,7 +82,7 @@ const ObservatoireStats = ({
 	const { data: lastMonthResultStats } =
 		trpc.answer.getObservatoireStats.useQuery(
 			{
-				product_id: productId.toString(),
+				product_id: productId,
 				...(buttonId && { button_id: buttonId }),
 				start_date: startDate,
 				end_date: new Date(

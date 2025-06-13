@@ -17,7 +17,7 @@ export async function createOrUpdateAnswers(
     answers: Prisma.AnswerCreateInput[];
     review: ReviewWithButtonAndProduct;
     step_name?: FormStepNames;
-  },
+  }
 ) {
   const { prisma, elkClient } = ctx;
   const { review, answers, step_name } = input;
@@ -144,7 +144,7 @@ export async function createOrUpdateAnswers(
           return newAnswer;
         });
       });
-    }),
+    })
   );
 
   await promises.then((responses) => {
@@ -166,6 +166,7 @@ export async function createOrUpdateAnswers(
                   button_id: review.button_id,
                   button_name: review.button.title,
                   product_id: review.product_id,
+                  form_id: review.form_id,
                   product_name: review.product.title,
                   created_at: review.created_at,
                 },
@@ -173,7 +174,7 @@ export async function createOrUpdateAnswers(
             });
           }
         })
-        .flat(),
+        .flat()
     );
   });
 }
@@ -183,7 +184,7 @@ export async function createReview(
   input: {
     review: Prisma.ReviewUncheckedCreateInput;
     answers: Prisma.AnswerCreateInput[];
-  },
+  }
 ) {
   const { prisma } = ctx;
   const { review, answers } = input;
@@ -211,7 +212,7 @@ export const reviewRouter = router({
       z.object({
         review: ReviewUncheckedCreateInputSchema,
         answers: z.array(AnswerCreateInputSchema),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const newReview = await createReview(ctx, input);
@@ -232,7 +233,7 @@ export const reviewRouter = router({
           "verbatim",
           "contact",
         ]),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
       const { user_id, product_id, button_id, answers, step_name } = input;

@@ -13,6 +13,7 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
+	formId: number;
 	buttonId: number | undefined;
 	startDate: string;
 	endDate: string;
@@ -22,6 +23,7 @@ type Props = {
 const AnswersChart = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -35,6 +37,7 @@ const AnswersChart = ({
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,

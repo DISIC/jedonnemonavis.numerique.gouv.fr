@@ -76,6 +76,7 @@ const BarMultipleQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,

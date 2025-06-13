@@ -24,6 +24,7 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
+	formId: number;
 	buttonId: number | undefined;
 	startDate: string;
 	endDate: string;
@@ -40,6 +41,7 @@ export const intentionSortOrder = {
 const SmileyQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -52,15 +54,16 @@ const SmileyQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
 				...(oldFormFieldCodes.includes(fieldCode) && {
-					form_id: 1
+					xwiki: true
 				}),
 				...(newFormFieldCodes.includes(fieldCode) && {
-					form_id: 2
+					xwiki: false
 				})
 			},
 			{
@@ -81,6 +84,7 @@ const SmileyQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -147,6 +151,8 @@ const SmileyQuestionViz = ({
 		});
 		data.push(item);
 	}
+
+	console.log(resultFieldCode);
 
 	return (
 		<QuestionWrapper
@@ -224,7 +230,7 @@ const SmileyQuestionViz = ({
 							})}
 					</div>
 				</ChartWrapper>
-		)}
+			)}
 
 			<ChartWrapper
 				title="Évolution des réponses"
@@ -280,7 +286,7 @@ const useStyles = tss.create({
 		marginTop: fr.spacing('2v'),
 		marginBottom: fr.spacing('2v'),
 		height: '1.5rem',
-		textWrap: 'nowrap',
+		textWrap: 'nowrap'
 	},
 	progressBar: {
 		width: '100%',

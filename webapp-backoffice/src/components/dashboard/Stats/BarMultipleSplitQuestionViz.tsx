@@ -21,6 +21,7 @@ const StackedVerticalBarChart = dynamic(
 type Props = {
 	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	productId: number;
+	formId: number;
 	buttonId?: number;
 	startDate: string;
 	endDate: string;
@@ -32,6 +33,7 @@ type Props = {
 const BarMultipleSplitQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -61,6 +63,7 @@ const BarMultipleSplitQuestionViz = ({
 		trpc.answer.getByChildFieldCode.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
@@ -84,6 +87,7 @@ const BarMultipleSplitQuestionViz = ({
 	} = trpc.answer.getByChildFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
