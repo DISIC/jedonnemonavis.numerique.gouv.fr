@@ -1,23 +1,63 @@
-import React from 'react';
-import { tss } from 'tss-react/dsfr';
-import { fr } from '@codegouvfr/react-dsfr';
-import Image from 'next/image';
-import Link from 'next/link';
 import { Loader } from '@/src/components/ui/Loader';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import ObservatoireStats from '../../Stats/ObservatoireStats';
+import { displayIntention, getStatsIcon } from '@/src/utils/stats';
+import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { tss } from 'tss-react/dsfr';
 import AnswersChart from '../../Stats/AnswersChart';
+import ObservatoireStats from '../../Stats/ObservatoireStats';
 
 interface Props {
 	nbReviews: number;
 	isLoading: boolean;
 	form: FormWithElements;
+	onClickGoToReviews?: () => void;
 }
 
-const DashboardTab = ({ nbReviews, isLoading, form }: Props) => {
+const DashboardTab = ({
+	nbReviews,
+	isLoading,
+	form,
+	onClickGoToReviews
+}: Props) => {
+	const router = useRouter();
 	const { cx, classes } = useStyles();
 
-	if (isLoading) return <Loader />;
+	const { data: reviewResults, isFetching: isLoadingReviews } =
+		trpc.review.getList.useQuery(
+			{
+				product_id: form.product_id,
+				form_id: form.id,
+				numberPerPage: 4,
+				page: 1,
+				shouldIncludeAnswers: true,
+				mustHaveVerbatims: true,
+				newReviews: true,
+				needLogging: false // On ne veut pas créer l'événement service_reviews_view ici
+			},
+			{
+				initialData: {
+					data: [],
+					metadata: {
+						countFiltered: 0,
+						countAll: 0,
+						countNew: 0,
+						countForm1: 0,
+						countForm2: 0
+					}
+				}
+			}
+		);
+
+	if (isLoading || isLoadingReviews) return <Loader />;
+
+	const hasNewReviews = reviewResults.data.length > 0;
 
 	return nbReviews > 0 ? (
 		<div className={fr.cx('fr-grid-row')}>
@@ -61,6 +101,72 @@ const DashboardTab = ({ nbReviews, isLoading, form }: Props) => {
 						customHeight={350}
 					/>
 				</div>
+			</div>
+
+			<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
+
+			<div className={fr.cx('fr-col-8')}>
+				<h3>Dernières réponses</h3>
+			</div>
+			<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+				<Button
+					priority="tertiary no outline"
+					iconId="fr-icon-arrow-right-line"
+					iconPosition="right"
+					onClick={onClickGoToReviews}
+				>
+					Voir toutes les réponses
+				</Button>
+			</div>
+			<div className={fr.cx('fr-col-12')}>
+				<p className={classes.newReviewsLabel}>
+					<b>
+						{hasNewReviews
+							? `${reviewResults.data.length} nouvelles réponses`
+							: 'Aucune nouvelle réponse'}
+					</b>{' '}
+					depuis votre dernière connexion
+				</p>
+			</div>
+			<div className={cx(classes.reviewsContainer)}>
+				{reviewResults.data.map(review => {
+					const satisfactionReview = review.answers?.find(
+						a => a.field_code === 'satisfaction'
+					);
+					return (
+						<div className={cx(classes.reviewCard)}>
+							{satisfactionReview?.intention && (
+								<Badge
+									className={cx(classes.badge, fr.cx('fr-mb-4v'))}
+									small
+									noIcon
+									severity={getSeverity(satisfactionReview.intention || '')}
+								>
+									<Image
+										alt=""
+										src={`/assets/smileys/${getStatsIcon({
+											intention: satisfactionReview.intention ?? 'neutral'
+										})}.svg`}
+										width={15}
+										height={15}
+									/>
+									{displayIntention(satisfactionReview.intention ?? 'neutral')}
+								</Badge>
+							)}
+							<p className={cx(classes.reviewText, fr.cx('fr-mb-4v'))}>
+								{formatDateToFrenchString(
+									review.created_at?.toISOString().split('T')[0] || ''
+								)}
+							</p>
+							<p className={cx(classes.reviewText, fr.cx('fr-mb-0'))}>
+								{
+									review.answers?.find(a => a.field_code === 'verbatim')
+										?.answer_text
+								}
+							</p>
+						</div>
+					);
+				})}
 			</div>
 		</div>
 	) : (
@@ -117,6 +223,48 @@ const useStyles = tss.withName(DashboardTab.name).create({
 		fontWeight: 'bold',
 		fontSize: '20px',
 		lineHeight: '28px'
+	},
+	newReviewsLabel: {
+		color: fr.colors.decisions.text.mention.grey.default,
+		b: {
+			color: fr.colors.decisions.text.title.grey.default
+		}
+	},
+	buttonsGroup: {
+		display: 'flex',
+		justifyContent: 'end',
+		gap: fr.spacing('4v'),
+		alignSelf: 'center',
+		button: {
+			a: {
+				display: 'flex',
+				alignItems: 'center'
+			}
+		}
+	},
+	reviewsContainer: {
+		display: 'flex',
+		width: '100%',
+		gap: fr.spacing('3v')
+	},
+	reviewCard: {
+		display: 'flex',
+		width: '100%',
+		maxWidth: '25%',
+		flexDirection: 'column',
+		padding: fr.spacing('4v'),
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+	},
+	badge: {
+		fontSize: 11,
+		paddingVertical: 4,
+		display: 'flex',
+		alignItems: 'center',
+		gap: '0.25rem'
+	},
+	reviewText: {
+		fontSize: '12px',
+		lineHeight: '20px'
 	}
 });
 
