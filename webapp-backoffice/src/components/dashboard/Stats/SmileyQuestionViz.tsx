@@ -152,8 +152,6 @@ const SmileyQuestionViz = ({
 		data.push(item);
 	}
 
-	console.log(resultFieldCode);
-
 	return (
 		<QuestionWrapper
 			totalField={

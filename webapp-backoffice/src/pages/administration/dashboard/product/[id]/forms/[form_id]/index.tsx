@@ -16,6 +16,7 @@ import FormTab from '@/src/components/dashboard/Form/tabs/form';
 import { trpc } from '@/src/utils/trpc';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
+import { useRef } from 'react';
 
 interface Props {
 	form: FormWithElements;
@@ -26,6 +27,7 @@ const ProductFormPage = (props: Props) => {
 	const router = useRouter();
 	const { form, ownRight } = props;
 	const { classes, cx } = useStyles();
+	const tabsRef = useRef<HTMLDivElement>(null);
 
 	const breadcrumbSegments = [
 		{
@@ -110,6 +112,7 @@ const ProductFormPage = (props: Props) => {
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-mt-4v')}>
 					<Tabs
+						ref={tabsRef}
 						tabs={[
 							{
 								label: 'Tableau de bord',
@@ -118,6 +121,13 @@ const ProductFormPage = (props: Props) => {
 										form={form}
 										nbReviews={nbReviews}
 										isLoading={isLoadingReviewsCount}
+										onClickGoToReviews={() => {
+											tabsRef.current
+												?.querySelector<HTMLButtonElement>(
+													'li[role="presentation"]:nth-child(2) button[role="tab"]'
+												)
+												?.click();
+										}}
 									/>
 								)
 							},

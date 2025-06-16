@@ -186,7 +186,7 @@ const useStyles = tss.create({
 		marginBottom: 12,
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
-			alignItems: 'initial',
+			alignItems: 'initial'
 		}
 	},
 	date: {
