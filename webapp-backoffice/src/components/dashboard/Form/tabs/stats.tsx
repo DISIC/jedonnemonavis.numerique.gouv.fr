@@ -176,7 +176,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
-			<div className={cx(fr.cx('fr-container'), classes.container)}>
+			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
 				<div className={fr.cx('fr-mt-20v')}>
 					<Loader />
@@ -187,7 +187,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 
 	if (nbReviews === 0 || buttonResults.metadata.count === 0) {
 		return (
-			<div className={cx(fr.cx('fr-container'), classes.container)}>
+			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
 				{buttonResults.metadata.count === 0 ? (
 					<NoButtonsPanel onButtonClick={handleButtonClick} />
