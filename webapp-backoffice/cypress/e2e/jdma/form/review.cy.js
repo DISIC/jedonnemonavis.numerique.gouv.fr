@@ -23,6 +23,7 @@ function fillFormStep1() {
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
+	cy.wait(5000);
 
 	cy.url().should('include', 'step=0');
 	cy.get('h1').contains('Clarté');
