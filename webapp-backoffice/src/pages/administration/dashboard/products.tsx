@@ -11,7 +11,6 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Select } from '@codegouvfr/react-dsfr/Select';
@@ -26,11 +25,6 @@ import { tss } from 'tss-react/dsfr';
 
 const product_modal = createModal({
 	id: 'product-modal',
-	isOpenedByDefault: false
-});
-
-const api_modal = createModal({
-	id: 'api-modal',
 	isOpenedByDefault: false
 });
 
@@ -191,6 +185,7 @@ const DashBoard = () => {
 		filters.filterEntity.length === 0 &&
 		filters.validatedSearch === '' &&
 		!filters.filterOnlyFavorites &&
+		!filters.filterOnlyArchived &&
 		!countArchivedUserScope &&
 		!isLoadingProducts &&
 		!isRefetchingProducts
@@ -212,6 +207,7 @@ const DashBoard = () => {
 		nbPages > 1 ||
 		search !== '' ||
 		filters.filterOnlyFavorites ||
+		filters.filterOnlyArchived ||
 		!!filters.filterEntity.length;
 
 	return (
@@ -306,7 +302,7 @@ const DashBoard = () => {
 										<option value="updated_at:desc">Date de mise à jour</option>
 									</Select>
 								</div>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 									<Autocomplete
 										id="filter-entity"
 										disablePortal
@@ -353,7 +349,7 @@ const DashBoard = () => {
 								<div
 									className={fr.cx(
 										'fr-col-12',
-										'fr-col-md-5',
+										'fr-col-md-4',
 										'fr-col--bottom'
 									)}
 								>
@@ -402,70 +398,67 @@ const DashBoard = () => {
 										</div>
 									</form>
 								</div>
-							</>
-						)}
-						<div
-							className={fr.cx(
-								'fr-col-12',
-								'fr-mt-4w',
-								nbPages > 1 ? 'fr-mb-2w' : 'fr-mb-0',
-								'fr-py-0'
-							)}
-						>
-							<div className={cx(classes.checkboxContainer)}>
-								{countTotalUserScope > 10 && !filters.filterOnlyArchived && (
-									<Checkbox
-										className={fr.cx('fr-mb-0')}
-										style={{ userSelect: 'none' }}
-										options={[
-											{
-												label: 'Afficher uniquement mes favoris',
-												nativeInputProps: {
-													name: 'favorites-products',
-													checked: filters.filterOnlyFavorites,
-													onChange: e => {
-														updateFilters({
-															...filters,
-															currentPage: 1,
-															filterOnlyFavorites: e.target.checked
-														});
-													}
-												}
-											}
-										]}
-									/>
-								)}
-							</div>
-						</div>
-						<ul
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
-								classes.tagContainer
-							)}
-						>
-							{filters.filterEntity.map((entity, index) => (
-								<li key={index}>
-									<Tag
-										dismissible
-										className={cx(classes.tagFilter)}
-										title={`Retirer ${entity.label}`}
-										nativeButtonProps={{
-											onClick: () => {
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-2')}>
+									<Select
+										label="Vue"
+										nativeSelectProps={{
+											name: 'select-view',
+											value: filters.view,
+											onChange: event => {
+												const value = event.target.value as
+													| 'all'
+													| 'favorites'
+													| 'archived';
+
 												updateFilters({
 													...filters,
-													filterEntity: filters.filterEntity.filter(
-														e => e.value !== entity.value
-													)
+													currentPage: 1,
+													view: value,
+													filterOnlyFavorites: value === 'favorites',
+													filterOnlyArchived: value === 'archived'
 												});
-												setInputValue('');
 											}
 										}}
 									>
-										<p>{entity.label}</p>
-									</Tag>
-								</li>
-							))}
-						</ul>
+										<option value="all">Services actifs</option>
+										<option value="favorites">Mes favoris</option>
+										<option value="archived">Services archivés</option>
+									</Select>
+								</div>
+							</>
+						)}
+						{filters.filterEntity.length > 0 && (
+							<ul
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-md-12', 'fr-my-1w'),
+									classes.tagContainer
+								)}
+							>
+								{filters.filterEntity.map((entity, index) => (
+									<li key={index}>
+										<Tag
+											dismissible
+											className={cx(classes.tagFilter)}
+											title={`Retirer ${entity.label}`}
+											nativeButtonProps={{
+												onClick: () => {
+													updateFilters({
+														...filters,
+														filterEntity: filters.filterEntity.filter(
+															e => e.value !== entity.value
+														)
+													});
+													setInputValue('');
+												}
+											}}
+										>
+											<p>{entity.label}</p>
+										</Tag>
+									</li>
+								))}
+							</ul>
+						)}
 					</div>
 				)}
 				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
@@ -518,10 +511,6 @@ const DashBoard = () => {
 													)
 												}
 												showFavoriteButton={countTotalUserScope > 10}
-												onDeleteEssential={() => {
-													setProductTitle(product.title);
-													essential_service_modal.open();
-												}}
 												onDeleteProduct={() => {
 													setStatusProductState({
 														msg: `Le service "${product.title}" a bien été supprimé`,
@@ -563,30 +552,6 @@ const DashBoard = () => {
 									</div>
 								</div>
 							)}
-							<div className={cx(classes.checkboxContainer)}>
-								{countArchivedUserScope > 0 && (
-									<Checkbox
-										className={fr.cx('fr-mb-0')}
-										style={{ userSelect: 'none' }}
-										options={[
-											{
-												label: 'Afficher uniquement les services supprimés',
-												nativeInputProps: {
-													name: 'archived-products',
-													checked: filters.filterOnlyArchived,
-													onChange: e => {
-														updateFilters({
-															...filters,
-															currentPage: 1,
-															filterOnlyArchived: e.target.checked
-														});
-													}
-												}
-											}
-										]}
-									/>
-								)}
-							</div>
 						</div>
 						<div
 							className={fr.cx(

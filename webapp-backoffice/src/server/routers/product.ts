@@ -20,7 +20,7 @@ import {
 	getProductRestoredEmail
 } from '@/src/utils/emails';
 
-const checkRightToProceed = async (
+export const checkRightToProceed = async (
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
 	session: Session,
 	product_id: number
@@ -211,7 +211,18 @@ export const productRouter = router({
 					take: numberPerPage,
 					skip: numberPerPage * (page - 1),
 					include: {
-						buttons: true
+						forms: {
+							include: {
+								buttons: true,
+								form_template: true,
+								form_configs: {
+									include: {
+										form_config_displays: true,
+										form_config_labels: true
+									}
+								}
+							}
+						}
 					}
 				});
 
@@ -282,7 +293,11 @@ export const productRouter = router({
 				take: numberPerPage,
 				skip: numberPerPage * (page - 1),
 				include: {
-					buttons: true
+					forms: {
+						include: {
+							buttons: true
+						}
+					}
 				}
 			});
 
@@ -293,7 +308,7 @@ export const productRouter = router({
 					id: product.id,
 					xwiki_id: product.xwiki_id,
 					title: product.title,
-					buttons: product.buttons.map(b => ({
+					buttons: product.forms[0].buttons.map(b => ({
 						id: b.id,
 						title: b.title,
 						xwiki_title: b.xwiki_title
@@ -323,6 +338,7 @@ export const productRouter = router({
 					}
 				}
 			});
+			
 
 			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
 			const inputObj = trpcQueries[0].includes('get')

@@ -4,19 +4,7 @@ import React from 'react';
 import ApiKeyHandler from './ApiKeyHandler';
 import { Entity } from '@prisma/client';
 import Link from 'next/link';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
+import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	modal: CustomModalProps;

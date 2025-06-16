@@ -35,19 +35,19 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async session({ session, token }) {
 			if (token.email) {
-			  const user = await prisma.user.findUnique({
-				where: { email: token.email }
-			  });
-		  
-			  if (user) {
-				session.user = {
-				  ...session.user,
-				  id: user.id.toString(),
-				  role: user.role,
-				  name: `${user.firstName} ${user.lastName}`,
-				  email: user.email
-				};
-			  }
+				const user = await prisma.user.findUnique({
+					where: { email: token.email }
+				});
+
+				if (user) {
+					session.user = {
+						...session.user,
+						id: user.id.toString(),
+						role: user.role,
+						name: `${user.firstName} ${user.lastName}`,
+						email: user.email
+					};
+				}
 			}
 			return session;
 		},
@@ -72,34 +72,40 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async redirect({ url, baseUrl }) {
-		  if (url.startsWith(baseUrl)) {
-			return url;
-		  }
-		  return baseUrl;
+			if (url.startsWith(baseUrl)) {
+				return url;
+			}
+			return baseUrl;
 		},
 
 		async signIn({ account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
-		
+
 				const email = proconnectProfile.email?.toLowerCase();
-		
+
 				let user = await prisma.user.findUnique({
-					where: { email },
+					where: { email }
 				});
-		
+
 				if (!user) {
 					try {
 						const data = await getSiretInfo(proconnectProfile.siret);
-		
+
 						const etablissement = data.etablissement;
-						const formeJuridique = etablissement.uniteLegale.categorieJuridiqueUniteLegale;
-		
-						if (formeJuridique.startsWith('7') || formeJuridique.startsWith('8')) {
-		
+						const formeJuridique =
+							etablissement.uniteLegale.categorieJuridiqueUniteLegale;
+
+						if (
+							formeJuridique.startsWith('7') ||
+							formeJuridique.startsWith('8')
+						) {
 							const salt = bcrypt.genSaltSync(10);
-							const newHashedPassword = bcrypt.hashSync(generateRandomString(10), salt);
-		
+							const newHashedPassword = bcrypt.hashSync(
+								generateRandomString(10),
+								salt
+							);
+
 							user = await prisma.user.create({
 								data: {
 									email,
@@ -113,7 +119,7 @@ export const authOptions: NextAuthOptions = {
 									xwiki_account: false,
 									xwiki_username: null,
 									proconnect_account: true
-								},
+								}
 							});
 						} else {
 							throw new Error('INVALID_PROVIDER');
@@ -129,8 +135,7 @@ export const authOptions: NextAuthOptions = {
 	},
 	providers: [
 		CredentialsProvider({
-			credentials: {
-			},
+			credentials: {},
 			async authorize(credentials: Record<string, string> | undefined) {
 				if (!credentials) {
 					throw new Error('Missing credentials');
@@ -150,12 +155,15 @@ export const authOptions: NextAuthOptions = {
 				if (user.password.startsWith('$2b$')) {
 					isPasswordCorrect = bcrypt.compareSync(password, user.password);
 				} else {
-					const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
+					const hashedPassword = crypto
+						.createHash('sha256')
+						.update(password)
+						.digest('hex');
 					isPasswordCorrect = hashedPassword === user.password;
-					
+
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);
-					const updatedUser = await prisma.user.update({
+					await prisma.user.update({
 						where: {
 							id: user.id
 						},
@@ -169,14 +177,14 @@ export const authOptions: NextAuthOptions = {
 					return null;
 				}
 
-				const logSignIn = await prisma.userEvent.create({
+				await prisma.userEvent.create({
 					data: {
-						user_id : user.id,
+						user_id: user.id,
 						action: 'user_signin',
 						created_at: new Date(),
 						metadata: {}
 					}
-				})
+				});
 
 				return { ...user, name: user.firstName + ' ' + user.lastName };
 			}
@@ -199,21 +207,23 @@ export const authOptions: NextAuthOptions = {
 			userinfo: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
 				async request({ tokens }): Promise<Record<string, any>> {
-					
-					const res = await fetch(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`, {
-						headers: {
-							Authorization: `Bearer ${tokens.access_token}`
+					const res = await fetch(
+						`https://${process.env.PROCONNECT_DOMAIN}/api/v2/userinfo`,
+						{
+							headers: {
+								Authorization: `Bearer ${tokens.access_token}`
+							}
 						}
-					});
-			
+					);
+
 					const responseText = await res.text();
-			
+
 					let data: Record<string, any>;
-			
+
 					try {
 						data = JSON.parse(responseText);
 					} catch (error) {
-						data = jwt.decode(responseText) as Record<string, any> || {}; // 🔥 Décode JWT
+						data = (jwt.decode(responseText) as Record<string, any>) || {}; // 🔥 Décode JWT
 					}
 					return data;
 				}
@@ -231,18 +241,17 @@ export const authOptions: NextAuthOptions = {
 					lastName: profile.family_name,
 					active: true,
 					xwiki_account: false,
-					xwiki_username: null,            
+					xwiki_username: null,
 					password: '',
-					role: 'user',    
+					role: 'user',
 					notifications: false,
 					notifications_frequency: 'daily',
 					created_at: new Date(),
 					updated_at: new Date(),
 					proconnect_account: false
-				}
+				};
 			}
 		}
-
 	],
 
 	session: {

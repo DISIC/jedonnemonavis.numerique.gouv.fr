@@ -7,9 +7,10 @@ import { tss } from 'tss-react/dsfr';
 import Head from 'next/head';
 import { trpc } from '@/src/utils/trpc';
 import { Loader } from '@/src/components/ui/Loader';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -20,7 +21,7 @@ const ProductFormView = (props: Props) => {
 	const { data: buttonResult } = trpc.button.getList.useQuery({
 		numberPerPage: 10,
 		page: 1,
-		product_id: product.id,
+		form_id: product.forms[0].id,
 		isTest: false
 	});
 	const buttonId = buttonResult?.data[0]?.id;

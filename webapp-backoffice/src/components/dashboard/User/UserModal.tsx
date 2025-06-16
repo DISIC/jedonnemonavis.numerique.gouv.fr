@@ -12,19 +12,8 @@ import Image from 'next/image';
 import { trpc } from '@/src/utils/trpc';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import Select from '@codegouvfr/react-dsfr/Select';
+import { CustomModalProps } from '@/src/types/custom';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	isOpen: boolean;
@@ -144,7 +133,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"email"
+									name: 'email'
 								}}
 							/>
 						)}
@@ -176,7 +165,7 @@ const ButtonModal = (props: Props) => {
 										onChange,
 										value,
 										type: 'password',
-										name:"password"
+										name: 'password'
 									}}
 								/>
 							)}
@@ -195,7 +184,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"firstName"
+									name: 'firstName'
 								}}
 							/>
 						)}
@@ -213,7 +202,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"lastName"
+									name: 'lastName'
 								}}
 							/>
 						)}

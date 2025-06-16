@@ -25,19 +25,7 @@ import {
 import { on } from 'events';
 import { Icon } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
+import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	modal: CustomModalProps;
@@ -73,9 +61,9 @@ const ProductModal = (props: Props) => {
 	const lastUrlRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
 	const modalOpen = useIsModalOpen(modal);
-	const [selectedValue, setSelectedValue] = React.useState<number | undefined>(
-		newCreatedEntity?.id
-	);
+	const [selectedEntityValue, setSelectedEntityValue] = React.useState<
+		number | undefined
+	>(product ? product.entity_id : newCreatedEntity?.id);
 	const [selectedTitle, setSelectedTitle] = React.useState<string | undefined>(
 		''
 	);
@@ -148,6 +136,7 @@ const ProductModal = (props: Props) => {
 				id: product.id,
 				product: {
 					...tmpProduct,
+					forms: undefined,
 					urls: filteredUrls
 				}
 			});
@@ -161,7 +150,7 @@ const ProductModal = (props: Props) => {
 
 		if (productId) {
 			router
-				.push(`/administration/dashboard/product/${productId}/buttons`)
+				.push(`/administration/dashboard/product/${productId}/forms`)
 				.then(() => {
 					window.location.reload();
 				});
@@ -215,7 +204,9 @@ const ProductModal = (props: Props) => {
 	}, [product]);
 
 	useEffect(() => {
-		setSelectedValue(newCreatedEntity?.id);
+		if (newCreatedEntity?.id) {
+			setSelectedEntityValue(newCreatedEntity.id);
+		}
 	}, [newCreatedEntity]);
 
 	useEffect(() => {
@@ -302,8 +293,8 @@ const ProductModal = (props: Props) => {
 							rules={{ required: 'Ce champ est obligatoire' }}
 							render={({ field: { onChange, value, name } }) => {
 								useEffect(() => {
-									onChange(selectedValue);
-								}, [selectedValue]);
+									onChange(selectedEntityValue);
+								}, [selectedEntityValue]);
 								return (
 									<Autocomplete
 										disablePortal
@@ -318,17 +309,17 @@ const ProductModal = (props: Props) => {
 											if (optionSelected?.value === -1) {
 												onNewEntity();
 											} else {
-												setSelectedValue(optionSelected?.value);
+												setSelectedEntityValue(optionSelected?.value);
 											}
 										}}
 										isOptionEqualToValue={option => option.value === value}
 										defaultValue={entityOptions.find(
-											option => option.value === selectedValue
+											option => option.value === selectedEntityValue
 										)}
 										value={
-											selectedValue
+											selectedEntityValue
 												? entityOptions.find(
-														option => option.value === selectedValue
+														option => option.value === selectedEntityValue
 													)
 												: { label: '', value: undefined }
 										}
@@ -358,7 +349,6 @@ const ProductModal = (props: Props) => {
 												)}
 											</div>
 										)}
-										// Ajoutez renderOption pour personnaliser l'affichage des options
 										renderOption={(props, option) => (
 											<li
 												{...props}
@@ -450,6 +440,29 @@ const ProductModal = (props: Props) => {
 							</Button>
 						</fieldset>
 					</div>
+				</div>
+
+				<div className={fr.cx('fr-input-group')}>
+					<legend className={fr.cx('fr-label', 'fr-mb-1w')}>Options</legend>
+					<Controller
+						name="isPublic"
+						control={control}
+						defaultValue={product?.isPublic ?? false}
+						render={({ field: { value, onChange, name } }) => (
+							<Checkbox
+								options={[
+									{
+										label: 'Rendre les statistiques publiques',
+										nativeInputProps: {
+											name,
+											checked: !!value,
+											onChange: e => onChange(e.target.checked)
+										}
+									}
+								]}
+							/>
+						)}
+					/>
 				</div>
 			</form>
 		</modal.Component>

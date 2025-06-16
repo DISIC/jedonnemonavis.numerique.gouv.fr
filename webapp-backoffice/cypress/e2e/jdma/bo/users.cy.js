@@ -84,6 +84,7 @@ describe('jdma-users', () => {
 			.first()
 			.click();
 		cy.url().should('include', '/administration/dashboard/users');
+		cy.wait(1000);
 		cy.get('div.fr-card div.fr-grid-row div.fr-col a')
 			.filter(':contains("user 3")')
 			.first()
@@ -95,6 +96,8 @@ describe('jdma-users', () => {
 			.within(() => {
 				cy.get(selectors.sideMenu.menuItem).contains('Accès').click();
 			});
+
+		cy.wait(1000);
 
 		cy.get('h5')
 			.filter(':contains("e2e-jdma-entity-test")')
@@ -139,7 +142,7 @@ function navigateToCreatedProduct() {
 	cy.get(selectors.sideMenu.menu)
 		.should('be.visible')
 		.within(() => {
-			cy.get(selectors.sideMenu.menuItem).contains("Gérer l'accès").click();
+			cy.get(selectors.sideMenu.menuItem).contains("Droits d'accès").click();
 		});
 }
 

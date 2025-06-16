@@ -1,44 +1,32 @@
+import { CustomModalProps } from '@/src/types/custom';
+import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import { Button as PrismaButtonType } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
-import Image from 'next/image';
-import { trpc } from '@/src/utils/trpc';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { push } from '@socialgouv/matomo-next';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	isOpen: boolean;
 	modal: CustomModalProps;
 	modalType: string;
-	button?: PrismaButtonType | null;
-	onButtonCreatedOrUpdated: (isTest: boolean) => void;
-	product_id: number;
+	button?: ButtonWithForm | null;
+	onButtonCreatedOrUpdated: (isTest: boolean, button: ButtonWithForm) => void;
+	form_id: number;
 }
 
 const defaultButton = {
 	title: '',
 	description: '',
 	xwiki_title: null,
-	product_id: -1,
+	form_id: -1,
 	isTest: false
 };
 
@@ -63,7 +51,7 @@ const ButtonModal = (props: Props) => {
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = React.useState<
-		ButtonCreationPayload | PrismaButtonType
+		ButtonCreationPayload | ButtonWithForm
 	>(defaultButton);
 
 	React.useEffect(() => {
@@ -113,9 +101,9 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const handleModalClose = (createdOrUpdatedButton: ButtonCreationPayload) => {
+	const handleModalClose = (createdOrUpdatedButton: ButtonWithForm) => {
 		resetErrors('title');
-		onButtonCreatedOrUpdated(!!createdOrUpdatedButton.isTest);
+		onButtonCreatedOrUpdated(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
 	};
 
@@ -126,20 +114,21 @@ const ButtonModal = (props: Props) => {
 			return;
 		}
 
-		currentButton.product_id = props.product_id;
+		currentButton.form_id = props.form_id;
 
 		if ('id' in currentButton) {
-			updateButton.mutate(currentButton);
+			const { form, ...buttonWithoutForm } = currentButton;
+			updateButton.mutate(buttonWithoutForm);
 		} else {
 			createButton.mutate(currentButton);
 		}
 	};
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
       <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
 </a>`;
 
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
 	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
 	</a>`;
 
@@ -409,7 +398,7 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Créer',
-						onClick: handleButtonCreateOrEdit,
+						onClick: handleButtonCreateOrEdit, 
 						doClosesModal: false
 					}
 				];

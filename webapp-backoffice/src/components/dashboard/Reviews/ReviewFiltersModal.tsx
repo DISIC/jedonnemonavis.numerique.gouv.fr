@@ -1,4 +1,4 @@
-import { ReviewFiltersType } from '@/src/types/custom';
+import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
 import {
 	displayIntention,
 	getStatsColor,
@@ -17,36 +17,24 @@ import { push } from '@socialgouv/matomo-next';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { trpc } from '@/src/utils/trpc';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
-	product_id: number;
+	form_id: number;
 	setButtonId: (buttonId: number | undefined) => void;
 	submitFilters: (filters: ReviewFiltersType) => void;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters, setButtonId, product_id } = props;
+	const { modal, filters, submitFilters, setButtonId, form_id } = props;
 	const { cx, classes } = useStyles();
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery({
 			page: 1,
 			numberPerPage: 1000,
-			product_id: product_id,
+			form_id: form_id,
 			isTest: true
 		});
 

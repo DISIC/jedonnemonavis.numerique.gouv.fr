@@ -8,17 +8,35 @@ import { tss } from 'tss-react/dsfr';
 import { ExtendedReview } from './interface';
 import React from 'react';
 import { generateRandomString } from '@/src/utils/tools';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 
 const ReviewCommonVerbatimLine = ({
 	review,
-	type
+	type,
+	formConfig
 }: {
 	review: ExtendedReview;
 	type: 'Line' | 'Verbatim';
+	formConfig?: FormConfigWithChildren;
 }) => {
 	const { cx, classes } = useStyles();
+	const { formTemplate, isLoading, error } = useRootFormTemplateContext();
 
-	if (!review) return null;
+	const formConfigHiddenSteps =
+		formConfig?.form_config_displays.filter(fcd => fcd.kind === 'step') || [];
+
+	if (!review || isLoading) return null;
+
+	const hiddenSteps = formConfigHiddenSteps
+		.map(fcd => {
+			const stepIndex = formTemplate?.form_template_steps.findIndex(
+				f => f.id === fcd.parent_id
+			);
+
+			return stepIndex;
+		})
+		.filter(stepIndex => stepIndex !== -1);
 
 	const getConditionnalValueText = (
 		parentSlug: string,
@@ -91,26 +109,29 @@ const ReviewCommonVerbatimLine = ({
 
 	return (
 		<>
-			{fieldCodesHelper.map((fch, index) => (
-				<div key={index} className={fr.cx('fr-col-12')}>
-					<h2 className={cx(classes.subtitle)}>{fch?.question}</h2>
-					<p className={cx(classes.content)}>
-						{getFieldCodeTexts(fch?.slug || '').map(text => (
-							<span
-								key={text}
-								className={
-									text !== '-'
-										? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
-										: ''
-								}
-							>
-								{text}
-							</span>
-						))}
-					</p>
-				</div>
-			))}
-			{!review.xwiki_id && (
+			{fieldCodesHelper.map(
+				(fch, index) =>
+					!hiddenSteps.includes(index + 1) && (
+						<div key={index} className={fr.cx('fr-col-12')}>
+							<h2 className={cx(classes.subtitle)}>{fch?.question}</h2>
+							<p className={cx(classes.content)}>
+								{getFieldCodeTexts(fch?.slug || '').map(text => (
+									<span
+										key={text}
+										className={
+											text !== '-'
+												? cx(fr.cx('fr-tag', 'fr-tag--sm'), classes.tag)
+												: ''
+										}
+									>
+										{text}
+									</span>
+								))}
+							</p>
+						</div>
+					)
+			)}
+			{!review.xwiki_id && !hiddenSteps.includes(2) && (
 				<div className={fr.cx('fr-col-12')}>
 					<h2 className={cx(classes.subtitle)}>
 						Votre rapport à l'aide de l'administration
@@ -146,7 +167,10 @@ const ReviewCommonVerbatimLine = ({
 										}
 
 										return (
-											<p key={`${generateRandomString()}_${answer}`} className={cx(classes.content)}>
+											<p
+												key={`${generateRandomString()}_${answer}`}
+												className={cx(classes.content)}
+											>
 												{row} :{' '}
 												<span
 													key={row}

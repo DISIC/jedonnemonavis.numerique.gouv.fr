@@ -8,19 +8,8 @@ import { useSession } from 'next-auth/react';
 import React from 'react';
 import { Loader } from '../../ui/Loader';
 import { push } from '@socialgouv/matomo-next';
+import { CustomModalProps } from '@/src/types/custom';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;

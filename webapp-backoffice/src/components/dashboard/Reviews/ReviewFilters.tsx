@@ -5,11 +5,12 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	onClick: (sort: string) => void;
 	sort: string;
+	hasManyVersions: boolean;
 	displayMode: 'reviews' | 'verbatim';
 }
 
 const ReviewFilters = (props: Props) => {
-	const { onClick, displayMode } = props;
+	const { onClick, displayMode, hasManyVersions } = props;
 
 	const { cx, classes } = useStyles({});
 
@@ -30,6 +31,7 @@ const ReviewFilters = (props: Props) => {
 				{
 					label: 'Heure'
 				},
+				...(hasManyVersions ? [{ label: 'Formulaire' }] : []),
 				{
 					label: 'Id'
 				},
@@ -49,7 +51,6 @@ const ReviewFilters = (props: Props) => {
 				{
 					label: 'Date'
 				},
-
 				{
 					label: 'Satisfaction'
 				},

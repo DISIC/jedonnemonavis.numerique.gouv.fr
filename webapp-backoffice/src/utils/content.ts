@@ -1,5 +1,3 @@
-import { TypeBlocsInput } from "../types/custom";
-
 interface MainStructure {
 	[key: string]: {
 		title: string;
@@ -14,124 +12,6 @@ interface MainStructure {
 		)[];
 	};
 }
-
-export const TypeBlocksDescription: TypeBlocsInput[] = [
-	{
-		type: 'paragraph',
-		name: 'Paragraphe',
-		category: 'Interface',
-		description: 'Utilisé pour afficher n\'importe quel type de texte.',
-		hint: 'Entrez votre texte...'
-	},
-	{
-		type: 'heading_1',
-		name: 'Titre 1',
-		category: 'Interface',
-		description: 'Un grand titre, approprié pour les grandes sections de votre formulaire.',
-		hint: 'Entrez votre grand titre...'
-	},
-	{
-		type: 'heading_2',
-		name: 'Titre 2',
-		category: 'Interface',
-		description: 'Un titre de taile moyenne, appropié pour les petites sections de votre formulaire.',
-		hint: 'Entrez votre titre moyen...'
-	},
-	{
-		type: 'heading_3',
-		name: 'Titre 3',
-		category: 'Interface',
-		description: 'Petit titre, approprié pour les questions.',
-		hint: 'Entrez votre petit titre...'
-	},
-	{
-		type: 'new_page',
-		name: 'Nouvelle Page',
-		category: 'Interface',
-		description: 'Ajoutez une nouvelle page au formulaire. Utilisez ceci pour créer des formulaires en plusieurs étapes.',
-		hint: 'Saisissez le texte du bouton pour naviguer vers la page suivante.'
-	},
-	{
-		type: 'input_text',
-		name: 'Réponse courte',
-		category: 'Questions',
-		description: 'Utilisez ceci pour insérer une question combinée avec une réponse courte sous forme de texte.',
-		hint: 'Entrez votre question... (réponse courte)'
-	},
-	{
-		type: 'input_text_area',
-		name: 'Réponse longue',
-		category: 'Questions',
-		description: 'Utilisez ceci pour insérer une question combinée avec une réponse longue sans limite de caractère.',
-		hint: 'Entrez votre question... (réponse longue)'
-	},
-	{
-		type: 'radio',
-		name: 'Choix multiple',
-		category: 'Questions',
-		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants ne peuvent choisir qu\'une seule réponse.',
-		hint: 'Entrez votre question... (choix multiple)'
-	},
-	{
-		type: 'checkbox',
-		name: 'Checkbox',
-		category: 'Questions',
-		description: 'Utilisez ceci pour ajouter une question avec plusieurs options de réponse. Les répondants peuvent choisir plusieurs réponses.',
-		hint: 'Entrez votre question... (checkbox)'
-	},
-	{
-		type: 'select',
-		name: 'Menu déroulant',
-		category: 'Questions',
-		description: 'Utilisez ceci pour ajouter une question avec une liste de réponse sous forme de menu déroulant. Les répondants ne peuvent choisir qu\'une seule réponse.',
-		hint: 'Entrez votre question... (menu déroulant)'
-	},
-	{
-		type: 'logic',
-		name: 'Logique conditionnelle',
-		category: 'Divers',
-		description: 'Créez des formulaires intelligents basés sur les réponses de vos répondants. Utilisez notamment ceci pour afficher des questions en fonction des réponses précédentes.',
-		hint: 'Renseignez la logique ici : '
-	},
-]
-
-export const TypeConditions = [
-	{
-		label: "est vide",
-		value: 'isEmpty'
-	},
-	{
-		label: "n'est pas vide",
-		value: "notEmpty"
-	},
-	{
-		label: "contient",
-		value: "contains"
-	},
-	{
-		label: "ne contient pas",
-		value: "notContain"
-	}
-]
-
-export const TypeActions = [
-	{
-		label: "afficher",
-		value: 'show'
-	},
-	{
-		label: "cacher",
-		value: "hide"
-	},
-	{
-		label: "activer",
-		value: "enable"
-	},
-	{
-		label: "désactiver",
-		value: "disable"
-	}
-]
 
 export const CGU: MainStructure = {
 	responsable: {
@@ -203,50 +83,81 @@ export const Accessibility: MainStructure = {
 	intro_p2: {
 		title: '',
 		content: [
-			{text: `Cette déclaration d'accessibilité s'applique à${' '}`, type: 'noSpaces'},
-			{text: " jedonnemonavis.numerique.gouv.fr", type: 'link', href: 'https://jedonnemonavis.numerique.gouv.fr/'},
+			{
+				text: `Cette déclaration d'accessibilité s'applique à${' '}`,
+				type: 'noSpaces'
+			},
+			{
+				text: ' jedonnemonavis.numerique.gouv.fr',
+				type: 'link',
+				href: 'https://jedonnemonavis.numerique.gouv.fr/'
+			}
 		]
 	},
 	state: {
 		title: 'État de conformité',
 		content: [
-			{text: `Le site est `, type:'noSpaces'},
-			{text: `non conforme `, type:'bold'},
-			{text: `avec le référentiel général d’amélioration de l’accessibilité, RGAA version 4.1, en raison de l’absence d’audit de conformité.`, type:'noSpaces'},
+			{ text: `Le site est `, type: 'noSpaces' },
+			{ text: `non conforme `, type: 'bold' },
+			{
+				text: `avec le référentiel général d’amélioration de l’accessibilité, RGAA version 4.1, en raison de l’absence d’audit de conformité.`,
+				type: 'noSpaces'
+			}
 		]
 	},
 	state_p2: {
 		title: '',
 		content: [
-			{text: `Un audit de conformité est en cours. L’état de conformité sera mis à jour lorsque l’audit sera terminé.`, type:'noSpaces'}
+			{
+				text: `Un audit de conformité est en cours. L’état de conformité sera mis à jour lorsque l’audit sera terminé.`,
+				type: 'noSpaces'
+			}
 		]
 	},
 	info_contact: {
 		title: 'Retour d’information et contact',
 		content: [
-			{text: `Si vous n’arrivez pas à accéder à un contenu ou à un service, vous pouvez nous contacter par courriel à l’adresse `, type:'noSpaces'},
-			{text: `contact.jdma@design.numerique.gouv.fr `, type:'bold'},
-			{text: `pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme.`, type:'noSpaces'},
+			{
+				text: `Si vous n’arrivez pas à accéder à un contenu ou à un service, vous pouvez nous contacter par courriel à l’adresse `,
+				type: 'noSpaces'
+			},
+			{ text: `contact.jdma@design.numerique.gouv.fr `, type: 'bold' },
+			{
+				text: `pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme.`,
+				type: 'noSpaces'
+			}
 		]
 	},
 	rights: {
 		title: 'Défenseur des droits',
 		content: [
-			{text: `Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.`, type:'noSpaces'}
+			{
+				text: `Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.`,
+				type: 'noSpaces'
+			}
 		]
 	},
 	rights_p2: {
 		title: '',
 		content: [
-			{text: `Plusieurs moyens sont à votre disposition :`, type:'noSpaces'}
+			{ text: `Plusieurs moyens sont à votre disposition :`, type: 'noSpaces' }
 		]
 	},
 	rights_p3: {
 		title: '',
 		content: [
-			{text: `Écrire un message au Défenseur des droits (https://www.defenseurdesdroits.fr/nous-contacter-355)`, type:'list'},
-			{text: `Contacter le délégué du Défenseur des droits près de chez vous (https://www.defenseurdesdroits.fr/carte-des-delegues)`, type:'list'},
-			{text: `Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) Défenseur des droits Libre réponse 71120 75342 Paris CEDEX 07`, type:'list'},
+			{
+				text: `Écrire un message au Défenseur des droits (https://www.defenseurdesdroits.fr/nous-contacter-355)`,
+				type: 'list'
+			},
+			{
+				text: `Contacter le délégué du Défenseur des droits près de chez vous (https://www.defenseurdesdroits.fr/carte-des-delegues)`,
+				type: 'list'
+			},
+			{
+				text: `Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) Défenseur des droits Libre réponse 71120 75342 Paris CEDEX 07`,
+				type: 'list'
+			}
 		]
 	}
 };

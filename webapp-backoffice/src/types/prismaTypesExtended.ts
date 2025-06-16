@@ -21,23 +21,34 @@ export type AdminEntityRightWithUsers = Prisma.AdminEntityRightGetPayload<
 	typeof AdminEntityRightWithUsers
 >;
 
-const BlockWithOptions = Prisma.validator<Prisma.BlockDefaultArgs>()({
+const ProductWithForms = Prisma.validator<Prisma.ProductDefaultArgs>()({
 	include: {
-		options: true
+		forms: {
+			include: {
+				form_template: true,
+				form_configs: {
+					include: {
+						form_config_displays: true,
+						form_config_labels: true
+					}
+				},
+				buttons: true
+			}
+		}
 	}
 });
 
-export type BlockWithOptions = Prisma.BlockGetPayload<typeof BlockWithOptions>;
-
-const ProductWithButtons = Prisma.validator<Prisma.ProductDefaultArgs>()({
-	include: {
-		buttons: true
-	}
-});
-
-export type ProductWithButtons = Prisma.ProductGetPayload<
-	typeof ProductWithButtons
+export type ProductWithForms = Prisma.ProductGetPayload<
+	typeof ProductWithForms
 >;
+
+const ButtonWithForm = Prisma.validator<Prisma.ButtonDefaultArgs>()({
+	include: {
+		form: true
+	}
+});
+
+export type ButtonWithForm = Prisma.ButtonGetPayload<typeof ButtonWithForm>;
 
 const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
@@ -65,4 +76,63 @@ const UserWithAccessRight = Prisma.validator<Prisma.UserDefaultArgs>()({
 
 export type UserWithAccessRight = Prisma.UserGetPayload<
 	typeof UserWithAccessRight
+>;
+
+const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
+	include: {
+		product: true,
+		form_configs: {
+			include: {
+				form_config_displays: true,
+				form_config_labels: true
+			}
+		},
+		form_template: {
+			include: {
+				form_template_steps: {
+					include: {
+						form_template_blocks: {
+							include: {
+								options: true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+});
+
+export type FormWithElements = Prisma.FormGetPayload<typeof FormWithElements>;
+
+const FormTemplateWithElements =
+	Prisma.validator<Prisma.FormTemplateDefaultArgs>()({
+		include: {
+			form_template_steps: {
+				include: {
+					form_template_blocks: {
+						include: {
+							options: true
+						}
+					}
+				}
+			}
+		}
+	});
+
+export type FormTemplateWithElements = Prisma.FormTemplateGetPayload<
+	typeof FormTemplateWithElements
+>;
+
+const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
+	{
+		include: {
+			form_config_displays: true,
+			form_config_labels: true
+		}
+	}
+);
+
+export type FormConfigWithChildren = Prisma.FormConfigGetPayload<
+	typeof FormConfigWithChildren
 >;

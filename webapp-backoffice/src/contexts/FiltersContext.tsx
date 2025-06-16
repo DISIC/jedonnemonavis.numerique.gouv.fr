@@ -30,6 +30,7 @@ export type Filters = {
 	filterEntity: { label: string; value: number }[];
 	currentPage: number;
 	filter: string;
+	view: 'all' | 'favorites' | 'archived';
 	filterOnlyFavorites: boolean;
 	filterOnlyArchived: boolean;
 	validatedSearch: string;
@@ -84,6 +85,7 @@ const initialState: Filters = {
 	filterEntity: [],
 	currentPage: 1,
 	filter: 'title',
+	view: 'all',
 	filterOnlyFavorites: false,
 	filterOnlyArchived: false,
 	validatedSearch: ''

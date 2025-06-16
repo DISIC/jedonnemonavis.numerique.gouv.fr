@@ -1,11 +1,16 @@
-import { formatNumberWithSpaces } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
+import { HideBlockOptionsHelper } from '../Form/tabs/stats';
 
 type QuestionWrapperProps = {
 	totalField: number;
 	fieldLabel: string;
 	total: number;
+	hiddenOptions?: HideBlockOptionsHelper;
 	required?: boolean;
 	hidePercentage?: boolean;
 	children: React.ReactNode;
@@ -15,11 +20,12 @@ const QuestionWrapper = ({
 	totalField,
 	fieldLabel,
 	total,
+	hiddenOptions,
 	required = false,
 	hidePercentage = false,
 	children
 }: QuestionWrapperProps) => {
-	const { classes } = useStyles();
+	const { cx, classes } = useStyles();
 
 	if (!totalField) return;
 
@@ -47,6 +53,21 @@ const QuestionWrapper = ({
 					)}
 				</div>
 			</div>
+			{hiddenOptions && hiddenOptions.options.length > 0 && (
+				<div className={cx(classes.hiddenOptionsSection, fr.cx('fr-mt-6v'))}>
+					<i className={fr.cx('ri-alert-fill')} />
+					<b>
+						Dans la version actuelle du formulaire, publiée le{' '}
+						{formatDateToFrenchString(hiddenOptions.date.toString())}, les
+						modifications suivantes sont en vigueur :
+					</b>
+					<ul>
+						{hiddenOptions.options.map(option => (
+							<li key={option.id}>L'option "{option.label}" a été masquée</li>
+						))}
+					</ul>
+				</div>
+			)}
 			<div>{children}</div>
 			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
 		</div>
@@ -100,6 +121,19 @@ const useStyles = tss.create({
 	totalFieldText: {
 		marginBottom: 0,
 		fontSize: '2rem'
+	},
+	hiddenOptionsSection: {
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		margin: fr.spacing('1v'),
+		padding: fr.spacing('4v'),
+		ul: {
+			marginLeft: fr.spacing('8v'),
+			marginBottom: 0
+		},
+		'.ri-alert-fill': {
+			color: fr.colors.decisions.background.actionHigh.blueFrance.default,
+			marginRight: fr.spacing('2v')
+		}
 	}
 });
 

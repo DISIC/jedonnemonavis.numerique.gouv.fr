@@ -1,4 +1,8 @@
-import { ButtonSchema, ProductSchema } from "@/prisma/generated/zod";
+import {
+  ButtonSchema,
+  FormSchema,
+  ProductSchema,
+} from "@/prisma/generated/zod";
 import { publicProcedure, router } from "@/src/server/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -9,7 +13,9 @@ export const productRouter = router({
     .input(z.object({ id: z.number() }))
     .output(
       z.object({
-        data: ProductSchema.extend({ buttons: z.array(ButtonSchema) }),
+        data: ProductSchema.extend({
+          forms: z.array(FormSchema.extend({ buttons: z.array(ButtonSchema) })),
+        }),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -18,7 +24,11 @@ export const productRouter = router({
           id: input.id,
         },
         include: {
-          buttons: true,
+          forms: {
+            include: {
+              buttons: true,
+            },
+          },
         },
       });
 

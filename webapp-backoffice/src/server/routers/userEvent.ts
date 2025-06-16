@@ -16,7 +16,8 @@ const PRODUCT_ACTIONS: TypeAction[] = [
 	TypeAction.service_button_create,
 	TypeAction.service_button_update,
 	TypeAction.service_apikeys_create,
-	TypeAction.service_apikeys_delete
+	TypeAction.service_apikeys_delete,
+	TypeAction.form_config_create
 ];
 
 const ORGANISATION_ACTIONS: TypeAction[] = [
@@ -60,6 +61,63 @@ export const userEventRouter = router({
 			});
 
 			return { data: reviewViewLog };
+		}),
+
+	getLastFormReviewView: protectedProcedure
+		.input(
+			z.object({
+				product_id: z.number(),
+				form_id: z.number()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { product_id, form_id } = input;
+
+			const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
+				where: {
+					user_id: parseInt(ctx.session?.user?.id),
+					action: 'form_reviews_view',
+					product_id: product_id,
+					metadata: {
+						path: ['form_id'],
+						equals: form_id
+					}
+				},
+				orderBy: { created_at: 'desc' },
+				take: 1
+			});
+
+			let lastLog = lastSeenFormReview;
+
+			if (lastSeenFormReview.length === 0) {
+				const lastSeenProductReview = await ctx.prisma.userEvent.findMany({
+					where: {
+						user_id: parseInt(ctx.session?.user?.id),
+						action: 'service_reviews_view',
+						product_id: product_id
+					},
+					orderBy: { created_at: 'desc' },
+					take: 1
+				});
+				lastLog = lastSeenProductReview;
+			}
+
+			const user = ctx.session?.user;
+			if (user) {
+				await ctx.prisma.userEvent.create({
+					data: {
+						user_id: parseInt(user.id),
+						action: 'form_reviews_view' as any,
+						product_id: product_id,
+						metadata: {
+							form_id: form_id
+						}
+					}
+				});
+			}
+
+			const logToReturn = lastLog.length > 1 ? [lastLog[1]] : lastLog;
+			return { data: logToReturn };
 		}),
 
 	createReviewView: protectedProcedure
@@ -129,7 +187,6 @@ export const userEventRouter = router({
 				input;
 			const skip = (page - 1) * limit;
 
-
 			const whereCondition: Prisma.UserEventWhereInput = {
 				OR: [
 					{ product_id },
@@ -139,6 +196,13 @@ export const userEventRouter = router({
 								some: {
 									id: product_id
 								}
+							}
+						}
+					},
+					{
+						form: {
+							is: {
+								product_id: product_id
 							}
 						}
 					}

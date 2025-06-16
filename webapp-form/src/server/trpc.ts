@@ -99,7 +99,10 @@ function isIpAllowed(ip: string): boolean {
 }
 
 function ipToNumber(ip: string): number {
-  return ipaddr.parse(ip).toByteArray().reduce((acc, byte) => (acc << 8) + byte, 0);
+  return ipaddr
+    .parse(ip)
+    .toByteArray()
+    .reduce((acc, byte) => (acc << 8) + byte, 0);
 }
 
 const limiter = createTRPCStoreLimiter<typeof t>({

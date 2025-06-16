@@ -6,9 +6,6 @@ import { accessRightRouter } from './accessRight';
 import { adminEntityRightRouter } from './adminEntityRight';
 import { userRouter } from './user';
 import { favoriteRouter } from './favorite';
-import { formRouter } from './form';
-import { blockRouter } from './block';
-import { optionsRouter } from './options';
 import { exportRouter } from './export';
 import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
@@ -19,6 +16,9 @@ import { apiKeyRouter } from './apiKey';
 import { reviewRouter } from './review';
 import { reviewCustomRouter } from './reviewCustom';
 import { reviewViewLogRouter } from './reviewViewLog';
+import { formRouter } from './form';
+import { formConfigRouter } from './formConfig';
+
 export const appRouter = router({
 	user: userRouter,
 	product: productRouter,
@@ -27,9 +27,6 @@ export const appRouter = router({
 	adminEntityRight: adminEntityRightRouter,
 	button: buttonRouter,
 	favorite: favoriteRouter,
-	form: formRouter,
-	block: blockRouter,
-	options: optionsRouter,
 	export: exportRouter,
 	domain: domainRouter,
 	userRequest: userRequestRouter,
@@ -39,7 +36,9 @@ export const appRouter = router({
 	apiKey: apiKeyRouter,
 	review: reviewRouter,
 	reviewCustom: reviewCustomRouter,
-	reviewViewLog: reviewViewLogRouter
+	reviewViewLog: reviewViewLogRouter,
+	form: formRouter,
+	formConfig: formConfigRouter
 });
 
 export type AppRouter = typeof appRouter;

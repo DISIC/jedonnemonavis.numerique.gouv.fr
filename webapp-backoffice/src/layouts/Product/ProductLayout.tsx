@@ -1,18 +1,19 @@
+import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
+import Tag from '@codegouvfr/react-dsfr/Tag';
+import { Product, RightAccessStatus } from '@prisma/client';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
-import { useRouter } from 'next/router';
-import { Product, RightAccessStatus } from '@prisma/client';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { Toast } from '@/src/components/ui/Toast';
-import Button from '@codegouvfr/react-dsfr/Button';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
 	product: Product;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	hideMenu?: Boolean;
 }
 
 interface MenuItems {
@@ -24,7 +25,12 @@ interface MenuItems {
 	isActive?: boolean;
 }
 
-const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
+const ProductLayout = ({
+	children,
+	product,
+	ownRight,
+	hideMenu
+}: ProductLayoutProps) => {
 	const { id } = product;
 
 	const [displayToast, setDisplayToast] = useState(false);
@@ -36,40 +42,16 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 
 	const menuItems: MenuItems[] = [
 		{
-			text: 'Statistiques',
+			text: 'Formulaires',
 			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/stats`,
+				router.pathname === `/administration/dashboard/product/[id]/forms`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/stats`,
-				alt: 'Statistiques'
-			}
-		},
-		{
-			text: 'Avis',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/reviews`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/reviews`,
-				alt: 'Avis'
-			}
-		},
-		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les boutons'
-					: 'Voir les boutons',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/buttons`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/buttons`,
+				href: `/administration/dashboard/product/${id}/forms`,
 				alt: 'Gérer mes boutons'
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? "Gérer l'accès"
-					: "Voir l'accès",
+			text: "Droits d'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
@@ -87,15 +69,12 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les clés API'
-					: 'Voir les clés API',
+			text: ownRight && ownRight === 'carrier_admin' ? 'Clés API' : 'Clés API',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {
 				href: `/administration/dashboard/product/${id}/api_keys`,
-				alt: 'Gérer les clés API'
+				alt: 'Clés API'
 			}
 		},
 		{
@@ -165,7 +144,12 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3', 'fr-mb-6v')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-3' : 'fr-hidden'
+					)}
+				>
 					<div role="navigation">
 						<SideMenu
 							align="left"
@@ -176,7 +160,13 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 						/>
 					</div>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-9' : 'fr-col-md-12',
+						'fr-mb-12v'
+					)}
+				>
 					{children}
 					{router.pathname.includes('/stats') && showBackToTop && (
 						<div className={cx(classes.backToTop)}>

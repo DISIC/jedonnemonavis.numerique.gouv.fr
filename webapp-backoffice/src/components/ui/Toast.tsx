@@ -1,5 +1,5 @@
 import Alert from '@codegouvfr/react-dsfr/Alert';
-import { Snackbar } from '@mui/material';
+import { Snackbar, SnackbarOrigin } from '@mui/material';
 
 interface ToastProps {
 	isOpen: boolean;
@@ -7,6 +7,7 @@ interface ToastProps {
 	autoHideDuration: number;
 	severity: 'success' | 'info' | 'warning' | 'error';
 	message: string;
+	placement?: SnackbarOrigin;
 }
 
 export const Toast = ({
@@ -14,7 +15,8 @@ export const Toast = ({
 	setIsOpen,
 	autoHideDuration,
 	severity,
-	message
+	message,
+	placement
 }: ToastProps) => {
 	return (
 		<Snackbar
@@ -22,6 +24,7 @@ export const Toast = ({
 			autoHideDuration={autoHideDuration}
 			onClose={() => setIsOpen(false)}
 			role={severity === 'success' ? 'status' : 'alert'}
+			anchorOrigin={placement}
 			sx={{
 				'& .MuiPaper-root': {
 					padding: 0,
@@ -30,7 +33,8 @@ export const Toast = ({
 				},
 				'& .MuiSnackbarContent-message': {
 					padding: 0
-				}
+				},
+				zIndex: 9999 
 			}}
 			message={
 				<div role="status">

@@ -146,6 +146,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 					// Extraire entityId et productId
 					let entity_id: number | null = null;
 					let product_id: number | null = null;
+					let form_id: number | null = null;
 
 					if (input?.json?.entity_id) {
 						entity_id = input.json.entity_id;
@@ -159,6 +160,10 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						product_id = input.json.product.id;
 					}
 
+					if (input?.json?.form_id) {
+						form_id = input.json.form_id;
+					}
+
 					if (user && action) {
 						await ctx.prisma.userEvent.create({
 							data: {
@@ -166,6 +171,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 								action,
 								entity_id,
 								product_id,
+								form_id,
 								metadata: input
 							}
 						});

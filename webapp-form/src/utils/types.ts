@@ -1,4 +1,40 @@
-import { Answer, Prisma } from "@prisma/client";
+import { $Enums, Prisma } from "@prisma/client";
+
+const FormWithElementsQuery = Prisma.validator<Prisma.FormDefaultArgs>()({
+  include: {
+    form_configs: {
+      include: {
+        form_config_displays: true,
+        form_config_labels: true,
+      },
+    },
+    form_template: {
+      include: {
+        form_template_steps: {
+          include: {
+            form_template_blocks: {
+              include: {
+                options: true,
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+});
+
+type RawFormWithElements = Prisma.FormGetPayload<typeof FormWithElementsQuery>;
+
+type DateToString<T> = T extends Date
+  ? string
+  : T extends Array<infer U>
+    ? Array<DateToString<U>>
+    : T extends object
+      ? { [K in keyof T]: DateToString<T[K]> }
+      : T;
+
+export type FormWithElements = DateToString<RawFormWithElements>;
 
 export type Feeling = "good" | "bad" | "medium";
 
@@ -16,6 +52,7 @@ export type Product = {
   id: number;
   title: string;
   buttons: { id: number }[];
+  form: FormWithElements;
 };
 
 type BaseOption = {
@@ -115,6 +152,7 @@ export interface ElkAnswer extends Prisma.AnswerUncheckedCreateInput {
   review_user_id?: string;
   product_name: string;
   product_id: number;
+  form_id: number;
   button_name: string;
   button_id: number;
   parent_field_code?: string;

@@ -14,13 +14,21 @@ import { ExtendedReview } from './interface';
 import ReviewLineMoreInfos from './ReviewLineMoreInfos';
 import Image from 'next/image';
 import { push } from '@socialgouv/matomo-next';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
 const ReviewLine = ({
 	review,
-	search
+	search,
+	formConfigHelper,
+	hasManyVersions
 }: {
 	review: ExtendedReview;
 	search: string;
+	formConfigHelper: {
+		formConfig?: FormConfigWithChildren;
+		versionNumber: number;
+	};
+	hasManyVersions: boolean;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(() => {
@@ -72,6 +80,14 @@ const ReviewLine = ({
 					{review.created_at?.toLocaleTimeString('fr-FR')}
 				</div>
 			</td>
+			{hasManyVersions && (
+				<td className={cx(classes.cellContainer)}>
+					<div className={cx(classes.date)}>
+						<span className={fr.cx('fr-hidden-lg')}>Formulaire : </span>
+						Version {formConfigHelper.versionNumber}
+					</div>
+				</td>
+			)}
 			<td className={cx(classes.cellContainer)}>
 				<div className={cx(classes.date)}>
 					<span className={fr.cx('fr-hidden-lg')}>Id : </span>
@@ -132,7 +148,7 @@ const ReviewLine = ({
 			<td className={cx(classes.cellContainer)}>
 				<Button
 					priority="secondary"
-					title={`Plus d'infos sur l'avis ${review.id}`}
+					title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 					iconPosition="right"
 					iconId="fr-icon-arrow-down-s-fill"
 					aria-expanded={displayMoreInfo ? true : false}
@@ -143,11 +159,15 @@ const ReviewLine = ({
 					}}
 				>
 					{' '}
-					Plus d'infos
+					Détails
 				</Button>
 			</td>
 			{displayMoreInfo && (
-				<ReviewLineMoreInfos review={review} search={search} />
+				<ReviewLineMoreInfos
+					review={review}
+					search={search}
+					formConfig={formConfigHelper.formConfig}
+				/>
 			)}
 		</tr>
 	);
@@ -166,7 +186,7 @@ const useStyles = tss.create({
 		marginBottom: 12,
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
-			alignItems: 'initial',
+			alignItems: 'initial'
 		}
 	},
 	date: {

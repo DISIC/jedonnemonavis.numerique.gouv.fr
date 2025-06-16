@@ -7,19 +7,8 @@ import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { CustomModalProps } from '@/src/types/custom';
 
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	isOpen: boolean;
@@ -333,7 +322,6 @@ const ButtonModal = (props: Props) => {
 				return [...defaultButtons];
 		}
 
-		return;
 	};
 
 	return (

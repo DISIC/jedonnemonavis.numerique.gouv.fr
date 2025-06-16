@@ -187,10 +187,7 @@ function createProduct() {
 	cy.get(selectors.modalFooter)
 		.contains('button', 'Ajouter ce service')
 		.click();
-	cy.get('[class*="ProductButtonsPage-btnContainer"]', {
-		timeout: 10000
-	}).should('be.visible');
-	createAndModifyButton();
+	createAndModifyForm();
 }
 
 function selectEntity() {
@@ -208,16 +205,29 @@ function addUrls(urls) {
 	});
 }
 
-function createAndModifyButton() {
-	cy.get('[class*="ProductButtonsPage-btnContainer"]')
-		.contains('Créer un bouton JDMA')
-		.click();
-	cy.get('dialog#button-modal').within(() => {
-		cy.get('input[name="button-create-title"]').type('bouton test 1');
-		cy.get('textarea').type('Description du bouton test 1');
+function createAndModifyForm() {
+	cy.get('[class*="buttonContainer"]').contains('Créer un formulaire').click();
+	cy.get('dialog#new-form-modal').within(() => {
+		cy.get('input[name="title"]').type('form test 1');
 	});
 	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
-	modifyButton();
+
+	cy.wait(5000);
+
+	renameForm();
+	// TODO: Add extra test steps after form creation about button creation
+}
+
+function renameForm() {
+	cy.get('button').contains('Renommer').click();
+
+	cy.get('dialog#rename-form-modal')
+		.should('be.visible')
+		.within(() => {
+			cy.get('input[name="title"]').clear().type('e2e-jdma-form-test-renamed');
+
+			cy.get('button').contains('Modifier').click();
+		});
 }
 
 function modifyButton() {

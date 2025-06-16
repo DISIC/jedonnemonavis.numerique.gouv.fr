@@ -21,7 +21,17 @@ export const getServerSideProps: GetServerSideProps = async context => {
 					}
 				: {
 						id: parseInt(id as string)
-					}
+					},
+		include: {
+			forms: {
+				include: {
+					form_template: true
+				},
+				orderBy: {
+					created_at: 'asc'
+				}
+			}
+		}
 	});
 
 	prisma.$disconnect();

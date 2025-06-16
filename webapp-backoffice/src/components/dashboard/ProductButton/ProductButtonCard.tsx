@@ -1,16 +1,16 @@
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
-import { Button as PrismaButtonType, RightAccessStatus } from '@prisma/client';
-import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
-import { tss } from 'tss-react/dsfr';
+import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
-	button: PrismaButtonType;
-	onButtonClick: (modalType: string, button?: PrismaButtonType) => void;
+	button: ButtonWithForm;
+	onButtonClick: (modalType: string, button?: ButtonWithForm) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -41,30 +41,46 @@ const ProductButtonCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-						<p className={fr.cx('fr-mb-0')}>{button.title}</p>
-						<p className={fr.cx('fr-mb-0', 'fr-hint-text')}>
-							{button.description}
+						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>
+							{button.title}
 						</p>
+						{button.description && (
+							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
+								{button.description}
+							</p>
+						)}
 					</div>
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
 							{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
 							<Button
+								priority="secondary"
+								size="small"
+								onClick={() => {
+									onButtonClick('install', button);
+									push(['trackEvent', 'Gestion boutons', 'Installer']);
+									handleClose();
+								}}
+								className="fr-mr-2v"
+							>
+								Voir le code
+							</Button>
+							<Button
 								id="button-options"
 								aria-controls={menuOpen ? 'option-menu' : undefined}
 								aria-haspopup="true"
 								aria-expanded={menuOpen ? 'true' : undefined}
+								title={`Ouvrir le menu contextuel du bouton « ${button.title} »`}
 								priority="secondary"
 								size="small"
 								onClick={handleClick}
-								iconId={
-									menuOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'
-								}
-								iconPosition="right"
-								className={classes.button}
+								iconId={'ri-more-2-fill'}
+								className={cx(classes.buttonWrapper)}
 							>
-								Options
+								<span
+									className={fr.cx('fr-hidden')}
+								>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
 							</Button>
 							<Menu
 								id="option-menu"
@@ -84,30 +100,10 @@ const ProductButtonCard = (props: Props) => {
 										Modifier
 									</MenuItem>
 								)}
-								{/* <MenuItem onClick={() => onButtonClick('merge')}>
-								Fusionner avec un autre bouton
-							</MenuItem>
-							<MenuItem
-								onClick={() => onButtonClick('archive', button)}
-								style={{
-									color: fr.colors.decisions.background.flat.error.default
-								}}
-							>
-								Archiver bouton
-							</MenuItem> */}
-								<MenuItem
-									onClick={() => {
-										onButtonClick('install', button);
-										push(['trackEvent', 'Gestion boutons', 'Installer']);
-										handleClose();
-									}}
-								>
-									Voir le code
-								</MenuItem>
 								<MenuItem
 									onClick={() => {
 										navigator.clipboard.writeText(
-											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.product_id}?button=${button.id}`
+											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.form.product_id}?button=${button.id}`
 										);
 										handleClose();
 									}}
@@ -115,17 +111,6 @@ const ProductButtonCard = (props: Props) => {
 									Copier le lien du formulaire
 								</MenuItem>
 							</Menu>
-							{/* {!button.isTest && (
-								<Button
-									size="small"
-									onClick={() => {
-										onButtonClick('install', button);
-										push(['trackEvent', 'Gestion boutons', 'Installer']);
-									}}
-								>
-									Installer
-								</Button>
-							)} */}
 						</div>
 					</div>
 				</div>
@@ -141,7 +126,12 @@ const useStyles = tss
 		card: {
 			backgroundColor: isTest
 				? fr.colors.decisions.border.default.grey.default
-				: fr.colors.decisions.background.default.grey.default
+				: fr.colors.decisions.background.alt.blueFrance.default,
+			height: 'auto!important',
+			backgroundImage: 'none!important'
+		},
+		title: {
+			fontWeight: 'bold'
 		},
 		actionsContainer: {
 			display: 'flex',
@@ -156,10 +146,9 @@ const useStyles = tss
 				gap: fr.spacing('4v')
 			}
 		},
-		button: {
-			[fr.breakpoints.down('md')]: {
-				width: '100%',
-				justifyContent: 'center',
+		buttonWrapper: {
+			'&::before': {
+				marginRight: '0 !important'
 			}
 		},
 		tag: {}

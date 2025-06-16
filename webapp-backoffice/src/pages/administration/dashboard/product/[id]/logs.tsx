@@ -142,15 +142,15 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 							if (option) {
 								updateFilters({
 									...filters,
-									['productActivityLogs']: {
-										...filters['productActivityLogs'],
+									productActivityLogs: {
+										...filters.productActivityLogs,
 										actionType: [
-											...filters['productActivityLogs'].actionType,
+											...filters.productActivityLogs.actionType,
 											option.value as TypeAction
 										]
 									},
 									sharedFilters: {
-										...filters['sharedFilters'],
+										...filters.sharedFilters,
 										hasChanged: true
 									}
 								});
