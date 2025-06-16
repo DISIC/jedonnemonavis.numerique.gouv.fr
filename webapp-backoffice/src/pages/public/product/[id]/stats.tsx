@@ -18,15 +18,17 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Product } from '@prisma/client';
 import Head from 'next/head';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
 import { push } from '@socialgouv/matomo-next';
 import { SectionWrapper } from '@/src/components/dashboard/Form/tabs/stats';
+import { Select } from '@codegouvfr/react-dsfr/Select';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 
 interface Props {
-	product: Product | null;
+	product: ProductWithForms | null;
 	defaultStartDate: string;
 	defaultEndDate: string;
 }
@@ -39,9 +41,11 @@ const ProductStatPage = (props: Props) => {
 
 	const [tmpStartDate, setTmpStartDate] = useState<string>(defaultStartDate);
 	const [tmpEndDate, setTmpEndDate] = useState<string>(defaultEndDate);
+	const [tmpFormId, setTmpFormId] = useState<number>(0);
 
 	const [startDate, setStartDate] = useState<string>(defaultStartDate);
 	const [endDate, setEndDate] = useState<string>(defaultEndDate);
+	const [formId, setFormId] = useState<number>(0);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 200);
 	const debouncedEndDate = useDebounce<string>(endDate, 200);
@@ -65,31 +69,48 @@ const ProductStatPage = (props: Props) => {
 	}
 
 	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.countReviews.useQuery({
-			numberPerPage: 0,
-			page: 1,
-			product_id: product.id
-		});
+		trpc.review.countReviews.useQuery(
+			{
+				numberPerPage: 0,
+				page: 1,
+				product_id: product.id,
+				form_id: formId
+			},
+			{
+				enabled: formId !== 0
+			}
+		);
 
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
-	} = trpc.review.countReviews.useQuery({
-		numberPerPage: 0,
-		page: 1,
-		product_id: product.id,
-		start_date: debouncedStartDate,
-		end_date: debouncedEndDate
-	});
-
-	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
-		trpc.answer.countByFieldCode.useQuery({
+	} = trpc.review.countReviews.useQuery(
+		{
+			numberPerPage: 0,
+			page: 1,
 			product_id: product.id,
-			form_id: 0, // TODO: CHANGER
-			field_code: 'verbatim',
+			form_id: formId,
 			start_date: debouncedStartDate,
 			end_date: debouncedEndDate
-		});
+		},
+		{
+			enabled: formId !== 0
+		}
+	);
+
+	const { data: dataNbVerbatims, isLoading: isLoadingNbVerbatims } =
+		trpc.answer.countByFieldCode.useQuery(
+			{
+				product_id: product.id,
+				form_id: formId,
+				field_code: 'verbatim',
+				start_date: debouncedStartDate,
+				end_date: debouncedEndDate
+			},
+			{
+				enabled: formId !== 0
+			}
+		);
 
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
@@ -128,7 +149,7 @@ const ProductStatPage = (props: Props) => {
 			<>
 				<ObservatoireStats
 					productId={product.id}
-					formId={0} // TODO: CHANGER
+					formId={formId}
 					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
@@ -159,22 +180,12 @@ const ProductStatPage = (props: Props) => {
 								hideLink
 							/>
 						</div>
-						{/* <div className={fr.cx('fr-col-4')}>
-							<KPITile
-								title="Formulaires complets"
-								kpi={0}
-								desc="soit 0 % des répondants"
-								linkHref={`/administration/dashboard/product/${product.id}/forms`}
-								hideLink
-								grey
-							/>
-						</div> */}
 					</div>
 				</div>
 				<AnswersChart
 					fieldCode="satisfaction"
 					productId={product.id}
-					formId={0} // TODO: CHANGER
+					formId={formId}
 					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
@@ -188,7 +199,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -198,7 +209,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="comprehension"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -207,7 +218,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_tried"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -216,7 +227,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_reached"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -225,7 +236,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="contact_satisfaction"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -240,7 +251,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="easy"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -250,7 +261,7 @@ const ProductStatPage = (props: Props) => {
 						fieldCode="difficulties"
 						total={nbReviewsWithFilters}
 						productId={product.id}
-						formId={0} // TODO: CHANGER
+						formId={formId}
 						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
@@ -261,11 +272,24 @@ const ProductStatPage = (props: Props) => {
 	};
 
 	const submit = () => {
-		if (tmpStartDate !== startDate || tmpEndDate !== endDate) {
+		if (
+			tmpStartDate !== startDate ||
+			tmpEndDate !== endDate ||
+			tmpFormId !== formId
+		) {
+			console.log(tmpFormId, formId);
 			setStartDate(tmpStartDate);
 			setEndDate(tmpEndDate);
+			setFormId(tmpFormId);
 		}
 	};
+
+	useEffect(() => {
+		if (product.forms.length > 0 && formId === 0) {
+			setFormId(product.forms[0].id);
+			setTmpFormId(product.forms[0].id);
+		}
+	}, [product]);
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-mb-10w')}>
@@ -280,7 +304,7 @@ const ProductStatPage = (props: Props) => {
 				<h1>{product.title}</h1>
 			</div>
 			<p className={fr.cx('fr-mt-5v')}>
-				Données recueillies en ligne, entre le{' '}
+				Données recueillies en ligne pour le formulaire, entre le{' '}
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
 				{transformDateToFrenchReadable(debouncedEndDate)}
 				{!!nbReviews
@@ -295,6 +319,27 @@ const ProductStatPage = (props: Props) => {
 					push(['trackEvent', 'Product - Stats', 'Apply-Search']);
 				}}
 			>
+				<div className={fr.cx('fr-col-4')}>
+					<Select
+						label="Formulaire"
+						nativeSelectProps={{
+							value: tmpFormId ?? 'undefined',
+							onChange: e => {
+								const newValue =
+									e.target.value === 'undefined'
+										? undefined
+										: parseInt(e.target.value);
+								if (newValue) setTmpFormId(newValue);
+							}
+						}}
+					>
+						{product.forms.map(form => (
+							<option key={form.id} value={form.id}>
+								{form.title || form.form_template.title}
+							</option>
+						))}
+					</Select>
+				</div>
 				<div className={fr.cx('fr-col-3')}>
 					<Input
 						label="Date de début"
