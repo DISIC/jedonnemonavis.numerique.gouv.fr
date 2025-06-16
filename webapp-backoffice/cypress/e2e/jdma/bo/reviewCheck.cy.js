@@ -20,7 +20,7 @@ describe('jdma-answer-check', () => {
 		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
-				cy.wait(2000);
+				cy.wait(5000);
 				cy.get('button').contains('Statistiques').click();
 				cy.wait(1000);
 				cy.get('button')
@@ -32,10 +32,10 @@ describe('jdma-answer-check', () => {
 							.first()
 							.click()
 							.then(() => {
-								cy.get('a[href="/public/product/5/stats"]').then($link => {
+								cy.get('a[href="/public/product/2/stats"]').then($link => {
 									const url = $link.prop('href');
-									expect(url).to.contain('/public/product/5/stats');
-									cy.get('a[href="/public/product/5/stats"]')
+									expect(url).to.contain('/public/product/2/stats');
+									cy.get('a[href="/public/product/2/stats"]')
 										.click()
 										.then(() => {
 											cy.get('h1').contains('e2e-jdma-service-test-1');
@@ -50,7 +50,7 @@ describe('jdma-answer-check', () => {
 		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
-				cy.wait(2000);
+				cy.wait(5000);
 				cy.get('button').contains('Statistiques').click();
 				cy.wait(1000);
 				cy.get('button')
@@ -62,7 +62,7 @@ describe('jdma-answer-check', () => {
 							.first()
 							.click()
 							.then(() => {
-								cy.get('a[href="/public/product/5/stats"]').should('not.exist');
+								cy.get('a[href="/public/product/2/stats"]').should('not.exist');
 							});
 					});
 			});
