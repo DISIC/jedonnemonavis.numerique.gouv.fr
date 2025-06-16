@@ -23,7 +23,8 @@ const selectors = {
 	modal: {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
-		button: 'dialog#button-modal'
+		button: 'dialog#button-modal',
+		form: 'dialog#new-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productTitle: '[class*="productTitle"]'
@@ -171,10 +172,9 @@ describe('jdma-admin', () => {
 			.contains(selectors.dashboard.nameTestService)
 			.click();
 
-		cy.contains('Créer un bouton JDMA').click();
-		cy.get(selectors.modal.button).within(() => {
-			cy.get('input[name="button-create-title"]').type('e2e-jdma-button-test');
-			cy.get('textarea').type('Description du bouton e2e-jdma-button-test');
+		cy.contains('Créer un formulaire').click();
+		cy.get(selectors.modal.form).within(() => {
+			cy.get('input[name="title"]').type('e2e-jdma-form-test');
 		});
 
 		cy.get(selectors.modalFooter).contains('Créer').click();

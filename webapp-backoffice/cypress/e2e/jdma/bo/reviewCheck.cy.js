@@ -8,7 +8,7 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should the test answer exist', () => {
-		cy.get('div.fr-label--info.fr-text--bold')
+		cy.get('span.fr-text--bold')
 			.invoke('text')
 			.then(text => {
 				const value = parseInt(text);
@@ -17,7 +17,8 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should activate the stats public page', () => {
-		cy.get('a[href*="/administration/dashboard/product/5/stats"]')
+		// TODO: Fix form id (from the previous created form) to pass the test
+		cy.get('a[href*="/administration/dashboard/product/5/forms/9]')
 			.first()
 			.click()
 			.then(() => {
@@ -45,7 +46,8 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should deactivate the stats public page', () => {
-		cy.get('a[href*="/administration/dashboard/product/5/stats"]')
+		// TODO: Fix form id (from the previous created form) to pass the test
+		cy.get('a[href*="/administration/dashboard/product/5/forms/9"]')
 			.first()
 			.click()
 			.then(() => {
