@@ -331,19 +331,9 @@ const StatsTab = ({ form, ownRight }: Props) => {
 	};
 
 	return (
-		<div className={cx(fr.cx('fr-container'), classes.container)}>
-			<PublicDataModal modal={public_modal} product={form.product} />
+		<div className={cx(classes.container)}>
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
-				{ownRight === 'carrier_admin' && (
-					<Button
-						priority="secondary"
-						type="button"
-						nativeButtonProps={public_modal.buttonProps}
-					>
-						Rendre ces statistiques publiques
-					</Button>
-				)}
 			</div>
 			<div className={cx(classes.container)}>
 				<GenericFilters filterKey="productStats">
