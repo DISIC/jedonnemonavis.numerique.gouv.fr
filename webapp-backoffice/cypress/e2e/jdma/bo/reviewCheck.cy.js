@@ -17,11 +17,12 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should activate the stats public page', () => {
-		// TODO: Fix form id (from the previous created form) to pass the test
-		cy.get('a[href*="/administration/dashboard/product/5/forms/9]')
-			.first()
+		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
+				cy.wait(2000);
+				cy.get('button').contains('Statistiques').click();
+				cy.wait(1000);
 				cy.get('button')
 					.contains('Rendre ces statistiques publiques')
 					.first()
@@ -46,11 +47,12 @@ describe('jdma-answer-check', () => {
 	});
 
 	it('should deactivate the stats public page', () => {
-		// TODO: Fix form id (from the previous created form) to pass the test
-		cy.get('a[href*="/administration/dashboard/product/5/forms/9"]')
-			.first()
+		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
+				cy.wait(2000);
+				cy.get('button').contains('Statistiques').click();
+				cy.wait(1000);
 				cy.get('button')
 					.contains('Rendre ces statistiques publiques')
 					.first()
@@ -89,7 +91,7 @@ function loginAndNavigate() {
 				.click()
 				.then(() => {
 					cy.url().should('eq', app_url + '/administration/dashboard/products');
-					cy.wait(8000);
+					cy.wait(6000);
 				});
 		});
 }

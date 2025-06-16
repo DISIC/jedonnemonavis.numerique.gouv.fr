@@ -86,7 +86,7 @@ function fillFormStep4() {
 		});
 
 	cy.get('button').contains('Continuer').click();
-	cy.get('h1').contains('Informations complémentaires').should('exist');
+	cy.get('h1').contains('Commentaire').should('exist');
 	cy.get('form').within(() => {
 		cy.get('textarea').type('e2e test content');
 	});

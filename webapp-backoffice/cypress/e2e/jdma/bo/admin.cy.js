@@ -172,10 +172,16 @@ describe('jdma-admin', () => {
 			.contains(selectors.dashboard.nameTestService)
 			.click();
 
+		cy.wait(1000);
+
 		cy.contains('Créer un formulaire').click();
-		cy.get(selectors.modal.form).within(() => {
-			cy.get('input[name="title"]').type('e2e-jdma-form-test', { force: true });
-		});
+		cy.get(selectors.modal.form)
+			.first()
+			.within(() => {
+				cy.get('input[name="title"]').type('e2e-jdma-form-test', {
+					force: true
+				});
+			});
 
 		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
