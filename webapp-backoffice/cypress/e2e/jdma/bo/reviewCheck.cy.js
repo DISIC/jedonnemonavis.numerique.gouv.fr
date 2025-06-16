@@ -20,7 +20,7 @@ describe('jdma-answer-check', () => {
 		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
-				cy.wait(2000);
+				cy.wait(5000);
 				cy.get('button').contains('Statistiques').click();
 				cy.wait(1000);
 				cy.get('button')
@@ -50,7 +50,7 @@ describe('jdma-answer-check', () => {
 		cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 			.click()
 			.then(() => {
-				cy.wait(2000);
+				cy.wait(5000);
 				cy.get('button').contains('Statistiques').click();
 				cy.wait(1000);
 				cy.get('button')
