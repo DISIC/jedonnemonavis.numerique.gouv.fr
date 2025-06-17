@@ -39,7 +39,7 @@ const essential_service_modal = createModal({
 });
 
 const DashBoard = () => {
-	const { filters, updateFilters, clearFilters } = useFilters();
+	const { filters, updateFilters } = useFilters();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -418,7 +418,8 @@ const DashBoard = () => {
 													filterOnlyFavorites: value === 'favorites',
 													filterOnlyArchived: value === 'archived'
 												});
-											}
+											},
+											className: fr.cx('fr-pr-8v')
 										}}
 									>
 										<option value="all">Services actifs</option>
@@ -496,7 +497,7 @@ const DashBoard = () => {
 							) : (
 								<ul className={classes.buttonList}>
 									{products.map((product, index) => (
-										<li key={index} role="list" onClick={() => clearFilters()}>
+										<li key={index} role="list">
 											<ProductCard
 												product={product}
 												userId={parseInt(session?.user?.id as string)}

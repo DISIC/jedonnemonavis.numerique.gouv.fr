@@ -18,6 +18,7 @@ import { Toast } from '../../ui/Toast';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
 import NoFormsPanel from '../Pannels/NoFormsPanel';
+import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface CreateModalProps {
 	buttonProps: {
@@ -54,6 +55,7 @@ const ProductCard = ({
 	onRestoreProduct: () => void;
 	onDeleteProduct: () => void;
 }) => {
+	const { clearFilters } = useFilters();
 	const [onConfirmModalRestore, setOnConfirmModalRestore] =
 		useState<CreateModalProps | null>(null);
 	const [onConfirmModalArchive, setOnConfirmModalArchive] =
@@ -116,13 +118,13 @@ const ProductCard = ({
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.newCountsByForm['1'] ?? 0) +
 				(reviewsCountData?.newCountsByForm['2'] ?? 0)
-			: (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0);
+			: reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -279,6 +281,10 @@ const ProductCard = ({
 							tabIndex={0}
 							title={`Voir les statistiques pour le service ${product.title}`}
 							className={cx(classes.productLink, fr.cx('fr-link'))}
+							onClick={() => clearFilters()}
+							style={{
+								pointerEvents: isDisabled ? 'none' : 'auto'
+							}}
 						>
 							<span className={cx(classes.productTitle)}>{product.title}</span>
 						</Link>
@@ -298,14 +304,32 @@ const ProductCard = ({
 								)}
 								{isDisabled && (
 									<Badge noIcon small>
-										Service supprimé
+										Service archivé
 									</Badge>
 								)}
 							</div>
 						)}
+						{isDisabled && (
+							<div className={cx(classes.buttonsCol)}>
+								<Button
+									iconId={'ri-inbox-unarchive-line'}
+									iconPosition="right"
+									title={`Restaurer le produit « ${product.title} »`}
+									aria-label={`Restaurer le produit « ${product.title} »`}
+									priority="secondary"
+									size="small"
+									onClick={e => {
+										e.preventDefault();
+										onConfirmModalRestore.open();
+										push(['trackEvent', 'BO - Product', `Restore`]);
+									}}
+								>
+									Restaurer
+								</Button>
+							</div>
+						)}
 						{showFavoriteButton && !isDisabled && (
 							<Button
-								//iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
 								title={
 									isFavorite
 										? `Supprimer le produit « ${product.title} » des favoris`
@@ -355,110 +379,85 @@ const ProductCard = ({
 						</p>
 					</div>
 
-					{isDisabled ? (
-						<div
-							className={cx(
-								classes.buttonsCol,
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12')
-							)}
-						>
-							<Button
-								iconId={'ri-inbox-unarchive-line'}
-								iconPosition="right"
-								title={`Restaurer le produit « ${product.title} »`}
-								aria-label={`Restaurer le produit « ${product.title} »`}
-								priority="secondary"
-								size="small"
-								onClick={e => {
-									e.preventDefault();
-									onConfirmModalRestore.open();
-									push(['trackEvent', 'BO - Product', `Restore`]);
-								}}
-							>
-								Restaurer
-							</Button>
-						</div>
-					) : (
-						<>
-							{!isLoadingReviewsCount && totalReviews !== undefined && (
-								<div
-									className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}
-								>
-									{product.forms.length === 0 && (
-										<NoFormsPanel isSmall product={product} />
-									)}
-									{product.forms.slice(0, 2).map(form => (
+					{!isDisabled &&
+						!isLoadingReviewsCount &&
+						totalReviews !== undefined && (
+							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
+								{product.forms.length === 0 && (
+									<NoFormsPanel isSmall product={product} />
+								)}
+								{product.forms.slice(0, 2).map(form => (
+									<div
+										key={form.id}
+										className={cx(
+											fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+											classes.formCard
+										)}
+									>
+										<Link
+											href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+											className={classes.formLink}
+											onClick={() => clearFilters()}
+										/>
 										<div
-											key={form.id}
 											className={cx(
-												fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
-												classes.formCard
+												fr.cx(
+													'fr-col',
+													'fr-col-12',
+													'fr-col-md-6',
+													'fr-pb-0',
+													'fr-p-4v'
+												)
 											)}
 										>
-											<Link
-												href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-												className={classes.formLink}
-											/>
-											<div
-												className={cx(
-													fr.cx(
-														'fr-col',
-														'fr-col-12',
-														'fr-col-md-6',
-														'fr-pb-0',
-														'fr-p-4v'
-													)
+											<span className={cx(classes.productTitle)}>
+												{form.title || form.form_template.title}
+											</span>
+										</div>
+										<div
+											className={cx(
+												fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'),
+												classes.formStatsWrapper
+											)}
+										>
+											<div className={classes.formStatsContent}>
+												{getFormNewReviewCount(form.id, form.legacy) > 0 && (
+													<Badge
+														severity="success"
+														noIcon
+														small
+														className="fr-mr-4v"
+													>
+														{getFormNewReviewCount(form.id, form.legacy)}{' '}
+														NOUVELLES RÉPONSES
+													</Badge>
 												)}
-											>
-												<span className={cx(classes.productTitle)}>
-													{form.title || form.form_template.title}
+												<span
+													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+												>
+													Réponses déposées
+												</span>
+												<span className={fr.cx('fr-text--bold')}>
+													{formatNumberWithSpaces(
+														getFormReviewCount(form.id, form.legacy)
+													)}
 												</span>
 											</div>
-											<div
-												className={cx(
-													fr.cx(
-														'fr-col',
-														'fr-col-12',
-														'fr-col-md-6',
-														'fr-p-4v'
-													),
-													classes.formStatsWrapper
-												)}
-											>
-												<div className={classes.formStatsContent}>
-													<span
-														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-													>
-														Réponses déposées
-													</span>
-													<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
-														{formatNumberWithSpaces(
-															getFormReviewCount(form.id, form.legacy)
-														)}
-													</span>
-													{getFormNewReviewCount(form.id, form.legacy) > 0 && (
-														<Badge severity="success" noIcon small>
-															{getFormNewReviewCount(form.id, form.legacy)}{' '}
-															NOUVELLES RÉPONSES
-														</Badge>
-													)}
-												</div>
-											</div>
 										</div>
-									))}
-									{product.forms.length > 2 && (
-										<Link
-											href={`/administration/dashboard/product/${product.id}/forms`}
-											title={`Voir les formulaires pour ${product.title}`}
-											className={cx(classes.productLink, fr.cx('fr-link'))}
-										>
-											Voir tous les formulaires ({product.forms.length})
-										</Link>
-									)}
-								</div>
-							)}
-						</>
-					)}
+									</div>
+								))}
+								{product.forms.length > 2 && (
+									<Link
+										href={`/administration/dashboard/product/${product.id}/forms`}
+										title={`Voir les formulaires pour ${product.title}`}
+										className={cx(classes.productLink, fr.cx('fr-link'))}
+										onClick={() => clearFilters()}
+									>
+										Voir tous les formulaires ({product.forms.length})
+									</Link>
+								)}
+							</div>
+						)}
 				</div>
 			</div>
 		</>
