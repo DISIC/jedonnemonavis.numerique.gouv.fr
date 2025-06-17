@@ -9,7 +9,7 @@ import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVer
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
-import { ReviewFiltersType } from '@/src/types/custom';
+import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
@@ -34,6 +34,8 @@ import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfi
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	modal: CustomModalProps;
+	hasButtons: boolean;
 }
 
 type FormErrors = {
@@ -47,7 +49,7 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const { form, ownRight } = props;
+	const { form, ownRight, modal, hasButtons } = props;
 	const router = useRouter();
 	const { view } = router.query;
 	const [search, setSearch] = useState<string>('');
@@ -370,10 +372,7 @@ const ReviewsTab = (props: Props) => {
 	}, [filters.productReviews.displayNew]);
 
 	const handleButtonClick = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${form.product_id}/forms`,
-			query: { autoCreate: true }
-		});
+		modal.open();
 	};
 
 	const handleSendInvitation = () => {
@@ -384,7 +383,7 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const displayEmptyState = () => {
-		if (!buttonResults?.data.length) {
+		if (!hasButtons) {
 			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
 		}
 

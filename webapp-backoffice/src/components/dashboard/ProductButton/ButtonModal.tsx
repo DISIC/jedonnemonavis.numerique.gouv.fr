@@ -14,9 +14,8 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
-	isOpen: boolean;
 	modal: CustomModalProps;
-	modalType: string;
+	modalType?: string;
 	button?: ButtonWithForm | null;
 	onButtonCreatedOrUpdated: (isTest: boolean, button: ButtonWithForm) => void;
 	form_id: number;
@@ -47,7 +46,12 @@ export type ButtonCreationPayload = Omit<
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, modalType, button, onButtonCreatedOrUpdated } = props;
+	const {
+		modal,
+		modalType = 'create',
+		button,
+		onButtonCreatedOrUpdated
+	} = props;
 	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
 	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = React.useState<
@@ -103,7 +107,10 @@ const ButtonModal = (props: Props) => {
 
 	const handleModalClose = (createdOrUpdatedButton: ButtonWithForm) => {
 		resetErrors('title');
-		onButtonCreatedOrUpdated(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
+		onButtonCreatedOrUpdated(
+			!!createdOrUpdatedButton.isTest,
+			createdOrUpdatedButton
+		);
 		modal.close();
 	};
 
@@ -398,7 +405,7 @@ const ButtonModal = (props: Props) => {
 					},
 					{
 						children: 'Créer',
-						onClick: handleButtonCreateOrEdit, 
+						onClick: handleButtonCreateOrEdit,
 						doClosesModal: false
 					}
 				];

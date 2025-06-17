@@ -12,19 +12,26 @@ import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
+import NoReviewsDashboardPanel from '../../Pannels/NoReviewsDashboardPanel';
+import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
+import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	nbReviews: number;
 	isLoading: boolean;
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
+	hasButtons: boolean;
+	modal: CustomModalProps;
 }
 
 const DashboardTab = ({
 	nbReviews,
 	isLoading,
 	form,
-	onClickGoToReviews
+	onClickGoToReviews,
+	hasButtons,
+	modal
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
@@ -169,29 +176,16 @@ const DashboardTab = ({
 				})}
 			</div>
 		</div>
+	) : hasButtons ? (
+		<NoReviewsDashboardPanel />
 	) : (
-		<div className={cx(classes.mainContainer, fr.cx('fr-container'))}>
-			<Image
-				src="/assets/chat_picto.svg"
-				alt="Picto feuille de route"
-				width={120}
-				height={120}
+		<div>
+			<h2>Tableau de bord</h2>
+			<NoButtonsPanel
+				onButtonClick={() => {
+					modal.open();
+				}}
 			/>
-			<div className={classes.container}>
-				<span className={classes.smallTitle}>
-					Il n’y a aucun avis pour le moment
-				</span>
-				<p className={fr.cx('fr-mt-3v', 'fr-mb-0')}>
-					Vous n’avez pas encore reçu d’avis de la part de vos utilisateurs.
-				</p>
-				<p className={fr.cx('fr-mb-3v')}>
-					En attendant, vous pouvez découvrir nos conseils pour bien placer le
-					bouton de récolte d’avis :
-				</p>
-				<Link href="#" target="_blank">
-					Améliorer le placement de votre bouton
-				</Link>
-			</div>
 		</div>
 	);
 };

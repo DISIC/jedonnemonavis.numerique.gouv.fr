@@ -26,11 +26,6 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
-const modal = createModal({
-	id: 'button-modal',
-	isOpenedByDefault: false
-});
-
 const new_form_modal = createModal({
 	id: 'new-form-modal',
 	isOpenedByDefault: false
@@ -50,13 +45,13 @@ const ProductButtonsPage = (props: Props) => {
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.newCountsByForm['1'] ?? 0) +
 				(reviewsCountData?.newCountsByForm['2'] ?? 0)
-			: (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0);
+			: reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
@@ -76,7 +71,12 @@ const ProductButtonsPage = (props: Props) => {
 						<div className={fr.cx('fr-col-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 						</div>
-						<div className={cx(classes.headerButtons, fr.cx('fr-col-6'))}>
+						<div
+							className={cx(
+								classes.headerButtons,
+								fr.cx('fr-col-6', 'fr-mb-6v')
+							)}
+						>
 							{ownRight === 'carrier_admin' && !product.isTop250 && (
 								<Button priority="secondary" onClick={new_form_modal.open}>
 									Créer un nouveau formulaire
@@ -90,7 +90,7 @@ const ProductButtonsPage = (props: Props) => {
 								</Button>
 							)}
 						</div>
-						<div className={cx(fr.cx('fr-col-12'))}>
+						{/* <div className={cx(fr.cx('fr-col-12'))}>
 							<Checkbox
 								options={[
 									{
@@ -102,7 +102,7 @@ const ProductButtonsPage = (props: Props) => {
 									}
 								]}
 							/>
-						</div>
+						</div> */}
 						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
 							{product.forms.map(form => (
 								<div
