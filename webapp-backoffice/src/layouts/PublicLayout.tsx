@@ -359,7 +359,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							en remplissant{' '}
 							<a
 								title="Formulaire de retour (nouvelle fenêtre)"
-								href="https://tally.so/r/m6kyyB"
+								href={
+									process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ||
+									'https://tally.so/r/m6kyyB'
+								}
 								target="_blank"
 							>
 								ce court formulaire.
