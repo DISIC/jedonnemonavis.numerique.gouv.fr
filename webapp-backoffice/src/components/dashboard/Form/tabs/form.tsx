@@ -45,7 +45,7 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 		}
 	];
 
-const FormTab = ({ form, ownRight, modal }: Props) => {
+const SettingsTab = ({ form, ownRight, modal }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 
@@ -124,7 +124,7 @@ const FormTab = ({ form, ownRight, modal }: Props) => {
 				isClosed={!isAlertShown}
 				onClose={() => setIsAlertShown(false)}
 			/>
-			<h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Formulaire</h2>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Paramètres</h2>
 			<div className={fr.cx('fr-col-8')}>
 				<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
 			</div>
@@ -244,7 +244,7 @@ const FormTab = ({ form, ownRight, modal }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormTab.name).create({
+const useStyles = tss.withName(SettingsTab.name).create({
 	container: {
 		...fr.spacing('padding', {}),
 		background: fr.colors.decisions.artwork.decorative.blueFrance.default,
@@ -299,6 +299,6 @@ const useStyles = tss.withName(FormTab.name).create({
 	}
 });
 
-export default FormTab;
+export default SettingsTab;
 
 export { getServerSideProps };

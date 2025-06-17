@@ -12,7 +12,7 @@ import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
-import FormTab from '@/src/components/dashboard/Form/tabs/form';
+import SettingsTab from '@/src/components/dashboard/Form/tabs/form';
 import { trpc } from '@/src/utils/trpc';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
@@ -198,9 +198,9 @@ const ProductFormPage = (props: Props) => {
 								isDefault: router.query.tab === 'stats'
 							},
 							{
-								label: 'Formulaire',
+								label: 'Paramètres',
 								content: (
-									<FormTab
+									<SettingsTab
 										form={form}
 										ownRight={ownRight}
 										modal={buttonModal}
