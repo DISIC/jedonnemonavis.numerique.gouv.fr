@@ -35,6 +35,7 @@ interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	modal: CustomModalProps;
+	hasButtons: boolean;
 }
 
 type FormErrors = {
@@ -48,7 +49,7 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const { form, ownRight, modal } = props;
+	const { form, ownRight, modal, hasButtons } = props;
 	const router = useRouter();
 	const { view } = router.query;
 	const [search, setSearch] = useState<string>('');
@@ -382,7 +383,7 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const displayEmptyState = () => {
-		if (!buttonResults?.data.length) {
+		if (!hasButtons) {
 			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
 		}
 

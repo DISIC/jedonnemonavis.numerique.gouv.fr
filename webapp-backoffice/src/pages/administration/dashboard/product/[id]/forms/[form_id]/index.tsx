@@ -181,6 +181,7 @@ const ProductFormPage = (props: Props) => {
 										form={form}
 										ownRight={ownRight}
 										modal={buttonModal}
+										hasButtons={nbButtons > 0}
 									/>
 								),
 								isDefault: router.query.tab === 'reviews'
