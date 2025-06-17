@@ -83,7 +83,7 @@ const ProductFormPage = (props: Props) => {
 	);
 
 	const nbButtons = buttonResults?.metadata.count || 0;
-	const nbReviews = reviewsData?.metadata.countAll || 0;
+	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
 	const onButtonCreated = async () => {
 		buttonModal.close();
