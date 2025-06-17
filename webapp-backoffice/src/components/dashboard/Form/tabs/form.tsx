@@ -21,15 +21,12 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Loader } from '@/src/components/ui/Loader';
-
-const modal = createModal({
-	id: 'button-modal',
-	isOpenedByDefault: false
-});
+import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	modal: CustomModalProps;
 }
 
 const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
@@ -48,7 +45,7 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 		}
 	];
 
-const FormTab = ({ form, ownRight }: Props) => {
+const FormTab = ({ form, ownRight, modal }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 
@@ -114,7 +111,6 @@ const FormTab = ({ form, ownRight }: Props) => {
 			<ButtonModal
 				form_id={form.id}
 				modal={modal}
-				isOpen={isModalOpen}
 				modalType={modalType}
 				button={currentButton}
 				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}

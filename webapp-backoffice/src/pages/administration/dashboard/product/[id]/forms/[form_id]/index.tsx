@@ -17,6 +17,13 @@ import { trpc } from '@/src/utils/trpc';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useRef } from 'react';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
+
+const buttonModal = createModal({
+	id: 'button-modal',
+	isOpenedByDefault: false
+});
 
 interface Props {
 	form: FormWithElements;
@@ -52,7 +59,36 @@ const ProductFormPage = (props: Props) => {
 			form_id: form.id
 		});
 
+	const {
+		data: buttonResults,
+		isLoading: isLoadingButtons,
+		isRefetching: isRefetchingButtons,
+		refetch: refetchButtons
+	} = trpc.button.getList.useQuery(
+		{
+			page: 1,
+			numberPerPage: 1000,
+			form_id: form.id,
+			isTest: false
+		},
+		{
+			initialData: {
+				data: [],
+				metadata: {
+					count: 0
+				}
+			},
+			enabled: !!form.id && !isNaN(form.id)
+		}
+	);
+
+	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countAll || 0;
+
+	const onButtonCreated = async () => {
+		buttonModal.close();
+		await refetchButtons();
+	};
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
@@ -63,6 +99,11 @@ const ProductFormPage = (props: Props) => {
 					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
 				/>
 			</Head>
+			<ButtonModal
+				form_id={form.id}
+				modal={buttonModal}
+				onButtonCreatedOrUpdated={onButtonCreated}
+			/>
 			<Breadcrumb
 				currentPageLabel={
 					'Formulaire : ' + (form.title || form.form_template.title)
@@ -119,8 +160,10 @@ const ProductFormPage = (props: Props) => {
 								content: (
 									<DashboardTab
 										form={form}
+										hasButtons={nbButtons > 0}
 										nbReviews={nbReviews}
 										isLoading={isLoadingReviewsCount}
+										modal={buttonModal}
 										onClickGoToReviews={() => {
 											tabsRef.current
 												?.querySelector<HTMLButtonElement>(
@@ -133,17 +176,35 @@ const ProductFormPage = (props: Props) => {
 							},
 							{
 								label: 'Réponses',
-								content: <ReviewsTab form={form} ownRight={ownRight} />,
+								content: (
+									<ReviewsTab
+										form={form}
+										ownRight={ownRight}
+										modal={buttonModal}
+									/>
+								),
 								isDefault: router.query.tab === 'reviews'
 							},
 							{
 								label: 'Statistiques',
-								content: <StatsTab form={form} ownRight={ownRight} />,
+								content: (
+									<StatsTab
+										form={form}
+										ownRight={ownRight}
+										modal={buttonModal}
+									/>
+								),
 								isDefault: router.query.tab === 'stats'
 							},
 							{
 								label: 'Formulaire',
-								content: <FormTab form={form} ownRight={ownRight} />,
+								content: (
+									<FormTab
+										form={form}
+										ownRight={ownRight}
+										modal={buttonModal}
+									/>
+								),
 								isDefault: router.query.tab === 'form'
 							}
 						]}

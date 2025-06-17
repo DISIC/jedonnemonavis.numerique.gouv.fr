@@ -11,6 +11,7 @@ import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { betaTestXwikiIds, formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -29,6 +30,7 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	modal: CustomModalProps;
 }
 
 export interface HideBlockOptionsHelper {
@@ -69,7 +71,7 @@ export const SectionWrapper = ({
 
 const nbMaxReviews = 500000;
 
-const StatsTab = ({ form, ownRight }: Props) => {
+const StatsTab = ({ form, ownRight, modal }: Props) => {
 	const router = useRouter();
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
@@ -161,10 +163,7 @@ const StatsTab = ({ form, ownRight }: Props) => {
 		: 0;
 
 	const handleButtonClick = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${form.product.id}/buttons`,
-			query: { autoCreate: true }
-		});
+		modal.open();
 	};
 
 	const handleSendInvitation = () => {
