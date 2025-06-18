@@ -123,7 +123,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 	}, [filters['productStats'].buttonId]);
 
 	const formConfigs = form.form_configs;
-	const currentFormConfig = formConfigs[formConfigs.length - 1];
+	const currentFormConfig = formConfigs[0];
 	const formConfigHiddenSteps =
 		currentFormConfig?.form_config_displays.filter(
 			fcd => fcd.kind === 'step'
