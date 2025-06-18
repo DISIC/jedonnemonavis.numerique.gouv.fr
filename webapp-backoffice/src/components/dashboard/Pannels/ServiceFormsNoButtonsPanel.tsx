@@ -27,7 +27,7 @@ const editContents: ContentType[] = [
 	}
 ];
 
-const buttonContents: ContentType[] = [
+export const buttonContents: ContentType[] = [
 	{
 		iconId: 'ri-cursor-line',
 		text: 'Un bouton JDMA permet à vos utilisateurs d’accéder au formulaire.'
@@ -44,7 +44,7 @@ const buttonContents: ContentType[] = [
 			label: 'En savoir plus sur les boutons multiples'
 		}
 	}
-];
+] as const;
 
 const ServiceFormsNoButtonsPanel = (props: Props) => {
 	const router = useRouter();
@@ -89,8 +89,7 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 			</Button>
 			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
 				<span className={classes.title}>
-					Définissez maintenant les emplacements de vos boutons Je Donne Mon
-					Avis (JDMA)
+					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
 				</span>
 			</div>
 			{buttonContents.map((content, index) => (

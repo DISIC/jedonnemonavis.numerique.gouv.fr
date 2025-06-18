@@ -2,30 +2,12 @@ import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import { tss } from 'tss-react/dsfr';
+import { buttonContents } from './ServiceFormsNoButtonsPanel';
 
 interface Props {
 	onButtonClick: () => void;
 	isSmall?: boolean;
 }
-
-const contents: {
-	iconId: FrIconClassName | RiIconClassName;
-	text: string;
-	link?: { href: string; label: string };
-}[] = [
-	{
-		iconId: 'ri-code-box-line',
-		text: 'Lors de la création d’un emplacement, un code HTML est généré. Il vous suffit de le copier-coller dans le code de la page où vous voulez faire apparaître le bouton d’avis.'
-	},
-	{
-		iconId: 'ri-list-check',
-		text: 'Vous pouvez créer plusieurs emplacements pour chaque formulaire, par exemple sur une démarche, sur un email de finalisation,\u00A0...',
-		link: {
-			href: 'https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7',
-			label: 'Pourquoi créer plusieurs emplacements ?'
-		}
-	}
-];
 
 const NoButtonsPanel = (props: Props) => {
 	const { onButtonClick, isSmall } = props;
@@ -33,10 +15,12 @@ const NoButtonsPanel = (props: Props) => {
 
 	return (
 		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
-			<div className={fr.cx('fr-col-8', 'fr-mb-6v')}>
-				<span className={classes.title}>Comment ça fonctionne ?</span>
+			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
+				<span className={classes.title}>
+					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
+				</span>
 			</div>
-			{contents.map((content, index) => (
+			{buttonContents.map((content, index) => (
 				<div
 					key={index}
 					className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}
@@ -60,6 +44,7 @@ const NoButtonsPanel = (props: Props) => {
 				iconId="fr-icon-add-line"
 				iconPosition="right"
 				type="button"
+				size="large"
 				nativeButtonProps={{
 					onClick: event => {
 						event.preventDefault();
