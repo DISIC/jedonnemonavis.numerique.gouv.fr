@@ -150,7 +150,7 @@ const SettingsTab = ({ form, ownRight, modal }: Props) => {
 						voulez faire apparaître le bouton d’avis. Vous pouvez créer
 						plusieurs emplacements pour chaque formulaire.&nbsp;
 						<Link
-							href="#"
+							href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
 							style={{
 								color: fr.colors.decisions.text.title.blueFrance.default
 							}}

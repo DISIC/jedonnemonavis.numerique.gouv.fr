@@ -21,7 +21,7 @@ const contents: {
 		iconId: 'ri-list-check',
 		text: 'Vous pouvez créer plusieurs emplacements pour chaque formulaire, par exemple sur une démarche, sur un email de finalisation,\u00A0...',
 		link: {
-			href: '#',
+			href: 'https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7',
 			label: 'Pourquoi créer plusieurs emplacements ?'
 		}
 	}

@@ -63,7 +63,7 @@ const NoReviewsPanel = () => {
 					</p>
 					<a
 						title="En savoir plus sur les boutons multiples"
-						href="#"
+						href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
 						target="_blank"
 						className="fr-link"
 					>
