@@ -1,5 +1,5 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -14,14 +14,14 @@ const ReviewFilters = (props: Props) => {
 
 	const { cx, classes } = useStyles({});
 
-	const [sortList, setSortList] = React.useState<
+	const [sortList, setSortList] = useState<
 		{
 			label: string;
 			code?: string;
 		}[]
 	>([]);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		if (displayMode === 'reviews') {
 			setSortList([
 				{
@@ -63,7 +63,12 @@ const ReviewFilters = (props: Props) => {
 
 	return (
 		<thead className={cx(classes.lineContainer)}>
-			<tr className={cx(classes.trContainer, fr.cx('fr-hidden', 'fr-unhidden-lg'))}>
+			<tr
+				className={cx(
+					classes.trContainer,
+					fr.cx('fr-hidden', 'fr-unhidden-lg')
+				)}
+			>
 				{sortList.map((sort, index) => (
 					<th
 						className={cx(
@@ -96,14 +101,14 @@ const ReviewFilters = (props: Props) => {
 				{new Array(displayMode === 'reviews' ? 1 : 3)
 					.fill(0)
 					.map((i, index) => (
-						<div
+						<th
 							className={cx(
 								displayMode === 'reviews'
 									? classes.badge
 									: classes.badgeVerbatim
 							)}
 							key={`fake_div_${index}`}
-						></div>
+						></th>
 					))}
 			</tr>
 		</thead>
@@ -130,6 +135,7 @@ const useStyles = tss.create({
 		cursor: 'pointer'
 	},
 	badge: {
+		display: 'block',
 		fontSize: 14,
 		flex: '1 1 10%',
 		[fr.breakpoints.down('lg')]: {
@@ -144,6 +150,7 @@ const useStyles = tss.create({
 		}
 	},
 	badgeVerbatim: {
+		display: 'block',
 		width: 'fit-content',
 		minWidth: 120,
 		paddingVertical: 4,

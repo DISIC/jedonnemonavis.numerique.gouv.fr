@@ -31,19 +31,17 @@ const QuestionWrapper = ({
 
 	return (
 		<div className={classes.wrapperSection}>
-			{fieldLabel !== '' && (
-				<h3 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h3>
-			)}
+			{fieldLabel !== '' && <h3 className={fr.cx('fr-mt-6v')}>{fieldLabel}</h3>}
 			<div className={classes.metaInfos}>
 				<div className={classes.metaInfosIcon}>
 					<span className={fr.cx('ri-question-answer-line', 'fr-icon--lg')} />
 				</div>
 				<div className={classes.metaInfosTitleWithHint}>
 					<p className={classes.metaInfosTotal}>
-						<p className={classes.totalFieldText}>
+						<span className={cx(classes.totalFieldText)}>
 							{formatNumberWithSpaces(totalField)}
-						</p>{' '}
-						<span>Réponses</span>
+						</span>{' '}
+						<span className={cx(classes.totalFieldHint)}>Réponses</span>
 					</p>
 					{!hidePercentage && (
 						<div className={fr.cx('fr-hint-text', 'fr-ml-md-4v', 'fr-mt-0-5v')}>
@@ -112,15 +110,16 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		fontSize: '2rem',
 		fontWeight: 'bold',
-		margin: 0,
-		span: {
-			...fr.typography[19].style,
-			margin: `0 0 0 ${fr.spacing('4v')}`
-		}
+		margin: 0
 	},
 	totalFieldText: {
-		marginBottom: 0,
-		fontSize: '2rem'
+		...fr.typography[4].style,
+		color: fr.colors.decisions.text.default.grey.default,
+		marginBottom: 0
+	},
+	totalFieldHint: {
+		...fr.typography[19].style,
+		margin: `0 0 0 ${fr.spacing('4v')}`
 	},
 	hiddenOptionsSection: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,

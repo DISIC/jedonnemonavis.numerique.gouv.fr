@@ -10,7 +10,6 @@ import { Loader } from '../../ui/Loader';
 import { push } from '@socialgouv/matomo-next';
 import { CustomModalProps } from '@/src/types/custom';
 
-
 interface Props {
 	modal: CustomModalProps;
 	counts: {
@@ -98,7 +97,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'filtered',
 									checked: choice === 'filtered',
-									onClick: () => {
+									onChange: () => {
 										setChoice('filtered');
 									},
 									disabled: !startDate || !endDate
@@ -109,7 +108,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'all',
 									checked: choice === 'all',
-									onClick: () => {
+									onChange: () => {
 										setChoice('all');
 									}
 								}
@@ -127,7 +126,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'xls',
 									checked: format === 'xls',
-									onClick: () => {
+									onChange: () => {
 										setFormat('xls');
 									}
 								}
@@ -137,7 +136,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'csv',
 									checked: format === 'csv',
-									onClick: () => {
+									onChange: () => {
 										setFormat('csv');
 									}
 								}

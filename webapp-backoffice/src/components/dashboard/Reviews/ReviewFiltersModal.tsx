@@ -4,19 +4,16 @@ import {
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { AnswerIntention } from '@prisma/client';
-import React from 'react';
-import Image from 'next/image';
-import { tss } from 'tss-react/dsfr';
-import { push } from '@socialgouv/matomo-next';
 import Select from '@codegouvfr/react-dsfr/Select';
-import { trpc } from '@/src/utils/trpc';
-
+import { AnswerIntention } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	modal: CustomModalProps;
@@ -30,20 +27,15 @@ const ReviewFiltersModal = (props: Props) => {
 	const { modal, filters, submitFilters, setButtonId, form_id } = props;
 	const { cx, classes } = useStyles();
 
-	const { data: buttonResults, isLoading: isLoadingButtons } =
-		trpc.button.getList.useQuery({
-			page: 1,
-			numberPerPage: 1000,
-			form_id: form_id,
-			isTest: true
-		});
+	const { data: buttonResults } = trpc.button.getList.useQuery({
+		page: 1,
+		numberPerPage: 1000,
+		form_id: form_id,
+		isTest: true
+	});
 
-	const [tmpFilters, setTmpFilters] =
-		React.useState<ReviewFiltersType>(filters);
-
-	const isOpen = useIsModalOpen(modal);
-
-	React.useEffect(() => {
+	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
+	useEffect(() => {
 		setTmpFilters(filters);
 	}, [filters]);
 
@@ -194,13 +186,7 @@ const ReviewFiltersModal = (props: Props) => {
 				/>
 			</div>
 
-			<div
-				className={fr.cx(
-					'fr-grid-row',
-					'fr-grid-row--left',
-					'fr-mt-4w'
-				)}
-			>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
 				<ul className={cx(classes.listContainer)}>
 					<li>
 						<Button
@@ -283,8 +269,8 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 			flexDirection: 'column-reverse',
 			button: {
 				width: '100%',
-				justifyContent: 'center',
-			},
+				justifyContent: 'center'
+			}
 		}
 	},
 	iconError: {
@@ -297,9 +283,9 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 	},
 	badgeContainer: {
 		display: 'flex',
-		gap:10,
+		gap: 10,
 		[fr.breakpoints.down('md')]: {
-			justifyContent: 'space-between',
+			justifyContent: 'space-between'
 		}
 	},
 	badge: {
@@ -307,7 +293,7 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		cursor: 'pointer',
 		gap: '0.25rem',
 		[fr.breakpoints.down('md')]: {
-			flex: '1 1 100%',
+			flex: '1 1 100%'
 		}
 	},
 	selectedOption: {

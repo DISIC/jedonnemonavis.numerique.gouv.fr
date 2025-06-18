@@ -689,33 +689,35 @@ const ReviewsTab = (props: Props) => {
 												onClick={handleSortChange}
 												hasManyVersions={formConfigs.length > 0}
 											/>
-											{reviewsExtended.map((review, index) => {
-												if (review && displayMode === 'reviews') {
-													return (
-														<ReviewLine
-															key={index}
-															review={review}
-															search={validatedSearch}
-															formConfigHelper={getFormConfigHelperFromDate(
-																review.created_at || new Date()
-															)}
-															hasManyVersions={formConfigs.length > 0}
-														/>
-													);
-												} else if (review && displayMode === 'verbatim') {
-													return (
-														<ReviewLineVerbatim
-															key={index}
-															review={review}
-															search={validatedSearch}
-															formConfigHelper={getFormConfigHelperFromDate(
-																review.created_at || new Date()
-															)}
-															hasManyVersions={formConfigs.length > 0}
-														/>
-													);
-												}
-											})}
+											<tbody>
+												{reviewsExtended.map((review, index) => {
+													if (review && displayMode === 'reviews') {
+														return (
+															<ReviewLine
+																key={index}
+																review={review}
+																search={validatedSearch}
+																formConfigHelper={getFormConfigHelperFromDate(
+																	review.created_at || new Date()
+																)}
+																hasManyVersions={formConfigs.length > 0}
+															/>
+														);
+													} else if (review && displayMode === 'verbatim') {
+														return (
+															<ReviewLineVerbatim
+																key={index}
+																review={review}
+																search={validatedSearch}
+																formConfigHelper={getFormConfigHelperFromDate(
+																	review.created_at || new Date()
+																)}
+																hasManyVersions={formConfigs.length > 0}
+															/>
+														);
+													}
+												})}
+											</tbody>
 										</table>
 									</>
 								) : (
