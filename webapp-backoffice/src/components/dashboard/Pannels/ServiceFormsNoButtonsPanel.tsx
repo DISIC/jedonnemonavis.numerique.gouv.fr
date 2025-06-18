@@ -27,7 +27,7 @@ const editContents: ContentType[] = [
 	}
 ];
 
-export const buttonContents: ContentType[] = [
+export const buttonContents: readonly ContentType[] = [
 	{
 		iconId: 'ri-cursor-line',
 		text: 'Un bouton JDMA permet à vos utilisateurs d’accéder au formulaire.'
