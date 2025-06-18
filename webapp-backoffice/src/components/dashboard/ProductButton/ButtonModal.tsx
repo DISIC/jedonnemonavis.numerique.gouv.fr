@@ -91,7 +91,7 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'install':
-				return 'Code à copier';
+				return 'Copier le code';
 			case 'create':
 				return 'Créer un bouton';
 			case 'edit':
@@ -145,8 +145,9 @@ const ButtonModal = (props: Props) => {
 				return (
 					<div>
 						<p>
-							Pour installer le bouton JDMA et récolter les avis, copier-collez
-							ce code dans votre service numérique.
+							Pour installer le bouton JDMA et récolter les avis, copiez-collez
+							le code ci-dessous dans votre service numérique ou dans le champ
+							dédié sur Démarche simplifiée.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
 							<div className={fr.cx('fr-col', 'fr-col-12')}>

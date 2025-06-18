@@ -1,32 +1,29 @@
+import { Loader } from '@/src/components/ui/Loader';
+import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
+import { CustomModalProps } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { RightAccessStatus } from '@prisma/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React from 'react';
+import { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import {
-	ButtonWithForm,
-	FormWithElements
-} from '@/src/types/prismaTypesExtended';
-import { trpc } from '@/src/utils/trpc';
-import ProductButtonCard from '../../ProductButton/ProductButtonCard';
-import { RightAccessStatus } from '@prisma/client';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ButtonModal, {
-	ButtonCreationPayload
-} from '../../ProductButton/ButtonModal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { Loader } from '@/src/components/ui/Loader';
-import { CustomModalProps } from '@/src/types/custom';
+import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	modal: CustomModalProps;
+	handleModalOpening: (modalType: string, button?: any) => void;
+	alertText: string;
+	isAlertShown: boolean;
+	setIsAlertShown: (value: boolean) => void;
 }
 
 const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
@@ -45,17 +42,39 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 		}
 	];
 
-const SettingsTab = ({ form, ownRight, modal }: Props) => {
+const SettingsTab = ({
+	form,
+	ownRight,
+	modal,
+	handleModalOpening,
+	alertText,
+	isAlertShown,
+	setIsAlertShown
+}: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 
-	const [modalType, setModalType] = React.useState<string>('');
-	const [currentButton, setCurrentButton] =
-		React.useState<ButtonWithForm | null>(null);
-	const [isAlertShown, setIsAlertShown] = React.useState<boolean>(false);
-	const [alertText, setAlertText] = React.useState<string>('');
-
 	const isModalOpen = useIsModalOpen(modal);
+
+	useEffect(() => {
+		if (router.query.shouldOpenButtonModal) {
+			handleModalOpening('create');
+		}
+	}, [router.query]);
+
+	useEffect(() => {
+		if (!isModalOpen && router.query.shouldOpenButtonModal) {
+			const { shouldOpenButtonModal, ...restQuery } = router.query;
+			router.replace(
+				{
+					pathname: router.pathname,
+					query: restQuery
+				},
+				undefined,
+				{ shallow: true }
+			);
+		}
+	}, [isModalOpen]);
 
 	const {
 		data: buttonResults,
@@ -84,37 +103,8 @@ const SettingsTab = ({ form, ownRight, modal }: Props) => {
 		metadata: { count: buttonsCount }
 	} = buttonResults;
 
-	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
-		setCurrentButton(button ? button : null);
-		setModalType(modalType);
-		modal.open();
-	};
-
-	const onButtonCreatedOrUpdated = async (
-		isTest: boolean,
-		finalButton: ButtonWithForm
-	) => {
-		modal.close();
-		await refetchButtons();
-
-		if (modalType === 'create') {
-			setAlertText(
-				`L\'emplacement "${finalButton.title}" a été créé avec succès.`
-			);
-			setIsAlertShown(true);
-			handleModalOpening('install', finalButton);
-		}
-	};
-
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<ButtonModal
-				form_id={form.id}
-				modal={modal}
-				modalType={modalType}
-				button={currentButton}
-				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
-			/>
 			<Alert
 				className={fr.cx('fr-col-12', 'fr-mb-6v')}
 				description={alertText}
@@ -150,7 +140,7 @@ const SettingsTab = ({ form, ownRight, modal }: Props) => {
 						voulez faire apparaître le bouton d’avis. Vous pouvez créer
 						plusieurs emplacements pour chaque formulaire.&nbsp;
 						<Link
-							href="#"
+							href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
 							style={{
 								color: fr.colors.decisions.text.title.blueFrance.default
 							}}
@@ -184,27 +174,13 @@ const SettingsTab = ({ form, ownRight, modal }: Props) => {
 					</div>
 					<div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}>
 						<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-							<div className={fr.cx('fr-col-8')}>
+							<div className={fr.cx('fr-col-12')}>
 								<span className={classes.containerTitle}>
 									Éditer le formulaire
 								</span>
 								<Badge severity="new" className={fr.cx('fr-ml-4v')} small>
 									Beta
 								</Badge>
-							</div>
-							<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
-								<Button
-									priority="secondary"
-									iconId="fr-icon-settings-5-line"
-									iconPosition="right"
-									onClick={() => {
-										router.push(
-											`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
-										);
-									}}
-								>
-									Éditer le formulaire
-								</Button>
 							</div>
 							<p className={fr.cx('fr-col-12', 'fr-mb-3v', 'fr-mt-6v')}>
 								Désormais, pour adapter vos formulaires à vos besoins
@@ -236,6 +212,26 @@ const SettingsTab = ({ form, ownRight, modal }: Props) => {
 								</a>
 								.
 							</p>
+							<div
+								className={cx(
+									classes.buttonsGroup,
+									fr.cx('fr-col-12', 'fr-mt-6v')
+								)}
+							>
+								<Button
+									priority="primary"
+									iconId="fr-icon-edit-line"
+									iconPosition="right"
+									size="large"
+									onClick={() => {
+										router.push(
+											`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
+										);
+									}}
+								>
+									Éditer le formulaire
+								</Button>
+							</div>
 						</div>
 					</div>
 				</>
@@ -254,7 +250,7 @@ const useStyles = tss.withName(SettingsTab.name).create({
 	},
 	buttonsGroup: {
 		display: 'flex',
-		justifyContent: 'end',
+		justifyContent: 'center',
 		gap: fr.spacing('4v'),
 		alignSelf: 'center',
 		button: {

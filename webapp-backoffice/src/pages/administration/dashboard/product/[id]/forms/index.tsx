@@ -191,13 +191,7 @@ const ProductButtonsPage = (props: Props) => {
 											</div>
 										</>
 									) : (
-										<ServiceFormsNoButtonsPanel
-											onButtonClick={() => {
-												router.push(
-													`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=form`
-												);
-											}}
-										/>
+										<ServiceFormsNoButtonsPanel form={form} />
 									)}
 								</div>
 							))}
