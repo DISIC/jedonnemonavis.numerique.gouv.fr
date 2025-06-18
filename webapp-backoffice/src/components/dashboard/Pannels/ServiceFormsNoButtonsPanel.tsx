@@ -122,7 +122,7 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 						event.preventDefault();
 						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
 						router.push(
-							`/administration/dashboard/product/${form.product_id}/forms/${form.id}?tab=form`
+							`/administration/dashboard/product/${form.product_id}/forms/${form.id}?tab=settings&shouldOpenButtonModal=true`
 						);
 					}
 				}}

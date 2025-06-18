@@ -1,4 +1,7 @@
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithForm,
+	FormWithElements
+} from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -12,11 +15,11 @@ import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
 import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
-import SettingsTab from '@/src/components/dashboard/Form/tabs/form';
+import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
 import { trpc } from '@/src/utils/trpc';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
 
@@ -34,6 +37,14 @@ const ProductFormPage = (props: Props) => {
 	const router = useRouter();
 	const { form, ownRight } = props;
 	const { classes, cx } = useStyles();
+
+	const [modalType, setModalType] = useState<string>('');
+	const [currentButton, setCurrentButton] = useState<ButtonWithForm | null>(
+		null
+	);
+	const [alertText, setAlertText] = useState<string>('');
+	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
+
 	const tabsRef = useRef<HTMLDivElement>(null);
 
 	const breadcrumbSegments = [
@@ -85,9 +96,41 @@ const ProductFormPage = (props: Props) => {
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
-	const onButtonCreated = async () => {
+	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
+		setCurrentButton(button ? button : null);
+		setModalType(modalType);
+		buttonModal.open();
+	};
+
+	const onButtonCreatedOrUpdated = async (
+		isTest: boolean,
+		finalButton: ButtonWithForm
+	) => {
 		buttonModal.close();
 		await refetchButtons();
+
+		if (modalType === 'create') {
+			setAlertText(
+				`L\'emplacement "${finalButton.title}" a été créé avec succès.`
+			);
+			setIsAlertShown(true);
+			handleModalOpening('install', finalButton);
+		}
+	};
+
+	const getSlugFromIndex = (index: number) => {
+		switch (index) {
+			case 0:
+				return undefined;
+			case 1:
+				return 'reviews';
+			case 2:
+				return 'stats';
+			case 3:
+				return 'settings';
+			default:
+				return;
+		}
 	};
 
 	return (
@@ -102,7 +145,9 @@ const ProductFormPage = (props: Props) => {
 			<ButtonModal
 				form_id={form.id}
 				modal={buttonModal}
-				onButtonCreatedOrUpdated={onButtonCreated}
+				modalType={modalType}
+				button={currentButton}
+				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
 			/>
 			<Breadcrumb
 				currentPageLabel={
@@ -154,6 +199,23 @@ const ProductFormPage = (props: Props) => {
 				<div className={fr.cx('fr-col-12', 'fr-mt-4v')}>
 					<Tabs
 						ref={tabsRef}
+						onTabChange={t => {
+							const { tab, ...restQuery } = router.query;
+							router.push(
+								{
+									pathname: router.pathname,
+									query:
+										t.tabIndex !== 0
+											? {
+													...router.query,
+													tab: getSlugFromIndex(t.tabIndex)
+												}
+											: restQuery
+								},
+								undefined,
+								{ shallow: true }
+							);
+						}}
 						tabs={[
 							{
 								label: 'Tableau de bord',
@@ -204,9 +266,13 @@ const ProductFormPage = (props: Props) => {
 										form={form}
 										ownRight={ownRight}
 										modal={buttonModal}
+										alertText={alertText}
+										handleModalOpening={handleModalOpening}
+										isAlertShown={isAlertShown}
+										setIsAlertShown={setIsAlertShown}
 									/>
 								),
-								isDefault: router.query.tab === 'form'
+								isDefault: router.query.tab === 'settings'
 							}
 						]}
 					/>
