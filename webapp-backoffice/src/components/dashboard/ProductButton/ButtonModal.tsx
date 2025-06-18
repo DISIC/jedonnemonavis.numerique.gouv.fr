@@ -3,14 +3,13 @@ import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Button as PrismaButtonType } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -52,13 +51,21 @@ const ButtonModal = (props: Props) => {
 		button,
 		onButtonCreatedOrUpdated
 	} = props;
-	const [buttonColor, setButtonColor] = React.useState<string>('bleu');
-	const [errors, setErrors] = React.useState<FormErrors>({ ...defaultErrors });
-	const [currentButton, setCurrentButton] = React.useState<
+	const [buttonColor, setButtonColor] = useState<string>('bleu');
+	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
+	const [currentButton, setCurrentButton] = useState<
 		ButtonCreationPayload | ButtonWithForm
 	>(defaultButton);
 
-	React.useEffect(() => {
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
+</a>`;
+
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
+	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
+	</a>`;
+
+	useEffect(() => {
 		if (button) {
 			setCurrentButton(button);
 		} else {
@@ -96,10 +103,6 @@ const ButtonModal = (props: Props) => {
 				return 'Créer un bouton';
 			case 'edit':
 				return 'Modifier un bouton';
-			// case 'archive':
-			// 	return 'Archiver un bouton';
-			// case 'merge':
-			// 	return 'Fusionner avec un autre bouton';
 			default:
 				return '';
 		}
@@ -130,14 +133,6 @@ const ButtonModal = (props: Props) => {
 			createButton.mutate(currentButton);
 		}
 	};
-
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
-      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
-</a>`;
-
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
-	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
-	</a>`;
 
 	const displayModalContent = (): JSX.Element => {
 		switch (modalType) {
@@ -312,76 +307,6 @@ const ButtonModal = (props: Props) => {
 						/>
 					</div>
 				);
-
-			case 'edit':
-				return (
-					<div>
-						<Input
-							id="button-edit-title"
-							label="Nom du bouton"
-							nativeInputProps={{
-								onChange: e => {
-									setCurrentButton({
-										...currentButton,
-										title: e.target.value
-									});
-								}
-							}}
-						/>
-						<Input
-							id="button-edit-description"
-							label="Description du bouton"
-							textArea
-							nativeTextAreaProps={{
-								onChange: e => {
-									setCurrentButton({
-										...currentButton,
-										description: e.target.value
-									});
-								}
-							}}
-						/>
-						<Checkbox
-							options={[
-								{
-									hintText:
-										'Cocher cette case si vous préférez que les avis de ce bouton ne soient pas pris en compte dans les statistiques.',
-									label: 'Bouton de test',
-									nativeInputProps: {
-										name: 'checkboxes-1',
-										checked: button?.isTest || false,
-										onChange: e => {
-											setCurrentButton({
-												...currentButton,
-												isTest: e.target.checked
-											});
-										}
-									}
-								}
-							]}
-						/>
-					</div>
-				);
-			// case 'archive':
-			// 	return (
-			// 		<div>
-			// 			<p>
-			// 				Vous êtes sur le point d'archiver le bouton{' '}
-			// 				<span className={cx(classes.boldText)}>{button?.title}</span>.
-			// 				<br />
-			// 			</p>
-			// 		</div>
-			// 	);
-			// case 'merge':
-			// 	return (
-			// 		<div>
-			// 			<p>Instructions ...</p>
-			// 			<Select label="Fusionner avec" nativeSelectProps={{}}>
-			// 				<option value="">Bouton 1</option>
-			// 				<option value="">Bouton 2</option>
-			// 			</Select>
-			// 		</div>
-			// 	);
 			default:
 				return <div></div>;
 		}
@@ -426,30 +351,6 @@ const ButtonModal = (props: Props) => {
 						doClosesModal: false
 					}
 				];
-			// case 'archive':
-			// 	return [
-			// 		{
-			// 			children: 'Annuler',
-			// 			priority: 'secondary',
-			// 			onClick: modal.close
-			// 		},
-			// 		{
-			// 			children: 'Oui',
-			// 			onClick: modal.close
-			// 		}
-			// 	];
-			// case 'merge':
-			// 	return [
-			// 		{
-			// 			children: 'Annuler',
-			// 			priority: 'secondary',
-			// 			onClick: modal.close
-			// 		},
-			// 		{
-			// 			children: 'Fusionner les boutons',
-			// 			onClick: modal.close
-			// 		}
-			// 	];
 		}
 
 		return;
