@@ -467,7 +467,9 @@ const ReviewsTab = (props: Props) => {
 				)}
 			</div>
 			{isLoadingMetaResults || isLoadingButtons ? (
-				<Loader />
+				<div className={cx(classes.loaderContainer)}>
+					<Loader />
+				</div>
 			) : reviewMetaResults.metadata.countAll === 0 ||
 			  buttonResults?.data.length === 0 ? (
 				displayEmptyState()
@@ -771,6 +773,13 @@ const useStyles = tss
 			fontWeight: 'bold'
 		},
 		tableContainer: {
+			width: '100%'
+		},
+		loaderContainer: {
+			display: 'flex',
+			justifyContent: 'center',
+			alignItems: 'center',
+			height: '500px',
 			width: '100%'
 		},
 		searchForm: {

@@ -103,6 +103,148 @@ const SettingsTab = ({
 		metadata: { count: buttonsCount }
 	} = buttonResults;
 
+	const displaySettingsContent = () => {
+		if (isLoadingButtons || isRefetchingButtons) {
+			return (
+				<div className={cx(classes.loaderContainer)}>
+					<Loader />
+				</div>
+			);
+		}
+
+		return (
+			<>
+				<div className={fr.cx('fr-col-8')}>
+					<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
+				</div>
+				{buttonsCount > 0 && (
+					<>
+						<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+							{ownRight === 'carrier_admin' && (
+								<Button
+									priority="secondary"
+									iconId="fr-icon-add-line"
+									iconPosition="right"
+									onClick={() => {
+										handleModalOpening('create');
+									}}
+								>
+									Créer un emplacement
+								</Button>
+							)}
+						</div>
+						<p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
+							Lors de la création d’un emplacement, un code HTML est généré. Il
+							vous suffit de le copier-coller dans le code de la page où vous
+							voulez faire apparaître le bouton d’avis. Vous pouvez créer
+							plusieurs emplacements pour chaque formulaire.&nbsp;
+							<Link
+								href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
+								style={{
+									color: fr.colors.decisions.text.title.blueFrance.default
+								}}
+								target="_blank"
+							>
+								Pourquoi créer plusieurs emplacements ?
+							</Link>
+						</p>
+					</>
+				)}
+				<div className={fr.cx('fr-col-12', buttonsCount === 0 && 'fr-mt-6v')}>
+					{!(isLoadingButtons || isRefetchingButtons) && buttonsCount === 0 && (
+						<NoButtonsPanel
+							onButtonClick={() => handleModalOpening('create')}
+						/>
+					)}
+					{!(isLoadingButtons || isRefetchingButtons) &&
+						buttons?.map((button, index) => (
+							<ProductButtonCard
+								key={index}
+								button={button}
+								onButtonClick={handleModalOpening}
+								ownRight={ownRight}
+							/>
+						))}
+				</div>
+				{!form.product.isTop250 && (
+					<>
+						<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
+						<div className={fr.cx('fr-col-8')}>
+							<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
+						</div>
+						<div
+							className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}
+						>
+							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
+								<div className={fr.cx('fr-col-12')}>
+									<span className={classes.containerTitle}>
+										Éditer le formulaire
+									</span>
+									<Badge severity="new" className={fr.cx('fr-ml-4v')} small>
+										Beta
+									</Badge>
+								</div>
+								<p className={fr.cx('fr-col-12', 'fr-mb-3v', 'fr-mt-6v')}>
+									Désormais, pour adapter vos formulaires à vos besoins
+									spécifiques, vous pouvez :
+								</p>
+
+								{contents.map((content, index) => (
+									<div
+										key={index}
+										className={cx(
+											classes.content,
+											fr.cx('fr-col-12', 'fr-py-0')
+										)}
+									>
+										<div
+											className={cx(
+												classes.indicatorIcon,
+												cx(fr.cx('fr-mr-md-6v'))
+											)}
+										>
+											<i className={cx(fr.cx(content.iconId), classes.icon)} />
+										</div>
+										<p>{content.text}</p>
+									</div>
+								))}
+
+								<p className={fr.cx('fr-col-12', 'fr-mb-0')}>
+									Pour en savoir plus sur ces fonctionnalités et découvrir
+									celles à venir, vous pouvez&nbsp;
+									<a href="/public/roadmap" target="_blank">
+										consulter notre feuille de route
+									</a>
+									.
+								</p>
+								<div
+									className={cx(
+										classes.buttonsGroup,
+										fr.cx('fr-col-12', 'fr-mt-6v')
+									)}
+								>
+									<Button
+										priority="primary"
+										iconId="fr-icon-edit-line"
+										iconPosition="right"
+										size="large"
+										onClick={() => {
+											router.push(
+												`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
+											);
+										}}
+									>
+										Éditer le formulaire
+									</Button>
+								</div>
+							</div>
+						</div>
+					</>
+				)}
+			</>
+		);
+	};
+
 	return (
 		<div className={fr.cx('fr-grid-row')}>
 			<Alert
@@ -115,127 +257,8 @@ const SettingsTab = ({
 				onClose={() => setIsAlertShown(false)}
 			/>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Paramètres</h2>
-			<div className={fr.cx('fr-col-8')}>
-				<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
-			</div>
-			{buttonsCount > 0 && (
-				<>
-					<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
-						{ownRight === 'carrier_admin' && (
-							<Button
-								priority="secondary"
-								iconId="fr-icon-add-line"
-								iconPosition="right"
-								onClick={() => {
-									handleModalOpening('create');
-								}}
-							>
-								Créer un emplacement
-							</Button>
-						)}
-					</div>
-					<p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
-						Lors de la création d’un emplacement, un code HTML est généré. Il
-						vous suffit de le copier-coller dans le code de la page où vous
-						voulez faire apparaître le bouton d’avis. Vous pouvez créer
-						plusieurs emplacements pour chaque formulaire.&nbsp;
-						<Link
-							href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
-							style={{
-								color: fr.colors.decisions.text.title.blueFrance.default
-							}}
-							target="_blank"
-						>
-							Pourquoi créer plusieurs emplacements ?
-						</Link>
-					</p>
-				</>
-			)}
-			<div className={fr.cx('fr-col-12', buttonsCount === 0 && 'fr-mt-6v')}>
-				{(isLoadingButtons || isRefetchingButtons) && <Loader />}
-				{!(isLoadingButtons || isRefetchingButtons) && buttonsCount === 0 && (
-					<NoButtonsPanel onButtonClick={() => handleModalOpening('create')} />
-				)}
-				{!(isLoadingButtons || isRefetchingButtons) &&
-					buttons?.map((button, index) => (
-						<ProductButtonCard
-							key={index}
-							button={button}
-							onButtonClick={handleModalOpening}
-							ownRight={ownRight}
-						/>
-					))}
-			</div>
-			{!form.product.isTop250 && (
-				<>
-					<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
-					<div className={fr.cx('fr-col-8')}>
-						<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
-					</div>
-					<div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}>
-						<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-							<div className={fr.cx('fr-col-12')}>
-								<span className={classes.containerTitle}>
-									Éditer le formulaire
-								</span>
-								<Badge severity="new" className={fr.cx('fr-ml-4v')} small>
-									Beta
-								</Badge>
-							</div>
-							<p className={fr.cx('fr-col-12', 'fr-mb-3v', 'fr-mt-6v')}>
-								Désormais, pour adapter vos formulaires à vos besoins
-								spécifiques, vous pouvez :
-							</p>
 
-							{contents.map((content, index) => (
-								<div
-									key={index}
-									className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}
-								>
-									<div
-										className={cx(
-											classes.indicatorIcon,
-											cx(fr.cx('fr-mr-md-6v'))
-										)}
-									>
-										<i className={cx(fr.cx(content.iconId), classes.icon)} />
-									</div>
-									<p>{content.text}</p>
-								</div>
-							))}
-
-							<p className={fr.cx('fr-col-12', 'fr-mb-0')}>
-								Pour en savoir plus sur ces fonctionnalités et découvrir celles
-								à venir, vous pouvez&nbsp;
-								<a href="/public/roadmap" target="_blank">
-									consulter notre feuille de route
-								</a>
-								.
-							</p>
-							<div
-								className={cx(
-									classes.buttonsGroup,
-									fr.cx('fr-col-12', 'fr-mt-6v')
-								)}
-							>
-								<Button
-									priority="primary"
-									iconId="fr-icon-edit-line"
-									iconPosition="right"
-									size="large"
-									onClick={() => {
-										router.push(
-											`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
-										);
-									}}
-								>
-									Éditer le formulaire
-								</Button>
-							</div>
-						</div>
-					</div>
-				</>
-			)}
+			{displaySettingsContent()}
 		</div>
 	);
 };
@@ -247,6 +270,13 @@ const useStyles = tss.withName(SettingsTab.name).create({
 		a: {
 			color: fr.colors.decisions.text.title.blueFrance.default
 		}
+	},
+	loaderContainer: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: '500px',
+		width: '100%'
 	},
 	buttonsGroup: {
 		display: 'flex',

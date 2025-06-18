@@ -62,7 +62,12 @@ const DashboardTab = ({
 			}
 		);
 
-	if (isLoading || isLoadingReviews) return <Loader />;
+	if (isLoading || isLoadingReviews)
+		return (
+			<div className={cx(classes.loaderContainer)}>
+				<Loader />
+			</div>
+		);
 
 	const hasNewReviews = reviewResults.data.length > 0;
 
@@ -202,6 +207,13 @@ const useStyles = tss.withName(DashboardTab.name).create({
 			flexDirection: 'column',
 			maxWidth: '100%'
 		}
+	},
+	loaderContainer: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: '500px',
+		width: '100%'
 	},
 	container: {
 		...fr.spacing('padding', {}),

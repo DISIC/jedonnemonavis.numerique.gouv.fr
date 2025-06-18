@@ -249,7 +249,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 		return (
 			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
-				<div className={fr.cx('fr-mt-20v')}>
+				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
 			</div>
@@ -331,7 +331,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 	const getStatsDisplay = () => {
 		if (isLoadingReviewsDataWithFilters) {
 			return (
-				<div className={fr.cx('fr-mt-16w')}>
+				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
 			);
@@ -506,6 +506,13 @@ const useStyles = tss.create({
 	},
 	container: {
 		position: 'relative'
+	},
+	loaderContainer: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: '500px',
+		width: '100%'
 	},
 	overLoader: {
 		position: 'absolute',
