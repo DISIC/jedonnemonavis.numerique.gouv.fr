@@ -101,8 +101,12 @@ const queryCountByFieldCode = ({
 		};
 	} else if (legacy) {
 		mustClauses.push({
-			terms: {
-				form_id: [form_id, 2]
+			bool: {
+				should: [
+					{ term: { form_id: form_id } },
+					{ term: { form_id: 2 } },
+					{ bool: { must_not: { exists: { field: 'form_id' } } } }
+				]
 			}
 		});
 	} else {
