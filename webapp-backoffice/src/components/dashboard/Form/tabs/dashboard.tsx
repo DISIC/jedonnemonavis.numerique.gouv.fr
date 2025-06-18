@@ -80,7 +80,11 @@ const DashboardTab = ({
 					productId={form.product_id}
 					formId={form.id}
 					startDate={
-						new Date(new Date().setFullYear(new Date().getFullYear() - 1))
+						new Date(
+							new Date(
+								new Date().setDate(new Date().getDate() + 1)
+							).setFullYear(new Date().getFullYear() - 1)
+						)
 							.toISOString()
 							.split('T')[0]
 					}

@@ -83,12 +83,13 @@ const ObservatoireStats = ({
 		trpc.answer.getObservatoireStats.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				start_date: startDate,
 				end_date: new Date(
 					new Date().getFullYear(),
 					new Date().getMonth() - 1,
-					0
+					new Date().getDate() + 2
 				)
 					.toISOString()
 					.split('T')[0],
@@ -133,8 +134,8 @@ const ObservatoireStats = ({
 			lastMonthDiffValue:
 				lastMonthResultStats &&
 				(
-					lastMonthResultStats.data.satisfaction -
-					resultStatsObservatoire.data.satisfaction
+					resultStatsObservatoire.data.satisfaction -
+					lastMonthResultStats.data.satisfaction
 				).toFixed(1),
 			tooltip:
 				'Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire.',
@@ -147,8 +148,8 @@ const ObservatoireStats = ({
 			lastMonthDiffValue:
 				lastMonthResultStats &&
 				(
-					lastMonthResultStats.data.comprehension -
-					resultStatsObservatoire.data.comprehension
+					resultStatsObservatoire.data.comprehension -
+					lastMonthResultStats.data.comprehension
 				).toFixed(1),
 			tooltip:
 				"Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Qu'avez-vous pensé des informations et des instructions fournies ? » en attribuant une note sur 10 aux cinq réponses proposées dans le questionnaire.",
@@ -161,8 +162,8 @@ const ObservatoireStats = ({
 			lastMonthDiffValue:
 				lastMonthResultStats &&
 				(
-					lastMonthResultStats.data.contact_reachability -
-					resultStatsObservatoire.data.contact_reachability
+					resultStatsObservatoire.data.contact_reachability -
+					lastMonthResultStats.data.contact_reachability
 				).toFixed(1),
 			tooltip:
 				'Cette évaluation correspond à la part d’usagers en pourcentage ayant réussi à joindre l’administration pour l’aider dans la réalisation de sa démarche. La part est calculée grâce aux réponses obtenues à la question  « Quand vous avez cherché de l’aide, avez-vous réussi à joindre l’administration ? ».',
@@ -175,8 +176,8 @@ const ObservatoireStats = ({
 			lastMonthDiffValue:
 				lastMonthResultStats &&
 				(
-					lastMonthResultStats.data.contact_satisfaction -
-					resultStatsObservatoire.data.contact_satisfaction
+					resultStatsObservatoire.data.contact_satisfaction -
+					lastMonthResultStats.data.contact_satisfaction
 				).toFixed(1),
 			tooltip:
 				'Cette évaluation correspond à la qualité de l’aide obtenue de la part de l’administration. Nous réalisons une moyenne des réponses données à la question « Comment évaluez-vous la qualité de l’aide que vous avez obtenue de la part de l’administration ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire.',
@@ -193,15 +194,15 @@ const ObservatoireStats = ({
 	];
 
 	const getDiffLabel = (
-		value: string
+		value?: string
 	): { severity: AlertProps.Severity; label: string } => {
-		const numValue = parseFloat(value);
+		const numValue = parseFloat(value || '0');
 		if (numValue > 0) {
-			return { severity: 'success', label: `+${value}` };
+			return { severity: 'success', label: `+ ${numValue}` };
 		} else if (numValue < 0) {
-			return { severity: 'error', label: value };
+			return { severity: 'error', label: `- ${Math.abs(numValue)}` };
 		} else {
-			return { severity: 'info', label: '0' };
+			return { severity: 'info', label: '+ 0' };
 		}
 	};
 
@@ -234,7 +235,7 @@ const ObservatoireStats = ({
 							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))} %`
 							: `${getReadableValue(field.value)} / 10`}
 					</p>
-					{view === 'form-dashboard' && field.lastMonthDiffValue && (
+					{view === 'form-dashboard' && (
 						<Badge
 							severity={getDiffLabel(field.lastMonthDiffValue).severity}
 							small
