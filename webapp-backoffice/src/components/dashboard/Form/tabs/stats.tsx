@@ -7,24 +7,33 @@ import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMul
 import BarQuestionViz from '@/src/components/dashboard/Stats/BarQuestionViz';
 import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
-import PublicDataModal from '@/src/components/dashboard/Stats/PublicDataModal';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 import { CustomModalProps } from '@/src/types/custom';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { betaTestXwikiIds, formatNumberWithSpaces } from '@/src/utils/tools';
+import {
+	FormConfigWithChildren,
+	FormWithElements
+} from '@/src/types/prismaTypesExtended';
+import {
+	betaTestXwikiIds,
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
-import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
-import { FormTemplateBlockOption, RightAccessStatus } from '@prisma/client';
+import {
+	FormTemplateBlockOption,
+	FormTemplateStep,
+	RightAccessStatus
+} from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -33,15 +42,18 @@ interface Props {
 	modal: CustomModalProps;
 }
 
+interface CommonStepProps {
+	productId: number;
+	formId: number;
+	buttonId?: number;
+	startDate: string;
+	endDate: string;
+}
+
 export interface HideBlockOptionsHelper {
 	options: FormTemplateBlockOption[];
 	date: Date;
 }
-
-const public_modal = createModal({
-	id: 'public-modal',
-	isOpenedByDefault: false
-});
 
 export const SectionWrapper = ({
 	title,
@@ -69,10 +81,36 @@ export const SectionWrapper = ({
 	);
 };
 
+export const OldSectionWrapper = ({
+	children,
+	formConfig
+}: {
+	children: React.ReactNode;
+	formConfig?: FormConfigWithChildren;
+}) => {
+	const { classes, cx } = useStyles();
+
+	return (
+		<div>
+			<div className={cx(classes.alertContainer)}>
+				<i className={fr.cx('ri-alert-fill')} /> Cette section présente les
+				résultats aux questions des anciennes versions du formulaire. La version
+				actuellement en vigueur a été publiée le{' '}
+				{formConfig
+					? formatDateToFrenchString(formConfig.created_at.toString())
+					: '03 juillet 2024'}
+				.
+			</div>
+			{children}
+		</div>
+	);
+};
+
 const nbMaxReviews = 500000;
 
 const StatsTab = ({ form, ownRight, modal }: Props) => {
 	const router = useRouter();
+	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
 
@@ -83,6 +121,47 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 	useEffect(() => {
 		setSelectedButton(filters['productStats'].buttonId);
 	}, [filters['productStats'].buttonId]);
+
+	const formConfigs = form.form_configs;
+	const currentFormConfig = formConfigs[formConfigs.length - 1];
+	const formConfigHiddenSteps =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'step'
+		) || [];
+	const formConfigHiddenOptions =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'blockOption'
+		) || [];
+
+	const formTemplateBlockOptionsHidden = (
+		formTemplate?.form_template_steps || []
+	).reduce(
+		(acc, step) => {
+			step.form_template_blocks.forEach(block => {
+				const blockOptions = block.options.filter(option =>
+					formConfigHiddenOptions.map(fcd => fcd.parent_id).includes(option.id)
+				);
+				acc.options = acc.options.concat(blockOptions);
+			});
+			return acc;
+		},
+		{
+			options: [],
+			date: currentFormConfig?.created_at
+		} as HideBlockOptionsHelper
+	);
+
+	const hiddenSteps = formConfigHiddenSteps
+		.map(fcd => {
+			const stepIndex = formTemplate?.form_template_steps.findIndex(
+				f => f.id === fcd.parent_id
+			);
+
+			return stepIndex;
+		})
+		.filter(
+			stepIndex => stepIndex !== undefined && stepIndex !== -1
+		) as number[];
 
 	const { data: buttonResults, isLoading: isLoadingButtons } =
 		trpc.button.getList.useQuery(
@@ -166,13 +245,6 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 		modal.open();
 	};
 
-	const handleSendInvitation = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${form.product.id}/access`,
-			query: { autoInvite: true }
-		});
-	};
-
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<div className={cx(classes.container)}>
@@ -196,6 +268,65 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 			</div>
 		);
 	}
+
+	const hiddableStepsConfiguration = [
+		{
+			stepIndex: 1,
+			component: (props: CommonStepProps) => (
+				<BarQuestionViz
+					fieldCode="comprehension"
+					total={nbReviewsWithFilters}
+					{...props}
+				/>
+			)
+		},
+		{
+			stepIndex: 2,
+			component: (props: CommonStepProps) => (
+				<>
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviewsWithFilters}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+				</>
+			)
+		}
+	];
+
+	const renderVisibleSteps = (
+		hiddenSteps: number[],
+		props: CommonStepProps
+	) => {
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (!hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
+
+	const renderHiddenSteps = (hiddenSteps: number[], props: CommonStepProps) => {
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
 
 	const getStatsDisplay = () => {
 		if (isLoadingReviewsDataWithFilters) {
@@ -264,67 +395,43 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 						endDate={filters.sharedFilters.currentEndDate}
 						required
 					/>
-					<BarQuestionViz
-						fieldCode="comprehension"
-						total={nbReviewsWithFilters}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="contact_tried"
-						total={nbReviewsWithFilters}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_reached"
-						total={nbReviewsWithFiltersForm2}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_satisfaction"
-						total={nbReviewsWithFiltersForm2}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
+					{renderVisibleSteps(hiddenSteps, {
+						productId: form.product_id,
+						formId: form.id,
+						buttonId: filters.productStats.buttonId,
+						startDate: filters.sharedFilters.currentStartDate,
+						endDate: filters.sharedFilters.currentEndDate
+					})}
 				</SectionWrapper>
-				<SectionWrapper
-					title="Détails des anciennes réponses"
-					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${form.product.xwiki_id && betaTestXwikiIds.includes(form.product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
-					total={nbReviewsWithFilters}
-				>
-					<SmileyQuestionViz
-						fieldCode="easy"
-						total={nbReviewsWithFiltersForm1}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="difficulties"
-						total={nbReviewsWithFiltersForm1}
-						productId={form.product.id}
-						formId={form.id}
-						buttonId={filters.productStats.buttonId}
-						startDate={filters.sharedFilters.currentStartDate}
-						endDate={filters.sharedFilters.currentEndDate}
-					/>
-				</SectionWrapper>
+				{!!nbReviewsWithFilters && (
+					<OldSectionWrapper formConfig={currentFormConfig}>
+						{renderHiddenSteps(hiddenSteps, {
+							productId: form.product_id,
+							formId: form.id,
+							buttonId: filters.productStats.buttonId,
+							startDate: filters.sharedFilters.currentStartDate,
+							endDate: filters.sharedFilters.currentEndDate
+						})}
+						<SmileyQuestionViz
+							fieldCode="easy"
+							total={nbReviewsWithFiltersForm1}
+							productId={form.product.id}
+							formId={form.id}
+							buttonId={filters.productStats.buttonId}
+							startDate={filters.sharedFilters.currentStartDate}
+							endDate={filters.sharedFilters.currentEndDate}
+						/>
+						<BarMultipleQuestionViz
+							fieldCode="difficulties"
+							total={nbReviewsWithFiltersForm1}
+							productId={form.product.id}
+							formId={form.id}
+							buttonId={filters.productStats.buttonId}
+							startDate={filters.sharedFilters.currentStartDate}
+							endDate={filters.sharedFilters.currentEndDate}
+						/>
+					</OldSectionWrapper>
+				)}
 			</>
 		);
 	};
@@ -409,6 +516,22 @@ const useStyles = tss.create({
 		height: '100%',
 		backgroundColor: 'white',
 		zIndex: 9
+	},
+	oldSectionWrapper: {
+		'.fr-collapse': {
+			backgroundColor: fr.colors.decisions.background.default.grey.hover,
+			margin: `0 1px`
+		}
+	},
+	alertContainer: {
+		fontWeight: 'bold',
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		margin: fr.spacing('1v'),
+		padding: fr.spacing('4v'),
+		'.ri-alert-fill': {
+			color: fr.colors.decisions.background.actionHigh.blueFrance.default,
+			marginRight: fr.spacing('1v')
+		}
 	},
 	title: {
 		display: 'flex',
