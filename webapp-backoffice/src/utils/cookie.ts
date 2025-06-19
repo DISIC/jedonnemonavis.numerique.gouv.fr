@@ -5,7 +5,8 @@ export const UserSettingsSchema = z.object({
 });
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
-const USER_SETTINGS_COOKIE = 'jdma-user-settings';
+const USER_SETTINGS_COOKIE =
+	process.env.NEXT_PUBLIC_USER_SETTINGS_COOKIE_KEY || 'jdma-user-settings';
 
 function setCookie(name: string, value: string, days = 365) {
 	if (typeof document === 'undefined') return;
