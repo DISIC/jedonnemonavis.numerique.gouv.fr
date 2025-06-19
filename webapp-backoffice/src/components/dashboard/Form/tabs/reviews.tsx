@@ -51,16 +51,12 @@ const defaultErrors = {
 const ReviewsTab = (props: Props) => {
 	const { form, ownRight, modal, hasButtons } = props;
 	const router = useRouter();
-	const { view } = router.query;
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [numberPerPage, setNumberPerPage] = useState(10);
 	const [sort, setSort] = useState<string>('created_at:desc');
-	const [displayMode, setDisplayMode] = useState<'reviews' | 'verbatim'>(
-		view === 'verbatim' ? 'verbatim' : 'reviews'
-	);
 	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
@@ -129,7 +125,7 @@ const ReviewsTab = (props: Props) => {
 			numberPerPage: numberPerPage,
 			page: currentPage,
 			shouldIncludeAnswers: true,
-			mustHaveVerbatims: displayMode === 'reviews' ? false : true,
+			mustHaveVerbatims: true,
 			search: validatedSearch,
 			start_date: filters.productReviews.displayNew
 				? undefined
@@ -211,7 +207,7 @@ const ReviewsTab = (props: Props) => {
 		return regex.test(date);
 	};
 
-	const { cx, classes } = useStyles({ displayMode });
+	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
@@ -448,7 +444,7 @@ const ReviewsTab = (props: Props) => {
 			></ReviewFiltersModal>
 
 			<div className={cx(classes.title)}>
-				<h2 className={fr.cx('fr-mb-0')}>Avis</h2>
+				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
 				{reviewMetaResults.metadata.countAll > 0 && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
@@ -456,7 +452,7 @@ const ReviewsTab = (props: Props) => {
 							form_id={form.id}
 							startDate={filters.sharedFilters.currentStartDate}
 							endDate={filters.sharedFilters.currentEndDate}
-							mustHaveVerbatims={displayMode === 'reviews' ? false : true}
+							mustHaveVerbatims={true}
 							search={search}
 							button_id={buttonId}
 							filters={filters.productReviews.filters}
@@ -475,115 +471,7 @@ const ReviewsTab = (props: Props) => {
 				displayEmptyState()
 			) : (
 				<>
-					<div
-						className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mt-8v')}
-					>
-						<div
-							className={cx(
-								classes.filtersWrapper,
-								fr.cx('fr-col-12', 'fr-col-lg-6')
-							)}
-						>
-							<div className={cx(classes.filterView)}>
-								<label>Vue</label>
-								<div className={fr.cx('fr-mt-2v')}>
-									<Button
-										priority={
-											displayMode === 'reviews' ? 'primary' : 'secondary'
-										}
-										className={
-											displayMode === 'reviews'
-												? classes.buttonOption
-												: classes.buttonOptionDisabled
-										}
-										onClick={() => {
-											setDisplayMode('reviews');
-											setCurrentPage(1);
-											push(['trackEvent', 'Form - Reviews', 'Filtre-Vue-Avis']);
-										}}
-									>
-										{displayMode === 'reviews' && (
-											<span
-												className="ri-chat-poll-line fr-mr-1v fr-icon--sm"
-												aria-hidden="true"
-											></span>
-										)}
-										Avis
-									</Button>
-									<Button
-										priority={
-											displayMode === 'reviews' ? 'secondary' : 'primary'
-										}
-										className={
-											displayMode === 'reviews'
-												? classes.buttonOptionDisabled
-												: classes.buttonOption
-										}
-										onClick={() => {
-											setDisplayMode('verbatim');
-											setCurrentPage(1);
-											push([
-												'trackEvent',
-												'Form - Reviews',
-												'Filtre-Vue-Verbatim'
-											]);
-										}}
-									>
-										{displayMode === 'verbatim' && (
-											<span
-												className="ri-chat-3-line fr-mr-1v fr-icon--sm"
-												aria-hidden="true"
-											></span>
-										)}
-										Verbatims
-									</Button>
-								</div>
-							</div>
-						</div>
-						<div
-							className={cx(
-								classes.filtersWrapper,
-								fr.cx('fr-col-12', 'fr-col-lg-6')
-							)}
-						>
-							<form
-								className={cx(classes.searchForm)}
-								onSubmit={e => {
-									e.preventDefault();
-									submit();
-									push(['trackEvent', 'Form - Reviews', 'Search']);
-								}}
-							>
-								<div role="search" className={fr.cx('fr-search-bar')}>
-									<Input
-										label="Rechercher un avis"
-										hideLabel
-										nativeInputProps={{
-											placeholder: 'Rechercher dans les verbatims',
-											type: 'search',
-											value: search,
-											onChange: event => {
-												if (!event.target.value) {
-													setValidatedSearch('');
-												}
-												setSearch(event.target.value);
-												push(['trackEvent', 'Avis', 'Filtre-Recherche']);
-											}
-										}}
-									/>
-									<Button
-										priority="primary"
-										type="submit"
-										iconId="ri-search-2-line"
-										iconPosition="left"
-									>
-										Rechercher
-									</Button>
-								</div>
-							</form>
-						</div>
-					</div>
-					<div className={fr.cx('fr-mt-8v')}>
+					<div className={fr.cx('fr-my-8v')}>
 						<GenericFilters
 							filterKey="productReviews"
 							topRight={
@@ -629,6 +517,48 @@ const ReviewsTab = (props: Props) => {
 								/>
 							)}
 						</GenericFilters>
+					</div>
+					<div
+						className={cx(
+							classes.filtersWrapper,
+							fr.cx('fr-col-12', 'fr-col-lg-4')
+						)}
+					>
+						<form
+							className={cx(classes.searchForm)}
+							onSubmit={e => {
+								e.preventDefault();
+								submit();
+								push(['trackEvent', 'Form - Reviews', 'Search']);
+							}}
+						>
+							<div role="search" className={fr.cx('fr-search-bar')}>
+								<Input
+									label="Rechercher un avis"
+									hideLabel
+									nativeInputProps={{
+										placeholder: 'Rechercher dans les verbatims',
+										type: 'search',
+										value: search,
+										onChange: event => {
+											if (!event.target.value) {
+												setValidatedSearch('');
+											}
+											setSearch(event.target.value);
+											push(['trackEvent', 'Avis', 'Filtre-Recherche']);
+										}
+									}}
+								/>
+								<Button
+									priority="primary"
+									type="submit"
+									iconId="ri-search-2-line"
+									iconPosition="left"
+								>
+									Rechercher
+								</Button>
+							</div>
+						</form>
 					</div>
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -686,26 +616,14 @@ const ReviewsTab = (props: Props) => {
 									<>
 										<table className={cx(classes.tableContainer)}>
 											<ReviewFilters
-												displayMode={displayMode}
+												displayMode={'verbatim'}
 												sort={sort}
 												onClick={handleSortChange}
 												hasManyVersions={formConfigs.length > 0}
 											/>
 											<tbody>
 												{reviewsExtended.map((review, index) => {
-													if (review && displayMode === 'reviews') {
-														return (
-															<ReviewLine
-																key={index}
-																review={review}
-																search={validatedSearch}
-																formConfigHelper={getFormConfigHelperFromDate(
-																	review.created_at || new Date()
-																)}
-																hasManyVersions={formConfigs.length > 0}
-															/>
-														);
-													} else if (review && displayMode === 'verbatim') {
+													if (review) {
 														return (
 															<ReviewLineVerbatim
 																key={index}
@@ -765,82 +683,79 @@ const ReviewsTab = (props: Props) => {
 
 export default ReviewsTab;
 
-const useStyles = tss
-	.withName(ReviewsTab.name)
-	.withParams<{ displayMode: 'reviews' | 'verbatim' }>()
-	.create(({ displayMode }) => ({
-		boldText: {
-			fontWeight: 'bold'
-		},
-		tableContainer: {
-			width: '100%'
-		},
-		loaderContainer: {
-			display: 'flex',
-			justifyContent: 'center',
-			alignItems: 'center',
-			height: '500px',
-			width: '100%'
-		},
-		searchForm: {
-			width: '100%',
-			'.fr-search-bar': {
-				'.fr-input-group': {
-					width: '100%',
-					marginBottom: 0
-				}
-			}
-		},
-		buttonOption: {
-			border: `1px solid ${fr.colors.decisions.border.active.blueFrance.default}`
-		},
-		buttonOptionDisabled: {
-			border: 'none'
-		},
-		title: {
-			display: 'flex',
-			justifyContent: 'space-between',
-			marginBottom: '1.5rem',
-			[fr.breakpoints.down('lg')]: {
-				flexDirection: 'column',
-				'.fr-btn': {
-					marginTop: '1rem'
-				}
-			}
-		},
-		filterView: {
-			display: 'flex',
-			flexDirection: 'column'
-		},
-		tagFilter: {
-			marginRight: '0.5rem',
-			marginBottom: '0.5rem'
-		},
-		filtersWrapper: {
-			display: 'flex',
-			alignItems: 'end'
-		},
-		buttonContainer: {
-			width: '100%',
-			[fr.breakpoints.up('lg')]: {
-				display: 'flex',
-				justifyContent: 'flex-end',
-				'.fr-btn': {
-					justifySelf: 'flex-end'
-				}
-			},
-			[fr.breakpoints.down('lg')]: {
-				'.fr-btn:first-of-type': {
-					marginBottom: '1rem'
-				}
-			}
-		},
-		errorMsg: {
-			'.fr-error-text': {
-				marginTop: '0.5rem'
-			},
-			'p.fr-error-text': {
-				position: 'absolute'
+const useStyles = tss.withName(ReviewsTab.name).create({
+	boldText: {
+		fontWeight: 'bold'
+	},
+	tableContainer: {
+		width: '100%'
+	},
+	loaderContainer: {
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: '500px',
+		width: '100%'
+	},
+	searchForm: {
+		width: '100%',
+		'.fr-search-bar': {
+			'.fr-input-group': {
+				width: '100%',
+				marginBottom: 0
 			}
 		}
-	}));
+	},
+	buttonOption: {
+		border: `1px solid ${fr.colors.decisions.border.active.blueFrance.default}`
+	},
+	buttonOptionDisabled: {
+		border: 'none'
+	},
+	title: {
+		display: 'flex',
+		justifyContent: 'space-between',
+		marginBottom: '1.5rem',
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'column',
+			'.fr-btn': {
+				marginTop: '1rem'
+			}
+		}
+	},
+	filterView: {
+		display: 'flex',
+		flexDirection: 'column'
+	},
+	tagFilter: {
+		marginRight: '0.5rem',
+		marginBottom: '0.5rem'
+	},
+	filtersWrapper: {
+		display: 'flex',
+		alignItems: 'end'
+	},
+	buttonContainer: {
+		width: '100%',
+		[fr.breakpoints.up('lg')]: {
+			display: 'flex',
+			justifyContent: 'flex-end',
+			'.fr-btn': {
+				justifySelf: 'flex-end'
+			}
+		},
+		[fr.breakpoints.down('lg')]: {
+			'.fr-btn:first-of-type': {
+				marginBottom: '1rem'
+			}
+		}
+	},
+	errorMsg: {
+		'.fr-error-text': {
+			marginTop: '0.5rem'
+		},
+		'p.fr-error-text': {
+			position: 'absolute'
+		}
+	}
+});

@@ -1,21 +1,20 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { ExtendedReview } from './interface';
-import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
-import { tss } from 'tss-react/dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import React, { useEffect } from 'react';
-import Image from 'next/image';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
+import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
-import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
-import { text } from 'stream/consumers';
+import Image from 'next/image';
+import React, { useEffect } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { ExtendedReview } from './interface';
+import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 const ReviewLineVerbatim = ({
 	review,
@@ -34,7 +33,7 @@ const ReviewLineVerbatim = ({
 	const color = getStatsColor({
 		intention: review.satisfaction?.intention || 'neutral'
 	});
-	const { cx, classes } = useStyles({ color: color });
+	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
 	const { mutate: createReviewViewLog } =
@@ -51,18 +50,17 @@ const ReviewLineVerbatim = ({
 	return (
 		<tr className={cx(classes.container)}>
 			<div
-				className={cx(classes.line, fr.cx('fr-grid-row'))}
-				style={{
-					backgroundColor: getStatsColor({
-						intention: review.satisfaction?.intention ?? 'neutral',
-						kind: 'background'
-					}),
-					borderColor: getStatsColor({
-						intention: review.satisfaction?.intention ?? 'neutral'
-					})
-				}}
+				className={cx(
+					classes.line,
+					fr.cx('fr-grid-row', 'fr-grid-row--middle')
+				)}
 			>
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')}>
+				<td
+					className={cx(
+						classes.dateLabel,
+						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')
+					)}
+				>
 					{formatDateToFrenchString(
 						review.created_at?.toISOString().split('T')[0] || ''
 					)}
@@ -79,29 +77,24 @@ const ReviewLineVerbatim = ({
 					}}
 				>
 					{review.satisfaction && review.satisfaction.intention && (
-						<>
+						<Badge
+							className={cx(classes.badge)}
+							noIcon={true}
+							severity={getSeverity(review.satisfaction.intention || '')}
+						>
 							<Image
 								alt=""
 								src={`/assets/smileys/${getStatsIcon({
 									intention: review.satisfaction.intention ?? 'neutral'
 								})}.svg`}
-								width={20}
-								height={20}
+								width={16}
+								height={16}
 							/>
-							{displayIntention(
-								review.satisfaction.intention ?? 'neutral'
-							).toUpperCase()}
-						</>
+							{displayIntention(review.satisfaction.intention ?? 'neutral')}
+						</Badge>
 					)}
 				</td>
-				<td
-					className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pr-3v')}
-					style={{
-						color: getStatsColor({
-							intention: review.satisfaction?.intention ?? 'neutral'
-						})
-					}}
-				>
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pr-3v')}>
 					<p
 						className={cx(classes.content)}
 						dangerouslySetInnerHTML={{
@@ -111,28 +104,22 @@ const ReviewLineVerbatim = ({
 				</td>
 				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
 					<Button
-						priority="secondary"
-						iconPosition="right"
-						iconId="fr-icon-arrow-down-s-fill"
+						priority="tertiary no outline"
 						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 						size="small"
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 						}}
-						style={{
-							boxShadow: 'none',
-							border: `solid ${getStatsColor({
-								intention: review.satisfaction?.intention ?? 'neutral'
-							})} 1px`,
-							color: getStatsColor({
-								intention: review.satisfaction?.intention ?? 'neutral'
-							})
-						}}
 						className={classes.button}
+						style={{
+							backgroundColor: displayMoreInfo
+								? fr.colors.decisions.background.alt.blueFrance.default
+								: undefined
+						}}
 					>
 						{' '}
-						Détails
+						Voir le détail de l'avis
 					</Button>
 				</td>
 			</div>
@@ -143,61 +130,69 @@ const ReviewLineVerbatim = ({
 					hasManyVersions={hasManyVersions}
 				/>
 			)}
+			<hr />
 		</tr>
 	);
 };
 
-const useStyles = tss
-	.withParams<{
-		color: string;
-	}>()
-	.create(({ color }) => ({
-		container: {
-			display: 'flex',
-			flexDirection: 'column',
-			border: '1px solid',
-			borderColor: color,
-			marginBottom: 12,
-			width: '100%',
-			'td:last-of-type': {
-				textAlign: 'right'
-			}
-		},
-		line: {
-			fontSize: 12,
-			display: 'flex',
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			padding: 12,
-			width: '100%',
-			borderRadius: 0,
-			fontWeight: 'normal'
-		},
-		label: {
-			fontWeight: 'bold',
-			display: 'flex',
-			gap: '0.3rem'
-		},
-		verbatim: {
-			flexShrink: 1
-		},
-		date: {
-			fontSize: 12,
-			width: 100,
-			flexShrink: 0
-		},
-		content: {
-			wordWrap: 'break-word',
-			span: {
-				backgroundColor: 'yellow'
-			}
-		},
-		button: {
-			[fr.breakpoints.down('md')]: {
-				width: '100%',
-				justifyContent: 'center'
-			}
+const useStyles = tss.create({
+	container: {
+		display: 'flex',
+		flexDirection: 'column',
+		marginBottom: 12,
+		width: '100%',
+		'td:last-of-type': {
+			textAlign: 'right'
 		}
-	}));
+	},
+	line: {
+		fontSize: fr.spacing('4v'),
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		padding: fr.spacing('4v'),
+		width: '100%',
+		borderRadius: 0,
+		fontWeight: 'normal'
+	},
+	dateLabel: {
+		fontWeight: 'bold'
+	},
+	label: {
+		fontWeight: 'bold',
+		display: 'flex',
+		alignItems: 'center',
+		gap: '0.3rem'
+	},
+	verbatim: {
+		flexShrink: 1
+	},
+	date: {
+		fontSize: 12,
+		width: 100,
+		flexShrink: 0
+	},
+	content: {
+		wordWrap: 'break-word',
+		margin: 0,
+		span: {
+			backgroundColor: 'yellow'
+		}
+	},
+	button: {
+		textDecoration: 'underline',
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
+	},
+	badge: {
+		fontSize: 12,
+		paddingVertical: 4,
+		display: 'flex',
+		alignItems: 'center',
+		gap: '0.25rem'
+	}
+});
 
 export default ReviewLineVerbatim;

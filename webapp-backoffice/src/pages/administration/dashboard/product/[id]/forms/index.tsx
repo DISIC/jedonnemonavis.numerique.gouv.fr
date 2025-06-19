@@ -161,7 +161,7 @@ const ProductButtonsPage = (props: Props) => {
 												)}
 												{getFormReviewCount(form.id, form.legacy) > 0 && (
 													<Link
-														href={`/administration/dashboard/product/${product.id}/reviews`}
+														href={`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=reviews`}
 														title={`Voir les avis pour ${product.title}`}
 														className={fr.cx('fr-link', 'fr-ml-4v')}
 													>

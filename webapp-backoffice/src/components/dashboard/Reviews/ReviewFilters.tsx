@@ -49,10 +49,12 @@ const ReviewFilters = (props: Props) => {
 		} else {
 			setSortList([
 				{
-					label: 'Date'
+					label: 'Date',
+					code: 'created_at'
 				},
 				{
-					label: 'Satisfaction'
+					label: 'Satisfaction',
+					code: 'satisfaction'
 				},
 				{
 					label: 'Verbatim'

@@ -169,14 +169,17 @@ export const formatWhereAndOrder = (
 	];
 
 	if (sort) {
-		const values = sort.split(':');
-		if (sort.includes('created_at')) {
-			orderBy = [
-				{
-					[values[0]]: values[1]
-				}
-			];
-		}
+		const values: string[] = sort.split(';');
+		values.forEach(value => {
+			const sortValues = value.split(':');
+			if (value.includes('created_at')) {
+				orderBy = [
+					{
+						[sortValues[0]]: sortValues[1]
+					}
+				];
+			}
+		});
 	}
 
 	return {

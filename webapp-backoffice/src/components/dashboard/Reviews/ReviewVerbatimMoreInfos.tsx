@@ -21,11 +21,6 @@ const ReviewVerbatimMoreInfos = ({
 
 	if (!review) return null;
 
-	const displayFieldCodeText = (fieldCode: string) => {
-		return review.answers?.find(answer => answer.field_code === fieldCode)
-			?.answer_text;
-	};
-
 	return (
 		<div className={cx(fr.cx('fr-p-3v'), classes.container)}>
 			<div
@@ -80,7 +75,10 @@ const useStyles = tss.create({
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'space-between',
-		height: '100%'
+		height: '100%',
+		width: '100%',
+		marginTop: fr.spacing('2v'),
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	subtitle: {
 		...fr.typography[18].style,

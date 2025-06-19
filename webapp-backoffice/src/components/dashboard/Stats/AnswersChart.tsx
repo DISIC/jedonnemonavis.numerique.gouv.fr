@@ -69,7 +69,6 @@ const AnswersChart = ({
 				total={total}
 				data={countByFieldCodePerMonth}
 				isFormDashboardType={isFormDashboardType}
-				smallTitle
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
