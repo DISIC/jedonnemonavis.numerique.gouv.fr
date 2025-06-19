@@ -22,6 +22,7 @@ import { useRouter } from 'next/router';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
+import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 
 export type FormConfigHelper = {
 	displays: {
@@ -55,10 +56,21 @@ const rename_form_modal = createModal({
 	isOpenedByDefault: false
 });
 
+const formHelpModal = createModal({
+	id: 'form-help-modal',
+	isOpenedByDefault: false
+});
+
 const ProductFormPage = (props: Props) => {
 	const { form } = props;
 	const router = useRouter();
 	const formConfig = form.form_configs[0];
+
+	const {
+		settings,
+		setSetting,
+		isLoading: isLoadingSettings
+	} = useUserSettings();
 
 	const { classes, cx } = useStyles();
 
@@ -80,6 +92,18 @@ const ProductFormPage = (props: Props) => {
 			form_id: form.id,
 			status: 'published'
 		});
+	const [shouldModalOpen, setShouldModalOpen] = useState(false);
+
+	useEffect(() => {
+		if (isLoadingSettings) return;
+		setShouldModalOpen(!settings.formHelpModalSeen);
+	}, [isLoadingSettings]);
+
+	useEffect(() => {
+		if (shouldModalOpen) {
+			formHelpModal.open();
+		}
+	}, [shouldModalOpen, formHelpModal]);
 
 	const breadcrumbSegments = [
 		{
@@ -180,12 +204,13 @@ const ProductFormPage = (props: Props) => {
 		}
 	});
 
-	const isMobile = useMemo(
-		() =>
-			typeof window !== 'undefined' &&
-			window.innerWidth <= fr.breakpoints.getPxValues().md,
-		[]
-	);
+	useIsModalOpen(formHelpModal, {
+		onConceal: () => {
+			if (!settings.formHelpModalSeen && shouldModalOpen) {
+				setSetting('formHelpModalSeen', true);
+			}
+		}
+	});
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
@@ -240,7 +265,13 @@ const ProductFormPage = (props: Props) => {
 					Retourner sur la page du formulaire
 				</Button>
 			</Link>
-			{!isMobile && <CustomFormHelpPanel />}
+			<OnConfirmModal
+				modal={formHelpModal}
+				title={``}
+				handleOnConfirm={() => {}}
+			>
+				<CustomFormHelpPanel />
+			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h1 className={fr.cx('fr-mb-0')}>
