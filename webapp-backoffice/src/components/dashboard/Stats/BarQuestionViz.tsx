@@ -103,6 +103,7 @@ const BarQuestionViz = ({
 				title="Répartition des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeData}
+				smallTitle
 			>
 				<BarChart data={formatedFieldCodeData} />
 			</ChartWrapper>
@@ -113,6 +114,7 @@ const BarQuestionViz = ({
 				singleRowLabel={
 					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 				}
+				smallTitle
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}

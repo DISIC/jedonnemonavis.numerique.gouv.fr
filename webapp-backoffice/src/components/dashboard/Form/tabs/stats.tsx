@@ -72,7 +72,7 @@ export const SectionWrapper = ({
 
 	return (
 		<div className={fr.cx('fr-mt-5w')}>
-			<h2>{title}</h2>
+			<h3>{title}</h3>
 			{alert && (
 				<Highlight className={cx(classes.highlight)}>{alert}</Highlight>
 			)}
@@ -347,7 +347,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 					endDate={filters.sharedFilters.currentEndDate}
 				/>
 				<div className={fr.cx('fr-mt-5w')}>
-					<h4>Participation</h4>
+					<h3>Participation</h3>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile

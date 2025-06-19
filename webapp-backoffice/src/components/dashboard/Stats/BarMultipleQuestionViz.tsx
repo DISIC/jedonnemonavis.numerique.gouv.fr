@@ -182,6 +182,7 @@ const BarMultipleQuestionViz = ({
 				data={formatedFieldCodeData}
 				reverseData
 				displayTotal="percentage"
+				smallTitle
 			>
 				<BarVerticalChart data={formatedFieldCodeData} />
 			</ChartWrapper>
@@ -189,6 +190,7 @@ const BarMultipleQuestionViz = ({
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeDataPerInterval}
+				smallTitle
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

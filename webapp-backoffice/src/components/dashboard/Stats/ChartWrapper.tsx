@@ -29,6 +29,7 @@ type Props = {
 	displayTotal?: 'classic' | 'percentage';
 	tooltip?: string;
 	isFormDashboardType?: boolean;
+	smallTitle?: boolean;
 };
 
 const orderData = (
@@ -98,7 +99,8 @@ const ChartWrapper = ({
 	singleRowLabel,
 	displayTotal,
 	tooltip,
-	isFormDashboardType = false
+	isFormDashboardType = false,
+	smallTitle
 }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
@@ -250,6 +252,7 @@ const ChartWrapper = ({
 		);
 	};
 
+	const TitleTag = smallTitle ? 'h5' : 'h4';
 	return (
 		<div
 			className={cx(
@@ -266,7 +269,7 @@ const ChartWrapper = ({
 			>
 				<div className={classes.container}>
 					<label className={cx(classes.label)}>
-						<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
+						<TitleTag className={fr.cx('fr-mb-0')}>{title}</TitleTag>
 						{tooltip && (
 							<Tooltip
 								placement="top"

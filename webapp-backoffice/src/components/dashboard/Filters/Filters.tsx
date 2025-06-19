@@ -29,7 +29,7 @@ export type DateShortcutName =
 
 export type FilterSectionKey = keyof Pick<
 	Filters,
-	'productActivityLogs' | 'productReviews' | 'productStats' 
+	'productActivityLogs' | 'productReviews' | 'productStats'
 >;
 
 type FiltersProps<T extends FilterSectionKey> = {
@@ -82,7 +82,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 				updateFilters({
 					...filters,
 					[filterKey]: {
-						...filters[filterKey],
+						...filters[filterKey]
 					},
 					sharedFilters: {
 						...filters['sharedFilters'],
@@ -95,8 +95,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 	}, [sharedFilters.hasChanged, sharedFilters.dateShortcut]);
 
-
-
 	const isValidDate = (date: string) => {
 		if (!date) return false;
 		return /^\d{4}-\d{2}-\d{2}$/.test(date);
@@ -108,7 +106,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 				...filters,
 				currentPage: 1,
 				[filterKey]: {
-					...filters[filterKey],
+					...filters[filterKey]
 				},
 				sharedFilters: {
 					...filters['sharedFilters'],
@@ -152,7 +150,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
 		>
 			<div className={cx(fr.cx('fr-mb-1v'), classes.titleContainer)}>
-				<h4 className={fr.cx('fr-mb-2v')}>Filtres</h4>
+				<h3 className={fr.cx('fr-mb-2v')}>Filtres</h3>
 				{topRight}
 			</div>
 			<div
@@ -177,12 +175,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 												...filters,
 												currentPage: 1,
 												[filterKey]: {
-													...filters[filterKey],
+													...filters[filterKey]
 												},
 												sharedFilters: {
 													...filters['sharedFilters'],
 													hasChanged: true,
-													dateShortcut: ds.name,
+													dateShortcut: ds.name
 												}
 											});
 											push(['trackEvent', 'Logs', 'Filtre-Date']);
@@ -205,7 +203,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 													...filters,
 													currentPage: 1,
 													[filterKey]: {
-														...filters[filterKey],
+														...filters[filterKey]
 													},
 													sharedFilters: {
 														...filters['sharedFilters'],
@@ -301,7 +299,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 									sharedFilters: {
 										...filters['sharedFilters'],
 										dateShortcut: 'one-year',
-										hasChanged: false,
+										hasChanged: false
 									}
 								});
 							}}
@@ -345,7 +343,11 @@ const useStyles = tss.create({
 	},
 	titleContainer: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		h3: {
+			fontSize: '1.5rem',
+			lineHeight: '2rem'
+		}
 	},
 	dateShortcuts: {
 		backgroundColor: fr.colors.decisions.background.default.grey.default,

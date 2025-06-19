@@ -170,6 +170,7 @@ const BarMultipleSplitQuestionViz = ({
 				sortOrder={sortOrder}
 				reverseData
 				displayTotal="classic"
+				smallTitle
 			>
 				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
@@ -183,6 +184,7 @@ const BarMultipleSplitQuestionViz = ({
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeDataPerInterval}
+				smallTitle
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

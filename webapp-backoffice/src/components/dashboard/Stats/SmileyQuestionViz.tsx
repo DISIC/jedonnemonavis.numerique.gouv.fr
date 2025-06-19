@@ -163,7 +163,7 @@ const SmileyQuestionViz = ({
 			required={required}
 		>
 			{resultFieldCode.data.length > 0 && (
-				<ChartWrapper title="Répartition des réponses">
+				<ChartWrapper title="Répartition des réponses" smallTitle>
 					<div className={classes.distributionContainer}>
 						{resultFieldCode.data
 							.sort(
@@ -234,6 +234,7 @@ const SmileyQuestionViz = ({
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={data}
+				smallTitle
 			>
 				<SmileyBarChart data={data} total={total} />
 			</ChartWrapper>
@@ -244,6 +245,7 @@ const SmileyQuestionViz = ({
 				data={dataForChart}
 				singleRowLabel="Note moyenne"
 				tooltip="Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire."
+				smallTitle
 			>
 				<LineChart
 					data={dataForChart}
