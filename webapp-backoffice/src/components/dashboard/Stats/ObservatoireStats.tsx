@@ -128,7 +128,7 @@ const ObservatoireStats = ({
 
 	const statFields: StatField[] = [
 		{
-			label: 'Satisfaction',
+			label: 'Satisfaction usager',
 			slug: 'satisfaction',
 			value: resultStatsObservatoire.data.satisfaction,
 			lastMonthDiffValue:
@@ -235,15 +235,7 @@ const ObservatoireStats = ({
 							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))} %`
 							: `${getReadableValue(field.value)} / 10`}
 					</p>
-					{view === 'form-dashboard' && (
-						<Badge
-							severity={getDiffLabel(field.lastMonthDiffValue).severity}
-							small
-							noIcon
-						>
-							{getDiffLabel(field.lastMonthDiffValue).label}
-						</Badge>
-					)}
+
 					{field.slug !== 'autonomy' && view === 'default' && (
 						<Badge
 							severity={getSeverityFromValue(
@@ -348,9 +340,29 @@ const ObservatoireStats = ({
 								</label>
 								{getStatsDisplay(field)}
 								{view === 'form-dashboard' && (
-									<p className={classes.lastMonthLabel}>
-										depuis le dernier mois
-									</p>
+									<div className={cx(fr.cx('fr-mt-2v', 'fr-grid-row'))}>
+										{!!resultStatsObservatoire.metadata[
+											`${field.slug}_count`
+										] ? (
+											<>
+												<Badge
+													severity={
+														getDiffLabel(field.lastMonthDiffValue).severity
+													}
+													small
+													noIcon
+													className="fr-mr-2v"
+												>
+													{getDiffLabel(field.lastMonthDiffValue).label}
+												</Badge>
+												<p className={classes.lastMonthLabel}>
+													depuis le dernier mois
+												</p>
+											</>
+										) : (
+											<></>
+										)}
+									</div>
 								)}
 							</GroupTag>
 						</div>

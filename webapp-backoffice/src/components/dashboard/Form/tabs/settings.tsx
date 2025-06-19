@@ -119,7 +119,13 @@ const SettingsTab = ({
 				</div>
 				{buttonsCount > 0 && (
 					<>
-						<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
+						<div
+							className={cx(
+								classes.buttonsGroup,
+								classes.justifyEnd,
+								fr.cx('fr-col-4')
+							)}
+						>
 							{ownRight === 'carrier_admin' && (
 								<Button
 									priority="secondary"
@@ -289,6 +295,9 @@ const useStyles = tss.withName(SettingsTab.name).create({
 				alignItems: 'center'
 			}
 		}
+	},
+	justifyEnd: {
+		justifyContent: 'end'
 	},
 	content: {
 		display: 'flex',
