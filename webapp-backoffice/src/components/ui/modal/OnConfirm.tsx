@@ -4,7 +4,6 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-
 interface Props {
 	modal: CustomModalProps;
 	title: string;

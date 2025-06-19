@@ -16,6 +16,7 @@ import { FiltersContextProvider } from '../contexts/FiltersContext';
 import React from 'react';
 import { init } from '@socialgouv/matomo-next';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
+import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -87,13 +88,15 @@ function App({ Component, pageProps }: AppProps) {
 		<MuiDsfrThemeProvider>
 			<SessionProvider session={pageProps.session}>
 				<AuthProvider>
-					<StatsTotalsProvider>
-						<FiltersContextProvider>
-							<RootFormTemplateProvider>
-								{getLayout(<Component {...pageProps} />)}
-							</RootFormTemplateProvider>
-						</FiltersContextProvider>
-					</StatsTotalsProvider>
+					<UserSettingsProvider>
+						<StatsTotalsProvider>
+							<FiltersContextProvider>
+								<RootFormTemplateProvider>
+									{getLayout(<Component {...pageProps} />)}
+								</RootFormTemplateProvider>
+							</FiltersContextProvider>
+						</StatsTotalsProvider>
+					</UserSettingsProvider>
 				</AuthProvider>
 			</SessionProvider>
 		</MuiDsfrThemeProvider>
