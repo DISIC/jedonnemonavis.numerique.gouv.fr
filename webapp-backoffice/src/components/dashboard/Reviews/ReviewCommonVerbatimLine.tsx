@@ -14,11 +14,13 @@ import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateConte
 const ReviewCommonVerbatimLine = ({
 	review,
 	type,
-	formConfig
+	formConfig,
+	search
 }: {
 	review: ExtendedReview;
 	type: 'Line' | 'Verbatim';
 	formConfig?: FormConfigWithChildren;
+	search: string;
 }) => {
 	const { cx, classes } = useStyles();
 	const { formTemplate, isLoading, error } = useRootFormTemplateContext();
@@ -107,6 +109,22 @@ const ReviewCommonVerbatimLine = ({
 		tableFieldCodeHelper[0]?.slug || ''
 	).filter(row => row.includes('administration'));
 
+	console.log(search);
+	console.log(review.verbatim?.answer_text);
+
+	const createMarkup = () => {
+		if (review.verbatim?.answer_text) {
+			const words = search.split(/\s+/).filter(Boolean);
+			const regex = new RegExp(`(${words.join('|')})`, 'gi');
+			const highlightedText = review.verbatim.answer_text
+				.replace(regex, `<span>$1</span>`)
+				.replace(/\n/g, '<br />');
+
+			return { __html: highlightedText };
+		}
+		return { __html: '-' };
+	};
+
 	return (
 		<>
 			{fieldCodesHelper.map(
@@ -193,6 +211,15 @@ const ReviewCommonVerbatimLine = ({
 					)}
 				</div>
 			)}
+			<div className={fr.cx('fr-col-12')}>
+				<h2 className={cx(classes.subtitle)}>
+					Souhaitez-vous nous en dire plus ?
+				</h2>
+				<p
+					className={cx(classes.verbatimContent, classes.content)}
+					dangerouslySetInnerHTML={createMarkup()}
+				/>
+			</div>
 		</>
 	);
 };
@@ -215,6 +242,11 @@ const useStyles = tss.create({
 		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0
+	},
+	verbatimContent: {
+		span: {
+			backgroundColor: 'yellow'
+		}
 	},
 	tag: {
 		...fr.typography[17].style,

@@ -493,7 +493,7 @@ const ReviewsTab = (props: Props) => {
 									className={fr.cx('fr-mb-0')}
 									options={[
 										{
-											label: 'Afficher uniquement les nouveaux avis',
+											label: 'Afficher uniquement les nouvelles réponses',
 											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(reviewLog[0].created_at.toString())})`,
 											nativeInputProps: {
 												name: 'favorites-products',
@@ -595,7 +595,7 @@ const ReviewsTab = (props: Props) => {
 											role="status"
 											className={fr.cx('fr-col-12', 'fr-mt-8v')}
 										>
-											Avis de{' '}
+											Réponses de{' '}
 											<span className={cx(classes.boldText)}>
 												{numberPerPage * (currentPage - 1) + 1}
 											</span>{' '}

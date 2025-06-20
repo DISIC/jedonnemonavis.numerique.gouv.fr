@@ -94,15 +94,15 @@ const ReviewLineVerbatim = ({
 						</Badge>
 					)}
 				</td>
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pr-3v')}>
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5', 'fr-pr-3v')}>
 					<p
-						className={cx(classes.content)}
+						className={cx(classes.content, classes.contentVerbatim)}
 						dangerouslySetInnerHTML={{
 							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}`
 						}}
 					></p>
 				</td>
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')}>
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<Button
 						priority="tertiary no outline"
 						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
@@ -119,7 +119,7 @@ const ReviewLineVerbatim = ({
 						}}
 					>
 						{' '}
-						Voir le détail de l'avis
+						Voir le détail de la réponse
 					</Button>
 				</td>
 			</div>
@@ -128,6 +128,7 @@ const ReviewLineVerbatim = ({
 					review={review}
 					formConfigHelper={formConfigHelper}
 					hasManyVersions={hasManyVersions}
+					search={search}
 				/>
 			)}
 			<hr />
@@ -173,11 +174,19 @@ const useStyles = tss.create({
 		flexShrink: 0
 	},
 	content: {
-		wordWrap: 'break-word',
+		display: '-webkit-box',
+		WebkitLineClamp: 3,
+		WebkitBoxOrient: 'vertical',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
 		margin: 0,
 		span: {
 			backgroundColor: 'yellow'
 		}
+	},
+	contentVerbatim: {
+		...fr.typography[18].style,
+		margin: 0
 	},
 	button: {
 		textDecoration: 'underline',

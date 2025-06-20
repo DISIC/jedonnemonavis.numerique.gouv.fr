@@ -93,7 +93,7 @@ const ExportModal = (props: Props) => {
 						}`}
 						options={[
 							{
-								label: `En fonction des filtres sélectionnés (${counts.countFiltered} avis)`,
+								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
 								nativeInputProps: {
 									value: 'filtered',
 									checked: choice === 'filtered',
@@ -104,7 +104,7 @@ const ExportModal = (props: Props) => {
 								}
 							},
 							{
-								label: `Tous les avis (${counts.countAll} avis)`,
+								label: `Tous les avis (${counts.countAll} réponses)`,
 								nativeInputProps: {
 									value: 'all',
 									checked: choice === 'all',
@@ -190,7 +190,7 @@ const ExportModal = (props: Props) => {
 						}
 			]}
 			concealingBackdrop={false}
-			title={'Exporter les avis'}
+			title={'Exporter les réponses'}
 			size="large"
 		>
 			{getModalContent()}

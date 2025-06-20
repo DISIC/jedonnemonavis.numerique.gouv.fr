@@ -8,7 +8,8 @@ import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 const ReviewVerbatimMoreInfos = ({
 	review,
 	formConfigHelper,
-	hasManyVersions
+	hasManyVersions,
+	search
 }: {
 	review: ExtendedReview;
 	formConfigHelper: {
@@ -16,6 +17,7 @@ const ReviewVerbatimMoreInfos = ({
 		versionNumber: number;
 	};
 	hasManyVersions: boolean;
+	search: string;
 }) => {
 	const { cx, classes } = useStyles();
 
@@ -64,6 +66,7 @@ const ReviewVerbatimMoreInfos = ({
 					review={review}
 					type={'Line'}
 					formConfig={formConfigHelper.formConfig}
+					search={search}
 				></ReviewCommonVerbatimLine>
 			</div>
 		</div>
