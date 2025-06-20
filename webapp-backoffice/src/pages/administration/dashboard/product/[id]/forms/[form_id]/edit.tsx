@@ -23,6 +23,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
+import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
 
 export type FormConfigHelper = {
 	displays: {
@@ -263,9 +264,28 @@ const ProductFormPage = (props: Props) => {
 			</OnConfirmModal>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
 				<div className={fr.cx('fr-col-8')}>
-					<h1 className={fr.cx('fr-mb-0')}>
-						{form.title || form.form_template.title}
-					</h1>
+					<div className={cx(classes.titleContainer)}>
+						<h1 className={fr.cx('fr-mb-0')}>
+							{form.title || form.form_template.title}
+						</h1>
+						<Tooltip
+							className={classes.tooltip}
+							kind="hover"
+							title={
+								<>
+									<b>Pourquoi ce modèle ?</b>
+									<br />
+									<span>
+										Évaluez le niveau de satisfaction de votre service numérique
+										et identifiez les problèmes rencontrés par vos usagers.
+										<br />
+										Récoltez des données sur les indicateurs clés définis par la
+										plateforme Vos démarches essentielles.
+									</span>
+								</>
+							}
+						/>
+					</div>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>
 					<Button
@@ -279,14 +299,6 @@ const ProductFormPage = (props: Props) => {
 					</Button>
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-pb-0')}>
-					<p className={fr.cx('fr-mb-0')}>
-						Évaluez le niveau de satisfaction de votre service numérique et
-						identifiez les problèmes rencontrés par vos usagers.
-					</p>
-					<p>
-						Récoltez des données sur les indicateurs clés définis par la
-						plateforme Vos démarches essentielles.
-					</p>
 					<hr className={fr.cx('fr-hr')} />
 				</div>
 				<div className={fr.cx('fr-col-8')}>
@@ -348,6 +360,16 @@ const useStyles = tss.withName(ProductFormPage.name).create({
 	},
 	configuratorContainer: {
 		minHeight: '75vh'
+	},
+	tooltip: {
+		...fr.typography[18].style
+	},
+	titleContainer: {
+		display: 'flex',
+		alignItems: 'center',
+		'.fr-icon-question-line': {
+			marginLeft: fr.spacing('2v')
+		}
 	}
 });
 
