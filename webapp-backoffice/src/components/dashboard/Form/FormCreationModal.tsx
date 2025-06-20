@@ -66,6 +66,7 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
 					product_id: productId
 				}
 			});
+			router.reload();
 		} else {
 			if (!rootFormTemplate?.data?.id) return setDisplayToast(true);
 			const savedFormResponse = await saveFormTmp.mutateAsync({
@@ -74,9 +75,6 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
 				form_template_id: rootFormTemplate?.data?.id
 			});
 			formId = savedFormResponse.data.id;
-		}
-
-		if ((form && form.id) || formId) {
 			router.push(`/administration/dashboard/product/${productId}/forms`);
 		}
 
