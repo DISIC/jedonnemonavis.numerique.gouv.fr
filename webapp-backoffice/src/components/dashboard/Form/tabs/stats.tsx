@@ -342,6 +342,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 				<ObservatoireStats
 					productId={form.product.id}
 					formId={form.id}
+					formConfig={currentFormConfig}
 					buttonId={filters.productStats.buttonId}
 					startDate={filters.sharedFilters.currentStartDate}
 					endDate={filters.sharedFilters.currentEndDate}

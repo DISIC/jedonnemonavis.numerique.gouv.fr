@@ -1,4 +1,10 @@
-import { getPercentageFromValue, getReadableValue } from '@/src/utils/tools';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
+import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import {
+	formatDateToFrenchString,
+	getPercentageFromValue,
+	getReadableValue
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import { AlertProps } from '@codegouvfr/react-dsfr/Alert';
@@ -10,6 +16,7 @@ import { tss } from 'tss-react';
 type ObservatoireStatsProps = {
 	productId: number;
 	formId: number;
+	formConfig?: FormConfigWithChildren;
 	buttonId?: number;
 	startDate: string;
 	endDate: string;
@@ -30,11 +37,13 @@ export type StatField = {
 	lastMonthDiffValue?: string;
 	tooltip: string;
 	icon: RiIconClassName | FrIconClassName;
+	hidden?: boolean;
 };
 
 const ObservatoireStats = ({
 	productId,
 	formId,
+	formConfig,
 	buttonId,
 	startDate,
 	endDate,
@@ -43,6 +52,21 @@ const ObservatoireStats = ({
 	view = 'default'
 }: ObservatoireStatsProps) => {
 	const { cx, classes } = useStyles();
+	const { formTemplate } = useRootFormTemplateContext();
+
+	const formConfigHiddenSteps =
+		formConfig?.form_config_displays.filter(fcd => fcd.kind === 'step') || [];
+	const hiddenSteps = formConfigHiddenSteps
+		.map(fcd => {
+			const stepIndex = formTemplate?.form_template_steps.findIndex(
+				f => f.id === fcd.parent_id
+			);
+
+			return stepIndex;
+		})
+		.filter(
+			stepIndex => stepIndex !== undefined && stepIndex !== -1
+		) as number[];
 
 	const {
 		data: resultStatsObservatoire,
@@ -153,7 +177,8 @@ const ObservatoireStats = ({
 				).toFixed(1),
 			tooltip:
 				"Pour calculer la note de simplicité du langage, nous réalisons une moyenne des réponses données à la question « Qu'avez-vous pensé des informations et des instructions fournies ? » en attribuant une note sur 10 aux cinq réponses proposées dans le questionnaire.",
-			icon: 'ri-speak-line'
+			icon: 'ri-speak-line',
+			hidden: hiddenSteps.includes(1)
 		},
 		{
 			label: 'Aide joignable',
@@ -167,7 +192,8 @@ const ObservatoireStats = ({
 				).toFixed(1),
 			tooltip:
 				'Cette évaluation correspond à la part d’usagers en pourcentage ayant réussi à joindre l’administration pour l’aider dans la réalisation de sa démarche. La part est calculée grâce aux réponses obtenues à la question  « Quand vous avez cherché de l’aide, avez-vous réussi à joindre l’administration ? ».',
-			icon: 'ri-customer-service-line'
+			icon: 'ri-customer-service-line',
+			hidden: hiddenSteps.includes(2)
 		},
 		{
 			label: 'Aide efficace',
@@ -181,7 +207,8 @@ const ObservatoireStats = ({
 				).toFixed(1),
 			tooltip:
 				'Cette évaluation correspond à la qualité de l’aide obtenue de la part de l’administration. Nous réalisons une moyenne des réponses données à la question « Comment évaluez-vous la qualité de l’aide que vous avez obtenue de la part de l’administration ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire.',
-			icon: 'ri-customer-service-line'
+			icon: 'ri-customer-service-line',
+			hidden: hiddenSteps.includes(2)
 		},
 		{
 			label: "Niveau d'autonomie",
@@ -189,7 +216,8 @@ const ObservatoireStats = ({
 			value: resultStatsObservatoire.data.autonomy,
 			tooltip:
 				'Comme la note de satisfaction usager, cette note est calculée sur la base des retours usagers récoltés via le questionnaire de satisfaction (bouton «je donne mon avis», qui se trouve à la fin de la démarche).',
-			icon: 'ri-chat-smile-line'
+			icon: 'ri-chat-smile-line',
+			hidden: hiddenSteps.includes(2)
 		}
 	];
 
@@ -292,10 +320,30 @@ const ObservatoireStats = ({
 				</h3>
 			)}
 
+			{view === 'default' && formConfig && hiddenSteps.length > 0 && (
+				<div className={cx(classes.hiddenOptionsSection, fr.cx('fr-mb-6v'))}>
+					<i className={fr.cx('ri-alert-fill')} />
+					<b>
+						Dans la version actuelle du formulaire, publiée le{' '}
+						{formatDateToFrenchString(formConfig.created_at.toString())}, les
+						modifications suivantes sont en vigueur :
+					</b>
+					<ul>
+						{hiddenSteps.map(stepIndex => (
+							<li key={stepIndex}>
+								L'étape "{stepIndex === 1 ? 'Clarté' : 'Aides'}" a été masquée
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
 			<div className={classes.contentContainer}>
 				{statFields
 					.filter(
-						field => !slugsToDisplay || slugsToDisplay.includes(field.slug)
+						field =>
+							(!slugsToDisplay || slugsToDisplay.includes(field.slug)) &&
+							!field.hidden
 					)
 					.map((field, index) => (
 						<div
@@ -500,6 +548,19 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.background.flat.blueFrance.default,
 		'::before': {
 			'--icon-size': '2rem'
+		}
+	},
+	hiddenOptionsSection: {
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		margin: fr.spacing('1v'),
+		padding: fr.spacing('4v'),
+		ul: {
+			marginLeft: fr.spacing('8v'),
+			marginBottom: 0
+		},
+		'.ri-alert-fill': {
+			color: fr.colors.decisions.background.actionHigh.blueFrance.default,
+			marginRight: fr.spacing('2v')
 		}
 	},
 	skeleton: {

@@ -36,6 +36,8 @@ const DashboardTab = ({
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 
+	const currentFormConfig = form.form_configs[0];
+
 	const { data: reviewResults, isFetching: isLoadingReviews } =
 		trpc.review.getList.useQuery(
 			{
@@ -78,6 +80,7 @@ const DashboardTab = ({
 			<div className={fr.cx('fr-col-4')}>
 				<ObservatoireStats
 					productId={form.product_id}
+					formConfig={currentFormConfig}
 					formId={form.id}
 					startDate={
 						new Date(
