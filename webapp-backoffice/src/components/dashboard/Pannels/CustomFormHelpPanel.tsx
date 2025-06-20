@@ -34,7 +34,10 @@ const CustomFormHelpPanel = () => {
 				<p className={fr.cx('fr-mb-0', 'fr-mt-3v')}>
 					Pour en savoir plus sur ces fonctionnalités et découvrir celles à
 					venir, vous pouvez{' '}
-					<Link href="/public/roadmap">consulter notre feuille de route</Link>.
+					<Link href="/public/roadmap" target="_blank">
+						consulter notre feuille de route
+					</Link>
+					.
 				</p>
 			</div>
 			<Image

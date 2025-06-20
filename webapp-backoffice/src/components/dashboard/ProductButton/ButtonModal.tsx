@@ -100,9 +100,9 @@ const ButtonModal = (props: Props) => {
 			case 'install':
 				return 'Copier le code';
 			case 'create':
-				return 'Créer un bouton';
+				return 'Créer un emplacement';
 			case 'edit':
-				return 'Modifier un bouton';
+				return 'Modifier un emplacement';
 			default:
 				return '';
 		}
@@ -273,7 +273,8 @@ const ButtonModal = (props: Props) => {
 							id="button-create-title"
 							label={
 								<p className={fr.cx('fr-mb-0')}>
-									Nom du bouton <span className={cx(classes.asterisk)}>*</span>
+									Nom de l'emplacement{' '}
+									<span className={cx(classes.asterisk)}>*</span>
 								</p>
 							}
 							nativeInputProps={{
@@ -293,7 +294,7 @@ const ButtonModal = (props: Props) => {
 						/>
 						<Input
 							id="button-create-description"
-							label="Description du bouton"
+							label="Description de l'emplacement"
 							textArea
 							nativeTextAreaProps={{
 								value: currentButton.description || '',

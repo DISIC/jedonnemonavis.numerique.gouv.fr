@@ -77,7 +77,7 @@ const ProductModal = (props: Props) => {
 		defaultValues: product
 			? { ...product, urls: product.urls.map(url => ({ value: url })) }
 			: savedTitle
-				? { title: savedTitle }
+				? { title: savedTitle, urls: [{ value: '' }] }
 				: { urls: [{ value: '' }] }
 	});
 
@@ -199,7 +199,7 @@ const ProductModal = (props: Props) => {
 		if (product) {
 			reset({ ...product, urls: product.urls.map(url => ({ value: url })) });
 		} else {
-			reset({ title: '', entity_id: undefined });
+			reset({ title: '', entity_id: undefined, urls: [{ value: '' }] });
 		}
 	}, [product]);
 

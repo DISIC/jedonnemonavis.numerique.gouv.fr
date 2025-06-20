@@ -163,11 +163,13 @@ const ReviewLine = ({
 				</Button>
 			</td>
 			{displayMoreInfo && (
-				<ReviewLineMoreInfos
-					review={review}
-					search={search}
-					formConfig={formConfigHelper.formConfig}
-				/>
+				<td colSpan={6}>
+					<ReviewLineMoreInfos
+						review={review}
+						search={search}
+						formConfig={formConfigHelper.formConfig}
+					/>
+				</td>
 			)}
 		</tr>
 	);
