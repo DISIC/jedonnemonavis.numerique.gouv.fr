@@ -186,7 +186,9 @@ const DashboardTab = ({
 			</div>
 		</div>
 	) : hasButtons ? (
-		<NoReviewsDashboardPanel />
+		<div className={fr.cx('fr-my-10v')}>
+			<NoReviewsDashboardPanel />
+		</div>
 	) : (
 		<div>
 			<h2>Tableau de bord</h2>
