@@ -122,7 +122,7 @@ const ProductFormPage = (props: Props) => {
 		{
 			label: 'Formulaire : ' + (form.title || form.form_template.title),
 			linkProps: {
-				href: `/administration/dashboard/product/${form.product.id}/forms/${form.id}`
+				href: `/administration/dashboard/product/${form.product.id}/forms/${form.id}?tab=settings`
 			}
 		}
 	];
