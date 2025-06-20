@@ -147,13 +147,15 @@ const ProductStatPage = (props: Props) => {
 
 		return (
 			<>
-				<ObservatoireStats
-					productId={product.id}
-					formId={formId}
-					buttonId={buttonId}
-					startDate={debouncedStartDate}
-					endDate={debouncedEndDate}
-				/>
+				<div className={cx(classes.observatoireStats)}>
+					<ObservatoireStats
+						productId={product.id}
+						formId={formId}
+						buttonId={buttonId}
+						startDate={debouncedStartDate}
+						endDate={debouncedEndDate}
+					/>
+				</div>
 				<div className={fr.cx('fr-mt-5w')}>
 					<h3>Participation</h3>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -395,6 +397,11 @@ const ProductStatPage = (props: Props) => {
 const useStyles = tss.create({
 	applyContainer: {
 		paddingTop: fr.spacing('8v')
+	},
+	observatoireStats: {
+		marginTop: fr.spacing('16v'),
+		paddingBottom: fr.spacing('20v'),
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	}
 });
 

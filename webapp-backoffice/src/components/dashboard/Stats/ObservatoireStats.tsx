@@ -22,6 +22,7 @@ type ObservatoireStatsProps = {
 	endDate: string;
 	slugsToDisplay?: StatField['slug'][];
 	noTitle?: boolean;
+	showHiddenSteps?: boolean;
 	view?: 'default' | 'form-dashboard';
 };
 
@@ -49,6 +50,7 @@ const ObservatoireStats = ({
 	endDate,
 	slugsToDisplay,
 	noTitle = false,
+	showHiddenSteps = false,
 	view = 'default'
 }: ObservatoireStatsProps) => {
 	const { cx, classes } = useStyles();
@@ -313,37 +315,40 @@ const ObservatoireStats = ({
 			: Fragment;
 
 	return (
-		<div className={cx(view === 'default' && classes.card)}>
+		<div>
 			{!noTitle && (
 				<h3 className={classes.title}>
 					Les indicateurs de vos démarches essentielles
 				</h3>
 			)}
 
-			{view === 'default' && formConfig && hiddenSteps.length > 0 && (
-				<div className={cx(classes.hiddenOptionsSection, fr.cx('fr-mb-6v'))}>
-					<i className={fr.cx('ri-alert-fill')} />
-					<b>
-						Dans la version actuelle du formulaire, publiée le{' '}
-						{formatDateToFrenchString(formConfig.created_at.toString())}, les
-						modifications suivantes sont en vigueur :
-					</b>
-					<ul>
-						{hiddenSteps.map(stepIndex => (
-							<li key={stepIndex}>
-								L'étape "{stepIndex === 1 ? 'Clarté' : 'Aides'}" a été masquée
-							</li>
-						))}
-					</ul>
-				</div>
-			)}
+			{view === 'default' &&
+				!showHiddenSteps &&
+				formConfig &&
+				hiddenSteps.length > 0 && (
+					<div className={cx(classes.hiddenOptionsSection, fr.cx('fr-mb-6v'))}>
+						<i className={fr.cx('ri-alert-fill')} />
+						<b>
+							Dans la version actuelle du formulaire, publiée le{' '}
+							{formatDateToFrenchString(formConfig.created_at.toString())}, les
+							modifications suivantes sont en vigueur :
+						</b>
+						<ul>
+							{hiddenSteps.map(stepIndex => (
+								<li key={stepIndex}>
+									L'étape "{stepIndex === 1 ? 'Clarté' : 'Aides'}" a été masquée
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
 
 			<div className={classes.contentContainer}>
 				{statFields
 					.filter(
 						field =>
 							(!slugsToDisplay || slugsToDisplay.includes(field.slug)) &&
-							!field.hidden
+							(showHiddenSteps ? !!field.hidden : !field.hidden)
 					)
 					.map((field, index) => (
 						<div
@@ -424,11 +429,6 @@ const ObservatoireStats = ({
 };
 
 const useStyles = tss.create({
-	card: {
-		marginTop: fr.spacing('16v'),
-		paddingBottom: fr.spacing('20v'),
-		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
-	},
 	title: {
 		marginBottom: fr.spacing('4v')
 	},

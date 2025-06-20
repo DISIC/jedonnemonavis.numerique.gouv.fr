@@ -339,14 +339,16 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 
 		return (
 			<>
-				<ObservatoireStats
-					productId={form.product.id}
-					formId={form.id}
-					formConfig={currentFormConfig}
-					buttonId={filters.productStats.buttonId}
-					startDate={filters.sharedFilters.currentStartDate}
-					endDate={filters.sharedFilters.currentEndDate}
-				/>
+				<div className={cx(classes.observatoireStats)}>
+					<ObservatoireStats
+						productId={form.product.id}
+						formId={form.id}
+						formConfig={currentFormConfig}
+						buttonId={filters.productStats.buttonId}
+						startDate={filters.sharedFilters.currentStartDate}
+						endDate={filters.sharedFilters.currentEndDate}
+					/>
+				</div>
 				<div className={fr.cx('fr-mt-5w')}>
 					<h3>Participation</h3>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
@@ -406,6 +408,23 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 				</SectionWrapper>
 				{!!nbReviewsWithFilters && (
 					<OldSectionWrapper formConfig={currentFormConfig}>
+						{hiddenSteps.length > 0 && (
+							<div className={fr.cx('fr-mb-8v', 'fr-mt-4v')}>
+								<h4 className={fr.cx('fr-mt-6v')}>
+									Indicateurs cachés de vos démarches essentielles
+								</h4>
+								<ObservatoireStats
+									productId={form.product.id}
+									formId={form.id}
+									formConfig={currentFormConfig}
+									buttonId={filters.productStats.buttonId}
+									startDate={filters.sharedFilters.currentStartDate}
+									endDate={filters.sharedFilters.currentEndDate}
+									showHiddenSteps
+									noTitle
+								/>
+							</div>
+						)}
 						{renderHiddenSteps(hiddenSteps, {
 							productId: form.product_id,
 							formId: form.id,
@@ -454,7 +473,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 										? undefined
 										: parseInt(e.target.value);
 
-								setSelectedButton(newValue); // Mise à jour du state local pour refléter la sélection
+								setSelectedButton(newValue);
 
 								updateFilters({
 									...filters,
@@ -504,6 +523,11 @@ const useStyles = tss.create({
 		gap: '3rem',
 		padding: '2rem',
 		border: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`
+	},
+	observatoireStats: {
+		marginTop: fr.spacing('16v'),
+		paddingBottom: fr.spacing('20v'),
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},
 	container: {
 		position: 'relative'
