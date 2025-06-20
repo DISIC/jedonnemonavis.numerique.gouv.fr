@@ -156,20 +156,7 @@ const ProductFormPage = (props: Props) => {
 				segments={breadcrumbSegments}
 				className={fr.cx('fr-mb-4v')}
 			/>
-			<Link
-				href={breadcrumbSegments[1].linkProps.href}
-				className={cx(classes.backLink)}
-				title={`Retourner à la page du service ${form.product.title}`}
-			>
-				<Button
-					iconId="fr-icon-arrow-left-s-line"
-					priority="tertiary"
-					size="small"
-				>
-					Retourner à la liste des formulaires
-				</Button>
-			</Link>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
 				<div className={fr.cx('fr-col-12')}>
 					<h1>{form.title || form.form_template.title}</h1>
 					{form.product.isTop250 && (

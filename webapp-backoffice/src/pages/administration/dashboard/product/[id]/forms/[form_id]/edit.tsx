@@ -252,19 +252,6 @@ const ProductFormPage = (props: Props) => {
 				segments={breadcrumbSegments}
 				className={fr.cx('fr-mb-4v')}
 			/>
-			<Link
-				href={breadcrumbSegments[2].linkProps.href}
-				className={cx(classes.backLink)}
-				title={`Retourner à la page du service ${form.product.title}`}
-			>
-				<Button
-					iconId="fr-icon-arrow-left-s-line"
-					priority="tertiary"
-					size="small"
-				>
-					Retourner sur la page du formulaire
-				</Button>
-			</Link>
 			<OnConfirmModal
 				modal={formHelpModal}
 				title={``}
@@ -274,7 +261,7 @@ const ProductFormPage = (props: Props) => {
 			>
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-my-6v')}>
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
 				<div className={fr.cx('fr-col-8')}>
 					<h1 className={fr.cx('fr-mb-0')}>
 						{form.title || form.form_template.title}

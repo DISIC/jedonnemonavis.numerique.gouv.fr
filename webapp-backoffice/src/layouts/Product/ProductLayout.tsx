@@ -1,6 +1,7 @@
 import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import Tag from '@codegouvfr/react-dsfr/Tag';
@@ -39,6 +40,15 @@ const ProductLayout = ({
 	const router = useRouter();
 
 	const { cx, classes } = useStyles();
+
+	const breadcrumbSegments = [
+		{
+			label: 'Services',
+			linkProps: {
+				href: '/administration/dashboard/products'
+			}
+		}
+	];
 
 	const menuItems: MenuItems[] = [
 		{
@@ -105,7 +115,12 @@ const ProductLayout = ({
 	}, []);
 
 	return (
-		<div className={cx(fr.cx('fr-container'), classes.container)}>
+		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
+			<Breadcrumb
+				currentPageLabel={'Service : ' + product.title}
+				segments={breadcrumbSegments}
+				className={fr.cx('fr-mb-4v')}
+			/>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -113,26 +128,6 @@ const ProductLayout = ({
 				severity="info"
 				message="Identifiant copié dans le presse papier !"
 			/>
-			<div className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}>
-				<Tag id="product-id" small>
-					{`# ${id}`}
-				</Tag>
-				<Button
-					priority="tertiary"
-					type="button"
-					className={cx(classes.copyBtn)}
-					nativeButtonProps={{
-						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-						onClick: () => {
-							navigator.clipboard.writeText(product.id.toString());
-							setDisplayToast(true);
-						}
-					}}
-				>
-					Copier dans le presse-papier
-				</Button>
-			</div>
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
 					{product.title}
@@ -202,12 +197,6 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('md')]: {
 			minHeight: 'auto'
 		}
-	},
-	tagContainer: {
-		display: 'flex'
-	},
-	copyBtn: {
-		boxShadow: 'none'
 	},
 	backToTop: {
 		position: 'sticky',
