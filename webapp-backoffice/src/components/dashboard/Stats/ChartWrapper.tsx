@@ -312,12 +312,10 @@ const ChartWrapper = ({
 							push(['trackEvent', 'Product - Stats', 'View-Chart']);
 						}}
 					>
-						{view === 'chart' && (
-							<span
-								className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
-								aria-hidden="true"
-							></span>
-						)}
+						<span
+							className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
+							aria-hidden="true"
+						></span>
 						Graphique
 					</Button>
 					<Button
@@ -333,12 +331,10 @@ const ChartWrapper = ({
 							push(['trackEvent', 'Product - Stats', 'View-Table']);
 						}}
 					>
-						{view === 'table' && (
-							<span
-								className="ri-grid-line fr-mr-1v fr-icon--sm"
-								aria-hidden="true"
-							></span>
-						)}
+						<span
+							className="ri-grid-line fr-mr-1v fr-icon--sm"
+							aria-hidden="true"
+						></span>
 						Tableau
 					</Button>
 				</div>

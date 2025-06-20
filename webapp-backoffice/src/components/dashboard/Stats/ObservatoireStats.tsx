@@ -251,6 +251,9 @@ const ObservatoireStats = ({
 							)}
 						</Badge>
 					)}
+					{field.slug === 'autonomy' && view === 'default' && (
+						<div className={classes.fakeIntention} />
+					)}
 				</div>
 			);
 		} else {
@@ -425,14 +428,19 @@ const useStyles = tss.create({
 		}
 	},
 	dashboardLabel: {
-		marginBottom: fr.spacing('2v')
+		marginBottom: fr.spacing('2v'),
+		'.fr-icon-information-line': {
+			'&::before': {
+				'--icon-size': '1.25rem'
+			}
+		}
 	},
 	statsDisplay: {
 		flex: 2,
 		display: 'flex',
 		height: '100%',
 		alignItems: 'center',
-		justifyContent: 'space-between',
+		justifyContent: 'flex-end',
 		gap: fr.spacing('8v'),
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
@@ -453,6 +461,9 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('md')]: {
 			minWidth: '10rem'
 		}
+	},
+	fakeIntention: {
+		width: '7.25rem'
 	},
 	value: {
 		fontSize: '2rem',
