@@ -25,7 +25,6 @@ const ProductFormConfigurationInfo = (props: Props) => {
 				<ul className={cx(classes.infoList)}>
 					<li>✅ Masquer une possibilité de réponse à une question</li>
 					<li>✅ Masquer une question entière </li>
-					<li>✅ Ajouter des questions supplémentaires</li>
 				</ul>
 				<p className={fr.cx('fr-mb-0')}>
 					Pour en savoir plus sur ces fonctionnalités et découvrir celles à

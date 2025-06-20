@@ -35,10 +35,6 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 		{
 			iconId: 'ri-list-check-3',
 			text: 'Masquer une question entière'
-		},
-		{
-			iconId: 'ri-play-list-add-line',
-			text: 'Ajouter des questions supplémentaires'
 		}
 	];
 

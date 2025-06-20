@@ -20,11 +20,7 @@ const editContents: ContentType[] = [
 		iconId: 'ri-eye-off-line',
 		text: 'Masquer une possibilité de réponse à une question'
 	},
-	{ iconId: 'ri-list-check-3', text: 'Masquer une question entière' },
-	{
-		iconId: 'ri-play-list-add-line',
-		text: 'Ajouter des questions supplémentaires'
-	}
+	{ iconId: 'ri-list-check-3', text: 'Masquer une question entière' }
 ];
 
 export const buttonContents: readonly ContentType[] = [
