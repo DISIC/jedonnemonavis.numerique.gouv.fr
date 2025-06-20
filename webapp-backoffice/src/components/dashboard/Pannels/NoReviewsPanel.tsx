@@ -33,7 +33,7 @@ const NoReviewsPanel = () => {
 					</p>
 					<a
 						title="Améliorer le placement de votre bouton"
-						href="#"
+						href="https://www.notion.so/designgouv/Augmenter-le-nombre-d-avis-r-colt-s-sur-votre-service-num-rique-avec-JDMA-21615cb9824180f89fcefa3d9a99d50f"
 						target="_blank"
 						className="fr-link"
 					>
