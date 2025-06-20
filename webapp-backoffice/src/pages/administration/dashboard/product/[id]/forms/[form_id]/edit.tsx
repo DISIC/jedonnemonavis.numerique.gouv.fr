@@ -268,7 +268,9 @@ const ProductFormPage = (props: Props) => {
 			<OnConfirmModal
 				modal={formHelpModal}
 				title={``}
-				handleOnConfirm={() => {}}
+				handleOnConfirm={() => {
+					formHelpModal.close();
+				}}
 			>
 				<CustomFormHelpPanel />
 			</OnConfirmModal>
