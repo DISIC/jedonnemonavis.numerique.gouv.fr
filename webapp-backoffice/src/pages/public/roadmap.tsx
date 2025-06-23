@@ -36,7 +36,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
 	// Extraire l'introduction
 	const introMatch = cleanedContent.match(
-		/^#\s+Introduction\n(.*?)(?:\n##|$)/s
+		/^#\s+Introduction\n([\s\S].*?)(?:\n##|$)/
 	);
 	const intro = introMatch?.[1]?.trim() || '';
 

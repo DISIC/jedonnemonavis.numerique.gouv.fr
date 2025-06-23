@@ -1,20 +1,20 @@
 # Introduction
 
-De Janvier à Mars = objectif créer de nouveaux formulaires, voici la roadmap.
+Les prochains grands chantiers de JDMA sont décrits dans le tableau suivant.
 
 ## Items
 
 - **Catégorie**: Créer un formulaire personnalisé
   **Titre**: Modifier les réponses
-  **Statut**: En cours
-  **Description**: Permettre aux administrateurs de service de masquer/afficher certaines réponses du formulaire de l'Observatoire.
+  **Statut**: Livré
+  **Description**: Permettre aux administrateurs de service de masquer/afficher certaines réponses du formulaire d'évaluation de la satisfaction usager
 
 - **Catégorie**: Créer un formulaire personnalisé
   **Titre**: Ajouter une étape au modèle
   **Statut**: A venir
-  **Description**: Permettre aux administrateurs de service de rajouter une étape au formulaire de l'Observatoire.
+  **Description**: Il sera possible d'ajouter une étape et des questions parmi une liste pré-établi au formulaire d'évaluation de la satisfaction usager
 
 - **Catégorie**: Créer un formulaire personnalisé
-  **Titre**: Pouvoir choisir entre le modèle Observatoire et un autre
+  **Titre**: Permettre la création de formulaire en partant de nouveaux modèles
   **Statut**: A venir
-  **Description**: Permettre aux administrateurs de service de choisir parmis plusieurs modèles proposés afin de publier un formulaire.
+  **Description**: De nouveaux modèles de formulaire vont faire leur apparition, comme la remontée de bugs ou les tests d'usabilité
