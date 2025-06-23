@@ -122,10 +122,9 @@ const ProductButtonsPage = (props: Props) => {
 											fr.cx(
 												'fr-col',
 												'fr-col-12',
-												'fr-col-md-9',
+												'fr-col-md-7',
 												'fr-pb-0',
-												'fr-pt-1v',
-												'fr-mb-6v'
+												form.buttons.length === 0 && 'fr-mb-6v'
 											)
 										)}
 									>
@@ -135,51 +134,8 @@ const ProductButtonsPage = (props: Props) => {
 										>
 											<span>{form.title || form.form_template.title}</span>
 										</Link>
-									</div>
-									{form.buttons.length > 0 ? (
-										<>
-											<div
-												className={cx(
-													fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')
-												)}
-											>
-												<span
-													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-												>
-													Réponses déposées
-												</span>
-												<span className={fr.cx('fr-text--bold', 'fr-mr-4v')}>
-													{formatNumberWithSpaces(
-														getFormReviewCount(form.id, form.legacy)
-													)}
-												</span>
-												{getFormNewReviewCount(form.id, form.legacy) > 0 && (
-													<Badge severity="success" noIcon small>
-														{getFormNewReviewCount(form.id, form.legacy)}{' '}
-														NOUVELLES RÉPONSES
-													</Badge>
-												)}
-												{getFormReviewCount(form.id, form.legacy) > 0 && (
-													<Link
-														href={`/administration/dashboard/product/${product.id}/forms/${form.id}?tab=reviews`}
-														title={`Voir les avis pour ${product.title}`}
-														className={fr.cx('fr-link', 'fr-ml-4v')}
-													>
-														Voir les réponses
-													</Link>
-												)}
-											</div>
-											<div
-												className={cx(
-													fr.cx(
-														'fr-col',
-														'fr-col-12',
-														'fr-col-md-3',
-														'fr-mt-auto'
-													),
-													classes.rightButtonsWrapper
-												)}
-											>
+										{form.buttons.length > 0 && (
+											<div className="fr-mt-4v">
 												<span
 													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
 												>
@@ -189,7 +145,42 @@ const ProductButtonsPage = (props: Props) => {
 													{formatDateToFrenchString(form.updated_at.toString())}
 												</span>
 											</div>
-										</>
+										)}
+									</div>
+									{form.buttons.length > 0 ? (
+										<div
+											className={cx(
+												fr.cx(
+													'fr-col',
+													'fr-col-12',
+													'fr-col-md-5',
+													'fr-my-auto'
+												),
+												classes.formStatsContent
+											)}
+										>
+											{getFormNewReviewCount(form.id, form.legacy) > 0 && (
+												<Badge
+													severity="success"
+													noIcon
+													small
+													className="fr-mr-4v"
+												>
+													{getFormNewReviewCount(form.id, form.legacy)}{' '}
+													NOUVELLES RÉPONSES
+												</Badge>
+											)}
+											<span
+												className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+											>
+												Réponses déposées
+											</span>
+											<span className={fr.cx('fr-text--bold')}>
+												{formatNumberWithSpaces(
+													getFormReviewCount(form.id, form.legacy)
+												)}
+											</span>
+										</div>
 									) : (
 										<ServiceFormsNoButtonsPanel form={form} />
 									)}
@@ -210,7 +201,7 @@ const useStyles = tss
 	.withParams()
 	.create({
 		formCard: {
-			backgroundColor: fr.colors.decisions.background.contrast.info.default,
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 			display: 'flex',
 			flexWrap: 'wrap',
 			width: '100%',
@@ -234,9 +225,11 @@ const useStyles = tss
 				}
 			}
 		},
-		rightButtonsWrapper: {
+		formStatsContent: {
 			display: 'flex',
-			justifyContent: 'end'
+			height: '100%',
+			justifyContent: 'end',
+			gap: fr.spacing('1v')
 		},
 		productTitle: {
 			backgroundImage: 'none',
