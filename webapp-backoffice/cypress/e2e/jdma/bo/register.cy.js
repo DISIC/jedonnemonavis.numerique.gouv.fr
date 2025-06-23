@@ -17,6 +17,7 @@ const selectors = {
 	passwordInput: 'input.fr-password__input',
 	passwordToggle: 'label[for*="toggle-show"]',
 	modalFooter: '.fr-modal__footer',
+	modalHeader: '.fr-modal__header',
 	productForm: '#product-form'
 };
 
@@ -210,9 +211,19 @@ function createAndModifyForm() {
 	cy.get('dialog#new-form-modal').within(() => {
 		cy.get('input[name="title"]').type('form test 1');
 	});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.get(selectors.modalFooter)
+		.contains('button', 'Créer')
+		.click({ force: true });
 
-	cy.wait(5000);
+	cy.wait(2000);
+
+	cy.get('button').contains('Éditer le formulaire').click();
+
+	cy.wait(3000);
+
+	tryCloseHelpModal();
+
+	cy.wait(2000);
 
 	renameForm();
 	// TODO: Add extra test steps after form creation about button creation
@@ -229,6 +240,20 @@ function renameForm() {
 			cy.get('button').contains('Modifier').click();
 		});
 }
+
+const tryCloseHelpModal = () => {
+	cy.get('body').then(body => {
+		if (body.find('dialog#form-help-modal').length > 0) {
+			cy.get('dialog#form-help-modal')
+				.should('be.visible')
+				.within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+		} else {
+			cy.log('Help modal not found, skipping close action.');
+		}
+	});
+};
 
 function modifyButton() {
 	cy.get('[class*="ProductButtonCard"]')
