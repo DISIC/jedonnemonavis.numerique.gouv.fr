@@ -4,8 +4,10 @@ import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
 import ProductModal from '@/src/components/dashboard/Product/ProductModal';
 import { Loader } from '@/src/components/ui/Loader';
+import NewsModal from '@/src/components/ui/modal/NewsModal';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -13,6 +15,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Autocomplete } from '@mui/material';
@@ -20,7 +23,7 @@ import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const product_modal = createModal({
@@ -45,6 +48,11 @@ const newsModal = createModal({
 
 const DashBoard = () => {
 	const { filters, updateFilters } = useFilters();
+	const {
+		settings,
+		setSetting,
+		isLoading: isLoadingSettings
+	} = useUserSettings();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -60,12 +68,23 @@ const DashBoard = () => {
 		Entity | undefined
 	>();
 	const [productTitle, setProductTitle] = React.useState<string>('');
-
 	const [numberPerPage, _] = React.useState(10);
+	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
 
 	const { data: session } = useSession({ required: true });
 
 	const { cx, classes } = useStyles();
+
+	useEffect(() => {
+		if (isLoadingSettings) return;
+		setShouldModalOpen(!settings.newsModalSeen);
+	}, [isLoadingSettings]);
+
+	useEffect(() => {
+		if (shouldModalOpen) {
+			newsModal.open();
+		}
+	}, [shouldModalOpen, newsModal]);
 
 	const {
 		data: productsResult,
@@ -181,9 +200,18 @@ const DashBoard = () => {
 						essential_service_modal.close();
 					}}
 				/>
+				<NewsModal modal={newsModal} />
 			</>
 		);
 	};
+
+	useIsModalOpen(newsModal, {
+		onConceal: () => {
+			if (!settings.newsModalSeen && shouldModalOpen) {
+				setSetting('newsModalSeen', true);
+			}
+		}
+	});
 
 	if (
 		products.length === 0 &&

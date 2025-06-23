@@ -9,7 +9,7 @@ const NewsPage = () => {
 	return (
 		<NewsLayout>
 			<div className={fr.cx('fr-grid-row')}>
-				<div className={fr.cx('fr-col-12', 'fr-px-0')}>
+				<div className={fr.cx('fr-col-12')}>
 					<h2 className={fr.cx('fr-mb-0')}>Dernières fonctionnalités</h2>
 				</div>
 				<div
@@ -31,7 +31,7 @@ const NewsPage = () => {
 						</li>
 					</ul>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-px-0')}>
+				<div className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Édition du formulaire
 					</h3>
@@ -66,7 +66,7 @@ const NewsPage = () => {
 					</p>
 					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-px-0')}>
+				<div className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Nouvelle interface
 					</h3>
@@ -110,7 +110,7 @@ const NewsPage = () => {
 					</p>
 					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-px-0')}>
+				<div className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Évolution de la gestion des boutons
 					</h3>

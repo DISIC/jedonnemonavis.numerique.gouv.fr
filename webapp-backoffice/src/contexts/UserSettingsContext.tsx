@@ -25,8 +25,9 @@ interface UserSettingsContextProps {
 const UserSettingsContext = createContext<UserSettingsContextProps | undefined>(
 	undefined
 );
-const initialState: UserSettings = {
-	formHelpModalSeen: false
+const initialState: Required<UserSettings> = {
+	formHelpModalSeen: false,
+	newsModalSeen: false
 };
 
 export const UserSettingsProvider = ({ children }: { children: ReactNode }) => {
