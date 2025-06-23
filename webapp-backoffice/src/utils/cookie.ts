@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 export const UserSettingsSchema = z.object({
 	formHelpModalSeen: z.boolean().optional(),
-	newsModalSeen: z.boolean().optional()
+	newsModalSeen: z.boolean().optional(),
+	newsPageSeen: z.boolean().optional()
 });
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
