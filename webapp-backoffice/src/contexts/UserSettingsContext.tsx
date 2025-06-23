@@ -27,7 +27,8 @@ const UserSettingsContext = createContext<UserSettingsContextProps | undefined>(
 );
 const initialState: Required<UserSettings> = {
 	formHelpModalSeen: false,
-	newsModalSeen: false
+	newsModalSeen: false,
+	newsPageSeen: false
 };
 
 export const UserSettingsProvider = ({ children }: { children: ReactNode }) => {

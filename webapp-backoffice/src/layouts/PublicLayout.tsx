@@ -13,6 +13,7 @@ import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
+import { useUserSettings } from '../contexts/UserSettingsContext';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -29,6 +30,7 @@ type NavigationItem = {
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
+	const { settings } = useUserSettings();
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -311,16 +313,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	if (session?.user.role.includes('admin')) {
 		navigationItems.push({
 			text: (
-				<div>
+				<>
 					Nouveautés
-					<Badge
-						severity="new"
-						small
-						className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-					>
-						1
-					</Badge>
-				</div>
+					{!settings.newsPageSeen && (
+						<Badge
+							severity="new"
+							small
+							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+						>
+							1
+						</Badge>
+					)}
+				</>
 			),
 			linkProps: {
 				href: '/administration/dashboard/news',

@@ -1,11 +1,23 @@
+import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import NewsLayout from '@/src/layouts/News/NewsLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const NewsPage = () => {
+	const {
+		settings,
+		setSetting,
+		isLoading: isLoadingSettings
+	} = useUserSettings();
 	const { cx, classes } = useStyles();
+
+	useEffect(() => {
+		if (!isLoadingSettings && !settings.newsPageSeen) {
+			setSetting('newsPageSeen', true);
+		}
+	}, [isLoadingSettings]);
 	return (
 		<NewsLayout>
 			<div className={fr.cx('fr-grid-row')}>

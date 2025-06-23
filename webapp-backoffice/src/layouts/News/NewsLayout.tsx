@@ -1,3 +1,4 @@
+import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import SideMenu, { SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
@@ -13,20 +14,23 @@ interface NewsLayoutProps {
 const NewsLayout = ({ children }: NewsLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
+	const { settings } = useUserSettings();
 
 	const menuItems: SideMenuProps.Item[] = [
 		{
 			text: (
 				<>
 					Dernières fonctionnalités
-					<Badge
-						as="span"
-						severity="new"
-						small
-						className={cx(classes.badge, fr.cx('fr-ml-2v'))}
-					>
-						1
-					</Badge>
+					{!settings.newsPageSeen && (
+						<Badge
+							as="span"
+							severity="new"
+							small
+							className={cx(classes.badge, fr.cx('fr-ml-2v'))}
+						>
+							1
+						</Badge>
+					)}
 				</>
 			),
 			isActive: router.pathname === '/administration/dashboard/news',
