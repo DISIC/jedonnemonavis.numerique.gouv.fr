@@ -125,7 +125,6 @@ const ReviewsTab = (props: Props) => {
 			numberPerPage: numberPerPage,
 			page: currentPage,
 			shouldIncludeAnswers: true,
-			mustHaveVerbatims: true,
 			search: validatedSearch,
 			start_date: filters.productReviews.displayNew
 				? undefined

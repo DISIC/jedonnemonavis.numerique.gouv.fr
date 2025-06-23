@@ -285,6 +285,18 @@ export const fetchAndFormatData = async ({
 	end_date,
 	interval
 }: FetchAndFormatDataProps) => {
+
+	//TO BE REMOVED TO IMPLEMENT RIGHT USE OF FORMS IDS
+	const legacyFormIds = await ctx.prisma.form.findMany({
+		where: {
+		  	product_id: { in: product_ids as number[] },
+			legacy: true
+		},
+		select: { id: true }
+	});
+	  
+	const validFormIds = [2, ...legacyFormIds.map(f => f.id)];
+	  
 	let query: QueryDslQueryContainer = {
 		bool: {
 			must: [
@@ -311,6 +323,14 @@ export const fetchAndFormatData = async ({
 							lte: end_date
 						}
 					}
+				},
+				{
+				  bool: {
+					should: [
+					  { terms: { form_id: validFormIds } },
+					  { bool: { must_not: { exists: { field: 'form_id' } } } }
+					]
+				  }
 				}
 			]
 		}
