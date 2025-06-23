@@ -109,9 +109,6 @@ const ReviewCommonVerbatimLine = ({
 		tableFieldCodeHelper[0]?.slug || ''
 	).filter(row => row.includes('administration'));
 
-	console.log(search);
-	console.log(review.verbatim?.answer_text);
-
 	const createMarkup = () => {
 		if (review.verbatim?.answer_text) {
 			const words = search.split(/\s+/).filter(Boolean);

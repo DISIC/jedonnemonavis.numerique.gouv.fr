@@ -44,6 +44,7 @@ const ReviewLineMoreInfos = ({
 					review={review}
 					type={'Line'}
 					formConfig={formConfig}
+					search={search}
 				></ReviewCommonVerbatimLine>
 				<div className={fr.cx('fr-col-12')}>
 					<h2 className={cx(classes.subtitle)}>
