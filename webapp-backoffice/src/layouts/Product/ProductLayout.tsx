@@ -2,9 +2,7 @@ import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
-import Tag from '@codegouvfr/react-dsfr/Tag';
+import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
 import { Product, RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -15,15 +13,6 @@ interface ProductLayoutProps {
 	product: Product;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	hideMenu?: Boolean;
-}
-
-interface MenuItems {
-	text: string;
-	linkProps: {
-		href: string;
-		alt?: string;
-	};
-	isActive?: boolean;
 }
 
 const ProductLayout = ({
@@ -50,14 +39,13 @@ const ProductLayout = ({
 		}
 	];
 
-	const menuItems: MenuItems[] = [
+	const menuItems: SideMenuProps.Item[] = [
 		{
 			text: 'Formulaires',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/forms`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/forms`,
-				alt: 'Gérer mes boutons'
+				href: `/administration/dashboard/product/${id}/forms`
 			}
 		},
 		{
@@ -65,8 +53,7 @@ const ProductLayout = ({
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/access`,
-				alt: "Gérer les droits d'accès"
+				href: `/administration/dashboard/product/${id}/access`
 			}
 		},
 		{
@@ -74,8 +61,7 @@ const ProductLayout = ({
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/infos`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/infos`,
-				alt: 'Informations'
+				href: `/administration/dashboard/product/${id}/infos`
 			}
 		},
 		{
@@ -83,8 +69,7 @@ const ProductLayout = ({
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/api_keys`,
-				alt: 'Clés API'
+				href: `/administration/dashboard/product/${id}/api_keys`
 			}
 		},
 		{
@@ -92,8 +77,7 @@ const ProductLayout = ({
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/logs`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/logs`,
-				alt: "Consulter l'historique d'activité"
+				href: `/administration/dashboard/product/${id}/logs`
 			}
 		}
 	];

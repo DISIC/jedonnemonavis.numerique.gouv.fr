@@ -38,6 +38,11 @@ const essential_service_modal = createModal({
 	isOpenedByDefault: false
 });
 
+const newsModal = createModal({
+	id: 'news-modal',
+	isOpenedByDefault: false
+});
+
 const DashBoard = () => {
 	const { filters, updateFilters } = useFilters();
 

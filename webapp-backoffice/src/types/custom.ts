@@ -1,15 +1,11 @@
-import { AnswerIntention, Prisma, Typebloc } from '@prisma/client';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
+import { AnswerIntention, Prisma } from '@prisma/client';
 import { z } from 'zod';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '../utils/helpers';
-import {
-	EnumTypeblocFilterSchema,
-	TypeblocSchema
-} from '@/prisma/generated/zod';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 
 export type FieldCodeBoolean =
 	(typeof FIELD_CODE_BOOLEAN_VALUES)[number]['slug'];

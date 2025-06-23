@@ -2,18 +2,17 @@ import { ReactNode, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
 import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
-import { signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import { tss } from 'tss-react/dsfr';
-import { Menu, MenuItem, Skeleton } from '@mui/material';
-import Button from '@codegouvfr/react-dsfr/Button';
-import router from 'next/router';
+import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import Badge from '@codegouvfr/react-dsfr/Badge';
+import { signOut, useSession } from 'next-auth/react';
+import router, { useRouter } from 'next/router';
+import { tss } from 'tss-react/dsfr';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -307,6 +306,28 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		];
 		navigationItems.push(...superAdminNavigationItems);
+	}
+
+	if (session?.user.role.includes('admin')) {
+		navigationItems.push({
+			text: (
+				<div>
+					Nouveautés
+					<Badge
+						severity="new"
+						small
+						className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+					>
+						1
+					</Badge>
+				</div>
+			),
+			linkProps: {
+				href: '/administration/dashboard/news',
+				target: '_self'
+			},
+			isActive: pathname.startsWith('/administration/dashboard/news')
+		});
 	}
 
 	return (
