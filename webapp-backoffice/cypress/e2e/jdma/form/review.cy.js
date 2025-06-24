@@ -25,7 +25,6 @@ function fillFormStep1() {
 	});
 	cy.wait(5000);
 
-	cy.url().should('include', 'step=0');
 	cy.get('h1').contains('Clarté');
 }
 

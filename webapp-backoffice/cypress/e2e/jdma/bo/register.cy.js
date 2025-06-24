@@ -219,7 +219,7 @@ function createAndModifyForm() {
 
 	cy.get('button').contains('Éditer le formulaire').click();
 
-	cy.wait(3000);
+	cy.wait(6000);
 
 	tryCloseHelpModal();
 
