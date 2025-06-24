@@ -35,6 +35,9 @@ describe('jdma-users', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 	});
 
 	it('should create a service and attach an organization', () => {
@@ -164,6 +167,18 @@ function login(email, password) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 }
 
+const tryCloseNewsModal = () => {
+	cy.get('body').then(body => {
+		if (body.find('dialog#news-modal').length > 0) {
+			cy.get('dialog#news-modal').within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not found, skipping close action.');
+		}
+	});
+};
+
 function createProduct() {
 	cy.contains('button', 'Ajouter un nouveau service').click();
 	cy.get(selectors.productForm, { timeout: 10000 })
@@ -177,6 +192,7 @@ function createProduct() {
 	cy.get(selectors.modalFooter)
 		.contains('button', 'Ajouter ce service')
 		.click();
+	cy.wait(2000);
 }
 
 function selectEntity() {

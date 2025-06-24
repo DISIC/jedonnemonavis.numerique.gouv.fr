@@ -35,6 +35,9 @@ describe('jdma-admin', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 	});
 
 	it('create and delete users', () => {
@@ -226,6 +229,18 @@ function login(email, password) {
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 }
+
+const tryCloseNewsModal = () => {
+	cy.get('body').then(body => {
+		if (body.find('dialog#news-modal').length > 0) {
+			cy.get('dialog#news-modal').within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not found, skipping close action.');
+		}
+	});
+};
 
 function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();
