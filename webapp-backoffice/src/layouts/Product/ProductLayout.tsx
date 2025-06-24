@@ -126,7 +126,9 @@ const ProductLayout = ({
 				<div
 					className={fr.cx(
 						'fr-col-12',
-						!hideMenu ? 'fr-col-md-3' : 'fr-hidden'
+						!hideMenu ? 'fr-col-md-3' : 'fr-hidden',
+						'fr-mb-6v',
+						'fr-mb-md-0'
 					)}
 				>
 					<div role="navigation">

@@ -71,7 +71,14 @@ const NewsLayout = ({ children }: NewsLayoutProps) => {
 				</h1>
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						'fr-col-md-4',
+						'fr-mb-6v',
+						'fr-mb-md-0'
+					)}
+				>
 					<div role="navigation">
 						<SideMenu
 							align="left"
@@ -92,7 +99,10 @@ const NewsLayout = ({ children }: NewsLayoutProps) => {
 
 const useStyles = tss.create({
 	title: {
-		...fr.spacing('margin', { bottom: '12v' })
+		marginBottom: fr.spacing('12v'),
+		[fr.breakpoints.down('md')]: {
+			marginBottom: fr.spacing('6v')
+		}
 	},
 	container: {
 		height: '100%'

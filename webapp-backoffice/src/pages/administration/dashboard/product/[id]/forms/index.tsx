@@ -68,13 +68,13 @@ const ProductButtonsPage = (props: Props) => {
 				<>
 					<FormCreationModal modal={new_form_modal} productId={product.id} />
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
 						</div>
 						<div
 							className={cx(
 								classes.headerButtons,
-								fr.cx('fr-col-6', 'fr-mb-6v')
+								fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v')
 							)}
 						>
 							{ownRight === 'carrier_admin' && !product.isTop250 && (
@@ -150,12 +150,7 @@ const ProductButtonsPage = (props: Props) => {
 									{form.buttons.length > 0 ? (
 										<div
 											className={cx(
-												fr.cx(
-													'fr-col',
-													'fr-col-12',
-													'fr-col-md-5',
-													'fr-my-auto'
-												),
+												fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),
 												classes.formStatsContent
 											)}
 										>
@@ -164,22 +159,24 @@ const ProductButtonsPage = (props: Props) => {
 													severity="success"
 													noIcon
 													small
-													className="fr-mr-4v"
+													className={fr.cx('fr-mr-4v')}
 												>
 													{getFormNewReviewCount(form.id, form.legacy)}{' '}
 													NOUVELLES RÉPONSES
 												</Badge>
 											)}
-											<span
-												className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-											>
-												Réponses déposées
-											</span>
-											<span className={fr.cx('fr-text--bold')}>
-												{formatNumberWithSpaces(
-													getFormReviewCount(form.id, form.legacy)
-												)}
-											</span>
+											<div className={fr.cx('fr-grid-row')}>
+												<span
+													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+												>
+													Réponses déposées
+												</span>
+												<span className={fr.cx('fr-text--bold')}>
+													{formatNumberWithSpaces(
+														getFormReviewCount(form.id, form.legacy)
+													)}
+												</span>
+											</div>
 										</div>
 									) : (
 										<ServiceFormsNoButtonsPanel form={form} />
@@ -223,13 +220,24 @@ const useStyles = tss
 					display: 'flex',
 					alignItems: 'center'
 				}
+			},
+			[fr.breakpoints.down('md')]: {
+				button: {
+					width: '100%',
+					justifyContent: 'center'
+				}
 			}
 		},
 		formStatsContent: {
 			display: 'flex',
 			height: '100%',
 			justifyContent: 'end',
-			gap: fr.spacing('1v')
+			gap: fr.spacing('1v'),
+			[fr.breakpoints.down('md')]: {
+				marginTop: fr.spacing('4v'),
+				justifyContent: 'start',
+				flexWrap: 'wrap'
+			}
 		},
 		productTitle: {
 			backgroundImage: 'none',

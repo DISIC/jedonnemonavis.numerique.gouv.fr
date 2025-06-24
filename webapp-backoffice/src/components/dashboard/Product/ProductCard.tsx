@@ -390,7 +390,7 @@ const ProductCard = ({
 									<div
 										key={form.id}
 										className={cx(
-											fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
+											fr.cx('fr-grid-row', 'fr-p-4v'),
 											classes.formCard
 										)}
 									>
@@ -401,13 +401,7 @@ const ProductCard = ({
 										/>
 										<div
 											className={cx(
-												fr.cx(
-													'fr-col',
-													'fr-col-12',
-													'fr-col-md-6',
-													'fr-pb-0',
-													'fr-p-4v'
-												)
+												fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0')
 											)}
 										>
 											<span className={cx(classes.productTitle)}>
@@ -416,7 +410,7 @@ const ProductCard = ({
 										</div>
 										<div
 											className={cx(
-												fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-p-4v'),
+												fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
 												classes.formStatsWrapper
 											)}
 										>
@@ -432,16 +426,18 @@ const ProductCard = ({
 														NOUVELLES RÉPONSES
 													</Badge>
 												)}
-												<span
-													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-												>
-													Réponses déposées
-												</span>
-												<span className={fr.cx('fr-text--bold')}>
-													{formatNumberWithSpaces(
-														getFormReviewCount(form.id, form.legacy)
-													)}
-												</span>
+												<div className={fr.cx('fr-grid-row')}>
+													<span
+														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+													>
+														Réponses déposées
+													</span>
+													<span className={fr.cx('fr-text--bold')}>
+														{formatNumberWithSpaces(
+															getFormReviewCount(form.id, form.legacy)
+														)}
+													</span>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -546,12 +542,20 @@ const useStyles = tss.withName(ProductCard.name).create({
 	formStatsWrapper: {
 		display: 'flex',
 		justifyContent: 'flex-end',
-		alignItems: 'center'
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start'
+		}
 	},
 	formStatsContent: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: fr.spacing('1v')
+		gap: fr.spacing('1v'),
+		[fr.breakpoints.down('md')]: {
+			marginTop: fr.spacing('4v'),
+			justifyContent: 'start',
+			flexWrap: 'wrap'
+		}
 	},
 	smallText: {
 		color: fr.colors.decisions.text.default.grey.default,

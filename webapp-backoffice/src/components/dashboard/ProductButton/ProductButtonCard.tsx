@@ -28,6 +28,8 @@ const ProductButtonCard = (props: Props) => {
 
 	const { cx, classes } = useStyles({ isTest: button.isTest || false });
 
+	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
 	return (
 		<>
 			<div
@@ -62,7 +64,7 @@ const ProductButtonCard = (props: Props) => {
 									push(['trackEvent', 'Gestion boutons', 'Installer']);
 									handleClose();
 								}}
-								className="fr-mr-2v"
+								className="fr-mr-md-2v"
 							>
 								Voir le code
 							</Button>
@@ -75,9 +77,17 @@ const ProductButtonCard = (props: Props) => {
 								priority="secondary"
 								size="small"
 								onClick={handleClick}
-								iconId={'ri-more-2-fill'}
+								iconId={
+									isMobile
+										? menuOpen
+											? 'ri-arrow-up-s-line'
+											: 'ri-arrow-down-s-line'
+										: 'ri-more-2-fill'
+								}
+								iconPosition={isMobile ? 'right' : undefined}
 								className={cx(classes.buttonWrapper)}
 							>
+								{isMobile && 'Options'}
 								<span
 									className={fr.cx('fr-hidden')}
 								>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
@@ -143,7 +153,11 @@ const useStyles = tss
 				paddingLeft: 0,
 				flexDirection: 'column',
 				justifyContent: 'flex-start',
-				gap: fr.spacing('4v')
+				gap: fr.spacing('4v'),
+				button: {
+					width: '100%',
+					justifyContent: 'center'
+				}
 			}
 		},
 		buttonWrapper: {

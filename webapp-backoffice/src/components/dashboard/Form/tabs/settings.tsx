@@ -110,7 +110,7 @@ const SettingsTab = ({
 
 		return (
 			<>
-				<div className={fr.cx('fr-col-8')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
 				</div>
 				{buttonsCount > 0 && (
@@ -119,7 +119,7 @@ const SettingsTab = ({
 							className={cx(
 								classes.buttonsGroup,
 								classes.justifyEnd,
-								fr.cx('fr-col-4')
+								fr.cx('fr-col-12', 'fr-col-md-4')
 							)}
 						>
 							{ownRight === 'carrier_admin' && (
@@ -171,7 +171,7 @@ const SettingsTab = ({
 				{!form.product.isTop250 && (
 					<>
 						<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
-						<div className={fr.cx('fr-col-8')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 							<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
 						</div>
 						<div
@@ -258,7 +258,9 @@ const SettingsTab = ({
 				isClosed={!isAlertShown}
 				onClose={() => setIsAlertShown(false)}
 			/>
-			<h2 className={fr.cx('fr-col-12', 'fr-mb-10v')}>Paramètres</h2>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v', 'fr-mb-md-10v')}>
+				Paramètres
+			</h2>
 
 			{displaySettingsContent()}
 		</div>
@@ -289,6 +291,13 @@ const useStyles = tss.withName(SettingsTab.name).create({
 			a: {
 				display: 'flex',
 				alignItems: 'center'
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			marginTop: fr.spacing('4v'),
+			button: {
+				width: '100%',
+				justifyContent: 'center'
 			}
 		}
 	},
