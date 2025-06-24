@@ -435,7 +435,16 @@ const useStyles = tss.create({
 	contentContainer: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('4v')
+		gap: fr.spacing('4v'),
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'row',
+			flexWrap: 'wrap',
+			maxWidth: '100%'
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			flexWrap: 'nowrap'
+		}
 	},
 	content: {
 		textAlign: 'center',
@@ -450,11 +459,17 @@ const useStyles = tss.create({
 	},
 	dashboardContent: {
 		textAlign: 'left',
-		justifyContent: 'initial'
+		justifyContent: 'initial',
+		[fr.breakpoints.down('lg')]: {
+			flex: 1
+		}
 	},
 	dashboardInnerContent: {
 		display: 'flex',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		[fr.breakpoints.down('md')]: {
+			alignItems: 'center'
+		}
 	},
 	lastMonthLabel: {
 		margin: 0,
@@ -476,10 +491,12 @@ const useStyles = tss.create({
 		}
 	},
 	dashboardLabel: {
+		display: 'flex',
+		flexWrap: 'nowrap',
 		marginBottom: fr.spacing('2v'),
 		'.fr-icon-information-line': {
 			'&::before': {
-				'--icon-size': '1.25rem'
+				'--icon-size': '1.125rem'
 			}
 		}
 	},

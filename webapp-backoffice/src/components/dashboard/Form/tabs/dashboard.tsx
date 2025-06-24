@@ -73,11 +73,13 @@ const DashboardTab = ({
 
 	const hasNewReviews = reviewResults.data.length > 0;
 
+	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
 	return nbReviews > 0 ? (
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-8v')}>Tableau de bord</h2>
 			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
-			<div className={fr.cx('fr-col-4')}>
+			<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
 				<ObservatoireStats
 					productId={form.product_id}
 					formConfig={currentFormConfig}
@@ -102,8 +104,8 @@ const DashboardTab = ({
 					view="form-dashboard"
 				/>
 			</div>
-			<div className={fr.cx('fr-col-8')}>
-				<div className={fr.cx('fr-ml-4v')} style={{ height: '100%' }}>
+			<div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
+				<div className={cx(classes.chartContainer)}>
 					<AnswersChart
 						fieldCode="satisfaction"
 						productId={form.product.id}
@@ -124,20 +126,27 @@ const DashboardTab = ({
 
 			<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
 
-			<div className={fr.cx('fr-col-8')}>
-				<h3>Dernières réponses</h3>
+			<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
+				<h3 className={fr.cx('fr-mb-0')}>Dernières réponses</h3>
 			</div>
-			<div className={cx(classes.buttonsGroup, fr.cx('fr-col-4'))}>
-				<Button
-					priority="tertiary no outline"
-					iconId="fr-icon-arrow-right-line"
-					iconPosition="right"
-					onClick={onClickGoToReviews}
+			{!isMobile && (
+				<div
+					className={cx(
+						classes.buttonsGroup,
+						fr.cx('fr-col-12', 'fr-col-md-4')
+					)}
 				>
-					Voir toutes les réponses
-				</Button>
-			</div>
-			<div className={fr.cx('fr-col-12')}>
+					<Button
+						priority="tertiary no outline"
+						iconId="fr-icon-arrow-right-line"
+						iconPosition="right"
+						onClick={onClickGoToReviews}
+					>
+						Voir toutes les réponses
+					</Button>
+				</div>
+			)}
+			<div className={fr.cx('fr-col-12', 'fr-mt-6v')}>
 				<p className={classes.newReviewsLabel}>
 					<b>
 						{hasNewReviews
@@ -187,6 +196,23 @@ const DashboardTab = ({
 					);
 				})}
 			</div>
+			{isMobile && (
+				<div
+					className={cx(
+						classes.buttonsGroup,
+						fr.cx('fr-col-12', 'fr-col-md-4')
+					)}
+				>
+					<Button
+						priority="tertiary no outline"
+						iconId="fr-icon-arrow-right-line"
+						iconPosition="right"
+						onClick={onClickGoToReviews}
+					>
+						Voir toutes les réponses
+					</Button>
+				</div>
+			)}
 		</div>
 	) : hasButtons ? (
 		<div className={fr.cx('fr-my-10v')}>
@@ -234,6 +260,14 @@ const useStyles = tss.withName(DashboardTab.name).create({
 			color: fr.colors.decisions.text.title.blueFrance.default
 		}
 	},
+	chartContainer: {
+		height: '100%',
+		marginLeft: fr.spacing('4v'),
+		[fr.breakpoints.down('lg')]: {
+			marginTop: fr.spacing('4v'),
+			marginLeft: 0
+		}
+	},
 	smallTitle: {
 		fontWeight: 'bold',
 		fontSize: '20px',
@@ -255,12 +289,20 @@ const useStyles = tss.withName(DashboardTab.name).create({
 				display: 'flex',
 				alignItems: 'center'
 			}
+		},
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'start',
+			button: { paddingLeft: 0 }
 		}
 	},
 	reviewsContainer: {
 		display: 'flex',
 		width: '100%',
-		gap: fr.spacing('3v')
+		marginBottom: fr.spacing('6v'),
+		gap: fr.spacing('3v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column'
+		}
 	},
 	reviewCard: {
 		display: 'flex',
@@ -268,7 +310,10 @@ const useStyles = tss.withName(DashboardTab.name).create({
 		maxWidth: '25%',
 		flexDirection: 'column',
 		padding: fr.spacing('4v'),
-		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		[fr.breakpoints.down('md')]: {
+			maxWidth: '100%'
+		}
 	},
 	badge: {
 		fontSize: 11,
@@ -279,7 +324,14 @@ const useStyles = tss.withName(DashboardTab.name).create({
 	},
 	reviewText: {
 		fontSize: '12px',
-		lineHeight: '20px'
+		lineHeight: '20px',
+		display: '-webkit-box',
+		WebkitLineClamp: 6,
+		WebkitBoxOrient: 'vertical',
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		wordBreak: 'break-all',
+		whiteSpace: 'pre-wrap'
 	}
 });
 
