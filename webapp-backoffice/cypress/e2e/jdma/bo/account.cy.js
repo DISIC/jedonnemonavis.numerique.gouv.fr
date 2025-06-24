@@ -123,6 +123,17 @@ describe('Account page', () => {
 });
 
 // Helpers
+function tryCloseNewsModal() {
+	cy.get('body').then(body => {
+		if (body.find('dialog#news-modal').length > 0) {
+			cy.get('dialog#news-modal').within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not found, skipping close action.');
+		}
+	});
+}
 
 function login(email, password) {
 	cy.get(selectors.loginForm.email).type(email);
@@ -197,6 +208,9 @@ function testEmail({
 		cy.contains('button', selectors.action.save).should('exist');
 	} else {
 		login(newEmailTest, userPassword);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 	}
 	logout();

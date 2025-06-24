@@ -133,6 +133,9 @@ describe('jdma-users', () => {
 
 function navigateToCreatedProduct() {
 	cy.visit(`${app_url}${selectors.dashboard.products}`);
+	cy.wait(1000);
+	tryCloseNewsModal();
+	cy.wait(1000);
 	cy.url().should('include', selectors.dashboard.products);
 	cy.get(selectors.productTitle)
 		.filter(':contains("e2e-jdma-service-test-users")')

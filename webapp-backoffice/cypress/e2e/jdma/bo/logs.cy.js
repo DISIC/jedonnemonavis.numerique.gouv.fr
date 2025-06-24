@@ -32,6 +32,9 @@ describe('jdma-logs', () => {
 	it('should display the logs page with no events', () => {
 		cy.wait(4000);
 		cy.visit(app_url + '/administration/dashboard/product/2/logs');
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 		cy.get(
 			'.fr-sidemenu__link[href="/administration/dashboard/product/2/logs"]'
 		)
