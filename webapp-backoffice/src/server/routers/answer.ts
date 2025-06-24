@@ -1088,16 +1088,26 @@ export const answerRouter = router({
 				input;
 
 			const product = await ctx.prisma.product.findUnique({
-				where: isXWiki ? { xwiki_id: product_id } : { id: product_id }
-			});
-
-			const form = await ctx.prisma.form.findUnique({
-				where: { id: form_id }
+				where: isXWiki ? { xwiki_id: product_id } : { id: product_id },
+				include: {
+					forms: {
+						where: {
+							legacy: true
+						}
+					}
+				}
 			});
 
 			if (!product) throw new Error('Product not found');
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
+
+			if (!form_id && !product.forms[0].id)
+				throw new Error('No form specified');
+
+			const form = await ctx.prisma.form.findUnique({
+				where: { id: form_id ? form_id : product?.forms[0].id }
+			});
 
 			if (!form) throw new Error('Form not found');
 
