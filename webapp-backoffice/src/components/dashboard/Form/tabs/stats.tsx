@@ -23,6 +23,7 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import Select from '@codegouvfr/react-dsfr/Select';
@@ -109,10 +110,11 @@ export const OldSectionWrapper = ({
 const nbMaxReviews = 500000;
 
 const StatsTab = ({ form, ownRight, modal }: Props) => {
-	const router = useRouter();
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
+
+	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
 
 	const [selectedButton, setSelectedButton] = useState<number | undefined>(
 		filters['productStats'].buttonId
@@ -407,50 +409,57 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 					})}
 				</SectionWrapper>
 				{!!nbReviewsWithFilters && (
-					<OldSectionWrapper formConfig={currentFormConfig}>
-						{hiddenSteps.length > 0 && (
-							<div className={fr.cx('fr-mb-8v', 'fr-mt-4v')}>
-								<h4 className={fr.cx('fr-mt-6v')}>
-									Indicateurs cachés de vos démarches essentielles
-								</h4>
-								<ObservatoireStats
-									productId={form.product.id}
-									formId={form.id}
-									formConfig={currentFormConfig}
-									buttonId={filters.productStats.buttonId}
-									startDate={filters.sharedFilters.currentStartDate}
-									endDate={filters.sharedFilters.currentEndDate}
-									showHiddenSteps
-									noTitle
-								/>
-							</div>
-						)}
-						{renderHiddenSteps(hiddenSteps, {
-							productId: form.product_id,
-							formId: form.id,
-							buttonId: filters.productStats.buttonId,
-							startDate: filters.sharedFilters.currentStartDate,
-							endDate: filters.sharedFilters.currentEndDate
-						})}
-						<SmileyQuestionViz
-							fieldCode="easy"
-							total={nbReviewsWithFiltersForm1}
-							productId={form.product.id}
-							formId={form.id}
-							buttonId={filters.productStats.buttonId}
-							startDate={filters.sharedFilters.currentStartDate}
-							endDate={filters.sharedFilters.currentEndDate}
-						/>
-						<BarMultipleQuestionViz
-							fieldCode="difficulties"
-							total={nbReviewsWithFiltersForm1}
-							productId={form.product.id}
-							formId={form.id}
-							buttonId={filters.productStats.buttonId}
-							startDate={filters.sharedFilters.currentStartDate}
-							endDate={filters.sharedFilters.currentEndDate}
-						/>
-					</OldSectionWrapper>
+					<Accordion
+						label="Détails des anciennes réponses"
+						onExpandedChange={value => setOldSectionExpanded(!value)}
+						expanded={oldSectionExpanded}
+						className={cx(classes.oldSectionWrapper)}
+					>
+						<OldSectionWrapper formConfig={currentFormConfig}>
+							{hiddenSteps.length > 0 && (
+								<div className={fr.cx('fr-mb-8v', 'fr-mt-4v')}>
+									<h4 className={fr.cx('fr-mt-6v')}>
+										Indicateurs cachés de vos démarches essentielles
+									</h4>
+									<ObservatoireStats
+										productId={form.product.id}
+										formId={form.id}
+										formConfig={currentFormConfig}
+										buttonId={filters.productStats.buttonId}
+										startDate={filters.sharedFilters.currentStartDate}
+										endDate={filters.sharedFilters.currentEndDate}
+										showHiddenSteps
+										noTitle
+									/>
+								</div>
+							)}
+							{renderHiddenSteps(hiddenSteps, {
+								productId: form.product_id,
+								formId: form.id,
+								buttonId: filters.productStats.buttonId,
+								startDate: filters.sharedFilters.currentStartDate,
+								endDate: filters.sharedFilters.currentEndDate
+							})}
+							<SmileyQuestionViz
+								fieldCode="easy"
+								total={nbReviewsWithFiltersForm1}
+								productId={form.product.id}
+								formId={form.id}
+								buttonId={filters.productStats.buttonId}
+								startDate={filters.sharedFilters.currentStartDate}
+								endDate={filters.sharedFilters.currentEndDate}
+							/>
+							<BarMultipleQuestionViz
+								fieldCode="difficulties"
+								total={nbReviewsWithFiltersForm1}
+								productId={form.product.id}
+								formId={form.id}
+								buttonId={filters.productStats.buttonId}
+								startDate={filters.sharedFilters.currentStartDate}
+								endDate={filters.sharedFilters.currentEndDate}
+							/>
+						</OldSectionWrapper>
+					</Accordion>
 				)}
 			</>
 		);
