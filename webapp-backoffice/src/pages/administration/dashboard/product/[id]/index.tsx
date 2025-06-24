@@ -21,6 +21,9 @@ export const getServerSideProps: GetServerSideProps = async context => {
 						include: {
 							form_config_displays: true,
 							form_config_labels: true
+						},
+						orderBy: {
+							created_at: 'desc'
 						}
 					},
 					buttons: true

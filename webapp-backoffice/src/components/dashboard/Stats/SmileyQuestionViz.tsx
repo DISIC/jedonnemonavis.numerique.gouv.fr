@@ -25,7 +25,7 @@ type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
 	formId: number;
-	buttonId: number | undefined;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;

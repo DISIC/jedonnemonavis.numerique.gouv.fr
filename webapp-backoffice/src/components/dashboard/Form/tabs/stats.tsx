@@ -43,7 +43,7 @@ interface Props {
 	modal: CustomModalProps;
 }
 
-interface CommonStepProps {
+export interface CommonStepProps {
 	productId: number;
 	formId: number;
 	buttonId?: number;

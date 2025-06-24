@@ -1,3 +1,9 @@
+import {
+	CommonStepProps,
+	HideBlockOptionsHelper,
+	OldSectionWrapper,
+	SectionWrapper
+} from '@/src/components/dashboard/Form/tabs/stats';
 import AnswersChart from '@/src/components/dashboard/Stats/AnswersChart';
 import BarMultipleQuestionViz from '@/src/components/dashboard/Stats/BarMultipleQuestionViz';
 import BarMultipleSplitQuestionViz from '@/src/components/dashboard/Stats/BarMultipleSplitQuestionViz';
@@ -6,26 +12,25 @@ import KPITile from '@/src/components/dashboard/Stats/KPITile';
 import ObservatoireStats from '@/src/components/dashboard/Stats/ObservatoireStats';
 import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionViz';
 import { Loader } from '@/src/components/ui/Loader';
+import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import {
-	betaTestXwikiIds,
 	formatNumberWithSpaces,
 	transformDateToFrenchReadable
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { Product } from '@prisma/client';
+import { Select } from '@codegouvfr/react-dsfr/Select';
+import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
 import { getServerSideProps } from '.';
-import { push } from '@socialgouv/matomo-next';
-import { SectionWrapper } from '@/src/components/dashboard/Form/tabs/stats';
-import { Select } from '@codegouvfr/react-dsfr/Select';
-import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 
 interface Props {
 	product: ProductWithForms | null;
@@ -36,6 +41,7 @@ interface Props {
 const nbMaxReviews = 500000;
 
 const ProductStatPage = (props: Props) => {
+	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
 	const { product, defaultStartDate, defaultEndDate } = props;
 
@@ -46,11 +52,53 @@ const ProductStatPage = (props: Props) => {
 	const [startDate, setStartDate] = useState<string>(defaultStartDate);
 	const [endDate, setEndDate] = useState<string>(defaultEndDate);
 	const [formId, setFormId] = useState<number>(0);
+	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
 
 	const debouncedStartDate = useDebounce<string>(startDate, 200);
 	const debouncedEndDate = useDebounce<string>(endDate, 200);
 
-	const [buttonId, setButtonId] = useState<number | undefined>(undefined);
+	const form = product?.forms.find(form => form.id === formId);
+	const formConfigs = form?.form_configs;
+	const currentFormConfig =
+		formConfigs && formConfigs.length > 0 ? formConfigs[0] : undefined;
+	const formConfigHiddenSteps =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'step'
+		) || [];
+	const formConfigHiddenOptions =
+		currentFormConfig?.form_config_displays.filter(
+			fcd => fcd.kind === 'blockOption'
+		) || [];
+
+	const formTemplateBlockOptionsHidden = (
+		formTemplate?.form_template_steps || []
+	).reduce(
+		(acc, step) => {
+			step.form_template_blocks.forEach(block => {
+				const blockOptions = block.options.filter(option =>
+					formConfigHiddenOptions.map(fcd => fcd.parent_id).includes(option.id)
+				);
+				acc.options = acc.options.concat(blockOptions);
+			});
+			return acc;
+		},
+		{
+			options: [],
+			date: currentFormConfig?.created_at
+		} as HideBlockOptionsHelper
+	);
+
+	const hiddenSteps = formConfigHiddenSteps
+		.map(fcd => {
+			const stepIndex = formTemplate?.form_template_steps.findIndex(
+				f => f.id === fcd.parent_id
+			);
+
+			return stepIndex;
+		})
+		.filter(
+			stepIndex => stepIndex !== undefined && stepIndex !== -1
+		) as number[];
 
 	if (product === null) {
 		return (
@@ -115,10 +163,73 @@ const ProductStatPage = (props: Props) => {
 	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
+	const nbReviewsWithFiltersForm1 =
+		reviewsDataWithFilters?.metadata.countForm1 || 0;
+	const nbReviewsWithFiltersForm2 =
+		reviewsDataWithFilters?.metadata.countForm2 || 0;
 	const nbVerbatims = dataNbVerbatims?.data || 0;
 	const percetengeVerbatimsOfReviews = !!nbReviewsWithFilters
 		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
 		: 0;
+
+	const hiddableStepsConfiguration = [
+		{
+			stepIndex: 1,
+			component: (props: CommonStepProps) => (
+				<BarQuestionViz
+					fieldCode="comprehension"
+					total={nbReviewsWithFilters}
+					{...props}
+				/>
+			)
+		},
+		{
+			stepIndex: 2,
+			component: (props: CommonStepProps) => (
+				<>
+					<BarMultipleQuestionViz
+						fieldCode="contact_tried"
+						total={nbReviewsWithFilters}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_reached"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+					<BarMultipleSplitQuestionViz
+						fieldCode="contact_satisfaction"
+						total={nbReviewsWithFiltersForm2}
+						hiddenOptions={formTemplateBlockOptionsHidden}
+						{...props}
+					/>
+				</>
+			)
+		}
+	];
+
+	const renderVisibleSteps = (
+		hiddenSteps: number[],
+		props: CommonStepProps
+	) => {
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (!hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
+
+	const renderHiddenSteps = (hiddenSteps: number[], props: CommonStepProps) => {
+		return hiddableStepsConfiguration.map(({ stepIndex, component }) => {
+			if (hiddenSteps.includes(stepIndex)) {
+				return <Fragment key={stepIndex}>{component(props)}</Fragment>;
+			}
+			return null;
+		});
+	};
 
 	const getStatsDisplay = () => {
 		if (
@@ -133,25 +244,13 @@ const ProductStatPage = (props: Props) => {
 			);
 		}
 
-		if (nbReviewsWithFilters === 0) {
-			return (
-				<div className={fr.cx('fr-mt-10v')} role="status">
-					<Alert
-						severity="info"
-						title="Aucun avis sur cette période"
-						description={`Nous n'avons pas trouvé d'avis entre le ${transformDateToFrenchReadable(debouncedStartDate)} et le ${transformDateToFrenchReadable(endDate)}, tentez de changer la période de date.`}
-					/>
-				</div>
-			);
-		}
-
 		return (
 			<>
 				<div className={cx(classes.observatoireStats)}>
 					<ObservatoireStats
 						productId={product.id}
 						formId={formId}
-						buttonId={buttonId}
+						formConfig={currentFormConfig}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 					/>
@@ -159,7 +258,7 @@ const ProductStatPage = (props: Props) => {
 				<div className={fr.cx('fr-mt-5w')}>
 					<h3>Participation</h3>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Avis"
 								kpi={nbReviewsWithFilters}
@@ -168,7 +267,7 @@ const ProductStatPage = (props: Props) => {
 								hideLink
 							/>
 						</div>
-						<div className={fr.cx('fr-col-6')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
 								title="Verbatims"
 								kpi={nbVerbatims}
@@ -188,7 +287,6 @@ const ProductStatPage = (props: Props) => {
 					fieldCode="satisfaction"
 					productId={product.id}
 					formId={formId}
-					buttonId={buttonId}
 					startDate={debouncedStartDate}
 					endDate={debouncedEndDate}
 					total={nbReviewsWithFilters}
@@ -202,73 +300,66 @@ const ProductStatPage = (props: Props) => {
 						total={nbReviewsWithFilters}
 						productId={product.id}
 						formId={formId}
-						buttonId={buttonId}
 						startDate={debouncedStartDate}
 						endDate={debouncedEndDate}
 						required
 					/>
-					<BarQuestionViz
-						fieldCode="comprehension"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="contact_tried"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_reached"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-					<BarMultipleSplitQuestionViz
-						fieldCode="contact_satisfaction"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
+					{renderVisibleSteps(hiddenSteps, {
+						productId: product.id,
+						formId: formId,
+						startDate: debouncedStartDate,
+						endDate: debouncedEndDate
+					})}
 				</SectionWrapper>
-				<SectionWrapper
-					title="Détails des anciennes réponses"
-					alert={`Cette section présente les résultats de l'ancien questionnaire, modifié le ${product.xwiki_id && betaTestXwikiIds.includes(product.xwiki_id) ? '19 juin 2024.' : '03 juillet 2024.'}`}
-					total={nbReviewsWithFilters}
-				>
-					<SmileyQuestionViz
-						fieldCode="easy"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-						required
-					/>
-					<BarMultipleQuestionViz
-						fieldCode="difficulties"
-						total={nbReviewsWithFilters}
-						productId={product.id}
-						formId={formId}
-						buttonId={buttonId}
-						startDate={debouncedStartDate}
-						endDate={debouncedEndDate}
-					/>
-				</SectionWrapper>
+				{!!nbReviewsWithFilters && (
+					<Accordion
+						label="Détails des anciennes réponses"
+						onExpandedChange={value => setOldSectionExpanded(!value)}
+						expanded={oldSectionExpanded}
+						className={cx(classes.oldSectionWrapper)}
+					>
+						<OldSectionWrapper formConfig={currentFormConfig}>
+							{hiddenSteps.length > 0 && (
+								<div className={fr.cx('fr-mb-8v', 'fr-mt-4v')}>
+									<h4 className={fr.cx('fr-mt-6v')}>
+										Indicateurs cachés de vos démarches essentielles
+									</h4>
+									<ObservatoireStats
+										productId={product.id}
+										formId={formId}
+										startDate={debouncedStartDate}
+										endDate={debouncedEndDate}
+										formConfig={currentFormConfig}
+										showHiddenSteps
+										noTitle
+									/>
+								</div>
+							)}
+							{renderHiddenSteps(hiddenSteps, {
+								productId: product.id,
+								formId: formId,
+								startDate: debouncedStartDate,
+								endDate: debouncedEndDate
+							})}
+							<SmileyQuestionViz
+								fieldCode="easy"
+								total={nbReviewsWithFiltersForm1}
+								productId={product.id}
+								formId={formId}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+							<BarMultipleQuestionViz
+								fieldCode="difficulties"
+								total={nbReviewsWithFiltersForm1}
+								productId={product.id}
+								formId={formId}
+								startDate={debouncedStartDate}
+								endDate={debouncedEndDate}
+							/>
+						</OldSectionWrapper>
+					</Accordion>
+				)}
 			</>
 		);
 	};
@@ -402,6 +493,12 @@ const useStyles = tss.create({
 		marginTop: fr.spacing('16v'),
 		paddingBottom: fr.spacing('20v'),
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+	},
+	oldSectionWrapper: {
+		'.fr-collapse': {
+			backgroundColor: fr.colors.decisions.background.default.grey.hover,
+			margin: `0 1px`
+		}
 	}
 });
 
