@@ -56,7 +56,7 @@ const NewsLayout = ({ children }: NewsLayoutProps) => {
 	];
 
 	return (
-		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
+		<div className={cx(fr.cx('fr-container', 'fr-py-6w'), classes.container)}>
 			<Head>
 				<title>{`Nouveautés | Formulaires | Je donne mon avis`}</title>
 				<meta
