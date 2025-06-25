@@ -70,13 +70,13 @@ function login(email, password) {
 }
 
 const tryCloseNewsModal = () => {
-	cy.get('body').then(body => {
-		if (body.find('dialog#news-modal').length > 0) {
-			cy.get('dialog#news-modal').within(() => {
+	cy.get('dialog#news-modal').then($modal => {
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
 				cy.contains('button', 'Fermer').click();
 			});
 		} else {
-			cy.log('News modal not found, skipping close action.');
+			cy.log('News modal not visible, skipping close action.');
 		}
 	});
 };

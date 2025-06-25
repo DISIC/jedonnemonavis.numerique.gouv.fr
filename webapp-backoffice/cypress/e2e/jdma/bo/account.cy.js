@@ -123,17 +123,17 @@ describe('Account page', () => {
 });
 
 // Helpers
-function tryCloseNewsModal() {
-	cy.get('body').then(body => {
-		if (body.find('dialog#news-modal').length > 0) {
-			cy.get('dialog#news-modal').within(() => {
+const tryCloseNewsModal = () => {
+	cy.get('dialog#news-modal').then($modal => {
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
 				cy.contains('button', 'Fermer').click();
 			});
 		} else {
-			cy.log('News modal not found, skipping close action.');
+			cy.log('News modal not visible, skipping close action.');
 		}
 	});
-}
+};
 
 function login(email, password) {
 	cy.get(selectors.loginForm.email).type(email);
