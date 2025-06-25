@@ -32,9 +32,6 @@ describe('jdma-logs', () => {
 	it('should display the logs page with no events', () => {
 		cy.wait(4000);
 		cy.visit(app_url + '/administration/dashboard/product/2/logs');
-		cy.wait(1000);
-		tryCloseNewsModal();
-		cy.wait(1000);
 		cy.get(
 			'.fr-sidemenu__link[href="/administration/dashboard/product/2/logs"]'
 		)
@@ -58,19 +55,14 @@ function login(email, password) {
 	cy.url().should('eq', app_url + '/administration/dashboard/products');
 	cy.wait(8000);
 }
-
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal', { timeout: 1000 })
-		.then($modal => {
-			if ($modal.length && $modal.is(':visible')) {
-				cy.wrap($modal).within(() => {
-					cy.contains('button', 'Fermer').click({ force: true });
-				});
-			} else {
-				cy.log('News modal not visible, skipping close action.');
-			}
-		})
-		.catch(() => {
-			cy.log('News modal not found, skipping close action.');
-		});
+	cy.get('dialog#news-modal').then($modal => {
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not visible, skipping close action.');
+		}
+	});
 };
