@@ -9,7 +9,7 @@ const NoReviewsPanel = () => {
 		<div
 			className={cx(
 				classes.container,
-				fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-12v')
+				fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-20v')
 			)}
 		>
 			<h3 className={cx(classes.title)}>En attendant vos premiers avis...</h3>
@@ -19,7 +19,7 @@ const NoReviewsPanel = () => {
 					classes.rowContainer
 				)}
 			>
-				<div className={fr.cx('fr-col-md-3')}>
+				<div className={fr.cx('fr-col-md-2')}>
 					<Image
 						src="/assets/chat_picto.svg"
 						alt="Picto bulles de discussion"
@@ -27,9 +27,12 @@ const NoReviewsPanel = () => {
 						height={120}
 					/>
 				</div>
-				<div className={cx(fr.cx('fr-col-md-9'))}>
+				<div className={cx(fr.cx('fr-col-md-10'))}>
 					<p className={cx(fr.cx('fr-mb-3v'))}>
-						Nos conseils pour obtenir plus d’avis !
+						Vous n’avez pas encore reçu d’avis de la part de vos utilisateurs.{' '}
+						<br />
+						En attendant, vous pouvez.découvrir nos conseils pour bien placer le
+						bouton de récolte d’avis :
 					</p>
 					<a
 						title="Améliorer le placement de votre bouton"
@@ -38,36 +41,6 @@ const NoReviewsPanel = () => {
 						className="fr-link"
 					>
 						Améliorer le placement de votre bouton
-					</a>
-				</div>
-			</div>
-			<div
-				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-grid-row--middle'),
-					classes.rowContainer
-				)}
-			>
-				<div className={fr.cx('fr-col-md-3')}>
-					<Image
-						src="/assets/cone_picto.svg"
-						alt="Picto bulles de discussion"
-						width={120}
-						height={120}
-					/>
-				</div>
-				<div className={cx(fr.cx('fr-col-md-9'))}>
-					<p className={cx(fr.cx('fr-mb-3v'))}>
-						Besoin de tester un parcours sur mobile vs. sur ordinateur ? Faire
-						un test A/B suite à une modification de parcours ? Vous pouvez en
-						créer plusieurs boutons JDMA.
-					</p>
-					<a
-						title="En savoir plus sur les boutons multiples"
-						href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
-						target="_blank"
-						className="fr-link"
-					>
-						En savoir plus sur les boutons multiples
 					</a>
 				</div>
 			</div>

@@ -1,4 +1,5 @@
 import { Loader } from '@/src/components/ui/Loader';
+import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { displayIntention, getStatsIcon } from '@/src/utils/stats';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
@@ -7,14 +8,12 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
+import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
+import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
-import NoReviewsDashboardPanel from '../../Pannels/NoReviewsDashboardPanel';
-import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
-import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	nbReviews: number;
@@ -76,7 +75,7 @@ const DashboardTab = ({
 
 	return nbReviews > 0 ? (
 		<div className={fr.cx('fr-grid-row')}>
-			<h2 className={fr.cx('fr-col-12', 'fr-mb-8v')}>Tableau de bord</h2>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
 			<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
 				<ObservatoireStats
@@ -216,12 +215,13 @@ const DashboardTab = ({
 			)}
 		</div>
 	) : hasButtons ? (
-		<div className={fr.cx('fr-my-10v')}>
-			<NoReviewsDashboardPanel />
+		<div className={fr.cx('fr-grid-row')}>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
+			<NoReviewsPanel />
 		</div>
 	) : (
-		<div>
-			<h2>Tableau de bord</h2>
+		<div className={fr.cx('fr-grid-row')}>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<NoButtonsPanel
 				onButtonClick={() => {
 					modal.open();

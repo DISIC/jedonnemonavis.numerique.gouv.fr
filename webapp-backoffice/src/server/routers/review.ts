@@ -1,12 +1,12 @@
-import { z } from 'zod';
-import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { formatDateToFrenchString } from '@/src/utils/tools';
+import { TRPCError } from '@trpc/server';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
-import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
-import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
 export const reviewRouter = router({
 	getList: protectedProcedure
@@ -179,7 +179,11 @@ export const reviewRouter = router({
 				ctx.prisma.review.count({ where }),
 				ctx.prisma.review.count({
 					where: {
-						product_id: input.product_id
+						product_id: input.product_id,
+						...(form_id &&
+							(form?.legacy
+								? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+								: { form_id }))
 					}
 				}),
 				lastSeenReview[0]
@@ -285,7 +289,11 @@ export const reviewRouter = router({
 					ctx.prisma.review.count({ where }),
 					ctx.prisma.review.count({
 						where: {
-							product_id: input.product_id
+							product_id: input.product_id,
+							...(form_id &&
+								(form?.legacy
+									? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+									: { form_id }))
 						}
 					}),
 					ctx.prisma.review.count({

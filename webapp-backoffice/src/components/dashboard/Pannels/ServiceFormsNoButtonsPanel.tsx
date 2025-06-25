@@ -51,40 +51,6 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
 			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
 				<span className={classes.title}>
-					Éditez et prévisualisez le formulaire (optionnel)
-				</span>
-			</div>
-			{editContents.map((content, index) => (
-				<div
-					key={index}
-					className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}
-				>
-					<div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}>
-						<i className={cx(fr.cx(content.iconId), classes.icon)} />
-					</div>
-					<p>{content.text}</p>
-				</div>
-			))}
-			<Button
-				className={cx(classes.button, fr.cx('fr-mb-6v'))}
-				priority="secondary"
-				iconId="ri-edit-line"
-				iconPosition="right"
-				type="button"
-				nativeButtonProps={{
-					onClick: event => {
-						event.preventDefault();
-						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
-						router.push(
-							`/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
-						);
-					}
-				}}
-			>
-				Éditer le formulaire
-			</Button>
-			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
-				<span className={classes.title}>
 					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
 				</span>
 			</div>
@@ -107,7 +73,7 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 				</div>
 			))}
 			<Button
-				className={cx(classes.button, fr.cx('fr-mt-6v'))}
+				className={cx(classes.button, fr.cx('fr-mt-8v'))}
 				priority="primary"
 				iconId="fr-icon-add-line"
 				iconPosition="right"
@@ -149,7 +115,7 @@ const useStyles = tss.create({
 		display: 'flex',
 		alignItems: 'center',
 
-		marginBottom: fr.spacing('3v'),
+		marginBottom: fr.spacing('6v'),
 		'&:last-of-type': {
 			marginBottom: 0
 		},

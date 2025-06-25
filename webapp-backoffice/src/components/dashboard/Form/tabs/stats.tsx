@@ -17,7 +17,6 @@ import {
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import {
-	betaTestXwikiIds,
 	formatDateToFrenchString,
 	formatNumberWithSpaces
 } from '@/src/utils/tools';
@@ -27,13 +26,8 @@ import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import Select from '@codegouvfr/react-dsfr/Select';
-import {
-	FormTemplateBlockOption,
-	FormTemplateStep,
-	RightAccessStatus
-} from '@prisma/client';
+import { FormTemplateBlockOption, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import { useRouter } from 'next/router';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
