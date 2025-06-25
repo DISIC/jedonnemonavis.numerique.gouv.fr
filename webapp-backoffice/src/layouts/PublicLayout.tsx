@@ -310,7 +310,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		navigationItems.push(...superAdminNavigationItems);
 	}
 
-	if (session?.user.role.includes('admin')) {
+	if (session?.user) {
 		navigationItems.push({
 			text: (
 				<>
