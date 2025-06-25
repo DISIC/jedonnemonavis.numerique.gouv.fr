@@ -98,7 +98,7 @@ const ReviewLineVerbatim = ({
 					<p
 						className={cx(classes.content, classes.contentVerbatim)}
 						dangerouslySetInnerHTML={{
-							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : 'Non renseigné'}`
+							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : '-'}`
 						}}
 					></p>
 				</td>

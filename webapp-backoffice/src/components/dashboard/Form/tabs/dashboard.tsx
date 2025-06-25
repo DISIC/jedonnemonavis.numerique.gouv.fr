@@ -46,9 +46,8 @@ const DashboardTab = ({
 				numberPerPage: 4,
 				page: 1,
 				shouldIncludeAnswers: true,
-				mustHaveVerbatims: true,
 				newReviews: true,
-				needLogging: false // On ne veut pas créer l'événement service_reviews_view ici
+				needLogging: false
 			},
 			{
 				initialData: {
@@ -186,12 +185,14 @@ const DashboardTab = ({
 									review.created_at?.toISOString().split('T')[0] || ''
 								)}
 							</p>
-							<p className={cx(classes.reviewText, fr.cx('fr-mb-0'))}>
-								{
-									review.answers?.find(a => a.field_code === 'verbatim')
-										?.answer_text
-								}
-							</p>
+							{review.answers?.find(a => a.field_code === 'verbatim') && (
+								<p className={cx(classes.reviewText, fr.cx('fr-mb-0'))}>
+									{
+										review.answers?.find(a => a.field_code === 'verbatim')
+											?.answer_text
+									}
+								</p>
+							)}
 						</div>
 					);
 				})}
