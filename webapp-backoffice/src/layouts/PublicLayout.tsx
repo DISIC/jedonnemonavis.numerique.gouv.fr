@@ -227,6 +227,27 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				},
 				isActive: pathname.startsWith('/administration/dashboard/product')
 			});
+			navigationItems.push({
+				text: (
+					<>
+						Nouveautés
+						{!settings.newsPageSeen && (
+							<Badge
+								severity="new"
+								small
+								className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+							>
+								1
+							</Badge>
+						)}
+					</>
+				),
+				linkProps: {
+					href: '/administration/dashboard/news',
+					target: '_self'
+				},
+				isActive: pathname.startsWith('/administration/dashboard/news')
+			});
 		}
 
 		if (
@@ -308,30 +329,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		];
 		navigationItems.push(...superAdminNavigationItems);
-	}
-
-	if (session?.user) {
-		navigationItems.push({
-			text: (
-				<>
-					Nouveautés
-					{!settings.newsPageSeen && (
-						<Badge
-							severity="new"
-							small
-							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-						>
-							1
-						</Badge>
-					)}
-				</>
-			),
-			linkProps: {
-				href: '/administration/dashboard/news',
-				target: '_self'
-			},
-			isActive: pathname.startsWith('/administration/dashboard/news')
-		});
 	}
 
 	return (
