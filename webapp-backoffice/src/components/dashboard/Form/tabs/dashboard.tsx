@@ -217,49 +217,31 @@ const DashboardTab = ({
 	) : hasButtons ? (
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
-			<NoReviewsPanel />
+			<div className={fr.cx('fr-col-12')}>
+				<NoReviewsPanel />
+			</div>
 		</div>
 	) : (
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
-			<NoButtonsPanel
-				onButtonClick={() => {
-					modal.open();
-				}}
-			/>
+			<div className={fr.cx('fr-col-12')}>
+				<NoButtonsPanel
+					onButtonClick={() => {
+						modal.open();
+					}}
+				/>
+			</div>
 		</div>
 	);
 };
 
 const useStyles = tss.withName(DashboardTab.name).create({
-	mainContainer: {
-		...fr.spacing('padding', {}),
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		gap: fr.spacing('6v'),
-		maxWidth: '65%',
-		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column',
-			maxWidth: '100%'
-		}
-	},
 	loaderContainer: {
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
 		height: '500px',
 		width: '100%'
-	},
-	container: {
-		...fr.spacing('padding', {}),
-		display: 'flex',
-		flexDirection: 'column',
-		justifyContent: 'flex-start',
-		alignItems: 'flex-start',
-		a: {
-			color: fr.colors.decisions.text.title.blueFrance.default
-		}
 	},
 	chartContainer: {
 		height: '100%',
