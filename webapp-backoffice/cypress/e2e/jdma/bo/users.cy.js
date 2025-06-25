@@ -133,9 +133,6 @@ describe('jdma-users', () => {
 
 function navigateToCreatedProduct() {
 	cy.visit(`${app_url}${selectors.dashboard.products}`);
-	cy.wait(1000);
-	tryCloseNewsModal();
-	cy.wait(1000);
 	cy.url().should('include', selectors.dashboard.products);
 	cy.get(selectors.productTitle)
 		.filter(':contains("e2e-jdma-service-test-users")')
@@ -169,21 +166,16 @@ function login(email, password) {
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 }
-
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal', { timeout: 1000 })
-		.then($modal => {
-			if ($modal.length && $modal.is(':visible')) {
-				cy.wrap($modal).within(() => {
-					cy.contains('button', 'Fermer').click({ force: true });
-				});
-			} else {
-				cy.log('News modal not visible, skipping close action.');
-			}
-		})
-		.catch(() => {
-			cy.log('News modal not found, skipping close action.');
-		});
+	cy.get('dialog#news-modal').then($modal => {
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not visible, skipping close action.');
+		}
+	});
 };
 
 function createProduct() {
