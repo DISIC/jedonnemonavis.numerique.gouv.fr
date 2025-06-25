@@ -1,11 +1,12 @@
+import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
-import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ChartWrapper from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
-import { newFormFieldCodes, oldFormFieldCodes } from '@/src/utils/tools';
+import { HideBlockOptionsHelper } from '../Form/tabs/stats';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
@@ -21,20 +22,24 @@ const BarVerticalChart = dynamic(
 type Props = {
 	fieldCode: string;
 	productId: number;
-	buttonId: number | undefined;
+	formId: number;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
+	hiddenOptions?: HideBlockOptionsHelper;
 	required?: boolean;
 };
 
 const BarMultipleQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
 	total,
+	hiddenOptions,
 	required = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -47,12 +52,11 @@ const BarMultipleQuestionViz = ({
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
-				...(oldFormFieldCodes.includes(fieldCode) && {
-					form_id: 1
-				}),
-				...(newFormFieldCodes.includes(fieldCode) && {
-					form_id: 2
-				})
+				form_id: oldFormFieldCodes.includes(fieldCode)
+					? 1
+					: newFormFieldCodes.includes(fieldCode)
+						? formId
+						: -1
 			},
 			{
 				initialData: {
@@ -72,6 +76,7 @@ const BarMultipleQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -169,6 +174,7 @@ const BarMultipleQuestionViz = ({
 			fieldLabel={resultFieldCode.metadata.fieldLabel || ''}
 			total={total}
 			required={required}
+			hiddenOptions={hiddenOptions}
 		>
 			<ChartWrapper
 				title="Répartition des réponses"
@@ -176,6 +182,7 @@ const BarMultipleQuestionViz = ({
 				data={formatedFieldCodeData}
 				reverseData
 				displayTotal="percentage"
+				smallTitle
 			>
 				<BarVerticalChart data={formatedFieldCodeData} />
 			</ChartWrapper>
@@ -183,6 +190,7 @@ const BarMultipleQuestionViz = ({
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeDataPerInterval}
+				smallTitle
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

@@ -123,6 +123,22 @@ describe('Account page', () => {
 });
 
 // Helpers
+const tryCloseNewsModal = () => {
+	cy.get('dialog#news-modal', { timeout: 4000 })
+		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.catch(() => {
+			cy.log('News modal not found within timeout, skipping close action.');
+		});
+};
 
 function login(email, password) {
 	cy.get(selectors.loginForm.email).type(email);
@@ -134,6 +150,8 @@ function login(email, password) {
 function logout() {
 	cy.reload();
 	cy.wait(2000);
+	tryCloseNewsModal();
+	cy.wait(1000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.contains('button', 'Se déconnecter').click({ force: true });

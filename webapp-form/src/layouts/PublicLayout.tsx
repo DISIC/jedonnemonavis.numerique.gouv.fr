@@ -87,15 +87,14 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       ];
 
   useEffect(() => {
-    setIsMobile(window.innerWidth <= fr.breakpoints.getBreakpointsValues().md);
+    setIsMobile(window.innerWidth <= fr.breakpoints.getPxValues().md);
   }, []);
 
   return (
     <>
       <Head>
         <title>
-          {getStepTitle(router.query.step)} Je donne mon avis sur la démarche "
-          {getProductTitle()}"
+          {`${getStepTitle(router.query.step)} Je donne mon avis sur la démarche "${getProductTitle()}"`}
         </title>
         <meta name="description" content="Je donne mon avis" />
       </Head>

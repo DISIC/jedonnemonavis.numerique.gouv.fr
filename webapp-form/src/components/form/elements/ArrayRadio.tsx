@@ -47,8 +47,6 @@ export const ArrayRadio = (props: Props) => {
         ) ? (
           <>
             <div className={cx(fr.cx("fr-col-12"), classes.reviewContainer)}>
-              <div className={fr.cx("fr-col-12")}></div>
-             
               <div className={cx(classes.reviews)}>
                 <h3>{t(field.label)}</h3>
                 <p className={cx(classes.smallText)}>{t(field.hint ?? "")}</p>
@@ -115,20 +113,23 @@ export const ArrayRadio = (props: Props) => {
                                           opinion.contact_satisfaction.includes(
                                             escapeRegex(
                                               option.value.toString()
-                                            ) + "_" + opt.value
+                                            ) +
+                                              "_" +
+                                              opt.value
                                           )
                                         ) {
                                           setOpinion({
                                             ...opinion,
-                                            contact_satisfaction: opinion.contact_satisfaction.filter(
-                                              (cs) =>
-                                                cs !==
-                                                escapeRegex(
-                                                  option.value.toString()
-                                                ) +
-                                                  "_" +
-                                                  opt.value
-                                            ),
+                                            contact_satisfaction:
+                                              opinion.contact_satisfaction.filter(
+                                                (cs) =>
+                                                  cs !==
+                                                  escapeRegex(
+                                                    option.value.toString()
+                                                  ) +
+                                                    "_" +
+                                                    opt.value
+                                              ),
                                           });
                                         }
                                       }}
@@ -221,7 +222,7 @@ const useStyles = tss
       ["input:checked + label"]: {
         borderColor: fr.colors.decisions.background.flat.blueFrance.default,
         backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-        color: 'white',
+        color: "white",
       },
       [".fr-radio-group input[type=radio] + label::before"]: {
         content: "none",
@@ -240,7 +241,7 @@ const useStyles = tss
     reviews: {
       ul: {
         display: "flex",
-        flexDirection:'row',
+        flexDirection: "row",
         flexWrap: "wrap",
         listStyle: "none",
         ...fr.spacing("margin", { topBottom: 0, rightLeft: 0 }),
@@ -252,7 +253,7 @@ const useStyles = tss
           marginBottom: fr.spacing("3v"),
 
           minWidth: "100%",
-          ':last-child': {
+          ":last-child": {
             marginBottom: 0,
           },
           input: {
@@ -271,10 +272,10 @@ const useStyles = tss
             minWidth: "initial",
             marginBottom: 0,
             marginRight: fr.spacing("3v"),
-            ':last-child': {
+            ":last-child": {
               marginRight: 0,
             },
-          }
+          },
         },
       },
     },
@@ -303,9 +304,9 @@ const useStyles = tss
     },
     reviewInputLabel: {
       border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-      ...fr.spacing("padding", {topBottom: "2v", rightLeft: "4v"}),
+      ...fr.spacing("padding", { topBottom: "2v", rightLeft: "4v" }),
       display: "flex",
-      alignItems:'center',
+      alignItems: "center",
       justifyContent: "center",
       textAlign: "center",
       cursor: "pointer",

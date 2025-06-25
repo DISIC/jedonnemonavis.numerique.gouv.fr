@@ -1,10 +1,10 @@
 import { LoginForm } from '@/src/components/auth/LoginForm';
+import { ProconnectError } from '@/src/components/auth/ProConnectError';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Breadcrumb } from '@codegouvfr/react-dsfr/Breadcrumb';
 import Head from 'next/head';
-import { tss } from 'tss-react/dsfr';
 import { useRouter } from 'next/router';
-import { ProconnectError } from '@/src/components/auth/ProConnectError';
+import { tss } from 'tss-react/dsfr';
 
 export default function Login() {
 	const { classes, cx } = useStyles();
@@ -64,6 +64,6 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		formContainer: {
-			backgroundColor: fr.colors.decisions.background.alt.grey.default,
+			backgroundColor: fr.colors.decisions.background.alt.grey.default
 		}
 	}));

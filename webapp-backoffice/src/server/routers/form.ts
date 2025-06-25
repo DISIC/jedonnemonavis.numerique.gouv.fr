@@ -1,89 +1,97 @@
-import { z } from 'zod';
-import { router, protectedProcedure } from '@/src/server/trpc';
 import { FormUncheckedCreateInputSchema, FormUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
-import { TRPCError } from '@trpc/server';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import { z } from 'zod';
+import { checkRightToProceed } from './product';
 
 export const formRouter = router({
-	getByUser: protectedProcedure
-		.input(
-			z.object({ 
-				user_id: z.number(),
-				numberPerPage: z.number(),
-				page: z.number().default(1),
-			})
-		)
+	getById: protectedProcedure
+		.input(z.object({ id: z.number() }))
 		.query(async ({ ctx, input }) => {
-			const { user_id, numberPerPage, page } = input;
-
-			const userForms = await ctx.prisma.form.findMany({
-				where: {
-					user_id
-				},
-				take: numberPerPage,
-				skip: (page - 1) * numberPerPage,
-				orderBy: {
-					updated_at: 'desc'
+			const { id } = input;
+			const form = await ctx.prisma.form.findUnique({
+				where: { id },
+				include: {
+					form_configs: {
+						include: {
+							form_config_labels: true,
+							form_config_displays: true
+						}
+					},
+					form_template: {
+						include: {
+							form_template_steps: {
+								include: {
+									form_template_blocks: {
+										include: {
+											options: true
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			});
-
-            const formCount =  await ctx.prisma.form.count({
-				where: {
-					user_id
-				}
-			});
-
-			return { data: userForms, metadata: { formCount } };
-		}),
-
-	create: protectedProcedure
-		.input(FormUncheckedCreateInputSchema)
-		.mutation(async ({ ctx, input: formPayLoad }) => {
-
-			const existsEntity = await ctx.prisma.form.findFirst({
-				where: {
-					title: formPayLoad.title,
-					user_id: formPayLoad.user_id
-				}
-			});
-
-			if (existsEntity)
-				throw new TRPCError({
-					code: 'CONFLICT',
-					message: 'Form with this name already exists'
-				});
-
-
-			const form = await ctx.prisma.form.create({
-				data: formPayLoad
-			});
-
 			return { data: form };
 		}),
 
+	getFormTemplateBySlug: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const { slug } = input;
+			const formTemplate = await ctx.prisma.formTemplate.findUnique({
+				where: { slug },
+				include: {
+					form_template_steps: {
+						include: {
+							form_template_blocks: {
+								include: {
+									options: true
+								}
+							}
+						}
+					}
+				}
+			});
+			return { data: formTemplate };
+		}),
+	create: protectedProcedure
+		.meta({ logEvent: true })
+		.input(FormUncheckedCreateInputSchema)
+		.mutation(async ({ ctx, input: formPayload }) => {
+
+			const form = await ctx.prisma.form.create({
+				data: {
+					...formPayload,
+				}
+			});
+			
+
+			return { data: form };
+		}),
 	update: protectedProcedure
-		.input(FormUncheckedUpdateInputSchema)
+		.meta({ logEvent: true })
+		.input(
+			z.object({ 
+				id: z.number(), 
+				form: FormUncheckedUpdateInputSchema.and(z.object({
+					product_id: z.number()
+				}))
+			})
+		)
 		.mutation(async ({ ctx, input }) => {
+			const { id, form } = input;
+
+			await checkRightToProceed(ctx.prisma, ctx.session, form.product_id);
+
+
 			const updatedForm = await ctx.prisma.form.update({
-				where: {
-					id: input.id as number
-				},
-				data: input
+				where: { id },
+				data: {
+					...form
+				}
 			});
 
 			return { data: updatedForm };
 		}),
-
-	delete: protectedProcedure
-		.input(z.object({ id: z.number() }))
-		.mutation(async ({ ctx, input }) => {
-            const { id } = input;
-			const deletedForm = await ctx.prisma.form.delete({
-				where: {
-					id
-				}
-			});
-
-			return { data: deletedForm };
-		})
-
-})
+});

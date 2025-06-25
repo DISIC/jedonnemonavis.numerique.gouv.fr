@@ -1,27 +1,17 @@
+import { User } from '@/prisma/generated/zod';
+import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
+import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
+import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
-import { useRouter } from 'next/router';
-import { Toast } from '@/src/components/ui/Toast';
-import { User } from '@/prisma/generated/zod';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
-import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 
 interface ProductLayoutProps {
 	isOwn?: Boolean;
 	user: User;
 	children: React.ReactNode;
-}
-
-interface MenuItems {
-	text: string;
-	linkProps: {
-		href: string;
-		alt?: string;
-	};
-	isActive?: boolean;
 }
 
 const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
@@ -34,15 +24,14 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 
 	const { cx, classes } = useStyles();
 
-	const menuItems: MenuItems[] = isOwn
+	const menuItems: SideMenuProps.Item[] = isOwn
 		? [
 				{
 					text: 'Informations',
 					isActive:
 						router.pathname === `/administration/dashboard/user/[id]/infos`,
 					linkProps: {
-						href: `/administration/dashboard/user/${session?.user.id}/infos`,
-						alt: 'Informations'
+						href: `/administration/dashboard/user/${session?.user.id}/infos`
 					}
 				},
 				{
@@ -51,8 +40,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						router.pathname ===
 						`/administration/dashboard/user/[id]/notifications`,
 					linkProps: {
-						href: `/administration/dashboard/user/${session?.user.id}/notifications`,
-						alt: 'Notifications'
+						href: `/administration/dashboard/user/${session?.user.id}/notifications`
 					}
 				}
 			]
@@ -62,8 +50,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 					isActive:
 						router.pathname === `/administration/dashboard/user/[id]/account`,
 					linkProps: {
-						href: `/administration/dashboard/user/${user.id}/account`,
-						alt: 'Informations'
+						href: `/administration/dashboard/user/${user.id}/account`
 					}
 				},
 				{
@@ -71,8 +58,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 					isActive:
 						router.pathname === `/administration/dashboard/user/[id]/access`,
 					linkProps: {
-						href: `/administration/dashboard/user/${user.id}/access`,
-						alt: 'Informations'
+						href: `/administration/dashboard/user/${user.id}/access`
 					}
 				}
 			];

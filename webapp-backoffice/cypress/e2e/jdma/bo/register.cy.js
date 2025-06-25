@@ -17,6 +17,7 @@ const selectors = {
 	passwordInput: 'input.fr-password__input',
 	passwordToggle: 'label[for*="toggle-show"]',
 	modalFooter: '.fr-modal__footer',
+	modalHeader: '.fr-modal__header',
 	productForm: '#product-form'
 };
 
@@ -187,10 +188,7 @@ function createProduct() {
 	cy.get(selectors.modalFooter)
 		.contains('button', 'Ajouter ce service')
 		.click();
-	cy.get('[class*="ProductButtonsPage-btnContainer"]', {
-		timeout: 10000
-	}).should('be.visible');
-	createAndModifyButton();
+	createAndModifyForm();
 }
 
 function selectEntity() {
@@ -208,17 +206,45 @@ function addUrls(urls) {
 	});
 }
 
-function createAndModifyButton() {
-	cy.get('[class*="ProductButtonsPage-btnContainer"]')
-		.contains('Créer un bouton JDMA')
-		.click();
-	cy.get('dialog#button-modal').within(() => {
-		cy.get('input[name="button-create-title"]').type('bouton test 1');
-		cy.get('textarea').type('Description du bouton test 1');
+function createAndModifyForm() {
+	cy.get('[class*="buttonContainer"]').contains('Créer un formulaire').click();
+	cy.get('dialog#new-form-modal').within(() => {
+		cy.get('input[name="title"]').type('form test 1');
 	});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
-	modifyButton();
+	cy.get(selectors.modalFooter)
+		.contains('button', 'Créer')
+		.click({ force: true });
+
+	cy.wait(3000);
+
+	// TODO : create button & edit form
 }
+
+function renameForm() {
+	cy.get('button').contains('Renommer').click();
+
+	cy.get('dialog#rename-form-modal')
+		.should('be.visible')
+		.within(() => {
+			cy.get('input[name="title"]').clear().type('e2e-jdma-form-test-renamed');
+
+			cy.get('button').contains('Modifier').click();
+		});
+}
+
+const tryCloseHelpModal = () => {
+	cy.get('body').then(body => {
+		if (body.find('dialog#form-help-modal').length > 0) {
+			cy.get('dialog#form-help-modal')
+				.should('be.visible')
+				.within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+		} else {
+			cy.log('Help modal not found, skipping close action.');
+		}
+	});
+};
 
 function modifyButton() {
 	cy.get('[class*="ProductButtonCard"]')

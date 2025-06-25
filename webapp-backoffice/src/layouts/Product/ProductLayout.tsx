@@ -1,30 +1,26 @@
+import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
+import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
+import { Product, RightAccessStatus } from '@prisma/client';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
-import { useRouter } from 'next/router';
-import { Product, RightAccessStatus } from '@prisma/client';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { Toast } from '@/src/components/ui/Toast';
-import Button from '@codegouvfr/react-dsfr/Button';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface ProductLayoutProps {
 	children: React.ReactNode;
 	product: Product;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	hideMenu?: Boolean;
 }
 
-interface MenuItems {
-	text: string;
-	linkProps: {
-		href: string;
-		alt?: string;
-	};
-	isActive?: boolean;
-}
-
-const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
+const ProductLayout = ({
+	children,
+	product,
+	ownRight,
+	hideMenu
+}: ProductLayoutProps) => {
 	const { id } = product;
 
 	const [displayToast, setDisplayToast] = useState(false);
@@ -34,47 +30,30 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 
 	const { cx, classes } = useStyles();
 
-	const menuItems: MenuItems[] = [
+	const breadcrumbSegments = [
 		{
-			text: 'Statistiques',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/stats`,
+			label: 'Services',
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/stats`,
-				alt: 'Statistiques'
+				href: '/administration/dashboard/products'
+			}
+		}
+	];
+
+	const menuItems: SideMenuProps.Item[] = [
+		{
+			text: 'Formulaires',
+			isActive:
+				router.pathname === `/administration/dashboard/product/[id]/forms`,
+			linkProps: {
+				href: `/administration/dashboard/product/${id}/forms`
 			}
 		},
 		{
-			text: 'Avis',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/reviews`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/reviews`,
-				alt: 'Avis'
-			}
-		},
-		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les boutons'
-					: 'Voir les boutons',
-			isActive:
-				router.pathname === `/administration/dashboard/product/[id]/buttons`,
-			linkProps: {
-				href: `/administration/dashboard/product/${id}/buttons`,
-				alt: 'Gérer mes boutons'
-			}
-		},
-		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? "Gérer l'accès"
-					: "Voir l'accès",
+			text: "Droits d'accès",
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/access`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/access`,
-				alt: "Gérer les droits d'accès"
+				href: `/administration/dashboard/product/${id}/access`
 			}
 		},
 		{
@@ -82,20 +61,15 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/infos`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/infos`,
-				alt: 'Informations'
+				href: `/administration/dashboard/product/${id}/infos`
 			}
 		},
 		{
-			text:
-				ownRight && ownRight === 'carrier_admin'
-					? 'Gérer les clés API'
-					: 'Voir les clés API',
+			text: ownRight && ownRight === 'carrier_admin' ? 'Clés API' : 'Clés API',
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/api_keys`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/api_keys`,
-				alt: 'Gérer les clés API'
+				href: `/administration/dashboard/product/${id}/api_keys`
 			}
 		},
 		{
@@ -103,8 +77,7 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 			isActive:
 				router.pathname === `/administration/dashboard/product/[id]/logs`,
 			linkProps: {
-				href: `/administration/dashboard/product/${id}/logs`,
-				alt: "Consulter l'historique d'activité"
+				href: `/administration/dashboard/product/${id}/logs`
 			}
 		}
 	];
@@ -126,7 +99,12 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 	}, []);
 
 	return (
-		<div className={cx(fr.cx('fr-container'), classes.container)}>
+		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
+			<Breadcrumb
+				currentPageLabel={'Service : ' + product.title}
+				segments={breadcrumbSegments}
+				className={fr.cx('fr-mb-4v')}
+			/>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -134,26 +112,6 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 				severity="info"
 				message="Identifiant copié dans le presse papier !"
 			/>
-			<div className={cx(fr.cx('fr-mt-4w', 'fr-mb-5v'), classes.tagContainer)}>
-				<Tag id="product-id" small>
-					{`# ${id}`}
-				</Tag>
-				<Button
-					priority="tertiary"
-					type="button"
-					className={cx(classes.copyBtn)}
-					nativeButtonProps={{
-						title: `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-						'aria-label': `Copier l’identifiant du service « ${id} » dans le presse-papier`,
-						onClick: () => {
-							navigator.clipboard.writeText(product.id.toString());
-							setDisplayToast(true);
-						}
-					}}
-				>
-					Copier dans le presse-papier
-				</Button>
-			</div>
 			<div className={cx(classes.title)}>
 				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
 					{product.title}
@@ -165,7 +123,14 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-3', 'fr-mb-6v')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-3' : 'fr-hidden',
+						'fr-mb-6v',
+						'fr-mb-md-0'
+					)}
+				>
 					<div role="navigation">
 						<SideMenu
 							align="left"
@@ -176,7 +141,13 @@ const ProductLayout = ({ children, product, ownRight }: ProductLayoutProps) => {
 						/>
 					</div>
 				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-9', 'fr-mb-12v')}>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						!hideMenu ? 'fr-col-md-9' : 'fr-col-md-12',
+						'fr-mb-12v'
+					)}
+				>
 					{children}
 					{router.pathname.includes('/stats') && showBackToTop && (
 						<div className={cx(classes.backToTop)}>
@@ -212,12 +183,6 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('md')]: {
 			minHeight: 'auto'
 		}
-	},
-	tagContainer: {
-		display: 'flex'
-	},
-	copyBtn: {
-		boxShadow: 'none'
 	},
 	backToTop: {
 		position: 'sticky',

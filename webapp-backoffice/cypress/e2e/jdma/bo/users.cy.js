@@ -35,6 +35,9 @@ describe('jdma-users', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 	});
 
 	it('should create a service and attach an organization', () => {
@@ -84,6 +87,7 @@ describe('jdma-users', () => {
 			.first()
 			.click();
 		cy.url().should('include', '/administration/dashboard/users');
+		cy.wait(1000);
 		cy.get('div.fr-card div.fr-grid-row div.fr-col a')
 			.filter(':contains("user 3")')
 			.first()
@@ -95,6 +99,8 @@ describe('jdma-users', () => {
 			.within(() => {
 				cy.get(selectors.sideMenu.menuItem).contains('Accès').click();
 			});
+
+		cy.wait(1000);
 
 		cy.get('h5')
 			.filter(':contains("e2e-jdma-entity-test")')
@@ -127,6 +133,9 @@ describe('jdma-users', () => {
 
 function navigateToCreatedProduct() {
 	cy.visit(`${app_url}${selectors.dashboard.products}`);
+	cy.wait(1000);
+	tryCloseNewsModal();
+	cy.wait(1000);
 	cy.url().should('include', selectors.dashboard.products);
 	cy.get(selectors.productTitle)
 		.filter(':contains("e2e-jdma-service-test-users")')
@@ -139,7 +148,7 @@ function navigateToCreatedProduct() {
 	cy.get(selectors.sideMenu.menu)
 		.should('be.visible')
 		.within(() => {
-			cy.get(selectors.sideMenu.menuItem).contains("Gérer l'accès").click();
+			cy.get(selectors.sideMenu.menuItem).contains("Droits d'accès").click();
 		});
 }
 
@@ -161,6 +170,23 @@ function login(email, password) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 }
 
+const tryCloseNewsModal = () => {
+	cy.get('dialog#news-modal', { timeout: 4000 })
+		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.catch(() => {
+			cy.log('News modal not found within timeout, skipping close action.');
+		});
+};
+
 function createProduct() {
 	cy.contains('button', 'Ajouter un nouveau service').click();
 	cy.get(selectors.productForm, { timeout: 10000 })
@@ -174,6 +200,7 @@ function createProduct() {
 	cy.get(selectors.modalFooter)
 		.contains('button', 'Ajouter ce service')
 		.click();
+	cy.wait(2000);
 }
 
 function selectEntity() {

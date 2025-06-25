@@ -14,22 +14,10 @@ import { Loader } from '../../ui/Loader';
 import EntityRightCard from './EntityRightCard';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { push } from '@socialgouv/matomo-next';
+import { CustomModalProps } from '@/src/types/custom';
 import { PageItemsCounter } from '../../ui/Pagination';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
 
 interface Props {
 	modal: CustomModalProps;
@@ -193,7 +181,10 @@ const EntityRightsModal = (props: Props) => {
 	};
 
 	const displayRightsTable = () => {
-		if (!adminEntityRights.filter(aer => aer.user !== null).length && !session?.user.role.includes('admin')) {
+		if (
+			!adminEntityRights.filter(aer => aer.user !== null).length &&
+			!session?.user.role.includes('admin')
+		) {
 			return (
 				<div role="status">
 					<Alert
@@ -235,7 +226,8 @@ const EntityRightsModal = (props: Props) => {
 							label="Administrateurs"
 							startItemCount={numberPerPage * (currentPage - 1) + 1}
 							endItemCount={
-								numberPerPage * (currentPage - 1) + adminEntityRights.filter(aer => aer.user !== null).length
+								numberPerPage * (currentPage - 1) +
+								adminEntityRights.filter(aer => aer.user !== null).length
 							}
 							totalItemsCount={adminEntityRightsCount}
 						/>

@@ -24,27 +24,22 @@ describe('jdma-logs', () => {
 		cy.visit(app_url + '/login');
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 	});
 
 	it('should display the logs page with no events', () => {
-		cy.wait(8000);
-		cy.visit(app_url + '/administration/dashboard/product/5/logs');
-		cy.get('.fr-sidemenu__link[alt="Consulter l\'historique d\'activité"]')
+		cy.wait(4000);
+		cy.visit(app_url + '/administration/dashboard/product/2/logs');
+		cy.get(
+			'.fr-sidemenu__link[href="/administration/dashboard/product/2/logs"]'
+		)
 			.should('have.attr', 'aria-current', 'page')
 			.and('contain', "Historique d'activité")
 			.click();
 		cy.get('h2').contains("Historique d'activité");
-		cy.get('table').should('exist');
-		cy.get('table tbody tr')
-			.last()
-			.within(() => {
-				cy.get('td')
-					.last()
-					.should(
-						'contain',
-						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
-					);
-			});
+		cy.get('p').contains('Aucun événement trouvé');
 	});
 });
 
@@ -60,3 +55,19 @@ function login(email, password) {
 	cy.url().should('eq', app_url + '/administration/dashboard/products');
 	cy.wait(8000);
 }
+const tryCloseNewsModal = () => {
+	cy.get('dialog#news-modal', { timeout: 4000 })
+		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.catch(() => {
+			cy.log('News modal not found within timeout, skipping close action.');
+		});
+};

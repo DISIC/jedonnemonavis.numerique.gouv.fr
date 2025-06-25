@@ -1,8 +1,9 @@
-import { matchSorter } from 'match-sorter';
-import { trpc } from './trpc';
 import { AnswerIntention, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
-import { off } from 'process';
+import { matchSorter } from 'match-sorter';
+import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
+import { FormConfigWithChildren } from '../types/prismaTypesExtended';
+import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -388,7 +389,8 @@ export const actionMapping: Record<string, TypeAction> = {
 	'button.update': TypeAction.service_button_update,
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete,
-	'userEvent.getList': TypeAction.service_logs_view
+	'userEvent.getList': TypeAction.service_logs_view,
+	'formConfig.create': TypeAction.form_config_create
 };
 
 export const handleActionTypeDisplay = (
@@ -428,6 +430,8 @@ export const handleActionTypeDisplay = (
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
 			return `Suppression d'une clé API`;
+		case TypeAction.form_config_create:
+			return `Mise en place du formulaire version ${metadataTyped.json.version}`;
 	}
 };
 
@@ -448,5 +452,54 @@ export const filtersLabel = [
 	},
 	{ value: 'service_button_create', label: "Création d'un bouton" },
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
-	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" }
+	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
+	{ value: 'form_config_create', label: 'Modification du formulaire' }
 ];
+
+export const getHelperFromFormConfig = (
+	formConfig: FormConfigWithChildren | undefined
+): FormConfigHelper => {
+	return {
+		displays:
+			formConfig?.form_config_displays.map(fcd => ({
+				hidden: fcd.hidden,
+				parent_id: fcd.parent_id,
+				kind: fcd.kind
+			})) || [],
+		labels:
+			formConfig?.form_config_labels.map(fcl => ({
+				label: fcl.label,
+				parent_id: fcl.parent_id,
+				kind: fcl.kind
+			})) || []
+	};
+};
+
+export const getHasConfigChanged = (
+	firstConfig: FormConfigHelper,
+	secondConfig: FormConfigHelper
+) => {
+	return (
+		JSON.stringify({
+			displays: firstConfig.displays.sort((a, b) => a.parent_id - b.parent_id),
+			labels: firstConfig.labels.sort((a, b) => a.parent_id - b.parent_id)
+		}) !==
+		JSON.stringify({
+			displays: secondConfig.displays.sort((a, b) => a.parent_id - b.parent_id),
+			labels: secondConfig.labels.sort((a, b) => a.parent_id - b.parent_id)
+		})
+	);
+};
+
+export const normalizeHtml = (html: string): string => {
+	return html
+		.replace(/<\/?[^>]+(>|$)/g, '') // Retire toutes les balises HTML
+		.replace(/\s+/g, ' ') // Normalise les espaces multiples en un seul
+		.replace(/&nbsp;/g, ' ') // Remplace les espaces insécables
+		.replace(/&lt;/g, '<') // Remplace les entités HTML courantes
+		.replace(/&gt;/g, '>')
+		.replace(/&amp;/g, '&')
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.trim(); // Supprime les espaces en début et fin
+};

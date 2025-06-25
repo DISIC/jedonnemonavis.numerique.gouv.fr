@@ -13,6 +13,7 @@ import { entities } from './seeds/entities';
 import { getRandomObjectFromArray, removeAccents } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { Domain } from 'domain';
+import { createRootForm } from './seeds/form';
 
 const prisma = new PrismaClient();
 
@@ -20,7 +21,11 @@ async function main() {
 	const command = process.argv[2];
 
 	switch (command) {
+		case 'seedRootFormTemplate':
+			await seed_root_form_template();
+			break;
 		case 'seedUsersProducts':
+			await seed_root_form_template();
 			await seed_users_products();
 			break;
 		case 'seedFormattedTitles':
@@ -30,6 +35,7 @@ async function main() {
 			await Promise.all(getWLDPromises());
 			break;
 		default:
+			await seed_root_form_template();
 			await seed_users_products();
 			await formatted_title();
 	}
@@ -53,6 +59,14 @@ function getWLDPromises() {
 	});
 
 	return promisesWLDs;
+}
+
+async function seed_root_form_template() {
+	await prisma.formTemplate.upsert({
+		where: { slug: 'root' },
+		update: createRootForm,
+		create: createRootForm
+	});
 }
 
 async function seed_users_products() {
@@ -100,18 +114,27 @@ async function seed_users_products() {
 								name: randomEntity.name
 							}
 						},
-						buttons: {
-							create: buttons.map(b => ({
-								...b,
-								product_id: b.product_id
-							})) as Button[]
-						},
 						accessRights: {
 							create: {
 								user_email: users.filter(u => u.active && u?.role !== 'admin')[
 									index % 2
-								].email
+								].email,
+								status: 'carrier_admin'
 							}
+						},
+						forms: {
+							create: [
+								{
+									form_template: {
+										connect: {
+											slug: 'root'
+										}
+									},
+									buttons: {
+										create: buttons as Button[]
+									}
+								}
+							]
 						}
 					}
 				})

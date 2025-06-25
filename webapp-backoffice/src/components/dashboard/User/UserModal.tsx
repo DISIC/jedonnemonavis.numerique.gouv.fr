@@ -1,30 +1,14 @@
+import { CustomModalProps } from '@/src/types/custom';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
-import { Prisma, User, UserRole } from '@prisma/client';
-import React from 'react';
-import { tss } from 'tss-react/dsfr';
-import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
-import Image from 'next/image';
-import { trpc } from '@/src/utils/trpc';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import Select from '@codegouvfr/react-dsfr/Select';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
+import { User, UserRole } from '@prisma/client';
+import React from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	isOpen: boolean;
@@ -144,7 +128,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"email"
+									name: 'email'
 								}}
 							/>
 						)}
@@ -176,7 +160,7 @@ const ButtonModal = (props: Props) => {
 										onChange,
 										value,
 										type: 'password',
-										name:"password"
+										name: 'password'
 									}}
 								/>
 							)}
@@ -195,7 +179,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"firstName"
+									name: 'firstName'
 								}}
 							/>
 						)}
@@ -213,7 +197,7 @@ const ButtonModal = (props: Props) => {
 								nativeInputProps={{
 									onChange,
 									value,
-									name:"lastName"
+									name: 'lastName'
 								}}
 							/>
 						)}
@@ -257,8 +241,10 @@ const ButtonModal = (props: Props) => {
 		);
 	};
 
-	const displayModalButtons = ():
-		[ModalProps.ActionAreaButtonProps, ...ModalProps.ActionAreaButtonProps[]]=> {
+	const displayModalButtons = (): [
+		ModalProps.ActionAreaButtonProps,
+		...ModalProps.ActionAreaButtonProps[]
+	] => {
 		return [
 			{
 				children: 'Annuler',
@@ -314,19 +300,19 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 			}
 		}
 	},
-	buttonsContainer: { 
-		display: 'flex', 
-		flexDirection: 'column-reverse', 
-		gap: '1.5rem', 
+	buttonsContainer: {
+		display: 'flex',
+		flexDirection: 'column-reverse',
+		gap: '1.5rem',
 		marginTop: '2rem',
 		[fr.breakpoints.up('md')]: {
 			flexDirection: 'row',
-			justifyContent: 'end',
-		} 
+			justifyContent: 'end'
+		}
 	},
 	button: {
-		display: 'flex', 
-		justifyContent:'center', 
+		display: 'flex',
+		justifyContent: 'center',
 		width: '100%',
 		[fr.breakpoints.up('md')]: {
 			width: 'initial'

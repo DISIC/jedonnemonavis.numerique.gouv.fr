@@ -13,19 +13,27 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
-	buttonId: number | undefined;
+	formId: number;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
+	displayLine?: boolean;
+	isFormDashboardType?: boolean;
+	customHeight?: number;
 };
 
 const AnswersChart = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
-	total
+	total,
+	displayLine = true,
+	isFormDashboardType = false,
+	customHeight
 }: Props) => {
 	const { classes, cx } = useStyles();
 
@@ -35,6 +43,7 @@ const AnswersChart = ({
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -59,14 +68,16 @@ const AnswersChart = ({
 				title="Évolution des réponses"
 				total={total}
 				data={countByFieldCodePerMonth}
+				isFormDashboardType={isFormDashboardType}
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}
 					labelAxisY="Nombre de réponses"
+					customHeight={customHeight}
 				/>
 			</ChartWrapper>
 
-			<hr className={fr.cx('fr-hr', 'fr-mt-16v')} />
+			{displayLine && <hr className={fr.cx('fr-hr', 'fr-mt-16v')} />}
 		</>
 	);
 };

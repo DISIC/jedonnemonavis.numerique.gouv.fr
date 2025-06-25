@@ -2,18 +2,18 @@ import { ReactNode, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
 import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
-import { signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
-import { tss } from 'tss-react/dsfr';
-import { Menu, MenuItem, Skeleton } from '@mui/material';
-import Button from '@codegouvfr/react-dsfr/Button';
-import router from 'next/router';
+import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import Badge from '@codegouvfr/react-dsfr/Badge';
+import { signOut, useSession } from 'next-auth/react';
+import router, { useRouter } from 'next/router';
+import { tss } from 'tss-react/dsfr';
+import { useUserSettings } from '../contexts/UserSettingsContext';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -30,6 +30,7 @@ type NavigationItem = {
 
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
+	const { settings } = useUserSettings();
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -309,6 +310,34 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		navigationItems.push(...superAdminNavigationItems);
 	}
 
+	if (
+		userAccessRights.metadata.count ||
+		userAdminEntityRights.metadata.count ||
+		session?.user.role.includes('admin')
+	) {
+		navigationItems.push({
+			text: (
+				<>
+					Nouveautés
+					{!settings.newsPageSeen && (
+						<Badge
+							severity="new"
+							small
+							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+						>
+							1
+						</Badge>
+					)}
+				</>
+			),
+			linkProps: {
+				href: '/administration/dashboard/news',
+				target: '_self'
+			},
+			isActive: pathname.startsWith('/administration/dashboard/news')
+		});
+	}
+
 	return (
 		<>
 			<SkipLinks
@@ -359,7 +388,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							en remplissant{' '}
 							<a
 								title="Formulaire de retour (nouvelle fenêtre)"
-								href="https://tally.so/r/m6kyyB"
+								href={
+									process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ||
+									'https://tally.so/r/m6kyyB'
+								}
 								target="_blank"
 							>
 								ce court formulaire.

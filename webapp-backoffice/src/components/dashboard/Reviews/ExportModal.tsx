@@ -8,19 +8,7 @@ import { useSession } from 'next-auth/react';
 import React from 'react';
 import { Loader } from '../../ui/Loader';
 import { push } from '@socialgouv/matomo-next';
-
-interface CustomModalProps {
-	buttonProps: {
-		id: string;
-		'aria-controls': string;
-		'data-fr-opened': boolean;
-	};
-	Component: (props: ModalProps) => JSX.Element;
-	close: () => void;
-	open: () => void;
-	isOpenedByDefault: boolean;
-	id: string;
-}
+import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	modal: CustomModalProps;
@@ -105,22 +93,22 @@ const ExportModal = (props: Props) => {
 						}`}
 						options={[
 							{
-								label: `En fonction des filtres sélectionnés (${counts.countFiltered} avis)`,
+								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
 								nativeInputProps: {
 									value: 'filtered',
 									checked: choice === 'filtered',
-									onClick: () => {
+									onChange: () => {
 										setChoice('filtered');
 									},
 									disabled: !startDate || !endDate
 								}
 							},
 							{
-								label: `Tous les avis (${counts.countAll} avis)`,
+								label: `Tous les avis (${counts.countAll} réponses)`,
 								nativeInputProps: {
 									value: 'all',
 									checked: choice === 'all',
-									onClick: () => {
+									onChange: () => {
 										setChoice('all');
 									}
 								}
@@ -138,7 +126,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'xls',
 									checked: format === 'xls',
-									onClick: () => {
+									onChange: () => {
 										setFormat('xls');
 									}
 								}
@@ -148,7 +136,7 @@ const ExportModal = (props: Props) => {
 								nativeInputProps: {
 									value: 'csv',
 									checked: format === 'csv',
-									onClick: () => {
+									onChange: () => {
 										setFormat('csv');
 									}
 								}
@@ -202,7 +190,7 @@ const ExportModal = (props: Props) => {
 						}
 			]}
 			concealingBackdrop={false}
-			title={'Exporter les avis'}
+			title={'Exporter les réponses'}
 			size="large"
 		>
 			{getModalContent()}

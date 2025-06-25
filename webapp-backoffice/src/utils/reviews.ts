@@ -1,30 +1,50 @@
 import { AnswerIntention, Prisma } from '@prisma/client';
-import { Condition } from '../types/custom';
 
-export const formatWhereAndOrder = (input: { [key: string]: any }) => {
+export const formatWhereAndOrder = (
+	input: { [key: string]: any },
+	isLegacy: boolean
+) => {
 	const {
 		product_id,
+		form_id,
 		mustHaveVerbatims,
 		search,
 		sort,
 		start_date,
 		end_date,
-		filters
+		filters,
+		newReviews,
+		lastSeenDate
 	} = input;
 
 	let where: Prisma.ReviewWhereInput = {
 		...(product_id && { product_id }),
-		...(filters?.buttonId?.length > 0 && { button_id: parseInt(filters.buttonId[0]) }),
-		...(end_date && {
-			created_at: {
-				...(start_date && { gte: new Date(start_date) }),
-				lte: (() => {
-					const adjustedend_date = new Date(end_date);
-					adjustedend_date.setHours(23, 59, 59);
-					return adjustedend_date;
-				})()
-			}
+		...(form_id &&
+			(isLegacy
+				? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+				: { form_id })),
+		...(filters?.buttonId?.length > 0 && {
+			button_id: parseInt(filters.buttonId[0])
 		}),
+		...(newReviews &&
+			lastSeenDate && {
+				created_at: {
+					gt: new Date(lastSeenDate)
+				}
+			}),
+		...(!newReviews &&
+			(start_date || end_date) && {
+				created_at: {
+					...(start_date && { gte: new Date(start_date) }),
+					...(end_date && {
+						lte: (() => {
+							const adjustedend_date = new Date(end_date);
+							adjustedend_date.setHours(23, 59, 59);
+							return adjustedend_date;
+						})()
+					})
+				}
+			}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [
 				{
@@ -32,17 +52,18 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 						some: {
 							AND: [
 								{ field_code: 'verbatim' },
-								end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
 									}
-								}
-							]
+							].filter(Boolean)
 						}
 					}
 				}
@@ -54,26 +75,33 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								{ answer_text: { search: search.split(' ').filter((item: string) => item !== '').join('&') } },
-								{ field_code: 'verbatim' },
-								end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
+								{
+									answer_text: {
+										search: search
+											.split(' ')
+											.filter((item: string) => item !== '')
+											.join('&')
 									}
-								}
-							]
+								},
+								{ field_code: 'verbatim' },
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
+									}
+							].filter(Boolean)
 						}
 					}
 				}
 			]
 		})
 	};
-
 
 	let andConditions: Prisma.ReviewWhereInput[] = [];
 
@@ -95,16 +123,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 					answers: {
 						some: {
 							AND: [
-								end_date && {
-									created_at: {
-										...(start_date && { gte: new Date(start_date) }),
-										lte: (() => {
-											const adjustedend_date = new Date(end_date);
-											adjustedend_date.setHours(23, 59, 59);
-											return adjustedend_date;
-										})()
-									}
-								},
+								!newReviews &&
+									end_date && {
+										created_at: {
+											...(start_date && { gte: new Date(start_date) }),
+											lte: (() => {
+												const adjustedend_date = new Date(end_date);
+												adjustedend_date.setHours(23, 59, 59);
+												return adjustedend_date;
+											})()
+										}
+									},
 								{
 									field_code: fields.find(field => field.key === key)
 										?.field as string,
@@ -119,7 +148,7 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 										}
 									})
 								}
-							]
+							].filter(Boolean)
 						}
 					}
 				};
@@ -140,14 +169,17 @@ export const formatWhereAndOrder = (input: { [key: string]: any }) => {
 	];
 
 	if (sort) {
-		const values = sort.split(':');
-		if (sort.includes('created_at')) {
-			orderBy = [
-				{
-					[values[0]]: values[1]
-				}
-			];
-		}
+		const values: string[] = sort.split(';');
+		values.forEach(value => {
+			const sortValues = value.split(':');
+			if (value.includes('created_at')) {
+				orderBy = [
+					{
+						[sortValues[0]]: sortValues[1]
+					}
+				];
+			}
+		});
 	}
 
 	return {

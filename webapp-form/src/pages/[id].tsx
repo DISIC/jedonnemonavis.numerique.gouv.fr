@@ -1,25 +1,35 @@
 import { FormFirstBlock } from "@/src/components/form/layouts/FormFirstBlock";
-import { FormField, Opinion, Product, RadioOption } from "@/src/utils/types";
+import {
+  FormField,
+  FormWithElements,
+  Opinion,
+  Product,
+  RadioOption,
+} from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
+import { Notice } from "@codegouvfr/react-dsfr/Notice";
+import { AnswerIntention, Prisma } from "@prisma/client";
+import { push } from "@socialgouv/matomo-next";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { GetServerSideProps } from "next/types";
 import React, { useState } from "react";
 import { tss } from "tss-react/dsfr";
-import { trpc } from "../utils/trpc";
-import { AnswerIntention, Button, Prisma } from "@prisma/client";
-import { allFields, steps_A, steps_B } from "../utils/form";
+import { v4 as uuidv4 } from "uuid";
 import { FormStepper } from "../components/form/layouts/FormStepper";
-import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/router";
 import { Loader } from "../components/global/Loader";
 import prisma from "../utils/db";
-import { v4 as uuidv4 } from "uuid";
-import { push } from "@socialgouv/matomo-next";
+import { allFields, steps_A, steps_B } from "../utils/form";
+import { filterByFormConfig, serializeData } from "../utils/tools";
+import { trpc } from "../utils/trpc";
 
 type JDMAFormProps = {
   product: Product;
+  isPreviewPublished: boolean;
+  isPreviewUnpublished: boolean;
 };
 
 export type FormStepNames =
@@ -32,7 +42,11 @@ export type FormStepNames =
     >
   | "contact";
 
-export default function JDMAForm({ product }: JDMAFormProps) {
+export default function JDMAForm({
+  product,
+  isPreviewPublished,
+  isPreviewUnpublished,
+}: JDMAFormProps) {
   const { t } = useTranslation("common");
   const router = useRouter();
 
@@ -40,8 +54,15 @@ export default function JDMAForm({ product }: JDMAFormProps) {
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
-  const currentSteps =
-    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B;
+  const currentSteps = (
+    process.env.NEXT_PUBLIC_AB_TESTING === "A" ? steps_A : steps_B
+  ).filter((_, index) =>
+    filterByFormConfig(
+      index,
+      product.form.form_template,
+      product.form.form_configs[0]
+    )
+  );
 
   const isInIframe = router.query.iframe === "true";
 
@@ -244,7 +265,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
           review: {
             product_id: product.id,
             button_id: product.buttons[0].id,
-            form_id: 2,
+            form_id: product.form.id,
             user_id: userId,
           },
           answers,
@@ -398,6 +419,7 @@ export default function JDMAForm({ product }: JDMAFormProps) {
         <>
           {router.query.step ? (
             <FormStepper
+              product={product}
               opinion={opinion}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
@@ -451,6 +473,36 @@ export default function JDMAForm({ product }: JDMAFormProps) {
 
   return (
     <div>
+      {isPreviewUnpublished && (
+        <Notice
+          className={cx(classes.notice)}
+          isClosable
+          onClose={function noRefCheck() {}}
+          title={
+            <>
+              <b>Vous prévisualisez une version non plubliée du formulaire.</b>
+              <span className={fr.cx("fr-ml-2v")}>
+                Vos réponses ne sont pas prises en compte.
+              </span>
+            </>
+          }
+        />
+      )}
+      {isPreviewPublished && (
+        <Notice
+          className={cx(classes.notice)}
+          isClosable
+          onClose={function noRefCheck() {}}
+          title={
+            <>
+              <b>Vous consultez une visualisation du formulaire.</b>
+              <span className={fr.cx("fr-ml-2v")}>
+                Vos réponses ne sont pas prises en compte.
+              </span>
+            </>
+          }
+        />
+      )}
       <div>
         <div className={classes.blueSection}>
           {!isFormSubmitted ? (
@@ -491,68 +543,117 @@ export const getServerSideProps: GetServerSideProps<{
 
   const productId = params.id as string;
   const buttonId = query.button as string;
+  const formConfig = query.formConfig as string;
   const xwikiButtonName = query.nd_source as string;
+  const isInIframe = (query.iframe as string) === "true";
 
-  const isXWikiLink = !buttonId;
+  const isXWikiLink = !buttonId && !isInIframe;
 
   await prisma.$connect();
+  let buttonFormId: number | undefined = undefined;
+
+  if (buttonId) {
+    const button = await prisma.button.findUnique({
+      where: { id: parseInt(buttonId) },
+      select: { form_id: true },
+    });
+
+    buttonFormId = button?.form_id;
+  }
+
   const product = await prisma.product.findUnique({
     where: isXWikiLink
-      ? {
-          xwiki_id: parseInt(productId),
-          buttons: {
-            some: {},
-          },
-        }
-      : {
-          id: parseInt(productId),
-          buttons: {
-            some: {
-              id: { equals: parseInt(buttonId) },
-            },
-          },
-        },
+      ? { xwiki_id: parseInt(productId) }
+      : { id: parseInt(productId) },
     include: {
-      buttons: isXWikiLink
-        ? true
-        : {
-            where: {
-              id: { equals: parseInt(buttonId) },
+      forms: {
+        // Si buttonFormId est défini, on filtre les forms, sinon on les laisse tous
+        where: buttonFormId ? { id: buttonFormId } : undefined,
+        include: {
+          form_configs: {
+            // Pareil ici : si on a un formId ciblé via le bouton, on le filtre
+            where: buttonFormId ? { form_id: buttonFormId } : undefined,
+            include: {
+              form_config_displays: true,
+              form_config_labels: true,
+            },
+            orderBy: {
+              created_at: "desc",
+            },
+            take: 1,
+          },
+          form_template: {
+            include: {
+              form_template_steps: {
+                include: {
+                  form_template_blocks: {
+                    include: {
+                      options: true,
+                    },
+                  },
+                },
+              },
             },
           },
+          buttons:
+            isXWikiLink || isInIframe
+              ? true
+              : {
+                  where: {
+                    id: parseInt(buttonId),
+                  },
+                },
+        },
+      },
     },
   });
   await prisma.$disconnect();
 
+  if (!product?.forms[0] || (!!formConfig && !isInIframe)) {
+    return {
+      notFound: true,
+    };
+  }
+
   if (isXWikiLink) {
-    if (!product?.buttons.length)
+    if (!product.forms[0].buttons.length)
       return {
         notFound: true,
       };
 
-    const sameName = product.buttons.find(
+    const sameName = product.forms[0].buttons.find(
       (b) => b.xwiki_title === xwikiButtonName
     );
-    const nameButton = product.buttons.find((b) => b.xwiki_title === "button");
+    const nameButton = product.forms[0].buttons.find(
+      (b) => b.xwiki_title === "button"
+    );
 
-    if (sameName) product.buttons = [sameName];
-    else if (nameButton) product.buttons = [nameButton];
-    else product.buttons = [product.buttons[0]];
+    if (sameName) product.forms[0].buttons = [sameName];
+    else if (nameButton) product.forms[0].buttons = [nameButton];
+    else product.forms[0].buttons = [product.forms[0].buttons[0]];
   }
 
   if (product && product.status !== "archived") {
     return {
       props: {
         product: {
-          ...product,
-          created_at: product.created_at.toString(),
-          updated_at: product.updated_at.toString(),
-          buttons: product.buttons.map((button: Button) => ({
-            ...button,
-            created_at: button.created_at.toString(),
-            updated_at: button.updated_at.toString(),
-          })),
+          id: product.id,
+          title: product.title,
+          buttons: serializeData(product.forms[0]?.buttons || []),
+          form: {
+            ...serializeData(product.forms[0]),
+            form_configs: formConfig
+              ? [
+                  {
+                    form_config_displays: JSON.parse(formConfig).displays,
+                    form_config_labels: JSON.parse(formConfig).labels,
+                  } as FormWithElements["form_configs"][0],
+                ]
+              : serializeData(product.forms[0].form_configs),
+          },
         },
+        isPreviewPublished: !formConfig && isInIframe,
+        isPreviewUnpublished: !!formConfig && isInIframe,
         ...(await serverSideTranslations(locale ?? "fr", ["common"])),
       },
     };
@@ -631,6 +732,16 @@ const useStyles = tss
       [fr.breakpoints.up("md")]: {
         transform: `translateY(-${blueSectionPxHeight / 2}px)`,
         ...fr.spacing("padding", { topBottom: "8v", rightLeft: "16v" }),
+      },
+    },
+    notice: {
+      ...fr.typography[19].style,
+      p: {
+        fontWeight: "normal",
+      },
+      ".fr-notice__title": {
+        marginLeft: `-${fr.spacing("2v")}`,
+        paddingTop: "1px",
       },
     },
   }));

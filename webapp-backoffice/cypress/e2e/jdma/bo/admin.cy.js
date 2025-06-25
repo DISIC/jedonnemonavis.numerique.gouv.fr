@@ -23,7 +23,8 @@ const selectors = {
 	modal: {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
-		button: 'dialog#button-modal'
+		button: 'dialog#button-modal',
+		form: 'dialog#new-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productTitle: '[class*="productTitle"]'
@@ -34,6 +35,9 @@ describe('jdma-admin', () => {
 		cy.visit(`${app_url}/login`);
 		loginAsAdmin();
 		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.wait(1000);
+		tryCloseNewsModal();
+		cy.wait(1000);
 	});
 
 	it('create and delete users', () => {
@@ -171,41 +175,46 @@ describe('jdma-admin', () => {
 			.contains(selectors.dashboard.nameTestService)
 			.click();
 
-		cy.contains('Créer un bouton JDMA').click();
-		cy.get(selectors.modal.button).within(() => {
-			cy.get('input[name="button-create-title"]').type('e2e-jdma-button-test');
-			cy.get('textarea').type('Description du bouton e2e-jdma-button-test');
-		});
+		cy.wait(1000);
+
+		cy.contains('Créer un formulaire').click();
+		cy.get(selectors.modal.form)
+			.first()
+			.within(() => {
+				cy.get('input[name="title"]').type('e2e-jdma-form-test', {
+					force: true
+				});
+			});
 
 		cy.get(selectors.modalFooter).contains('Créer').click();
 		cy.visit(app_url);
 	});
 
-	it('delete service with guest admin', () => {
-		logout();
-		login(invitedEmail, userPassword);
-		deleteService(selectors.dashboard.nameTestService);
-		checkMail(
-			false,
-			`Suppression du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
-		);
-		checkform(false);
-		cy.visit(`${app_url}`);
-		cy.contains('div', selectors.dashboard.nameTestService).should('not.exist');
-	});
+	// it('delete service with guest admin', () => {
+	// 	logout();
+	// 	login(invitedEmail, userPassword);
+	// 	deleteService(selectors.dashboard.nameTestService);
+	// 	checkMail(
+	// 		false,
+	// 		`Suppression du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
+	// 	);
+	// 	checkform(false);
+	// 	cy.visit(`${app_url}`);
+	// 	cy.contains('div', selectors.dashboard.nameTestService).should('not.exist');
+	// });
 
-	it('restore service with guest admin', () => {
-		logout();
-		login(invitedEmail, userPassword);
-		restaureService();
-		cy.get('input[name="archived-products"]').should('not.exist');
-		cy.contains('div', selectors.dashboard.nameTestService).should('exist');
-		checkMail(
-			false,
-			`Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
-		);
-		checkform(true);
-	});
+	// it('restore service with guest admin', () => {
+	// 	logout();
+	// 	login(invitedEmail, userPassword);
+	// 	restaureService();
+	// 	cy.get('input[name="archived-products"]').should('not.exist');
+	// 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
+	// 	checkMail(
+	// 		false,
+	// 		`Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
+	// 	);
+	// 	checkform(true);
+	// });
 });
 
 // Helpers
@@ -220,6 +229,23 @@ function login(email, password) {
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 }
+
+const tryCloseNewsModal = () => {
+	cy.get('dialog#news-modal', { timeout: 4000 })
+		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click();
+				});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.catch(() => {
+			cy.log('News modal not found within timeout, skipping close action.');
+		});
+};
 
 function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();

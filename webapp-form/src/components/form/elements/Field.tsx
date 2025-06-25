@@ -4,6 +4,7 @@ import {
   Feeling,
   FormField,
   Opinion,
+  Product,
 } from "@/src/utils/types";
 import { Checkbox } from "@codegouvfr/react-dsfr/Checkbox";
 import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
@@ -22,66 +23,28 @@ type Props = {
   field: FormField;
   opinion: Opinion;
   form: FormField[];
+  formConfig?: Product["form"]["form_configs"][0];
+  formTemplateStep?: Product["form"]["form_template"]["form_template_steps"][0];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
-type CheckboxOpinionKeys = "contact_tried";
-
 export const Field = (props: Props) => {
-  const { field, opinion, setOpinion, form } = props;
+  const { field, opinion, setOpinion, form, formConfig, formTemplateStep } =
+    props;
   const { classes, cx } = useStyles({ nbItems: 5 });
 
   const { t } = useTranslation("common");
 
-  const getChildrenResetObject = () => {
-    const children = form.filter(
-      (f) =>
-        f.conditions && f.conditions.map((c) => c.name).includes(field.name)
-    );
+  const templateField = formTemplateStep?.form_template_blocks.find(
+    (ftb) => ftb.label === t(field.label, { lng: "fr" })
+  );
 
-    let opinionPropsObj: {
-      [key in keyof Opinion]?: any;
-    } = {};
-
-    children.forEach((cf) => {
-      opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
-        ? []
-        : undefined;
-    });
-
-    return opinionPropsObj;
-  };
-
-  const onChangeCheckbox = (
-    key: CheckboxOpinionKeys,
-    isolated: boolean,
-    e: ChangeEvent<HTMLInputElement>,
-    options: CheckboxOption[]
-  ) => {
-    if (isolated) {
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked ? [e.target.value] : [],
-        ...getChildrenResetObject(),
-      });
-    } else {
-      const isolatedSiblings = options
-        .filter((opt) => opt.isolated)
-        .map((opt) => opt.value);
-      setOpinion({
-        ...opinion,
-        [key]: e.target.checked
-          ? [
-              ...opinion[key].filter(
-                (sibling) => !isolatedSiblings.includes(sibling)
-              ),
-              parseInt(e.target.value),
-            ]
-          : opinion[key].filter((d) => d !== parseInt(e.target.value)),
-        ...getChildrenResetObject(),
-      });
-    }
-  };
+  const displayConfig = formConfig?.form_config_displays.find(
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
+  );
+  const labelConfig = formConfig?.form_config_labels.find(
+    (fcd) => fcd.kind === "block" && fcd.parent_id === templateField?.id
+  );
 
   if (field.conditions) {
     const showField = field.conditions.some((condition) => {
@@ -151,6 +114,8 @@ export const Field = (props: Props) => {
           field={field}
           opinion={opinion}
           form={form}
+          formTemplateField={templateField}
+          formConfig={formConfig}
           setOpinion={setOpinion}
         ></CheckboxInput>
       );
@@ -167,12 +132,20 @@ export const Field = (props: Props) => {
       return (
         <div className={classes.inputContainer}>
           <Input
-            hintText={field.hint ? t(field.hint) : undefined}
+            hintText={
+              templateField?.upLabel ? (
+                <p
+                  dangerouslySetInnerHTML={{
+                    __html: templateField.upLabel,
+                  }}
+                ></p>
+              ) : undefined
+            }
             label={<h3>{t(field.label)}</h3>}
             state={
               (opinion[field.name] || "").length > 15000 ? "error" : "default"
             }
-            stateRelatedMessage="Maximum 250 caractères"
+            stateRelatedMessage="Maximum 15000 caractères"
             nativeTextAreaProps={{
               value: opinion[field.name]?.slice(0, 15000),
               onChange: (e) => {
@@ -184,6 +157,12 @@ export const Field = (props: Props) => {
             }}
             textArea
           />
+          {templateField?.downLabel && (
+            <p className={cx(classes.infoText, fr.cx("fr-mt-0"))}>
+              <span className={fr.cx("fr-icon-info-fill", "fr-mr-1v")} />{" "}
+              {templateField.downLabel}
+            </p>
+          )}
           <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
             {opinion[field.name]?.length || 0} / 15000
           </div>
@@ -281,5 +260,12 @@ const useStyles = tss
     },
     textCount: {
       alignSelf: "flex-end",
+    },
+    infoText: {
+      color: fr.colors.decisions.text.default.info.default,
+      fontSize: "0.8rem",
+      ".fr-icon-info-fill::before": {
+        "--icon-size": "1rem",
+      },
     },
   }));

@@ -11,7 +11,7 @@ import {
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 import { Prisma, PrismaClient, Product } from '@prisma/client';
-import { removeAccents } from '@/src/utils/tools';
+import { actionMapping, removeAccents } from '@/src/utils/tools';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
 import { sendMail } from '@/src/utils/mailer';
@@ -20,7 +20,7 @@ import {
 	getProductRestoredEmail
 } from '@/src/utils/emails';
 
-const checkRightToProceed = async (
+export const checkRightToProceed = async (
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
 	session: Session,
 	product_id: number
@@ -211,7 +211,18 @@ export const productRouter = router({
 					take: numberPerPage,
 					skip: numberPerPage * (page - 1),
 					include: {
-						buttons: true
+						forms: {
+							include: {
+								buttons: true,
+								form_template: true,
+								form_configs: {
+									include: {
+										form_config_displays: true,
+										form_config_labels: true
+									}
+								}
+							}
+						}
 					}
 				});
 
@@ -282,7 +293,11 @@ export const productRouter = router({
 				take: numberPerPage,
 				skip: numberPerPage * (page - 1),
 				include: {
-					buttons: true
+					forms: {
+						include: {
+							buttons: true
+						}
+					}
 				}
 			});
 
@@ -293,7 +308,7 @@ export const productRouter = router({
 					id: product.id,
 					xwiki_id: product.xwiki_id,
 					title: product.title,
-					buttons: product.buttons.map(b => ({
+					buttons: product.forms[0].buttons.map(b => ({
 						id: b.id,
 						title: b.title,
 						xwiki_title: b.xwiki_title
@@ -304,7 +319,6 @@ export const productRouter = router({
 		}),
 
 	create: protectedProcedure
-		.meta({ logEvent: true })
 		.input(ProductUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
@@ -322,6 +336,28 @@ export const productRouter = router({
 							}
 						]
 					}
+				}
+			});
+			
+
+			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
+			const inputObj = trpcQueries[0].includes('get')
+						? ctx.req.query.input
+							? JSON.parse(ctx.req.query.input as string)
+							: { defaultKey: 'defaultValue' }
+						: ctx.req.body && typeof ctx.req.body === 'string'
+							? JSON.parse(ctx.req.body)
+							: ctx.req.body || { defaultKey: 'defaultValue' };
+							
+			const action = actionMapping[trpcQueries[0]];
+			const input = inputObj[0] !== undefined ? inputObj[0] : {};
+
+			await ctx.prisma.userEvent.create({
+				data: {
+					user_id: parseInt(ctx.session.user.id),
+					action: 'service_create',
+					product_id: product.id,
+					metadata: input
 				}
 			});
 

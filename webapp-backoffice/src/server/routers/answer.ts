@@ -1,21 +1,21 @@
-import {
-	BucketsInside,
-	Buckets,
-	ElkAnswer,
-	ElkAnswerDefaults
-} from '../../types/custom';
-import { z } from 'zod';
-import { router, protectedProcedure, publicProcedure } from '@/src/server/trpc';
-import { AnswerIntention, PrismaClient } from '@prisma/client';
+import { publicProcedure, router } from '@/src/server/trpc';
 import {
 	calculateBucketsAverage,
 	getCalendarFormat,
 	getCalendarInterval,
 	getDiffDaysBetweenTwoDates
 } from '@/src/utils/tools';
-import { Session } from 'next-auth';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Client } from '@elastic/elasticsearch';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { AnswerIntention, PrismaClient } from '@prisma/client';
+import { Session } from 'next-auth';
+import { z } from 'zod';
+import {
+	Buckets,
+	BucketsInside,
+	ElkAnswer,
+	ElkAnswerDefaults
+} from '../../types/custom';
 
 const checkAndGetProduct = async ({
 	ctx,
@@ -36,6 +36,23 @@ const checkAndGetProduct = async ({
 
 	return product;
 };
+const checkAndGetForm = async ({
+	ctx,
+	form_id
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	form_id: number;
+}) => {
+	const form = await ctx.prisma.form.findUnique({
+		where: {
+			id: form_id
+		}
+	});
+
+	if (!form) throw new Error('Form not found');
+
+	return form;
+};
 
 const queryCountByFieldCode = ({
 	field_code,
@@ -44,74 +61,77 @@ const queryCountByFieldCode = ({
 	start_date,
 	end_date,
 	form_id,
-	only_parent_values
+	only_parent_values,
+	legacy,
+	xwiki
 }: {
 	field_code: string;
 	product_id: number;
 	button_id?: number;
 	start_date: string;
 	end_date: string;
-	form_id?: number;
+	form_id: number;
 	only_parent_values?: boolean;
+	legacy: boolean;
+	xwiki?: boolean;
 }): QueryDslQueryContainer => {
-	let query: QueryDslQueryContainer = {
-		bool: {
-			must: [
-				{
-					match: {
-						field_code
-					}
-				},
-				{
-					match: {
-						product_id
-					}
-				},
-				{
-					range: {
-						created_at: {
-							gte: start_date,
-							lte: end_date
-						}
-					}
+	const mustClauses: QueryDslQueryContainer[] = [
+		{ term: { field_code } },
+		{ term: { product_id } },
+		{
+			range: {
+				created_at: {
+					gte: start_date,
+					lte: end_date
 				}
-			]
+			}
 		}
-	};
+	];
 
-	// SPECIFIC CODE BECAUSE FORM_ID DOES NOT EXIST IN THE MIGRATED DATA
-	if (query.bool && query.bool.must) {
-		if (form_id && form_id === 1) {
-			query.bool.must_not = {
-				exists: {
-					field: 'form_id'
+	if (xwiki) {
+		return {
+			bool: {
+				must: mustClauses,
+				must_not: {
+					exists: {
+						field: 'form_id'
+					}
 				}
-			};
-		} else if (form_id) {
-			(query.bool.must as QueryDslQueryContainer[]).push({
-				match: {
-					form_id
-				}
-			});
-		}
-		if (button_id) {
-			(query.bool.must as QueryDslQueryContainer[]).push({
-				match: {
-					button_id
-				}
-			});
-		}
+			}
+		};
+	} else if (legacy) {
+		mustClauses.push({
+			bool: {
+				should: [
+					{ term: { form_id: form_id } },
+					{ term: { form_id: 2 } },
+					{ bool: { must_not: { exists: { field: 'form_id' } } } }
+				]
+			}
+		});
+	} else {
+		mustClauses.push({
+			term: { form_id }
+		});
 	}
 
-	if (only_parent_values && query.bool && query.bool.must) {
-		(query.bool.must as QueryDslQueryContainer[]).push({
+	if (button_id !== undefined) {
+		mustClauses.push({ term: { button_id } });
+	}
+
+	if (only_parent_values) {
+		mustClauses.push({
 			wildcard: {
 				'answer_text.keyword': '*avec l’administration'
 			}
 		});
 	}
 
-	return query;
+	return {
+		bool: {
+			must: mustClauses
+		}
+	};
 };
 
 const getDefaultValues = async ({
@@ -222,23 +242,27 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string(),
-				form_id: z.number().optional()
+				xwiki: z.boolean().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, button_id, form_id } = input;
+			const { product_id, xwiki, button_id, form_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy,
+					xwiki
 				}),
 				aggs: {
 					term: {
@@ -256,7 +280,8 @@ export const answerRouter = router({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					unique_review_ids: {
@@ -341,16 +366,18 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.enum(['contact_reached', 'contact_satisfaction']),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id } = input;
+			const { product_id, form_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const parentFieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
 				index: 'jdma-answers',
@@ -358,6 +385,7 @@ export const answerRouter = router({
 				query: {
 					...queryCountByFieldCode({
 						...input,
+						legacy: form.legacy,
 						field_code: 'contact_tried',
 						only_parent_values: true
 					})
@@ -390,7 +418,8 @@ export const answerRouter = router({
 				track_total_hits: true,
 				query: {
 					...queryCountByFieldCode({
-						...input
+						...input,
+						legacy: form.legacy
 					})
 				},
 				aggs: {
@@ -520,21 +549,24 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, button_id } = input;
+			const { product_id, form_id, button_id } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const data = await ctx.elkClient.count({
 				index: 'jdma-answers',
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: !!form?.legacy
 				})
 			});
 
@@ -545,23 +577,33 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { field_code, product_id, button_id, start_date, end_date } = input;
+			const {
+				field_code,
+				product_id,
+				form_id,
+				button_id,
+				start_date,
+				end_date
+			} = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
 			const data = await ctx.elkClient.search({
 				index: 'jdma-answers',
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					count_per_month: {
@@ -629,16 +671,18 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, start_date, end_date } = input;
+			const { product_id, form_id, start_date, end_date } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
@@ -646,7 +690,8 @@ export const answerRouter = router({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					count_per_month: {
@@ -746,16 +791,18 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				field_code: z.string(),
-				product_id: z.number() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number(),
 				button_id: z.number().optional(),
 				start_date: z.string(),
 				end_date: z.string()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, start_date, end_date } = input;
+			const { product_id, form_id, start_date, end_date } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
@@ -764,6 +811,7 @@ export const answerRouter = router({
 				track_total_hits: true,
 				query: queryCountByFieldCode({
 					...input,
+					legacy: form.legacy,
 					field_code: 'contact_tried'
 				}),
 				aggs: {
@@ -793,7 +841,8 @@ export const answerRouter = router({
 				index: 'jdma-answers',
 				track_total_hits: true,
 				query: queryCountByFieldCode({
-					...input
+					...input,
+					legacy: form.legacy
 				}),
 				aggs: {
 					count_per_month: {
@@ -1025,7 +1074,8 @@ export const answerRouter = router({
 	getObservatoireStats: publicProcedure
 		.input(
 			z.object({
-				product_id: z.string() /* To change to button_id */,
+				product_id: z.number(),
+				form_id: z.number().optional(),
 				button_id: z.number().optional(),
 				start_date: z.string().optional(),
 				end_date: z.string().optional(),
@@ -1034,17 +1084,32 @@ export const answerRouter = router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, button_id, start_date, end_date, isXWiki } = input;
+			const { product_id, form_id, button_id, start_date, end_date, isXWiki } =
+				input;
 
 			const product = await ctx.prisma.product.findUnique({
-				where: isXWiki
-					? { xwiki_id: parseInt(product_id) }
-					: { id: parseInt(product_id) }
+				where: isXWiki ? { xwiki_id: product_id } : { id: product_id },
+				include: {
+					forms: {
+						where: {
+							legacy: true
+						}
+					}
+				}
 			});
 
 			if (!product) throw new Error('Product not found');
 			if (!product.isPublic && !ctx.session?.user)
 				throw new Error('Product is not public');
+
+			if (!form_id && !product.forms[0].id)
+				throw new Error('No form specified');
+
+			const form = await ctx.prisma.form.findUnique({
+				where: { id: form_id ? form_id : product?.forms[0].id }
+			});
+
+			if (!form) throw new Error('Form not found');
 
 			let query: QueryDslQueryContainer = {
 				bool: {
@@ -1060,7 +1125,11 @@ export const answerRouter = router({
 								]
 							}
 						},
-						{ match: { product_id: product.id } },
+						{
+							match: {
+								product_id: product.id
+							}
+						},
 						{
 							range: {
 								created_at: {
@@ -1070,7 +1139,22 @@ export const answerRouter = router({
 										: new Date().toISOString().split('T')[0]
 								}
 							}
-						}
+						},
+						form.legacy
+							? {
+									bool: {
+										should: [
+											{ terms: { form_id: [form.id, 1, 2] } },
+											{ bool: { must_not: { exists: { field: 'form_id' } } } }
+										],
+										minimum_should_match: 1
+									}
+								}
+							: {
+									term: {
+										form_id: form.id
+									}
+								}
 					]
 				}
 			};
@@ -1115,7 +1199,22 @@ export const answerRouter = router({
 											: new Date().toISOString().split('T')[0]
 									}
 								}
-							}
+							},
+							form.legacy
+								? {
+										bool: {
+											should: [
+												{ terms: { form_id: [form.id, 1, 2] } },
+												{ bool: { must_not: { exists: { field: 'form_id' } } } }
+											],
+											minimum_should_match: 1
+										}
+									}
+								: {
+										term: {
+											form_id: form.id
+										}
+									}
 						]
 					}
 				},
@@ -1250,7 +1349,7 @@ export const answerRouter = router({
 						data: {
 							user_id: parseInt(user.id),
 							action: 'service_stats_view',
-							product_id: parseInt(product_id),
+							product_id: product_id,
 							metadata: input
 						}
 					});

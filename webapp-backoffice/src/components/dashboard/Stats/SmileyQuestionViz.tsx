@@ -24,7 +24,8 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 type Props = {
 	fieldCode: FieldCodeSmiley;
 	productId: number;
-	buttonId: number | undefined;
+	formId: number;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
@@ -40,6 +41,7 @@ export const intentionSortOrder = {
 const SmileyQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -52,15 +54,16 @@ const SmileyQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
 				end_date: endDate,
 				...(oldFormFieldCodes.includes(fieldCode) && {
-					form_id: 1
+					xwiki: true
 				}),
 				...(newFormFieldCodes.includes(fieldCode) && {
-					form_id: 2
+					xwiki: false
 				})
 			},
 			{
@@ -81,6 +84,7 @@ const SmileyQuestionViz = ({
 	} = trpc.answer.getByFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -159,7 +163,7 @@ const SmileyQuestionViz = ({
 			required={required}
 		>
 			{resultFieldCode.data.length > 0 && (
-				<ChartWrapper title="Répartition des réponses">
+				<ChartWrapper title="Répartition des réponses" smallTitle>
 					<div className={classes.distributionContainer}>
 						{resultFieldCode.data
 							.sort(
@@ -205,6 +209,7 @@ const SmileyQuestionViz = ({
 											placement="top-start"
 											tabIndex={0}
 											title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+											enterTouchDelay={0}
 										>
 											<div
 												className={classes.progressBar}
@@ -223,12 +228,13 @@ const SmileyQuestionViz = ({
 							})}
 					</div>
 				</ChartWrapper>
-		)}
+			)}
 
 			<ChartWrapper
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={data}
+				smallTitle
 			>
 				<SmileyBarChart data={data} total={total} />
 			</ChartWrapper>
@@ -239,6 +245,7 @@ const SmileyQuestionViz = ({
 				data={dataForChart}
 				singleRowLabel="Note moyenne"
 				tooltip="Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire."
+				smallTitle
 			>
 				<LineChart
 					data={dataForChart}
@@ -278,7 +285,8 @@ const useStyles = tss.create({
 	distributionLabel: {
 		marginTop: fr.spacing('2v'),
 		marginBottom: fr.spacing('2v'),
-		height: '1.5rem'
+		height: '1.5rem',
+		textWrap: 'nowrap'
 	},
 	progressBar: {
 		width: '100%',

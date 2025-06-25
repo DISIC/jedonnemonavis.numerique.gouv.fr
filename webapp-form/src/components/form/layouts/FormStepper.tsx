@@ -1,5 +1,5 @@
 import { secondSectionA, steps_A, steps_B } from "@/src/utils/form";
-import { FormField, Opinion, Step } from "@/src/utils/types";
+import { FormField, Opinion, Product, Step } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Button } from "@codegouvfr/react-dsfr/Button";
 import { useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 import { useRouter } from "next/router";
 
 type Props = {
+  product: Product;
   opinion: Opinion;
   steps: Step[];
   onSubmit: (opinion: Opinion, isLastStep: boolean) => void;
@@ -19,7 +20,8 @@ type Props = {
 };
 
 export const FormStepper = (props: Props) => {
-  const { onSubmit, opinion, steps, currentStep, setCurrentStep } = props;
+  const { onSubmit, opinion, steps, currentStep, product, setCurrentStep } =
+    props;
 
   const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
   const { t } = useTranslation();
@@ -27,6 +29,10 @@ export const FormStepper = (props: Props) => {
   const router = useRouter();
 
   const { classes, cx } = useStyles();
+
+  const formTemplateStep = product.form.form_template.form_template_steps.find(
+    (fts) => fts.title === t(`${steps[currentStep].name}`, { lng: "fr" })
+  );
 
   return (
     <div>
@@ -38,13 +44,9 @@ export const FormStepper = (props: Props) => {
             </h1>
             <Stepper
               currentStep={currentStep + 1}
-              stepCount={
-                process.env.NEXT_PUBLIC_AB_TESTING === "A"
-                  ? steps_A.length
-                  : steps_B.length
-              }
-              title={t(`${steps[currentStep].name}`)}   
-              className={fr.cx("fr-mb-12v")}           
+              stepCount={steps.length}
+              title={t(`${steps[currentStep].name}`)}
+              className={fr.cx("fr-mb-12v")}
             />
           </>
         )}
@@ -67,6 +69,8 @@ export const FormStepper = (props: Props) => {
               opinion={tmpOpinion}
               setOpinion={setTmpOpinion}
               form={secondSectionA}
+              formConfig={product.form.form_configs[0]}
+              formTemplateStep={formTemplateStep}
             />
           </div>
         ))}
@@ -122,15 +126,15 @@ const useStyles = tss
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
-      }
+      },
     },
-    stepButton:{
+    stepButton: {
       width: "100%",
       display: "flex",
       justifyContent: "center",
-      ...fr.spacing('padding', {topBottom: "3v", rightLeft: "6v"}),
+      ...fr.spacing("padding", { topBottom: "3v", rightLeft: "6v" }),
       [fr.breakpoints.up("md")]: {
         width: "initial",
       },
-    }
+    },
   }));

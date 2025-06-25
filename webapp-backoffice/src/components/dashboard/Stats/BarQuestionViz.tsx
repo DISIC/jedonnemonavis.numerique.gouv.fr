@@ -16,7 +16,8 @@ const BarChart = dynamic(() => import('@/src/components/chart/BarChart'), {
 type Props = {
 	fieldCode: string;
 	productId: number;
-	buttonId: number | undefined;
+	formId: number;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
@@ -26,6 +27,7 @@ type Props = {
 const BarQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
@@ -38,6 +40,7 @@ const BarQuestionViz = ({
 		trpc.answer.getByFieldCode.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
@@ -72,6 +75,7 @@ const BarQuestionViz = ({
 	} = trpc.answer.countByFieldCodePerMonth.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -99,6 +103,7 @@ const BarQuestionViz = ({
 				title="Répartition des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeData}
+				smallTitle
 			>
 				<BarChart data={formatedFieldCodeData} />
 			</ChartWrapper>
@@ -109,6 +114,7 @@ const BarQuestionViz = ({
 				singleRowLabel={
 					fieldCode === 'comprehension' ? 'Score moyen' : 'Nombre de réponses'
 				}
+				smallTitle
 			>
 				<LineChart
 					data={countByFieldCodePerMonth}

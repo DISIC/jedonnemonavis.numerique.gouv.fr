@@ -12,6 +12,23 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		where: {
 			id: parseInt(id as string),
 			status: 'published'
+		},
+		include: {
+			forms: {
+				include: {
+					form_template: true,
+					form_configs: {
+						include: {
+							form_config_displays: true,
+							form_config_labels: true
+						},
+						orderBy: {
+							created_at: 'desc'
+						}
+					},
+					buttons: true
+				}
+			}
 		}
 	});
 

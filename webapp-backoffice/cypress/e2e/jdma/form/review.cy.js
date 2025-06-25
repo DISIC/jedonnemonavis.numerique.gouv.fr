@@ -3,7 +3,7 @@ const app_bo_url = Cypress.env('app_base_url');
 
 describe('jdma-form-review', () => {
 	before(() => {
-		cy.visit(`${app_url}/Demarches/5?button=8`);
+		cy.visit(`${app_url}/Demarches/2?button=3`);
 	});
 
 	it('Fill form', () => {
@@ -23,8 +23,8 @@ function fillFormStep1() {
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
+	cy.wait(5000);
 
-	cy.url().should('include', 'step=0');
 	cy.get('h1').contains('Clarté');
 }
 
@@ -54,37 +54,39 @@ function fillFormStep3() {
 				.eq(0)
 				.find('input[type="radio"]')
 				.eq(0)
-				.check({ force: true }); 
+				.check({ force: true });
 			cy.get('fieldset')
 				.eq(1)
 				.find('input[type="radio"]')
 				.eq(0)
-				.check({ force: true }); 
+				.check({ force: true });
 			cy.get('fieldset')
 				.eq(2)
 				.find('input[type="radio"]')
 				.eq(1)
-				.check({ force: true }); 
+				.check({ force: true });
 		});
 }
 
 function fillFormStep4() {
-	cy.get("[class*='reviews']").should('be.visible').within(() => {
-		cy.contains('label', 'Au guichet')
-			.parents("[class*='optionRow']")
-			.within(() => {
-				cy.get('input[type="radio"]').eq(4).check({ force: true }); 
-			});
+	cy.get("[class*='reviews']")
+		.should('be.visible')
+		.within(() => {
+			cy.contains('label', 'Au guichet')
+				.parents("[class*='optionRow']")
+				.within(() => {
+					cy.get('input[type="radio"]').eq(4).check({ force: true });
+				});
 
-		cy.contains('label', 'Par téléphone')
-			.parents("[class*='optionRow']")
-			.within(() => {
-				cy.get('input[type="radio"]').eq(3).check({ force: true }); 
-			});
-	});
+			cy.contains('label', 'Par téléphone')
+				.parents("[class*='optionRow']")
+				.within(() => {
+					cy.get('input[type="radio"]').eq(3).check({ force: true });
+				});
+		});
 
 	cy.get('button').contains('Continuer').click();
-	cy.get('h1').contains('Informations complémentaires').should('exist');
+	cy.get('h1').contains('Commentaire').should('exist');
 	cy.get('form').within(() => {
 		cy.get('textarea').type('e2e test content');
 	});

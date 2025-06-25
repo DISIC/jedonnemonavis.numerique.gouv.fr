@@ -36,7 +36,7 @@ export const KPITile = (props: KPITileProps) => {
 	return (
 		<div className={cx(fr.cx('fr-tile'))}>
 			<div className={cx(fr.cx('fr-tile__body'))}>
-				<h3
+				<span
 					className={cx(
 						fr.cx('fr-tile__title'),
 						classes.titleText,
@@ -44,8 +44,8 @@ export const KPITile = (props: KPITileProps) => {
 					)}
 				>
 					{title}
-				</h3>
-				<p className={cx(classes.kpiText)}>
+				</span>
+				<p className={cx(classes.kpiText, fr.cx('fr-mt-4v'))}>
 					{isLoading ? (
 						<Skeleton variant="text" width="20%" height="2rem" />
 					) : (

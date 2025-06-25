@@ -3,6 +3,7 @@ import {
   Condition,
   FormField,
   Opinion,
+  Product,
 } from "@/src/utils/types";
 import { useTranslation } from "next-i18next";
 import { ChangeEvent, SetStateAction, useEffect } from "react";
@@ -15,11 +16,14 @@ type Props = {
   field: FormField;
   opinion: Opinion;
   form: FormField[];
+  formTemplateField?: Product["form"]["form_template"]["form_template_steps"][0]["form_template_blocks"][0];
+  formConfig?: Product["form"]["form_configs"][0];
   setOpinion: (value: SetStateAction<Opinion>) => void;
 };
 
 export const CheckboxInput = (props: Props) => {
-  const { field, opinion, setOpinion, form } = props;
+  const { field, opinion, setOpinion, form, formTemplateField, formConfig } =
+    props;
   const { classes, cx } = useStyles({ nbItems: 5 });
   const { t } = useTranslation("common");
 
@@ -105,6 +109,29 @@ export const CheckboxInput = (props: Props) => {
 
   if (field.kind === "checkbox") {
     const uncheckText = "(cette option décoche les autres options)";
+
+    const displays =
+      formConfig?.form_config_displays
+        .filter((fcd) =>
+          formTemplateField?.options
+            .map((opt) => opt.id)
+            .includes(fcd.parent_id),
+        )
+        .map((fcd) => {
+          const formTemplateOption = formTemplateField?.options.find(
+            (opt) => opt.id === fcd.parent_id,
+          );
+          const fieldOption = field.options.find(
+            (opt) => t(opt.label, { lng: "fr" }) === formTemplateOption?.label,
+          );
+
+          return {
+            ...fcd,
+            option_value: fieldOption?.value,
+          };
+        })
+        .filter((fcd) => fcd.option_value !== undefined) || [];
+
     return (
       <div className={fr.cx("fr-grid-row")}>
         <div className={cx(fr.cx("fr-col-12"), classes.checkboxContainer)}>
@@ -112,35 +139,42 @@ export const CheckboxInput = (props: Props) => {
             <Checkbox
               legend={<h3>{t(field.label)}</h3>}
               hintText={t(field.hint ?? "")}
-              options={field.options.map((opt, index) => ({
-                label: (
-                  <>
-                    {t(opt.label) === "Je n'ai pas eu besoin d'aide" ? (
-                      <>
-                        {t(opt.label)}{" "}
-                        <span className="fr-sr-only">{uncheckText}</span>
-                      </>
-                    ) : (
-                      t(opt.label)
-                    )}
-                  </>
-                ),
-                nativeInputProps: {
-                  name: opt.name || `${field.name}-${index}`,
-                  checked: opinion[field.name as CheckboxOpinionKeys]?.includes(
-                    opt.value,
+              options={field.options
+                .filter(
+                  (opt) =>
+                    !displays.some(
+                      (d) => d.option_value === opt.value && d.hidden,
+                    ),
+                )
+                .map((opt, index) => ({
+                  label: (
+                    <>
+                      {t(opt.label) === "Je n'ai pas eu besoin d'aide" ? (
+                        <>
+                          {t(opt.label)}{" "}
+                          <span className="fr-sr-only">{uncheckText}</span>
+                        </>
+                      ) : (
+                        t(opt.label)
+                      )}
+                    </>
                   ),
-                  value: opt.value,
-                  onChange: (e) => {
-                    onChangeCheckbox(
-                      field.name as CheckboxOpinionKeys,
-                      opt.isolated || false,
-                      e,
-                      field.options,
-                    );
+                  nativeInputProps: {
+                    name: opt.name || `${field.name}-${index}`,
+                    checked: opinion[
+                      field.name as CheckboxOpinionKeys
+                    ]?.includes(opt.value),
+                    value: opt.value,
+                    onChange: (e) => {
+                      onChangeCheckbox(
+                        field.name as CheckboxOpinionKeys,
+                        opt.isolated || false,
+                        e,
+                        field.options,
+                      );
+                    },
                   },
-                },
-              }))}
+                }))}
             />
           </>
         </div>

@@ -1,90 +1,50 @@
-import { fr } from '@codegouvfr/react-dsfr';
+import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
-import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { buttonContents } from './ServiceFormsNoButtonsPanel';
 
 interface Props {
 	onButtonClick: () => void;
 	isSmall?: boolean;
 }
+
 const NoButtonsPanel = (props: Props) => {
 	const { onButtonClick, isSmall } = props;
 	const { cx, classes } = useStyles();
 
-	const getTitle = () => {
-		return isSmall ? (
-			<div className={cx(classes.smallTitle)}>C'est quoi un bouton JDMA ?</div>
-		) : (
-			<h3 className={cx(classes.title)}>C'est quoi un bouton JDMA ?</h3>
-		);
-	};
-
 	return (
-		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-8v', 'fr-p-md-12v'))}>
-			{getTitle()}
-			<div
-				className={cx(
-					fr.cx(
-						'fr-grid-row',
-						'fr-grid-row--left',
-						'fr-grid-row--middle',
-						'fr-pb-3v'
-					),
-					classes.maxWidth
-				)}
-			>
-				<div className={fr.cx('fr-col-3')}>
-					<Image
-						src="/assets/chat_picto.svg"
-						alt="C'est quoi un bouton JDMA ?"
-						width={120}
-						height={120}
-						className={cx(classes.image)}
-					/>
-				</div>
-				<div
-					className={cx(
-						fr.cx('fr-col-9', 'fr-pl-2v', 'fr-pl-md-0'),
-						classes.textContainer
-					)}
-				>
-					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
-						Le bouton JDMA se place sur votre service numérique pour récolter
-						l’avis de vos usagers.
-					</p>
-				</div>
+		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
+			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
+				<span className={classes.title}>
+					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
+				</span>
 			</div>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-pb-3v')}>
-				<div className={fr.cx('fr-col-3')}>
-					<Image
-						src="/assets/install_picto.svg"
-						alt="C'est quoi un bouton JDMA ?"
-						width={120}
-						height={120}
-						className={cx(classes.image)}
-					/>
-				</div>
+			{buttonContents.map((content, index) => (
 				<div
-					className={cx(
-						fr.cx('fr-col-9', 'fr-pl-2v', 'fr-pl-md-0'),
-						classes.textContainer
-					)}
+					key={index}
+					className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}
 				>
-					<p className={cx(fr.cx('fr-mb-0'), classes.text)}>
-						Pour installer le bouton sur votre service numérique, insérez le
-						code HTML fourni par la plateforme et commencez à récolter des avis.
-					</p>
+					<div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}>
+						<i className={cx(fr.cx(content.iconId), classes.icon)} />
+					</div>
+					<div className="fr-col-11">
+						<p>{content.text}</p>
+						{content.link && (
+							<a href={content.link.href} target="_blank" className="fr-col-12">
+								{content.link.label}
+							</a>
+						)}
+					</div>
 				</div>
-			</div>
+			))}
 			<Button
-				className={cx(classes.button)}
+				className={cx(classes.button, fr.cx('fr-mt-6v'))}
 				priority="primary"
-				iconId="fr-icon-add-circle-line"
+				iconId="fr-icon-add-line"
 				iconPosition="right"
 				type="button"
-				size={isSmall ? 'small' : 'medium'}
+				size="large"
 				nativeButtonProps={{
 					onClick: event => {
 						event.preventDefault();
@@ -93,7 +53,7 @@ const NoButtonsPanel = (props: Props) => {
 					}
 				}}
 			>
-				Créer un bouton JDMA
+				Créer un emplacement
 			</Button>
 		</div>
 	);
@@ -102,40 +62,51 @@ const NoButtonsPanel = (props: Props) => {
 const useStyles = tss.create({
 	container: {
 		...fr.spacing('padding', {}),
-		background: fr.colors.decisions.artwork.background.blueCumulus.default,
+		background: fr.colors.decisions.artwork.decorative.blueFrance.default,
 		display: 'flex',
 		flexDirection: 'column',
 		justifyContent: 'flex-start',
-		alignItems: 'flex-start'
+		alignItems: 'flex-start',
+		a: {
+			color: fr.colors.decisions.text.title.blueFrance.default
+		}
 	},
 	title: {
 		fontWeight: 'bold',
-		fontSize: '28px',
-		color: fr.colors.decisions.text.title.blueFrance.default,
-		[fr.breakpoints.down('sm')]: {
-			marginBottom: fr.spacing('4v'),
+		fontSize: '1.5rem',
+		lineHeight: '2rem'
+	},
+	content: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		marginBottom: fr.spacing('3v'),
+		'&:last-of-type': {
+			marginBottom: 0
+		},
+		p: {
+			margin: 0,
+			whiteSpace: 'pre-wrap'
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			marginBottom: fr.spacing('6v')
 		}
 	},
-	smallTitle: {
-		fontWeight: 'bold',
-		fontSize: '16px',
-		color: fr.colors.decisions.text.title.blueFrance.default
-	},
-	maxWidth: {
-		width: '100%'
-	},
-	textContainer: {
+	indicatorIcon: {
+		width: fr.spacing('12v'),
+		height: fr.spacing('12v'),
 		display: 'flex',
-		alignItems: 'center'
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderRadius: '50%',
+		backgroundColor: 'white'
 	},
-	row: {
-		gap: '24px',
-		paddingBottom: '12px'
-	},
-	text: {
-		fontSize: '18px',
-		[fr.breakpoints.down('sm')]: {
-			fontSize: '16px'
+	icon: {
+		color: fr.colors.decisions.background.flat.blueFrance.default,
+		'::before': {
+			'--icon-size': fr.spacing('7v')
 		}
 	},
 	button: {
@@ -144,14 +115,6 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'
-		}
-	},
-	image: {
-		[fr.breakpoints.down('md')]: {
-			alignSelf: 'center',
-			display: 'block',
-			margin: '0 auto',
-			width: '100%',
 		}
 	}
 });

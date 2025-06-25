@@ -1,9 +1,4 @@
-import {
-  BlockPartialWithRelations,
-  BlockWithPartialRelations,
-  ReviewCustomPartialWithRelations,
-  TypeblocType,
-} from "@/prisma/generated/zod";
+import { Product, Step } from "./types";
 
 export const areArrayEquals = (array1?: any[], array2?: any[]) => {
   if (!array1) return false;
@@ -15,65 +10,57 @@ export const areArrayEquals = (array1?: any[], array2?: any[]) => {
   );
 };
 
-export const BlockQuestionsType: TypeblocType[] = [
-  "input_text",
-  "input_text_area",
-  "mark_input",
-  "smiley_input",
-  "select",
-  "radio",
-  "checkbox",
-];
+type Serialized<T> = T extends Date
+  ? string
+  : T extends Array<infer U>
+    ? Array<Serialized<U>>
+    : T extends object
+      ? { [K in keyof T]: Serialized<T[K]> }
+      : T;
 
-export const applyLogicForm = (
-  action: "disable" | "show",
-  block_id: number | null,
-  logicBlocks: BlockPartialWithRelations[],
-  context: ReviewCustomPartialWithRelations,
-): boolean => {
-  const blockActionned = logicBlocks.find((b) =>
-    b.options?.some(
-      (o) => o.label === "then" && parseInt(o.content || "") === block_id,
-    ),
-  );
-
-  if (blockActionned) {
-    const blockTriggeredId = parseInt(
-      blockActionned.options?.find((o) => o.label === "when")?.content || "",
-    );
-    const condition = blockActionned.options?.find(
-      (o) => o.label === "condition",
-    )?.content;
-    const desiredAction = blockActionned.options?.find(
-      (o) => o.label === "action",
-    )?.content;
-    const conditionValue = blockActionned.options?.find(
-      (o) => o.label === "value",
-    )?.content;
-
-    if (!blockTriggeredId || !condition || !desiredAction) return false;
-
-    const blockTriggeredValue =
-      context.answers?.find((a) => a.block_id === blockTriggeredId)?.content ||
-      "";
-
-    const conditionSatisfied =
-      (condition === "isEmpty" &&
-        (!blockTriggeredValue || blockTriggeredValue.trim() === "")) ||
-      (condition === "notEmpty" && blockTriggeredValue.trim() !== "") ||
-      (condition === "contains" &&
-        blockTriggeredValue.includes(conditionValue || "")) ||
-      (condition === "notContain" &&
-        !blockTriggeredValue.includes(conditionValue || ""));
-
-    if (action === "show") {
-      if (conditionSatisfied && desiredAction === "hide") return true;
-      if (!conditionSatisfied && desiredAction === "show") return true;
-    } else if (action === "disable") {
-      if (conditionSatisfied && desiredAction === "disable") return true;
-      if (!conditionSatisfied && desiredAction === "enable") return true;
-    }
+export const serializeData = <T>(obj: T): Serialized<T> => {
+  if (obj === null || obj === undefined) {
+    return obj as Serialized<T>;
   }
 
-  return false;
+  if (obj instanceof Date) {
+    return obj.toString() as Serialized<T>;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => serializeData(item)) as Serialized<T>;
+  }
+
+  if (typeof obj === "object") {
+    const result: Record<string, any> = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        result[key] = serializeData(obj[key]);
+      }
+    }
+    return result as Serialized<T>;
+  }
+
+  return obj as Serialized<T>;
+};
+
+export const filterByFormConfig = (
+  index: number,
+  formTemplate: Product["form"]["form_template"],
+  formConfig?: Product["form"]["form_configs"][0],
+) => {
+  if (!formConfig) return true;
+
+  const formTemplateStep = formTemplate.form_template_steps.find(
+    (fts) => fts.position === index + 1,
+  );
+
+  const isHidden = formConfig.form_config_displays.some(
+    (fcd) =>
+      fcd.kind === "step" &&
+      fcd.parent_id === formTemplateStep?.id &&
+      fcd.hidden,
+  );
+
+  return !isHidden;
 };

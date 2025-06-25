@@ -28,6 +28,8 @@ type Props = {
 	singleRowLabel?: string;
 	displayTotal?: 'classic' | 'percentage';
 	tooltip?: string;
+	isFormDashboardType?: boolean;
+	smallTitle?: boolean;
 };
 
 const orderData = (
@@ -96,7 +98,9 @@ const ChartWrapper = ({
 	reverseData,
 	singleRowLabel,
 	displayTotal,
-	tooltip
+	tooltip,
+	isFormDashboardType = false,
+	smallTitle
 }: Props) => {
 	const totalFormatted = total ? formatNumberWithSpaces(total) : '';
 	const [view, setView] = useState<'chart' | 'table'>('chart');
@@ -248,14 +252,31 @@ const ChartWrapper = ({
 		);
 	};
 
+	const TitleTag = smallTitle ? 'h5' : 'h4';
 	return (
-		<div className={cx(classes.container, fr.cx('fr-mt-10v'))}>
-			<div className={classes.header}>
+		<div
+			className={cx(
+				classes.container,
+				isFormDashboardType && classes.dashboardContainer,
+				fr.cx(!isFormDashboardType && 'fr-mt-10v')
+			)}
+		>
+			<div
+				className={cx(
+					classes.header,
+					isFormDashboardType && classes.dashboardHeader
+				)}
+			>
 				<div className={classes.container}>
 					<label className={cx(classes.label)}>
-						<h4 className={fr.cx('fr-mb-0')}>{title}</h4>
+						<TitleTag className={fr.cx('fr-mb-0')}>{title}</TitleTag>
 						{tooltip && (
-							<Tooltip placement="top" title={tooltip} tabIndex={0}>
+							<Tooltip
+								placement="top"
+								title={tooltip}
+								tabIndex={0}
+								enterTouchDelay={0}
+							>
 								<span
 									className={fr.cx(
 										'fr-icon-information-line',
@@ -267,7 +288,14 @@ const ChartWrapper = ({
 						)}
 					</label>
 					{totalFormatted && (
-						<p className={fr.cx('fr-hint-text')}>{totalFormatted} réponses</p>
+						<p
+							className={fr.cx(
+								'fr-hint-text',
+								isFormDashboardType && 'fr-mb-0'
+							)}
+						>
+							{totalFormatted} réponses
+						</p>
 					)}
 				</div>
 				<div className={classes.flexAlignCenter}>
@@ -284,12 +312,10 @@ const ChartWrapper = ({
 							push(['trackEvent', 'Product - Stats', 'View-Chart']);
 						}}
 					>
-						{view === 'chart' && (
-							<span
-								className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
-								aria-hidden="true"
-							></span>
-						)}
+						<span
+							className="ri-bar-chart-2-line fr-mr-1v fr-icon--sm"
+							aria-hidden="true"
+						></span>
 						Graphique
 					</Button>
 					<Button
@@ -305,17 +331,20 @@ const ChartWrapper = ({
 							push(['trackEvent', 'Product - Stats', 'View-Table']);
 						}}
 					>
-						{view === 'table' && (
-							<span
-								className="ri-grid-line fr-mr-1v fr-icon--sm"
-								aria-hidden="true"
-							></span>
-						)}
+						<span
+							className="ri-grid-line fr-mr-1v fr-icon--sm"
+							aria-hidden="true"
+						></span>
 						Tableau
 					</Button>
 				</div>
 			</div>
-			<div className={classes.container}>
+			<div
+				className={cx(
+					classes.container,
+					isFormDashboardType && classes.dashboardChartContainer
+				)}
+			>
 				{view === 'chart' ? children : displayTable()}
 			</div>
 		</div>
@@ -327,6 +356,17 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		display: 'flex',
 		flexDirection: 'column',
 		gap: '0.25rem'
+	},
+	dashboardContainer: {
+		height: '100%',
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+	},
+	dashboardHeader: {
+		...fr.spacing('padding', { topBottom: '4v', rightLeft: '6v' }),
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+	},
+	dashboardChartContainer: {
+		padding: fr.spacing('6v')
 	},
 	tableContainer: {
 		overflowX: 'auto',
@@ -342,7 +382,7 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 			margin: 0
 		},
 		[fr.breakpoints.down('md')]: {
-			height: 'auto'	
+			height: 'auto'
 		}
 	},
 	table: {
@@ -399,11 +439,11 @@ const useStyles = tss.withName(ChartWrapper.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: '1rem',
 		[fr.breakpoints.down('md')]: {
+			marginBottom: '1rem',
 			flexDirection: 'column',
 			alignItems: 'flex-start',
-			justifyContent: 'flex-start',
+			justifyContent: 'flex-start'
 		}
 	},
 	flexAlignCenter: {

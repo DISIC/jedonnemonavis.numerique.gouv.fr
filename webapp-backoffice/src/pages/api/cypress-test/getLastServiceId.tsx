@@ -23,7 +23,7 @@ export default async function handler(
 		const productId = lastTestProduct ? lastTestProduct.id : null;
 
 		const lastTestButton = await prisma.button.findFirst({
-			where: productId ? { product_id: productId } : {}
+			where: productId ? { form: { product_id: productId } } : {}
 		});
 
 		res

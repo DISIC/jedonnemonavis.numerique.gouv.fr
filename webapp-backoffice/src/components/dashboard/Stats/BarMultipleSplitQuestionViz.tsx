@@ -1,10 +1,11 @@
 import { trpc } from '@/src/utils/trpc';
 import { Skeleton } from '@mui/material';
-import ChartWrapper from './ChartWrapper';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ChartWrapper from './ChartWrapper';
 import QuestionWrapper from './QuestionWrapper';
+import { HideBlockOptionsHelper } from '../Form/tabs/stats';
 
 const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 	ssr: false
@@ -20,20 +21,24 @@ const StackedVerticalBarChart = dynamic(
 type Props = {
 	fieldCode: 'contact_reached' | 'contact_satisfaction';
 	productId: number;
-	buttonId: number | undefined;
+	formId: number;
+	buttonId?: number;
 	startDate: string;
 	endDate: string;
 	total: number;
+	hiddenOptions?: HideBlockOptionsHelper;
 	required?: boolean;
 };
 
 const BarMultipleSplitQuestionViz = ({
 	fieldCode,
 	productId,
+	formId,
 	buttonId,
 	startDate,
 	endDate,
 	total,
+	hiddenOptions,
 	required = false
 }: Props) => {
 	const { classes } = useStyles();
@@ -58,6 +63,7 @@ const BarMultipleSplitQuestionViz = ({
 		trpc.answer.getByChildFieldCode.useQuery(
 			{
 				product_id: productId,
+				form_id: formId,
 				...(buttonId && { button_id: buttonId }),
 				field_code: fieldCode,
 				start_date: startDate,
@@ -81,6 +87,7 @@ const BarMultipleSplitQuestionViz = ({
 	} = trpc.answer.getByChildFieldCodeInterval.useQuery(
 		{
 			product_id: productId,
+			form_id: formId,
 			...(buttonId && { button_id: buttonId }),
 			field_code: fieldCode,
 			start_date: startDate,
@@ -155,6 +162,7 @@ const BarMultipleSplitQuestionViz = ({
 			hidePercentage={['contact_reached', 'contact_satisfaction'].includes(
 				fieldCode
 			)}
+			hiddenOptions={hiddenOptions}
 		>
 			<ChartWrapper
 				title="Répartition des réponses"
@@ -162,6 +170,7 @@ const BarMultipleSplitQuestionViz = ({
 				sortOrder={sortOrder}
 				reverseData
 				displayTotal="classic"
+				smallTitle
 			>
 				<StackedVerticalBarChart
 					data={formatedFieldCodeData}
@@ -175,6 +184,7 @@ const BarMultipleSplitQuestionViz = ({
 				title="Évolution des réponses"
 				total={resultFieldCode.metadata.total}
 				data={formatedFieldCodeDataPerInterval}
+				smallTitle
 			>
 				<LineChart
 					data={formatedFieldCodeDataPerInterval}

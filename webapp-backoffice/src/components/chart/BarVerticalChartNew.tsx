@@ -41,6 +41,7 @@ const BarVerticalChartNew = ({
 				title="Graphique: Répartition des réponses"
 				data={data}
 				layout="vertical"
+				margin={{ left: -20 }}
 			>
 				<CartesianGrid horizontal={false} strokeDasharray="3 3" />
 				<XAxis
@@ -53,7 +54,6 @@ const BarVerticalChartNew = ({
 					<Label
 						value="Nombre de réponses"
 						fontSize="0.75rem"
-						dy={5}
 						position="insideBottom"
 					/>
 				</XAxis>
