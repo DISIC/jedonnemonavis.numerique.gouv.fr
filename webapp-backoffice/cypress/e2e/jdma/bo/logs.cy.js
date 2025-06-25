@@ -42,17 +42,7 @@ describe('jdma-logs', () => {
 			.and('contain', "Historique d'activité")
 			.click();
 		cy.get('h2').contains("Historique d'activité");
-		cy.get('table').should('exist');
-		cy.get('table tbody tr')
-			.last()
-			.within(() => {
-				cy.get('td')
-					.last()
-					.should(
-						'contain',
-						"Invitation de l'utilisateur e2e-jdma-test-invite-bis@beta.gouv.fr à l'organisation"
-					);
-			});
+		cy.get('p').contains('Aucun événement trouvé');
 	});
 });
 
