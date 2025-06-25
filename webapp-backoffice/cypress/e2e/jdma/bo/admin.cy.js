@@ -231,15 +231,19 @@ function login(email, password) {
 }
 
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal').then($modal => {
-		if ($modal.length && $modal.is(':visible')) {
-			cy.wrap($modal).within(() => {
-				cy.contains('button', 'Fermer').click();
-			});
-		} else {
-			cy.log('News modal not visible, skipping close action.');
-		}
-	});
+	cy.get('dialog#news-modal', { timeout: 1000 })
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click({ force: true });
+				});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.catch(() => {
+			cy.log('News modal not found, skipping close action.');
+		});
 };
 
 function selectEntity() {
