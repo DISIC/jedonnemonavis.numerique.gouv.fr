@@ -56,18 +56,20 @@ function login(email, password) {
 	cy.wait(8000);
 }
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal', { timeout: 4000 })
-		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
-		.then($modal => {
-			if ($modal.length && $modal.is(':visible')) {
-				cy.wrap($modal).within(() => {
-					cy.contains('button', 'Fermer').click();
+	cy.get('body').then($body => {
+		if ($body.find('dialog#news-modal').length > 0) {
+			cy.get('dialog#news-modal', { timeout: 4000 })
+				.should('be.visible')
+				.then($modal => {
+					cy.wrap($modal).within(() => {
+						cy.contains('button', 'Fermer').click();
+					});
+				})
+				.catch(() => {
+					cy.log('News modal found but not visible within 4s, skipping.');
 				});
-			} else {
-				cy.log('News modal not visible, skipping close action.');
-			}
-		})
-		.catch(() => {
-			cy.log('News modal not found within timeout, skipping close action.');
-		});
+		} else {
+			cy.log('News modal not found in DOM, skipping.');
+		}
+	});
 };
