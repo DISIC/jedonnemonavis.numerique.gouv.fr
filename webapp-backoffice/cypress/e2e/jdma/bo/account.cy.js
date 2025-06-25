@@ -145,6 +145,8 @@ function login(email, password) {
 function logout() {
 	cy.reload();
 	cy.wait(2000);
+	tryCloseNewsModal();
+	cy.wait(1000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.contains('button', 'Se déconnecter').click({ force: true });
