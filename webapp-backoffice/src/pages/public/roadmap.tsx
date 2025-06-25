@@ -103,7 +103,7 @@ const Roadmap: React.FC<HomeProps> = ({ intro, tableData }) => {
 								'Tag / Epic',
 								'Titre de la fonctionnalité',
 								'Statut',
-								'Descripition'
+								'Description'
 							]}
 						></Table>
 					</div>
