@@ -231,22 +231,26 @@ function login(email, password) {
 }
 
 const tryCloseNewsModal = () => {
-	cy.get('body').then($body => {
-		if ($body.find('dialog#news-modal').length > 0) {
-			cy.get('dialog#news-modal', { timeout: 4000 })
-				.should('be.visible')
-				.then($modal => {
-					cy.wrap($modal).within(() => {
-						cy.contains('button', 'Fermer').click();
-					});
-				})
-				.catch(() => {
-					cy.log('News modal found but not visible within 4s, skipping.');
+	cy.get('dialog#news-modal', { timeout: 4000 })
+		.then($modal => {
+			if ($modal.length && $modal.is(':visible')) {
+				cy.wrap($modal).within(() => {
+					cy.contains('button', 'Fermer').click();
 				});
-		} else {
-			cy.log('News modal not found in DOM, skipping.');
-		}
-	});
+			} else {
+				cy.log('News modal not visible, skipping close action.');
+			}
+		})
+		.on('fail', err => {
+			if (
+				err.name === 'CypressError' &&
+				err.message.includes('Expected to find element')
+			) {
+				cy.log('News modal not found within timeout, skipping close action.');
+				return false;
+			}
+			throw err;
+		});
 };
 
 function selectEntity() {
