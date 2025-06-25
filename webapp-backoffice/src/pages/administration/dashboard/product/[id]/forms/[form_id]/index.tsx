@@ -210,7 +210,7 @@ const ProductFormPage = (props: Props) => {
 										hasButtons={nbButtons > 0}
 										nbReviews={nbReviews}
 										isLoading={isLoadingReviewsCount}
-										modal={buttonModal}
+										handleModalOpening={handleModalOpening}
 										onClickGoToReviews={() => {
 											tabsRef.current
 												?.querySelector<HTMLButtonElement>(
@@ -227,7 +227,7 @@ const ProductFormPage = (props: Props) => {
 									<ReviewsTab
 										form={form}
 										ownRight={ownRight}
-										modal={buttonModal}
+										handleModalOpening={handleModalOpening}
 										hasButtons={nbButtons > 0}
 									/>
 								),
@@ -239,7 +239,7 @@ const ProductFormPage = (props: Props) => {
 									<StatsTab
 										form={form}
 										ownRight={ownRight}
-										modal={buttonModal}
+										handleModalOpening={handleModalOpening}
 									/>
 								),
 								isDefault: router.query.tab === 'stats'

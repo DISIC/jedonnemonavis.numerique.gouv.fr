@@ -34,7 +34,7 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	modal: CustomModalProps;
+	handleModalOpening: (modalType: string, button?: any) => void;
 }
 
 export interface CommonStepProps {
@@ -103,7 +103,7 @@ export const OldSectionWrapper = ({
 
 const nbMaxReviews = 500000;
 
-const StatsTab = ({ form, ownRight, modal }: Props) => {
+const StatsTab = ({ form, ownRight, handleModalOpening }: Props) => {
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
@@ -238,7 +238,7 @@ const StatsTab = ({ form, ownRight, modal }: Props) => {
 		: 0;
 
 	const handleButtonClick = () => {
-		modal.open();
+		handleModalOpening('create');
 	};
 
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {

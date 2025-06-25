@@ -34,7 +34,7 @@ import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfi
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	modal: CustomModalProps;
+	handleModalOpening: (modalType: string, button?: any) => void;
 	hasButtons: boolean;
 }
 
@@ -49,7 +49,7 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const { form, ownRight, modal, hasButtons } = props;
+	const { form, ownRight, handleModalOpening, hasButtons } = props;
 	const router = useRouter();
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
@@ -367,7 +367,7 @@ const ReviewsTab = (props: Props) => {
 	}, [filters.productReviews.displayNew]);
 
 	const handleButtonClick = () => {
-		modal.open();
+		handleModalOpening('create');
 	};
 
 	const handleSendInvitation = () => {

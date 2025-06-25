@@ -21,7 +21,7 @@ interface Props {
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
 	hasButtons: boolean;
-	modal: CustomModalProps;
+	handleModalOpening: (modalType: string, button?: any) => void;
 }
 
 const DashboardTab = ({
@@ -30,7 +30,7 @@ const DashboardTab = ({
 	form,
 	onClickGoToReviews,
 	hasButtons,
-	modal
+	handleModalOpening
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
@@ -227,7 +227,7 @@ const DashboardTab = ({
 			<div className={fr.cx('fr-col-12')}>
 				<NoButtonsPanel
 					onButtonClick={() => {
-						modal.open();
+						handleModalOpening('create');
 					}}
 				/>
 			</div>
