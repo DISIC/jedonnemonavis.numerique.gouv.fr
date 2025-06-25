@@ -68,7 +68,7 @@ const NewsUpcomingPage = ({ intro, tableData = [] }: NewsUpcomingProps) => {
 					<Table
 						caption={intro}
 						data={tableData}
-						headers={['Titre de la fonctionnalité', 'Descripition']}
+						headers={['Titre de la fonctionnalité', 'Description']}
 					/>
 				</div>
 			</div>
