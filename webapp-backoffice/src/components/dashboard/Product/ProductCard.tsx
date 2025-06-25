@@ -119,12 +119,7 @@ const ProductCard = ({
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
 			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
-	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
-		legacy
-			? (reviewsCountData?.newCountsByForm[formId.toString()] ?? 0) +
-				(reviewsCountData?.newCountsByForm['1'] ?? 0) +
-				(reviewsCountData?.newCountsByForm['2'] ?? 0)
-			: reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
+	const getFormNewReviewCount = (formId: number, legacy: boolean) => reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
