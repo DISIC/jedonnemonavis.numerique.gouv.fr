@@ -231,13 +231,15 @@ function login(email, password) {
 }
 
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal').then($modal => {
+	cy.wait(1500);
+	cy.get('body').then($body => {
+		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
 			cy.wrap($modal).within(() => {
 				cy.contains('button', 'Fermer').click();
 			});
 		} else {
-			cy.log('News modal not visible, skipping close action.');
+			cy.log('News modal not found or not visible, skipping close action.');
 		}
 	});
 };
