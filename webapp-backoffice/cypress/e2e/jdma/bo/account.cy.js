@@ -212,9 +212,6 @@ function testEmail({
 		cy.contains('button', selectors.action.save).should('exist');
 	} else {
 		login(newEmailTest, userPassword);
-		cy.wait(1000);
-		tryCloseNewsModal();
-		cy.wait(1000);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 	}
 	logout();

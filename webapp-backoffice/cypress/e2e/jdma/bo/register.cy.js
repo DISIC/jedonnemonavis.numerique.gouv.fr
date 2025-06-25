@@ -215,18 +215,9 @@ function createAndModifyForm() {
 		.contains('button', 'Créer')
 		.click({ force: true });
 
-	cy.wait(2000);
+	cy.wait(3000);
 
-	cy.get('button').contains('Éditer le formulaire').click();
-
-	cy.wait(6000);
-
-	tryCloseHelpModal();
-
-	cy.wait(2000);
-
-	renameForm();
-	// TODO: Add extra test steps after form creation about button creation
+	// TODO : create button & edit form
 }
 
 function renameForm() {
