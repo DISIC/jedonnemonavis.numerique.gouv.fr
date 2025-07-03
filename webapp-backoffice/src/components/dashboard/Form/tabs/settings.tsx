@@ -30,11 +30,15 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 	[
 		{
 			iconId: 'ri-eye-off-line',
-			text: 'Masquer une possibilité de réponse à une question'
+			text: 'Masquez une étape, une question ou une option de réponse'
 		},
 		{
-			iconId: 'ri-list-check-3',
-			text: 'Masquer une question entière'
+			iconId: 'fr-icon-edit-line',
+			text: 'Éditez le texte d’introduction'
+		},
+		{
+			iconId: 'ri-code-fill',
+			text: 'Vos usagers auront directement accès au formulaire modifié, sans nécessité de rééditer le lien d’accès.'
 		}
 	];
 
@@ -178,7 +182,7 @@ const SettingsTab = ({
 							className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-								<div className={fr.cx('fr-col-12')}>
+								<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
 									<span className={classes.containerTitle}>
 										Éditer le formulaire
 									</span>
@@ -186,10 +190,6 @@ const SettingsTab = ({
 										Beta
 									</Badge>
 								</div>
-								<p className={fr.cx('fr-col-12', 'fr-mb-3v', 'fr-mt-6v')}>
-									Désormais, pour adapter vos formulaires à vos besoins
-									spécifiques, vous pouvez :
-								</p>
 
 								{contents.map((content, index) => (
 									<div
@@ -211,18 +211,10 @@ const SettingsTab = ({
 									</div>
 								))}
 
-								<p className={fr.cx('fr-col-12', 'fr-mb-0')}>
-									Pour en savoir plus sur ces fonctionnalités et découvrir
-									celles à venir, vous pouvez&nbsp;
-									<a href="/public/roadmap" target="_blank">
-										consulter notre feuille de route
-									</a>
-									.
-								</p>
 								<div
 									className={cx(
 										classes.buttonsGroup,
-										fr.cx('fr-col-12', 'fr-mt-6v')
+										fr.cx('fr-col-12', 'fr-mt-3v')
 									)}
 								>
 									<Button
