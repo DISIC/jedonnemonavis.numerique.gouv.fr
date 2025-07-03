@@ -69,7 +69,9 @@ const EntityRightsModal = (props: Props) => {
 				enabled: !!entity,
 				onSuccess: adminEntityRightsResult => {
 					setAdminEntityRights(adminEntityRightsResult.data);
-					setAdminEntityRightsCount(adminEntityRightsResult.metadata.count);
+					setAdminEntityRightsCount(
+						adminEntityRightsResult.data.filter(aer => aer.user !== null).length
+					);
 				}
 			}
 		);
@@ -218,21 +220,23 @@ const EntityRightsModal = (props: Props) => {
 						/>
 					</div>
 				)}
-				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
-				>
-					<div className={fr.cx('fr-col-8')}>
-						<PageItemsCounter
-							label="Administrateurs"
-							startItemCount={numberPerPage * (currentPage - 1) + 1}
-							endItemCount={
-								numberPerPage * (currentPage - 1) +
-								adminEntityRights.filter(aer => aer.user !== null).length
-							}
-							totalItemsCount={adminEntityRightsCount}
-						/>
+				{adminEntityRightsCount !== 0 && (
+					<div
+						className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
+					>
+						<div className={fr.cx('fr-col-8')}>
+							<PageItemsCounter
+								label="Administrateurs"
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) +
+									adminEntityRights.filter(aer => aer.user !== null).length
+								}
+								totalItemsCount={adminEntityRightsCount}
+							/>
+						</div>
 					</div>
-				</div>
+				)}
 				<div>
 					{!entity || isLoading ? (
 						<div className={fr.cx('fr-py-10v')}>

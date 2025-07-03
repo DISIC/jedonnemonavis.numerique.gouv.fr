@@ -119,7 +119,8 @@ const ProductCard = ({
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
 			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
-	const getFormNewReviewCount = (formId: number, legacy: boolean) => reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
+	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
+		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
 	const createFavorite = trpc.favorite.create.useMutation({
 		onSuccess: result => {
@@ -497,8 +498,13 @@ const useStyles = tss.withName(ProductCard.name).create({
 	formLink: {
 		backgroundImage: 'none',
 		position: 'absolute',
+		top: 0,
+		left: 0,
 		width: '100%',
-		height: '100%'
+		height: '100%',
+		'&:active': {
+			opacity: 0.2
+		}
 	},
 	productTitle: {
 		fontSize: '18px',
