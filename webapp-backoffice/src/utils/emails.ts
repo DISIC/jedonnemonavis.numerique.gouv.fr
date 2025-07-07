@@ -341,7 +341,7 @@ export function getEmailNotificationsHtml(
 					</td>
 					<td style="padding: 16px; text-align: right;">
 					<p style="margin: 0; font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px;">+${formatNbReviews(p.nbReviews)}</p>
-					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true"
+					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms"
 						target="_blank"
 						style="font-size: 12px; line-height: 20px; color: #0063CB; text-decoration: underline;">Voir les avis</a>
 					</td>
