@@ -390,11 +390,13 @@ export const openAPIRouter = router({
 							scope: z.enum(['daily', 'weekly', 'monthly']),
 							startDate: z.date(),
 							endDate: z.date(),
-							products: z.array(
+							forms: z.array(
 								z.object({
-									productId: z.number(),
+									formId: z.number(),
+									formTitle: z.string(),
 									reviewCount: z.number(),
-									title: z.string()
+									productId: z.number(),
+									productTitle: z.string()
 								})
 							),
 							users: z
@@ -405,8 +407,14 @@ export const openAPIRouter = router({
 										accessibleProducts: z.array(
 											z.object({
 												productId: z.number(),
-												reviewCount: z.number(),
-												title: z.string()
+												productTitle: z.string(),
+												forms: z.array(
+													z.object({
+														formId: z.number(),
+														formTitle: z.string(),
+														reviewCount: z.number()
+													})
+												)
 											})
 										)
 									})
@@ -467,26 +475,37 @@ export const openAPIRouter = router({
 				});
 			}
 
-			// Count new reviews and group by product
+			// Count new reviews and group by form
 			const results: {
 				scope: 'daily' | 'weekly' | 'monthly';
 				startDate: Date;
 				endDate: Date;
-				products: { productId: number; reviewCount: number; title: string }[];
+				forms: { 
+					formId: number; 
+					formTitle: string; 
+					reviewCount: number; 
+					productId: number; 
+					productTitle: string;
+					entityName: string;
+				}[];
 				users?: {
 					userEmail: string;
 					userId: number;
 					accessibleProducts: {
 						productId: number;
-						reviewCount: number;
-						title: string;
+						productTitle: string;
+						forms: {
+							formId: number;
+							formTitle: string;
+							reviewCount: number;
+						}[];
 					}[];
 				}[];
 			}[] = await getProductsWithReviewCountsByScope(ctx.prisma, scopes);
 
-			// Add user filtering and product matching for each scope
+			// Add user filtering and form matching for each scope
 			for (const scopeResult of results) {
-				const { scope, products, startDate, endDate } = scopeResult;
+				const { scope, forms, startDate, endDate } = scopeResult;
 
 				// Fetch users for the current scope
 				const users = await ctx.prisma.user.findMany({
@@ -522,19 +541,58 @@ export const openAPIRouter = router({
 						)
 					];
 
-					const accessibleProducts = user.role.includes('admin')
-						? products
-								.sort((a, b) => b.reviewCount - a.reviewCount)
-								.slice(0, 10)
-						: products
-								.filter(product =>
-									accessibleProductIds.includes(product.productId)
-								)
-								.sort((a, b) => b.reviewCount - a.reviewCount)
-								.slice(0, 10);
+					// Filter forms by accessible products
+					const accessibleForms = user.role.includes('admin')
+						? forms
+						: forms.filter(form =>
+								accessibleProductIds.includes(form.productId)
+							);
+
+					// Group forms by product and limit to 10 most active products
+					const productGroups = new Map<number, {
+						productId: number;
+						productTitle: string;
+						entityName: string;
+						forms: {
+							formId: number;
+							formTitle: string;
+							reviewCount: number;
+						}[];
+						totalReviews: number;
+					}>();
+
+					accessibleForms.forEach(form => {
+						const productId = form.productId;
+						if (productGroups.has(productId)) {
+							const group = productGroups.get(productId)!;
+							group.forms.push({
+								formId: form.formId,
+								formTitle: form.formTitle,
+								reviewCount: form.reviewCount
+							});
+							group.totalReviews += form.reviewCount;
+						} else {
+							productGroups.set(productId, {
+								productId: form.productId,
+								productTitle: form.productTitle,
+								entityName: form.entityName,
+								forms: [{
+									formId: form.formId,
+									formTitle: form.formTitle,
+									reviewCount: form.reviewCount
+								}],
+								totalReviews: form.reviewCount
+							});
+						}
+					});
+
+					// Sort by total reviews and limit to 10 products
+					const accessibleProducts = Array.from(productGroups.values())
+						.sort((a, b) => b.totalReviews - a.totalReviews)
+						.slice(0, 10);
 
 					const totalNewReviews = accessibleProducts.reduce(
-						(sum, product) => sum + product.reviewCount,
+						(sum, product) => sum + product.totalReviews,
 						0
 					);
 
@@ -545,10 +603,12 @@ export const openAPIRouter = router({
 							totalNewReviews,
 							startDate,
 							endDate,
-							accessibleProducts.map(ap => ({
-								title: ap.title,
-								id: ap.productId,
-								nbReviews: ap.reviewCount
+							accessibleProducts.map(product => ({
+								title: product.productTitle,
+								id: product.productId,
+								nbReviews: product.totalReviews,
+								entityName: product.entityName,
+								forms: product.forms
 							}))
 						);
 

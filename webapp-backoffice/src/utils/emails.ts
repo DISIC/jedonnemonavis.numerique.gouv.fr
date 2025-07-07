@@ -289,6 +289,12 @@ export function getEmailNotificationsHtml(
 		title: string;
 		id: number;
 		nbReviews: number;
+		entityName?: string;
+		forms?: {
+			formId: number;
+			formTitle: string;
+			reviewCount: number;
+		}[];
 	}[]
 ) {
 	const frequencyLabel = () => {
@@ -328,7 +334,6 @@ export function getEmailNotificationsHtml(
 			<thead>
 				<tr>
 				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Service</th>
-				<th style="text-align: right; font-size: 14px; padding: 8px 0;">Avis reçu ${displayTableFrequenceLabel}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -337,13 +342,34 @@ export function getEmailNotificationsHtml(
 						p => `
 				<tr style="border: 1px solid #e0e0e0; margin-top: 10px">
 					<td style="padding: 16px; font-size: 16px; color: #161616; font-weight: bold; line-height: 24px;">
-					${p.title}
-					</td>
-					<td style="padding: 16px; text-align: right;">
-					<p style="margin: 0; font-weight: bold; color: #0063CB; font-size: 14px; line-height: 24px;">+${formatNbReviews(p.nbReviews)}</p>
-					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/reviews?fromMail=true"
-						target="_blank"
-						style="font-size: 12px; line-height: 20px; color: #0063CB; text-decoration: underline;">Voir les avis</a>
+					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms"
+						target="_blank" 
+						style="font-size: 14px; line-height: 20px; color: #000091;">
+							${p.title}
+					</a>
+					${p.entityName ? `
+						<div style="font-size: 14px; color: #666; margin-top: 4px; font-weight: normal;">
+							${p.entityName}
+						</div>
+					` : ''}
+					${p.forms && p.forms.length > 0 ? `
+						<div style="margin-top: 12px;">
+							${p.forms.map(form => `
+								<div style="display: flex; justify-content: space-between; align-items: center; background-color: #F5F5FE; margin: 4px 0; padding: 12px; width: 100%; box-sizing: border-box;">
+									<div style="flex: 1; font-size: 14px; color: #333; font-weight: normal;">
+										<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
+											target="_blank" 
+											style="color: #000091;">
+												${form.formTitle}
+										</a>
+									</div>
+									<div style="background-color: #B8FEC9; color: #18753C; padding: 4px 12px; font-size: 12px; font-weight: bold; margin-left: 8px;">
+										${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
+									</div>
+								</div>
+							`).join('')}
+						</div>
+					` : ''}
 					</td>
 				</tr>
 				<tr>
@@ -356,14 +382,14 @@ export function getEmailNotificationsHtml(
 			</table>
 		</div>
 		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
-			style="font-size: 14px; color: #0063CB; text-decoration: underline;">
+			style="font-size: 14px; color: #000091; text-decoration: underline;">
 			Retrouvez tous vos services sur votre tableau de bord JDMA
 		</a>
 		<p>
 			Pour changer la fréquence de cette synthèse ou ne plus la recevoir du tout,
 			<a href="${jdmaUrl}/administration/dashboard/user/${userId}/notifications"
 			target="_blank"
-			style="color: #0063CB; text-decoration: underline;">
+			style="color: #000091; text-decoration: underline;">
 			modifiez vos paramètres de notification
 			</a>.
 		</p>
