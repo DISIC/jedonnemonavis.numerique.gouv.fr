@@ -193,8 +193,8 @@ const ProductFormPage = (props: Props) => {
 							description={
 								<>
 									Ce service est référencé comme démarche essentielle dans
-									l’Observatoire des démarches essentielles. <br />
-									Le formulaire ne peut pas être modifié
+									l’Observatoire des démarches essentielles. Le formulaire ne
+									peut pas être modifié
 								</>
 							}
 						/>
