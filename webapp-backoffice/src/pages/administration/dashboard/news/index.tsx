@@ -75,7 +75,6 @@ const NewsPage = () => {
 					<ul className={classes.customList}>
 						<li>Masquer une question</li>
 						<li>Masquer une proposition de réponse</li>
-						<li>Ajouter des questions supplémentaires</li>
 						<li>Modifier le texte d'introduction</li>
 					</ul>
 					<p className={fr.cx('fr-mb-0')}>

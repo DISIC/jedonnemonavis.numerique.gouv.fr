@@ -274,7 +274,7 @@ export function getProductRestoredEmail(
 		</p>
 
 		<p>
-			Vous pouvez à nouveau <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/product/${productId.toString()}/stats" target="_blank">accéder aux avis et aux verbatims de ce service</a>.
+			Vous pouvez à nouveau <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/product/${productId.toString()}/forms" target="_blank">accéder aux avis et aux verbatims de ce service</a>.
 		</p>
 	`);
 }
@@ -347,14 +347,22 @@ export function getEmailNotificationsHtml(
 						style="font-size: 14px; line-height: 20px; color: #000091;">
 							${p.title}
 					</a>
-					${p.entityName ? `
+					${
+						p.entityName
+							? `
 						<div style="font-size: 14px; color: #666; margin-top: 4px; font-weight: normal;">
 							${p.entityName}
 						</div>
-					` : ''}
-					${p.forms && p.forms.length > 0 ? `
+					`
+							: ''
+					}
+					${
+						p.forms && p.forms.length > 0
+							? `
 						<div style="margin-top: 12px;">
-							${p.forms.map(form => `
+							${p.forms
+								.map(
+									form => `
 								<div style="display: flex; justify-content: space-between; align-items: center; background-color: #F5F5FE; margin: 4px 0; padding: 12px; width: 100%; box-sizing: border-box;">
 									<div style="flex: 1; font-size: 14px; color: #333; font-weight: normal;">
 										<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
@@ -367,9 +375,13 @@ export function getEmailNotificationsHtml(
 										${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
 									</div>
 								</div>
-							`).join('')}
+							`
+								)
+								.join('')}
 						</div>
-					` : ''}
+					`
+							: ''
+					}
 					</td>
 				</tr>
 				<tr>
