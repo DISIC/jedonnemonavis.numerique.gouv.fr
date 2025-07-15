@@ -263,7 +263,7 @@ const ProductStatPage = (props: Props) => {
 								title="Avis"
 								kpi={nbReviewsWithFilters}
 								isLoading={isLoadingReviewsDataWithFilters}
-								linkHref={`/administration/dashboard/product/${product.id}/reviews`}
+								linkHref={`/administration/dashboard/product/${product.id}/forms/${formId}?tab=reviews`}
 								hideLink
 							/>
 						</div>
@@ -277,7 +277,7 @@ const ProductStatPage = (props: Props) => {
 										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
 										: undefined
 								}
-								linkHref={`/administration/dashboard/product/${product.id}/reviews?view=verbatim`}
+								linkHref={`/administration/dashboard/product/${product.id}/forms/${formId}?tab=reviews`}
 								hideLink
 							/>
 						</div>

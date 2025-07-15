@@ -259,6 +259,13 @@ const ProductFormPage = (props: Props) => {
 										form={form}
 										ownRight={ownRight}
 										handleModalOpening={handleModalOpening}
+										onClickGoToReviews={() => {
+											tabsRef.current
+												?.querySelector<HTMLButtonElement>(
+													'li[role="presentation"]:nth-child(2) button[role="tab"]'
+												)
+												?.click();
+										}}
 									/>
 								),
 								isDefault: router.query.tab === 'stats'
