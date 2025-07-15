@@ -329,11 +329,11 @@ export function getEmailNotificationsHtml(
 		<br />
 		<p>Vous avez eu un total de ${formatNbReviews(totalNbReviews)} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
 		<br />
-		<div style="margin-top: 64px; margin-bottom: 48px;">
+		<div style="margin-bottom: 48px;">
 			<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
 			<thead>
 				<tr>
-				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Service</th>
+				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Services</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -363,19 +363,23 @@ export function getEmailNotificationsHtml(
 							${p.forms
 								.map(
 									form => `
-								<div style="display: flex; justify-content: space-between; align-items: center; background-color: #F5F5FE; margin: 4px 0; padding: 12px; width: 100%; box-sizing: border-box;">
-									<div style="flex: 1; font-size: 14px; color: #333; font-weight: normal;">
-										<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
-											target="_blank" 
-											style="color: #000091;">
-												${form.formTitle}
-										</a>
-									</div>
-									<div style="background-color: #B8FEC9; color: #18753C; padding: 4px 12px; font-size: 12px; font-weight: bold; margin-left: 8px;">
-										${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
-									</div>
-								</div>
-							`
+										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 4px 0; box-sizing: border-box;">
+											<tr>
+												<td valign="top" style="padding: 12px; font-size: 14px; color: #333;">
+												<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
+													target="_blank" 
+													style="color: #000091;">
+													${form.formTitle}
+												</a>
+												</td>
+												<td align="right" valign="middle" width="1%" style="padding-right: 12px;">
+													<div style="display: inline-block; background-color: #B8FEC9; color: #18753C; padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 1; white-space: nowrap;">
+														${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
+													</div>
+												</td>
+											</tr>
+										</table>
+									`
 								)
 								.join('')}
 						</div>
