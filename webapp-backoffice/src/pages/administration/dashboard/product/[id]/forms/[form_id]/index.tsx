@@ -193,8 +193,8 @@ const ProductFormPage = (props: Props) => {
 							description={
 								<>
 									Ce service est référencé comme démarche essentielle dans
-									l’Observatoire des démarches essentielles. <br />
-									Le formulaire ne peut pas être modifié
+									l’Observatoire des démarches essentielles. Le formulaire ne
+									peut pas être modifié
 								</>
 							}
 						/>
@@ -270,21 +270,25 @@ const ProductFormPage = (props: Props) => {
 								),
 								isDefault: router.query.tab === 'stats'
 							},
-							{
-								label: 'Paramètres',
-								content: (
-									<SettingsTab
-										form={form}
-										ownRight={ownRight}
-										modal={buttonModal}
-										alertText={alertText}
-										handleModalOpening={handleModalOpening}
-										isAlertShown={isAlertShown}
-										setIsAlertShown={setIsAlertShown}
-									/>
-								),
-								isDefault: router.query.tab === 'settings'
-							}
+							...(ownRight === 'carrier_admin'
+								? [
+										{
+											label: 'Paramètres',
+											content: (
+												<SettingsTab
+													form={form}
+													ownRight={ownRight}
+													modal={buttonModal}
+													alertText={alertText}
+													handleModalOpening={handleModalOpening}
+													isAlertShown={isAlertShown}
+													setIsAlertShown={setIsAlertShown}
+												/>
+											),
+											isDefault: router.query.tab === 'settings'
+										}
+									]
+								: [])
 						]}
 					/>
 				</div>
@@ -440,10 +444,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	prisma.$disconnect();
 
 	if (
-		!(
-			hasAccessRightToProduct &&
-			hasAccessRightToProduct.status === 'carrier_admin'
-		) &&
+		!hasAccessRightToProduct &&
 		!hasAdminEntityRight &&
 		!currentUser.role.includes('admin')
 	) {
