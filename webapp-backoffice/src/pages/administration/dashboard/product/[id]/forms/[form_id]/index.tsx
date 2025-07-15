@@ -244,21 +244,25 @@ const ProductFormPage = (props: Props) => {
 								),
 								isDefault: router.query.tab === 'stats'
 							},
-							{
-								label: 'Paramètres',
-								content: (
-									<SettingsTab
-										form={form}
-										ownRight={ownRight}
-										modal={buttonModal}
-										alertText={alertText}
-										handleModalOpening={handleModalOpening}
-										isAlertShown={isAlertShown}
-										setIsAlertShown={setIsAlertShown}
-									/>
-								),
-								isDefault: router.query.tab === 'settings'
-							}
+							...(ownRight === 'carrier_admin'
+								? [
+										{
+											label: 'Paramètres',
+											content: (
+												<SettingsTab
+													form={form}
+													ownRight={ownRight}
+													modal={buttonModal}
+													alertText={alertText}
+													handleModalOpening={handleModalOpening}
+													isAlertShown={isAlertShown}
+													setIsAlertShown={setIsAlertShown}
+												/>
+											),
+											isDefault: router.query.tab === 'settings'
+										}
+									]
+								: [])
 						]}
 					/>
 				</div>
@@ -399,10 +403,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	prisma.$disconnect();
 
 	if (
-		!(
-			hasAccessRightToProduct &&
-			hasAccessRightToProduct.status === 'carrier_admin'
-		) &&
+		!hasAccessRightToProduct &&
 		!hasAdminEntityRight &&
 		!currentUser.role.includes('admin')
 	) {
