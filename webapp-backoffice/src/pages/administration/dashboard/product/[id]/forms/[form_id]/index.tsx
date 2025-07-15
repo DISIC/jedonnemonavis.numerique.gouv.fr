@@ -22,6 +22,8 @@ import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 
 const buttonModal = createModal({
 	id: 'button-modal',
@@ -158,14 +160,16 @@ const ProductFormPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
 				<div className={fr.cx('fr-col-12')}>
-					<h1>{form.title || form.form_template.title}</h1>
-					{form.product.isTop250 && (
-						<p>
-							Ce service est référencé comme <b>démarche essentielle</b> dans
-							l’Observatoire des démarches essentielles. Le formulaire ne peut
-							être modifié.
-						</p>
-					)}
+					<div className={cx(classes.titleContainer, fr.cx('fr-mb-6v'))}>
+						<h1 className={fr.cx('fr-mb-0')}>
+							{form.title || form.form_template.title}
+						</h1>
+						{form.product.isTop250 && (
+							<Badge severity="info" noIcon className={fr.cx('fr-ml-md-6v')}>
+								Démarche essentielle
+							</Badge>
+						)}
+					</div>
 					<p className={fr.cx('fr-mb-0')}>
 						Vous pouvez&nbsp;
 						<Link
@@ -180,6 +184,21 @@ const ProductFormPage = (props: Props) => {
 						. Les réponses que vous déposerez ne seront pas prises en compte
 						dans les statistiques.
 					</p>
+					{form.product.isTop250 && (
+						<Notice
+							isClosable
+							onClose={function noRefCheck() {}}
+							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
+							title={'Formulaire non éditable'}
+							description={
+								<>
+									Ce service est référencé comme démarche essentielle dans
+									l’Observatoire des démarches essentielles. <br />
+									Le formulaire ne peut pas être modifié
+								</>
+							}
+						/>
+					)}
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-mt-4v')}>
 					<Tabs
@@ -240,6 +259,13 @@ const ProductFormPage = (props: Props) => {
 										form={form}
 										ownRight={ownRight}
 										handleModalOpening={handleModalOpening}
+										onClickGoToReviews={() => {
+											tabsRef.current
+												?.querySelector<HTMLButtonElement>(
+													'li[role="presentation"]:nth-child(2) button[role="tab"]'
+												)
+												?.click();
+										}}
 									/>
 								),
 								isDefault: router.query.tab === 'stats'
@@ -275,6 +301,18 @@ const useStyles = tss.withName(ProductFormPage.name).create({
 	backLink: {
 		backgroundImage: 'none'
 	},
+	titleContainer: {
+		display: 'flex',
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'start',
+			gap: fr.spacing('2v')
+		},
+		'& .fr-badge': {
+			textWrap: 'nowrap'
+		}
+	},
 	headerButtons: {
 		display: 'flex',
 		justifyContent: 'end',
@@ -289,6 +327,9 @@ const useStyles = tss.withName(ProductFormPage.name).create({
 	},
 	configuratorContainer: {
 		minHeight: '75vh'
+	},
+	notice: {
+		p: { display: 'flex', flexDirection: 'column', gap: fr.spacing('2v') }
 	}
 });
 

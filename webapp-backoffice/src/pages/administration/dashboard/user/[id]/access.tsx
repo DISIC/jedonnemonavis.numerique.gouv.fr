@@ -203,7 +203,7 @@ const UserAccess: React.FC<Props> = props => {
 				title: p.title,
 				date: formatDateToFrenchString(aer.created_at.toString()),
 				modifiable: false,
-				link: `/administration/dashboard/product/${p.id}/stats`
+				link: `/administration/dashboard/product/${p.id}/forms`
 			}))
 		);
 	});
@@ -219,7 +219,7 @@ const UserAccess: React.FC<Props> = props => {
 			title: product.title,
 			date: formatDateToFrenchString(ar.created_at.toString()),
 			modifiable: true,
-			link: `/administration/dashboard/product/${product.id}/stats`,
+			link: `/administration/dashboard/product/${product.id}/forms`,
 			right: ar.status,
 			action: async (message: string) => {
 				setDisplayToast(message);
@@ -398,9 +398,7 @@ const UserAccess: React.FC<Props> = props => {
 									{sortedEntities.map((entity, index) => (
 										<li key={entity.name} className={fr.cx('fr-mb-12v')}>
 											<React.Fragment key={index}>
-												<h5>
-													{entity.name}
-												</h5>
+												<h5>{entity.name}</h5>
 												<hr />
 												<ul className={cx(classes.ulContainer)}>
 													{entity.products.map((product, productIndex) => (
@@ -442,7 +440,7 @@ const useStyles = tss.withName(UserAccess.name).create({
 	},
 	column: {
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'column'
 	},
 	droppableArea: {
 		padding: '8px',

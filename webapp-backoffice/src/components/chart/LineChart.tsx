@@ -69,7 +69,7 @@ const CustomLineChart = ({
 					...item,
 					name: translateMonthToFrench(item.name)
 				}))}
-				margin={{ top: dataKeys ? 0 : 20, left: -10 }}
+				margin={{ top: dataKeys ? 0 : 20 }}
 			>
 				<CartesianGrid vertical={false} strokeDasharray="3 3" />
 				<XAxis
@@ -78,20 +78,31 @@ const CustomLineChart = ({
 					fontSize="0.75rem"
 					tickLine={false}
 					padding={{ left: 25, right: 25 }}
+					dy={5}
 				/>
 				<YAxis
 					axisLine={false}
 					tickLine={false}
 					fontSize="0.75rem"
+					tickFormatter={(value: number) => {
+						const intValue = Math.round(value);
+						const intStr = intValue.toString();
+						if (intStr.length > 4) {
+							const prefix = intStr.slice(0, -3);
+							return `${prefix}k`;
+						}
+						return value.toString();
+					}}
 					tickCount={6}
 					ticks={ticks ? ticks : undefined}
 					label={{
 						value: labelAxisY,
-						angle: 90,
+						angle: -90,
 						position: 'insideLeft',
 						fontSize: '0.75rem',
-						dy: -60,
-						dx: 15
+						dx: 2,
+						textAnchor: 'middle',
+						style: { textAnchor: 'middle' }
 					}}
 				/>
 				{!dataKeys ? (

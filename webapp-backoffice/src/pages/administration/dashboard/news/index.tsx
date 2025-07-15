@@ -33,20 +33,41 @@ const NewsPage = () => {
 					<span className={cx(classes.summaryTitle)}>Sommaire</span>
 					<ul className={cx(classes.summaryList, fr.cx('fr-mt-2v'))}>
 						<li>
-							<b>1.</b> Édition du formulaire
+							<b>1.</b>{' '}
+							<a href="#edition-formulaire" className={fr.cx('fr-link--xs')}>
+								Édition du formulaire
+							</a>
 						</li>
 						<li>
-							<b>2.</b> Nouvelle interface
+							<b>2.</b>{' '}
+							<a href="#nouvelle-interface" className={fr.cx('fr-link--xs')}>
+								Nouvelle interface
+							</a>
 						</li>
 						<li>
-							<b>3.</b> Évolution des boutons
+							<b>3.</b>{' '}
+							<a href="#evolution-boutons" className={fr.cx('fr-link--xs')}>
+								Évolution des boutons
+							</a>
 						</li>
 					</ul>
 				</div>
-				<div className={fr.cx('fr-col-12')}>
+				<div id="edition-formulaire" className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Édition du formulaire
 					</h3>
+					<div
+						className={cx(classes.imageContainer, fr.cx('fr-my-6v', 'fr-p-6v'))}
+						style={{ justifyContent: 'start' }}
+					>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('fr-icon-edit-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v')}>
+							Les formulaires liés à une <b>Démarche Essentielle</b> ne peuvent
+							pas être édités
+						</p>
+					</div>
 					<p className={fr.cx('fr-mb-0')}>
 						Vous pouvez désormais adapter vos formulaires à vos besoins
 						spécifiques :
@@ -54,11 +75,10 @@ const NewsPage = () => {
 					<ul className={classes.customList}>
 						<li>Masquer une question</li>
 						<li>Masquer une proposition de réponse</li>
-						<li>Ajouter des questions supplémentaires</li>
 						<li>Modifier le texte d'introduction</li>
 					</ul>
 					<p className={fr.cx('fr-mb-0')}>
-						Ces fonctionnalités sont accessibles depuis la section Formulaire de
+						Ces fonctionnalités sont accessibles depuis la section Paramètres de
 						votre service.
 					</p>
 					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
@@ -78,7 +98,7 @@ const NewsPage = () => {
 					</p>
 					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
-				<div className={fr.cx('fr-col-12')}>
+				<div id="nouvelle-interface" className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Nouvelle interface
 					</h3>
@@ -122,7 +142,7 @@ const NewsPage = () => {
 					</p>
 					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
-				<div className={fr.cx('fr-col-12')}>
+				<div id="evolution-boutons" className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
 						Évolution de la gestion des boutons
 					</h3>
@@ -151,7 +171,7 @@ const NewsPage = () => {
 						className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
 						style={{ color: fr.colors.decisions.text.mention.grey.default }}
 					>
-						Onglet Formulaire avec un emplacement créé
+						Onglet Paramètres avec un emplacement créé
 					</p>
 				</div>
 			</div>
@@ -204,6 +224,17 @@ const useStyles = tss.create({
 		justifyContent: 'center',
 		width: '100%',
 		backgroundColor: fr.colors.options.blueEcume._950_100.default
+	},
+	iconContainer: {
+		width: fr.spacing('12v'),
+		height: fr.spacing('12v'),
+		backgroundColor: 'white',
+		color: fr.colors.decisions.background.flat.blueFrance.default,
+		borderRadius: '50%',
+		flexShrink: 0,
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center'
 	},
 	image: {
 		maxWidth: '100%',
