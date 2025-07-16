@@ -35,6 +35,7 @@ interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	handleModalOpening: (modalType: string, button?: any) => void;
+	onClickGoToReviews?: () => void;
 }
 
 export interface CommonStepProps {
@@ -103,7 +104,12 @@ export const OldSectionWrapper = ({
 
 const nbMaxReviews = 500000;
 
-const StatsTab = ({ form, ownRight, handleModalOpening }: Props) => {
+const StatsTab = ({
+	form,
+	ownRight,
+	handleModalOpening,
+	onClickGoToReviews
+}: Props) => {
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
@@ -353,7 +359,8 @@ const StatsTab = ({ form, ownRight, handleModalOpening }: Props) => {
 								title="Avis"
 								kpi={nbReviewsWithFilters}
 								isLoading={isLoadingReviewsDataWithFilters}
-								linkHref={`/administration/dashboard/product/${form.product.id}/reviews`}
+								linkHref={`/administration/dashboard/product/${form.product.id}/forms/${form.id}?tab=reviews`}
+								onClick={onClickGoToReviews}
 							/>
 						</div>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
@@ -366,7 +373,8 @@ const StatsTab = ({ form, ownRight, handleModalOpening }: Props) => {
 										? `soit ${percetengeVerbatimsOfReviews} % des répondants`
 										: undefined
 								}
-								linkHref={`/administration/dashboard/product/${form.product.id}/reviews?view=verbatim`}
+								linkHref={`/administration/dashboard/product/${form.product.id}/forms/${form.id}?tab=reviews`}
+								onClick={onClickGoToReviews}
 							/>
 						</div>
 					</div>

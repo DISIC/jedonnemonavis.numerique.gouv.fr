@@ -55,19 +55,17 @@ function login(email, password) {
 	cy.url().should('eq', app_url + '/administration/dashboard/products');
 	cy.wait(8000);
 }
+
 const tryCloseNewsModal = () => {
-	cy.get('dialog#news-modal', { timeout: 4000 })
-		.should(Cypress._.noop) // évite l'échec si l'élément est introuvable
-		.then($modal => {
-			if ($modal.length && $modal.is(':visible')) {
-				cy.wrap($modal).within(() => {
-					cy.contains('button', 'Fermer').click();
-				});
-			} else {
-				cy.log('News modal not visible, skipping close action.');
-			}
-		})
-		.catch(() => {
-			cy.log('News modal not found within timeout, skipping close action.');
-		});
+	cy.wait(3000);
+	cy.get('body').then($body => {
+		const $modal = $body.find('dialog#news-modal');
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('News modal not found or not visible, skipping close action.');
+		}
+	});
 };

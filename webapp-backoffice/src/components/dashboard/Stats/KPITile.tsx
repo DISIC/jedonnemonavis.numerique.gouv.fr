@@ -16,6 +16,7 @@ export type KPITileProps = {
 	hideLink?: boolean;
 	grey?: boolean;
 	isLoading?: boolean;
+	onClick?: () => void;
 
 	/** Default false */
 	horizontal?: boolean;
@@ -25,7 +26,8 @@ export type KPITileProps = {
 export namespace KPITileProps {}
 
 export const KPITile = (props: KPITileProps) => {
-	const { title, kpi, desc, grey, hideLink, linkHref, isLoading } = props;
+	const { title, kpi, desc, grey, hideLink, linkHref, isLoading, onClick } =
+		props;
 
 	const { cx, classes } = useStyles({
 		grey: grey ?? false
@@ -68,6 +70,7 @@ export const KPITile = (props: KPITileProps) => {
 							classes.link,
 							!grey && classes.blueColor
 						)}
+						onClick={onClick}
 					>
 						{isLoading ? (
 							<Skeleton variant="text" width="50%" height="0.9rem" />
