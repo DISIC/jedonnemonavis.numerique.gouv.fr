@@ -1,52 +1,24 @@
-const app_url = Cypress.env('app_base_url');
-const app_form_url = Cypress.env('app_form_base_url');
-const adminEmail = Cypress.env('admin_user_mail');
-const adminPassword = Cypress.env('admin_user_password');
-const userPassword = Cypress.env('user_password');
-const mailer_url = Cypress.env('mailer_base_url');
-const invitedEmail = Cypress.env('admin_guest_mail_bis');
+import { selectors } from '../selectors';
+import { login, logout, tryCloseNewsModal } from '../helpers';
+import {
+	adminEmail,
+	appUrl,
+	invitedEmailBis,
+	userPassword
+} from '../variables';
+
 const firstNameTest = 'Stevie';
 const lastNameTest = 'Wonder';
 const newEmailTest = 'stevie-wonder@beta.gouv.fr';
 
-// Sélecteurs communs
-const selectors = {
-	loginForm: {
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		continueButton: '[class*="LoginForm-button"]'
-	},
-	accountForm: {
-		firstName: 'input[name="firstName"]',
-		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		emailConfirmation: 'input[name="emailConfirmation"]',
-		confirm: 'input[name="word"]'
-	},
-	card: {
-		identity: 'Identité',
-		credentials: 'Identifiants de connexion'
-	},
-	menu: {
-		account: 'Informations personnelles'
-	},
-	action: {
-		save: 'Sauvegarder',
-		modify: 'Modifier',
-		delete: 'Supprimer le compte',
-		confirmDelete: 'Supprimer',
-		confirm: 'Confirmer'
-	}
-};
-
 describe('Account page', () => {
 	beforeEach(() => {
-		cy.visit(`${app_url}/login`);
+		cy.visit(`${appUrl}/login`);
 	});
 
 	it('change identity parameters', () => {
-		login(invitedEmail, userPassword);
-		checkAccountHeader('John Doe', invitedEmail);
+		login(invitedEmailBis, userPassword);
+		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		cy.wait(1000);
 		clickModifyCard(selectors.card.identity);
@@ -55,7 +27,7 @@ describe('Account page', () => {
 		cy.wait(1000);
 		cy.contains('button', selectors.action.save).click();
 		cy.wait(1000);
-		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmail);
+		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 		logout();
 	});
 
@@ -123,39 +95,7 @@ describe('Account page', () => {
 });
 
 // Helpers
-const tryCloseNewsModal = () => {
-	cy.wait(3000);
-	cy.get('body').then($body => {
-		const $modal = $body.find('dialog#news-modal');
-		if ($modal.length && $modal.is(':visible')) {
-			cy.wrap($modal).within(() => {
-				cy.contains('button', 'Fermer').click();
-			});
-		} else {
-			cy.log('News modal not found or not visible, skipping close action.');
-		}
-	});
-};
-
-function login(email, password) {
-	cy.get(selectors.loginForm.email).type(email);
-	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).type(password);
-	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-}
-
-function logout() {
-	cy.reload();
-	cy.wait(2000);
-	tryCloseNewsModal();
-	cy.wait(1000);
-	cy.get('header', { timeout: 10000 }).should('be.visible');
-	cy.get('header').contains('Compte').click({ force: true });
-	cy.contains('button', 'Se déconnecter').click({ force: true });
-	cy.url().should('include', '/login');
-}
-
-function checkAccountHeader(name, invitedEmail) {
+function checkAccountHeader(name: string, invitedEmail: string) {
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.get('ul.MuiList-root')
 		.find('li')
@@ -166,7 +106,7 @@ function checkAccountHeader(name, invitedEmail) {
 		});
 }
 
-function clickModifyCard(nameCard) {
+function clickModifyCard(nameCard: string) {
 	cy.contains('h4', nameCard).parents('.fr-card').find('button.fr-btn').click();
 }
 
@@ -199,8 +139,8 @@ function testEmail({
 	confirmationEmail = '',
 	expectedMEssage = ''
 }) {
-	login(invitedEmail, userPassword);
-	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmail);
+	login(invitedEmailBis, userPassword);
+	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 	cy.contains('li', selectors.menu.account).click({ force: true });
 	clickModifyCard(selectors.card.credentials);
 	fillForm({ email: email, emailConfirmation: confirmationEmail });

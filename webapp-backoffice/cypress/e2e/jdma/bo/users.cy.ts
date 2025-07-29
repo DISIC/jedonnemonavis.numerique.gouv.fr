@@ -1,40 +1,12 @@
-const app_url = Cypress.env('app_base_url');
-const app_form_url = Cypress.env('app_form_base_url');
-const adminEmail = Cypress.env('admin_user_mail');
-const adminPassword = Cypress.env('admin_user_password');
-
-const selectors = {
-	loginForm: {
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		continueButton: '[class*="LoginForm-button"]'
-	},
-	dashboard: {
-		products: '/administration/dashboard/products',
-		entities: '/administration/dashboard/entities',
-		users: '/administration/dashboard/users',
-		nameTestOrga: 'e2e-jdma-entity-test',
-		nameTestService: 'e2e-jdma-service-test'
-	},
-	modal: {
-		product: 'dialog#product-modal',
-		entity: 'dialog#entity-modal',
-		button: 'dialog#button-modal'
-	},
-	sideMenu: {
-		menu: 'nav.fr-sidemenu',
-		menuItem: 'li.fr-sidemenu__item'
-	},
-	modalFooter: '.fr-modal__footer',
-	productTitle: '[class*="productTitle"]',
-	productForm: '#product-form'
-};
+import { addUrls, login, selectEntity, tryCloseNewsModal } from '../helpers';
+import { selectors } from '../selectors';
+import { adminEmail, adminPassword, appUrl } from '../variables';
 
 describe('jdma-users', () => {
 	beforeEach(() => {
-		cy.visit(`${app_url}/login`);
-		loginAsAdmin();
-		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.visit(`${appUrl}/login`);
+		login(adminEmail, adminPassword);
+		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
 		cy.wait(1000);
 		tryCloseNewsModal();
 		cy.wait(1000);
@@ -132,7 +104,7 @@ describe('jdma-users', () => {
 });
 
 function navigateToCreatedProduct() {
-	cy.visit(`${app_url}${selectors.dashboard.products}`);
+	cy.visit(`${appUrl}${selectors.dashboard.products}`);
 	cy.wait(1000);
 	tryCloseNewsModal();
 	cy.wait(1000);
@@ -152,38 +124,6 @@ function navigateToCreatedProduct() {
 		});
 }
 
-function loginAsAdmin() {
-	login(adminEmail, adminPassword);
-}
-
-function addUrls(urls) {
-	urls.forEach((url, index) => {
-		if (index > 0) cy.contains('button', 'Ajouter un URL').click();
-		cy.get(`input[name="urls.${index}.value"]`).type(url);
-	});
-}
-
-function login(email, password) {
-	cy.get(selectors.loginForm.email).type(email);
-	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).type(password);
-	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-}
-
-const tryCloseNewsModal = () => {
-	cy.wait(3000);
-	cy.get('body').then($body => {
-		const $modal = $body.find('dialog#news-modal');
-		if ($modal.length && $modal.is(':visible')) {
-			cy.wrap($modal).within(() => {
-				cy.contains('button', 'Fermer').click();
-			});
-		} else {
-			cy.log('News modal not found or not visible, skipping close action.');
-		}
-	});
-};
-
 function createProduct() {
 	cy.contains('button', 'Ajouter un nouveau service').click();
 	cy.get(selectors.productForm, { timeout: 10000 })
@@ -198,12 +138,4 @@ function createProduct() {
 		.contains('button', 'Ajouter ce service')
 		.click();
 	cy.wait(2000);
-}
-
-function selectEntity() {
-	cy.get('input#entity-select-autocomplete').click();
-	cy.get('div[role="presentation"]')
-		.should('be.visible')
-		.find('[id="entity-select-autocomplete-option-0"]')
-		.click();
 }

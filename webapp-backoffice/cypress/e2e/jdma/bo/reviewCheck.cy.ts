@@ -1,6 +1,4 @@
-const app_url = Cypress.env('app_base_url');
-const invitedEmail = Cypress.env('admin_user_mail');
-const userPassword = Cypress.env('admin_user_password');
+import { adminEmail, adminPassword, appUrl } from '../variables';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
@@ -71,27 +69,27 @@ describe('jdma-answer-check', () => {
 });
 
 function loginAndNavigate() {
-	cy.visit(app_url);
+	cy.visit(appUrl);
 	cy.get('header')
 		.find('.fr-header__tools')
 		.contains('Connexion / Inscription')
 		.click();
 	cy.url()
-		.should('eq', app_url + '/login')
+		.should('eq', appUrl + '/login')
 		.then(() => {
-			cy.get('input[name="email"]').type(invitedEmail);
+			cy.get('input[name="email"]').type(adminEmail);
 			cy.get('[class*="LoginForm-button"]')
 				.contains('Continuer')
 				.click()
 				.then(() => {
 					cy.wait(1000);
-					cy.get('input[type="password"]').type(userPassword);
+					cy.get('input[type="password"]').type(adminPassword);
 				});
 			cy.get('[class*="LoginForm-button"]')
 				.contains('Se connecter')
 				.click()
 				.then(() => {
-					cy.url().should('eq', app_url + '/administration/dashboard/products');
+					cy.url().should('eq', appUrl + '/administration/dashboard/products');
 					cy.wait(6000);
 				});
 		});

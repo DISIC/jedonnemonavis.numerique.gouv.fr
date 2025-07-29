@@ -1,3 +1,5 @@
+import { appFormUrl } from '../../e2e/jdma/variables';
+
 declare global {
 	namespace Cypress {
 		interface Chainable<Subject> {
@@ -6,11 +8,8 @@ declare global {
 	}
 }
 
-const app_url = Cypress.env('app_form_base_url');
-const app_bo_url = Cypress.env('app_base_url');
-
 Cypress.Commands.add('submitCompleteReview', () => {
-	cy.visit(`${app_url}/Demarches/2?button=3`);
+	cy.visit(`${appFormUrl}/Demarches/2?button=3`);
 	fillFormStep1();
 	fillFormStep2();
 	fillFormStep3();

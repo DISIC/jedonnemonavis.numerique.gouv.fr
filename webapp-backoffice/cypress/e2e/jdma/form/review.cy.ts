@@ -1,9 +1,8 @@
-const app_url = Cypress.env('app_form_base_url');
-const app_bo_url = Cypress.env('app_base_url');
+import { appFormUrl, appUrl } from '../variables';
 
 describe('jdma-form-review', () => {
 	before(() => {
-		cy.visit(`${app_url}/Demarches/2?button=3`);
+		cy.visit(`${appFormUrl}/Demarches/2?button=3`);
 	});
 
 	it('Fill form', () => {
@@ -99,7 +98,7 @@ function getLastTestServiceID() {
 	return cy
 		.request({
 			method: 'GET',
-			url: `${app_bo_url}/api/cypress-test/getLastServiceId`,
+			url: `${appUrl}/api/cypress-test/getLastServiceId`,
 			failOnStatusCode: false
 		})
 		.then(response => {

@@ -1,47 +1,33 @@
-const app_url = Cypress.env('app_base_url');
-const app_form_url = Cypress.env('app_form_base_url');
-const adminEmail = Cypress.env('admin_user_mail');
-const adminPassword = Cypress.env('admin_user_password');
-const userPassword = Cypress.env('user_password');
-const mailer_url = Cypress.env('mailer_base_url');
-const invitedEmail = Cypress.env('admin_guest_mail_bis');
-
-// Sélecteurs communs
-const selectors = {
-	loginForm: {
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		continueButton: '[class*="LoginForm-button"]'
-	},
-	dashboard: {
-		products: '/administration/dashboard/products',
-		entities: '/administration/dashboard/entities',
-		users: '/administration/dashboard/users',
-		nameTestOrga: 'e2e-jdma-entity-test',
-		nameTestService: 'e2e-jdma-service-test'
-	},
-	modal: {
-		product: 'dialog#product-modal',
-		entity: 'dialog#entity-modal',
-		button: 'dialog#button-modal',
-		form: 'dialog#new-form-modal'
-	},
-	modalFooter: '.fr-modal__footer',
-	productTitle: '[class*="productTitle"]'
-};
+import { selectors } from '../selectors';
+import {
+	login,
+	logout,
+	tryCloseNewsModal,
+	selectEntity,
+	fillForm
+} from '../helpers';
+import {
+	adminEmail,
+	adminPassword,
+	appFormUrl,
+	appUrl,
+	invitedEmailBis,
+	mailerUrl,
+	userPassword
+} from '../variables';
 
 describe('jdma-admin', () => {
 	beforeEach(() => {
-		cy.visit(`${app_url}/login`);
-		loginAsAdmin();
-		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		cy.visit(`${appUrl}/login`);
+		login(adminEmail, adminPassword);
+		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
 		cy.wait(1000);
 		tryCloseNewsModal();
 		cy.wait(1000);
 	});
 
 	it('create and delete users', () => {
-		cy.visit(`${app_url}${selectors.dashboard.users}`);
+		cy.visit(`${appUrl}${selectors.dashboard.users}`);
 		cy.reload();
 		for (let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
@@ -71,10 +57,10 @@ describe('jdma-admin', () => {
 	});
 
 	it('create organisation', () => {
-		cy.visit(`${app_url}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
 
 		cy.get('nav').contains('Organisations').click();
-		cy.url().should('eq', `${app_url}${selectors.dashboard.entities}`);
+		cy.url().should('eq', `${appUrl}${selectors.dashboard.entities}`);
 
 		cy.get('[class*="DashBoardEntities"]')
 			.contains('Ajouter une organisation')
@@ -94,7 +80,7 @@ describe('jdma-admin', () => {
 					.click();
 			});
 
-		cy.visit(`${app_url}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
 		cy.wait(1000);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
@@ -104,7 +90,7 @@ describe('jdma-admin', () => {
 	});
 
 	it('invite admin on organisation', () => {
-		cy.visit(`${app_url}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
 		cy.wait(1000);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
@@ -117,14 +103,14 @@ describe('jdma-admin', () => {
 		cy.get('dialog#entity-rights-modal')
 			.should('exist')
 			.within(() => {
-				cy.get('input[name="email"]').type(invitedEmail);
+				cy.get('input[name="email"]').type(invitedEmailBis);
 				cy.get('button').contains('Inviter').click();
 				cy.get('[class*="entityCardWrapper"]')
-					.contains(invitedEmail)
+					.contains(invitedEmailBis)
 					.should('be.visible');
 			});
 		checkMail(false, 'Invitation à rejoindre « Je donne mon avis »');
-		cy.visit(`${app_url}`);
+		cy.visit(`${appUrl}`);
 		logout();
 	});
 
@@ -142,7 +128,7 @@ describe('jdma-admin', () => {
 			});
 
 		cy.get(selectors.modalFooter).contains('Ajouter ce service').click();
-		cy.visit(`${app_url}`);
+		cy.visit(`${appUrl}`);
 		cy.get(selectors.productTitle)
 			.should('exist')
 			.then($productTitle => {
@@ -161,8 +147,8 @@ describe('jdma-admin', () => {
 
 	it('login guest admin', () => {
 		logout();
-		login(invitedEmail, userPassword);
-		cy.url().should('eq', `${app_url}${selectors.dashboard.products}`);
+		login(invitedEmailBis, userPassword);
+		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
 		cy.get(selectors.productTitle).contains(
 			selectors.dashboard.nameTestService
 		);
@@ -187,7 +173,7 @@ describe('jdma-admin', () => {
 			});
 
 		cy.get(selectors.modalFooter).contains('Créer').click();
-		cy.visit(app_url);
+		cy.visit(appUrl);
 	});
 
 	// it('delete service with guest admin', () => {
@@ -219,53 +205,7 @@ describe('jdma-admin', () => {
 
 // Helpers
 
-function loginAsAdmin() {
-	login(adminEmail, adminPassword);
-}
-
-function login(email, password) {
-	cy.get(selectors.loginForm.email).type(email);
-	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).type(password);
-	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-}
-
-const tryCloseNewsModal = () => {
-	cy.wait(3000);
-	cy.get('body').then($body => {
-		const $modal = $body.find('dialog#news-modal');
-		if ($modal.length && $modal.is(':visible')) {
-			cy.wrap($modal).within(() => {
-				cy.contains('button', 'Fermer').click();
-			});
-		} else {
-			cy.log('News modal not found or not visible, skipping close action.');
-		}
-	});
-};
-
-function selectEntity() {
-	cy.get('input#entity-select-autocomplete').click();
-	cy.get('div[role="presentation"]')
-		.find('#entity-select-autocomplete-option-0')
-		.click();
-}
-
-function fillForm({
-	firstName = 'John',
-	lastName = 'Doe',
-	password = '',
-	email = ''
-}) {
-	cy.get('input[name="firstName"]').type(firstName, { force: true });
-	cy.get('input[name="lastName"]').type(lastName);
-	cy.get('input[type="password"]').type(password);
-	if (email !== '') {
-		cy.get('input[name="email"]').type(email);
-	}
-}
-
-function deleteService(serviceName) {
+function deleteService(serviceName: string) {
 	cy.contains('a', serviceName)
 		.parents('div.fr-card')
 		.within(() => {
@@ -286,17 +226,8 @@ function restaureService() {
 	cy.contains('button', 'Confirmer').click();
 }
 
-function logout() {
-	cy.reload();
-	cy.wait(2000);
-	cy.get('header', { timeout: 10000 }).should('be.visible');
-	cy.get('header').contains('Compte').click({ force: true });
-	cy.contains('button', 'Se déconnecter').click({ force: true });
-	cy.url().should('include', '/login');
-}
-
 function checkform(shouldWork = false) {
-	cy.visit(`${app_form_url}/Demarches/4?button=7`, { failOnStatusCode: false });
+	cy.visit(`${appFormUrl}/Demarches/4?button=7`, { failOnStatusCode: false });
 	if (shouldWork) {
 		cy.contains('h1', 'Je donne mon avis').should('exist');
 		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
@@ -306,7 +237,7 @@ function checkform(shouldWork = false) {
 }
 
 function checkMail(click = false, topic = '') {
-	cy.visit(mailer_url);
+	cy.visit(mailerUrl);
 	cy.wait(1000);
 	cy.get('button[ng-click="refresh()"]').click();
 	cy.wait(1000);
@@ -330,7 +261,7 @@ function checkMail(click = false, topic = '') {
 }
 
 function getEmail() {
-	cy.visit(mailer_url);
+	cy.visit(mailerUrl);
 	cy.get('button.btn-default[title="Refresh"]').click();
 
 	cy.get('div.messages')
@@ -350,7 +281,7 @@ function getEmail() {
 }
 
 function clearInbox() {
-	cy.visit(mailer_url);
+	cy.visit(mailerUrl);
 	cy.get('.nav-pills').contains('Delete all messages').click();
 	cy.get('.modal-footer').contains('Delete all messages').click();
 }

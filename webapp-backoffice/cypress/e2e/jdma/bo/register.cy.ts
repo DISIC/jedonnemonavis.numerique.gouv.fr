@@ -1,29 +1,15 @@
-const app_url = Cypress.env('app_base_url');
-const userPassword = Cypress.env('user_password');
-const email = generateUniqueEmail();
-const invitedEmail = Cypress.env('admin_guest_mail');
-const mailer_url = Cypress.env('mailer_base_url');
+import { selectors } from '../selectors';
+import { login, logout, selectEntity, addUrls, fillForm } from '../helpers';
+import { appUrl, mailerUrl, userPassword } from '../variables';
 
-// Sélecteurs communs
-const selectors = {
-	signupForm: {
-		firstName: 'input[name="firstName"]',
-		lastName: 'input[name="lastName"]',
-		email: 'input[name="email"]',
-		password: 'input[type="password"]',
-		submitButton: 'button[type="submit"]'
-	},
-	errorMessages: '.fr-messages-group',
-	passwordInput: 'input.fr-password__input',
-	passwordToggle: 'label[for*="toggle-show"]',
-	modalFooter: '.fr-modal__footer',
-	modalHeader: '.fr-modal__header',
-	productForm: '#product-form'
-};
+// const userPassword = Cypress.env('user_password');
+const email = generateUniqueEmail();
+// const invitedEmail = Cypress.env('admin_guest_mail');
+// const mailer_url = Cypress.env('mailer_base_url');
 
 describe('jdma-register', () => {
 	beforeEach(() => {
-		cy.visit(`${app_url}/register`);
+		cy.visit(`${appUrl}/register`);
 	});
 
 	// Vérification de la page initiale
@@ -126,13 +112,19 @@ function checkSignupFormVisible() {
 	cy.get(submitButton).should('be.visible');
 }
 
-function testPasswordValidation({ password, message }) {
+function testPasswordValidation({
+	password,
+	message
+}: {
+	password: string;
+	message: string;
+}) {
 	fillForm({ password, email: 'john.doe@example.com' });
 	cy.get(selectors.signupForm.submitButton).click();
 	cy.get(selectors.errorMessages).should('contain', message);
 }
 
-function togglePasswordVisibility(password) {
+function togglePasswordVisibility(password: string) {
 	cy.get(selectors.passwordInput).type(password);
 	cy.get(selectors.passwordToggle).click();
 	cy.get(selectors.passwordInput).should('have.attr', 'type', 'text');
@@ -140,7 +132,11 @@ function togglePasswordVisibility(password) {
 	cy.get(selectors.passwordInput).should('have.attr', 'type', 'password');
 }
 
-function testEmailSubmission(email, errorMessage, successMessage) {
+function testEmailSubmission(
+	email: string,
+	errorMessage: string,
+	successMessage: string
+) {
 	fillForm({ password: userPassword, email });
 	cy.get(selectors.signupForm.submitButton).click();
 
@@ -159,18 +155,18 @@ function testEmailSubmission(email, errorMessage, successMessage) {
 	});
 }
 
-function performPostRegistrationFlow(email) {
+function performPostRegistrationFlow(email: string) {
 	getEmail();
 	loginAndCreateProduct(email);
 }
 
-function loginAndCreateProduct(email) {
-	cy.visit(`${app_url}/login`);
+function loginAndCreateProduct(email: string) {
+	cy.visit(`${appUrl}/login`);
 	cy.get('input[name="email"]').type(email);
 	cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
 	cy.get('input[type="password"]').type(userPassword);
 	cy.get('[class*="LoginForm-button"]').contains('Se connecter').click();
-	cy.url().should('eq', `${app_url}/administration/dashboard/products`);
+	cy.url().should('eq', `${appUrl}/administration/dashboard/products`);
 
 	createProduct();
 }
@@ -189,21 +185,6 @@ function createProduct() {
 		.contains('button', 'Ajouter ce service')
 		.click();
 	createAndModifyForm();
-}
-
-function selectEntity() {
-	cy.get('input#entity-select-autocomplete').click();
-	cy.get('div[role="presentation"]')
-		.should('be.visible')
-		.find('[id="entity-select-autocomplete-option-0"]')
-		.click();
-}
-
-function addUrls(urls) {
-	urls.forEach((url, index) => {
-		if (index > 0) cy.contains('button', 'Ajouter un URL').click();
-		cy.get(`input[name="urls.${index}.value"]`).type(url);
-	});
 }
 
 function createAndModifyForm() {
@@ -279,41 +260,15 @@ function checkExistingAccountError() {
 	});
 }
 
-function fillForm({
-	firstName = 'John',
-	lastName = 'Doe',
-	email = '',
-	password = ''
-}) {
-	const {
-		firstName: firstNameSelector,
-		lastName: lastNameSelector,
-		email: emailSelector,
-		password: passwordSelector
-	} = selectors.signupForm;
-	cy.get(firstNameSelector).type(firstName);
-	cy.get(lastNameSelector).type(lastName);
-	cy.get(emailSelector).type(email);
-	cy.get(passwordSelector).type(password);
-}
-
 function generateUniqueEmail() {
 	const randomPart = Math.random().toString().slice(2, 12);
 	const datePart = Date.now();
 	return `e2e-jdma-test${randomPart}${datePart}@beta.gouv.fr`;
 }
 
-function logout() {
-	cy.reload();
-	cy.get('header', { timeout: 10000 }).should('be.visible');
-	cy.get('header').contains('Compte').click({ force: true });
-	cy.contains('button', 'Se déconnecter').click({ force: true });
-	cy.url().should('include', '/login');
-}
-
 function getEmail() {
 	cy.wait(5000);
-	cy.visit(mailer_url);
+	cy.visit(mailerUrl);
 	cy.get('button.btn-default[title="Refresh"]').click();
 	cy.get('div.messages', { timeout: 20000 })
 		.find('div.msglist-message')

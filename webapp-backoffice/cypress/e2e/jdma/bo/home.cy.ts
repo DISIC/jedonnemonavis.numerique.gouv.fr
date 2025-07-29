@@ -1,31 +1,15 @@
-const app_url = Cypress.env('app_base_url');
-
-const selectors = {
-	header: 'header',
-	navbarLogo: '.fr-logo',
-	navbarTitle: 'Je donne mon avis',
-	navbarSubtitle: 'La voix de vos usagers',
-	loginLink: '.fr-header__tools',
-	bodyTitle: 'h1',
-	subtitle: 'p',
-	image: '[class*="HomeHeader-image"] > img',
-	stepsContainer: '[class*="HomeStepper-container"]',
-	actionButton: '[class*="HomeActionButton-container"]',
-	accordionGroup: '.fr-accordions-group .fr-accordion__item',
-	footer: 'footer',
-	footerLinks: '.fr-footer__bottom-list',
-	footerLogo: '.fr-logo'
-};
+import { selectors } from '../selectors';
+import { appUrl } from '../variables';
 
 // Helper function
-const checkUrlRedirection = (selector, expectedUrl) => {
+const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 	cy.get(selector).click();
-	cy.url().should('eq', app_url + expectedUrl);
+	cy.url().should('eq', appUrl + expectedUrl);
 };
 
 describe('jdma-home', () => {
 	beforeEach(() => {
-		cy.visit(app_url);
+		cy.visit(appUrl);
 	});
 
 	// NAVBAR Tests
