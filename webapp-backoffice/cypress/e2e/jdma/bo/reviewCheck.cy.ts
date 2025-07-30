@@ -1,3 +1,4 @@
+import { login } from '../helpers';
 import { adminEmail, adminPassword, appUrl } from '../variables';
 
 describe('jdma-answer-check', () => {
@@ -77,20 +78,6 @@ function loginAndNavigate() {
 	cy.url()
 		.should('eq', appUrl + '/login')
 		.then(() => {
-			cy.get('input[name="email"]').type(adminEmail);
-			cy.get('[class*="LoginForm-button"]')
-				.contains('Continuer')
-				.click()
-				.then(() => {
-					cy.wait(1000);
-					cy.get('input[type="password"]').type(adminPassword);
-				});
-			cy.get('[class*="LoginForm-button"]')
-				.contains('Se connecter')
-				.click()
-				.then(() => {
-					cy.url().should('eq', appUrl + '/administration/dashboard/products');
-					cy.wait(6000);
-				});
+			login(adminEmail, adminPassword);
 		});
 }

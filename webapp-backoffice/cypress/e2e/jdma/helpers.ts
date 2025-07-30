@@ -1,11 +1,15 @@
 // Common helper functions for Cypress tests
 import { selectors } from './selectors';
+import { appUrl } from './variables';
 
 export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
+	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
+	tryCloseNewsModal();
+	cy.wait(500);
 }
 
 export function logout() {
