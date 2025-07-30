@@ -3,6 +3,7 @@ import { appFormUrl, appUrl } from '../variables';
 describe('jdma-form-review', () => {
 	before(() => {
 		cy.visit(`${appFormUrl}/Demarches/2?button=3`);
+		cy.reload();
 	});
 
 	it('Fill form', () => {
@@ -22,7 +23,7 @@ function fillFormStep1() {
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
-	cy.wait(5000);
+	cy.wait(3000);
 
 	cy.get('h1').contains('Clarté');
 }
