@@ -1,11 +1,6 @@
-import { selectors } from '../selectors';
-import { appUrl } from '../variables';
-
-// Helper function
-const checkUrlRedirection = (selector: string, expectedUrl: string) => {
-	cy.get(selector).click();
-	cy.url().should('eq', appUrl + expectedUrl);
-};
+import { checkUrlRedirection } from '../../../utils/helpers/common';
+import { selectors } from '../../../utils/selectors';
+import { appUrl } from '../../../utils/variables';
 
 describe('jdma-home', () => {
 	beforeEach(() => {

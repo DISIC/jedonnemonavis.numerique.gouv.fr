@@ -6,6 +6,9 @@ const userPassword = Cypress.env('user_password');
 const mailerUrl = Cypress.env('mailer_base_url');
 const invitedEmail = Cypress.env('admin_guest_mail');
 const invitedEmailBis = Cypress.env('admin_guest_mail_bis');
+const firstNameTest = 'Stevie';
+const lastNameTest = 'Wonder';
+const newEmailTest = 'stevie-wonder@beta.gouv.fr';
 
 export {
 	appUrl,
@@ -15,5 +18,8 @@ export {
 	userPassword,
 	mailerUrl,
 	invitedEmail,
-	invitedEmailBis
+	invitedEmailBis,
+	firstNameTest,
+	lastNameTest,
+	newEmailTest
 };

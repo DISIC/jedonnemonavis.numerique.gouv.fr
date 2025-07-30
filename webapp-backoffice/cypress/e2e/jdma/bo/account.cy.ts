@@ -1,15 +1,20 @@
-import { selectors } from '../selectors';
-import { login, logout, tryCloseNewsModal } from '../helpers';
+import {
+	checkAccountHeader,
+	clickModifyCard,
+	fillAccountForm,
+	testEmail
+} from '../../../utils/helpers/account';
+import { login, logout } from '../../../utils/helpers/common';
+import { selectors } from '../../../utils/selectors';
 import {
 	adminEmail,
 	appUrl,
+	firstNameTest,
 	invitedEmailBis,
+	lastNameTest,
+	newEmailTest,
 	userPassword
-} from '../variables';
-
-const firstNameTest = 'Stevie';
-const lastNameTest = 'Wonder';
-const newEmailTest = 'stevie-wonder@beta.gouv.fr';
+} from '../../../utils/variables';
 
 describe('Account page', () => {
 	beforeEach(() => {
@@ -23,7 +28,7 @@ describe('Account page', () => {
 		cy.wait(1000);
 		clickModifyCard(selectors.card.identity);
 		cy.wait(1000);
-		fillForm({ firstName: firstNameTest, lastName: lastNameTest });
+		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });
 		cy.wait(1000);
 		cy.contains('button', selectors.action.save).click();
 		cy.wait(1000);
@@ -93,66 +98,3 @@ describe('Account page', () => {
 		);
 	});
 });
-
-// Helpers
-function checkAccountHeader(name: string, invitedEmail: string) {
-	cy.get('header').contains('Compte').click({ force: true });
-	cy.get('ul.MuiList-root')
-		.find('li')
-		.first()
-		.within(() => {
-			cy.get('div.fr-text--bold').should('contain.text', name);
-			cy.get('div').should('contain.text', invitedEmail);
-		});
-}
-
-function clickModifyCard(nameCard: string) {
-	cy.contains('h4', nameCard).parents('.fr-card').find('button.fr-btn').click();
-}
-
-function fillForm({
-	firstName = '',
-	lastName = '',
-	email = '',
-	emailConfirmation = ''
-}) {
-	if (firstName !== '') {
-		cy.get(selectors.accountForm.firstName)
-			.clear()
-			.type(firstName, { force: true });
-	}
-	if (lastName !== '') {
-		cy.get(selectors.accountForm.lastName).clear().type(lastName);
-	}
-	if (email !== '') {
-		cy.get(selectors.accountForm.email).clear().type(email);
-	}
-	if (emailConfirmation !== '') {
-		cy.get(selectors.accountForm.emailConfirmation)
-			.clear()
-			.type(emailConfirmation);
-	}
-}
-
-function testEmail({
-	email = '',
-	confirmationEmail = '',
-	expectedMEssage = ''
-}) {
-	login(invitedEmailBis, userPassword);
-	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
-	cy.contains('li', selectors.menu.account).click({ force: true });
-	clickModifyCard(selectors.card.credentials);
-	fillForm({ email: email, emailConfirmation: confirmationEmail });
-	cy.contains('button', selectors.action.save).click();
-	cy.contains('button', selectors.action.confirm).click();
-
-	if (expectedMEssage !== '') {
-		cy.contains('p', expectedMEssage).should('exist');
-		cy.contains('button', selectors.action.save).should('exist');
-	} else {
-		login(newEmailTest, userPassword);
-		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
-	}
-	logout();
-}

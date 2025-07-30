@@ -1,6 +1,6 @@
-import { login, tryCloseNewsModal } from '../helpers';
-import { selectors } from '../selectors';
-import { adminEmail, adminPassword, appUrl } from '../variables';
+import { login, tryCloseNewsModal } from '../../../utils/helpers/common';
+import { selectors } from '../../../utils/selectors';
+import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-logs', () => {
 	beforeEach(() => {

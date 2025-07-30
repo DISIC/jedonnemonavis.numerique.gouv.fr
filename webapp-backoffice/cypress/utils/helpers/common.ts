@@ -1,6 +1,5 @@
-// Common helper functions for Cypress tests
-import { selectors } from './selectors';
-import { appUrl } from './variables';
+import { selectors } from '../selectors';
+import { appUrl } from '../variables';
 
 export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.email).type(email);
@@ -52,7 +51,7 @@ export function addUrls(urls: string[]) {
 	});
 }
 
-export function fillForm({
+export function fillSignupForm({
 	firstName = 'John',
 	lastName = 'Doe',
 	email = '',
@@ -69,3 +68,8 @@ export function fillForm({
 	if (email !== '') cy.get(emailSelector).type(email);
 	if (password !== '') cy.get(passwordSelector).type(password);
 }
+
+export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
+	cy.get(selector).click();
+	cy.url().should('eq', appUrl + expectedUrl);
+};

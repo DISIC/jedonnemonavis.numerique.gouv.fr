@@ -1,5 +1,5 @@
-import { login } from '../helpers';
-import { adminEmail, adminPassword, appUrl } from '../variables';
+import { login } from '../../../utils/helpers/common';
+import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
