@@ -130,7 +130,7 @@ export const FILTER_LABELS = [
 		type: 'iconbox'
 	},
 	{
-		label: 'Verbatim',
+		label: 'Commentaire',
 		value: 'needVerbatim',
 		type: 'checkbox'
 	},

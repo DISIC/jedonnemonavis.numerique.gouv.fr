@@ -349,18 +349,21 @@ export const reviewRouter = router({
 				{ code: 'difficulties_details', label: 'Difficultés détails' },
 				{
 					code: 'difficulties_details_verbatim',
-					label: 'Difficultés verbatim'
+					label: 'Difficultés commentaire'
 				},
 				{ code: 'contact', label: 'Contact tenté' },
 				{ code: 'contact_reached', label: 'Contact réussi' },
 				{ code: 'contact_channels', label: 'Contact canal' },
-				{ code: 'contact_channels_verbatim', label: 'Contact canal verbatim' },
+				{
+					code: 'contact_channels_verbatim',
+					label: 'Contact canal commentaire'
+				},
 				{ code: 'contact_details', label: 'Contact détails' },
 				{ code: 'contact_satisfaction', label: 'Contact satisfaction' },
 				{ code: 'help', label: 'Aide' },
 				{ code: 'help_details', label: 'Aide détails' },
-				{ code: 'help_details_verbatim', label: 'Aide verbatim' },
-				{ code: 'verbatim', label: 'Verbatim' }
+				{ code: 'help_details_verbatim', label: 'Aide commentaire' },
+				{ code: 'verbatim', label: 'Commentaire' }
 			];
 
 			const headers = ['Date', 'ID', 'Bouton'].concat(

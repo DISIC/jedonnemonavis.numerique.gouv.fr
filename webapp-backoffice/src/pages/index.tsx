@@ -35,7 +35,7 @@ export default function Home() {
 		},
 		{
 			icon: <i className={fr.cx('ri-chat-3-line')} />,
-			title: 'Récoltez des notes et des verbatims en temps réel',
+			title: 'Récoltez des notes et des commentaires en temps réel',
 			description:
 				'Le bouton Je donne mon avis permet aux usagers de vos démarches en ligne de noter la qualité globale du service, ainsi que la facilité d’usage et la simplicité du langage. Il leur permet également de vous transmettre des retours écrits détaillés.',
 			image: '/assets/feature_3.png',

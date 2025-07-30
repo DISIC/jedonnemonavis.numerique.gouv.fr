@@ -43,7 +43,7 @@ const ReviewFilters = (props: Props) => {
 					label: 'Satisfaction'
 				},
 				{
-					label: 'Verbatim'
+					label: 'Commentaire'
 				}
 			]);
 		} else {
@@ -57,7 +57,7 @@ const ReviewFilters = (props: Props) => {
 					code: 'satisfaction'
 				},
 				{
-					label: 'Verbatim'
+					label: 'Commentaire'
 				}
 			]);
 		}

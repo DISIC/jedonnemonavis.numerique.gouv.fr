@@ -125,7 +125,7 @@ const DashboardTab = ({
 			<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
 
 			<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-				<h3 className={fr.cx('fr-mb-0')}>Dernières réponses</h3>
+				<h3 className={fr.cx('fr-mb-0')}>Derniers commentaires</h3>
 			</div>
 			{!isMobile && (
 				<div
@@ -144,16 +144,6 @@ const DashboardTab = ({
 					</Button>
 				</div>
 			)}
-			<div className={fr.cx('fr-col-12', 'fr-mt-6v')}>
-				<p className={classes.newReviewsLabel}>
-					<b>
-						{hasNewReviews
-							? `${reviewResults.data.length} nouvelles réponses`
-							: 'Aucune nouvelle réponse'}
-					</b>{' '}
-					depuis votre dernière connexion
-				</p>
-			</div>
 			<div className={cx(classes.reviewsContainer)}>
 				{reviewResults.data.map(review => {
 					const satisfactionReview = review.answers?.find(

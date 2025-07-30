@@ -10,7 +10,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-
 interface Props {
 	modal: CustomModalProps;
 	product: Product;
@@ -50,7 +49,7 @@ const PublicDataModal = (props: Props) => {
 					<p className={fr.cx('fr-my-5v')}>
 						En activant le partage public, toutes les personnes disposant du
 						lien peuvent consulter la page de statistiques. Elles n’auront pas
-						accès aux verbatims.
+						accès aux commentaires.
 					</p>
 				</div>
 				<div className={fr.cx('fr-col-12')}>
@@ -119,9 +118,7 @@ const PublicDataModal = (props: Props) => {
 					</div>
 				) : (
 					<div className={fr.cx('fr-col-12')} style={{ height: initialHeight }}>
-						<p>
-							Le partage public est désactivé.
-						</p>
+						<p>Le partage public est désactivé.</p>
 					</div>
 				)}
 			</div>
@@ -139,7 +136,7 @@ const useStyles = tss.withName(PublicDataModal.name).create(() => ({
 		justifyContent: 'space-between',
 		gap: fr.spacing('4v'),
 		a: {
-			wordBreak: 'break-all',
+			wordBreak: 'break-all'
 		},
 		button: {
 			width: '100%',

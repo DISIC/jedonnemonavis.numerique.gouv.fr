@@ -251,7 +251,7 @@ export function getProductArchivedEmail(
 
 		<p>
 			${contextUser.name} vient de supprimer le service « ${productTitle} » sur la plateforme <a href="${process.env.NODEMAILER_BASEURL}" target="_blank">Je donne mon avis</a>.
-			Vous n'avez plus accès aux avis et verbatims de ce service, et les utilisateurs de ce service n'ont plus accès au formulaire.
+			Vous n'avez plus accès aux avis et commentaires de ce service, et les utilisateurs de ce service n'ont plus accès au formulaire.
 		</p>
 
 		<p>
@@ -274,7 +274,7 @@ export function getProductRestoredEmail(
 		</p>
 
 		<p>
-			Vous pouvez à nouveau <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/product/${productId.toString()}/forms" target="_blank">accéder aux avis et aux verbatims de ce service</a>.
+			Vous pouvez à nouveau <a href="${process.env.NODEMAILER_BASEURL}/administration/dashboard/product/${productId.toString()}/forms" target="_blank">accéder aux avis et aux commentaires de ce service</a>.
 		</p>
 	`);
 }
