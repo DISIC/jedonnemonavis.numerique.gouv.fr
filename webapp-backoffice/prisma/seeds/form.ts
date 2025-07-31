@@ -16,7 +16,7 @@ const createQualityRatingOptions =
 			position: 2
 		},
 		{ label: 'Bonne', value: 'Bonne', position: 3 },
-		{ label: 'Excellente', value: 'Excellente', position: 4 },
+		{ label: 'Excellente', value: 'Excellente', position: 4 }
 	];
 
 const createRadioBlock = (
@@ -210,7 +210,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 			{
 				title: 'Commentaires',
 				description:
-					"Cette étape permet de récolter des verbatims, dans lesquels les usagers expriment des retours personnels et détaillés de l’expérience avec le service.\nLes données récoltées permettent d’améliorer votre connaissance usager et d'identifier des pistes d’amélioration du service en ligne.",
+					"Cette étape permet de récolter des commentaires, dans lesquels les usagers expriment des retours personnels et détaillés de l’expérience avec le service.\nLes données récoltées permettent d’améliorer votre connaissance usager et d'identifier des pistes d’amélioration du service en ligne.",
 				position: 3,
 				isHideable: false,
 				form_template_blocks: {
