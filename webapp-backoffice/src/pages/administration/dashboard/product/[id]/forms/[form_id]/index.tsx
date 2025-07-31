@@ -242,7 +242,7 @@ const ProductFormPage = (props: Props) => {
 							},
 							{
 								label: 'Réponses',
-								content: (
+								content: router.query.tab === 'reviews' && (
 									<ReviewsTab
 										form={form}
 										ownRight={ownRight}
@@ -254,7 +254,7 @@ const ProductFormPage = (props: Props) => {
 							},
 							{
 								label: 'Statistiques',
-								content: (
+								content: router.query.tab === 'stats' && (
 									<StatsTab
 										form={form}
 										ownRight={ownRight}

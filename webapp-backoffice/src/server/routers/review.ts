@@ -551,14 +551,11 @@ export const reviewRouter = router({
 						}
 					},
 					orderBy: { created_at: 'desc' },
-					take: 2
+					take: 1
 				});
-				const relevantFormLog =
-					lastSeenFormReview.length > 1
-						? lastSeenFormReview[1]
-						: lastSeenFormReview[0];
-				const lastSeenDate = relevantFormLog
-					? relevantFormLog.created_at
+
+				const lastSeenDate = lastSeenFormReview[0]
+					? lastSeenFormReview[0].created_at
 					: lastSeenReview[0]
 						? lastSeenReview[0].created_at
 						: null;
