@@ -1,5 +1,4 @@
-import { login } from '../../../utils/helpers/common';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { loginAndNavigate } from '../../../utils/helpers/review';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
@@ -68,16 +67,3 @@ describe('jdma-answer-check', () => {
 	// 		});
 	// });
 });
-
-function loginAndNavigate() {
-	cy.visit(appUrl);
-	cy.get('header')
-		.find('.fr-header__tools')
-		.contains('Connexion / Inscription')
-		.click();
-	cy.url()
-		.should('eq', appUrl + '/login')
-		.then(() => {
-			login(adminEmail, adminPassword);
-		});
-}

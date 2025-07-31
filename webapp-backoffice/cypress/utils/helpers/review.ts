@@ -1,4 +1,5 @@
-import { appUrl } from '../variables';
+import { adminEmail, adminPassword, appUrl } from '../variables';
+import { login } from './common';
 
 export function fillFormStep1() {
 	cy.get('[class*="formSection"]').within(() => {
@@ -94,5 +95,18 @@ export function getLastTestServiceID() {
 			} else {
 				throw new Error('ID not received');
 			}
+		});
+}
+
+export function loginAndNavigate() {
+	cy.visit(appUrl);
+	cy.get('header')
+		.find('.fr-header__tools')
+		.contains('Connexion / Inscription')
+		.click();
+	cy.url()
+		.should('eq', appUrl + '/login')
+		.then(() => {
+			login(adminEmail, adminPassword);
 		});
 }
