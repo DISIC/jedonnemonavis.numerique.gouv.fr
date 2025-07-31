@@ -45,8 +45,9 @@ const DashboardTab = ({
 				numberPerPage: 4,
 				page: 1,
 				shouldIncludeAnswers: true,
-				newReviews: true,
-				needLogging: false
+				mustHaveVerbatims: true,
+				needLogging: false,
+				sort: 'created_at:desc'
 			},
 			{
 				initialData: {
@@ -271,7 +272,7 @@ const useStyles = tss.withName(DashboardTab.name).create({
 	reviewsContainer: {
 		display: 'flex',
 		width: '100%',
-		marginBottom: fr.spacing('6v'),
+		...fr.spacing('margin', { topBottom: '6v' }),
 		gap: fr.spacing('3v'),
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column'
