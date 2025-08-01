@@ -168,7 +168,7 @@ const ReviewFiltersModal = (props: Props) => {
 				<Checkbox
 					options={[
 						{
-							label: 'Verbatim complété',
+							label: 'Réponse avec commentaire',
 							nativeInputProps: {
 								name: 'needVerbatim',
 								checked: tmpFilters.needVerbatim,

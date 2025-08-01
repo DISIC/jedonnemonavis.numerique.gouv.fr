@@ -237,7 +237,7 @@ const ReviewsTab = (props: Props) => {
 					return (
 						<Tag
 							key={index}
-							title={'Retirer le filtre : Verbatim complété'}
+							title={'Retirer le filtre : Réponse avec commentaire'}
 							dismissible
 							className={cx(classes.tagFilter)}
 							nativeButtonProps={{
@@ -536,7 +536,7 @@ const ReviewsTab = (props: Props) => {
 									label="Rechercher un avis"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher dans les verbatims',
+										placeholder: 'Rechercher dans les commentaires',
 										type: 'search',
 										value: search,
 										onChange: event => {
