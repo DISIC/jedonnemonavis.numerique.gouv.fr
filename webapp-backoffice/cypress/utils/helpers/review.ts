@@ -97,16 +97,3 @@ export function getLastTestServiceID() {
 			}
 		});
 }
-
-export function loginAndNavigate() {
-	cy.visit(appUrl);
-	cy.get('header')
-		.find('.fr-header__tools')
-		.contains('Connexion / Inscription')
-		.click();
-	cy.url()
-		.should('eq', appUrl + '/login')
-		.then(() => {
-			login(adminEmail, adminPassword);
-		});
-}

@@ -17,15 +17,11 @@ import {
 } from '../../../utils/variables';
 
 describe('Account page', () => {
-	beforeEach(() => {
-		cy.visit(`${appUrl}/login`);
-	});
-
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
-		cy.wait(1000);
+		cy.wait(2000);
 		clickModifyCard(selectors.card.identity);
 		cy.wait(1000);
 		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });

@@ -12,8 +12,10 @@
 		"format": "prettier --write .",
 		"lhci:audit": "next build && concurrently \"npm run lhci:server\" \"lhci autorun\"",
 		"lhci:wizard": "lhci wizard",
-		"lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql",
-		"test:e2e": "cypress run"
+		"lhci:server": "LHCI_DB_PATH=${LHCI_DB_PATH:-./db.sql}; lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=$LHCI_DB_PATH",
+		"db:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed",
+		"test": "npx cypress run --browser chrome --headed",
+		"test:r": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed && npx cypress run --browser chrome --headed"
 	},
 	"husky": {
 		"hooks": {

@@ -1,8 +1,9 @@
-import { loginAndNavigate } from '../../../utils/helpers/review';
+import { login } from '../../../utils/helpers/common';
+import { adminEmail, adminPassword } from '../../../utils/variables';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
-		loginAndNavigate();
+		login(adminEmail, adminPassword);
 	});
 
 	it('should the test answer exist', () => {

@@ -1,19 +1,14 @@
-import { login, tryCloseNewsModal } from '../../../utils/helpers/common';
+import { login } from '../../../utils/helpers/common';
 import {
 	createProduct,
 	navigateToCreatedProduct
 } from '../../../utils/helpers/users';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import { adminEmail, adminPassword } from '../../../utils/variables';
 
 describe('jdma-users', () => {
 	beforeEach(() => {
-		cy.visit(`${appUrl}/login`);
 		login(adminEmail, adminPassword);
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-		cy.wait(1000);
-		tryCloseNewsModal();
-		cy.wait(1000);
 	});
 
 	it('should create a service and attach an organization', () => {

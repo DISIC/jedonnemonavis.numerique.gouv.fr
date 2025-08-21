@@ -4,12 +4,7 @@ import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-logs', () => {
 	beforeEach(() => {
-		cy.visit(appUrl + '/login');
 		login(adminEmail, adminPassword);
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-		cy.wait(1000);
-		tryCloseNewsModal();
-		cy.wait(1000);
 	});
 
 	it('should display the logs page with no events', () => {

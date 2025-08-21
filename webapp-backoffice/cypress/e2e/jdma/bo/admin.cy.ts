@@ -17,12 +17,7 @@ import {
 
 describe('jdma-admin', () => {
 	beforeEach(() => {
-		cy.visit(`${appUrl}/login`);
 		login(adminEmail, adminPassword);
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-		cy.wait(1000);
-		tryCloseNewsModal();
-		cy.wait(1000);
 	});
 
 	it('create and delete users', () => {
