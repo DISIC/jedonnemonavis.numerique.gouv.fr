@@ -22,19 +22,3 @@ export function navigateToCreatedProduct() {
 			cy.get(selectors.sideMenu.menuItem).contains("Droits d'accès").click();
 		});
 }
-
-export function createProduct() {
-	cy.contains('button', 'Ajouter un nouveau service').click();
-	cy.get(selectors.productForm, { timeout: 10000 })
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="title"]').type('e2e-jdma-service-test-users');
-			selectEntity();
-			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
-		});
-
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Ajouter ce service')
-		.click();
-	cy.wait(1000);
-}

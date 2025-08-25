@@ -1,10 +1,10 @@
 import { checkMail } from '../../../utils/helpers/admin';
 import {
+	createForm,
 	fillSignupForm,
 	login,
 	logout,
-	selectEntity,
-	tryCloseNewsModal
+	selectEntity
 } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
@@ -157,16 +157,7 @@ describe('jdma-admin', () => {
 
 		cy.wait(1000);
 
-		cy.contains('Créer un formulaire').click();
-		cy.get(selectors.modal.form)
-			.first()
-			.within(() => {
-				cy.get('input[name="title"]').type('e2e-jdma-form-test', {
-					force: true
-				});
-			});
-
-		cy.get(selectors.modalFooter).contains('Créer').click();
+		createForm('e2e-jdma-form-test');
 		cy.visit(appUrl);
 	});
 

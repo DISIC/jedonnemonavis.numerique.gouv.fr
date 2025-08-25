@@ -74,3 +74,36 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 	cy.get(selector).click();
 	cy.url().should('eq', appUrl + expectedUrl);
 };
+
+export function createProduct(name: string) {
+	cy.contains('button', 'Ajouter un nouveau service').click();
+	cy.get(selectors.productForm, { timeout: 10000 })
+		.should('be.visible')
+		.within(() => {
+			cy.get('input[name="title"]').clear().type(name);
+			selectEntity();
+			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
+		});
+
+	cy.get(selectors.modalFooter)
+		.contains('button', 'Ajouter ce service')
+		.click();
+}
+
+export function createForm(name: string) {
+	cy.wait(1000);
+
+	cy.contains('button', /^Créer un (nouveau )?formulaire$/).click();
+
+	cy.get(selectors.modal.form, { timeout: 2000 })
+		.should('be.visible')
+		.within(() => {
+			cy.get('input[name="title"]', { timeout: 5000 })
+				.should('be.visible')
+				.and('not.be.disabled')
+				.clear()
+				.type(name);
+		});
+	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.wait(500);
+}

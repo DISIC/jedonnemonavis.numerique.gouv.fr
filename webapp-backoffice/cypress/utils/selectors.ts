@@ -38,13 +38,17 @@ export const selectors = {
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
 		nameTestOrga: 'e2e-jdma-entity-test',
-		nameTestService: 'e2e-jdma-service-test'
+		nameTestService: 'e2e-jdma-service-test',
+		nameTestForm1: 'e2e-jdma-form-test-1',
+		nameTestForm2: 'e2e-jdma-form-test-2',
+		renamedTestForm: 'e2e-jdma-form-test-renamed'
 	},
 	modal: {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
 		button: 'dialog#button-modal',
-		form: 'dialog#new-form-modal'
+		form: 'dialog#new-form-modal',
+		renameForm: 'dialog#rename-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productTitle: '[class*="productTitle"]',

@@ -1,6 +1,6 @@
 import { selectors } from '../selectors';
-import { appUrl, mailerUrl, userPassword } from '../variables';
-import { addUrls, fillSignupForm, selectEntity } from './common';
+import { mailerUrl, userPassword } from '../variables';
+import { createForm, createProduct, fillSignupForm, login } from './common';
 
 export function checkSignupFormVisible() {
 	const { firstName, lastName, email, password, submitButton } =
@@ -57,75 +57,10 @@ export function testEmailSubmission(
 
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
-	loginAndCreateProduct(email);
+	login(email, userPassword);
+	createProduct('e2e-jdma-service-test-1');
+	createForm('form-test-1');
 }
-
-export function loginAndCreateProduct(email: string) {
-	cy.visit(`${appUrl}/login`);
-	cy.get('input[name="email"]').type(email);
-	cy.get('[class*="LoginForm-button"]').contains('Continuer').click();
-	cy.get('input[type="password"]').type(userPassword);
-	cy.get('[class*="LoginForm-button"]').contains('Se connecter').click();
-	cy.url().should('eq', `${appUrl}/administration/dashboard/products`);
-
-	createProduct();
-}
-
-export function createProduct() {
-	cy.contains('button', 'Ajouter un service').click();
-	cy.get(selectors.productForm, { timeout: 10000 })
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="title"]').type('e2e-jdma-service-test-1');
-			selectEntity();
-			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
-		});
-
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Ajouter ce service')
-		.click();
-	createAndModifyForm();
-}
-
-export function createAndModifyForm() {
-	cy.get('[class*="buttonContainer"]').contains('Créer un formulaire').click();
-	cy.get('dialog#new-form-modal').within(() => {
-		cy.get('input[name="title"]').type('form test 1');
-	});
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Créer')
-		.click({ force: true });
-
-	cy.wait(3000);
-
-	// TODO : create button & edit form
-}
-
-export function renameForm() {
-	cy.get('button').contains('Renommer').click();
-
-	cy.get('dialog#rename-form-modal')
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="title"]').clear().type('e2e-jdma-form-test-renamed');
-
-			cy.get('button').contains('Modifier').click();
-		});
-}
-
-const tryCloseHelpModal = () => {
-	cy.get('body').then(body => {
-		if (body.find('dialog#form-help-modal').length > 0) {
-			cy.get('dialog#form-help-modal')
-				.should('be.visible')
-				.within(() => {
-					cy.contains('button', 'Fermer').click();
-				});
-		} else {
-			cy.log('Help modal not found, skipping close action.');
-		}
-	});
-};
 
 export function modifyButton() {
 	cy.get('[class*="ProductButtonCard"]')
