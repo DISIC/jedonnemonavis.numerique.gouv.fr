@@ -52,7 +52,6 @@ describe('jdma-forms', () => {
 
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {
 		goToCurrentFormReviewPage();
-		cy.reload();
 		fillFormStep1();
 		fillFormStep2();
 		fillFormStep3();

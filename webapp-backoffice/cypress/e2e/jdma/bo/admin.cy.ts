@@ -1,10 +1,10 @@
 import { checkMail } from '../../../utils/helpers/admin';
 import {
 	createForm,
+	createProduct,
 	fillSignupForm,
 	login,
-	logout,
-	selectEntity
+	logout
 } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
@@ -22,7 +22,6 @@ describe('jdma-admin', () => {
 
 	it('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.users}`);
-		cy.reload();
 		for (let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
 				.should('be.visible')
@@ -76,8 +75,6 @@ describe('jdma-admin', () => {
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist');
-
-		logout();
 	});
 
 	it('invite admin on organisation', () => {
@@ -101,31 +98,16 @@ describe('jdma-admin', () => {
 			});
 		checkMail(false, 'Invitation à rejoindre « Je donne mon avis »');
 		cy.visit(`${appUrl}`);
-		logout();
 	});
 
 	it('create service', () => {
-		cy.get('#product-modal-control-button')
-			.contains('Ajouter un nouveau service')
-			.click();
-
-		cy.get(selectors.modal.product)
-			.should('be.visible')
-			.within(() => {
-				cy.get('input[name="title"]').type(selectors.dashboard.nameTestService);
-				selectEntity();
-				cy.get('input[name="urls.0.value"]').type('http://testurl1.com/');
-			});
-
-		cy.get(selectors.modalFooter).contains('Ajouter ce service').click();
+		createProduct(selectors.dashboard.nameTestService);
 		cy.visit(`${appUrl}`);
 		cy.get(selectors.productLink)
 			.should('exist')
 			.then($productLink => {
 				cy.wrap($productLink).contains(selectors.dashboard.nameTestService);
 			});
-
-		logout();
 	});
 
 	it('register guest admin', () => {
