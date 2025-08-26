@@ -14,14 +14,13 @@ export function login(email: string, password: string) {
 export function logout() {
 	cy.reload();
 	tryCloseNewsModal();
-	cy.get('header', { timeout: 10000 }).should('be.visible');
+	cy.get('header').should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.contains('button', 'Se déconnecter').click({ force: true });
 	cy.url().should('include', '/login');
 }
 
 export function tryCloseNewsModal() {
-	cy.wait(1000);
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
@@ -74,7 +73,7 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 
 export function createProduct(name: string) {
 	cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
-	cy.get(selectors.productForm, { timeout: 10000 })
+	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="title"]').clear().type(name);
@@ -88,24 +87,22 @@ export function createProduct(name: string) {
 }
 
 export function createForm(name: string) {
-	cy.wait(1000);
 	cy.contains('button', /^Créer un (nouveau )?formulaire$/).click();
-	cy.get(selectors.modal.form, { timeout: 2000 })
+	cy.get(selectors.modal.form)
 		.should('be.visible')
 		.within(() => {
-			cy.get('input[name="title"]', { timeout: 5000 })
+			cy.get('input[name="title"]')
 				.should('be.visible')
 				.and('not.be.disabled')
 				.clear()
 				.type(name);
 		});
 	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
-	cy.wait(500);
 }
 
 export function createButton(name: string) {
 	cy.contains('button', 'Créer un emplacement').click();
-	cy.get(selectors.modal.button, { timeout: 2000 })
+	cy.get(selectors.modal.button)
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="button-create-title"]').clear().type(name);

@@ -93,7 +93,7 @@ describe('jdma-register', () => {
 
 			cy.get(selectors.signupForm.submitButton).click();
 
-			cy.url({ timeout: 10000 })
+			cy.url()
 				.should('include', 'registered')
 				.then(currentUrl => {
 					if (currentUrl.includes('registered=classic')) {

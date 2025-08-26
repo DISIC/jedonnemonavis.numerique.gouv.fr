@@ -4,9 +4,7 @@ import { addUrls, selectEntity, tryCloseNewsModal } from './common';
 
 export function navigateToCreatedProduct() {
 	cy.visit(`${appUrl}${selectors.dashboard.products}`);
-	cy.wait(1000);
 	tryCloseNewsModal();
-	cy.wait(1000);
 	cy.url().should('include', selectors.dashboard.products);
 	cy.get(selectors.productLink)
 		.filter(':contains("e2e-jdma-service-test-users")')

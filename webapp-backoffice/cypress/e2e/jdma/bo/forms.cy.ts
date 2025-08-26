@@ -38,7 +38,7 @@ describe('jdma-forms', () => {
 
 				if (!exists) {
 					createForm(title);
-					cy.contains('a', title, { timeout: 10000 }).should('exist');
+					cy.contains('a', title).should('exist');
 				} else {
 					cy.log(`Form "${title}" already exists`);
 				}
@@ -67,7 +67,6 @@ describe('jdma-forms', () => {
 		cy.contains('button', 'Étape suivante').click();
 		cy.contains('button', "Masquer l'étape").click();
 		publishForm();
-		cy.wait(2000);
 		cy.contains('Simplicité du langage').should('not.be.visible');
 		goToCurrentFormReviewPage(true);
 		fillFormStep1(true);

@@ -55,20 +55,17 @@ describe('jdma-users', () => {
 			.first()
 			.click();
 		cy.url().should('include', '/administration/dashboard/users');
-		cy.wait(1000);
 		cy.get('div.fr-card div.fr-grid-row div.fr-col a')
 			.filter(':contains("user 3")')
 			.first()
 			.click();
-		cy.wait(1000);
+
 		cy.url().should('include', '/administration/dashboard/user/');
 		cy.get(selectors.sideMenu.menu)
 			.should('be.visible')
 			.within(() => {
 				cy.get(selectors.sideMenu.menuItem).contains('Accès').click();
 			});
-
-		cy.wait(1000);
 
 		cy.get('h5')
 			.filter(':contains("e2e-jdma-entity-test")')
@@ -92,9 +89,6 @@ describe('jdma-users', () => {
 
 	it('should have removed the user', () => {
 		navigateToCreatedProduct();
-		cy.get('div.fr-card div span', { timeout: 10000 }).should(
-			'not.contain',
-			'user3@example.com'
-		);
+		cy.get('div.fr-card div span').should('not.contain', 'user3@example.com');
 	});
 });

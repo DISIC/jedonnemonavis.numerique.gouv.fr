@@ -20,9 +20,7 @@ describe('jdma-answer-check', () => {
 	// 	cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 	// 		.click()
 	// 		.then(() => {
-	// 			cy.wait(5000);
 	// 			cy.get('button').contains('Statistiques').click();
-	// 			cy.wait(1000);
 	// 			cy.get('button')
 	// 				.contains('Rendre ces statistiques publiques')
 	// 				.first()
@@ -50,9 +48,7 @@ describe('jdma-answer-check', () => {
 	// 	cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
 	// 		.click()
 	// 		.then(() => {
-	// 			cy.wait(5000);
 	// 			cy.get('button').contains('Statistiques').click();
-	// 			cy.wait(1000);
 	// 			cy.get('button')
 	// 				.contains('Rendre ces statistiques publiques')
 	// 				.first()

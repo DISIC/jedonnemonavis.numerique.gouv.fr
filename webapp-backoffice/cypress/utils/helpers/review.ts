@@ -9,7 +9,6 @@ export function fillFormStep1(isSimplicityHidden?: boolean) {
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
-	cy.wait(3000);
 
 	if (isSimplicityHidden) {
 		cy.contains('h1', 'Clarté').should('not.exist');

@@ -7,6 +7,7 @@ export default defineConfig({
 		reporterOptions: {
 			toConsole: true
 		},
+		defaultCommandTimeout: 10000,
 		screenshotOnRunFailure: false,
 		viewportWidth: 1280,
 		viewportHeight: 720,

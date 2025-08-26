@@ -21,13 +21,9 @@ describe('Account page', () => {
 		login(invitedEmailBis, userPassword);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
-		cy.wait(2000);
 		clickModifyCard(selectors.card.identity);
-		cy.wait(1000);
 		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });
-		cy.wait(1000);
 		cy.contains('button', selectors.action.save).click();
-		cy.wait(1000);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 		logout();
 	});

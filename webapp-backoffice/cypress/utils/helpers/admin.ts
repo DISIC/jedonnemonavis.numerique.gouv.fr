@@ -7,8 +7,9 @@ export function deleteService(serviceName: string) {
 		.within(() => {
 			cy.get('#button-options-service').click();
 		});
-	cy.wait(1000);
-	cy.contains('li', 'Supprimer ce service').click({ force: true });
+	cy.contains('li', 'Supprimer ce service').click({
+		force: true
+	});
 	cy.contains('button', 'Supprimer').click({ force: true });
 }
 
@@ -34,9 +35,7 @@ export function checkform(shouldWork = false) {
 
 export function checkMail(click = false, topic = '') {
 	cy.visit(mailerUrl);
-	cy.wait(1000);
 	cy.get('button[ng-click="refresh()"]').click();
-	cy.wait(1000);
 	cy.get('.msglist-message')
 		.contains('span', topic)
 		.should('exist')

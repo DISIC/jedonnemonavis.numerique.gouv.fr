@@ -27,7 +27,6 @@ describe('jdma-admin', () => {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
 				.should('be.visible')
 				.click();
-			cy.wait(1000);
 			fillSignupForm({
 				email: `test${i}@gmail.com`,
 				password: userPassword,
@@ -38,7 +37,6 @@ describe('jdma-admin', () => {
 		}
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
-		cy.wait(1000);
 		cy.get('input[type="checkbox"]').should('have.length', 5);
 		cy.get('input[type="checkbox"][value="value1"]').click({ force: true });
 		cy.contains('button', 'Supprimer tous').click();
@@ -75,7 +73,6 @@ describe('jdma-admin', () => {
 			});
 
 		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
-		cy.wait(1000);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist');
@@ -85,7 +82,6 @@ describe('jdma-admin', () => {
 
 	it('invite admin on organisation', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
-		cy.wait(1000);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist')
@@ -152,8 +148,6 @@ describe('jdma-admin', () => {
 		cy.get(selectors.productLink)
 			.contains(selectors.dashboard.nameTestService)
 			.click();
-
-		cy.wait(1000);
 
 		createForm('e2e-jdma-form-test');
 		cy.visit(appUrl);

@@ -102,13 +102,9 @@ export function generateUniqueEmail() {
 }
 
 export function getEmail() {
-	cy.wait(2000);
 	cy.visit(mailerUrl);
 	cy.get('button.btn-default[title="Refresh"]').click();
-	cy.get('div.messages', { timeout: 20000 })
-		.find('div.msglist-message')
-		.first()
-		.click();
+	cy.get('div.messages').find('div.msglist-message').first().click();
 	cy.get('ul.nav-tabs').contains('Plain text').click();
 	cy.get('#preview-plain')
 		.find('a')

@@ -35,10 +35,12 @@ export function fillAccountForm({
 			.type(firstName, { force: true });
 	}
 	if (lastName !== '') {
-		cy.get(selectors.accountForm.lastName).clear().type(lastName);
+		cy.get(selectors.accountForm.lastName)
+			.clear()
+			.type(lastName, { force: true });
 	}
 	if (email !== '') {
-		cy.get(selectors.accountForm.email).clear().type(email);
+		cy.get(selectors.accountForm.email).clear().type(email, { force: true });
 	}
 	if (emailConfirmation !== '') {
 		cy.get(selectors.accountForm.emailConfirmation)
