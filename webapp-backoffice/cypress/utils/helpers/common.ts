@@ -73,7 +73,7 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 };
 
 export function createProduct(name: string) {
-	cy.contains('button', 'Ajouter un nouveau service').click();
+	cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
 	cy.get(selectors.productForm, { timeout: 10000 })
 		.should('be.visible')
 		.within(() => {
