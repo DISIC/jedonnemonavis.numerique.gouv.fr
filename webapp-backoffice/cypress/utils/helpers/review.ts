@@ -1,7 +1,6 @@
-import { adminEmail, adminPassword, appUrl } from '../variables';
-import { login } from './common';
+import { appUrl } from '../variables';
 
-export function fillFormStep1() {
+export function fillFormStep1(isSimplicityHidden?: boolean) {
 	cy.get('[class*="formSection"]').within(() => {
 		cy.get('h1').contains('Je donne mon avis');
 		cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);
@@ -12,7 +11,11 @@ export function fillFormStep1() {
 	});
 	cy.wait(3000);
 
-	cy.get('h1').contains('Clarté');
+	if (isSimplicityHidden) {
+		cy.contains('h1', 'Clarté').should('not.exist');
+	} else {
+		cy.get('h1').contains('Clarté');
+	}
 }
 
 export function fillFormStep2() {

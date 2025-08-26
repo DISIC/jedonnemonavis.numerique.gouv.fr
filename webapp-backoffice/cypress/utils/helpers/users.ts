@@ -8,7 +8,7 @@ export function navigateToCreatedProduct() {
 	tryCloseNewsModal();
 	cy.wait(1000);
 	cy.url().should('include', selectors.dashboard.products);
-	cy.get(selectors.productTitle)
+	cy.get(selectors.productLink)
 		.filter(':contains("e2e-jdma-service-test-users")')
 		.should('have.length', 1)
 		.should('contain', 'e2e-jdma-service-test-users')

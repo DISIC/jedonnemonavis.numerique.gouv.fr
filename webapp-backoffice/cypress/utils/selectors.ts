@@ -43,15 +43,19 @@ export const selectors = {
 		nameTestForm2: 'e2e-jdma-form-test-2',
 		renamedTestForm: 'e2e-jdma-form-test-renamed'
 	},
+	formBuilder: {
+		modifiedIntroductionText: 'Modification du texte introductif.'
+	},
 	modal: {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
 		button: 'dialog#button-modal',
 		form: 'dialog#new-form-modal',
-		renameForm: 'dialog#rename-form-modal'
+		renameForm: 'dialog#rename-form-modal',
+		publishForm: 'dialog#form-publish-modal'
 	},
 	modalFooter: '.fr-modal__footer',
-	productTitle: '[class*="productTitle"]',
+	productLink: '[class*="productLink"]',
 	productForm: '#product-form',
 	sideMenu: {
 		menu: 'nav.fr-sidemenu',

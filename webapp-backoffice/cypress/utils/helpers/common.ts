@@ -9,14 +9,11 @@ export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
 	tryCloseNewsModal();
-	cy.wait(1000);
 }
 
 export function logout() {
 	cy.reload();
-	cy.wait(2000);
 	tryCloseNewsModal();
-	cy.wait(1000);
 	cy.get('header', { timeout: 10000 }).should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.contains('button', 'Se déconnecter').click({ force: true });
@@ -92,9 +89,7 @@ export function createProduct(name: string) {
 
 export function createForm(name: string) {
 	cy.wait(1000);
-
 	cy.contains('button', /^Créer un (nouveau )?formulaire$/).click();
-
 	cy.get(selectors.modal.form, { timeout: 2000 })
 		.should('be.visible')
 		.within(() => {
@@ -106,4 +101,14 @@ export function createForm(name: string) {
 		});
 	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
 	cy.wait(500);
+}
+
+export function createButton(name: string) {
+	cy.contains('button', 'Créer un emplacement').click();
+	cy.get(selectors.modal.button, { timeout: 2000 })
+		.should('be.visible')
+		.within(() => {
+			cy.get('input[name="button-create-title"]').clear().type(name);
+		});
+	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
 }

@@ -123,10 +123,10 @@ describe('jdma-admin', () => {
 
 		cy.get(selectors.modalFooter).contains('Ajouter ce service').click();
 		cy.visit(`${appUrl}`);
-		cy.get(selectors.productTitle)
+		cy.get(selectors.productLink)
 			.should('exist')
-			.then($productTitle => {
-				cy.wrap($productTitle).contains(selectors.dashboard.nameTestService);
+			.then($productLink => {
+				cy.wrap($productLink).contains(selectors.dashboard.nameTestService);
 			});
 
 		logout();
@@ -143,15 +143,13 @@ describe('jdma-admin', () => {
 		logout();
 		login(invitedEmailBis, userPassword);
 		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-		cy.get(selectors.productTitle).contains(
-			selectors.dashboard.nameTestService
-		);
+		cy.get(selectors.productLink).contains(selectors.dashboard.nameTestService);
 
 		cy.get('nav').contains('Organisations').click();
 		cy.get('p').contains(selectors.dashboard.nameTestOrga).should('be.visible');
 
 		cy.get('nav').contains('Services').click();
-		cy.get(selectors.productTitle)
+		cy.get(selectors.productLink)
 			.contains(selectors.dashboard.nameTestService)
 			.click();
 
