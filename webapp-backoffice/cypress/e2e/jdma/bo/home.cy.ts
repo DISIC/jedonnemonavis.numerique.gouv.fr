@@ -1,10 +1,17 @@
 import { checkUrlRedirection } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import { appUrl } from '../../../utils/variables';
 
 describe('jdma-home', () => {
 	beforeEach(() => {
 		cy.visit(appUrl);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 	});
 
 	describe('Navbar', () => {

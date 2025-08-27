@@ -1,11 +1,18 @@
 import { createProduct, login } from '../../../utils/helpers/common';
 import { navigateToCreatedProduct } from '../../../utils/helpers/users';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword } from '../../../utils/variables';
 
 describe('jdma-users', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 	});
 
 	it('should create a service and attach an organization', () => {

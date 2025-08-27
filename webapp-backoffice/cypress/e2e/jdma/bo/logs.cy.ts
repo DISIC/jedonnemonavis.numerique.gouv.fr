@@ -1,10 +1,17 @@
 import { login, tryCloseNewsModal } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-logs', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 	});
 
 	it('should display the logs page with no events', () => {
