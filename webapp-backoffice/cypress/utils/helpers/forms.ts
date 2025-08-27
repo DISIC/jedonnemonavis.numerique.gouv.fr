@@ -2,6 +2,7 @@ import { selectors } from '../selectors';
 import { createProduct } from './common';
 
 export const tryCloseHelpModal = () => {
+	cy.wait(500);
 	cy.get('body').then(body => {
 		if (body.find('dialog#form-help-modal').length > 0) {
 			cy.get('dialog#form-help-modal')
@@ -28,6 +29,7 @@ export function renameForm(newName: string) {
 }
 
 export function ensureTestServiceExistsAndGoToForms() {
+	cy.wait(500);
 	cy.get('body').then($body => {
 		const found = $body
 			.find(`*:contains("${selectors.dashboard.nameTestService}")`)

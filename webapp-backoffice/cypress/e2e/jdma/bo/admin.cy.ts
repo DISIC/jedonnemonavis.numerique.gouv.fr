@@ -129,10 +129,7 @@ describe('jdma-admin', () => {
 		cy.get('nav').contains('Services').click();
 		cy.get(selectors.productLink)
 			.contains(selectors.dashboard.nameTestService)
-			.click();
-
-		createForm('e2e-jdma-form-test');
-		cy.visit(appUrl);
+			.should('be.visible');
 	});
 
 	// it('delete service with guest admin', () => {

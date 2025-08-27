@@ -88,6 +88,7 @@ export function createProduct(name: string) {
 }
 
 export function createForm(name: string) {
+	cy.url().should('include', '/forms');
 	cy.contains('button', /^Créer un (nouveau )?formulaire$/).click();
 	cy.get(selectors.modal.form)
 		.should('be.visible')
@@ -102,6 +103,7 @@ export function createForm(name: string) {
 }
 
 export function createButton(name: string) {
+	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', 'Créer un emplacement').click();
 	cy.get(selectors.modal.button)
 		.should('be.visible')
@@ -109,4 +111,5 @@ export function createButton(name: string) {
 			cy.get('input[name="button-create-title"]').clear().type(name);
 		});
 	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
 }
