@@ -16,7 +16,7 @@ import {
 	userPassword
 } from '../../../utils/variables';
 
-describe('Account page', () => {
+describe('jdma-account', () => {
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
 		checkAccountHeader('John Doe', invitedEmailBis);
