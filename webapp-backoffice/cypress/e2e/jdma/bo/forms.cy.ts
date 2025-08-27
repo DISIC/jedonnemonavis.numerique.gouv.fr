@@ -66,7 +66,9 @@ describe('jdma-forms', () => {
 		cy.contains('button', 'Étape suivante').click();
 		cy.contains('button', "Masquer l'étape").click();
 		publishForm();
-		cy.contains('Simplicité du langage').should('not.be.visible');
+		cy.get('[role="tabpanel"]')
+			.first()
+			.should('not.contain', 'Simplicité du langage');
 		goToCurrentFormReviewPage(true);
 		fillFormStep1(true);
 	});
