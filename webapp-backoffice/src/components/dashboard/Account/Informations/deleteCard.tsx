@@ -78,7 +78,7 @@ const DeleteCard = (props: Props) => {
 		<>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`Suppresion de compte`}
+				title={`Supprimer le compte`}
 				kind="danger"
 				handleOnConfirm={() => {
 					if (validateDelete) {
@@ -101,8 +101,10 @@ const DeleteCard = (props: Props) => {
 									<Input
 										label={
 											<p className={fr.cx('fr-mb-0')}>
-												Veuillez taper le mot "supprimer" pour confirmer la
-												suppression
+												<strong>
+													Veuillez taper le mot "supprimer" pour confirmer la
+													suppression
+												</strong>
 												<span className={cx(classes.asterisk)}>*</span>
 											</p>
 										}
