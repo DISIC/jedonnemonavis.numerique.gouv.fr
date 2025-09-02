@@ -60,6 +60,17 @@ export async function createOrUpdateAnswers(
         },
       });
 
+      if (answer.field_code === "verbatim") {
+        await prisma.review.update({
+          where: {
+            id_created_at: { id: review.id, created_at: review.created_at },
+          },
+          data: {
+            has_verbatim: true,
+          },
+        });
+      }
+
       const formatAnswer = {
         data: {
           ...answer,

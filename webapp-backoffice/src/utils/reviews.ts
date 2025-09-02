@@ -8,6 +8,7 @@ export const formatWhereAndOrder = (
 		product_id,
 		form_id,
 		mustHaveVerbatims,
+		mustHaveVerbatimsOptimzed,
 		search,
 		sort,
 		start_date,
@@ -45,6 +46,9 @@ export const formatWhereAndOrder = (
 					})
 				}
 			}),
+		...(mustHaveVerbatimsOptimzed && {
+			has_verbatim: true
+		}),
 		...((mustHaveVerbatims || filters?.needVerbatim) && {
 			OR: [
 				{
