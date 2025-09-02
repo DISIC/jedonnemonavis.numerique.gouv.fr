@@ -18,6 +18,7 @@ export const reviewRouter = router({
 				form_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
 				mustHaveVerbatims: z.boolean().optional().default(false),
+				mustHaveVerbatimsOptimzed: z.boolean().optional().default(false),
 				sort: z.string().optional(),
 				search: z.string().optional(),
 				start_date: z.string().optional(),

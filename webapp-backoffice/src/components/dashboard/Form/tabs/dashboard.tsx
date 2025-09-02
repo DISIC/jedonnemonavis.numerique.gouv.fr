@@ -35,6 +35,14 @@ const DashboardTab = ({
 
 	const currentFormConfig = form.form_configs[0];
 
+	const endDate = new Date().toISOString().split('T')[0];
+	const startDate = (() => {
+		const date = new Date();
+		date.setFullYear(date.getFullYear() - 1);
+		date.setHours(0, 0, 0, 0);
+		return date.toISOString().split('T')[0];
+	})();
+
 	const { data: reviewResults, isFetching: isLoadingReviews } =
 		trpc.review.getList.useQuery(
 			{
@@ -43,7 +51,7 @@ const DashboardTab = ({
 				numberPerPage: 4,
 				page: 1,
 				shouldIncludeAnswers: true,
-				mustHaveVerbatims: true,
+				mustHaveVerbatimsOptimzed: true,
 				needLogging: false,
 				sort: 'created_at:desc'
 			},
@@ -79,16 +87,8 @@ const DashboardTab = ({
 					productId={form.product_id}
 					formConfig={currentFormConfig}
 					formId={form.id}
-					startDate={
-						new Date(
-							new Date(
-								new Date().setDate(new Date().getDate() + 1)
-							).setFullYear(new Date().getFullYear() - 1)
-						)
-							.toISOString()
-							.split('T')[0]
-					}
-					endDate={new Date().toISOString().split('T')[0]}
+					startDate={startDate}
+					endDate={endDate}
 					slugsToDisplay={[
 						'satisfaction',
 						'comprehension',
@@ -105,12 +105,8 @@ const DashboardTab = ({
 						fieldCode="satisfaction"
 						productId={form.product.id}
 						formId={form.id}
-						startDate={
-							new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-								.toISOString()
-								.split('T')[0]
-						}
-						endDate={new Date().toISOString().split('T')[0]}
+						startDate={startDate}
+						endDate={endDate}
 						total={nbReviews}
 						displayLine={false}
 						isFormDashboardType
