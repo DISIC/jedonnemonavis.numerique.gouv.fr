@@ -1,34 +1,12 @@
-const app_url = Cypress.env('app_base_url');
-
-const selectors = {
-	header: 'header',
-	navbarLogo: '.fr-logo',
-	navbarTitle: 'Je donne mon avis',
-	navbarSubtitle: 'La voix de vos usagers',
-	loginLink: '.fr-header__tools',
-	bodyTitle: 'h1',
-	subtitle: 'p',
-	image: '[class*="HomeHeader-image"] > img',
-	stepsContainer: '[class*="HomeStepper-container"]',
-	actionButton: '[class*="HomeActionButton-container"]',
-	accordionGroup: '.fr-accordions-group .fr-accordion__item',
-	footer: 'footer',
-	footerLinks: '.fr-footer__bottom-list',
-	footerLogo: '.fr-logo'
-};
-
-// Helper function
-const checkUrlRedirection = (selector, expectedUrl) => {
-	cy.get(selector).click();
-	cy.url().should('eq', app_url + expectedUrl);
-};
+import { checkUrlRedirection } from '../../../utils/helpers/common';
+import { selectors } from '../../../utils/selectors';
+import { appUrl } from '../../../utils/variables';
 
 describe('jdma-home', () => {
 	beforeEach(() => {
-		cy.visit(app_url);
+		cy.visit(appUrl);
 	});
 
-	// NAVBAR Tests
 	describe('Navbar', () => {
 		it('should display the correct navbar logo and title', () => {
 			cy.get(selectors.header)
@@ -52,7 +30,6 @@ describe('jdma-home', () => {
 		});
 	});
 
-	// BODY Tests
 	describe('Body', () => {
 		it('should display the correct title, subtitle and image', () => {
 			cy.contains(
@@ -96,7 +73,6 @@ describe('jdma-home', () => {
 		});
 	});
 
-	// FOOTER Tests
 	describe('Footer', () => {
 		it('should display the correct footer logo', () => {
 			cy.get(selectors.footer)
@@ -106,13 +82,11 @@ describe('jdma-home', () => {
 		});
 
 		it('should display and verify footer internal links', () => {
-			// Vérifier la présence de chaque lien individuellement
 			cy.get(selectors.footer)
 				.find(selectors.footerLinks)
 				.find('li')
 				.should('have.length', 6);
 
-			// Utiliser des expressions régulières pour être plus tolérant aux variations de formatage
 			cy.get(selectors.footer)
 				.contains(/Accessibilité\s*:\s*non conforme/i)
 				.should('exist');
@@ -123,7 +97,6 @@ describe('jdma-home', () => {
 				.contains(/Données personnelles/i)
 				.should('exist');
 
-			// Vérifier le lien "Modalités d'utilisation" par son URL
 			cy.get(selectors.footer)
 				.find('a[href="/public/termsOfUse"]')
 				.should('exist');

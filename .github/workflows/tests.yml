@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: "yarn"
+          cache: 'yarn'
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
@@ -90,7 +90,7 @@ jobs:
       # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
-        run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.js" --headed --browser chrome
+        run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.ts" --headed --browser chrome
 
       # 10. Vérifier si MailHog reçoit les emails
       - name: Check MailHog for received emails

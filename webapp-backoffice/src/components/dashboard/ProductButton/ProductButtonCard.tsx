@@ -113,7 +113,7 @@ const ProductButtonCard = (props: Props) => {
 								<MenuItem
 									onClick={() => {
 										navigator.clipboard.writeText(
-											`https://jedonnemonavis.numerique.gouv.fr/Demarches/${button.form.product_id}?button=${button.id}`
+											`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${button.form.product_id}?button=${button.id}`
 										);
 										handleClose();
 									}}
