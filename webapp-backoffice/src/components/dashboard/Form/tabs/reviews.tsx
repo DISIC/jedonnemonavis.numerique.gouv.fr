@@ -366,6 +366,12 @@ const ReviewsTab = (props: Props) => {
 		}
 	}, [filters.productReviews.displayNew]);
 
+	useEffect(() => {
+		if (filters && currentPage !== 1) {
+			setCurrentPage(1);
+		}
+	}, [filters]);
+
 	const handleButtonClick = () => {
 		handleModalOpening('create');
 	};
