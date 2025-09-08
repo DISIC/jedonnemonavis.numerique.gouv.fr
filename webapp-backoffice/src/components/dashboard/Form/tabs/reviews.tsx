@@ -30,11 +30,12 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	hasButtons: boolean;
 }
 

@@ -270,11 +270,13 @@ model Button {
   isTest      Boolean? @default(false)
   form        Form     @relation(fields: [form_id], references: [id])
   form_id     Int
+  delete_reason String?
 
   reviews Review[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+  deleted_at DateTime?
 }
 
 model ApiKey {

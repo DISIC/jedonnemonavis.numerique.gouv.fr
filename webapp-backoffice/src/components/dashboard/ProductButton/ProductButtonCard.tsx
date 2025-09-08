@@ -7,10 +7,12 @@ import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
+import { ButtonModalType } from './ButtonModal';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface Props {
 	button: ButtonWithForm;
-	onButtonClick: (modalType: string, button?: ButtonWithForm) => void;
+	onButtonClick: (modalType: ButtonModalType, button?: ButtonWithForm) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -46,81 +48,131 @@ const ProductButtonCard = (props: Props) => {
 						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>
 							{button.title}
 						</p>
-						{button.description && (
+						{(button.description || button.deleted_at) && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
-								{button.description}
+								{button.deleted_at
+									? `Fermé le ${button.deleted_at.toLocaleDateString()}` +
+										(button.delete_reason ? ` : ${button.delete_reason}` : '')
+									: button.description}
 							</p>
 						)}
 					</div>
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
-							{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
-							<Button
-								priority="secondary"
-								size="small"
-								onClick={() => {
-									onButtonClick('install', button);
-									push(['trackEvent', 'Gestion boutons', 'Installer']);
-									handleClose();
-								}}
-								className="fr-mr-md-2v"
-							>
-								Voir le code
-							</Button>
-							<Button
-								id="button-options"
-								aria-controls={menuOpen ? 'option-menu' : undefined}
-								aria-haspopup="true"
-								aria-expanded={menuOpen ? 'true' : undefined}
-								title={`Ouvrir le menu contextuel du bouton « ${button.title} »`}
-								priority="secondary"
-								size="small"
-								onClick={handleClick}
-								iconId={
-									isMobile
-										? menuOpen
-											? 'ri-arrow-up-s-line'
-											: 'ri-arrow-down-s-line'
-										: 'ri-more-2-fill'
-								}
-								iconPosition={isMobile ? 'right' : undefined}
-								className={cx(classes.buttonWrapper)}
-							>
-								{isMobile && 'Options'}
-								<span
-									className={fr.cx('fr-hidden')}
-								>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
-							</Button>
-							<Menu
-								id="option-menu"
-								open={menuOpen}
-								anchorEl={anchorEl}
-								onClose={handleClose}
-								MenuListProps={{
-									'aria-labelledby': 'button-options'
-								}}
-							>
-								{ownRight === 'carrier_admin' && (
-									<MenuItem
+							{button.deleted_at ? (
+								<Badge severity="error" noIcon>
+									Fermé
+								</Badge>
+							) : (
+								<>
+									{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
+									<Button
+										priority="secondary"
+										size="small"
 										onClick={() => {
-											onButtonClick('edit', button), handleClose();
+											onButtonClick('install', button);
+											push(['trackEvent', 'Gestion boutons', 'Installer']);
+											handleClose();
+										}}
+										className="fr-mr-md-2v"
+									>
+										Voir le code
+									</Button>
+									<Button
+										id="button-options"
+										aria-controls={menuOpen ? 'option-menu' : undefined}
+										aria-haspopup="true"
+										aria-expanded={menuOpen ? 'true' : undefined}
+										title={`Ouvrir le menu contextuel du bouton « ${button.title} »`}
+										priority="secondary"
+										size="small"
+										onClick={handleClick}
+										iconId={
+											isMobile
+												? menuOpen
+													? 'ri-arrow-up-s-line'
+													: 'ri-arrow-down-s-line'
+												: 'ri-more-2-fill'
+										}
+										iconPosition={isMobile ? 'right' : undefined}
+										className={cx(classes.buttonWrapper)}
+									>
+										{isMobile && 'Options'}
+										<span
+											className={fr.cx('fr-hidden')}
+										>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
+									</Button>
+									<Menu
+										id="option-menu"
+										open={menuOpen}
+										anchorEl={anchorEl}
+										onClose={handleClose}
+										MenuListProps={{
+											'aria-labelledby': 'button-options'
 										}}
 									>
-										Modifier
-									</MenuItem>
-								)}
-								<MenuItem
-									onClick={() => {
-										navigator.clipboard.writeText(
-											`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${button.form.product_id}?button=${button.id}`
-										);
-										handleClose();
-									}}
-								>
-									Copier le lien du formulaire
-								</MenuItem>
-							</Menu>
+										{ownRight === 'carrier_admin' && (
+											<MenuItem
+												onClick={() => {
+													onButtonClick('edit', button);
+													handleClose();
+												}}
+											>
+												<i
+													className={cx(
+														fr.cx(
+															'fr-icon-edit-line',
+															'fr-mr-2v',
+															'fr-icon--sm'
+														)
+													)}
+												/>
+												Modifier
+											</MenuItem>
+										)}
+										<MenuItem
+											onClick={() => {
+												navigator.clipboard.writeText(
+													`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${button.form.product_id}?button=${button.id}`
+												);
+												handleClose();
+											}}
+										>
+											<i
+												className={cx(
+													fr.cx('ri-file-copy-line', 'fr-mr-2v', 'fr-icon--sm')
+												)}
+											/>
+											Copier le lien du formulaire
+										</MenuItem>
+										{ownRight === 'carrier_admin' && (
+											<MenuItem
+												onClick={() => {
+													onButtonClick('delete', button);
+													handleClose();
+												}}
+												style={{
+													color:
+														fr.colors.decisions.text.actionHigh.redMarianne
+															.default
+												}}
+											>
+												<i
+													className={cx(
+														fr.cx(
+															'fr-icon-delete-line',
+															'fr-mr-2v',
+															'fr-icon--sm'
+														)
+													)}
+												/>
+												Fermer l'emplacement
+											</MenuItem>
+										)}
+									</Menu>
+								</>
+							)}
 						</div>
 					</div>
 				</div>

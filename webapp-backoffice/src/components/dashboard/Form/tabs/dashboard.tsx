@@ -13,6 +13,7 @@ import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	nbReviews: number;
@@ -20,7 +21,7 @@ interface Props {
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
 	hasButtons: boolean;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 }
 
 const DashboardTab = ({

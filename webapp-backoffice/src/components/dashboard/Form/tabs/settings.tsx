@@ -15,12 +15,13 @@ import { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	modal: CustomModalProps;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
@@ -163,7 +164,21 @@ const SettingsTab = ({
 						/>
 					)}
 					{!(isLoadingButtons || isRefetchingButtons) &&
-						buttons?.map((button, index) => (
+						buttons &&
+						[
+							...buttons
+								.filter(b => !b.deleted_at)
+								.sort(
+									(a, b) => b.created_at.getTime() - a.created_at.getTime()
+								),
+							...buttons
+								.filter(b => b.deleted_at)
+								.sort(
+									(a, b) =>
+										(b.deleted_at?.getTime() ?? 0) -
+										(a.deleted_at?.getTime() ?? 0)
+								)
+						].map((button, index) => (
 							<ProductButtonCard
 								key={index}
 								button={button}

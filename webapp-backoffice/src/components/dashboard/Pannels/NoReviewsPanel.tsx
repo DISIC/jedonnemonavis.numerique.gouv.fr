@@ -31,7 +31,7 @@ const NoReviewsPanel = () => {
 					<p className={cx(fr.cx('fr-mb-3v'))}>
 						Vous n’avez pas encore reçu d’avis de la part de vos utilisateurs.{' '}
 						<br />
-						En attendant, vous pouvez.découvrir nos conseils pour bien placer le
+						En attendant, vous pouvez découvrir nos conseils pour bien placer le
 						bouton de récolte d’avis :
 					</p>
 					<a

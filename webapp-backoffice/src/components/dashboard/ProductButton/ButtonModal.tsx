@@ -11,21 +11,26 @@ import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
+
+export type ButtonModalType = 'install' | 'create' | 'edit' | 'delete';
 
 interface Props {
 	modal: CustomModalProps;
-	modalType?: string;
+	modalType?: ButtonModalType;
 	button?: ButtonWithForm | null;
-	onButtonCreatedOrUpdated: (isTest: boolean, button: ButtonWithForm) => void;
+	onButtonMutation: (isTest: boolean, button: ButtonWithForm) => void;
 	form_id: number;
 }
 
-const defaultButton = {
+const defaultButton: ButtonCreationPayload | ButtonWithForm = {
 	title: '',
 	description: '',
 	xwiki_title: null,
 	form_id: -1,
-	isTest: false
+	isTest: false,
+	delete_reason: null,
+	deleted_at: null
 };
 
 type FormErrors = {
@@ -45,12 +50,7 @@ export type ButtonCreationPayload = Omit<
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const {
-		modal,
-		modalType = 'create',
-		button,
-		onButtonCreatedOrUpdated
-	} = props;
+	const { modal, modalType = 'create', button, onButtonMutation } = props;
 	const [buttonColor, setButtonColor] = useState<string>('bleu');
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<
@@ -103,6 +103,8 @@ const ButtonModal = (props: Props) => {
 				return 'Créer un emplacement';
 			case 'edit':
 				return 'Modifier un emplacement';
+			case 'delete':
+				return "Fermer l'emplacement";
 			default:
 				return '';
 		}
@@ -110,10 +112,7 @@ const ButtonModal = (props: Props) => {
 
 	const handleModalClose = (createdOrUpdatedButton: ButtonWithForm) => {
 		resetErrors('title');
-		onButtonCreatedOrUpdated(
-			!!createdOrUpdatedButton.isTest,
-			createdOrUpdatedButton
-		);
+		onButtonMutation(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
 	};
 
@@ -131,6 +130,17 @@ const ButtonModal = (props: Props) => {
 			updateButton.mutate(buttonWithoutForm);
 		} else {
 			createButton.mutate(currentButton);
+		}
+	};
+
+	const handleButtonDelete = () => {
+		if ('id' in currentButton) {
+			const { form, ...buttonWithoutForm } = currentButton;
+			updateButton.mutate({
+				...buttonWithoutForm,
+				deleted_at: new Date(),
+				delete_reason: currentButton.delete_reason || null
+			});
 		}
 	};
 
@@ -308,6 +318,26 @@ const ButtonModal = (props: Props) => {
 						/>
 					</div>
 				);
+			case 'delete':
+				return (
+					<div>
+						<DeleteButtonOrFormPanel />
+						<Input
+							id="button-delete-reason"
+							label={<p className={fr.cx('fr-mb-0')}>Raison de la fermeture</p>}
+							nativeInputProps={{
+								name: 'button-delete-reason',
+
+								onChange: e => {
+									setCurrentButton({
+										...currentButton,
+										delete_reason: e.target.value
+									});
+								}
+							}}
+						/>
+					</div>
+				);
 			default:
 				return <div></div>;
 		}
@@ -349,6 +379,23 @@ const ButtonModal = (props: Props) => {
 					{
 						children: 'Modifier',
 						onClick: handleButtonCreateOrEdit,
+						doClosesModal: false
+					}
+				];
+
+			case 'delete':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: () => {
+							setCurrentButton(defaultButton);
+							resetErrors('title');
+						}
+					},
+					{
+						children: 'Fermer l’emplacement',
+						onClick: handleButtonDelete,
 						doClosesModal: false
 					}
 				];
