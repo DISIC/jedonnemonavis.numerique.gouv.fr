@@ -341,6 +341,12 @@ export function getButtonDeletedEmail(
 				</tr>
 			</tbody>
 		</table>
+		<br/>
+		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
+			style="font-size: 14px; color: #000091; text-decoration: underline;">
+			Retrouvez tous vos services sur votre tableau de bord JDMA
+		</a>
+		<br/>
 	`);
 }
 

@@ -25,11 +25,13 @@ import prisma from '../utils/db';
 import { allFields, steps_A, steps_B } from '../utils/form';
 import { filterByFormConfig, serializeData } from '../utils/tools';
 import { trpc } from '../utils/trpc';
+import FormClosed from './form-closed';
 
 type JDMAFormProps = {
 	product: Product;
 	isPreviewPublished: boolean;
 	isPreviewUnpublished: boolean;
+	isButtonDeleted: boolean;
 };
 
 export type FormStepNames =
@@ -46,6 +48,7 @@ export default function JDMAForm({
 	product,
 	isPreviewPublished,
 	isPreviewUnpublished,
+	isButtonDeleted,
 }: JDMAFormProps) {
 	const { t } = useTranslation('common');
 	const router = useRouter();
@@ -471,6 +474,10 @@ export default function JDMAForm({
 		}
 	};
 
+	if (isButtonDeleted) {
+		return <FormClosed />;
+	}
+
 	return (
 		<div>
 			{isPreviewUnpublished && (
@@ -551,16 +558,14 @@ export const getServerSideProps: GetServerSideProps<{
 
 	await prisma.$connect();
 	let buttonFormId: number | undefined = undefined;
+	let isButtonDeleted: boolean = false;
 
 	if (buttonId) {
 		const button = await prisma.button.findUnique({
 			where: { id: parseInt(buttonId) },
 			select: { form_id: true, deleted_at: true },
 		});
-		if (button?.deleted_at) {
-			return { notFound: true };
-		}
-
+		isButtonDeleted = !!button?.deleted_at;
 		buttonFormId = button?.form_id;
 	}
 
@@ -657,6 +662,7 @@ export const getServerSideProps: GetServerSideProps<{
 				},
 				isPreviewPublished: !formConfig && isInIframe,
 				isPreviewUnpublished: !!formConfig && isInIframe,
+				isButtonDeleted: isButtonDeleted,
 				...(await serverSideTranslations(locale ?? 'fr', ['common'])),
 			},
 		};
