@@ -11,7 +11,7 @@ const DeleteButtonOrFormPanel = () => {
 				className={cx(classes.blueContainer, fr.cx('fr-container', 'fr-p-6v'))}
 			>
 				<Image
-					src="/assets/chat_picto.svg"
+					src="/assets/install_picto.svg"
 					alt="Picto bulles de discussion"
 					width={120}
 					height={120}

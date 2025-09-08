@@ -20,16 +20,24 @@ import {
 	getProductRestoredEmail
 } from '@/src/utils/emails';
 
-export const checkRightToProceed = async (
-	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
-	session: Session,
-	product_id: number
-) => {
-	const product = await prisma.product.findUnique({
+export const checkRightToProceed = async ({
+	prisma,
+	session,
+	product_id,
+	form_id
+}: {
+	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>;
+	session: Session;
+	product_id?: number;
+	form_id?: number;
+}) => {
+	const product = await prisma.product.findFirst({
 		where: {
-			id: product_id
-		}
+			OR: [{ id: product_id }, { forms: { some: { id: form_id } } }]
+		},
+		include: { entity: { select: { name: true } } }
 	});
+
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product_id,
@@ -51,7 +59,7 @@ export const checkRightToProceed = async (
 			message: 'You do not have rights to proceed on this product'
 		});
 
-	return !!accessRight || isAdmin;
+	return { hasRight: !!accessRight || isAdmin, product };
 };
 
 export const productRouter = router({
@@ -338,17 +346,16 @@ export const productRouter = router({
 					}
 				}
 			});
-			
 
 			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
 			const inputObj = trpcQueries[0].includes('get')
-						? ctx.req.query.input
-							? JSON.parse(ctx.req.query.input as string)
-							: { defaultKey: 'defaultValue' }
-						: ctx.req.body && typeof ctx.req.body === 'string'
-							? JSON.parse(ctx.req.body)
-							: ctx.req.body || { defaultKey: 'defaultValue' };
-							
+				? ctx.req.query.input
+					? JSON.parse(ctx.req.query.input as string)
+					: { defaultKey: 'defaultValue' }
+				: ctx.req.body && typeof ctx.req.body === 'string'
+					? JSON.parse(ctx.req.body)
+					: ctx.req.body || { defaultKey: 'defaultValue' };
+
 			const action = actionMapping[trpcQueries[0]];
 			const input = inputObj[0] !== undefined ? inputObj[0] : {};
 
@@ -372,7 +379,11 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { id, product } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id: id
+			});
 
 			product.title_formatted = removeAccents(product.title as string);
 
@@ -392,7 +403,11 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id
+			});
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id: product_id },
@@ -436,7 +451,11 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id
+			});
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id: product_id },
