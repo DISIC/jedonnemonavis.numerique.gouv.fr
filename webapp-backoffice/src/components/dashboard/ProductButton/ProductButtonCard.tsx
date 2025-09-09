@@ -1,4 +1,7 @@
-import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithClosedLog,
+	ButtonWithForm
+} from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
@@ -9,9 +12,10 @@ import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from './ButtonModal';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
-	button: ButtonWithForm;
+	button: ButtonWithForm & ButtonWithClosedLog;
 	onButtonClick: (modalType: ButtonModalType, button?: ButtonWithForm) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
@@ -176,6 +180,30 @@ const ProductButtonCard = (props: Props) => {
 						</div>
 					</div>
 				</div>
+
+				{button.closedButtonLog && (
+					<Alert
+						severity="error"
+						title="Tentative de dépôt d'avis"
+						description={
+							<>
+								<p>
+									Une tentative de dépôt d'avis a été effectuée sur cet
+									emplacement fermé. Nous vous invitons à supprimer le code HTML
+									correspondant de la page concernée.
+								</p>
+								<small>
+									Dernière tentative :{' '}
+									{button.closedButtonLog.updated_at.toLocaleString()} — Nombre
+									total de tentatives : {button.closedButtonLog.count}
+								</small>
+							</>
+						}
+						closable
+						className={cx(fr.cx('fr-mt-2w'), classes.alertButtonLog)}
+						as="h4"
+					/>
+				)}
 			</div>
 		</>
 	);
@@ -215,6 +243,11 @@ const useStyles = tss
 		buttonWrapper: {
 			'&::before': {
 				marginRight: '0 !important'
+			}
+		},
+		alertButtonLog: {
+			'.fr-link--close': {
+				color: fr.colors.decisions.text.actionHigh.redMarianne.default
 			}
 		},
 		tag: {}

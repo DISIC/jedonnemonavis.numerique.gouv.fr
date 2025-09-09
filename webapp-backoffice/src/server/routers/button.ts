@@ -41,7 +41,8 @@ export const buttonRouter = router({
 					title: filterByTitle === 'title:asc' ? 'asc' : 'desc'
 				},
 				include: {
-					form: true
+					form: true,
+					closedButtonLog: true
 				}
 			});
 

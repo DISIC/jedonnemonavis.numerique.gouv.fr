@@ -271,6 +271,7 @@ model Button {
   form        Form     @relation(fields: [form_id], references: [id])
   form_id     Int
   delete_reason String?
+  closedButtonLog ClosedButtonLog?
 
   reviews Review[]
 
@@ -281,6 +282,7 @@ model Button {
 
 model ClosedButtonLog {
   id         Int      @id @default(autoincrement())
+  button     Button   @relation(fields: [button_id], references: [id], onDelete: Cascade)
   button_id  Int      @unique
   count      Int      @default(1)
   

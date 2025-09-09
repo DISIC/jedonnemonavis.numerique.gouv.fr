@@ -50,6 +50,16 @@ const ButtonWithForm = Prisma.validator<Prisma.ButtonDefaultArgs>()({
 
 export type ButtonWithForm = Prisma.ButtonGetPayload<typeof ButtonWithForm>;
 
+const ButtonWithClosedLog = Prisma.validator<Prisma.ButtonDefaultArgs>()({
+	include: {
+		closedButtonLog: true
+	}
+});
+
+export type ButtonWithClosedLog = Prisma.ButtonGetPayload<
+	typeof ButtonWithClosedLog
+>;
+
 const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
 		entities: true
