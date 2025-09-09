@@ -563,10 +563,18 @@ export const getServerSideProps: GetServerSideProps<{
 	if (buttonId) {
 		const button = await prisma.button.findUnique({
 			where: { id: parseInt(buttonId) },
-			select: { form_id: true, deleted_at: true },
+			select: { id: true, form_id: true, deleted_at: true },
 		});
-		isButtonDeleted = !!button?.deleted_at;
 		buttonFormId = button?.form_id;
+
+		if (button?.deleted_at) {
+			isButtonDeleted = true;
+			await prisma.closedButtonLog.upsert({
+				where: { button_id: button.id },
+				update: { count: { increment: 1 } },
+				create: { button_id: button.id },
+			});
+		}
 	}
 
 	const product = await prisma.product.findUnique({
