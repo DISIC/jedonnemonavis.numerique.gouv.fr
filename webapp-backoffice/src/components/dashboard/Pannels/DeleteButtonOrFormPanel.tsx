@@ -2,7 +2,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 
-const DeleteButtonOrFormPanel = () => {
+const DeleteButtonOrFormPanel = ({ isForForm }: { isForForm?: boolean }) => {
 	const { cx, classes } = useStyles();
 
 	return (
@@ -30,13 +30,17 @@ const DeleteButtonOrFormPanel = () => {
 			</div>
 
 			<ul className={fr.cx('fr-mt-4v', 'fr-mb-6v', 'fr-ml-2v')}>
-				<li>Le formulaire ne recevra plus de donnée de cet emplacement</li>
 				<li>
-					Les usagers n’auront plus accès au formulaire via cet emplacement
+					Le formulaire ne recevra plus de donnée
+					{!isForForm && ' de cet emplacement'}
+				</li>
+				<li>
+					Les usagers n’auront plus accès au formulaire
+					{!isForForm && ' via cet emplacement'}
 				</li>
 				<li>
 					Vous aurez toujours accès aux statistiques récoltées avant la
-					fermeture de l’emplacement
+					fermeture{!isForForm ? ' de l’emplacement' : ' du formulaire'}
 				</li>
 				<li>Cette action est irréversible</li>
 			</ul>

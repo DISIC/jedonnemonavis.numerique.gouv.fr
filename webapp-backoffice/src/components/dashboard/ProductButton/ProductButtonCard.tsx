@@ -32,7 +32,10 @@ const ProductButtonCard = (props: Props) => {
 		setAnchorEl(null);
 	};
 
-	const { cx, classes } = useStyles({ isTest: button.isTest || false });
+	const { cx, classes } = useStyles({
+		isTest: button.isTest || false,
+		isClosed: !!button.deleted_at
+	});
 
 	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
 
@@ -211,12 +214,14 @@ const ProductButtonCard = (props: Props) => {
 
 const useStyles = tss
 	.withName(ProductButtonCard.name)
-	.withParams<{ isTest: boolean }>()
-	.create(({ isTest }) => ({
+	.withParams<{ isTest: boolean; isClosed: boolean }>()
+	.create(({ isTest, isClosed }) => ({
 		card: {
 			backgroundColor: isTest
 				? fr.colors.decisions.border.default.grey.default
-				: fr.colors.decisions.background.alt.blueFrance.default,
+				: isClosed
+					? fr.colors.decisions.background.default.grey.hover
+					: fr.colors.decisions.background.alt.blueFrance.default,
 			height: 'auto!important',
 			backgroundImage: 'none!important'
 		},

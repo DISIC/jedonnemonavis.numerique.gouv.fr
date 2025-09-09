@@ -293,6 +293,7 @@ const ProductFormPage = (props: Props) => {
 													ownRight={ownRight}
 													modal={buttonModal}
 													alertText={alertText}
+													setAlertText={setAlertText}
 													handleModalOpening={handleModalOpening}
 													isAlertShown={isAlertShown}
 													setIsAlertShown={setIsAlertShown}

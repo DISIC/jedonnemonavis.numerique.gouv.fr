@@ -16,6 +16,8 @@ import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import FormDeleteModal from '../FormDeleteModal';
 
 interface Props {
 	form: FormWithElements;
@@ -23,6 +25,7 @@ interface Props {
 	modal: CustomModalProps;
 	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	alertText: string;
+	setAlertText: (text: string) => void;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
 }
@@ -43,12 +46,18 @@ const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
 		}
 	];
 
+const delete_form_modal = createModal({
+	id: 'delete-form-modal',
+	isOpenedByDefault: false
+});
+
 const SettingsTab = ({
 	form,
 	ownRight,
 	modal,
 	handleModalOpening,
 	alertText,
+	setAlertText,
 	isAlertShown,
 	setIsAlertShown
 }: Props) => {
@@ -99,10 +108,26 @@ const SettingsTab = ({
 		}
 	);
 
+	const updateButton = trpc.button.update.useMutation();
+
 	const {
 		data: buttons,
 		metadata: { count: buttonsCount }
 	} = buttonResults;
+
+	const deleteAllButtons = async () => {
+		if (buttonsCount === 0) return;
+		await Promise.all(
+			buttons.map(button => {
+				const { form, closedButtonLog, ...data } = button;
+				return updateButton.mutateAsync({
+					...data,
+					deleted_at: new Date()
+				});
+			})
+		);
+		refetchButtons();
+	};
 
 	const displaySettingsContent = () => {
 		if (isLoadingButtons || isRefetchingButtons) {
@@ -115,6 +140,19 @@ const SettingsTab = ({
 
 		return (
 			<>
+				<FormDeleteModal
+					modal={delete_form_modal}
+					form={form}
+					onDelete={async v => {
+						await deleteAllButtons();
+						// TODO: DISPLAY ALERT ON THE FORMS PAGE
+						router.replace(router.asPath);
+						setAlertText(
+							`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`
+						);
+						setIsAlertShown(true);
+					}}
+				/>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
 				</div>
@@ -244,6 +282,40 @@ const SettingsTab = ({
 										}}
 									>
 										Éditer le formulaire
+									</Button>
+								</div>
+							</div>
+						</div>
+						<div
+							className={fr.cx('fr-col-12', 'fr-card', 'fr-my-3w', 'fr-p-6v')}
+						>
+							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
+								<div className="fr-col-8">
+									<span className={classes.containerTitle}>
+										Fermer le formulaire
+									</span>
+									<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
+										Le formulaire n’enregistrera plus de nouvelles réponses.
+										Cette action est irréversible.
+									</p>
+								</div>
+								<div
+									className={fr.cx('fr-col-4')}
+									style={{ display: 'flex', justifyContent: 'end' }}
+								>
+									<Button
+										priority="tertiary"
+										iconId="fr-icon-delete-line"
+										style={{
+											color: fr.colors.decisions.text.default.error.default
+										}}
+										className={fr.cx('fr-ml-auto')}
+										iconPosition="right"
+										onClick={() => {
+											delete_form_modal.open();
+										}}
+									>
+										Fermer le formulaire
 									</Button>
 								</div>
 							</div>

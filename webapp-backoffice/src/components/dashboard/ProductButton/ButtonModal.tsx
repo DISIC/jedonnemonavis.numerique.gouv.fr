@@ -1,5 +1,8 @@
 import { CustomModalProps } from '@/src/types/custom';
-import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithClosedLog,
+	ButtonWithForm
+} from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -54,7 +57,7 @@ const ButtonModal = (props: Props) => {
 	const [buttonColor, setButtonColor] = useState<string>('bleu');
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<
-		ButtonCreationPayload | ButtonWithForm
+		ButtonCreationPayload | (ButtonWithForm & ButtonWithClosedLog)
 	>(defaultButton);
 
 	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
@@ -126,7 +129,7 @@ const ButtonModal = (props: Props) => {
 		currentButton.form_id = props.form_id;
 
 		if ('id' in currentButton) {
-			const { form, ...buttonWithoutForm } = currentButton;
+			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
 			updateButton.mutate(buttonWithoutForm);
 		} else {
 			createButton.mutate(currentButton);
@@ -135,7 +138,7 @@ const ButtonModal = (props: Props) => {
 
 	const handleButtonDelete = () => {
 		if ('id' in currentButton) {
-			const { form, ...buttonWithoutForm } = currentButton;
+			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
 			updateButton.mutate({
 				...buttonWithoutForm,
 				deleted_at: new Date(),
@@ -390,7 +393,6 @@ const ButtonModal = (props: Props) => {
 						priority: 'secondary',
 						onClick: () => {
 							setCurrentButton(defaultButton);
-							resetErrors('title');
 						}
 					},
 					{

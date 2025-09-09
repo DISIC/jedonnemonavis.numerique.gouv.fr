@@ -11,3 +11,6 @@ CREATE TABLE "ClosedButtonLog" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ClosedButtonLog_button_id_key" ON "ClosedButtonLog"("button_id");
+
+-- AddForeignKey
+ALTER TABLE "ClosedButtonLog" ADD CONSTRAINT "ClosedButtonLog_button_id_fkey" FOREIGN KEY ("button_id") REFERENCES "Button"("id") ON DELETE CASCADE ON UPDATE CASCADE;

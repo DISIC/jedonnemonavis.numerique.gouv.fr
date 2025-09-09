@@ -263,21 +263,19 @@ model Entity {
 }
 
 model Button {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  xwiki_title String?
-  isTest      Boolean? @default(false)
-  form        Form     @relation(fields: [form_id], references: [id])
-  form_id     Int
-  delete_reason String?
+  id              Int              @id @default(autoincrement())
+  title           String
+  description     String?
+  xwiki_title     String?
+  isTest          Boolean?         @default(false)
+  form            Form             @relation(fields: [form_id], references: [id])
+  form_id         Int
+  delete_reason   String?
   closedButtonLog ClosedButtonLog?
-
-  reviews Review[]
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  deleted_at DateTime?
+  reviews         Review[]
+  created_at      DateTime         @default(now())
+  updated_at      DateTime         @updatedAt
+  deleted_at      DateTime?
 }
 
 model ClosedButtonLog {
@@ -285,7 +283,6 @@ model ClosedButtonLog {
   button     Button   @relation(fields: [button_id], references: [id], onDelete: Cascade)
   button_id  Int      @unique
   count      Int      @default(1)
-  
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }
@@ -555,8 +552,10 @@ model Form {
   buttons          Button[]
   UserEvent        UserEvent[]
   legacy           Boolean      @default(false)
+  delete_reason    String?
   created_at       DateTime     @default(now())
   updated_at       DateTime     @default(now())
+  deleted_at       DateTime?
 }
 
 model FormConfig {
