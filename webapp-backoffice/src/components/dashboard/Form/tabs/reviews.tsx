@@ -414,6 +414,7 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const submit = () => {
+		push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 		const startDateValid = validateDateFormat(
 			filters.sharedFilters.currentStartDate
 		);
@@ -550,7 +551,6 @@ const ReviewsTab = (props: Props) => {
 												setValidatedSearch('');
 											}
 											setSearch(event.target.value);
-											push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 										}
 									}}
 								/>
