@@ -353,7 +353,7 @@ const ReviewsTab = (props: Props) => {
 				},
 				currentPage: 1
 			});
-		} else {
+		} else if (!filters.sharedFilters.dateShortcut) {
 			updateFilters({
 				...filters,
 				sharedFilters: {
