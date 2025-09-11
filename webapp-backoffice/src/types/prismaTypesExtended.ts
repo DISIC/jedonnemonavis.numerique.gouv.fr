@@ -32,7 +32,7 @@ const ProductWithForms = Prisma.validator<Prisma.ProductDefaultArgs>()({
 						form_config_labels: true
 					}
 				},
-				buttons: true
+				buttons: { include: { closedButtonLog: true } }
 			}
 		}
 	}

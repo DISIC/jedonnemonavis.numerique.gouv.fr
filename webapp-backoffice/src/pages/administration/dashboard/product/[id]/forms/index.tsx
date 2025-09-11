@@ -286,6 +286,7 @@ const ProductButtonsPage = (props: Props) => {
 														</div>
 													)}
 												</div>
+
 												{form.deleted_at ? (
 													<div
 														className={cx(
@@ -341,6 +342,49 @@ const ProductButtonsPage = (props: Props) => {
 															<ServiceFormsNoButtonsPanel form={form} />
 														)}
 													</>
+												)}
+
+												{form.buttons.some(b => b.closedButtonLog) && (
+													<Alert
+														severity="error"
+														title="Tentative de dépôt d'avis"
+														description={
+															<>
+																<small>
+																	Un ou plusieurs boutons “Je Donne Mon Avis”
+																	sont toujours visibles par les usagers. Nous
+																	vous invitons à supprimer le code HTML
+																	correspondant de la page concernée.
+																</small>
+																<ul>
+																	{form.buttons
+																		.filter(b => b.closedButtonLog)
+																		.map(b => (
+																			<li key={b.id}>
+																				<small>
+																					Emplacement &laquo;<b>{b.title}</b>
+																					&raquo; — Dernière
+																					tentative&nbsp;:&nbsp;
+																					{formatDateToFrenchString(
+																						b.closedButtonLog?.updated_at.toString() ||
+																							''
+																					)}
+																					&nbsp; — Nombre total de
+																					tentatives&nbsp;:&nbsp;
+																					{b.closedButtonLog?.count}
+																				</small>
+																			</li>
+																		))}
+																</ul>
+															</>
+														}
+														closable
+														className={cx(
+															fr.cx('fr-mt-2w'),
+															classes.alertButtonLog
+														)}
+														as="h4"
+													/>
 												)}
 											</div>
 										))}
@@ -410,6 +454,11 @@ const useStyles = tss
 			color: fr.colors.decisions.text.title.blueFrance.default,
 			'&:hover': {
 				textDecoration: 'underline'
+			}
+		},
+		alertButtonLog: {
+			'.fr-link--close': {
+				color: fr.colors.decisions.text.actionHigh.redMarianne.default
 			}
 		}
 	});

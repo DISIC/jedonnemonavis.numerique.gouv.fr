@@ -279,31 +279,26 @@ export function getProductRestoredEmail(
 	`);
 }
 
-export function getButtonDeletedEmail(
-	contextUser: Session['user'],
-	buttonTitle: string,
-	form: { id: number; title: string },
-	product: { id: number; title: string; entityName: string },
-	deleteReason: string
-) {
+export function getClosedButtonOrFormEmail({
+	contextUser,
+	buttonTitle,
+	formTitle,
+	form,
+	product
+}: {
+	contextUser: Session['user'];
+	buttonTitle?: string;
+	formTitle?: string;
+	form: { id: number; title: string };
+	product: { id: number; title: string; entityName: string };
+}) {
 	const jdmaUrl = process.env.NODEMAILER_BASEURL;
+	const closeTitle = buttonTitle
+		? `l'emplacement « <b>${buttonTitle}</b> » pour le formulaire « ${form.title} »`
+		: `le formulaire « <b>${formTitle}</b> »`;
 
-	return getEmailWithLayout(`
-		<p>Bonjour,</p>
-
-		<p>
-			${contextUser.name} vient de fermer l'emplacement « <b>${buttonTitle}</b> » pour le formulaire « ${form.title} » du service « ${product.title} ».
-			Il ne recevra plus de données, mais les statistiques récoltées avant la fermeture restent accessibles.
-		</p>
-		<br/>
-		<div style="background-color: #ECECFE; padding: 24px; display: flex; align-items: center;">
-			<img src="https://jedonnemonavis.numerique.gouv.fr/assets/install_picto.svg" style="height: 120px; margin-right: 18px;"/>
-			<div>
-				<p>Les boutons “Je donne mon avis” sont visible par les usagers tant que les codes HTML correspondant aux emplacements n’ont pas été retirés des pages.</p>
-				<p>Pensez à vérifier que c’est le cas sur votre service numérique.</p>
-			</div>
-		</div>
-		<br/>
+	const serviceFormDisplay = buttonTitle
+		? `
 		<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
 			<thead>
 				<tr>
@@ -341,6 +336,26 @@ export function getButtonDeletedEmail(
 				</tr>
 			</tbody>
 		</table>
+		`
+		: '';
+
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser.name} vient de fermer ${closeTitle} du service « ${product.title} ».
+			Il ne recevra plus de données, mais les statistiques récoltées avant la fermeture restent accessibles.
+		</p>
+		<br/>
+		<div style="background-color: #ECECFE; padding: 24px; display: flex; align-items: center;">
+			<img src="https://jedonnemonavis.numerique.gouv.fr/assets/install_picto.svg" style="height: 120px; margin-right: 18px;"/>
+			<div>
+				<p>Les boutons “Je donne mon avis” <b>sont toujours visible par les usagers</b> tant que les codes HTML correspondant aux emplacements n’ont pas été retirés des pages.</p>
+				<p>Pensez à vérifier que c’est le cas sur votre service numérique.</p>
+			</div>
+		</div>
+		<br/>
+		${serviceFormDisplay}
 		<br/>
 		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
 			style="font-size: 14px; color: #000091; text-decoration: underline;">

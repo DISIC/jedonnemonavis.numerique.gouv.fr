@@ -5,6 +5,8 @@ import {
 import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from './product';
+import { sendMail } from '@/src/utils/mailer';
+import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
 
 export const formRouter = router({
 	getById: protectedProcedure
@@ -85,18 +87,65 @@ export const formRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { id, form } = input;
 
-			await checkRightToProceed({
+			const { product } = await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
 				product_id: form.product_id
+			});
+
+			const currentForm = await ctx.prisma.form.findUnique({
+				where: { id: input.id as number },
+				select: { deleted_at: true }
 			});
 
 			const updatedForm = await ctx.prisma.form.update({
 				where: { id },
 				data: {
 					...form
-				}
+				},
+				include: { form_template: true }
 			});
+			const hasBeenClosed =
+				currentForm?.deleted_at === null && updatedForm.deleted_at !== null;
+			if (hasBeenClosed) {
+				const accessRights = await ctx.prisma.accessRight.findMany({
+					where: {
+						product_id: updatedForm.product_id
+					}
+				});
+
+				const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+					where: {
+						entity_id: product?.entity_id
+					}
+				});
+
+				const emails = [
+					...accessRights.map(ar => ar.user_email),
+					...adminEntityRights.map(aer => aer.user_email)
+				].filter(email => email !== null) as string[];
+
+				emails.forEach((email: string) => {
+					sendMail(
+						`Fermeture du formulaire «${updatedForm.title ?? updatedForm.form_template.title}» du service «${product?.title}»`,
+						email,
+						getClosedButtonOrFormEmail({
+							contextUser: ctx.session.user,
+							formTitle: updatedForm.title ?? updatedForm.form_template.title,
+							form: {
+								id: updatedForm.id,
+								title: updatedForm.title ?? updatedForm.form_template.title
+							},
+							product: {
+								id: product?.id as number,
+								title: product?.title as string,
+								entityName: product?.entity.name as string
+							}
+						}),
+						`Fermeture du formulaire «${updatedForm.title || updatedForm.form_template.title}» du service «${product?.title}»`
+					);
+				});
+			}
 
 			return { data: updatedForm };
 		})

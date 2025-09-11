@@ -7,7 +7,7 @@ import {
 } from '@/prisma/generated/zod';
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
-import { getButtonDeletedEmail } from '@/src/utils/emails';
+import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
 
 export const buttonRouter = router({
 	getList: publicProcedure
@@ -109,10 +109,10 @@ export const buttonRouter = router({
 				}
 			});
 
-			if (
-				currentButton?.deleted_at === null &&
-				updatedButton.deleted_at !== null
-			) {
+			const hasBeenClosed =
+				currentButton?.deleted_at === null && updatedButton.deleted_at !== null;
+
+			if (updatedButton.form.deleted_at === null && hasBeenClosed) {
 				const accessRights = await ctx.prisma.accessRight.findMany({
 					where: {
 						product_id: updatedButton.form.product_id
@@ -136,22 +136,21 @@ export const buttonRouter = router({
 							updatedButton.form.title ?? updatedButton.form.form_template.title
 						}» du service «${product?.title}»`,
 						email,
-						getButtonDeletedEmail(
-							ctx.session.user,
-							updatedButton.title,
-							{
+						getClosedButtonOrFormEmail({
+							contextUser: ctx.session.user,
+							buttonTitle: updatedButton.title,
+							form: {
 								id: updatedButton.form.id,
 								title:
 									updatedButton.form.title ??
 									updatedButton.form.form_template.title
 							},
-							{
+							product: {
 								id: product?.id as number,
 								title: product?.title as string,
 								entityName: product?.entity.name as string
-							},
-							input.delete_reason as string
-						),
+							}
+						}),
 						`Fermeture de l'emplacement «${updatedButton.title}» pour le formulaire «${
 							updatedButton.form.title ?? updatedButton.form.form_template.title
 						}» du service «${product?.title}»`

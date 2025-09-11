@@ -265,6 +265,13 @@ const StatsTab = ({
 				<h2>Statistiques</h2>
 				{buttonResults.metadata.count === 0 ? (
 					<NoButtonsPanel onButtonClick={handleButtonClick} />
+				) : form.deleted_at ? (
+					<div
+						className={fr.cx('fr-col-12')}
+						style={{ display: 'flex', justifyContent: 'center' }}
+					>
+						<span>Ce formulaire est fermé</span>
+					</div>
 				) : (
 					<NoReviewsPanel />
 				)}

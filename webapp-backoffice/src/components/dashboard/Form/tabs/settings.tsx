@@ -117,7 +117,7 @@ const SettingsTab = ({
 
 	const deleteAllButtons = async () => {
 		if (buttonsCount === 0) return;
-		await Promise.all(
+		return await Promise.all(
 			buttons.map(button => {
 				const { form, closedButtonLog, ...data } = button;
 				return updateButton.mutateAsync({
@@ -126,7 +126,6 @@ const SettingsTab = ({
 				});
 			})
 		);
-		refetchButtons();
 	};
 
 	const displaySettingsContent = () => {
