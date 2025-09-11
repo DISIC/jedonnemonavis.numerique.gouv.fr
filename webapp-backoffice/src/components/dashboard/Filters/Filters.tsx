@@ -183,7 +183,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 													dateShortcut: ds.name
 												}
 											});
-											push(['trackEvent', 'Logs', 'Filtre-Date']);
+											push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
 										}}
 									/>
 									<label
@@ -211,7 +211,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 														dateShortcut: ds.name
 													}
 												});
-												push(['trackEvent', 'Logs', 'Filtre-Date']);
+												push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
 											}
 										}}
 									>

@@ -365,7 +365,7 @@ const StatsTab = ({
 						</div>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<KPITile
-								title="Verbatims"
+								title="Commentaires"
 								kpi={nbVerbatims}
 								isLoading={isLoadingNbVerbatims}
 								desc={

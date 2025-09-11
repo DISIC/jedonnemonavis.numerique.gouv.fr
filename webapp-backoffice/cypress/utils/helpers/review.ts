@@ -1,20 +1,6 @@
-const app_url = Cypress.env('app_form_base_url');
-const app_bo_url = Cypress.env('app_base_url');
+import { appUrl } from '../variables';
 
-describe('jdma-form-review', () => {
-	before(() => {
-		cy.visit(`${app_url}/Demarches/2?button=3`);
-	});
-
-	it('Fill form', () => {
-		fillFormStep1();
-		fillFormStep2();
-		fillFormStep3();
-		fillFormStep4();
-	});
-});
-
-function fillFormStep1() {
+export function fillFormStep1(isSimplicityHidden?: boolean) {
 	cy.get('[class*="formSection"]').within(() => {
 		cy.get('h1').contains('Je donne mon avis');
 		cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);
@@ -23,12 +9,15 @@ function fillFormStep1() {
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
-	cy.wait(5000);
 
-	cy.get('h1').contains('Clarté');
+	if (isSimplicityHidden) {
+		cy.contains('h1', 'Clarté').should('not.exist');
+	} else {
+		cy.get('h1').contains('Clarté');
+	}
 }
 
-function fillFormStep2() {
+export function fillFormStep2() {
 	cy.get('[class*="radioContainer"]')
 		.find('fieldset')
 		.find('li')
@@ -40,7 +29,7 @@ function fillFormStep2() {
 	cy.get('h1').contains('Aides');
 }
 
-function fillFormStep3() {
+export function fillFormStep3() {
 	cy.get('form').within(() => {
 		cy.get('input[name="contact_tried-0"]').check({ force: true });
 		cy.get('input[name="contact_tried-1"]').check({ force: true });
@@ -68,7 +57,7 @@ function fillFormStep3() {
 		});
 }
 
-function fillFormStep4() {
+export function fillFormStep4() {
 	cy.get("[class*='reviews']")
 		.should('be.visible')
 		.within(() => {
@@ -95,11 +84,11 @@ function fillFormStep4() {
 	cy.get('h1').contains('Merci beaucoup !').should('exist');
 }
 
-function getLastTestServiceID() {
+export function getLastTestServiceID() {
 	return cy
 		.request({
 			method: 'GET',
-			url: `${app_bo_url}/api/cypress-test/getLastServiceId`,
+			url: `${appUrl}/api/cypress-test/getLastServiceId`,
 			failOnStatusCode: false
 		})
 		.then(response => {

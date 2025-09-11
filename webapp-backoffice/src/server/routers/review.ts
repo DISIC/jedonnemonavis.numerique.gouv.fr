@@ -18,6 +18,7 @@ export const reviewRouter = router({
 				form_id: z.number().optional(),
 				shouldIncludeAnswers: z.boolean().optional().default(false),
 				mustHaveVerbatims: z.boolean().optional().default(false),
+				mustHaveVerbatimsOptimzed: z.boolean().optional().default(false),
 				sort: z.string().optional(),
 				search: z.string().optional(),
 				start_date: z.string().optional(),
@@ -349,18 +350,21 @@ export const reviewRouter = router({
 				{ code: 'difficulties_details', label: 'Difficultés détails' },
 				{
 					code: 'difficulties_details_verbatim',
-					label: 'Difficultés verbatim'
+					label: 'Difficultés commentaire'
 				},
 				{ code: 'contact', label: 'Contact tenté' },
 				{ code: 'contact_reached', label: 'Contact réussi' },
 				{ code: 'contact_channels', label: 'Contact canal' },
-				{ code: 'contact_channels_verbatim', label: 'Contact canal verbatim' },
+				{
+					code: 'contact_channels_verbatim',
+					label: 'Contact canal commentaire'
+				},
 				{ code: 'contact_details', label: 'Contact détails' },
 				{ code: 'contact_satisfaction', label: 'Contact satisfaction' },
 				{ code: 'help', label: 'Aide' },
 				{ code: 'help_details', label: 'Aide détails' },
-				{ code: 'help_details_verbatim', label: 'Aide verbatim' },
-				{ code: 'verbatim', label: 'Verbatim' }
+				{ code: 'help_details_verbatim', label: 'Aide commentaire' },
+				{ code: 'verbatim', label: 'Commentaire' }
 			];
 
 			const headers = ['Date', 'ID', 'Bouton'].concat(
@@ -548,14 +552,11 @@ export const reviewRouter = router({
 						}
 					},
 					orderBy: { created_at: 'desc' },
-					take: 2
+					take: 1
 				});
-				const relevantFormLog =
-					lastSeenFormReview.length > 1
-						? lastSeenFormReview[1]
-						: lastSeenFormReview[0];
-				const lastSeenDate = relevantFormLog
-					? relevantFormLog.created_at
+
+				const lastSeenDate = lastSeenFormReview[0]
+					? lastSeenFormReview[0].created_at
 					: lastSeenReview[0]
 						? lastSeenReview[0].created_at
 						: null;

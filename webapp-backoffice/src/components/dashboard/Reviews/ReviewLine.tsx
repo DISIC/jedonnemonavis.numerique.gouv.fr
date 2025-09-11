@@ -134,14 +134,14 @@ const ReviewLine = ({
 			<td className={cx(classes.cellContainer)}>
 				<>
 					<span className={cx(classes.badge, fr.cx('fr-hidden-lg'))}>
-						Verbatim :{' '}
+						Commentaire :{' '}
 					</span>
 					<Badge
 						className={cx(classes.badge)}
 						noIcon
 						severity={review.verbatim ? 'info' : 'error'}
 					>
-						{review.verbatim ? 'Verbatim' : 'Non'}
+						{review.verbatim ? 'Commentaire' : 'Non'}
 					</Badge>
 				</>
 			</td>

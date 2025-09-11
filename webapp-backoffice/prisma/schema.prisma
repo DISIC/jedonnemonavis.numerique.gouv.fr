@@ -370,14 +370,15 @@ model Favorite {
 }
 
 model Review {
-  id         Int     @default(autoincrement())
-  form_id    Int
-  product    Product @relation(fields: [product_id], references: [id])
-  product_id Int
-  button     Button  @relation(fields: [button_id], references: [id])
-  button_id  Int
-  xwiki_id   Int?
-  user_id    String?
+  id           Int     @default(autoincrement())
+  form_id      Int
+  product      Product @relation(fields: [product_id], references: [id])
+  product_id   Int
+  button       Button  @relation(fields: [button_id], references: [id])
+  button_id    Int
+  xwiki_id     Int?
+  user_id      String?
+  has_verbatim Boolean @default(false)
 
   reviewViewLogs ReviewViewLog[]
 

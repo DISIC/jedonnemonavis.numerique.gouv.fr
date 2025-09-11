@@ -237,7 +237,7 @@ const ReviewsTab = (props: Props) => {
 					return (
 						<Tag
 							key={index}
-							title={'Retirer le filtre : Verbatim complété'}
+							title={'Retirer le filtre : Réponse avec commentaire'}
 							dismissible
 							className={cx(classes.tagFilter)}
 							nativeButtonProps={{
@@ -353,7 +353,7 @@ const ReviewsTab = (props: Props) => {
 				},
 				currentPage: 1
 			});
-		} else {
+		} else if (!filters.sharedFilters.dateShortcut) {
 			updateFilters({
 				...filters,
 				sharedFilters: {
@@ -365,6 +365,12 @@ const ReviewsTab = (props: Props) => {
 			});
 		}
 	}, [filters.productReviews.displayNew]);
+
+	useEffect(() => {
+		if (filters && currentPage !== 1) {
+			setCurrentPage(1);
+		}
+	}, [filters]);
 
 	const handleButtonClick = () => {
 		handleModalOpening('create');
@@ -408,6 +414,7 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const submit = () => {
+		push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 		const startDateValid = validateDateFormat(
 			filters.sharedFilters.currentStartDate
 		);
@@ -536,7 +543,7 @@ const ReviewsTab = (props: Props) => {
 									label="Rechercher un avis"
 									hideLabel
 									nativeInputProps={{
-										placeholder: 'Rechercher dans les verbatims',
+										placeholder: 'Rechercher dans les commentaires',
 										type: 'search',
 										value: search,
 										onChange: event => {
@@ -544,7 +551,6 @@ const ReviewsTab = (props: Props) => {
 												setValidatedSearch('');
 											}
 											setSearch(event.target.value);
-											push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 										}
 									}}
 								/>

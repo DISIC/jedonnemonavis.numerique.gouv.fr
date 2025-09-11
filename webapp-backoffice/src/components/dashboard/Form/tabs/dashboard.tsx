@@ -1,5 +1,4 @@
 import { Loader } from '@/src/components/ui/Loader';
-import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { displayIntention, getStatsIcon } from '@/src/utils/stats';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
@@ -32,10 +31,17 @@ const DashboardTab = ({
 	hasButtons,
 	handleModalOpening
 }: Props) => {
-	const router = useRouter();
 	const { cx, classes } = useStyles();
 
 	const currentFormConfig = form.form_configs[0];
+
+	const endDate = new Date().toISOString().split('T')[0];
+	const startDate = (() => {
+		const date = new Date();
+		date.setFullYear(date.getFullYear() - 1);
+		date.setHours(0, 0, 0, 0);
+		return date.toISOString().split('T')[0];
+	})();
 
 	const { data: reviewResults, isFetching: isLoadingReviews } =
 		trpc.review.getList.useQuery(
@@ -45,8 +51,9 @@ const DashboardTab = ({
 				numberPerPage: 4,
 				page: 1,
 				shouldIncludeAnswers: true,
-				newReviews: true,
-				needLogging: false
+				mustHaveVerbatimsOptimzed: true,
+				needLogging: false,
+				sort: 'created_at:desc'
 			},
 			{
 				initialData: {
@@ -69,8 +76,6 @@ const DashboardTab = ({
 			</div>
 		);
 
-	const hasNewReviews = reviewResults.data.length > 0;
-
 	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
 
 	return nbReviews > 0 ? (
@@ -82,16 +87,8 @@ const DashboardTab = ({
 					productId={form.product_id}
 					formConfig={currentFormConfig}
 					formId={form.id}
-					startDate={
-						new Date(
-							new Date(
-								new Date().setDate(new Date().getDate() + 1)
-							).setFullYear(new Date().getFullYear() - 1)
-						)
-							.toISOString()
-							.split('T')[0]
-					}
-					endDate={new Date().toISOString().split('T')[0]}
+					startDate={startDate}
+					endDate={endDate}
 					slugsToDisplay={[
 						'satisfaction',
 						'comprehension',
@@ -108,12 +105,8 @@ const DashboardTab = ({
 						fieldCode="satisfaction"
 						productId={form.product.id}
 						formId={form.id}
-						startDate={
-							new Date(new Date().setFullYear(new Date().getFullYear() - 1))
-								.toISOString()
-								.split('T')[0]
-						}
-						endDate={new Date().toISOString().split('T')[0]}
+						startDate={startDate}
+						endDate={endDate}
 						total={nbReviews}
 						displayLine={false}
 						isFormDashboardType
@@ -121,97 +114,92 @@ const DashboardTab = ({
 					/>
 				</div>
 			</div>
+			{reviewResults.data.length > 0 && (
+				<>
+					<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
 
-			<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
-
-			<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-				<h3 className={fr.cx('fr-mb-0')}>Dernières réponses</h3>
-			</div>
-			{!isMobile && (
-				<div
-					className={cx(
-						classes.buttonsGroup,
-						fr.cx('fr-col-12', 'fr-col-md-4')
-					)}
-				>
-					<Button
-						priority="tertiary no outline"
-						iconId="fr-icon-arrow-right-line"
-						iconPosition="right"
-						onClick={onClickGoToReviews}
-					>
-						Voir toutes les réponses
-					</Button>
-				</div>
-			)}
-			<div className={fr.cx('fr-col-12', 'fr-mt-6v')}>
-				<p className={classes.newReviewsLabel}>
-					<b>
-						{hasNewReviews
-							? `${reviewResults.data.length} nouvelles réponses`
-							: 'Aucune nouvelle réponse'}
-					</b>{' '}
-					depuis votre dernière connexion
-				</p>
-			</div>
-			<div className={cx(classes.reviewsContainer)}>
-				{reviewResults.data.map(review => {
-					const satisfactionReview = review.answers?.find(
-						a => a.field_code === 'satisfaction'
-					);
-					return (
-						<div className={cx(classes.reviewCard)}>
-							{satisfactionReview?.intention && (
-								<Badge
-									className={cx(classes.badge, fr.cx('fr-mb-4v'))}
-									small
-									noIcon
-									severity={getSeverity(satisfactionReview.intention || '')}
-								>
-									<Image
-										alt=""
-										src={`/assets/smileys/${getStatsIcon({
-											intention: satisfactionReview.intention ?? 'neutral'
-										})}.svg`}
-										width={15}
-										height={15}
-									/>
-									{displayIntention(satisfactionReview.intention ?? 'neutral')}
-								</Badge>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
+						<h3 className={fr.cx('fr-mb-0')}>Derniers commentaires</h3>
+					</div>
+					{!isMobile && (
+						<div
+							className={cx(
+								classes.buttonsGroup,
+								fr.cx('fr-col-12', 'fr-col-md-4')
 							)}
-							<p className={cx(classes.reviewText, fr.cx('fr-mb-4v'))}>
-								{formatDateToFrenchString(
-									review.created_at?.toISOString().split('T')[0] || ''
-								)}
-							</p>
-							{review.answers?.find(a => a.field_code === 'verbatim') && (
-								<p className={cx(classes.reviewText, fr.cx('fr-mb-0'))}>
-									{
-										review.answers?.find(a => a.field_code === 'verbatim')
-											?.answer_text
-									}
-								</p>
-							)}
+						>
+							<Button
+								priority="tertiary no outline"
+								iconId="fr-icon-arrow-right-line"
+								iconPosition="right"
+								onClick={onClickGoToReviews}
+							>
+								Voir toutes les réponses
+							</Button>
 						</div>
-					);
-				})}
-			</div>
-			{isMobile && (
-				<div
-					className={cx(
-						classes.buttonsGroup,
-						fr.cx('fr-col-12', 'fr-col-md-4')
 					)}
-				>
-					<Button
-						priority="tertiary no outline"
-						iconId="fr-icon-arrow-right-line"
-						iconPosition="right"
-						onClick={onClickGoToReviews}
-					>
-						Voir toutes les réponses
-					</Button>
-				</div>
+					<div className={cx(classes.reviewsContainer)}>
+						{reviewResults.data.map(review => {
+							const satisfactionReview = review.answers?.find(
+								a => a.field_code === 'satisfaction'
+							);
+							return (
+								<div className={cx(classes.reviewCard)}>
+									{satisfactionReview?.intention && (
+										<Badge
+											className={cx(classes.badge, fr.cx('fr-mb-4v'))}
+											small
+											noIcon
+											severity={getSeverity(satisfactionReview.intention || '')}
+										>
+											<Image
+												alt=""
+												src={`/assets/smileys/${getStatsIcon({
+													intention: satisfactionReview.intention ?? 'neutral'
+												})}.svg`}
+												width={15}
+												height={15}
+											/>
+											{displayIntention(
+												satisfactionReview.intention ?? 'neutral'
+											)}
+										</Badge>
+									)}
+									<p className={cx(classes.reviewText, fr.cx('fr-mb-4v'))}>
+										{formatDateToFrenchString(
+											review.created_at?.toISOString().split('T')[0] || ''
+										)}
+									</p>
+									{review.answers?.find(a => a.field_code === 'verbatim') && (
+										<p className={cx(classes.reviewText, fr.cx('fr-mb-0'))}>
+											{
+												review.answers?.find(a => a.field_code === 'verbatim')
+													?.answer_text
+											}
+										</p>
+									)}
+								</div>
+							);
+						})}
+					</div>
+					{isMobile && (
+						<div
+							className={cx(
+								classes.buttonsGroup,
+								fr.cx('fr-col-12', 'fr-col-md-4')
+							)}
+						>
+							<Button
+								priority="tertiary no outline"
+								iconId="fr-icon-arrow-right-line"
+								iconPosition="right"
+								onClick={onClickGoToReviews}
+							>
+								Voir toutes les réponses
+							</Button>
+						</div>
+					)}
+				</>
 			)}
 		</div>
 	) : hasButtons ? (
@@ -281,7 +269,7 @@ const useStyles = tss.withName(DashboardTab.name).create({
 	reviewsContainer: {
 		display: 'flex',
 		width: '100%',
-		marginBottom: fr.spacing('6v'),
+		...fr.spacing('margin', { topBottom: '6v' }),
 		gap: fr.spacing('3v'),
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column'

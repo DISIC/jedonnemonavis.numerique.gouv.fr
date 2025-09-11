@@ -1,19 +1,18 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import React, { ReactElement } from 'react';
-import { tss } from 'tss-react/dsfr';
 import { User, UserSchema } from '@/prisma/generated/zod';
-import Button from '@codegouvfr/react-dsfr/Button';
-import GenericCardInfos from './genericCardAccount';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { signIn, signOut, useSession } from 'next-auth/react';
-import Input from '@codegouvfr/react-dsfr/Input';
-import { trpc } from '@/src/utils/trpc';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { Toast } from '@/src/components/ui/Toast';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Input from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { push } from '@socialgouv/matomo-next';
+import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { tss } from 'tss-react/dsfr';
+import GenericCardInfos from './genericCardAccount';
 
 interface Props {
 	user: User;
@@ -90,6 +89,7 @@ const CredentialsCard = (props: Props) => {
 	};
 
 	const onFormSubmit = (): Promise<boolean> => {
+		if (user.proconnect_account) return Promise.resolve(true);
 		return new Promise<boolean>(resolve => {
 			setResolvePromise(() => resolve);
 			setModalType('change-mail');
@@ -244,74 +244,89 @@ const CredentialsCard = (props: Props) => {
 											}}
 										/>
 									</div>
-									<div className={fr.cx('fr-input-group')}>
-										<Controller
-											control={control}
-											name="email"
-											rules={{
-												required: 'Ce champ est obligatoire',
-												pattern: {
-													value:
-														/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-													message: "Format d'adresse e-mail invalide"
-												}
-											}}
-											render={({ field: { onChange, value, name } }) => (
-												<Input
-													label={
-														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Nouvelle adresse e-mail
-														</p>
-													}
-													nativeInputProps={{
-														onChange,
-														value: value || '',
-														name,
-														required: true,
-														placeholder: 'Saisissez votre nouvelle adresse mail'
+									{!user.proconnect_account && (
+										<>
+											<div className={fr.cx('fr-input-group')}>
+												<Controller
+													control={control}
+													name="email"
+													rules={{
+														required: 'Ce champ est obligatoire',
+														pattern: {
+															value:
+																/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+															message: "Format d'adresse e-mail invalide"
+														}
 													}}
-													state={errors[name] ? 'error' : 'default'}
-													stateRelatedMessage={errors[name]?.message}
+													render={({ field: { onChange, value, name } }) => (
+														<Input
+															label={
+																<p
+																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
+																>
+																	Nouvelle adresse e-mail
+																</p>
+															}
+															nativeInputProps={{
+																onChange,
+																value: value || '',
+																name,
+																required: true,
+																placeholder:
+																	'Saisissez votre nouvelle adresse mail'
+															}}
+															state={errors[name] ? 'error' : 'default'}
+															stateRelatedMessage={errors[name]?.message}
+														/>
+													)}
 												/>
-											)}
-										/>
-									</div>
-									<div className={fr.cx('fr-input-group')}>
-										<Controller
-											control={control}
-											name="emailConfirmation"
-											rules={{
-												required: 'Ce champ est obligatoire',
-												validate: value =>
-													value === emailValue ||
-													'Les adresses e-mail ne correspondent pas'
-											}}
-											render={({ field: { onChange, value, name } }) => (
-												<Input
-													label={
-														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Confirmation de la nouvelle adresse e-mail
-														</p>
-													}
-													nativeInputProps={{
-														onChange,
-														value: value || '',
-														name,
-														required: true,
-														placeholder: 'Confirmez votre nouvelle adresse mail'
+											</div>
+											<div className={fr.cx('fr-input-group')}>
+												<Controller
+													control={control}
+													name="emailConfirmation"
+													rules={{
+														required: 'Ce champ est obligatoire',
+														validate: value =>
+															value === emailValue ||
+															'Les adresses e-mail ne correspondent pas'
 													}}
-													state={errors[name] ? 'error' : 'default'}
-													stateRelatedMessage={errors[name]?.message}
+													render={({ field: { onChange, value, name } }) => (
+														<Input
+															label={
+																<p
+																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
+																>
+																	Confirmation de la nouvelle adresse e-mail
+																</p>
+															}
+															nativeInputProps={{
+																onChange,
+																value: value || '',
+																name,
+																required: true,
+																placeholder:
+																	'Confirmez votre nouvelle adresse mail'
+															}}
+															state={errors[name] ? 'error' : 'default'}
+															stateRelatedMessage={errors[name]?.message}
+														/>
+													)}
 												/>
-											)}
-										/>
-									</div>
+											</div>
+										</>
+									)}
 								</form>
 							</div>
 							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
 								Mot de passe
 							</div>
-							<div className={cx(fr.cx('fr-col-md-12', 'fr-pt-0'), classes.buttonContainer)}>
+							<div
+								className={cx(
+									fr.cx('fr-col-md-12', 'fr-pt-0'),
+									classes.buttonContainer
+								)}
+							>
 								<Button
 									priority="secondary"
 									onClick={() => {
@@ -345,7 +360,7 @@ const useStyles = tss.withName(CredentialsCard.name).create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
-			justifyContent: 'center',
+			justifyContent: 'center'
 		}
 	}
 }));

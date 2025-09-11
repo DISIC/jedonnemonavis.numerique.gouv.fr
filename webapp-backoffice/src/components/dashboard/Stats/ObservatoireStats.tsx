@@ -118,8 +118,7 @@ const ObservatoireStats = ({
 					new Date().getDate() + 2
 				)
 					.toISOString()
-					.split('T')[0],
-				needLogging: true
+					.split('T')[0]
 			},
 			{
 				enabled: view === 'form-dashboard'
