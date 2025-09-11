@@ -2,9 +2,18 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Image from 'next/image';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { trpc } from '../utils/trpc';
+import { useEffect } from 'react';
 
-const FormClosed = () => {
+const FormClosed = ({ buttonId }: { buttonId: number }) => {
 	const { classes, cx } = useStyles();
+
+	const newVisitOnClosedButton =
+		trpc.closedButtonLog.createOrUpdate.useMutation();
+
+	useEffect(() => {
+		newVisitOnClosedButton.mutateAsync({ button_id: buttonId });
+	}, []);
 
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.root)}>
@@ -15,7 +24,6 @@ const FormClosed = () => {
 					expérience via le formulaire du site Service Public+.
 				</div>
 				<div className={classes.buttonsGroup}>
-					<Button priority="secondary">Retour</Button>
 					<Button
 						linkProps={{
 							href: 'https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2',

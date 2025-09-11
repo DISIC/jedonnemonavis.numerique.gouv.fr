@@ -94,6 +94,11 @@ export const buttonRouter = router({
 				form_id: input.form_id as number
 			});
 
+			const currentButton = await ctx.prisma.button.findUnique({
+				where: { id: input.id as number },
+				select: { deleted_at: true }
+			});
+
 			const updatedButton = await ctx.prisma.button.update({
 				where: {
 					id: input.id as number
@@ -104,7 +109,10 @@ export const buttonRouter = router({
 				}
 			});
 
-			if (input.deleted_at && input.delete_reason) {
+			if (
+				currentButton?.deleted_at === null &&
+				updatedButton.deleted_at !== null
+			) {
 				const accessRights = await ctx.prisma.accessRight.findMany({
 					where: {
 						product_id: updatedButton.form.product_id

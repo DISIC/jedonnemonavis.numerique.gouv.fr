@@ -32,6 +32,7 @@ type JDMAFormProps = {
 	isPreviewPublished: boolean;
 	isPreviewUnpublished: boolean;
 	isButtonDeleted: boolean;
+	buttonId: number;
 };
 
 export type FormStepNames =
@@ -49,6 +50,7 @@ export default function JDMAForm({
 	isPreviewPublished,
 	isPreviewUnpublished,
 	isButtonDeleted,
+	buttonId,
 }: JDMAFormProps) {
 	const { t } = useTranslation('common');
 	const router = useRouter();
@@ -475,7 +477,7 @@ export default function JDMAForm({
 	};
 
 	if (isButtonDeleted) {
-		return <FormClosed />;
+		return <FormClosed buttonId={buttonId} />;
 	}
 
 	return (
@@ -569,11 +571,6 @@ export const getServerSideProps: GetServerSideProps<{
 
 		if (button?.deleted_at) {
 			isButtonDeleted = true;
-			await prisma.closedButtonLog.upsert({
-				where: { button_id: button.id },
-				update: { count: { increment: 1 } },
-				create: { button_id: button.id },
-			});
 		}
 	}
 
@@ -671,6 +668,7 @@ export const getServerSideProps: GetServerSideProps<{
 				isPreviewPublished: !formConfig && isInIframe,
 				isPreviewUnpublished: !!formConfig && isInIframe,
 				isButtonDeleted: isButtonDeleted,
+				buttonId: parseInt(buttonId),
 				...(await serverSideTranslations(locale ?? 'fr', ['common'])),
 			},
 		};
