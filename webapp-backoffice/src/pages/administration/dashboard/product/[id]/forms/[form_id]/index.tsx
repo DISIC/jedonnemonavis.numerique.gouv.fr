@@ -202,12 +202,18 @@ const ProductFormPage = (props: Props) => {
 							isClosable
 							onClose={function noRefCheck() {}}
 							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
-							title={'Formulaire non éditable'}
+							title={'Ce formulaire ne peut être ni édité ni supprimé'}
 							description={
 								<>
-									Ce service est référencé comme démarche essentielle dans
-									l’Observatoire des démarches essentielles. Le formulaire ne
-									peut pas être modifié
+									Ce service est référencé comme démarche essentielle dans l’
+									<a
+										href="https://observatoire.numerique.gouv.fr/"
+										target="_blank"
+									>
+										Observatoire des démarches essentielles
+									</a>
+									. Ce formulaire ne peut donc pas être modifié ou supprimé du
+									service.
 								</>
 							}
 						/>

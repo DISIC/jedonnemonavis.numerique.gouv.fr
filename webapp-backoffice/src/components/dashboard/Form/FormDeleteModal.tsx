@@ -1,11 +1,11 @@
 import { Form } from '@/prisma/generated/zod';
 import { CustomModalProps } from '@/src/types/custom';
-import React from 'react';
-import { fr } from '@codegouvfr/react-dsfr';
-import { trpc } from '@/src/utils/trpc';
-import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
-import Input from '@codegouvfr/react-dsfr/Input';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Input from '@codegouvfr/react-dsfr/Input';
+import React from 'react';
+import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 
 interface Props {
 	modal: CustomModalProps;

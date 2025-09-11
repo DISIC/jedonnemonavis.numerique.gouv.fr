@@ -145,12 +145,9 @@ const SettingsTab = ({
 					form={form}
 					onDelete={async v => {
 						await deleteAllButtons();
-						// TODO: DISPLAY ALERT ON THE FORMS PAGE
-						router.replace(router.asPath);
-						setAlertText(
-							`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`
+						router.push(
+							`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`)}`
 						);
-						setIsAlertShown(true);
 					}}
 				/>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
@@ -165,7 +162,7 @@ const SettingsTab = ({
 								fr.cx('fr-col-12', 'fr-col-md-4')
 							)}
 						>
-							{ownRight === 'carrier_admin' && (
+							{ownRight === 'carrier_admin' && form.deleted_at === null && (
 								<Button
 									priority="secondary"
 									iconId="fr-icon-add-line"
@@ -178,7 +175,10 @@ const SettingsTab = ({
 								</Button>
 							)}
 						</div>
-						<p className={fr.cx('fr-col-12', 'fr-mt-6v')}>
+						<p
+							className={fr.cx('fr-col-12', 'fr-mt-6v')}
+							hidden={form.deleted_at !== null}
+						>
 							Lors de la création d’un emplacement, un code HTML est généré. Il
 							vous suffit de le copier-coller dans le code de la page où vous
 							voulez faire apparaître le bouton d’avis. Vous pouvez créer
@@ -195,12 +195,26 @@ const SettingsTab = ({
 						</p>
 					</>
 				)}
-				<div className={fr.cx('fr-col-12', buttonsCount === 0 && 'fr-mt-6v')}>
-					{!(isLoadingButtons || isRefetchingButtons) && buttonsCount === 0 && (
-						<NoButtonsPanel
-							onButtonClick={() => handleModalOpening('create')}
-						/>
+				<div
+					className={fr.cx(
+						'fr-col-12',
+						(buttonsCount === 0 || form.deleted_at !== null) && 'fr-mt-3v'
 					)}
+				>
+					{!(isLoadingButtons || isRefetchingButtons) &&
+						buttonsCount === 0 &&
+						(!form.deleted_at ? (
+							<NoButtonsPanel
+								onButtonClick={() => handleModalOpening('create')}
+							/>
+						) : (
+							<div
+								className={fr.cx('fr-col-12')}
+								style={{ display: 'flex', justifyContent: 'center' }}
+							>
+								<span>Aucun emplacement trouvé</span>
+							</div>
+						))}
 					{!(isLoadingButtons || isRefetchingButtons) &&
 						buttons &&
 						[
@@ -233,6 +247,7 @@ const SettingsTab = ({
 						</div>
 						<div
 							className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}
+							hidden={form.deleted_at !== null}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
 								<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
@@ -287,37 +302,55 @@ const SettingsTab = ({
 							</div>
 						</div>
 						<div
-							className={fr.cx('fr-col-12', 'fr-card', 'fr-my-3w', 'fr-p-6v')}
+							className={fr.cx(
+								form.deleted_at ? 'fr-my-0' : 'fr-my-3w',
+								'fr-col-12',
+								'fr-card',
+								'fr-p-6v'
+							)}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-								<div className="fr-col-8">
-									<span className={classes.containerTitle}>
-										Fermer le formulaire
-									</span>
-									<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
-										Le formulaire n’enregistrera plus de nouvelles réponses.
-										Cette action est irréversible.
-									</p>
-								</div>
-								<div
-									className={fr.cx('fr-col-4')}
-									style={{ display: 'flex', justifyContent: 'end' }}
-								>
-									<Button
-										priority="tertiary"
-										iconId="fr-icon-delete-line"
-										style={{
-											color: fr.colors.decisions.text.default.error.default
-										}}
-										className={fr.cx('fr-ml-auto')}
-										iconPosition="right"
-										onClick={() => {
-											delete_form_modal.open();
-										}}
+								{form.deleted_at ? (
+									<div
+										className={fr.cx('fr-col-12')}
+										style={{ display: 'flex', justifyContent: 'center' }}
 									>
-										Fermer le formulaire
-									</Button>
-								</div>
+										<span className={classes.containerTitle}>
+											Ce formulaire est fermé
+										</span>
+									</div>
+								) : (
+									<>
+										<div className="fr-col-8">
+											<span className={classes.containerTitle}>
+												Fermer le formulaire
+											</span>
+											<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
+												Le formulaire n’enregistrera plus de nouvelles réponses.
+												Cette action est irréversible.
+											</p>
+										</div>
+										<div
+											className={fr.cx('fr-col-4')}
+											style={{ display: 'flex', justifyContent: 'end' }}
+										>
+											<Button
+												priority="tertiary"
+												iconId="fr-icon-delete-line"
+												style={{
+													color: fr.colors.decisions.text.default.error.default
+												}}
+												className={fr.cx('fr-ml-auto')}
+												iconPosition="right"
+												onClick={() => {
+													delete_form_modal.open();
+												}}
+											>
+												Fermer le formulaire
+											</Button>
+										</div>
+									</>
+								)}
 							</div>
 						</div>
 					</>
