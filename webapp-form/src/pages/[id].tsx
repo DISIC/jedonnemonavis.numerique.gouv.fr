@@ -565,11 +565,11 @@ export const getServerSideProps: GetServerSideProps<{
 	if (buttonId) {
 		const button = await prisma.button.findUnique({
 			where: { id: parseInt(buttonId) },
-			select: { id: true, form_id: true, deleted_at: true },
+			select: { id: true, form_id: true, isDeleted: true },
 		});
 		buttonFormId = button?.form_id;
 
-		if (button?.deleted_at) {
+		if (button?.isDeleted) {
 			isButtonDeleted = true;
 		}
 	}

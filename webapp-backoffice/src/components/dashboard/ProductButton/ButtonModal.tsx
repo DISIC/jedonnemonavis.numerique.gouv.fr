@@ -33,7 +33,8 @@ const defaultButton: ButtonCreationPayload | ButtonWithForm = {
 	form_id: -1,
 	isTest: false,
 	delete_reason: null,
-	deleted_at: null
+	deleted_at: null,
+	isDeleted: false
 };
 
 type FormErrors = {
@@ -142,7 +143,8 @@ const ButtonModal = (props: Props) => {
 			updateButton.mutate({
 				...buttonWithoutForm,
 				deleted_at: new Date(),
-				delete_reason: currentButton.delete_reason || null
+				delete_reason: currentButton.delete_reason || null,
+				isDeleted: true
 			});
 		}
 	};

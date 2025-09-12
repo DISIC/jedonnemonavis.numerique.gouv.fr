@@ -55,7 +55,7 @@ const ProductButtonCard = (props: Props) => {
 						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>
 							{button.title}
 						</p>
-						{(button.description || button.deleted_at) && (
+						{(button.description || button.isDeleted) && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.deleted_at
 									? `Fermé le ${button.deleted_at.toLocaleDateString()}` +
@@ -67,7 +67,7 @@ const ProductButtonCard = (props: Props) => {
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
-							{button.deleted_at ? (
+							{button.isDeleted ? (
 								<Badge severity="error" noIcon>
 									Fermé
 								</Badge>

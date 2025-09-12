@@ -8,6 +8,7 @@ import {
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
 import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
+import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 
 export const buttonRouter = router({
 	getList: publicProcedure
@@ -96,7 +97,7 @@ export const buttonRouter = router({
 
 			const currentButton = await ctx.prisma.button.findUnique({
 				where: { id: input.id as number },
-				select: { deleted_at: true }
+				select: { isDeleted: true }
 			});
 
 			const updatedButton = await ctx.prisma.button.update({
@@ -109,10 +110,13 @@ export const buttonRouter = router({
 				}
 			});
 
-			const hasBeenClosed =
-				currentButton?.deleted_at === null && updatedButton.deleted_at !== null;
-
-			if (updatedButton.form.deleted_at === null && hasBeenClosed) {
+			if (
+				shouldSendEmailsAboutDeletion(
+					currentButton?.isDeleted,
+					updatedButton.isDeleted,
+					updatedButton.form.isDeleted
+				)
+			) {
 				const accessRights = await ctx.prisma.accessRight.findMany({
 					where: {
 						product_id: updatedButton.form.product_id

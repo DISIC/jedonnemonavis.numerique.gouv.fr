@@ -276,6 +276,7 @@ model Button {
   created_at      DateTime         @default(now())
   updated_at      DateTime         @updatedAt
   deleted_at      DateTime?
+  isDeleted       Boolean?         @default(false)
 }
 
 model ClosedButtonLog {
@@ -556,6 +557,7 @@ model Form {
   created_at       DateTime     @default(now())
   updated_at       DateTime     @default(now())
   deleted_at       DateTime?
+  isDeleted        Boolean?     @default(false)
 }
 
 model FormConfig {

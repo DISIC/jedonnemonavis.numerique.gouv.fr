@@ -117,14 +117,18 @@ const SettingsTab = ({
 
 	const deleteAllButtons = async () => {
 		if (buttonsCount === 0) return;
-		return await Promise.all(
+		await Promise.all(
 			buttons.map(button => {
 				const { form, closedButtonLog, ...data } = button;
 				return updateButton.mutateAsync({
 					...data,
-					deleted_at: new Date()
+					deleted_at: new Date(),
+					isDeleted: true
 				});
 			})
+		);
+		router.push(
+			`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`)}`
 		);
 	};
 
@@ -142,12 +146,7 @@ const SettingsTab = ({
 				<FormDeleteModal
 					modal={delete_form_modal}
 					form={form}
-					onDelete={async v => {
-						await deleteAllButtons();
-						router.push(
-							`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`)}`
-						);
-					}}
+					onDelete={deleteAllButtons}
 				/>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 					<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
@@ -161,7 +160,7 @@ const SettingsTab = ({
 								fr.cx('fr-col-12', 'fr-col-md-4')
 							)}
 						>
-							{ownRight === 'carrier_admin' && form.deleted_at === null && (
+							{ownRight === 'carrier_admin' && form.isDeleted && (
 								<Button
 									priority="secondary"
 									iconId="fr-icon-add-line"
@@ -176,7 +175,7 @@ const SettingsTab = ({
 						</div>
 						<p
 							className={fr.cx('fr-col-12', 'fr-mt-6v')}
-							hidden={form.deleted_at !== null}
+							hidden={!form.isDeleted}
 						>
 							Lors de la création d’un emplacement, un code HTML est généré. Il
 							vous suffit de le copier-coller dans le code de la page où vous
@@ -197,12 +196,12 @@ const SettingsTab = ({
 				<div
 					className={fr.cx(
 						'fr-col-12',
-						(buttonsCount === 0 || form.deleted_at !== null) && 'fr-mt-3v'
+						(buttonsCount === 0 || !form.isDeleted) && 'fr-mt-3v'
 					)}
 				>
 					{!(isLoadingButtons || isRefetchingButtons) &&
 						buttonsCount === 0 &&
-						(!form.deleted_at ? (
+						(!form.isDeleted ? (
 							<NoButtonsPanel
 								onButtonClick={() => handleModalOpening('create')}
 							/>
@@ -218,12 +217,12 @@ const SettingsTab = ({
 						buttons &&
 						[
 							...buttons
-								.filter(b => !b.deleted_at)
+								.filter(b => !b.isDeleted)
 								.sort(
 									(a, b) => b.created_at.getTime() - a.created_at.getTime()
 								),
 							...buttons
-								.filter(b => b.deleted_at)
+								.filter(b => b.isDeleted)
 								.sort(
 									(a, b) =>
 										(b.deleted_at?.getTime() ?? 0) -
@@ -246,7 +245,7 @@ const SettingsTab = ({
 						</div>
 						<div
 							className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}
-							hidden={form.deleted_at !== null}
+							hidden={!form.isDeleted}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
 								<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
@@ -302,14 +301,14 @@ const SettingsTab = ({
 						</div>
 						<div
 							className={fr.cx(
-								form.deleted_at ? 'fr-my-0' : 'fr-my-3w',
+								form.isDeleted ? 'fr-my-0' : 'fr-my-3w',
 								'fr-col-12',
 								'fr-card',
 								'fr-p-6v'
 							)}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-								{form.deleted_at ? (
+								{form.isDeleted ? (
 									<div
 										className={fr.cx('fr-col-12')}
 										style={{ display: 'flex', justifyContent: 'center' }}

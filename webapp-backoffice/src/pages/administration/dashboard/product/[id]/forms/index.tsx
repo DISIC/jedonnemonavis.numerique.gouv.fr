@@ -117,7 +117,7 @@ const ProductButtonsPage = (props: Props) => {
 						</div>
 
 						<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
-							{product.forms.filter(f => !f.deleted_at).length === 0 && (
+							{product.forms.filter(f => !f.isDeleted).length === 0 && (
 								<div className={fr.cx('fr-pb-6v')}>
 									<span
 										className={cx(classes.smallText)}
@@ -128,7 +128,7 @@ const ProductButtonsPage = (props: Props) => {
 								</div>
 							)}
 							{product.forms
-								.filter(f => !f.deleted_at)
+								.filter(f => !f.isDeleted)
 								.map(form => (
 									<div
 										key={form.id}
@@ -210,13 +210,13 @@ const ProductButtonsPage = (props: Props) => {
 										)}
 									</div>
 								))}
-							{product.forms.filter(f => f.deleted_at).length > 0 && (
+							{product.forms.filter(f => f.isDeleted).length > 0 && (
 								<div className={fr.cx('fr-mt-8v', 'fr-pb-6v')}>
 									<h3 className={fr.cx('fr-mb-3v', 'fr-text--md')}>
 										Formulaires fermés
 									</h3>
 									{product.forms
-										.filter(f => !!f.deleted_at)
+										.filter(f => !!f.isDeleted)
 										.map(form => (
 											<div
 												key={form.id}
@@ -242,7 +242,7 @@ const ProductButtonsPage = (props: Props) => {
 															'fr-col-md-7',
 															'fr-pb-0',
 															form.buttons.length === 0 &&
-																!form.deleted_at &&
+																!form.isDeleted &&
 																'fr-mb-6v'
 														)
 													)}
@@ -255,7 +255,7 @@ const ProductButtonsPage = (props: Props) => {
 															{form.title || form.form_template.title}
 														</span>
 													</Link>
-													{(form.buttons.length > 0 || form.deleted_at) && (
+													{(form.buttons.length > 0 || form.isDeleted) && (
 														<div className="fr-mt-4v">
 															{form.deleted_at ? (
 																<span className={cx(classes.smallText)}>
@@ -287,7 +287,7 @@ const ProductButtonsPage = (props: Props) => {
 													)}
 												</div>
 
-												{form.deleted_at ? (
+												{form.isDeleted ? (
 													<div
 														className={cx(
 															fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5'),

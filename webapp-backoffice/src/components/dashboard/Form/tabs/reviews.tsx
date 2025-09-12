@@ -389,7 +389,7 @@ const ReviewsTab = (props: Props) => {
 		}
 
 		if (!reviewsCountAll) {
-			return form.deleted_at ? (
+			return form.isDeleted ? (
 				<div
 					className={fr.cx('fr-col-12')}
 					style={{ display: 'flex', justifyContent: 'center' }}

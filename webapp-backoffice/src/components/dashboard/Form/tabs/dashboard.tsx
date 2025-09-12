@@ -207,7 +207,7 @@ const DashboardTab = ({
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<div className={fr.cx('fr-col-12')}>
-				{form.deleted_at ? (
+				{form.isDeleted ? (
 					<div
 						className={fr.cx('fr-col-12')}
 						style={{ display: 'flex', justifyContent: 'center' }}

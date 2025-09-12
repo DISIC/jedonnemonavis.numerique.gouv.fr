@@ -32,7 +32,8 @@ const FormDeleteModal = ({ modal, form, onDelete }: Props) => {
 			form: {
 				...data,
 				deleted_at: new Date(),
-				delete_reason: deleteReason || null
+				delete_reason: deleteReason || null,
+				isDeleted: true
 			}
 		});
 	};
