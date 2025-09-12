@@ -5,6 +5,10 @@ import {
 	ButtonUncheckedCreateInputSchema,
 	ButtonUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
+import { checkRightToProceed } from './product';
+import { sendMail } from '@/src/utils/mailer';
+import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
+import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 
 export const buttonRouter = router({
 	getList: publicProcedure
@@ -38,7 +42,8 @@ export const buttonRouter = router({
 					title: filterByTitle === 'title:asc' ? 'asc' : 'desc'
 				},
 				include: {
-					form: true
+					form: true,
+					closedButtonLog: true
 				}
 			});
 
@@ -65,6 +70,11 @@ export const buttonRouter = router({
 		.meta({ logEvent: true })
 		.input(ButtonUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				form_id: input.form_id as number
+			});
 			const newButton = await ctx.prisma.button.create({
 				data: input,
 				include: {
@@ -79,15 +89,78 @@ export const buttonRouter = router({
 		.meta({ logEvent: true })
 		.input(ButtonUncheckedUpdateInputSchema)
 		.mutation(async ({ ctx, input }) => {
+			const { product } = await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				form_id: input.form_id as number
+			});
+
+			const currentButton = await ctx.prisma.button.findUnique({
+				where: { id: input.id as number },
+				select: { isDeleted: true }
+			});
+
 			const updatedButton = await ctx.prisma.button.update({
 				where: {
 					id: input.id as number
 				},
 				data: input,
 				include: {
-					form: true
+					form: { include: { form_template: true } }
 				}
 			});
+
+			if (
+				shouldSendEmailsAboutDeletion(
+					currentButton?.isDeleted,
+					updatedButton.isDeleted,
+					updatedButton.form.isDeleted
+				)
+			) {
+				const accessRights = await ctx.prisma.accessRight.findMany({
+					where: {
+						product_id: updatedButton.form.product_id
+					}
+				});
+
+				const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({
+					where: {
+						entity_id: product?.entity_id
+					}
+				});
+
+				const emails = [
+					...accessRights.map(ar => ar.user_email),
+					...adminEntityRights.map(aer => aer.user_email)
+				].filter(email => email !== null) as string[];
+
+				emails.forEach((email: string) => {
+					sendMail(
+						`Fermeture de l'emplacement «${updatedButton.title}» pour le formulaire «${
+							updatedButton.form.title ?? updatedButton.form.form_template.title
+						}» du service «${product?.title}»`,
+						email,
+						getClosedButtonOrFormEmail({
+							contextUser: ctx.session.user,
+							buttonTitle: updatedButton.title,
+							form: {
+								id: updatedButton.form.id,
+								title:
+									updatedButton.form.title ??
+									updatedButton.form.form_template.title
+							},
+							product: {
+								id: product?.id as number,
+								title: product?.title as string,
+								entityName: product?.entity.name as string
+							}
+						}),
+						`Fermeture de l'emplacement «${updatedButton.title}» pour le formulaire «${
+							updatedButton.form.title ?? updatedButton.form.form_template.title
+						}» du service «${product?.title}»`
+					);
+				});
+			}
 
 			return { data: updatedButton };
 		})

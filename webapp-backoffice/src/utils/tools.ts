@@ -503,3 +503,11 @@ export const normalizeHtml = (html: string): string => {
 		.replace(/&#39;/g, "'")
 		.trim(); // Supprime les espaces en début et fin
 };
+
+export const shouldSendEmailsAboutDeletion = (
+	isCurrentDeleted?: boolean | null,
+	isUpdatedDeleted?: boolean | null,
+	isParentDeleted?: boolean | null
+): boolean => {
+	return !isCurrentDeleted && !!isUpdatedDeleted && !isParentDeleted;
+};

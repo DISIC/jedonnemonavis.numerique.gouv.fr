@@ -11,7 +11,6 @@ import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionVi
 import { Loader } from '@/src/components/ui/Loader';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
-import { CustomModalProps } from '@/src/types/custom';
 import {
 	FormConfigWithChildren,
 	FormWithElements
@@ -30,11 +29,12 @@ import { FormTemplateBlockOption, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	onClickGoToReviews?: () => void;
 }
 
@@ -262,7 +262,14 @@ const StatsTab = ({
 		return (
 			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
-				{buttonResults.metadata.count === 0 ? (
+				{form.isDeleted ? (
+					<div
+						className={fr.cx('fr-col-12')}
+						style={{ display: 'flex', justifyContent: 'center' }}
+					>
+						<span>Ce formulaire est fermé</span>
+					</div>
+				) : buttonResults.metadata.count === 0 ? (
 					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
 					<NoReviewsPanel />
