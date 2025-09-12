@@ -221,7 +221,7 @@ export const productRouter = router({
 					include: {
 						forms: {
 							include: {
-								buttons: true,
+								buttons: { include: { closedButtonLog: true } },
 								form_template: true,
 								form_configs: {
 									include: {
