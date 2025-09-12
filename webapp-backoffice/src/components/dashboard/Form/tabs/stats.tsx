@@ -11,7 +11,6 @@ import SmileyQuestionViz from '@/src/components/dashboard/Stats/SmileyQuestionVi
 import { Loader } from '@/src/components/ui/Loader';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
-import { CustomModalProps } from '@/src/types/custom';
 import {
 	FormConfigWithChildren,
 	FormWithElements
@@ -263,15 +262,15 @@ const StatsTab = ({
 		return (
 			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
-				{buttonResults.metadata.count === 0 ? (
-					<NoButtonsPanel onButtonClick={handleButtonClick} />
-				) : form.isDeleted ? (
+				{form.isDeleted ? (
 					<div
 						className={fr.cx('fr-col-12')}
 						style={{ display: 'flex', justifyContent: 'center' }}
 					>
 						<span>Ce formulaire est fermé</span>
 					</div>
+				) : buttonResults.metadata.count === 0 ? (
+					<NoButtonsPanel onButtonClick={handleButtonClick} />
 				) : (
 					<NoReviewsPanel />
 				)}

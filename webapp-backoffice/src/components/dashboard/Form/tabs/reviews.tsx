@@ -384,21 +384,22 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const displayEmptyState = () => {
-		if (!hasButtons) {
-			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
-		}
-
-		if (!reviewsCountAll) {
-			return form.isDeleted ? (
+		if (form.isDeleted) {
+			return (
 				<div
 					className={fr.cx('fr-col-12')}
 					style={{ display: 'flex', justifyContent: 'center' }}
 				>
 					<span>Ce formulaire est fermé</span>
 				</div>
-			) : (
-				<NoReviewsPanel />
 			);
+		}
+		if (!hasButtons) {
+			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
+		}
+
+		if (!reviewsCountAll) {
+			return <NoReviewsPanel />;
 		}
 	};
 

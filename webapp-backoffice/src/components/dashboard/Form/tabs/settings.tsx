@@ -116,7 +116,6 @@ const SettingsTab = ({
 	} = buttonResults;
 
 	const deleteAllButtons = async () => {
-		if (buttonsCount === 0) return;
 		await Promise.all(
 			buttons.map(button => {
 				const { form, closedButtonLog, ...data } = button;
@@ -175,7 +174,7 @@ const SettingsTab = ({
 						</div>
 						<p
 							className={fr.cx('fr-col-12', 'fr-mt-6v')}
-							hidden={!form.isDeleted}
+							hidden={!!form.isDeleted}
 						>
 							Lors de la création d’un emplacement, un code HTML est généré. Il
 							vous suffit de le copier-coller dans le code de la page où vous
@@ -196,7 +195,7 @@ const SettingsTab = ({
 				<div
 					className={fr.cx(
 						'fr-col-12',
-						(buttonsCount === 0 || !form.isDeleted) && 'fr-mt-3v'
+						(buttonsCount === 0 || form.isDeleted) && 'fr-mt-4v'
 					)}
 				>
 					{!(isLoadingButtons || isRefetchingButtons) &&
@@ -245,7 +244,7 @@ const SettingsTab = ({
 						</div>
 						<div
 							className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}
-							hidden={!form.isDeleted}
+							hidden={!!form.isDeleted}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
 								<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
