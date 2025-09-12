@@ -159,7 +159,7 @@ const SettingsTab = ({
 								fr.cx('fr-col-12', 'fr-col-md-4')
 							)}
 						>
-							{ownRight === 'carrier_admin' && form.isDeleted && (
+							{ownRight === 'carrier_admin' && !form.isDeleted && (
 								<Button
 									priority="secondary"
 									iconId="fr-icon-add-line"
