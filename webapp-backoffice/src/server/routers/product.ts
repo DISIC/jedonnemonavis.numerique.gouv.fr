@@ -31,9 +31,24 @@ export const checkRightToProceed = async ({
 	product_id?: number;
 	form_id?: number;
 }) => {
+	const orFilters: Prisma.ProductWhereInput[] = [];
+	if (typeof product_id === 'number') {
+		orFilters.push({ id: product_id });
+	}
+	if (typeof form_id === 'number') {
+		orFilters.push({ forms: { some: { id: form_id } } });
+	}
+
+	if (orFilters.length === 0) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Either product_id or form_id must be provided'
+		});
+	}
+
 	const product = await prisma.product.findFirst({
 		where: {
-			OR: [{ id: product_id }, { forms: { some: { id: form_id } } }]
+			OR: orFilters
 		},
 		include: { entity: { select: { name: true } } }
 	});

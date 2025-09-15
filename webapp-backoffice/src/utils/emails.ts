@@ -294,7 +294,7 @@ export function getClosedButtonOrFormEmail({
 }) {
 	const jdmaUrl = process.env.NODEMAILER_BASEURL;
 	const closeTitle = buttonTitle
-		? `l'emplacement « <b>${buttonTitle}</b> » pour le formulaire « ${form.title} »`
+		? `l'emplacement « <b>${buttonTitle}</b> »`
 		: `le formulaire « <b>${formTitle}</b> »`;
 
 	const serviceFormDisplay = buttonTitle
@@ -331,12 +331,8 @@ export function getClosedButtonOrFormEmail({
 						</div>
 					</td>
 				</tr>
-				<tr>
-				  <td style="height: 16px;"></td> <!-- Espacement -->
-				</tr>
 			</tbody>
-		</table>
-		`
+		</table>`
 		: '';
 
 	return getEmailWithLayout(`
@@ -356,7 +352,6 @@ export function getClosedButtonOrFormEmail({
 		</div>
 		<br/>
 		${serviceFormDisplay}
-		<br/>
 		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
 			style="font-size: 14px; color: #000091; text-decoration: underline;">
 			Retrouvez tous vos services sur votre tableau de bord JDMA

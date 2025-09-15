@@ -182,6 +182,11 @@ const ProductFormPage = (props: Props) => {
 								Démarche essentielle
 							</Badge>
 						)}
+						{form.isDeleted && (
+							<Badge severity="error" noIcon className="fr-ml-md-3v">
+								Fermé
+							</Badge>
+						)}
 					</div>
 					<p className={fr.cx('fr-mb-0')}>
 						Vous pouvez&nbsp;
@@ -216,6 +221,13 @@ const ProductFormPage = (props: Props) => {
 									service.
 								</>
 							}
+						/>
+					)}
+					{form.isDeleted && (
+						<Notice
+							severity="alert"
+							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
+							title={'Ce formulaire est fermé et ne peut être plus être édité'}
 						/>
 					)}
 				</div>

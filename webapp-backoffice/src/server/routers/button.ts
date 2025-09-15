@@ -136,9 +136,7 @@ export const buttonRouter = router({
 
 				emails.forEach((email: string) => {
 					sendMail(
-						`Fermeture de l'emplacement «${updatedButton.title}» pour le formulaire «${
-							updatedButton.form.title ?? updatedButton.form.form_template.title
-						}» du service «${product?.title}»`,
+						`Fermeture de l'emplacement «${updatedButton.title}» du service «${product?.title}»`,
 						email,
 						getClosedButtonOrFormEmail({
 							contextUser: ctx.session.user,
@@ -155,9 +153,7 @@ export const buttonRouter = router({
 								entityName: product?.entity.name as string
 							}
 						}),
-						`Fermeture de l'emplacement «${updatedButton.title}» pour le formulaire «${
-							updatedButton.form.title ?? updatedButton.form.form_template.title
-						}» du service «${product?.title}»`
+						`Fermeture de l'emplacement «${updatedButton.title}» du service «${product?.title}»`
 					);
 				});
 			}

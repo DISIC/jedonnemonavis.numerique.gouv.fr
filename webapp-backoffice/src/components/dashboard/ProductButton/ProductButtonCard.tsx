@@ -52,8 +52,24 @@ const ProductButtonCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-						<p className={cx(classes.title, fr.cx('fr-mb-0'))}>
-							{button.title}
+						<p
+							className={cx(
+								classes.title,
+								fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
+							)}
+						>
+							{button.title}{' '}
+							{button.isDeleted && (
+								<Badge
+									as="span"
+									severity="error"
+									noIcon
+									small
+									className="fr-ml-2v"
+								>
+									Fermé
+								</Badge>
+							)}
 						</p>
 						{(button.description || button.isDeleted) && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
@@ -67,11 +83,7 @@ const ProductButtonCard = (props: Props) => {
 
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
 						<div className={cx(classes.actionsContainer)}>
-							{button.isDeleted ? (
-								<Badge severity="error" noIcon>
-									Fermé
-								</Badge>
-							) : (
+							{!button.isDeleted && (
 								<>
 									{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
 									<Button

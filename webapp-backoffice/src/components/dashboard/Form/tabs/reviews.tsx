@@ -390,7 +390,7 @@ const ReviewsTab = (props: Props) => {
 					className={fr.cx('fr-col-12')}
 					style={{ display: 'flex', justifyContent: 'center' }}
 				>
-					<span>Ce formulaire est fermé</span>
+					<span>Ce formulaire est fermé et ne contient aucune réponse</span>
 				</div>
 			);
 		}

@@ -148,7 +148,9 @@ const SettingsTab = ({
 					onDelete={deleteAllButtons}
 				/>
 				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-					<h3 className={fr.cx('fr-mb-0')}>Gérer les emplacements</h3>
+					<h3 className={fr.cx('fr-mb-0')}>
+						{form.isDeleted ? 'Voir' : 'Gérer'} les emplacements
+					</h3>
 				</div>
 				{buttonsCount > 0 && (
 					<>
@@ -236,7 +238,7 @@ const SettingsTab = ({
 							/>
 						))}
 				</div>
-				{!form.product.isTop250 && (
+				{!form.product.isTop250 && !form.isDeleted && (
 					<>
 						<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
 						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
@@ -247,7 +249,7 @@ const SettingsTab = ({
 							hidden={!!form.isDeleted}
 						>
 							<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-								<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
+								<div className={fr.cx('fr-col-12', 'fr-mb-3v')}>
 									<span className={classes.containerTitle}>
 										Éditer le formulaire
 									</span>
@@ -276,12 +278,7 @@ const SettingsTab = ({
 									</div>
 								))}
 
-								<div
-									className={cx(
-										classes.buttonsGroup,
-										fr.cx('fr-col-12', 'fr-mt-3v')
-									)}
-								>
+								<div className={cx(classes.buttonsGroup, fr.cx('fr-col-12'))}>
 									<Button
 										priority="primary"
 										iconId="fr-icon-edit-line"
@@ -443,8 +440,8 @@ const useStyles = tss.withName(SettingsTab.name).create({
 	},
 	containerTitle: {
 		fontWeight: 'bold',
-		fontSize: '1.5rem',
-		lineHeight: '2rem'
+		fontSize: '1.125rem',
+		lineHeight: '1.75rem'
 	}
 });
 
