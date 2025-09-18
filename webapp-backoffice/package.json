@@ -15,7 +15,8 @@
 		"lhci:server": "LHCI_DB_PATH=${LHCI_DB_PATH:-./db.sql}; lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=$LHCI_DB_PATH",
 		"db:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed",
 		"test": "npx cypress run --browser chrome --headed",
-		"test:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed && npx cypress run --browser chrome --headed"
+		"test:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed && npx cypress run --browser chrome --headed",
+		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts"
 	},
 	"husky": {
 		"hooks": {

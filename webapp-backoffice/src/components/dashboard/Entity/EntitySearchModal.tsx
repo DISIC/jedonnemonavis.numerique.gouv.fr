@@ -1,5 +1,5 @@
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
-import { getLastPage, getNbPages, removeAccents } from '@/src/utils/tools';
+import { getLastPage, getNbPages, normalizeString } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -18,7 +18,6 @@ import { push } from '@socialgouv/matomo-next';
 import { CustomModalProps } from '@/src/types/custom';
 
 export type AdminEntityRightActionType = 'add' | 'remove' | 'resend-email';
-
 
 interface Props {
 	modal: CustomModalProps;
@@ -113,7 +112,7 @@ const EntitySearchModal = (props: Props) => {
 	const displayModalContent = () => {
 		// AVOID BUG ON AUTOCOMPLETE WHEN REFOCUS FIELD WITH SEARCH TEXT
 		const filteredOptions = entityOptions.filter(eo =>
-			new RegExp(removeAccents(search), 'i').test(removeAccents(eo.label))
+			new RegExp(normalizeString(search), 'i').test(normalizeString(eo.label))
 		);
 		return (
 			<>
