@@ -370,7 +370,6 @@ const ProductStatPage = (props: Props) => {
 			tmpEndDate !== endDate ||
 			tmpFormId !== formId
 		) {
-			console.log(tmpFormId, formId);
 			setStartDate(tmpStartDate);
 			setEndDate(tmpEndDate);
 			setFormId(tmpFormId);
