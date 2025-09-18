@@ -6,7 +6,7 @@ import {
 	EntityUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
-import { removeAccents } from '@/src/utils/tools';
+import { normalizeString } from '@/src/utils/tools';
 
 export const entityRouter = router({
 	getList: protectedProcedure
@@ -35,7 +35,7 @@ export const entityRouter = router({
 			let where: Prisma.EntityWhereInput = {};
 
 			if (search) {
-				let searchWithoutAccents = removeAccents(search);
+				let searchWithoutAccents = normalizeString(search);
 				const searchSplitted = searchWithoutAccents.split(' ');
 
 				if (searchSplitted.length > 1) {
@@ -203,7 +203,7 @@ export const entityRouter = router({
 					message: 'Entity with this name already exists'
 				});
 
-			entityPayload.name_formatted = removeAccents(entityPayload.name);
+			entityPayload.name_formatted = normalizeString(entityPayload.name);
 
 			const entity = await ctx.prisma.entity.create({
 				data: {
@@ -243,7 +243,7 @@ export const entityRouter = router({
 					message: 'Entity with this name already exists'
 				});
 
-			entity.name_formatted = removeAccents(entity.name as string);
+			entity.name_formatted = normalizeString(entity.name as string);
 
 			const updatedEntity = await ctx.prisma.entity.update({
 				where: { id },

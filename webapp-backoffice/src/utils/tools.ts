@@ -151,8 +151,24 @@ export const transformDateToFrenchReadable = (dateString: string): string => {
 	return `${day === 1 ? '1er' : day} ${monthInFrench} ${year}`;
 };
 
-export const removeAccents = (str: string): string => {
-	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+export const buildSearchQuery = (str: string) => {
+	return str
+		.split(' ')
+		.filter(w => w.trim().length > 0)
+		.map(word => `${word}:*`)
+		.join('&');
+};
+
+export const normalizeString = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '') // strip accents
+		.replace(/[^\w\sÀ-ÿ\u0152\u0153'"]/gi, '') // allow œ/Œ; remove other special characters except letters, numbers, spaces, apostrophes, and quotes
+		.trim();
+};
+
+export const alternativeString = (str: string): string => {
+	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
 };
 
 export const createFilterOptionsWithArgument =

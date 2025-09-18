@@ -8,7 +8,7 @@ import NewsModal from '@/src/components/ui/modal/NewsModal';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
-import { getNbPages } from '@/src/utils/tools';
+import { getNbPages, normalizeString } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -393,9 +393,7 @@ const DashBoard = () => {
 											updateFilters({
 												...filters,
 												currentPage: 1,
-												validatedSearch: search
-													.replace(/[^\w\sÀ-ÿ'"]/gi, '')
-													.trim()
+												validatedSearch: normalizeString(search)
 											});
 											push(['trackEvent', 'Product', 'Search']);
 										}}

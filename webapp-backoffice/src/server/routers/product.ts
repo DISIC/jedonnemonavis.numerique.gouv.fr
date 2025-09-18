@@ -11,7 +11,12 @@ import {
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 import { Prisma, PrismaClient, Product } from '@prisma/client';
-import { actionMapping, removeAccents } from '@/src/utils/tools';
+import {
+	actionMapping,
+	alternativeString,
+	buildSearchQuery,
+	normalizeString
+} from '@/src/utils/tools';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
 import { sendMail } from '@/src/utils/mailer';
@@ -160,30 +165,26 @@ export const productRouter = router({
 			};
 
 			if (search) {
-				let searchWithoutAccents = removeAccents(search);
-				const searchQuery = searchWithoutAccents
-					.split(' ')
-					.map(word => `${word}:*`)
-					.join('&');
+				const searchWithoutAccents = normalizeString(search);
+				const alternativeSearchText = alternativeString(searchWithoutAccents);
+
+				const queries = new Set<string>([
+					buildSearchQuery(searchWithoutAccents)
+				]);
+				if (
+					alternativeSearchText &&
+					alternativeSearchText !== searchWithoutAccents
+				) {
+					queries.add(buildSearchQuery(alternativeSearchText));
+				}
+
+				const orConditions = Array.from(queries).flatMap(q => [
+					{ title_formatted: { search: q } },
+					{ title: { search: q } }
+				]);
 
 				where = {
-					AND: [
-						{ ...where },
-						{
-							OR: [
-								{
-									title_formatted: {
-										search: searchQuery
-									}
-								},
-								{
-									title: {
-										search: searchQuery
-									}
-								}
-							]
-						}
-					]
+					AND: [{ ...where }, { OR: orConditions }]
 				};
 			}
 
@@ -346,7 +347,7 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
 
-			productPayload.title_formatted = removeAccents(productPayload.title);
+			productPayload.title_formatted = normalizeString(productPayload.title);
 
 			const product = await ctx.prisma.product.create({
 				data: {
@@ -400,7 +401,7 @@ export const productRouter = router({
 				product_id: id
 			});
 
-			product.title_formatted = removeAccents(product.title as string);
+			product.title_formatted = normalizeString(product.title as string);
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id },

@@ -15,7 +15,8 @@ import { FILTER_LABELS } from '@/src/utils/helpers';
 import { displayIntention } from '@/src/utils/stats';
 import {
 	formatDateToFrenchStringWithHour,
-	getNbPages
+	getNbPages,
+	normalizeString
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -442,7 +443,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim());
+			setValidatedSearch(normalizeString(search));
 			setCurrentPage(1);
 		}
 	};
