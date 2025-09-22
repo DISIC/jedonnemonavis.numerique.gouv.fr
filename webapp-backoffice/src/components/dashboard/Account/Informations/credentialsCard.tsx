@@ -146,6 +146,21 @@ const CredentialsCard = (props: Props) => {
 				title={'Identifiants de connexion'}
 				modifiable={true}
 				onSubmit={onFormSubmit}
+				customModifyButton={
+					user.proconnect_account ? (
+						<Button
+							priority="secondary"
+							onClick={() => {
+								setModalType('change-pwd');
+								onConfirmModal.open();
+								push(['trackEvent', 'BO - Account', `Credentials-Modal-Open`]);
+							}}
+							className={classes.buttonContainer}
+						>
+							Réinitialiser le mot de passe
+						</Button>
+					) : undefined
+				}
 				viewModeContent={
 					<>
 						{displayToast && (
@@ -254,7 +269,7 @@ const CredentialsCard = (props: Props) => {
 										/>
 									</div>
 
-									{!user.proconnect_account ? (
+									{!user.proconnect_account && (
 										<>
 											<div className={fr.cx('fr-input-group', 'fr-col-md-6')}>
 												<Controller
@@ -325,14 +340,6 @@ const CredentialsCard = (props: Props) => {
 												/>
 											</div>
 										</>
-									) : (
-										<Alert
-											small
-											severity="info"
-											description="Vous ne pouvez pas modifier cet email car il s'agit de votre adresse ProConnect, que vous avez utilisé pour créer votre compte Je Donne Mon Avis. Si vous souhaitez vous connecter avec une autre adresse, vous devez créer un autre compte."
-											className={fr.cx('fr-col-12', 'fr-mb-6v')}
-											style={{ textAlign: 'justify' }}
-										/>
 									)}
 								</form>
 							</div>
