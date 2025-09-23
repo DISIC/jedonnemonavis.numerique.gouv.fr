@@ -7,6 +7,7 @@ import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { RightAccessStatus } from '@prisma/client';
 import Link from 'next/link';
@@ -14,9 +15,8 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
-import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 import FormDeleteModal from '../FormDeleteModal';
 
 interface Props {
@@ -108,7 +108,7 @@ const SettingsTab = ({
 		}
 	);
 
-	const updateButton = trpc.button.update.useMutation();
+	const deleteButton = trpc.button.delete.useMutation();
 
 	const {
 		data: buttons,
@@ -119,7 +119,7 @@ const SettingsTab = ({
 		await Promise.all(
 			buttons.map(button => {
 				const { form, closedButtonLog, ...data } = button;
-				return updateButton.mutateAsync({
+				return deleteButton.mutateAsync({
 					...data,
 					deleted_at: new Date(),
 					isDeleted: true

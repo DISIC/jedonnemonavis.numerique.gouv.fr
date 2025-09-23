@@ -116,6 +116,7 @@ enum TypeAction {
   service_buttons_list_view
   service_button_create
   service_button_update
+  service_button_delete
   service_apikeys_list_view
   service_apikeys_create
   service_apikeys_delete

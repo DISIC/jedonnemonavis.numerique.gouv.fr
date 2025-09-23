@@ -15,6 +15,7 @@ const PRODUCT_ACTIONS: TypeAction[] = [
 	TypeAction.service_uninvite,
 	TypeAction.service_button_create,
 	TypeAction.service_button_update,
+	TypeAction.service_button_delete,
 	TypeAction.service_apikeys_create,
 	TypeAction.service_apikeys_delete,
 	TypeAction.form_config_create

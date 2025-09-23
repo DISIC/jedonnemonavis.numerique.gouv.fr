@@ -403,6 +403,7 @@ export const actionMapping: Record<string, TypeAction> = {
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
 	'button.create': TypeAction.service_button_create,
 	'button.update': TypeAction.service_button_update,
+	'button.delete': TypeAction.service_button_delete,
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete,
 	'userEvent.getList': TypeAction.service_logs_view,
@@ -439,9 +440,11 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_uninvite:
 			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.service_button_create:
-			return `Création du bouton <strong>${metadataTyped.json.title}</strong>`;
+			return `Création de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
-			return `Modification du bouton <strong>${metadataTyped.json.title}</strong>`;
+			return `Modification de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
+		case TypeAction.service_button_delete:
+			return `Suppression de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
@@ -466,7 +469,9 @@ export const filtersLabel = [
 		value: 'organisation_uninvite',
 		label: "Retrait d'utilisateur d'une organisation"
 	},
-	{ value: 'service_button_create', label: "Création d'un bouton" },
+	{ value: 'service_button_create', label: "Création d'un emplacement" },
+	{ value: 'service_button_update', label: "Modification d'un emplacement" },
+	{ value: 'service_button_delete', label: "Suppression d'un emplacement" },
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
 	{ value: 'form_config_create', label: 'Modification du formulaire' }

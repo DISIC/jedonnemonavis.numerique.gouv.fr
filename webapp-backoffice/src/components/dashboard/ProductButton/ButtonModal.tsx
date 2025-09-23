@@ -91,6 +91,13 @@ const ButtonModal = (props: Props) => {
 		}
 	});
 
+	const deleteButton = trpc.button.delete.useMutation({
+		onSuccess: result => {
+			setCurrentButton(defaultButton);
+			handleModalClose(result.data);
+		}
+	});
+
 	const hasErrors = (key: keyof FormErrors): boolean => {
 		return Object.values(errors[key]).some(value => value === true);
 	};
@@ -140,7 +147,7 @@ const ButtonModal = (props: Props) => {
 	const handleButtonDelete = () => {
 		if ('id' in currentButton) {
 			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
-			updateButton.mutate({
+			deleteButton.mutate({
 				...buttonWithoutForm,
 				deleted_at: new Date(),
 				delete_reason: currentButton.delete_reason || null,

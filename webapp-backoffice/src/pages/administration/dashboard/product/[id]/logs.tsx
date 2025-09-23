@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
-import ProductLayout from '../../../../../layouts/Product/ProductLayout';
-import { Product, RightAccessStatus, TypeAction } from '@prisma/client';
-import Head from 'next/head';
-import { getServerSideProps } from '.';
-import { tss } from 'tss-react/dsfr';
-import { trpc } from '@/src/utils/trpc';
-import { Table } from '@codegouvfr/react-dsfr/Table';
+import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
+import { useFilters } from '@/src/contexts/FiltersContext';
 import {
 	filtersLabel,
 	getNbPages,
 	handleActionTypeDisplay
 } from '@/src/utils/tools';
-import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { useSession } from 'next-auth/react';
-import { useFilters } from '@/src/contexts/FiltersContext';
-import GenericFilters from '@/src/components/dashboard/Filters/Filters';
-import { Autocomplete } from '@mui/material';
+import { Table } from '@codegouvfr/react-dsfr/Table';
 import Tag from '@codegouvfr/react-dsfr/Tag';
+import { Autocomplete } from '@mui/material';
+import { Product, RightAccessStatus, TypeAction } from '@prisma/client';
+import { useSession } from 'next-auth/react';
+import Head from 'next/head';
+import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
+import ProductLayout from '../../../../../layouts/Product/ProductLayout';
 
 interface Props {
 	product: Product;

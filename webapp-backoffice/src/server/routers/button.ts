@@ -89,15 +89,10 @@ export const buttonRouter = router({
 		.meta({ logEvent: true })
 		.input(ButtonUncheckedUpdateInputSchema)
 		.mutation(async ({ ctx, input }) => {
-			const { product } = await checkRightToProceed({
+			await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
 				form_id: input.form_id as number
-			});
-
-			const currentButton = await ctx.prisma.button.findUnique({
-				where: { id: input.id as number },
-				select: { isDeleted: true }
 			});
 
 			const updatedButton = await ctx.prisma.button.update({
@@ -110,16 +105,43 @@ export const buttonRouter = router({
 				}
 			});
 
+			return { data: updatedButton };
+		}),
+	delete: protectedProcedure
+		.meta({ logEvent: true })
+		.input(ButtonUncheckedUpdateInputSchema)
+		.mutation(async ({ ctx, input }) => {
+			const { product } = await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				form_id: input.form_id as number
+			});
+
+			const currentButton = await ctx.prisma.button.findUnique({
+				where: { id: input.id as number },
+				select: { isDeleted: true }
+			});
+
+			const deletedButton = await ctx.prisma.button.update({
+				where: {
+					id: input.id as number
+				},
+				data: input,
+				include: {
+					form: { include: { form_template: true } }
+				}
+			});
+
 			if (
 				shouldSendEmailsAboutDeletion(
 					currentButton?.isDeleted,
-					updatedButton.isDeleted,
-					updatedButton.form.isDeleted
+					deletedButton.isDeleted,
+					deletedButton.form.isDeleted
 				)
 			) {
 				const accessRights = await ctx.prisma.accessRight.findMany({
 					where: {
-						product_id: updatedButton.form.product_id
+						product_id: deletedButton.form.product_id
 					}
 				});
 
@@ -136,16 +158,16 @@ export const buttonRouter = router({
 
 				emails.forEach((email: string) => {
 					sendMail(
-						`Fermeture de l'emplacement «${updatedButton.title}» du service «${product?.title}»`,
+						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
 						email,
 						getClosedButtonOrFormEmail({
 							contextUser: ctx.session.user,
-							buttonTitle: updatedButton.title,
+							buttonTitle: deletedButton.title,
 							form: {
-								id: updatedButton.form.id,
+								id: deletedButton.form.id,
 								title:
-									updatedButton.form.title ??
-									updatedButton.form.form_template.title
+									deletedButton.form.title ??
+									deletedButton.form.form_template.title
 							},
 							product: {
 								id: product?.id as number,
@@ -153,11 +175,11 @@ export const buttonRouter = router({
 								entityName: product?.entity.name as string
 							}
 						}),
-						`Fermeture de l'emplacement «${updatedButton.title}» du service «${product?.title}»`
+						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`
 					);
 				});
 			}
 
-			return { data: updatedButton };
+			return { data: deletedButton };
 		})
 });
