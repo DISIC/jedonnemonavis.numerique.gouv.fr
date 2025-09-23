@@ -515,7 +515,7 @@ export default function JDMAForm({
 			<div>
 				<div className={classes.blueSection}>
 					{!isFormSubmitted ? (
-						opinion.satisfaction ? (
+						opinion.satisfaction && router.query.step ? (
 							<h1>{t(`${currentSteps[currentStep].name}`)}</h1>
 						) : (
 							<h1>{t('first_block.title')}</h1>
