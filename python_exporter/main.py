@@ -495,7 +495,9 @@ def process_exports(conn):
     """
 
     start_date = datetime.strptime(filter_params.get('startDate', '2018-01-01'), '%Y-%m-%d')
-    end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')) + ' 23:59', '%Y-%m-%d %H:%M')
+    end_date_str = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    end_date = datetime.combine(end_date, datetime.max.time())
     count_params = [product_id, start_date, end_date] + filters_values
     total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
     print(f"{total_reviews} avis concernés, format d'export : {export_format}")
