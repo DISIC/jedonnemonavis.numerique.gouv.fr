@@ -6,6 +6,7 @@ import {
 } from '../../../utils/helpers/account';
 import { login, logout } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import {
 	adminEmail,
 	appUrl,
@@ -19,6 +20,12 @@ import {
 describe('jdma-account', () => {
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);
@@ -67,6 +74,12 @@ describe('jdma-account', () => {
 
 	it('delete account', () => {
 		login(newEmailTest, userPassword);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		cy.contains('button', selectors.action.delete).click({ force: true });

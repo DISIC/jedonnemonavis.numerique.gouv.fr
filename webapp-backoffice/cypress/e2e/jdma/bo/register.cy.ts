@@ -9,6 +9,7 @@ import {
 	togglePasswordVisibility
 } from '../../../utils/helpers/register';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import { appUrl, userPassword } from '../../../utils/variables';
 
 const email = generateUniqueEmail();
@@ -16,6 +17,12 @@ const email = generateUniqueEmail();
 describe('jdma-register', () => {
 	beforeEach(() => {
 		cy.visit(`${appUrl}/register`);
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 	});
 
 	// Vérification de la page initiale
