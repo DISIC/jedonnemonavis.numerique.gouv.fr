@@ -1,4 +1,5 @@
 import { AnswerIntention, Prisma } from '@prisma/client';
+import { getDateWhereFromUTCRange } from './tools';
 
 export const formatWhereAndOrder = (
 	input: { [key: string]: any },
@@ -35,16 +36,7 @@ export const formatWhereAndOrder = (
 			}),
 		...(!newReviews &&
 			(start_date || end_date) && {
-				created_at: {
-					...(start_date && { gte: new Date(start_date) }),
-					...(end_date && {
-						lte: (() => {
-							const adjustedend_date = new Date(end_date);
-							adjustedend_date.setHours(23, 59, 59);
-							return adjustedend_date;
-						})()
-					})
-				}
+				created_at: getDateWhereFromUTCRange(input.start_date, input.end_date)
 			}),
 		...(mustHaveVerbatimsOptimzed && {
 			has_verbatim: true
@@ -58,14 +50,10 @@ export const formatWhereAndOrder = (
 								{ field_code: 'verbatim' },
 								!newReviews &&
 									end_date && {
-										created_at: {
-											...(start_date && { gte: new Date(start_date) }),
-											lte: (() => {
-												const adjustedend_date = new Date(end_date);
-												adjustedend_date.setHours(23, 59, 59);
-												return adjustedend_date;
-											})()
-										}
+										created_at: getDateWhereFromUTCRange(
+											input.start_date,
+											input.end_date
+										)
 									}
 							].filter(Boolean)
 						}
@@ -90,14 +78,10 @@ export const formatWhereAndOrder = (
 								{ field_code: 'verbatim' },
 								!newReviews &&
 									end_date && {
-										created_at: {
-											...(start_date && { gte: new Date(start_date) }),
-											lte: (() => {
-												const adjustedend_date = new Date(end_date);
-												adjustedend_date.setHours(23, 59, 59);
-												return adjustedend_date;
-											})()
-										}
+										created_at: getDateWhereFromUTCRange(
+											input.start_date,
+											input.end_date
+										)
 									}
 							].filter(Boolean)
 						}
@@ -129,14 +113,10 @@ export const formatWhereAndOrder = (
 							AND: [
 								!newReviews &&
 									end_date && {
-										created_at: {
-											...(start_date && { gte: new Date(start_date) }),
-											lte: (() => {
-												const adjustedend_date = new Date(end_date);
-												adjustedend_date.setHours(23, 59, 59);
-												return adjustedend_date;
-											})()
-										}
+										created_at: getDateWhereFromUTCRange(
+											input.start_date,
+											input.end_date
+										)
 									},
 								{
 									field_code: fields.find(field => field.key === key)

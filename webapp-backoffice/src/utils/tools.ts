@@ -1,9 +1,11 @@
-import { AnswerIntention, TypeAction } from '@prisma/client';
+import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { matchSorter } from 'match-sorter';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
+import { addDays } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -407,7 +409,10 @@ export const actionMapping: Record<string, TypeAction> = {
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete,
 	'userEvent.getList': TypeAction.service_logs_view,
-	'formConfig.create': TypeAction.form_config_create
+	'formConfig.create': TypeAction.form_config_create,
+	'form.create': TypeAction.service_form_create,
+	'form.update': TypeAction.service_form_edit,
+	'form.delete': TypeAction.service_form_delete
 };
 
 export const handleActionTypeDisplay = (
@@ -451,6 +456,12 @@ export const handleActionTypeDisplay = (
 			return `Suppression d'une clé API`;
 		case TypeAction.form_config_create:
 			return `Mise en place du formulaire version ${metadataTyped.json.version}`;
+		case TypeAction.service_form_create:
+			return `Création du formulaire <strong>${metadataTyped.json.title}</strong>`;
+		case TypeAction.service_form_edit:
+			return `Modification du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
+		case TypeAction.service_form_delete:
+			return `Suppression du formulaire <strong>${metadataTyped.json.title}</strong>`;
 	}
 };
 
@@ -474,7 +485,10 @@ export const filtersLabel = [
 	{ value: 'service_button_delete', label: "Suppression d'un emplacement" },
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
-	{ value: 'form_config_create', label: 'Modification du formulaire' }
+	{ value: 'form_config_create', label: 'Modification du formulaire' },
+	{ value: 'service_form_create', label: 'Création d’un formulaire' },
+	{ value: 'service_form_edit', label: 'Modification d’un formulaire' },
+	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' }
 ];
 
 export const getHelperFromFormConfig = (
@@ -531,4 +545,23 @@ export const shouldSendEmailsAboutDeletion = (
 	isParentDeleted?: boolean | null
 ): boolean => {
 	return !isCurrentDeleted && !!isUpdatedDeleted && !isParentDeleted;
+};
+
+export const getDateWhereFromUTCRange = (
+	start_date?: string,
+	end_date?: string
+) => {
+	const tz = 'Europe/Paris';
+	const range: Prisma.DateTimeFilter = {};
+
+	if (start_date) {
+		range.gte = toZonedTime(`${start_date}T00:00:00`, tz);
+	}
+
+	if (end_date) {
+		const endDateParisMidnight = addDays(new Date(`${end_date}T00:00:00`), 1);
+		range.lt = endDateParisMidnight;
+	}
+
+	return range;
 };

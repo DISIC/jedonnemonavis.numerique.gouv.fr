@@ -133,6 +133,9 @@ enum TypeAction {
   api_call
   form_config_create
   form_reviews_view
+  service_form_create
+  service_form_edit
+  service_form_delete
 }
 
 enum FormConfigKind {
