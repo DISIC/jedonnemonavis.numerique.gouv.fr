@@ -15,7 +15,7 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 
 	return (
 		<modal.Component
-			title="De nouvelles fonctionnalités sont disponibles !"
+			title={<>De nouvelles fonctionnalités sont disponibles&nbsp;!</>}
 			buttons={[
 				{
 					onClick: () => {
@@ -26,27 +26,26 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 					iconPosition: 'right'
 				}
 			]}
+			size="large"
 		>
-			<p className={fr.cx('fr-mb-4v')}>Découvrez les nouveautés : </p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Une nouvelle interface pour gérer ses formulaires
-			</p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ La possibilité d’éditer un formulaire : masquer une question, une
-				option de réponse, ...
-			</p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ La gestion des emplacements de vos boutons JDMA
-			</p>
+			<p className={fr.cx('fr-mb-4v')}>Vous pouvez désormais : </p>
+			<p className={fr.cx('fr-mb-4v')}>⭐️ Fermer un emplacement</p>
+			<p className={fr.cx('fr-mb-4v')}>⭐️ Fermer un formulaire</p>
 			<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 				<Image
-					src="/assets/news-feature-1.png"
+					src="/assets/news-feature/close-button.png"
 					alt=""
-					width={450}
-					height={285}
+					width={451}
+					height={309}
 					className={classes.image}
 				/>
 			</div>
+			<p
+				className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
+				style={{ color: fr.colors.decisions.text.mention.grey.default }}
+			>
+				Fermeture d'un emplacement
+			</p>
 		</modal.Component>
 	);
 };
