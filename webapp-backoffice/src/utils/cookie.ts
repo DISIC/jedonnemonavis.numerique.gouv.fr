@@ -1,9 +1,12 @@
 import { z } from 'zod';
 
+export const LATEST_NEWS_VERSION = 2; // Increment this when there are new features to announce
+
 export const UserSettingsSchema = z.object({
 	formHelpModalSeen: z.boolean().optional(),
 	newsModalSeen: z.boolean().optional(),
-	newsPageSeen: z.boolean().optional()
+	newsPageSeen: z.boolean().optional(),
+	newsVersionSeen: z.number().optional()
 });
 export type UserSettings = z.infer<typeof UserSettingsSchema>;
 
@@ -30,8 +33,18 @@ export async function getCookiesUserSettings(): Promise<Partial<UserSettings>> {
 	try {
 		const parsed = JSON.parse(cookie);
 		const validated = UserSettingsSchema.safeParse(parsed);
-		if (validated.success) return validated.data;
-		return {};
+		if (!validated.success) return {};
+
+		const data = validated.data;
+		if (data.newsVersionSeen !== LATEST_NEWS_VERSION) {
+			return {
+				...data,
+				newsVersionSeen: data.newsVersionSeen ?? 0,
+				newsModalSeen: false,
+				newsPageSeen: false
+			};
+		}
+		return data;
 	} catch {
 		return {};
 	}
