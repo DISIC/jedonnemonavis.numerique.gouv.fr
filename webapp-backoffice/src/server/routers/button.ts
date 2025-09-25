@@ -109,24 +109,32 @@ export const buttonRouter = router({
 		}),
 	delete: protectedProcedure
 		.meta({ logEvent: true })
-		.input(ButtonUncheckedUpdateInputSchema)
-		.mutation(async ({ ctx, input }) => {
+		.input(
+			z.object({
+				buttonPayload: ButtonUncheckedUpdateInputSchema,
+				shouldLogEvent: z.boolean().optional(),
+				product_id: z.number(),
+				title: z.string()
+			})
+		)
+		.mutation(async ({ ctx, input: initialInput }) => {
+			const { buttonPayload } = initialInput;
 			const { product } = await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
-				form_id: input.form_id as number
+				form_id: buttonPayload.form_id as number
 			});
 
 			const currentButton = await ctx.prisma.button.findUnique({
-				where: { id: input.id as number },
+				where: { id: buttonPayload.id as number },
 				select: { isDeleted: true }
 			});
 
 			const deletedButton = await ctx.prisma.button.update({
 				where: {
-					id: input.id as number
+					id: buttonPayload.id as number
 				},
-				data: input,
+				data: buttonPayload,
 				include: {
 					form: { include: { form_template: true } }
 				}

@@ -120,9 +120,10 @@ const SettingsTab = ({
 			buttons.map(button => {
 				const { form, closedButtonLog, ...data } = button;
 				return deleteButton.mutateAsync({
-					...data,
-					deleted_at: new Date(),
-					isDeleted: true
+					buttonPayload: { ...data, deleted_at: new Date(), isDeleted: true },
+					shouldLogEvent: false,
+					product_id: form.product_id,
+					title: button.title
 				});
 			})
 		);

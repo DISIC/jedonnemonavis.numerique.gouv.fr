@@ -148,10 +148,14 @@ const ButtonModal = (props: Props) => {
 		if ('id' in currentButton) {
 			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
 			deleteButton.mutate({
-				...buttonWithoutForm,
-				deleted_at: new Date(),
-				delete_reason: currentButton.delete_reason || null,
-				isDeleted: true
+				product_id: form.product_id,
+				title: buttonWithoutForm.title,
+				buttonPayload: {
+					...buttonWithoutForm,
+					deleted_at: new Date(),
+					delete_reason: currentButton.delete_reason || null,
+					isDeleted: true
+				}
 			});
 		}
 	};

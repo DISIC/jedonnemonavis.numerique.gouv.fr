@@ -88,15 +88,10 @@ export const formRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { id, form } = input;
 
-			const { product } = await checkRightToProceed({
+			await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
 				product_id: form.product_id
-			});
-
-			const currentForm = await ctx.prisma.form.findUnique({
-				where: { id: input.id as number },
-				select: { isDeleted: true }
 			});
 
 			const updatedForm = await ctx.prisma.form.update({
@@ -107,15 +102,48 @@ export const formRouter = router({
 				include: { form_template: true }
 			});
 
+			return { data: updatedForm };
+		}),
+	delete: protectedProcedure
+		.meta({ logEvent: true })
+		.input(
+			z.object({
+				id: z.number(),
+				product_id: z.number(),
+				form: FormUncheckedUpdateInputSchema
+			})
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, form, product_id } = input;
+
+			const { product } = await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id: product_id
+			});
+
+			const currentForm = await ctx.prisma.form.findUnique({
+				where: { id: input.id as number },
+				select: { isDeleted: true }
+			});
+
+			const deletedForm = await ctx.prisma.form.update({
+				where: { id },
+				data: {
+					...form
+				},
+				include: { form_template: true }
+			});
+
 			if (
 				shouldSendEmailsAboutDeletion(
 					currentForm?.isDeleted,
-					updatedForm.isDeleted
+					deletedForm.isDeleted
 				)
 			) {
 				const accessRights = await ctx.prisma.accessRight.findMany({
 					where: {
-						product_id: updatedForm.product_id
+						product_id: deletedForm.product_id
 					}
 				});
 
@@ -132,14 +160,14 @@ export const formRouter = router({
 
 				emails.forEach((email: string) => {
 					sendMail(
-						`Fermeture du formulaire «${updatedForm.title ?? updatedForm.form_template.title}» du service «${product?.title}»`,
+						`Fermeture du formulaire «${deletedForm.title ?? deletedForm.form_template.title}» du service «${product?.title}»`,
 						email,
 						getClosedButtonOrFormEmail({
 							contextUser: ctx.session.user,
-							formTitle: updatedForm.title ?? updatedForm.form_template.title,
+							formTitle: deletedForm.title ?? deletedForm.form_template.title,
 							form: {
-								id: updatedForm.id,
-								title: updatedForm.title ?? updatedForm.form_template.title
+								id: deletedForm.id,
+								title: deletedForm.title ?? deletedForm.form_template.title
 							},
 							product: {
 								id: product?.id as number,
@@ -147,11 +175,11 @@ export const formRouter = router({
 								entityName: product?.entity.name as string
 							}
 						}),
-						`Fermeture du formulaire «${updatedForm.title || updatedForm.form_template.title}» du service «${product?.title}»`
+						`Fermeture du formulaire «${deletedForm.title || deletedForm.form_template.title}» du service «${product?.title}»`
 					);
 				});
 			}
 
-			return { data: updatedForm };
+			return { data: deletedForm };
 		})
 });

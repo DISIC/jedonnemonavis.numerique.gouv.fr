@@ -1,6 +1,5 @@
 import { FormConfigUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import { protectedProcedure, router } from '@/src/server/trpc';
-import { z } from 'zod';
 
 export const formConfigRouter = router({
 	create: protectedProcedure
@@ -11,7 +10,8 @@ export const formConfigRouter = router({
 				data: input,
 				include: {
 					form_config_displays: true,
-					form_config_labels: true
+					form_config_labels: true,
+					form: true
 				}
 			});
 			return { data: createdFormConfig };

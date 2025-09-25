@@ -461,7 +461,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_form_edit:
 			return `Modification du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
 		case TypeAction.service_form_delete:
-			return `Suppression du formulaire <strong>${metadataTyped.json.title}</strong>`;
+			return `Suppression du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
 	}
 };
 

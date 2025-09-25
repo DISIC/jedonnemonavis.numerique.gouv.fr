@@ -18,7 +18,7 @@ const FormDeleteModal = ({ modal, form, onDelete }: Props) => {
 		form.delete_reason || ''
 	);
 
-	const updateForm = trpc.form.update.useMutation({
+	const deleteForm = trpc.form.delete.useMutation({
 		onSuccess: result => {
 			onDelete(result.data);
 			modal.close();
@@ -27,8 +27,9 @@ const FormDeleteModal = ({ modal, form, onDelete }: Props) => {
 
 	const handleFormDelete = () => {
 		const { form_configs, product, form_template, ...data } = form;
-		updateForm.mutate({
+		deleteForm.mutate({
 			id: form.id,
+			product_id: form.product_id,
 			form: {
 				...data,
 				deleted_at: new Date(),

@@ -158,13 +158,18 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 						product_id = input.json.product_id;
 					} else if (input?.json?.product?.id) {
 						product_id = input.json.product.id;
+					} else if (input?.json?.form?.product_id) {
+						product_id = input.json.form.product_id;
 					}
 
 					if (input?.json?.form_id) {
 						form_id = input.json.form_id;
 					}
 
-					if (user && action) {
+					const shouldLogEvent =
+						'shouldLogEvent' in input?.json ? input.json.shouldLogEvent : true;
+
+					if (user && action && shouldLogEvent) {
 						await ctx.prisma.userEvent.create({
 							data: {
 								user_id: user.id,
