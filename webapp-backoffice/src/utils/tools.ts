@@ -449,7 +449,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_button_update:
 			return `Modification de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_delete:
-			return `Suppression de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
+			return `Fermeture de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
@@ -461,7 +461,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_form_edit:
 			return `Modification du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
 		case TypeAction.service_form_delete:
-			return `Suppression du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
+			return `Fermeture du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
 	}
 };
 
