@@ -61,9 +61,7 @@ const ReviewLineVerbatim = ({
 						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')
 					)}
 				>
-					{formatDateToFrenchString(
-						review.created_at?.toISOString().split('T')[0] || ''
-					)}
+					{formatDateToFrenchString(review.created_at?.toString() || '')}
 				</td>
 				<td
 					className={cx(
