@@ -1,5 +1,5 @@
 export async function getSiretInfo(siret: string): Promise<any> {
-	const response = await fetch(`${process.env.INSEE_API_URL}/entreprises/sirene/V3.11/siret/${siret}`, {
+	const response = await fetch(`${process.env.INSEE_API_URL}/siret/${siret}`, {
 		method: "GET",
 		headers: {
 			"X-INSEE-Api-Key-Integration": process.env.INSEE_API_KEY!,
