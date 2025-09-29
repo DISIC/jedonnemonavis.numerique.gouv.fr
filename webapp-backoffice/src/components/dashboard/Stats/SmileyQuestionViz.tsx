@@ -163,96 +163,98 @@ const SmileyQuestionViz = ({
 			required={required}
 		>
 			{resultFieldCode.data.length > 0 && (
-				<ChartWrapper title="Répartition des réponses" smallTitle>
-					<div className={classes.distributionContainer}>
-						{resultFieldCode.data
-							.sort(
-								(a, b) =>
-									intentionSortOrder[
-										a.intention as keyof typeof intentionSortOrder
-									] -
-									intentionSortOrder[
-										b.intention as keyof typeof intentionSortOrder
-									]
-							)
-							.map((rfc, index) => {
-								const percentage = Math.round(
-									(rfc.doc_count / resultFieldCode.metadata.total) * 100
-								);
-								const limitToShowTopInfos = 10;
-								const limitToShowBottomInfos = 4;
-								return (
-									<div
-										key={index}
-										className={classes.distributionItem}
-										style={{
-											width: `${percentage}%`
-										}}
-									>
-										{percentage >= limitToShowTopInfos ? (
-											<Image
-												alt=""
-												role="img"
-												src={`/assets/smileys/${getStatsIcon({
-													intention: rfc.intention as AnswerIntention
-												})}.svg`}
-												width={40}
-												height={40}
-											/>
-										) : (
-											<span className={cx(classes.distributionIcon)}></span>
-										)}
-										<label className={classes.distributionLabel}>
-											{percentage >= limitToShowTopInfos && rfc.answer_text}
-										</label>
-										<Tooltip
-											placement="top-start"
-											tabIndex={0}
-											title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
-											enterTouchDelay={0}
+				<>
+					<ChartWrapper title="Répartition des réponses" smallTitle>
+						<div className={classes.distributionContainer}>
+							{resultFieldCode.data
+								.sort(
+									(a, b) =>
+										intentionSortOrder[
+											a.intention as keyof typeof intentionSortOrder
+										] -
+										intentionSortOrder[
+											b.intention as keyof typeof intentionSortOrder
+										]
+								)
+								.map((rfc, index) => {
+									const percentage = Math.round(
+										(rfc.doc_count / resultFieldCode.metadata.total) * 100
+									);
+									const limitToShowTopInfos = 10;
+									const limitToShowBottomInfos = 4;
+									return (
+										<div
+											key={index}
+											className={classes.distributionItem}
+											style={{
+												width: `${percentage}%`
+											}}
 										>
-											<div
-												className={classes.progressBar}
-												style={{
-													backgroundColor: getStatsColor({
+											{percentage >= limitToShowTopInfos ? (
+												<Image
+													alt=""
+													role="img"
+													src={`/assets/smileys/${getStatsIcon({
 														intention: rfc.intention as AnswerIntention
-													})
-												}}
-											/>
-										</Tooltip>
-										<label className={classes.distributionPercentage}>
-											{percentage >= limitToShowBottomInfos && `${percentage}%`}
-										</label>
-									</div>
-								);
-							})}
-					</div>
-				</ChartWrapper>
+													})}.svg`}
+													width={40}
+													height={40}
+												/>
+											) : (
+												<span className={cx(classes.distributionIcon)}></span>
+											)}
+											<label className={classes.distributionLabel}>
+												{percentage >= limitToShowTopInfos && rfc.answer_text}
+											</label>
+											<Tooltip
+												placement="top-start"
+												tabIndex={0}
+												title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+												enterTouchDelay={0}
+											>
+												<div
+													className={classes.progressBar}
+													style={{
+														backgroundColor: getStatsColor({
+															intention: rfc.intention as AnswerIntention
+														})
+													}}
+												/>
+											</Tooltip>
+											<label className={classes.distributionPercentage}>
+												{percentage >= limitToShowBottomInfos &&
+													`${percentage}%`}
+											</label>
+										</div>
+									);
+								})}
+						</div>
+					</ChartWrapper>
+					<ChartWrapper
+						title="Évolution des réponses"
+						total={resultFieldCode.metadata.total}
+						data={data}
+						smallTitle
+					>
+						<SmileyBarChart data={data} total={total} />
+					</ChartWrapper>
+
+					<ChartWrapper
+						title="Évolution de la note moyenne"
+						total={resultFieldCode.metadata.total}
+						data={dataForChart}
+						singleRowLabel="Note moyenne"
+						tooltip="Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire."
+						smallTitle
+					>
+						<LineChart
+							data={dataForChart}
+							labelAxisY="Moyenne satisfaction"
+							ticks={[0, 5, 10]}
+						/>
+					</ChartWrapper>
+				</>
 			)}
-
-			<ChartWrapper
-				title="Évolution des réponses"
-				total={resultFieldCode.metadata.total}
-				data={data}
-				smallTitle
-			>
-				<SmileyBarChart data={data} total={total} />
-			</ChartWrapper>
-
-			<ChartWrapper
-				title="Évolution de la note moyenne"
-				total={resultFieldCode.metadata.total}
-				data={dataForChart}
-				singleRowLabel="Note moyenne"
-				tooltip="Pour calculer la note de satisfaction, nous réalisons une moyenne des réponses données à la question « De façon générale, comment ça s’est passé ? » en attribuant une note sur 10 à chaque option de réponses proposée dans le questionnaire."
-				smallTitle
-			>
-				<LineChart
-					data={dataForChart}
-					labelAxisY="Moyenne satisfaction"
-					ticks={[0, 5, 10]}
-				/>
-			</ChartWrapper>
 		</QuestionWrapper>
 	);
 };

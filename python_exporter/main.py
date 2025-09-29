@@ -261,7 +261,12 @@ def get_month_ranges(start_date, end_date):
     ranges = []
     current_date = start_date
     while current_date <= end_date:
-        start_of_month = current_date.replace(day=1) if current_date != start_date else current_date
+        # fix for the first month if starting on the 1st bcs of timezone display
+        if current_date == start_date and start_date.day == 1:
+            start_of_month = current_date
+            start_of_month -= timedelta(hours=2)
+        else:
+            start_of_month = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0) if current_date != start_date else current_date
         end_of_month = current_date.replace(day=calendar.monthrange(current_date.year, current_date.month)[1])
         end_of_month = datetime.combine(end_of_month, datetime.max.time())
         if end_of_month > end_date:
@@ -495,7 +500,11 @@ def process_exports(conn):
     """
 
     start_date = datetime.strptime(filter_params.get('startDate', '2018-01-01'), '%Y-%m-%d')
-    end_date = datetime.strptime(filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d')) + ' 23:59', '%Y-%m-%d %H:%M')
+    if start_date.day == 1:
+        start_date -= timedelta(hours=2) 
+    end_date_str = filter_params.get('endDate', datetime.now().strftime('%Y-%m-%d'))
+    end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+    end_date = datetime.combine(end_date, datetime.max.time())
     count_params = [product_id, start_date, end_date] + filters_values
     total_reviews = fetch_query_with_filters(conn, count_query, count_params)[0][0]
     print(f"{total_reviews} avis concernés, format d'export : {export_format}")
@@ -573,7 +582,7 @@ def process_exports(conn):
                         'product_id': product_id,
                         'button_id': button_id,
                         'xwiki_id': xwiki_id,
-                        'review_created_at': datetime.strftime(review_created_at, '%Y-%m-%d %H:%M:%S'),
+                        'review_created_at': datetime.strftime(review_created_at + timedelta(hours=2), '%Y-%m-%d %H:%M:%S'),
                         'answers': defaultdict(list)
                     }
 

@@ -11,7 +11,12 @@ import {
 } from '@/prisma/generated/zod';
 import { TRPCError } from '@trpc/server';
 import { Prisma, PrismaClient, Product } from '@prisma/client';
-import { actionMapping, removeAccents } from '@/src/utils/tools';
+import {
+	actionMapping,
+	alternativeString,
+	buildSearchQuery,
+	normalizeString
+} from '@/src/utils/tools';
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
 import { sendMail } from '@/src/utils/mailer';
@@ -20,16 +25,39 @@ import {
 	getProductRestoredEmail
 } from '@/src/utils/emails';
 
-export const checkRightToProceed = async (
-	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
-	session: Session,
-	product_id: number
-) => {
-	const product = await prisma.product.findUnique({
+export const checkRightToProceed = async ({
+	prisma,
+	session,
+	product_id,
+	form_id
+}: {
+	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>;
+	session: Session;
+	product_id?: number;
+	form_id?: number;
+}) => {
+	const orFilters: Prisma.ProductWhereInput[] = [];
+	if (typeof product_id === 'number') {
+		orFilters.push({ id: product_id });
+	}
+	if (typeof form_id === 'number') {
+		orFilters.push({ forms: { some: { id: form_id } } });
+	}
+
+	if (orFilters.length === 0) {
+		throw new TRPCError({
+			code: 'BAD_REQUEST',
+			message: 'Either product_id or form_id must be provided'
+		});
+	}
+
+	const product = await prisma.product.findFirst({
 		where: {
-			id: product_id
-		}
+			OR: orFilters
+		},
+		include: { entity: { select: { name: true } } }
 	});
+
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product_id,
@@ -51,7 +79,7 @@ export const checkRightToProceed = async (
 			message: 'You do not have rights to proceed on this product'
 		});
 
-	return !!accessRight || isAdmin;
+	return { hasRight: !!accessRight || isAdmin, product };
 };
 
 export const productRouter = router({
@@ -137,30 +165,26 @@ export const productRouter = router({
 			};
 
 			if (search) {
-				let searchWithoutAccents = removeAccents(search);
-				const searchQuery = searchWithoutAccents
-					.split(' ')
-					.map(word => `${word}:*`)
-					.join('&');
+				const searchWithoutAccents = normalizeString(search);
+				const alternativeSearchText = alternativeString(searchWithoutAccents);
+
+				const queries = new Set<string>([
+					buildSearchQuery(searchWithoutAccents)
+				]);
+				if (
+					alternativeSearchText &&
+					alternativeSearchText !== searchWithoutAccents
+				) {
+					queries.add(buildSearchQuery(alternativeSearchText));
+				}
+
+				const orConditions = Array.from(queries).flatMap(q => [
+					{ title_formatted: { search: q } },
+					{ title: { search: q } }
+				]);
 
 				where = {
-					AND: [
-						{ ...where },
-						{
-							OR: [
-								{
-									title_formatted: {
-										search: searchQuery
-									}
-								},
-								{
-									title: {
-										search: searchQuery
-									}
-								}
-							]
-						}
-					]
+					AND: [{ ...where }, { OR: orConditions }]
 				};
 			}
 
@@ -213,7 +237,7 @@ export const productRouter = router({
 					include: {
 						forms: {
 							include: {
-								buttons: true,
+								buttons: { include: { closedButtonLog: true } },
 								form_template: true,
 								form_configs: {
 									include: {
@@ -323,7 +347,7 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input: productPayload }) => {
 			const userEmail = ctx.session?.user?.email;
 
-			productPayload.title_formatted = removeAccents(productPayload.title);
+			productPayload.title_formatted = normalizeString(productPayload.title);
 
 			const product = await ctx.prisma.product.create({
 				data: {
@@ -338,17 +362,16 @@ export const productRouter = router({
 					}
 				}
 			});
-			
 
 			const trpcQueries = (ctx.req.query.trpc as string)?.split(',');
 			const inputObj = trpcQueries[0].includes('get')
-						? ctx.req.query.input
-							? JSON.parse(ctx.req.query.input as string)
-							: { defaultKey: 'defaultValue' }
-						: ctx.req.body && typeof ctx.req.body === 'string'
-							? JSON.parse(ctx.req.body)
-							: ctx.req.body || { defaultKey: 'defaultValue' };
-							
+				? ctx.req.query.input
+					? JSON.parse(ctx.req.query.input as string)
+					: { defaultKey: 'defaultValue' }
+				: ctx.req.body && typeof ctx.req.body === 'string'
+					? JSON.parse(ctx.req.body)
+					: ctx.req.body || { defaultKey: 'defaultValue' };
+
 			const action = actionMapping[trpcQueries[0]];
 			const input = inputObj[0] !== undefined ? inputObj[0] : {};
 
@@ -372,9 +395,13 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { id, product } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id: id
+			});
 
-			product.title_formatted = removeAccents(product.title as string);
+			product.title_formatted = normalizeString(product.title as string);
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id },
@@ -392,7 +419,11 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id
+			});
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id: product_id },
@@ -436,7 +467,11 @@ export const productRouter = router({
 		.mutation(async ({ ctx, input }) => {
 			const { product_id } = input;
 
-			await checkRightToProceed(ctx.prisma, ctx.session, product_id);
+			await checkRightToProceed({
+				prisma: ctx.prisma,
+				session: ctx.session,
+				product_id
+			});
 
 			const updatedProduct = await ctx.prisma.product.update({
 				where: { id: product_id },

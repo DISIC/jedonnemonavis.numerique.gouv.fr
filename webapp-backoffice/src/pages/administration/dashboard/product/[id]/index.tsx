@@ -26,7 +26,10 @@ export const getServerSideProps: GetServerSideProps = async context => {
 							created_at: 'desc'
 						}
 					},
-					buttons: true
+					buttons: { include: { closedButtonLog: true } }
+				},
+				orderBy: {
+					deleted_at: 'desc'
 				}
 			}
 		}

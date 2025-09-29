@@ -8,7 +8,8 @@ import NewsModal from '@/src/components/ui/modal/NewsModal';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
-import { getNbPages } from '@/src/utils/tools';
+import { LATEST_NEWS_VERSION } from '@/src/utils/cookie';
+import { getNbPages, normalizeString } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -50,7 +51,7 @@ const DashBoard = () => {
 	const { filters, updateFilters } = useFilters();
 	const {
 		settings,
-		setSetting,
+		setSettings,
 		isLoading: isLoadingSettings
 	} = useUserSettings();
 
@@ -208,7 +209,11 @@ const DashBoard = () => {
 	useIsModalOpen(newsModal, {
 		onConceal: () => {
 			if (!settings.newsModalSeen && shouldModalOpen) {
-				setSetting('newsModalSeen', true);
+				setSettings({
+					...settings,
+					newsModalSeen: true,
+					newsVersionSeen: LATEST_NEWS_VERSION
+				});
 			}
 		}
 	});
@@ -393,9 +398,7 @@ const DashBoard = () => {
 											updateFilters({
 												...filters,
 												currentPage: 1,
-												validatedSearch: search
-													.replace(/[^\w\sÀ-ÿ'"]/gi, '')
-													.trim()
+												validatedSearch: normalizeString(search)
 											});
 											push(['trackEvent', 'Product', 'Search']);
 										}}

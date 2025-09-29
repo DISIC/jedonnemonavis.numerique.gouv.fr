@@ -21,7 +21,9 @@ import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
+import ButtonModal, {
+	ButtonModalType
+} from '@/src/components/dashboard/ProductButton/ButtonModal';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 
@@ -40,7 +42,7 @@ const ProductFormPage = (props: Props) => {
 	const { form, ownRight } = props;
 	const { classes, cx } = useStyles();
 
-	const [modalType, setModalType] = useState<string>('');
+	const [modalType, setModalType] = useState<ButtonModalType>();
 	const [currentButton, setCurrentButton] = useState<ButtonWithForm | null>(
 		null
 	);
@@ -98,25 +100,36 @@ const ProductFormPage = (props: Props) => {
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
-	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
+	const handleModalOpening = (
+		modalType: ButtonModalType,
+		button?: ButtonWithForm
+	) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		buttonModal.open();
 	};
 
-	const onButtonCreatedOrUpdated = async (
+	const onButtonMutation = async (
 		isTest: boolean,
 		finalButton: ButtonWithForm
 	) => {
 		buttonModal.close();
 		await refetchButtons();
 
-		if (modalType === 'create') {
-			setAlertText(
-				`L\'emplacement "${finalButton.title}" a été créé avec succès.`
-			);
-			setIsAlertShown(true);
-			handleModalOpening('install', finalButton);
+		switch (modalType) {
+			case 'create': {
+				setAlertText(
+					`L\'emplacement "${finalButton.title}" a été créé avec succès.`
+				);
+				setIsAlertShown(true);
+				handleModalOpening('install', finalButton);
+				break;
+			}
+			case 'delete': {
+				setAlertText(`L\'emplacement "${finalButton.title}" a bien été fermé.`);
+				setIsAlertShown(true);
+				break;
+			}
 		}
 	};
 
@@ -149,7 +162,7 @@ const ProductFormPage = (props: Props) => {
 				modal={buttonModal}
 				modalType={modalType}
 				button={currentButton}
-				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
+				onButtonMutation={onButtonMutation}
 			/>
 			<Breadcrumb
 				currentPageLabel={
@@ -167,6 +180,11 @@ const ProductFormPage = (props: Props) => {
 						{form.product.isTop250 && (
 							<Badge severity="info" noIcon className={fr.cx('fr-ml-md-6v')}>
 								Démarche essentielle
+							</Badge>
+						)}
+						{form.isDeleted && (
+							<Badge severity="error" noIcon className="fr-ml-md-3v">
+								Fermé
 							</Badge>
 						)}
 					</div>
@@ -189,14 +207,27 @@ const ProductFormPage = (props: Props) => {
 							isClosable
 							onClose={function noRefCheck() {}}
 							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
-							title={'Formulaire non éditable'}
+							title={'Ce formulaire ne peut être ni édité ni supprimé'}
 							description={
 								<>
-									Ce service est référencé comme démarche essentielle dans
-									l’Observatoire des démarches essentielles. Le formulaire ne
-									peut pas être modifié
+									Ce service est référencé comme démarche essentielle dans l’
+									<a
+										href="https://observatoire.numerique.gouv.fr/"
+										target="_blank"
+									>
+										Observatoire des démarches essentielles
+									</a>
+									. Ce formulaire ne peut donc pas être modifié ou supprimé du
+									service.
 								</>
 							}
+						/>
+					)}
+					{form.isDeleted && (
+						<Notice
+							severity="alert"
+							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
+							title={'Ce formulaire est fermé et ne peut être plus être édité'}
 						/>
 					)}
 				</div>
@@ -280,6 +311,7 @@ const ProductFormPage = (props: Props) => {
 													ownRight={ownRight}
 													modal={buttonModal}
 													alertText={alertText}
+													setAlertText={setAlertText}
 													handleModalOpening={handleModalOpening}
 													isAlertShown={isAlertShown}
 													setIsAlertShown={setIsAlertShown}

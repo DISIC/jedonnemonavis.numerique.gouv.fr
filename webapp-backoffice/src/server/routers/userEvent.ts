@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
-import { Prisma, TypeAction } from '@prisma/client';
 import { UserEventUncheckedCreateInputSchema } from '@/prisma/generated/zod';
+import { protectedProcedure, router } from '@/src/server/trpc';
+import { Prisma, TypeAction } from '@prisma/client';
+import { z } from 'zod';
 
 const SERVICE_ACTIONS: TypeAction[] = [
 	TypeAction.service_create,
@@ -15,9 +15,13 @@ const PRODUCT_ACTIONS: TypeAction[] = [
 	TypeAction.service_uninvite,
 	TypeAction.service_button_create,
 	TypeAction.service_button_update,
+	TypeAction.service_button_delete,
 	TypeAction.service_apikeys_create,
 	TypeAction.service_apikeys_delete,
-	TypeAction.form_config_create
+	TypeAction.form_config_create,
+	TypeAction.service_form_create,
+	TypeAction.service_form_edit,
+	TypeAction.service_form_delete
 ];
 
 const ORGANISATION_ACTIONS: TypeAction[] = [

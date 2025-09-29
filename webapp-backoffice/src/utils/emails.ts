@@ -279,6 +279,87 @@ export function getProductRestoredEmail(
 	`);
 }
 
+export function getClosedButtonOrFormEmail({
+	contextUser,
+	buttonTitle,
+	formTitle,
+	form,
+	product
+}: {
+	contextUser: Session['user'];
+	buttonTitle?: string;
+	formTitle?: string;
+	form: { id: number; title: string };
+	product: { id: number; title: string; entityName: string };
+}) {
+	const jdmaUrl = process.env.NODEMAILER_BASEURL;
+	const closeTitle = buttonTitle
+		? `l'emplacement « <b>${buttonTitle}</b> »`
+		: `le formulaire « <b>${formTitle}</b> »`;
+
+	const serviceFormDisplay = buttonTitle
+		? `
+		<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+			<thead>
+				<tr>
+				<th style="text-align: left; font-size: 14px; padding: 8px 0;">Service</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr style="border: 1px solid #e0e0e0; margin-top: 10px">
+					<td style="padding: 16px; font-size: 16px; color: #161616; font-weight: bold; line-height: 24px;">
+					<a href="${jdmaUrl}/administration/dashboard/product/${product.id.toString()}/forms"
+						target="_blank" 
+						style="font-size: 14px; line-height: 20px; color: #000091;">
+							${product.title}
+					</a>
+						<div style="font-size: 14px; color: #666; margin-top: 4px; font-weight: normal;">
+							${product.entityName}
+						</div>
+						<div style="margin-top: 12px;">
+							<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 4px 0; box-sizing: border-box;">
+								<tr>
+									<td valign="top" style="padding: 12px; font-size: 14px; color: #333;">
+									<a href="${jdmaUrl}/administration/dashboard/product/${product.id.toString()}/forms/${form.id.toString()}"
+										target="_blank" 
+										style="color: #000091;">
+										${form.title}
+									</a>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>`
+		: '';
+
+	return getEmailWithLayout(`
+		<p>Bonjour,</p>
+
+		<p>
+			${contextUser.name} vient de fermer ${closeTitle} du service « ${product.title} ».
+			Il ne recevra plus de données, mais les statistiques récoltées avant la fermeture restent accessibles.
+		</p>
+		<br/>
+		<div style="background-color: #ECECFE; padding: 24px; display: flex; align-items: center;">
+			<img src="https://jedonnemonavis.numerique.gouv.fr/assets/install_picto.svg" style="height: 120px; margin-right: 18px;"/>
+			<div>
+				<p>Les boutons “Je donne mon avis” <b>sont toujours visible par les usagers</b> tant que les codes HTML correspondant aux emplacements n’ont pas été retirés des pages.</p>
+				<p>Pensez à vérifier que c’est le cas sur votre service numérique.</p>
+			</div>
+		</div>
+		<br/>
+		${serviceFormDisplay}
+		<a href="${jdmaUrl}/administration/dashboard/products" target="_blank"
+			style="font-size: 14px; color: #000091; text-decoration: underline;">
+			Retrouvez tous vos services sur votre tableau de bord JDMA
+		</a>
+		<br/>
+	`);
+}
+
 export function getEmailNotificationsHtml(
 	userId: number,
 	frequency: NotificationFrequency,
