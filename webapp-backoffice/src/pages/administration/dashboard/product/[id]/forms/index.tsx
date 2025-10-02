@@ -20,7 +20,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface Props {
 	product: ProductWithForms;
@@ -69,6 +69,24 @@ const ProductButtonsPage = (props: Props) => {
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
+	const defaultTitle = useMemo(() => {
+		const rootFormTemplate = product.forms.find(
+			f => f.form_template.slug === 'root'
+		);
+
+		if (!product.forms || product.forms.length === 0)
+			return rootFormTemplate?.title || '';
+
+		const existingTemplateForms = product.forms.filter(
+			f => rootFormTemplate?.title && f.title?.includes(rootFormTemplate.title)
+		);
+
+		if (existingTemplateForms.length === 0)
+			return rootFormTemplate?.title || '';
+
+		return `${rootFormTemplate?.title} ${existingTemplateForms.length + 1}`;
+	}, [product.forms]);
+
 	return (
 		<ProductLayout product={product} ownRight={ownRight}>
 			<Head>
@@ -82,7 +100,11 @@ const ProductButtonsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					<FormCreationModal modal={new_form_modal} productId={product.id} />
+					<FormCreationModal
+						modal={new_form_modal}
+						productId={product.id}
+						defaultTitle={defaultTitle}
+					/>
 					<Alert
 						className={fr.cx('fr-col-12', 'fr-mb-6v')}
 						description={alertText}
