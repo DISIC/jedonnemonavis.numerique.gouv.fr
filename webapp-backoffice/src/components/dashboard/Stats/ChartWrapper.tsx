@@ -15,7 +15,7 @@ interface AnyKey {
 
 export interface FormattedData {
 	name: string;
-	[key: string]: number | string;
+	[key: string]: number | string | null;
 }
 
 type Props = {
@@ -54,6 +54,7 @@ const reverseDataInput = (
 			Object.keys(item)
 				.filter(key => key !== 'name')
 				.forEach(key => {
+					if (item[key] === null) return;
 					const targetItemIndex = outputArray.findIndex(
 						oaItem => oaItem.name === key
 					);
@@ -137,7 +138,10 @@ const ChartWrapper = ({
 			return Object.keys(rest)
 				.filter(key => !key.includes('value_'))
 				.reduce((obj, key) => {
-					obj[key] = rest[key];
+					const value = rest[key];
+					if (value !== null) {
+						obj[key] = value;
+					}
 					return obj;
 				}, {} as AnyKey);
 		});
