@@ -72,13 +72,15 @@ const ProductButtonsPage = (props: Props) => {
 	const defaultTitle = useMemo(() => {
 		const rootFormTemplate = product.forms.find(
 			f => f.form_template.slug === 'root'
-		);
+		)?.form_template;
 
 		if (!product.forms || product.forms.length === 0)
 			return rootFormTemplate?.title || '';
 
 		const existingTemplateForms = product.forms.filter(
-			f => rootFormTemplate?.title && f.title?.includes(rootFormTemplate.title)
+			f =>
+				rootFormTemplate?.title &&
+				f.form_template.title === rootFormTemplate.title
 		);
 
 		if (existingTemplateForms.length === 0)
