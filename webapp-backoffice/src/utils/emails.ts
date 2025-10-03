@@ -444,18 +444,20 @@ export function getEmailNotificationsHtml(
 							${p.forms
 								.map(
 									form => `
-										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 4px 0; box-sizing: border-box;">
+										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 8px 0; box-sizing: border-box;">
 											<tr>
-												<td valign="top" style="padding: 12px; font-size: 14px; color: #333;">
-												<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
-													target="_blank" 
-													style="color: #000091;">
-													${form.formTitle}
-												</a>
-												</td>
-												<td align="right" valign="middle" width="1%" style="padding-right: 12px;">
-													<div style="display: inline-block; background-color: #B8FEC9; color: #18753C; padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 1; white-space: nowrap;">
-														${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
+												<td valign="top" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px; font-size: 14px; color: #333;">
+													<div>
+														<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
+															target="_blank"
+															style="color: #000091;">
+															${form.formTitle}
+														</a>
+													</div>
+													<div>
+														<span style="background-color: #B8FEC9; color: #18753C; padding: 6px; font-size: 12px; font-weight: bold; line-height: 1; white-space: nowrap; display: inline-block;">
+															NOUVELLES RÉPONSES
+														</span>
 													</div>
 												</td>
 											</tr>
