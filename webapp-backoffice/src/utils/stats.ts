@@ -8,7 +8,9 @@ import {
 	FormHelper,
 	Hit,
 	OpenProduct,
-	ProductMapEntry
+	ProductMapEntry,
+	BucketData,
+	ProductBuilder
 } from '../types/custom';
 import { FieldCodeHelper } from './helpers';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -110,57 +112,298 @@ export const displayIntention = (intention: string) => {
 	}
 };
 
-const handleChildren = (buckets: Buckets) => {
-	let result: CategoryData[] = [];
+const ensureCategoryExists = (
+	categories: CategoryData[],
+	bucketData: BucketData
+): number => {
+	let categoryIndex = categories.findIndex(
+		c => c.category === bucketData.fieldCode
+	);
+
+	if (categoryIndex === -1) {
+		const newCategory: CategoryData = {
+			category: bucketData.fieldCode,
+			label: bucketData.fieldLabel,
+			number_hits: []
+		};
+		categories.push(newCategory);
+		categoryIndex = categories.length - 1;
+	}
+
+	return categoryIndex;
+};
+
+const findChildBuckets = (
+	buckets: Buckets,
+	parentFieldCode: string
+): Buckets => {
+	return buckets.filter(b => {
+		const childBucketData = parseBucketKey(b);
+		return childBucketData.parentFieldCode === parentFieldCode;
+	}) as Buckets;
+};
+
+const addOrUpdateHitInCategory = (
+	category: CategoryData,
+	bucketData: BucketData,
+	children?: CategoryData[]
+): void => {
+	const existingHitIndex = category.number_hits.findIndex(
+		hit =>
+			hit.label === bucketData.answerText &&
+			hit.intention === bucketData.intention
+	);
+
+	if (existingHitIndex !== -1) {
+		category.number_hits[existingHitIndex].count += bucketData.docCount;
+	} else {
+		category.number_hits.push({
+			intention: bucketData.intention,
+			label: bucketData.answerText,
+			count: bucketData.docCount,
+			children
+		});
+	}
+};
+
+const handleChildren = (buckets: Buckets): CategoryData[] => {
+	const categories: CategoryData[] = [];
 
 	buckets.forEach(bucket => {
-		const [
-			productId,
-			productName,
-			fieldCode,
-			parentFieldCode,
-			parentAnswerItemId,
-			fieldLabel,
-			intention,
-			answerText,
-			answerItemId
-		] = bucket.key.split('#!#');
-		const docCount = bucket.doc_count;
+		const bucketData = parseBucketKey(bucket);
 
-		let categoryIndex = result.findIndex(c => c.category === fieldCode);
+		const categoryIndex = ensureCategoryExists(categories, bucketData);
+		const childBuckets = findChildBuckets(buckets, bucketData.fieldCode);
+		const childCategories =
+			childBuckets.length > 0 ? handleChildren(childBuckets) : undefined;
 
-		if (categoryIndex === -1) {
-			const newCategory = {
-				category: fieldCode,
-				label: fieldLabel,
-				number_hits: []
-			};
-			result.push(newCategory);
-			categoryIndex = result.length - 1;
-		}
-
-		const children = buckets.filter(b => {
-			const bParentFieldCode = b.key.split('#!#')[3];
-			return bParentFieldCode === fieldCode;
-		}) as Buckets;
-
-		const existingHitIndex = result[categoryIndex].number_hits.findIndex(
-			hit => hit.label === answerText && hit.intention === intention
+		addOrUpdateHitInCategory(
+			categories[categoryIndex],
+			bucketData,
+			childCategories
 		);
-
-		if (existingHitIndex !== -1) {
-			result[categoryIndex].number_hits[existingHitIndex].count += docCount;
-		} else {
-			result[categoryIndex].number_hits.push({
-				intention: intention,
-				label: answerText,
-				count: docCount,
-				children: !!children.length ? handleChildren(children) : undefined
-			});
-		}
 	});
 
-	return result;
+	return categories;
+};
+
+const parseBucketKey = (bucket: any): BucketData => {
+	const [
+		productId,
+		formId,
+		fieldCode,
+		parentFieldCode,
+		parentAnswerItemId,
+		fieldLabel,
+		intention,
+		answerText,
+		answerItemId
+	] = bucket.key.split('#!#');
+
+	return {
+		productId,
+		formId,
+		fieldCode,
+		parentFieldCode,
+		parentAnswerItemId,
+		fieldLabel,
+		intention,
+		answerText,
+		answerItemId,
+		docCount: bucket.doc_count,
+		docDate: bucket.date
+	};
+};
+
+const findFormHelper = (
+	bucketData: BucketData,
+	formsHelper: FormHelper[]
+): FormHelper | undefined => {
+	let formHelper = formsHelper.find(
+		f => f.id === parseInt(bucketData.formId, 10)
+	);
+
+	if (!formHelper) {
+		formHelper = formsHelper.find(
+			f => !!f.legacy && f.product_id === parseInt(bucketData.productId, 10)
+		);
+	}
+
+	return formHelper;
+};
+
+const ensureProduct = (
+	builder: ProductBuilder,
+	bucketData: BucketData,
+	formHelper?: FormHelper
+): void => {
+	if (!builder.productIndexMap.has(bucketData.productId)) {
+		const newProduct: OpenProduct = {
+			product_id: bucketData.productId,
+			product_name: formHelper?.product.title || '',
+			forms: []
+		};
+
+		builder.products.push(newProduct);
+		builder.productIndexMap.set(
+			bucketData.productId,
+			builder.products.length - 1
+		);
+		builder.formIndexMap.set(bucketData.productId, new Map());
+		builder.intervalIndexMap.set(bucketData.productId, new Map());
+		builder.categoryIndexMap.set(bucketData.productId, new Map());
+	}
+};
+
+const ensureForm = (
+	builder: ProductBuilder,
+	bucketData: BucketData,
+	formHelper?: FormHelper
+): void => {
+	const usableFormId = `${formHelper?.id}` || bucketData.formId;
+	const productIndex = builder.productIndexMap.get(bucketData.productId)!;
+	const formMap = builder.formIndexMap.get(bucketData.productId)!;
+
+	if (!formMap.has(usableFormId)) {
+		const newForm = {
+			form_id: `${formHelper?.id}`,
+			form_name: formHelper?.title || formHelper?.form_template.title || '',
+			intervals: []
+		};
+
+		builder.products[productIndex].forms.push(newForm);
+		formMap.set(usableFormId, builder.products[productIndex].forms.length - 1);
+		builder.intervalIndexMap
+			.get(bucketData.productId)!
+			.set(usableFormId, new Map());
+		builder.categoryIndexMap
+			.get(bucketData.productId)!
+			.set(usableFormId, new Map());
+	}
+};
+
+const ensureInterval = (
+	builder: ProductBuilder,
+	bucketData: BucketData,
+	interval: string,
+	formHelper?: FormHelper
+): void => {
+	const usableFormId = `${formHelper?.id}` || bucketData.formId;
+	const productIndex = builder.productIndexMap.get(bucketData.productId)!;
+	const formIndex = builder.formIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!;
+	const intervalMap = builder.intervalIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!;
+
+	if (!intervalMap.has(bucketData.docDate)) {
+		const newInterval = {
+			date: bucketData.docDate,
+			length_interval: interval,
+			data: []
+		};
+
+		builder.products[productIndex].forms[formIndex].intervals.push(newInterval);
+		intervalMap.set(
+			bucketData.docDate,
+			builder.products[productIndex].forms[formIndex].intervals.length - 1
+		);
+		builder.categoryIndexMap
+			.get(bucketData.productId)!
+			.get(usableFormId)!
+			.set(bucketData.docDate, new Map());
+	}
+};
+
+const ensureCategory = (
+	builder: ProductBuilder,
+	bucketData: BucketData,
+	formHelper?: FormHelper
+): void => {
+	const usableFormId = `${formHelper?.id}` || bucketData.formId;
+	const productIndex = builder.productIndexMap.get(bucketData.productId)!;
+	const formIndex = builder.formIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!;
+	const intervalIndex = builder.intervalIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!
+		.get(bucketData.docDate)!;
+	const categoryMap = builder.categoryIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!
+		.get(bucketData.docDate)!;
+
+	if (!categoryMap.has(bucketData.fieldCode)) {
+		const newCategory = {
+			category: bucketData.fieldCode,
+			label: bucketData.fieldLabel,
+			number_hits: []
+		};
+
+		builder.products[productIndex].forms[formIndex].intervals[
+			intervalIndex
+		].data.push(newCategory);
+		categoryMap.set(
+			bucketData.fieldCode,
+			builder.products[productIndex].forms[formIndex].intervals[intervalIndex]
+				.data.length - 1
+		);
+	}
+};
+
+const findChildren = (buckets: Buckets, bucketData: BucketData): Buckets => {
+	return buckets.filter(b => {
+		const [, , , bParentFieldCode, bParentFieldAnswerItemId] =
+			b.key.split('#!#');
+		return (
+			bParentFieldCode === bucketData.fieldCode &&
+			bParentFieldAnswerItemId === bucketData.answerItemId
+		);
+	}) as Buckets;
+};
+
+const addOrUpdateHit = (
+	builder: ProductBuilder,
+	bucketData: BucketData,
+	children: Buckets,
+	formHelper?: FormHelper
+): void => {
+	const usableFormId = `${formHelper?.id}` || bucketData.formId;
+	const productIndex = builder.productIndexMap.get(bucketData.productId)!;
+	const formIndex = builder.formIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!;
+	const intervalIndex = builder.intervalIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!
+		.get(bucketData.docDate)!;
+	const categoryIndex = builder.categoryIndexMap
+		.get(bucketData.productId)!
+		.get(usableFormId)!
+		.get(bucketData.docDate)!
+		.get(bucketData.fieldCode)!;
+
+	const hits =
+		builder.products[productIndex].forms[formIndex].intervals[intervalIndex]
+			.data[categoryIndex].number_hits;
+	const existingHitIndex = hits.findIndex(
+		hit =>
+			hit.label === bucketData.answerText &&
+			hit.intention === bucketData.intention
+	);
+
+	if (existingHitIndex !== -1) {
+		hits[existingHitIndex].count += bucketData.docCount;
+	} else {
+		hits.push({
+			intention: bucketData.intention,
+			label: bucketData.answerText,
+			count: bucketData.docCount,
+			children: children.length > 0 ? handleChildren(children) : undefined
+		});
+	}
 };
 
 const handleBucket = (
@@ -168,133 +411,34 @@ const handleBucket = (
 	field_codes_slugs: string[],
 	interval: string,
 	formsHelper: FormHelper[]
-) => {
-	let result: OpenProduct[] = [];
-	let productMap: { [productId: string]: ProductMapEntry } = {};
+): OpenProduct[] => {
+	const builder: ProductBuilder = {
+		products: [],
+		productIndexMap: new Map(),
+		formIndexMap: new Map(),
+		intervalIndexMap: new Map(),
+		categoryIndexMap: new Map()
+	};
 
 	buckets.forEach(bucket => {
-		const [
-			productId,
-			formId,
-			fieldCode,
-			parentFieldCode,
-			parentAnswerItemId,
-			fieldLabel,
-			intention,
-			answerText,
-			answerItemId
-		] = bucket.key.split('#!#');
-		const docCount = bucket.doc_count;
-		const docDate = bucket.date;
-		let formHelper = formsHelper.find(f => f.id === parseInt(formId, 10));
+		const bucketData = parseBucketKey(bucket);
 
-		if (!formHelper)
-			formHelper = formsHelper.find(
-				f => !!f.legacy && f.product_id === parseInt(productId, 10)
-			);
-
-		const usableFormId = `${formHelper?.id}` || formId;
-
-		if (!productMap.hasOwnProperty(productId)) {
-			const newProduct = {
-				product_id: productId,
-				product_name: formHelper?.product.title || '',
-				forms: []
-			};
-			result.push(newProduct);
-			productMap[productId] = {
-				productIndex: result.length - 1,
-				forms: {}
-			};
+		if (!field_codes_slugs.includes(bucketData.fieldCode)) {
+			return;
 		}
 
-		const currentProduct = productMap[productId];
+		const formHelper = findFormHelper(bucketData, formsHelper);
 
-		if (!productMap[productId].forms.hasOwnProperty(usableFormId)) {
-			const newForm = {
-				form_id: `${formHelper?.id}`,
-				form_name: formHelper?.title || formHelper?.form_template.title || '',
-				intervals: []
-			};
-			result[currentProduct.productIndex].forms.push(newForm);
-			productMap[productId].forms[usableFormId] = {
-				formIndex: result[currentProduct.productIndex].forms.length - 1,
-				dateMap: {}
-			};
-		}
+		ensureProduct(builder, bucketData, formHelper);
+		ensureForm(builder, bucketData, formHelper);
+		ensureInterval(builder, bucketData, interval, formHelper);
+		ensureCategory(builder, bucketData, formHelper);
 
-		const currentForm = productMap[productId].forms[usableFormId];
-
-		if (!currentForm.dateMap.hasOwnProperty(docDate)) {
-			const newDateEntry = {
-				date: docDate,
-				length_interval: interval,
-				data: []
-			};
-			result[currentProduct.productIndex].forms[
-				currentForm.formIndex
-			].intervals.push(newDateEntry);
-			currentForm.dateMap[docDate] = {
-				dateIndex:
-					result[currentProduct.productIndex].forms[currentForm.formIndex]
-						.intervals.length - 1,
-				categories: {}
-			};
-		}
-
-		const dateIndex = currentForm.dateMap[docDate].dateIndex;
-
-		if (field_codes_slugs.includes(fieldCode)) {
-			if (!currentForm.dateMap[docDate].categories.hasOwnProperty(fieldCode)) {
-				const newCategory = {
-					category: fieldCode,
-					label: fieldLabel,
-					number_hits: []
-				};
-				result[currentProduct.productIndex].forms[
-					currentForm.formIndex
-				].intervals[dateIndex].data.push(newCategory);
-				currentForm.dateMap[docDate].categories[fieldCode] =
-					result[currentProduct.productIndex].forms[currentForm.formIndex]
-						.intervals[dateIndex].data.length - 1;
-			}
-
-			const children = buckets.filter(b => {
-				const bParentFieldCode = b.key.split('#!#')[3];
-				const bParentFieldAnswerItemId = b.key.split('#!#')[4];
-				return (
-					bParentFieldCode === fieldCode &&
-					bParentFieldAnswerItemId === answerItemId
-				);
-			}) as Buckets;
-
-			const categoryIndex = currentForm.dateMap[docDate].categories[fieldCode];
-			const existingHitIndex = result[currentProduct.productIndex].forms[
-				currentForm.formIndex
-			].intervals[dateIndex].data[categoryIndex].number_hits.findIndex(
-				hit => hit.label === answerText && hit.intention === intention
-			);
-
-			if (existingHitIndex !== -1) {
-				result[currentProduct.productIndex].forms[
-					currentForm.formIndex
-				].intervals[dateIndex].data[categoryIndex].number_hits[
-					existingHitIndex
-				].count += docCount;
-			} else {
-				result[currentProduct.productIndex].forms[
-					currentForm.formIndex
-				].intervals[dateIndex].data[categoryIndex].number_hits.push({
-					intention: intention,
-					label: answerText,
-					count: docCount,
-					children: !!children.length ? handleChildren(children) : undefined
-				});
-			}
-		}
+		const children = findChildren(buckets, bucketData);
+		addOrUpdateHit(builder, bucketData, children, formHelper);
 	});
 
-	return result;
+	return builder.products;
 };
 
 export type FetchAndFormatDataProps = {

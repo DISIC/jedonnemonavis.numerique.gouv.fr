@@ -110,6 +110,28 @@ export interface FormHelper {
 	product: { title: string };
 }
 
+export interface BucketData {
+	productId: string;
+	formId: string;
+	fieldCode: string;
+	parentFieldCode: string;
+	parentAnswerItemId: string;
+	fieldLabel: string;
+	intention: string;
+	answerText: string;
+	answerItemId: string;
+	docCount: number;
+	docDate: string;
+}
+
+export interface ProductBuilder {
+	products: OpenProduct[];
+	productIndexMap: Map<string, number>;
+	formIndexMap: Map<string, Map<string, number>>;
+	intervalIndexMap: Map<string, Map<string, Map<string, number>>>;
+	categoryIndexMap: Map<string, Map<string, Map<string, Map<string, number>>>>;
+}
+
 export type ReviewFiltersType = {
 	satisfaction: string[];
 	comprehension: string[];
