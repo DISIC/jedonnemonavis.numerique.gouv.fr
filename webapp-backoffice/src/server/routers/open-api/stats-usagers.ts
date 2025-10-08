@@ -6,7 +6,10 @@ import {
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
-import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
+import {
+	fetchAndFormatData,
+	FetchAndFormatDataProps
+} from '@/src/utils/stats/index';
 import type { Context } from '@/src/server/trpc';
 
 const MAX_NB_PRODUCTS = 10;

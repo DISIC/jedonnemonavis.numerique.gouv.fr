@@ -1,5 +1,8 @@
 import { FieldCodeSmiley } from '@/src/types/custom';
-import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import {
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats/intention-helpers';
 import {
 	newFormFieldCodes,
 	oldFormFieldCodes,
