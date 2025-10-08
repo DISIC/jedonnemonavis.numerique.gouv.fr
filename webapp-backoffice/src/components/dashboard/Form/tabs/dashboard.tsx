@@ -1,6 +1,9 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { displayIntention, getStatsIcon } from '@/src/utils/stats';
+import {
+	displayIntention,
+	getStatsIcon
+} from '@/src/utils/stats/intention-helpers';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';

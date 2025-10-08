@@ -1,4 +1,7 @@
-import { getStatsColor, getStatsIcon } from '@/src/utils/stats';
+import {
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats/intention-helpers';
 import {
 	formatDateToFrenchString,
 	getSeverity,

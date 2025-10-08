@@ -3,7 +3,7 @@ import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
-} from '@/src/utils/stats';
+} from '@/src/utils/stats/intention-helpers';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
