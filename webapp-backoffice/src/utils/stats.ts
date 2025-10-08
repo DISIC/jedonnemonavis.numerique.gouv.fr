@@ -5,6 +5,7 @@ import {
 	Buckets,
 	CategoryData,
 	ElkAnswer,
+	FormHelper,
 	Hit,
 	OpenProduct,
 	ProductMapEntry
@@ -165,7 +166,8 @@ const handleChildren = (buckets: Buckets) => {
 const handleBucket = (
 	buckets: Buckets,
 	field_codes_slugs: string[],
-	interval: string
+	interval: string,
+	formsHelper: FormHelper[]
 ) => {
 	let result: OpenProduct[] = [];
 	let productMap: { [productId: string]: ProductMapEntry } = {};
@@ -173,7 +175,7 @@ const handleBucket = (
 	buckets.forEach(bucket => {
 		const [
 			productId,
-			productName,
+			formId,
 			fieldCode,
 			parentFieldCode,
 			parentAnswerItemId,
@@ -184,51 +186,77 @@ const handleBucket = (
 		] = bucket.key.split('#!#');
 		const docCount = bucket.doc_count;
 		const docDate = bucket.date;
+		let formHelper = formsHelper.find(f => f.id === parseInt(formId, 10));
+
+		if (!formHelper)
+			formHelper = formsHelper.find(
+				f => !!f.legacy && f.product_id === parseInt(productId, 10)
+			);
+
+		const usableFormId = `${formHelper?.id}` || formId;
 
 		if (!productMap.hasOwnProperty(productId)) {
 			const newProduct = {
 				product_id: productId,
-				product_name: productName,
-				intervals: []
+				product_name: formHelper?.product.title || '',
+				forms: []
 			};
 			result.push(newProduct);
 			productMap[productId] = {
 				productIndex: result.length - 1,
+				forms: {}
+			};
+		}
+
+		const currentProduct = productMap[productId];
+
+		if (!productMap[productId].forms.hasOwnProperty(usableFormId)) {
+			const newForm = {
+				form_id: `${formHelper?.id}`,
+				form_name: formHelper?.title || formHelper?.form_template.title || '',
+				intervals: []
+			};
+			result[currentProduct.productIndex].forms.push(newForm);
+			productMap[productId].forms[usableFormId] = {
+				formIndex: result[currentProduct.productIndex].forms.length - 1,
 				dateMap: {}
 			};
 		}
 
-		const productIndex = productMap[productId].productIndex;
+		const currentForm = productMap[productId].forms[usableFormId];
 
-		if (!productMap[productId].dateMap.hasOwnProperty(docDate)) {
+		if (!currentForm.dateMap.hasOwnProperty(docDate)) {
 			const newDateEntry = {
 				date: docDate,
 				length_interval: interval,
 				data: []
 			};
-			result[productIndex].intervals.push(newDateEntry);
-			productMap[productId].dateMap[docDate] = {
-				dateIndex: result[productIndex].intervals.length - 1,
+			result[currentProduct.productIndex].forms[
+				currentForm.formIndex
+			].intervals.push(newDateEntry);
+			currentForm.dateMap[docDate] = {
+				dateIndex:
+					result[currentProduct.productIndex].forms[currentForm.formIndex]
+						.intervals.length - 1,
 				categories: {}
 			};
 		}
 
-		const dateIndex = productMap[productId].dateMap[docDate].dateIndex;
+		const dateIndex = currentForm.dateMap[docDate].dateIndex;
 
 		if (field_codes_slugs.includes(fieldCode)) {
-			if (
-				!productMap[productId].dateMap[docDate].categories.hasOwnProperty(
-					fieldCode
-				)
-			) {
+			if (!currentForm.dateMap[docDate].categories.hasOwnProperty(fieldCode)) {
 				const newCategory = {
 					category: fieldCode,
 					label: fieldLabel,
 					number_hits: []
 				};
-				result[productIndex].intervals[dateIndex].data.push(newCategory);
-				productMap[productId].dateMap[docDate].categories[fieldCode] =
-					result[productIndex].intervals[dateIndex].data.length - 1;
+				result[currentProduct.productIndex].forms[
+					currentForm.formIndex
+				].intervals[dateIndex].data.push(newCategory);
+				currentForm.dateMap[docDate].categories[fieldCode] =
+					result[currentProduct.productIndex].forms[currentForm.formIndex]
+						.intervals[dateIndex].data.length - 1;
 			}
 
 			const children = buckets.filter(b => {
@@ -240,22 +268,23 @@ const handleBucket = (
 				);
 			}) as Buckets;
 
-			const categoryIndex =
-				productMap[productId].dateMap[docDate].categories[fieldCode];
-			const existingHitIndex = result[productIndex].intervals[dateIndex].data[
-				categoryIndex
-			].number_hits.findIndex(
+			const categoryIndex = currentForm.dateMap[docDate].categories[fieldCode];
+			const existingHitIndex = result[currentProduct.productIndex].forms[
+				currentForm.formIndex
+			].intervals[dateIndex].data[categoryIndex].number_hits.findIndex(
 				hit => hit.label === answerText && hit.intention === intention
 			);
 
 			if (existingHitIndex !== -1) {
-				result[productIndex].intervals[dateIndex].data[
-					categoryIndex
-				].number_hits[existingHitIndex].count += docCount;
+				result[currentProduct.productIndex].forms[
+					currentForm.formIndex
+				].intervals[dateIndex].data[categoryIndex].number_hits[
+					existingHitIndex
+				].count += docCount;
 			} else {
-				result[productIndex].intervals[dateIndex].data[
-					categoryIndex
-				].number_hits.push({
+				result[currentProduct.productIndex].forms[
+					currentForm.formIndex
+				].intervals[dateIndex].data[categoryIndex].number_hits.push({
 					intention: intention,
 					label: answerText,
 					count: docCount,
@@ -285,18 +314,6 @@ export const fetchAndFormatData = async ({
 	end_date,
 	interval
 }: FetchAndFormatDataProps) => {
-
-	//TO BE REMOVED TO IMPLEMENT RIGHT USE OF FORMS IDS
-	const legacyFormIds = await ctx.prisma.form.findMany({
-		where: {
-		  	product_id: { in: product_ids as number[] },
-			legacy: true
-		},
-		select: { id: true }
-	});
-	  
-	const validFormIds = [2, ...legacyFormIds.map(f => f.id)];
-	  
 	let query: QueryDslQueryContainer = {
 		bool: {
 			must: [
@@ -323,14 +340,6 @@ export const fetchAndFormatData = async ({
 							lte: end_date
 						}
 					}
-				},
-				{
-				  bool: {
-					should: [
-					  { terms: { form_id: validFormIds } },
-					  { bool: { must_not: { exists: { field: 'form_id' } } } }
-					]
-				  }
 				}
 			]
 		}
@@ -358,7 +367,7 @@ export const fetchAndFormatData = async ({
 						terms: {
 							script: {
 								source: `
-								return doc["product_id"].value + "#!#" + doc["product_name.keyword"].value + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value;
+								return doc["product_id"].value + "#!#" + (doc["form_id"].length != 0 ? doc["form_id"].value : "1") + "#!#" + doc["field_code.keyword"].value + "#!#" + (doc["parent_field_code.keyword"].length != 0 ? doc["parent_field_code.keyword"].value : "") + "#!#" + (doc["parent_answer_item_id"].length != 0 ? doc["parent_answer_item_id"].value : "") + "#!#" + doc["field_label.keyword"].value + "#!#" + doc["intention.keyword"].value + "#!#" + doc["answer_text.keyword"].value + "#!#" + doc["answer_item_id"].value;
 								`,
 								lang: 'painless'
 							},
@@ -382,9 +391,24 @@ export const fetchAndFormatData = async ({
 		}))
 	);
 
+	const formsHelper = await ctx.prisma.form.findMany({
+		where: {
+			product_id: { in: product_ids as number[] }
+		},
+		select: {
+			id: true,
+			product_id: true,
+			legacy: true,
+			title: true,
+			form_template: { select: { title: true } },
+			product: { select: { title: true } }
+		}
+	});
+
 	return handleBucket(
 		tmpBuckets,
 		field_codes.map(fc => fc.slug),
-		interval
+		interval,
+		formsHelper
 	);
 };

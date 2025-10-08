@@ -73,23 +73,41 @@ export type CategoryData = {
 export type OpenProduct = {
 	product_id: string;
 	product_name: string;
-	intervals: Array<{
-		date: string;
-		length_interval: string;
-		data: CategoryData[];
-	}>;
+	forms: {
+		form_id: string;
+		form_name: string;
+		intervals: Array<{
+			date: string;
+			length_interval: string;
+			data: CategoryData[];
+		}>;
+	}[];
 };
 
 export interface ProductMapEntry {
 	productIndex: number;
-	dateMap: {
-		[date: string]: {
-			dateIndex: number;
-			categories: {
-				[category: string]: number;
+	forms: {
+		[formIndex: string]: {
+			formIndex: number;
+			dateMap: {
+				[date: string]: {
+					dateIndex: number;
+					categories: {
+						[category: string]: number;
+					};
+				};
 			};
 		};
 	};
+}
+
+export interface FormHelper {
+	id: number;
+	product_id: number;
+	legacy: boolean;
+	title: string | null;
+	form_template: { title: string };
+	product: { title: string };
 }
 
 export type ReviewFiltersType = {
@@ -123,11 +141,17 @@ export const ZOpenApiStatsOutput = z.object({
 		z.object({
 			product_id: z.string(),
 			product_name: z.string(),
-			intervals: z.array(
+			forms: z.array(
 				z.object({
-					date: z.string(),
-					length_interval: z.string(),
-					data: z.array(ZOpenApiStatsCategory)
+					form_id: z.string(),
+					form_name: z.string(),
+					intervals: z.array(
+						z.object({
+							date: z.string(),
+							length_interval: z.string(),
+							data: z.array(ZOpenApiStatsCategory)
+						})
+					)
 				})
 			)
 		})

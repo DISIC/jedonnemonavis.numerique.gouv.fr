@@ -163,18 +163,18 @@ const DocAPI = () => {
 						</p>
 					</div>
 					<div className={fr.cx('fr-container', 'fr-pt-6w')}>
-						<h4>3. Point d'accès Infos Démarches</h4>
+						<h4>3. Point d'accès Infos Services</h4>
 						<p>
 							Ce point d'accès retourne les informations sur les services
 							auxquels votre clé donne accès.
 						</p>
 						<p>
-							Il sera notamment utile pour récupérer les ids des démarches, et
-							ainsi pouvoir filtrer les résultats du point d'accès
-							/statsUsagers.
+							Il sera notamment utile pour récupérer les ids des services, ceux
+							des formulaires, et ainsi pouvoir filtrer les résultats du point
+							d'accès /statsUsagers.
 						</p>
 						<SwaggerUI
-							spec={filterDoc('/demarches')}
+							spec={filterDoc('/services')}
 							layout="BaseLayout"
 							presets={[]}
 						/>
@@ -184,7 +184,7 @@ const DocAPI = () => {
 						<h4>4. Point d'accès statistiques de statisfaction des usagers</h4>
 						<p>
 							Ce point d'accès retourne les données de satisfaction des
-							utilisateurs pour toutes les démarches liées à la clé fournie.
+							utilisateurs pour tous les services liés à la clé fournie.
 						</p>
 						<p>
 							Il offre les options de filtrage suivantes : <br />
@@ -196,22 +196,30 @@ const DocAPI = () => {
 									<br />
 									Voici la correspondance entre les field_codes et les questions
 									: <br />
-									<table
-										className={fr.cx('fr-table')}
-										dangerouslySetInnerHTML={{
-											__html: [
-												...FIELD_CODE_SMILEY_VALUES,
-												...FIELD_CODE_DETAILS_VALUES,
-												...FIELD_CODE_BOOLEAN_VALUES
-											]
-												.filter(fc => !('hideInDocs' in fc) || !fc.hideInDocs)
-												.map(code => {
-													return `<tr><td>${code.slug}</td><td>${code.question}${'hint' in code && code.hint ? `<br><span class="fr-hint-text">${code.hint}</span>` : ''}</td></tr>`;
-												})
-												.join()
-												.replace(/,/g, '')
-										}}
-									></table>
+									<div className={fr.cx('fr-table')}>
+										<div className={fr.cx('fr-table__content')}>
+											<table
+												dangerouslySetInnerHTML={{
+													__html:
+														'<thead><tr><th>Code</th><th>Nom de la question</th></tr></thead><tbody>' +
+														[
+															...FIELD_CODE_SMILEY_VALUES,
+															...FIELD_CODE_DETAILS_VALUES,
+															...FIELD_CODE_BOOLEAN_VALUES
+														]
+															.filter(
+																fc => !('hideInDocs' in fc) || !fc.hideInDocs
+															)
+															.map(code => {
+																return `<tr><td>${code.slug}</td><td>${code.question}${'hint' in code && code.hint ? `<br><span class="fr-hint-text">${code.hint}</span>` : ''}</td></tr>`;
+															})
+															.join()
+															.replace(/,/g, '') +
+														'</tbody>'
+												}}
+											></table>
+										</div>
+									</div>
 								</li>
 								<li>
 									<b>product_ids : </b> Les ids des produits sur lesquels vous
@@ -232,10 +240,6 @@ const DocAPI = () => {
 							</ul>
 						</p>
 						<SwaggerUI spec={filterDoc('/stats')} />
-						<div className={fr.cx('fr-container', 'fr-py-6w')}>
-							<h4>Temporaire : Point d'accès notifs mails</h4>
-							<SwaggerUI spec={filterDoc('/triggerMails')} />
-						</div>
 					</div>
 				</>
 			)}
