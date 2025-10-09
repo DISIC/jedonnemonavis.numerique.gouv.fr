@@ -1,24 +1,22 @@
-import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	UserCreateInputSchema,
-	UserUncheckedUpdateInputSchema,
-	UserUpdateInputSchema
+	UserUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
-import bcrypt from 'bcrypt';
-import { Prisma, PrismaClient, User } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import {
-	extractDomainFromEmail,
-	generateRandomString
-} from '@/src/utils/tools';
-import { sendMail } from '@/src/utils/mailer';
-import {
-	getEmailNotificationsHtml,
 	getOTPEmailHtml,
 	getRegisterEmailHtml,
 	getResetPasswordEmailHtml
 } from '@/src/utils/emails';
+import { sendMail } from '@/src/utils/mailer';
+import {
+	extractDomainFromEmail,
+	generateRandomString
+} from '@/src/utils/tools';
+import { Prisma, PrismaClient, User } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -613,7 +611,7 @@ export const userRouter = router({
 				createOTP(ctx.prisma, user);
 
 				return { data: undefined, metadata: { statusCode: 206 } };
-			} else if(user.proconnect_account) {
+			} else if (user.proconnect_account) {
 				return { data: undefined, metadata: { statusCode: 203 } };
 			} else if (!user.active) {
 				// Code: 423

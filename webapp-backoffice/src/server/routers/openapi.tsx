@@ -28,6 +28,8 @@ import {
 import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { getEmailNotificationsHtml } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
+import { render } from '@react-email/components';
+import JdmaNotificationsEmail from '@/react-email/emails/jdma-notifications-email';
 
 const maxNbProducts = 10;
 
@@ -480,11 +482,11 @@ export const openAPIRouter = router({
 				scope: 'daily' | 'weekly' | 'monthly';
 				startDate: Date;
 				endDate: Date;
-				forms: { 
-					formId: number; 
-					formTitle: string; 
-					reviewCount: number; 
-					productId: number; 
+				forms: {
+					formId: number;
+					formTitle: string;
+					reviewCount: number;
+					productId: number;
 					productTitle: string;
 					entityName: string;
 				}[];
@@ -549,17 +551,20 @@ export const openAPIRouter = router({
 							);
 
 					// Group forms by product and limit to 10 most active products
-					const productGroups = new Map<number, {
-						productId: number;
-						productTitle: string;
-						entityName: string;
-						forms: {
-							formId: number;
-							formTitle: string;
-							reviewCount: number;
-						}[];
-						totalReviews: number;
-					}>();
+					const productGroups = new Map<
+						number,
+						{
+							productId: number;
+							productTitle: string;
+							entityName: string;
+							forms: {
+								formId: number;
+								formTitle: string;
+								reviewCount: number;
+							}[];
+							totalReviews: number;
+						}
+					>();
 
 					accessibleForms.forEach(form => {
 						const productId = form.productId;
@@ -576,11 +581,13 @@ export const openAPIRouter = router({
 								productId: form.productId,
 								productTitle: form.productTitle,
 								entityName: form.entityName,
-								forms: [{
-									formId: form.formId,
-									formTitle: form.formTitle,
-									reviewCount: form.reviewCount
-								}],
+								forms: [
+									{
+										formId: form.formId,
+										formTitle: form.formTitle,
+										reviewCount: form.reviewCount
+									}
+								],
 								totalReviews: form.reviewCount
 							});
 						}
@@ -597,25 +604,27 @@ export const openAPIRouter = router({
 					);
 
 					if (accessibleProducts.length > 0) {
-						const email = getEmailNotificationsHtml(
-							user.id,
-							scope,
-							totalNewReviews,
-							startDate,
-							endDate,
-							accessibleProducts.map(product => ({
-								title: product.productTitle,
-								id: product.productId,
-								nbReviews: product.totalReviews,
-								entityName: product.entityName,
-								forms: product.forms
-							}))
+						const emailHtml = await render(
+							<JdmaNotificationsEmail
+								userId={user.id}
+								frequency={scope}
+								totalNbReviews={totalNewReviews}
+								startDate={startDate}
+								endDate={endDate}
+								products={accessibleProducts.map(product => ({
+									title: product.productTitle,
+									id: product.productId,
+									nbReviews: product.totalReviews,
+									entityName: product.entityName,
+									forms: product.forms
+								}))}
+							/>
 						);
 
 						sendMail(
 							'Nouveaux avis JDMA',
 							user.email,
-							email,
+							emailHtml,
 							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
 						);
 					}
