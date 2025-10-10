@@ -618,6 +618,7 @@ export const openAPIRouter = router({
 									entityName: product.entityName,
 									forms: product.forms
 								}))}
+								baseUrl={process.env.NODEMAILER_BASEURL}
 							/>
 						);
 

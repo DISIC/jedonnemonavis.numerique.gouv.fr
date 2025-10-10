@@ -23,10 +23,8 @@ interface JdmaNotificationsEmailProps {
 	startDate?: Date;
 	endDate?: Date;
 	products?: ProductWithReviews[];
+	baseUrl?: string;
 }
-
-const baseUrl =
-	process.env.NODEMAILER_BASEURL || 'https://jedonnemonavis.numerique.gouv.fr';
 
 const formatNumber = (num: number) => {
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
@@ -61,7 +59,8 @@ export const JdmaNotificationsEmail = ({
 				{ formId: 2, formTitle: 'Formulaire de contact', reviewCount: 12 }
 			]
 		}
-	]
+	],
+	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaNotificationsEmailProps) => {
 	const getFrequencyLabel = () => {
 		switch (frequency) {
@@ -79,6 +78,7 @@ export const JdmaNotificationsEmail = ({
 	return (
 		<JdmaLayout
 			preview={`${formatNumber(totalNbReviews)} nouveaux avis sur vos services`}
+			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
