@@ -2,6 +2,7 @@ import { NotificationFrequency } from '@prisma/client';
 import { Session } from 'next-auth';
 import { formatDateToFrenchString } from './tools';
 
+// migrated ✅
 function getEmailWithLayout(content: string) {
 	return `
 	<!DOCTYPE html>
@@ -62,6 +63,7 @@ function getEmailWithLayout(content: string) {
 	`;
 }
 
+// migrated ✅
 export function getOTPEmailHtml(code: string) {
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
@@ -80,6 +82,7 @@ export function getOTPEmailHtml(code: string) {
 	`);
 }
 
+// migrated ✅
 export function getRegisterEmailHtml(token: string) {
 	const link = `${
 		process.env.NODEMAILER_BASEURL
@@ -100,6 +103,7 @@ export function getRegisterEmailHtml(token: string) {
 	`);
 }
 
+// migrated ✅
 export function getUserInviteEntityEmailHtml(
 	contextUser: Session['user'],
 	email: string,
@@ -121,6 +125,7 @@ export function getUserInviteEntityEmailHtml(
 	`);
 }
 
+// migrated ✅
 export function getUserInviteEmailHtml(
 	contextUser: Session['user'],
 	email: string,
@@ -142,6 +147,7 @@ export function getUserInviteEmailHtml(
 	`);
 }
 
+// migrated ✅
 export function getInviteEmailHtml(
 	contextUser: Session['user'],
 	productTitle: string
@@ -163,6 +169,7 @@ export function getInviteEmailHtml(
 	`);
 }
 
+// migrated ✅
 export function getResetPasswordEmailHtml(token: string) {
 	const link = `${
 		process.env.NODEMAILER_BASEURL
@@ -183,6 +190,7 @@ export function getResetPasswordEmailHtml(token: string) {
 	`);
 }
 
+// migrated ✅
 export function getInviteEntityEmailHtml(
 	contextUser: Session['user'],
 	entityName: string

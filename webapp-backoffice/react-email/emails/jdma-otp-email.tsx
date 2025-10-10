@@ -3,16 +3,19 @@ import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 
 interface JdmaOtpEmailProps {
-	code?: string;
+	code: string;
+	baseUrl?: string;
 }
 
-const baseUrl =
-	process.env.NODEMAILER_BASEURL ||
-	'https://jedonnemonavis.numerique.gouv.fr';
-
-export const JdmaOtpEmail = ({ code = '123456' }: JdmaOtpEmailProps) => {
+export const JdmaOtpEmail = ({
+	code = '123456',
+	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
+}: JdmaOtpEmailProps) => {
 	return (
-		<JdmaLayout preview="Votre code de connexion à Je donne mon avis">
+		<JdmaLayout
+			preview="Votre code de connexion à Je donne mon avis"
+			baseUrl={baseUrl}
+		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
@@ -58,7 +61,7 @@ const link: React.CSSProperties = {
 };
 
 const codeStyle: React.CSSProperties = {
-	fontSize: '24px',
+	fontSize: '36px',
 	fontWeight: 'bold',
 	margin: '20px 0',
 	color: '#000091',

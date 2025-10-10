@@ -3,30 +3,30 @@ import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 
 interface JdmaResetPasswordEmailProps {
-	token?: string;
+	token: string;
+	baseUrl?: string;
 }
 
-const baseUrl =
-	process.env.NODEMAILER_BASEURL ||
-	'https://jedonnemonavis.numerique.gouv.fr';
-
 export const JdmaResetPasswordEmail = ({
-	token = 'example-token-123'
+	token = 'example-token-123',
+	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaResetPasswordEmailProps) => {
-	const link = `${baseUrl}/reset-password?token=${token}`;
+	const link = `${baseUrl}/reset-password?${new URLSearchParams({ token })}`;
 
 	return (
-		<JdmaLayout preview="Réinitialisation de votre mot de passe">
+		<JdmaLayout
+			preview="Réinitialisation de votre mot de passe"
+			baseUrl={baseUrl}
+		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous avez demandé à réinitialiser votre mot de passe sur la plateforme
-				«{' '}
+				Vous avez demandé à réinitialiser votre mot de passe sur la plateforme «{' '}
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>{' '}
-				». Afin de choisir un nouveau mot de passe, veuillez cliquer sur le
-				lien ci-dessous.
+				». Afin de choisir un nouveau mot de passe, veuillez cliquer sur le lien
+				ci-dessous.
 			</Text>
 
 			<Link href={link} target="_blank" style={buttonLink}>

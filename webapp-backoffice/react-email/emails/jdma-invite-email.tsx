@@ -2,25 +2,18 @@ import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 
-interface JdmaUserInviteEmailProps {
+interface JdmaInviteEmailProps {
 	inviterName: string;
-	recipientEmail: string;
-	inviteToken: string;
 	productTitle?: string;
 	entityName?: string;
 	baseUrl?: string;
 }
-
-export const JdmaUserInviteEmail = ({
+const JdmaInviteEmail = ({
 	inviterName = 'Jean Dupont',
-	recipientEmail = 'user@example.com',
-	inviteToken = 'example-token-123',
 	productTitle,
 	entityName,
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
-}: JdmaUserInviteEmailProps) => {
-	const link = `${baseUrl}/register?${new URLSearchParams({ email: recipientEmail, inviteToken })}`;
-
+}: JdmaInviteEmailProps) => {
 	const accessType = productTitle
 		? `la démarche « ${productTitle} »`
 		: entityName
@@ -28,32 +21,37 @@ export const JdmaUserInviteEmail = ({
 			: 'un service';
 
 	const previewText = productTitle
-		? `Invitation à rejoindre la démarche ${productTitle}`
+		? `Accès à la démarche ${productTitle}`
 		: entityName
-			? `Invitation à rejoindre l'organisation ${entityName}`
-			: 'Invitation à rejoindre Je donne mon avis';
+			? `Accès à l'organisation ${entityName}`
+			: 'Accès à Je donne mon avis';
 
 	return (
 		<JdmaLayout preview={previewText} baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				<strong>{inviterName}</strong> vous invite à rejoindre la plateforme «{' '}
+				<strong>{inviterName}</strong> vient de vous donner accès à {accessType}{' '}
+				sur la plateforme «{' '}
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>{' '}
-				» et vous donne accès à {accessType}. Afin de créer votre compte,
-				veuillez cliquer sur le lien ci-dessous.
+				».
 			</Text>
 
-			<Link href={link} target="_blank" style={buttonLink}>
-				{link}
+			<Text style={paragraph}>
+				Vous pouvez vous connecter à votre compte en cliquant sur le lien
+				ci-dessous.
+			</Text>
+
+			<Link href={baseUrl} target="_blank" style={buttonLink}>
+				{baseUrl}
 			</Link>
 		</JdmaLayout>
 	);
 };
 
-export default JdmaUserInviteEmail;
+export default JdmaInviteEmail;
 
 // Styles
 const paragraph: React.CSSProperties = {
@@ -72,6 +70,5 @@ const buttonLink: React.CSSProperties = {
 	color: '#000091',
 	textDecoration: 'underline',
 	display: 'block',
-	marginBottom: '16px',
 	wordBreak: 'break-all' as const
 };

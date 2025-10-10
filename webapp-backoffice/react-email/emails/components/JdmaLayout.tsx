@@ -14,12 +14,10 @@ import * as React from 'react';
 interface JdmaLayoutProps {
 	preview?: string;
 	children: React.ReactNode;
+	baseUrl: string;
 }
 
-const baseUrl =
-	process.env.NODEMAILER_BASEURL || 'https://jedonnemonavis.numerique.gouv.fr';
-
-export const JdmaLayout = ({ preview, children }: JdmaLayoutProps) => {
+export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 	return (
 		<Html>
 			<Head />

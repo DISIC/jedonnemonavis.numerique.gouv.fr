@@ -2,18 +2,17 @@ import {
 	UserCreateInputSchema,
 	UserUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
+import JdmaOtpEmail from '@/react-email/emails/jdma-otp-email';
+import JdmaRegisterEmail from '@/react-email/emails/jdma-register-email';
+import JdmaResetPasswordEmail from '@/react-email/emails/jdma-reset-password-email';
 import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
-import {
-	getOTPEmailHtml,
-	getRegisterEmailHtml,
-	getResetPasswordEmailHtml
-} from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import {
 	extractDomainFromEmail,
 	generateRandomString
 } from '@/src/utils/tools';
 import { Prisma, PrismaClient, User } from '@prisma/client';
+import { render } from '@react-email/components';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
@@ -35,11 +34,14 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 			expiration_date: new Date(now.getTime() + 60 * 60 * 1000)
 		}
 	});
+	const emailHtml = await render(
+		<JdmaOtpEmail code={code} baseUrl={process.env.NODEMAILER_BASEURL} />
+	);
 
 	await sendMail(
 		'Votre mot de passe temporaire',
 		user.email.toLowerCase(),
-		getOTPEmailHtml(code),
+		emailHtml,
 		`Votre mot de passe temporaire valable 60 minutes : ${code}`
 	);
 }
@@ -522,10 +524,17 @@ export const userRouter = router({
 						createdUser.id
 					);
 
+					const emailHtml = await render(
+						<JdmaRegisterEmail
+							token={token}
+							baseUrl={process.env.NODEMAILER_BASEURL}
+						/>
+					);
+
 					await sendMail(
 						'Confirmez votre email',
 						createdUser.email.toLowerCase(),
-						getRegisterEmailHtml(token),
+						emailHtml,
 						`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
 					);
 				} else {
@@ -758,10 +767,17 @@ export const userRouter = router({
 				}
 			});
 
+			const emailHtml = await render(
+				<JdmaResetPasswordEmail
+					token={token}
+					baseUrl={process.env.NODEMAILER_BASEURL}
+				/>
+			);
+
 			await sendMail(
 				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',
 				email.toLowerCase(),
-				getResetPasswordEmailHtml(token),
+				emailHtml,
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
 					process.env.NODEMAILER_BASEURL
 				}/reset-password?${new URLSearchParams({ token })}`

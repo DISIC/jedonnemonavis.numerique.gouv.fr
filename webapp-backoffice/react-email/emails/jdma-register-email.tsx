@@ -3,20 +3,21 @@ import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 
 interface JdmaRegisterEmailProps {
-	token?: string;
+	token: string;
+	baseUrl?: string;
 }
 
-const baseUrl =
-	process.env.NODEMAILER_BASEURL ||
-	'https://jedonnemonavis.numerique.gouv.fr';
-
 export const JdmaRegisterEmail = ({
-	token = 'example-token-123'
+	token = 'example-token-123',
+	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaRegisterEmailProps) => {
-	const link = `${baseUrl}/register/validate?token=${token}`;
+	const link = `${baseUrl}/register/validate?${new URLSearchParams({ token })}`;
 
 	return (
-		<JdmaLayout preview="Validez votre compte Je donne mon avis">
+		<JdmaLayout
+			preview="Validez votre compte Je donne mon avis"
+			baseUrl={baseUrl}
+		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
