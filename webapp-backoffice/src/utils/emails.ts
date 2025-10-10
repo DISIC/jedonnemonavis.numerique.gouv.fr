@@ -9,7 +9,8 @@ function getEmailWithLayout(content: string) {
 		<head>
 			<style>
 				body {
-					font-family: Arial, sans-serif;
+					font-family: Marianne-Medium, Arial, sans-serif;
+					font-size: 14px;
 				}
 				.container {
 					max-width: 640px;
@@ -407,10 +408,8 @@ export function getEmailNotificationsHtml(
 
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
-		<br />
 		<p>Vous avez eu un total de ${formatNbReviews(totalNbReviews)} avis ${frequencyLabel()} sur vos services dans Je donne mon avis.</p>
-		<br />
-		<div style="margin-bottom: 48px;">
+		<div style="margin-bottom: 32px;">
 			<table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
 			<thead>
 				<tr>
@@ -425,7 +424,7 @@ export function getEmailNotificationsHtml(
 					<td style="padding: 16px; font-size: 16px; color: #161616; font-weight: bold; line-height: 24px;">
 					<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms"
 						target="_blank" 
-						style="font-size: 14px; line-height: 20px; color: #000091;">
+						style="font-size: 14px; line-height: 20px; color: #000091; text-decoration: none;">
 							${p.title}
 					</a>
 					${
@@ -444,18 +443,20 @@ export function getEmailNotificationsHtml(
 							${p.forms
 								.map(
 									form => `
-										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 4px 0; box-sizing: border-box;">
+										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 8px 0; box-sizing: border-box;">
 											<tr>
-												<td valign="top" style="padding: 12px; font-size: 14px; color: #333;">
-												<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
-													target="_blank" 
-													style="color: #000091;">
-													${form.formTitle}
-												</a>
-												</td>
-												<td align="right" valign="middle" width="1%" style="padding-right: 12px;">
-													<div style="display: inline-block; background-color: #B8FEC9; color: #18753C; padding: 6px 12px; font-size: 12px; font-weight: bold; line-height: 1; white-space: nowrap;">
-														${formatNbReviews(form.reviewCount)} NOUVELLES RÉPONSES
+												<td valign="top" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px; font-size: 14px; color: #333;">
+													<div style="margin-right: 8px;">
+														<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
+															target="_blank"
+															style="color: #000091; font-size: 13px; text-decoration: none;">
+															${form.formTitle}
+														</a>
+													</div>
+													<div>
+														<span style="background-color: #B8FEC9; color: #18753C; border-radius: 4px; padding: 5px; font-size: 10px; font-weight: bold; line-height: 1; white-space: nowrap; display: inline-block;">
+															NOUVELLES RÉPONSES
+														</span>
 													</div>
 												</td>
 											</tr>
@@ -468,9 +469,6 @@ export function getEmailNotificationsHtml(
 							: ''
 					}
 					</td>
-				</tr>
-				<tr>
-				  <td style="height: 16px;"></td> <!-- Espacement -->
 				</tr>
 				`
 					)

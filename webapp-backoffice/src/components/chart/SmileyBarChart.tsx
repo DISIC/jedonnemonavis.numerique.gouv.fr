@@ -99,7 +99,7 @@ const CustomBar = (props: any) => {
 const SmileyBarChart = ({
 	data
 }: {
-	data: { name: string; [key: string]: number | string }[];
+	data: { name: string; [key: string]: number | string | null }[];
 	total: number;
 }) => {
 	const { classes, cx } = useStyles();
@@ -170,7 +170,7 @@ const SmileyBarChart = ({
 					dataKey="name"
 					fontSize="0.75rem"
 					tickLine={false}
-					padding={{ left: 20, }}
+					padding={{ left: 20 }}
 				/>
 				<YAxis
 					axisLine={false}

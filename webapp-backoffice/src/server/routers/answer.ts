@@ -653,7 +653,7 @@ export const answerRouter = router({
 							? Number(
 									countByFieldCodePerMonth.average_answer_text.value.toFixed(1)
 								)
-							: 0,
+							: null,
 						name: countByFieldCodePerMonth.key_as_string
 					};
 				}
