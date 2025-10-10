@@ -1,11 +1,13 @@
-import { z } from 'zod';
-import { router, protectedProcedure } from '@/src/server/trpc';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
+import { AccessRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
+import JdmaInviteEmail from '@/react-email/emails/jdma-invite-email';
+import JdmaUserInviteEmail from '@/react-email/emails/jdma-user-invite-email';
+import { protectedProcedure, router } from '@/src/server/trpc';
 import { sendMail } from '@/src/utils/mailer';
 import { generateRandomString } from '@/src/utils/tools';
-import { AccessRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
-import { getInviteEmailHtml, getUserInviteEmailHtml } from '@/src/utils/emails';
+import { Prisma, PrismaClient } from '@prisma/client';
+import { render } from '@react-email/components';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
 export const generateInviteToken = async (
 	prisma: PrismaClient,
@@ -176,15 +178,20 @@ export const accessRightRouter = router({
 			if (newAccessRight.user === null) {
 				const token = await generateInviteToken(ctx.prisma, user_email);
 
+				const emailHtml = await render(
+					<JdmaUserInviteEmail
+						inviterName={contextUser.name || "Quelqu'un"}
+						recipientEmail={user_email.toLowerCase()}
+						inviteToken={token}
+						productTitle={newAccessRight.product.title}
+						baseUrl={process.env.NODEMAILER_BASEURL}
+					/>
+				);
+
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
 					user_email.toLowerCase(),
-					getUserInviteEmailHtml(
-						contextUser,
-						user_email.toLowerCase(),
-						token,
-						newAccessRight.product.title
-					),
+					emailHtml,
 					`Cliquez sur ce lien pour créer votre compte : ${
 						process.env.NODEMAILER_BASEURL
 					}/register?${new URLSearchParams({
@@ -193,10 +200,18 @@ export const accessRightRouter = router({
 					})}`
 				);
 			} else {
+				const emailHtml = await render(
+					<JdmaInviteEmail
+						inviterName={contextUser.name || "Quelqu'un"}
+						productTitle={newAccessRight.product.title}
+						baseUrl={process.env.NODEMAILER_BASEURL}
+					/>
+				);
+
 				await sendMail(
 					`Accès à la démarche « ${newAccessRight.product.title} » sur la plateforme « Je donne mon avis »`,
 					user_email.toLowerCase(),
-					getInviteEmailHtml(contextUser, newAccessRight.product.title),
+					emailHtml,
 					`Cliquez sur ce lien pour rejoindre le produit numérique "${newAccessRight.product.title}" : ${process.env.NODEMAILER_BASEURL}`
 				);
 			}
@@ -224,15 +239,20 @@ export const accessRightRouter = router({
 
 			const token = await generateInviteToken(ctx.prisma, user_email);
 
+			const emailHtml = await render(
+				<JdmaUserInviteEmail
+					inviterName={contextUser.name || "Quelqu'un"}
+					recipientEmail={user_email.toLowerCase()}
+					inviteToken={token}
+					productTitle={product.title}
+					baseUrl={process.env.NODEMAILER_BASEURL}
+				/>
+			);
+
 			await sendMail(
 				'Invitation à rejoindre « Je donne mon avis »',
 				user_email.toLowerCase(),
-				getUserInviteEmailHtml(
-					contextUser,
-					user_email.toLowerCase(),
-					token,
-					product.title
-				),
+				emailHtml,
 				`Cliquez sur ce lien pour créer votre compte : ${
 					process.env.NODEMAILER_BASEURL
 				}/register?${new URLSearchParams({

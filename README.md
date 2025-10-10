@@ -89,6 +89,24 @@ Voici les informations des utilisateurs prêts à être utilisés en développem
 | user4@example.com | Porteur | Oui | Non | jdma |
 | admin@example.com | Administrateur | Oui | Non | jdma |
 
+#### Création/Édition des templates d'e-mails
+
+Dans le dossier `webapp-backoffice/react-email`, vous trouverez les templates d'e-mails utilisant la bibliothèque [react-email](https://react.email/).
+
+Pour prévisualiser les templates d'e-mails depuis ce dossier, vous pouvez utiliser la commande suivante :
+
+Premièrement, assurez-vous d'être dans le dossier `webapp-backoffice/react-email` puis d'installer les dépendances :
+
+```bash
+yarn
+```
+
+Ensuite, lancez le serveur de prévisualisation :
+
+```bash
+yarn dev
+```
+
 ### Webapp Formulaire
 
 Accédez au dossier de l'application NextJS webapp-form :
