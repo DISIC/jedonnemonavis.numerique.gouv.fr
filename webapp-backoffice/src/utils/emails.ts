@@ -446,7 +446,7 @@ export function getEmailNotificationsHtml(
 										<table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F5F5FE; margin: 8px 0; box-sizing: border-box;">
 											<tr>
 												<td valign="top" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 8px; font-size: 14px; color: #333;">
-													<div>
+													<div style="margin-right: 8px;">
 														<a href="${jdmaUrl}/administration/dashboard/product/${p.id.toString()}/forms/${form.formId.toString()}"
 															target="_blank"
 															style="color: #000091; font-size: 13px; text-decoration: none;">
