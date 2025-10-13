@@ -8,11 +8,10 @@ import {
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { sendMail } from '@/src/utils/mailer';
-import {
-	getUserRequestAcceptedEmailHtml,
-	getUserRequestRefusedEmailHtml
-} from '@/src/utils/emails';
 import { generateValidationToken, makeRelationFromUserInvite } from './user';
+import { render } from '@react-email/components';
+import JdmaUserRequestAcceptedEmail from '@/react-email/emails/jdma-user-request-accepted-email';
+import JdmaUserRequestRefusedEmail from '@/react-email/emails/jdma-user-request-refused-email';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -96,13 +95,21 @@ export async function updateUserRequest(
 				});
 			}
 
-			if(foundUser)
-			await sendMail(
-				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
-				foundUser?.email.toLowerCase(),
-				getUserRequestAcceptedEmailHtml(token),
-				`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
-			);
+			if(foundUser) {
+				const emailHtml = await render(
+					<JdmaUserRequestAcceptedEmail
+						token={token}
+						baseUrl={process.env.NODEMAILER_BASEURL}
+					/>
+				);
+
+				await sendMail(
+					`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
+					foundUser?.email.toLowerCase(),
+					emailHtml,
+					`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
+				);
+			}
 		} else if (updatedUserRequest.status === 'refused') {
 			await prisma.userRequest.update({
 				where: { id },
@@ -113,10 +120,17 @@ export async function updateUserRequest(
 				where: { id: updatedUserRequest.user.id }
 			});
 
+			const emailHtml = await render(
+				<JdmaUserRequestRefusedEmail
+					message={message}
+					baseUrl={process.env.NODEMAILER_BASEURL}
+				/>
+			);
+
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
 				updatedUserRequest.user.email.toLowerCase(),
-				getUserRequestRefusedEmailHtml(message),
+				emailHtml,
 				`Votre demande d'accès a été refusée${
 					message ? ` pour la raison suivante : ${message}` : '.'
 				}`

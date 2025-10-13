@@ -212,6 +212,7 @@ export function getInviteEntityEmailHtml(
 	`);
 }
 
+// migrated ✅
 export function getUserRequestAcceptedEmailHtml(token: string) {
 	const link = `${
 		process.env.NODEMAILER_BASEURL
@@ -232,6 +233,7 @@ export function getUserRequestAcceptedEmailHtml(token: string) {
 	`);
 }
 
+// migrated ✅
 export function getUserRequestRefusedEmailHtml(message?: string) {
 	return getEmailWithLayout(`
 		<p>Bonjour,</p>
@@ -251,6 +253,7 @@ export function getUserRequestRefusedEmailHtml(message?: string) {
 	`);
 }
 
+// migrated ✅
 export function getProductArchivedEmail(
 	contextUser: Session['user'],
 	productTitle: string
@@ -270,6 +273,7 @@ export function getProductArchivedEmail(
 	`);
 }
 
+// migrated ✅
 export function getProductRestoredEmail(
 	contextUser: Session['user'],
 	productTitle: string,
@@ -288,6 +292,7 @@ export function getProductRestoredEmail(
 	`);
 }
 
+// migrated ✅
 export function getClosedButtonOrFormEmail({
 	contextUser,
 	buttonTitle,
@@ -369,6 +374,7 @@ export function getClosedButtonOrFormEmail({
 	`);
 }
 
+// migrated ✅
 export function getEmailNotificationsHtml(
 	userId: number,
 	frequency: NotificationFrequency,

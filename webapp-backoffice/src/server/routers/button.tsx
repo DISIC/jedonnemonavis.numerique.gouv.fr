@@ -7,8 +7,9 @@ import {
 } from '@/prisma/generated/zod';
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
-import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
+import { render } from '@react-email/components';
+import JdmaClosedButtonOrFormEmail from '@/react-email/emails/jdma-closed-button-or-form-email';
 
 export const buttonRouter = router({
 	getList: publicProcedure
@@ -164,28 +165,33 @@ export const buttonRouter = router({
 					...adminEntityRights.map(aer => aer.user_email)
 				].filter(email => email !== null) as string[];
 
-				emails.forEach((email: string) => {
-					sendMail(
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
-						email,
-						getClosedButtonOrFormEmail({
-							contextUser: ctx.session.user,
-							buttonTitle: deletedButton.title,
-							form: {
+				for (const email of emails) {
+					const emailHtml = await render(
+						<JdmaClosedButtonOrFormEmail
+							userName={ctx.session.user.name || "Quelqu'un"}
+							buttonTitle={deletedButton.title}
+							form={{
 								id: deletedButton.form.id,
 								title:
 									deletedButton.form.title ??
 									deletedButton.form.form_template.title
-							},
-							product: {
+							}}
+							product={{
 								id: product?.id as number,
 								title: product?.title as string,
 								entityName: product?.entity.name as string
-							}
-						}),
+							}}
+							baseUrl={process.env.NODEMAILER_BASEURL}
+						/>
+					);
+
+					await sendMail(
+						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
+						email,
+						emailHtml,
 						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`
 					);
-				});
+				}
 			}
 
 			return { data: deletedButton };
