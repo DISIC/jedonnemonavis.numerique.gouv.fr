@@ -1,4 +1,5 @@
 import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
+import LinksTab from '@/src/components/dashboard/Form/tabs/links';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
@@ -37,7 +38,7 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
-export type TabsSlug = 'dashboard' | 'reviews' | 'stats' | 'settings';
+export type TabsSlug = 'dashboard' | 'reviews' | 'stats' | 'links' | 'settings';
 
 const ProductFormPage = (props: Props) => {
 	const router = useRouter();
@@ -124,14 +125,16 @@ const ProductFormPage = (props: Props) => {
 		switch (modalType) {
 			case 'create': {
 				setAlertText(
-					`L\'emplacement "${finalButton.title}" a été créé avec succès.`
+					`Le lien d'intégration "${finalButton.title}" a été créé avec succès.`
 				);
 				setIsAlertShown(true);
 				handleModalOpening('install', finalButton);
 				break;
 			}
 			case 'delete': {
-				setAlertText(`L\'emplacement "${finalButton.title}" a bien été fermé.`);
+				setAlertText(
+					`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
+				);
 				setIsAlertShown(true);
 				break;
 			}
@@ -263,6 +266,10 @@ const ProductFormPage = (props: Props) => {
 							...(ownRight === 'carrier_admin'
 								? [
 										{
+											tabId: 'links',
+											label: "Liens d'intégration"
+										},
+										{
 											tabId: 'settings',
 											label: 'Paramètres'
 										}
@@ -308,17 +315,28 @@ const ProductFormPage = (props: Props) => {
 								}}
 							/>
 						)}
-						{selectedTabId === 'settings' && ownRight === 'carrier_admin' && (
-							<SettingsTab
-								form={form}
-								ownRight={ownRight}
-								modal={buttonModal}
-								alertText={alertText}
-								setAlertText={setAlertText}
-								handleModalOpening={handleModalOpening}
-								isAlertShown={isAlertShown}
-								setIsAlertShown={setIsAlertShown}
-							/>
+						{ownRight === 'carrier_admin' && (
+							<>
+								{selectedTabId === 'links' && (
+									<LinksTab
+										form={form}
+										ownRight={ownRight}
+										modal={buttonModal}
+										handleModalOpening={handleModalOpening}
+										alertText={alertText}
+										isAlertShown={isAlertShown}
+										setIsAlertShown={setIsAlertShown}
+									/>
+								)}
+								{selectedTabId === 'settings' && (
+									<SettingsTab
+										form={form}
+										alertText={alertText}
+										isAlertShown={isAlertShown}
+										setIsAlertShown={setIsAlertShown}
+									/>
+								)}
+							</>
 						)}
 					</Tabs>
 				</div>

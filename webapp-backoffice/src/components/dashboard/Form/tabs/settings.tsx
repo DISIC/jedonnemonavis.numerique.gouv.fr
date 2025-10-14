@@ -1,6 +1,5 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
@@ -8,24 +7,14 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { RightAccessStatus } from '@prisma/client';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
-import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 import FormDeleteModal from '../FormDeleteModal';
 
 interface Props {
 	form: FormWithElements;
-	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	modal: CustomModalProps;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	alertText: string;
-	setAlertText: (text: string) => void;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
 }
@@ -53,44 +42,18 @@ const delete_form_modal = createModal({
 
 const SettingsTab = ({
 	form,
-	ownRight,
-	modal,
-	handleModalOpening,
 	alertText,
-	setAlertText,
 	isAlertShown,
 	setIsAlertShown
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-
-	const isModalOpen = useIsModalOpen(modal);
-
-	useEffect(() => {
-		if (router.query.shouldOpenButtonModal) {
-			handleModalOpening('create');
-		}
-	}, [router.query]);
-
-	useEffect(() => {
-		if (!isModalOpen && router.query.shouldOpenButtonModal) {
-			const { shouldOpenButtonModal, ...restQuery } = router.query;
-			router.replace(
-				{
-					pathname: router.pathname,
-					query: restQuery
-				},
-				undefined,
-				{ shallow: true }
-			);
-		}
-	}, [isModalOpen]);
+	const [isCopied, setIsCopied] = useState(false);
 
 	const {
 		data: buttonResults,
 		isLoading: isLoadingButtons,
-		isRefetching: isRefetchingButtons,
-		refetch: refetchButtons
+		isRefetching: isRefetchingButtons
 	} = trpc.button.getList.useQuery(
 		{
 			page: 1,
@@ -110,10 +73,7 @@ const SettingsTab = ({
 
 	const deleteButton = trpc.button.delete.useMutation();
 
-	const {
-		data: buttons,
-		metadata: { count: buttonsCount }
-	} = buttonResults;
+	const { data: buttons } = buttonResults;
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
@@ -148,100 +108,31 @@ const SettingsTab = ({
 					form={form}
 					onDelete={deleteAllButtons}
 				/>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-					<h3 className={fr.cx('fr-mb-0')}>
-						{form.isDeleted ? 'Voir' : 'Gérer'} les emplacements
-					</h3>
-				</div>
-				{buttonsCount > 0 && (
-					<>
-						<div
-							className={cx(
-								classes.buttonsGroup,
-								classes.justifyEnd,
-								fr.cx('fr-col-12', 'fr-col-md-4')
-							)}
-						>
-							{ownRight === 'carrier_admin' && !form.isDeleted && (
-								<Button
-									priority="secondary"
-									iconId="fr-icon-add-line"
-									iconPosition="right"
-									onClick={() => {
-										handleModalOpening('create');
-									}}
-								>
-									Créer un emplacement
-								</Button>
-							)}
-						</div>
-						<p
-							className={fr.cx('fr-col-12', 'fr-mt-6v')}
-							hidden={!!form.isDeleted}
-						>
-							Lors de la création d’un emplacement, un code HTML est généré. Il
-							vous suffit de le copier-coller dans le code de la page où vous
-							voulez faire apparaître le bouton d’avis. Vous pouvez créer
-							plusieurs emplacements pour chaque formulaire.&nbsp;
-							<Link
-								href="https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7"
-								style={{
-									color: fr.colors.decisions.text.title.blueFrance.default
-								}}
-								target="_blank"
-							>
-								Pourquoi créer plusieurs emplacements ?
-							</Link>
-						</p>
-					</>
-				)}
-				<div
-					className={fr.cx(
-						'fr-col-12',
-						(buttonsCount === 0 || form.isDeleted) && 'fr-mt-4v'
-					)}
-				>
-					{!(isLoadingButtons || isRefetchingButtons) &&
-						buttonsCount === 0 &&
-						(!form.isDeleted ? (
-							<NoButtonsPanel
-								onButtonClick={() => handleModalOpening('create')}
-							/>
-						) : (
-							<div
-								className={fr.cx('fr-col-12')}
-								style={{ display: 'flex', justifyContent: 'center' }}
-							>
-								<span>Aucun emplacement trouvé</span>
-							</div>
-						))}
-					{!(isLoadingButtons || isRefetchingButtons) &&
-						buttons &&
-						[
-							...buttons
-								.filter(b => !b.isDeleted)
-								.sort(
-									(a, b) => b.created_at.getTime() - a.created_at.getTime()
-								),
-							...buttons
-								.filter(b => b.isDeleted)
-								.sort(
-									(a, b) =>
-										(b.deleted_at?.getTime() ?? 0) -
-										(a.deleted_at?.getTime() ?? 0)
-								)
-						].map((button, index) => (
-							<ProductButtonCard
-								key={index}
-								button={button}
-								onButtonClick={handleModalOpening}
-								ownRight={ownRight}
-							/>
-						))}
-				</div>
 				{!form.product.isTop250 && !form.isDeleted && (
 					<>
-						<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-7v')} />
+						<div className={fr.cx('fr-col-12', 'fr-mb-7v')}>
+							<span
+								className={fr.cx('fr-text--bold')}
+								style={{ userSelect: 'none' }}
+							>
+								Identifiant de formulaire
+							</span>
+							<span className={fr.cx('fr-ml-2v', 'fr-mr-4v')}>#{form.id}</span>
+							<Button
+								priority="secondary"
+								size="small"
+								onClick={() => {
+									navigator.clipboard.writeText(form.id.toString());
+									setIsCopied(true);
+									setTimeout(() => setIsCopied(false), 2000);
+								}}
+								className="fr-mr-md-2v"
+								iconId={isCopied ? 'fr-icon-check-line' : 'ri-file-copy-line'}
+								iconPosition="right"
+							>
+								Copier
+							</Button>
+						</div>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 							<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
 						</div>
@@ -365,9 +256,7 @@ const SettingsTab = ({
 				isClosed={!isAlertShown}
 				onClose={() => setIsAlertShown(false)}
 			/>
-			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v', 'fr-mb-md-10v')}>
-				Paramètres
-			</h2>
+			<h2 className={fr.cx('fr-col-12', 'fr-mb-7v')}>Paramètres</h2>
 
 			{displaySettingsContent()}
 		</div>

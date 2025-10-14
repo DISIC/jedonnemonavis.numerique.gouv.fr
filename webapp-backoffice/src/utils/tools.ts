@@ -574,6 +574,7 @@ export const getValidTabSlug = (tab: string | undefined): TabsSlug => {
 		case 'reviews':
 		case 'stats':
 		case 'settings':
+		case 'links':
 			return tab;
 		default:
 			return 'dashboard';
