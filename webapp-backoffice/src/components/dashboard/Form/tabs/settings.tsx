@@ -88,7 +88,7 @@ const SettingsTab = ({
 			})
 		);
 		router.push(
-			`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les emplacements associés ont bien été fermés.`)}`
+			`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les liens d'intégration associés ont bien été fermés.`)}`
 		);
 	};
 

@@ -135,7 +135,7 @@ const LinksTab = ({
 							className={fr.cx('fr-col-12')}
 							style={{ display: 'flex', justifyContent: 'center' }}
 						>
-							<span>Aucun emplacement trouvé</span>
+							<span>Aucun lien d'intégration trouvé</span>
 						</div>
 					))}
 				{!(isLoadingButtons || isRefetchingButtons) &&

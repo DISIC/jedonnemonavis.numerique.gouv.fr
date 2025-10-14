@@ -111,11 +111,11 @@ const ButtonModal = (props: Props) => {
 			case 'install':
 				return 'Copier le code';
 			case 'create':
-				return 'Créer un emplacement';
+				return "Créer un lien d'intégration";
 			case 'edit':
-				return 'Modifier un emplacement';
+				return "Modifier un lien d'intégration";
 			case 'delete':
-				return "Fermer l'emplacement";
+				return "Fermer le lien d'intégration";
 			default:
 				return '';
 		}
