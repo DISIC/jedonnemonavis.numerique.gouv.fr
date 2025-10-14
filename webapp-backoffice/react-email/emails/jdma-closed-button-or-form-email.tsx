@@ -24,8 +24,8 @@ export const JdmaClosedButtonOrFormEmail = ({
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaClosedButtonOrFormEmailProps) => {
 	const closeTitle = buttonTitle
-		? `l'emplacement « ${buttonTitle} »`
-		: `le formulaire « ${formTitle} »`;
+		? `l'emplacement « <strong>${buttonTitle}</strong> »`
+		: `le formulaire « <strong>${formTitle}</strong> »`;
 
 	const productUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms`;
 	const formUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms/${form.id.toString()}`;
@@ -39,9 +39,10 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 			<Text style={paragraph}>
 				{userName} vient de fermer{' '}
-				<span dangerouslySetInnerHTML={{ __html: closeTitle }} /> du service «{' '}
-				{product.title} ». Il ne recevra plus de données, mais les statistiques
-				récoltées avant la fermeture restent accessibles.
+				<span dangerouslySetInnerHTML={{ __html: closeTitle }} /> du service
+				«&nbsp;
+				{product.title}&nbsp;». Il ne recevra plus de données, mais les
+				statistiques récoltées avant la fermeture restent accessibles.
 			</Text>
 
 			<Section style={warningSection}>
@@ -139,7 +140,7 @@ const serviceSection: React.CSSProperties = {
 const tableHeader: React.CSSProperties = {
 	textAlign: 'left' as const,
 	fontSize: '14px',
-	fontWeight: 'normal' as const
+	fontWeight: 'bolder' as const
 };
 
 const serviceCard: React.CSSProperties = {

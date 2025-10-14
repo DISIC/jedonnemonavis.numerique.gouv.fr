@@ -21,8 +21,8 @@ export const JdmaProductArchivedEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				{userName} vient de supprimer le service « {productTitle} » sur la
-				plateforme{' '}
+				{userName} vient de supprimer le service «{' '}
+				<strong>{productTitle}</strong> » sur la plateforme{' '}
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>

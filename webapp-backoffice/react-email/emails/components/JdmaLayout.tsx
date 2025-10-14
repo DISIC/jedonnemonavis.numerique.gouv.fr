@@ -47,13 +47,13 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							>
 								Je donne mon avis
 							</Link>
-							, développé par{' '}
+							, développé par la{' '}
 							<Link
 								href="https://design.numerique.gouv.fr/"
 								target="_blank"
 								style={footerLink}
 							>
-								la Brigade d'Intervention Numérique
+								Brigade d'Intervention Numérique
 							</Link>
 							, propulsé par la{' '}
 							<Link
@@ -66,7 +66,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							.
 						</Text>
 						<Text style={footerText}>
-							Pour toute question, merci de nous contacter à{' '}
+							Pour toute question, envoyez-nous un mail à{' '}
 							<Link
 								href="mailto:contact.jdma@design.numerique.gouv.fr"
 								style={footerLink}
@@ -119,7 +119,8 @@ const footer: React.CSSProperties = {
 const footerText: React.CSSProperties = {
 	margin: '8px 0',
 	lineHeight: '1.5',
-	color: '#666666'
+	color: '#666666',
+	textAlign: 'justify'
 };
 
 const footerLink: React.CSSProperties = {
