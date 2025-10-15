@@ -3,7 +3,7 @@ import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
-} from '@/src/utils/stats';
+} from '@/src/utils/stats/intention-helpers';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';

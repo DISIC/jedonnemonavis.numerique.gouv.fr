@@ -12,7 +12,7 @@ import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { FILTER_LABELS } from '@/src/utils/helpers';
-import { displayIntention } from '@/src/utils/stats';
+import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import {
 	formatDateToFrenchStringWithHour,
 	getNbPages,
