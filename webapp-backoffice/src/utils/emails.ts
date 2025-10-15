@@ -295,7 +295,7 @@ export function getClosedButtonOrFormEmail({
 }) {
 	const jdmaUrl = process.env.NODEMAILER_BASEURL;
 	const closeTitle = buttonTitle
-		? `l'emplacement « <b>${buttonTitle}</b> »`
+		? `le lien d'intégration « <b>${buttonTitle}</b> »`
 		: `le formulaire « <b>${formTitle}</b> »`;
 
 	const serviceFormDisplay = buttonTitle
@@ -347,7 +347,7 @@ export function getClosedButtonOrFormEmail({
 		<div style="background-color: #ECECFE; padding: 24px; display: flex; align-items: center;">
 			<img src="https://jedonnemonavis.numerique.gouv.fr/assets/install_picto.svg" style="height: 120px; margin-right: 18px;"/>
 			<div>
-				<p>Les boutons “Je donne mon avis” <b>sont toujours visible par les usagers</b> tant que les codes HTML correspondant aux emplacements n’ont pas été retirés des pages.</p>
+				<p>Les boutons “Je donne mon avis” <b>sont toujours visible par les usagers</b> tant que les codes HTML correspondant aux liens d'intégration n’ont pas été retirés des pages.</p>
 				<p>Pensez à vérifier que c’est le cas sur votre service numérique.</p>
 			</div>
 		</div>

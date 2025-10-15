@@ -1,8 +1,8 @@
-import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
-import { buttonContents } from './ServiceFormsNoButtonsPanel';
 
 interface Props {
 	onButtonClick: () => void;
@@ -14,32 +14,38 @@ const NoButtonsPanel = (props: Props) => {
 	const { cx, classes } = useStyles();
 
 	return (
-		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
-			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
-				<span className={classes.title}>
-					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
-				</span>
-			</div>
-			{buttonContents.map((content, index) => (
-				<div
-					key={index}
-					className={cx(classes.content, fr.cx('fr-col-12', 'fr-py-0'))}
-				>
-					<div className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}>
-						<i className={cx(fr.cx(content.iconId), classes.icon)} />
-					</div>
-					<div className="fr-col-11">
-						<p>{content.text}</p>
-						{content.link && (
-							<a href={content.link.href} target="_blank" className="fr-col-12">
-								{content.link.label}
-							</a>
-						)}
-					</div>
+		<div
+			className={cx(
+				classes.container,
+				fr.cx('fr-container', 'fr-p-3v', 'fr-pb-6v', 'fr-p-md-16v')
+			)}
+		>
+			<h3 className={cx(classes.title)}>
+				Intégrer le formulaire sur votre site
+			</h3>
+			<div
+				className={cx(
+					fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-grid-row--middle'),
+					classes.rowContainer
+				)}
+			>
+				<div className={fr.cx('fr-col-md-2')}>
+					<Image
+						src="/assets/install_picto.svg"
+						alt="Picto bulles de discussion"
+						width={120}
+						height={120}
+					/>
 				</div>
-			))}
+				<div className={cx(fr.cx('fr-col-md-10'))}>
+					<p className={cx(fr.cx('fr-mb-0'))}>
+						Créez votre premier lien d’intégration et copiez le code généré sur
+						votre site afin de publier le formulaire
+					</p>
+				</div>
+			</div>
 			<Button
-				className={cx(classes.button, fr.cx('fr-mt-6v'))}
+				className={cx(classes.button)}
 				priority="primary"
 				iconId="fr-icon-add-line"
 				iconPosition="right"
@@ -53,7 +59,7 @@ const NoButtonsPanel = (props: Props) => {
 					}
 				}}
 			>
-				Créer un emplacement
+				Créer un lien d'intégration
 			</Button>
 		</div>
 	);
@@ -73,8 +79,25 @@ const useStyles = tss.create({
 	},
 	title: {
 		fontWeight: 'bold',
-		fontSize: '1.5rem',
-		lineHeight: '2rem'
+		fontSize: '28px',
+		color: fr.colors.decisions.text.title.blueFrance.default,
+		[fr.breakpoints.down('sm')]: {
+			marginBottom: fr.spacing('4v'),
+			fontSize: '24px'
+		}
+	},
+	rowContainer: {
+		width: '100%',
+		':not(:last-child)': {
+			marginBottom: fr.spacing('3v'),
+			[fr.breakpoints.down('md')]: {
+				marginBottom: fr.spacing('6v')
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'start'
+		}
 	},
 	content: {
 		display: 'flex',
@@ -111,7 +134,6 @@ const useStyles = tss.create({
 	},
 	button: {
 		alignSelf: 'center',
-		marginTop: fr.spacing('4v'),
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

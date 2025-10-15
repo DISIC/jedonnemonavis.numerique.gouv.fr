@@ -299,7 +299,7 @@ const ButtonModal = (props: Props) => {
 							id="button-create-title"
 							label={
 								<p className={fr.cx('fr-mb-0')}>
-									Nom de l'emplacement{' '}
+									Nom du lien d'intégration{' '}
 									<span className={cx(classes.asterisk)}>*</span>
 								</p>
 							}
@@ -320,7 +320,7 @@ const ButtonModal = (props: Props) => {
 						/>
 						<Input
 							id="button-create-description"
-							label="Description de l'emplacement"
+							label="Description du lien d'intégration"
 							textArea
 							nativeTextAreaProps={{
 								value: currentButton.description || '',
@@ -409,7 +409,7 @@ const ButtonModal = (props: Props) => {
 						}
 					},
 					{
-						children: 'Fermer l’emplacement',
+						children: "Fermer le lien d'intégration",
 						onClick: handleButtonDelete,
 						doClosesModal: false
 					}

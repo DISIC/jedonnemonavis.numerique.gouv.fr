@@ -64,7 +64,7 @@ const ProductButtonsPage = (props: Props) => {
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
@@ -386,7 +386,8 @@ const ProductButtonsPage = (props: Props) => {
 																		.map(b => (
 																			<li key={b.id}>
 																				<small>
-																					Emplacement &laquo;<b>{b.title}</b>
+																					Lien d'intégration &laquo;
+																					<b>{b.title}</b>
 																					&raquo; — Dernière
 																					tentative&nbsp;:&nbsp;
 																					{formatDateToFrenchString(

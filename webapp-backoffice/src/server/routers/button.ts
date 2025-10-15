@@ -166,7 +166,7 @@ export const buttonRouter = router({
 
 				emails.forEach((email: string) => {
 					sendMail(
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
+						`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`,
 						email,
 						getClosedButtonOrFormEmail({
 							contextUser: ctx.session.user,
@@ -183,7 +183,7 @@ export const buttonRouter = router({
 								entityName: product?.entity.name as string
 							}
 						}),
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`
+						`Fermeture du lien d'intégration  «${deletedButton.title}» du service «${product?.title}»`
 					);
 				});
 			}

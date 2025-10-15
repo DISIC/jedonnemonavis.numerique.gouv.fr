@@ -30,14 +30,14 @@ export const buttonContents: readonly ContentType[] = [
 	},
 	{
 		iconId: 'ri-code-box-line',
-		text: 'Chaque emplacement génère une petite portion de code à coller à l’endroit où vous souhaitez faire apparaitre le bouton JDMA'
+		text: "Chaque lien d'intégration génère une petite portion de code à coller à l’endroit où vous souhaitez faire apparaitre le bouton JDMA"
 	},
 	{
 		iconId: 'ri-line-chart-line',
-		text: 'Vous pouvez créer plusieurs emplacements de bouton JDMA pour chaque formulaire.',
+		text: "Vous pouvez créer plusieurs liens d'intégration de bouton JDMA pour chaque formulaire.",
 		link: {
 			href: 'https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7',
-			label: 'En savoir plus sur les boutons multiples'
+			label: 'En savoir plus sur les liens multiples'
 		}
 	}
 ] as const;
@@ -51,7 +51,8 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
 			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
 				<span className={classes.title}>
-					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
+					Définissez les liens d'intégration de vos boutons JDMA (Je Donne Mon
+					Avis)
 				</span>
 			</div>
 			{buttonContents.map((content, index) => (
@@ -88,7 +89,7 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 					}
 				}}
 			>
-				Créer un emplacement
+				Créer un lien d'intégration
 			</Button>
 		</div>
 	);
