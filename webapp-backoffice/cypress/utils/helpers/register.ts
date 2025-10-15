@@ -62,27 +62,6 @@ export function performPostRegistrationFlow(email: string) {
 	createForm('form-test-1');
 }
 
-export function modifyButton() {
-	cy.get('[class*="ProductButtonCard"]')
-		.first()
-		.within(() => {
-			cy.get('p').contains('bouton test 1');
-			cy.get('[class*="actionsContainer"]')
-				.find('button#button-options')
-				.click();
-		});
-	cy.get('div#option-menu').contains('Modifier').click();
-	cy.get('dialog#button-modal').within(() => {
-		cy.get('input[name="button-create-title"]')
-			.clear()
-			.type('e2e-jdma-button-test-1');
-		cy.get('textarea')
-			.clear()
-			.type('Description du bouton e2e-jdma-button-test-1');
-	});
-	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
-}
-
 export function checkExistingAccountError() {
 	cy.get('body').then(body => {
 		if (body.find('.fr-alert--error').length > 0) {
