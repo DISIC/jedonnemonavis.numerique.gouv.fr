@@ -114,11 +114,11 @@ export const statsUsagersQuery = async ({
 };
 
 export const statsUsagersInputSchema = z.object({
-	field_codes: z.array(z.string()),
-	product_ids: z.array(z.number()),
 	start_date: z.string(),
 	end_date: z.string(),
-	interval: z.enum(['day', 'week', 'month', 'year', 'none'])
+	field_codes: z.array(z.string()).default([]),
+	product_ids: z.array(z.number()).default([]),
+	interval: z.enum(['day', 'week', 'month', 'year', 'none']).default('none')
 });
 
 export const statsUsagersOutputSchema = ZOpenApiStatsOutput;

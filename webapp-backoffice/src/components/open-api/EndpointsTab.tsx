@@ -68,29 +68,89 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 					options de filtrage.
 				</p>
 
-				<h4>Paramètres de filtrage :</h4>
-				<ul>
-					<li>
-						<code>field_codes</code> : Codes des questions à inclure (optionnel)
-					</li>
-					<li>
-						<code>product_ids</code> : IDs des services à filtrer (optionnel)
-					</li>
-					<li>
-						<code>start_date</code> : Date de début (yyyy-mm-dd)
-					</li>
-					<li>
-						<code>end_date</code> : Date de fin (yyyy-mm-dd)
-					</li>
-					<li>
-						<code>interval</code> : Intervalle temporel (day, week, month, year,
-						none)
-					</li>
-				</ul>
+				<h4 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-6v')}>
+					Paramètres de filtrage
+				</h4>
+				<div className={fr.cx('fr-table')}>
+					<div className={fr.cx('fr-table__content')}>
+						<table>
+							<thead>
+								<tr>
+									<th>Paramètre</th>
+									<th>Description</th>
+									<th>Type</th>
+									<th>Requis</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>
+										<code>start_date</code>
+									</td>
+									<td>Date de début au format YYYY-MM-DD</td>
+									<td>string</td>
+									<td>Oui</td>
+								</tr>
+								<tr>
+									<td>
+										<code>end_date</code>
+									</td>
+									<td>Date de fin au format YYYY-MM-DD</td>
+									<td>string</td>
+									<td>Oui</td>
+								</tr>
+								<tr>
+									<td>
+										<code>product_ids</code>
+									</td>
+									<td>
+										IDs des services à filtrer
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Défaut: [] (tous les services accessibles)
+										</span>
+									</td>
+									<td>Array[number]</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>field_codes</code>
+									</td>
+									<td>
+										Codes des questions à inclure dans les résultats
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Valeurs : voir ci-dessous | Défaut: [] (toutes les
+											questions)
+										</span>
+									</td>
+									<td>Array[string]</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
+										<code>interval</code>
+									</td>
+									<td>
+										Intervalle de regroupement des données
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Valeurs: day, week, month, year, none | Défaut: none
+										</span>
+									</td>
+									<td>string</td>
+									<td>Non</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
 
 				<Accordion
 					titleAs="h4"
 					label={`Codes des questions disponibles (${fieldCodes.length} au total)`}
+					className={fr.cx('fr-mb-4w')}
 				>
 					<div className={fr.cx('fr-table')}>
 						<div className={fr.cx('fr-table__content')}>

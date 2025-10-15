@@ -76,11 +76,10 @@ const openAPIRouter = router({
 					"Ce point d'accès retourne les données de satisfaction pour tous les formulaires des services liés à la clé fournie.",
 				example: {
 					request: {
-						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
-						product_ids: [],
-						inteval: undefined,
-						start_date: '2023-01-01',
+						start_date: '2024-01-01',
 						end_date: new Date().toISOString().split('T')[0],
+						product_ids: [],
+						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						interval: 'none'
 					}
 				}
