@@ -6,8 +6,8 @@ import { Loader } from '@/src/components/ui/Loader';
 import { fr } from '@codegouvfr/react-dsfr';
 import { SideMenu } from '@codegouvfr/react-dsfr/SideMenu';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { tss } from 'tss-react/dsfr';
 
 const DocAPIv2 = () => {
 	type DocApi = {} & {
@@ -16,6 +16,7 @@ const DocAPIv2 = () => {
 		};
 	};
 
+	const router = useRouter();
 	const [docApi, setDocApi] = useState<DocApi | null>(null);
 	const [activeSection, setActiveSection] = useState<string>('authentication');
 
@@ -64,13 +65,35 @@ const DocAPIv2 = () => {
 		getDocApi();
 	}, []);
 
+	useEffect(() => {
+		const { activeTab } = router.query;
+		if (activeTab && typeof activeTab === 'string') {
+			const validSections = sections.map(s => s.id);
+			if (validSections.includes(activeTab)) {
+				setActiveSection(activeTab);
+			}
+		}
+	}, [router.query]);
+
+	const handleSectionChange = (sectionId: string) => {
+		setActiveSection(sectionId);
+		router.push(
+			{
+				pathname: router.pathname,
+				query: { ...router.query, activeTab: sectionId }
+			},
+			undefined,
+			{ shallow: true }
+		);
+	};
+
 	const sideMenuItems = sections.map(section => ({
 		text: section.label,
 		linkProps: {
 			href: `#${section.id}`,
 			onClick: (e: React.MouseEvent) => {
 				e.preventDefault();
-				setActiveSection(section.id);
+				handleSectionChange(section.id);
 			}
 		},
 		isActive: activeSection === section.id
@@ -107,7 +130,7 @@ const DocAPIv2 = () => {
 								<NavigationButtons
 									previousSection={previousSection}
 									nextSection={nextSection}
-									onSectionChange={setActiveSection}
+									onSectionChange={handleSectionChange}
 								/>
 							</>
 						)}
@@ -118,7 +141,7 @@ const DocAPIv2 = () => {
 								<NavigationButtons
 									previousSection={previousSection}
 									nextSection={nextSection}
-									onSectionChange={setActiveSection}
+									onSectionChange={handleSectionChange}
 								/>
 							</>
 						)}
@@ -129,7 +152,7 @@ const DocAPIv2 = () => {
 								<NavigationButtons
 									previousSection={previousSection}
 									nextSection={nextSection}
-									onSectionChange={setActiveSection}
+									onSectionChange={handleSectionChange}
 								/>
 							</>
 						)}
@@ -139,7 +162,5 @@ const DocAPIv2 = () => {
 		</div>
 	);
 };
-
-const useStyles = tss.withName(DocAPIv2.name).create(() => ({}));
 
 export default DocAPIv2;
