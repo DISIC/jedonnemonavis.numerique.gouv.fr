@@ -73,7 +73,7 @@ const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					"Ce point d'accès retourne les données de satisfaction des utilisateurs pour tous les services et formulaires liés à la clé fournie.",
+					"Ce point d'accès retourne les données de satisfaction pour tous les formulaires des services liés à la clé fournie.",
 				example: {
 					request: {
 						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],

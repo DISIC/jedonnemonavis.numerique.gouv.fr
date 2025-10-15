@@ -90,7 +90,7 @@ const AuthenticationTab = () => {
 			<p>
 				Une fois votre clé générée, incluez-la dans l'en-tête de vos requêtes :
 			</p>
-			<CodeBlock>
+			<CodeBlock hideCopy>
 				{`Authorization: Bearer VOTRE_CLE_API
 Content-Type: application/json`}
 			</CodeBlock>
