@@ -28,7 +28,7 @@ const ExamplesTab = () => {
 				Obtenir les statistiques du mois dernier
 			</h3>
 			<CodeBlock language="bash">
-				{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/stats?start_date=${startDate}&end_date=${endDate}&interval=day" \\
+				{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/statistiques?start_date=${startDate}&end_date=${endDate}&interval=day" \\
   -H "Authorization: Bearer VOTRE_CLE_API" \\
   -H "Content-Type: application/json"`}
 			</CodeBlock>
@@ -37,7 +37,7 @@ const ExamplesTab = () => {
 				Filtrer par type de question (satisfaction uniquement)
 			</h3>
 			<CodeBlock language="bash">
-				{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/stats?field_codes=satisfaction" \\
+				{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/statistiques?field_codes=satisfaction" \\
   -H "Authorization: Bearer VOTRE_CLE_API" \\
   -H "Content-Type: application/json"`}
 			</CodeBlock>
@@ -58,7 +58,7 @@ const services = await fetch(\`\${baseUrl}/services\`, {
 }).then(res => res.json());
 
 // Récupérer les stats avec filtres
-const stats = await fetch(\`\${baseUrl}/stats?start_date=${startDate}&interval=month\`, {
+const stats = await fetch(\`\${baseUrl}/statistiques?start_date=${startDate}&interval=month\`, {
   headers: {
     'Authorization': \`Bearer \${apiKey}\`,
     'Content-Type': 'application/json'
@@ -94,7 +94,7 @@ last_month_end = datetime(today.year, today.month, 1) - timedelta(days=1)
 # Récupérer les statistiques
 try:
     stats_response = requests.get(
-        f'{base_url}/stats',
+        f'{base_url}/statistiques',
         headers=headers,
         params={
             'start_date': last_month_start.strftime('%Y-%m-%d'),
