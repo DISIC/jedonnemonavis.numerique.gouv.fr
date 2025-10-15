@@ -13,6 +13,7 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Alert from '@codegouvfr/react-dsfr/Alert';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	form: FormWithElements;
@@ -23,6 +24,30 @@ interface Props {
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
 }
+
+const faqContents: { title: string; content: string }[] = [
+	{
+		title: 'Pourquoi créer un lien d’intégration ?',
+		content: ''
+	},
+	{
+		title: 'Comment nommer ses liens d’intégration ?',
+		content: ''
+	},
+	{
+		title:
+			'Comment définir le meilleur emplacement pour son bouton Je donne mon avis ?',
+		content: ''
+	},
+	{
+		title: 'Comment intégrer un lien sur mon site ?',
+		content: ''
+	},
+	{
+		title: 'Je souhaite modifier un formulaire qui est déjà en ligne',
+		content: ''
+	}
+];
 
 const LinksTab = ({
 	form,
@@ -159,6 +184,14 @@ const LinksTab = ({
 							ownRight={ownRight}
 						/>
 					))}
+			</div>
+
+			<div className={fr.cx('fr-col-12', 'fr-mt-16v')}>
+				{faqContents.map((faq, index) => (
+					<Accordion key={index} label={faq.title}>
+						<p>{faq.content}</p>
+					</Accordion>
+				))}
 			</div>
 		</div>
 	);
