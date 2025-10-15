@@ -69,7 +69,7 @@ const openAPIRouter = router({
 		.meta({
 			openapi: {
 				method: 'POST',
-				path: '/stats',
+				path: '/statistiques',
 				protect: true,
 				enabled: true,
 				summary:

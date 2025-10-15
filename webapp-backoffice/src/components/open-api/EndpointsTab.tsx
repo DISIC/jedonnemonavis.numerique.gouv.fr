@@ -57,7 +57,7 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 
 			<div className={fr.cx('fr-mt-8w')}>
 				<div className={fr.cx('fr-mb-2w')}>
-					<strong>/stats</strong>
+					<strong>/statistiques</strong>
 					<span className={fr.cx('fr-ml-2v', 'fr-text--sm')}>
 						Statistiques de satisfaction
 					</span>
@@ -212,7 +212,7 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 					</div>
 				</Accordion>
 
-				<SwaggerUI spec={filterDoc('/stats')} />
+				<SwaggerUI spec={filterDoc('/statistiques')} />
 			</div>
 		</div>
 	);
