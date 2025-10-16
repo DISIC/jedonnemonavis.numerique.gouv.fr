@@ -1,3 +1,4 @@
+import { useFilters } from '@/src/contexts/FiltersContext';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import { formatNumberWithSpaces } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -18,7 +19,6 @@ import { Toast } from '../../ui/Toast';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
 import NoFormsPanel from '../Pannels/NoFormsPanel';
-import { useFilters } from '@/src/contexts/FiltersContext';
 
 interface CreateModalProps {
 	buttonProps: {
@@ -118,7 +118,7 @@ const ProductCard = ({
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
@@ -413,57 +413,56 @@ const ProductCard = ({
 											/>
 											<div
 												className={cx(
-													fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6', 'fr-pb-0')
+													classes.productTitleContainer,
+													fr.cx('fr-pb-0')
 												)}
 											>
 												<span className={cx(classes.productTitle)}>
 													{form.title || form.form_template.title}
 												</span>
-											</div>
-											<div
-												className={cx(
-													fr.cx('fr-col', 'fr-col-12', 'fr-col-md-6'),
-													classes.formStatsWrapper
-												)}
-											>
-												<div className={classes.formStatsContent}>
-													{form.isDeleted ? (
-														<Badge severity="error" noIcon>
-															Fermé
-														</Badge>
-													) : (
-														<>
-															{getFormNewReviewCount(form.id, form.legacy) >
+												{form.isDeleted ? (
+													<Badge severity="error" noIcon>
+														Fermé
+													</Badge>
+												) : (
+													<>
+														{form.buttons.length === 0 ? (
+															<Badge severity="warning" small noIcon>
+																Configuration à terminer
+															</Badge>
+														) : (
+															getFormNewReviewCount(form.id, form.legacy) >
 																0 && (
-																<Badge
-																	severity="success"
-																	noIcon
-																	small
-																	className="fr-mr-4v"
-																>
+																<Badge severity="success" noIcon small>
 																	{getFormNewReviewCount(form.id, form.legacy)}{' '}
 																	NOUVELLES RÉPONSES
 																</Badge>
-															)}
-															<div className={fr.cx('fr-grid-row')}>
-																<span
-																	className={cx(
-																		fr.cx('fr-mr-2v'),
-																		classes.smallText
-																	)}
-																>
-																	Réponses déposées
-																</span>
-																<span className={fr.cx('fr-text--bold')}>
-																	{formatNumberWithSpaces(
-																		getFormReviewCount(form.id, form.legacy)
-																	)}
-																</span>
-															</div>
-														</>
-													)}
-												</div>
+															)
+														)}
+													</>
+												)}
 											</div>
+											{!form.isDeleted && (
+												<div className={cx(classes.formStatsWrapper)}>
+													<div className={classes.formStatsContent}>
+														<div className={fr.cx('fr-grid-row')}>
+															<span
+																className={cx(
+																	fr.cx('fr-mr-2v'),
+																	classes.smallText
+																)}
+															>
+																Réponses déposées
+															</span>
+															<span className={fr.cx('fr-text--bold')}>
+																{formatNumberWithSpaces(
+																	getFormReviewCount(form.id, form.legacy)
+																)}
+															</span>
+														</div>
+													</div>
+												</div>
+											)}
 										</div>
 									))}
 								{product.forms.length > 2 && (
@@ -534,6 +533,11 @@ const useStyles = tss.withName(ProductCard.name).create({
 			opacity: 0.2
 		}
 	},
+	productTitleContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: fr.spacing('4v')
+	},
 	productTitle: {
 		fontSize: '18px',
 		lineHeight: '1.5rem',
@@ -554,6 +558,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	formCard: {
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 		display: 'flex',
+		justifyContent: 'space-between',
 		position: 'relative',
 		flexWrap: 'wrap',
 		width: '100%',
