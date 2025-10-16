@@ -267,102 +267,105 @@ const ProductCard = ({
 					)}
 				>
 					<div
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-6', 'fr-col-md-6', 'fr-pb-1v'),
-							classes.titleSection
-						)}
+						className={cx(fr.cx('fr-col-12', 'fr-pb-1v'), classes.titleSection)}
 					>
-						<Link
-							href={`/administration/dashboard/product/${product.id}/forms`}
-							tabIndex={0}
-							title={`Voir les statistiques pour le service ${product.title}`}
-							className={cx(classes.productLink, fr.cx('fr-link'))}
-							onClick={() => clearFilters()}
-							style={{
-								pointerEvents: isDisabled ? 'none' : 'auto'
-							}}
-						>
-							<span className={cx(classes.productTitle)}>{product.title}</span>
-						</Link>
-					</div>
-					<div
-						className={cx(
-							fr.cx('fr-col', 'fr-col-6', 'fr-pb-1v'),
-							classes.badgesSection
-						)}
-					>
-						{(product.isTop250 || isDisabled) && (
-							<div className={classes.badgesContainer}>
-								{product.isTop250 && (
-									<Badge severity="info" noIcon small>
-										Démarche essentielle
-									</Badge>
-								)}
-								{isDisabled && (
-									<Badge noIcon small>
-										Service archivé
-									</Badge>
-								)}
-							</div>
-						)}
-						{isDisabled && (
-							<div className={cx(classes.buttonsCol)}>
+						<div className={cx(fr.cx('fr-col-9'), classes.titleWithBadges)}>
+							<Link
+								href={`/administration/dashboard/product/${product.id}/forms`}
+								tabIndex={0}
+								title={`Voir les statistiques pour le service ${product.title}`}
+								className={cx(classes.productLink, fr.cx('fr-link'))}
+								onClick={() => clearFilters()}
+								style={{
+									pointerEvents: isDisabled ? 'none' : 'auto'
+								}}
+							>
+								<span className={cx(classes.productTitle)}>
+									{product.title}
+								</span>
+							</Link>
+							{(product.isTop250 ||
+								isDisabled ||
+								product.forms.length === 0) && (
+								<div className={classes.badgesContainer}>
+									{product.isTop250 && (
+										<Badge severity="info" noIcon small>
+											Démarche essentielle
+										</Badge>
+									)}
+									{isDisabled && (
+										<Badge noIcon small>
+											Service archivé
+										</Badge>
+									)}
+									{product.forms.length === 0 && (
+										<Badge severity="warning" small noIcon>
+											Configuration à terminer
+										</Badge>
+									)}
+								</div>
+							)}
+						</div>
+						<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
+							{isDisabled && (
+								<div className={cx(classes.buttonsCol)}>
+									<Button
+										iconId={'ri-inbox-unarchive-line'}
+										iconPosition="right"
+										title={`Restaurer le produit « ${product.title} »`}
+										aria-label={`Restaurer le produit « ${product.title} »`}
+										priority="secondary"
+										size="small"
+										onClick={e => {
+											e.preventDefault();
+											onConfirmModalRestore.open();
+											push(['trackEvent', 'BO - Product', `Restore`]);
+										}}
+									>
+										Restaurer
+									</Button>
+								</div>
+							)}
+							{showFavoriteButton && !isDisabled && (
 								<Button
-									iconId={'ri-inbox-unarchive-line'}
-									iconPosition="right"
-									title={`Restaurer le produit « ${product.title} »`}
-									aria-label={`Restaurer le produit « ${product.title} »`}
-									priority="secondary"
+									title={
+										isFavorite
+											? `Supprimer le produit « ${product.title} » des favoris`
+											: `Ajouter le produit « ${product.title} » aux favoris`
+									}
+									aria-label={
+										isFavorite
+											? `Supprimer le produit « ${product.title} » des favoris`
+											: `Ajouter le produit « ${product.title} » aux favoris`
+									}
+									className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
+									priority="tertiary"
 									size="small"
 									onClick={e => {
 										e.preventDefault();
-										onConfirmModalRestore.open();
-										push(['trackEvent', 'BO - Product', `Restore`]);
+										if (isFavorite) {
+											deleteFavorite.mutate({
+												product_id: product.id,
+												user_id: userId
+											});
+											push(['trackEvent', 'BO - Product', `Set-Favorite`]);
+										} else {
+											createFavorite.mutate({
+												product_id: product.id,
+												user_id: userId
+											});
+											push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
+										}
 									}}
 								>
-									Restaurer
+									{isFavorite ? (
+										<Image alt="favoris ajouté" src={starFill} />
+									) : (
+										<Image alt="favoris retiré" src={starOutline} />
+									)}
 								</Button>
-							</div>
-						)}
-						{showFavoriteButton && !isDisabled && (
-							<Button
-								title={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								aria-label={
-									isFavorite
-										? `Supprimer le produit « ${product.title} » des favoris`
-										: `Ajouter le produit « ${product.title} » aux favoris`
-								}
-								className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
-								priority="tertiary"
-								size="small"
-								onClick={e => {
-									e.preventDefault();
-									if (isFavorite) {
-										deleteFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-										push(['trackEvent', 'BO - Product', `Set-Favorite`]);
-									} else {
-										createFavorite.mutate({
-											product_id: product.id,
-											user_id: userId
-										});
-										push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
-									}
-								}}
-							>
-								{isFavorite ? (
-									<Image alt="favoris ajouté" src={starFill} />
-								) : (
-									<Image alt="favoris retiré" src={starOutline} />
-								)}
-							</Button>
-						)}
+							)}
+						</div>
 					</div>
 					<div
 						className={cx(
@@ -378,10 +381,16 @@ const ProductCard = ({
 					{!isDisabled &&
 						!isLoadingReviewsCount &&
 						totalReviews !== undefined && (
-							<div className={cx(fr.cx('fr-col', 'fr-col-12', 'fr-col-md-12'))}>
-								{product.forms.length === 0 && (
-									<NoFormsPanel isSmall product={product} />
+							<div
+								className={cx(
+									fr.cx(
+										'fr-col',
+										'fr-col-12',
+										'fr-col-md-12',
+										product.forms.length === 0 && 'fr-hidden'
+									)
 								)}
+							>
 								{[
 									...product.forms.filter(f => !f.isDeleted),
 									...product.forms
@@ -445,21 +454,19 @@ const ProductCard = ({
 											{!form.isDeleted && (
 												<div className={cx(classes.formStatsWrapper)}>
 													<div className={classes.formStatsContent}>
-														<div className={fr.cx('fr-grid-row')}>
-															<span
-																className={cx(
-																	fr.cx('fr-mr-2v'),
-																	classes.smallText
-																)}
-															>
-																Réponses déposées
-															</span>
-															<span className={fr.cx('fr-text--bold')}>
-																{formatNumberWithSpaces(
-																	getFormReviewCount(form.id, form.legacy)
-																)}
-															</span>
-														</div>
+														<span
+															className={cx(
+																fr.cx('fr-mr-2v'),
+																classes.smallText
+															)}
+														>
+															Réponses déposées
+														</span>
+														<span className={fr.cx('fr-text--bold')}>
+															{formatNumberWithSpaces(
+																getFormReviewCount(form.id, form.legacy)
+															)}
+														</span>
 													</div>
 												</div>
 											)}
@@ -495,7 +502,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 			'.entitySection': {
 				order: 2
 			},
-			'.badgesSection': {
+			'.actionsSection': {
 				order: 3
 			},
 			'.statsSection': {
@@ -503,9 +510,12 @@ const useStyles = tss.withName(ProductCard.name).create({
 			}
 		}
 	},
-	titleSection: {},
+	titleSection: {
+		display: 'flex',
+		justifyContent: 'space-between'
+	},
 	entitySection: {},
-	badgesSection: {
+	actionsSection: {
 		display: 'flex',
 		alignItems: 'center',
 		justifyContent: 'end'
@@ -547,20 +557,28 @@ const useStyles = tss.withName(ProductCard.name).create({
 			textDecoration: 'underline'
 		}
 	},
+	titleWithBadges: {
+		display: 'flex',
+		gap: fr.spacing('2v'),
+		alignItems: 'center'
+	},
 	entityName: {
 		color: '#666666'
 	},
 	badgesContainer: {
 		display: 'flex',
+		alignItems: 'center',
+		height: '100%',
 		gap: fr.spacing('2v'),
-		marginRight: '1rem'
+		marginRight: '1rem',
+		textWrap: 'nowrap'
 	},
 	formCard: {
 		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 		display: 'flex',
 		justifyContent: 'space-between',
 		position: 'relative',
-		flexWrap: 'wrap',
+		flexWrap: 'nowrap',
 		width: '100%',
 		maxWidth: '100%',
 		marginLeft: 0,
@@ -585,6 +603,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		display: 'flex',
 		alignItems: 'center',
 		gap: fr.spacing('1v'),
+		textWrap: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			marginTop: fr.spacing('4v'),
 			justifyContent: 'start',
