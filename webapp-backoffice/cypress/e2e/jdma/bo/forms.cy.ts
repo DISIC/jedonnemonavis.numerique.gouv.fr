@@ -47,7 +47,7 @@ describe('jdma-forms', () => {
 	});
 
 	it('should create a button from the forms page', () => {
-		createButton('Emplacement 1');
+		createButton("Lien d'intégration 1");
 	});
 
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {

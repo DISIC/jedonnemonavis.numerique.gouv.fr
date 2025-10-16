@@ -104,7 +104,7 @@ export function createForm(name: string) {
 
 export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
-	cy.contains('button', 'Créer un emplacement').click();
+	cy.contains('button', "Créer un lien d'intégration").click();
 	cy.get(selectors.modal.button)
 		.should('be.visible')
 		.within(() => {

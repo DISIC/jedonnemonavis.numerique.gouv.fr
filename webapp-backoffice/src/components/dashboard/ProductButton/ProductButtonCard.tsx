@@ -186,7 +186,7 @@ const ProductButtonCard = (props: Props) => {
 														)
 													)}
 												/>
-												Fermer l'emplacement
+												Fermer le lien
 											</MenuItem>
 										)}
 									</Menu>
@@ -203,8 +203,8 @@ const ProductButtonCard = (props: Props) => {
 						description={
 							<>
 								<p>
-									Une tentative de dépôt d'avis a été effectuée sur cet
-									emplacement fermé. Nous vous invitons à supprimer le code HTML
+									Une tentative de dépôt d'avis a été effectuée sur depuis ce
+									lien fermé. Nous vous invitons à supprimer le code HTML
 									correspondant de la page concernée.
 								</p>
 								<small>

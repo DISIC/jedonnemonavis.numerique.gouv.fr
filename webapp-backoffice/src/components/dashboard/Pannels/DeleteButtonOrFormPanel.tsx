@@ -18,13 +18,13 @@ const DeleteButtonOrFormPanel = ({ isForForm }: { isForForm?: boolean }) => {
 				/>
 				<div className={fr.cx('fr-ml-4w')}>
 					<p className={cx(fr.cx('fr-mb-3v'))}>
-						Les boutons “Je donne mon avis” sont
-						<b> visibles par les usagers </b>
-						tant que les codes HTML correspondant aux emplacements n’ont pas été
-						retirés des pages.
+						Fermer un lien d’intégration ne supprime pas le bouton Je Donne Mon
+						Avis de votre site.{' '}
+						<strong>Il est toujours visible par les usagers.</strong>
 					</p>
 					<p className={cx(fr.cx('fr-mb-0'))}>
-						Pensez à vérifier que c’est le cas sur votre service numérique.
+						Pensez à supprimer le code correspondant sur votre site ou sur
+						Démarche Simplifiée.
 					</p>
 				</div>
 			</div>
@@ -32,15 +32,15 @@ const DeleteButtonOrFormPanel = ({ isForForm }: { isForForm?: boolean }) => {
 			<ul className={fr.cx('fr-mt-4v', 'fr-mb-6v', 'fr-ml-2v')}>
 				<li>
 					Le formulaire ne recevra plus de donnée
-					{!isForForm && ' de cet emplacement'}
+					{!isForForm && ' de ce bouton'}
 				</li>
 				<li>
 					Les usagers n’auront plus accès au formulaire
-					{!isForForm && ' via cet emplacement'}
+					{!isForForm && ' via ce bouton'}
 				</li>
 				<li>
 					Vous aurez toujours accès aux statistiques récoltées avant la
-					fermeture{!isForForm ? ' de l’emplacement' : ' du formulaire'}
+					fermeture{!isForForm ? " du lien d'intégration" : ' du formulaire'}
 				</li>
 				<li>Cette action est irréversible</li>
 			</ul>
