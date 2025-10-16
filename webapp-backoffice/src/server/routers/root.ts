@@ -11,7 +11,7 @@ import { domainRouter } from './domain';
 import { userRequestRouter } from './userRequest';
 import { userEventRouter } from './userEvent';
 import { answerRouter } from './answer';
-import { openAPIRouter } from './openapi.tsx';
+import { openAPIRouter } from './openapi';
 import { apiKeyRouter } from './apiKey';
 import { reviewRouter } from './review';
 import { reviewCustomRouter } from './reviewCustom';
