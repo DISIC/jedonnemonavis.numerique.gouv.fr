@@ -1,11 +1,9 @@
 import { AdminEntityRightUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
-import JdmaInviteEmail from '@/react-email/emails/jdma-invite-email';
-import JdmaUserInviteEmail from '@/react-email/emails/jdma-user-invite-email';
 import { protectedProcedure, router } from '@/src/server/trpc';
 import { sendMail } from '@/src/utils/mailer';
+import { renderInviteEmail, renderUserInviteEmail } from '@/src/utils/emails';
 import { generateRandomString } from '@/src/utils/tools';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { render } from '@react-email/components';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -133,15 +131,13 @@ export const adminEntityRightRouter = router({
 
 			if (newAdminEntityRight.user === null) {
 				const token = await generateInviteToken(ctx.prisma, user_email);
-				const emailHtml = await render(
-					<JdmaUserInviteEmail
-						inviterName={contextUser.name || "Quelqu'un"}
-						recipientEmail={user_email.toLowerCase()}
-						inviteToken={token}
-						entityName={newAdminEntityRight.entity.name}
-						baseUrl={process.env.NODEMAILER_BASEURL}
-					/>
-				);
+				const emailHtml = await renderUserInviteEmail({
+					inviterName: contextUser.name || "Quelqu'un",
+					recipientEmail: user_email.toLowerCase(),
+					inviteToken: token,
+					entityName: newAdminEntityRight.entity.name,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
 
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
@@ -155,13 +151,11 @@ export const adminEntityRightRouter = router({
 					})}`
 				);
 			} else {
-				const emailHtml = await render(
-					<JdmaInviteEmail
-						inviterName={contextUser.name || "Quelqu'un"}
-						entityName={newAdminEntityRight.entity.name}
-						baseUrl={process.env.NODEMAILER_BASEURL}
-					/>
-				);
+				const emailHtml = await renderInviteEmail({
+					inviterName: contextUser.name || "Quelqu'un",
+					entityName: newAdminEntityRight.entity.name,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
 				await sendMail(
 					`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
 					user_email,
@@ -205,15 +199,13 @@ export const adminEntityRightRouter = router({
 
 			const token = await generateInviteToken(ctx.prisma, user_email);
 
-			const emailHtml = await render(
-				<JdmaUserInviteEmail
-					inviterName={contextUser.name || "Quelqu'un"}
-					recipientEmail={user_email.toLowerCase()}
-					inviteToken={token}
-					entityName={entity.name}
-					baseUrl={process.env.NODEMAILER_BASEURL}
-				/>
-			);
+			const emailHtml = await renderUserInviteEmail({
+				inviterName: contextUser.name || "Quelqu'un",
+				recipientEmail: user_email.toLowerCase(),
+				inviteToken: token,
+				entityName: entity.name,
+				baseUrl: process.env.NODEMAILER_BASEURL
+			});
 
 			await sendMail(
 				'Invitation à rejoindre « Je donne mon avis »',

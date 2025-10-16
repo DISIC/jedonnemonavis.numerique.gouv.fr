@@ -1,15 +1,7 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaUserInviteEmailProps {
-	inviterName: string;
-	recipientEmail: string;
-	inviteToken: string;
-	productTitle?: string;
-	entityName?: string;
-	baseUrl?: string;
-}
+import { JdmaUserInviteEmailProps } from './interface';
 
 export const JdmaUserInviteEmail = ({
 	inviterName = 'Jean Dupont',

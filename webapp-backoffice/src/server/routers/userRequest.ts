@@ -8,10 +8,11 @@ import {
 } from '@/prisma/generated/zod';
 import crypto from 'crypto';
 import { sendMail } from '@/src/utils/mailer';
+import {
+	renderUserRequestAcceptedEmail,
+	renderUserRequestRefusedEmail
+} from '@/src/utils/emails';
 import { generateValidationToken, makeRelationFromUserInvite } from './user';
-import { render } from '@react-email/components';
-import JdmaUserRequestAcceptedEmail from '@/react-email/emails/jdma-user-request-accepted-email';
-import JdmaUserRequestRefusedEmail from '@/react-email/emails/jdma-user-request-refused-email';
 
 export async function createUserRequest(
 	prisma: PrismaClient,
@@ -76,8 +77,8 @@ export async function updateUserRequest(
 			});*/
 
 			const foundUser = await prisma.user.findFirst({
-				where: { id: updatedUserRequest.user.id}
-			})
+				where: { id: updatedUserRequest.user.id }
+			});
 
 			const token = await generateValidationToken(
 				prisma,
@@ -95,13 +96,11 @@ export async function updateUserRequest(
 				});
 			}
 
-			if(foundUser) {
-				const emailHtml = await render(
-					<JdmaUserRequestAcceptedEmail
-						token={token}
-						baseUrl={process.env.NODEMAILER_BASEURL}
-					/>
-				);
+			if (foundUser) {
+				const emailHtml = await renderUserRequestAcceptedEmail({
+					token,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
 
 				await sendMail(
 					`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
@@ -120,12 +119,10 @@ export async function updateUserRequest(
 				where: { id: updatedUserRequest.user.id }
 			});
 
-			const emailHtml = await render(
-				<JdmaUserRequestRefusedEmail
-					message={message}
-					baseUrl={process.env.NODEMAILER_BASEURL}
-				/>
-			);
+			const emailHtml = await renderUserRequestRefusedEmail({
+				message,
+				baseUrl: process.env.NODEMAILER_BASEURL
+			});
 
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,

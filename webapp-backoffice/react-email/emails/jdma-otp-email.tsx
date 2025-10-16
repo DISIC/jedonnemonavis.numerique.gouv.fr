@@ -1,11 +1,7 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaOtpEmailProps {
-	code: string;
-	baseUrl?: string;
-}
+import { JdmaOtpEmailProps } from './interface';
 
 export const JdmaOtpEmail = ({
 	code = '123456',

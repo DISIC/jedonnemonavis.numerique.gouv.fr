@@ -1,30 +1,7 @@
 import { Column, Link, Row, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface FormWithReviews {
-	formId: number;
-	formTitle: string;
-	reviewCount: number;
-}
-
-interface ProductWithReviews {
-	title: string;
-	id: number;
-	nbReviews: number;
-	entityName?: string;
-	forms?: FormWithReviews[];
-}
-
-interface JdmaNotificationsEmailProps {
-	userId?: number;
-	frequency?: 'daily' | 'weekly' | 'monthly';
-	totalNbReviews?: number;
-	startDate?: Date;
-	endDate?: Date;
-	products?: ProductWithReviews[];
-	baseUrl?: string;
-}
+import { JdmaNotificationsEmailProps } from './interface';
 
 const formatNumber = (num: number) => {
 	return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');

@@ -6,9 +6,8 @@ import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
+import { renderClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
-import { render } from '@react-email/components';
-import JdmaClosedButtonOrFormEmail from '@/react-email/emails/jdma-closed-button-or-form-email';
 
 export const formRouter = router({
 	getById: protectedProcedure
@@ -160,22 +159,20 @@ export const formRouter = router({
 				].filter(email => email !== null) as string[];
 
 				for (const email of emails) {
-					const emailHtml = await render(
-						<JdmaClosedButtonOrFormEmail
-							userName={ctx.session.user.name || "Quelqu'un"}
-							formTitle={deletedForm.title ?? deletedForm.form_template.title}
-							form={{
-								id: deletedForm.id,
-								title: deletedForm.title ?? deletedForm.form_template.title
-							}}
-							product={{
-								id: product?.id as number,
-								title: product?.title as string,
-								entityName: product?.entity.name as string
-							}}
-							baseUrl={process.env.NODEMAILER_BASEURL}
-						/>
-					);
+					const emailHtml = await renderClosedButtonOrFormEmail({
+						userName: ctx.session.user.name || "Quelqu'un",
+						formTitle: deletedForm.title ?? deletedForm.form_template.title,
+						form: {
+							id: deletedForm.id,
+							title: deletedForm.title ?? deletedForm.form_template.title
+						},
+						product: {
+							id: product?.id as number,
+							title: product?.title as string,
+							entityName: product?.entity.name as string
+						},
+						baseUrl: process.env.NODEMAILER_BASEURL
+					});
 
 					await sendMail(
 						`Fermeture du formulaire «${deletedForm.title ?? deletedForm.form_template.title}» du service «${product?.title}»`,

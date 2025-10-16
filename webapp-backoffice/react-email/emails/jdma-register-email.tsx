@@ -1,16 +1,12 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaRegisterEmailProps {
-	token: string;
-	baseUrl?: string;
-}
+import { JdmaTokenEmailProps } from './interface';
 
 export const JdmaRegisterEmail = ({
 	token = 'example-token-123',
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
-}: JdmaRegisterEmailProps) => {
+}: JdmaTokenEmailProps) => {
 	const link = `${baseUrl}/register/validate?${new URLSearchParams({ token })}`;
 
 	return (

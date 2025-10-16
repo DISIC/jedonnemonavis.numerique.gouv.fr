@@ -1,12 +1,7 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaProductArchivedEmailProps {
-	userName: string;
-	productTitle: string;
-	baseUrl?: string;
-}
+import { JdmaProductArchivedEmailProps } from './interface';
 
 export const JdmaProductArchivedEmail = ({
 	userName = 'Jean Dupont',

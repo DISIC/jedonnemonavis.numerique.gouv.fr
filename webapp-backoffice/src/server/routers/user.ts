@@ -2,17 +2,18 @@ import {
 	UserCreateInputSchema,
 	UserUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
-import JdmaOtpEmail from '@/react-email/emails/jdma-otp-email';
-import JdmaRegisterEmail from '@/react-email/emails/jdma-register-email';
-import JdmaResetPasswordEmail from '@/react-email/emails/jdma-reset-password-email';
 import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { sendMail } from '@/src/utils/mailer';
+import {
+	renderOtpEmail,
+	renderRegisterEmail,
+	renderResetPasswordEmail
+} from '@/src/utils/emails';
 import {
 	extractDomainFromEmail,
 	generateRandomString
 } from '@/src/utils/tools';
 import { Prisma, PrismaClient, User } from '@prisma/client';
-import { render } from '@react-email/components';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
@@ -34,9 +35,10 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 			expiration_date: new Date(now.getTime() + 60 * 60 * 1000)
 		}
 	});
-	const emailHtml = await render(
-		<JdmaOtpEmail code={code} baseUrl={process.env.NODEMAILER_BASEURL} />
-	);
+	const emailHtml = await renderOtpEmail({
+		code,
+		baseUrl: process.env.NODEMAILER_BASEURL
+	});
 
 	await sendMail(
 		'Votre mot de passe temporaire',
@@ -524,12 +526,10 @@ export const userRouter = router({
 						createdUser.id
 					);
 
-					const emailHtml = await render(
-						<JdmaRegisterEmail
-							token={token}
-							baseUrl={process.env.NODEMAILER_BASEURL}
-						/>
-					);
+					const emailHtml = await renderRegisterEmail({
+						token,
+						baseUrl: process.env.NODEMAILER_BASEURL
+					});
 
 					await sendMail(
 						'Confirmez votre email',
@@ -761,18 +761,16 @@ export const userRouter = router({
 			await ctx.prisma.userResetToken.create({
 				data: {
 					user_id: user.id,
-					token,
+					token: token,
 					user_email: user.email.toLowerCase(),
 					expiration_date: new Date(new Date().getTime() + 15 * 60 * 1000)
 				}
 			});
 
-			const emailHtml = await render(
-				<JdmaResetPasswordEmail
-					token={token}
-					baseUrl={process.env.NODEMAILER_BASEURL}
-				/>
-			);
+			const emailHtml = await renderResetPasswordEmail({
+				token,
+				baseUrl: process.env.NODEMAILER_BASEURL
+			});
 
 			await sendMail(
 				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',

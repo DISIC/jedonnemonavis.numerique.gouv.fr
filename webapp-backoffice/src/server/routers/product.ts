@@ -20,9 +20,10 @@ import {
 import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
 import { sendMail } from '@/src/utils/mailer';
-import { render } from '@react-email/components';
-import JdmaProductArchivedEmail from '@/react-email/emails/jdma-product-archived-email';
-import JdmaProductRestoredEmail from '@/react-email/emails/jdma-product-restored-email';
+import {
+	renderProductArchivedEmail,
+	renderProductRestoredEmail
+} from '@/src/utils/emails';
 
 export const checkRightToProceed = async ({
 	prisma,
@@ -449,13 +450,11 @@ export const productRouter = router({
 			].filter(email => email !== null) as string[];
 
 			for (const email of emails) {
-				const emailHtml = await render(
-					<JdmaProductArchivedEmail
-						userName={ctx.session.user.name || "Quelqu'un"}
-						productTitle={updatedProduct.title}
-						baseUrl={process.env.NODEMAILER_BASEURL}
-					/>
-				);
+				const emailHtml = await renderProductArchivedEmail({
+					userName: ctx.session.user.name || "Quelqu'un",
+					productTitle: updatedProduct.title,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
 
 				await sendMail(
 					`Suppression du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
@@ -504,14 +503,12 @@ export const productRouter = router({
 			].filter(email => email !== null) as string[];
 
 			for (const email of emails) {
-				const emailHtml = await render(
-					<JdmaProductRestoredEmail
-						userName={ctx.session.user.name || "Quelqu'un"}
-						productTitle={updatedProduct.title}
-						productId={updatedProduct.id}
-						baseUrl={process.env.NODEMAILER_BASEURL}
-					/>
-				);
+				const emailHtml = await renderProductRestoredEmail({
+					userName: ctx.session.user.name || "Quelqu'un",
+					productTitle: updatedProduct.title,
+					productId: updatedProduct.id,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
 
 				await sendMail(
 					`Restauration du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,

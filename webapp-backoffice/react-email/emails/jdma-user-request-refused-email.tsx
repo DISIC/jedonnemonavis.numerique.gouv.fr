@@ -1,11 +1,7 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaUserRequestRefusedEmailProps {
-	message?: string;
-	baseUrl?: string;
-}
+import { JdmaUserRequestRefusedEmailProps } from './interface';
 
 export const JdmaUserRequestRefusedEmail = ({
 	message,

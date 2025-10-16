@@ -4,32 +4,30 @@ import {
 	router
 } from '@/src/server/trpc';
 import { ZOpenApiStatsOutput } from '@/src/types/custom';
+import { renderJdmaNotificationsEmail } from '@/src/utils/emails';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
+import { sendMail } from '@/src/utils/mailer';
+import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
 import { Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
 import {
-	startOfDay,
 	endOfDay,
-	startOfWeek,
-	endOfWeek,
-	startOfMonth,
 	endOfMonth,
+	endOfWeek,
 	isMonday,
-	subWeeks,
+	startOfDay,
+	startOfMonth,
+	startOfWeek,
 	subDays,
-	subMonths
+	subMonths,
+	subWeeks
 } from 'date-fns';
-import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
-import { getEmailNotificationsHtml } from '@/src/utils/emails';
-import { sendMail } from '@/src/utils/mailer';
-import { render } from '@react-email/components';
-import JdmaNotificationsEmail from '@/react-email/emails/jdma-notifications-email';
+import { z } from 'zod';
 
 const maxNbProducts = 10;
 
@@ -604,23 +602,21 @@ export const openAPIRouter = router({
 					);
 
 					if (accessibleProducts.length > 0) {
-						const emailHtml = await render(
-							<JdmaNotificationsEmail
-								userId={user.id}
-								frequency={scope}
-								totalNbReviews={totalNewReviews}
-								startDate={startDate}
-								endDate={endDate}
-								products={accessibleProducts.map(product => ({
-									title: product.productTitle,
-									id: product.productId,
-									nbReviews: product.totalReviews,
-									entityName: product.entityName,
-									forms: product.forms
-								}))}
-								baseUrl={process.env.NODEMAILER_BASEURL}
-							/>
-						);
+						const emailHtml = await renderJdmaNotificationsEmail({
+							userId: user.id,
+							frequency: scope,
+							totalNbReviews: totalNewReviews,
+							startDate,
+							endDate,
+							products: accessibleProducts.map(product => ({
+								title: product.productTitle,
+								id: product.productId,
+								nbReviews: product.totalReviews,
+								entityName: product.entityName,
+								forms: product.forms
+							})),
+							baseUrl: process.env.NODEMAILER_BASEURL
+						});
 
 						sendMail(
 							'Nouveaux avis JDMA',

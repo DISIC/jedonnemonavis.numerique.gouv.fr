@@ -1,16 +1,12 @@
 import { Link, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaResetPasswordEmailProps {
-	token: string;
-	baseUrl?: string;
-}
+import { JdmaTokenEmailProps } from './interface';
 
 export const JdmaResetPasswordEmail = ({
 	token = 'example-token-123',
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
-}: JdmaResetPasswordEmailProps) => {
+}: JdmaTokenEmailProps) => {
 	const link = `${baseUrl}/reset-password?${new URLSearchParams({ token })}`;
 
 	return (

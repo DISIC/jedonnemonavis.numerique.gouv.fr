@@ -1,15 +1,7 @@
 import { Column, Img, Link, Row, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
-
-interface JdmaClosedButtonOrFormEmailProps {
-	userName: string;
-	buttonTitle?: string;
-	formTitle?: string;
-	form: { id: number; title: string };
-	product: { id: number; title: string; entityName: string };
-	baseUrl?: string;
-}
+import { JdmaClosedButtonOrFormEmailProps } from './interface';
 
 export const JdmaClosedButtonOrFormEmail = ({
 	userName = 'Jean Dupont',
