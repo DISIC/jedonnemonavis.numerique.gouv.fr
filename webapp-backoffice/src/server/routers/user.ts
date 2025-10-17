@@ -1,24 +1,22 @@
-import { z } from 'zod';
-import { router, publicProcedure, protectedProcedure } from '@/src/server/trpc';
 import {
 	UserCreateInputSchema,
-	UserUncheckedUpdateInputSchema,
-	UserUpdateInputSchema
+	UserUncheckedUpdateInputSchema
 } from '@/prisma/generated/zod';
-import bcrypt from 'bcrypt';
-import { Prisma, PrismaClient, User } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
+import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import { sendMail } from '@/src/utils/mailer';
+import {
+	renderOtpEmail,
+	renderRegisterEmail,
+	renderResetPasswordEmail
+} from '@/src/utils/emails';
 import {
 	extractDomainFromEmail,
 	generateRandomString
 } from '@/src/utils/tools';
-import { sendMail } from '@/src/utils/mailer';
-import {
-	getEmailNotificationsHtml,
-	getOTPEmailHtml,
-	getRegisterEmailHtml,
-	getResetPasswordEmailHtml
-} from '@/src/utils/emails';
+import { Prisma, PrismaClient, User } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
 
 export async function createOTP(prisma: PrismaClient, user: User) {
 	const now = new Date();
@@ -37,11 +35,15 @@ export async function createOTP(prisma: PrismaClient, user: User) {
 			expiration_date: new Date(now.getTime() + 60 * 60 * 1000)
 		}
 	});
+	const emailHtml = await renderOtpEmail({
+		code,
+		baseUrl: process.env.NODEMAILER_BASEURL
+	});
 
 	await sendMail(
 		'Votre mot de passe temporaire',
 		user.email.toLowerCase(),
-		getOTPEmailHtml(code),
+		emailHtml,
 		`Votre mot de passe temporaire valable 60 minutes : ${code}`
 	);
 }
@@ -524,10 +526,15 @@ export const userRouter = router({
 						createdUser.id
 					);
 
+					const emailHtml = await renderRegisterEmail({
+						token,
+						baseUrl: process.env.NODEMAILER_BASEURL
+					});
+
 					await sendMail(
 						'Confirmez votre email',
 						createdUser.email.toLowerCase(),
-						getRegisterEmailHtml(token),
+						emailHtml,
 						`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
 					);
 				} else {
@@ -613,7 +620,7 @@ export const userRouter = router({
 				createOTP(ctx.prisma, user);
 
 				return { data: undefined, metadata: { statusCode: 206 } };
-			} else if(user.proconnect_account) {
+			} else if (user.proconnect_account) {
 				return { data: undefined, metadata: { statusCode: 203 } };
 			} else if (!user.active) {
 				// Code: 423
@@ -754,16 +761,21 @@ export const userRouter = router({
 			await ctx.prisma.userResetToken.create({
 				data: {
 					user_id: user.id,
-					token,
+					token: token,
 					user_email: user.email.toLowerCase(),
 					expiration_date: new Date(new Date().getTime() + 15 * 60 * 1000)
 				}
 			});
 
+			const emailHtml = await renderResetPasswordEmail({
+				token,
+				baseUrl: process.env.NODEMAILER_BASEURL
+			});
+
 			await sendMail(
 				forgot ? 'Mot de passe oublié' : 'Réinitialisation du mot de passe',
 				email.toLowerCase(),
-				getResetPasswordEmailHtml(token),
+				emailHtml,
 				`Cliquez sur ce lien pour réinitialiser votre mot de passe : ${
 					process.env.NODEMAILER_BASEURL
 				}/reset-password?${new URLSearchParams({ token })}`

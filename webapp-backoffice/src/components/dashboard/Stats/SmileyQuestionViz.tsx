@@ -113,7 +113,7 @@ const SmileyQuestionViz = ({
 		return Object.entries(resultFieldCodeInterval.data).map(
 			([month, responses]) => {
 				if (responses.length === 0) {
-					return { name: month, value: 0 };
+					return { name: month, value: null };
 				}
 
 				const total = responses.reduce(

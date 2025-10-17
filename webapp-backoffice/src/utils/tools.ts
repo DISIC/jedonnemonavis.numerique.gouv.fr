@@ -6,6 +6,7 @@ import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -564,4 +565,17 @@ export const getDateWhereFromUTCRange = (
 	}
 
 	return range;
+};
+
+export const getValidTabSlug = (tab: string | undefined): TabsSlug => {
+	if (!tab) return 'dashboard';
+	switch (tab) {
+		case 'dashboard':
+		case 'reviews':
+		case 'stats':
+		case 'settings':
+			return tab;
+		default:
+			return 'dashboard';
+	}
 };

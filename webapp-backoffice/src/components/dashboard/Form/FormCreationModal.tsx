@@ -5,7 +5,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Form } from '@prisma/client';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { Toast } from '../../ui/Toast';
@@ -14,11 +14,12 @@ interface Props {
 	modal: CustomModalProps;
 	form?: Form;
 	productId: number;
+	defaultTitle?: string;
 }
 
 type FormValues = Omit<Form, 'id' | 'created_at' | 'updated_at'>;
 
-const FormCreationModal = ({ modal, form, productId }: Props) => {
+const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 	const modalOpen = useIsModalOpen(modal);
@@ -38,9 +39,15 @@ const FormCreationModal = ({ modal, form, productId }: Props) => {
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
-			title: form?.title || rootFormTemplate?.data?.title || ''
+			title: form?.title || defaultTitle || rootFormTemplate?.data?.title || ''
 		}
 	});
+
+	useEffect(() => {
+		reset({
+			title: form?.title || defaultTitle || rootFormTemplate?.data?.title || ''
+		});
+	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
 

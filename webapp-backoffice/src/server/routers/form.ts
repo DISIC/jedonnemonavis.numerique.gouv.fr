@@ -6,7 +6,7 @@ import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
-import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
+import { renderClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 
 export const formRouter = router({
@@ -158,26 +158,29 @@ export const formRouter = router({
 					...adminEntityRights.map(aer => aer.user_email)
 				].filter(email => email !== null) as string[];
 
-				emails.forEach((email: string) => {
-					sendMail(
+				for (const email of emails) {
+					const emailHtml = await renderClosedButtonOrFormEmail({
+						userName: ctx.session.user.name || "Quelqu'un",
+						formTitle: deletedForm.title ?? deletedForm.form_template.title,
+						form: {
+							id: deletedForm.id,
+							title: deletedForm.title ?? deletedForm.form_template.title
+						},
+						product: {
+							id: product?.id as number,
+							title: product?.title as string,
+							entityName: product?.entity.name as string
+						},
+						baseUrl: process.env.NODEMAILER_BASEURL
+					});
+
+					await sendMail(
 						`Fermeture du formulaire «${deletedForm.title ?? deletedForm.form_template.title}» du service «${product?.title}»`,
 						email,
-						getClosedButtonOrFormEmail({
-							contextUser: ctx.session.user,
-							formTitle: deletedForm.title ?? deletedForm.form_template.title,
-							form: {
-								id: deletedForm.id,
-								title: deletedForm.title ?? deletedForm.form_template.title
-							},
-							product: {
-								id: product?.id as number,
-								title: product?.title as string,
-								entityName: product?.entity.name as string
-							}
-						}),
+						emailHtml,
 						`Fermeture du formulaire «${deletedForm.title || deletedForm.form_template.title}» du service «${product?.title}»`
 					);
-				});
+				}
 			}
 
 			return { data: deletedForm };

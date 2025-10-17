@@ -2,6 +2,7 @@ import { translateMonthToFrench } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import {
 	CartesianGrid,
+	Dot,
 	Legend,
 	Line,
 	LineChart,
@@ -39,7 +40,7 @@ const CustomLineChart = ({
 	customHeight
 }: {
 	data:
-		| { value: number | number[]; name: string }[]
+		| { value: number | number[] | null; name: string }[]
 		| { [key: string]: string | number; name: string }[];
 	dataKeys?: string[];
 	labelAxisY: string;
@@ -47,6 +48,24 @@ const CustomLineChart = ({
 	customHeight?: number;
 }) => {
 	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+
+	const CustomDot = (props: any) => {
+		const { cx, cy, payload, dataKey } = props;
+		const value = payload[dataKey];
+		if (value === null) {
+			return null;
+		}
+		return (
+			<Dot
+				cx={cx}
+				cy={cy}
+				r={3}
+				fill={props.stroke || 'black'}
+				stroke="white"
+				strokeWidth={1}
+			/>
+		);
+	};
 
 	return (
 		<ResponsiveContainer
@@ -108,11 +127,26 @@ const CustomLineChart = ({
 				{!dataKeys ? (
 					<>
 						<Tooltip formatter={value => [value, labelAxisY]} cursor={false} />
+						{/* Dashed line that connects through nulls */}
 						<Line
 							type="linear"
 							dataKey="value"
 							stroke="black"
 							strokeWidth={2}
+							dot={false}
+							tooltipType="none"
+							connectNulls={true}
+							strokeDasharray="5 5"
+							strokeOpacity={0.6}
+						/>
+						{/* Solid line for non-null values only */}
+						<Line
+							type="linear"
+							dataKey="value"
+							stroke="black"
+							strokeWidth={2}
+							dot={<CustomDot />}
+							connectNulls={false}
 						/>
 					</>
 				) : (
