@@ -1,4 +1,5 @@
 import { selectors } from '../selectors';
+import { displayViolationsTable } from '../tools';
 import {
 	firstNameTest,
 	invitedEmailBis,
@@ -55,6 +56,12 @@ export function testEmail({
 	expectedMEssage = ''
 }) {
 	login(invitedEmailBis, userPassword);
+	cy.injectAxe();
+	cy.checkA11y(
+		null,
+		{ includedImpacts: ['moderate', 'serious', 'critical'] },
+		displayViolationsTable
+	);
 	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 	cy.contains('li', selectors.menu.account).click({ force: true });
 	clickModifyCard(selectors.card.credentials);

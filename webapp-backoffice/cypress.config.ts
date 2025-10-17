@@ -1,5 +1,4 @@
 import { defineConfig } from 'cypress';
-import { Client, ClientConfig } from 'pg';
 
 export default defineConfig({
 	e2e: {
@@ -17,9 +16,15 @@ export default defineConfig({
 				log(message) {
 					console.log(message);
 					return null;
+				},
+				table(message) {
+					console.table(message);
+
+					return null;
 				}
 			});
 		},
+
 		baseUrl: process.env.NEXTAUTH_URL
 	}
 });
