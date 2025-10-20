@@ -1,31 +1,24 @@
+import { CustomModalProps } from '@/src/types/custom';
+import { createFilterOptionsWithArgument } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { tss } from 'tss-react/dsfr';
-import { useDebounce } from 'usehooks-ts';
-import Button from '@codegouvfr/react-dsfr/Button';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Entity, Product } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import { useRouter } from 'next/router';
 import React, { useEffect, useRef } from 'react';
-import { trpc } from '@/src/utils/trpc';
 import {
 	Controller,
 	SubmitHandler,
 	useFieldArray,
-	useForm,
-	useFormContext
+	useForm
 } from 'react-hook-form';
-import { useRouter } from 'next/router';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import {
-	autocompleteFilterOptions,
-	createFilterOptionsWithArgument
-} from '@/src/utils/tools';
-import { on } from 'events';
-import { Icon } from '@mui/material';
-import { push } from '@socialgouv/matomo-next';
-import { CustomModalProps } from '@/src/types/custom';
+import { tss } from 'tss-react/dsfr';
+import { useDebounce } from 'usehooks-ts';
 
 interface Props {
 	modal: CustomModalProps;
