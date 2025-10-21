@@ -41,9 +41,7 @@ const ProductButtonCard = (props: Props) => {
 
 	return (
 		<>
-			<div
-				className={cx(classes.card, fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'))}
-			>
+			<div className={cx(classes.card, fr.cx('fr-card', 'fr-p-2w'))}>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
