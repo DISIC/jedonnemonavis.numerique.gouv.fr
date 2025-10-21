@@ -1,6 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
@@ -10,7 +10,7 @@ import { tss } from 'tss-react/dsfr';
 
 interface OnboardingLayoutProps {
 	children: React.ReactNode;
-	showHeader?: boolean;
+	title?: string;
 	showActions?: boolean;
 	isSkippable?: boolean;
 	isCancelable?: boolean;
@@ -21,13 +21,13 @@ interface OnboardingLayoutProps {
 
 const OnboardingLayout = ({
 	children,
-	showHeader,
-	showActions,
+	showActions = true,
 	isSkippable,
 	isCancelable,
 	confirmText,
 	onCancel,
-	onConfirm
+	onConfirm,
+	title
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: showActions });
@@ -155,31 +155,20 @@ const OnboardingLayout = ({
 
 	return (
 		<>
-			{showHeader && (
-				<Header
-					brandTop={
-						<>
-							RÉPUBLIQUE <br /> FRANÇAISE
-						</>
-					}
-					homeLinkProps={{
-						href: !session?.user ? '/' : '/administration/dashboard/products',
-						title: "Je donne mon avis, retour à l'accueil"
-					}}
-					quickAccessItems={quickAccessItems}
-					className={classes.navigation}
-					id="fr-header-public-header"
-					serviceTitle="Je donne mon avis"
-					serviceTagline="La voix de vos usagers"
-				/>
-			)}
 			<main
 				id="main"
 				role="main"
 				tabIndex={-1}
 				className={classes.mainContainer}
 			>
-				{children}
+				<div className={classes.stepContent}>
+					<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
+					<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
+						Les champs marqués d&apos;un{' '}
+						<span className={cx(classes.asterisk)}>*</span> sont obligatoires
+					</p>
+					{children}
+				</div>
 			</main>
 			{showActions && (
 				<section
@@ -280,7 +269,19 @@ const useStyles = tss
 			overflowY: 'auto',
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 			paddingTop: fr.spacing('20v'),
-			paddingBottom: fr.spacing('10v')
+			paddingBottom: fr.spacing('10v'),
+			[fr.breakpoints.down('md')]: {
+				padding: 0
+			}
+		},
+		stepContent: {
+			padding: fr.spacing('10v'),
+			backgroundColor: 'white',
+			width: fr.breakpoints.values.md,
+			[fr.breakpoints.down('md')]: {
+				width: '100%',
+				height: '100%'
+			}
 		},
 		actionsContainer: {
 			position: 'fixed',
@@ -294,10 +295,26 @@ const useStyles = tss
 			height: fr.spacing('20v'),
 			backgroundColor: 'white',
 			borderTop: `solid 1px ${fr.colors.decisions.border.default.grey.default}`,
-			...fr.spacing('padding', { topBottom: '4v', rightLeft: '10v' })
+			...fr.spacing('padding', { topBottom: '4v', rightLeft: '10v' }),
+			[fr.breakpoints.down('sm')]: {
+				borderTop: 'none',
+				flexDirection: 'column',
+				height: 'auto',
+				gap: fr.spacing('4v'),
+				button: {
+					width: '100%',
+					justifyContent: 'center',
+					fontSize: '1rem',
+					lineHeight: '1.5rem',
+					minHeight: fr.spacing('8v')
+				}
+			}
 		},
 		rightActions: {
 			display: 'flex',
 			gap: fr.spacing('4v')
+		},
+		asterisk: {
+			color: fr.colors.decisions.text.default.error.default
 		}
 	}));
