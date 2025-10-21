@@ -23,7 +23,6 @@ import { useDebounce } from 'usehooks-ts';
 interface Props {
 	modal: CustomModalProps;
 	product?: Product;
-	fromEmptyState?: boolean;
 	savedTitle?: string;
 	onSubmit: () => void;
 	onTitleChange?: (title: string) => void;
@@ -40,7 +39,6 @@ const ProductModal = (props: Props) => {
 	const {
 		modal,
 		product,
-		fromEmptyState,
 		savedTitle,
 		onTitleChange,
 		onSubmit,

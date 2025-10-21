@@ -59,7 +59,6 @@ const DashBoard = () => {
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
-	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const [statusProductState, setStatusProductState] = React.useState<{
@@ -170,7 +169,6 @@ const DashBoard = () => {
 				</Head>
 				<ProductModal
 					modal={product_modal}
-					fromEmptyState={fromEmptyState}
 					savedTitle={productTitle}
 					onSubmit={() => {
 						setSearch('');
@@ -235,8 +233,7 @@ const DashBoard = () => {
 				{loadModalAndHead()}
 				<ProductEmptyState
 					onButtonClick={() => {
-						product_modal.open();
-						setFromEmptyState(true);
+						router.push('/administration/dashboard/onboarding/product');
 					}}
 				/>
 			</>
