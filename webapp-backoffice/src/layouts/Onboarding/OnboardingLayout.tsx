@@ -12,12 +12,22 @@ interface OnboardingLayoutProps {
 	children: React.ReactNode;
 	showHeader?: boolean;
 	showActions?: boolean;
+	isSkippable?: boolean;
+	isCancelable?: boolean;
+	confirmText?: string;
+	onCancel?: () => void;
+	onConfirm?: () => void;
 }
 
 const OnboardingLayout = ({
 	children,
 	showHeader,
-	showActions
+	showActions,
+	isSkippable,
+	isCancelable,
+	confirmText,
+	onCancel,
+	onConfirm
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: showActions });
@@ -177,7 +187,42 @@ const OnboardingLayout = ({
 					role="region"
 					aria-label="Actions d'onboarding"
 					className={classes.actionsContainer}
-				></section>
+				>
+					{isCancelable ? (
+						<Button priority="secondary" size="large" onClick={onCancel}>
+							Annuler
+						</Button>
+					) : (
+						<Button
+							priority="tertiary"
+							size="large"
+							iconId="fr-icon-arrow-left-s-line"
+						>
+							Retour
+						</Button>
+					)}
+
+					<div className={cx(classes.rightActions)}>
+						{isSkippable && (
+							<Button
+								priority="secondary"
+								size="large"
+								iconPosition="right"
+								iconId="fr-icon-arrow-right-s-line"
+							>
+								Passer cette étape
+							</Button>
+						)}
+						<Button
+							size="large"
+							iconPosition="right"
+							iconId="fr-icon-arrow-right-s-line"
+							onClick={onConfirm}
+						>
+							{confirmText ? confirmText : 'Continuer'}
+						</Button>
+					</div>
+				</section>
 			)}
 		</>
 	);
@@ -248,6 +293,11 @@ const useStyles = tss
 			width: '100%',
 			height: fr.spacing('20v'),
 			backgroundColor: 'white',
-			...fr.spacing('padding', { topBottom: '4v', leftRight: '10v' })
+			borderTop: `solid 1px ${fr.colors.decisions.border.default.grey.default}`,
+			...fr.spacing('padding', { topBottom: '4v', rightLeft: '10v' })
+		},
+		rightActions: {
+			display: 'flex',
+			gap: fr.spacing('4v')
 		}
 	}));
