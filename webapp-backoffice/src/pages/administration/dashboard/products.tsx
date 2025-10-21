@@ -24,6 +24,7 @@ import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -54,6 +55,7 @@ const DashBoard = () => {
 		setSettings,
 		isLoading: isLoadingSettings
 	} = useUserSettings();
+	const router = useRouter();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -311,7 +313,9 @@ const DashBoard = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={product_modal.buttonProps}
+							onClick={() =>
+								router.push('/administration/dashboard/onboarding/product')
+							}
 						>
 							Ajouter un nouveau service
 						</Button>
