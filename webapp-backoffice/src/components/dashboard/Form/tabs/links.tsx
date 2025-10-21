@@ -251,7 +251,9 @@ const LinksTab = ({
 				)}
 			</div>
 
-			<div className={fr.cx('fr-col-12', 'fr-mt-8v')}>
+			<div
+				className={cx(classes.cardContainer, fr.cx('fr-col-12', 'fr-mt-8v'))}
+			>
 				{!(isLoadingButtons || isRefetchingButtons) &&
 					buttonsCount === 0 &&
 					(!form.isDeleted ? (
@@ -301,12 +303,10 @@ const LinksTab = ({
 };
 
 const useStyles = tss.withName(LinksTab.name).create({
-	container: {
-		...fr.spacing('padding', {}),
-		background: fr.colors.decisions.artwork.decorative.blueFrance.default,
-		a: {
-			color: fr.colors.decisions.text.title.blueFrance.default
-		}
+	cardContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('4v')
 	},
 	loaderContainer: {
 		display: 'flex',

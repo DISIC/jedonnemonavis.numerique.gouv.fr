@@ -58,7 +58,7 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 					)}
 
 					<p>
-						Un formulaire vous permet de récolter avis de vos usagers sur un
+						Un formulaire vous permet de récolter les avis de vos usagers sur un
 						service numérique.
 					</p>
 				</div>
