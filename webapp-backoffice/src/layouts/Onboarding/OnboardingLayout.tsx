@@ -1,10 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { HeaderProps } from '@codegouvfr/react-dsfr/Header';
-import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import { signOut, useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -29,11 +25,8 @@ const OnboardingLayout = ({
 	onConfirm,
 	title
 }: OnboardingLayoutProps) => {
-	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: showActions });
-	const { data: session } = useSession();
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const menuOpen = Boolean(anchorEl);
 
 	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		event.preventDefault();
