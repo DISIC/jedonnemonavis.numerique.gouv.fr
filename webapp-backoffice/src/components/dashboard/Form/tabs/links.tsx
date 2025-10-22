@@ -14,6 +14,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
+import { linksFaqContents } from '@/src/utils/content';
 
 interface Props {
 	form: FormWithElements;
@@ -24,133 +25,6 @@ interface Props {
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
 }
-
-const faqContents: { title: string; children: JSX.Element }[] = [
-	{
-		title: 'Pourquoi créer plusieurs liens d’intégration ?',
-		children: (
-			<>
-				<p>
-					Si vous souhaitez afficher plusieurs boutons Je donne mon avis, il est
-					recommandé de créer un lien d’intégration distinct pour chacun d’eux.
-				</p>
-				<p>
-					Cette approche vous permet d’obtenir des{' '}
-					<strong>données plus précises</strong>, de{' '}
-					<strong>comparer les statistiques</strong> grâce aux filtres
-					disponibles et de <strong>trier les réponses</strong> selon leur
-					origine — par exemple, selon le parcours emprunté par l’usager ou
-					selon qu’il réponde depuis un e-mail ou depuis la démarche en ligne.
-					<br />
-					Vous pouvez également vous en servir pour d’autres cas d’usages, comme
-					pour réaliser un AB testing (tester deux versions d'une page ou d'un
-					parcours en parallèle).
-				</p>
-				<p>
-					Note : Il n'est pas possible d'insérer plusieurs liens d'intégration
-					sur Démarche Simplifiée pour l'instant.
-					<br />
-					<a
-						href="https://docs.numerique.gouv.fr/docs/b824bc7b-fed3-4b75-91ca-1e6f9a5a6df1"
-						target="_blank"
-					>
-						En savoir plus
-					</a>
-				</p>
-			</>
-		)
-	},
-	{
-		title:
-			'Comment définir le meilleur emplacement pour son bouton Je donne mon avis ?',
-		children: (
-			<>
-				<p>
-					Idéalement, il faut placer le bouton JDMA sur une page de
-					confirmation, qui <strong>ne contient pas d’action principale</strong>{' '}
-					(bouton primaire) lui faisant quitter la page. <br />
-					Il est aussi important d’
-					<strong>
-						expliquer à quoi sert le bouton JDMA et de le mettre en valeur
-					</strong>
-					. Pour ce faire, il faut le distinguer visuellement (en jouant sur
-					l’espacement et/ou sur les couleurs) et le contextualiser avec une
-					phrase d’accroche.
-				</p>
-				<p>
-					Vous pouvez placer le bouton sur votre démarche, dans un email de
-					confirmation ou dans un email dédié.
-					<br />
-					<a
-						href="https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff"
-						target="_blank"
-					>
-						En savoir plus
-					</a>
-				</p>
-			</>
-		)
-	},
-	{
-		title: 'Comment intégrer un lien sur mon site ?',
-		children: (
-			<>
-				<p>
-					L’intégration d’un lien permet d’afficher le bouton{' '}
-					<strong>Je donne mon avis</strong> sur votre site.
-				</p>
-				<p>
-					<b>Étape 1</b>
-					<br />
-					Créer un lien d’intégration depuis l'onglet{' '}
-					<strong>Liens d'intégration</strong> du formulaire JDMA. Ce lien
-					correspond à un code à insérer sur le site de votre choix.
-				</p>
-				<p>
-					<b>Étape 2</b>
-					<br />
-					Coller le code à l’endroit souhaité sur le site, à l’emplacement où
-					vous souhaitez faire apparaître le bouton{' '}
-					<strong>Je donne mon avis</strong>. Vous pouvez aussi coller le code
-					sur le site de Démarche Simplifiée.
-					<br />
-					<a
-						href="https://docs.numerique.gouv.fr/docs/c6d84027-74e7-4df4-8f7e-fb33f0c60c91"
-						target="_blank"
-					>
-						En savoir plus
-					</a>
-				</p>
-			</>
-		)
-	},
-	{
-		title: 'Modifier un formulaire qui est déjà en ligne',
-		children: (
-			<>
-				<p>
-					Vous pouvez à tout moment ajuster un formulaire sans avoir à le
-					recréer ou à modifier les liens d’intégration existants. Les
-					modifications apportées sont automatiquement prises en compte et
-					visibles par les usagers.
-				</p>
-				<p>
-					<b>Données</b>
-					<br />
-					Il n’y a aucun impact sur les données déjà collectées. Pour les
-					nouvelles données, toute modification de l’affichage d’une étape ou
-					d’une option de réponse se répercute sur les statistiques. <br />
-					<a
-						href="https://docs.numerique.gouv.fr/docs/bd97cb99-ac14-434f-bb13-aed58acabd24"
-						target="_blank"
-					>
-						En savoir plus
-					</a>
-				</p>
-			</>
-		)
-	}
-];
 
 const LinksTab = ({
 	form,
@@ -290,7 +164,7 @@ const LinksTab = ({
 			</div>
 
 			<div className={fr.cx('fr-col-12', 'fr-mt-16v')}>
-				{faqContents.map((faq, index) => (
+				{linksFaqContents.map((faq, index) => (
 					<Accordion key={index} label={faq.title}>
 						<div className={cx(classes.accordionContent)}>{faq.children}</div>
 					</Accordion>
