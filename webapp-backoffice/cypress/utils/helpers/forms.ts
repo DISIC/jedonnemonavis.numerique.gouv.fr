@@ -55,6 +55,7 @@ export function ensureTestServiceExistsAndGoToForms() {
 		}
 	});
 }
+
 export function goToSettingsTabOfForm(isCurrentFormPage?: boolean) {
 	if (isCurrentFormPage) {
 		cy.contains('button', 'Paramètres').click();
@@ -65,8 +66,18 @@ export function goToSettingsTabOfForm(isCurrentFormPage?: boolean) {
 	}
 }
 
+export function goToLinksTabOfForm(isCurrentFormPage?: boolean) {
+	if (isCurrentFormPage) {
+		cy.contains('button', "Liens d'intégration").click();
+	} else {
+		cy.get(`a:contains("${selectors.dashboard.nameTestForm1}")`).then($link => {
+			cy.visit($link.prop('href') + '?tab=links');
+		});
+	}
+}
+
 export function goToCurrentFormReviewPage(isCurrentFormPage?: boolean) {
-	goToSettingsTabOfForm(isCurrentFormPage);
+	goToLinksTabOfForm(isCurrentFormPage);
 	let copiedUrl = '';
 
 	cy.window().then(win => {
