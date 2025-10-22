@@ -414,76 +414,80 @@ const ProductCard = ({
 										)
 								]
 									.slice(0, 2)
-									.map(form => (
-										<div
-											key={form.id}
-											className={cx(
-												fr.cx('fr-grid-row', 'fr-p-4v'),
-												classes.formCard
-											)}
-											style={{
-												backgroundColor: form.isDeleted
-													? fr.colors.decisions.background.default.grey.hover
-													: undefined
-											}}
-										>
-											<Link
-												href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-												className={classes.formLink}
-												onClick={() => clearFilters()}
-											/>
+									.map(form => {
+										const newReviewsCount = getFormNewReviewCount(
+											form.id,
+											form.legacy
+										);
+										return (
 											<div
+												key={form.id}
 												className={cx(
-													classes.productTitleContainer,
-													fr.cx('fr-pb-0')
+													fr.cx('fr-grid-row', 'fr-p-4v'),
+													classes.formCard
 												)}
+												style={{
+													backgroundColor: form.isDeleted
+														? fr.colors.decisions.background.default.grey.hover
+														: undefined
+												}}
 											>
-												<span className={cx(classes.productTitle)}>
-													{form.title || form.form_template.title}
-												</span>
-												{form.isDeleted ? (
-													<Badge severity="error" noIcon>
-														Fermé
-													</Badge>
-												) : (
-													<>
-														{form.buttons.length === 0 ? (
-															<Badge severity="warning" small noIcon>
-																Configuration à terminer
-															</Badge>
-														) : (
-															getFormNewReviewCount(form.id, form.legacy) >
-																0 && (
-																<Badge severity="success" noIcon small>
-																	{getFormNewReviewCount(form.id, form.legacy)}{' '}
-																	NOUVELLES RÉPONSES
+												<Link
+													href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+													className={classes.formLink}
+													onClick={() => clearFilters()}
+												/>
+												<div
+													className={cx(
+														classes.productTitleContainer,
+														fr.cx('fr-pb-0')
+													)}
+												>
+													<span className={cx(classes.productTitle)}>
+														{form.title || form.form_template.title}
+													</span>
+													{form.isDeleted ? (
+														<Badge severity="error" noIcon>
+															Fermé
+														</Badge>
+													) : (
+														<>
+															{form.buttons.length === 0 ? (
+																<Badge severity="warning" small noIcon>
+																	Configuration à terminer
 																</Badge>
-															)
-														)}
-													</>
+															) : (
+																newReviewsCount > 0 && (
+																	<Badge severity="success" noIcon small>
+																		{newReviewsCount} NOUVELLES RÉPONSES
+																	</Badge>
+																)
+															)}
+														</>
+													)}
+												</div>
+												{!form.isDeleted && (
+													<div className={cx(classes.formStatsWrapper)}>
+														<div className={classes.formStatsContent}>
+															<span
+																className={cx(
+																	fr.cx('fr-mr-2v'),
+																	classes.smallText
+																)}
+															>
+																Réponses déposées
+															</span>
+															<span className={fr.cx('fr-text--bold')}>
+																{formatNumberWithSpaces(
+																	getFormReviewCount(form.id, form.legacy)
+																)}
+															</span>
+														</div>
+													</div>
 												)}
 											</div>
-											{!form.isDeleted && (
-												<div className={cx(classes.formStatsWrapper)}>
-													<div className={classes.formStatsContent}>
-														<span
-															className={cx(
-																fr.cx('fr-mr-2v'),
-																classes.smallText
-															)}
-														>
-															Réponses déposées
-														</span>
-														<span className={fr.cx('fr-text--bold')}>
-															{formatNumberWithSpaces(
-																getFormReviewCount(form.id, form.legacy)
-															)}
-														</span>
-													</div>
-												</div>
-											)}
-										</div>
-									))}
+										);
+									})}
 								{product.forms.length > 2 && (
 									<Link
 										href={`/administration/dashboard/product/${product.id}/forms`}

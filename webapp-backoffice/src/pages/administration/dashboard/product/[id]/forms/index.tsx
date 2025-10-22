@@ -152,91 +152,99 @@ const ProductFormsPage = (props: Props) => {
 							)}
 							{product.forms
 								.filter(f => !f.isDeleted)
-								.map(form => (
-									<div
-										key={form.id}
-										className={cx(
-											fr.cx(
-												'fr-grid-row',
-												'fr-mb-6v',
-												'fr-p-4v',
-												'fr-grid-row--middle'
-											),
-											classes.formCard
-										)}
-									>
+								.map(form => {
+									const newReviewsCount = getFormNewReviewCount(
+										form.id,
+										form.legacy
+									);
+									return (
 										<div
+											key={form.id}
 											className={cx(
-												classes.topFormCardContainer,
-												fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
+												fr.cx(
+													'fr-grid-row',
+													'fr-mb-6v',
+													'fr-p-4v',
+													'fr-grid-row--middle'
+												),
+												classes.formCard
 											)}
 										>
 											<div
 												className={cx(
-													classes.productTitleContainer,
-													fr.cx('fr-pb-0')
+													classes.topFormCardContainer,
+													fr.cx('fr-col', 'fr-col-12', 'fr-pb-0')
 												)}
 											>
-												<Link
-													href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
-													className={cx(classes.productTitle)}
+												<div
+													className={cx(
+														classes.productTitleContainer,
+														fr.cx('fr-pb-0')
+													)}
 												>
-													<span>{form.title || form.form_template.title}</span>
-												</Link>
-												{form.buttons.length > 0 ? (
-													<div
-														className={cx(
-															fr.cx(
-																'fr-col',
-																'fr-col-12',
-																'fr-col-md-5',
-																getFormNewReviewCount(form.id, form.legacy) ===
-																	0 && 'fr-hidden'
-															),
-															classes.formStatsContent
-														)}
+													<Link
+														href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
+														className={cx(classes.productTitle)}
 													>
-														{getFormNewReviewCount(form.id, form.legacy) >
-															0 && (
-															<Badge severity="success" noIcon small>
-																{getFormNewReviewCount(form.id, form.legacy)}{' '}
-																NOUVELLES RÉPONSES
-															</Badge>
-														)}
+														<span>
+															{form.title || form.form_template.title}
+														</span>
+													</Link>
+													{form.buttons.length > 0 ? (
+														<div
+															className={cx(
+																fr.cx(
+																	'fr-col',
+																	'fr-col-12',
+																	'fr-col-md-5',
+																	newReviewsCount === 0 && 'fr-hidden'
+																),
+																classes.formStatsContent
+															)}
+														>
+															{newReviewsCount > 0 && (
+																<Badge severity="success" noIcon small>
+																	{newReviewsCount} NOUVELLES RÉPONSES
+																</Badge>
+															)}
+														</div>
+													) : (
+														<Badge severity="warning" noIcon small>
+															Configuration à terminer
+														</Badge>
+													)}
+												</div>
+												{form.buttons.length > 0 && (
+													<div className={fr.cx('fr-grid-row')}>
+														<span
+															className={cx(
+																fr.cx('fr-mr-2v'),
+																classes.smallText
+															)}
+														>
+															Réponses déposées
+														</span>
+														<span className={fr.cx('fr-text--bold')}>
+															{formatNumberWithSpaces(
+																getFormReviewCount(form.id, form.legacy)
+															)}
+														</span>
 													</div>
-												) : (
-													<Badge severity="warning" noIcon small>
-														Configuration à terminer
-													</Badge>
 												)}
 											</div>
-											{form.buttons.length > 0 && (
-												<div className={fr.cx('fr-grid-row')}>
-													<span
-														className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-													>
-														Réponses déposées
-													</span>
-													<span className={fr.cx('fr-text--bold')}>
-														{formatNumberWithSpaces(
-															getFormReviewCount(form.id, form.legacy)
-														)}
-													</span>
-												</div>
-											)}
+											<div className="fr-mt-4v">
+												<span
+													className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+												>
+													Modifié le
+												</span>
+												<span className={fr.cx('fr-text--bold')}>
+													{formatDateToFrenchString(form.updated_at.toString())}
+												</span>
+											</div>
 										</div>
-										<div className="fr-mt-4v">
-											<span
-												className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
-											>
-												Modifié le
-											</span>
-											<span className={fr.cx('fr-text--bold')}>
-												{formatDateToFrenchString(form.updated_at.toString())}
-											</span>
-										</div>
-									</div>
-								))}
+									);
+								})}
 							{product.forms.filter(f => f.isDeleted).length > 0 && (
 								<div className={fr.cx('fr-mt-8v', 'fr-pb-6v')}>
 									<h3 className={fr.cx('fr-mb-3v', 'fr-text--md')}>
