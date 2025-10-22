@@ -220,6 +220,18 @@ const LinksTab = ({
 		metadata: { count: buttonsCount }
 	} = buttonResults;
 
+	const buttonsList = [
+		...buttons
+			.filter(b => !b.isDeleted)
+			.sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
+		...buttons
+			.filter(b => b.isDeleted)
+			.sort(
+				(a, b) =>
+					(b.deleted_at?.getTime() ?? 0) - (a.deleted_at?.getTime() ?? 0)
+			)
+	];
+
 	return (
 		<div className={fr.cx('fr-grid-row')}>
 			<Alert
@@ -254,8 +266,7 @@ const LinksTab = ({
 			<div
 				className={cx(classes.cardContainer, fr.cx('fr-col-12', 'fr-mt-8v'))}
 			>
-				{!(isLoadingButtons || isRefetchingButtons) &&
-					buttonsCount === 0 &&
+				{buttonsCount === 0 &&
 					(!form.isDeleted ? (
 						<NoButtonsPanel
 							onButtonClick={() => handleModalOpening('create')}
@@ -268,27 +279,14 @@ const LinksTab = ({
 							<span>Aucun lien d'intégration trouvé</span>
 						</div>
 					))}
-				{!(isLoadingButtons || isRefetchingButtons) &&
-					buttons &&
-					[
-						...buttons
-							.filter(b => !b.isDeleted)
-							.sort((a, b) => b.created_at.getTime() - a.created_at.getTime()),
-						...buttons
-							.filter(b => b.isDeleted)
-							.sort(
-								(a, b) =>
-									(b.deleted_at?.getTime() ?? 0) -
-									(a.deleted_at?.getTime() ?? 0)
-							)
-					].map((button, index) => (
-						<ProductButtonCard
-							key={index}
-							button={button}
-							onButtonClick={handleModalOpening}
-							ownRight={ownRight}
-						/>
-					))}
+				{buttonsList.map((button, index) => (
+					<ProductButtonCard
+						key={index}
+						button={button}
+						onButtonClick={handleModalOpening}
+						ownRight={ownRight}
+					/>
+				))}
 			</div>
 
 			<div className={fr.cx('fr-col-12', 'fr-mt-16v')}>
