@@ -28,11 +28,6 @@ import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const product_modal = createModal({
-	id: 'product-modal',
-	isOpenedByDefault: false
-});
-
 const entity_modal = createModal({
 	id: 'entity-modal',
 	isOpenedByDefault: false
@@ -66,9 +61,6 @@ const DashBoard = () => {
 		role: 'status' | 'alert';
 	} | null>(null);
 
-	const [entityCreated, setEntityCreated] = React.useState<
-		Entity | undefined
-	>();
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
@@ -155,11 +147,6 @@ const DashBoard = () => {
 			: 'Services | Je donne mon avis';
 	};
 
-	const handleSubmit = async (newEntity?: Entity) => {
-		setEntityCreated(newEntity);
-		product_modal.open();
-	};
-
 	const loadModalAndHead = () => {
 		return (
 			<>
@@ -167,33 +154,7 @@ const DashBoard = () => {
 					<title>{headTitle()}</title>
 					<meta name="description" content={headTitle()} />
 				</Head>
-				<ProductModal
-					modal={product_modal}
-					savedTitle={productTitle}
-					onSubmit={() => {
-						setSearch('');
-						if (filters.filter === 'created_at') {
-							updateFilters({ ...filters, validatedSearch: '' });
-						} else {
-							updateFilters({ ...filters, filter: 'created_at' });
-						}
-						refetchEntities();
-						setIsModalSubmitted(true);
-					}}
-					onTitleChange={title => {
-						setProductTitle(title);
-					}}
-					onNewEntity={() => {
-						product_modal.close();
-						entity_modal.open();
-					}}
-					allowCreateEntity={true}
-					newCreatedEntity={entityCreated}
-				/>
-				<EntityModal
-					modal={entity_modal}
-					onSubmit={newEntity => handleSubmit(newEntity)}
-				/>
+
 				<EssentialProductModal
 					modal={essential_service_modal}
 					productTitle={productTitle}

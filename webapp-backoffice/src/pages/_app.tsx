@@ -60,8 +60,9 @@ function App({ Component, pageProps }: AppProps) {
 		if (
 			router.pathname.startsWith('/public/maintenance') ||
 			router.pathname.startsWith('/administration/dashboard/onboarding')
-		)
+		) {
 			return children;
+		}
 
 		const lightMode =
 			router.pathname.startsWith('/public') ||
