@@ -118,7 +118,7 @@ const ProductCard = ({
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
 				(reviewsCountData?.countsByForm['1'] ?? 0) +
 				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
@@ -561,7 +561,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
-		':nth-child(2), :last-child': {
+		':nth-of-type(2), :last-child': {
 			marginBottom: '0.5rem'
 		},
 		'&:hover > div:first-of-type span:first-of-type': {
