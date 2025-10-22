@@ -77,15 +77,6 @@ function App({ Component, pageProps }: AppProps) {
 				url: MATOMO_URL ? MATOMO_URL : '',
 				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
 			});
-		const removeButtonOnLoad = () => {
-			const buttonToRemove = document.getElementById(
-				'fr-theme-modal-hidden-control-button'
-			);
-			if (buttonToRemove) {
-				buttonToRemove.remove();
-			}
-		};
-		removeButtonOnLoad();
 	}, []);
 
 	return (
