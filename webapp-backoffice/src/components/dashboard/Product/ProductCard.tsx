@@ -158,6 +158,38 @@ const ProductCard = ({
 
 	const isDisabled = product.status === 'archived';
 
+	const renderProductBadges = () => {
+		const badges = [];
+
+		if (!product.isTop250) {
+			badges.push(
+				<Badge key="top250" severity="info" noIcon small>
+					Démarche essentielle
+				</Badge>
+			);
+		}
+
+		if (!isDisabled) {
+			badges.push(
+				<Badge key="archived" noIcon small>
+					Service archivé
+				</Badge>
+			);
+		}
+
+		if (product.forms.length === 0) {
+			badges.push(
+				<Badge key="no-forms" severity="warning" small noIcon>
+					Configuration à terminer
+				</Badge>
+			);
+		}
+
+		return badges.length > 0 ? (
+			<div className={classes.badgesContainer}>{badges}</div>
+		) : null;
+	};
+
 	return (
 		<>
 			<Toast
@@ -284,27 +316,7 @@ const ProductCard = ({
 									{product.title}
 								</span>
 							</Link>
-							{(product.isTop250 ||
-								isDisabled ||
-								product.forms.length === 0) && (
-								<div className={classes.badgesContainer}>
-									{product.isTop250 && (
-										<Badge severity="info" noIcon small>
-											Démarche essentielle
-										</Badge>
-									)}
-									{isDisabled && (
-										<Badge noIcon small>
-											Service archivé
-										</Badge>
-									)}
-									{product.forms.length === 0 && (
-										<Badge severity="warning" small noIcon>
-											Configuration à terminer
-										</Badge>
-									)}
-								</div>
-							)}
+							{renderProductBadges()}
 						</div>
 						<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
 							{isDisabled && (
