@@ -161,7 +161,7 @@ const ProductCard = ({
 	const renderProductBadges = () => {
 		const badges = [];
 
-		if (!product.isTop250) {
+		if (product.isTop250) {
 			badges.push(
 				<Badge key="top250" severity="info" noIcon small>
 					Démarche essentielle
@@ -169,7 +169,7 @@ const ProductCard = ({
 			);
 		}
 
-		if (!isDisabled) {
+		if (isDisabled) {
 			badges.push(
 				<Badge key="archived" noIcon small>
 					Service archivé
