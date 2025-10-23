@@ -41,7 +41,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 				<Row>
 					<Column style={imageColumn}>
 						<Img
-							src={`${baseUrl}/assets/install_picto.svg`}
+							src={`${baseUrl}/assets/install_picto.png`}
 							alt="Attention"
 							width={120}
 							height={120}
