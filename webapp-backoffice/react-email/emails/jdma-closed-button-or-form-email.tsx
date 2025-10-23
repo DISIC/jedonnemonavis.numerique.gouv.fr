@@ -5,8 +5,8 @@ import { JdmaClosedButtonOrFormEmailProps } from './interface';
 
 export const JdmaClosedButtonOrFormEmail = ({
 	userName = 'Jean Dupont',
-	buttonTitle = 'Emplacement Test',
-	formTitle,
+	buttonTitle,
+	formTitle = 'Formulaire Test',
 	form = { id: 0, title: 'Formulaire de satisfaction' },
 	product = {
 		id: 0,
@@ -16,7 +16,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaClosedButtonOrFormEmailProps) => {
 	const closeTitle = buttonTitle
-		? `l'emplacement « <strong>${buttonTitle}</strong> »`
+		? `le lien d'intégration « <strong>${buttonTitle}</strong> »`
 		: `le formulaire « <strong>${formTitle}</strong> »`;
 
 	const productUrl = `${baseUrl}/administration/dashboard/product/${product.id.toString()}/forms`;
@@ -24,7 +24,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`Fermeture ${buttonTitle ? "d'un emplacement" : "d'un formulaire"} du service « ${product.title} »`}
+			preview={`Fermeture ${buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"} du service « ${product.title} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
@@ -52,7 +52,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 						<Text style={warningText}>
 							Les boutons "Je donne mon avis"&nbsp;
 							<strong>sont toujours visibles par les usagers</strong> tant que
-							les codes HTML correspondant aux emplacements n'ont pas été
+							les codes HTML correspondant aux liens d'intégration n'ont pas été
 							retirés des pages.
 						</Text>
 						<Text style={warningText}>
