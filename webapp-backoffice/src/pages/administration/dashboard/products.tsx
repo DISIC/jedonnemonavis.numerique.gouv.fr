@@ -194,7 +194,7 @@ const DashBoard = () => {
 				{loadModalAndHead()}
 				<ProductEmptyState
 					onButtonClick={() => {
-						router.push('/administration/dashboard/onboarding/product');
+						router.push('/administration/dashboard/product/new');
 					}}
 				/>
 			</>
@@ -272,7 +272,7 @@ const DashBoard = () => {
 							iconPosition="right"
 							type="button"
 							onClick={() =>
-								router.push('/administration/dashboard/onboarding/product')
+								router.push('/administration/dashboard/product/new')
 							}
 						>
 							Ajouter un nouveau service

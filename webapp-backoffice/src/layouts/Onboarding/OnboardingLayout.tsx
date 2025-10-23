@@ -1,7 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { push } from '@socialgouv/matomo-next';
-import React, { useState } from 'react';
+import { useRouter } from 'next/router';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface OnboardingLayoutProps {
@@ -25,22 +25,8 @@ const OnboardingLayout = ({
 	onConfirm,
 	title
 }: OnboardingLayoutProps) => {
+	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: showActions });
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
-	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		event.preventDefault();
-		event.stopPropagation();
-		setAnchorEl(event.currentTarget);
-		push(['trackEvent', 'Account', 'Open-Menu']);
-	};
-	const handleClose = (
-		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
-	) => {
-		event.preventDefault();
-		event.stopPropagation();
-		setAnchorEl(null);
-	};
 
 	return (
 		<>
@@ -51,11 +37,16 @@ const OnboardingLayout = ({
 				className={classes.mainContainer}
 			>
 				<div className={classes.stepContent}>
-					<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
-					<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
-						Les champs marqués d&apos;un{' '}
-						<span className={cx(classes.asterisk)}>*</span> sont obligatoires
-					</p>
+					{title && (
+						<>
+							<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
+							<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
+								Les champs marqués d&apos;un{' '}
+								<span className={cx(classes.asterisk)}>*</span> sont
+								obligatoires
+							</p>
+						</>
+					)}
 					{children}
 				</div>
 			</main>
@@ -66,19 +57,14 @@ const OnboardingLayout = ({
 					aria-label="Actions d'onboarding"
 					className={classes.actionsContainer}
 				>
-					{isCancelable ? (
-						<Button priority="secondary" size="large" onClick={onCancel}>
-							Annuler
-						</Button>
-					) : (
-						<Button
-							priority="tertiary"
-							size="large"
-							iconId="fr-icon-arrow-left-s-line"
-						>
-							Retour
-						</Button>
-					)}
+					<Button
+						priority={isCancelable ? 'secondary' : 'tertiary'}
+						size="large"
+						iconId={isCancelable ? undefined : 'fr-icon-arrow-left-s-line'}
+						onClick={() => (onCancel ? onCancel() : router.back())}
+					>
+						{isCancelable ? 'Annuler' : 'Retour'}
+					</Button>
 
 					<div className={cx(classes.rightActions)}>
 						{isSkippable && (
