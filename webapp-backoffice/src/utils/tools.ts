@@ -6,6 +6,7 @@ import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { z } from 'zod';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
@@ -29,8 +30,7 @@ export function isValidDate(dateString: string) {
 }
 
 export function isValidEmail(email: string): boolean {
-	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-	return emailRegex.test(email);
+	return z.string().email().safeParse(email).success;
 }
 
 export function generateRandomString(length: number = 8): string {
