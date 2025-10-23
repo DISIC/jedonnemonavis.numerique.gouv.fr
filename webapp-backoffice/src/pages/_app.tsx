@@ -53,14 +53,18 @@ export { augmentDocumentWithEmotionCache };
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
 const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 
+const OFF_ADMIN_PATHS = [
+	'/public/maintenance',
+	'/administration/dashboard/onboarding',
+	'/administration/dashboard/product/new',
+	'/administration/dashboard/product/[id]/forms/new'
+];
+
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
 	const getLayout = (children: ReactNode) => {
-		if (
-			router.pathname.startsWith('/public/maintenance') ||
-			router.pathname.startsWith('/administration/dashboard/onboarding')
-		) {
+		if (OFF_ADMIN_PATHS.some(path => router.pathname.startsWith(path))) {
 			return children;
 		}
 
