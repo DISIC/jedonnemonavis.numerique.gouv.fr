@@ -17,11 +17,11 @@ export const JdmaRegisterEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous venez de créer un compte sur la plateforme «{' '}
+				Vous venez de créer un compte sur la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				». Afin de valider votre compte, veuillez cliquer sur le lien
+				</Link>
+				&nbsp; ». Afin de valider votre compte, veuillez cliquer sur le lien
 				ci-dessous.
 			</Text>
 

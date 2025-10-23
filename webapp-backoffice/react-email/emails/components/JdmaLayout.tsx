@@ -39,7 +39,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 					{/* Footer */}
 					<Section style={footer}>
 						<Text style={footerText}>
-							Ce message est envoyé automatiquement par le site{' '}
+							Ce message est envoyé automatiquement par le site&nbsp;
 							<Link
 								href="https://jedonnemonavis.numerique.gouv.fr/"
 								target="_blank"
@@ -47,7 +47,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							>
 								Je donne mon avis
 							</Link>
-							, développé par la{' '}
+							, développé par la&nbsp;
 							<Link
 								href="https://design.numerique.gouv.fr/"
 								target="_blank"
@@ -55,7 +55,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							>
 								Brigade d'Intervention Numérique
 							</Link>
-							, propulsé par la{' '}
+							, propulsé par la&nbsp;
 							<Link
 								href="https://www.numerique.gouv.fr/"
 								target="_blank"
@@ -66,7 +66,7 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							.
 						</Text>
 						<Text style={footerText}>
-							Pour toute question, envoyez-nous un mail à{' '}
+							Pour toute question, envoyez-nous un mail à&nbsp;
 							<Link
 								href="mailto:contact.jdma@design.numerique.gouv.fr"
 								style={footerLink}

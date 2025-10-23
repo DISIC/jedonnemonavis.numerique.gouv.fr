@@ -15,11 +15,11 @@ export const JdmaOtpEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous vous connectez pour la première fois à la plateforme «{' '}
+				Vous vous connectez pour la première fois à la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={link}>
 					Je donne mon avis
-				</Link>{' '}
-				» avec votre ancien compte{' '}
+				</Link>
+				&nbsp; » avec votre ancien compte&nbsp;
 				<Link
 					href="https://observatoire.numerique.gouv.fr/"
 					target="_blank"

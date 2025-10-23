@@ -161,7 +161,7 @@ const ProductButtonCard = (props: Props) => {
 													fr.cx('ri-file-copy-line', 'fr-mr-2v', 'fr-icon--sm')
 												)}
 											/>
-											Copier le lien du formulaire
+											Copier l'URL
 										</MenuItem>
 										{ownRight === 'carrier_admin' && (
 											<MenuItem

@@ -12,11 +12,11 @@ export const JdmaUserRequestRefusedEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Votre demande d'accès à la plateforme «{' '}
+				Votre demande d'accès à la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				» a été refusée.
+				</Link>
+				&nbsp; » a été refusée.
 			</Text>
 
 			{message && (

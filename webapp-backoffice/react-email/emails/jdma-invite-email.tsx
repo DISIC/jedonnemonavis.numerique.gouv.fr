@@ -26,12 +26,12 @@ const JdmaInviteEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				<strong>{inviterName}</strong> vient de vous donner accès à {accessType}{' '}
-				sur la plateforme «{' '}
+				<strong>{inviterName}</strong> vient de vous donner accès à {accessType}
+				&nbsp; sur la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				».
+				</Link>
+				&nbsp; ».
 			</Text>
 
 			<Text style={paragraph}>

@@ -17,12 +17,12 @@ export const JdmaUserRequestAcceptedEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Votre demande d'accès à la plateforme «{' '}
+				Votre demande d'accès à la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				» a été acceptée. Afin de valider votre compte, veuillez cliquer sur le
-				lien ci-dessous.
+				</Link>
+				&nbsp; » a été acceptée. Afin de valider votre compte, veuillez cliquer
+				sur le lien ci-dessous.
 			</Text>
 
 			<Link href={link} target="_blank" style={buttonLink}>

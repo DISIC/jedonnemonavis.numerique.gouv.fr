@@ -60,8 +60,8 @@ export const JdmaNotificationsEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous avez eu un total de{' '}
-				<strong>{formatNumber(totalNbReviews)} réponses</strong>{' '}
+				Vous avez eu un total de
+				<strong>&nbsp;{formatNumber(totalNbReviews)} réponses&nbsp;</strong>
 				{getFrequencyLabel()} sur vos services dans Je donne mon avis.
 			</Text>
 
@@ -124,7 +124,7 @@ export const JdmaNotificationsEmail = ({
 
 			<Text style={paragraph}>
 				Pour changer la fréquence de cette synthèse ou ne plus la recevoir du
-				tout,{' '}
+				tout,&nbsp;
 				<Link
 					href={`${baseUrl}/administration/dashboard/user/${userId}/notifications`}
 					target="_blank"

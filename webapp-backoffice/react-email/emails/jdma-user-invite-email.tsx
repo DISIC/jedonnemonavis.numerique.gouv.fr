@@ -30,11 +30,12 @@ export const JdmaUserInviteEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				<strong>{inviterName}</strong> vous invite à rejoindre la plateforme «{' '}
+				<strong>{inviterName}</strong> vous invite à rejoindre la plateforme
+				«&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				» et vous donne accès à {accessType}. Afin de créer votre compte,
+				</Link>
+				&nbsp; » et vous donne accès à {accessType}. Afin de créer votre compte,
 				veuillez cliquer sur le lien ci-dessous.
 			</Text>
 

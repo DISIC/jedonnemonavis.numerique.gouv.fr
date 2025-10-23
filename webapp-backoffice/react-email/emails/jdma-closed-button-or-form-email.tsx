@@ -30,7 +30,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				{userName} vient de fermer{' '}
+				{userName} vient de fermer&nbsp;
 				<span dangerouslySetInnerHTML={{ __html: closeTitle }} /> du service
 				«&nbsp;
 				{product.title}&nbsp;». Il ne recevra plus de données, mais les
@@ -50,7 +50,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 					</Column>
 					<Column style={textColumn}>
 						<Text style={warningText}>
-							Les boutons "Je donne mon avis"{' '}
+							Les boutons "Je donne mon avis"&nbsp;
 							<strong>sont toujours visibles par les usagers</strong> tant que
 							les codes HTML correspondant aux emplacements n'ont pas été
 							retirés des pages.
