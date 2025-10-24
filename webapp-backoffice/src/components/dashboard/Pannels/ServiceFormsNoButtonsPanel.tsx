@@ -15,14 +15,6 @@ type ContentType = {
 	link?: { href: string; label: string };
 };
 
-const editContents: ContentType[] = [
-	{
-		iconId: 'ri-eye-off-line',
-		text: 'Masquer une possibilité de réponse à une question'
-	},
-	{ iconId: 'ri-list-check-3', text: 'Masquer une question entière' }
-];
-
 export const buttonContents: readonly ContentType[] = [
 	{
 		iconId: 'ri-cursor-line',
@@ -30,14 +22,14 @@ export const buttonContents: readonly ContentType[] = [
 	},
 	{
 		iconId: 'ri-code-box-line',
-		text: 'Chaque emplacement génère une petite portion de code à coller à l’endroit où vous souhaitez faire apparaitre le bouton JDMA'
+		text: "Chaque lien d'intégration génère une petite portion de code à coller à l’endroit où vous souhaitez faire apparaitre le bouton JDMA"
 	},
 	{
 		iconId: 'ri-line-chart-line',
-		text: 'Vous pouvez créer plusieurs emplacements de bouton JDMA pour chaque formulaire.',
+		text: "Vous pouvez créer plusieurs liens d'intégration de bouton JDMA pour chaque formulaire.",
 		link: {
 			href: 'https://designgouv.notion.site/Pourquoi-cr-er-plusieurs-emplacements-21515cb98241806fa1a4f9251f3ebce7',
-			label: 'En savoir plus sur les boutons multiples'
+			label: 'En savoir plus sur les liens multiples'
 		}
 	}
 ] as const;
@@ -51,7 +43,8 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 		<div className={cx(classes.container, fr.cx('fr-container', 'fr-p-6v'))}>
 			<div className={fr.cx('fr-col-12', 'fr-mb-6v')}>
 				<span className={classes.title}>
-					Définissez les emplacements de vos boutons JDMA (Je Donne Mon Avis)
+					Définissez les liens d'intégration de vos boutons JDMA (Je Donne Mon
+					Avis)
 				</span>
 			</div>
 			{buttonContents.map((content, index) => (
@@ -83,12 +76,12 @@ const ServiceFormsNoButtonsPanel = (props: Props) => {
 						event.preventDefault();
 						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
 						router.push(
-							`/administration/dashboard/product/${form.product_id}/forms/${form.id}?tab=settings&shouldOpenButtonModal=true`
+							`/administration/dashboard/product/${form.product_id}/forms/${form.id}?tab=links&shouldOpenButtonModal=true`
 						);
 					}
 				}}
 			>
-				Créer un emplacement
+				Créer un lien d'intégration
 			</Button>
 		</div>
 	);

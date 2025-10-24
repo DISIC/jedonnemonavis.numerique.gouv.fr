@@ -41,7 +41,7 @@ Fichier: `bo/forms.cy.ts`
 - should edit a form in builder (hide step, edit block, publish) and check changes from dashboard and on form review page
 - should rename form
 
-Couverture fonctionnelle : Création de formulaires (multiples), création de bouton, dépôt d'un avis utilisateur (toutes les étapes), édition de formulaire (contenu & visibilité d'étape), publication, renommage.
+Couverture fonctionnelle : Création de formulaires (multiples), création de lien d'intégration, dépôt d'un avis utilisateur (toutes les étapes), édition de formulaire (contenu & visibilité d'étape), publication, renommage.
 
 ## Page d'accueil (jdma-home)
 
@@ -123,17 +123,17 @@ Couverture fonctionnelle : Complétion du formulaire utilisateur final sur toute
 
 ## Tableau récapitulatif
 
-| Suite             | Fichier              | Tests | Thèmes clés                               |
-| ----------------- | -------------------- | ----- | ----------------------------------------- |
-| jdma-account      | bo/account.cy.ts     | 7     | Profil, validation email, suppression     |
-| jdma-admin        | bo/admin.cy.ts       | 6     | Gestion utilisateurs, org, service, invit |
-| jdma-forms        | bo/forms.cy.ts       | 5     | CRUD formulaires, bouton, publication     |
-| jdma-home         | bo/home.cy.ts        | 11    | Page publique & navigation                |
-| jdma-logs         | bo/logs.cy.ts        | 1     | État vide historique                      |
-| jdma-register     | bo/register.cy.ts    | 11    | Inscription, politique mot de passe       |
-| jdma-answer-check | bo/reviewCheck.cy.ts | 1     | Présence avis                             |
-| jdma-users        | bo/users.cy.ts       | 8     | Cycle gestion des accès                   |
-| jdma-form-review  | form/review.cy.ts    | 1     | Soumission complète formulaire            |
+| Suite             | Fichier              | Tests | Thèmes clés                                       |
+| ----------------- | -------------------- | ----- | ------------------------------------------------- |
+| jdma-account      | bo/account.cy.ts     | 7     | Profil, validation email, suppression             |
+| jdma-admin        | bo/admin.cy.ts       | 6     | Gestion utilisateurs, org, service, invit         |
+| jdma-forms        | bo/forms.cy.ts       | 5     | CRUD formulaires, lien d'intégration, publication |
+| jdma-home         | bo/home.cy.ts        | 11    | Page publique & navigation                        |
+| jdma-logs         | bo/logs.cy.ts        | 1     | État vide historique                              |
+| jdma-register     | bo/register.cy.ts    | 11    | Inscription, politique mot de passe               |
+| jdma-answer-check | bo/reviewCheck.cy.ts | 1     | Présence avis                                     |
+| jdma-users        | bo/users.cy.ts       | 8     | Cycle gestion des accès                           |
+| jdma-form-review  | form/review.cy.ts    | 1     | Soumission complète formulaire                    |
 
 Nombre total de tests actifs : 51
 

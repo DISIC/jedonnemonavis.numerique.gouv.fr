@@ -21,8 +21,8 @@ import { DefaultArgs } from '@prisma/client/runtime/library';
 import { Session } from 'next-auth';
 import { sendMail } from '@/src/utils/mailer';
 import {
-	getProductArchivedEmail,
-	getProductRestoredEmail
+	renderProductArchivedEmail,
+	renderProductRestoredEmail
 } from '@/src/utils/emails';
 
 export const checkRightToProceed = async ({
@@ -449,14 +449,20 @@ export const productRouter = router({
 				...adminEntityRights.map(aer => aer.user_email)
 			].filter(email => email !== null) as string[];
 
-			emails.forEach((email: string) => {
-				sendMail(
+			for (const email of emails) {
+				const emailHtml = await renderProductArchivedEmail({
+					userName: ctx.session.user.name || "Quelqu'un",
+					productTitle: updatedProduct.title,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
+
+				await sendMail(
 					`Suppression du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
 					email,
-					getProductArchivedEmail(ctx.session.user, updatedProduct.title),
+					emailHtml,
 					`Le produit numérique "${updatedProduct.title}" a été supprimé.`
 				);
-			});
+			}
 
 			return { data: updatedProduct };
 		}),
@@ -496,18 +502,21 @@ export const productRouter = router({
 				...adminEntityRights.map(aer => aer.user_email)
 			].filter(email => email !== null) as string[];
 
-			emails.forEach((email: string) => {
-				sendMail(
+			for (const email of emails) {
+				const emailHtml = await renderProductRestoredEmail({
+					userName: ctx.session.user.name || "Quelqu'un",
+					productTitle: updatedProduct.title,
+					productId: updatedProduct.id,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
+
+				await sendMail(
 					`Restauration du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
 					email,
-					getProductRestoredEmail(
-						ctx.session.user,
-						updatedProduct.title,
-						updatedProduct.id
-					),
+					emailHtml,
 					`Le produit numérique "${updatedProduct.title}" a été restauré.`
 				);
-			});
+			}
 
 			return { data: updatedProduct };
 		})

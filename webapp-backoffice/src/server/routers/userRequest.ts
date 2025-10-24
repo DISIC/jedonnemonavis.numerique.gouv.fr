@@ -9,8 +9,8 @@ import {
 import crypto from 'crypto';
 import { sendMail } from '@/src/utils/mailer';
 import {
-	getUserRequestAcceptedEmailHtml,
-	getUserRequestRefusedEmailHtml
+	renderUserRequestAcceptedEmail,
+	renderUserRequestRefusedEmail
 } from '@/src/utils/emails';
 import { generateValidationToken, makeRelationFromUserInvite } from './user';
 
@@ -77,8 +77,8 @@ export async function updateUserRequest(
 			});*/
 
 			const foundUser = await prisma.user.findFirst({
-				where: { id: updatedUserRequest.user.id}
-			})
+				where: { id: updatedUserRequest.user.id }
+			});
 
 			const token = await generateValidationToken(
 				prisma,
@@ -96,13 +96,19 @@ export async function updateUserRequest(
 				});
 			}
 
-			if(foundUser)
-			await sendMail(
-				`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
-				foundUser?.email.toLowerCase(),
-				getUserRequestAcceptedEmailHtml(token),
-				`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
-			);
+			if (foundUser) {
+				const emailHtml = await renderUserRequestAcceptedEmail({
+					token,
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
+
+				await sendMail(
+					`Votre demande d'accès sur « Je donne mon avis » a été acceptée`,
+					foundUser?.email.toLowerCase(),
+					emailHtml,
+					`Cliquez sur ce lien pour valider votre compte : ${process.env.NODEMAILER_BASEURL}/register/validate?${new URLSearchParams({ token })}`
+				);
+			}
 		} else if (updatedUserRequest.status === 'refused') {
 			await prisma.userRequest.update({
 				where: { id },
@@ -113,10 +119,15 @@ export async function updateUserRequest(
 				where: { id: updatedUserRequest.user.id }
 			});
 
+			const emailHtml = await renderUserRequestRefusedEmail({
+				message,
+				baseUrl: process.env.NODEMAILER_BASEURL
+			});
+
 			await sendMail(
 				`Votre demande d'accès sur « Je donne mon avis » a été refusée`,
 				updatedUserRequest.user.email.toLowerCase(),
-				getUserRequestRefusedEmailHtml(message),
+				emailHtml,
 				`Votre demande d'accès a été refusée${
 					message ? ` pour la raison suivante : ${message}` : '.'
 				}`

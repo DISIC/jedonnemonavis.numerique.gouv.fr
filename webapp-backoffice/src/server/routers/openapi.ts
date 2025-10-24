@@ -4,30 +4,30 @@ import {
 	router
 } from '@/src/server/trpc';
 import { ZOpenApiStatsOutput } from '@/src/types/custom';
+import { renderJdmaNotificationsEmail } from '@/src/utils/emails';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
 	FIELD_CODE_SMILEY_VALUES
 } from '@/src/utils/helpers';
+import { sendMail } from '@/src/utils/mailer';
+import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
 import { fetchAndFormatData, FetchAndFormatDataProps } from '@/src/utils/stats';
 import { Product } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
-import { z } from 'zod';
 import {
-	startOfDay,
 	endOfDay,
-	startOfWeek,
-	endOfWeek,
-	startOfMonth,
 	endOfMonth,
+	endOfWeek,
 	isMonday,
-	subWeeks,
+	startOfDay,
+	startOfMonth,
+	startOfWeek,
 	subDays,
-	subMonths
+	subMonths,
+	subWeeks
 } from 'date-fns';
-import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
-import { getEmailNotificationsHtml } from '@/src/utils/emails';
-import { sendMail } from '@/src/utils/mailer';
+import { z } from 'zod';
 
 const maxNbProducts = 10;
 
@@ -480,11 +480,11 @@ export const openAPIRouter = router({
 				scope: 'daily' | 'weekly' | 'monthly';
 				startDate: Date;
 				endDate: Date;
-				forms: { 
-					formId: number; 
-					formTitle: string; 
-					reviewCount: number; 
-					productId: number; 
+				forms: {
+					formId: number;
+					formTitle: string;
+					reviewCount: number;
+					productId: number;
 					productTitle: string;
 					entityName: string;
 				}[];
@@ -549,17 +549,20 @@ export const openAPIRouter = router({
 							);
 
 					// Group forms by product and limit to 10 most active products
-					const productGroups = new Map<number, {
-						productId: number;
-						productTitle: string;
-						entityName: string;
-						forms: {
-							formId: number;
-							formTitle: string;
-							reviewCount: number;
-						}[];
-						totalReviews: number;
-					}>();
+					const productGroups = new Map<
+						number,
+						{
+							productId: number;
+							productTitle: string;
+							entityName: string;
+							forms: {
+								formId: number;
+								formTitle: string;
+								reviewCount: number;
+							}[];
+							totalReviews: number;
+						}
+					>();
 
 					accessibleForms.forEach(form => {
 						const productId = form.productId;
@@ -576,11 +579,13 @@ export const openAPIRouter = router({
 								productId: form.productId,
 								productTitle: form.productTitle,
 								entityName: form.entityName,
-								forms: [{
-									formId: form.formId,
-									formTitle: form.formTitle,
-									reviewCount: form.reviewCount
-								}],
+								forms: [
+									{
+										formId: form.formId,
+										formTitle: form.formTitle,
+										reviewCount: form.reviewCount
+									}
+								],
 								totalReviews: form.reviewCount
 							});
 						}
@@ -597,25 +602,26 @@ export const openAPIRouter = router({
 					);
 
 					if (accessibleProducts.length > 0) {
-						const email = getEmailNotificationsHtml(
-							user.id,
-							scope,
-							totalNewReviews,
+						const emailHtml = await renderJdmaNotificationsEmail({
+							userId: user.id,
+							frequency: scope,
+							totalNbReviews: totalNewReviews,
 							startDate,
 							endDate,
-							accessibleProducts.map(product => ({
+							products: accessibleProducts.map(product => ({
 								title: product.productTitle,
 								id: product.productId,
 								nbReviews: product.totalReviews,
 								entityName: product.entityName,
 								forms: product.forms
-							}))
-						);
+							})),
+							baseUrl: process.env.NODEMAILER_BASEURL
+						});
 
 						sendMail(
 							'Nouveaux avis JDMA',
 							user.email,
-							email,
+							emailHtml,
 							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
 						);
 					}

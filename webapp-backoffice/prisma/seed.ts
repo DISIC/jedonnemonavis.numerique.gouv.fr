@@ -6,14 +6,14 @@ import {
 	User,
 	WhiteListedDomain
 } from '@prisma/client';
-import { users } from './seeds/users';
-import { products } from './seeds/products';
-import { whiteListedDomains } from './seeds/white-listed-domains';
-import { entities } from './seeds/entities';
+import { Domain } from 'domain';
 import { getRandomObjectFromArray, normalizeString } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
-import { Domain } from 'domain';
+import { entities } from './seeds/entities';
 import { createRootForm } from './seeds/form';
+import { products } from './seeds/products';
+import { users } from './seeds/users';
+import { whiteListedDomains } from './seeds/white-listed-domains';
 
 const prisma = new PrismaClient();
 
@@ -73,6 +73,9 @@ async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
+	const rootFormTemplate = await prisma.formTemplate.findUnique({
+		where: { slug: 'root' }
+	});
 
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
@@ -125,6 +128,7 @@ async function seed_users_products() {
 						forms: {
 							create: [
 								{
+									title: rootFormTemplate?.title,
 									form_template: {
 										connect: {
 											slug: 'root'

@@ -1,8 +1,14 @@
-import { createButton, createForm, login } from '../../../utils/helpers/common';
+import {
+	createButton,
+	createForm,
+	login,
+	modifyButton
+} from '../../../utils/helpers/common';
 import {
 	editFormIntroductionText,
 	ensureTestServiceExistsAndGoToForms,
 	goToCurrentFormReviewPage,
+	goToLinksTabOfForm,
 	goToSettingsTabOfForm,
 	publishForm,
 	renameForm,
@@ -46,8 +52,10 @@ describe('jdma-forms', () => {
 		});
 	});
 
-	it('should create a button from the forms page', () => {
-		createButton('Emplacement 1');
+	it('should create and modify a button from the forms page', () => {
+		goToLinksTabOfForm();
+		createButton("Lien d'intégration 1");
+		modifyButton();
 	});
 
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {
