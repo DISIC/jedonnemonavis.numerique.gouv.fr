@@ -122,12 +122,6 @@ const NewProduct = () => {
 			/>
 			<form id="product-form">
 				<div className={cx(fr.cx('fr-input-group'), classes.popperOverride)}>
-					<label
-						htmlFor={'entity-select-autocomplete'}
-						className={fr.cx('fr-label')}
-					>
-						Organisation <span className={cx(classes.asterisk)}>*</span>
-					</label>
 					<Controller
 						name="entity_id"
 						control={control}
@@ -180,7 +174,12 @@ const NewProduct = () => {
 													placeholder: 'Rechercher une organisation'
 												}}
 												iconId="fr-icon-arrow-down-s-line"
-												label=""
+												label={
+													<p className={fr.cx('fr-mb-0')}>
+														Organisation{' '}
+														<span className={cx(classes.asterisk)}>*</span>
+													</p>
+												}
 												hintText={
 													<>
 														<span className={fr.cx('fr-hint-text')}>
