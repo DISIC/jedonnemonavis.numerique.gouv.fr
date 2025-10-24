@@ -121,7 +121,7 @@ const NewProduct = () => {
 				onSubmit={newEntity => onNewEntitySubmit(newEntity)}
 			/>
 			<form id="product-form">
-				<div className={fr.cx('fr-input-group')}>
+				<div className={cx(fr.cx('fr-input-group'), classes.popperOverride)}>
 					<label
 						htmlFor={'entity-select-autocomplete'}
 						className={fr.cx('fr-label')}
@@ -287,6 +287,11 @@ const useStyles = tss.withName(NewProduct.name).create(() => ({
 	},
 	autocomplete: {
 		width: '100%'
+	},
+	popperOverride: {
+		'.base-Popper-root': {
+			top: '-35px !important'
+		}
 	},
 	fieldset: {
 		ul: {
