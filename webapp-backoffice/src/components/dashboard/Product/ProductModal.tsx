@@ -2,8 +2,6 @@ import { CustomModalProps } from '@/src/types/custom';
 import { createFilterOptionsWithArgument } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { Checkbox } from '@codegouvfr/react-dsfr/Checkbox';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Autocomplete from '@mui/material/Autocomplete';
@@ -49,7 +47,6 @@ const ProductModal = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const [search, _] = React.useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
-	const lastUrlRef = useRef<HTMLInputElement>(null);
 	const router = useRouter();
 	const modalOpen = useIsModalOpen(modal);
 	const [selectedEntityValue, setSelectedEntityValue] = React.useState<
@@ -369,91 +366,6 @@ const ProductModal = (props: Props) => {
 							}}
 						/>
 					)}
-				</div>
-
-				<div className={fr.cx('fr-input-group')}>
-					<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-						<fieldset className={cx(classes.fieldset)}>
-							<legend>URL(s)</legend>
-							{urls.map((url, index) => (
-								<div key={url.id} className={cx(classes.flexContainer)}>
-									<Controller
-										control={control}
-										name={`urls.${index}.value`}
-										rules={{
-											pattern: {
-												value: /^(http|https):\/\/[^ "]+$/,
-												message: "Format d'url invalide"
-											}
-										}}
-										render={({ field: { onChange, value, name } }) => (
-											<Input
-												className={cx(classes.autocomplete, fr.cx('fr-mb-0'))}
-												id={name}
-												hideLabel={true}
-												label={`URL ${index + 1}`}
-												state={errors['urls']?.[index] ? 'error' : 'default'}
-												stateRelatedMessage={`${errors['urls']?.[index]?.value?.message}. Format attendu : https://exemple.com `}
-												nativeInputProps={{
-													name,
-													value,
-													onChange,
-													placeholder: 'Ex: https://exemple.com'
-												}}
-												ref={index === urls.length - 1 ? lastUrlRef : null}
-											/>
-										)}
-									/>
-									{index !== 0 && (
-										<Button
-											title={`Supprimer l'adresse web n°${index + 1}`}
-											aria-label={`Supprimer l'adresse web n°${index + 1}`}
-											priority="secondary"
-											type="button"
-											className={cx(classes.innerButton)}
-											onClick={() => handleRemoveUrl(index)}
-										>
-											<i className="ri-delete-bin-line"></i>
-											<span className="fr-sr-only">Supprimer</span>
-										</Button>
-									)}
-								</div>
-							))}
-							<Button
-								priority="secondary"
-								iconId="fr-icon-add-line"
-								className={fr.cx('fr-mt-1w')}
-								iconPosition="left"
-								type="button"
-								onClick={() => handleAppendUrl()}
-							>
-								Ajouter un URL
-							</Button>
-						</fieldset>
-					</div>
-				</div>
-
-				<div className={fr.cx('fr-input-group')}>
-					<legend className={fr.cx('fr-label', 'fr-mb-1w')}>Options</legend>
-					<Controller
-						name="isPublic"
-						control={control}
-						defaultValue={product?.isPublic ?? false}
-						render={({ field: { value, onChange, name } }) => (
-							<Checkbox
-								options={[
-									{
-										label: 'Rendre les statistiques publiques',
-										nativeInputProps: {
-											name,
-											checked: !!value,
-											onChange: e => onChange(e.target.checked)
-										}
-									}
-								]}
-							/>
-						)}
-					/>
 				</div>
 			</form>
 		</modal.Component>
