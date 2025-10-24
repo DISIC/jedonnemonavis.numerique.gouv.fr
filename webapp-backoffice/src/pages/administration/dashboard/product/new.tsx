@@ -128,107 +128,104 @@ const NewProduct = () => {
 					>
 						Organisation <span className={cx(classes.asterisk)}>*</span>
 					</label>
-					{!isLoadingEntities && entityOptions.length > 0 && (
-						<Controller
-							name="entity_id"
-							control={control}
-							rules={{ required: 'Ce champ est obligatoire' }}
-							render={({ field: { onChange, value, name } }) => {
-								useEffect(() => {
-									onChange(selectedEntityValue);
-								}, [selectedEntityValue]);
-								return (
-									<Autocomplete
-										disablePortal
-										id="entity-select-autocomplete"
-										noOptionsText="Aucune organisation trouvée"
-										sx={{ width: '100%' }}
-										options={entityOptions}
-										filterOptions={createFilterOptionsWithArgument(true)}
-										onChange={(_, optionSelected) => {
-											if (optionSelected?.value === -1) {
-												entity_modal.open();
-											} else {
-												setSelectedEntityValue(optionSelected?.value);
-											}
-										}}
-										isOptionEqualToValue={option => option.value === value}
-										defaultValue={entityOptions.find(
-											option => option.value === selectedEntityValue
-										)}
-										value={
-											selectedEntityValue
-												? entityOptions.find(
-														option => option.value === selectedEntityValue
-													)
-												: { label: '', value: undefined }
+					<Controller
+						name="entity_id"
+						control={control}
+						rules={{ required: 'Ce champ est obligatoire' }}
+						render={({ field: { onChange, value, name } }) => {
+							useEffect(() => {
+								onChange(selectedEntityValue);
+							}, [selectedEntityValue]);
+							return (
+								<Autocomplete
+									disablePortal
+									id="entity-select-autocomplete"
+									noOptionsText="Aucune organisation trouvée"
+									sx={{ width: '100%' }}
+									options={entityOptions}
+									loading={isLoadingEntities}
+									loadingText="Chargement des organisations..."
+									filterOptions={createFilterOptionsWithArgument(true)}
+									onChange={(_, optionSelected) => {
+										if (optionSelected?.value === -1) {
+											entity_modal.open();
+										} else {
+											setSelectedEntityValue(optionSelected?.value);
 										}
-										renderInput={params => (
-											<div
-												ref={params.InputProps.ref}
-												className={fr.cx(
-													'fr-input-group',
-													errors[name] ? 'fr-input-group--error' : undefined
-												)}
-											>
-												<Input
-													nativeInputProps={{
-														...params.inputProps,
-														type: 'search',
-														required: true,
-														placeholder: 'Rechercher une organisation'
-													}}
-													iconId="fr-icon-arrow-down-s-line"
-													label=""
-													hintText={
-														<>
-															<span className={fr.cx('fr-hint-text')}>
-																Exemples : Direction Générale des Finances
-																(DGFIP), Académie de Dijon
-															</span>
-														</>
-													}
-													state="info"
-													stateRelatedMessage={
-														'Vous pouvez ajouter votre organisation si elle n’apparait pas dans la liste'
-													}
-												/>
-												{errors[name] && (
-													<p className={fr.cx('fr-error-text')}>
-														{errors[name]?.message}
-													</p>
-												)}
-											</div>
-										)}
-										renderOption={(props, option) => (
-											<li
-												{...props}
-												className={fr.cx(
-													option.value === -1 ? 'fr-p-0' : 'fr-p-3v'
-												)}
-											>
-												{option.value === -1 ? (
-													<div
-														className={cx(
-															classes.buttonSelect,
-															fr.cx('fr-p-3v')
-														)}
-													>
-														<span className={fr.cx('fr-mr-2v')}>
-															{option.label}
+									}}
+									isOptionEqualToValue={option => option.value === value}
+									defaultValue={entityOptions.find(
+										option => option.value === selectedEntityValue
+									)}
+									value={
+										selectedEntityValue
+											? entityOptions.find(
+													option => option.value === selectedEntityValue
+												)
+											: { label: '', value: undefined }
+									}
+									renderInput={params => (
+										<div
+											ref={params.InputProps.ref}
+											className={fr.cx(
+												'fr-input-group',
+												errors[name] ? 'fr-input-group--error' : undefined
+											)}
+										>
+											<Input
+												nativeInputProps={{
+													...params.inputProps,
+													type: 'search',
+													required: true,
+													placeholder: 'Rechercher une organisation'
+												}}
+												iconId="fr-icon-arrow-down-s-line"
+												label=""
+												hintText={
+													<>
+														<span className={fr.cx('fr-hint-text')}>
+															Exemples : Direction Générale des Finances
+															(DGFIP), Académie de Dijon
 														</span>
-														<i className={fr.cx('fr-icon-add-circle-line')} />
-													</div>
-												) : (
-													option.label
-												)}
-											</li>
-										)}
-									/>
-								);
-							}}
-						/>
-					)}
+													</>
+												}
+												state="info"
+												stateRelatedMessage={
+													'Vous pouvez ajouter votre organisation si elle n’apparait pas dans la liste'
+												}
+											/>
+											{errors[name] && (
+												<p className={fr.cx('fr-error-text')}>
+													{errors[name]?.message}
+												</p>
+											)}
+										</div>
+									)}
+									renderOption={(props, option) => (
+										<li
+											{...props}
+											className={fr.cx(
+												option.value === -1 ? 'fr-p-0' : 'fr-p-3v'
+											)}
+										>
+											{option.value === -1 ? (
+												<div
+													className={cx(classes.buttonSelect, fr.cx('fr-p-3v'))}
+												>
+													<span className={fr.cx('fr-mr-2v')}>
+														{option.label}
+													</span>
+													<i className={fr.cx('fr-icon-add-circle-line')} />
+												</div>
+											) : (
+												option.label
+											)}
+										</li>
+									)}
+								/>
+							);
+						}}
+					/>
 				</div>
 				<div className={fr.cx('fr-input-group')}>
 					<Controller
