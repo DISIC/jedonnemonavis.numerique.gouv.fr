@@ -2,21 +2,20 @@ import PublicLayout from '@/src/layouts/PublicLayout';
 import { trpc } from '@/src/utils/trpc';
 import MuiDsfrThemeProvider from '@codegouvfr/react-dsfr/mui';
 import { createNextDsfrIntegrationApi } from '@codegouvfr/react-dsfr/next-pagesdir';
+import { init } from '@socialgouv/matomo-next';
 import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
+import { FiltersContextProvider } from '../contexts/FiltersContext';
+import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
 import { StatsTotalsProvider } from '../contexts/StatsContext';
+import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
-import { FiltersContextProvider } from '../contexts/FiltersContext';
-import React from 'react';
-import { init } from '@socialgouv/matomo-next';
-import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
-import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -54,11 +53,20 @@ export { augmentDocumentWithEmotionCache };
 const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
 const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 
+const OFF_ADMIN_PATHS = [
+	'/public/maintenance',
+	'/administration/dashboard/onboarding',
+	'/administration/dashboard/product/new',
+	'/administration/dashboard/product/[id]/forms/new'
+];
+
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
 	const getLayout = (children: ReactNode) => {
-		if (router.pathname.startsWith('/public/maintenance')) return children;
+		if (OFF_ADMIN_PATHS.some(path => router.pathname.startsWith(path))) {
+			return children;
+		}
 
 		const lightMode =
 			router.pathname.startsWith('/public') ||
@@ -73,15 +81,6 @@ function App({ Component, pageProps }: AppProps) {
 				url: MATOMO_URL ? MATOMO_URL : '',
 				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
 			});
-		const removeButtonOnLoad = () => {
-			const buttonToRemove = document.getElementById(
-				'fr-theme-modal-hidden-control-button'
-			);
-			if (buttonToRemove) {
-				buttonToRemove.remove();
-			}
-		};
-		removeButtonOnLoad();
 	}, []);
 
 	return (
