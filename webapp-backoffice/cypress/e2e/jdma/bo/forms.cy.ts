@@ -21,6 +21,7 @@ import {
 	fillFormStep4
 } from '../../../utils/helpers/review';
 import { selectors } from '../../../utils/selectors';
+import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 const FORM_TITLES = [
@@ -32,6 +33,13 @@ describe('jdma-forms', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
 		ensureTestServiceExistsAndGoToForms();
+
+		cy.injectAxe();
+		cy.checkA11y(
+			null,
+			{ includedImpacts: ['moderate', 'serious', 'critical'] },
+			displayViolationsTable
+		);
 	});
 
 	it('should create multiple forms for a single service', () => {
