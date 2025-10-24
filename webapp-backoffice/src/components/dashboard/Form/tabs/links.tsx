@@ -117,9 +117,9 @@ const LinksTab = ({
 				isClosed={!isAlertShown}
 				onClose={() => setIsAlertShown(false)}
 			/>
-			<h3 className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-0')}>
-				Lien d'intégration
-			</h3>
+			<h2 className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-0')}>
+				Liens d'intégration
+			</h2>
 			<div
 				className={cx(classes.buttonsGroup, fr.cx('fr-col-12', 'fr-col-md-4'))}
 			>
