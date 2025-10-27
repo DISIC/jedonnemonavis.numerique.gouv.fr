@@ -8,6 +8,7 @@ import { tss } from 'tss-react/dsfr';
 import FormCreationModal from '../Form/FormCreationModal';
 import { Product } from '@prisma/client';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 
 const new_form_modal = createModal({
 	id: 'new-form-modal',
@@ -20,6 +21,7 @@ interface Props {
 }
 
 const NoFormsPanel = ({ isSmall, product }: Props) => {
+	const router = useRouter();
 	const { cx, classes } = useStyles();
 
 	return (
@@ -91,7 +93,9 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 						onClick={e => {
 							e.stopPropagation();
 							e.preventDefault();
-							new_form_modal.open();
+							router.push(
+								`/administration/dashboard/product/${product.id}/forms/new`
+							);
 						}}
 						size={isSmall ? 'medium' : 'large'}
 					>

@@ -5,7 +5,6 @@ import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
 
-import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import NoFormsPanel from '@/src/components/dashboard/Pannels/NoFormsPanel';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import {
@@ -15,7 +14,6 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -26,17 +24,11 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
-const new_form_modal = createModal({
-	id: 'new-form-modal',
-	isOpenedByDefault: false
-});
-
 const ProductFormsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 	const router = useRouter();
 	const alertTextQuery = router.query.alert as string | undefined;
-	const [alertText, setAlertText] = useState(alertTextQuery);
 	const [isAlertShown, setIsAlertShown] = useState(!!alertTextQuery);
 
 	useEffect(() => {
@@ -100,22 +92,15 @@ const ProductFormsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					<FormCreationModal
-						modal={new_form_modal}
-						productId={product.id}
-						defaultTitle={defaultTitle}
+					<Alert
+						className={fr.cx('fr-col-12', 'fr-mb-6v')}
+						description={alertTextQuery || ''}
+						severity="success"
+						small
+						closable
+						isClosed={!isAlertShown}
+						onClose={() => setIsAlertShown(false)}
 					/>
-					{alertText && (
-						<Alert
-							className={fr.cx('fr-col-12', 'fr-mb-6v')}
-							description={alertText}
-							severity="success"
-							small
-							closable
-							isClosed={!isAlertShown}
-							onClose={() => setIsAlertShown(false)}
-						/>
-					)}
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
@@ -127,8 +112,15 @@ const ProductFormsPage = (props: Props) => {
 							)}
 						>
 							{ownRight === 'carrier_admin' && !product.isTop250 && (
-								<Button priority="secondary" onClick={new_form_modal.open}>
-									Créer un nouveau formulaire
+								<Button
+									priority="secondary"
+									onClick={() =>
+										router.push(
+											`/administration/dashboard/product/${product.id}/forms/new`
+										)
+									}
+								>
+									Générer un formulaire
 									<span
 										className={fr.cx(
 											'fr-icon-file-add-line',
