@@ -58,7 +58,9 @@ const OFF_ADMIN_PATHS = [
 	'/administration/dashboard/onboarding',
 	'/administration/dashboard/product/new',
 	'/administration/dashboard/product/[id]/forms/new'
-];
+] as const;
+
+const LIGHT_MODE_PATHS = ['/public', '/open-api'] as const;
 
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
@@ -68,11 +70,11 @@ function App({ Component, pageProps }: AppProps) {
 			return children;
 		}
 
-		const lightMode =
-			router.pathname.startsWith('/public') ||
-			router.pathname.startsWith('/open-api');
+		const isLightMode = LIGHT_MODE_PATHS.some(path =>
+			router.pathname.startsWith(path)
+		);
 
-		return <PublicLayout light={lightMode}>{children}</PublicLayout>;
+		return <PublicLayout light={isLightMode}>{children}</PublicLayout>;
 	};
 
 	React.useEffect(() => {
