@@ -1,14 +1,14 @@
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Input from '@codegouvfr/react-dsfr/Input';
 import { Form, RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import React, { useMemo } from 'react';
-import { getServerSideProps } from '..';
-import { tss } from 'tss-react/dsfr';
-import { fr } from '@codegouvfr/react-dsfr';
+import { useEffect, useMemo } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import Input from '@codegouvfr/react-dsfr/Input';
-import { trpc } from '@/src/utils/trpc';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '..';
 
 interface Props {
 	product: ProductWithForms;
@@ -23,26 +23,25 @@ const NewForm = (props: Props) => {
 	const { id } = router.query;
 	const { cx, classes } = useStyles();
 
-	const rootFormTemplate = useMemo(() => {
-		return product.forms.find(f => f.form_template.slug === 'root')
-			?.form_template;
-	}, [product.forms]);
+	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
+		slug: 'root'
+	});
 
 	const defaultTitle = useMemo(() => {
 		if (!product.forms || product.forms.length === 0)
-			return rootFormTemplate?.title || '';
+			return rootFormTemplate?.data?.title || '';
 
 		const existingTemplateForms = product.forms.filter(
 			f =>
-				rootFormTemplate?.title &&
-				f.form_template.title === rootFormTemplate.title
+				rootFormTemplate?.data?.title &&
+				f.form_template.title === rootFormTemplate.data.title
 		);
 
 		if (existingTemplateForms.length === 0)
-			return rootFormTemplate?.title || '';
+			return rootFormTemplate?.data?.title || '';
 
-		return `${rootFormTemplate?.title} ${existingTemplateForms.length + 1}`;
-	}, [product.forms]);
+		return `${rootFormTemplate?.data?.title} ${existingTemplateForms.length + 1}`;
+	}, [product.forms, rootFormTemplate]);
 
 	const {
 		control,
@@ -51,9 +50,15 @@ const NewForm = (props: Props) => {
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
-			title: defaultTitle || rootFormTemplate?.title || ''
+			title: defaultTitle || rootFormTemplate?.data?.title || ''
 		}
 	});
+
+	useEffect(() => {
+		reset({
+			title: defaultTitle || rootFormTemplate?.data?.title || ''
+		});
+	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
 
@@ -66,11 +71,11 @@ const NewForm = (props: Props) => {
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		let formId;
 
-		if (!rootFormTemplate?.id) return;
+		if (!rootFormTemplate?.data?.id) return;
 		const savedFormResponse = await saveFormTmp.mutateAsync({
 			...data,
 			product_id: product.id,
-			form_template_id: rootFormTemplate?.id
+			form_template_id: rootFormTemplate?.data?.id
 		});
 		formId = savedFormResponse.data.id;
 		router.push(`/administration/dashboard/product/${product.id}/forms`);
@@ -102,10 +107,31 @@ const NewForm = (props: Props) => {
 					<Controller
 						control={control}
 						name="title"
-						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => {
+						rules={{
+							required: 'Ce champ est obligatoire',
+							validate: value => {
+								const trimmedValue = value?.trim();
+								if (!trimmedValue) return 'Ce champ est obligatoire';
+								const isDuplicate = product.forms.some(
+									form =>
+										(
+											form?.title ||
+											rootFormTemplate?.data?.title ||
+											''
+										).trim() === trimmedValue
+								);
+								return !isDuplicate || 'Un formulaire avec ce nom existe déjà';
+							}
+						}}
+						render={({ field: { onChange, value, name, ref } }) => {
 							return (
-								<>
+								<div
+									ref={ref}
+									className={fr.cx(
+										'fr-input-group',
+										errors[name] ? 'fr-input-group--error' : undefined
+									)}
+								>
 									<Input
 										label={
 											<p className={fr.cx('fr-mb-0')}>
@@ -117,13 +143,7 @@ const NewForm = (props: Props) => {
 											onChange,
 											value: value || '',
 											name,
-											required: true,
-											onKeyDown: e => {
-												if (e.key === 'Enter') {
-													e.preventDefault();
-													handleSubmit(onLocalSubmit)();
-												}
-											}
+											required: true
 										}}
 										hintText={
 											<>
@@ -143,7 +163,7 @@ const NewForm = (props: Props) => {
 											{errors[name]?.message}
 										</p>
 									)}
-								</>
+								</div>
 							);
 						}}
 					/>
