@@ -79,11 +79,10 @@ export function createProduct(name: string) {
 		.within(() => {
 			cy.get('input[name="title"]').clear().type(name);
 			selectEntity();
-			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
 		});
 
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Ajouter ce service')
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
 		.click();
 }
 
