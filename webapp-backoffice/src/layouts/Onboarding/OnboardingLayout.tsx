@@ -7,8 +7,7 @@ import { tss } from 'tss-react/dsfr';
 interface OnboardingLayoutProps {
 	children: React.ReactNode;
 	title?: string;
-	showActions?: boolean;
-	isSkippable?: boolean;
+	hideActions?: boolean;
 	isCancelable?: boolean;
 	confirmText?: string;
 	onCancel?: () => void;
@@ -17,8 +16,7 @@ interface OnboardingLayoutProps {
 
 const OnboardingLayout = ({
 	children,
-	showActions = true,
-	isSkippable,
+	hideActions,
 	isCancelable,
 	confirmText,
 	onCancel,
@@ -26,7 +24,7 @@ const OnboardingLayout = ({
 	title
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
-	const { cx, classes } = useStyles({ hasActions: showActions });
+	const { cx, classes } = useStyles({ hasActions: !hideActions });
 
 	return (
 		<>
@@ -50,7 +48,7 @@ const OnboardingLayout = ({
 					{children}
 				</div>
 			</main>
-			{showActions && (
+			{!hideActions && (
 				<section
 					id="onboarding-actions"
 					role="region"
@@ -67,16 +65,14 @@ const OnboardingLayout = ({
 					</Button>
 
 					<div className={cx(classes.rightActions)}>
-						{isSkippable && (
-							<Button
-								priority="secondary"
-								size="large"
-								iconPosition="right"
-								iconId="fr-icon-arrow-right-s-line"
-							>
-								Passer cette étape
-							</Button>
-						)}
+						{/* <Button
+							priority="secondary"
+							size="large"
+							iconPosition="right"
+							iconId="fr-icon-arrow-right-s-line"
+						>
+							Passer cette étape
+						</Button> */}
 						<Button
 							size="large"
 							iconPosition="right"
