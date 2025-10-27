@@ -183,10 +183,10 @@ export const buttonRouter = router({
 					});
 
 					await sendMail(
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
+						`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`,
 						email,
 						emailHtml,
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`
+						`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`
 					);
 				}
 			}

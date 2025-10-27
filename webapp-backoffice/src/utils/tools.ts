@@ -6,6 +6,7 @@ import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { z } from 'zod';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
@@ -29,8 +30,7 @@ export function isValidDate(dateString: string) {
 }
 
 export function isValidEmail(email: string): boolean {
-	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-	return emailRegex.test(email);
+	return z.string().email().safeParse(email).success;
 }
 
 export function generateRandomString(length: number = 8): string {
@@ -446,11 +446,11 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_uninvite:
 			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.service_button_create:
-			return `Création de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
+			return `Création du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
-			return `Modification de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
+			return `Modification du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_delete:
-			return `Fermeture de l'emplacement <strong>${metadataTyped.json.title}</strong>`;
+			return `Fermeture du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
@@ -481,9 +481,15 @@ export const filtersLabel = [
 		value: 'organisation_uninvite',
 		label: "Retrait d'utilisateur d'une organisation"
 	},
-	{ value: 'service_button_create', label: "Création d'un emplacement" },
-	{ value: 'service_button_update', label: "Modification d'un emplacement" },
-	{ value: 'service_button_delete', label: "Suppression d'un emplacement" },
+	{ value: 'service_button_create', label: "Création d'un lien d'intégration" },
+	{
+		value: 'service_button_update',
+		label: "Modification d'un lien d'intégration"
+	},
+	{
+		value: 'service_button_delete',
+		label: "Suppression d'un lien d'intégration"
+	},
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
 	{ value: 'form_config_create', label: 'Modification du formulaire' },
@@ -574,6 +580,7 @@ export const getValidTabSlug = (tab: string | undefined): TabsSlug => {
 		case 'reviews':
 		case 'stats':
 		case 'settings':
+		case 'links':
 			return tab;
 		default:
 			return 'dashboard';

@@ -41,9 +41,7 @@ const ProductButtonCard = (props: Props) => {
 
 	return (
 		<>
-			<div
-				className={cx(classes.card, fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'))}
-			>
+			<div className={cx(classes.card, fr.cx('fr-card', 'fr-p-2w'))}>
 				<div
 					className={fr.cx(
 						'fr-grid-row',
@@ -163,7 +161,7 @@ const ProductButtonCard = (props: Props) => {
 													fr.cx('ri-file-copy-line', 'fr-mr-2v', 'fr-icon--sm')
 												)}
 											/>
-											Copier le lien du formulaire
+											Copier l'URL
 										</MenuItem>
 										{ownRight === 'carrier_admin' && (
 											<MenuItem
@@ -186,7 +184,7 @@ const ProductButtonCard = (props: Props) => {
 														)
 													)}
 												/>
-												Fermer l'emplacement
+												Fermer le lien
 											</MenuItem>
 										)}
 									</Menu>
@@ -203,8 +201,8 @@ const ProductButtonCard = (props: Props) => {
 						description={
 							<>
 								<p>
-									Une tentative de dépôt d'avis a été effectuée sur cet
-									emplacement fermé. Nous vous invitons à supprimer le code HTML
+									Une tentative de dépôt d'avis a été effectuée sur depuis ce
+									lien fermé. Nous vous invitons à supprimer le code HTML
 									correspondant de la page concernée.
 								</p>
 								<small>

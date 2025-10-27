@@ -34,6 +34,20 @@ export function tryCloseNewsModal() {
 	});
 }
 
+export function tryCloseModal() {
+	cy.wait(500);
+	cy.get('body').then($body => {
+		const $modal = $body.find('dialog[open]');
+		if ($modal.length && $modal.is(':visible')) {
+			cy.wrap($modal).within(() => {
+				cy.contains('button', 'Fermer').click();
+			});
+		} else {
+			cy.log('No open modal found, skipping close action.');
+		}
+	});
+}
+
 export function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();
 	cy.get('div[role="presentation"]')
@@ -88,7 +102,10 @@ export function createProduct(name: string) {
 
 export function createForm(name: string) {
 	cy.url().should('include', '/forms');
-	cy.contains('button', /^Créer un (nouveau )?formulaire$/).click();
+	cy.contains(
+		'button',
+		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
+	).click();
 	cy.get(selectors.modal.form)
 		.should('be.visible')
 		.within(() => {
@@ -103,7 +120,7 @@ export function createForm(name: string) {
 
 export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
-	cy.contains('button', 'Créer un emplacement').click();
+	cy.contains('button', "Créer un lien d'intégration").click();
 	cy.get(selectors.modal.button)
 		.should('be.visible')
 		.within(() => {
@@ -111,4 +128,27 @@ export function createButton(name: string) {
 		});
 	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
+	tryCloseModal();
+}
+
+export function modifyButton() {
+	cy.intercept('POST', '/api/trpc/button.update*').as('updateButton');
+	cy.get('[class*="ProductButtonCard"]')
+		.first()
+		.within(() => {
+			cy.get('[class*="actionsContainer"]')
+				.find('button#button-options')
+				.click();
+		});
+	cy.get('div#option-menu').contains('Modifier').click();
+	cy.get('dialog#button-modal').within(() => {
+		cy.get('input[name="button-create-title"]')
+			.clear()
+			.type('e2e-jdma-button-test-1');
+		cy.get('textarea')
+			.clear()
+			.type('Description du bouton e2e-jdma-button-test-1');
+	});
+	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
+	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
 }

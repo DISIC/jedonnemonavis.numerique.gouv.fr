@@ -16,8 +16,8 @@ export const JdmaProductArchivedEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				{userName} vient de supprimer le service «{' '}
-				<strong>{productTitle}</strong> » sur la plateforme{' '}
+				{userName} vient de supprimer le service «&nbsp;
+				<strong>{productTitle}</strong> » sur la plateforme&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>
@@ -26,15 +26,16 @@ export const JdmaProductArchivedEmail = ({
 			</Text>
 
 			<Text style={paragraph}>
-				Vous pouvez restaurer ce service depuis{' '}
+				Vous pouvez restaurer ce service depuis&nbsp;
 				<Link
 					href={`${baseUrl}/administration/dashboard/products`}
 					target="_blank"
 					style={linkStyle}
 				>
 					la page services
-				</Link>{' '}
-				pendant 6 mois. Après ce délai, le service sera définitivement supprimé.
+				</Link>
+				&nbsp; pendant 6 mois. Après ce délai, le service sera définitivement
+				supprimé.
 			</Text>
 		</JdmaLayout>
 	);

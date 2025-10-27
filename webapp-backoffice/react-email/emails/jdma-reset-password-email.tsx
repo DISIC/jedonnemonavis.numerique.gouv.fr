@@ -17,12 +17,13 @@ export const JdmaResetPasswordEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous avez demandé à réinitialiser votre mot de passe sur la plateforme «{' '}
+				Vous avez demandé à réinitialiser votre mot de passe sur la plateforme
+				«&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
-				</Link>{' '}
-				». Afin de choisir un nouveau mot de passe, veuillez cliquer sur le lien
-				ci-dessous.
+				</Link>
+				&nbsp; ». Afin de choisir un nouveau mot de passe, veuillez cliquer sur
+				le lien ci-dessous.
 			</Text>
 
 			<Link href={link} target="_blank" style={buttonLink}>
