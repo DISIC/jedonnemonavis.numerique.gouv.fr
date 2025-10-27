@@ -78,5 +78,8 @@ export const selectors = {
 		delete: 'Supprimer le compte',
 		confirmDelete: 'Supprimer',
 		confirm: 'Confirmer'
+	},
+	onboarding: {
+		actionsContainer: '#onboarding-actions'
 	}
 };
