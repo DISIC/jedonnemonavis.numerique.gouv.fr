@@ -63,12 +63,7 @@ const NewProduct = () => {
 
 	const utils = trpc.useUtils();
 
-	const saveProductTmp = trpc.product.create.useMutation({
-		onSuccess: () => {
-			utils.adminEntityRight.getUserList.invalidate();
-		}
-	});
-	const updateProduct = trpc.product.update.useMutation({
+	const createProduct = trpc.product.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
 		}
@@ -83,37 +78,19 @@ const NewProduct = () => {
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
 		const { ...tmpProduct } = data;
 
-		let productId;
+		const savedProductResponse = await createProduct.mutateAsync({
+			...tmpProduct
+		});
 
-		if (product && product.id) {
-			await updateProduct.mutateAsync({
-				id: product.id,
-				product: {
-					...tmpProduct,
-					forms: undefined
-				}
-			});
-		} else {
-			const savedProductResponse = await saveProductTmp.mutateAsync({
-				...tmpProduct
-			});
-			productId = savedProductResponse.data.id;
-		}
-
-		if (productId) {
-			router
-				.push(`/administration/dashboard/product/${productId}/forms`)
-				.then(() => {
-					window.location.reload();
-				});
-		}
+		router.push(
+			`/administration/dashboard/product/${savedProductResponse.data.id}/forms`
+		);
 	};
 
 	return (
 		<OnboardingLayout
 			isCancelable
 			title="Ajouter un service numérique"
-			onCancel={() => router.push('/administration/dashboard/products')}
 			onConfirm={handleSubmit(onLocalSubmit)}
 		>
 			<EntityModal
