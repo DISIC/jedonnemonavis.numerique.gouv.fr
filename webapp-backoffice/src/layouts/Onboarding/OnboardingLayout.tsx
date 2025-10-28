@@ -13,6 +13,7 @@ interface OnboardingLayoutProps {
 	onCancel?: () => void;
 	onConfirm?: () => void;
 	noBackground?: boolean;
+	isConfirmDisabled?: boolean;
 }
 
 const OnboardingLayout = ({
@@ -23,7 +24,8 @@ const OnboardingLayout = ({
 	onCancel,
 	onConfirm,
 	title,
-	noBackground
+	noBackground,
+	isConfirmDisabled
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: !hideActions });
@@ -83,6 +85,7 @@ const OnboardingLayout = ({
 							iconPosition="right"
 							iconId="fr-icon-arrow-right-s-line"
 							onClick={onConfirm}
+							disabled={isConfirmDisabled}
 						>
 							{confirmText ? confirmText : 'Continuer'}
 						</Button>
