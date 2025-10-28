@@ -12,6 +12,7 @@ interface OnboardingLayoutProps {
 	confirmText?: string;
 	onCancel?: () => void;
 	onConfirm?: () => void;
+	noBackground?: boolean;
 }
 
 const OnboardingLayout = ({
@@ -21,7 +22,8 @@ const OnboardingLayout = ({
 	confirmText,
 	onCancel,
 	onConfirm,
-	title
+	title,
+	noBackground
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: !hideActions });
@@ -34,7 +36,10 @@ const OnboardingLayout = ({
 				tabIndex={-1}
 				className={classes.mainContainer}
 			>
-				<div className={classes.stepContent}>
+				<div
+					className={classes.stepContent}
+					style={{ background: noBackground ? 'transparent' : undefined }}
+				>
 					{title && (
 						<>
 							<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>

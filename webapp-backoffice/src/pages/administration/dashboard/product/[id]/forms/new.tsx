@@ -5,10 +5,11 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Form, RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
+import FormGenerationAnimationPanel from '@/src/components/dashboard/Form/FormGenerationAnimationPanel';
 
 interface Props {
 	product: ProductWithForms;
@@ -22,6 +23,8 @@ const NewForm = (props: Props) => {
 	const router = useRouter();
 	const { id } = router.query;
 	const { cx, classes } = useStyles();
+
+	const [isGenerating, setIsGenerating] = useState(false);
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
@@ -62,113 +65,121 @@ const NewForm = (props: Props) => {
 
 	const utils = trpc.useUtils();
 
-	const saveFormTmp = trpc.form.create.useMutation({
+	const createForm = trpc.form.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
 		}
 	});
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		let formId;
-
-		if (!rootFormTemplate?.data?.id) return;
-		const savedFormResponse = await saveFormTmp.mutateAsync({
-			...data,
-			product_id: product.id,
-			form_template_id: rootFormTemplate?.data?.id
-		});
-		formId = savedFormResponse.data.id;
-		router.push(`/administration/dashboard/product/${product.id}/forms`);
+		setIsGenerating(true);
+		// if (!rootFormTemplate?.data?.id) return;
+		// const savedFormResponse = await createForm.mutateAsync({
+		// 	...data,
+		// 	product_id: product.id,
+		// 	form_template_id: rootFormTemplate?.data?.id
+		// });
+		// router.push(
+		// 	`/administration/dashboard/product/${product.id}/forms/${savedFormResponse.data.id}`
+		// );
 	};
 
 	return (
 		<OnboardingLayout
 			isCancelable
-			title="Générer un formulaire"
-			onCancel={() =>
-				router.push(`/administration/dashboard/product/${id}/forms`)
-			}
+			title={isGenerating ? undefined : 'Générer un formulaire'}
 			onConfirm={handleSubmit(onLocalSubmit)}
+			noBackground={isGenerating}
 		>
-			<div
-				className={cx(classes.infoContainer, fr.cx('fr-my-8v', 'fr-p-6v'))}
-				style={{ justifyContent: 'start' }}
-			>
-				<div className={classes.iconContainer}>
-					<i className={cx(fr.cx('ri-emotion-happy-line', 'fr-icon--lg'))} />
-				</div>
-				<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-					JDMA vous propose un formulaire pour évaluer la satisfaction globale
-					de vos usagers.
-				</p>
-			</div>
-			<form id="form-creation-form">
-				<div className={fr.cx('fr-input-group')}>
-					<Controller
-						control={control}
-						name="title"
-						rules={{
-							required: 'Ce champ est obligatoire',
-							validate: value => {
-								const trimmedValue = value?.trim();
-								if (!trimmedValue) return 'Ce champ est obligatoire';
-								const isDuplicate = product.forms.some(
-									form =>
-										(
-											form?.title ||
-											rootFormTemplate?.data?.title ||
-											''
-										).trim() === trimmedValue
-								);
-								return !isDuplicate || 'Un formulaire avec ce nom existe déjà';
-							}
-						}}
-						render={({ field: { onChange, value, name, ref } }) => {
-							return (
-								<div
-									ref={ref}
-									className={fr.cx(
-										'fr-input-group',
-										errors[name] ? 'fr-input-group--error' : undefined
-									)}
-								>
-									<Input
-										label={
-											<p className={fr.cx('fr-mb-0')}>
-												Nom du formulaire{' '}
-												<span className={cx(classes.asterisk)}>*</span>
-											</p>
-										}
-										nativeInputProps={{
-											onChange,
-											value: value || '',
-											name,
-											required: true
-										}}
-										hintText={
-											<>
-												<span className={fr.cx('fr-hint-text')}>
-													Visible uniquement par vous et les autres membres de
-													l’équipe
-												</span>
-											</>
-										}
-										state="info"
-										stateRelatedMessage={
-											'Vous pouvez modifier ce nom par défaut'
-										}
-									/>
-									{errors[name] && (
-										<p className={fr.cx('fr-error-text')}>
-											{errors[name]?.message}
-										</p>
-									)}
-								</div>
-							);
-						}}
-					/>
-				</div>
-			</form>
+			{isGenerating ? (
+				<FormGenerationAnimationPanel />
+			) : (
+				<>
+					<div
+						className={cx(classes.infoContainer, fr.cx('fr-my-8v', 'fr-p-6v'))}
+						style={{ justifyContent: 'start' }}
+					>
+						<div className={classes.iconContainer}>
+							<i
+								className={cx(fr.cx('ri-emotion-happy-line', 'fr-icon--lg'))}
+							/>
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							JDMA vous propose un formulaire pour évaluer la satisfaction
+							globale de vos usagers.
+						</p>
+					</div>
+					<form id="form-creation-form">
+						<div className={fr.cx('fr-input-group')}>
+							<Controller
+								control={control}
+								name="title"
+								rules={{
+									required: 'Ce champ est obligatoire',
+									validate: value => {
+										const trimmedValue = value?.trim();
+										if (!trimmedValue) return 'Ce champ est obligatoire';
+										const isDuplicate = product.forms.some(
+											form =>
+												(
+													form?.title ||
+													rootFormTemplate?.data?.title ||
+													''
+												).trim() === trimmedValue
+										);
+										return (
+											!isDuplicate || 'Un formulaire avec ce nom existe déjà'
+										);
+									}
+								}}
+								render={({ field: { onChange, value, name, ref } }) => {
+									return (
+										<div
+											ref={ref}
+											className={fr.cx(
+												'fr-input-group',
+												errors[name] ? 'fr-input-group--error' : undefined
+											)}
+										>
+											<Input
+												label={
+													<p className={fr.cx('fr-mb-0')}>
+														Nom du formulaire{' '}
+														<span className={cx(classes.asterisk)}>*</span>
+													</p>
+												}
+												nativeInputProps={{
+													onChange,
+													value: value || '',
+													name,
+													required: true
+												}}
+												hintText={
+													<>
+														<span className={fr.cx('fr-hint-text')}>
+															Visible uniquement par vous et les autres membres
+															de l’équipe
+														</span>
+													</>
+												}
+												state="info"
+												stateRelatedMessage={
+													'Vous pouvez modifier ce nom par défaut'
+												}
+											/>
+											{errors[name] && (
+												<p className={fr.cx('fr-error-text')}>
+													{errors[name]?.message}
+												</p>
+											)}
+										</div>
+									);
+								}}
+							/>
+						</div>
+					</form>
+				</>
+			)}
 		</OnboardingLayout>
 	);
 };
