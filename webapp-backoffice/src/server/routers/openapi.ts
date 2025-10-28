@@ -4,7 +4,7 @@ import {
 	router
 } from '@/src/server/trpc';
 import { ZOpenApiStatsOutput } from '@/src/types/custom';
-import { renderJdmaNotificationsEmail } from '@/src/utils/emails';
+import { renderNotificationsEmail } from '@/src/utils/emails';
 import {
 	FIELD_CODE_BOOLEAN_VALUES,
 	FIELD_CODE_DETAILS_VALUES,
@@ -602,7 +602,7 @@ export const openAPIRouter = router({
 					);
 
 					if (accessibleProducts.length > 0) {
-						const emailHtml = await renderJdmaNotificationsEmail({
+						const emailHtml = await renderNotificationsEmail({
 							userId: user.id,
 							frequency: scope,
 							totalNbReviews: totalNewReviews,
@@ -618,11 +618,13 @@ export const openAPIRouter = router({
 							baseUrl: process.env.NODEMAILER_BASEURL
 						});
 
+						const displayPlural = totalNewReviews > 1 ? 's' : '';
+
 						sendMail(
-							'Nouveaux avis JDMA',
+							'Nouvelles réponses JDMA',
 							user.email,
 							emailHtml,
-							`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
+							`Vous avez ${totalNewReviews} nouvelle${displayPlural} réponse${displayPlural} sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
 						);
 					}
 

@@ -54,7 +54,7 @@ export const JdmaNotificationsEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`${formatNumber(totalNbReviews)} ${totalNbReviews === 1 ? 'nouvel avis' : 'nouveaux avis'} sur vos services`}
+			preview={`${formatNumber(totalNbReviews)} ${totalNbReviews === 1 ? 'nouvelle réponse' : 'nouvelles réponses'} sur vos services`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>

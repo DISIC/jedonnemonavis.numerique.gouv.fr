@@ -82,7 +82,7 @@ export async function renderProductRestoredEmail(
 	return await render(<JdmaProductRestoredEmail {...props} />);
 }
 
-export async function renderJdmaNotificationsEmail(
+export async function renderNotificationsEmail(
 	props: JdmaNotificationsEmailProps
 ): Promise<string> {
 	return await render(<JdmaNotificationsEmail {...props} />);
