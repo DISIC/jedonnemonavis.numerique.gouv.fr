@@ -54,14 +54,17 @@ export const JdmaNotificationsEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`${formatNumber(totalNbReviews)} nouveaux avis sur vos services`}
+			preview={`${formatNumber(totalNbReviews)} ${totalNbReviews === 1 ? 'nouvel avis' : 'nouveaux avis'} sur vos services`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
 				Vous avez eu un total de
-				<strong>&nbsp;{formatNumber(totalNbReviews)} réponses&nbsp;</strong>
+				<strong>
+					&nbsp;{formatNumber(totalNbReviews)}{' '}
+					{totalNbReviews === 1 ? 'réponse' : 'réponses'}&nbsp;
+				</strong>
 				{getFrequencyLabel()} sur vos services dans Je donne mon avis.
 			</Text>
 
