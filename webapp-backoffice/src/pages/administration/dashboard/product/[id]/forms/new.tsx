@@ -25,6 +25,9 @@ const NewForm = (props: Props) => {
 	const { cx, classes } = useStyles();
 
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+	const [formTitle, setFormTitle] = useState<string>('');
+	const [createdFormId, setCreatedFormId] = useState<number>();
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
@@ -71,28 +74,42 @@ const NewForm = (props: Props) => {
 		}
 	});
 
-	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
+	const onSubmitCreateForm: SubmitHandler<FormValues> = async data => {
+		if (!rootFormTemplate?.data?.id) return;
+		const savedFormResponse = await createForm.mutateAsync({
+			...data,
+			product_id: product.id,
+			form_template_id: rootFormTemplate?.data?.id
+		});
+
 		setIsGenerating(true);
-		// if (!rootFormTemplate?.data?.id) return;
-		// const savedFormResponse = await createForm.mutateAsync({
-		// 	...data,
-		// 	product_id: product.id,
-		// 	form_template_id: rootFormTemplate?.data?.id
-		// });
-		// router.push(
-		// 	`/administration/dashboard/product/${product.id}/forms/${savedFormResponse.data.id}`
-		// );
+		setIsFormSubmitted(true);
+		setFormTitle(data.title || rootFormTemplate?.data?.title || '');
+		setCreatedFormId(savedFormResponse.data.id);
+	};
+
+	const goNextStep = () => {
+		if (!createdFormId) return;
+		router.push(
+			`/administration/dashboard/product/${product.id}/forms/${createdFormId}`
+		);
 	};
 
 	return (
 		<OnboardingLayout
-			isCancelable
-			title={isGenerating ? undefined : 'Générer un formulaire'}
-			onConfirm={handleSubmit(onLocalSubmit)}
-			noBackground={isGenerating}
+			isCancelable={!isFormSubmitted}
+			title={isFormSubmitted ? undefined : 'Générer un formulaire'}
+			onConfirm={
+				isFormSubmitted ? goNextStep : handleSubmit(onSubmitCreateForm)
+			}
+			noBackground={isFormSubmitted}
+			isConfirmDisabled={isGenerating}
 		>
-			{isGenerating ? (
-				<FormGenerationAnimationPanel />
+			{isFormSubmitted ? (
+				<FormGenerationAnimationPanel
+					title={formTitle}
+					onFinish={() => setIsGenerating(false)}
+				/>
 			) : (
 				<>
 					<div
