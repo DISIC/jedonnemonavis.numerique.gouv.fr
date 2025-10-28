@@ -24,13 +24,9 @@ import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
-
-const product_modal = createModal({
-	id: 'product-modal',
-	isOpenedByDefault: false
-});
 
 const entity_modal = createModal({
 	id: 'entity-modal',
@@ -54,10 +50,10 @@ const DashBoard = () => {
 		setSettings,
 		isLoading: isLoadingSettings
 	} = useUserSettings();
+	const router = useRouter();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
-	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const [statusProductState, setStatusProductState] = React.useState<{
@@ -65,9 +61,6 @@ const DashBoard = () => {
 		role: 'status' | 'alert';
 	} | null>(null);
 
-	const [entityCreated, setEntityCreated] = React.useState<
-		Entity | undefined
-	>();
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
@@ -154,11 +147,6 @@ const DashBoard = () => {
 			: 'Services | Je donne mon avis';
 	};
 
-	const handleSubmit = async (newEntity?: Entity) => {
-		setEntityCreated(newEntity);
-		product_modal.open();
-	};
-
 	const loadModalAndHead = () => {
 		return (
 			<>
@@ -166,34 +154,7 @@ const DashBoard = () => {
 					<title>{headTitle()}</title>
 					<meta name="description" content={headTitle()} />
 				</Head>
-				<ProductModal
-					modal={product_modal}
-					fromEmptyState={fromEmptyState}
-					savedTitle={productTitle}
-					onSubmit={() => {
-						setSearch('');
-						if (filters.filter === 'created_at') {
-							updateFilters({ ...filters, validatedSearch: '' });
-						} else {
-							updateFilters({ ...filters, filter: 'created_at' });
-						}
-						refetchEntities();
-						setIsModalSubmitted(true);
-					}}
-					onTitleChange={title => {
-						setProductTitle(title);
-					}}
-					onNewEntity={() => {
-						product_modal.close();
-						entity_modal.open();
-					}}
-					allowCreateEntity={true}
-					newCreatedEntity={entityCreated}
-				/>
-				<EntityModal
-					modal={entity_modal}
-					onSubmit={newEntity => handleSubmit(newEntity)}
-				/>
+
 				<EssentialProductModal
 					modal={essential_service_modal}
 					productTitle={productTitle}
@@ -233,8 +194,7 @@ const DashBoard = () => {
 				{loadModalAndHead()}
 				<ProductEmptyState
 					onButtonClick={() => {
-						product_modal.open();
-						setFromEmptyState(true);
+						router.push('/administration/dashboard/product/new');
 					}}
 				/>
 			</>
@@ -311,7 +271,9 @@ const DashBoard = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={product_modal.buttonProps}
+							onClick={() =>
+								router.push('/administration/dashboard/product/new')
+							}
 						>
 							Ajouter un nouveau service
 						</Button>

@@ -600,7 +600,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
-		':nth-child(2), :last-child': {
+		':nth-of-type(2), :last-child': {
 			marginBottom: '0.5rem'
 		},
 		'&:hover > div:first-of-type span:first-of-type': {
