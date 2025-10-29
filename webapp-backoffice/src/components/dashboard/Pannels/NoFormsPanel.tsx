@@ -36,11 +36,8 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 					)
 				)}
 			>
-				<Badge severity="new" className="fr-mb-2v" small>
-					Beta
-				</Badge>
 				<span className={isSmall ? classes.smallTitle : classes.title}>
-					Créer votre premier formulaire pour ce service
+					Générer votre premier formulaire
 				</span>
 				<div className={classes.content}>
 					{isSmall ? (
@@ -61,7 +58,7 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 					)}
 
 					<p>
-						Un formulaire vous permet de récolter avis de vos usagers sur un
+						Un formulaire vous permet de récolter les avis de vos usagers sur un
 						service numérique.
 					</p>
 				</div>
@@ -87,32 +84,6 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 						vos besoins de recherche spécifiques.
 					</p>
 				</div>
-				<div className={classes.content}>
-					{isSmall ? (
-						<div
-							className={cx(classes.indicatorIcon, cx(fr.cx('fr-mr-md-6v')))}
-						>
-							<i className={cx(fr.cx('ri-git-branch-line'), classes.icon)} />
-						</div>
-					) : (
-						<div className={fr.cx('fr-col-md-3')}>
-							<Image
-								src="/assets/cone_picto.svg"
-								alt="Picto feuille de route"
-								width={120}
-								height={120}
-							/>
-						</div>
-					)}
-					<p>
-						Pour en savoir plus sur ces fonctionnalités et découvrir celles à
-						venir, vous pouvez{' '}
-						<Link href="/public/roadmap" target="_blank">
-							consulter notre feuille de route
-						</Link>
-						.
-					</p>
-				</div>
 				<div className={classes.buttonContainer}>
 					<Button
 						iconId="ri-add-circle-line"
@@ -124,7 +95,7 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 						}}
 						size={isSmall ? 'medium' : 'large'}
 					>
-						Créer un formulaire
+						Générer un formulaire
 					</Button>
 				</div>
 			</div>

@@ -337,7 +337,8 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.email,
 						name: 'email',
 						ref: emailRef,
-						autoComplete: 'email'
+						autoComplete: 'email',
+						type: 'email'
 					}}
 					state={hasErrors('email') ? 'error' : 'default'}
 					stateRelatedMessage={
