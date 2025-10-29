@@ -7,7 +7,7 @@ export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
+	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
 }
 
@@ -50,6 +50,7 @@ export function tryCloseModal() {
 
 export function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();
+	cy.wait(200);
 	cy.get('div[role="presentation"]')
 		.should('be.visible')
 		.find('[id="entity-select-autocomplete-option-0"]')
@@ -101,12 +102,8 @@ export function createProduct(name: string) {
 }
 
 export function createForm(name: string) {
-	cy.url().should('include', '/forms');
-	cy.contains(
-		'button',
-		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
-	).click();
-	cy.get(selectors.modal.form)
+	cy.contains('button', /^(?:Générer un formulaire)$/).click();
+	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="title"]')
@@ -115,7 +112,13 @@ export function createForm(name: string) {
 				.clear()
 				.type(name);
 		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
+		.click();
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
+		.click();
 }
 
 export function createButton(name: string) {

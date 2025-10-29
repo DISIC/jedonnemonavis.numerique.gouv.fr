@@ -586,3 +586,15 @@ export const getValidTabSlug = (tab: string | undefined): TabsSlug => {
 			return 'dashboard';
 	}
 };
+
+export function computeItemFraction(
+	progress: number,
+	idx: number,
+	total: number
+) {
+	if (total <= 0) return 0;
+	const start = (idx / total) * 100;
+	const range = 100 / total;
+	const raw = (progress - start) / range;
+	return Math.max(0, Math.min(1, raw));
+}
