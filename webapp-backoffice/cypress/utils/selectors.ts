@@ -1,4 +1,3 @@
-// Centralized selectors for Cypress tests
 export const selectors = {
 	header: 'header',
 	navbarLogo: '.fr-logo',
@@ -33,10 +32,16 @@ export const selectors = {
 		emailConfirmation: 'input[name="emailConfirmation"]',
 		confirm: 'input[name="word"]'
 	},
-	dashboard: {
+	input: {
+		checkbox: 'input[type="checkbox"]'
+	},
+	url: {
+		productTestService: '/administration/dashboard/product/4/forms',
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
-		users: '/administration/dashboard/users',
+		users: '/administration/dashboard/users'
+	},
+	dashboard: {
 		nameTestOrga: 'e2e-jdma-entity-test',
 		nameTestService: 'e2e-jdma-service-test',
 		nameTestForm1: 'e2e-jdma-form-test-1',
@@ -50,13 +55,13 @@ export const selectors = {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
 		button: 'dialog#button-modal',
-		form: 'dialog#new-form-modal',
 		renameForm: 'dialog#rename-form-modal',
 		publishForm: 'dialog#form-publish-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productLink: '[class*="productLink"]',
 	productForm: '#product-form',
+	formCreation: '#form-creation-form',
 	sideMenu: {
 		menu: 'nav.fr-sidemenu',
 		menuItem: 'li.fr-sidemenu__item'
