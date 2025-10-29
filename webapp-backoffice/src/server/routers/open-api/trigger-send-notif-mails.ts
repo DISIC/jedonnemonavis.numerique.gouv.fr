@@ -13,9 +13,9 @@ import {
 	subMonths
 } from 'date-fns';
 import { getProductsWithReviewCountsByScope } from '@/src/utils/notifs';
-import { getEmailNotificationsHtml } from '@/src/utils/emails';
 import { sendMail } from '@/src/utils/mailer';
 import type { Context } from '@/src/server/trpc';
+import { renderNotificationsEmail } from '@/src/utils/emails';
 
 export const triggerSendNotifMailsMutation = async ({
 	ctx,
@@ -197,26 +197,29 @@ export const triggerSendNotifMailsMutation = async ({
 			);
 
 			if (accessibleProducts.length > 0) {
-				const email = getEmailNotificationsHtml(
-					user.id,
-					scope,
-					totalNewReviews,
+				const emailHtml = await renderNotificationsEmail({
+					userId: user.id,
+					frequency: scope,
+					totalNbReviews: totalNewReviews,
 					startDate,
 					endDate,
-					accessibleProducts.map(product => ({
+					products: accessibleProducts.map(product => ({
 						title: product.productTitle,
 						id: product.productId,
 						nbReviews: product.totalReviews,
 						entityName: product.entityName,
 						forms: product.forms
-					}))
-				);
+					})),
+					baseUrl: process.env.NODEMAILER_BASEURL
+				});
+
+				const displayPlural = totalNewReviews > 1 ? 's' : '';
 
 				sendMail(
-					'Nouveaux avis JDMA',
+					'Nouvelles réponses JDMA',
 					user.email,
-					email,
-					`Vous avez ${totalNewReviews} nouveaux avis sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
+					emailHtml,
+					`Vous avez ${totalNewReviews} nouvelle${displayPlural} réponse${displayPlural} sur vos différents services. Rendez vous sur votre tableau de bord JDMA pour plus de détails.`
 				);
 			}
 
