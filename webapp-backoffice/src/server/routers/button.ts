@@ -7,7 +7,7 @@ import {
 } from '@/prisma/generated/zod';
 import { checkRightToProceed } from './product';
 import { sendMail } from '@/src/utils/mailer';
-import { getClosedButtonOrFormEmail } from '@/src/utils/emails';
+import { renderClosedButtonOrFormEmail } from '@/src/utils/emails';
 import { shouldSendEmailsAboutDeletion } from '@/src/utils/tools';
 
 export const buttonRouter = router({
@@ -164,28 +164,31 @@ export const buttonRouter = router({
 					...adminEntityRights.map(aer => aer.user_email)
 				].filter(email => email !== null) as string[];
 
-				emails.forEach((email: string) => {
-					sendMail(
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`,
+				for (const email of emails) {
+					const emailHtml = await renderClosedButtonOrFormEmail({
+						userName: ctx.session.user.name || "Quelqu'un",
+						buttonTitle: deletedButton.title,
+						form: {
+							id: deletedButton.form.id,
+							title:
+								deletedButton.form.title ??
+								deletedButton.form.form_template.title
+						},
+						product: {
+							id: product?.id as number,
+							title: product?.title as string,
+							entityName: product?.entity.name as string
+						},
+						baseUrl: process.env.NODEMAILER_BASEURL
+					});
+
+					await sendMail(
+						`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`,
 						email,
-						getClosedButtonOrFormEmail({
-							contextUser: ctx.session.user,
-							buttonTitle: deletedButton.title,
-							form: {
-								id: deletedButton.form.id,
-								title:
-									deletedButton.form.title ??
-									deletedButton.form.form_template.title
-							},
-							product: {
-								id: product?.id as number,
-								title: product?.title as string,
-								entityName: product?.entity.name as string
-							}
-						}),
-						`Fermeture de l'emplacement «${deletedButton.title}» du service «${product?.title}»`
+						emailHtml,
+						`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`
 					);
-				});
+				}
 			}
 
 			return { data: deletedButton };
