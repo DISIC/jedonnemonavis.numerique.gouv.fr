@@ -37,7 +37,7 @@ describe('jdma-users', () => {
 
 		cy.get('input[value="carrier_admin"]').siblings('label').click();
 
-		cy.get('button').contains('Inviter').click();
+		cy.get('button').contains('Continuer').click();
 	});
 
 	it('should display the invited user', () => {
