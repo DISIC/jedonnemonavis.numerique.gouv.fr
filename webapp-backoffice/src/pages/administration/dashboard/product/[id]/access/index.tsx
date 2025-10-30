@@ -1,29 +1,25 @@
-import ProductLayout from '@/src/layouts/Product/ProductLayout';
-import { getServerSideProps } from '.';
-import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { tss } from 'tss-react/dsfr';
 import AccessRightCard from '@/src/components/dashboard/AccessRight/AccessRightCard';
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
-import React from 'react';
-import { Product, AccessRight, RightAccessStatus } from '@prisma/client';
-import {
-	AccessRightWithUsers,
-	AdminEntityRightWithUsers
-} from '@/src/types/prismaTypesExtended';
+import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
+import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
+import ProductLayout from '@/src/layouts/Product/ProductLayout';
+import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { getNbPages } from '@/src/utils/tools';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
+import { Product, RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import EntityRightCard from '@/src/components/dashboard/Entity/EntityRightCard';
-import { useSession } from 'next-auth/react';
-import { push } from '@socialgouv/matomo-next';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '..';
 
 interface Props {
 	product: Product;
@@ -221,7 +217,12 @@ const AccessManagement = (props: Props) => {
 					setCurrentAccessRight={setCurrentAccessRight}
 				/>
 
-				<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v'), classes.headerContainer)}>
+				<div
+					className={cx(
+						fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v'),
+						classes.headerContainer
+					)}
+				>
 					<div className={fr.cx('fr-col-8')}>
 						<h2 className={fr.cx('fr-mb-0', 'fr-mb-md-2w')}>
 							{ownRight && ownRight === 'carrier_admin'
@@ -236,7 +237,11 @@ const AccessManagement = (props: Props) => {
 								iconPosition="right"
 								iconId="ri-user-add-line"
 								onClick={() => {
-									handleModalOpening('add');
+									// handleModalOpening('add');
+									router.push(
+										`/administration/dashboard/product/${product.id}/access/new`
+									);
+
 									push(['trackEvent', 'Product', 'Modal-Admin']);
 								}}
 								className={classes.headerButton}
@@ -249,14 +254,14 @@ const AccessManagement = (props: Props) => {
 				{nbPages > 1 && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-8')}>
-								<PageItemsCounter
-									label="Admin"
-									startItemCount={numberPerPage * (currentPage - 1) + 1}
-									endItemCount={
-										numberPerPage * (currentPage - 1) + accessRights.length
-									}
-									totalItemsCount={accessRightsCount}
-								/>
+							<PageItemsCounter
+								label="Admin"
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) + accessRights.length
+								}
+								totalItemsCount={accessRightsCount}
+							/>
 						</div>
 
 						{/* <div className={cx(fr.cx('fr-col-4'), classes.alignRight)}>
@@ -415,7 +420,7 @@ const useStyles = tss.create({
 		textAlign: 'right',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
-			justifyContent: 'center',
+			justifyContent: 'center'
 		}
 	},
 	checkbox: {
@@ -434,7 +439,7 @@ const useStyles = tss.create({
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'flex-start',
-			gap: 0,
+			gap: 0
 		}
 	},
 	categoryTitle: {

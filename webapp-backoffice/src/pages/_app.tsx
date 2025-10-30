@@ -57,7 +57,8 @@ const OFF_ADMIN_PATHS = [
 	'/public/maintenance',
 	'/administration/dashboard/onboarding',
 	'/administration/dashboard/product/new',
-	'/administration/dashboard/product/[id]/forms/new'
+	'/administration/dashboard/product/[id]/forms/new',
+	'/administration/dashboard/product/[id]/access/new'
 ] as const;
 
 const LIGHT_MODE_PATHS = ['/public', '/open-api'] as const;
