@@ -222,11 +222,7 @@ const DashboardTab = ({
 				</div>
 			) : (
 				<div className={fr.cx('fr-col-12')}>
-					<NoButtonsPanel
-						onButtonClick={() => {
-							handleModalOpening('create');
-						}}
-					/>
+					<NoButtonsPanel />
 				</div>
 			)}
 		</div>

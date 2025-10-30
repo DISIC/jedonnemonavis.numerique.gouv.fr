@@ -374,10 +374,6 @@ const ReviewsTab = (props: Props) => {
 		}
 	}, [filters]);
 
-	const handleButtonClick = () => {
-		handleModalOpening('create');
-	};
-
 	const handleSendInvitation = () => {
 		router.push({
 			pathname: `/administration/dashboard/product/${form.product_id}/access`,
@@ -397,7 +393,7 @@ const ReviewsTab = (props: Props) => {
 			);
 		}
 		if (!hasButtons) {
-			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
+			return <NoButtonsPanel />;
 		}
 
 		if (!reviewsCountAll) {
