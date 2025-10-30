@@ -10,6 +10,7 @@ interface OnboardingLayoutProps {
 	hideActions?: boolean;
 	isCancelable?: boolean;
 	confirmText?: string;
+	hideMainHintText?: boolean;
 	onCancel?: () => void;
 	onConfirm?: () => void;
 }
@@ -21,7 +22,8 @@ const OnboardingLayout = ({
 	confirmText,
 	onCancel,
 	onConfirm,
-	title
+	title,
+	hideMainHintText
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: !hideActions });
@@ -38,11 +40,13 @@ const OnboardingLayout = ({
 					{title && (
 						<>
 							<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
-							<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
-								Les champs marqués d&apos;un{' '}
-								<span className={cx(classes.asterisk)}>*</span> sont
-								obligatoires
-							</p>
+							{!hideMainHintText && (
+								<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
+									Les champs marqués d&apos;un{' '}
+									<span className={cx(classes.asterisk)}>*</span> sont
+									obligatoires
+								</p>
+							)}
 						</>
 					)}
 					{children}

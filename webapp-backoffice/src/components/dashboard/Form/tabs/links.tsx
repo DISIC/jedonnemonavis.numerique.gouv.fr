@@ -129,7 +129,9 @@ const LinksTab = ({
 						iconId="fr-icon-add-line"
 						iconPosition="right"
 						onClick={() => {
-							handleModalOpening('create');
+							router.push(
+								`/administration/dashboard/product/${form.product_id}/forms/${form.id}/new-link`
+							);
 						}}
 					>
 						Créer un lien d'intégration
@@ -142,9 +144,7 @@ const LinksTab = ({
 			>
 				{buttonsCount === 0 &&
 					(!form.isDeleted ? (
-						<NoButtonsPanel
-							onButtonClick={() => handleModalOpening('create')}
-						/>
+						<NoButtonsPanel />
 					) : (
 						<div
 							className={fr.cx('fr-col-12')}
