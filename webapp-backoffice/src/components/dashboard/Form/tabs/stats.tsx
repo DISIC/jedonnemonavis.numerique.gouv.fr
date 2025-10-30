@@ -243,10 +243,6 @@ const StatsTab = ({
 		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
 		: 0;
 
-	const handleButtonClick = () => {
-		handleModalOpening('create');
-	};
-
 	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
 		return (
 			<div className={cx(classes.container)}>
@@ -270,7 +266,7 @@ const StatsTab = ({
 						<span>Ce formulaire est fermé et ne contient aucune réponse</span>
 					</div>
 				) : buttonResults.metadata.count === 0 ? (
-					<NoButtonsPanel onButtonClick={handleButtonClick} />
+					<NoButtonsPanel />
 				) : (
 					<NoReviewsPanel />
 				)}

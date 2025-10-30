@@ -27,18 +27,7 @@ const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	defaultColorScheme: 'light',
 	doPersistDarkModePreferenceWithCookie: true,
 	Link,
-	preloadFonts: [
-		//"Marianne-Light",
-		//"Marianne-Light_Italic",
-		'Marianne-Regular',
-		//"Marianne-Regular_Italic",
-		'Marianne-Medium',
-		//"Marianne-Medium_Italic",
-		'Marianne-Bold'
-		//"Marianne-Bold_Italic",
-		//"Spectral-Regular",
-		//"Spectral-ExtraBold"
-	]
+	preloadFonts: ['Marianne-Regular', 'Marianne-Medium', 'Marianne-Bold']
 });
 
 export { dsfrDocumentApi };
@@ -57,7 +46,8 @@ const OFF_ADMIN_PATHS = [
 	'/public/maintenance',
 	'/administration/dashboard/onboarding',
 	'/administration/dashboard/product/new',
-	'/administration/dashboard/product/[id]/forms/new'
+	'/administration/dashboard/product/[id]/forms/new',
+	'/administration/dashboard/product/[id]/forms/[form_id]/new-link'
 ] as const;
 
 const LIGHT_MODE_PATHS = ['/public', '/open-api'] as const;
