@@ -1,20 +1,19 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { linksFaqContents } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { useEffect } from 'react';
-import { useRouter } from 'next/router';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import Accordion from '@codegouvfr/react-dsfr/Accordion';
-import { linksFaqContents } from '@/src/utils/content';
 
 interface Props {
 	form: FormWithElements;
@@ -37,18 +36,13 @@ const LinksTab = ({
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
+	const linkCreated = router.query.linkCreated as string | undefined;
 
-	const isModalOpen = useIsModalOpen(modal);
-
-	useEffect(() => {
-		if (router.query.shouldOpenButtonModal) {
-			handleModalOpening('create');
-		}
-	}, [router.query]);
+	const [isLinkCreated, setIsLinkCreated] = useState(linkCreated);
 
 	useEffect(() => {
-		if (!isModalOpen && router.query.shouldOpenButtonModal) {
-			const { shouldOpenButtonModal, ...restQuery } = router.query;
+		if (router.query.linkCreated) {
+			const { linkCreated, ...restQuery } = router.query;
 			router.replace(
 				{
 					pathname: router.pathname,
@@ -58,7 +52,7 @@ const LinksTab = ({
 				{ shallow: true }
 			);
 		}
-	}, [isModalOpen]);
+	}, [router.query]);
 
 	const {
 		data: buttonResults,
@@ -108,15 +102,6 @@ const LinksTab = ({
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<Alert
-				className={fr.cx('fr-col-12', 'fr-mb-6v')}
-				description={alertText}
-				severity="success"
-				small
-				closable
-				isClosed={!isAlertShown}
-				onClose={() => setIsAlertShown(false)}
-			/>
 			<h2 className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-0')}>
 				Liens d'intégration
 			</h2>
@@ -138,6 +123,32 @@ const LinksTab = ({
 					</Button>
 				)}
 			</div>
+
+			{isLinkCreated && !isAlertShown ? (
+				<Alert
+					className={fr.cx('fr-col-12', 'fr-mt-6v')}
+					title="Votre lien d’intégration a été créé avec succès !"
+					description={
+						'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
+					}
+					severity="success"
+					small
+					closable
+				/>
+			) : (
+				<Alert
+					className={fr.cx('fr-col-12', 'fr-mt-6v')}
+					description={alertText}
+					severity="success"
+					small
+					closable
+					isClosed={!isAlertShown}
+					onClose={() => {
+						setIsAlertShown(false);
+						setIsLinkCreated(undefined);
+					}}
+				/>
+			)}
 
 			<div
 				className={cx(classes.cardContainer, fr.cx('fr-col-12', 'fr-mt-8v'))}

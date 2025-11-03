@@ -35,8 +35,7 @@ const ProductFormsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 	const router = useRouter();
-	const alertTextQuery = router.query.alert as string;
-
+	const alertTextQuery = router.query.alert as string | undefined;
 	const [alertText, setAlertText] = useState(alertTextQuery);
 	const [isAlertShown, setIsAlertShown] = useState(!!alertTextQuery);
 
@@ -106,15 +105,17 @@ const ProductFormsPage = (props: Props) => {
 						productId={product.id}
 						defaultTitle={defaultTitle}
 					/>
-					<Alert
-						className={fr.cx('fr-col-12', 'fr-mb-6v')}
-						description={alertText}
-						severity="success"
-						small
-						closable
-						isClosed={!isAlertShown}
-						onClose={() => setIsAlertShown(false)}
-					/>
+					{alertText && (
+						<Alert
+							className={fr.cx('fr-col-12', 'fr-mb-6v')}
+							description={alertText}
+							severity="success"
+							small
+							closable
+							isClosed={!isAlertShown}
+							onClose={() => setIsAlertShown(false)}
+						/>
+					)}
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
