@@ -20,7 +20,7 @@ const ButtonCopyInstructionsPanel = ({
 				},
 				{
 					label: 'Via Démarches Simplifiées',
-					content: <DSTab />
+					content: <DSTab buttonColor={buttonColor} button={button} />
 				}
 			]}
 			className={cx(classes.tabContainer)}

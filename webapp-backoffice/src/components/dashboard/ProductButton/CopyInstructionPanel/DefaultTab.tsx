@@ -1,5 +1,5 @@
-import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
@@ -8,7 +8,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonCopyInstructionsPanelProps } from './interface';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 
 const DefaultTab = ({
 	buttonColor,
