@@ -30,7 +30,7 @@ const NewLink = (props: Props) => {
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<ButtonStyle>('solid');
-	const [createdButton, setCreatedButton] = useState<ButtonWithForm>({});
+	const [createdButton, setCreatedButton] = useState<ButtonWithForm>();
 
 	const currentForm = useMemo(() => {
 		return product?.forms.find(form => form.id === Number(form_id));
