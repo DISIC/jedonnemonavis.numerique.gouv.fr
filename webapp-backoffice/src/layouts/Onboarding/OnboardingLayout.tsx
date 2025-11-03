@@ -39,7 +39,15 @@ const OnboardingLayout = ({
 				<div className={classes.stepContent}>
 					{title && (
 						<>
-							<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
+							<h1
+								className={fr.cx(
+									'fr-h3',
+									'fr-mb-1v',
+									hideMainHintText && 'fr-mb-8v'
+								)}
+							>
+								{title}
+							</h1>
 							{!hideMainHintText && (
 								<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
 									Les champs marqués d&apos;un{' '}

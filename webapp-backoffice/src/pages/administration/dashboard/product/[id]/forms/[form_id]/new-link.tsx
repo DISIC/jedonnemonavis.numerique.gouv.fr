@@ -1,17 +1,20 @@
 import { ButtonCreationPayload } from '@/src/components/dashboard/ProductButton/ButtonModal';
+import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/CopyInstructionPanel';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
-import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithForm,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { useRouter } from 'next/router';
-import React, { useMemo, useState } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
-import { getServerSideProps } from '..';
-import { tss } from 'tss-react/dsfr';
-import { trpc } from '@/src/utils/trpc';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import Image from 'next/image';
-import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/ButtonCopyInstructionsPanel';
+import { useRouter } from 'next/router';
+import { useMemo, useState } from 'react';
+import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '..';
 
 interface Props {
 	product: ProductWithForms;
@@ -27,9 +30,7 @@ const NewLink = (props: Props) => {
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<ButtonStyle>('solid');
-	const [isButtonCreated, setIsButtonCreated] = useState(false);
-
-	const buttonColor = selectedButtonStyle === 'solid' ? 'bleu' : 'blanc';
+	const [createdButton, setCreatedButton] = useState<ButtonWithForm>({});
 
 	const currentForm = useMemo(() => {
 		return product?.forms.find(form => form.id === Number(form_id));
@@ -61,8 +62,8 @@ const NewLink = (props: Props) => {
 	});
 
 	const createButton = trpc.button.create.useMutation({
-		onSuccess: async createdButton => {
-			setIsButtonCreated(true);
+		onSuccess: async result => {
+			setCreatedButton(result.data);
 		}
 	});
 
@@ -79,12 +80,15 @@ const NewLink = (props: Props) => {
 	return (
 		<OnboardingLayout
 			isCancelable
-			title={isButtonCreated ? 'Copier le code' : 'Créer un lien d’intégration'}
-			onConfirm={isButtonCreated ? goNextStep : handleSubmit(onSubmit)}
-			hideMainHintText={isButtonCreated}
+			title={createdButton ? 'Copier le code' : 'Créer un lien d’intégration'}
+			onConfirm={createdButton ? goNextStep : handleSubmit(onSubmit)}
+			hideMainHintText={!!createdButton}
 		>
-			{isButtonCreated ? (
-				<ButtonCopyInstructionsPanel />
+			{createdButton ? (
+				<ButtonCopyInstructionsPanel
+					buttonColor={selectedButtonStyle === 'solid' ? 'bleu' : 'blanc'}
+					button={createdButton}
+				/>
 			) : (
 				<>
 					<div
