@@ -73,7 +73,7 @@ const NewLink = (props: Props) => {
 
 	const goNextStep = () => {
 		router.push(
-			`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links`
+			`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
 		);
 	};
 
