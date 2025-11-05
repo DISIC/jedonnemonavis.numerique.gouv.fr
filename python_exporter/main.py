@@ -133,7 +133,9 @@ def upload_to_s3(file_data, bucket, object_name):
     """Upload un fichier sur S3 en utilisant le client réutilisable"""
     s3_client = get_s3_client()
     try:
-        s3_client.put_object(Bucket=bucket, Key=object_name, Body=file_data.getvalue())
+        # Utiliser directement le BytesIO sans créer de copie avec getvalue()
+        file_data.seek(0)
+        s3_client.upload_fileobj(file_data, bucket, object_name)
         return True
     except Exception as e:
         print(f"Erreur lors de l'upload du fichier sur S3: {e}")
