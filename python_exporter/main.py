@@ -11,6 +11,7 @@ import psycopg
 import threading
 import pandas as pd
 import csv
+import gc
 from datetime import datetime, timedelta
 from collections import defaultdict
 from email.mime.text import MIMEText
@@ -20,6 +21,14 @@ from dotenv import load_dotenv
 from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 from io import StringIO, BytesIO
+
+# Import optionnel pour le monitoring mémoire
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
+    print("psutil non disponible - monitoring mémoire désactivé")
 
 # Charger les variables d'environnement à partir du fichier .env
 load_dotenv()
@@ -39,6 +48,28 @@ PAGE_SIZE = int(env_vars['PAGE_SIZE'])
 CONCURRENCY_LIMIT = int(env_vars['CONCURRENCY_LIMIT'])
 NODEMAILER_PORT = int(env_vars['NODEMAILER_PORT'])
 MAX_LINES_SWITCH = int(env_vars['MAX_LINES_SWITCH'])
+
+# Client S3 réutilisable (singleton pattern)
+_s3_client = None
+
+def get_s3_client():
+    """Retourne un client S3 réutilisable pour éviter de créer plusieurs connexions"""
+    global _s3_client
+    if _s3_client is None:
+        _s3_client = boto3.client(
+            's3',
+            endpoint_url=f'https://{env_vars["CELLAR_ADDON_HOST"]}',
+            aws_access_key_id=env_vars['CELLAR_ADDON_KEY_ID'],
+            aws_secret_access_key=env_vars['CELLAR_ADDON_KEY_SECRET']
+        )
+    return _s3_client
+
+def log_memory_usage(label=""):
+    """Log l'utilisation de la mémoire pour détecter les fuites"""
+    if PSUTIL_AVAILABLE:
+        process = psutil.Process(os.getpid())
+        mem_mb = process.memory_info().rss / 1024 / 1024
+        print(f"[MEMORY {label}] {mem_mb:.2f} MB")
 
 class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -72,13 +103,22 @@ def create_connection():
         return None
 
 def execute_query(conn, query, params=None):
+    """Exécute une requête avec gestion robuste des erreurs de connexion"""
     with conn.cursor() as cursor:
         try:
             cursor.execute(query, params)
             conn.commit()
         except Exception as e:
             print(f"Erreur exécution requête: {e}")
-            conn.rollback()
+            # Tentative de rollback - peut échouer si la connexion est morte
+            try:
+                conn.rollback()
+            except Exception as rollback_error:
+                print(f"Erreur lors du rollback (connexion probablement perdue): {rollback_error}")
+                # Lever une exception spécifique pour indiquer que la connexion est perdue
+                raise ConnectionError("La connexion à la base de données est perdue") from e
+            # Re-lever l'exception originale si le rollback a réussi
+            raise
 
 def fetch_query(conn, query, params=None):
     with conn.cursor() as cursor:
@@ -90,10 +130,8 @@ def fetch_query(conn, query, params=None):
             return []
 
 def upload_to_s3(file_data, bucket, object_name):
-    s3_client = boto3.client('s3',
-                             endpoint_url=f'https://{env_vars["CELLAR_ADDON_HOST"]}',
-                             aws_access_key_id=env_vars['CELLAR_ADDON_KEY_ID'],
-                             aws_secret_access_key=env_vars['CELLAR_ADDON_KEY_SECRET'])
+    """Upload un fichier sur S3 en utilisant le client réutilisable"""
+    s3_client = get_s3_client()
     try:
         s3_client.put_object(Bucket=bucket, Key=object_name, Body=file_data.getvalue())
         return True
@@ -102,10 +140,8 @@ def upload_to_s3(file_data, bucket, object_name):
         return False
 
 def generate_download_link(bucket, object_name, expiration=2592000):
-    s3_client = boto3.client('s3',
-                             endpoint_url=f'https://{env_vars["CELLAR_ADDON_HOST"]}',
-                             aws_access_key_id=env_vars['CELLAR_ADDON_KEY_ID'],
-                             aws_secret_access_key=env_vars['CELLAR_ADDON_KEY_SECRET'])
+    """Génère un lien de téléchargement pré-signé en utilisant le client réutilisable"""
+    s3_client = get_s3_client()
     try:
         return s3_client.generate_presigned_url('get_object',
                                                 Params={'Bucket': bucket, 'Key': object_name},
@@ -333,28 +369,35 @@ def format_review_content(content):
     return content
 
 def create_csv_buffer(reviews, field_labels):
+    """Crée un buffer CSV avec les avis - retourne le contenu pour libérer le buffer"""
     csv_buffer = StringIO()
-    writer = csv.writer(csv_buffer)
-    header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
-    writer.writerow(header)
+    try:
+        writer = csv.writer(csv_buffer)
+        header = ['Review ID', 'Form ID', 'Product ID', 'Button ID', 'XWiki ID', 'Review Created At'] + field_labels
+        writer.writerow(header)
 
-    for review in reviews:
-        row = [
-            review['review_id'][-7:],
-            review['form_id'],
-            review['product_id'],
-            review['button_id'],
-            review['xwiki_id'],
-            review['review_created_at']
-        ]
-        for label in field_labels:
-            row.append(review['answers'].get(label, ''))
-        writer.writerow(row)
-    
-    csv_buffer.seek(0)
-    return csv_buffer
+        for review in reviews:
+            row = [
+                review['review_id'][-7:],
+                review['form_id'],
+                review['product_id'],
+                review['button_id'],
+                review['xwiki_id'],
+                review['review_created_at']
+            ]
+            for label in field_labels:
+                row.append(review['answers'].get(label, ''))
+            writer.writerow(row)
+        
+        csv_buffer.seek(0)
+        # Retourner le contenu sous forme de bytes pour pouvoir fermer le buffer
+        content = csv_buffer.getvalue().encode('utf-8')
+        return content
+    finally:
+        csv_buffer.close()
 
 def create_xls_buffer(reviews, field_labels, product_name):
+    """Crée un buffer Excel avec les avis - gère la libération mémoire du DataFrame"""
     rows = []
     for review in reviews:
         row = {
@@ -370,45 +413,70 @@ def create_xls_buffer(reviews, field_labels, product_name):
         rows.append(row)
     
     df = pd.DataFrame(rows)
-    for label in field_labels:
-        df[label] = df[label].apply(lambda x: format_review_content(x) if ' / ' in x else x)
-    
-    xls_buffer = BytesIO()
-    with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
-        # Configurer l'option nan_inf_to_errors lors de la création du workbook
-        writer.book.nan_inf_to_errors = True
-        df.to_excel(writer, index=False, sheet_name=f"Avis")
-        format_excel(writer, df, f"Avis {product_name}")
-    xls_buffer.seek(0)
-    return xls_buffer
+    try:
+        for label in field_labels:
+            df[label] = df[label].apply(lambda x: format_review_content(x) if ' / ' in x else x)
+        
+        xls_buffer = BytesIO()
+        try:
+            with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
+                # Configurer l'option nan_inf_to_errors lors de la création du workbook
+                writer.book.nan_inf_to_errors = True
+                df.to_excel(writer, index=False, sheet_name=f"Avis")
+                format_excel(writer, df, f"Avis {product_name}")
+            xls_buffer.seek(0)
+            # Retourner le contenu pour pouvoir fermer le buffer
+            content = xls_buffer.getvalue()
+            return content
+        finally:
+            xls_buffer.close()
+    finally:
+        # Libération explicite du DataFrame
+        del df
+        del rows
+        gc.collect()
 
 def process_single_export(export_format, reviews, field_labels, product_name, current_date):
+    """Traite un export simple (non-zippé) et retourne un BytesIO"""
     if export_format == 'csv':
-        csv_buffer = create_csv_buffer(reviews, field_labels)
+        content = create_csv_buffer(reviews, field_labels)
         file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.csv"
-        return csv_buffer, file_name
+        buffer = BytesIO(content)
+        return buffer, file_name
     elif export_format == 'xls':
-        xls_buffer = create_xls_buffer(reviews, field_labels, product_name)
+        content = create_xls_buffer(reviews, field_labels, product_name)
         file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.xlsx"
-        return xls_buffer, file_name
+        buffer = BytesIO(content)
+        return buffer, file_name
 
 def process_zip_export(export_format, reviews_by_year, field_labels, product_name, current_date):
+    """Traite un export zippé avec libération de mémoire entre chaque fichier"""
     zip_buffer = BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for year, reviews in reviews_by_year.items():
-            if export_format == 'csv':
-                csv_buffer = create_csv_buffer(reviews, field_labels)
-                csv_filename = f"Avis_{year}.csv"
-                zip_file.writestr(csv_filename, csv_buffer.getvalue())
-                csv_buffer.close()
-            elif export_format == 'xls':
-                xls_buffer = create_xls_buffer(reviews, field_labels, product_name)
-                xls_filename = f"Avis_{year}.xlsx"
-                zip_file.writestr(xls_filename, xls_buffer.getvalue())
-                xls_buffer.close()
-    zip_buffer.seek(0)
-    file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.zip"
-    return zip_buffer, file_name
+    try:
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for year, reviews in reviews_by_year.items():
+                if export_format == 'csv':
+                    content = create_csv_buffer(reviews, field_labels)
+                    csv_filename = f"Avis_{year}.csv"
+                    zip_file.writestr(csv_filename, content)
+                    # Libération explicite
+                    del content
+                elif export_format == 'xls':
+                    content = create_xls_buffer(reviews, field_labels, product_name)
+                    xls_filename = f"Avis_{year}.xlsx"
+                    zip_file.writestr(xls_filename, content)
+                    # Libération explicite
+                    del content
+                # Libérer les reviews de cette année
+                del reviews
+                gc.collect()
+        
+        zip_buffer.seek(0)
+        file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.zip"
+        return zip_buffer, file_name
+    except Exception as e:
+        zip_buffer.close()
+        raise
 
 def main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, product_name, current_date):
     if not switch_to_zip:
@@ -419,6 +487,8 @@ def main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_
 
 def process_exports(conn):
     print('------ START EXPORT ------')
+    log_memory_usage("START_EXPORT")
+    
     concurrency_check_query = "SELECT COUNT(*) FROM public.\"Export\" WHERE status = 'processing'::\"StatusExport\""
     concurrency_count = fetch_query(conn, concurrency_check_query)[0][0]
 
@@ -633,30 +703,73 @@ def process_exports(conn):
     field_labels = custom_sort(field_labels, desired_order)
     switch_to_zip = total_reviews > MAX_LINES_SWITCH
 
-    upload_buffer, file_name = main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, name_product, current_date)
+    log_memory_usage("BEFORE_FILE_GENERATION")
+    
+    upload_buffer = None
+    try:
+        upload_buffer, file_name = main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, name_product, current_date)
+        
+        log_memory_usage("AFTER_FILE_GENERATION")
+        
+        # Libération des données sources après génération du fichier
+        del all_reviews
+        del all_reviews_by_year
+        gc.collect()
+        
+        log_memory_usage("AFTER_DATA_CLEANUP")
 
-    # Upload to S3
-    if upload_to_s3(upload_buffer, env_vars['BUCKET_NAME'], file_name):
-        print(f"Fichier {file_name} uploadé avec succès sur le bucket {env_vars['BUCKET_NAME']}.")
+        # Upload to S3
+        if upload_to_s3(upload_buffer, env_vars['BUCKET_NAME'], file_name):
+            print(f"Fichier {file_name} uploadé avec succès sur le bucket {env_vars['BUCKET_NAME']}.")
 
-        download_link = generate_download_link(env_vars['BUCKET_NAME'], file_name)
-        if download_link:
-            print(f"Le lien de téléchargement est : {download_link}")
-            send_email(email_user, download_link, name_product, switch_to_zip)
+            download_link = generate_download_link(env_vars['BUCKET_NAME'], file_name)
+            if download_link:
+                print(f"Le lien de téléchargement est : {download_link}")
+                
+                # Envoi d'email séparé de la mise à jour DB pour ne pas bloquer
+                email_sent = False
+                try:
+                    send_email(email_user, download_link, name_product, switch_to_zip)
+                    email_sent = True
+                except Exception as email_error:
+                    print(f"Erreur lors de l'envoi de l'email (non bloquant): {email_error}")
 
-            end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            update_query = """
-            UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s WHERE id = %s
-            """
-            execute_query(conn, update_query, (end_date, download_link, export_id))
-
+                # Toujours mettre à jour le statut même si l'email a échoué
+                end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                update_query = """
+                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s WHERE id = %s
+                """
+                try:
+                    execute_query(conn, update_query, (end_date, download_link, export_id))
+                except ConnectionError as conn_error:
+                    print(f"Erreur de connexion lors de la mise à jour finale: {conn_error}")
+                    # L'export est fait et uploadé, on ne peut pas grand chose de plus
+    finally:
+        # Fermeture du buffer après utilisation (seulement si c'est un BytesIO)
+        if upload_buffer:
+            if isinstance(upload_buffer, BytesIO):
+                upload_buffer.close()
+            del upload_buffer
+        gc.collect()
+        
+    log_memory_usage("END_EXPORT")
     print('------- END EXPORT -------')
 
 def main():
+    """Point d'entrée principal - garantit la fermeture de la connexion DB"""
     conn = create_connection()
-    if conn:
+    if not conn:
+        return
+    
+    try:
         process_exports(conn)
-        conn.close()
+    finally:
+        # Garantir la fermeture de la connexion même en cas d'erreur
+        try:
+            conn.close()
+            print("Connexion BDD fermée")
+        except Exception as e:
+            print(f"Erreur lors de la fermeture de la connexion: {e}")
 
 def app(environ, start_response):
     start_response('200 OK', [('Content-Type', 'text/plain')])
