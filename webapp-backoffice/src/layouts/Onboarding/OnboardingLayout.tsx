@@ -11,6 +11,7 @@ interface OnboardingLayoutProps {
 	isCancelable?: boolean;
 	confirmText?: string;
 	hideMainHintText?: boolean;
+	hideBackButton?: boolean;
 	onCancel?: () => void;
 	onConfirm?: () => void;
 }
@@ -23,7 +24,8 @@ const OnboardingLayout = ({
 	onCancel,
 	onConfirm,
 	title,
-	hideMainHintText
+	hideMainHintText,
+	hideBackButton
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: !hideActions });
@@ -66,15 +68,20 @@ const OnboardingLayout = ({
 					role="region"
 					aria-label="Actions d'onboarding"
 					className={classes.actionsContainer}
+					style={{
+						justifyContent: hideBackButton ? 'flex-end' : 'space-between'
+					}}
 				>
-					<Button
-						priority={isCancelable ? 'secondary' : 'tertiary'}
-						size="large"
-						iconId={isCancelable ? undefined : 'fr-icon-arrow-left-s-line'}
-						onClick={() => (onCancel ? onCancel() : router.back())}
-					>
-						{isCancelable ? 'Annuler' : 'Retour'}
-					</Button>
+					{!hideBackButton && (
+						<Button
+							priority={isCancelable ? 'secondary' : 'tertiary'}
+							size="large"
+							iconId={isCancelable ? undefined : 'fr-icon-arrow-left-s-line'}
+							onClick={() => (onCancel ? onCancel() : router.back())}
+						>
+							{isCancelable ? 'Annuler' : 'Retour'}
+						</Button>
+					)}
 
 					<div className={cx(classes.rightActions)}>
 						{/* <Button
