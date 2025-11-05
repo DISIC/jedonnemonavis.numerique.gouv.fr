@@ -113,11 +113,16 @@ export function createForm(name: string) {
 				.type(name);
 		});
 
-	cy.get(selectors.onboarding.actionsContainer)
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions).contains('button', 'Continuer').click();
+	cy.get(actions).contains('button', 'Continuer').should('be.disabled');
+
+	cy.wait(2000);
+
+	cy.get(actions)
 		.contains('button', 'Continuer')
-		.click();
-	cy.get(selectors.onboarding.actionsContainer)
-		.contains('button', 'Continuer')
+		.should('not.be.disabled')
 		.click();
 }
 
