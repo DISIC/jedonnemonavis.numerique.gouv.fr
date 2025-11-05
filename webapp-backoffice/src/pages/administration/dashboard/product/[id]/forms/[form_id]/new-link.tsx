@@ -83,6 +83,7 @@ const NewLink = (props: Props) => {
 			title={createdButton ? 'Copier le code' : 'Créer un lien d’intégration'}
 			onConfirm={createdButton ? goNextStep : handleSubmit(onSubmit)}
 			hideMainHintText={!!createdButton}
+			hideBackButton={!!createdButton}
 		>
 			{createdButton ? (
 				<ButtonCopyInstructionsPanel
