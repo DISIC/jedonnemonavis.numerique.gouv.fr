@@ -68,6 +68,19 @@ const NewAccess = () => {
 	};
 
 	const onSubmit = () => {
+		const hasEmptyEmail = usersToAdd.some(user => user.email.trim() === '');
+		if (hasEmptyEmail) {
+			setUsersToAdd(prev => {
+				return prev.map(user => {
+					if (user.email.trim() === '') {
+						return { ...user, errorStatus: 400 };
+					}
+					return { ...user, errorStatus: undefined };
+				});
+			});
+			return;
+		}
+
 		usersToAdd.forEach(user => {
 			createAccessRight(user);
 		});
@@ -112,7 +125,7 @@ const NewAccess = () => {
 							stateRelatedMessage={
 								user.errorStatus == 409
 									? "L'utilisateur avec cet email a déja accès à ce service ou à l'oganisation à laquelle appartient ce service."
-									: 'Erreur serveur'
+									: 'Veuillez saisir une adresse email valide.'
 							}
 							hintText="Format attendu : nom@domaine.fr"
 							nativeInputProps={{
