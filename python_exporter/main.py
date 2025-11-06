@@ -399,7 +399,7 @@ def create_csv_buffer(reviews, field_labels):
         csv_buffer.close()
 
 def create_xls_buffer(reviews, field_labels, product_name):
-    """Crée un buffer Excel avec les avis - gère la libération mémoire du DataFrame"""
+    """Crée un buffer Excel avec les avis - retourne directement le BytesIO"""
     rows = []
     for review in reviews:
         row = {
@@ -420,18 +420,13 @@ def create_xls_buffer(reviews, field_labels, product_name):
             df[label] = df[label].apply(lambda x: format_review_content(x) if ' / ' in x else x)
         
         xls_buffer = BytesIO()
-        try:
-            with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
-                # Configurer l'option nan_inf_to_errors lors de la création du workbook
-                writer.book.nan_inf_to_errors = True
-                df.to_excel(writer, index=False, sheet_name=f"Avis")
-                format_excel(writer, df, f"Avis {product_name}")
-            xls_buffer.seek(0)
-            # Retourner le contenu pour pouvoir fermer le buffer
-            content = xls_buffer.getvalue()
-            return content
-        finally:
-            xls_buffer.close()
+        with pd.ExcelWriter(xls_buffer, engine='xlsxwriter') as writer:
+            writer.book.nan_inf_to_errors = True
+            df.to_excel(writer, index=False, sheet_name=f"Avis")
+            format_excel(writer, df, f"Avis {product_name}")
+        xls_buffer.seek(0)
+        # Retourner directement le BytesIO sans extraire le contenu
+        return xls_buffer
     finally:
         # Libération explicite du DataFrame
         del df
@@ -444,11 +439,12 @@ def process_single_export(export_format, reviews, field_labels, product_name, cu
         content = create_csv_buffer(reviews, field_labels)
         file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.csv"
         buffer = BytesIO(content)
+        del content
         return buffer, file_name
     elif export_format == 'xls':
-        content = create_xls_buffer(reviews, field_labels, product_name)
+        # create_xls_buffer retourne maintenant directement un BytesIO
+        buffer = create_xls_buffer(reviews, field_labels, product_name)
         file_name = f"Avis_{sanitize_filename(product_name)}_{current_date}.xlsx"
-        buffer = BytesIO(content)
         return buffer, file_name
 
 def process_zip_export(export_format, reviews_by_year, field_labels, product_name, current_date):
@@ -461,14 +457,14 @@ def process_zip_export(export_format, reviews_by_year, field_labels, product_nam
                     content = create_csv_buffer(reviews, field_labels)
                     csv_filename = f"Avis_{year}.csv"
                     zip_file.writestr(csv_filename, content)
-                    # Libération explicite
                     del content
                 elif export_format == 'xls':
-                    content = create_xls_buffer(reviews, field_labels, product_name)
+                    # create_xls_buffer retourne un BytesIO, on extrait son contenu
+                    xls_buffer = create_xls_buffer(reviews, field_labels, product_name)
                     xls_filename = f"Avis_{year}.xlsx"
-                    zip_file.writestr(xls_filename, content)
-                    # Libération explicite
-                    del content
+                    zip_file.writestr(xls_filename, xls_buffer.getvalue())
+                    xls_buffer.close()
+                    del xls_buffer
                 # Libérer les reviews de cette année
                 del reviews
                 gc.collect()
