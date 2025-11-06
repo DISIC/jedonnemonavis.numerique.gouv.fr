@@ -704,12 +704,15 @@ def process_exports(conn):
 
     field_labels = custom_sort(field_labels, desired_order)
     switch_to_zip = total_reviews > MAX_LINES_SWITCH
-
+    
+    print(f"Mode ZIP: {switch_to_zip} (seuil: {MAX_LINES_SWITCH})")
     log_memory_usage("BEFORE_FILE_GENERATION")
     
     upload_buffer = None
     try:
+        print(f"Début génération fichier {export_format}...")
         upload_buffer, file_name = main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, name_product, current_date)
+        print(f"Fichier {file_name} généré avec succès")
         
         log_memory_usage("AFTER_FILE_GENERATION")
         
