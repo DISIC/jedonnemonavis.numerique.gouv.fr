@@ -726,6 +726,14 @@ def process_exports(conn):
         # Upload to S3
         if upload_to_s3(upload_buffer, env_vars['BUCKET_NAME'], file_name):
             print(f"Fichier {file_name} uploadé avec succès sur le bucket {env_vars['BUCKET_NAME']}.")
+            
+            # Libérer immédiatement le buffer après upload pour libérer la mémoire
+            if isinstance(upload_buffer, BytesIO):
+                upload_buffer.close()
+            del upload_buffer
+            upload_buffer = None
+            gc.collect()
+            log_memory_usage("AFTER_UPLOAD_S3")
 
             download_link = generate_download_link(env_vars['BUCKET_NAME'], file_name)
             if download_link:
