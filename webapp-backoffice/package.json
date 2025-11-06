@@ -99,7 +99,7 @@
 		"@babel/preset-react": "^7.22.15",
 		"@babel/preset-typescript": "^7.22.15",
 		"@lhci/cli": "^0.12.0",
-		"@lhci/server": "^0.12.0",
+		"@lhci/server": "^0.15.1",
 		"@types/escape-html": "^1.0.4",
 		"@types/lodash": "^4.17.15",
 		"@types/react-beautiful-dnd": "^13.1.8",
