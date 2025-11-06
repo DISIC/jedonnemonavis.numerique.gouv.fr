@@ -779,6 +779,11 @@ def main():
             print("Connexion BDD fermée")
         except Exception as e:
             print(f"Erreur lors de la fermeture de la connexion: {e}")
+        
+        # Double GC pour libérer agressivement la mémoire
+        gc.collect()
+        gc.collect()
+        log_memory_usage("AFTER_FINAL_GC")
 
 def app(environ, start_response):
     start_response('200 OK', [('Content-Type', 'text/plain')])
