@@ -138,6 +138,8 @@ export function createButton(name: string) {
 
 	cy.contains('button', 'Copier le code').first().click();
 
+	cy.wait(200);
+
 	cy.get('div.fr-alert').should('be.visible');
 
 	cy.get(actions).contains('button', 'Continuer').click();
