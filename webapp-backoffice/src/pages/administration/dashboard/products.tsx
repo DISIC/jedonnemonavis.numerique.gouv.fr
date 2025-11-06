@@ -75,9 +75,13 @@ const DashBoard = () => {
 	}, [isLoadingSettings]);
 
 	useEffect(() => {
-		if (shouldModalOpen) {
-			newsModal.open();
-		}
+		if (!shouldModalOpen || !newsModal) return;
+		const timer = setTimeout(() => {
+			if (shouldModalOpen && newsModal) {
+				newsModal.open();
+			}
+		}, 500);
+		return () => clearTimeout(timer);
 	}, [shouldModalOpen, newsModal]);
 
 	const {

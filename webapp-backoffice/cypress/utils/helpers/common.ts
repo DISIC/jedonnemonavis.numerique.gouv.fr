@@ -21,7 +21,7 @@ export function logout() {
 }
 
 export function tryCloseNewsModal() {
-	cy.wait(500);
+	cy.wait(1000);
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
