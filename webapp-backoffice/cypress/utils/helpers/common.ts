@@ -129,14 +129,22 @@ export function createForm(name: string) {
 export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click();
-	cy.get(selectors.modal.button)
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="button-create-title"]').clear().type(name);
-		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.url().should('eq', `${appUrl}${selectors.url.newLink}`);
+	cy.get('input[name="button-create-title"]').clear().type(name);
+
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	cy.contains('button', 'Copier le code').first().click();
+
+	cy.get('div.fr-alert').should('be.visible');
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	cy.wait(500);
+
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
-	tryCloseModal();
 }
 
 export function modifyButton() {
