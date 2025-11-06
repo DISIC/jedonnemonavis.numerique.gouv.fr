@@ -130,7 +130,7 @@ const NewLink = (props: Props) => {
 												nativeInputProps={{
 													onChange,
 													value,
-													name,
+													name: 'button-create-title',
 													required: true
 												}}
 												state={'info'}
