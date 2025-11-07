@@ -10,13 +10,12 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Image from 'next/image';
-import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	nbReviews: number;
@@ -47,7 +46,7 @@ const DashboardTab = ({
 		return date.toISOString().split('T')[0];
 	})();
 
-	const { data: reviewResults, isFetching: isLoadingReviews } =
+	const { data: reviewResults, isLoading: isLoadingReviews } =
 		trpc.review.getList.useQuery(
 			{
 				product_id: form.product_id,
@@ -73,10 +72,13 @@ const DashboardTab = ({
 			}
 		);
 
-	if (isLoading || isLoadingReviews)
+	if (isLoading)
 		return (
-			<div className={cx(classes.loaderContainer)}>
-				<Loader />
+			<div className={fr.cx('fr-grid-row')}>
+				<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
+				<div className={cx(classes.loaderContainer)}>
+					<Loader />
+				</div>
 			</div>
 		);
 
@@ -118,6 +120,11 @@ const DashboardTab = ({
 					/>
 				</div>
 			</div>
+			{isLoadingReviews && (
+				<div className={cx(classes.loaderContainer)}>
+					<Loader />
+				</div>
+			)}
 			{reviewResults.data.length > 0 && (
 				<>
 					<hr className={fr.cx('fr-col-12', 'fr-mt-10v', 'fr-mb-3v')} />
@@ -234,7 +241,7 @@ const useStyles = tss.withName(DashboardTab.name).create({
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: '500px',
+		height: '350px',
 		width: '100%'
 	},
 	chartContainer: {

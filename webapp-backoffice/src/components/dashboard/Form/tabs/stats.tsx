@@ -25,7 +25,11 @@ import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
 import Select from '@codegouvfr/react-dsfr/Select';
-import { FormTemplateBlockOption, RightAccessStatus } from '@prisma/client';
+import {
+	Button,
+	FormTemplateBlockOption,
+	RightAccessStatus
+} from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -36,6 +40,9 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	onClickGoToReviews?: () => void;
+	nbReviews: number;
+	buttons: Button[];
+	isLoading: boolean;
 }
 
 export interface CommonStepProps {
@@ -108,7 +115,10 @@ const StatsTab = ({
 	form,
 	ownRight,
 	handleModalOpening,
-	onClickGoToReviews
+	onClickGoToReviews,
+	nbReviews,
+	buttons,
+	isLoading
 }: Props) => {
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
@@ -165,33 +175,6 @@ const StatsTab = ({
 			stepIndex => stepIndex !== undefined && stepIndex !== -1
 		) as number[];
 
-	const { data: buttonResults, isLoading: isLoadingButtons } =
-		trpc.button.getList.useQuery(
-			{
-				page: 1,
-				numberPerPage: 1000,
-				form_id: form.id,
-				isTest: false
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						count: 0
-					}
-				},
-				enabled: !!form.id && !isNaN(form.id)
-			}
-		);
-
-	const { data: reviewsData, isLoading: isLoadingReviewsCount } =
-		trpc.review.countReviews.useQuery({
-			numberPerPage: 0,
-			page: 1,
-			product_id: form.product.id,
-			form_id: form.id
-		});
-
 	const {
 		data: reviewsDataWithFilters,
 		isLoading: isLoadingReviewsDataWithFilters
@@ -231,7 +214,6 @@ const StatsTab = ({
 			}
 		);
 
-	const nbReviews = reviewsData?.metadata.countAll || 0;
 	const nbReviewsWithFilters =
 		reviewsDataWithFilters?.metadata.countFiltered || 0;
 	const nbReviewsWithFiltersForm1 =
@@ -243,7 +225,7 @@ const StatsTab = ({
 		? ((nbVerbatims / nbReviewsWithFilters) * 100).toFixed(0) || 0
 		: 0;
 
-	if (nbReviews === undefined || isLoadingButtons || isLoadingReviewsCount) {
+	if (isLoading) {
 		return (
 			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
@@ -254,7 +236,7 @@ const StatsTab = ({
 		);
 	}
 
-	if (nbReviews === 0 || buttonResults.metadata.count === 0) {
+	if (nbReviews === 0 || buttons.length === 0) {
 		return (
 			<div className={cx(classes.container)}>
 				<h2>Statistiques</h2>
@@ -265,7 +247,7 @@ const StatsTab = ({
 					>
 						<span>Ce formulaire est fermé et ne contient aucune réponse</span>
 					</div>
-				) : buttonResults.metadata.count === 0 ? (
+				) : buttons.length === 0 ? (
 					<NoButtonsPanel />
 				) : (
 					<NoReviewsPanel />
@@ -506,7 +488,7 @@ const StatsTab = ({
 						}}
 					>
 						<option value="undefined">Toutes les sources</option>
-						{buttonResults?.data?.map(button => (
+						{buttons.map(button => (
 							<option key={button.id} value={button.id}>
 								{button.title}
 							</option>

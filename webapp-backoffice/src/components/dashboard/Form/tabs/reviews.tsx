@@ -20,12 +20,12 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
+import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import { AnswerIntention, RightAccessStatus } from '@prisma/client';
+import { AnswerIntention, Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -37,6 +37,9 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	hasButtons: boolean;
+	nbReviews: number;
+	isLoading: boolean;
+	buttons: Button[];
 }
 
 type FormErrors = {
@@ -50,7 +53,15 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const { form, ownRight, handleModalOpening, hasButtons } = props;
+	const {
+		form,
+		ownRight,
+		handleModalOpening,
+		hasButtons,
+		nbReviews,
+		isLoading,
+		buttons
+	} = props;
 	const router = useRouter();
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
@@ -93,28 +104,6 @@ const ReviewsTab = (props: Props) => {
 		setCurrentPage(1);
 	};
 
-	const { data: reviewMetaResults, isLoading: isLoadingMetaResults } =
-		trpc.review.getList.useQuery(
-			{
-				product_id: form.product_id,
-				form_id: form.id,
-				numberPerPage: 1,
-				page: 1
-			},
-			{
-				initialData: {
-					data: [],
-					metadata: {
-						countFiltered: 0,
-						countAll: 0,
-						countNew: 0,
-						countForm1: 0,
-						countForm2: 0
-					}
-				}
-			}
-		);
-
 	const {
 		data: reviewResults,
 		isFetching: isLoadingReviews,
@@ -149,7 +138,8 @@ const ReviewsTab = (props: Props) => {
 					countForm1: 0,
 					countForm2: 0
 				}
-			}
+			},
+			enabled: nbReviews > 0 && !isLoading
 		}
 	);
 
@@ -162,19 +152,12 @@ const ReviewsTab = (props: Props) => {
 			{
 				initialData: {
 					data: []
-				}
+				},
+				enabled: nbReviews > 0 && !isLoading
 			}
 		);
 
 	const { data: reviewLog } = reviewLogResults;
-
-	const { data: buttonResults, isLoading: isLoadingButtons } =
-		trpc.button.getList.useQuery({
-			page: 1,
-			numberPerPage: 1000,
-			form_id: form.id,
-			isTest: true
-		});
 
 	const {
 		data: reviews,
@@ -316,7 +299,7 @@ const ReviewsTab = (props: Props) => {
 			case 'iconbox':
 				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return `Source : ${buttonResults?.data.find(b => b.id === parseInt(value as string))?.title}`;
+				return `Source : ${buttons.find(b => b.id === parseInt(value as string))?.title}`;
 			default:
 				return '';
 		}
@@ -458,7 +441,7 @@ const ReviewsTab = (props: Props) => {
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{reviewMetaResults.metadata.countAll > 0 && (
+				{nbReviews > 0 && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							product_id={form.product_id}
@@ -475,12 +458,11 @@ const ReviewsTab = (props: Props) => {
 					</div>
 				)}
 			</div>
-			{isLoadingMetaResults || isLoadingButtons ? (
+			{isLoading ? (
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
-			) : reviewMetaResults.metadata.countAll === 0 ||
-			  buttonResults?.data.length === 0 ? (
+			) : nbReviews === 0 || buttons.length === 0 ? (
 				displayEmptyState()
 			) : (
 				<>
@@ -488,7 +470,7 @@ const ReviewsTab = (props: Props) => {
 						<GenericFilters
 							filterKey="productReviews"
 							topRight={
-								<Button
+								<ButtonDSFR
 									priority="tertiary"
 									iconId="fr-icon-filter-line"
 									iconPosition="right"
@@ -496,7 +478,7 @@ const ReviewsTab = (props: Props) => {
 									nativeButtonProps={filter_modal.buttonProps}
 								>
 									Plus de filtres
-								</Button>
+								</ButtonDSFR>
 							}
 							renderTags={renderTags}
 						>
@@ -561,14 +543,14 @@ const ReviewsTab = (props: Props) => {
 										}
 									}}
 								/>
-								<Button
+								<ButtonDSFR
 									priority="primary"
 									type="submit"
 									iconId="ri-search-2-line"
 									iconPosition="left"
 								>
 									Rechercher
-								</Button>
+								</ButtonDSFR>
 							</div>
 						</form>
 					</div>
@@ -706,7 +688,7 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: '500px',
+		height: '350px',
 		width: '100%'
 	},
 	searchForm: {

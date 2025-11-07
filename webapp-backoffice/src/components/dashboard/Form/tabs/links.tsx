@@ -1,6 +1,10 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { CustomModalProps } from '@/src/types/custom';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithClosedLog,
+	ButtonWithForm,
+	FormWithElements
+} from '@/src/types/prismaTypesExtended';
 import { linksFaqContents } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -23,6 +27,8 @@ interface Props {
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
+	buttons: (ButtonWithForm & ButtonWithClosedLog)[];
+	isLoading: boolean;
 }
 
 const LinksTab = ({
@@ -32,7 +38,9 @@ const LinksTab = ({
 	handleModalOpening,
 	alertText,
 	isAlertShown,
-	setIsAlertShown
+	setIsAlertShown,
+	buttons,
+	isLoading
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
@@ -54,39 +62,18 @@ const LinksTab = ({
 		}
 	}, [router.query]);
 
-	const {
-		data: buttonResults,
-		isLoading: isLoadingButtons,
-		isRefetching: isRefetchingButtons
-	} = trpc.button.getList.useQuery(
-		{
-			page: 1,
-			numberPerPage: 1000,
-			form_id: form.id,
-			isTest: false
-		},
-		{
-			initialData: {
-				data: [],
-				metadata: {
-					count: 0
-				}
-			}
-		}
-	);
-
-	if (isLoadingButtons || isRefetchingButtons) {
+	if (isLoading) {
 		return (
-			<div className={cx(classes.loaderContainer)}>
-				<Loader />
+			<div className={fr.cx('fr-grid-row')}>
+				<h2 className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-0')}>
+					Liens d'intégration
+				</h2>
+				<div className={cx(classes.loaderContainer)}>
+					<Loader />
+				</div>
 			</div>
 		);
 	}
-
-	const {
-		data: buttons,
-		metadata: { count: buttonsCount }
-	} = buttonResults;
 
 	const buttonsList = [
 		...buttons
@@ -153,7 +140,7 @@ const LinksTab = ({
 			<div
 				className={cx(classes.cardContainer, fr.cx('fr-col-12', 'fr-mt-8v'))}
 			>
-				{buttonsCount === 0 &&
+				{buttons.length === 0 &&
 					(!form.isDeleted ? (
 						<NoButtonsPanel />
 					) : (
@@ -194,8 +181,8 @@ const useStyles = tss.withName(LinksTab.name).create({
 	loaderContainer: {
 		display: 'flex',
 		justifyContent: 'center',
-		alignItems: 'start',
-		height: '500px',
+		alignItems: 'center',
+		height: '350px',
 		width: '100%'
 	},
 	buttonsGroup: {
