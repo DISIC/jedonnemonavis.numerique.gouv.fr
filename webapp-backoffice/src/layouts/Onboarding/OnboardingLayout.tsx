@@ -34,6 +34,13 @@ const OnboardingLayout = ({
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles({ hasActions: !hideActions });
+	const mainRef = React.useRef<HTMLElement>(null);
+
+	React.useEffect(() => {
+		if (mainRef.current) {
+			mainRef.current.focus();
+		}
+	}, []);
 
 	return (
 		<>
@@ -41,9 +48,10 @@ const OnboardingLayout = ({
 				<title>{`${title} | Je donne mon avis`}</title>
 			</Head>
 			<main
+				ref={mainRef}
 				id="main"
 				role="main"
-				tabIndex={-1}
+				tabIndex={0}
 				className={classes.mainContainer}
 			>
 				<div
@@ -167,22 +175,29 @@ const useStyles = tss
 			flexDirection: 'column',
 			alignItems: 'center',
 			width: '100%',
-			height: hasActions ? `calc(100vh - ${fr.spacing('20v')})` : '100vh',
+			minHeight: '100vh',
 			overflowY: 'auto',
+			overflowX: 'hidden',
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 			paddingTop: fr.spacing('20v'),
-			paddingBottom: fr.spacing('10v'),
+			paddingBottom: hasActions ? fr.spacing('30v') : fr.spacing('10v'),
+			'&:focus': {
+				outline: 'none'
+			},
 			[fr.breakpoints.down('md')]: {
-				padding: 0
+				paddingTop: 0,
+				paddingBottom: hasActions ? fr.spacing('30v') : 0
 			}
 		},
 		stepContent: {
 			padding: fr.spacing('10v'),
 			backgroundColor: 'white',
 			width: fr.breakpoints.values.md,
+			maxWidth: '100%',
+			minHeight: 'fit-content',
 			[fr.breakpoints.down('md')]: {
 				width: '100%',
-				height: '100%'
+				minHeight: '100%'
 			}
 		},
 		actionsContainer: {
