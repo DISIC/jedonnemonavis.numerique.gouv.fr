@@ -1,5 +1,6 @@
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -36,6 +37,9 @@ const OnboardingLayout = ({
 
 	return (
 		<>
+			<Head>
+				<title>{`${title} | Je donne mon avis`}</title>
+			</Head>
 			<main
 				id="main"
 				role="main"
