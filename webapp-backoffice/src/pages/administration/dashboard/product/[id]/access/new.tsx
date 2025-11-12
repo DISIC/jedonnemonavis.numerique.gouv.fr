@@ -87,7 +87,7 @@ const NewAccess = () => {
 	};
 
 	return (
-		<OnboardingLayout title="Ajouter des membres" onConfirm={onSubmit}>
+		<OnboardingLayout title="Inviter des utilisateurs" onConfirm={onSubmit}>
 			<form id="new-access-form">
 				{usersToAdd.map((user, i) => (
 					<Fragment key={i}>
