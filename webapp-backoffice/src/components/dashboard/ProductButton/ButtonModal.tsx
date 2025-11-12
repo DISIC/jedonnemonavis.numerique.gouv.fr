@@ -177,7 +177,7 @@ const ButtonModal = (props: Props) => {
 									legend="Type de bouton"
 									options={[
 										{
-											label: 'Bleu',
+											label: 'Plein',
 											hintText: (
 												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 													Le bouton par défaut, à placer sur un{' '}
@@ -194,7 +194,7 @@ const ButtonModal = (props: Props) => {
 											}
 										},
 										{
-											label: 'Blanc',
+											label: 'Contour',
 											hintText: (
 												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
 													À placer sur un{' '}

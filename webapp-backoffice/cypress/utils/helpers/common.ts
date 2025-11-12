@@ -7,7 +7,7 @@ export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
+	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
 }
 
@@ -21,7 +21,7 @@ export function logout() {
 }
 
 export function tryCloseNewsModal() {
-	cy.wait(500);
+	cy.wait(1000);
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
@@ -50,6 +50,7 @@ export function tryCloseModal() {
 
 export function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();
+	cy.wait(200);
 	cy.get('div[role="presentation"]')
 		.should('be.visible')
 		.find('[id="entity-select-autocomplete-option-0"]')
@@ -93,21 +94,16 @@ export function createProduct(name: string) {
 		.within(() => {
 			cy.get('input[name="title"]').clear().type(name);
 			selectEntity();
-			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
 		});
 
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Ajouter ce service')
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
 		.click();
 }
 
 export function createForm(name: string) {
-	cy.url().should('include', '/forms');
-	cy.contains(
-		'button',
-		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
-	).click();
-	cy.get(selectors.modal.form)
+	cy.contains('button', /^(?:Générer un formulaire)$/).click();
+	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="title"]')
@@ -116,20 +112,41 @@ export function createForm(name: string) {
 				.clear()
 				.type(name);
 		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions).contains('button', 'Continuer').click();
+	cy.get(actions).contains('button', 'Continuer').should('be.disabled');
+
+	cy.wait(2000);
+
+	cy.get(actions)
+		.contains('button', 'Continuer')
+		.should('not.be.disabled')
+		.click();
 }
 
 export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click();
-	cy.get(selectors.modal.button)
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="button-create-title"]').clear().type(name);
-		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.url().should('eq', `${appUrl}${selectors.url.newLink}`);
+	cy.get('input[name="button-create-title"]').clear().type(name);
+
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	cy.contains('button', 'Copier le code').first().click();
+
+	cy.wait(200);
+
+	cy.get('div.fr-alert').should('be.visible');
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	cy.wait(500);
+
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
-	tryCloseModal();
 }
 
 export function modifyButton() {
