@@ -255,6 +255,7 @@ const NewForm = (props: Props) => {
 										// onConfirmPublishModal.open();
 									}}
 									hasConfigChanged={true}
+									isExternalPublish={true}
 								/>
 							) : (
 								<Loader />

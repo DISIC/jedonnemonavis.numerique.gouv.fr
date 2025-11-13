@@ -29,7 +29,9 @@ const Radios = (props: Props) => {
 								value={opt.value || ''}
 								checked={selectedValue === opt.value}
 								onClick={() => {
-									setSelectedValue((prev) => prev === opt.value ? null : opt.value);
+									setSelectedValue(prev =>
+										prev === opt.value ? null : opt.value
+									);
 								}}
 								disabled={disabled}
 							/>
@@ -47,24 +49,24 @@ const useStyles = tss
 	.withParams<{ nbItems?: number }>()
 	.create(({ nbItems }) => ({
 		container: {
-			display: "flex",
-			alignItems: "center",
-			marginTop: fr.spacing("4v"),
+			display: 'flex',
+			alignItems: 'center',
+			marginTop: fr.spacing('4v'),
 			fieldset: {
 				border: 0,
 				padding: 0,
 				margin: 0,
-				width: "100%",
+				width: '100%',
 				ul: {
 					padding: 0,
 					margin: 0,
 					listStyle: 'none',
-					width: "100%",
+					width: '100%',
 					li: {
 						paddingBottom: 0,
-						marginBottom: fr.spacing("3v"),
+						marginBottom: fr.spacing('3v'),
 						':last-child': {
-							marginBottom: 0,
+							marginBottom: 0
 						},
 						label: {
 							display: 'flex',
@@ -74,47 +76,45 @@ const useStyles = tss
 							fontWeight: 500,
 							width: '100%',
 							padding: fr.spacing('3v'),
-							color: fr.colors.decisions.text.label.blueFrance.default,
 							img: {
-								marginRight: fr.spacing("2v"),
+								marginRight: fr.spacing('2v')
 							},
-							["&:hover"]: {
-								borderColor: fr.colors.decisions.background.alt.grey.active,
+							['&:hover']: {
+								borderColor: fr.colors.decisions.background.alt.grey.active
 							},
-							[fr.breakpoints.up("md")]: {
+							[fr.breakpoints.up('md')]: {
 								marginBottom: 0,
-								flexDirection: "column",
-								...fr.spacing("padding", {topBottom: "2v", rightLeft: "4v"}),
+								flexDirection: 'column',
+								...fr.spacing('padding', { topBottom: '2v', rightLeft: '4v' }),
 								img: {
-									marginTop: fr.spacing("2v"),
-									marginRight: 0,
-								},
-							},
+									marginTop: fr.spacing('2v'),
+									marginRight: 0
+								}
+							}
 						}
-					},
+					}
 				},
-				[fr.breakpoints.up("md")]: {
-					width: "initial",
+				[fr.breakpoints.up('md')]: {
+					width: 'initial',
 					ul: {
-						width: "initial",
-						columns: nbItems,
-					},
-				},
+						width: 'initial',
+						columns: nbItems
+					}
+				}
 			},
-			["input:checked + label"]: {
+			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-				color: 'white',
+				color: 'white'
 			},
-			["input:focus-visible + label"]: {
-				outlineOffset: "2px",
-				outline: "2px solid #4D90FE",
+			['input:focus-visible + label']: {
+				outlineOffset: '2px',
+				outline: '2px solid #4D90FE'
 			},
-			[fr.breakpoints.down("md")]: {
-				flexDirection: "column",
-			},
-		},
-	}
-));
+			[fr.breakpoints.down('md')]: {
+				flexDirection: 'column'
+			}
+		}
+	}));
 
 export default Radios;
