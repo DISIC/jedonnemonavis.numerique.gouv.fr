@@ -22,6 +22,11 @@ interface OnboardingLayoutProps {
 	noBackground?: boolean;
 	isConfirmDisabled?: boolean;
 	isStepperLayout?: boolean;
+	customHintText?: React.ReactNode;
+	isLarge?: boolean;
+	shouldDisplayLine?: boolean;
+	headerActions?: React.ReactNode;
+	hideTitle?: boolean;
 }
 
 const OnboardingLayout = ({
@@ -35,7 +40,12 @@ const OnboardingLayout = ({
 	hideBackButton,
 	noBackground,
 	isConfirmDisabled,
-	isStepperLayout
+	isStepperLayout,
+	customHintText,
+	isLarge,
+	shouldDisplayLine,
+	headerActions,
+	hideTitle
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { data: session } = useSession();
@@ -69,8 +79,8 @@ const OnboardingLayout = ({
 			<Button
 				id="button-account"
 				iconId={'fr-icon-account-circle-line'}
-				title={`Ouvrir le menu mon compte`}
-				aria-label={`Ouvrir le menu mon compte`}
+				title="Ouvrir le menu mon compte"
+				aria-label="Ouvrir le menu mon compte"
 				priority="tertiary"
 				size="large"
 				onClick={handleMenuClick}
@@ -181,42 +191,55 @@ const OnboardingLayout = ({
 				id="main"
 				role="main"
 				tabIndex={0}
-				className={classes.mainContainer}
+				className={cx(classes.mainContainer, fr.cx(hideTitle && 'fr-pt-0'))}
 			>
 				<div
-					className={classes.stepContent}
-					style={{ background: noBackground ? 'transparent' : undefined }}
+					className={cx(classes.stepContent, fr.cx(hideTitle && 'fr-pt-0'))}
+					style={{
+						background: noBackground ? 'transparent' : undefined,
+						width:
+							isLarge || isStepperLayout
+								? fr.breakpoints.values.lg
+								: fr.breakpoints.values.md
+					}}
 				>
 					{isStepperLayout ? (
 						<OnboardingStepper />
 					) : (
 						<>
-							{title && (
-								<>
-									<h1
-										className={fr.cx(
-											'fr-h3',
-											'fr-mb-1v',
-											hideMainHintText && 'fr-mb-8v'
-										)}
-									>
-										{title}
-									</h1>
-									{!hideMainHintText && (
-										<p
+							<div className={classes.contentHeader}>
+								{!hideTitle && title && (
+									<div>
+										<h1
 											className={fr.cx(
-												'fr-hint-text',
-												'fr-text--sm',
-												'fr-mb-8v'
+												'fr-h3',
+												'fr-mb-1v',
+												hideMainHintText && 'fr-mb-8v'
 											)}
 										>
-											Les champs marqués d&apos;un{' '}
-											<span className={cx(classes.asterisk)}>*</span> sont
-											obligatoires
-										</p>
-									)}
-								</>
-							)}
+											{title}
+										</h1>
+										{!hideMainHintText &&
+											(customHintText || (
+												<p
+													className={fr.cx(
+														'fr-hint-text',
+														'fr-text--sm',
+														'fr-mb-8v'
+													)}
+												>
+													Les champs marqués d&apos;un{' '}
+													<span className={cx(classes.asterisk)}>*</span> sont
+													obligatoires
+												</p>
+											))}
+									</div>
+								)}
+								{headerActions && (
+									<div className={classes.headerActions}>{headerActions}</div>
+								)}
+							</div>
+							{shouldDisplayLine && <hr className={fr.cx('fr-mb-2v')} />}
 							{children}
 						</>
 					)}
@@ -328,23 +351,30 @@ const useStyles = tss
 				outline: 'none'
 			},
 			[fr.breakpoints.down('md')]: {
-				paddingTop: 0,
-				paddingBottom: isStepperLayout ? 0 : fr.spacing('30v')
+				paddingTop: isStepperLayout ? fr.spacing('6v') : 0,
+				paddingBottom: fr.spacing('12v'),
+				...fr.spacing('padding', { rightLeft: isStepperLayout ? '4v' : 0 })
 			}
 		},
 		stepContent: {
 			padding: isStepperLayout ? 0 : fr.spacing('10v'),
 			backgroundColor: 'white',
-			width: isStepperLayout
-				? fr.breakpoints.values.lg
-				: fr.breakpoints.values.md,
 			maxWidth: '100%',
 			minHeight: 'fit-content',
 			[fr.breakpoints.down('md')]: {
 				width: '100%',
-				minHeight: '100%'
+				minHeight: '100%',
+				...fr.spacing('padding', {
+					rightLeft: isStepperLayout ? 0 : '4v',
+					bottom: isStepperLayout ? 0 : '32v'
+				})
 			}
 		},
+		contentHeader: {
+			display: 'flex',
+			justifyContent: 'space-between'
+		},
+		headerActions: {},
 		actionsContainer: {
 			position: 'fixed',
 			bottom: 0,
@@ -363,6 +393,7 @@ const useStyles = tss
 				flexDirection: 'column',
 				height: 'auto',
 				gap: fr.spacing('4v'),
+				...fr.spacing('padding', { topBottom: '6v', rightLeft: '4v' }),
 				button: {
 					width: '100%',
 					justifyContent: 'center',
