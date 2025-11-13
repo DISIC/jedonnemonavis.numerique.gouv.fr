@@ -17,9 +17,10 @@ interface Props {
 	form: FormWithElements;
 	configHelper: FormConfigHelper;
 	hasConfigChanged: boolean;
+	isExternalPublish?: boolean;
 	changeStep: (to: 'previous' | 'next') => void;
 	onConfigChange: (config: FormConfigHelper) => void;
-	onPublish: () => void;
+	onPublish?: () => void;
 	isStepModified: (stepId: number) => boolean;
 }
 
@@ -29,6 +30,7 @@ const FormStepDisplay = (props: Props) => {
 		form,
 		configHelper,
 		hasConfigChanged,
+		isExternalPublish,
 		changeStep,
 		onConfigChange,
 		onPublish,
@@ -82,7 +84,9 @@ const FormStepDisplay = (props: Props) => {
 				isHidden ? classes.containerHidden : null
 			)}
 		>
-			<div className={cx(classes.box)}>
+			<div
+				className={cx(classes.box, !step.isHideable && classes.nonEditableBox)}
+			>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
 						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
@@ -120,20 +124,26 @@ const FormStepDisplay = (props: Props) => {
 						</div>
 					</div>
 					<div>
-						<Button
-							priority="secondary"
-							iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
-							iconPosition="right"
-							onClick={() => {
-								setIsHidden(!isHidden);
-							}}
-							disabled={!step.isHideable}
-						>
-							{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
-						</Button>
+						{step.isHideable ? (
+							<Button
+								priority="secondary"
+								iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+								iconPosition="right"
+								onClick={() => {
+									setIsHidden(!isHidden);
+								}}
+								disabled={!step.isHideable}
+							>
+								{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
+							</Button>
+						) : (
+							<Badge severity="info" noIcon>
+								Étape obligatoire
+							</Badge>
+						)}
 					</div>
 				</div>
-				{(isHidden || !step.isHideable) && (
+				{isHidden && (
 					<>
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
@@ -163,7 +173,10 @@ const FormStepDisplay = (props: Props) => {
 				) {
 					if (block.position === 1) {
 						return (
-							<div key={block.id} className={cx(classes.box)}>
+							<div
+								key={block.id}
+								className={cx(classes.box, classes.nonEditableBox)}
+							>
 								<RootYesNo
 									block={block}
 									step={step}
@@ -176,7 +189,10 @@ const FormStepDisplay = (props: Props) => {
 
 					if (block.position === 6) {
 						return (
-							<div key={block.id} className={cx(classes.box)}>
+							<div
+								key={block.id}
+								className={cx(classes.box, classes.nonEditableBox)}
+							>
 								<RootScales
 									block={block}
 									step={step}
@@ -192,7 +208,15 @@ const FormStepDisplay = (props: Props) => {
 				// END CUSTOM DISPLAY
 
 				return (
-					<div key={block.id} className={cx(classes.box)}>
+					<div
+						key={block.id}
+						className={cx(
+							classes.box,
+							!block.isUpdatable &&
+								block.options.length === 0 &&
+								classes.nonEditableBox
+						)}
+					>
 						<FormBlockDisplay
 							block={block}
 							form={form}
@@ -231,6 +255,8 @@ const FormStepDisplay = (props: Props) => {
 					>
 						Étape suivante
 					</Button>
+				) : isExternalPublish ? (
+					<div />
 				) : (
 					<Button
 						priority="primary"
@@ -282,6 +308,13 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 		display: 'flex',
 		alignItems: 'center'
 	},
+	nonEditableBox: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+		color: fr.colors.decisions.text.title.grey.default,
+		['h3, h4, h5, h6']: {
+			color: fr.colors.decisions.text.title.grey.default
+		}
+	},
 	disabledAlertMessage: {
 		color: fr.colors.decisions.background.flat.blueFrance.default
 	},
@@ -292,7 +325,10 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 	},
 	headerInfo: {
 		display: 'flex',
-		alignItems: 'center'
+		alignItems: 'center',
+		'& ::before, & ::after': {
+			'--icon-size': '1.5rem'
+		}
 	},
 	buttonsContainer: {
 		display: 'flex',
