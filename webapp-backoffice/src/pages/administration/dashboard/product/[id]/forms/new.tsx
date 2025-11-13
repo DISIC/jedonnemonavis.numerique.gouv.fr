@@ -109,7 +109,7 @@ const NewForm = (props: Props) => {
 		// });
 	};
 
-	const finishCreation = () => {
+	const saveEditedFormAndFinishCreation = () => {
 		if (!createdForm)
 			return router.push(
 				`/administration/dashboard/product/${product.id}/forms`
@@ -262,6 +262,7 @@ const NewForm = (props: Props) => {
 							)}
 						</div>
 					),
+					confirmAction: saveEditedFormAndFinishCreation,
 					confirmText: 'Enregistrer les modifications',
 					customHintText: (
 						<p className={fr.cx('fr-text--sm', 'fr-mb-3v')}>
