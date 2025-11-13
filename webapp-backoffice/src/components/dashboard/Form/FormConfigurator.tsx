@@ -12,11 +12,13 @@ interface Props {
 	form: FormWithElements;
 	hasConfigChanged: boolean;
 	onChange: (configHelper: FormConfigHelper) => void;
-	onPublish: () => void;
+	onPublish?: () => void;
+	isExternalPublish?: boolean;
 }
 
 const FormConfigurator = (props: Props) => {
-	const { form, hasConfigChanged, onChange, onPublish } = props;
+	const { form, hasConfigChanged, isExternalPublish, onChange, onPublish } =
+		props;
 	const formConfig = form.form_configs[0];
 
 	const { classes, cx } = useStyles();
@@ -100,6 +102,7 @@ const FormConfigurator = (props: Props) => {
 					onConfigChange={onConfigChange}
 					onPublish={onPublish}
 					isStepModified={isStepModified}
+					isExternalPublish={isExternalPublish}
 				/>
 			</div>
 		</div>

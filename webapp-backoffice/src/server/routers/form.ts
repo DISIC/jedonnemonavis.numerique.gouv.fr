@@ -68,6 +68,46 @@ export const formRouter = router({
 			const form = await ctx.prisma.form.create({
 				data: {
 					...formPayload
+				},
+				include: {
+					product: true,
+					form_configs: {
+						where: {
+							status: 'published'
+						},
+						orderBy: {
+							created_at: 'desc'
+						},
+						take: 100,
+						include: {
+							form_config_displays: true,
+							form_config_labels: true
+						}
+					},
+					form_template: {
+						include: {
+							form_template_steps: {
+								include: {
+									form_template_blocks: {
+										include: {
+											options: {
+												orderBy: {
+													position: 'asc'
+												}
+											}
+										},
+										orderBy: {
+											position: 'asc'
+										}
+									}
+								},
+
+								orderBy: {
+									position: 'asc'
+								}
+							}
+						}
+					}
 				}
 			});
 
