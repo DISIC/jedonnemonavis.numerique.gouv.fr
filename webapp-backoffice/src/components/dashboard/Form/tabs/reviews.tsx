@@ -560,7 +560,7 @@ const ReviewsTab = (props: Props) => {
 						</div>
 					) : (
 						<>
-							{!!formConfigs.length && (
+							{!!formConfigs.filter(fc => fc.version !== 0).length && (
 								<div className={fr.cx('fr-mt-8v')}>
 									<FormConfigVersionsDisplay
 										formConfigs={formConfigs}
