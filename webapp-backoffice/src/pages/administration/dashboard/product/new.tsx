@@ -1,4 +1,5 @@
 import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { createFilterOptionsWithArgument } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
@@ -8,7 +9,7 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Autocomplete } from '@mui/material';
 import { Entity, Product } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { useDebounce } from 'usehooks-ts';
@@ -23,13 +24,16 @@ const entity_modal = createModal({
 const NewProduct = () => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
+	const { createdProduct, updateCreatedProduct } = useOnboarding();
 
-	const [product, setProduct] = useState<Product>();
 	const [search, _] = useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
 	const [selectedEntityValue, setSelectedEntityValue] = useState<
 		number | undefined
-	>(product?.entity_id);
+	>(createdProduct?.entity_id);
+
+	const shouldShowStepper =
+		useMemo(() => Boolean(createdProduct), [createdProduct]) || true;
 
 	const {
 		control,
@@ -37,7 +41,7 @@ const NewProduct = () => {
 		reset,
 		formState: { errors }
 	} = useForm<FormValues>({
-		defaultValues: product ? { ...product } : {}
+		defaultValues: createdProduct ? { ...createdProduct } : {}
 	});
 
 	const {
@@ -82,9 +86,11 @@ const NewProduct = () => {
 			...tmpProduct
 		});
 
-		router.push(
-			`/administration/dashboard/product/${savedProductResponse.data.id}/forms`
-		);
+		updateCreatedProduct(savedProductResponse.data);
+
+		// router.push(
+		// 	`/administration/dashboard/product/${savedProductResponse.data.id}/forms`
+		// );
 	};
 
 	return (
@@ -92,6 +98,7 @@ const NewProduct = () => {
 			isCancelable
 			title="Ajouter un service numérique"
 			onConfirm={handleSubmit(onLocalSubmit)}
+			isStepperLayout={shouldShowStepper}
 		>
 			<EntityModal
 				modal={entity_modal}
