@@ -1,5 +1,7 @@
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -30,7 +32,7 @@ const stepContents: readonly StepContent[] = [
 	},
 	{
 		slug: 'access',
-		title: 'Ajouter des membres',
+		title: 'Inviter des utilisateurs',
 		iconId: 'fr-icon-user-add-line',
 		url: '/administration/dashboard/product/[id]/access/new',
 		details: [
@@ -40,7 +42,7 @@ const stepContents: readonly StepContent[] = [
 				iconId: 'ri-group-line'
 			}
 		],
-		actionsLabel: 'Ajouter des membres',
+		actionsLabel: 'Inviter des utilisateurs',
 		isSkippable: true
 	},
 	{
@@ -59,7 +61,7 @@ const stepContents: readonly StepContent[] = [
 	},
 	{
 		slug: 'link',
-		title: 'Créer un lien d’intégration',
+		title: 'Intégrer le formulaire sur votre site',
 		iconId: 'ri-link',
 		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
 		details: [
@@ -77,17 +79,40 @@ const stepContents: readonly StepContent[] = [
 const OnboardingStepper = () => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const { createdProduct } = useOnboarding();
+	const { createdProduct, createdUserAccesses, createdForm } = useOnboarding();
 	const [steps, setSteps] = useState(stepContents);
 
-	const getCompletedValue = (stepSlug: string) => {
+	const getSlugValues = (
+		stepSlug: string
+	): { isCompleted: boolean; url: string } => {
 		switch (stepSlug) {
 			case 'product':
-				return Boolean(createdProduct);
+				return {
+					isCompleted: Boolean(createdProduct),
+					url: '/administration/dashboard/product/new'
+				};
 			case 'access':
-				return false;
+				return {
+					isCompleted: Boolean(
+						createdUserAccesses && createdUserAccesses.length > 0
+					),
+					url: `/administration/dashboard/product/${createdProduct?.id}/access/new`
+				};
+			case 'form':
+				return {
+					isCompleted: Boolean(createdForm),
+					url: `/administration/dashboard/product/${createdProduct?.id}/forms/new`
+				};
+			case 'link':
+				return {
+					isCompleted: false,
+					url: `/administration/dashboard/product/${createdProduct?.id}/forms/[form_id]/new-link`
+				};
 			default:
-				return false;
+				return {
+					isCompleted: false,
+					url: '/administration/dashboard/product/new'
+				};
 		}
 	};
 
@@ -95,7 +120,8 @@ const OnboardingStepper = () => {
 		setSteps(
 			stepContents.map(step => ({
 				...step,
-				isCompleted: getCompletedValue(step.slug)
+				isCompleted: getSlugValues(step.slug).isCompleted,
+				url: getSlugValues(step.slug).url
 			}))
 		);
 	}, [createdProduct]);
@@ -105,23 +131,117 @@ const OnboardingStepper = () => {
 			{steps.map((step, index) => {
 				const isActiveStep =
 					index === 0 ||
-					(steps[index - 1].isCompleted === true && step.isCompleted !== true);
+					(steps[index - 1].isCompleted === true &&
+						step.isCompleted !== true &&
+						!step.isSkipped);
+
+				const stepIconId =
+					step.isCompleted || step.isSkipped ? 'ri-check-line' : step.iconId;
+
 				return (
 					<div
 						key={step.url}
-						className={cx(
-							classes.stepContainer,
-							fr.cx('fr-px-6v', 'fr-py-4v', 'fr-mb-4v')
-						)}
+						className={cx(classes.stepContainer, fr.cx('fr-px-6v', 'fr-py-4v'))}
+						style={{
+							backgroundColor:
+								step.isCompleted || step.isSkipped
+									? fr.colors.decisions.background.default.grey.hover
+									: undefined
+						}}
 					>
-						<div className={classes.iconContainer}>
-							<i
-								className={cx(step.iconId, fr.cx('fr-icon--lg'))}
-								aria-hidden="true"
-							/>
+						<div className={classes.mainStepContent}>
+							<div className={classes.titleContainer}>
+								<div
+									className={cx(
+										classes.iconContainer,
+										step.isCompleted || step.isSkipped
+											? classes.greyIcon
+											: undefined
+									)}
+								>
+									<i
+										className={cx(stepIconId, fr.cx('fr-icon--lg'))}
+										aria-hidden="true"
+									/>
+								</div>
+								<div className={classes.titleWithBadge}>
+									<h3 className={fr.cx('fr-h5', 'fr-m-0')}>{step.title}</h3>
+									{(step.isCompleted || step.isSkipped) && (
+										<Badge
+											severity={step.isSkipped ? 'info' : 'success'}
+											noIcon
+											small
+										>
+											{step.isCompleted ? 'Complété' : 'Ignoré'}
+										</Badge>
+									)}
+								</div>
+							</div>
+							{(step.isCompleted || step.isSkipped) && (
+								<Button
+									iconId="fr-icon-edit-line"
+									priority="tertiary"
+									iconPosition="right"
+									size="small"
+									linkProps={{ href: step.url }}
+								>
+									Modifier
+								</Button>
+							)}
 						</div>
-						<h3 className={fr.cx('fr-h5', 'fr-mt-2w')}>{step.title}</h3>
-						{/* Additional step details and actions can be rendered here */}
+						{step.details.length > 0 && isActiveStep && (
+							<div className={classes.detailsContainer}>
+								<div className={classes.detailsList}>
+									{step.details.map(detail => (
+										<div key={detail.title} className={classes.detailLine}>
+											<div
+												className={classes.iconContainer}
+												style={{
+													backgroundColor:
+														fr.colors.decisions.background.alt.blueFrance
+															.default
+												}}
+											>
+												<i
+													className={cx(detail.iconId, fr.cx('fr-icon--lg'))}
+													aria-hidden="true"
+												/>
+											</div>
+											<span className={fr.cx('fr-text--lg', 'fr-m-0')}>
+												{detail.title}
+											</span>
+										</div>
+									))}
+								</div>
+								<div className={classes.detailsActions}>
+									{step.isSkippable && (
+										<Button
+											priority="secondary"
+											size="large"
+											iconPosition="right"
+											iconId="fr-icon-arrow-right-s-line"
+											onClick={() => {
+												setSteps(prevSteps =>
+													prevSteps.map(s =>
+														s.slug === step.slug ? { ...s, isSkipped: true } : s
+													)
+												);
+											}}
+										>
+											Passer cette étape
+										</Button>
+									)}
+									<Button
+										size="large"
+										iconPosition="right"
+										iconId="fr-icon-arrow-right-s-line"
+										linkProps={{ href: step.url }}
+									>
+										{step.actionsLabel}
+									</Button>
+								</div>
+							</div>
+						)}
 					</div>
 				);
 			})}
@@ -140,13 +260,16 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 	},
 	stepContainer: {
 		display: 'flex',
-		justifyContent: 'center',
+		flexDirection: 'column',
 		width: '100%',
-		backgroundColor: fr.colors.options.blueEcume._950_100.default
+		gap: fr.spacing('4v'),
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+		borderRadius: fr.spacing('2v')
 	},
 	iconContainer: {
 		width: fr.spacing('12v'),
 		height: fr.spacing('12v'),
+		marginRight: fr.spacing('4v'),
 		backgroundColor: 'white',
 		color: fr.colors.decisions.background.flat.blueFrance.default,
 		borderRadius: '50%',
@@ -154,5 +277,41 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center'
+	},
+	greyIcon: {
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		color: fr.colors.decisions.text.default.grey.default
+	},
+	mainStepContent: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('4v')
+	},
+	titleContainer: {
+		display: 'flex',
+		alignItems: 'center'
+	},
+	titleWithBadge: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('2v')
+	},
+	detailsContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		background: 'white',
+		gap: fr.spacing('4v'),
+		...fr.spacing('padding', { topBottom: '8v', rightLeft: '10v' })
+	},
+	detailLine: { display: 'flex', alignItems: 'center', gap: fr.spacing('4v') },
+	detailsList: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('3v')
+	},
+	detailsActions: {
+		display: 'flex',
+		justifyContent: 'center',
+		gap: fr.spacing('6v')
 	}
 }));

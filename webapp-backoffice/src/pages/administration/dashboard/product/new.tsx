@@ -32,8 +32,10 @@ const NewProduct = () => {
 		number | undefined
 	>(createdProduct?.entity_id);
 
-	const shouldShowStepper =
-		useMemo(() => Boolean(createdProduct), [createdProduct]) || true;
+	const shouldShowStepper = useMemo(
+		() => Boolean(createdProduct),
+		[createdProduct]
+	);
 
 	const {
 		control,
