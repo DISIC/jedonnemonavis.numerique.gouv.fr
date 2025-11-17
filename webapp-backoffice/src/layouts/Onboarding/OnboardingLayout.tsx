@@ -1,14 +1,18 @@
+import OnboardingStepper from '@/src/components/dashboard/Onboarding/OnboardingStepper';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { Menu, MenuItem } from '@mui/material';
+import { push } from '@socialgouv/matomo-next';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface OnboardingLayoutProps {
 	children: React.ReactNode;
 	title?: string;
-	hideActions?: boolean;
 	isCancelable?: boolean;
 	confirmText?: string;
 	hideMainHintText?: boolean;
@@ -17,11 +21,11 @@ interface OnboardingLayoutProps {
 	onConfirm?: () => void;
 	noBackground?: boolean;
 	isConfirmDisabled?: boolean;
+	isStepperLayout?: boolean;
 }
 
 const OnboardingLayout = ({
 	children,
-	hideActions,
 	isCancelable,
 	confirmText,
 	onCancel,
@@ -30,11 +34,29 @@ const OnboardingLayout = ({
 	hideMainHintText,
 	hideBackButton,
 	noBackground,
-	isConfirmDisabled
+	isConfirmDisabled,
+	isStepperLayout
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
-	const { cx, classes } = useStyles({ hasActions: !hideActions });
+	const { data: session } = useSession();
+	const { cx, classes } = useStyles({ isStepperLayout });
 	const mainRef = React.useRef<HTMLElement>(null);
+	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const menuOpen = Boolean(anchorEl);
+
+	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(event.currentTarget);
+		push(['trackEvent', 'Account', 'Open-Menu']);
+	};
+	const handleClose = (
+		event: React.MouseEvent<HTMLButtonElement | HTMLLIElement>
+	) => {
+		event.preventDefault();
+		event.stopPropagation();
+		setAnchorEl(null);
+	};
 
 	React.useEffect(() => {
 		if (mainRef.current) {
@@ -42,11 +64,118 @@ const OnboardingLayout = ({
 		}
 	}, []);
 
+	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
+		[
+			<Button
+				id="button-account"
+				iconId={'fr-icon-account-circle-line'}
+				title={`Ouvrir le menu mon compte`}
+				aria-label={`Ouvrir le menu mon compte`}
+				priority="tertiary"
+				size="large"
+				onClick={handleMenuClick}
+			>
+				Compte
+			</Button>,
+			<Menu
+				id="option-menu"
+				open={menuOpen}
+				anchorEl={anchorEl}
+				onClose={handleClose}
+				MenuListProps={{
+					'aria-labelledby': 'button-options-access-right'
+				}}
+			>
+				<MenuItem
+					style={{ pointerEvents: 'none' }}
+					className={cx(classes.firstItem)}
+				>
+					<div className={cx(fr.cx('fr-text--bold'), classes.inMenu)}>
+						{session?.user.name}
+					</div>
+					<div className={cx(fr.cx('fr-pb-2v'), classes.inMenu)}>
+						{session?.user.email}
+					</div>
+				</MenuItem>
+				<MenuItem
+					className={cx(fr.cx('fr-p-4v'), classes.item)}
+					onClick={e => {
+						handleClose(e);
+						router.push(
+							`/administration/dashboard/user/${session?.user.id}/infos`
+						);
+					}}
+				>
+					<span
+						className={fr.cx('fr-icon-user-line', 'fr-icon--sm', 'fr-mr-1-5v')}
+					/>
+					Informations personnelles
+				</MenuItem>
+				<MenuItem
+					className={cx(fr.cx('fr-p-4v'), classes.item)}
+					onClick={e => {
+						handleClose(e);
+						router.push(
+							`/administration/dashboard/user/${session?.user.id}/notifications`
+						);
+					}}
+				>
+					<span
+						className={fr.cx(
+							'fr-icon-notification-3-line',
+							'fr-icon--sm',
+							'fr-mr-1-5v'
+						)}
+					/>
+					Notifications
+				</MenuItem>
+				<MenuItem
+					className={cx(
+						fr.cx('fr-pb-2v', 'fr-pt-4v'),
+						classes.item,
+						classes.lastItem
+					)}
+				>
+					<Button
+						id="button-account"
+						iconId={'fr-icon-logout-box-r-line'}
+						title={`Déconnexion`}
+						aria-label={`Déconnexion`}
+						priority="tertiary"
+						onClick={() => {
+							signOut();
+							push(['trackEvent', 'Account', 'Disconnect']);
+						}}
+					>
+						Se déconnecter
+					</Button>
+				</MenuItem>
+			</Menu>
+		];
+
 	return (
 		<>
 			<Head>
 				<title>{`${title} | Je donne mon avis`}</title>
 			</Head>
+			{isStepperLayout && (
+				<Header
+					brandTop={
+						<>
+							RÉPUBLIQUE <br /> FRANÇAISE
+						</>
+					}
+					homeLinkProps={{
+						href: !session?.user ? '/' : '/administration/dashboard/products',
+						title: "Je donne mon avis, retour à l'accueil"
+					}}
+					quickAccessItems={quickAccessItems}
+					className={classes.navigation}
+					id="fr-header-public-header"
+					serviceTitle="Je donne mon avis"
+					serviceTagline="La voix de vos usagers"
+				/>
+			)}
 			<main
 				ref={mainRef}
 				id="main"
@@ -58,30 +187,42 @@ const OnboardingLayout = ({
 					className={classes.stepContent}
 					style={{ background: noBackground ? 'transparent' : undefined }}
 				>
-					{title && (
+					{isStepperLayout ? (
+						<OnboardingStepper />
+					) : (
 						<>
-							<h1
-								className={fr.cx(
-									'fr-h3',
-									'fr-mb-1v',
-									hideMainHintText && 'fr-mb-8v'
-								)}
-							>
-								{title}
-							</h1>
-							{!hideMainHintText && (
-								<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-8v')}>
-									Les champs marqués d&apos;un{' '}
-									<span className={cx(classes.asterisk)}>*</span> sont
-									obligatoires
-								</p>
+							{title && (
+								<>
+									<h1
+										className={fr.cx(
+											'fr-h3',
+											'fr-mb-1v',
+											hideMainHintText && 'fr-mb-8v'
+										)}
+									>
+										{title}
+									</h1>
+									{!hideMainHintText && (
+										<p
+											className={fr.cx(
+												'fr-hint-text',
+												'fr-text--sm',
+												'fr-mb-8v'
+											)}
+										>
+											Les champs marqués d&apos;un{' '}
+											<span className={cx(classes.asterisk)}>*</span> sont
+											obligatoires
+										</p>
+									)}
+								</>
 							)}
+							{children}
 						</>
 					)}
-					{children}
 				</div>
 			</main>
-			{!hideActions && (
+			{!isStepperLayout && (
 				<section
 					id="onboarding-actions"
 					role="region"
@@ -130,8 +271,8 @@ const OnboardingLayout = ({
 export default OnboardingLayout;
 
 const useStyles = tss
-	.withParams<{ hasActions?: boolean }>()
-	.create(({ hasActions }) => ({
+	.withParams<{ isStepperLayout?: boolean }>()
+	.create(({ isStepperLayout }) => ({
 		navigation: {
 			span: {
 				color: fr.colors.decisions.background.default.grey.default,
@@ -175,24 +316,28 @@ const useStyles = tss
 			flexDirection: 'column',
 			alignItems: 'center',
 			width: '100%',
-			minHeight: '100vh',
+			minHeight: isStepperLayout ? 'auto' : '100vh',
 			overflowY: 'auto',
 			overflowX: 'hidden',
-			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-			paddingTop: fr.spacing('20v'),
-			paddingBottom: hasActions ? fr.spacing('30v') : fr.spacing('10v'),
+			backgroundColor: isStepperLayout
+				? 'white'
+				: fr.colors.decisions.background.alt.blueFrance.default,
+			paddingTop: isStepperLayout ? fr.spacing('12v') : fr.spacing('20v'),
+			paddingBottom: isStepperLayout ? fr.spacing('12v') : fr.spacing('30v'),
 			'&:focus': {
 				outline: 'none'
 			},
 			[fr.breakpoints.down('md')]: {
 				paddingTop: 0,
-				paddingBottom: hasActions ? fr.spacing('30v') : 0
+				paddingBottom: isStepperLayout ? 0 : fr.spacing('30v')
 			}
 		},
 		stepContent: {
-			padding: fr.spacing('10v'),
+			padding: isStepperLayout ? 0 : fr.spacing('10v'),
 			backgroundColor: 'white',
-			width: fr.breakpoints.values.md,
+			width: isStepperLayout
+				? fr.breakpoints.values.lg
+				: fr.breakpoints.values.md,
 			maxWidth: '100%',
 			minHeight: 'fit-content',
 			[fr.breakpoints.down('md')]: {

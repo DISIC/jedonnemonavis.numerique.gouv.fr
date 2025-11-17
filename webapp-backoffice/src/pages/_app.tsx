@@ -12,6 +12,7 @@ import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
+import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { StatsTotalsProvider } from '../contexts/StatsContext';
 import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 import '../utils/global.css';
@@ -84,7 +85,9 @@ function App({ Component, pageProps }: AppProps) {
 						<StatsTotalsProvider>
 							<FiltersContextProvider>
 								<RootFormTemplateProvider>
-									{getLayout(<Component {...pageProps} />)}
+									<OnboardingProvider>
+										{getLayout(<Component {...pageProps} />)}
+									</OnboardingProvider>
 								</RootFormTemplateProvider>
 							</FiltersContextProvider>
 						</StatsTotalsProvider>
