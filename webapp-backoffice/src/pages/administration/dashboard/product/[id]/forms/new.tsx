@@ -9,7 +9,7 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { Form, RightAccessStatus } from '@prisma/client';
+import { Form, Prisma, RightAccessStatus } from '@prisma/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -17,6 +17,10 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
+import {
+	getHasConfigChanged,
+	getHelperFromFormConfig
+} from '@/src/utils/tools';
 
 interface Props {
 	product: ProductWithForms;
@@ -36,6 +40,12 @@ const NewForm = (props: Props) => {
 	const [formTitle, setFormTitle] = useState<string>('');
 	const [createdForm, setCreatedForm] = useState<FormWithElements>();
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
+	const [hasConfigChanged, setHasConfigChanged] = useState(false);
+	const [createConfig, setCreateConfig] =
+		useState<Prisma.FormConfigUncheckedCreateInput>({
+			form_id: createdForm?.id || 0,
+			status: 'published'
+		});
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
@@ -68,6 +78,8 @@ const NewForm = (props: Props) => {
 		}
 	});
 
+	const createFormConfig = trpc.formConfig.create.useMutation();
+
 	useEffect(() => {
 		reset({
 			title: defaultTitle || rootFormTemplate?.data?.title || ''
@@ -83,9 +95,7 @@ const NewForm = (props: Props) => {
 	});
 
 	const onSubmitCreateForm: SubmitHandler<FormValues> = async data => {
-		console.log('data', data);
 		if (!rootFormTemplate?.data?.id) return;
-		console.log('rootFormTemplate?.data?.id', rootFormTemplate?.data?.id);
 		const savedFormResponse = await createForm.mutateAsync({
 			...data,
 			product_id: product.id,
@@ -99,14 +109,14 @@ const NewForm = (props: Props) => {
 	const onChangeConfig = (configHelper: FormConfigHelper) => {
 		setTmpConfigHelper(configHelper);
 
-		// const rootConfigHelper = getHelperFromFormConfig(formConfig);
-		// setHasConfigChanged(getHasConfigChanged(configHelper, rootConfigHelper));
+		const rootConfigHelper = getHelperFromFormConfig(undefined);
+		setHasConfigChanged(getHasConfigChanged(configHelper, rootConfigHelper));
 
-		// setCreateConfig({
-		// 	...createConfig,
-		// 	form_config_displays: { create: configHelper.displays },
-		// 	form_config_labels: { create: configHelper.labels }
-		// });
+		setCreateConfig({
+			...createConfig,
+			form_config_displays: { create: configHelper.displays },
+			form_config_labels: { create: configHelper.labels }
+		});
 	};
 
 	const saveEditedFormAndFinishCreation = () => {
@@ -115,20 +125,20 @@ const NewForm = (props: Props) => {
 				`/administration/dashboard/product/${product.id}/forms`
 			);
 
+		if (hasConfigChanged) {
+			createFormConfig.mutate({
+				...createConfig,
+				form_id: createdForm.id,
+				version: 0
+			});
+		}
+
 		return router.push(
 			`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
 		);
 	};
 
-	const currentStepValues: {
-		content: React.ReactNode;
-		title?: string;
-		confirmAction?: () => void;
-		confirmText?: string;
-		noBackground?: boolean;
-		customHintText?: React.ReactNode;
-		headerActions?: React.ReactNode;
-	} = useMemo(() => {
+	const currentStepValues = (() => {
 		switch (formStep) {
 			case 'CREATE':
 				return {
@@ -137,7 +147,7 @@ const NewForm = (props: Props) => {
 							<div
 								className={cx(
 									classes.infoContainer,
-									fr.cx('fr-my-8v', 'fr-p-6v')
+									fr.cx('fr-mb-8v', 'fr-p-6v')
 								)}
 								style={{ justifyContent: 'start' }}
 							>
@@ -244,17 +254,12 @@ const NewForm = (props: Props) => {
 				return {
 					title: formTitle,
 					content: (
-						<div
-							className={cx(classes.configuratorContainer, fr.cx('fr-col-12'))}
-						>
+						<div className={fr.cx('fr-col-12')}>
 							{createdForm ? (
 								<FormConfigurator
 									form={createdForm}
 									onChange={onChangeConfig}
-									onPublish={() => {
-										// onConfirmPublishModal.open();
-									}}
-									hasConfigChanged={true}
+									hasConfigChanged={hasConfigChanged}
 									isExternalPublish={true}
 								/>
 							) : (
@@ -281,7 +286,7 @@ const NewForm = (props: Props) => {
 					)
 				};
 		}
-	}, [formStep]);
+	})();
 
 	return (
 		<OnboardingLayout
@@ -323,9 +328,6 @@ const useStyles = tss.withName(NewForm.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center'
-	},
-	configuratorContainer: {
-		minHeight: '75vh'
 	}
 }));
 

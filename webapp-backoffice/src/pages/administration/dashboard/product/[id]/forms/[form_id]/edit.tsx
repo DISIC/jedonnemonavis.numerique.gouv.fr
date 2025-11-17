@@ -139,7 +139,7 @@ const ProductFormPage = (props: Props) => {
 				setIsPublishing(true);
 				createFormConfig.mutate({
 					...createConfig,
-					version: form.form_configs.length + 1
+					version: form.form_configs.filter(fc => fc.version !== 0).length + 1
 				});
 			} catch (error) {
 				console.error(error);
