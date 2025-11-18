@@ -195,47 +195,52 @@ const OnboardingLayout = ({
 					className={classes.stepContent}
 					style={{
 						background: noBackground ? 'transparent' : undefined,
-						width: isLarge ? fr.breakpoints.values.xl : fr.breakpoints.values.md
+						width:
+							isLarge || isStepperLayout
+								? fr.breakpoints.values.xl
+								: fr.breakpoints.values.md
 					}}
 				>
 					{isStepperLayout ? (
 						<OnboardingStepper />
 					) : (
-						<div className={classes.contentHeader}>
-							{title && (
-								<div>
-									<h1
-										className={fr.cx(
-											'fr-h3',
-											'fr-mb-1v',
-											hideMainHintText && 'fr-mb-8v'
-										)}
-									>
-										{title}
-									</h1>
-									{!hideMainHintText &&
-										(customHintText || (
-											<p
-												className={fr.cx(
-													'fr-hint-text',
-													'fr-text--sm',
-													'fr-mb-8v'
-												)}
-											>
-												Les champs marqués d&apos;un{' '}
-												<span className={cx(classes.asterisk)}>*</span> sont
-												obligatoires
-											</p>
-										))}
-								</div>
-							)}
-							{headerActions && (
-								<div className={classes.headerActions}>{headerActions}</div>
-							)}
-						</div>
+						<>
+							<div className={classes.contentHeader}>
+								{title && (
+									<div>
+										<h1
+											className={fr.cx(
+												'fr-h3',
+												'fr-mb-1v',
+												hideMainHintText && 'fr-mb-8v'
+											)}
+										>
+											{title}
+										</h1>
+										{!hideMainHintText &&
+											(customHintText || (
+												<p
+													className={fr.cx(
+														'fr-hint-text',
+														'fr-text--sm',
+														'fr-mb-8v'
+													)}
+												>
+													Les champs marqués d&apos;un{' '}
+													<span className={cx(classes.asterisk)}>*</span> sont
+													obligatoires
+												</p>
+											))}
+									</div>
+								)}
+								{headerActions && (
+									<div className={classes.headerActions}>{headerActions}</div>
+								)}
+							</div>
+							{shouldDisplayLine && <hr className={fr.cx('fr-mb-2v')} />}
+							{children}
+						</>
 					)}
-					{shouldDisplayLine && <hr className={fr.cx('fr-mb-2v')} />}
-					{children}
 				</div>
 			</main>
 			{!isStepperLayout && (
@@ -351,9 +356,6 @@ const useStyles = tss
 		stepContent: {
 			padding: isStepperLayout ? 0 : fr.spacing('10v'),
 			backgroundColor: 'white',
-			width: isStepperLayout
-				? fr.breakpoints.values.lg
-				: fr.breakpoints.values.md,
 			maxWidth: '100%',
 			minHeight: 'fit-content',
 			[fr.breakpoints.down('md')]: {

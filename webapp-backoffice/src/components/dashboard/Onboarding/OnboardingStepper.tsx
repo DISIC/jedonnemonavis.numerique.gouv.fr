@@ -131,7 +131,7 @@ const OnboardingStepper = () => {
 			{steps.map((step, index) => {
 				const isActiveStep =
 					index === 0 ||
-					(steps[index - 1].isCompleted === true &&
+					((steps[index - 1].isCompleted || steps[index - 1].isSkipped) &&
 						step.isCompleted !== true &&
 						!step.isSkipped);
 
@@ -183,7 +183,17 @@ const OnboardingStepper = () => {
 									priority="tertiary"
 									iconPosition="right"
 									size="small"
-									linkProps={{ href: step.url }}
+									onClick={() => {
+										if (step.isSkipped) {
+											setSteps(prevSteps =>
+												prevSteps.map(s =>
+													s.slug === step.slug ? { ...s, isSkipped: false } : s
+												)
+											);
+											return;
+										}
+										router.push(step.url);
+									}}
 								>
 									Modifier
 								</Button>
