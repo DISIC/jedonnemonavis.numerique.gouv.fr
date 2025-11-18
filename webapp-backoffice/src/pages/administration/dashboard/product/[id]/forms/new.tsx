@@ -21,6 +21,7 @@ import {
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
@@ -35,10 +36,10 @@ const NewForm = (props: Props) => {
 	const router = useRouter();
 	const { id } = router.query;
 	const { cx, classes } = useStyles();
+	const { createdProduct, createdForm, updateCreatedForm } = useOnboarding();
 
 	const [formStep, setFormStep] = useState<FormCreationStep>('CREATE');
 	const [formTitle, setFormTitle] = useState<string>('');
-	const [createdForm, setCreatedForm] = useState<FormWithElements>();
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>();
 	const [hasConfigChanged, setHasConfigChanged] = useState(false);
 	const [createConfig, setCreateConfig] =
@@ -46,6 +47,11 @@ const NewForm = (props: Props) => {
 			form_id: createdForm?.id || 0,
 			status: 'published'
 		});
+
+	const shouldShowStepper = useMemo(
+		() => Boolean(createdProduct) && Boolean(createdForm),
+		[createdProduct, createdForm]
+	);
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
@@ -103,7 +109,7 @@ const NewForm = (props: Props) => {
 		});
 		setFormStep('GENERATING');
 		setFormTitle(data.title || rootFormTemplate?.data?.title || '');
-		setCreatedForm(savedFormResponse.data);
+		updateCreatedForm(savedFormResponse.data);
 	};
 
 	const onChangeConfig = (configHelper: FormConfigHelper) => {
@@ -133,9 +139,11 @@ const NewForm = (props: Props) => {
 			});
 		}
 
-		return router.push(
-			`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
-		);
+		if (!createdProduct) {
+			return router.push(
+				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
+			);
+		}
 	};
 
 	const currentStepValues = (() => {
@@ -300,6 +308,7 @@ const NewForm = (props: Props) => {
 			isLarge={formStep === 'EDIT'}
 			shouldDisplayLine={formStep === 'EDIT'}
 			headerActions={currentStepValues.headerActions}
+			isStepperLayout={shouldShowStepper}
 		>
 			{currentStepValues.content}
 		</OnboardingLayout>

@@ -24,7 +24,11 @@ const entity_modal = createModal({
 const NewProduct = () => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const { createdProduct, updateCreatedProduct } = useOnboarding();
+	const {
+		createdProduct,
+		updateCreatedProduct,
+		reset: resetContext
+	} = useOnboarding();
 
 	const [search, _] = useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
@@ -36,6 +40,10 @@ const NewProduct = () => {
 		() => Boolean(createdProduct),
 		[createdProduct]
 	);
+
+	useEffect(() => {
+		resetContext();
+	}, []);
 
 	const {
 		control,
@@ -89,10 +97,6 @@ const NewProduct = () => {
 		});
 
 		updateCreatedProduct(savedProductResponse.data);
-
-		// router.push(
-		// 	`/administration/dashboard/product/${savedProductResponse.data.id}/forms`
-		// );
 	};
 
 	return (

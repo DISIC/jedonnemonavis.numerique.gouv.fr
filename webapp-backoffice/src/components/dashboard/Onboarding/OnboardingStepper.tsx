@@ -84,7 +84,7 @@ const OnboardingStepper = () => {
 
 	const getSlugValues = (
 		stepSlug: string
-	): { isCompleted: boolean; url: string } => {
+	): { isCompleted: boolean; url: string; isSkipped?: boolean } => {
 		switch (stepSlug) {
 			case 'product':
 				return {
@@ -96,6 +96,7 @@ const OnboardingStepper = () => {
 					isCompleted: Boolean(
 						createdUserAccesses && createdUserAccesses.length > 0
 					),
+					isSkipped: getSlugValues('form').isCompleted || false,
 					url: `/administration/dashboard/product/${createdProduct?.id}/access/new`
 				};
 			case 'form':
@@ -121,7 +122,8 @@ const OnboardingStepper = () => {
 			stepContents.map(step => ({
 				...step,
 				isCompleted: getSlugValues(step.slug).isCompleted,
-				url: getSlugValues(step.slug).url
+				url: getSlugValues(step.slug).url,
+				isSkipped: getSlugValues(step.slug).isSkipped
 			}))
 		);
 	}, [createdProduct, createdUserAccesses, createdForm]);
