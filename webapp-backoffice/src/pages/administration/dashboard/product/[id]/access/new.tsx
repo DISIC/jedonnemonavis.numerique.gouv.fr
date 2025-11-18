@@ -1,3 +1,4 @@
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -5,7 +6,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useRouter } from 'next/router';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type RoleType = 'carrier_user' | 'carrier_admin';
@@ -21,6 +22,8 @@ const NewAccess = () => {
 	const router = useRouter();
 	const utils = trpc.useUtils();
 	const { id } = router.query;
+	const { createdProduct, createdUserAccesses, updateCreatedUserAccesses } =
+		useOnboarding();
 
 	const [usersToAdd, setUsersToAdd] = React.useState<UserToAdd[]>([
 		{
@@ -28,15 +31,22 @@ const NewAccess = () => {
 			role: 'carrier_user'
 		}
 	]);
+	const [shouldShowStepper, setShouldShowStepper] = useState(
+		Boolean(createdUserAccesses && createdUserAccesses.length > 0)
+	);
 
 	useEffect(() => {
 		if (usersToAdd.length === 0) {
-			router.push(`/administration/dashboard/product/${id}/access`);
+			if (!Boolean(createdProduct)) {
+				router.push(`/administration/dashboard/product/${id}/access`);
+				return;
+			}
+			setShouldShowStepper(true);
 		}
 	}, [usersToAdd]);
 
 	const createAccessRightMutation = trpc.accessRight.create.useMutation({
-		onSuccess: (_, values) => {
+		onSuccess: (createdValue, values) => {
 			utils.accessRight.getList.invalidate();
 			setUsersToAdd(prev => {
 				const newUsers = prev.filter(
@@ -44,6 +54,10 @@ const NewAccess = () => {
 				);
 				return newUsers;
 			});
+			updateCreatedUserAccesses([
+				...(createdUserAccesses || []),
+				{ ...createdValue.data }
+			]);
 		},
 		onError: (error, values) => {
 			setUsersToAdd(prev => {
@@ -87,7 +101,11 @@ const NewAccess = () => {
 	};
 
 	return (
-		<OnboardingLayout title="Inviter des utilisateurs" onConfirm={onSubmit}>
+		<OnboardingLayout
+			title="Inviter des utilisateurs"
+			onConfirm={onSubmit}
+			isStepperLayout={shouldShowStepper}
+		>
 			<form id="new-access-form">
 				{usersToAdd.map((user, i) => (
 					<Fragment key={i}>

@@ -124,7 +124,7 @@ const OnboardingStepper = () => {
 				url: getSlugValues(step.slug).url
 			}))
 		);
-	}, [createdProduct]);
+	}, [createdProduct, createdUserAccesses, createdForm]);
 
 	return (
 		<div className={classes.stepperContainer}>
