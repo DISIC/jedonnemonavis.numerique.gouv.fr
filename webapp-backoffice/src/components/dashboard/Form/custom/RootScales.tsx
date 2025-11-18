@@ -50,10 +50,7 @@ const RootScales = (props: Props) => {
 
 					return (
 						<div
-							className={cx(
-								classes.optionRow,
-								isParentHidden ? classes.parentHidden : null
-							)}
+							className={cx(isParentHidden ? classes.parentHidden : null)}
 							key={childBlock.id}
 						>
 							<div className={cx(classes.labelWrapper)}>
@@ -211,9 +208,6 @@ const useStyles = tss.withName(RootScales.name).create({
 			}
 		}
 	},
-	optionRow: {
-		background: 'white !important'
-	},
 	labelWrapper: {
 		paddingBottom: fr.spacing('4v'),
 		color: fr.colors.decisions.text.default.grey.default
@@ -231,7 +225,6 @@ const useStyles = tss.withName(RootScales.name).create({
 		cursor: 'pointer',
 		height: '100%',
 		fontWeight: 500,
-		color: fr.colors.decisions.background.flat.blueFrance.default,
 		['&:hover']: {
 			borderColor: fr.colors.decisions.background.alt.grey.active
 		}
@@ -251,6 +244,9 @@ const useStyles = tss.withName(RootScales.name).create({
 	parentHidden: {
 		'*': {
 			color: fr.colors.decisions.text.mention.grey.default
+		},
+		':not(:last-of-type)': {
+			marginBottom: fr.spacing('6v')
 		}
 	},
 	hiddenBadge: {

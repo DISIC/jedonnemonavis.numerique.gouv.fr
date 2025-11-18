@@ -22,6 +22,10 @@ interface OnboardingLayoutProps {
 	noBackground?: boolean;
 	isConfirmDisabled?: boolean;
 	isStepperLayout?: boolean;
+	customHintText?: React.ReactNode;
+	isLarge?: boolean;
+	shouldDisplayLine?: boolean;
+	headerActions?: React.ReactNode;
 }
 
 const OnboardingLayout = ({
@@ -35,7 +39,11 @@ const OnboardingLayout = ({
 	hideBackButton,
 	noBackground,
 	isConfirmDisabled,
-	isStepperLayout
+	isStepperLayout,
+	customHintText,
+	isLarge,
+	shouldDisplayLine,
+	headerActions
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { data: session } = useSession();
@@ -185,14 +193,17 @@ const OnboardingLayout = ({
 			>
 				<div
 					className={classes.stepContent}
-					style={{ background: noBackground ? 'transparent' : undefined }}
+					style={{
+						background: noBackground ? 'transparent' : undefined,
+						width: isLarge ? fr.breakpoints.values.xl : fr.breakpoints.values.md
+					}}
 				>
 					{isStepperLayout ? (
 						<OnboardingStepper />
 					) : (
-						<>
+						<div className={classes.contentHeader}>
 							{title && (
-								<>
+								<div>
 									<h1
 										className={fr.cx(
 											'fr-h3',
@@ -202,24 +213,29 @@ const OnboardingLayout = ({
 									>
 										{title}
 									</h1>
-									{!hideMainHintText && (
-										<p
-											className={fr.cx(
-												'fr-hint-text',
-												'fr-text--sm',
-												'fr-mb-8v'
-											)}
-										>
-											Les champs marqués d&apos;un{' '}
-											<span className={cx(classes.asterisk)}>*</span> sont
-											obligatoires
-										</p>
-									)}
-								</>
+									{!hideMainHintText &&
+										(customHintText || (
+											<p
+												className={fr.cx(
+													'fr-hint-text',
+													'fr-text--sm',
+													'fr-mb-8v'
+												)}
+											>
+												Les champs marqués d&apos;un{' '}
+												<span className={cx(classes.asterisk)}>*</span> sont
+												obligatoires
+											</p>
+										))}
+								</div>
 							)}
-							{children}
-						</>
+							{headerActions && (
+								<div className={classes.headerActions}>{headerActions}</div>
+							)}
+						</div>
 					)}
+					{shouldDisplayLine && <hr className={fr.cx('fr-mb-2v')} />}
+					{children}
 				</div>
 			</main>
 			{!isStepperLayout && (
@@ -345,6 +361,11 @@ const useStyles = tss
 				minHeight: '100%'
 			}
 		},
+		contentHeader: {
+			display: 'flex',
+			justifyContent: 'space-between'
+		},
+		headerActions: {},
 		actionsContainer: {
 			position: 'fixed',
 			bottom: 0,
