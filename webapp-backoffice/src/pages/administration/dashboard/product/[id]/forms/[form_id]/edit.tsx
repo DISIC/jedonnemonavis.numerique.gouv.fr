@@ -137,9 +137,12 @@ const ProductFormPage = (props: Props) => {
 		if (createConfig) {
 			try {
 				setIsPublishing(true);
+				const maxVersion = Math.max(
+					...form.form_configs.map(fc => fc.version ?? 0)
+				);
 				createFormConfig.mutate({
 					...createConfig,
-					version: form.form_configs.filter(fc => fc.version !== 0).length + 1
+					version: maxVersion + 1
 				});
 			} catch (error) {
 				console.error(error);
