@@ -77,6 +77,23 @@ const FormStepDisplay = (props: Props) => {
 		});
 	}, [isHidden]);
 
+	const displayPublishButton = () => {
+		if (isExternalPublish) {
+			return <div />;
+		}
+		return (
+			<Button
+				priority="primary"
+				iconId="fr-icon-computer-line"
+				iconPosition="right"
+				disabled={!hasConfigChanged}
+				onClick={onPublish}
+			>
+				Publier
+			</Button>
+		);
+	};
+
 	return (
 		<div
 			className={cx(
@@ -255,18 +272,8 @@ const FormStepDisplay = (props: Props) => {
 					>
 						Étape suivante
 					</Button>
-				) : isExternalPublish ? (
-					<div />
 				) : (
-					<Button
-						priority="primary"
-						iconId="fr-icon-computer-line"
-						iconPosition="right"
-						disabled={!hasConfigChanged}
-						onClick={onPublish}
-					>
-						Publier
-					</Button>
+					displayPublishButton()
 				)}
 			</div>
 		</div>
