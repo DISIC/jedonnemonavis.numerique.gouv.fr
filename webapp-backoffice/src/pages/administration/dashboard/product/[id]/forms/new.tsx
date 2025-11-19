@@ -47,10 +47,8 @@ const NewForm = (props: Props) => {
 			form_id: createdForm?.id || 0,
 			status: 'published'
 		});
-
-	const shouldShowStepper = useMemo(
-		() => Boolean(createdProduct) && Boolean(createdForm),
-		[createdProduct, createdForm]
+	const [shouldShowStepper, setShouldShowStepper] = useState(
+		Boolean(createdForm)
 	);
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
@@ -144,6 +142,7 @@ const NewForm = (props: Props) => {
 				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
 			);
 		}
+		setShouldShowStepper(true);
 	};
 
 	const currentStepValues = (() => {

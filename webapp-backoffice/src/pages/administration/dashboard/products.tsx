@@ -7,6 +7,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import NewsModal from '@/src/components/ui/modal/NewsModal';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { LATEST_NEWS_VERSION } from '@/src/utils/cookie';
 import { getNbPages, normalizeString } from '@/src/utils/tools';
@@ -24,6 +25,7 @@ import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -51,6 +53,8 @@ const DashBoard = () => {
 		isLoading: isLoadingSettings
 	} = useUserSettings();
 	const router = useRouter();
+	const onboardingDone = router.query.onboardingDone as string | undefined;
+	const { createdProduct, createdForm, reset: resetContext } = useOnboarding();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
@@ -64,6 +68,9 @@ const DashBoard = () => {
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
+	const [isOnboardingDone, setIsOnboardingDone] = React.useState(
+		onboardingDone === 'true'
+	);
 
 	const { data: session } = useSession({ required: true });
 
@@ -83,6 +90,20 @@ const DashBoard = () => {
 		}, 500);
 		return () => clearTimeout(timer);
 	}, [shouldModalOpen, newsModal]);
+
+	useEffect(() => {
+		if (router.query.onboardingDone) {
+			const { onboardingDone, ...restQuery } = router.query;
+			router.replace(
+				{
+					pathname: router.pathname,
+					query: restQuery
+				},
+				undefined,
+				{ shallow: true }
+			);
+		}
+	}, [router.query]);
 
 	const {
 		data: productsResult,
@@ -255,7 +276,7 @@ const DashBoard = () => {
 			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-5v')}
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
@@ -275,14 +296,41 @@ const DashBoard = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							onClick={() =>
-								router.push('/administration/dashboard/product/new')
-							}
+							onClick={() => {
+								resetContext();
+								router.push('/administration/dashboard/product/new');
+							}}
 						>
 							Ajouter un nouveau service
 						</Button>
 					</div>
 				</div>
+				{isOnboardingDone && (
+					<Alert
+						className={fr.cx('fr-col-12', 'fr-mb-8v')}
+						title="Votre service et votre formulaire ont été créé avec succès !"
+						description={
+							<>
+								Pensez à copier le lien d’intégration sur votre site pour rendre
+								votre formulaire visible aux usagers
+								<Link
+									href={`/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}?tab=links`}
+									className={fr.cx(
+										'fr-link--icon-right',
+										'fr-ml-2v',
+										'fr-icon-arrow-right-line',
+										'fr-link'
+									)}
+								>
+									Copier le lien d’intégration
+								</Link>
+							</>
+						}
+						severity="success"
+						closable
+					/>
+				)}
+
 				{(displayFilters || !!countArchivedUserScope) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
