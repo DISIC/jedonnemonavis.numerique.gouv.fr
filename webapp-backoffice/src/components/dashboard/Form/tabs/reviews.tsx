@@ -93,6 +93,24 @@ const ReviewsTab = (props: Props) => {
 		setCurrentPage(1);
 	};
 
+	const { data: keywordsResults, isLoading: isLoadingKeywords } =
+		trpc.answer.getKeywords.useQuery(
+			{
+				product_id: form.product_id,
+				start_date: filters.productReviews.displayNew
+					? undefined
+					: filters.sharedFilters.currentStartDate,
+				end_date: filters.productReviews.displayNew
+					? undefined
+					: filters.sharedFilters.currentEndDate
+			},
+			{
+				initialData: {
+					data: []
+				}
+			}
+		);
+
 	const { data: reviewMetaResults, isLoading: isLoadingMetaResults } =
 		trpc.review.getList.useQuery(
 			{

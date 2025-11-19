@@ -1357,5 +1357,60 @@ export const answerRouter = router({
 			}
 
 			return { data: returnValue, metadata };
+		}),
+
+	getKeywords: publicProcedure
+		.input(
+			z.object({
+				product_id: z.number(),
+				start_date: z.string().optional(),
+				end_date: z.string().optional()
+			})
+		)
+		.query(async ({ ctx, input }) => {
+			const { product_id, start_date, end_date } = input;
+
+			await checkAndGetProduct({ ctx, product_id });
+
+			const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
+
+			if (start_date && end_date) {
+				mustClauses.push({
+					range: {
+						review_created_at: {
+							gte: start_date,
+							lte: end_date
+						}
+					}
+				});
+			}
+
+			const keywordsAggs = await ctx.elkClient.search({
+				index: 'jdma-answers-tokens',
+				query: {
+					bool: {
+						must: mustClauses
+					}
+				},
+				aggs: {
+					keywords: {
+						terms: {
+							field: 'answer_text',
+							size: 50
+						}
+					}
+				},
+				size: 0
+			});
+
+			const buckets =
+				(keywordsAggs?.aggregations?.keywords as any)?.buckets ?? [];
+
+			const data = buckets.map((bucket: any) => ({
+				keyword: bucket.key,
+				count: bucket.doc_count
+			}));
+
+			return { data };
 		})
 });
