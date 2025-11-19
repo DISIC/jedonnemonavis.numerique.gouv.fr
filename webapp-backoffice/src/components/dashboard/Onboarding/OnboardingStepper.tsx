@@ -1,132 +1,16 @@
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
-import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import { onboardingStepsContent, StepContent } from '@/src/utils/content';
+import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-
-type InfoContent = {
-	title: string;
-	iconId: FrIconClassName | RiIconClassName;
-};
-
-type StepContent = InfoContent & {
-	slug: string;
-	url: string;
-	details: InfoContent[];
-	actionsLabel: string;
-	isSkippable?: boolean;
-	isCompleted?: boolean;
-	isSkipped?: boolean;
-};
-
-const stepContents: readonly StepContent[] = [
-	{
-		slug: 'product',
-		title: 'Ajouter un service numérique',
-		iconId: 'ri-check-line',
-		url: '/administration/dashboard/product/new',
-		details: [],
-		actionsLabel: ''
-	},
-	{
-		slug: 'access',
-		title: 'Inviter des utilisateurs',
-		iconId: 'fr-icon-user-add-line',
-		url: '/administration/dashboard/product/[id]/access/new',
-		details: [
-			{
-				title:
-					'Ajoutez des membres sur votre service numérique et partagez les informations à votre équipe !',
-				iconId: 'ri-group-line'
-			}
-		],
-		actionsLabel: 'Inviter des utilisateurs',
-		isSkippable: true
-	},
-	{
-		slug: 'form',
-		title: 'Générer un formulaire',
-		iconId: 'ri-survey-line',
-		url: '/administration/dashboard/product/[id]/forms/new',
-		details: [
-			{
-				title:
-					'Un formulaire vous permet de récolter les l’avis de vos usagers sur un service numérique.',
-				iconId: 'ri-file-edit-line'
-			}
-		],
-		actionsLabel: 'Générer un formulaire'
-	},
-	{
-		slug: 'link',
-		title: 'Intégrer le formulaire sur votre site',
-		iconId: 'ri-link',
-		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
-		details: [
-			{ title: 'Créez votre premier lien d’intégration', iconId: 'ri-link' },
-			{
-				title:
-					'Copiez le code généré sur votre site pour publier le formulaire',
-				iconId: 'ri-file-copy-line'
-			}
-		],
-		actionsLabel: 'Créer un lien d’intégration'
-	}
-] as const;
 
 const OnboardingStepper = () => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const { createdProduct, createdUserAccesses, createdForm } = useOnboarding();
-	const [steps, setSteps] = useState(stepContents);
-
-	const getSlugValues = (
-		stepSlug: string
-	): { isCompleted: boolean; url: string; isSkipped?: boolean } => {
-		switch (stepSlug) {
-			case 'product':
-				return {
-					isCompleted: Boolean(createdProduct),
-					url: '/administration/dashboard/product/new'
-				};
-			case 'access':
-				return {
-					isCompleted: Boolean(
-						createdUserAccesses && createdUserAccesses.length > 0
-					),
-					isSkipped: getSlugValues('form').isCompleted || false,
-					url: `/administration/dashboard/product/${createdProduct?.id}/access/new`
-				};
-			case 'form':
-				return {
-					isCompleted: Boolean(createdForm),
-					url: `/administration/dashboard/product/${createdProduct?.id}/forms/new`
-				};
-			case 'link':
-				return {
-					isCompleted: false,
-					url: `/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}/new-link`
-				};
-			default:
-				return {
-					isCompleted: false,
-					url: '/administration/dashboard/product/new'
-				};
-		}
-	};
-
-	useEffect(() => {
-		setSteps(
-			stepContents.map(step => ({
-				...step,
-				isCompleted: getSlugValues(step.slug).isCompleted,
-				url: getSlugValues(step.slug).url,
-				isSkipped: getSlugValues(step.slug).isSkipped
-			}))
-		);
-	}, [createdProduct, createdUserAccesses, createdForm]);
+	const { steps, updateSteps } = useOnboarding();
 
 	return (
 		<div className={classes.stepperContainer}>
@@ -187,8 +71,8 @@ const OnboardingStepper = () => {
 									size="small"
 									onClick={() => {
 										if (step.isSkipped) {
-											setSteps(prevSteps =>
-												prevSteps.map(s =>
+											updateSteps(
+												steps.map(s =>
 													s.slug === step.slug ? { ...s, isSkipped: false } : s
 												)
 											);
@@ -233,8 +117,8 @@ const OnboardingStepper = () => {
 											iconPosition="right"
 											iconId="fr-icon-arrow-right-s-line"
 											onClick={() => {
-												setSteps(prevSteps =>
-													prevSteps.map(s =>
+												updateSteps(
+													steps.map(s =>
 														s.slug === step.slug ? { ...s, isSkipped: true } : s
 													)
 												);

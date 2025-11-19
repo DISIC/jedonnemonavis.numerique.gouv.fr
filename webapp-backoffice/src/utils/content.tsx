@@ -1,3 +1,5 @@
+import { FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+
 interface MainStructure {
 	[key: string]: {
 		title: string;
@@ -467,5 +469,75 @@ export const linksFaqContents: { title: string; children: JSX.Element }[] = [
 				</p>
 			</>
 		)
+	}
+];
+
+export type InfoContent = {
+	title: string;
+	iconId: FrIconClassName | RiIconClassName;
+};
+
+export type StepContent = InfoContent & {
+	slug: string;
+	url: string;
+	details: InfoContent[];
+	actionsLabel: string;
+	isSkippable?: boolean;
+	isCompleted?: boolean;
+	isSkipped?: boolean;
+};
+
+export const onboardingStepsContent: StepContent[] = [
+	{
+		slug: 'product',
+		title: 'Ajouter un service numérique',
+		iconId: 'ri-check-line',
+		url: '/administration/dashboard/product/new',
+		details: [],
+		actionsLabel: ''
+	},
+	{
+		slug: 'access',
+		title: 'Inviter des utilisateurs',
+		iconId: 'fr-icon-user-add-line',
+		url: '/administration/dashboard/product/[id]/access/new',
+		details: [
+			{
+				title:
+					'Ajoutez des membres sur votre service numérique et partagez les informations à votre équipe !',
+				iconId: 'ri-group-line'
+			}
+		],
+		actionsLabel: 'Inviter des utilisateurs',
+		isSkippable: true
+	},
+	{
+		slug: 'form',
+		title: 'Générer un formulaire',
+		iconId: 'ri-survey-line',
+		url: '/administration/dashboard/product/[id]/forms/new',
+		details: [
+			{
+				title:
+					'Un formulaire vous permet de récolter les l’avis de vos usagers sur un service numérique.',
+				iconId: 'ri-file-edit-line'
+			}
+		],
+		actionsLabel: 'Générer un formulaire'
+	},
+	{
+		slug: 'link',
+		title: 'Intégrer le formulaire sur votre site',
+		iconId: 'ri-link',
+		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
+		details: [
+			{ title: 'Créez votre premier lien d’intégration', iconId: 'ri-link' },
+			{
+				title:
+					'Copiez le code généré sur votre site pour publier le formulaire',
+				iconId: 'ri-file-copy-line'
+			}
+		],
+		actionsLabel: 'Créer un lien d’intégration'
 	}
 ];
