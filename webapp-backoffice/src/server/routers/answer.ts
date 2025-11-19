@@ -1363,16 +1363,34 @@ export const answerRouter = router({
 		.input(
 			z.object({
 				product_id: z.number(),
+				form_id: z.number(),
 				start_date: z.string().optional(),
 				end_date: z.string().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, start_date, end_date } = input;
+			const { product_id, form_id, start_date, end_date } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
+			const form = await checkAndGetForm({ ctx, form_id });
 
 			const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
+
+			if (form.legacy) {
+				mustClauses.push({
+					bool: {
+						should: [
+							{ term: { form_id: form_id } },
+							{ term: { form_id: 2 } },
+							{ bool: { must_not: { exists: { field: 'form_id' } } } }
+						]
+					}
+				});
+			} else {
+				mustClauses.push({
+					term: { form_id }
+				});
+			}
 
 			if (start_date && end_date) {
 				mustClauses.push({
@@ -1389,14 +1407,19 @@ export const answerRouter = router({
 				index: 'jdma-answers-tokens',
 				query: {
 					bool: {
-						must: mustClauses
+						must: mustClauses,
+						must_not: {
+							wildcard: {
+								answer_tokens: '*_*'
+							}
+						}
 					}
 				},
 				aggs: {
 					keywords: {
 						terms: {
-							field: 'answer_text',
-							size: 50
+							field: 'answer_tokens',
+							size: 10
 						}
 					}
 				},
@@ -1411,6 +1434,6 @@ export const answerRouter = router({
 				count: bucket.doc_count
 			}));
 
-			return { data };
+			return { data: data as { keyword: string; count: number }[] };
 		})
 });

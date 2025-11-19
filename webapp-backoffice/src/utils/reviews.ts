@@ -72,7 +72,7 @@ export const formatWhereAndOrder = (
 										search: search
 											.split(' ')
 											.filter((item: string) => item !== '')
-											.join('&')
+											.join('<->')
 									}
 								},
 								{ field_code: 'verbatim' },

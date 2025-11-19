@@ -5,6 +5,7 @@ import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
+import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
@@ -92,24 +93,6 @@ const ReviewsTab = (props: Props) => {
 		filter_modal.close();
 		setCurrentPage(1);
 	};
-
-	const { data: keywordsResults, isLoading: isLoadingKeywords } =
-		trpc.answer.getKeywords.useQuery(
-			{
-				product_id: form.product_id,
-				start_date: filters.productReviews.displayNew
-					? undefined
-					: filters.sharedFilters.currentStartDate,
-				end_date: filters.productReviews.displayNew
-					? undefined
-					: filters.sharedFilters.currentEndDate
-			},
-			{
-				initialData: {
-					data: []
-				}
-			}
-		);
 
 	const { data: reviewMetaResults, isLoading: isLoadingMetaResults } =
 		trpc.review.getList.useQuery(
@@ -442,7 +425,7 @@ const ReviewsTab = (props: Props) => {
 		return { formConfig, versionNumber: formConfigIndex + 1 };
 	};
 
-	const submit = () => {
+	const submitSearch = (tmpSearch?: string) => {
 		push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 		const startDateValid = validateDateFormat(
 			filters.sharedFilters.currentStartDate
@@ -461,7 +444,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(normalizeString(search));
+			setValidatedSearch(normalizeString(tmpSearch ?? search));
 			setCurrentPage(1);
 		}
 	};
@@ -553,6 +536,24 @@ const ReviewsTab = (props: Props) => {
 							)}
 						</GenericFilters>
 					</div>
+					<ReviewKeywordFilters
+						product_id={form.product_id}
+						form_id={form.id}
+						start_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentStartDate
+						}
+						end_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentEndDate
+						}
+						onClick={keyword => {
+							setSearch(keyword);
+							submitSearch(keyword);
+						}}
+					/>
 					<div
 						className={cx(
 							classes.filtersWrapper,
@@ -563,7 +564,7 @@ const ReviewsTab = (props: Props) => {
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
 								e.preventDefault();
-								submit();
+								submitSearch();
 								push(['trackEvent', 'Form - Reviews', 'Search']);
 							}}
 						>
