@@ -107,7 +107,7 @@ const OnboardingStepper = () => {
 			case 'link':
 				return {
 					isCompleted: false,
-					url: `/administration/dashboard/product/${createdProduct?.id}/forms/[form_id]/new-link`
+					url: `/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}/new-link`
 				};
 			default:
 				return {

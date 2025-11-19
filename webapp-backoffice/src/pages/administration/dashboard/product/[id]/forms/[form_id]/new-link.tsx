@@ -15,6 +15,7 @@ import { useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
@@ -27,6 +28,7 @@ const NewLink = (props: Props) => {
 	const router = useRouter();
 	const { form_id } = router.query;
 	const { cx, classes } = useStyles();
+	const { createdProduct } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<ButtonStyle>('solid');
@@ -72,9 +74,13 @@ const NewLink = (props: Props) => {
 	};
 
 	const goNextStep = () => {
-		router.push(
-			`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
-		);
+		if (!createdProduct) {
+			router.push(
+				`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
+			);
+			return;
+		}
+		router.push(`/administration/dashboard/products?onboardingDone=true`);
 	};
 
 	return (

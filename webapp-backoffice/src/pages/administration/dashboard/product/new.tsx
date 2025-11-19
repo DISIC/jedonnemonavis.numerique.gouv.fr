@@ -41,10 +41,6 @@ const NewProduct = () => {
 		[createdProduct]
 	);
 
-	useEffect(() => {
-		resetContext();
-	}, []);
-
 	const {
 		control,
 		handleSubmit,
