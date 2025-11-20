@@ -478,13 +478,14 @@ export type InfoContent = {
 };
 
 export type StepContent = InfoContent & {
-	slug: string;
+	slug: 'product' | 'access' | 'form' | 'link';
 	url: string;
 	details: InfoContent[];
 	actionsLabel: string;
 	isSkippable?: boolean;
 	isCompleted?: boolean;
 	isSkipped?: boolean;
+	isEditing?: boolean;
 };
 
 export const onboardingStepsContent: StepContent[] = [

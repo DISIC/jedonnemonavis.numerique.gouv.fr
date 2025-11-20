@@ -22,13 +22,9 @@ const entity_modal = createModal({
 });
 
 const NewProduct = () => {
-	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const {
-		createdProduct,
-		updateCreatedProduct,
-		reset: resetContext
-	} = useOnboarding();
+	const { createdProduct, updateCreatedProduct, steps, updateSteps } =
+		useOnboarding();
 
 	const [search, _] = useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
@@ -36,9 +32,14 @@ const NewProduct = () => {
 		number | undefined
 	>(createdProduct?.entity_id);
 
+	const isEditingStep = useMemo(
+		() => steps.find(step => step.slug === 'product')?.isEditing,
+		[steps]
+	);
+
 	const shouldShowStepper = useMemo(
-		() => Boolean(createdProduct),
-		[createdProduct]
+		() => Boolean(createdProduct) && !isEditingStep,
+		[createdProduct, isEditingStep]
 	);
 
 	const {
@@ -79,6 +80,12 @@ const NewProduct = () => {
 		}
 	});
 
+	const updateProduct = trpc.product.update.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
+
 	const onNewEntitySubmit = async (newEntity?: Entity) => {
 		await refetchEntities();
 		setSelectedEntityValue(newEntity?.id);
@@ -86,13 +93,31 @@ const NewProduct = () => {
 	};
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		const { ...tmpProduct } = data;
+		const { ...tmpProductFormData } = data;
+		let tmpProduct: Product;
 
-		const savedProductResponse = await createProduct.mutateAsync({
-			...tmpProduct
-		});
+		if (isEditingStep && createdProduct) {
+			tmpProduct = await updateProduct
+				.mutateAsync({
+					id: createdProduct.id,
+					product: tmpProductFormData
+				})
+				.then(res => res.data);
+		} else {
+			tmpProduct = await createProduct
+				.mutateAsync({
+					...tmpProductFormData
+				})
+				.then(res => res.data);
+		}
 
-		updateCreatedProduct(savedProductResponse.data);
+		updateSteps(
+			steps.map(step =>
+				step.slug === 'product' ? { ...step, isEditing: false } : step
+			)
+		);
+
+		updateCreatedProduct(tmpProduct);
 	};
 
 	return (

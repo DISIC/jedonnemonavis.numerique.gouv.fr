@@ -1,10 +1,8 @@
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
-import { onboardingStepsContent, StepContent } from '@/src/utils/content';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const OnboardingStepper = () => {
@@ -78,6 +76,11 @@ const OnboardingStepper = () => {
 											);
 											return;
 										}
+										updateSteps(
+											steps.map(s =>
+												s.slug === step.slug ? { ...s, isEditing: true } : s
+											)
+										);
 										router.push(step.url);
 									}}
 								>
