@@ -6,7 +6,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useRouter } from 'next/router';
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type RoleType = 'carrier_user' | 'carrier_admin';
@@ -22,8 +22,13 @@ const NewAccess = () => {
 	const router = useRouter();
 	const utils = trpc.useUtils();
 	const { id } = router.query;
-	const { createdProduct, createdUserAccesses, updateCreatedUserAccesses } =
-		useOnboarding();
+	const {
+		createdProduct,
+		createdUserAccesses,
+		updateCreatedUserAccesses,
+		steps,
+		updateSteps
+	} = useOnboarding();
 
 	const [usersToAdd, setUsersToAdd] = React.useState<UserToAdd[]>([
 		{
@@ -31,8 +36,17 @@ const NewAccess = () => {
 			role: 'carrier_user'
 		}
 	]);
-	const [shouldShowStepper, setShouldShowStepper] = useState(
-		Boolean(createdUserAccesses && createdUserAccesses.length > 0)
+
+	const isEditingStep = useMemo(
+		() => steps.find(step => step.slug === 'access')?.isEditing,
+		[steps]
+	);
+
+	const shouldShowStepper = useMemo(
+		() =>
+			Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
+			!isEditingStep,
+		[createdUserAccesses, isEditingStep]
 	);
 
 	useEffect(() => {
@@ -41,9 +55,27 @@ const NewAccess = () => {
 				router.push(`/administration/dashboard/product/${id}/access`);
 				return;
 			}
-			setShouldShowStepper(true);
+
+			if (isEditingStep) {
+				updateSteps(
+					steps.map(step =>
+						step.slug === 'access' ? { ...step, isEditing: false } : step
+					)
+				);
+			}
 		}
 	}, [usersToAdd]);
+
+	useEffect(() => {
+		if (isEditingStep && usersToAdd.length === 0) {
+			setUsersToAdd([
+				{
+					email: '',
+					role: 'carrier_user'
+				}
+			]);
+		}
+	}, [isEditingStep]);
 
 	const createAccessRightMutation = trpc.accessRight.create.useMutation({
 		onSuccess: (createdValue, values) => {
