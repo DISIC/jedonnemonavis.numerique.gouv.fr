@@ -286,8 +286,11 @@ const NewForm = (props: Props) => {
 							</form>
 						</>
 					),
-					title: 'Générer un formulaire',
-					confirmAction: handleSubmit(onSubmitCreateForm)
+					title: isEditingStep
+						? 'Modifier un formulaire'
+						: 'Générer un formulaire',
+					confirmAction: handleSubmit(onSubmitCreateForm),
+					confirmText: isEditingStep ? 'Enregistrer et continuer' : undefined
 				};
 			case 'READY':
 			case 'GENERATING':
@@ -319,7 +322,9 @@ const NewForm = (props: Props) => {
 						</div>
 					),
 					confirmAction: saveEditedFormAndFinishCreation,
-					confirmText: 'Enregistrer les modifications',
+					confirmText: hasConfigChanged
+						? 'Enregistrer les modifications'
+						: undefined,
 					customHintText: (
 						<p className={fr.cx('fr-text--sm', 'fr-mb-3v')}>
 							Prévisualisez le formulaire puis masquez des étapes ou des options
@@ -341,7 +346,6 @@ const NewForm = (props: Props) => {
 
 	return (
 		<OnboardingLayout
-			isCancelable={formStep === 'CREATE'}
 			title={currentStepValues.title}
 			onConfirm={currentStepValues.confirmAction}
 			noBackground={currentStepValues.noBackground}

@@ -77,6 +77,20 @@ const DashBoard = () => {
 	const { cx, classes } = useStyles();
 
 	useEffect(() => {
+		const handleRouteChangeStart = (url: string) => {
+			if (!url.startsWith('/administration/dashboard/products')) {
+				resetContext();
+			}
+		};
+
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+
+		return () => {
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+		};
+	}, [resetContext, router.events]);
+
+	useEffect(() => {
 		if (isLoadingSettings) return;
 		setShouldModalOpen(!settings.newsModalSeen);
 	}, [isLoadingSettings]);
