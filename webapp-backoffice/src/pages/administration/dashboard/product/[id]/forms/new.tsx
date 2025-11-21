@@ -1,11 +1,17 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
 import FormGenerationAnimationPanel from '@/src/components/dashboard/Form/FormGenerationAnimationPanel';
 import { Loader } from '@/src/components/ui/Loader';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
+	FormConfigWithChildren,
 	FormWithElements,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
+import {
+	getHasConfigChanged,
+	getHelperFromFormConfig
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -17,11 +23,6 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
-import {
-	getHasConfigChanged,
-	getHelperFromFormConfig
-} from '@/src/utils/tools';
-import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
@@ -36,7 +37,8 @@ const NewForm = (props: Props) => {
 	const router = useRouter();
 	const { id } = router.query;
 	const { cx, classes } = useStyles();
-	const { createdProduct, createdForm, updateCreatedForm } = useOnboarding();
+	const { createdProduct, createdForm, updateCreatedForm, steps, updateSteps } =
+		useOnboarding();
 
 	const [formStep, setFormStep] = useState<FormCreationStep>('CREATE');
 	const [formTitle, setFormTitle] = useState<string>('');
@@ -47,8 +49,15 @@ const NewForm = (props: Props) => {
 			form_id: createdForm?.id || 0,
 			status: 'published'
 		});
-	const [shouldShowStepper, setShouldShowStepper] = useState(
-		Boolean(createdForm)
+
+	const isEditingStep = useMemo(
+		() => steps.find(step => step.slug === 'form')?.isEditing,
+		[steps]
+	);
+
+	const shouldShowStepper = useMemo(
+		() => Boolean(createdForm) && !isEditingStep && formStep === 'CREATE',
+		[createdForm, isEditingStep, formStep]
 	);
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
@@ -56,6 +65,7 @@ const NewForm = (props: Props) => {
 	});
 
 	const defaultTitle = useMemo(() => {
+		if (createdForm) return createdForm.title;
 		if (!product.forms || product.forms.length === 0)
 			return rootFormTemplate?.data?.title || '';
 
@@ -98,22 +108,52 @@ const NewForm = (props: Props) => {
 		}
 	});
 
+	const updateForm = trpc.form.update.useMutation({
+		onSuccess: () => {
+			utils.adminEntityRight.getUserList.invalidate();
+		}
+	});
+
 	const onSubmitCreateForm: SubmitHandler<FormValues> = async data => {
 		if (!rootFormTemplate?.data?.id) return;
-		const savedFormResponse = await createForm.mutateAsync({
-			...data,
-			product_id: product.id,
-			form_template_id: rootFormTemplate?.data?.id
-		});
-		setFormStep('GENERATING');
+		let tmpForm: FormWithElements;
+
+		if (isEditingStep && createdForm) {
+			tmpForm = await updateForm
+				.mutateAsync({
+					id: createdForm.id,
+					form: {
+						...data,
+						product_id: product.id
+					}
+				})
+				.then(res => res.data);
+
+			setFormStep('EDIT');
+		} else {
+			tmpForm = await createForm
+				.mutateAsync({
+					...data,
+					product_id: product.id,
+					form_template_id: rootFormTemplate?.data?.id
+				})
+				.then(res => res.data);
+
+			setFormStep('GENERATING');
+		}
+
 		setFormTitle(data.title || rootFormTemplate?.data?.title || '');
-		updateCreatedForm(savedFormResponse.data);
+		updateCreatedForm(tmpForm);
 	};
 
 	const onChangeConfig = (configHelper: FormConfigHelper) => {
 		setTmpConfigHelper(configHelper);
+		let zeroVersionFormConfig: FormConfigWithChildren | undefined;
+		if (createdForm) {
+			zeroVersionFormConfig = createdForm.form_configs[0];
+		}
 
-		const rootConfigHelper = getHelperFromFormConfig(undefined);
+		const rootConfigHelper = getHelperFromFormConfig(zeroVersionFormConfig);
 		setHasConfigChanged(getHasConfigChanged(configHelper, rootConfigHelper));
 
 		setCreateConfig({
@@ -142,7 +182,12 @@ const NewForm = (props: Props) => {
 				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
 			);
 		}
-		setShouldShowStepper(true);
+		updateSteps(
+			steps.map(step =>
+				step.slug === 'form' ? { ...step, isEditing: false } : step
+			)
+		);
+		setFormStep('CREATE');
 	};
 
 	const currentStepValues = (() => {
@@ -180,6 +225,7 @@ const NewForm = (props: Props) => {
 											validate: value => {
 												const trimmedValue = value?.trim();
 												if (!trimmedValue) return 'Ce champ est obligatoire';
+												if (isEditingStep) return true;
 												const isDuplicate = product.forms.some(
 													form =>
 														(

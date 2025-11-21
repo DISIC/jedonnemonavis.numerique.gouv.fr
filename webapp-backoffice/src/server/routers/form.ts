@@ -139,7 +139,46 @@ export const formRouter = router({
 				data: {
 					...form
 				},
-				include: { form_template: true }
+				include: {
+					product: true,
+					form_configs: {
+						where: {
+							status: 'published'
+						},
+						orderBy: {
+							created_at: 'desc'
+						},
+						take: 100,
+						include: {
+							form_config_displays: true,
+							form_config_labels: true
+						}
+					},
+					form_template: {
+						include: {
+							form_template_steps: {
+								include: {
+									form_template_blocks: {
+										include: {
+											options: {
+												orderBy: {
+													position: 'asc'
+												}
+											}
+										},
+										orderBy: {
+											position: 'asc'
+										}
+									}
+								},
+
+								orderBy: {
+									position: 'asc'
+								}
+							}
+						}
+					}
+				}
 			});
 
 			return { data: updatedForm };

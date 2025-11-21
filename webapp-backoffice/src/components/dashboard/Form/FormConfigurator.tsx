@@ -1,12 +1,12 @@
+import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
+import useModifiedSteps from '../../../hooks/dashboard/form/useModifiedSteps';
 import FormStepDisplay from './FormStepDisplay';
 import FormStepper from './FormStepper';
-import { getHelperFromFormConfig } from '@/src/utils/tools';
-import useModifiedSteps from '../../../hooks/dashboard/form/useModifiedSteps';
-import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
 interface Props {
 	form: FormWithElements;
