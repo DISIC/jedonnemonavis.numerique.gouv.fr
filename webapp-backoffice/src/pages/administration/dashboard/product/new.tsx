@@ -8,7 +8,6 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Autocomplete } from '@mui/material';
 import { Entity, Product } from '@prisma/client';
-import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';

@@ -1,11 +1,11 @@
+import { AccessRight, Product } from '@prisma/client';
 import React, {
 	createContext,
-	useContext,
-	useState,
 	useCallback,
-	useEffect
+	useContext,
+	useEffect,
+	useState
 } from 'react';
-import { AccessRight, Form, Product } from '@prisma/client';
 import { FormWithElements } from '../types/prismaTypesExtended';
 import { onboardingStepsContent, StepContent } from '../utils/content';
 
@@ -77,8 +77,8 @@ export const OnboardingProvider = ({
 	};
 
 	useEffect(() => {
-		setSteps(
-			steps.map(step => ({
+		setSteps(prev =>
+			prev.map(step => ({
 				...step,
 				isCompleted: getSlugValues(step.slug).isCompleted,
 				url: getSlugValues(step.slug).url
