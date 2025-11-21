@@ -27,7 +27,7 @@ import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const entity_modal = createModal({
@@ -68,9 +68,10 @@ const DashBoard = () => {
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
-	const [isOnboardingDone, setIsOnboardingDone] = React.useState(
-		onboardingDone === 'true'
-	);
+
+	const isOnboardingDone = useMemo(() => {
+		return Boolean(onboardingDone);
+	}, []);
 
 	const { data: session } = useSession({ required: true });
 

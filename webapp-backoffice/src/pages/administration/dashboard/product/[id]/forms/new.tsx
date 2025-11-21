@@ -56,7 +56,10 @@ const NewForm = (props: Props) => {
 	);
 
 	const shouldShowStepper =
-		Boolean(createdForm) && !isEditingStep && formStep === 'CREATE';
+		Boolean(createdProduct) &&
+		Boolean(createdForm) &&
+		!isEditingStep &&
+		formStep === 'CREATE';
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
@@ -177,7 +180,7 @@ const NewForm = (props: Props) => {
 
 		if (!createdProduct) {
 			return router.push(
-				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}`
+				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}/new-link`
 			);
 		}
 		updateSteps(
