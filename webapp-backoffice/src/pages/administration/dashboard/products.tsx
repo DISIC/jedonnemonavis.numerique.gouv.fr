@@ -305,7 +305,7 @@ const DashBoard = () => {
 						</Button>
 					</div>
 				</div>
-				{isOnboardingDone && (
+				{isOnboardingDone && createdProduct && createdForm && (
 					<Alert
 						className={fr.cx('fr-col-12', 'fr-mb-8v')}
 						title="Votre service et votre formulaire ont été créé avec succès !"
@@ -314,7 +314,7 @@ const DashBoard = () => {
 								Pensez à copier le lien d’intégration sur votre site pour rendre
 								votre formulaire visible aux usagers
 								<Link
-									href={`/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}?tab=links`}
+									href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
 									className={fr.cx(
 										'fr-link--icon-right',
 										'fr-ml-2v',

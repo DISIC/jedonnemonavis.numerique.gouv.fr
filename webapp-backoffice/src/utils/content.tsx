@@ -520,7 +520,7 @@ export const onboardingStepsContent: StepContent[] = [
 		details: [
 			{
 				title:
-					'Un formulaire vous permet de récolter les l’avis de vos usagers sur un service numérique.',
+					'Un formulaire vous permet de récolter les avis de vos usagers sur un service numérique.',
 				iconId: 'ri-file-edit-line'
 			}
 		],

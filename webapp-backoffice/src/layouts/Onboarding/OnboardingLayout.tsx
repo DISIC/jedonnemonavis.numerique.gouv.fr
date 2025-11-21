@@ -77,8 +77,8 @@ const OnboardingLayout = ({
 			<Button
 				id="button-account"
 				iconId={'fr-icon-account-circle-line'}
-				title={`Ouvrir le menu mon compte`}
-				aria-label={`Ouvrir le menu mon compte`}
+				title="Ouvrir le menu mon compte"
+				aria-label="Ouvrir le menu mon compte"
 				priority="tertiary"
 				size="large"
 				onClick={handleMenuClick}

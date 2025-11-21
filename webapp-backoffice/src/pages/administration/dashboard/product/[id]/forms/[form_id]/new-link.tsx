@@ -78,9 +78,9 @@ const NewLink = (props: Props) => {
 			router.push(
 				`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
 			);
-			return;
+		} else {
+			router.push(`/administration/dashboard/products?onboardingDone=true`);
 		}
-		router.push(`/administration/dashboard/products?onboardingDone=true`);
 	};
 
 	return (
