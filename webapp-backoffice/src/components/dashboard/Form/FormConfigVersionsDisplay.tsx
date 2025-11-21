@@ -4,7 +4,6 @@ import {
 } from '@/src/types/prismaTypesExtended';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import { FormConfig } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 
 type FormConfigVersionsDisplayProps = {
