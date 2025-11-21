@@ -36,10 +36,7 @@ const NewProduct = () => {
 		[steps]
 	);
 
-	const shouldShowStepper = useMemo(
-		() => Boolean(createdProduct) && !isEditingStep,
-		[createdProduct, isEditingStep]
-	);
+	const shouldShowStepper = Boolean(createdProduct) && !isEditingStep;
 
 	const {
 		control,

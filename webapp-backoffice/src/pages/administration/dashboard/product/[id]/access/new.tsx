@@ -42,12 +42,9 @@ const NewAccess = () => {
 		[steps]
 	);
 
-	const shouldShowStepper = useMemo(
-		() =>
-			Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
-			!isEditingStep,
-		[createdUserAccesses, isEditingStep]
-	);
+	const shouldShowStepper =
+		Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
+		!isEditingStep;
 
 	useEffect(() => {
 		if (usersToAdd.length === 0) {

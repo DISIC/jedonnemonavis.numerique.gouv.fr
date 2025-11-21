@@ -55,10 +55,8 @@ const NewForm = (props: Props) => {
 		[steps]
 	);
 
-	const shouldShowStepper = useMemo(
-		() => Boolean(createdForm) && !isEditingStep && formStep === 'CREATE',
-		[createdForm, isEditingStep, formStep]
-	);
+	const shouldShowStepper =
+		Boolean(createdForm) && !isEditingStep && formStep === 'CREATE';
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
 		slug: 'root'
