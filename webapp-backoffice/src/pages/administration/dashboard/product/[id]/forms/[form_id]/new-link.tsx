@@ -28,7 +28,7 @@ const NewLink = (props: Props) => {
 	const router = useRouter();
 	const { form_id } = router.query;
 	const { cx, classes } = useStyles();
-	const { createdProduct } = useOnboarding();
+	const { createdProduct, createdForm } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<ButtonStyle>('solid');
@@ -74,9 +74,13 @@ const NewLink = (props: Props) => {
 	};
 
 	const goNextStep = () => {
-		if (!createdProduct) {
+		if (!createdProduct && !createdForm) {
 			router.push(
 				`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
+			);
+		} else if (!createdProduct && createdForm) {
+			router.push(
+				`/administration/dashboard/product/${product.id}/forms?formCreated=true`
 			);
 		} else {
 			router.push(`/administration/dashboard/products?onboardingDone=true`);

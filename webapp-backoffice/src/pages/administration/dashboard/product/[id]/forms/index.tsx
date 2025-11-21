@@ -18,6 +18,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
@@ -28,12 +29,47 @@ const ProductFormsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 	const router = useRouter();
+	const { createdForm, reset: resetContext } = useOnboarding();
+
 	const alertTextQuery = router.query.alert as string | undefined;
-	const [isAlertShown, setIsAlertShown] = useState(!!alertTextQuery);
+	const formCreated = router.query.formCreated as string | undefined;
+	const isAlertTextShown = useMemo(() => {
+		return Boolean(alertTextQuery);
+	}, []);
+	const isFormAlertShown = useMemo(() => {
+		return Boolean(formCreated);
+	}, []);
+
+	useEffect(() => {
+		const handleRouteChangeStart = (url: string) => {
+			if (
+				!url.startsWith(`/administration/dashboard/product/${product.id}/forms`)
+			) {
+				resetContext();
+			}
+		};
+
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+
+		return () => {
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+		};
+	}, [resetContext, router.events]);
 
 	useEffect(() => {
 		if (router.query.alert) {
 			const { alert, ...restQuery } = router.query;
+			router.replace(
+				{
+					pathname: router.pathname,
+					query: restQuery
+				},
+				undefined,
+				{ shallow: true }
+			);
+		}
+		if (router.query.formCreated) {
+			const { formCreated, ...restQuery } = router.query;
 			router.replace(
 				{
 					pathname: router.pathname,
@@ -92,15 +128,41 @@ const ProductFormsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					<Alert
-						className={fr.cx('fr-col-12', 'fr-mb-6v')}
-						description={alertTextQuery || ''}
-						severity="success"
-						small
-						closable
-						isClosed={!isAlertShown}
-						onClose={() => setIsAlertShown(false)}
-					/>
+					{isAlertTextShown && (
+						<Alert
+							className={fr.cx('fr-col-12', 'fr-mb-6v')}
+							description={alertTextQuery || ''}
+							severity="success"
+							small
+							closable
+						/>
+					)}
+
+					{isFormAlertShown && createdForm && (
+						<Alert
+							className={fr.cx('fr-col-12', 'fr-mb-8v')}
+							title="Votre formulaire a été créé avec succès !"
+							description={
+								<>
+									Pensez à copier le lien d’intégration sur votre site pour
+									rendre votre formulaire visible aux usagers
+									<Link
+										href={`/administration/dashboard/product/${product.id}/forms/${createdForm.id}?tab=links`}
+										className={fr.cx(
+											'fr-link--icon-right',
+											'fr-ml-2v',
+											'fr-icon-arrow-right-line',
+											'fr-link'
+										)}
+									>
+										Copier le lien d’intégration
+									</Link>
+								</>
+							}
+							severity="success"
+							closable
+						/>
+					)}
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
@@ -114,11 +176,12 @@ const ProductFormsPage = (props: Props) => {
 							{ownRight === 'carrier_admin' && !product.isTop250 && (
 								<Button
 									priority="secondary"
-									onClick={() =>
+									onClick={() => {
+										resetContext();
 										router.push(
 											`/administration/dashboard/product/${product.id}/forms/new`
-										)
-									}
+										);
+									}}
 								>
 									Générer un formulaire
 									<span
