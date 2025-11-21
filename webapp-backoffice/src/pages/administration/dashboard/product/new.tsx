@@ -118,10 +118,24 @@ const NewProduct = () => {
 
 	return (
 		<OnboardingLayout
-			isCancelable
-			title="Ajouter un service numérique"
+			title={
+				isEditingStep
+					? 'Modifier un service numérique'
+					: 'Ajouter un service numérique'
+			}
 			onConfirm={handleSubmit(onLocalSubmit)}
 			isStepperLayout={shouldShowStepper}
+			confirmText={isEditingStep ? 'Enregistrer et continuer' : 'Continuer'}
+			onCancel={
+				isEditingStep
+					? () =>
+							updateSteps(
+								steps.map(step =>
+									step.slug === 'product' ? { ...step, isEditing: false } : step
+								)
+							)
+					: undefined
+			}
 		>
 			<EntityModal
 				modal={entity_modal}
