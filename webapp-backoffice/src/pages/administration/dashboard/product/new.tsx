@@ -121,7 +121,9 @@ const NewProduct = () => {
 			title={
 				isEditingStep
 					? 'Modifier un service numérique'
-					: 'Ajouter un service numérique'
+					: shouldShowStepper
+						? 'Étapier parcours de création'
+						: 'Ajouter un service numérique'
 			}
 			onConfirm={handleSubmit(onLocalSubmit)}
 			isStepperLayout={shouldShowStepper}

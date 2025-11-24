@@ -131,7 +131,11 @@ const NewAccess = () => {
 
 	return (
 		<OnboardingLayout
-			title="Inviter des utilisateurs"
+			title={
+				shouldShowStepper
+					? 'Étapier parcours de création'
+					: 'Inviter des utilisateurs'
+			}
 			onConfirm={onSubmit}
 			isStepperLayout={shouldShowStepper}
 		>

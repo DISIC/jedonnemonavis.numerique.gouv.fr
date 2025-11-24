@@ -291,7 +291,9 @@ const NewForm = (props: Props) => {
 					),
 					title: isEditingStep
 						? 'Modifier un formulaire'
-						: 'Générer un formulaire',
+						: shouldShowStepper
+							? 'Étapier parcours de création'
+							: 'Générer un formulaire',
 					confirmAction: handleSubmit(onSubmitCreateForm),
 					confirmText: isEditingStep ? 'Enregistrer et continuer' : undefined
 				};
@@ -305,7 +307,8 @@ const NewForm = (props: Props) => {
 						/>
 					),
 					confirmAction: () => setFormStep('EDIT'),
-					noBackground: true
+					noBackground: true,
+					title: 'Génération du formulaire en cours...'
 				};
 			case 'EDIT':
 				return {
