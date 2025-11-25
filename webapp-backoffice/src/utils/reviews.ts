@@ -67,7 +67,7 @@ export const formatWhereAndOrder = (
 					answers: {
 						some: {
 							AND: [
-								search
+								...search
 									.split(' ')
 									.filter(Boolean)
 									.map((word: string) => ({
