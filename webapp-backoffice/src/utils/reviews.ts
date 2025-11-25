@@ -67,14 +67,12 @@ export const formatWhereAndOrder = (
 					answers: {
 						some: {
 							AND: [
-								{
-									answer_text: {
-										search: search
-											.split(' ')
-											.filter((item: string) => item !== '')
-											.join('<->')
-									}
-								},
+								search
+									.split(' ')
+									.filter(Boolean)
+									.map((word: string) => ({
+										answer_text: { contains: word, mode: 'insensitive' }
+									})),
 								{ field_code: 'verbatim' },
 								!newReviews &&
 									end_date && {
