@@ -1,6 +1,6 @@
 import {
 	createButton,
-	createForm,
+	createOrEditForm,
 	login,
 	modifyButton
 } from '../../../utils/helpers/common';
@@ -43,7 +43,7 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					createForm(title);
+					createOrEditForm(title);
 					cy.visit(`${appUrl}${selectors.url.productTestService}`);
 					cy.contains('a', title).should('exist');
 				} else {

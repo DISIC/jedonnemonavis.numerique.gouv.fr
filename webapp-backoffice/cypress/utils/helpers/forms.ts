@@ -1,5 +1,5 @@
 import { selectors } from '../selectors';
-import { createProduct } from './common';
+import { createOrEditProduct } from './common';
 
 export const tryCloseHelpModal = () => {
 	cy.wait(1000);
@@ -44,7 +44,7 @@ export function ensureTestServiceExistsAndGoToForms() {
 				`"${selectors.dashboard.nameTestService}" not found, creating resources...`
 			);
 
-			createProduct(selectors.dashboard.nameTestService);
+			createOrEditProduct(selectors.dashboard.nameTestService);
 		} else {
 			cy.log(
 				`"${selectors.dashboard.nameTestService}" exists, skipping creation`

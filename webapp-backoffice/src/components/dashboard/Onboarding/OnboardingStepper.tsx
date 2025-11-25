@@ -24,6 +24,7 @@ const OnboardingStepper = () => {
 
 				return (
 					<div
+						id={`onboarding-step-${step.slug}`}
 						key={step.url}
 						className={cx(classes.stepContainer, fr.cx('fr-px-6v', 'fr-py-4v'))}
 						style={{

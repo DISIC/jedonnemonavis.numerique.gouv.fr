@@ -1,6 +1,6 @@
 import { checkMail } from '../../../utils/helpers/admin';
 import {
-	createProduct,
+	createOrEditProduct,
 	fillSignupForm,
 	login,
 	logout
@@ -102,7 +102,7 @@ describe('jdma-admin', () => {
 	});
 
 	it('create service', () => {
-		createProduct(selectors.dashboard.nameTestService);
+		createOrEditProduct(selectors.dashboard.nameTestService);
 		cy.visit(`${appUrl}`);
 		cy.get(selectors.productLink)
 			.should('exist')

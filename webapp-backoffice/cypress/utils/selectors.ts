@@ -40,7 +40,7 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
-		newLink: '/administration/dashboard/product/4/forms/5/new-link'
+		newLink: '/administration/dashboard/product/4/forms/4/new-link'
 	},
 	dashboard: {
 		nameTestOrga: 'e2e-jdma-entity-test',
@@ -86,6 +86,15 @@ export const selectors = {
 		confirm: 'Confirmer'
 	},
 	onboarding: {
-		actionsContainer: '#onboarding-actions'
+		actionsContainer: '#onboarding-actions',
+		step: {
+			product: '#onboarding-step-product',
+			access: '#onboarding-step-access',
+			form: '#onboarding-step-form',
+			link: '#onboarding-step-link'
+		},
+		continue: 'Continuer',
+		save: 'Enregistrer et continuer',
+		saveModifications: 'Enregistrer les modifications'
 	}
 };

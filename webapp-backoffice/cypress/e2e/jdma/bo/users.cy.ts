@@ -1,4 +1,4 @@
-import { createProduct, login } from '../../../utils/helpers/common';
+import { createOrEditProduct, login } from '../../../utils/helpers/common';
 import { navigateToCreatedProduct } from '../../../utils/helpers/users';
 import { selectors } from '../../../utils/selectors';
 import { adminEmail, adminPassword } from '../../../utils/variables';
@@ -9,7 +9,7 @@ describe('jdma-users', () => {
 	});
 
 	it('should create a service and attach an organization', () => {
-		createProduct('e2e-jdma-service-test-users');
+		createOrEditProduct('e2e-jdma-service-test-users');
 	});
 
 	it('should navigate to created product access page', () => {
