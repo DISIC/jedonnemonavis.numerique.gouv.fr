@@ -360,6 +360,7 @@ const NewForm = (props: Props) => {
 			customHintText={currentStepValues.customHintText}
 			isLarge={formStep === 'EDIT'}
 			shouldDisplayLine={formStep === 'EDIT'}
+			hideTitle={formStep === 'GENERATING' || formStep === 'READY'}
 			headerActions={currentStepValues.headerActions}
 			isStepperLayout={shouldShowStepper}
 		>
