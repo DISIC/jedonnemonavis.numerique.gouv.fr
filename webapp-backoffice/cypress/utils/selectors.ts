@@ -40,7 +40,7 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
-		newLink: '/administration/dashboard/product/4/forms/4/new-link'
+		newLink: '/administration/dashboard/product/5/forms/4/new-link'
 	},
 	dashboard: {
 		nameTestOrga: 'e2e-jdma-entity-test',
