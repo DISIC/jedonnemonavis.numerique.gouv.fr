@@ -50,6 +50,10 @@ const NewForm = (props: Props) => {
 			status: 'published'
 		});
 
+	useEffect(() => {
+		formStep !== 'READY' && window.scrollTo(0, 0);
+	}, [formStep]);
+
 	const isEditingStep = useMemo(
 		() => steps.find(step => step.slug === 'form')?.isEditing,
 		[steps]

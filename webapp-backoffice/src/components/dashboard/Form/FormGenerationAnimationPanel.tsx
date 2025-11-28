@@ -148,6 +148,7 @@ const useStyles = tss.create(() => ({
 	infoContainer: {
 		display: 'flex',
 		justifyContent: 'center',
+		alignItems: 'center',
 		width: '100%'
 	},
 	withBackground: {

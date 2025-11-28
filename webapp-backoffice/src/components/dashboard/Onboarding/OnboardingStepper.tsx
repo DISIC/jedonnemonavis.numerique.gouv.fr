@@ -12,6 +12,10 @@ const OnboardingStepper = () => {
 
 	return (
 		<div className={classes.stepperContainer}>
+			<h1 className={fr.cx('fr-h3', 'fr-mb-2v')}>
+				Configurez votre service en 4 étapes
+			</h1>
+
 			{steps.map((step, index) => {
 				const isActiveStep =
 					index === 0 ||
@@ -50,7 +54,7 @@ const OnboardingStepper = () => {
 									/>
 								</div>
 								<div className={classes.titleWithBadge}>
-									<h3 className={fr.cx('fr-h5', 'fr-m-0')}>{step.title}</h3>
+									<h2 className={fr.cx('fr-h5', 'fr-m-0')}>{step.title}</h2>
 									{(step.isCompleted || step.isSkipped) && (
 										<Badge
 											severity={step.isSkipped ? 'info' : 'success'}
@@ -107,9 +111,7 @@ const OnboardingStepper = () => {
 													aria-hidden="true"
 												/>
 											</div>
-											<span className={fr.cx('fr-text--lg', 'fr-m-0')}>
-												{detail.title}
-											</span>
+											<span className={fr.cx('fr-m-0')}>{detail.title}</span>
 										</div>
 									))}
 								</div>
@@ -176,7 +178,14 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 		flexShrink: 0,
 		display: 'flex',
 		justifyContent: 'center',
-		alignItems: 'center'
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			width: fr.spacing('10v'),
+			height: fr.spacing('10v'),
+			'.fr-icon--lg::before': {
+				'--icon-size': '1.5rem'
+			}
+		}
 	},
 	greyIcon: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,
@@ -185,7 +194,15 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 	mainStepContent: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: fr.spacing('4v')
+		gap: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			button: {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	titleContainer: {
 		display: 'flex',
@@ -194,16 +211,34 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 	titleWithBadge: {
 		display: 'flex',
 		alignItems: 'center',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			h2: {
+				fontSize: '1.125rem!important'
+			}
+		}
 	},
 	detailsContainer: {
 		display: 'flex',
 		flexDirection: 'column',
 		background: 'white',
 		gap: fr.spacing('4v'),
-		...fr.spacing('padding', { topBottom: '8v', rightLeft: '10v' })
+		...fr.spacing('padding', { topBottom: '8v', rightLeft: '10v' }),
+		[fr.breakpoints.down('md')]: {
+			...fr.spacing('padding', { rightLeft: '4v' })
+		}
 	},
-	detailLine: { display: 'flex', alignItems: 'center', gap: fr.spacing('4v') },
+	detailLine: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			fontSize: '14px'
+		}
+	},
 	detailsList: {
 		display: 'flex',
 		flexDirection: 'column',
@@ -212,6 +247,20 @@ const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
 	detailsActions: {
 		display: 'flex',
 		justifyContent: 'center',
-		gap: fr.spacing('6v')
+		gap: fr.spacing('6v'),
+		[fr.breakpoints.down('md')]: {
+			gap: fr.spacing('4v'),
+			flexDirection: 'column',
+			width: '100%',
+			textAlign: 'center',
+			'button, a': {
+				width: '100%',
+				justifyContent: 'center',
+				fontSize: '1rem',
+				lineHeight: '1.5rem',
+				minHeight: fr.spacing('10v'),
+				'::after': { display: 'none' }
+			}
+		}
 	}
 }));
