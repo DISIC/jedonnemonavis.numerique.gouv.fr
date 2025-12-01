@@ -18,11 +18,10 @@ describe('jdma-register', () => {
 	beforeEach(() => {
 		cy.visit(`${appUrl}/register`);
 		cy.injectAxe();
-		cy.checkA11y(
-			null,
-			{ includedImpacts: ['moderate', 'serious', 'critical'] },
-			displayViolationsTable
-		);
+	});
+
+	it('should pass a11y checks', () => {
+		cy.auditA11y();
 	});
 
 	// Vérification de la page initiale

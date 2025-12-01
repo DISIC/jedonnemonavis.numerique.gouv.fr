@@ -1,8 +1,9 @@
-import './bo/home.cy.ts';
+import './public/home.cy.js';
+import './public/login.cy.js';
 import './bo/admin.cy.ts';
-import './bo/register.cy.ts';
+import './public/register.cy.js';
 import './bo/forms.cy.ts';
-import './form/review.cy.ts';
+import './public/review.cy.js';
 import './bo/reviewCheck.cy.ts';
 import './bo/account.cy.ts';
 import './bo/users.cy.ts';

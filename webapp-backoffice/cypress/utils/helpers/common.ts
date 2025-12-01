@@ -1,4 +1,5 @@
 import { selectors } from '../selectors';
+import { displayViolationsTable } from '../tools';
 import { appUrl } from '../variables';
 
 export function login(email: string, password: string) {
@@ -25,6 +26,11 @@ export function tryCloseNewsModal() {
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
+			cy.checkA11y(
+				null,
+				{ includedImpacts: ['moderate', 'serious', 'critical'] },
+				displayViolationsTable
+			);
 			cy.wrap($modal).within(() => {
 				cy.contains('button', 'Fermer').click();
 			});

@@ -7,11 +7,10 @@ describe('jdma-home', () => {
 	beforeEach(() => {
 		cy.visit(appUrl);
 		cy.injectAxe();
-		cy.checkA11y(
-			null,
-			{ includedImpacts: ['moderate', 'serious', 'critical'] },
-			displayViolationsTable
-		);
+	});
+
+	it('should pass a11y checks', () => {
+		cy.auditA11y();
 	});
 
 	describe('Navbar', () => {

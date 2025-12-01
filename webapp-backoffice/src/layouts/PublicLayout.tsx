@@ -360,34 +360,33 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				serviceTagline="La voix de vos usagers"
 			/>
 
-			{/* FOR BETA TESTING */}
-			{!!session?.user && (
-				<Notice
-					isClosable
-					onClose={function noRefCheck() {}}
-					style={{
-						marginBottom: '-1rem'
-					}}
-					title={
-						<>
-							Aidez-nous à améliorer cet outil ! Faites-nous part de vos retours
-							en remplissant{' '}
-							<a
-								title="Formulaire de retour (nouvelle fenêtre)"
-								href={
-									process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ||
-									'https://tally.so/r/m6kyyB'
-								}
-								target="_blank"
-							>
-								ce court formulaire.
-							</a>{' '}
-						</>
-					}
-				/>
-			)}
-			{/* END FOR BETA TESTING */}
 			<main id="main" role="main" tabIndex={-1}>
+				{!!session?.user && (
+					<Notice
+						isClosable
+						onClose={function noRefCheck() {}}
+						style={{
+							marginBottom: '-1rem'
+						}}
+						className={classes.notice}
+						title={
+							<>
+								Aidez-nous à améliorer cet outil ! Faites-nous part de vos
+								retours en remplissant{' '}
+								<a
+									title="Formulaire de retour (nouvelle fenêtre)"
+									href={
+										process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL ||
+										'https://tally.so/r/m6kyyB'
+									}
+									target="_blank"
+								>
+									ce court formulaire.
+								</a>{' '}
+							</>
+						}
+					/>
+				)}
 				{children}
 			</main>
 			<div id="footer" tabIndex={-1}>
@@ -482,6 +481,11 @@ const useStyles = tss
 				bottom: '2px',
 				fontSize: '10px',
 				fontWeight: 'bold'
+			}
+		},
+		notice: {
+			'.fr-notice__body': {
+				alignItems: 'center'
 			}
 		}
 	}));

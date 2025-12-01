@@ -1,6 +1,5 @@
 import { checkMail } from '../../../utils/helpers/admin';
 import {
-	createForm,
 	createProduct,
 	fillSignupForm,
 	login,
@@ -20,11 +19,12 @@ describe('jdma-admin', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
-		cy.checkA11y(
-			null,
-			{ includedImpacts: ['moderate', 'serious', 'critical'] },
-			displayViolationsTable
-		);
+
+		// cy.checkA11y(
+		// 	null,
+		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
+		// 	displayViolationsTable
+		// );
 	});
 
 	it('create and delete users', () => {

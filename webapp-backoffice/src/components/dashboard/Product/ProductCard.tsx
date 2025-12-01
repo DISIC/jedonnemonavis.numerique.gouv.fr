@@ -436,6 +436,7 @@ const ProductCard = ({
 													href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
 													className={classes.formLink}
 													onClick={() => clearFilters()}
+													aria-label="Aller sur la page de gestion du formulaire"
 												/>
 												<div
 													className={cx(
@@ -600,7 +601,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
-		':nth-child(2), :last-child': {
+		':nth-of-type': {
 			marginBottom: '0.5rem'
 		},
 		'&:hover > div:first-of-type span:first-of-type': {
