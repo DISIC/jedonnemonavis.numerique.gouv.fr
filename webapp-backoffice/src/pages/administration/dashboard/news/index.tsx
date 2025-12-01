@@ -1,5 +1,6 @@
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import NewsLayout from '@/src/layouts/News/NewsLayout';
+import { LATEST_NEWS_VERSION } from '@/src/utils/cookie';
 import { fr } from '@codegouvfr/react-dsfr';
 import Image from 'next/image';
 import React, { useEffect } from 'react';
@@ -8,14 +9,18 @@ import { tss } from 'tss-react/dsfr';
 const NewsPage = () => {
 	const {
 		settings,
-		setSetting,
+		setSettings,
 		isLoading: isLoadingSettings
 	} = useUserSettings();
 	const { cx, classes } = useStyles();
 
 	useEffect(() => {
 		if (!isLoadingSettings && !settings.newsPageSeen) {
-			setSetting('newsPageSeen', true);
+			setSettings({
+				...settings,
+				newsPageSeen: true,
+				newsVersionSeen: LATEST_NEWS_VERSION
+			});
 		}
 	}, [isLoadingSettings]);
 	return (
@@ -34,23 +39,129 @@ const NewsPage = () => {
 					<ul className={cx(classes.summaryList, fr.cx('fr-mt-2v'))}>
 						<li>
 							<b>1.</b>{' '}
-							<a href="#edition-formulaire" className={fr.cx('fr-link--xs')}>
-								Édition du formulaire
+							<a href="#fermer-emplacement" className={fr.cx('fr-link--xs')}>
+								Fermer un emplacement (septembre 2025)
 							</a>
 						</li>
 						<li>
 							<b>2.</b>{' '}
-							<a href="#nouvelle-interface" className={fr.cx('fr-link--xs')}>
-								Nouvelle interface
+							<a href="#fermer-formulaire" className={fr.cx('fr-link--xs')}>
+								Fermer un formulaire (septembre 2025)
 							</a>
 						</li>
 						<li>
 							<b>3.</b>{' '}
+							<a href="#edition-formulaire" className={fr.cx('fr-link--xs')}>
+								Édition du formulaire (juin 2025)
+							</a>
+						</li>
+						<li>
+							<b>4.</b>{' '}
+							<a href="#nouvelle-interface" className={fr.cx('fr-link--xs')}>
+								Nouvelle interface (juin 2025)
+							</a>
+						</li>
+						<li>
+							<b>5.</b>{' '}
 							<a href="#evolution-boutons" className={fr.cx('fr-link--xs')}>
-								Évolution des boutons
+								Évolution des boutons (juin 2025)
 							</a>
 						</li>
 					</ul>
+				</div>
+				<div id="fermer-emplacement" className={fr.cx('fr-col-12')}>
+					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
+						Fermer un emplacement
+					</h3>
+					<p>
+						Un emplacement génère un code à copier sur votre site qui affiche un
+						bouton “Je donne mon avis”.
+					</p>
+					<p className={fr.cx('fr-mb-2v')}>En le fermant:</p>
+					<ul className={classes.customList}>
+						<li data-emoji="ℹ️">
+							Le formulaire ne recevra plus de réponses via cet emplacement
+						</li>
+						<li data-emoji="ℹ️">
+							Les usagers n’auront plus accès au formulaire via cet emplacement
+						</li>
+						<li>Vous gardez l’accès aux statistiques déjà collectées</li>
+						<li data-emoji="⚠️">Cette action est irréversible</li>
+					</ul>
+					<p>
+						⚠️ Fermer un emplacement ne supprime pas le bouton Je Donne Mon Avis
+						associé sur votre site.
+					</p>
+					<p className={fr.cx('fr-mb-0')}>
+						Cette fonctionnalité est accessible depuis la section Paramètres de
+						votre formulaire.
+					</p>
+					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
+						<Image
+							src="/assets/news-feature/close-button.png"
+							alt=""
+							width={451}
+							height={308}
+							className={classes.image}
+						/>
+					</div>
+					<p
+						className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
+						style={{ color: fr.colors.decisions.text.mention.grey.default }}
+					>
+						Fermeture d’un emplacement
+					</p>
+					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
+				</div>
+				<div id="fermer-formulaire" className={fr.cx('fr-col-12')}>
+					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
+						Fermer un formulaire
+					</h3>
+					<div
+						className={cx(classes.imageContainer, fr.cx('fr-my-6v', 'fr-p-6v'))}
+						style={{ justifyContent: 'start' }}
+					>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('fr-icon-edit-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							Les formulaires liés à une <b>Démarche Essentielle</b> ne peuvent
+							pas être supprimés
+						</p>
+					</div>
+					<p>Vous pouvez désormais fermer un formulaire.</p>
+					<ul className={classes.customList}>
+						<li data-emoji="ℹ️">
+							Le formulaire ne recevra plus de nouvelles réponses
+						</li>
+						<li data-emoji="ℹ️">Les usagers n’y auront plus accès</li>
+						<li>Vous gardez l’accès aux statistiques déjà collectées</li>
+						<li data-emoji="⚠️">Cette action est irréversible</li>
+					</ul>
+					<p>
+						⚠️ Fermer un formulaire ne supprime pas les boutons Je Donne Mon
+						Avis de votre site.
+					</p>
+					<p className={fr.cx('fr-mb-0')}>
+						Cette fonctionnalité est accessible depuis la section Paramètres de
+						votre formulaire.
+					</p>
+					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
+						<Image
+							src="/assets/news-feature/close-form.png"
+							alt=""
+							width={451}
+							height={390}
+							className={classes.image}
+						/>
+					</div>
+					<p
+						className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
+						style={{ color: fr.colors.decisions.text.mention.grey.default }}
+					>
+						Section de gestion du formulaire avec fermeture
+					</p>
+					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
 				<div id="edition-formulaire" className={fr.cx('fr-col-12')}>
 					<h3 className={cx(classes.newsTitle, fr.cx('fr-mb-6v'))}>
@@ -63,12 +174,12 @@ const NewsPage = () => {
 						<div className={classes.iconContainer}>
 							<i className={cx(fr.cx('fr-icon-edit-line', 'fr-icon--lg'))} />
 						</div>
-						<p className={fr.cx('fr-mb-0', 'fr-ml-6v')}>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
 							Les formulaires liés à une <b>Démarche Essentielle</b> ne peuvent
 							pas être édités
 						</p>
 					</div>
-					<p className={fr.cx('fr-mb-0')}>
+					<p className={fr.cx('fr-mb-3v')}>
 						Vous pouvez désormais adapter vos formulaires à vos besoins
 						spécifiques :
 					</p>
@@ -83,10 +194,10 @@ const NewsPage = () => {
 					</p>
 					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 						<Image
-							src="/assets/news-feature-1.png"
+							src="/assets/news-feature/edit-question.png"
 							alt=""
-							width={450}
-							height={285}
+							width={451}
+							height={309}
 							className={classes.image}
 						/>
 					</div>
@@ -108,7 +219,7 @@ const NewsPage = () => {
 					</p>
 					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 						<Image
-							src="/assets/news-feature-2.png"
+							src="/assets/news-feature/new-interface-1.png"
 							alt=""
 							width={450}
 							height={247}
@@ -127,7 +238,7 @@ const NewsPage = () => {
 					</p>
 					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 						<Image
-							src="/assets/news-feature-3.png"
+							src="/assets/news-feature/new-interface-2.png"
 							alt=""
 							width={450}
 							height={306}
@@ -160,7 +271,7 @@ const NewsPage = () => {
 					</p>
 					<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 						<Image
-							src="/assets/news-feature-4.png"
+							src="/assets/news-feature/buttons-handling.png"
 							alt=""
 							width={450}
 							height={357}
@@ -173,6 +284,7 @@ const NewsPage = () => {
 					>
 						Onglet Paramètres avec un emplacement créé
 					</p>
+					<hr className={fr.cx('fr-hr', 'fr-mt-12v')} />
 				</div>
 			</div>
 		</NewsLayout>
@@ -204,13 +316,13 @@ const useStyles = tss.create({
 		listStyle: 'none',
 		paddingLeft: 0,
 		margin: 0,
-		...fr.spacing('margin', { topBottom: '4v' }),
+		...fr.spacing('margin', { bottom: '4v' }),
 		'& li': {
 			position: 'relative',
 			paddingLeft: fr.spacing('6v'),
 			marginBottom: fr.spacing('1v'),
 			'&::before': {
-				content: '"✅"',
+				content: 'attr(data-emoji,"✅")',
 				position: 'absolute',
 				left: 0,
 				top: 0,

@@ -3,7 +3,7 @@ import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
-} from '@/src/utils/stats';
+} from '@/src/utils/stats/intention-helpers';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -61,9 +61,7 @@ const ReviewLineVerbatim = ({
 						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')
 					)}
 				>
-					{formatDateToFrenchString(
-						review.created_at?.toISOString().split('T')[0] || ''
-					)}
+					{formatDateToFrenchString(review.created_at?.toString() || '')}
 				</td>
 				<td
 					className={cx(

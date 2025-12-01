@@ -1,4 +1,4 @@
-pip==24.2
+pip==25.3
 setuptools==65.5.0
 psycopg[binary]
 boto3==1.26.70
@@ -7,3 +7,4 @@ requests==2.26.0
 XlsxWriter==3.0.2
 numpy
 pandas
+psutil==5.9.5

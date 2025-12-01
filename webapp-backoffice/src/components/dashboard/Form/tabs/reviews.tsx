@@ -1,21 +1,23 @@
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
+import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import ReviewLine from '@/src/components/dashboard/Reviews/ReviewLine';
+import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
-import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { FILTER_LABELS } from '@/src/utils/helpers';
-import { displayIntention } from '@/src/utils/stats';
+import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import {
 	formatDateToFrenchStringWithHour,
-	getNbPages
+	getNbPages,
+	normalizeString
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -29,12 +31,12 @@ import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	hasButtons: boolean;
 }
 
@@ -353,7 +355,7 @@ const ReviewsTab = (props: Props) => {
 				},
 				currentPage: 1
 			});
-		} else {
+		} else if (!filters.sharedFilters.dateShortcut) {
 			updateFilters({
 				...filters,
 				sharedFilters: {
@@ -384,6 +386,16 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const displayEmptyState = () => {
+		if (form.isDeleted) {
+			return (
+				<div
+					className={fr.cx('fr-col-12')}
+					style={{ display: 'flex', justifyContent: 'center' }}
+				>
+					<span>Ce formulaire est fermé et ne contient aucune réponse</span>
+				</div>
+			);
+		}
 		if (!hasButtons) {
 			return <NoButtonsPanel onButtonClick={handleButtonClick} />;
 		}
@@ -413,7 +425,8 @@ const ReviewsTab = (props: Props) => {
 		return { formConfig, versionNumber: formConfigIndex + 1 };
 	};
 
-	const submit = () => {
+	const submitSearch = (tmpSearch?: string) => {
+		push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 		const startDateValid = validateDateFormat(
 			filters.sharedFilters.currentStartDate
 		);
@@ -431,7 +444,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(search.replace(/[^\w\sÀ-ÿ'"]/gi, '').trim());
+			setValidatedSearch(normalizeString(tmpSearch ?? search));
 			setCurrentPage(1);
 		}
 	};
@@ -523,6 +536,24 @@ const ReviewsTab = (props: Props) => {
 							)}
 						</GenericFilters>
 					</div>
+					<ReviewKeywordFilters
+						product_id={form.product_id}
+						form_id={form.id}
+						start_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentStartDate
+						}
+						end_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentEndDate
+						}
+						onClick={keyword => {
+							setSearch(keyword);
+							submitSearch(keyword);
+						}}
+					/>
 					<div
 						className={cx(
 							classes.filtersWrapper,
@@ -533,7 +564,7 @@ const ReviewsTab = (props: Props) => {
 							className={cx(classes.searchForm)}
 							onSubmit={e => {
 								e.preventDefault();
-								submit();
+								submitSearch();
 								push(['trackEvent', 'Form - Reviews', 'Search']);
 							}}
 						>
@@ -550,7 +581,6 @@ const ReviewsTab = (props: Props) => {
 												setValidatedSearch('');
 											}
 											setSearch(event.target.value);
-											push(['trackEvent', 'Avis', 'Filtre-Recherche']);
 										}
 									}}
 								/>

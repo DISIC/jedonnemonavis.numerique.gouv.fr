@@ -51,7 +51,7 @@ export default function Register() {
 		return (
 			<p>
 				Bravo {userValidated?.firstName}!<br />
-				<br /> Votre compte a été validé avec success,{' '}
+				<br /> Votre compte a été validé avec succès,{' '}
 				<Link className={fr.cx('fr-link')} href="/login">
 					connectez-vous dès maintenant
 				</Link>{' '}
@@ -118,6 +118,6 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		formContainer: {
-			backgroundColor: fr.colors.decisions.background.alt.grey.default,
+			backgroundColor: fr.colors.decisions.background.alt.grey.default
 		}
 	}));

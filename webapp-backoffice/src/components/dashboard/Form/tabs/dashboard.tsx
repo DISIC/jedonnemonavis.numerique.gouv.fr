@@ -1,6 +1,9 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { displayIntention, getStatsIcon } from '@/src/utils/stats';
+import {
+	displayIntention,
+	getStatsIcon
+} from '@/src/utils/stats/intention-helpers';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -13,6 +16,7 @@ import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
+import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	nbReviews: number;
@@ -20,7 +24,7 @@ interface Props {
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
 	hasButtons: boolean;
-	handleModalOpening: (modalType: string, button?: any) => void;
+	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 }
 
 const DashboardTab = ({
@@ -202,23 +206,29 @@ const DashboardTab = ({
 				</>
 			)}
 		</div>
-	) : hasButtons ? (
-		<div className={fr.cx('fr-grid-row')}>
-			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
-			<div className={fr.cx('fr-col-12')}>
-				<NoReviewsPanel />
-			</div>
-		</div>
 	) : (
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
-			<div className={fr.cx('fr-col-12')}>
-				<NoButtonsPanel
-					onButtonClick={() => {
-						handleModalOpening('create');
-					}}
-				/>
-			</div>
+			{form.isDeleted ? (
+				<div
+					className={fr.cx('fr-col-12')}
+					style={{ display: 'flex', justifyContent: 'center' }}
+				>
+					<span>Ce formulaire est fermé et ne contient aucune réponse</span>
+				</div>
+			) : hasButtons ? (
+				<div className={fr.cx('fr-col-12')}>
+					<NoReviewsPanel />
+				</div>
+			) : (
+				<div className={fr.cx('fr-col-12')}>
+					<NoButtonsPanel
+						onButtonClick={() => {
+							handleModalOpening('create');
+						}}
+					/>
+				</div>
+			)}
 		</div>
 	);
 };

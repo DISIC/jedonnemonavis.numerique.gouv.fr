@@ -37,9 +37,12 @@ const ReviewVerbatimMoreInfos = ({
 					<h2 className={cx(classes.subtitle)}>Horaire</h2>
 					<p className={cx(classes.content)}>
 						{review.created_at &&
-							new Date(review.created_at).getHours() +
-								':' +
-								new Date(review.created_at).getMinutes()}
+							(() => {
+								const date = new Date(review.created_at);
+								const hours = String(date.getHours()).padStart(2, '0');
+								const minutes = String(date.getMinutes()).padStart(2, '0');
+								return `${hours}:${minutes}`;
+							})()}
 					</p>
 				</div>
 				{hasManyVersions && (

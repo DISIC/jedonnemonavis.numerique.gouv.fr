@@ -2,7 +2,10 @@ import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
 import { getMemoryValue, setMemoryValue } from '@/src/utils/memoryStorage';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
-import { formatDateToFrenchString } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	getDateWhereFromUTCRange
+} from '@/src/utils/tools';
 import { TRPCError } from '@trpc/server';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
@@ -161,16 +164,10 @@ export const reviewRouter = router({
 									},
 									where: {
 										...(input.end_date && {
-											created_at: {
-												...(input.start_date && {
-													gte: new Date(input.start_date)
-												}),
-												lte: (() => {
-													const adjustedEndDate = new Date(input.end_date);
-													adjustedEndDate.setHours(23, 59, 59);
-													return adjustedEndDate;
-												})()
-											}
+											created_at: getDateWhereFromUTCRange(
+												input.start_date,
+												input.end_date
+											)
 										})
 									}
 								}

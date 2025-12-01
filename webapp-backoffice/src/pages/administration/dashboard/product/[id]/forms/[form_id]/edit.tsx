@@ -1,4 +1,8 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
+import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
+import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
+import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
 import {
@@ -9,21 +13,17 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { $Enums, Prisma, RightAccessStatus } from '@prisma/client';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
+import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
+import { $Enums, Prisma } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { tss } from 'tss-react/dsfr';
-import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
-import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
-import { useUserSettings } from '@/src/contexts/UserSettingsContext';
-import { Tooltip } from '@codegouvfr/react-dsfr/Tooltip';
+import { useCallback, useEffect, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 export type FormConfigHelper = {
 	displays: {
@@ -425,6 +425,15 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		return {
 			redirect: {
 				destination: `/administration/dashboard/product/${id}/forms`,
+				permanent: false
+			}
+		};
+	}
+
+	if (form.isDeleted) {
+		return {
+			redirect: {
+				destination: `/administration/dashboard/product/${id}/forms/${form.id}`,
 				permanent: false
 			}
 		};

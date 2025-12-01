@@ -1,9 +1,13 @@
-import { AnswerIntention, TypeAction } from '@prisma/client';
+import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { matchSorter } from 'match-sorter';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
+import { addDays } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { z } from 'zod';
+import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -26,8 +30,7 @@ export function isValidDate(dateString: string) {
 }
 
 export function isValidEmail(email: string): boolean {
-	const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-	return emailRegex.test(email);
+	return z.string().email().safeParse(email).success;
 }
 
 export function generateRandomString(length: number = 8): string {
@@ -151,8 +154,24 @@ export const transformDateToFrenchReadable = (dateString: string): string => {
 	return `${day === 1 ? '1er' : day} ${monthInFrench} ${year}`;
 };
 
-export const removeAccents = (str: string): string => {
-	return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+export const buildSearchQuery = (str: string) => {
+	return str
+		.split(' ')
+		.filter(w => w.trim().length > 0)
+		.map(word => `${word}:*`)
+		.join('&');
+};
+
+export const normalizeString = (str: string): string => {
+	return str
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '') // strip accents
+		.replace(/[^\w\sÀ-ÿ\u0152\u0153'"]/gi, '') // allow œ/Œ; remove other special characters except letters, numbers, spaces, apostrophes, and quotes
+		.trim();
+};
+
+export const alternativeString = (str: string): string => {
+	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
 };
 
 export const createFilterOptionsWithArgument =
@@ -387,10 +406,14 @@ export const actionMapping: Record<string, TypeAction> = {
 	'adminEntityRight.delete': TypeAction.organisation_uninvite,
 	'button.create': TypeAction.service_button_create,
 	'button.update': TypeAction.service_button_update,
+	'button.delete': TypeAction.service_button_delete,
 	'apiKey.create': TypeAction.service_apikeys_create,
 	'apiKey.delete': TypeAction.service_apikeys_delete,
 	'userEvent.getList': TypeAction.service_logs_view,
-	'formConfig.create': TypeAction.form_config_create
+	'formConfig.create': TypeAction.form_config_create,
+	'form.create': TypeAction.service_form_create,
+	'form.update': TypeAction.service_form_edit,
+	'form.delete': TypeAction.service_form_delete
 };
 
 export const handleActionTypeDisplay = (
@@ -423,15 +446,23 @@ export const handleActionTypeDisplay = (
 		case TypeAction.organisation_uninvite:
 			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.service_button_create:
-			return `Création du bouton <strong>${metadataTyped.json.title}</strong>`;
+			return `Création du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
-			return `Modification du bouton <strong>${metadataTyped.json.title}</strong>`;
+			return `Modification du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
+		case TypeAction.service_button_delete:
+			return `Fermeture du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
 			return `Suppression d'une clé API`;
 		case TypeAction.form_config_create:
 			return `Mise en place du formulaire version ${metadataTyped.json.version}`;
+		case TypeAction.service_form_create:
+			return `Création du formulaire <strong>${metadataTyped.json.title}</strong>`;
+		case TypeAction.service_form_edit:
+			return `Modification du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
+		case TypeAction.service_form_delete:
+			return `Fermeture du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
 	}
 };
 
@@ -450,10 +481,21 @@ export const filtersLabel = [
 		value: 'organisation_uninvite',
 		label: "Retrait d'utilisateur d'une organisation"
 	},
-	{ value: 'service_button_create', label: "Création d'un bouton" },
+	{ value: 'service_button_create', label: "Création d'un lien d'intégration" },
+	{
+		value: 'service_button_update',
+		label: "Modification d'un lien d'intégration"
+	},
+	{
+		value: 'service_button_delete',
+		label: "Suppression d'un lien d'intégration"
+	},
 	{ value: 'service_apikeys_create', label: "Création d'une clé API" },
 	{ value: 'service_apikeys_delete', label: "Suppression d'une clé API" },
-	{ value: 'form_config_create', label: 'Modification du formulaire' }
+	{ value: 'form_config_create', label: 'Modification du formulaire' },
+	{ value: 'service_form_create', label: 'Création d’un formulaire' },
+	{ value: 'service_form_edit', label: 'Modification d’un formulaire' },
+	{ value: 'service_form_delete', label: 'Suppression d’un formulaire' }
 ];
 
 export const getHelperFromFormConfig = (
@@ -502,4 +544,45 @@ export const normalizeHtml = (html: string): string => {
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;/g, "'")
 		.trim(); // Supprime les espaces en début et fin
+};
+
+export const shouldSendEmailsAboutDeletion = (
+	isCurrentDeleted?: boolean | null,
+	isUpdatedDeleted?: boolean | null,
+	isParentDeleted?: boolean | null
+): boolean => {
+	return !isCurrentDeleted && !!isUpdatedDeleted && !isParentDeleted;
+};
+
+export const getDateWhereFromUTCRange = (
+	start_date?: string,
+	end_date?: string
+) => {
+	const tz = 'Europe/Paris';
+	const range: Prisma.DateTimeFilter = {};
+
+	if (start_date) {
+		range.gte = toZonedTime(`${start_date}T00:00:00`, tz);
+	}
+
+	if (end_date) {
+		const endDateParisMidnight = addDays(new Date(`${end_date}T00:00:00`), 1);
+		range.lt = endDateParisMidnight;
+	}
+
+	return range;
+};
+
+export const getValidTabSlug = (tab: string | undefined): TabsSlug => {
+	if (!tab) return 'dashboard';
+	switch (tab) {
+		case 'dashboard':
+		case 'reviews':
+		case 'stats':
+		case 'settings':
+		case 'links':
+			return tab;
+		default:
+			return 'dashboard';
+	}
 };

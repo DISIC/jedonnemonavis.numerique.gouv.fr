@@ -1,29 +1,32 @@
+import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
+import LinksTab from '@/src/components/dashboard/Form/tabs/links';
+import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
+import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
+import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
+import ButtonModal, {
+	ButtonModalType
+} from '@/src/components/dashboard/ProductButton/ButtonModal';
 import {
 	ButtonWithForm,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
+import { getValidTabSlug } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
-import Button from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Notice from '@codegouvfr/react-dsfr/Notice';
+import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
+import { RightAccessStatus } from '@prisma/client';
 import { GetServerSideProps } from 'next';
 import { getToken } from 'next-auth/jwt';
 import Head from 'next/head';
 import Link from 'next/link';
-import { tss } from 'tss-react/dsfr';
-import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
-import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
-import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
-import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
-import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
-import { trpc } from '@/src/utils/trpc';
-import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useRef, useState } from 'react';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import Notice from '@codegouvfr/react-dsfr/Notice';
+import { useEffect, useRef, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 const buttonModal = createModal({
 	id: 'button-modal',
@@ -35,17 +38,22 @@ interface Props {
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
+export type TabsSlug = 'dashboard' | 'reviews' | 'stats' | 'links' | 'settings';
+
 const ProductFormPage = (props: Props) => {
 	const router = useRouter();
 	const { form, ownRight } = props;
 	const { classes, cx } = useStyles();
 
-	const [modalType, setModalType] = useState<string>('');
+	const [modalType, setModalType] = useState<ButtonModalType>();
 	const [currentButton, setCurrentButton] = useState<ButtonWithForm | null>(
 		null
 	);
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
+	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
+		getValidTabSlug(router.query.tab as string | undefined)
+	);
 
 	const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -98,42 +106,45 @@ const ProductFormPage = (props: Props) => {
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
-	const handleModalOpening = (modalType: string, button?: ButtonWithForm) => {
+	const handleModalOpening = (
+		modalType: ButtonModalType,
+		button?: ButtonWithForm
+	) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
 		buttonModal.open();
 	};
 
-	const onButtonCreatedOrUpdated = async (
+	const onButtonMutation = async (
 		isTest: boolean,
 		finalButton: ButtonWithForm
 	) => {
 		buttonModal.close();
 		await refetchButtons();
 
-		if (modalType === 'create') {
-			setAlertText(
-				`L\'emplacement "${finalButton.title}" a été créé avec succès.`
-			);
-			setIsAlertShown(true);
-			handleModalOpening('install', finalButton);
+		switch (modalType) {
+			case 'create': {
+				setAlertText(
+					`Le lien d'intégration "${finalButton.title}" a été créé avec succès.`
+				);
+				setIsAlertShown(true);
+				handleModalOpening('install', finalButton);
+				break;
+			}
+			case 'delete': {
+				setAlertText(
+					`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
+				);
+				setIsAlertShown(true);
+				break;
+			}
 		}
 	};
 
-	const getSlugFromIndex = (index: number) => {
-		switch (index) {
-			case 0:
-				return undefined;
-			case 1:
-				return 'reviews';
-			case 2:
-				return 'stats';
-			case 3:
-				return 'settings';
-			default:
-				return;
-		}
-	};
+	useEffect(() => {
+		if (!router.isReady) return;
+		setSelectedTabId(getValidTabSlug(router.query.tab as string | undefined));
+	}, [router.asPath]);
 
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
@@ -149,7 +160,7 @@ const ProductFormPage = (props: Props) => {
 				modal={buttonModal}
 				modalType={modalType}
 				button={currentButton}
-				onButtonCreatedOrUpdated={onButtonCreatedOrUpdated}
+				onButtonMutation={onButtonMutation}
 			/>
 			<Breadcrumb
 				currentPageLabel={
@@ -167,6 +178,11 @@ const ProductFormPage = (props: Props) => {
 						{form.product.isTop250 && (
 							<Badge severity="info" noIcon className={fr.cx('fr-ml-md-6v')}>
 								Démarche essentielle
+							</Badge>
+						)}
+						{form.isDeleted && (
+							<Badge severity="error" noIcon className="fr-ml-md-3v">
+								Fermé
 							</Badge>
 						)}
 					</div>
@@ -189,30 +205,44 @@ const ProductFormPage = (props: Props) => {
 							isClosable
 							onClose={function noRefCheck() {}}
 							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
-							title={'Formulaire non éditable'}
+							title={'Ce formulaire ne peut être ni édité ni supprimé'}
 							description={
 								<>
-									Ce service est référencé comme démarche essentielle dans
-									l’Observatoire des démarches essentielles. Le formulaire ne
-									peut pas être modifié
+									Ce service est référencé comme démarche essentielle dans l’
+									<a
+										href="https://observatoire.numerique.gouv.fr/"
+										target="_blank"
+									>
+										Observatoire des démarches essentielles
+									</a>
+									. Ce formulaire ne peut donc pas être modifié ou supprimé du
+									service.
 								</>
 							}
+						/>
+					)}
+					{form.isDeleted && (
+						<Notice
+							severity="alert"
+							className={cx(classes.notice, fr.cx('fr-mt-6v'))}
+							title={'Ce formulaire est fermé et ne peut être plus être édité'}
 						/>
 					)}
 				</div>
 				<div className={fr.cx('fr-col-12', 'fr-mt-4v')}>
 					<Tabs
 						ref={tabsRef}
-						onTabChange={t => {
+						selectedTabId={selectedTabId}
+						onTabChange={tabSlug => {
 							const { tab, ...restQuery } = router.query;
 							router.push(
 								{
 									pathname: router.pathname,
 									query:
-										t.tabIndex !== 0
+										tabSlug !== 'dashboard'
 											? {
 													...router.query,
-													tab: getSlugFromIndex(t.tabIndex)
+													tab: tabSlug
 												}
 											: restQuery
 								},
@@ -222,75 +252,93 @@ const ProductFormPage = (props: Props) => {
 						}}
 						tabs={[
 							{
-								label: 'Tableau de bord',
-								content: (
-									<DashboardTab
-										form={form}
-										hasButtons={nbButtons > 0}
-										nbReviews={nbReviews}
-										isLoading={isLoadingReviewsCount}
-										handleModalOpening={handleModalOpening}
-										onClickGoToReviews={() => {
-											tabsRef.current
-												?.querySelector<HTMLButtonElement>(
-													'li[role="presentation"]:nth-child(2) button[role="tab"]'
-												)
-												?.click();
-										}}
-									/>
-								)
+								tabId: 'dashboard',
+								label: 'Tableau de bord'
 							},
 							{
-								label: 'Réponses',
-								content: router.query.tab === 'reviews' && (
-									<ReviewsTab
-										form={form}
-										ownRight={ownRight}
-										handleModalOpening={handleModalOpening}
-										hasButtons={nbButtons > 0}
-									/>
-								),
-								isDefault: router.query.tab === 'reviews'
+								tabId: 'reviews',
+								label: 'Réponses'
 							},
 							{
-								label: 'Statistiques',
-								content: router.query.tab === 'stats' && (
-									<StatsTab
-										form={form}
-										ownRight={ownRight}
-										handleModalOpening={handleModalOpening}
-										onClickGoToReviews={() => {
-											tabsRef.current
-												?.querySelector<HTMLButtonElement>(
-													'li[role="presentation"]:nth-child(2) button[role="tab"]'
-												)
-												?.click();
-										}}
-									/>
-								),
-								isDefault: router.query.tab === 'stats'
+								tabId: 'stats',
+								label: 'Statistiques'
 							},
 							...(ownRight === 'carrier_admin'
 								? [
 										{
-											label: 'Paramètres',
-											content: (
-												<SettingsTab
-													form={form}
-													ownRight={ownRight}
-													modal={buttonModal}
-													alertText={alertText}
-													handleModalOpening={handleModalOpening}
-													isAlertShown={isAlertShown}
-													setIsAlertShown={setIsAlertShown}
-												/>
-											),
-											isDefault: router.query.tab === 'settings'
+											tabId: 'links',
+											label: "Liens d'intégration"
+										},
+										{
+											tabId: 'settings',
+											label: 'Paramètres'
 										}
 									]
 								: [])
 						]}
-					/>
+					>
+						{selectedTabId === 'dashboard' && (
+							<DashboardTab
+								form={form}
+								hasButtons={nbButtons > 0}
+								nbReviews={nbReviews}
+								isLoading={isLoadingReviewsCount}
+								handleModalOpening={handleModalOpening}
+								onClickGoToReviews={() => {
+									tabsRef.current
+										?.querySelector<HTMLButtonElement>(
+											'li[role="presentation"]:nth-child(2) button[role="tab"]'
+										)
+										?.click();
+								}}
+							/>
+						)}
+						{selectedTabId === 'reviews' && (
+							<ReviewsTab
+								form={form}
+								ownRight={ownRight}
+								handleModalOpening={handleModalOpening}
+								hasButtons={nbButtons > 0}
+							/>
+						)}
+						{selectedTabId === 'stats' && (
+							<StatsTab
+								form={form}
+								ownRight={ownRight}
+								handleModalOpening={handleModalOpening}
+								onClickGoToReviews={() => {
+									tabsRef.current
+										?.querySelector<HTMLButtonElement>(
+											'li[role="presentation"]:nth-child(2) button[role="tab"]'
+										)
+										?.click();
+								}}
+							/>
+						)}
+						{ownRight === 'carrier_admin' && (
+							<>
+								{selectedTabId === 'links' && (
+									<LinksTab
+										form={form}
+										ownRight={ownRight}
+										modal={buttonModal}
+										handleModalOpening={handleModalOpening}
+										alertText={alertText}
+										isAlertShown={isAlertShown}
+										setIsAlertShown={setIsAlertShown}
+									/>
+								)}
+								{selectedTabId === 'settings' && (
+									<SettingsTab
+										form={form}
+										alertText={alertText}
+										isAlertShown={isAlertShown}
+										setIsAlertShown={setIsAlertShown}
+									/>
+								)}
+							</>
+						)}
+					</Tabs>
 				</div>
 			</div>
 		</div>
