@@ -9,7 +9,6 @@ import {
 	togglePasswordVisibility
 } from '../../../utils/helpers/register';
 import { selectors } from '../../../utils/selectors';
-import { displayViolationsTable } from '../../../utils/tools';
 import { appUrl, userPassword } from '../../../utils/variables';
 
 const email = generateUniqueEmail();
@@ -39,6 +38,7 @@ describe('jdma-register', () => {
 	it('should show message for non-agent public users', () => {
 		cy.get('input[value="no"]').check({ force: true });
 		cy.contains('button', 'Continuer').click();
+		cy.auditA11y();
 		cy.contains('La création de compte est réservée aux agents public').should(
 			'be.visible'
 		);
@@ -49,6 +49,10 @@ describe('jdma-register', () => {
 		beforeEach(() => {
 			cy.get('input[value="yes"]').check({ force: true });
 			cy.contains('button', 'Continuer').click();
+		});
+
+		it('should pass a11y checks', () => {
+			cy.auditA11y(null, { withDetails: true });
 		});
 
 		it('should display the signup form for agent public', () => {

@@ -37,6 +37,7 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
+		news: '/administration/dashboard/news',
 		nameTestOrga: 'e2e-jdma-entity-test',
 		nameTestService: 'e2e-jdma-service-test',
 		nameTestForm1: 'e2e-jdma-form-test-1',

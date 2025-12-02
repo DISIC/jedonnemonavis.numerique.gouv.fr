@@ -22,7 +22,8 @@ const UserCard = ({
 	selected
 }: Props) => {
 	const { data: session } = useSession({ required: true });
-	const isOwn = session?.user?.id !== undefined && Number(session.user.id) === user.id;
+	const isOwn =
+		session?.user?.id !== undefined && Number(session.user.id) === user.id;
 	const { cx, classes } = useStyles();
 
 	return (
@@ -40,6 +41,7 @@ const UserCard = ({
 							{
 								label: '',
 								nativeInputProps: {
+									'aria-label': `Sélectionner l'utilisateur ${user.firstName} ${user.lastName}`,
 									name: user.email,
 									value: user.id,
 									checked: selected,
@@ -52,7 +54,9 @@ const UserCard = ({
 					></Checkbox>
 				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<Link href={`/administration/dashboard/user/${user.id}/${isOwn ? 'infos' : 'account'}`}>
+					<Link
+						href={`/administration/dashboard/user/${user.id}/${isOwn ? 'infos' : 'account'}`}
+					>
 						<p
 							className={cx(
 								fr.cx('fr-mb-0', 'fr-text--bold'),

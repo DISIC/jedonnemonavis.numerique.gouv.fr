@@ -3,10 +3,10 @@ import {
 	createProduct,
 	fillSignupForm,
 	login,
-	logout
+	logout,
+	tryCloseNewsModal
 } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { displayViolationsTable } from '../../../utils/tools';
 import {
 	adminEmail,
 	adminPassword,
@@ -16,23 +16,40 @@ import {
 } from '../../../utils/variables';
 
 describe('jdma-admin', () => {
+	before(() => {
+		login(adminEmail, adminPassword, true);
+		cy.injectAxe();
+		cy.wait(500);
+		cy.auditA11y();
+		tryCloseNewsModal();
+		cy.wait(500);
+		cy.auditA11y();
+		logout();
+	});
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
+	});
 
-		// cy.checkA11y(
-		// 	null,
-		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-		// 	displayViolationsTable
-		// );
+	it('check a11y news page', () => {
+		cy.visit(`${appUrl}${selectors.dashboard.news}`);
+		cy.injectAxe();
+		cy.auditA11y();
 	});
 
 	it('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.users}`);
+		cy.injectAxe();
+		cy.auditA11y();
+
 		for (let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
 				.should('be.visible')
 				.click();
+			if (i === 0) {
+				cy.wait(500);
+				cy.auditA11y();
+			}
 			fillSignupForm({
 				email: `test${i}@gmail.com`,
 				password: userPassword,
@@ -46,6 +63,8 @@ describe('jdma-admin', () => {
 		cy.get('input[type="checkbox"]').should('have.length', 5);
 		cy.get('input[type="checkbox"][value="value1"]').click({ force: true });
 		cy.contains('button', 'Supprimer tous').click();
+		cy.wait(500);
+		cy.auditA11y();
 		cy.get('input[name="word"]').type('supprimer');
 		cy.contains('button', 'Supprimer').click();
 		cy.get('input[type="checkbox"]').should('have.length', 2);
@@ -54,15 +73,17 @@ describe('jdma-admin', () => {
 		cy.get('input[type="checkbox"]').should('have.length', 7);
 	});
 
-	it('create organisation', () => {
+	it.only('create organisation', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
-
-		cy.get('nav').contains('Organisations').click();
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.entities}`);
+		cy.injectAxe();
+		cy.auditA11y();
 
 		cy.get('[class*="DashBoardEntities"]')
 			.contains('Ajouter une organisation')
 			.click();
+
+		cy.wait(500);
+		cy.auditA11y();
 
 		cy.get(selectors.modal.entity)
 			.should('be.visible')

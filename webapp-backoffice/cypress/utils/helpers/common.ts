@@ -2,14 +2,14 @@ import { selectors } from '../selectors';
 import { displayViolationsTable } from '../tools';
 import { appUrl } from '../variables';
 
-export function login(email: string, password: string) {
+export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-	tryCloseNewsModal();
+	if (!loginOnly) tryCloseNewsModal();
 }
 
 export function logout() {

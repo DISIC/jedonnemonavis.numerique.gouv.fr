@@ -1,7 +1,7 @@
 import './public/home.cy.js';
 import './public/login.cy.js';
-import './bo/admin.cy.ts';
 import './public/register.cy.js';
+import './bo/admin.cy.ts';
 import './bo/forms.cy.ts';
 import './public/review.cy.js';
 import './bo/reviewCheck.cy.ts';

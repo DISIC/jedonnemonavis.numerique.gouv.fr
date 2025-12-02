@@ -1,4 +1,3 @@
-import { displayViolationsTable } from '../../../utils/tools';
 import { appUrl } from '../../../utils/variables';
 
 describe('jdma-login', () => {
