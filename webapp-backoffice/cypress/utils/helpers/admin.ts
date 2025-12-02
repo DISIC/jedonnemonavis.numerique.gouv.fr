@@ -2,14 +2,22 @@ import { selectors } from '../selectors';
 import { appFormUrl, mailerUrl } from '../variables';
 
 export function deleteService(serviceName: string) {
-	cy.contains('a', serviceName)
-		.parents('div.fr-card')
-		.within(() => {
-			cy.get('#button-options-service').click();
-		});
-	cy.contains('li', 'Supprimer ce service').click({
+	cy.get(selectors.productLink)
+		.contains(serviceName)
+		.should('be.visible')
+		.click();
+
+	cy.injectAxe();
+
+	cy.contains('a', 'Informations').click();
+	cy.wait(500);
+	cy.auditA11y();
+
+	cy.contains('button', 'Supprimer ce service').click({
 		force: true
 	});
+	cy.wait(500);
+	cy.auditA11y();
 	cy.contains('button', 'Supprimer').click({ force: true });
 }
 
@@ -23,7 +31,7 @@ export function restaureService() {
 	cy.contains('button', 'Confirmer').click();
 }
 
-export function checkform(shouldWork = false) {
+export function checkReviewForm(shouldWork = false) {
 	cy.visit(`${appFormUrl}/Demarches/4?button=7`, { failOnStatusCode: false });
 	if (shouldWork) {
 		cy.contains('h1', 'Je donne mon avis').should('exist');

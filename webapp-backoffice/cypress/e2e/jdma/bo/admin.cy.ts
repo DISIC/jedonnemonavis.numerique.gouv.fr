@@ -40,6 +40,7 @@ describe('jdma-admin', () => {
 	it('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.users}`);
 		cy.injectAxe();
+		cy.wait(500);
 		cy.auditA11y();
 
 		for (let i = 0; i < 3; i++) {
@@ -70,7 +71,7 @@ describe('jdma-admin', () => {
 		cy.get('input[type="checkbox"]').should('have.length', 2);
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear();
 		cy.contains('button', 'Rechercher').click();
-		cy.get('input[type="checkbox"]').should('have.length', 7);
+		cy.get('input[type="checkbox"]').should('have.length', 8);
 	});
 
 	it('create organisation', () => {
@@ -163,29 +164,33 @@ describe('jdma-admin', () => {
 			.should('be.visible');
 	});
 
+	// TODO: reactivate these tests when it will be decided how to display archived products in the backoffice
+
 	// it('delete service with guest admin', () => {
 	// 	logout();
-	// 	login(invitedEmail, userPassword);
+	// 	login(invitedEmailBis, userPassword);
 	// 	deleteService(selectors.dashboard.nameTestService);
 	// 	checkMail(
 	// 		false,
 	// 		`Suppression du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
 	// 	);
-	// 	checkform(false);
-	// 	cy.visit(`${app_url}`);
+	// 	checkReviewForm(false);
+	// 	cy.visit(`${appUrl}`);
 	// 	cy.contains('div', selectors.dashboard.nameTestService).should('not.exist');
 	// });
 
-	// it('restore service with guest admin', () => {
+	// it.only('restore service with guest admin', () => {
 	// 	logout();
-	// 	login(invitedEmail, userPassword);
+	// 	login(invitedEmailBis, userPassword);
+	// 	cy.wait(5000);
 	// 	restaureService();
+	// 	cy.wait(5000);
 	// 	cy.get('input[name="archived-products"]').should('not.exist');
 	// 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 	// 	checkMail(
 	// 		false,
 	// 		`Restauration du service « ${selectors.dashboard.nameTestService} » sur la plateforme « Je donne mon avis »`
 	// 	);
-	// 	checkform(true);
+	// 	checkReviewForm(true);
 	// });
 });

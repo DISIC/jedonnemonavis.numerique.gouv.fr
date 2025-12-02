@@ -58,6 +58,7 @@ export function testEmailSubmission(
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
+	cy.injectAxe();
 	createProduct('e2e-jdma-service-test-1');
 	createForm('form-test-1');
 }
