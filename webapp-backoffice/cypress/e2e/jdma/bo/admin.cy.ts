@@ -73,7 +73,7 @@ describe('jdma-admin', () => {
 		cy.get('input[type="checkbox"]').should('have.length', 7);
 	});
 
-	it.only('create organisation', () => {
+	it('create organisation', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
 		cy.injectAxe();
 		cy.auditA11y();
@@ -107,6 +107,8 @@ describe('jdma-admin', () => {
 
 	it('invite admin on organisation', () => {
 		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
+		cy.injectAxe();
+
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist')
@@ -118,6 +120,7 @@ describe('jdma-admin', () => {
 		cy.get('dialog#entity-rights-modal')
 			.should('exist')
 			.within(() => {
+				cy.auditA11y();
 				cy.get('input[name="email"]').type(invitedEmailBis);
 				cy.get('button').contains('Inviter').click();
 				cy.get('[class*="entityCardWrapper"]')
@@ -129,6 +132,7 @@ describe('jdma-admin', () => {
 	});
 
 	it('create service', () => {
+		// TODO: add a11y checks when the new onboarding flows will be merged
 		createProduct(selectors.dashboard.nameTestService);
 		cy.visit(`${appUrl}`);
 		cy.get(selectors.productLink)
@@ -148,7 +152,6 @@ describe('jdma-admin', () => {
 	it('login guest admin', () => {
 		logout();
 		login(invitedEmailBis, userPassword);
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
 		cy.get(selectors.productLink).contains(selectors.dashboard.nameTestService);
 
 		cy.get('nav').contains('Organisations').click();

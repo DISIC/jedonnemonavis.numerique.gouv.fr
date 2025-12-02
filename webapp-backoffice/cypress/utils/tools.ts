@@ -1,4 +1,4 @@
-import axe = require('axe-core');
+import * as axe from 'axe-core';
 
 export function displayViolationsTable(
 	violations: axe.Result[],
@@ -11,13 +11,13 @@ export function displayViolationsTable(
 			violations.length === 1 ? '' : 's'
 		} ${violations.length === 1 ? 'was' : 'were'} detected`
 	);
-	// pluck specific keys to keep the table readable
+
 	const violationData = violations.map(
 		({ id, impact, description, nodes }) => ({
 			id,
 			impact,
 			description,
-			nodes: nodes.length // nodes.map(n => n.html)
+			nodes: nodes.length
 		})
 	);
 

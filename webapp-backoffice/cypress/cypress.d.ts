@@ -8,7 +8,7 @@ declare namespace Cypress {
 		 * @param options  { withDetails?: boolean; detailId?: string }
 		 */
 		auditA11y(
-			context?: string | Node | null,
+			context?: string | Node,
 			options?: {
 				withDetails?: boolean;
 				detailId?: string;

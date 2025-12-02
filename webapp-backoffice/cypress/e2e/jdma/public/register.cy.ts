@@ -52,7 +52,7 @@ describe('jdma-register', () => {
 		});
 
 		it('should pass a11y checks', () => {
-			cy.auditA11y(null, { withDetails: true });
+			cy.auditA11y(undefined, { withDetails: true });
 		});
 
 		it('should display the signup form for agent public', () => {

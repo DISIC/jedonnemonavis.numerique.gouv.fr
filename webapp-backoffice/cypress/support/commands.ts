@@ -1,11 +1,11 @@
 import 'cypress-axe';
 import { displayViolationsTable } from '../utils/tools';
-import axe = require('axe-core');
+import * as axe from 'axe-core';
 
 Cypress.Commands.add(
 	'auditA11y',
 	(
-		context: string | Node | axe.ContextObject | null = null,
+		context?: string | Node | axe.ContextObject,
 		options?: {
 			withDetails?: boolean;
 			detailId?: string;

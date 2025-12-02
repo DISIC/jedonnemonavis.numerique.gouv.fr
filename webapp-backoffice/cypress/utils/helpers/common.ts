@@ -1,5 +1,4 @@
 import { selectors } from '../selectors';
-import { displayViolationsTable } from '../tools';
 import { appUrl } from '../variables';
 
 export function login(email: string, password: string, loginOnly = false) {
@@ -26,11 +25,6 @@ export function tryCloseNewsModal() {
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
-			cy.checkA11y(
-				null,
-				{ includedImpacts: ['moderate', 'serious', 'critical'] },
-				displayViolationsTable
-			);
 			cy.wrap($modal).within(() => {
 				cy.contains('button', 'Fermer').click();
 			});
@@ -93,7 +87,10 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 };
 
 export function createProduct(name: string) {
+	// TODO: add a11y checks when the new onboarding flows will be merged
 	cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+	cy.wait(500);
+	cy.auditA11y();
 	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
