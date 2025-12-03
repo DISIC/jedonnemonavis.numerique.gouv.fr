@@ -21,7 +21,6 @@ import {
 	fillFormStep4
 } from '../../../utils/helpers/review';
 import { selectors } from '../../../utils/selectors';
-import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 const FORM_TITLES = [
@@ -32,18 +31,13 @@ const FORM_TITLES = [
 describe('jdma-forms', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
-		ensureTestServiceExistsAndGoToForms();
-
 		cy.injectAxe();
-		// cy.checkA11y(
-		// 	null,
-		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-		// 	displayViolationsTable
-		// );
+		ensureTestServiceExistsAndGoToForms();
 	});
 
-	it('should create multiple forms for a single service', () => {
-		cy.wrap(FORM_TITLES).each((title: string) => {
+	it.only('should create multiple forms for a single service', () => {
+		cy.auditA11y();
+		cy.wrap(FORM_TITLES).each((title: string, i: number) => {
 			cy.get('body').then($body => {
 				const exists =
 					$body.find(`a:contains("${title}")`).filter(function () {
@@ -51,7 +45,7 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					createForm(title);
+					createForm(title, i === 0);
 					cy.contains('a', title).should('exist');
 				} else {
 					cy.log(`Form "${title}" already exists`);

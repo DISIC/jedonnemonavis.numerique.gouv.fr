@@ -179,12 +179,10 @@ describe('jdma-admin', () => {
 	// 	cy.contains('div', selectors.dashboard.nameTestService).should('not.exist');
 	// });
 
-	// it.only('restore service with guest admin', () => {
+	// it('restore service with guest admin', () => {
 	// 	logout();
 	// 	login(invitedEmailBis, userPassword);
-	// 	cy.wait(5000);
 	// 	restaureService();
-	// 	cy.wait(5000);
 	// 	cy.get('input[name="archived-products"]').should('not.exist');
 	// 	cy.contains('div', selectors.dashboard.nameTestService).should('exist');
 	// 	checkMail(

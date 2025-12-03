@@ -59,8 +59,8 @@ export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
 	cy.injectAxe();
-	createProduct('e2e-jdma-service-test-1');
-	createForm('form-test-1');
+	createProduct('e2e-jdma-service-test-from-registration');
+	createForm('form-test-from-registration');
 }
 
 export function checkExistingAccountError() {

@@ -104,15 +104,21 @@ export function createProduct(name: string) {
 		.click();
 }
 
-export function createForm(name: string) {
+export function createForm(name: string, shouldCheckA11y = false) {
 	cy.url().should('include', '/forms');
 	cy.contains(
 		'button',
 		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
 	).click();
+
 	cy.get(selectors.modal.form)
 		.should('be.visible')
 		.within(() => {
+			if (shouldCheckA11y) {
+				cy.injectAxe();
+				cy.wait(500);
+				cy.auditA11y();
+			}
 			cy.get('input[name="title"]')
 				.should('be.visible')
 				.and('not.be.disabled')
