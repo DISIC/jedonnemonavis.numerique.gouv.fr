@@ -209,10 +209,10 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			<h5>Avec ProConnect</h5>
+			<h2 className={fr.cx('fr-h5')}>Avec ProConnect</h2>
 			<ProConnectButton onClick={() => signIn('openid')} />
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-			<h5>Avec votre adresse mail</h5>
+			<h2 className={fr.cx('fr-h5')}>Avec votre adresse mail</h2>
 			<form
 				onSubmit={e => {
 					e.preventDefault();
@@ -303,7 +303,7 @@ export const LoginForm = () => {
 				</Button>
 			</form>
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-			<h5>Vous n&apos;avez pas de compte ?</h5>
+			<h2 className={fr.cx('fr-h5')}>Vous n&apos;avez pas de compte ?</h2>
 			<Link
 				className={cx(classes.button, fr.cx('fr-btn', 'fr-btn--secondary'))}
 				href="/register"

@@ -281,7 +281,9 @@ const ChartWrapper = ({
 								tabIndex={0}
 								enterTouchDelay={0}
 							>
-								<span
+								<button
+									type="button"
+									aria-label={tooltip}
 									className={fr.cx(
 										'fr-icon-information-line',
 										'fr-icon--md',

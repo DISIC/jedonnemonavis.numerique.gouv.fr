@@ -31,10 +31,10 @@ const ProductEmptyState = (props: Props) => {
 						classes.blocs
 					)}
 				>
-					<h4>
+					<h2 className={fr.cx('fr-h4')}>
 						<span className={cx(classes.blueText)}>Je donne mon avis </span>{' '}
 						n’est pas installé sur votre service ?
-					</h4>
+					</h2>
 					<div className={cx(fr.cx('fr-pb-5v'), classes.subtitle)}>
 						Commencez à{' '}
 						<span className={cx(classes.boldText)}>récolter des avis </span>{' '}
@@ -64,10 +64,10 @@ const ProductEmptyState = (props: Props) => {
 						classes.blocs
 					)}
 				>
-					<h4>
+					<h2 className={fr.cx('fr-h4')}>
 						<span className={cx(classes.blueText)}>Je donne mon avis</span> est
 						déjà installé sur votre service ?
-					</h4>
+					</h2>
 					<div className={cx(classes.subtitle)}>
 						Accédez aux <span className={cx(classes.boldText)}>avis</span> et
 						aux <span className={cx(classes.boldText)}>statistiques</span> en

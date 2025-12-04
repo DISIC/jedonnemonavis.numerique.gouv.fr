@@ -1,15 +1,23 @@
 import { selectors } from '../selectors';
-import { appFormUrl, mailerUrl } from '../variables';
+import { mailerUrl } from '../variables';
 
 export function deleteService(serviceName: string) {
-	cy.contains('a', serviceName)
-		.parents('div.fr-card')
-		.within(() => {
-			cy.get('#button-options-service').click();
-		});
-	cy.contains('li', 'Supprimer ce service').click({
+	cy.get(selectors.productLink)
+		.contains(serviceName)
+		.should('be.visible')
+		.click();
+
+	cy.injectAxe();
+
+	cy.contains('a', 'Informations').click();
+	cy.wait(500);
+	cy.auditA11y();
+
+	cy.contains('button', 'Supprimer ce service').click({
 		force: true
 	});
+	cy.wait(500);
+	cy.auditA11y();
 	cy.contains('button', 'Supprimer').click({ force: true });
 }
 
@@ -21,38 +29,6 @@ export function restaureService() {
 	cy.contains('button', 'Restaurer').should('exist').click();
 	cy.get('.fr-modal__body').should('be.visible');
 	cy.contains('button', 'Confirmer').click();
-}
-
-export function checkform(shouldWork = false) {
-	cy.visit(`${appFormUrl}/Demarches/4?button=7`, { failOnStatusCode: false });
-	if (shouldWork) {
-		cy.contains('h1', 'Je donne mon avis').should('exist');
-		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
-	} else {
-		cy.contains('h1', 'Formulaire non trouvé').should('exist');
-	}
-}
-
-export function checkMail(click = false, topic = '') {
-	cy.visit(mailerUrl);
-	cy.get('button[ng-click="refresh()"]').click();
-	cy.get('.msglist-message')
-		.contains('span', topic)
-		.should('exist')
-		.then($message => {
-			if (click) {
-				cy.wrap($message).click();
-				cy.get('ul.nav-tabs').contains('Plain text').click();
-				cy.get('#preview-plain')
-					.find('a')
-					.each($link => {
-						const href = $link.attr('href');
-						if (href && href.includes('/register')) {
-							cy.wrap($link).invoke('removeAttr', 'target').click();
-						}
-					});
-			}
-		});
 }
 
 export function getEmail() {

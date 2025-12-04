@@ -156,7 +156,6 @@ async function seed_users_products() {
 				if ('title' in r) log[`product ${r.title}`] = r;
 				if ('name' in r) log[`owner ${r.name}`] = r;
 			});
-			console.log(log);
 		});
 	});
 }
@@ -181,7 +180,6 @@ async function formatted_title() {
 
 	entities.forEach(async e => {
 		const formattedName = normalizeString(e.name);
-		console.log('processing entity : ', e.name);
 		await prisma.entity.update({
 			where: {
 				id: e.id

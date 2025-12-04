@@ -37,6 +37,7 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
+		news: '/administration/dashboard/news',
 		nameTestOrga: 'e2e-jdma-entity-test',
 		nameTestService: 'e2e-jdma-service-test',
 		nameTestForm1: 'e2e-jdma-form-test-1',
@@ -52,7 +53,8 @@ export const selectors = {
 		button: 'dialog#button-modal',
 		form: 'dialog#new-form-modal',
 		renameForm: 'dialog#rename-form-modal',
-		publishForm: 'dialog#form-publish-modal'
+		publishForm: 'dialog#form-publish-modal',
+		deleteForm: 'dialog#delete-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productLink: '[class*="productLink"]',

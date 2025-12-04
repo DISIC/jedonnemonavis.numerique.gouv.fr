@@ -16,6 +16,11 @@ const email = generateUniqueEmail();
 describe('jdma-register', () => {
 	beforeEach(() => {
 		cy.visit(`${appUrl}/register`);
+		cy.injectAxe();
+	});
+
+	it('should pass a11y checks', () => {
+		cy.auditA11y();
 	});
 
 	// Vérification de la page initiale
@@ -33,6 +38,7 @@ describe('jdma-register', () => {
 	it('should show message for non-agent public users', () => {
 		cy.get('input[value="no"]').check({ force: true });
 		cy.contains('button', 'Continuer').click();
+		cy.auditA11y();
 		cy.contains('La création de compte est réservée aux agents public').should(
 			'be.visible'
 		);
@@ -43,6 +49,10 @@ describe('jdma-register', () => {
 		beforeEach(() => {
 			cy.get('input[value="yes"]').check({ force: true });
 			cy.contains('button', 'Continuer').click();
+		});
+
+		it('should pass a11y checks', () => {
+			cy.auditA11y(undefined, { withDetails: true });
 		});
 
 		it('should display the signup form for agent public', () => {

@@ -533,7 +533,7 @@ const DashBoard = () => {
 							) : (
 								<ul className={classes.buttonList}>
 									{products.map((product, index) => (
-										<li key={index} role="list">
+										<li key={index}>
 											<ProductCard
 												product={product}
 												userId={parseInt(session?.user?.id as string)}

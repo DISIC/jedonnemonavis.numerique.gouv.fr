@@ -1,14 +1,14 @@
 import { selectors } from '../selectors';
-import { appUrl } from '../variables';
+import { appFormUrl, appUrl, mailerUrl } from '../variables';
 
-export function login(email: string, password: string) {
+export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
-	tryCloseNewsModal();
+	if (!loginOnly) tryCloseNewsModal();
 }
 
 export function logout() {
@@ -87,7 +87,10 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 };
 
 export function createProduct(name: string) {
+	// TODO: add a11y checks when the new onboarding flows will be merged
 	cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+	cy.wait(500);
+	cy.auditA11y();
 	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
@@ -101,15 +104,21 @@ export function createProduct(name: string) {
 		.click();
 }
 
-export function createForm(name: string) {
+export function createForm(name: string, shouldCheckA11y = false) {
 	cy.url().should('include', '/forms');
 	cy.contains(
 		'button',
 		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
 	).click();
+
 	cy.get(selectors.modal.form)
 		.should('be.visible')
 		.within(() => {
+			if (shouldCheckA11y) {
+				cy.injectAxe();
+				cy.wait(500);
+				cy.auditA11y();
+			}
 			cy.get('input[name="title"]')
 				.should('be.visible')
 				.and('not.be.disabled')
@@ -152,4 +161,40 @@ export function modifyButton() {
 	});
 	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
+}
+
+export function checkMail(click = false, topic = '') {
+	cy.visit(mailerUrl);
+	cy.get('button[ng-click="refresh()"]').click();
+	cy.get('.msglist-message')
+		.contains('span', topic)
+		.should('exist')
+		.then($message => {
+			if (click) {
+				cy.wrap($message).click();
+				cy.get('ul.nav-tabs').contains('Plain text').click();
+				cy.get('#preview-plain')
+					.find('a')
+					.each($link => {
+						const href = $link.attr('href');
+						if (href && href.includes('/register')) {
+							cy.wrap($link).invoke('removeAttr', 'target').click();
+						}
+					});
+			}
+		});
+}
+
+export function checkReviewForm(shouldWork = false, url?: string) {
+	cy.visit(url ?? `${appFormUrl}/Demarches/4?button=7`, {
+		failOnStatusCode: false
+	});
+	if (shouldWork) {
+		cy.contains('h1', 'Je donne mon avis').should('exist');
+		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
+	} else {
+		cy.contains('h1', /Formulaire non trouvé|Ce formulaire est fermé/).should(
+			'exist'
+		);
+	}
 }
