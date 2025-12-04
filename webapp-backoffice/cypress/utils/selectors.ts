@@ -53,7 +53,8 @@ export const selectors = {
 		button: 'dialog#button-modal',
 		form: 'dialog#new-form-modal',
 		renameForm: 'dialog#rename-form-modal',
-		publishForm: 'dialog#form-publish-modal'
+		publishForm: 'dialog#form-publish-modal',
+		deleteForm: 'dialog#delete-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
 	productLink: '[class*="productLink"]',

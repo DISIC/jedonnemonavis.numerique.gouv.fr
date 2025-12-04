@@ -1,5 +1,5 @@
 import { selectors } from '../selectors';
-import { appUrl } from '../variables';
+import { appFormUrl, appUrl, mailerUrl } from '../variables';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
@@ -161,4 +161,40 @@ export function modifyButton() {
 	});
 	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
+}
+
+export function checkMail(click = false, topic = '') {
+	cy.visit(mailerUrl);
+	cy.get('button[ng-click="refresh()"]').click();
+	cy.get('.msglist-message')
+		.contains('span', topic)
+		.should('exist')
+		.then($message => {
+			if (click) {
+				cy.wrap($message).click();
+				cy.get('ul.nav-tabs').contains('Plain text').click();
+				cy.get('#preview-plain')
+					.find('a')
+					.each($link => {
+						const href = $link.attr('href');
+						if (href && href.includes('/register')) {
+							cy.wrap($link).invoke('removeAttr', 'target').click();
+						}
+					});
+			}
+		});
+}
+
+export function checkReviewForm(shouldWork = false, url?: string) {
+	cy.visit(url ?? `${appFormUrl}/Demarches/4?button=7`, {
+		failOnStatusCode: false
+	});
+	if (shouldWork) {
+		cy.contains('h1', 'Je donne mon avis').should('exist');
+		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
+	} else {
+		cy.contains('h1', /Formulaire non trouvé|Ce formulaire est fermé/).should(
+			'exist'
+		);
+	}
 }

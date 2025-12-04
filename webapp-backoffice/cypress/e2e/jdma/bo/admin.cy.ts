@@ -1,5 +1,5 @@
-import { checkMail } from '../../../utils/helpers/admin';
 import {
+	checkMail,
 	createProduct,
 	fillSignupForm,
 	login,

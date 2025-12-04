@@ -91,7 +91,10 @@ const getPaginationParts = ({
 /** @see <https://components.react-dsfr.codegouv.studio/?path=/docs/components-pagination> */
 export const Pagination = memo(
 	forwardRef<HTMLDivElement, PaginationProps>((props, ref) => {
-		const isMobile = useMemo(() => window.innerWidth <= fr.breakpoints.getPxValues().sm, []);
+		const isMobile = useMemo(
+			() => window.innerWidth <= fr.breakpoints.getPxValues().sm,
+			[]
+		);
 
 		const {
 			id: id_props,
@@ -114,8 +117,12 @@ export const Pagination = memo(
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
-			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, 
-			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize,
+			maxVisiblePages: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: maxVisiblePages,
+			slicesSize: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: slicesSize,
 			isMobile
 		});
 
@@ -139,7 +146,6 @@ export const Pagination = memo(
 										classes.link,
 										getPageLinkProps(1).className
 									)}
-									aria-disabled={true}
 									role="link"
 								>
 									Première page
@@ -151,6 +157,7 @@ export const Pagination = memo(
 										classes.link
 									)}
 									role="link"
+									aria-disabled={true}
 								>
 									Première page
 								</a>
@@ -169,7 +176,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage - 1)}
-								aria-disabled={true}
 								role="link"
 							>
 								page précédente
@@ -184,6 +190,7 @@ export const Pagination = memo(
 									),
 									classes.link
 								)}
+								aria-disabled={true}
 								role="link"
 							>
 								page précédente
@@ -250,7 +257,6 @@ export const Pagination = memo(
 										classes.link
 									)}
 									{...getPageLinkProps(count)}
-									aria-disabled={true}
 									role="link"
 								>
 									Dernière page
@@ -262,6 +268,7 @@ export const Pagination = memo(
 										classes.link
 									)}
 									role="link"
+									aria-disabled={true}
 								>
 									Dernière page
 								</a>

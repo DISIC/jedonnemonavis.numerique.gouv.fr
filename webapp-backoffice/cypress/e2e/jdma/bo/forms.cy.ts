@@ -1,15 +1,18 @@
 import {
+	checkMail,
+	checkReviewForm,
 	createButton,
 	createForm,
 	login,
 	modifyButton
 } from '../../../utils/helpers/common';
 import {
+	checkAllTabsA11y,
+	deleteForm,
 	editFormIntroductionText,
 	ensureTestServiceExistsAndGoToForms,
 	goToCurrentFormReviewPage,
-	goToLinksTabOfForm,
-	goToSettingsTabOfForm,
+	goToTabOfForm,
 	publishForm,
 	renameForm,
 	tryCloseHelpModal
@@ -29,13 +32,14 @@ const FORM_TITLES = [
 ];
 
 describe('jdma-forms', () => {
+	let copiedReviewUrl = '';
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
-		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
+		cy.injectAxe();
 	});
 
-	it.only('should create multiple forms for a single service', () => {
+	it('should create multiple forms for a single service', () => {
 		cy.auditA11y();
 		cy.wrap(FORM_TITLES).each((title: string, i: number) => {
 			cy.get('body').then($body => {
@@ -52,16 +56,23 @@ describe('jdma-forms', () => {
 				}
 			});
 		});
+		cy.auditA11y();
+	});
+
+	it('should pass a11y checks for each form tab', () => {
+		checkAllTabsA11y();
 	});
 
 	it('should create and modify a button from the forms page', () => {
-		goToLinksTabOfForm();
+		goToTabOfForm('links');
 		createButton("Lien d'intégration 1");
 		modifyButton();
 	});
 
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {
-		goToCurrentFormReviewPage();
+		goToCurrentFormReviewPage().then(url => {
+			copiedReviewUrl = url;
+		});
 		fillFormStep1();
 		fillFormStep2();
 		fillFormStep3();
@@ -69,7 +80,7 @@ describe('jdma-forms', () => {
 	});
 
 	it('should edit a form in builder (hide step, edit block, publish) and check changes from dashboard and on form review page', () => {
-		goToSettingsTabOfForm();
+		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		tryCloseHelpModal();
 		editFormIntroductionText();
@@ -79,17 +90,32 @@ describe('jdma-forms', () => {
 		cy.get('[role="tabpanel"]')
 			.first()
 			.should('not.contain', 'Simplicité du langage');
-		goToCurrentFormReviewPage(true);
+		goToCurrentFormReviewPage({ isCurrentFormPage: true });
 		fillFormStep1(true);
 	});
 
+	it('should pass a11y checks for each form tab with data', () => {
+		checkAllTabsA11y();
+	});
+
 	it('should rename form', () => {
-		goToSettingsTabOfForm();
+		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		tryCloseHelpModal();
 		renameForm(selectors.dashboard.renamedTestForm);
 		cy.visit(`${appUrl}${selectors.dashboard.products}`);
 		ensureTestServiceExistsAndGoToForms();
 		cy.contains('a', selectors.dashboard.renamedTestForm).should('exist');
+	});
+
+	it('should delete a form and his links', () => {
+		goToTabOfForm('settings', { isRenamed: true });
+		cy.injectAxe();
+		deleteForm();
+		checkMail(
+			false,
+			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service «${selectors.dashboard.nameTestService}»`
+		);
+		checkReviewForm(false);
 	});
 });
