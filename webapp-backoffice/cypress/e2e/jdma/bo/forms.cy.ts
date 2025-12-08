@@ -1,6 +1,6 @@
 import {
 	createButton,
-	createForm,
+	createOrEditForm,
 	login,
 	modifyButton
 } from '../../../utils/helpers/common';
@@ -43,7 +43,8 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					createForm(title);
+					createOrEditForm(title);
+					cy.visit(`${appUrl}${selectors.url.productTestService}`);
 					cy.contains('a', title).should('exist');
 				} else {
 					cy.log(`Form "${title}" already exists`);
@@ -86,7 +87,7 @@ describe('jdma-forms', () => {
 		cy.contains('button', 'Éditer le formulaire').click();
 		tryCloseHelpModal();
 		renameForm(selectors.dashboard.renamedTestForm);
-		cy.visit(`${appUrl}${selectors.dashboard.products}`);
+		cy.visit(`${appUrl}${selectors.url.products}`);
 		ensureTestServiceExistsAndGoToForms();
 		cy.contains('a', selectors.dashboard.renamedTestForm).should('exist');
 	});

@@ -8,7 +8,6 @@ import { login, logout } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
 	adminEmail,
-	appUrl,
 	firstNameTest,
 	invitedEmailBis,
 	lastNameTest,

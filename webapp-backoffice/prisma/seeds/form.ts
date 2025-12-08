@@ -219,7 +219,11 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							label: 'Souhaitez-vous nous en dire plus ?',
 							content: "Ne partagez pas d'information personnelle.",
 							type_bloc: 'input_text_area',
-							position: 0
+							position: 0,
+							upLabel:
+								'Si vous le souhaitez, vous pouvez partager votre expérience avec notre service en ligne. Vos commentaires nous aideront à l’améliorer et à mieux répondre à vos attentes.<br/><br/>Ce formulaire étant anonyme, les informations fournies ne permettent pas de traiter votre situation personnelle lors du dépôt de votre démarche.',
+							downLabel:
+								'Ne partagez aucune information personnelle (exemple : nom , mail, numéro de démarche)'
 						}
 					]
 				}

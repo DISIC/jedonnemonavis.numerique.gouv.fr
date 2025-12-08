@@ -1,11 +1,11 @@
 import { selectors } from '../selectors';
 import { appUrl } from '../variables';
-import { addUrls, selectEntity, tryCloseNewsModal } from './common';
+import { tryCloseNewsModal } from './common';
 
 export function navigateToCreatedProduct() {
-	cy.visit(`${appUrl}${selectors.dashboard.products}`);
+	cy.visit(`${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
-	cy.url().should('include', selectors.dashboard.products);
+	cy.url().should('include', selectors.url.products);
 	cy.get(selectors.productLink)
 		.filter(':contains("e2e-jdma-service-test-users")')
 		.should('have.length', 1)

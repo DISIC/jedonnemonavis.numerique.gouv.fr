@@ -1,7 +1,6 @@
 import { checkMail } from '../../../utils/helpers/admin';
 import {
-	createForm,
-	createProduct,
+	createOrEditProduct,
 	fillSignupForm,
 	login,
 	logout
@@ -21,7 +20,7 @@ describe('jdma-admin', () => {
 	});
 
 	it('create and delete users', () => {
-		cy.visit(`${appUrl}${selectors.dashboard.users}`);
+		cy.visit(`${appUrl}${selectors.url.users}`);
 		for (let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
 				.should('be.visible')
@@ -36,22 +35,24 @@ describe('jdma-admin', () => {
 		}
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
-		cy.get('input[type="checkbox"]').should('have.length', 5);
-		cy.get('input[type="checkbox"][value="value1"]').click({ force: true });
+		cy.get(selectors.input.checkbox).should('have.length', 5);
+		cy.get(`${selectors.input.checkbox}[value="value1"]`).click({
+			force: true
+		});
 		cy.contains('button', 'Supprimer tous').click();
 		cy.get('input[name="word"]').type('supprimer');
 		cy.contains('button', 'Supprimer').click();
-		cy.get('input[type="checkbox"]').should('have.length', 2);
+		cy.get(selectors.input.checkbox).should('have.length', 2);
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear();
 		cy.contains('button', 'Rechercher').click();
-		cy.get('input[type="checkbox"]').should('have.length', 7);
+		cy.get(selectors.input.checkbox).should('have.length', 7);
 	});
 
 	it('create organisation', () => {
-		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.url.entities}`);
 
 		cy.get('nav').contains('Organisations').click();
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.entities}`);
+		cy.url().should('eq', `${appUrl}${selectors.url.entities}`);
 
 		cy.get('[class*="DashBoardEntities"]')
 			.contains('Ajouter une organisation')
@@ -71,14 +72,14 @@ describe('jdma-admin', () => {
 					.click();
 			});
 
-		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.url.entities}`);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist');
 	});
 
 	it('invite admin on organisation', () => {
-		cy.visit(`${appUrl}${selectors.dashboard.entities}`);
+		cy.visit(`${appUrl}${selectors.url.entities}`);
 		cy.get('.fr-card')
 			.contains('p', selectors.dashboard.nameTestOrga)
 			.should('exist')
@@ -101,7 +102,7 @@ describe('jdma-admin', () => {
 	});
 
 	it('create service', () => {
-		createProduct(selectors.dashboard.nameTestService);
+		createOrEditProduct(selectors.dashboard.nameTestService);
 		cy.visit(`${appUrl}`);
 		cy.get(selectors.productLink)
 			.should('exist')
@@ -120,7 +121,7 @@ describe('jdma-admin', () => {
 	it('login guest admin', () => {
 		logout();
 		login(invitedEmailBis, userPassword);
-		cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
+		cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 		cy.get(selectors.productLink).contains(selectors.dashboard.nameTestService);
 
 		cy.get('nav').contains('Organisations').click();
