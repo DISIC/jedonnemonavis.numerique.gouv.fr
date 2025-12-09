@@ -2,6 +2,7 @@ import OnboardingStepper from '@/src/components/dashboard/Onboarding/OnboardingS
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import SkipLinks from '@codegouvfr/react-dsfr/SkipLinks';
 import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
@@ -168,6 +169,22 @@ const OnboardingLayout = ({
 			<Head>
 				<title>{`${title} | Je donne mon avis`}</title>
 			</Head>
+			<SkipLinks
+				links={[
+					{
+						anchor: '#main',
+						label: 'Contenu'
+					},
+					...(!isStepperLayout
+						? [
+								{
+									anchor: '#onboarding-actions',
+									label: 'Actions du parcours'
+								}
+						  ]
+						: [])
+				]}
+			/>
 			{isStepperLayout && (
 				<Header
 					brandTop={
