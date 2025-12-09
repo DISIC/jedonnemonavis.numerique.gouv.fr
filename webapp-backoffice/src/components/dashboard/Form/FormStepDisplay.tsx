@@ -70,7 +70,7 @@ const FormStepDisplay = (props: Props) => {
 								parent_id: step.id,
 								kind: 'step' as FormConfigKind
 							}
-						]
+					  ]
 					: [])
 			],
 			labels: configHelper.labels
@@ -125,23 +125,31 @@ const FormStepDisplay = (props: Props) => {
 								}
 							/>
 						)}
-
-						<div className={cx(classes.badgeContainer)}>
-							{isHidden && (
-								<Badge className={cx(classes.hiddenBadge)} small>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-									étape masquée
-								</Badge>
-							)}
-							{!isHidden && isStepModified(step.id) && (
-								<Badge className={cx(classes.modifiedBadge)} small>
-									étape modifiée
-								</Badge>
-							)}
-						</div>
 					</div>
-					<div>
-						{step.isHideable ? (
+					<div className={cx(classes.badgeContainer)}>
+						{!step.isHideable && (
+							<Badge severity="info" noIcon small className={fr.cx('fr-mr-2v')}>
+								Étape obligatoire
+							</Badge>
+						)}
+						{isHidden && (
+							<Badge
+								className={cx(classes.hiddenBadge, fr.cx('fr-mr-2v'))}
+								small
+							>
+								<span className={fr.cx('ri-eye-off-line', 'fr-mr-2v')} />
+								étape masquée
+							</Badge>
+						)}
+						{!isHidden && isStepModified(step.id) && (
+							<Badge
+								className={cx(classes.modifiedBadge, fr.cx('fr-mr-2v'))}
+								small
+							>
+								étape modifiée
+							</Badge>
+						)}
+						{step.isHideable && (
 							<Button
 								priority="secondary"
 								iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
@@ -153,10 +161,6 @@ const FormStepDisplay = (props: Props) => {
 							>
 								{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
 							</Button>
-						) : (
-							<Badge severity="info" noIcon>
-								Étape obligatoire
-							</Badge>
 						)}
 					</div>
 				</div>
@@ -175,7 +179,11 @@ const FormStepDisplay = (props: Props) => {
 								</p>
 							)}
 							<p className={fr.cx('fr-mb-0')}>
-								{`${isHidden ? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.' : "Cette étape n'est pas masquable."}`}
+								{`${
+									isHidden
+										? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.'
+										: "Cette étape n'est pas masquable."
+								}`}
 							</p>
 						</div>
 					</>
@@ -328,7 +336,9 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 	header: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		alignItems: 'center'
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: fr.spacing('2v')
 	},
 	headerInfo: {
 		display: 'flex',
@@ -347,15 +357,14 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,
-		marginLeft: fr.spacing('4v'),
+
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		}
 	},
 	modifiedBadge: {
 		backgroundColor:
-			fr.colors.decisions.background.contrast.yellowTournesol.default,
-		marginLeft: fr.spacing('4v')
+			fr.colors.decisions.background.contrast.yellowTournesol.default
 	},
 	tooltip: {
 		...fr.typography[18].style

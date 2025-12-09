@@ -3,12 +3,20 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
+import { useEffect, useRef } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const OnboardingStepper = () => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 	const { steps, updateSteps } = useOnboarding();
+	const currentStepSectionRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (currentStepSectionRef.current) {
+			currentStepSectionRef.current.focus();
+		}
+	}, [steps]);
 
 	return (
 		<div className={classes.stepperContainer}>
@@ -115,7 +123,11 @@ const OnboardingStepper = () => {
 										</div>
 									))}
 								</div>
-								<div className={classes.detailsActions}>
+								<div
+									className={classes.detailsActions}
+									ref={currentStepSectionRef}
+									tabIndex={-1}
+								>
 									{step.isSkippable && (
 										<Button
 											priority="secondary"

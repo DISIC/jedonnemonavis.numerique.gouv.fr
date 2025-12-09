@@ -1,9 +1,9 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { Feeling, smileys } from '@/src/utils/form';
 import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react';
 import Image from 'next/image';
 import { useState } from 'react';
+import { tss } from 'tss-react';
 
 interface Props {
 	block: FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -83,36 +83,37 @@ const useStyles = tss
 		},
 		smileyInput: {
 			width: '100%',
+			height: '100%',
 			border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
 			padding: fr.spacing('4v'),
 			display: 'flex',
-			flexDirection: "column",
-      justifyContent: "center",
-      textAlign: "center",
-      alignItems: "center",
-      gap: fr.spacing("4v"),
+			flexDirection: 'column',
+			justifyContent: 'center',
+			textAlign: 'center',
+			alignItems: 'center',
+			gap: fr.spacing('4v'),
 			cursor: 'pointer',
 			['&:hover']: {
 				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
-				padding: fr.spacing("4v"),
-        paddingLeft: fr.spacing("16v"),
-        paddingRight: fr.spacing("16v"),
+				padding: fr.spacing('4v'),
+				paddingLeft: fr.spacing('16v'),
+				paddingRight: fr.spacing('16v'),
 				img: {
 					marginRight: 0
 				}
 			}
 		},
 		inputIndicator: {
-      position: "absolute",
-      top: "50%",
-      transform: "translateY(-50%)",
-      left: "5%",
-      height: "1rem",
-      width: "1rem",
-      accentColor: fr.colors.decisions.background.flat.blueFrance.default,
-    },
+			position: 'absolute',
+			top: '50%',
+			transform: 'translateY(-50%)',
+			left: '5%',
+			height: '1rem',
+			width: '1rem',
+			accentColor: fr.colors.decisions.background.flat.blueFrance.default
+		},
 		fieldset: {
 			width: '100%',
 			margin: 0,
@@ -125,18 +126,18 @@ const useStyles = tss
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
 				width: '100%',
-				li:{
-          position: "relative",
-          paddingBottom: 0,
-					marginBottom: fr.spacing("4v"),
-          ':last-child': {
-            marginBottom: 0,
-          },
-        }
+				display: 'grid',
+				gridTemplateColumns: '1fr',
+				gap: fr.spacing('4v'),
+				li: {
+					position: 'relative',
+					paddingBottom: 0,
+					display: 'flex'
+				}
 			},
 			[fr.breakpoints.up('md')]: {
 				ul: {
-					columns: nbItems
+					gridTemplateColumns: `repeat(${nbItems}, 1fr)`
 				}
 			}
 		}

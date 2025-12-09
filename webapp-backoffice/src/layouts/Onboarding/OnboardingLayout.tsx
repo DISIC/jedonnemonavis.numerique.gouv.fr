@@ -272,17 +272,6 @@ const OnboardingLayout = ({
 						justifyContent: hideBackButton ? 'flex-end' : 'space-between'
 					}}
 				>
-					{!hideBackButton && (
-						<Button
-							priority={isCancelable ? 'secondary' : 'tertiary'}
-							size="large"
-							iconId={isCancelable ? undefined : 'fr-icon-arrow-left-s-line'}
-							onClick={() => (onCancel ? onCancel() : router.back())}
-						>
-							{isCancelable ? 'Annuler' : 'Retour'}
-						</Button>
-					)}
-
 					<div className={cx(classes.rightActions)}>
 						{/* <Button
 							priority="secondary"
@@ -302,6 +291,18 @@ const OnboardingLayout = ({
 							{confirmText ? confirmText : 'Continuer'}
 						</Button>
 					</div>
+
+					{!hideBackButton && (
+						<Button
+							className={classes.backButton}
+							priority={isCancelable ? 'secondary' : 'tertiary'}
+							size="large"
+							iconId={isCancelable ? undefined : 'fr-icon-arrow-left-s-line'}
+							onClick={() => (onCancel ? onCancel() : router.back())}
+						>
+							{isCancelable ? 'Annuler' : 'Retour'}
+						</Button>
+					)}
 				</section>
 			)}
 		</>
@@ -422,7 +423,11 @@ const useStyles = tss
 		},
 		rightActions: {
 			display: 'flex',
-			gap: fr.spacing('4v')
+			gap: fr.spacing('4v'),
+			order: 2
+		},
+		backButton: {
+			order: 1
 		},
 		asterisk: {
 			color: fr.colors.decisions.text.default.error.default
