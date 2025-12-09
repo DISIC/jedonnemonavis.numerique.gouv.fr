@@ -514,7 +514,7 @@ const ReviewsTab = (props: Props) => {
 							)}
 						</GenericFilters>
 					</div>
-					<ReviewKeywordFilters
+					{/* <ReviewKeywordFilters
 						product_id={form.product_id}
 						form_id={form.id}
 						start_date={
@@ -531,7 +531,7 @@ const ReviewsTab = (props: Props) => {
 							setSearch(keyword);
 							submitSearch(keyword);
 						}}
-					/>
+					/> */}
 					<div
 						className={cx(
 							classes.filtersWrapper,
