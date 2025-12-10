@@ -167,6 +167,11 @@ export function createButton(name: string, isLink = false) {
 
 	cy.get(actions).contains('button', 'Continuer').click();
 
+	// Stub clipboard to avoid "Document is not focused" error in CI
+	cy.window().then(win => {
+		cy.stub(win.navigator.clipboard, 'writeText').resolves();
+	});
+
 	cy.contains('button', 'Copier le code').first().click();
 
 	cy.wait(200);
