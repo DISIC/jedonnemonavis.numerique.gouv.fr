@@ -18,6 +18,7 @@ import {
 describe('jdma-account', () => {
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
+		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);
