@@ -9,6 +9,7 @@ export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
+	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
 }
