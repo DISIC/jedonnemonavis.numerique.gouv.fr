@@ -539,6 +539,6 @@ export const onboardingStepsContent: StepContent[] = [
 				iconId: 'ri-file-copy-line'
 			}
 		],
-		actionsLabel: 'Créer un lien d’intégration'
+		actionsLabel: "Créer un lien d'intégration"
 	}
 ];

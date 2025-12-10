@@ -90,7 +90,7 @@ const NewLink = (props: Props) => {
 	return (
 		<OnboardingLayout
 			isCancelable
-			title={createdButton ? 'Copier le code' : 'Créer un lien d’intégration'}
+			title={createdButton ? 'Copier le code' : "Créer un lien d'intégration"}
 			onConfirm={createdButton ? goNextStep : handleSubmit(onSubmit)}
 			hideMainHintText={!!createdButton}
 			hideBackButton={!!createdButton}
