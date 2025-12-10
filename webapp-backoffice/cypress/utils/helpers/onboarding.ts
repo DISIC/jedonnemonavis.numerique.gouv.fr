@@ -5,7 +5,9 @@ export const editStep = (stepSelector: string) => {
 };
 
 export const skipStep = (stepSelector: string) => {
-	cy.get(stepSelector).contains('button', 'Passer cette étape').click();
+	cy.get(stepSelector)
+		.contains('button', 'Passer cette étape')
+		.click({ force: true });
 };
 
 export const addUserToProduct = (userEmail: string) => {

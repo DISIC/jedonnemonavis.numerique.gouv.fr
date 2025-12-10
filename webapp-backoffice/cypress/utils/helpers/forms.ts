@@ -44,7 +44,7 @@ export function ensureTestServiceExistsAndGoToForms() {
 				`"${selectors.dashboard.nameTestService}" not found, creating resources...`
 			);
 
-			createOrEditProduct(selectors.dashboard.nameTestService);
+			createOrEditProduct(selectors.dashboard.nameTestService, false, true);
 		} else {
 			cy.log(
 				`"${selectors.dashboard.nameTestService}" exists, skipping creation`

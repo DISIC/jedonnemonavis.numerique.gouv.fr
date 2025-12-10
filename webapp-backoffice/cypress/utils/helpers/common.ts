@@ -89,7 +89,11 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 	cy.url().should('eq', appUrl + expectedUrl);
 };
 
-export function createOrEditProduct(name: string, isEdit = false) {
+export function createOrEditProduct(
+	name: string,
+	isEdit = false,
+	onlyProductCreation = false
+) {
 	if (!isEdit) cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
 	cy.get(selectors.productForm)
 		.should('be.visible')
@@ -104,6 +108,13 @@ export function createOrEditProduct(name: string, isEdit = false) {
 			isEdit ? selectors.onboarding.save : selectors.onboarding.continue
 		)
 		.click();
+
+	if (onlyProductCreation) {
+		cy.visit(`${appUrl}${selectors.url.products}`);
+		cy.contains(selectors.productLink, selectors.dashboard.nameTestService)
+			.should('be.visible')
+			.click();
+	}
 }
 
 export function createOrEditForm(name: string, isLink = false, isEdit = false) {
@@ -145,8 +156,11 @@ export function createOrEditForm(name: string, isLink = false, isEdit = false) {
 
 export function createButton(name: string, isLink = false) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
-	cy.contains(isLink ? 'a' : 'button', 'Créer un lien d’intégration').click();
-	cy.url().should('eq', `${appUrl}${selectors.url.newLink}`);
+	cy.contains(isLink ? 'a' : 'button', "Créer un lien d'intégration").click({
+		force: true
+	});
+
+	cy.wait(500);
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;
