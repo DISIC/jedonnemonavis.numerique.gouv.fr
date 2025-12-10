@@ -1,6 +1,7 @@
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
+import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -10,10 +11,18 @@ interface Props {
 	start_date?: string;
 	end_date?: string;
 	onClick: (keyword: string) => void;
+	selectedKeyword?: string;
 }
 
 const ReviewKeywordFilters = (props: Props) => {
-	const { product_id, form_id, start_date, end_date, onClick } = props;
+	const {
+		product_id,
+		form_id,
+		start_date,
+		end_date,
+		onClick,
+		selectedKeyword
+	} = props;
 
 	const { data: keywordsResults } = trpc.answer.getKeywords.useQuery(
 		{
@@ -38,12 +47,18 @@ const ReviewKeywordFilters = (props: Props) => {
 	return (
 		<div className={cx(classes.keywordsBox, fr.cx('fr-p-4v', 'fr-mb-8v'))}>
 			<p className={fr.cx('fr-mb-0')}>
-				<strong>Filtrer par mot récurrent</strong>
+				<strong>Filtrer par mot récurrent</strong>{' '}
+				<Tooltip
+					kind="hover"
+					title="Les mots récurrents apparaissent à partir de 5 occurrences d'un mot, dans des réponses différentes"
+				/>
 			</p>
 			<div className={cx(classes.keywordsContainer)}>
 				{keywordsResults.data.map(keywordObject => {
+					const isSelected = selectedKeyword === keywordObject.keyword;
 					return (
 						<Tag
+							pressed={isSelected}
 							nativeButtonProps={{
 								onClick: () => {
 									onClick(keywordObject.keyword);
@@ -71,6 +86,10 @@ const useStyles = tss.withName(ReviewKeywordFilters.name).create({
 	},
 	keywordsContainer: {
 		display: 'flex',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		flexWrap: 'wrap',
+		[fr.breakpoints.down('md')]: {
+			gap: fr.spacing('1v')
+		}
 	}
 });

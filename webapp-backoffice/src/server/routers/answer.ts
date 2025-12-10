@@ -1429,10 +1429,12 @@ export const answerRouter = router({
 			const buckets =
 				(keywordsAggs?.aggregations?.keywords as any)?.buckets ?? [];
 
-			const data = buckets.map((bucket: any) => ({
-				keyword: bucket.key,
-				count: bucket.doc_count
-			}));
+			const data = buckets
+				.filter((bucket: any) => bucket.doc_count >= 5)
+				.map((bucket: any) => ({
+					keyword: bucket.key,
+					count: bucket.doc_count
+				}));
 
 			return { data: data as { keyword: string; count: number }[] };
 		})
