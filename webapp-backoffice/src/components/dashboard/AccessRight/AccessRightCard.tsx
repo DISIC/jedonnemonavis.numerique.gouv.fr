@@ -44,14 +44,30 @@ const ProductAccessCard = (props: Props) => {
 				)}
 			>
 				<div className={cx(fr.cx('fr-grid-row', 'fr-grid-row--middle'))}>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4', 'fr-mb-4v', 'fr-mb-md-0')}>
+					<div
+						className={fr.cx(
+							'fr-col',
+							'fr-col-12',
+							'fr-col-md-4',
+							'fr-mb-4v',
+							'fr-mb-md-0'
+						)}
+					>
 						<span className={fr.cx('fr-text--bold')}>
 							{accessRight.user
 								? `${accessRight.user?.firstName} ${accessRight.user?.lastName}`
 								: '-'}
 						</span>
 					</div>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4', 'fr-mb-4v', 'fr-mb-md-0')}>
+					<div
+						className={fr.cx(
+							'fr-col',
+							'fr-col-12',
+							'fr-col-md-4',
+							'fr-mb-4v',
+							'fr-mb-md-0'
+						)}
+					>
 						<span className={cx(classes.userEmail)}>
 							{accessRight?.user_email
 								? accessRight?.user_email
@@ -62,7 +78,13 @@ const ProductAccessCard = (props: Props) => {
 					{!accessRight.user_email ? (
 						<div
 							className={cx(
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-mb-4v', 'fr-mb-md-0'),
+								fr.cx(
+									'fr-col',
+									'fr-col-12',
+									'fr-col-md-2',
+									'fr-mb-4v',
+									'fr-mb-md-0'
+								),
 								classes.badgeStatusInvited
 							)}
 						>
@@ -88,7 +110,10 @@ const ProductAccessCard = (props: Props) => {
 									aria-haspopup="true"
 									aria-expanded={menuOpen ? 'true' : undefined}
 									priority={'secondary'}
-									className={cx(classes.button, (menuOpen ? classes.buttonOptionsOpen : ''))}
+									className={cx(
+										classes.button,
+										menuOpen ? classes.buttonOptionsOpen : ''
+									)}
 									onClick={handleClick}
 									disabled={ownRight !== 'carrier_admin'}
 									iconId={
@@ -129,7 +154,7 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		[fr.breakpoints.down('md')]: {
-			justifyContent: 'flex-start',
+			justifyContent: 'flex-start'
 		}
 	},
 	badgeStatusRemoved: {
@@ -148,15 +173,15 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'flex-end',
 		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column',
+			flexDirection: 'column'
 		}
 	},
 	button: {
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
-			justifyContent: 'center',
+			justifyContent: 'center'
 		}
-	},
+	}
 });
 
 export default ProductAccessCard;

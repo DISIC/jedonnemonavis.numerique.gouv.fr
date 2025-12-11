@@ -42,6 +42,8 @@ const NewAccess = () => {
 		[steps]
 	);
 
+	console.log('createdUserAccesses', createdUserAccesses);
+
 	const shouldShowStepper =
 		Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
 		!isEditingStep;
@@ -139,13 +141,20 @@ const NewAccess = () => {
 			onConfirm={onSubmit}
 			isStepperLayout={shouldShowStepper}
 		>
+			{createdUserAccesses && createdUserAccesses.length > 0 && (
+				<div className={classes.alreadyCreatedContainer}>
+					<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
+						Utilisateurs invités
+					</h2>
+				</div>
+			)}
 			<form id="new-access-form">
 				{usersToAdd.map((user, i) => (
 					<Fragment key={i}>
 						<div className={classes.titleContainer}>
-							<p className={fr.cx('fr-text--bold', 'fr-mb-0')}>
-								Personne {i + 1}
-							</p>
+							<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
+								Personne {i + (createdUserAccesses?.length || 0) + 1}
+							</h2>
 							{i > 0 && (
 								<Button
 									size="small"
@@ -275,5 +284,10 @@ const useStyles = tss.create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	alreadyCreatedContainer: {
+		display: 'flex',
+		gap: fr.spacing('4v'),
+		marginBottom: fr.spacing('8v')
 	}
 }));

@@ -1,32 +1,25 @@
-import React from 'react';
-import { getServerSideProps } from '.';
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import Head from 'next/head';
-import AccountLayout from '@/src/layouts/Account/AccountLayout';
-import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
-import {
-	AccessRight,
-	AdminEntityRight,
-	Entity,
-	RightAccessStatus,
-	UserRole
-} from '@prisma/client';
-import AccessCard from '@/src/components/dashboard/Account/Informations/accessCard';
-import { formatDateToFrenchString } from '@/src/utils/tools';
-import Alert from '@codegouvfr/react-dsfr/Alert';
-import { push } from '@socialgouv/matomo-next';
 import {
 	AccessRightSchema,
 	AccessRightWithRelations,
 	AdminEntityRightWithRelations,
 	User
 } from '@/prisma/generated/zod';
+import AccessCard from '@/src/components/dashboard/Account/Informations/accessCard';
+import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
+import AccountLayout from '@/src/layouts/Account/AccountLayout';
+import { formatDateToFrenchString } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { RightAccessStatus, UserRole } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 
 interface Props {
 	isOwn: Boolean;
@@ -154,7 +147,10 @@ const UserAccess: React.FC<Props> = props => {
 				status: ar.status.includes('admin') ? 'carrier_user' : 'carrier_admin'
 			});
 			setDisplayToast(
-				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${ar.status.includes('admin') ? 'utilisateur' : 'administrateur'} du service "${user?.accessRights.find(aer => aer.id === id)?.product.title}".`
+				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${
+					ar.status.includes('admin') ? 'utilisateur' : 'administrateur'
+				} du service "${user?.accessRights.find(aer => aer.id === id)?.product
+					.title}".`
 			);
 		}
 	};
@@ -162,7 +158,9 @@ const UserAccess: React.FC<Props> = props => {
 	const handleSwitchrole = async () => {
 		if (user) {
 			setDisplayToast(
-				`L'accès au rôle superadmin a bien été ${user.role.includes('admin') ? 'retiré' : 'accordé'} pour le compte ${user.firstName} ${user.lastName}.`
+				`L'accès au rôle superadmin a bien été ${
+					user.role.includes('admin') ? 'retiré' : 'accordé'
+				} pour le compte ${user.firstName} ${user.lastName}.`
 			);
 			editUser.mutate({
 				id: user?.id,
@@ -179,14 +177,19 @@ const UserAccess: React.FC<Props> = props => {
 				admin_entity_right_id: id
 			});
 			setDisplayToast(
-				`L'accès à l'organisation "${user?.adminEntityRights.find(aer => aer.id === id)?.entity.name}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès à l'organisation "${user?.adminEntityRights.find(
+					aer => aer.id === id
+				)?.entity
+					.name}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		} else {
 			removeAccessRight.mutate({
 				access_right_id: id
 			});
 			setDisplayToast(
-				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)?.product.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)
+					?.product
+					.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		}
 	};
@@ -264,9 +267,10 @@ const UserAccess: React.FC<Props> = props => {
 				}}
 			>
 				<>
-					<p
-						className={fr.cx('fr-mt-8v')}
-					>{`${modal?.sentence.replace('__!NAME!__', `${user.firstName} ${user.lastName}`)}`}</p>
+					<p className={fr.cx('fr-mt-8v')}>{`${modal?.sentence.replace(
+						'__!NAME!__',
+						`${user.firstName} ${user.lastName}`
+					)}`}</p>
 				</>
 			</OnConfirmModal>
 			<AccountLayout isOwn={isOwn} user={user}>
@@ -368,7 +372,11 @@ const UserAccess: React.FC<Props> = props => {
 						>
 							<div className={fr.cx('fr-col-12', 'fr-mt-8v', 'fr-mb-4v')}>
 								<h3>Organisations</h3>
-								<p>{`${user.firstName} ${user.lastName} ${user.adminEntityRights.length > 0 ? 'est administrateur des organisations suivantes : ' : "n'est administrateur d'aucune organisation pour le moment."}`}</p>
+								<p>{`${user.firstName} ${user.lastName} ${
+									user.adminEntityRights.length > 0
+										? 'est administrateur des organisations suivantes : '
+										: "n'est administrateur d'aucune organisation pour le moment."
+								}`}</p>
 								<ul className={cx(classes.ulContainer)}>
 									{user.adminEntityRights
 										.sort((a, b) => a.entity.name.localeCompare(b.entity.name))
@@ -393,7 +401,11 @@ const UserAccess: React.FC<Props> = props => {
 							</div>
 							<div className={fr.cx('fr-col-12')}>
 								<h3>Services</h3>
-								<p>{`${user.firstName} ${user.lastName} ${sortedEntities.length > 0 ? 'est administrateur des services suivants : ' : "n'est administrateur d'aucun service pour le moment."}`}</p>
+								<p>{`${user.firstName} ${user.lastName} ${
+									sortedEntities.length > 0
+										? 'est administrateur des services suivants : '
+										: "n'est administrateur d'aucun service pour le moment."
+								}`}</p>
 								<ul className={cx(classes.ulContainer)}>
 									{sortedEntities.map((entity, index) => (
 										<li key={entity.name} className={fr.cx('fr-mb-12v')}>
