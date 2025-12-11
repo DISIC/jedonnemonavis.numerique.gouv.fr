@@ -296,11 +296,16 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} complété`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} complété`;
 			case 'iconbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)?.label} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} : ${displayIntention(
+					(value ?? 'neutral') as AnswerIntention
+				)}`;
 			case 'select':
-				return `Source : ${buttons.find(b => b.id === parseInt(value as string))?.title}`;
+				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			default:
 				return '';
 		}
@@ -490,7 +495,9 @@ const ReviewsTab = (props: Props) => {
 									options={[
 										{
 											label: 'Afficher uniquement les nouvelles réponses',
-											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(reviewLog[0].created_at.toString())})`,
+											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(
+												reviewLog[0].created_at.toString()
+											)})`,
 											nativeInputProps: {
 												name: 'favorites-products',
 												checked: filters.productReviews.displayNew,
@@ -514,7 +521,7 @@ const ReviewsTab = (props: Props) => {
 							)}
 						</GenericFilters>
 					</div>
-					<ReviewKeywordFilters
+					{/* <ReviewKeywordFilters
 						product_id={form.product_id}
 						form_id={form.id}
 						start_date={
@@ -532,7 +539,7 @@ const ReviewsTab = (props: Props) => {
 							setSearch(keyword);
 							submitSearch(keyword);
 						}}
-					/>
+					/> */}
 					<div
 						className={cx(
 							classes.filtersWrapper,
