@@ -1,6 +1,6 @@
 import { selectors } from '../selectors';
 import { mailerUrl, userPassword } from '../variables';
-import { createForm, createProduct, fillSignupForm, login } from './common';
+import { doTheOnboardingFlow, fillSignupForm, login } from './common';
 
 export function checkSignupFormVisible() {
 	const { firstName, lastName, email, password, submitButton } =
@@ -58,8 +58,7 @@ export function testEmailSubmission(
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
-	createProduct('e2e-jdma-service-test-1');
-	createForm('form-test-1');
+	doTheOnboardingFlow();
 }
 
 export function checkExistingAccountError() {

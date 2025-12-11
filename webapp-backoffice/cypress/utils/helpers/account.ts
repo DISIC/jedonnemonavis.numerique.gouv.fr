@@ -61,6 +61,7 @@ export function testEmail({
 	fillAccountForm({ email: email, emailConfirmation: confirmationEmail });
 	cy.contains('button', selectors.action.save).click();
 	cy.contains('button', selectors.action.confirm).click();
+	cy.wait(500);
 
 	if (expectedMEssage !== '') {
 		cy.contains('p', expectedMEssage).should('exist');

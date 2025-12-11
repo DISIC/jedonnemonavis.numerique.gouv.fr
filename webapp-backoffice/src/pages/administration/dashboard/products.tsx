@@ -7,6 +7,7 @@ import { Loader } from '@/src/components/ui/Loader';
 import NewsModal from '@/src/components/ui/modal/NewsModal';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
 import { LATEST_NEWS_VERSION } from '@/src/utils/cookie';
 import { getNbPages, normalizeString } from '@/src/utils/tools';
@@ -24,13 +25,10 @@ import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import Head from 'next/head';
-import React, { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
-
-const product_modal = createModal({
-	id: 'product-modal',
-	isOpenedByDefault: false
-});
 
 const entity_modal = createModal({
 	id: 'entity-modal',
@@ -54,10 +52,12 @@ const DashBoard = () => {
 		setSettings,
 		isLoading: isLoadingSettings
 	} = useUserSettings();
+	const router = useRouter();
+	const onboardingDone = router.query.onboardingDone as string | undefined;
+	const { createdProduct, createdForm, reset: resetContext } = useOnboarding();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
 	const [inputValue, setInputValue] = React.useState<string>('');
-	const [fromEmptyState, setFromEmptyState] = React.useState<boolean>(false);
 
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 	const [statusProductState, setStatusProductState] = React.useState<{
@@ -65,16 +65,31 @@ const DashBoard = () => {
 		role: 'status' | 'alert';
 	} | null>(null);
 
-	const [entityCreated, setEntityCreated] = React.useState<
-		Entity | undefined
-	>();
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
 
+	const isOnboardingDone = useMemo(() => {
+		return Boolean(onboardingDone);
+	}, []);
+
 	const { data: session } = useSession({ required: true });
 
 	const { cx, classes } = useStyles();
+
+	useEffect(() => {
+		const handleRouteChangeStart = (url: string) => {
+			if (!url.startsWith('/administration/dashboard/products')) {
+				resetContext();
+			}
+		};
+
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+
+		return () => {
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+		};
+	}, [resetContext, router.events]);
 
 	useEffect(() => {
 		if (isLoadingSettings) return;
@@ -82,10 +97,28 @@ const DashBoard = () => {
 	}, [isLoadingSettings]);
 
 	useEffect(() => {
-		if (shouldModalOpen) {
-			newsModal.open();
-		}
+		if (!shouldModalOpen || !newsModal) return;
+		const timer = setTimeout(() => {
+			if (shouldModalOpen && newsModal) {
+				newsModal.open();
+			}
+		}, 500);
+		return () => clearTimeout(timer);
 	}, [shouldModalOpen, newsModal]);
+
+	useEffect(() => {
+		if (router.query.onboardingDone) {
+			const { onboardingDone, ...restQuery } = router.query;
+			router.replace(
+				{
+					pathname: router.pathname,
+					query: restQuery
+				},
+				undefined,
+				{ shallow: true }
+			);
+		}
+	}, [router.query]);
 
 	const {
 		data: productsResult,
@@ -154,11 +187,6 @@ const DashBoard = () => {
 			: 'Services | Je donne mon avis';
 	};
 
-	const handleSubmit = async (newEntity?: Entity) => {
-		setEntityCreated(newEntity);
-		product_modal.open();
-	};
-
 	const loadModalAndHead = () => {
 		return (
 			<>
@@ -166,34 +194,7 @@ const DashBoard = () => {
 					<title>{headTitle()}</title>
 					<meta name="description" content={headTitle()} />
 				</Head>
-				<ProductModal
-					modal={product_modal}
-					fromEmptyState={fromEmptyState}
-					savedTitle={productTitle}
-					onSubmit={() => {
-						setSearch('');
-						if (filters.filter === 'created_at') {
-							updateFilters({ ...filters, validatedSearch: '' });
-						} else {
-							updateFilters({ ...filters, filter: 'created_at' });
-						}
-						refetchEntities();
-						setIsModalSubmitted(true);
-					}}
-					onTitleChange={title => {
-						setProductTitle(title);
-					}}
-					onNewEntity={() => {
-						product_modal.close();
-						entity_modal.open();
-					}}
-					allowCreateEntity={true}
-					newCreatedEntity={entityCreated}
-				/>
-				<EntityModal
-					modal={entity_modal}
-					onSubmit={newEntity => handleSubmit(newEntity)}
-				/>
+
 				<EssentialProductModal
 					modal={essential_service_modal}
 					productTitle={productTitle}
@@ -233,8 +234,7 @@ const DashBoard = () => {
 				{loadModalAndHead()}
 				<ProductEmptyState
 					onButtonClick={() => {
-						product_modal.open();
-						setFromEmptyState(true);
+						router.push('/administration/dashboard/product/new');
 					}}
 				/>
 			</>
@@ -291,7 +291,7 @@ const DashBoard = () => {
 			{loadModalAndHead()}
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				<div
-					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-3w')}
+					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-5v')}
 				>
 					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 						<h1 className={fr.cx('fr-mb-0')}>
@@ -311,12 +311,41 @@ const DashBoard = () => {
 							iconId="fr-icon-add-circle-line"
 							iconPosition="right"
 							type="button"
-							nativeButtonProps={product_modal.buttonProps}
+							onClick={() => {
+								resetContext();
+								router.push('/administration/dashboard/product/new');
+							}}
 						>
 							Ajouter un nouveau service
 						</Button>
 					</div>
 				</div>
+				{isOnboardingDone && createdProduct && createdForm && (
+					<Alert
+						className={fr.cx('fr-col-12', 'fr-mb-8v')}
+						title="Votre service et votre formulaire ont été créé avec succès !"
+						description={
+							<>
+								Pensez à copier le lien d’intégration sur votre site pour rendre
+								votre formulaire visible aux usagers
+								<Link
+									href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
+									className={fr.cx(
+										'fr-link--icon-right',
+										'fr-ml-2v',
+										'fr-icon-arrow-right-line',
+										'fr-link'
+									)}
+								>
+									Copier le lien d’intégration
+								</Link>
+							</>
+						}
+						severity="success"
+						closable
+					/>
+				)}
+
 				{(displayFilters || !!countArchivedUserScope) && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (

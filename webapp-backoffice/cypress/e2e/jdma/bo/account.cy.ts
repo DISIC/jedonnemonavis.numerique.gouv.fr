@@ -8,7 +8,6 @@ import { login, logout } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
 	adminEmail,
-	appUrl,
 	firstNameTest,
 	invitedEmailBis,
 	lastNameTest,
@@ -19,6 +18,7 @@ import {
 describe('jdma-account', () => {
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
+		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);

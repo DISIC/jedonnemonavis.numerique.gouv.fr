@@ -17,9 +17,10 @@ interface Props {
 	form: FormWithElements;
 	configHelper: FormConfigHelper;
 	hasConfigChanged: boolean;
+	isExternalPublish?: boolean;
 	changeStep: (to: 'previous' | 'next') => void;
 	onConfigChange: (config: FormConfigHelper) => void;
-	onPublish: () => void;
+	onPublish?: () => void;
 	isStepModified: (stepId: number) => boolean;
 }
 
@@ -29,6 +30,7 @@ const FormStepDisplay = (props: Props) => {
 		form,
 		configHelper,
 		hasConfigChanged,
+		isExternalPublish,
 		changeStep,
 		onConfigChange,
 		onPublish,
@@ -68,12 +70,29 @@ const FormStepDisplay = (props: Props) => {
 								parent_id: step.id,
 								kind: 'step' as FormConfigKind
 							}
-						]
+					  ]
 					: [])
 			],
 			labels: configHelper.labels
 		});
 	}, [isHidden]);
+
+	const displayPublishButton = () => {
+		if (isExternalPublish) {
+			return <div />;
+		}
+		return (
+			<Button
+				priority="primary"
+				iconId="fr-icon-computer-line"
+				iconPosition="right"
+				disabled={!hasConfigChanged}
+				onClick={onPublish}
+			>
+				Publier
+			</Button>
+		);
+	};
 
 	return (
 		<div
@@ -82,7 +101,9 @@ const FormStepDisplay = (props: Props) => {
 				isHidden ? classes.containerHidden : null
 			)}
 		>
-			<div className={cx(classes.box)}>
+			<div
+				className={cx(classes.box, !step.isHideable && classes.nonEditableBox)}
+			>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
 						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
@@ -104,36 +125,46 @@ const FormStepDisplay = (props: Props) => {
 								}
 							/>
 						)}
-
-						<div className={cx(classes.badgeContainer)}>
-							{isHidden && (
-								<Badge className={cx(classes.hiddenBadge)} small>
-									<span className={fr.cx('ri-eye-off-line', 'fr-mr-1v')} />
-									étape masquée
-								</Badge>
-							)}
-							{!isHidden && isStepModified(step.id) && (
-								<Badge className={cx(classes.modifiedBadge)} small>
-									étape modifiée
-								</Badge>
-							)}
-						</div>
 					</div>
-					<div>
-						<Button
-							priority="secondary"
-							iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
-							iconPosition="right"
-							onClick={() => {
-								setIsHidden(!isHidden);
-							}}
-							disabled={!step.isHideable}
-						>
-							{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
-						</Button>
+					<div className={cx(classes.badgeContainer)}>
+						{!step.isHideable && (
+							<Badge severity="info" noIcon small className={fr.cx('fr-mr-2v')}>
+								Étape obligatoire
+							</Badge>
+						)}
+						{isHidden && (
+							<Badge
+								className={cx(classes.hiddenBadge, fr.cx('fr-mr-2v'))}
+								small
+							>
+								<span className={fr.cx('ri-eye-off-line', 'fr-mr-2v')} />
+								étape masquée
+							</Badge>
+						)}
+						{!isHidden && isStepModified(step.id) && (
+							<Badge
+								className={cx(classes.modifiedBadge, fr.cx('fr-mr-2v'))}
+								small
+							>
+								étape modifiée
+							</Badge>
+						)}
+						{step.isHideable && (
+							<Button
+								priority="secondary"
+								iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+								iconPosition="right"
+								onClick={() => {
+									setIsHidden(!isHidden);
+								}}
+								disabled={!step.isHideable}
+							>
+								{isHidden ? "Afficher l'étape" : "Masquer l'étape"}
+							</Button>
+						)}
 					</div>
 				</div>
-				{(isHidden || !step.isHideable) && (
+				{isHidden && (
 					<>
 						<hr className={fr.cx('fr-mt-8v', 'fr-mb-7v', 'fr-pb-1v')} />
 						<div className={cx(classes.boxDisabled)}>
@@ -148,7 +179,11 @@ const FormStepDisplay = (props: Props) => {
 								</p>
 							)}
 							<p className={fr.cx('fr-mb-0')}>
-								{`${isHidden ? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.' : "Cette étape n'est pas masquable."}`}
+								{`${
+									isHidden
+										? 'Cette étape est masquée sur le formulaire usager mais vous pouvez visualiser son contenu.'
+										: "Cette étape n'est pas masquable."
+								}`}
 							</p>
 						</div>
 					</>
@@ -163,7 +198,10 @@ const FormStepDisplay = (props: Props) => {
 				) {
 					if (block.position === 1) {
 						return (
-							<div key={block.id} className={cx(classes.box)}>
+							<div
+								key={block.id}
+								className={cx(classes.box, classes.nonEditableBox)}
+							>
 								<RootYesNo
 									block={block}
 									step={step}
@@ -176,7 +214,10 @@ const FormStepDisplay = (props: Props) => {
 
 					if (block.position === 6) {
 						return (
-							<div key={block.id} className={cx(classes.box)}>
+							<div
+								key={block.id}
+								className={cx(classes.box, classes.nonEditableBox)}
+							>
 								<RootScales
 									block={block}
 									step={step}
@@ -192,7 +233,15 @@ const FormStepDisplay = (props: Props) => {
 				// END CUSTOM DISPLAY
 
 				return (
-					<div key={block.id} className={cx(classes.box)}>
+					<div
+						key={block.id}
+						className={cx(
+							classes.box,
+							!block.isUpdatable &&
+								block.options.length === 0 &&
+								classes.nonEditableBox
+						)}
+					>
 						<FormBlockDisplay
 							block={block}
 							form={form}
@@ -232,15 +281,7 @@ const FormStepDisplay = (props: Props) => {
 						Étape suivante
 					</Button>
 				) : (
-					<Button
-						priority="primary"
-						iconId="fr-icon-computer-line"
-						iconPosition="right"
-						disabled={!hasConfigChanged}
-						onClick={onPublish}
-					>
-						Publier
-					</Button>
+					displayPublishButton()
 				)}
 			</div>
 		</div>
@@ -282,17 +323,29 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 		display: 'flex',
 		alignItems: 'center'
 	},
+	nonEditableBox: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+		color: fr.colors.decisions.text.title.grey.default,
+		['h3, h4, h5, h6']: {
+			color: fr.colors.decisions.text.title.grey.default
+		}
+	},
 	disabledAlertMessage: {
 		color: fr.colors.decisions.background.flat.blueFrance.default
 	},
 	header: {
 		display: 'flex',
 		justifyContent: 'space-between',
-		alignItems: 'center'
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: fr.spacing('2v')
 	},
 	headerInfo: {
 		display: 'flex',
-		alignItems: 'center'
+		alignItems: 'center',
+		'& ::before, & ::after': {
+			'--icon-size': '1.5rem'
+		}
 	},
 	buttonsContainer: {
 		display: 'flex',
@@ -304,15 +357,14 @@ const useStyles = tss.withName(FormStepDisplay.name).create({
 	},
 	hiddenBadge: {
 		backgroundColor: fr.colors.decisions.background.default.grey.active,
-		marginLeft: fr.spacing('4v'),
+
 		'.ri-eye-off-line::before': {
 			'--icon-size': '1rem'
 		}
 	},
 	modifiedBadge: {
 		backgroundColor:
-			fr.colors.decisions.background.contrast.yellowTournesol.default,
-		marginLeft: fr.spacing('4v')
+			fr.colors.decisions.background.contrast.yellowTournesol.default
 	},
 	tooltip: {
 		...fr.typography[18].style
