@@ -5,10 +5,9 @@ import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
@@ -612,23 +611,15 @@ const ReviewsTab = (props: Props) => {
 							>
 								{reviews.length > 0 && nbPages > 0 && (
 									<>
-										<div
-											role="status"
-											className={fr.cx('fr-col-12', 'fr-mt-8v')}
-										>
-											Réponses de{' '}
-											<span className={cx(classes.boldText)}>
-												{numberPerPage * (currentPage - 1) + 1}
-											</span>{' '}
-											à{' '}
-											<span className={cx(classes.boldText)}>
-												{numberPerPage * (currentPage - 1) + reviews.length}
-											</span>{' '}
-											sur{' '}
-											<span className={cx(classes.boldText)}>
-												{reviewsCountFiltered}
-											</span>
-										</div>
+										<PageItemsCounter
+											label="Réponses"
+											startItemCount={numberPerPage * (currentPage - 1) + 1}
+											endItemCount={
+												numberPerPage * (currentPage - 1) + reviews.length
+											}
+											totalItemsCount={reviewsCountFiltered}
+											additionalClasses={['fr-col-12', 'fr-mt-8v']}
+										/>
 									</>
 								)}
 							</div>

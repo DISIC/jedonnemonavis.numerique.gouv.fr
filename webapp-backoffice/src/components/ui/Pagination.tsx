@@ -91,7 +91,10 @@ const getPaginationParts = ({
 /** @see <https://components.react-dsfr.codegouv.studio/?path=/docs/components-pagination> */
 export const Pagination = memo(
 	forwardRef<HTMLDivElement, PaginationProps>((props, ref) => {
-		const isMobile = useMemo(() => window.innerWidth <= fr.breakpoints.getPxValues().sm, []);
+		const isMobile = useMemo(
+			() => window.innerWidth <= fr.breakpoints.getPxValues().sm,
+			[]
+		);
 
 		const {
 			id: id_props,
@@ -114,8 +117,12 @@ export const Pagination = memo(
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
-			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, 
-			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize,
+			maxVisiblePages: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: maxVisiblePages,
+			slicesSize: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: slicesSize,
 			isMobile
 		});
 
@@ -294,9 +301,13 @@ export const PageItemsCounter = ({
 	const { cx, classes } = useStyles();
 
 	if (totalItemsCount === 0) return null;
+
+	const key = `${startItemCount}-${endItemCount}-${totalItemsCount}`;
 	return (
 		<div
+			key={key}
 			aria-live="assertive"
+			aria-atomic="true"
 			role="status"
 			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
 		>

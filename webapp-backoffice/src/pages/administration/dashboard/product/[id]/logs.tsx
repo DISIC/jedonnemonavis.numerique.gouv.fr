@@ -96,7 +96,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						<Tag
 							dismissible
 							className={cx(classes.tagFilter)}
-							title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+							title={`Retirer ${filtersLabel.find(f => f.value === action)
+								?.label}`}
 							nativeButtonProps={{
 								onClick: () => {
 									updateFilters({
@@ -182,6 +183,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 							fr.cx('fr-grid-row--center', 'fr-grid-row'),
 							classes.emptyState
 						)}
+						role="status"
 					>
 						<p>Aucun événement trouvé</p>
 					</div>

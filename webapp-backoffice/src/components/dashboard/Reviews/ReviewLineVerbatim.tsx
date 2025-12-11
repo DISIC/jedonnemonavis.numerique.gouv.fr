@@ -96,7 +96,14 @@ const ReviewLineVerbatim = ({
 					<p
 						className={cx(classes.content, classes.contentVerbatim)}
 						dangerouslySetInnerHTML={{
-							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : '-'}`
+							__html: `${
+								review.verbatim
+									? review.verbatim.answer_text?.replace(
+											new RegExp(search, 'gi'),
+											`<span>${search}</span>`
+									  )
+									: '-'
+							}`
 						}}
 					></p>
 				</td>
@@ -115,8 +122,8 @@ const ReviewLineVerbatim = ({
 								? fr.colors.decisions.background.alt.blueFrance.default
 								: undefined
 						}}
+						aria-expanded={displayMoreInfo}
 					>
-						{' '}
 						Voir le détail de la réponse
 					</Button>
 				</td>
