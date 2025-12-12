@@ -62,30 +62,67 @@ export const formatWhereAndOrder = (
 			]
 		}),
 		...(search && {
-			OR: [
-				{
-					answers: {
-						some: {
-							AND: [
-								...search
-									.split(' ')
-									.filter(Boolean)
-									.map((word: string) => ({
-										answer_text: { contains: word, mode: 'insensitive' }
-									})),
-								{ field_code: 'verbatim' },
-								!newReviews &&
-									end_date && {
-										created_at: getDateWhereFromUTCRange(
-											input.start_date,
-											input.end_date
-										)
+			answers: {
+				some: {
+					AND: [
+						{
+							AND: search
+								.split(' ')
+								.filter(Boolean)
+								.flatMap((word: string) => [
+									{
+										OR: [
+											{
+												answer_text: {
+													contains: ` ${word}`,
+													mode: 'insensitive'
+												}
+											},
+											{
+												answer_text: {
+													contains: `${word} `,
+													mode: 'insensitive'
+												}
+											},
+											{
+												answer_text: {
+													contains: ` ${word} `,
+													mode: 'insensitive'
+												}
+											},
+											{
+												answer_text: {
+													startsWith: word,
+													mode: 'insensitive'
+												}
+											},
+											{
+												answer_text: {
+													endsWith: word,
+													mode: 'insensitive'
+												}
+											},
+											{
+												answer_text: {
+													equals: word,
+													mode: 'insensitive'
+												}
+											}
+										]
 									}
-							].filter(Boolean)
-						}
-					}
+								])
+						},
+						{ field_code: 'verbatim' },
+						!newReviews &&
+							end_date && {
+								created_at: getDateWhereFromUTCRange(
+									input.start_date,
+									input.end_date
+								)
+							}
+					].filter(Boolean)
 				}
-			]
+			}
 		})
 	};
 
