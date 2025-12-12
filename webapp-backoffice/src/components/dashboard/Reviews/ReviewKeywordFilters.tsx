@@ -2,7 +2,8 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
-import React from 'react';
+import { push } from '@socialgouv/matomo-next';
+import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -24,12 +25,15 @@ const ReviewKeywordFilters = (props: Props) => {
 		selectedKeyword
 	} = props;
 
-	const { data: keywordsResults } = trpc.answer.getKeywords.useQuery(
+	const [size, setSize] = useState(10);
+
+	const { data: hasKeywords } = trpc.answer.getKeywords.useQuery(
 		{
 			product_id,
 			form_id,
 			start_date,
-			end_date
+			end_date,
+			size: 1
 		},
 		{
 			initialData: {
@@ -38,9 +42,30 @@ const ReviewKeywordFilters = (props: Props) => {
 		}
 	);
 
+	const { data: keywordsResults } = trpc.answer.getKeywords.useQuery(
+		{
+			product_id,
+			form_id,
+			start_date,
+			end_date,
+			size
+		},
+		{
+			initialData: {
+				data: []
+			},
+			enabled: hasKeywords.data.length > 0
+		}
+	);
+
+	const handleLoadMore = () => {
+		push(['trackEvent', 'Product - Reviews', 'Load-More-Keywords']);
+		setSize(prevSize => Math.min(prevSize + 10, 50));
+	};
+
 	const { cx, classes } = useStyles();
 
-	if (!keywordsResults.data.length) {
+	if (!hasKeywords.data.length) {
 		return null;
 	}
 
@@ -71,6 +96,15 @@ const ReviewKeywordFilters = (props: Props) => {
 					);
 				})}
 			</div>
+			{size < 50 && keywordsResults.data.length === size && (
+				<button
+					className={cx(classes.loadMoreButton)}
+					onClick={handleLoadMore}
+					type="button"
+				>
+					Afficher plus de mots récurrents
+				</button>
+			)}
 		</div>
 	);
 };
@@ -90,6 +124,21 @@ const useStyles = tss.withName(ReviewKeywordFilters.name).create({
 		flexWrap: 'wrap',
 		[fr.breakpoints.down('md')]: {
 			gap: fr.spacing('1v')
+		}
+	},
+	loadMoreButton: {
+		background: 'none',
+		border: 'none',
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+		...fr.typography[18].style,
+		cursor: 'pointer',
+		textDecoration: 'underline',
+		padding: 0,
+		marginTop: fr.spacing('2v'),
+		marginBottom: 0,
+		alignSelf: 'flex-start',
+		'&:hover': {
+			textDecoration: 'none'
 		}
 	}
 });
