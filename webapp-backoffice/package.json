@@ -63,7 +63,7 @@
 		"jsonwebtoken": "9.0.2",
 		"lodash": "4.17.21",
 		"match-sorter": "6.3.4",
-		"next": "13.5.9",
+		"next": "16.0.10",
 		"next-auth": "4.24.12",
 		"nodemailer": "7.0.10",
 		"pg": "8.13.0",
