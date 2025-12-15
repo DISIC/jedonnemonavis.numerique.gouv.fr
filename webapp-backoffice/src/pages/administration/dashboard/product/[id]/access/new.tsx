@@ -51,6 +51,7 @@ const NewAccess = () => {
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+	const [isFormSubmitted, setIsFormSubmitted] = React.useState(false);
 	const [isLoading, setIsLoading] = React.useState(false);
 
 	const isEditingStep = useMemo(
@@ -61,18 +62,21 @@ const NewAccess = () => {
 	const isModalOpen = useIsModalOpen(modal);
 
 	const shouldShowStepper =
-		Boolean(createdProduct) &&
-		Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
-		!isEditingStep;
+		steps.find(step => step.slug === 'access')?.isSkipped ||
+		(Boolean(createdProduct) &&
+			isFormSubmitted &&
+			Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
+			!isEditingStep);
 
 	useEffect(() => {
-		if (usersToAdd.length === 0) {
+		if (usersToAdd.length === 0 && isFormSubmitted) {
 			if (!Boolean(createdProduct)) {
 				router
 					.push(`/administration/dashboard/product/${id}/access`)
 					.then(() => {
 						reset();
 						setIsLoading(false);
+						setIsFormSubmitted(false);
 					});
 				return;
 			}
@@ -85,6 +89,7 @@ const NewAccess = () => {
 				);
 			}
 			setIsLoading(false);
+			setIsModalSubmitted(false);
 		}
 	}, [usersToAdd]);
 
@@ -96,6 +101,7 @@ const NewAccess = () => {
 					role: 'carrier_user'
 				}
 			]);
+			setIsFormSubmitted(false);
 		}
 	}, [isEditingStep]);
 
@@ -114,7 +120,6 @@ const NewAccess = () => {
 			]);
 		},
 		onError: (error, values) => {
-			setIsLoading(false);
 			setUsersToAdd(prev => {
 				const newUsers = [...prev];
 				const index = newUsers.findIndex(
@@ -129,14 +134,37 @@ const NewAccess = () => {
 	});
 
 	const createAccessRight = (user: UserToAdd) => {
-		createAccessRightMutation.mutate({
+		return createAccessRightMutation.mutateAsync({
 			user_email: user.email,
 			role: user.role,
 			product_id: Number(id)
 		});
 	};
 
-	const onSubmit = () => {
+	const onSubmit = async () => {
+		if (usersToAdd.length === 0) {
+			setIsFormSubmitted(true);
+			if (!Boolean(createdProduct)) {
+				router
+					.push(`/administration/dashboard/product/${id}/access`)
+					.then(() => {
+						reset();
+						setIsLoading(false);
+						setIsFormSubmitted(false);
+					});
+				return;
+			}
+
+			if (isEditingStep) {
+				updateSteps(
+					steps.map(step =>
+						step.slug === 'access' ? { ...step, isEditing: false } : step
+					)
+				);
+			}
+			return;
+		}
+
 		const hasEmptyEmail = usersToAdd.some(user => user.email.trim() === '');
 		if (hasEmptyEmail) {
 			setUsersToAdd(prev => {
@@ -149,11 +177,14 @@ const NewAccess = () => {
 			});
 			return;
 		}
+		setIsFormSubmitted(true);
 		setIsLoading(true);
 
-		usersToAdd.forEach(user => {
-			createAccessRight(user);
-		});
+		const usersSnapshot = [...usersToAdd];
+		await Promise.allSettled(
+			usersSnapshot.map(user => createAccessRight(user))
+		);
+		setIsLoading(false);
 	};
 
 	const handleRemoveAccess = async (accessRight: AccessRightWithUsers) => {
@@ -168,6 +199,14 @@ const NewAccess = () => {
 			: currentAccessRight?.user_email_invite;
 
 		return `${userName} ne fait plus partie de ${createdProduct?.title}.`;
+	};
+
+	const onSkipAction = () => {
+		updateSteps(
+			steps.map(step =>
+				step.slug === 'access' ? { ...step, isSkipped: true } : step
+			)
+		);
 	};
 
 	if (isLoading) {
@@ -186,7 +225,9 @@ const NewAccess = () => {
 					: 'Inviter des utilisateurs'
 			}
 			onConfirm={onSubmit}
+			onSkip={Boolean(createdProduct) ? onSkipAction : undefined}
 			isStepperLayout={shouldShowStepper}
+			isConfirmDisabled={usersToAdd.length === 0 && !isFormSubmitted}
 		>
 			{createdProduct && (
 				<AccessRightModal
@@ -292,24 +333,22 @@ const NewAccess = () => {
 							<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
 								Personne {i + (createdUserAccesses?.length || 0) + 1}
 							</h2>
-							{i > 0 && (
-								<Button
-									size="small"
-									iconId="fr-icon-delete-line"
-									priority="tertiary"
-									iconPosition="right"
-									type="button"
-									onClick={() => {
-										setUsersToAdd(prev => {
-											const newUsers = [...prev];
-											newUsers.splice(i, 1);
-											return newUsers;
-										});
-									}}
-								>
-									Supprimer
-								</Button>
-							)}
+							<Button
+								size="small"
+								iconId="fr-icon-delete-line"
+								priority="tertiary"
+								iconPosition="right"
+								type="button"
+								onClick={() => {
+									setUsersToAdd(prev => {
+										const newUsers = [...prev];
+										newUsers.splice(i, 1);
+										return newUsers;
+									});
+								}}
+							>
+								Supprimer
+							</Button>
 						</div>
 
 						<Input
@@ -384,27 +423,25 @@ const NewAccess = () => {
 							]}
 						/>
 						<hr />
-						{i === usersToAdd.length - 1 && (
-							<Button
-								size="small"
-								iconId="fr-icon-user-add-line"
-								priority="tertiary"
-								type="button"
-								onClick={() => {
-									setUsersToAdd(prev => [
-										...prev,
-										{
-											email: '',
-											role: 'carrier_user'
-										}
-									]);
-								}}
-							>
-								Ajouter un collaborateur
-							</Button>
-						)}
 					</Fragment>
 				))}
+				<Button
+					size="small"
+					iconId="fr-icon-user-add-line"
+					priority="tertiary"
+					type="button"
+					onClick={() => {
+						setUsersToAdd(prev => [
+							...prev,
+							{
+								email: '',
+								role: 'carrier_user'
+							}
+						]);
+					}}
+				>
+					Ajouter un collaborateur
+				</Button>
 			</form>
 		</OnboardingLayout>
 	);
