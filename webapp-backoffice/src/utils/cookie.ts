@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LATEST_NEWS_VERSION = 2; // Increment this when there are new features to announce
+export const LATEST_NEWS_VERSION = 3; // Increment this when there are new features to announce
 
 export const UserSettingsSchema = z.object({
 	formHelpModalSeen: z.boolean().optional(),
@@ -16,7 +16,9 @@ const USER_SETTINGS_COOKIE =
 function setCookie(name: string, value: string, days = 365) {
 	if (typeof document === 'undefined') return;
 	const maxAge = days * 24 * 60 * 60;
-	document.cookie = `${name}=${encodeURIComponent(value)}; max-age=${maxAge}; path=/; Secure; SameSite=Lax`;
+	document.cookie = `${name}=${encodeURIComponent(
+		value
+	)}; max-age=${maxAge}; path=/; Secure; SameSite=Lax`;
 }
 
 function getCookie(name: string) {
