@@ -1,4 +1,4 @@
-import { AccessRight, Product } from '@prisma/client';
+import { Product } from '@prisma/client';
 import React, {
 	createContext,
 	useCallback,
@@ -6,20 +6,23 @@ import React, {
 	useEffect,
 	useState
 } from 'react';
-import { FormWithElements } from '../types/prismaTypesExtended';
+import {
+	AccessRightWithUsers,
+	FormWithElements
+} from '../types/prismaTypesExtended';
 import { onboardingStepsContent, StepContent } from '../utils/content';
 
 interface OnboardingState {
 	createdProduct?: Product;
 	createdForm?: FormWithElements;
-	createdUserAccesses?: AccessRight[];
+	createdUserAccesses?: AccessRightWithUsers[];
 	steps: StepContent[];
 }
 
 interface OnboardingContextValue extends OnboardingState {
 	updateCreatedProduct: (product: Product) => void;
 	updateCreatedForm: (form: FormWithElements) => void;
-	updateCreatedUserAccesses: (accesses: AccessRight[]) => void;
+	updateCreatedUserAccesses: (accesses: AccessRightWithUsers[]) => void;
 	updateSteps: (newSteps: StepContent[]) => void;
 	reset: () => void;
 }
@@ -35,7 +38,7 @@ export const OnboardingProvider = ({
 }) => {
 	const [createdProduct, setCreatedProduct] = useState<Product | undefined>();
 	const [createdUserAccesses, setCreatedUserAccesses] = useState<
-		AccessRight[] | undefined
+		AccessRightWithUsers[] | undefined
 	>();
 	const [createdForm, setCreatedForm] = useState<
 		FormWithElements | undefined
@@ -94,9 +97,12 @@ export const OnboardingProvider = ({
 		setCreatedForm(f);
 	}, []);
 
-	const updateCreatedUserAccesses = useCallback((accesses: AccessRight[]) => {
-		setCreatedUserAccesses(accesses);
-	}, []);
+	const updateCreatedUserAccesses = useCallback(
+		(accesses: AccessRightWithUsers[]) => {
+			setCreatedUserAccesses(accesses);
+		},
+		[]
+	);
 
 	const updateSteps = useCallback((newSteps: StepContent[]) => {
 		setSteps(newSteps);

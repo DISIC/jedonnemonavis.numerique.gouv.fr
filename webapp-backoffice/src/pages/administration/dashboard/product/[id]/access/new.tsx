@@ -1,9 +1,13 @@
+import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
+import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo } from 'react';
@@ -17,6 +21,11 @@ type UserToAdd = {
 	errorStatus?: number;
 };
 
+const modal = createModal({
+	id: 'user-product-modal',
+	isOpenedByDefault: false
+});
+
 const NewAccess = () => {
 	const { cx, classes } = useStyles();
 	const router = useRouter();
@@ -27,7 +36,8 @@ const NewAccess = () => {
 		createdUserAccesses,
 		updateCreatedUserAccesses,
 		steps,
-		updateSteps
+		updateSteps,
+		reset
 	} = useOnboarding();
 
 	const [usersToAdd, setUsersToAdd] = React.useState<UserToAdd[]>([
@@ -36,13 +46,19 @@ const NewAccess = () => {
 			role: 'carrier_user'
 		}
 	]);
+	const [currentAccessRight, setCurrentAccessRight] =
+		React.useState<AccessRightWithUsers>();
+	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
 
 	const isEditingStep = useMemo(
 		() => steps.find(step => step.slug === 'access')?.isEditing,
 		[steps]
 	);
 
+	const isModalOpen = useIsModalOpen(modal);
+
 	const shouldShowStepper =
+		Boolean(createdProduct) &&
 		Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
 		!isEditingStep;
 
@@ -50,6 +66,7 @@ const NewAccess = () => {
 		if (usersToAdd.length === 0) {
 			if (!Boolean(createdProduct)) {
 				router.push(`/administration/dashboard/product/${id}/access`);
+				reset();
 				return;
 			}
 
@@ -129,6 +146,12 @@ const NewAccess = () => {
 		});
 	};
 
+	const handleRemoveAccess = async (accessRight: AccessRightWithUsers) => {
+		setCurrentAccessRight(accessRight);
+		setIsModalSubmitted(false);
+		modal.open();
+	};
+
 	return (
 		<OnboardingLayout
 			title={
@@ -139,13 +162,95 @@ const NewAccess = () => {
 			onConfirm={onSubmit}
 			isStepperLayout={shouldShowStepper}
 		>
+			{createdProduct && (
+				<AccessRightModal
+					modal={modal}
+					isOpen={isModalOpen}
+					modalType={'remove'}
+					productId={createdProduct.id}
+					productName={createdProduct.title}
+					setIsModalSubmitted={setIsModalSubmitted}
+					currentAccessRight={currentAccessRight}
+					setCurrentAccessRight={setCurrentAccessRight}
+					onSuccess={() => {
+						updateCreatedUserAccesses(
+							(createdUserAccesses || []).filter(
+								access => access.id !== currentAccessRight?.id
+							)
+						);
+					}}
+				/>
+			)}
+			{createdUserAccesses && createdUserAccesses.length > 0 && (
+				<div className={classes.alreadyCreatedContainer}>
+					<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
+						Utilisateurs invités
+					</h2>
+					{createdUserAccesses.map((access, i) => {
+						const invitedUserTitle = access.user
+							? `${access.user.firstName} ${access.user.lastName}`
+							: access.user_email_invite;
+						const roleTitle =
+							access.status === 'carrier_admin'
+								? 'Administrateur'
+								: 'Utilisateur';
+						return (
+							<div
+								key={i}
+								className={cx(classes.card, fr.cx('fr-card', 'fr-p-2w'))}
+							>
+								<div
+									className={fr.cx(
+										'fr-grid-row',
+										'fr-grid-row--gutters',
+										'fr-grid-row--middle'
+									)}
+								>
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
+										<p
+											className={cx(
+												classes.title,
+												fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
+											)}
+										>
+											{invitedUserTitle} - {roleTitle}
+										</p>
+										{access.user_email && (
+											<p
+												className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-text--xs')}
+											>
+												{access.user_email}
+											</p>
+										)}
+									</div>
+
+									<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
+										<div className={cx(classes.actionsContainer)}>
+											<Button
+												priority="secondary"
+												size="small"
+												onClick={() => {
+													handleRemoveAccess(access);
+												}}
+												className="fr-mr-md-2v"
+											>
+												Retirer l'accès
+											</Button>
+										</div>
+									</div>
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			)}
 			<form id="new-access-form">
 				{usersToAdd.map((user, i) => (
 					<Fragment key={i}>
 						<div className={classes.titleContainer}>
-							<p className={fr.cx('fr-text--bold', 'fr-mb-0')}>
-								Personne {i + 1}
-							</p>
+							<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
+								Personne {i + (createdUserAccesses?.length || 0) + 1}
+							</h2>
 							{i > 0 && (
 								<Button
 									size="small"
@@ -275,5 +380,36 @@ const useStyles = tss.create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
+	},
+	alreadyCreatedContainer: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('4v'),
+		marginBottom: fr.spacing('8v')
+	},
+	card: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+		height: 'auto!important',
+		backgroundImage: 'none!important'
+	},
+	title: {
+		fontWeight: 'bold'
+	},
+	actionsContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		justifyContent: 'flex-end',
+
+		[fr.breakpoints.down('md')]: {
+			paddingLeft: 0,
+			flexDirection: 'column',
+			justifyContent: 'flex-start',
+			gap: fr.spacing('4v'),
+			button: {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	}
 }));
