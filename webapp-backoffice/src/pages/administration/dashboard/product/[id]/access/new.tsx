@@ -1,9 +1,11 @@
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
+import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
@@ -49,6 +51,7 @@ const NewAccess = () => {
 	const [currentAccessRight, setCurrentAccessRight] =
 		React.useState<AccessRightWithUsers>();
 	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
+	const [isLoading, setIsLoading] = React.useState(false);
 
 	const isEditingStep = useMemo(
 		() => steps.find(step => step.slug === 'access')?.isEditing,
@@ -65,8 +68,12 @@ const NewAccess = () => {
 	useEffect(() => {
 		if (usersToAdd.length === 0) {
 			if (!Boolean(createdProduct)) {
-				router.push(`/administration/dashboard/product/${id}/access`);
-				reset();
+				router
+					.push(`/administration/dashboard/product/${id}/access`)
+					.then(() => {
+						reset();
+						setIsLoading(false);
+					});
 				return;
 			}
 
@@ -77,6 +84,7 @@ const NewAccess = () => {
 					)
 				);
 			}
+			setIsLoading(false);
 		}
 	}, [usersToAdd]);
 
@@ -106,6 +114,7 @@ const NewAccess = () => {
 			]);
 		},
 		onError: (error, values) => {
+			setIsLoading(false);
 			setUsersToAdd(prev => {
 				const newUsers = [...prev];
 				const index = newUsers.findIndex(
@@ -140,6 +149,7 @@ const NewAccess = () => {
 			});
 			return;
 		}
+		setIsLoading(true);
 
 		usersToAdd.forEach(user => {
 			createAccessRight(user);
@@ -151,6 +161,22 @@ const NewAccess = () => {
 		setIsModalSubmitted(false);
 		modal.open();
 	};
+
+	const getAlertTitle = () => {
+		const userName = currentAccessRight?.user
+			? `${currentAccessRight.user.firstName} ${currentAccessRight.user.lastName}`
+			: currentAccessRight?.user_email_invite;
+
+		return `${userName} ne fait plus partie de ${createdProduct?.title}.`;
+	};
+
+	if (isLoading) {
+		return (
+			<OnboardingLayout noBackground>
+				<Loader />
+			</OnboardingLayout>
+		);
+	}
 
 	return (
 		<OnboardingLayout
@@ -181,6 +207,21 @@ const NewAccess = () => {
 					}}
 				/>
 			)}
+			{isModalSubmitted && (
+				<div role="status">
+					<Alert
+						closable
+						onClose={function noRefCheck() {
+							setIsModalSubmitted(false);
+						}}
+						severity={'success'}
+						className={fr.cx('fr-mb-8v')}
+						small
+						description={getAlertTitle()}
+					/>
+				</div>
+			)}
+
 			{createdUserAccesses && createdUserAccesses.length > 0 && (
 				<div className={classes.alreadyCreatedContainer}>
 					<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
