@@ -154,9 +154,9 @@ export function createOrEditForm(name: string, isEdit = false) {
 	}
 }
 
-export function createButton(name: string, isLink = false) {
+export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
-	cy.contains(isLink ? 'a' : 'button', "Créer un lien d'intégration").click({
+	cy.contains('button', "Créer un lien d'intégration").click({
 		force: true
 	});
 
@@ -217,5 +217,5 @@ export function doTheOnboardingFlow() {
 	createOrEditForm('form-test-1');
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true);
-	createButton('e2e-jdma-button-test-1', true);
+	createButton('e2e-jdma-button-test-1');
 }
