@@ -118,9 +118,8 @@ export function createOrEditProduct(
 	}
 }
 
-export function createOrEditForm(name: string, isLink = false, isEdit = false) {
-	if (!isEdit)
-		cy.contains(isLink ? 'a' : 'button', 'Générer un formulaire').click();
+export function createOrEditForm(name: string, isEdit = false) {
+	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
 	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
@@ -215,8 +214,8 @@ export function doTheOnboardingFlow() {
 	skipStep(selectors.onboarding.step.access);
 	editStep(selectors.onboarding.step.access);
 	addUserToProduct(invitedEmail);
-	createOrEditForm('form-test-1', true);
+	createOrEditForm('form-test-1');
 	editStep(selectors.onboarding.step.form);
-	createOrEditForm('form-test-1-edited', true, true);
+	createOrEditForm('form-test-1-edited', true);
 	createButton('e2e-jdma-button-test-1', true);
 }
