@@ -16,5 +16,5 @@ export const addUserToProduct = (userEmail: string) => {
 		.click();
 	cy.get('input[class*="fr-input"]').type(userEmail);
 	cy.get('input[value="carrier_admin"]').siblings('label').click();
-	cy.get('button').contains('Continuer').click();
+	cy.get('button').contains('Inviter et continuer').click();
 };
