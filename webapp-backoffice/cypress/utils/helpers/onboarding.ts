@@ -12,7 +12,7 @@ export const skipStep = (stepSelector: string) => {
 
 export const addUserToProduct = (userEmail: string) => {
 	cy.get(selectors.onboarding.step.access)
-		.contains('a', 'Inviter des utilisateurs')
+		.contains('button', 'Inviter des utilisateurs')
 		.click();
 	cy.get('input[class*="fr-input"]').type(userEmail);
 	cy.get('input[value="carrier_admin"]').siblings('label').click();
