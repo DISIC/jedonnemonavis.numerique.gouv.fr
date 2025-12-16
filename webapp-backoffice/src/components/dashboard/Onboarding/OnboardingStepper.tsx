@@ -84,7 +84,9 @@ const OnboardingStepper = () => {
 										if (step.isSkipped) {
 											updateSteps(
 												steps.map(s =>
-													s.slug === step.slug ? { ...s, isSkipped: false } : s
+													s.slug === step.slug
+														? { ...s, isSkipped: false, isEditing: undefined }
+														: s
 												)
 											);
 											return;
@@ -137,7 +139,9 @@ const OnboardingStepper = () => {
 											onClick={() => {
 												updateSteps(
 													steps.map(s =>
-														s.slug === step.slug ? { ...s, isSkipped: true } : s
+														s.slug === step.slug
+															? { ...s, isSkipped: true, isEditing: false }
+															: s
 													)
 												);
 											}}
@@ -149,7 +153,16 @@ const OnboardingStepper = () => {
 										size="large"
 										iconPosition="right"
 										iconId="fr-icon-arrow-right-s-line"
-										linkProps={{ href: step.url }}
+										onClick={() => {
+											if (step.isSkippable) {
+												updateSteps(
+													steps.map(s =>
+														s.slug === step.slug ? { ...s, isEditing: true } : s
+													)
+												);
+											}
+											router.push(step.url);
+										}}
 									>
 										{step.actionsLabel}
 									</Button>
