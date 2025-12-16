@@ -1,5 +1,4 @@
 import AccessRightModal from '@/src/components/dashboard/AccessRight/AccessRightModal';
-import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
@@ -12,8 +11,10 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useRouter } from 'next/router';
-import React, { Fragment, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '..';
+import { Product } from '@prisma/client';
 
 type RoleType = 'carrier_user' | 'carrier_admin';
 
@@ -28,7 +29,16 @@ const modal = createModal({
 	isOpenedByDefault: false
 });
 
-const NewAccess = () => {
+const emptyUser: UserToAdd = {
+	email: '',
+	role: 'carrier_user'
+};
+
+interface Props {
+	product: Product;
+}
+
+const NewAccess = ({ product }: Props) => {
 	const { cx, classes } = useStyles();
 	const router = useRouter();
 	const utils = trpc.useUtils();
@@ -42,94 +52,53 @@ const NewAccess = () => {
 		reset
 	} = useOnboarding();
 
-	const [usersToAdd, setUsersToAdd] = React.useState<UserToAdd[]>([
-		{
-			email: '',
-			role: 'carrier_user'
-		}
-	]);
+	const [userToInvite, setUserToInvite] = useState<UserToAdd>(emptyUser);
 	const [currentAccessRight, setCurrentAccessRight] =
-		React.useState<AccessRightWithUsers>();
-	const [isModalSubmitted, setIsModalSubmitted] = React.useState(false);
-	const [isFormSubmitted, setIsFormSubmitted] = React.useState(false);
-	const [isLoading, setIsLoading] = React.useState(false);
+		useState<AccessRightWithUsers>();
+	const [isModalSubmitted, setIsModalSubmitted] = useState(false);
+	const [isMounted, setIsMounted] = useState(false);
 
 	const isEditingStep = useMemo(
 		() => steps.find(step => step.slug === 'access')?.isEditing,
 		[steps]
 	);
+	const isSkippedStep = useMemo(
+		() => steps.find(step => step.slug === 'access')?.isSkipped,
+		[steps]
+	);
+	const [shouldShowStepper, setShouldShowStepper] = useState<boolean>(
+		isSkippedStep ||
+			(Boolean(createdProduct) &&
+				Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
+				!isEditingStep)
+	);
 
 	const isModalOpen = useIsModalOpen(modal);
 
-	const shouldShowStepper =
-		steps.find(step => step.slug === 'access')?.isSkipped ||
-		(Boolean(createdProduct) &&
-			isFormSubmitted &&
-			Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
-			!isEditingStep);
+	useEffect(() => {
+		setIsMounted(true);
+	}, [isMounted]);
 
 	useEffect(() => {
-		if (usersToAdd.length === 0 && isFormSubmitted) {
-			if (!Boolean(createdProduct)) {
-				router
-					.push(`/administration/dashboard/product/${id}/access`)
-					.then(() => {
-						reset();
-						setIsLoading(false);
-						setIsFormSubmitted(false);
-					});
-				return;
-			}
-
-			if (isEditingStep) {
-				updateSteps(
-					steps.map(step =>
-						step.slug === 'access' ? { ...step, isEditing: false } : step
-					)
-				);
-			}
-			setIsLoading(false);
-			setIsModalSubmitted(false);
-		}
-	}, [usersToAdd]);
-
-	useEffect(() => {
-		if (isEditingStep && usersToAdd.length === 0) {
-			setUsersToAdd([
-				{
-					email: '',
-					role: 'carrier_user'
-				}
-			]);
-			setIsFormSubmitted(false);
-		}
-	}, [isEditingStep]);
+		if (isEditingStep !== undefined) setShouldShowStepper(!isEditingStep);
+		if (isSkippedStep) setShouldShowStepper(true);
+	}, [isEditingStep, isSkippedStep]);
 
 	const createAccessRightMutation = trpc.accessRight.create.useMutation({
 		onSuccess: (createdValue, values) => {
 			utils.accessRight.getList.invalidate();
-			setUsersToAdd(prev => {
-				const newUsers = prev.filter(
-					u => !(u.email === values.user_email && u.role === values.role)
-				);
-				return newUsers;
-			});
+			setUserToInvite(emptyUser);
+
 			updateCreatedUserAccesses([
 				...(createdUserAccesses || []),
 				{ ...createdValue.data }
 			]);
 		},
 		onError: (error, values) => {
-			setUsersToAdd(prev => {
-				const newUsers = [...prev];
-				const index = newUsers.findIndex(
-					u => u.email === values.user_email && u.role === values.role
-				);
-				if (index !== -1) {
-					newUsers[index].errorStatus = error.data?.httpStatus;
-				}
-				return newUsers;
-			});
+			setUserToInvite(prev => ({
+				...prev,
+				errorStatus: error.data?.httpStatus
+			}));
 		}
 	});
 
@@ -142,55 +111,22 @@ const NewAccess = () => {
 	};
 
 	const onSubmit = async () => {
-		if (usersToAdd.length === 0) {
-			setIsFormSubmitted(true);
-			if (!Boolean(createdProduct)) {
-				router
-					.push(`/administration/dashboard/product/${id}/access`)
-					.then(() => {
-						reset();
-						setIsLoading(false);
-						setIsFormSubmitted(false);
-					});
-				return;
-			}
-
-			if (isEditingStep) {
-				updateSteps(
-					steps.map(step =>
-						step.slug === 'access' ? { ...step, isEditing: false } : step
-					)
-				);
-			}
-			return;
-		}
-
-		const hasEmptyEmail = usersToAdd.some(user => user.email.trim() === '');
+		const hasEmptyEmail = userToInvite.email.trim() === '';
 		if (hasEmptyEmail) {
-			setUsersToAdd(prev => {
-				return prev.map(user => {
-					if (user.email.trim() === '') {
-						return { ...user, errorStatus: 400 };
-					}
-					return { ...user, errorStatus: undefined };
-				});
-			});
+			setUserToInvite(prev => ({
+				...prev,
+				errorStatus: 400
+			}));
 			return;
 		}
-		setIsFormSubmitted(true);
-		setIsLoading(true);
 
-		const usersSnapshot = [...usersToAdd];
-		await Promise.allSettled(
-			usersSnapshot.map(user => createAccessRight(user))
-		);
-		setIsLoading(false);
+		await createAccessRight(userToInvite);
 	};
 
 	const handleRemoveAccess = async (accessRight: AccessRightWithUsers) => {
 		setCurrentAccessRight(accessRight);
 		setIsModalSubmitted(false);
-		modal.open();
+		if (isMounted) modal.open();
 	};
 
 	const getAlertTitle = () => {
@@ -198,7 +134,27 @@ const NewAccess = () => {
 			? `${currentAccessRight.user.firstName} ${currentAccessRight.user.lastName}`
 			: currentAccessRight?.user_email_invite;
 
-		return `${userName} ne fait plus partie de ${createdProduct?.title}.`;
+		return `${userName} ne fait plus partie de ${product.title}.`;
+	};
+
+	const onConfirm = async () => {
+		if (userToInvite.email.trim() !== '') await onSubmit();
+		if (!Boolean(createdProduct)) {
+			router.push(`/administration/dashboard/product/${id}/access`).then(() => {
+				reset();
+			});
+			return;
+		}
+
+		if (isEditingStep) {
+			updateSteps(
+				steps.map(step =>
+					step.slug === 'access' ? { ...step, isEditing: false } : step
+				)
+			);
+		}
+		setShouldShowStepper(true);
+		setIsModalSubmitted(false);
 	};
 
 	const onSkipAction = () => {
@@ -209,14 +165,6 @@ const NewAccess = () => {
 		);
 	};
 
-	if (isLoading) {
-		return (
-			<OnboardingLayout noBackground>
-				<Loader />
-			</OnboardingLayout>
-		);
-	}
-
 	return (
 		<OnboardingLayout
 			title={
@@ -224,30 +172,38 @@ const NewAccess = () => {
 					? 'Étapier parcours de création'
 					: 'Inviter des utilisateurs'
 			}
-			onConfirm={onSubmit}
-			onSkip={Boolean(createdProduct) ? onSkipAction : undefined}
+			onConfirm={onConfirm}
+			onSkip={
+				Boolean(createdProduct) &&
+				Boolean(!createdUserAccesses || createdUserAccesses.length === 0)
+					? onSkipAction
+					: undefined
+			}
 			isStepperLayout={shouldShowStepper}
-			isConfirmDisabled={usersToAdd.length === 0 && !isFormSubmitted}
+			confirmText={
+				userToInvite.email.trim() !== '' ? 'Inviter et continuer' : undefined
+			}
+			isConfirmDisabled={
+				userToInvite.email.trim() === '' && !createdUserAccesses?.length
+			}
 		>
-			{createdProduct && (
-				<AccessRightModal
-					modal={modal}
-					isOpen={isModalOpen}
-					modalType={'remove'}
-					productId={createdProduct.id}
-					productName={createdProduct.title}
-					setIsModalSubmitted={setIsModalSubmitted}
-					currentAccessRight={currentAccessRight}
-					setCurrentAccessRight={setCurrentAccessRight}
-					onSuccess={() => {
-						updateCreatedUserAccesses(
-							(createdUserAccesses || []).filter(
-								access => access.id !== currentAccessRight?.id
-							)
-						);
-					}}
-				/>
-			)}
+			<AccessRightModal
+				modal={modal}
+				isOpen={isModalOpen}
+				modalType={'remove'}
+				productId={product.id}
+				productName={product.title}
+				setIsModalSubmitted={setIsModalSubmitted}
+				currentAccessRight={currentAccessRight}
+				setCurrentAccessRight={setCurrentAccessRight}
+				onSuccess={() => {
+					updateCreatedUserAccesses(
+						(createdUserAccesses || []).filter(
+							access => access.id !== currentAccessRight?.id
+						)
+					);
+				}}
+			/>
 			{isModalSubmitted && (
 				<div role="status">
 					<Alert
@@ -327,121 +283,91 @@ const NewAccess = () => {
 				</div>
 			)}
 			<form id="new-access-form">
-				{usersToAdd.map((user, i) => (
-					<Fragment key={i}>
-						<div className={classes.titleContainer}>
-							<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
-								Personne {i + (createdUserAccesses?.length || 0) + 1}
-							</h2>
-							<Button
-								size="small"
-								iconId="fr-icon-delete-line"
-								priority="tertiary"
-								iconPosition="right"
-								type="button"
-								onClick={() => {
-									setUsersToAdd(prev => {
-										const newUsers = [...prev];
-										newUsers.splice(i, 1);
-										return newUsers;
-									});
-								}}
-							>
-								Supprimer
-							</Button>
-						</div>
+				<div className={classes.titleContainer}>
+					<h2 className={fr.cx('fr-text--bold', 'fr-mb-0', 'fr-h6')}>
+						Inviter un utilisateur
+					</h2>
+				</div>
 
-						<Input
-							label={
-								<p className={fr.cx('fr-mb-0')}>
-									Adresse email <span className={cx(classes.asterisk)}>*</span>
-								</p>
+				<Input
+					label={
+						<p className={fr.cx('fr-mb-0')}>
+							Adresse email <span className={cx(classes.asterisk)}>*</span>
+						</p>
+					}
+					state={userToInvite.errorStatus ? 'error' : 'default'}
+					stateRelatedMessage={
+						userToInvite.errorStatus == 409
+							? "L'utilisateur avec cet email a déja accès à ce service ou à l'oganisation à laquelle appartient ce service."
+							: 'Veuillez saisir une adresse email valide.'
+					}
+					hintText="Format attendu : nom@domaine.fr"
+					nativeInputProps={{
+						required: true,
+						type: 'email',
+						value: userToInvite.email,
+						onKeyDown: e => {
+							if (e.key === 'Enter') {
+								e.preventDefault();
+								onSubmit();
 							}
-							state={user.errorStatus ? 'error' : 'default'}
-							stateRelatedMessage={
-								user.errorStatus == 409
-									? "L'utilisateur avec cet email a déja accès à ce service ou à l'oganisation à laquelle appartient ce service."
-									: 'Veuillez saisir une adresse email valide.'
-							}
-							hintText="Format attendu : nom@domaine.fr"
-							nativeInputProps={{
-								required: true,
-								type: 'email',
-								value: user.email,
-								onKeyDown: e => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										onSubmit();
-									}
-								},
-								onChange: e =>
-									setUsersToAdd(prev => {
-										const newUsers = [...prev];
-										newUsers[i].email = e.target.value;
-										return newUsers;
-									})
-							}}
-						/>
-
-						<RadioButtons
-							legend="Rôle"
-							name={'access-role-' + i}
-							className={fr.cx('fr-mb-3v')}
-							options={[
-								{
-									label: 'Utilisateur du service',
-									hintText:
-										'Utilisateurs ayant le droit de voir le service, mais pas de le modifier',
-									nativeInputProps: {
-										value: 'carrier_user',
-										onChange: e => {
-											setUsersToAdd(prev => {
-												const newUsers = [...prev];
-												newUsers[i].role = e.target.value as RoleType;
-												return newUsers;
-											});
-										},
-										checked: user.role === 'carrier_user'
-									}
-								},
-								{
-									label: 'Administrateur du service',
-									hintText:
-										'Utilisateurs ayant le droit de modifier tout aspect du service',
-									nativeInputProps: {
-										value: 'carrier_admin',
-										onChange: e => {
-											setUsersToAdd(prev => {
-												const newUsers = [...prev];
-												newUsers[i].role = e.target.value as RoleType;
-												return newUsers;
-											});
-										},
-										checked: user.role === 'carrier_admin'
-									}
-								}
-							]}
-						/>
-						<hr />
-					</Fragment>
-				))}
-				<Button
-					size="small"
-					iconId="fr-icon-user-add-line"
-					priority="tertiary"
-					type="button"
-					onClick={() => {
-						setUsersToAdd(prev => [
-							...prev,
-							{
-								email: '',
-								role: 'carrier_user'
-							}
-						]);
+						},
+						onChange: e => {
+							setUserToInvite(prev => ({
+								...prev,
+								email: e.target.value
+							}));
+						}
 					}}
-				>
-					Ajouter un collaborateur
-				</Button>
+				/>
+
+				<RadioButtons
+					legend="Rôle"
+					name={'access-role'}
+					className={fr.cx('fr-mb-3v')}
+					options={[
+						{
+							label: 'Utilisateur du service',
+							hintText:
+								'Utilisateurs ayant le droit de voir le service, mais pas de le modifier',
+							nativeInputProps: {
+								value: 'carrier_user',
+								onChange: e => {
+									setUserToInvite(prev => ({
+										...prev,
+										role: e.target.value as RoleType
+									}));
+								},
+								checked: userToInvite.role === 'carrier_user'
+							}
+						},
+						{
+							label: 'Administrateur du service',
+							hintText:
+								'Utilisateurs ayant le droit de modifier tout aspect du service',
+							nativeInputProps: {
+								value: 'carrier_admin',
+								onChange: e => {
+									setUserToInvite(prev => ({
+										...prev,
+										role: e.target.value as RoleType
+									}));
+								},
+								checked: userToInvite.role === 'carrier_admin'
+							}
+						}
+					]}
+				/>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+					<Button
+						iconId="fr-icon-user-add-line"
+						priority="primary"
+						type="button"
+						onClick={onSubmit}
+					>
+						Inviter
+					</Button>
+				</div>
 			</form>
 		</OnboardingLayout>
 	);
@@ -491,3 +417,5 @@ const useStyles = tss.create(() => ({
 		}
 	}
 }));
+
+export { getServerSideProps };
