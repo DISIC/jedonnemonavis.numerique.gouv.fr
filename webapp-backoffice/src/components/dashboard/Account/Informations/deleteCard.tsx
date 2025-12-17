@@ -156,6 +156,7 @@ const DeleteCard = (props: Props) => {
 const useStyles = tss.withName(DeleteCard.name).create(() => ({
 	deleteButton: {
 		color: fr.colors.decisions.text.default.error.default,
+		boxShadow: `0 0 0 1px ${fr.colors.decisions.text.default.error.default}`,
 		[fr.breakpoints.down('md')]: {
 			justifyContent: 'center',
 			width: '100%'

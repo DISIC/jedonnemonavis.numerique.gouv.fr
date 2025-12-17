@@ -102,6 +102,9 @@ const IdentityCard = (props: Props) => {
 						)}
 					>
 						<div className={cx(fr.cx('fr-col-md-6'), classes.formContainer)}>
+							<p className={fr.cx('fr-hint-text')}>
+								Tous les champs sont obligatoires
+							</p>
 							<form id="identity-form">
 								<div className={fr.cx('fr-input-group')}>
 									<Controller
@@ -113,7 +116,13 @@ const IdentityCard = (props: Props) => {
 												<Input
 													label={
 														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Prénom(s)
+															Prénom(s){' '}
+															<span
+																aria-hidden="true"
+																className={classes.asterisk}
+															>
+																*
+															</span>
 														</p>
 													}
 													nativeInputProps={{
@@ -141,7 +150,13 @@ const IdentityCard = (props: Props) => {
 												<Input
 													label={
 														<p className={fr.cx('fr-mb-0', 'fr-text--bold')}>
-															Nom
+															Nom{' '}
+															<span
+																aria-hidden="true"
+																className={classes.asterisk}
+															>
+																*
+															</span>
 														</p>
 													}
 													nativeInputProps={{
@@ -173,6 +188,9 @@ const useStyles = tss.withName(IdentityCard.name).create(() => ({
 		[fr.breakpoints.down('md')]: {
 			width: '100%'
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.title.redMarianne.default
 	}
 }));
 

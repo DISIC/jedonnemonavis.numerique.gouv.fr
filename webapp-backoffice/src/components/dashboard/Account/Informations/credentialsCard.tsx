@@ -115,7 +115,11 @@ const CredentialsCard = (props: Props) => {
 		<>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`${modalType === 'change-mail' ? "Changer l'adresse mail" : 'Réinitialiser le mot de passe'}`}
+				title={`${
+					modalType === 'change-mail'
+						? "Changer l'adresse mail"
+						: 'Réinitialiser le mot de passe'
+				}`}
 				handleOnConfirm={() => {
 					if (modalType === 'change-mail') {
 						handleConfirm();
@@ -252,6 +256,9 @@ const CredentialsCard = (props: Props) => {
 							)}
 						>
 							<div className={cx(fr.cx('fr-col-12'), classes.formContainer)}>
+								<p className={fr.cx('fr-hint-text')}>
+									Tous les champs sont obligatoires
+								</p>
 								<form id="credentials-form">
 									<div className={fr.cx('fr-input-group', 'fr-col-md-6')}>
 										<Input
@@ -289,9 +296,16 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Nouvelle adresse e-mail
+																	Nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
+															hintText="Exemple : nom@domaine.fr"
 															nativeInputProps={{
 																onChange,
 																value: value || '',
@@ -322,7 +336,13 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Confirmation de la nouvelle adresse e-mail
+																	Confirmation de la nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
 															nativeInputProps={{
@@ -387,6 +407,9 @@ const useStyles = tss.withName(CredentialsCard.name).create(() => ({
 			width: '100%',
 			justifyContent: 'center'
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.title.redMarianne.default
 	}
 }));
 
