@@ -296,17 +296,16 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} complété`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} complété`;
 			case 'iconbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} : ${displayIntention(
+					(value ?? 'neutral') as AnswerIntention
+				)}`;
 			case 'select':
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
+				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			default:
 				return '';
 		}
@@ -537,6 +536,11 @@ const ReviewsTab = (props: Props) => {
 						}
 						selectedKeyword={validatedSearch}
 						onClick={keyword => {
+							push([
+								'trackEvent',
+								'Product - Reviews',
+								'Keyword-Filter-Clicked'
+							]);
 							setSearch(keyword);
 							submitSearch(keyword);
 						}}
