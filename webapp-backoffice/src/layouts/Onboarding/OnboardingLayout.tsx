@@ -20,6 +20,7 @@ interface OnboardingLayoutProps {
 	hideBackButton?: boolean;
 	onCancel?: () => void;
 	onConfirm?: () => void;
+	onSkip?: () => void;
 	noBackground?: boolean;
 	isConfirmDisabled?: boolean;
 	isStepperLayout?: boolean;
@@ -36,6 +37,7 @@ const OnboardingLayout = ({
 	confirmText,
 	onCancel,
 	onConfirm,
+	onSkip,
 	title,
 	hideMainHintText,
 	hideBackButton,
@@ -273,14 +275,17 @@ const OnboardingLayout = ({
 					}}
 				>
 					<div className={cx(classes.rightActions)}>
-						{/* <Button
-							priority="secondary"
-							size="large"
-							iconPosition="right"
-							iconId="fr-icon-arrow-right-s-line"
-						>
-							Passer cette étape
-						</Button> */}
+						{onSkip && (
+							<Button
+								priority="secondary"
+								size="large"
+								iconPosition="right"
+								iconId="fr-icon-arrow-right-s-line"
+								onClick={onSkip}
+							>
+								Passer cette étape
+							</Button>
+						)}
 						<Button
 							size="large"
 							iconPosition="right"

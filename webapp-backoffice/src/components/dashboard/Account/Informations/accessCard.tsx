@@ -1,14 +1,13 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import React, { ReactElement } from 'react';
-import { tss } from 'tss-react/dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import { push } from '@socialgouv/matomo-next';
-import { RightAccessStatus } from '@prisma/client';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { Menu, MenuItem } from '@mui/material';
 import { ModalAccessKind } from '@/src/pages/administration/dashboard/user/[id]/access';
+import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import Button from '@codegouvfr/react-dsfr/Button';
+import { Menu, MenuItem } from '@mui/material';
+import { RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Link from 'next/link';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	id?: number;
@@ -160,8 +159,12 @@ const AccessCard = (props: Props) => {
 											}
 										}}
 										nativeButtonProps={{
-											'aria-label': `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`,
-											title: `Retirer l'accès ${link ? 'au service' : "à l'organisation"} ${title}`
+											'aria-label': `Retirer l'accès ${
+												link ? 'au service' : "à l'organisation"
+											} ${title}`,
+											title: `Retirer l'accès ${
+												link ? 'au service' : "à l'organisation"
+											} ${title}`
 										}}
 										className={classes.button}
 									>
@@ -210,7 +213,7 @@ const useStyles = tss.withName(AccessCard.name).create(() => ({
 	button: {
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
-			justifyContent: 'center',
+			justifyContent: 'center'
 		}
 	},
 	badgeContainer: {

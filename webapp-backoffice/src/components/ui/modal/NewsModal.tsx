@@ -29,14 +29,24 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 			size="large"
 		>
 			<p className={fr.cx('fr-mb-4v')}>Vous pouvez désormais : </p>
-			<p className={fr.cx('fr-mb-4v')}>⭐️ Fermer un emplacement</p>
-			<p className={fr.cx('fr-mb-4v')}>⭐️ Fermer un formulaire</p>
+			<p className={fr.cx('fr-mb-4v')}>
+				⭐️ Analyser les réponses aux questionnaires à travers les mots clés les
+				plus employés
+			</p>
+			<p className={fr.cx('fr-mb-4v')}>
+				⭐️ Profiter d’un parcours fléché pour mieux comprendre comment
+				installer un questionnaire JDMA sur votre service numérique
+			</p>
+			<p className={fr.cx('fr-mb-4v')}>
+				⭐️ Récupérer les données agrégées de vos questionnaires avec une
+				granularité supplémentaire (formulaire)
+			</p>
 			<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 				<Image
-					src="/assets/news-feature/close-button.png"
+					src="/assets/news-feature/common-keywords.png"
 					alt=""
-					width={451}
-					height={309}
+					width={2030}
+					height={798}
 					className={classes.image}
 				/>
 			</div>
@@ -44,7 +54,7 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 				className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
 				style={{ color: fr.colors.decisions.text.mention.grey.default }}
 			>
-				Fermeture d'un emplacement
+				Mots-clés les plus récurrents dans les réponses aux questionnaires JDMA
 			</p>
 		</modal.Component>
 	);
@@ -58,10 +68,8 @@ const useStyles = tss.create({
 		backgroundColor: fr.colors.options.blueEcume._950_100.default
 	},
 	image: {
-		maxWidth: '100%',
-		[fr.breakpoints.down('md')]: {
-			height: 'auto'
-		}
+		height: 'auto',
+		maxWidth: '100%'
 	}
 });
 

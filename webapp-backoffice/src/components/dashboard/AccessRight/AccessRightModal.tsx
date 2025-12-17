@@ -20,6 +20,7 @@ interface Props {
 	setCurrentAccessRight: React.Dispatch<
 		React.SetStateAction<AccessRightWithUsers | undefined>
 	>;
+	onSuccess?: () => void;
 }
 
 const ButtonModal = (props: Props) => {
@@ -32,7 +33,8 @@ const ButtonModal = (props: Props) => {
 		productName,
 		currentAccessRight,
 		setIsModalSubmitted,
-		setCurrentAccessRight
+		setCurrentAccessRight,
+		onSuccess
 	} = props;
 
 	const utils = trpc.useUtils();
@@ -64,6 +66,7 @@ const ButtonModal = (props: Props) => {
 		onSuccess: () => {
 			utils.accessRight.getList.invalidate();
 			setIsModalSubmitted(true);
+			onSuccess && onSuccess();
 			modal.close();
 		}
 	});
