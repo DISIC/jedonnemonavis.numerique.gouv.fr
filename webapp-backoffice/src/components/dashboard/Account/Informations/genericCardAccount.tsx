@@ -14,6 +14,7 @@ interface Props {
 	customModifyButton?: ReactElement;
 	onSubmit?: () => Promise<boolean>;
 	smallScreenShowHr?: boolean;
+	editButtonTitle?: string;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -25,7 +26,8 @@ const GenericCardInfos = (props: Props) => {
 		editModeContent,
 		onSubmit,
 		smallScreenShowHr = true,
-		customModifyButton
+		customModifyButton,
+		editButtonTitle
 	} = props;
 	const [modifying, setModifying] = React.useState<Boolean>(false);
 	const { cx, classes } = useStyles();
@@ -97,6 +99,11 @@ const GenericCardInfos = (props: Props) => {
 												}}
 												size="small"
 												className={classes.button}
+												title={
+													editButtonTitle
+														? editButtonTitle
+														: `Modifier ${title}`
+												}
 											>
 												Modifier
 											</Button>

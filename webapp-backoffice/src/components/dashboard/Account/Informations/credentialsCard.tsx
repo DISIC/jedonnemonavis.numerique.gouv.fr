@@ -148,6 +148,7 @@ const CredentialsCard = (props: Props) => {
 			</OnConfirmModal>
 			<GenericCardInfos
 				title={'Identifiants de connexion'}
+				editButtonTitle="Modifier les informations de connexion"
 				modifiable={true}
 				onSubmit={onFormSubmit}
 				customModifyButton={

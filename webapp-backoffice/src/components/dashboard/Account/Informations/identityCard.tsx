@@ -63,6 +63,7 @@ const IdentityCard = (props: Props) => {
 				title={'Identité'}
 				modifiable={true}
 				onSubmit={onFormSubmit}
+				editButtonTitle="Modifier les informations personnelles"
 				viewModeContent={
 					<>
 						<div
