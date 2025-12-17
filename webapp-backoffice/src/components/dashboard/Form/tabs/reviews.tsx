@@ -31,6 +31,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
+import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
 interface Props {
 	form: FormWithElements;
