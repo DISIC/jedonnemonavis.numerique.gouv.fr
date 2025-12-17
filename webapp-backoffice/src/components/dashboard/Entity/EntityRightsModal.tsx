@@ -24,6 +24,7 @@ interface Props {
 	refetchEntities: () => void;
 	entity?: Entity;
 	onClose: () => void;
+	onConceal?: () => void;
 	fromSearch?: boolean;
 }
 
@@ -53,6 +54,7 @@ const EntityRightsModal = (props: Props) => {
 	useIsModalOpen(modal, {
 		onConceal: () => {
 			setActionType(null);
+			props.onConceal?.();
 		}
 	});
 
