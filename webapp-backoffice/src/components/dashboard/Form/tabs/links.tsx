@@ -147,6 +147,7 @@ const LinksTab = ({
 						<div
 							className={fr.cx('fr-col-12')}
 							style={{ display: 'flex', justifyContent: 'center' }}
+							role="status"
 						>
 							<span>Aucun lien d'intégration trouvé</span>
 						</div>

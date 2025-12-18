@@ -5,6 +5,7 @@ import { User } from '@/prisma/generated/zod';
 import Button from '@codegouvfr/react-dsfr/Button';
 import GenericCardInfos from './genericCardAccount';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { trpc } from '@/src/utils/trpc';
 import { signOut } from 'next-auth/react';
@@ -33,6 +34,7 @@ const DeleteCard = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const [validateDelete, setValidateDelete] = React.useState(false);
 	const router = useRouter();
+	const modalTriggerRef = React.useRef<HTMLButtonElement | null>(null);
 
 	const deleteUser = trpc.user.delete.useMutation({
 		onSuccess: () => {
@@ -44,10 +46,19 @@ const DeleteCard = (props: Props) => {
 		}
 	});
 
-	const handleDeletion = () => {
+	const handleDeletion = (
+		event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		modalTriggerRef.current = event.currentTarget;
 		onConfirmModal.open();
 		push(['trackEvent', 'BO - Account', `Open-Modal-Delete-Account`]);
 	};
+
+	useIsModalOpen(onConfirmModal, {
+		onConceal: () => {
+			window.setTimeout(() => modalTriggerRef.current?.focus(), 0);
+		}
+	});
 
 	const {
 		control,
@@ -138,7 +149,7 @@ const DeleteCard = (props: Props) => {
 							priority="tertiary"
 							iconId="fr-icon-delete-bin-line"
 							className={cx(fr.cx('fr-mr-5v'), classes.deleteButton)}
-							onClick={() => handleDeletion()}
+							onClick={handleDeletion}
 							nativeButtonProps={{
 								'aria-label': 'Supprimer le compte',
 								title: 'Supprimer le compte'
@@ -156,6 +167,7 @@ const DeleteCard = (props: Props) => {
 const useStyles = tss.withName(DeleteCard.name).create(() => ({
 	deleteButton: {
 		color: fr.colors.decisions.text.default.error.default,
+		boxShadow: `0 0 0 1px ${fr.colors.decisions.text.default.error.default}`,
 		[fr.breakpoints.down('md')]: {
 			justifyContent: 'center',
 			width: '100%'

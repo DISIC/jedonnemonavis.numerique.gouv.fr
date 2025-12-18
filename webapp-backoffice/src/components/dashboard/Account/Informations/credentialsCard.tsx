@@ -6,6 +6,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -40,6 +41,7 @@ const CredentialsCard = (props: Props) => {
 	const [modalType, setModalType] = React.useState<
 		'change-mail' | 'change-pwd'
 	>('change-mail');
+	const lastModalTriggerRef = React.useRef<HTMLButtonElement | null>(null);
 
 	const {
 		control,
@@ -93,6 +95,7 @@ const CredentialsCard = (props: Props) => {
 		return new Promise<boolean>(resolve => {
 			setResolvePromise(() => resolve);
 			setModalType('change-mail');
+			lastModalTriggerRef.current = null;
 			onConfirmModal.open();
 		});
 	};
@@ -111,11 +114,30 @@ const CredentialsCard = (props: Props) => {
 
 	const initResetPwd = trpc.user.initResetPwd.useMutation({});
 
+	useIsModalOpen(onConfirmModal, {
+		onConceal: () => {
+			window.setTimeout(() => lastModalTriggerRef.current?.focus(), 0);
+		}
+	});
+
+	const handleOpenResetPwdModal = (
+		event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		lastModalTriggerRef.current = event.currentTarget;
+		setModalType('change-pwd');
+		onConfirmModal.open();
+		push(['trackEvent', 'BO - Account', `Credentials-Modal-Open`]);
+	};
+
 	return (
 		<>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`${modalType === 'change-mail' ? "Changer l'adresse mail" : 'Réinitialiser le mot de passe'}`}
+				title={`${
+					modalType === 'change-mail'
+						? "Changer l'adresse mail"
+						: 'Réinitialiser le mot de passe'
+				}`}
 				handleOnConfirm={() => {
 					if (modalType === 'change-mail') {
 						handleConfirm();
@@ -144,17 +166,14 @@ const CredentialsCard = (props: Props) => {
 			</OnConfirmModal>
 			<GenericCardInfos
 				title={'Identifiants de connexion'}
+				editButtonTitle="Modifier les informations de connexion"
 				modifiable={true}
 				onSubmit={onFormSubmit}
 				customModifyButton={
 					user.proconnect_account ? (
 						<Button
 							priority="secondary"
-							onClick={() => {
-								setModalType('change-pwd');
-								onConfirmModal.open();
-								push(['trackEvent', 'BO - Account', `Credentials-Modal-Open`]);
-							}}
+							onClick={handleOpenResetPwdModal}
 							className={classes.buttonContainer}
 						>
 							Réinitialiser le mot de passe
@@ -252,6 +271,9 @@ const CredentialsCard = (props: Props) => {
 							)}
 						>
 							<div className={cx(fr.cx('fr-col-12'), classes.formContainer)}>
+								<p className={fr.cx('fr-hint-text')}>
+									Tous les champs sont obligatoires
+								</p>
 								<form id="credentials-form">
 									<div className={fr.cx('fr-input-group', 'fr-col-md-6')}>
 										<Input
@@ -289,14 +311,22 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Nouvelle adresse e-mail
+																	Nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
+															hintText="Exemple : nom@domaine.fr"
 															nativeInputProps={{
 																onChange,
 																value: value || '',
 																name,
 																required: true,
+																autoFocus: true,
 																placeholder:
 																	'Saisissez votre nouvelle adresse mail'
 															}}
@@ -322,7 +352,13 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Confirmation de la nouvelle adresse e-mail
+																	Confirmation de la nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
 															nativeInputProps={{
@@ -354,15 +390,7 @@ const CredentialsCard = (props: Props) => {
 							>
 								<Button
 									priority="secondary"
-									onClick={() => {
-										setModalType('change-pwd');
-										onConfirmModal.open();
-										push([
-											'trackEvent',
-											'BO - Account',
-											`Credentials-Modal-Open`
-										]);
-									}}
+									onClick={handleOpenResetPwdModal}
 									className={classes.buttonContainer}
 								>
 									Réinitialiser le mot de passe
@@ -387,6 +415,9 @@ const useStyles = tss.withName(CredentialsCard.name).create(() => ({
 			width: '100%',
 			justifyContent: 'center'
 		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.title.redMarianne.default
 	}
 }));
 

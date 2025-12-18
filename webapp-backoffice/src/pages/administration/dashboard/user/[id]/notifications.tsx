@@ -1,16 +1,16 @@
-import React from 'react';
-import { getServerSideProps } from '.';
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import Head from 'next/head';
 import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import { trpc } from '@/src/utils/trpc';
-import { Loader } from '@/src/components/ui/Loader';
-import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
+import { fr } from '@codegouvfr/react-dsfr';
+import { CallOut } from '@codegouvfr/react-dsfr/CallOut';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { NotificationFrequency } from '@prisma/client';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 
 interface Props {
 	isOwn: Boolean;
@@ -63,51 +63,61 @@ const NotificationsAccount: React.FC<Props> = props => {
 					</div>
 					<div className={classes.notificationsWrapper}>
 						<h3>Par e-mail</h3>
-						<div className={classes.divider} />
+
+						<hr />
 						<form className={classes.form}>
 							<ToggleSwitch
-								label="Recevoir une sythèse des nouveaux avis sur les services que vous administrez"
+								label="Recevoir une synthèse des nouveaux avis sur les services que vous administrez."
 								inputTitle="notifications"
-								labelPosition="left"
-								showCheckedHint={false}
 								defaultChecked={user.notifications}
 								onChange={e => handleNotificationsChange(e, 'daily')}
 							/>
+
 							{user.notifications && (
-								<RadioButtons
-									legend="Fréquence de la synthèse"
-									name="notifications-frequency"
-									options={[
-										{
-											label:
-												'Journalière (tous les jours à 08h heure de Paris)',
-											nativeInputProps: {
-												value: user.notifications_frequency,
-												checked: user.notifications_frequency === 'daily',
-												onChange: () => handleNotificationsChange(true, 'daily')
+								<>
+									<CallOut className={fr.cx('fr-mb-0')}>
+										Vous recevrez un mail de synthèse uniquement pour les
+										services ayant de nouveaux avis durant la période
+										sélectionnée. En l'absence de nouveaux avis sur la totalité
+										de vos services, aucun mail de synthèse ne vous sera envoyé.
+									</CallOut>
+									<RadioButtons
+										legend={<strong>Fréquence de la synthèse</strong>}
+										name="notifications-frequency"
+										options={[
+											{
+												label:
+													'Journalière (tous les jours à 08h heure de Paris)',
+												nativeInputProps: {
+													value: user.notifications_frequency,
+													checked: user.notifications_frequency === 'daily',
+													onChange: () =>
+														handleNotificationsChange(true, 'daily')
+												}
+											},
+											{
+												label:
+													'Hebdomadaire (tous les lundis à 08h heure de Paris)',
+												nativeInputProps: {
+													value: user.notifications_frequency,
+													checked: user.notifications_frequency === 'weekly',
+													onChange: () =>
+														handleNotificationsChange(true, 'weekly')
+												}
+											},
+											{
+												label:
+													'Mensuelle (tous les premiers lundis de chaque mois à 08h heure de Paris)',
+												nativeInputProps: {
+													value: user.notifications_frequency,
+													checked: user.notifications_frequency === 'monthly',
+													onChange: () =>
+														handleNotificationsChange(true, 'monthly')
+												}
 											}
-										},
-										{
-											label: 'Hebdo (tous les lundis à 08h heure de Paris)',
-											nativeInputProps: {
-												value: user.notifications_frequency,
-												checked: user.notifications_frequency === 'weekly',
-												onChange: () =>
-													handleNotificationsChange(true, 'weekly')
-											}
-										},
-										{
-											label:
-												'Mensuelle (tous les premiers lundis de chaque mois à 08h heure de Paris)',
-											nativeInputProps: {
-												value: user.notifications_frequency,
-												checked: user.notifications_frequency === 'monthly',
-												onChange: () =>
-													handleNotificationsChange(true, 'monthly')
-											}
-										}
-									]}
-								/>
+										]}
+									/>
+								</>
 							)}
 						</form>
 					</div>
@@ -131,7 +141,7 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 	},
 	column: {
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'column'
 	},
 	droppableArea: {
 		padding: '8px',
@@ -146,7 +156,6 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 	notificationsWrapper: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('4v'),
 		padding: '32px',
 		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},
@@ -161,7 +170,7 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 	form: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('4v')
+		gap: fr.spacing('6v')
 	}
 });
 

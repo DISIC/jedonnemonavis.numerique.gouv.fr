@@ -5,14 +5,22 @@ import ApiKeyHandler from './ApiKeyHandler';
 import { Entity } from '@prisma/client';
 import Link from 'next/link';
 import { CustomModalProps } from '@/src/types/custom';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 
 interface Props {
 	modal: CustomModalProps;
 	entity?: Entity;
+	onConceal?: () => void;
 }
 
 const ApiKeyModal = (props: Props) => {
 	const { modal, entity } = props;
+
+	useIsModalOpen(modal, {
+		onConceal: () => {
+			props.onConceal?.();
+		}
+	});
 
 	return (
 		<modal.Component

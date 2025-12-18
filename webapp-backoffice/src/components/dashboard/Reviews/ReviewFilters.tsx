@@ -85,6 +85,7 @@ const ReviewFilters = (props: Props) => {
 								onClick(sort.code);
 							}
 						}}
+						scope="col"
 					>
 						<span>
 							{sort.label}{' '}

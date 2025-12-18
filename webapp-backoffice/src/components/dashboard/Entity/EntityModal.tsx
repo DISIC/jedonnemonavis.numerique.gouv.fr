@@ -9,11 +9,11 @@ import { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
-
 interface Props {
 	modal: CustomModalProps;
 	entity?: Entity;
 	onSubmit: (entity?: Entity) => void;
+	onConceal?: () => void;
 }
 
 type FormValues = Omit<Entity, 'id' | 'urls' | 'created_at' | 'updated_at'> & {
@@ -102,6 +102,7 @@ const EntityModal = (props: Props) => {
 	useIsModalOpen(modal, {
 		onConceal: () => {
 			reset();
+			props.onConceal?.();
 		}
 	});
 
