@@ -33,7 +33,7 @@ export const MarkInput = (props: Props) => {
 								</p>
 							</legend>
 							<ul>
-								{field.options.map(f => (
+								{field.options.map((f, index) => (
 									<li key={f.value}>
 										<input
 											id={`radio-${f.label}-${f.value}`}
@@ -47,6 +47,9 @@ export const MarkInput = (props: Props) => {
 													[field.name]: f.value,
 												}));
 											}}
+											autoFocus={
+												index === 0 && !opinion[field.name] ? true : undefined
+											}
 											onClick={() => {
 												setOpinion(prevOpinion => ({
 													...prevOpinion,

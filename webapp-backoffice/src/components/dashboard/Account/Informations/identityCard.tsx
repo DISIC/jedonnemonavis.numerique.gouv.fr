@@ -130,6 +130,7 @@ const IdentityCard = (props: Props) => {
 														onChange: e => {
 															onChange(e);
 														},
+														autoFocus: true,
 														value: value || '',
 														name,
 														required: true
