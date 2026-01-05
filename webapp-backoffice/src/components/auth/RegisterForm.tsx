@@ -258,7 +258,7 @@ export const RegisterForm = (props: Props) => {
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
 			{errors.email.conflict && (
-				<div role="status">
+				<div role="alert">
 					<Alert
 						className={fr.cx('fr-mb-4v', 'fr-text--sm')}
 						closable

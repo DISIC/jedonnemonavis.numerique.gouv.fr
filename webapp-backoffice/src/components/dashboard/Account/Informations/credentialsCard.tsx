@@ -183,7 +183,7 @@ const CredentialsCard = (props: Props) => {
 				viewModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+							<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 								<Alert
 									closable
 									onClose={function noRefCheck() {
@@ -243,7 +243,7 @@ const CredentialsCard = (props: Props) => {
 				editModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+							<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 								<Alert
 									closable
 									onClose={function noRefCheck() {
@@ -253,12 +253,7 @@ const CredentialsCard = (props: Props) => {
 									className={fr.cx('fr-mb-5w')}
 									small
 									description={
-										<>
-											<p role="status">
-												Email de réinitialisation du mot de passe envoyé avec
-												succès.
-											</p>
-										</>
+										'Email de réinitialisation du mot de passe envoyé avec succès.'
 									}
 								/>
 							</div>

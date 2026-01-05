@@ -183,7 +183,7 @@ const AccessManagement = (props: Props) => {
 		<>
 			<div className={cx(fr.cx('fr-container'), classes.alertContainer)}>
 				{isModalSubmitted && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {

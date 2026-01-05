@@ -308,7 +308,7 @@ const UserAccess: React.FC<Props> = props => {
 					/>
 				</Head>
 				{displayToast && (
-					<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+					<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {

@@ -270,7 +270,7 @@ const DashBoardUserRequestUserRequests = () => {
 				{currentUserRequest &&
 					(currentUserRequest.type === 'refused' ||
 						currentUserRequest.type === 'accept') && (
-						<div role="status">
+						<div role="alert">
 							<Alert
 								severity={
 									currentUserRequest.type === 'accept' ? 'success' : 'info'

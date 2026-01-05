@@ -230,7 +230,7 @@ const DashBoardEntities = () => {
 			></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				{newEntity && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {}}

@@ -251,7 +251,7 @@ const EntitySearchModal = (props: Props) => {
 									))
 								)}
 								{(lastPage === currentPage || notFound) && (
-									<div role="status">
+									<div role="alert">
 										<Alert
 											className={fr.cx('fr-mb-4v')}
 											description={

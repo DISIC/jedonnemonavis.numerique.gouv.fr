@@ -190,7 +190,7 @@ const EntityRightsModal = (props: Props) => {
 			!session?.user.role.includes('admin')
 		) {
 			return (
-				<div role="status">
+				<div role="alert">
 					<Alert
 						className={fr.cx('fr-mb-16v')}
 						description={
@@ -209,7 +209,7 @@ const EntityRightsModal = (props: Props) => {
 		return (
 			<>
 				{actionType && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {

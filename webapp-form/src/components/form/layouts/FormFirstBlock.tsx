@@ -88,7 +88,7 @@ export const FormFirstBlock = (props: Props) => {
 					</div>
 				))}
 				{isRateLimitReached && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {

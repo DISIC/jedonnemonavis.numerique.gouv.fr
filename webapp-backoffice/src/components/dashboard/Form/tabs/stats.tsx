@@ -497,11 +497,13 @@ const StatsTab = ({
 				</GenericFilters>
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
-					<div className={fr.cx('fr-mt-10v')} role="status">
+					<div className={fr.cx('fr-mt-10v')} role="alert">
 						<Alert
 							title=""
 							severity="error"
-							description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(nbMaxReviews)} avis). Réduisez la fenêtre de temps.`}
+							description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(
+								nbMaxReviews
+							)} avis). Réduisez la fenêtre de temps.`}
 						/>
 					</div>
 				) : (

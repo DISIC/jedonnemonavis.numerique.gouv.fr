@@ -259,7 +259,7 @@ const DashBoardDomainDomains = () => {
 					</div>
 				</div>
 				{currentDomain && currentDomain.type !== 'on-confirm' && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							severity={currentDomain.type === 'create' ? 'success' : 'info'}
 							description={getAlertTitle()}
