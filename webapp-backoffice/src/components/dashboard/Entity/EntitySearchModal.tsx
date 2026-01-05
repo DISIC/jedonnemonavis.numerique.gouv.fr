@@ -226,7 +226,7 @@ const EntitySearchModal = (props: Props) => {
 							</h6>
 							<div className={fr.cx('fr-col-8', 'fr-pt-2v')}>
 								<PageItemsCounter
-									label="Organisation"
+									label="organisation"
 									startItemCount={numberPerPage * (currentPage - 1) + 1}
 									endItemCount={
 										numberPerPage * (currentPage - 1) + entitiesSearch.length

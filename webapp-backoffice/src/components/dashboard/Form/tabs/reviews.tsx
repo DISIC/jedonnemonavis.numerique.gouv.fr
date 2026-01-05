@@ -615,22 +615,19 @@ const ReviewsTab = (props: Props) => {
 									'fr-grid-row--right'
 								)}
 							>
-								{reviews.length > 0 && nbPages > 0 && (
-									<>
-										<PageItemsCounter
-											label="Réponses"
-											startItemCount={numberPerPage * (currentPage - 1) + 1}
-											endItemCount={
-												numberPerPage * (currentPage - 1) + reviews.length
-											}
-											totalItemsCount={reviewsCountFiltered}
-											additionalClasses={['fr-col-12', 'fr-mt-8v']}
-										/>
-									</>
-								)}
+								<PageItemsCounter
+									label="réponse"
+									isFeminine
+									startItemCount={numberPerPage * (currentPage - 1) + 1}
+									endItemCount={
+										numberPerPage * (currentPage - 1) + reviews.length
+									}
+									totalItemsCount={reviewsCountFiltered}
+									additionalClasses={['fr-col-12', 'fr-mt-8v']}
+								/>
 							</div>
 							<div>
-								{reviewsExtended.length > 0 ? (
+								{reviewsExtended.length > 0 && (
 									<>
 										<table className={cx(classes.tableContainer)}>
 											<ReviewFilters
@@ -658,16 +655,6 @@ const ReviewsTab = (props: Props) => {
 											</tbody>
 										</table>
 									</>
-								) : (
-									<div
-										className={fr.cx(
-											'fr-grid-row',
-											'fr-grid-row--center',
-											'fr-mt-20v'
-										)}
-									>
-										<p role="status">Aucun avis disponible </p>
-									</div>
 								)}
 							</div>
 							{reviewsExtended.length > 0 && (

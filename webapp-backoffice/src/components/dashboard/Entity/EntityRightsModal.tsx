@@ -222,13 +222,13 @@ const EntityRightsModal = (props: Props) => {
 						/>
 					</div>
 				)}
-				{adminEntityRightsCount !== 0 && (
+				{adminEntityRightsCount > 1 && (
 					<div
 						className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
 					>
 						<div className={fr.cx('fr-col-8')}>
 							<PageItemsCounter
-								label="Administrateurs"
+								label="administrateur"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) +

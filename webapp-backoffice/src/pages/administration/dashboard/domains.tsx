@@ -276,9 +276,9 @@ const DashBoardDomainDomains = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+						<div className={fr.cx('fr-col-12', 'fr-pt-3w')}>
 							<PageItemsCounter
-								label="Domaines"
+								label="domaine"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + domains.length
@@ -288,7 +288,9 @@ const DashBoardDomainDomains = () => {
 						</div>
 						<div
 							className={cx(
-								domains.length === 0 ? classes.domainsContainer : ''
+								domains.length === 0
+									? [classes.domainsContainer, fr.cx('fr-hidden')]
+									: ''
 							)}
 						>
 							<div className={fr.cx('fr-mt-2v')}>
@@ -322,19 +324,6 @@ const DashBoardDomainDomains = () => {
 										</li>
 									))}
 								</ul>
-							)}
-							{domains.length === 0 && !isRefetchingDomains && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p>Aucun domaine trouvé</p>
-									</div>
-								</div>
 							)}
 						</div>
 						<div

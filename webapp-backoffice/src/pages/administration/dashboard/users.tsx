@@ -188,7 +188,9 @@ const DashBoardUsers = () => {
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`Supprimer ${selectedUsers.length > 0 ? 'des' : 'un'} utilisateur${selectedUsers.length > 0 ? 's' : ''}`}
+				title={`Supprimer ${
+					selectedUsers.length > 0 ? 'des' : 'un'
+				} utilisateur${selectedUsers.length > 0 ? 's' : ''}`}
 				kind={'danger'}
 				handleOnConfirm={() => {
 					if (selectedUsers.length > 0) {
@@ -501,9 +503,9 @@ const DashBoardUsers = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w', 'fr-pb-2w')}>
+						<div className={fr.cx('fr-col-12', 'fr-pt-3w', 'fr-pb-2w')}>
 							<PageItemsCounter
-								label="Utilisateurs"
+								label="utilisateur"
 								startItemCount={
 									numberPerPage * (filters.users.currentPage - 1) + 1
 								}
@@ -514,7 +516,11 @@ const DashBoardUsers = () => {
 							/>
 						</div>
 						<div
-							className={cx(users.length === 0 ? classes.usersContainer : '')}
+							className={cx(
+								users.length === 0
+									? [classes.usersContainer, fr.cx('fr-hidden')]
+									: ''
+							)}
 						>
 							<div className={fr.cx('fr-mt-2v')}>
 								<div
@@ -609,20 +615,6 @@ const DashBoardUsers = () => {
 										</li>
 									))}
 								</ul>
-							)}
-
-							{!isRefetchingUsers && users.length === 0 && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p>Aucun utilisateur trouvé</p>
-									</div>
-								</div>
 							)}
 						</div>
 						<div

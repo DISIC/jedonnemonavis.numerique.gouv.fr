@@ -385,7 +385,8 @@ const DashBoardEntities = () => {
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							<PageItemsCounter
-								label="Organisation"
+								label="organisation"
+								isFeminine
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + entities.length
@@ -420,19 +421,6 @@ const DashBoardEntities = () => {
 										</li>
 									))}
 								</ul>
-							)}
-							{!isRefetchingEntities && entities.length === 0 && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p>Aucune organisation trouvée</p>
-									</div>
-								</div>
 							)}
 						</div>
 						<div

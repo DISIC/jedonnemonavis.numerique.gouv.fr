@@ -527,7 +527,10 @@ const DashBoard = () => {
 						)}
 					</div>
 				)}
-				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
+				{isLoadingProducts ||
+				isLoadingEntities ||
+				isLoadingFavorites ||
+				isRefetchingProducts ? (
 					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 						<Loader />
 					</div>
@@ -541,13 +544,20 @@ const DashBoard = () => {
 							)}
 						>
 							<PageItemsCounter
-								label="Services"
+								label="service"
 								startItemCount={numberPerPage * (filters.currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (filters.currentPage - 1) + products.length
 								}
 								totalItemsCount={productsResult.metadata.count}
 								additionalClasses={['fr-pt-3w']}
+								emptyStateMessage={
+									filters.filterOnlyFavorites &&
+									search === '' &&
+									!filters.filterEntity.length
+										? 'Aucun service dans vos favoris'
+										: undefined
+								}
 							/>
 						</div>
 						<div
@@ -555,69 +565,43 @@ const DashBoard = () => {
 								products.length === 0 ? classes.productsContainer : ''
 							)}
 						>
-							{isRefetchingProducts ? (
-								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-									<Loader />
-								</div>
-							) : (
-								<ul className={classes.buttonList}>
-									{products.map((product, index) => (
-										<li key={index} role="list">
-											<ProductCard
-												product={product}
-												userId={parseInt(session?.user?.id as string)}
-												entity={
-													entities.find(
-														entity => product.entity_id === entity.id
-													) as Entity
-												}
-												isFavorite={
-													!!favorites.find(
-														favorite => favorite.product_id === product.id
-													)
-												}
-												showFavoriteButton={countTotalUserScope > 10}
-												onDeleteProduct={() => {
-													setStatusProductState({
-														msg: `Le service "${product.title}" a bien été supprimé`,
-														role: 'status'
-													});
-												}}
-												onRestoreProduct={() => {
-													updateFilters({
-														...filters,
-														filterOnlyArchived: false
-													});
-													setStatusProductState({
-														msg: `Le service "${product.title}" a bien été restauré`,
-														role: 'status'
-													});
-												}}
-											/>
-										</li>
-									))}
-								</ul>
-							)}
-
-							{products.length === 0 && !isRefetchingProducts && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p aria-live="assertive">
-											{filters.filterOnlyFavorites &&
-											search === '' &&
-											!filters.filterEntity.length
-												? 'Aucun service dans vos favoris'
-												: 'Aucun service trouvé'}
-										</p>
-									</div>
-								</div>
-							)}
+							<ul className={classes.buttonList}>
+								{products.map((product, index) => (
+									<li key={index} role="list">
+										<ProductCard
+											product={product}
+											userId={parseInt(session?.user?.id as string)}
+											entity={
+												entities.find(
+													entity => product.entity_id === entity.id
+												) as Entity
+											}
+											isFavorite={
+												!!favorites.find(
+													favorite => favorite.product_id === product.id
+												)
+											}
+											showFavoriteButton={countTotalUserScope > 10}
+											onDeleteProduct={() => {
+												setStatusProductState({
+													msg: `Le service "${product.title}" a bien été supprimé`,
+													role: 'status'
+												});
+											}}
+											onRestoreProduct={() => {
+												updateFilters({
+													...filters,
+													filterOnlyArchived: false
+												});
+												setStatusProductState({
+													msg: `Le service "${product.title}" a bien été restauré`,
+													role: 'status'
+												});
+											}}
+										/>
+									</li>
+								))}
+							</ul>
 						</div>
 						<div
 							className={fr.cx(

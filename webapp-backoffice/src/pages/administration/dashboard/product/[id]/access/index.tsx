@@ -255,7 +255,7 @@ const AccessManagement = (props: Props) => {
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-8')}>
 							<PageItemsCounter
-								label="Admin"
+								label="admin"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + accessRights.length

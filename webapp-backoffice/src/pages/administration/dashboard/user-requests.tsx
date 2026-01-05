@@ -289,24 +289,25 @@ const DashBoardUserRequestUserRequests = () => {
 					</div>
 				) : (
 					<div>
-						{nbPages > 1 && (
-							<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
-								<PageItemsCounter
-									label="Demandes d’accès"
-									startItemCount={numberPerPage * (currentPage - 1) + 1}
-									endItemCount={
-										numberPerPage * (currentPage - 1) + userRequests.length
-									}
-									totalItemsCount={userrequestsResult.metadata.count}
-								/>
-							</div>
-						)}
+						<div className={fr.cx('fr-col-12', 'fr-pt-3w')}>
+							<PageItemsCounter
+								label="demande d’accès"
+								isFeminine
+								startItemCount={numberPerPage * (currentPage - 1) + 1}
+								endItemCount={
+									numberPerPage * (currentPage - 1) + userRequests.length
+								}
+								totalItemsCount={userrequestsResult.metadata.count}
+							/>
+						</div>
 						<div
 							className={cx(
-								userRequests.length === 0 ? classes.userrequestsContainer : ''
+								userRequests.length === 0
+									? [classes.userrequestsContainer, fr.cx('fr-hidden')]
+									: ''
 							)}
 						>
-							<div className={fr.cx('fr-mt-2v', 'fr-hidden', 'fr-unhidden-md')}>
+							<div className={fr.cx('fr-mt-6v', 'fr-hidden', 'fr-unhidden-md')}>
 								<div
 									className={cx(
 										fr.cx(
@@ -343,19 +344,6 @@ const DashBoardUserRequestUserRequests = () => {
 										</li>
 									))}
 								</ul>
-							)}
-							{userRequests.length === 0 && !isRefetchingUserRequests && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p>Aucun demande d'accès trouvée</p>
-									</div>
-								</div>
 							)}
 						</div>
 						<div

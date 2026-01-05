@@ -289,6 +289,8 @@ type PageItemsCounterProps = {
 	endItemCount: number;
 	totalItemsCount: number;
 	additionalClasses?: FrCxArg[];
+	emptyStateMessage?: string;
+	isFeminine?: boolean;
 };
 
 export const PageItemsCounter = ({
@@ -296,23 +298,81 @@ export const PageItemsCounter = ({
 	startItemCount,
 	endItemCount,
 	totalItemsCount,
-	additionalClasses = []
+	additionalClasses = [],
+	emptyStateMessage,
+	isFeminine = false
 }: PageItemsCounterProps) => {
 	const { cx, classes } = useStyles();
-
-	if (totalItemsCount === 0) return null;
-
 	const key = `${startItemCount}-${endItemCount}-${totalItemsCount}`;
+
+	const getLabel = () => {
+		const uppercaseLabel = label.charAt(0).toUpperCase() + label.slice(1);
+		const pluralLabel = label.endsWith('s')
+			? uppercaseLabel
+			: uppercaseLabel + 's';
+		return totalItemsCount > 1 ? pluralLabel : uppercaseLabel;
+	};
+
+	const getSingleLabelMessage = () => {
+		const preLabel = isFeminine ? 'Une seule' : 'Un seul';
+		const verb = isFeminine ? 'trouvée' : 'trouvé';
+		return `${preLabel} ${label} ${verb}`;
+	};
+
+	const getEmptyStateMessage = () => {
+		return isFeminine ? `Aucune ${label} trouvée` : `Aucun ${label} trouvé`;
+	};
+
+	if (totalItemsCount === 0) {
+		return (
+			<p
+				key={key}
+				className={cx(
+					classes.noContent,
+					fr.cx('fr-col-12', 'fr-mt-15v', 'fr-mb-0', 'fr-ml-0')
+				)}
+				role="alert"
+				aria-live="assertive"
+				aria-atomic="true"
+				aria-relevant="additions text"
+			>
+				{emptyStateMessage ?? getEmptyStateMessage()}
+			</p>
+		);
+	}
+
+	if (totalItemsCount === 1) {
+		return (
+			<p
+				key={key}
+				className={fr.cx(
+					...additionalClasses,
+					'fr-col-12',
+					'fr-mb-0',
+					'fr-ml-0'
+				)}
+				role="alert"
+				aria-live="assertive"
+				aria-atomic="true"
+				aria-relevant="additions text"
+			>
+				{getSingleLabelMessage()}
+			</p>
+		);
+	}
+
 	return (
 		<div
 			key={key}
-			aria-live="assertive"
+			role="alert"
+			aria-live="polite"
 			aria-atomic="true"
-			role="status"
+			aria-relevant="additions text"
 			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
 		>
-			{label} de <span className={cx(classes.boldText)}>{startItemCount}</span>{' '}
-			à <span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
+			{getLabel()} de{' '}
+			<span className={cx(classes.boldText)}>{startItemCount}</span> à{' '}
+			<span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
 			<span className={cx(classes.boldText)}>{totalItemsCount}</span>
 		</div>
 	);
@@ -320,6 +380,10 @@ export const PageItemsCounter = ({
 
 const useStyles = tss.create({
 	boldText: {
+		fontWeight: 'bold'
+	},
+	noContent: {
+		textAlign: 'center',
 		fontWeight: 'bold'
 	}
 });
