@@ -54,7 +54,7 @@ const GenericCardInfos = (props: Props) => {
 							)
 						)}
 					>
-						<h4 className={cx(fr.cx('fr-mb-0'))}>{title}</h4>
+						<h3 className={cx(fr.cx('fr-mb-0', 'fr-h4'))}>{title}</h3>
 						{hint && <p className={cx(fr.cx('fr-mb-0', 'fr-mt-4v'))}>{hint}</p>}
 					</div>
 
