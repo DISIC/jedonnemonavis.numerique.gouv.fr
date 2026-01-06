@@ -42,6 +42,7 @@ const CredentialsCard = (props: Props) => {
 		'change-mail' | 'change-pwd'
 	>('change-mail');
 	const lastModalTriggerRef = React.useRef<HTMLButtonElement | null>(null);
+	const [modifying, setModifying] = React.useState<Boolean>(false);
 
 	const {
 		control,
@@ -167,8 +168,9 @@ const CredentialsCard = (props: Props) => {
 			<GenericCardInfos
 				title={'Identifiants de connexion'}
 				editButtonTitle="Modifier les informations de connexion"
-				modifiable={true}
+				modifiable={false}
 				onSubmit={onFormSubmit}
+				propsIsModifying={modifying}
 				customModifyButton={
 					user.proconnect_account ? (
 						<Button
@@ -215,7 +217,8 @@ const CredentialsCard = (props: Props) => {
 								{user.email}
 							</div>
 						</div>
-						{user.proconnect_account && (
+
+						{user.proconnect_account ? (
 							<Alert
 								small
 								severity="info"
@@ -223,6 +226,26 @@ const CredentialsCard = (props: Props) => {
 								className={fr.cx('fr-col-12', 'fr-mb-6v')}
 								style={{ textAlign: 'justify' }}
 							/>
+						) : (
+							<div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+								<Button
+									priority="secondary"
+									iconId="fr-icon-edit-line"
+									onClick={() => {
+										setModifying(true);
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Modify-Identifiants de connexion`
+										]);
+									}}
+									size="small"
+									className={classes.button}
+									title={`Modifier l'adresse e-mail`}
+								>
+									Modifier
+								</Button>
+							</div>
 						)}
 						<div
 							className={fr.cx(
@@ -236,6 +259,20 @@ const CredentialsCard = (props: Props) => {
 							</div>
 							<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 								*****************
+							</div>
+							<div
+								className={cx(
+									fr.cx('fr-col-md-12', 'fr-pt-0'),
+									classes.buttonContainer
+								)}
+							>
+								<Button
+									priority="secondary"
+									onClick={handleOpenResetPwdModal}
+									className={classes.buttonContainer}
+								>
+									Réinitialiser le mot de passe
+								</Button>
 							</div>
 						</div>
 					</>
@@ -374,6 +411,43 @@ const CredentialsCard = (props: Props) => {
 									)}
 								</form>
 							</div>
+							<div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+								<Button
+									priority="secondary"
+									onClick={() => {
+										setModifying(false);
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Cancel-Changes-Identifiants de connexion`
+										]);
+									}}
+									size="small"
+									className={cx(classes.button)}
+								>
+									Annuler
+								</Button>
+								<Button
+									priority="primary"
+									iconId="fr-icon-save-line"
+									iconPosition="right"
+									size="small"
+									className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
+									onClick={async () => {
+										const isFormValid = await onFormSubmit();
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Validate-Changes-Identifiants de connexion`
+										]);
+										if (isFormValid) {
+											setModifying(false);
+										}
+									}}
+								>
+									Sauvegarder
+								</Button>
+							</div>
 							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
 								Mot de passe
 							</div>
@@ -413,6 +487,12 @@ const useStyles = tss.withName(CredentialsCard.name).create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.title.redMarianne.default
+	},
+	button: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
 	}
 }));
 

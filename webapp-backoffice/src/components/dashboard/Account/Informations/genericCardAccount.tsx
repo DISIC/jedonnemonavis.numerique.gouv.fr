@@ -15,6 +15,7 @@ interface Props {
 	onSubmit?: () => Promise<boolean>;
 	smallScreenShowHr?: boolean;
 	editButtonTitle?: string;
+	propsIsModifying?: Boolean;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -27,9 +28,18 @@ const GenericCardInfos = (props: Props) => {
 		onSubmit,
 		smallScreenShowHr = true,
 		customModifyButton,
-		editButtonTitle
+		editButtonTitle,
+		propsIsModifying
 	} = props;
-	const [modifying, setModifying] = React.useState<Boolean>(false);
+	const [internalModifying, setInternalModifying] =
+		React.useState<Boolean>(false);
+	const modifying =
+		propsIsModifying !== undefined ? propsIsModifying : internalModifying;
+	const setModifying = (value: Boolean) => {
+		if (propsIsModifying === undefined) {
+			setInternalModifying(value);
+		}
+	};
 	const { cx, classes } = useStyles();
 	const router = useRouter();
 
