@@ -252,7 +252,7 @@ const DashBoard = () => {
 		<>
 			{isModalSubmitted && (
 				<div
-					role="status"
+					role="alert"
 					className={cx(classes.container, fr.cx('fr-container'))}
 				>
 					<Alert
@@ -321,29 +321,31 @@ const DashBoard = () => {
 					</div>
 				</div>
 				{isOnboardingDone && createdProduct && createdForm && (
-					<Alert
-						className={fr.cx('fr-col-12', 'fr-mb-8v')}
-						title="Votre service et votre formulaire ont été créé avec succès !"
-						description={
-							<>
-								Pensez à copier le lien d’intégration sur votre site pour rendre
-								votre formulaire visible aux usagers
-								<Link
-									href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
-									className={fr.cx(
-										'fr-link--icon-right',
-										'fr-ml-2v',
-										'fr-icon-arrow-right-line',
-										'fr-link'
-									)}
-								>
-									Copier le lien d’intégration
-								</Link>
-							</>
-						}
-						severity="success"
-						closable
-					/>
+					<div role="alert">
+						<Alert
+							className={fr.cx('fr-col-12', 'fr-mb-8v')}
+							title="Votre service et votre formulaire ont été créé avec succès !"
+							description={
+								<>
+									Pensez à copier le lien d’intégration sur votre site pour
+									rendre votre formulaire visible aux usagers
+									<Link
+										href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
+										className={fr.cx(
+											'fr-link--icon-right',
+											'fr-ml-2v',
+											'fr-icon-arrow-right-line',
+											'fr-link'
+										)}
+									>
+										Copier le lien d’intégration
+									</Link>
+								</>
+							}
+							severity="success"
+							closable
+						/>
+					</div>
 				)}
 
 				{(displayFilters || !!countArchivedUserScope) && (
@@ -567,7 +569,7 @@ const DashBoard = () => {
 						>
 							<ul className={classes.buttonList}>
 								{products.map((product, index) => (
-									<li key={index} role="list">
+									<li key={index}>
 										<ProductCard
 											product={product}
 											userId={parseInt(session?.user?.id as string)}

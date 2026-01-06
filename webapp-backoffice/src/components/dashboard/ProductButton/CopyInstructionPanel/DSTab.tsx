@@ -21,13 +21,15 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 			<p className={fr.cx('fr-mb-4v')}>
 				1. Choisissez le thème à intégrer et copier le code correspondant
 			</p>
-			<Alert
-				isClosed={!displayToastTheme}
-				severity="success"
-				description={`Le lien du thème ${displayToastTheme} a été copié dans le presse papier`}
-				small
-				className={fr.cx('fr-mb-4v')}
-			/>
+			<div role="alert">
+				<Alert
+					isClosed={!displayToastTheme}
+					severity="success"
+					description={`Le lien du thème ${displayToastTheme} a été copié dans le presse papier`}
+					small
+					className={fr.cx('fr-mb-4v')}
+				/>
+			</div>
 			<div className={fr.cx('fr-grid-row')}>
 				{['clair', 'sombre'].map(theme => {
 					return (

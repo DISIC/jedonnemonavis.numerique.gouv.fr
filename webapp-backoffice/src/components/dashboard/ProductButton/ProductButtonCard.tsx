@@ -73,7 +73,7 @@ const ProductButtonCard = (props: Props) => {
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.deleted_at
 									? `Fermé le ${button.deleted_at.toLocaleDateString()}` +
-										(button.delete_reason ? ` : ${button.delete_reason}` : '')
+									  (button.delete_reason ? ` : ${button.delete_reason}` : '')
 									: button.description}
 							</p>
 						)}
@@ -195,27 +195,29 @@ const ProductButtonCard = (props: Props) => {
 				</div>
 
 				{button.closedButtonLog && (
-					<Alert
-						severity="error"
-						title="Tentative de dépôt d'avis"
-						description={
-							<>
-								<p>
-									Une tentative de dépôt d'avis a été effectuée sur depuis ce
-									lien fermé. Nous vous invitons à supprimer le code HTML
-									correspondant de la page concernée.
-								</p>
-								<small>
-									Dernière tentative :{' '}
-									{button.closedButtonLog.updated_at.toLocaleString()} — Nombre
-									total de tentatives : {button.closedButtonLog.count}
-								</small>
-							</>
-						}
-						closable
-						className={cx(fr.cx('fr-mt-2w'), classes.alertButtonLog)}
-						as="h4"
-					/>
+					<div role="status">
+						<Alert
+							severity="error"
+							title="Tentative de dépôt d'avis"
+							description={
+								<>
+									<p>
+										Une tentative de dépôt d'avis a été effectuée sur depuis ce
+										lien fermé. Nous vous invitons à supprimer le code HTML
+										correspondant de la page concernée.
+									</p>
+									<small>
+										Dernière tentative :{' '}
+										{button.closedButtonLog.updated_at.toLocaleString()} —
+										Nombre total de tentatives : {button.closedButtonLog.count}
+									</small>
+								</>
+							}
+							closable
+							className={cx(fr.cx('fr-mt-2w'), classes.alertButtonLog)}
+							as="h4"
+						/>
+					</div>
 				)}
 			</div>
 		</>
@@ -230,8 +232,8 @@ const useStyles = tss
 			backgroundColor: isTest
 				? fr.colors.decisions.border.default.grey.default
 				: isClosed
-					? fr.colors.decisions.background.default.grey.hover
-					: fr.colors.decisions.background.alt.blueFrance.default,
+				? fr.colors.decisions.background.default.grey.hover
+				: fr.colors.decisions.background.alt.blueFrance.default,
 			height: 'auto!important',
 			backgroundImage: 'none!important'
 		},

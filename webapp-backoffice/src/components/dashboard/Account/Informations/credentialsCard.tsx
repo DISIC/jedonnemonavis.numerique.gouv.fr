@@ -219,13 +219,15 @@ const CredentialsCard = (props: Props) => {
 						</div>
 
 						{user.proconnect_account ? (
-							<Alert
-								small
-								severity="info"
-								description="Vous ne pouvez pas modifier cet email car il s'agit de votre adresse ProConnect, que vous avez utilisé pour créer votre compte Je Donne Mon Avis. Si vous souhaitez vous connecter avec une autre adresse, vous devez créer un autre compte."
-								className={fr.cx('fr-col-12', 'fr-mb-6v')}
-								style={{ textAlign: 'justify' }}
-							/>
+							<div role="status">
+								<Alert
+									small
+									severity="info"
+									description="Vous ne pouvez pas modifier cet email car il s'agit de votre adresse ProConnect, que vous avez utilisé pour créer votre compte Je Donne Mon Avis. Si vous souhaitez vous connecter avec une autre adresse, vous devez créer un autre compte."
+									className={fr.cx('fr-col-12', 'fr-mb-6v')}
+									style={{ textAlign: 'justify' }}
+								/>
+							</div>
 						) : (
 							<div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
 								<Button

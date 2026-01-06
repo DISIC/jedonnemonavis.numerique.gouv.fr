@@ -112,29 +112,33 @@ const LinksTab = ({
 			</div>
 
 			{isLinkCreated && !isAlertShown ? (
-				<Alert
-					className={fr.cx('fr-col-12', 'fr-mt-6v')}
-					title="Votre lien d’intégration a été créé avec succès !"
-					description={
-						'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
-					}
-					severity="success"
-					small
-					closable
-				/>
+				<div role="alert">
+					<Alert
+						className={fr.cx('fr-col-12', 'fr-mt-6v')}
+						title="Votre lien d’intégration a été créé avec succès !"
+						description={
+							'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
+						}
+						severity="success"
+						small
+						closable
+					/>
+				</div>
 			) : (
-				<Alert
-					className={fr.cx('fr-col-12', 'fr-mt-6v')}
-					description={alertText}
-					severity="success"
-					small
-					closable
-					isClosed={!isAlertShown}
-					onClose={() => {
-						setIsAlertShown(false);
-						setIsLinkCreated(undefined);
-					}}
-				/>
+				<div role="alert">
+					<Alert
+						className={fr.cx('fr-col-12', 'fr-mt-6v')}
+						description={alertText}
+						severity="success"
+						small
+						closable
+						isClosed={!isAlertShown}
+						onClose={() => {
+							setIsAlertShown(false);
+							setIsLinkCreated(undefined);
+						}}
+					/>
+				</div>
 			)}
 
 			<div
