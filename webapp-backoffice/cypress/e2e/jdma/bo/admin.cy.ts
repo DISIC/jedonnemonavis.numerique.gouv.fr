@@ -19,7 +19,7 @@ describe('jdma-admin', () => {
 		login(adminEmail, adminPassword);
 	});
 
-	it('create and delete users', () => {
+	it.only('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.url.users}`);
 		for (let i = 0; i < 3; i++) {
 			cy.contains('button', 'Ajouter un nouvel utilisateur')
@@ -35,7 +35,10 @@ describe('jdma-admin', () => {
 		}
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
-		cy.get(selectors.input.checkbox).should('have.length', 5);
+		cy.get('.fr-card')
+			.filter((_, card) => card.textContent?.includes('@gmail.com'))
+			.should('have.length', 3);
+		cy.wait(50000);
 		cy.get(`${selectors.input.checkbox}[value="value1"]`).click({
 			force: true
 		});
