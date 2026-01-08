@@ -61,6 +61,7 @@ describe('jdma-forms', () => {
 
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {
 		goToCurrentFormReviewPage();
+		cy.wait(1000); // Wait for the page to load properly
 		fillFormStep1();
 		fillFormStep2();
 		fillFormStep3();
