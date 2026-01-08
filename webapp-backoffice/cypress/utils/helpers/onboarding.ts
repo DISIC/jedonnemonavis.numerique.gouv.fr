@@ -11,6 +11,8 @@ export const skipStep = (stepSelector: string) => {
 };
 
 export const addUserToProduct = (userEmail: string) => {
+	cy.wait(500);
+	cy.auditA11y();
 	cy.get(selectors.onboarding.step.access)
 		.contains('button', 'Inviter des utilisateurs')
 		.click();

@@ -35,8 +35,8 @@ describe('jdma-forms', () => {
 	let copiedReviewUrl = '';
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
-		ensureTestServiceExistsAndGoToForms();
 		cy.injectAxe();
+		ensureTestServiceExistsAndGoToForms();
 	});
 
 	it('should create multiple forms for a single service', () => {
@@ -74,11 +74,11 @@ describe('jdma-forms', () => {
 		goToCurrentFormReviewPage().then(url => {
 			copiedReviewUrl = url;
 		});
-		cy.wait(1000); // Wait for the page to load properly
-		fillFormStep1();
-		fillFormStep2();
-		fillFormStep3();
-		fillFormStep4();
+		cy.wait(1000);
+		fillFormStep1(false, true);
+		fillFormStep2(true);
+		fillFormStep3(true);
+		fillFormStep4(true);
 	});
 
 	it('should edit a form in builder (hide step, edit block, publish) and check changes from dashboard and on form review page', () => {

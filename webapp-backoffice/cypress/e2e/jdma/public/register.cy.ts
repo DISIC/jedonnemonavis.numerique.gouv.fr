@@ -19,12 +19,9 @@ describe('jdma-register', () => {
 		cy.injectAxe();
 	});
 
-	it('should pass a11y checks', () => {
-		cy.auditA11y();
-	});
-
 	// Vérification de la page initiale
 	it('should display the agent public question first', () => {
+		cy.auditA11y();
 		cy.contains('h2', 'Se créer un compte').should('be.visible');
 		cy.contains(
 			'legend',

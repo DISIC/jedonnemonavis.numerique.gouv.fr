@@ -112,9 +112,8 @@ const LinksTab = ({
 			</div>
 
 			{isLinkCreated && !isAlertShown ? (
-				<div role="alert">
+				<div role="alert" className={fr.cx('fr-col-12', 'fr-mt-6v')}>
 					<Alert
-						className={fr.cx('fr-col-12', 'fr-mt-6v')}
 						title="Votre lien d’intégration a été créé avec succès !"
 						description={
 							'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
@@ -125,9 +124,8 @@ const LinksTab = ({
 					/>
 				</div>
 			) : (
-				<div role="alert">
+				<div role="alert" className={fr.cx('fr-col-12', 'fr-mt-6v')}>
 					<Alert
-						className={fr.cx('fr-col-12', 'fr-mt-6v')}
 						description={alertText}
 						severity="success"
 						small

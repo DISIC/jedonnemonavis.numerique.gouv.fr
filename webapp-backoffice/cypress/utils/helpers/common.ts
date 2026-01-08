@@ -95,9 +95,12 @@ export function createOrEditProduct(
 	isEdit = false,
 	onlyProductCreation = false
 ) {
-	if (!isEdit) cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
-	cy.wait(500);
-	cy.auditA11y();
+	if (!isEdit) {
+		cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+		cy.wait(500);
+		cy.auditA11y();
+	}
+
 	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
@@ -126,6 +129,7 @@ export function createOrEditForm(
 	shouldCheckA11y = false
 ) {
 	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
+
 	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
@@ -165,18 +169,27 @@ export function createOrEditForm(
 	}
 }
 
-export function createButton(name: string) {
+export function createButton(name: string, shouldCheckA11y = false) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click({
 		force: true
 	});
 
-	cy.wait(500);
+	if (shouldCheckA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
+
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;
 
 	cy.get(actions).contains('button', 'Continuer').click();
+
+	if (shouldCheckA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 
 	// Stub clipboard to avoid "Document is not focused" error in CI
 	cy.window().then(win => {
@@ -255,15 +268,17 @@ export function checkReviewForm(shouldWork = false, url?: string) {
 }
 
 export function doTheOnboardingFlow() {
-	// TODO: apply audit a11y checks on each step
+	cy.injectAxe();
 	createOrEditProduct('e2e-jdma-service-test-1');
 	editStep(selectors.onboarding.step.product);
 	createOrEditProduct('e2e-jdma-service-test-1-edited', true);
+	cy.wait(500);
+	cy.auditA11y();
 	skipStep(selectors.onboarding.step.access);
 	editStep(selectors.onboarding.step.access);
 	addUserToProduct(invitedEmail);
-	createOrEditForm('form-test-1');
+	createOrEditForm('form-test-1', false, true);
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true, false);
-	createButton('e2e-jdma-button-test-1');
+	createButton('e2e-jdma-button-test-1', true);
 }
