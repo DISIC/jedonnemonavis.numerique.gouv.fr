@@ -1365,11 +1365,12 @@ export const answerRouter = router({
 				product_id: z.number(),
 				form_id: z.number(),
 				start_date: z.string().optional(),
-				end_date: z.string().optional()
+				end_date: z.string().optional(),
+				size: z.number().optional().default(10)
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { product_id, form_id, start_date, end_date } = input;
+			const { product_id, form_id, start_date, end_date, size } = input;
 
 			await checkAndGetProduct({ ctx, product_id });
 			const form = await checkAndGetForm({ ctx, form_id });
@@ -1408,18 +1409,20 @@ export const answerRouter = router({
 				query: {
 					bool: {
 						must: mustClauses,
-						must_not: {
-							wildcard: {
-								answer_tokens: '*_*'
+						must_not: [
+							{
+								wildcard: {
+									answer_tokens: '*_*'
+								}
 							}
-						}
+						]
 					}
 				},
 				aggs: {
 					keywords: {
 						terms: {
 							field: 'answer_tokens',
-							size: 10
+							size: size
 						}
 					}
 				},
@@ -1429,10 +1432,12 @@ export const answerRouter = router({
 			const buckets =
 				(keywordsAggs?.aggregations?.keywords as any)?.buckets ?? [];
 
-			const data = buckets.map((bucket: any) => ({
-				keyword: bucket.key,
-				count: bucket.doc_count
-			}));
+			const data = buckets
+				.filter((bucket: any) => bucket.doc_count >= 5)
+				.map((bucket: any) => ({
+					keyword: bucket.key,
+					count: bucket.doc_count
+				}));
 
 			return { data: data as { keyword: string; count: number }[] };
 		})

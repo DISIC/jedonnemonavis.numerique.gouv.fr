@@ -1,6 +1,7 @@
 import {
 	checkAccountHeader,
 	clickModifyCard,
+	deleteAccount,
 	fillAccountForm,
 	testEmail
 } from '../../../utils/helpers/account';
@@ -9,7 +10,6 @@ import { selectors } from '../../../utils/selectors';
 import { displayViolationsTable } from '../../../utils/tools';
 import {
 	adminEmail,
-	appUrl,
 	firstNameTest,
 	invitedEmailBis,
 	lastNameTest,
@@ -26,6 +26,7 @@ describe('jdma-account', () => {
 		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
 		// 	displayViolationsTable
 		// );
+		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);
@@ -82,19 +83,7 @@ describe('jdma-account', () => {
 		// );
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 		cy.contains('li', selectors.menu.account).click({ force: true });
-		cy.contains('button', selectors.action.delete).click({ force: true });
-		cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
-		cy.get(selectors.accountForm.confirm)
-			.clear({ force: true })
-			.type('blabla', { force: true });
-		cy.contains('button', selectors.action.confirmDelete).should('be.disabled');
-		cy.contains('p', 'Mot de confirmation incorrect').should('exist');
-		cy.get(selectors.accountForm.confirm)
-			.clear({ force: true })
-			.type('supprimer', { force: true });
-		cy.contains('button', selectors.action.confirmDelete)
-			.should('not.be.disabled')
-			.click({ force: true });
+		deleteAccount();
 		cy.url().should('include', '/login');
 		cy.get(selectors.loginForm.email).type(newEmailTest);
 		cy.get(selectors.loginForm.continueButton).contains('Continuer').click();

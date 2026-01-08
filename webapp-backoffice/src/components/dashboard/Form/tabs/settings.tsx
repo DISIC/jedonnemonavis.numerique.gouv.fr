@@ -1,11 +1,15 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import {
+	ButtonWithClosedLog,
+	ButtonWithForm,
+	FormWithElements
+} from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import Button from '@codegouvfr/react-dsfr/Button';
+import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -17,6 +21,8 @@ interface Props {
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
+	buttons: (ButtonWithForm & ButtonWithClosedLog)[];
+	isLoading: boolean;
 }
 
 const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
@@ -44,36 +50,15 @@ const SettingsTab = ({
 	form,
 	alertText,
 	isAlertShown,
-	setIsAlertShown
+	setIsAlertShown,
+	buttons,
+	isLoading
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 	const [isCopied, setIsCopied] = useState(false);
 
-	const {
-		data: buttonResults,
-		isLoading: isLoadingButtons,
-		isRefetching: isRefetchingButtons
-	} = trpc.button.getList.useQuery(
-		{
-			page: 1,
-			numberPerPage: 1000,
-			form_id: form.id,
-			isTest: false
-		},
-		{
-			initialData: {
-				data: [],
-				metadata: {
-					count: 0
-				}
-			}
-		}
-	);
-
 	const deleteButton = trpc.button.delete.useMutation();
-
-	const { data: buttons } = buttonResults;
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
@@ -88,12 +73,18 @@ const SettingsTab = ({
 			})
 		);
 		router.push(
-			`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les liens d'intégration associés ont bien été fermés.`)}`
+			`/administration/dashboard/product/${
+				form.product_id
+			}/forms?alert=${encodeURIComponent(
+				`Le formulaire "${
+					form.title || form.form_template.title
+				}" et tous les liens d'intégration associés ont bien été fermés.`
+			)}`
 		);
 	};
 
 	const displaySettingsContent = () => {
-		if (isLoadingButtons || isRefetchingButtons) {
+		if (isLoading) {
 			return (
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
@@ -118,7 +109,7 @@ const SettingsTab = ({
 								Identifiant de formulaire
 							</span>
 							<span className={fr.cx('fr-ml-2v', 'fr-mr-4v')}>#{form.id}</span>
-							<Button
+							<ButtonDSFR
 								priority="secondary"
 								size="small"
 								onClick={() => {
@@ -131,7 +122,7 @@ const SettingsTab = ({
 								iconPosition="right"
 							>
 								Copier
-							</Button>
+							</ButtonDSFR>
 						</div>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 							<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
@@ -171,7 +162,7 @@ const SettingsTab = ({
 								))}
 
 								<div className={cx(classes.buttonsGroup, fr.cx('fr-col-12'))}>
-									<Button
+									<ButtonDSFR
 										priority="primary"
 										iconId="fr-icon-edit-line"
 										iconPosition="right"
@@ -183,7 +174,7 @@ const SettingsTab = ({
 										}}
 									>
 										Éditer le formulaire
-									</Button>
+									</ButtonDSFR>
 								</div>
 							</div>
 						</div>
@@ -220,7 +211,7 @@ const SettingsTab = ({
 											className={fr.cx('fr-col-4')}
 											style={{ display: 'flex', justifyContent: 'end' }}
 										>
-											<Button
+											<ButtonDSFR
 												priority="tertiary"
 												iconId="fr-icon-delete-line"
 												style={{
@@ -233,7 +224,7 @@ const SettingsTab = ({
 												}}
 											>
 												Fermer le formulaire
-											</Button>
+											</ButtonDSFR>
 										</div>
 									</>
 								)}
@@ -247,15 +238,17 @@ const SettingsTab = ({
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<Alert
-				className={fr.cx('fr-col-12', 'fr-mb-6v')}
-				description={alertText}
-				severity="success"
-				small
-				closable
-				isClosed={!isAlertShown}
-				onClose={() => setIsAlertShown(false)}
-			/>
+			<div role="alert">
+				<Alert
+					className={fr.cx('fr-col-12', 'fr-mb-6v')}
+					description={alertText}
+					severity="success"
+					small
+					closable
+					isClosed={!isAlertShown}
+					onClose={() => setIsAlertShown(false)}
+				/>
+			</div>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-7v')}>Paramètres</h2>
 
 			{displaySettingsContent()}

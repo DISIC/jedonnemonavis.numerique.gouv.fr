@@ -282,7 +282,11 @@ const ProductFormPage = (props: Props) => {
 								form={form}
 								hasButtons={nbButtons > 0}
 								nbReviews={nbReviews}
-								isLoading={isLoadingReviewsCount}
+								isLoading={
+									isLoadingReviewsCount ||
+									isLoadingButtons ||
+									isRefetchingButtons
+								}
 								handleModalOpening={handleModalOpening}
 								onClickGoToReviews={() => {
 									tabsRef.current
@@ -299,6 +303,13 @@ const ProductFormPage = (props: Props) => {
 								ownRight={ownRight}
 								handleModalOpening={handleModalOpening}
 								hasButtons={nbButtons > 0}
+								isLoading={
+									isLoadingButtons ||
+									isLoadingReviewsCount ||
+									isRefetchingButtons
+								}
+								nbReviews={nbReviews}
+								buttons={buttonResults.data}
 							/>
 						)}
 						{selectedTabId === 'stats' && (
@@ -306,6 +317,13 @@ const ProductFormPage = (props: Props) => {
 								form={form}
 								ownRight={ownRight}
 								handleModalOpening={handleModalOpening}
+								nbReviews={nbReviews}
+								isLoading={
+									isLoadingReviewsCount ||
+									isLoadingButtons ||
+									isRefetchingButtons
+								}
+								buttons={buttonResults.data}
 								onClickGoToReviews={() => {
 									tabsRef.current
 										?.querySelector<HTMLButtonElement>(
@@ -326,6 +344,8 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
+										buttons={buttonResults.data}
+										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}
 								{selectedTabId === 'settings' && (
@@ -334,6 +354,8 @@ const ProductFormPage = (props: Props) => {
 										alertText={alertText}
 										isAlertShown={isAlertShown}
 										setIsAlertShown={setIsAlertShown}
+										buttons={buttonResults.data}
+										isLoading={isLoadingButtons || isRefetchingButtons}
 									/>
 								)}
 							</>

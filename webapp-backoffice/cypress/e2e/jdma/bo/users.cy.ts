@@ -1,4 +1,4 @@
-import { createProduct, login } from '../../../utils/helpers/common';
+import { createOrEditProduct, login } from '../../../utils/helpers/common';
 import { navigateToCreatedProduct } from '../../../utils/helpers/users';
 import { selectors } from '../../../utils/selectors';
 import { displayViolationsTable } from '../../../utils/tools';
@@ -16,7 +16,7 @@ describe('jdma-users', () => {
 	});
 
 	it('should create a service and attach an organization', () => {
-		createProduct('e2e-jdma-service-test-users');
+		createOrEditProduct('e2e-jdma-service-test-users');
 	});
 
 	it('should navigate to created product access page', () => {
@@ -44,7 +44,7 @@ describe('jdma-users', () => {
 
 		cy.get('input[value="carrier_admin"]').siblings('label').click();
 
-		cy.get('button').contains('Inviter').click();
+		cy.get('button').contains('Inviter et continuer').click();
 	});
 
 	it('should display the invited user', () => {

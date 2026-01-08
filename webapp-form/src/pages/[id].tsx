@@ -127,8 +127,8 @@ export default function JDMAForm({
 				value === field.values.bad
 					? 'bad'
 					: value === field.values.medium
-						? 'medium'
-						: 'good';
+					? 'medium'
+					: 'good';
 			const smileyLabel = t(`smileys.${smileyIntention}`, { lng: 'fr' });
 			return {
 				label: smileyLabel,
@@ -223,9 +223,9 @@ export default function JDMAForm({
 						fieldInSection.kind === 'smiley'
 							? 'radio'
 							: fieldInSection.kind !== 'input-text' &&
-								  fieldInSection.kind !== 'input-textarea'
-								? fieldInSection.kind
-								: 'text',
+							  fieldInSection.kind !== 'input-textarea'
+							? fieldInSection.kind
+							: 'text',
 					review: {},
 				} as Prisma.AnswerCreateInput;
 
@@ -369,7 +369,7 @@ export default function JDMAForm({
 							{t('success_block.title')}
 						</h1>
 					</div>
-					<p role="status" aria-live="polite">
+					<p role="alert" aria-live="polite">
 						{t('success_block.thanks')}
 					</p>
 					{/* REMOVE UNTIL WE HAVE DATA FOR CONTACTS IN PRODUCTS
@@ -615,7 +615,7 @@ export const getServerSideProps: GetServerSideProps<{
 									where: {
 										id: parseInt(buttonId),
 									},
-								},
+							  },
 				},
 			},
 		},
@@ -661,7 +661,7 @@ export const getServerSideProps: GetServerSideProps<{
 										form_config_displays: JSON.parse(formConfig).displays,
 										form_config_labels: JSON.parse(formConfig).labels,
 									} as FormWithElements['form_configs'][0],
-								]
+							  ]
 							: serializeData(product.forms[0].form_configs),
 					},
 				},

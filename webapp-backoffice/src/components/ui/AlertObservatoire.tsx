@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export const AlertObservatoire = () => {
 	return (
-		<div role="status">
+		<div role="alert">
 			<Alert
 				className={fr.cx('fr-mb-16v')}
 				closable

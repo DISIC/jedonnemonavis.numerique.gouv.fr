@@ -116,9 +116,9 @@ const ProductCard = ({
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-				(reviewsCountData?.countsByForm['1'] ?? 0) +
-				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+			  (reviewsCountData?.countsByForm['1'] ?? 0) +
+			  (reviewsCountData?.countsByForm['2'] ?? 0)
+			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
@@ -312,9 +312,7 @@ const ProductCard = ({
 									pointerEvents: isDisabled ? 'none' : 'auto'
 								}}
 							>
-								<span className={cx(classes.productTitle)}>
-									{product.title}
-								</span>
+								<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 							</Link>
 							{renderProductBadges()}
 						</div>
@@ -444,9 +442,9 @@ const ProductCard = ({
 														fr.cx('fr-pb-0')
 													)}
 												>
-													<span className={cx(classes.productTitle)}>
+													<h3 className={cx(classes.productTitle)}>
 														{form.title || form.form_template.title}
-													</span>
+													</h3>
 													{form.isDeleted ? (
 														<Badge severity="error" noIcon>
 															Fermé
@@ -570,6 +568,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
+		marginBottom: 0,
 		'&:hover': {
 			textDecoration: 'underline'
 		}
@@ -601,7 +600,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
-		':nth-of-type': {
+		':nth-of-type(2), :last-child': {
 			marginBottom: '0.5rem'
 		},
 		'&:hover > div:first-of-type span:first-of-type': {

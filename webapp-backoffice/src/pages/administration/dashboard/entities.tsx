@@ -49,6 +49,17 @@ const DashBoardEntities = () => {
 	const { cx, classes } = useStyles();
 	const { data: session } = useSession({ required: true });
 
+	const lastModalTriggerRef = React.useRef<HTMLElement | null>(null);
+	const restoreFocusToTrigger = React.useCallback(() => {
+		const trigger = lastModalTriggerRef.current;
+		if (!trigger) return;
+		if (typeof document === 'undefined') return;
+		if (!document.contains(trigger)) return;
+		requestAnimationFrame(() => {
+			trigger.focus();
+		});
+	}, []);
+
 	const [filter, setFilter] = React.useState<string>('name:asc');
 	const [search, setSearch] = React.useState<string>('');
 	const [validatedSearch, setValidatedSearch] = React.useState<string>('');
@@ -102,10 +113,16 @@ const DashBoardEntities = () => {
 		setCurrentPage(pageNumber);
 	};
 
-	const handleModalEntityRightsOpening = async ({
-		type,
-		entity
-	}: OnButtonClickEntityParams) => {
+	const handleModalEntityRightsOpening = async (
+		{ type, entity }: OnButtonClickEntityParams,
+		triggerEl?: HTMLElement | null
+	) => {
+		lastModalTriggerRef.current =
+			triggerEl ??
+			(typeof document !== 'undefined' &&
+			document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null);
 		setFromSearch(false);
 		setCurrentEntity(entity);
 		// avoid flick switching entity
@@ -130,7 +147,13 @@ const DashBoardEntities = () => {
 		}, 100);
 	};
 
-	const onCreateEntity = () => {
+	const onCreateEntity = (event?: React.MouseEvent<HTMLElement>) => {
+		lastModalTriggerRef.current =
+			event?.currentTarget ??
+			(typeof document !== 'undefined' &&
+			document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null);
 		setCurrentEntity(undefined);
 		setTimeout(() => {
 			entityModal.open();
@@ -183,6 +206,7 @@ const DashBoardEntities = () => {
 					fromSearch={fromSearch}
 					entity={currentEntity || entities[0]}
 					refetchEntities={refetchEntities}
+					onConceal={restoreFocusToTrigger}
 					onClose={() => {
 						if (fromSearch) entitySearchModal.open();
 					}}
@@ -191,6 +215,7 @@ const DashBoardEntities = () => {
 			<EntityModal
 				modal={entityModal}
 				entity={currentEntity}
+				onConceal={restoreFocusToTrigger}
 				onSubmit={newEntity => handleSubmit(newEntity)}
 			/>
 			<EntitySearchModal
@@ -198,10 +223,14 @@ const DashBoardEntities = () => {
 				onEntitySelected={onEntitySelected}
 				onCreate={onCreateEntity}
 			/>
-			<ApiKeyModal modal={apiKeyModal} entity={currentEntity}></ApiKeyModal>
+			<ApiKeyModal
+				modal={apiKeyModal}
+				entity={currentEntity}
+				onConceal={restoreFocusToTrigger}
+			></ApiKeyModal>
 			<div className={fr.cx('fr-container', 'fr-py-6w')}>
 				{newEntity && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {}}
@@ -356,7 +385,8 @@ const DashBoardEntities = () => {
 					<div>
 						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
 							<PageItemsCounter
-								label="Organisation"
+								label="organisation"
+								isFeminine
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) + entities.length
@@ -391,19 +421,6 @@ const DashBoardEntities = () => {
 										</li>
 									))}
 								</ul>
-							)}
-							{!isRefetchingEntities && entities.length === 0 && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p>Aucune organisation trouvée</p>
-									</div>
-								</div>
 							)}
 						</div>
 						<div

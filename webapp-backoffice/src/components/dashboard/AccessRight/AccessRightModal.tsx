@@ -1,14 +1,13 @@
-import { fr } from '@codegouvfr/react-dsfr';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import React from 'react';
-import { tss } from 'tss-react/dsfr';
+import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
+import { CustomModalProps } from '@/src/types/custom';
 import type { AccessRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
-import { AccessRightModalType } from '@/src/pages/administration/dashboard/product/[id]/access';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Input } from '@codegouvfr/react-dsfr/Input';
+import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { CustomModalProps } from '@/src/types/custom';
-
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	isOpen: boolean;
@@ -21,6 +20,7 @@ interface Props {
 	setCurrentAccessRight: React.Dispatch<
 		React.SetStateAction<AccessRightWithUsers | undefined>
 	>;
+	onSuccess?: () => void;
 }
 
 const ButtonModal = (props: Props) => {
@@ -33,7 +33,8 @@ const ButtonModal = (props: Props) => {
 		productName,
 		currentAccessRight,
 		setIsModalSubmitted,
-		setCurrentAccessRight
+		setCurrentAccessRight,
+		onSuccess
 	} = props;
 
 	const utils = trpc.useUtils();
@@ -65,6 +66,7 @@ const ButtonModal = (props: Props) => {
 		onSuccess: () => {
 			utils.accessRight.getList.invalidate();
 			setIsModalSubmitted(true);
+			onSuccess && onSuccess();
 			modal.close();
 		}
 	});
@@ -321,7 +323,6 @@ const ButtonModal = (props: Props) => {
 			default:
 				return [...defaultButtons];
 		}
-
 	};
 
 	return (

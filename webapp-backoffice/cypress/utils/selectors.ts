@@ -1,4 +1,3 @@
-// Centralized selectors for Cypress tests
 export const selectors = {
 	header: 'header',
 	navbarLogo: '.fr-logo',
@@ -33,11 +32,18 @@ export const selectors = {
 		emailConfirmation: 'input[name="emailConfirmation"]',
 		confirm: 'input[name="word"]'
 	},
-	dashboard: {
+	input: {
+		checkbox: 'input[type="checkbox"]'
+	},
+	url: {
+		productTestService: '/administration/dashboard/product/4/forms',
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
 		news: '/administration/dashboard/news',
+		newLink: '/administration/dashboard/product/5/forms/4/new-link'
+	},
+	dashboard: {
 		nameTestOrga: 'e2e-jdma-entity-test',
 		nameTestService: 'e2e-jdma-service-test',
 		nameTestForm1: 'e2e-jdma-form-test-1',
@@ -51,7 +57,6 @@ export const selectors = {
 		product: 'dialog#product-modal',
 		entity: 'dialog#entity-modal',
 		button: 'dialog#button-modal',
-		form: 'dialog#new-form-modal',
 		renameForm: 'dialog#rename-form-modal',
 		publishForm: 'dialog#form-publish-modal',
 		deleteForm: 'dialog#delete-form-modal'
@@ -59,6 +64,7 @@ export const selectors = {
 	modalFooter: '.fr-modal__footer',
 	productLink: '[class*="productLink"]',
 	productForm: '#product-form',
+	formCreation: '#form-creation-form',
 	sideMenu: {
 		menu: 'nav.fr-sidemenu',
 		menuItem: 'li.fr-sidemenu__item'
@@ -80,5 +86,17 @@ export const selectors = {
 		delete: 'Supprimer le compte',
 		confirmDelete: 'Supprimer',
 		confirm: 'Confirmer'
+	},
+	onboarding: {
+		actionsContainer: '#onboarding-actions',
+		step: {
+			product: '#onboarding-step-product',
+			access: '#onboarding-step-access',
+			form: '#onboarding-step-form',
+			link: '#onboarding-step-link'
+		},
+		continue: 'Continuer',
+		save: 'Enregistrer et continuer',
+		saveModifications: 'Enregistrer les modifications'
 	}
 };

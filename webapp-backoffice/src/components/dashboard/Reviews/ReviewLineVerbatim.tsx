@@ -16,6 +16,37 @@ import { ExtendedReview } from './interface';
 import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 
+const highlightSearchTerms = (text: string, search: string): string => {
+	if (!search.trim()) return text;
+
+	const words = search.split(' ').filter(Boolean);
+	let highlightedText = text;
+
+	words.forEach(word => {
+		const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+		const patterns = [
+			`\\b${escapedWord}(?=\\w)`,
+			`(?<=\\w)${escapedWord}\\b`,
+			`\\b${escapedWord}\\b`,
+			`^${escapedWord}(?=\\w)`,
+			`^${escapedWord}\\b`,
+			`(?<=\\w)${escapedWord}$`,
+			`\\b${escapedWord}$`,
+			`^${escapedWord}$`
+		];
+
+		patterns.forEach(pattern => {
+			const regex = new RegExp(pattern, 'gi');
+			highlightedText = highlightedText.replace(regex, match => {
+				return `<span>${match}</span>`;
+			});
+		});
+	});
+
+	return highlightedText;
+};
+
 const ReviewLineVerbatim = ({
 	review,
 	search,
@@ -30,9 +61,6 @@ const ReviewLineVerbatim = ({
 	};
 	hasManyVersions: boolean;
 }) => {
-	const color = getStatsColor({
-		intention: review.satisfaction?.intention || 'neutral'
-	});
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
@@ -96,7 +124,7 @@ const ReviewLineVerbatim = ({
 					<p
 						className={cx(classes.content, classes.contentVerbatim)}
 						dangerouslySetInnerHTML={{
-							__html: `${review.verbatim ? review.verbatim.answer_text?.replace(new RegExp(search, 'gi'), `<span>${search}</span>`) : '-'}`
+							__html: `${review.verbatim ? highlightSearchTerms(review.verbatim.answer_text || '', search) : '-'}`
 						}}
 					></p>
 				</td>
@@ -115,8 +143,8 @@ const ReviewLineVerbatim = ({
 								? fr.colors.decisions.background.alt.blueFrance.default
 								: undefined
 						}}
+						aria-expanded={displayMoreInfo}
 					>
-						{' '}
 						Voir le détail de la réponse
 					</Button>
 				</td>

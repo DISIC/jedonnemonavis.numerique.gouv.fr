@@ -1,5 +1,7 @@
 import { selectors } from '../selectors';
-import { appFormUrl, appUrl, mailerUrl } from '../variables';
+import { appFormUrl, appUrl, mailerUrl, invitedEmail } from '../variables';
+import { editFormIntroductionText } from './forms';
+import { addUserToProduct, editStep, skipStep } from './onboarding';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
@@ -7,7 +9,8 @@ export function login(email: string, password: string, loginOnly = false) {
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
 	cy.get(selectors.loginForm.password).type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-	cy.url().should('eq', `${appUrl}${selectors.dashboard.products}`);
+	cy.wait(1000);
+	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	if (!loginOnly) tryCloseNewsModal();
 }
 
@@ -21,7 +24,7 @@ export function logout() {
 }
 
 export function tryCloseNewsModal() {
-	cy.wait(500);
+	cy.wait(1000);
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog#news-modal');
 		if ($modal.length && $modal.is(':visible')) {
@@ -50,6 +53,7 @@ export function tryCloseModal() {
 
 export function selectEntity() {
 	cy.get('input#entity-select-autocomplete').click();
+	cy.wait(500);
 	cy.get('div[role="presentation"]')
 		.should('be.visible')
 		.find('[id="entity-select-autocomplete-option-0"]')
@@ -86,32 +90,39 @@ export const checkUrlRedirection = (selector: string, expectedUrl: string) => {
 	cy.url().should('eq', appUrl + expectedUrl);
 };
 
-export function createProduct(name: string) {
-	// TODO: add a11y checks when the new onboarding flows will be merged
-	cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
-	cy.wait(500);
+export function createOrEditProduct(
+	name: string,
+	isEdit = false,
+	onlyProductCreation = false
+) {
+	if (!isEdit) cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+  cy.wait(500);
 	cy.auditA11y();
 	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="title"]').clear().type(name);
 			selectEntity();
-			addUrls(['http://testurl1.com/', 'http://testurl2.com/']);
 		});
 
-	cy.get(selectors.modalFooter)
-		.contains('button', 'Ajouter ce service')
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains(
+			'button',
+			isEdit ? selectors.onboarding.save : selectors.onboarding.continue
+		)
 		.click();
+
+	if (onlyProductCreation) {
+		cy.visit(`${appUrl}${selectors.url.products}`);
+		cy.contains(selectors.productLink, selectors.dashboard.nameTestService)
+			.should('be.visible')
+			.click();
+	}
 }
 
-export function createForm(name: string, shouldCheckA11y = false) {
-	cy.url().should('include', '/forms');
-	cy.contains(
-		'button',
-		/^(?:Créer un nouveau ?formulaire|Générer un formulaire)$/
-	).click();
-
-	cy.get(selectors.modal.form)
+export function createOrEditForm(name: string, isEdit = false) {
+	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
+	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
 			if (shouldCheckA11y) {
@@ -125,20 +136,60 @@ export function createForm(name: string, shouldCheckA11y = false) {
 				.clear()
 				.type(name);
 		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions)
+		.contains(
+			'button',
+			isEdit ? selectors.onboarding.save : selectors.onboarding.continue
+		)
+		.click();
+
+	if (!isEdit) {
+		cy.get(actions)
+			.contains('button', selectors.onboarding.continue)
+			.should('be.disabled');
+
+		cy.get(actions).contains('button', selectors.onboarding.continue).click();
+		cy.get(actions).contains('button', selectors.onboarding.continue).click();
+	} else {
+		editFormIntroductionText();
+		cy.get(actions)
+			.contains('button', selectors.onboarding.saveModifications)
+			.click();
+	}
 }
 
 export function createButton(name: string) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
-	cy.contains('button', "Créer un lien d'intégration").click();
-	cy.get(selectors.modal.button)
-		.should('be.visible')
-		.within(() => {
-			cy.get('input[name="button-create-title"]').clear().type(name);
-		});
-	cy.get(selectors.modalFooter).contains('button', 'Créer').click();
+	cy.contains('button', "Créer un lien d'intégration").click({
+		force: true
+	});
+
+	cy.wait(500);
+	cy.get('input[name="button-create-title"]').clear().type(name);
+
+	const actions = selectors.onboarding.actionsContainer;
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	// Stub clipboard to avoid "Document is not focused" error in CI
+	cy.window().then(win => {
+		cy.stub(win.navigator.clipboard, 'writeText').resolves();
+	});
+
+	cy.contains('button', 'Copier le code').first().click();
+
+	cy.wait(200);
+
+	cy.get('div.fr-alert').should('be.visible');
+
+	cy.get(actions).contains('button', 'Continuer').click();
+
+	cy.wait(500);
+
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
-	tryCloseModal();
 }
 
 export function modifyButton() {
@@ -197,4 +248,17 @@ export function checkReviewForm(shouldWork = false, url?: string) {
 			'exist'
 		);
 	}
+}
+
+export function doTheOnboardingFlow() {
+	createOrEditProduct('e2e-jdma-service-test-1');
+	editStep(selectors.onboarding.step.product);
+	createOrEditProduct('e2e-jdma-service-test-1-edited', true);
+	skipStep(selectors.onboarding.step.access);
+	editStep(selectors.onboarding.step.access);
+	addUserToProduct(invitedEmail);
+	createOrEditForm('form-test-1');
+	editStep(selectors.onboarding.step.form);
+	createOrEditForm('form-test-1-edited', true);
+	createButton('e2e-jdma-button-test-1');
 }

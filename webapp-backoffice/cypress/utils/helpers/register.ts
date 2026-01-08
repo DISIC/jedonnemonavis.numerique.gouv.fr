@@ -1,6 +1,6 @@
 import { selectors } from '../selectors';
 import { mailerUrl, userPassword } from '../variables';
-import { createForm, createProduct, fillSignupForm, login } from './common';
+import { doTheOnboardingFlow, fillSignupForm, login } from './common';
 
 export function checkSignupFormVisible() {
 	const { firstName, lastName, email, password, submitButton } =
@@ -58,9 +58,8 @@ export function testEmailSubmission(
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
-	cy.injectAxe();
-	createProduct('e2e-jdma-service-test-from-registration');
-	createForm('form-test-from-registration');
+  // TODO: apply cy.injectAxe() inside the onboarding flow
+	doTheOnboardingFlow();
 }
 
 export function checkExistingAccountError() {

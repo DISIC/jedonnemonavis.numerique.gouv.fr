@@ -5,7 +5,6 @@ import { RightAccessStatus } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
 
-import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
 import NoFormsPanel from '@/src/components/dashboard/Pannels/NoFormsPanel';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import {
@@ -15,34 +14,62 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
-const new_form_modal = createModal({
-	id: 'new-form-modal',
-	isOpenedByDefault: false
-});
-
 const ProductFormsPage = (props: Props) => {
 	const { product, ownRight } = props;
 	const { cx, classes } = useStyles();
 	const router = useRouter();
-	const alertTextQuery = router.query.alert as string;
+	const { createdForm, reset: resetContext } = useOnboarding();
 
-	const [alertText, setAlertText] = useState(alertTextQuery);
-	const [isAlertShown, setIsAlertShown] = useState(!!alertTextQuery);
+	const alertTextQuery = router.query.alert as string | undefined;
+	const formCreated = router.query.formCreated as string | undefined;
+	const isAlertTextShown = useMemo(() => {
+		return Boolean(alertTextQuery);
+	}, []);
+	const isFormAlertShown = useMemo(() => {
+		return Boolean(formCreated);
+	}, []);
+
+	useEffect(() => {
+		const handleRouteChangeStart = (url: string) => {
+			if (
+				!url.startsWith(`/administration/dashboard/product/${product.id}/forms`)
+			) {
+				resetContext();
+			}
+		};
+
+		router.events.on('routeChangeStart', handleRouteChangeStart);
+
+		return () => {
+			router.events.off('routeChangeStart', handleRouteChangeStart);
+		};
+	}, [resetContext, router.events]);
 
 	useEffect(() => {
 		if (router.query.alert) {
 			const { alert, ...restQuery } = router.query;
+			router.replace(
+				{
+					pathname: router.pathname,
+					query: restQuery
+				},
+				undefined,
+				{ shallow: true }
+			);
+		}
+		if (router.query.formCreated) {
+			const { formCreated, ...restQuery } = router.query;
 			router.replace(
 				{
 					pathname: router.pathname,
@@ -61,9 +88,9 @@ const ProductFormsPage = (props: Props) => {
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-				(reviewsCountData?.countsByForm['1'] ?? 0) +
-				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+			  (reviewsCountData?.countsByForm['1'] ?? 0) +
+			  (reviewsCountData?.countsByForm['2'] ?? 0)
+			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
@@ -101,20 +128,45 @@ const ProductFormsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					<FormCreationModal
-						modal={new_form_modal}
-						productId={product.id}
-						defaultTitle={defaultTitle}
-					/>
-					<Alert
-						className={fr.cx('fr-col-12', 'fr-mb-6v')}
-						description={alertText}
-						severity="success"
-						small
-						closable
-						isClosed={!isAlertShown}
-						onClose={() => setIsAlertShown(false)}
-					/>
+					{isAlertTextShown && (
+						<div role="alert">
+							<Alert
+								className={fr.cx('fr-col-12', 'fr-mb-6v')}
+								description={alertTextQuery || ''}
+								severity="success"
+								small
+								closable
+							/>
+						</div>
+					)}
+
+					{isFormAlertShown && createdForm && (
+						<div role="alert">
+							<Alert
+								className={fr.cx('fr-col-12', 'fr-mb-8v')}
+								title="Votre formulaire a été créé avec succès !"
+								description={
+									<>
+										Pensez à copier le lien d’intégration sur votre site pour
+										rendre votre formulaire visible aux usagers
+										<Link
+											href={`/administration/dashboard/product/${product.id}/forms/${createdForm.id}?tab=links`}
+											className={fr.cx(
+												'fr-link--icon-right',
+												'fr-ml-2v',
+												'fr-icon-arrow-right-line',
+												'fr-link'
+											)}
+										>
+											Copier le lien d’intégration
+										</Link>
+									</>
+								}
+								severity="success"
+								closable
+							/>
+						</div>
+					)}
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 							<h2 className={fr.cx('fr-mb-0')}>Formulaires</h2>
@@ -126,8 +178,16 @@ const ProductFormsPage = (props: Props) => {
 							)}
 						>
 							{ownRight === 'carrier_admin' && !product.isTop250 && (
-								<Button priority="secondary" onClick={new_form_modal.open}>
-									Créer un nouveau formulaire
+								<Button
+									priority="secondary"
+									onClick={() => {
+										resetContext();
+										router.push(
+											`/administration/dashboard/product/${product.id}/forms/new`
+										);
+									}}
+								>
+									Générer un formulaire
 									<span
 										className={fr.cx(
 											'fr-icon-file-add-line',
@@ -321,47 +381,49 @@ const ProductFormsPage = (props: Props) => {
 												</div>
 
 												{form.buttons.some(b => b.closedButtonLog) && (
-													<Alert
-														severity="error"
-														title="Tentative de dépôt d'avis"
-														description={
-															<>
-																<small>
-																	Un ou plusieurs boutons “Je Donne Mon Avis”
-																	sont toujours visibles par les usagers. Nous
-																	vous invitons à supprimer le code HTML
-																	correspondant de la page concernée.
-																</small>
-																<ul>
-																	{form.buttons
-																		.filter(b => b.closedButtonLog)
-																		.map(b => (
-																			<li key={b.id}>
-																				<small>
-																					Lien d'intégration &laquo;
-																					<b>{b.title}</b>
-																					&raquo; — Dernière
-																					tentative&nbsp;:&nbsp;
-																					{formatDateToFrenchString(
-																						b.closedButtonLog?.updated_at.toString() ||
-																							''
-																					)}
-																					&nbsp; — Nombre total de
-																					tentatives&nbsp;:&nbsp;
-																					{b.closedButtonLog?.count}
-																				</small>
-																			</li>
-																		))}
-																</ul>
-															</>
-														}
-														closable
-														className={cx(
-															fr.cx('fr-mt-2w'),
-															classes.alertButtonLog
-														)}
-														as="h4"
-													/>
+													<div role="status">
+														<Alert
+															severity="error"
+															title="Tentative de dépôt d'avis"
+															description={
+																<>
+																	<small>
+																		Un ou plusieurs boutons “Je Donne Mon Avis”
+																		sont toujours visibles par les usagers. Nous
+																		vous invitons à supprimer le code HTML
+																		correspondant de la page concernée.
+																	</small>
+																	<ul>
+																		{form.buttons
+																			.filter(b => b.closedButtonLog)
+																			.map(b => (
+																				<li key={b.id}>
+																					<small>
+																						Lien d'intégration &laquo;
+																						<b>{b.title}</b>
+																						&raquo; — Dernière
+																						tentative&nbsp;:&nbsp;
+																						{formatDateToFrenchString(
+																							b.closedButtonLog?.updated_at.toString() ||
+																								''
+																						)}
+																						&nbsp; — Nombre total de
+																						tentatives&nbsp;:&nbsp;
+																						{b.closedButtonLog?.count}
+																					</small>
+																				</li>
+																			))}
+																	</ul>
+																</>
+															}
+															closable
+															className={cx(
+																fr.cx('fr-mt-2w'),
+																classes.alertButtonLog
+															)}
+															as="h4"
+														/>
+													</div>
 												)}
 											</div>
 										))}

@@ -4,7 +4,6 @@ import {
 } from '@/src/types/prismaTypesExtended';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import { FormConfig } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
 
 type FormConfigVersionsDisplayProps = {
@@ -19,27 +18,35 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 
 	if (!formConfigs.length) return;
 
+	const zeroVersionForm = formConfigs.find(fc => fc.version === 0);
+	const zeroVersionFormConfig = {
+		...zeroVersionForm,
+		displays: zeroVersionForm?.form_config_displays || [],
+		labels: zeroVersionForm?.form_config_labels || []
+	};
+	const formConfigsToDisplay = formConfigs.filter(fc => fc.version !== 0);
+
 	return (
 		<div className={classes.container}>
 			<b>
 				<i className={fr.cx('ri-alert-fill')} /> Depuis sa création, le
-				formulaire a été modifié {formConfigs.length} fois :
+				formulaire a été modifié {formConfigsToDisplay.length} fois :
 			</b>
 			<ul className={fr.cx('fr-mt-4v')}>
 				<li>
 					<a
 						className={fr.cx('fr-link')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${product.id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify({ displays: [], labels: [] }))}`}
+						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${product.id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(zeroVersionFormConfig))}`}
 						target="_blank"
 						title="Accéder à la version 0 du formulaire, nouvelle fenêtre"
 					>
 						<b>Version 0</b>
 					</a>{' '}
 					: en vigueur du{' '}
-					{formatDateToFrenchString(product.created_at.toString())} au{' '}
+					{formatDateToFrenchString(product.forms[0].created_at.toString())} au{' '}
 					{formatDateToFrenchString(formConfigs[0].created_at.toString())}
 				</li>
-				{formConfigs.map((formConfig, index) => (
+				{formConfigsToDisplay.map((formConfig, index) => (
 					<li key={formConfig.id}>
 						<a
 							className={fr.cx('fr-link')}

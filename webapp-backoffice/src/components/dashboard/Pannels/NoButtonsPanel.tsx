@@ -2,15 +2,16 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
-	onButtonClick: () => void;
 	isSmall?: boolean;
 }
 
 const NoButtonsPanel = (props: Props) => {
-	const { onButtonClick, isSmall } = props;
+	const { isSmall } = props;
+	const router = useRouter();
 	const { cx, classes } = useStyles();
 
 	return (
@@ -55,7 +56,7 @@ const NoButtonsPanel = (props: Props) => {
 					onClick: event => {
 						event.preventDefault();
 						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
-						onButtonClick();
+						router.push(`${router.asPath.split('?')[0]}/new-link`);
 					}
 				}}
 			>

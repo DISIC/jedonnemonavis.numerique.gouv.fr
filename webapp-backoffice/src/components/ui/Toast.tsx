@@ -34,10 +34,10 @@ export const Toast = ({
 				'& .MuiSnackbarContent-message': {
 					padding: 0
 				},
-				zIndex: 9999 
+				zIndex: 9999
 			}}
 			message={
-				<div role="status">
+				<div role="alert">
 					<Alert severity={severity} description={message} small />
 				</div>
 			}

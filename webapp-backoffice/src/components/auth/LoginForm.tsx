@@ -236,7 +236,8 @@ export const LoginForm = () => {
 							resetErrors();
 						},
 						name: 'email',
-						autoComplete: 'email'
+						autoComplete: 'email',
+						type: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -267,7 +268,7 @@ export const LoginForm = () => {
 											),
 											severity: 'error'
 										}
-									]
+								  ]
 								: []
 						}
 						messagesHint=""

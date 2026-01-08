@@ -1,8 +1,7 @@
 import { OnButtonClickUserParams } from '@/src/pages/administration/dashboard/users';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import { User } from '@prisma/client';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -11,16 +10,9 @@ import { tss } from 'tss-react/dsfr';
 type Props = {
 	user: User;
 	onButtonClick: ({ type, user }: OnButtonClickUserParams) => void;
-	onCheckboxClick: (user: User) => void;
-	selected: boolean;
 };
 
-const UserCard = ({
-	user,
-	onButtonClick,
-	onCheckboxClick,
-	selected
-}: Props) => {
+const UserCard = ({ user, onButtonClick }: Props) => {
 	const { data: session } = useSession({ required: true });
 	const isOwn =
 		session?.user?.id !== undefined && Number(session.user.id) === user.id;
@@ -35,27 +27,11 @@ const UserCard = ({
 					'fr-grid-row--middle'
 				)}
 			>
-				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
-					<Checkbox
-						options={[
-							{
-								label: '',
-								nativeInputProps: {
-									'aria-label': `Sélectionner l'utilisateur ${user.firstName} ${user.lastName}`,
-									name: user.email,
-									value: user.id,
-									checked: selected,
-									onClick: () => {
-										onCheckboxClick(user);
-									}
-								}
-							}
-						]}
-					></Checkbox>
-				</div>
 				<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<Link
-						href={`/administration/dashboard/user/${user.id}/${isOwn ? 'infos' : 'account'}`}
+						href={`/administration/dashboard/user/${user.id}/${
+							isOwn ? 'infos' : 'account'
+						}`}
 					>
 						<p
 							className={cx(
@@ -77,23 +53,13 @@ const UserCard = ({
 					<span
 						className={cx(fr.cx('fr-mb-0', 'fr-text--bold', 'fr-hidden-md'))}
 					>
-						Superadmin:{' '}
+						Statut:{' '}
 					</span>
 					{user.role.includes('admin') ? (
-						<i
-							className={cx(
-								fr.cx('fr-icon-checkbox-circle-line'),
-								classes.iconSuccess
-							)}
-						/>
-					) : (
-						<i
-							className={cx(
-								fr.cx('fr-icon-close-circle-line'),
-								classes.iconError
-							)}
-						/>
-					)}
+						<Badge small severity="info" noIcon>
+							Superadmin
+						</Badge>
+					) : null}
 				</div>
 			</div>
 		</div>
