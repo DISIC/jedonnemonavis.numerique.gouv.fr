@@ -36,7 +36,7 @@ export function fillFormStep3() {
 		cy.get('input[name="contact_tried-2"]').check({ force: true });
 	});
 
-	cy.get('[class*="SmileyInput-field"]')
+	cy.get('[class*="FormStepper-field"]')
 		.eq(2)
 		.within(() => {
 			cy.get('fieldset')

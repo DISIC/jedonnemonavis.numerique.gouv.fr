@@ -74,6 +74,7 @@ describe('jdma-forms', () => {
 		goToCurrentFormReviewPage().then(url => {
 			copiedReviewUrl = url;
 		});
+		cy.wait(1000); // Wait for the page to load properly
 		fillFormStep1();
 		fillFormStep2();
 		fillFormStep3();
