@@ -96,7 +96,7 @@ export function createOrEditProduct(
 	onlyProductCreation = false
 ) {
 	if (!isEdit) cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
-  cy.wait(500);
+	cy.wait(500);
 	cy.auditA11y();
 	cy.get(selectors.productForm)
 		.should('be.visible')
@@ -120,7 +120,11 @@ export function createOrEditProduct(
 	}
 }
 
-export function createOrEditForm(name: string, isEdit = false) {
+export function createOrEditForm(
+	name: string,
+	isEdit = false,
+	shouldCheckA11y = false
+) {
 	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
 	cy.get(selectors.formCreation)
 		.should('be.visible')
@@ -251,6 +255,7 @@ export function checkReviewForm(shouldWork = false, url?: string) {
 }
 
 export function doTheOnboardingFlow() {
+	// TODO: apply audit a11y checks on each step
 	createOrEditProduct('e2e-jdma-service-test-1');
 	editStep(selectors.onboarding.step.product);
 	createOrEditProduct('e2e-jdma-service-test-1-edited', true);
@@ -259,6 +264,6 @@ export function doTheOnboardingFlow() {
 	addUserToProduct(invitedEmail);
 	createOrEditForm('form-test-1');
 	editStep(selectors.onboarding.step.form);
-	createOrEditForm('form-test-1-edited', true);
+	createOrEditForm('form-test-1-edited', true, false);
 	createButton('e2e-jdma-button-test-1');
 }

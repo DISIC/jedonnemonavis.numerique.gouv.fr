@@ -1,6 +1,7 @@
 import { deleteAccount } from '../../../utils/helpers/account';
-import { checkMail } from '../../../utils/helpers/admin';
+
 import {
+	checkMail,
 	createOrEditProduct,
 	fillSignupForm,
 	login,
@@ -20,8 +21,6 @@ describe('jdma-admin', () => {
 	before(() => {
 		login(adminEmail, adminPassword, true);
 		cy.injectAxe();
-		cy.wait(500);
-		cy.auditA11y();
 		tryCloseNewsModal();
 		cy.wait(500);
 		cy.auditA11y();
@@ -33,14 +32,14 @@ describe('jdma-admin', () => {
 	});
 
 	it('check a11y news page', () => {
-		cy.visit(`${appUrl}${selectors.dashboard.news}`);
+		cy.visit(`${appUrl}${selectors.url.news}`);
 		cy.injectAxe();
 		cy.auditA11y();
 	});
 
 	it('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.url.users}`);
-    cy.injectAxe();
+		cy.injectAxe();
 		cy.wait(500);
 		cy.auditA11y();
 		cy.contains('button', 'Ajouter un nouvel utilisateur')
@@ -75,7 +74,7 @@ describe('jdma-admin', () => {
 		cy.visit(`${appUrl}${selectors.url.entities}`);
 		cy.get('nav').contains('Organisations').click();
 		cy.url().should('eq', `${appUrl}${selectors.url.entities}`);
-    cy.injectAxe();
+		cy.injectAxe();
 		cy.auditA11y();
 
 		cy.get('[class*="DashBoardEntities"]')

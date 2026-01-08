@@ -58,7 +58,6 @@ export function testEmailSubmission(
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
-  // TODO: apply cy.injectAxe() inside the onboarding flow
 	doTheOnboardingFlow();
 }
 
