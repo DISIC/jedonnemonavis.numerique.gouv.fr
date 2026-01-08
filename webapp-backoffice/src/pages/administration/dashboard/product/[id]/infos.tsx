@@ -142,7 +142,7 @@ const ProductInformationPage = (props: Props) => {
 			/>
 
 			{statusProductState && (
-				<div className={cx(classes.container)} role="status">
+				<div className={cx(classes.container)} role="alert">
 					<Alert
 						closable
 						onClose={function noRefCheck() {

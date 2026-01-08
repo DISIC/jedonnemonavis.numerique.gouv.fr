@@ -1,14 +1,13 @@
-import { secondSectionA, steps_A, steps_B } from '@/src/utils/form';
+import { secondSectionA } from '@/src/utils/form';
 import { FormField, Opinion, Product, Step } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { useEffect, useState } from 'react';
+import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
+import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Field } from '../elements/Field';
-import { SmileyInput } from '../elements/SmileyInput';
-import { useTranslation } from 'next-i18next';
-import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
-import { useRouter } from 'next/router';
 
 type Props = {
 	product: Product;
@@ -107,7 +106,7 @@ export const FormStepper = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(SmileyInput.name)
+	.withName(FormStepper.name)
 	.withParams()
 	.create(() => ({
 		title: {

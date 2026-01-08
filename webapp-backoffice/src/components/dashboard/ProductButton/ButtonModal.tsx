@@ -62,11 +62,11 @@ const ButtonModal = (props: Props) => {
 	>(defaultButton);
 
 	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
-      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
+      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis - nouvelle fenêtre" />
 </a>`;
 
 	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' title="Je donne mon avis - nouvelle fenêtre">
-	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
+	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis - nouvelle fenêtre" />
 	</a>`;
 
 	useEffect(() => {
@@ -221,7 +221,7 @@ const ButtonModal = (props: Props) => {
 											)}
 										>
 											<div className={fr.cx('fr-grid-row')}>
-												<h5>Thème {theme}</h5>
+												<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
 												<div className={fr.cx('fr-col', 'fr-col-12')}>
 													<div
 														className={cx(

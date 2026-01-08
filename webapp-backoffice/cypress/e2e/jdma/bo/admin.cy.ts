@@ -1,3 +1,4 @@
+import { deleteAccount } from '../../../utils/helpers/account';
 import { checkMail } from '../../../utils/helpers/admin';
 import {
 	createOrEditProduct,
@@ -21,31 +22,30 @@ describe('jdma-admin', () => {
 
 	it('create and delete users', () => {
 		cy.visit(`${appUrl}${selectors.url.users}`);
-		for (let i = 0; i < 3; i++) {
-			cy.contains('button', 'Ajouter un nouvel utilisateur')
-				.should('be.visible')
-				.click();
-			fillSignupForm({
-				email: `test${i}@gmail.com`,
-				password: userPassword,
-				firstName: `Prénom ${i}`,
-				lastName: `Nom ${i}`
-			});
-			cy.contains('button', 'Créer').click();
-		}
+		cy.contains('button', 'Ajouter un nouvel utilisateur')
+			.should('be.visible')
+			.click();
+		fillSignupForm({
+			email: `test@gmail.com`,
+			password: userPassword,
+			firstName: `Prénom`,
+			lastName: `Nom`
+		});
+		cy.contains('button', 'Créer').click();
 		cy.get('input[placeholder="Rechercher un utilisateur"]').type('gmail');
 		cy.contains('button', 'Rechercher').click();
-		cy.get(selectors.input.checkbox).should('have.length', 5);
-		cy.get(`${selectors.input.checkbox}[value="value1"]`).click({
+		cy.get('.fr-card')
+			.filter((_, card) => card.textContent?.includes('@gmail.com'))
+			.should('have.length', 1);
+		cy.contains('a', 'Prénom Nom').click({
 			force: true
 		});
-		cy.contains('button', 'Supprimer tous').click();
-		cy.get('input[name="word"]').type('supprimer');
-		cy.contains('button', 'Supprimer').click();
-		cy.get(selectors.input.checkbox).should('have.length', 2);
+		deleteAccount();
+		cy.wait(500);
+		cy.get('.fr-card').should('not.exist');
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear();
 		cy.contains('button', 'Rechercher').click();
-		cy.get(selectors.input.checkbox).should('have.length', 7);
+		cy.get('.fr-card').should('have.length', 5);
 	});
 
 	it('create organisation', () => {

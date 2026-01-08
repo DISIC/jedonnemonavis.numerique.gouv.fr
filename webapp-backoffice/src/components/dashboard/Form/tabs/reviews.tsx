@@ -5,10 +5,9 @@ import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
 import { Loader } from '@/src/components/ui/Loader';
-import { Pagination } from '@/src/components/ui/Pagination';
+import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
@@ -32,6 +31,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
+import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
 interface Props {
 	form: FormWithElements;
@@ -615,30 +615,19 @@ const ReviewsTab = (props: Props) => {
 									'fr-grid-row--right'
 								)}
 							>
-								{reviews.length > 0 && nbPages > 0 && (
-									<>
-										<div
-											role="status"
-											className={fr.cx('fr-col-12', 'fr-mt-8v')}
-										>
-											Réponses de{' '}
-											<span className={cx(classes.boldText)}>
-												{numberPerPage * (currentPage - 1) + 1}
-											</span>{' '}
-											à{' '}
-											<span className={cx(classes.boldText)}>
-												{numberPerPage * (currentPage - 1) + reviews.length}
-											</span>{' '}
-											sur{' '}
-											<span className={cx(classes.boldText)}>
-												{reviewsCountFiltered}
-											</span>
-										</div>
-									</>
-								)}
+								<PageItemsCounter
+									label="réponse"
+									isFeminine
+									startItemCount={numberPerPage * (currentPage - 1) + 1}
+									endItemCount={
+										numberPerPage * (currentPage - 1) + reviews.length
+									}
+									totalItemsCount={reviewsCountFiltered}
+									additionalClasses={['fr-col-12', 'fr-mt-8v']}
+								/>
 							</div>
 							<div>
-								{reviewsExtended.length > 0 ? (
+								{reviewsExtended.length > 0 && (
 									<>
 										<table className={cx(classes.tableContainer)}>
 											<ReviewFilters
@@ -666,16 +655,6 @@ const ReviewsTab = (props: Props) => {
 											</tbody>
 										</table>
 									</>
-								) : (
-									<div
-										className={fr.cx(
-											'fr-grid-row',
-											'fr-grid-row--center',
-											'fr-mt-20v'
-										)}
-									>
-										<p role="status">Aucun avis disponible </p>
-									</div>
 								)}
 							</div>
 							{reviewsExtended.length > 0 && (

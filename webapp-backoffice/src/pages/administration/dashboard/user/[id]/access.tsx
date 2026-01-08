@@ -13,6 +13,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { RightAccessStatus, UserRole } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
@@ -102,10 +103,27 @@ const UserAccess: React.FC<Props> = props => {
 	const { isOwn, userId, user } = props;
 	const { classes, cx } = useStyles();
 	const utils = trpc.useUtils();
+	const lastModalTriggerRef = React.useRef<HTMLElement | null>(null);
+	const restoreFocusToTrigger = React.useCallback(() => {
+		const trigger = lastModalTriggerRef.current;
+		if (!trigger) return;
+		if (typeof document === 'undefined') return;
+		if (!document.contains(trigger)) return;
+		requestAnimationFrame(() => {
+			trigger.focus();
+		});
+	}, []);
+
 	const [displayToast, setDisplayToast] = React.useState<string | null>(null);
 	const [modal, setModal] = React.useState<ModalAccessContent | null>(null);
 	const [idConcerned, setIdConcerned] = React.useState<number | null>(null);
 	const router = useRouter();
+
+	useIsModalOpen(onConfirmModal, {
+		onConceal: () => {
+			restoreFocusToTrigger();
+		}
+	});
 
 	const editUser = trpc.user.update.useMutation({
 		onSuccess: async () => {
@@ -132,6 +150,11 @@ const UserAccess: React.FC<Props> = props => {
 	});
 
 	const handleAction = async (kind: ModalAccessKind, id?: number) => {
+		lastModalTriggerRef.current =
+			typeof document !== 'undefined' &&
+			document.activeElement instanceof HTMLElement
+				? document.activeElement
+				: null;
 		const modalContent = modalAccessContents.find(item => item.kind === kind);
 		if (modalContent) setModal({ ...modalContent });
 		setIdConcerned(id ?? null);
@@ -285,7 +308,7 @@ const UserAccess: React.FC<Props> = props => {
 					/>
 				</Head>
 				{displayToast && (
-					<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+					<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {
