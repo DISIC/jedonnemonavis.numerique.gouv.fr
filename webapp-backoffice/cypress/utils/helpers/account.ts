@@ -11,6 +11,8 @@ import { login, logout } from './common';
 
 export function checkAccountHeader(name: string, invitedEmail: string) {
 	cy.get('header').contains('Compte').click({ force: true });
+	cy.wait(500);
+	cy.auditA11y(null, { withDetails: true });
 	cy.get('ul.MuiList-root')
 		.find('li')
 		.first()
@@ -21,6 +23,7 @@ export function checkAccountHeader(name: string, invitedEmail: string) {
 }
 
 export function clickModifyCard(nameCard: string) {
+	cy.auditA11y();
 	cy.contains('h4', nameCard).parents('.fr-card').find('button.fr-btn').click();
 }
 
@@ -57,11 +60,6 @@ export function testEmail({
 }) {
 	login(invitedEmailBis, userPassword);
 	cy.injectAxe();
-	// cy.checkA11y(
-	// 	null,
-	// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-	// 	displayViolationsTable
-	// );
 	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 	cy.contains('li', selectors.menu.account).click({ force: true });
 	clickModifyCard(selectors.card.credentials);

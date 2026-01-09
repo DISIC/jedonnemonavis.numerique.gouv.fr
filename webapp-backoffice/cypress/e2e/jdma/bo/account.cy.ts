@@ -7,7 +7,6 @@ import {
 } from '../../../utils/helpers/account';
 import { login, logout } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { displayViolationsTable } from '../../../utils/tools';
 import {
 	adminEmail,
 	firstNameTest,
@@ -18,18 +17,15 @@ import {
 } from '../../../utils/variables';
 
 describe('jdma-account', () => {
-	it('change identity parameters', () => {
+	it.only('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
 		cy.injectAxe();
-		// cy.checkA11y(
-		// 	null,
-		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-		// 	displayViolationsTable
-		// );
 		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);
+		cy.wait(500);
+		cy.auditA11y();
 		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });
 		cy.contains('button', selectors.action.save).click();
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
@@ -76,11 +72,6 @@ describe('jdma-account', () => {
 	it('delete account', () => {
 		login(newEmailTest, userPassword);
 		cy.injectAxe();
-		// cy.checkA11y(
-		// 	null,
-		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-		// 	displayViolationsTable
-		// );
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		deleteAccount();
