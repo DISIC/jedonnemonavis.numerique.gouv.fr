@@ -67,7 +67,7 @@ describe('jdma-admin', () => {
 		cy.get('.fr-card').should('not.exist');
 		cy.get('input[placeholder="Rechercher un utilisateur"]').clear();
 		cy.contains('button', 'Rechercher').click();
-		cy.get('.fr-card').should('have.length', 5);
+		cy.get('.fr-card').should('have.length', 6);
 	});
 
 	it('create organisation', () => {
