@@ -139,6 +139,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						MenuListProps={{
 							'aria-labelledby': 'button-options-access-right'
 						}}
+						PaperProps={{
+							component: 'nav'
+						}}
 					>
 						<MenuItem
 							style={{ pointerEvents: 'none' }}

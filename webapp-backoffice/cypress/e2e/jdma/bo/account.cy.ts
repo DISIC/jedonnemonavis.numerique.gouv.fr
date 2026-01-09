@@ -17,7 +17,7 @@ import {
 } from '../../../utils/variables';
 
 describe('jdma-account', () => {
-	it.only('change identity parameters', () => {
+	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
 		cy.injectAxe();
 		cy.wait(500);
@@ -74,6 +74,7 @@ describe('jdma-account', () => {
 		cy.injectAxe();
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 		cy.contains('li', selectors.menu.account).click({ force: true });
+		cy.injectAxe();
 		deleteAccount();
 		cy.url().should('include', '/login');
 		cy.get(selectors.loginForm.email).type(newEmailTest);

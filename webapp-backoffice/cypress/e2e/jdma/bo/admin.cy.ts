@@ -144,6 +144,7 @@ describe('jdma-admin', () => {
 		checkMail(true, 'Invitation à rejoindre « Je donne mon avis »');
 		fillSignupForm({ password: userPassword });
 		cy.get('button').contains('Valider').click();
+		cy.wait(500);
 	});
 
 	it('login guest admin', () => {

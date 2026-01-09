@@ -11,6 +11,7 @@ import { login, logout } from './common';
 
 export function checkAccountHeader(name: string, invitedEmail: string) {
 	cy.get('header').contains('Compte').click({ force: true });
+	cy.injectAxe();
 	cy.wait(500);
 	cy.auditA11y(null, { withDetails: true });
 	cy.get('ul.MuiList-root')
@@ -26,7 +27,7 @@ export function clickModifyCard(nameCard: string) {
 	cy.auditA11y();
 	cy.contains('h3', nameCard)
 		.parents('.fr-card')
-		.find('button.fr-btn')
+		.contains('button.fr-btn', 'Modifier')
 		.click({ force: true });
 }
 
@@ -62,9 +63,10 @@ export function testEmail({
 	expectedMEssage = ''
 }) {
 	login(invitedEmailBis, userPassword);
-	cy.injectAxe();
 	checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 	cy.contains('li', selectors.menu.account).click({ force: true });
+	cy.injectAxe();
+	cy.wait(500);
 	clickModifyCard(selectors.card.credentials);
 	fillAccountForm({ email: email, emailConfirmation: confirmationEmail });
 	cy.contains('button', selectors.action.save).click();
@@ -92,6 +94,7 @@ export function deleteAccount() {
 	cy.get(selectors.accountForm.confirm)
 		.clear({ force: true })
 		.type('supprimer', { force: true });
+	cy.auditA11y();
 	cy.contains('button', selectors.action.confirmDelete)
 		.should('not.be.disabled')
 		.click({ force: true });
