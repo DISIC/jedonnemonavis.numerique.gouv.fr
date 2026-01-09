@@ -96,6 +96,7 @@ export function createOrEditProduct(
 	onlyProductCreation = false
 ) {
 	if (!isEdit) {
+		cy.injectAxe();
 		cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
 		cy.wait(500);
 		cy.auditA11y();
@@ -180,6 +181,7 @@ export function createButton(name: string, shouldCheckA11y = false) {
 		cy.auditA11y();
 	}
 
+	cy.wait(1000);
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;

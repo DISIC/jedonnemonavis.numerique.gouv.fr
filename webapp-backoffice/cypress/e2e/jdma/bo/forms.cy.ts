@@ -37,6 +37,7 @@ describe('jdma-forms', () => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
+		cy.injectAxe();
 	});
 
 	it('should create multiple forms for a single service', () => {
@@ -57,6 +58,7 @@ describe('jdma-forms', () => {
 				}
 			});
 		});
+		cy.injectAxe();
 		cy.auditA11y();
 	});
 
@@ -81,9 +83,23 @@ describe('jdma-forms', () => {
 		fillFormStep4(true);
 	});
 
+	it('should check a11y in form builder', () => {
+		goToTabOfForm('settings');
+		cy.contains('button', 'Éditer le formulaire').click();
+		cy.injectAxe();
+		tryCloseHelpModal();
+		cy.auditA11y();
+		cy.contains('button', 'Étape suivante').click();
+		cy.auditA11y();
+		cy.contains('button', 'Étape suivante').click();
+		cy.auditA11y();
+		cy.contains('button', 'Étape suivante').click();
+	});
+
 	it('should edit a form in builder (hide step, edit block, publish) and check changes from dashboard and on form review page', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
+		cy.injectAxe();
 		tryCloseHelpModal();
 		editFormIntroductionText();
 		cy.contains('button', 'Étape suivante').click();
@@ -97,12 +113,13 @@ describe('jdma-forms', () => {
 	});
 
 	it('should pass a11y checks for each form tab with data', () => {
-		checkAllTabsA11y();
+		checkAllTabsA11y(true);
 	});
 
 	it('should rename form', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
+		cy.injectAxe();
 		tryCloseHelpModal();
 		renameForm(selectors.dashboard.renamedTestForm);
 		cy.visit(`${appUrl}${selectors.url.products}`);

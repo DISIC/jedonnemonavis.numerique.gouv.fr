@@ -19,6 +19,7 @@ const TAB_LABELS: Record<FormTab, string> = {
 
 export const tryCloseHelpModal = () => {
 	cy.wait(1000);
+	cy.auditA11y();
 	cy.get('body').then(body => {
 		if (body.find('dialog#form-help-modal').length > 0) {
 			cy.get('dialog#form-help-modal')
@@ -145,11 +146,11 @@ export function deleteForm() {
 	cy.auditA11y();
 }
 
-export function checkAllTabsA11y() {
+export function checkAllTabsA11y(withData = false) {
 	Object.keys(TAB_LABELS).forEach((tab: FormTab, i: number) => {
 		goToTabOfForm(tab, { isCurrentFormPage: i !== 0 });
 		if (i === 0) cy.injectAxe();
-		cy.wait(10000); // to replace with a better timeout
+		cy.wait(withData && (i === 0 || i === 2) ? 5000 : 500);
 		cy.auditA11y(undefined, { withDetails: true });
 	});
 }

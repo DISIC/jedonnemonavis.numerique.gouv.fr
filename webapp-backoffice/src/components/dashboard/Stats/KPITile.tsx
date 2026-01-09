@@ -73,7 +73,12 @@ export const KPITile = (props: KPITileProps) => {
 						onClick={onClick}
 					>
 						{isLoading ? (
-							<Skeleton variant="text" width="50%" height="0.9rem" />
+							<Skeleton
+								variant="text"
+								width="50%"
+								height="0.9rem"
+								aria-label="En cours de chargement"
+							/>
 						) : (
 							`Voir les ${title.toLowerCase()}`
 						)}
