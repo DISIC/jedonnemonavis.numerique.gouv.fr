@@ -24,7 +24,10 @@ export function checkAccountHeader(name: string, invitedEmail: string) {
 
 export function clickModifyCard(nameCard: string) {
 	cy.auditA11y();
-	cy.contains('h4', nameCard).parents('.fr-card').find('button.fr-btn').click();
+	cy.contains('h3', nameCard)
+		.parents('.fr-card')
+		.find('button.fr-btn')
+		.click({ force: true });
 }
 
 export function fillAccountForm({

@@ -23,6 +23,6 @@ describe('jdma-logs', () => {
 			.and('contain', "Historique d'activité")
 			.click();
 		cy.get('h2').contains("Historique d'activité");
-		cy.get('p').contains('Aucun événement trouvé');
+		cy.get('p').contains('Aucune activité trouvée');
 	});
 });
