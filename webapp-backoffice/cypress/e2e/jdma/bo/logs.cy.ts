@@ -1,17 +1,24 @@
-import { login, tryCloseNewsModal } from '../../../utils/helpers/common';
+import { login } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
-import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-logs', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
+	});
+
+	it('should display the logs page with events', () => {
+		cy.get(selectors.productLink)
+			.contains(selectors.dashboard.nameTestService)
+			.should('be.visible')
+			.click();
+		cy.get('.fr-sidemenu__link[href*="/logs"]')
+			.and('contain', "Historique d'activité")
+			.click();
+		cy.get('h2').contains("Historique d'activité");
 		cy.injectAxe();
-		// cy.checkA11y(
-		// 	null,
-		// 	{ includedImpacts: ['moderate', 'serious', 'critical'] },
-		// 	displayViolationsTable
-		// );
+		cy.wait(500);
+		cy.auditA11y();
 	});
 
 	it('should display the logs page with no events', () => {
@@ -23,6 +30,9 @@ describe('jdma-logs', () => {
 			.and('contain', "Historique d'activité")
 			.click();
 		cy.get('h2').contains("Historique d'activité");
+		cy.injectAxe();
+		cy.wait(500);
+		cy.auditA11y();
 		cy.get('p').contains('Aucune activité trouvée');
 	});
 });

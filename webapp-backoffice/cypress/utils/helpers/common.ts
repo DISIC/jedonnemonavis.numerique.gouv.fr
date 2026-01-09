@@ -114,7 +114,7 @@ export function createOrEditProduct(
 			'button',
 			isEdit ? selectors.onboarding.save : selectors.onboarding.continue
 		)
-		.click();
+		.click({ force: true });
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
