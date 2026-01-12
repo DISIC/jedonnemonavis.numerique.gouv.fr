@@ -48,7 +48,10 @@ const AuthenticationTab = () => {
 				titleAs="h3"
 				label="Générer une clé API liée à une organisation"
 			>
-				<div className={fr.cx('fr-alert', 'fr-alert--warning', 'fr-mb-4v')}>
+				<div
+					className={fr.cx('fr-alert', 'fr-alert--warning', 'fr-mb-4v')}
+					role="status"
+				>
 					<p>
 						<strong>Prérequis :</strong> Vous devez être administrateur de
 						l'organisation

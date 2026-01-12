@@ -11,7 +11,10 @@ type Props = {
 	entity: Entity;
 	isMine: boolean;
 	fromSearch?: boolean;
-	onButtonClick: ({ type, entity }: OnButtonClickEntityParams) => void;
+	onButtonClick: (
+		params: OnButtonClickEntityParams,
+		triggerEl?: HTMLElement | null
+	) => void;
 };
 
 const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
@@ -57,9 +60,12 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										iconId="fr-icon-admin-line"
 										iconPosition="right"
 										className={classes.button}
-										onClick={() => {
+										onClick={event => {
 											push(['trackEvent', 'BO - Entities', `Handle-Admins`]);
-											onButtonClick({ type: 'rights', entity });
+											onButtonClick(
+												{ type: 'rights', entity },
+												event.currentTarget
+											);
 										}}
 									>
 										Gérer les administrateurs
@@ -73,24 +79,30 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 										iconId="ri-key-2-line"
 										iconPosition="right"
 										className={classes.button}
-										onClick={() => {
+										onClick={event => {
 											push(['trackEvent', 'BO - Entities', `Handle-ApiKeys`]);
-											onButtonClick({ type: 'api', entity });
+											onButtonClick(
+												{ type: 'api', entity },
+												event.currentTarget
+											);
 										}}
 									>
 										Clés API
 									</Button>
 								</li>
-								<li> 
+								<li>
 									<Button
 										priority="secondary"
 										size="small"
 										title={`Modifier ${entity.name}`}
 										iconId="fr-icon-edit-line"
 										iconPosition="right"
-										onClick={() => {
+										onClick={event => {
 											push(['trackEvent', 'BO - Entities', `Handle-Edit`]);
-											onButtonClick({ type: 'edit', entity });
+											onButtonClick(
+												{ type: 'edit', entity },
+												event.currentTarget
+											);
 										}}
 										className={classes.button}
 									>
@@ -104,13 +116,16 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 									priority="secondary"
 									size="small"
 									className={classes.button}
-									onClick={() => {
+									onClick={event => {
 										push([
 											'trackEvent',
 											'BO - Entities',
 											`Handle-Become-Admin`
 										]);
-										onButtonClick({ type: 'rights', entity });
+										onButtonClick(
+											{ type: 'rights', entity },
+											event.currentTarget
+										);
 									}}
 								>
 									{fromSearch ? 'Devenir administrateur' : 'Voir plus'}
@@ -136,7 +151,7 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 		listStyle: 'none',
 		'@media (max-width: 768px)': {
 			flexDirection: 'column',
-			width: '100%',
+			width: '100%'
 		},
 		'@media (min-width: 768px)': {
 			flexDirection: 'row'
@@ -150,7 +165,7 @@ const useStyles = tss.withName(EntityCard.name).create(() => ({
 	},
 	wrapperButtons: {
 		display: 'flex',
-		justifyContent: 'end',
+		justifyContent: 'end'
 	},
 	entityEmail: {
 		wordWrap: 'break-word'

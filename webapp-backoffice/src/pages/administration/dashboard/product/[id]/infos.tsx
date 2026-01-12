@@ -142,7 +142,7 @@ const ProductInformationPage = (props: Props) => {
 			/>
 
 			{statusProductState && (
-				<div className={cx(classes.container)} role="status">
+				<div className={cx(classes.container)} role="alert">
 					<Alert
 						closable
 						onClose={function noRefCheck() {
@@ -176,7 +176,7 @@ const ProductInformationPage = (props: Props) => {
 					)}
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Identifiant</h4>
+					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Identifiant</h3>
 					<Tag id="product-id" small>
 						{`# ${product.id}`}
 					</Tag>
@@ -197,7 +197,7 @@ const ProductInformationPage = (props: Props) => {
 					</Button>
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Organisation</h4>
+					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Organisation</h3>
 					{!isLoadingEntity && (
 						<Tag>
 							{entity?.name} ({entity?.acronym})
@@ -205,7 +205,7 @@ const ProductInformationPage = (props: Props) => {
 					)}
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>URLs</h4>
+					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>URLs</h3>
 					<div className={classes.urlsWrapper}>
 						{product.urls.map(url => (
 							<Tag key={url} linkProps={{ href: url }}>
@@ -215,7 +215,9 @@ const ProductInformationPage = (props: Props) => {
 					</div>
 				</div>
 				<div>
-					<h4 className={fr.cx('fr-mb-3v')}>Données statistiques publiques</h4>
+					<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
+						Données statistiques publiques
+					</h3>
 					{product.isPublic ? 'Oui' : 'Non'}
 					{product.isPublic && (
 						<div className={fr.cx('fr-mt-1v')}>
@@ -231,7 +233,7 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				{ownRight === 'carrier_admin' && !product.isTop250 && (
 					<div>
-						<h4 className={fr.cx('fr-mb-3v')}>Supprimer le service</h4>
+						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Supprimer le service</h3>
 						<p>En supprimant ce service :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>

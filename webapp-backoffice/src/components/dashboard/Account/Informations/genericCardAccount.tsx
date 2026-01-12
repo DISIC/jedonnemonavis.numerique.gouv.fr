@@ -14,6 +14,9 @@ interface Props {
 	customModifyButton?: ReactElement;
 	onSubmit?: () => Promise<boolean>;
 	smallScreenShowHr?: boolean;
+	editButtonTitle?: string;
+	propsIsModifying?: Boolean;
+	titleLevel?: number;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -25,9 +28,20 @@ const GenericCardInfos = (props: Props) => {
 		editModeContent,
 		onSubmit,
 		smallScreenShowHr = true,
-		customModifyButton
+		customModifyButton,
+		editButtonTitle,
+		propsIsModifying,
+		titleLevel
 	} = props;
-	const [modifying, setModifying] = React.useState<Boolean>(false);
+	const [internalModifying, setInternalModifying] =
+		React.useState<Boolean>(false);
+	const modifying =
+		propsIsModifying !== undefined ? propsIsModifying : internalModifying;
+	const setModifying = (value: Boolean) => {
+		if (propsIsModifying === undefined) {
+			setInternalModifying(value);
+		}
+	};
 	const { cx, classes } = useStyles();
 	const router = useRouter();
 
@@ -52,89 +66,108 @@ const GenericCardInfos = (props: Props) => {
 							)
 						)}
 					>
-						<h4 className={cx(fr.cx('fr-mb-0'))}>{title}</h4>
+						<h3
+							aria-level={titleLevel}
+							className={cx(fr.cx('fr-mb-0', 'fr-h4'))}
+						>
+							{title}
+						</h3>
 						{hint && <p className={cx(fr.cx('fr-mb-0', 'fr-mt-4v'))}>{hint}</p>}
 					</div>
-					{modifiable && (
-						<div
-							className={cx(
-								fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-5v'),
-								classes.actionContainer
-							)}
-						>
-							{customModifyButton ? (
-								customModifyButton
-							) : (
-								<>
-									{modifiable && !modifying && (
-										<Button
-											priority="secondary"
-											iconId="fr-icon-edit-line"
-											onClick={() => {
-												setModifying(true);
-												push(['trackEvent', 'BO - Account', `Modify-${title}`]);
-											}}
-											className={classes.button}
-										>
-											Modifier
-										</Button>
-									)}
-									{modifiable && modifying && onSubmit && (
-										<>
-											<Button
-												priority="secondary"
-												onClick={() => {
-													setModifying(false);
-													push([
-														'trackEvent',
-														'BO - Account',
-														`Cancel-Changes-${title}`
-													]);
-												}}
-												className={cx(classes.button)}
-											>
-												Annuler
-											</Button>
-											<Button
-												priority="primary"
-												iconId="fr-icon-save-line"
-												className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
-												onClick={async () => {
-													const isFormValid = await onSubmit?.();
-													push([
-														'trackEvent',
-														'BO - Account',
-														`Validate-Changes-${title}`
-													]);
-													if (isFormValid) {
-														setModifying(false);
-													}
-												}}
-											>
-												Sauvegarder
-											</Button>
-										</>
-									)}
-								</>
-							)}
-						</div>
-					)}
-					{smallScreenShowHr ||
-						(modifying && (
-							<div className={cx(fr.cx('fr-col-md-12', 'fr-pb-0'))}>
-								<hr />
-							</div>
-						))}
+
+					<div className={cx(fr.cx('fr-col-12', 'fr-pb-0'))}>
+						<hr />
+					</div>
 					<div
 						className={cx(
 							fr.cx(
 								smallScreenShowHr || modifying ? 'fr-col-md-12' : 'fr-col-12',
-								'fr-pb-6v'
+								'fr-pb-6v',
+								'fr-pt-0'
 							),
+
 							smallScreenShowHr || modifying ? classes.mobileFullWidth : ''
 						)}
 					>
 						{modifying ? editModeContent : viewModeContent}
+
+						{modifiable && (
+							<div
+								className={cx(
+									fr.cx('fr-col-12', 'fr-col-lg-6', 'fr-pt-6v'),
+									classes.actionContainer
+								)}
+							>
+								{customModifyButton ? (
+									customModifyButton
+								) : (
+									<>
+										{modifiable && !modifying && (
+											<Button
+												priority="secondary"
+												iconId="fr-icon-edit-line"
+												onClick={() => {
+													setModifying(true);
+													push([
+														'trackEvent',
+														'BO - Account',
+														`Modify-${title}`
+													]);
+												}}
+												size="small"
+												className={classes.button}
+												title={
+													editButtonTitle
+														? editButtonTitle
+														: `Modifier ${title}`
+												}
+											>
+												Modifier
+											</Button>
+										)}
+										{modifiable && modifying && onSubmit && (
+											<>
+												<Button
+													priority="secondary"
+													onClick={() => {
+														setModifying(false);
+														push([
+															'trackEvent',
+															'BO - Account',
+															`Cancel-Changes-${title}`
+														]);
+													}}
+													size="small"
+													className={cx(classes.button)}
+												>
+													Annuler
+												</Button>
+												<Button
+													priority="primary"
+													iconId="fr-icon-save-line"
+													iconPosition="right"
+													size="small"
+													className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
+													onClick={async () => {
+														const isFormValid = await onSubmit?.();
+														push([
+															'trackEvent',
+															'BO - Account',
+															`Validate-Changes-${title}`
+														]);
+														if (isFormValid) {
+															setModifying(false);
+														}
+													}}
+												>
+													Sauvegarder
+												</Button>
+											</>
+										)}
+									</>
+								)}
+							</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -145,9 +178,8 @@ const GenericCardInfos = (props: Props) => {
 const useStyles = tss.withName(GenericCardInfos.name).create(() => ({
 	actionContainer: {
 		display: 'flex',
-		justifyContent: 'flex-end',
 		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column',
+			flexDirection: 'column-reverse',
 			gap: fr.spacing('4v'),
 			marginBottom: fr.spacing('2v')
 		}

@@ -1,9 +1,9 @@
 import { selectors } from '../selectors';
-import { appUrl, invitedEmail } from '../variables';
+import { appFormUrl, appUrl, mailerUrl, invitedEmail } from '../variables';
 import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 
-export function login(email: string, password: string) {
+export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
 	cy.get(selectors.loginForm.email).type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
@@ -11,7 +11,7 @@ export function login(email: string, password: string) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
-	tryCloseNewsModal();
+	if (!loginOnly) tryCloseNewsModal();
 }
 
 export function logout() {
@@ -95,7 +95,13 @@ export function createOrEditProduct(
 	isEdit = false,
 	onlyProductCreation = false
 ) {
-	if (!isEdit) cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+	if (!isEdit) {
+		cy.injectAxe();
+		cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+		cy.wait(500);
+		cy.auditA11y();
+	}
+
 	cy.get(selectors.productForm)
 		.should('be.visible')
 		.within(() => {
@@ -108,7 +114,7 @@ export function createOrEditProduct(
 			'button',
 			isEdit ? selectors.onboarding.save : selectors.onboarding.continue
 		)
-		.click();
+		.click({ force: true });
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
@@ -118,11 +124,21 @@ export function createOrEditProduct(
 	}
 }
 
-export function createOrEditForm(name: string, isEdit = false) {
+export function createOrEditForm(
+	name: string,
+	isEdit = false,
+	shouldCheckA11y = false
+) {
 	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
+
 	cy.get(selectors.formCreation)
 		.should('be.visible')
 		.within(() => {
+			if (shouldCheckA11y) {
+				cy.injectAxe();
+				cy.wait(500);
+				cy.auditA11y();
+			}
 			cy.get('input[name="title"]')
 				.should('be.visible')
 				.and('not.be.disabled')
@@ -154,18 +170,28 @@ export function createOrEditForm(name: string, isEdit = false) {
 	}
 }
 
-export function createButton(name: string) {
+export function createButton(name: string, shouldCheckA11y = false) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click({
 		force: true
 	});
 
-	cy.wait(500);
+	if (shouldCheckA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
+
+	cy.wait(1000);
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;
 
 	cy.get(actions).contains('button', 'Continuer').click();
+
+	if (shouldCheckA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 
 	// Stub clipboard to avoid "Document is not focused" error in CI
 	cy.window().then(win => {
@@ -207,15 +233,54 @@ export function modifyButton() {
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
 }
 
+export function checkMail(click = false, topic = '') {
+	cy.visit(mailerUrl);
+	cy.get('button[ng-click="refresh()"]').click();
+	cy.get('.msglist-message')
+		.contains('span', topic)
+		.should('exist')
+		.then($message => {
+			if (click) {
+				cy.wrap($message).click();
+				cy.get('ul.nav-tabs').contains('Plain text').click();
+				cy.get('#preview-plain')
+					.find('a')
+					.each($link => {
+						const href = $link.attr('href');
+						if (href && href.includes('/register')) {
+							cy.wrap($link).invoke('removeAttr', 'target').click();
+						}
+					});
+			}
+		});
+}
+
+export function checkReviewForm(shouldWork = false, url?: string) {
+	cy.visit(url ?? `${appFormUrl}/Demarches/4?button=7`, {
+		failOnStatusCode: false
+	});
+	if (shouldWork) {
+		cy.contains('h1', 'Je donne mon avis').should('exist');
+		cy.contains('h1', 'Formulaire non trouvé').should('not.exist');
+	} else {
+		cy.contains('h1', /Formulaire non trouvé|Ce formulaire est fermé/).should(
+			'exist'
+		);
+	}
+}
+
 export function doTheOnboardingFlow() {
+	cy.injectAxe();
 	createOrEditProduct('e2e-jdma-service-test-1');
 	editStep(selectors.onboarding.step.product);
 	createOrEditProduct('e2e-jdma-service-test-1-edited', true);
+	cy.wait(500);
+	cy.auditA11y();
 	skipStep(selectors.onboarding.step.access);
 	editStep(selectors.onboarding.step.access);
 	addUserToProduct(invitedEmail);
-	createOrEditForm('form-test-1');
+	createOrEditForm('form-test-1', false, true);
 	editStep(selectors.onboarding.step.form);
-	createOrEditForm('form-test-1-edited', true);
-	createButton('e2e-jdma-button-test-1');
+	createOrEditForm('form-test-1-edited', true, false);
+	createButton('e2e-jdma-button-test-1', true);
 }

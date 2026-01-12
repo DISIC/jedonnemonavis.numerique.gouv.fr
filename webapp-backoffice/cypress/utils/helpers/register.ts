@@ -48,7 +48,7 @@ export function testEmailSubmission(
 						.should('exist')
 						.and('contain', errorMessage);
 				} else {
-					cy.get('h5').contains(successMessage);
+					cy.get('h2').contains(successMessage);
 				}
 			});
 		}

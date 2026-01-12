@@ -1,16 +1,14 @@
-import React from 'react';
-import { getServerSideProps } from '.';
-import { fr } from '@codegouvfr/react-dsfr';
-import { tss } from 'tss-react/dsfr';
-import Head from 'next/head';
 import { User } from '@/prisma/generated/zod';
-import AccountLayout from '@/src/layouts/Account/AccountLayout';
-import IdentityCard from '@/src/components/dashboard/Account/Informations/identityCard';
 import CredentialsCard from '@/src/components/dashboard/Account/Informations/credentialsCard';
 import DeleteCard from '@/src/components/dashboard/Account/Informations/deleteCard';
-import { trpc } from '@/src/utils/trpc';
+import IdentityCard from '@/src/components/dashboard/Account/Informations/identityCard';
+import AccountLayout from '@/src/layouts/Account/AccountLayout';
+import { fr } from '@codegouvfr/react-dsfr';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { Loader } from '@/src/components/ui/Loader';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
+import { getServerSideProps } from '.';
 
 interface Props {
 	isOwn: Boolean;
@@ -64,7 +62,7 @@ const useStyles = tss.withName(UserInfos.name).create({
 	},
 	column: {
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'column'
 	},
 	droppableArea: {
 		padding: '8px',

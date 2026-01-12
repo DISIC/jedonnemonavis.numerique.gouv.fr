@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import { UserInfos } from './RegisterForm';
-import { tss } from 'tss-react/dsfr';
-import { Input } from '@codegouvfr/react-dsfr/Input';
-import { Button } from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '@/src/utils/trpc';
-import { useRouter } from 'next/router';
-import { RegisterValidationMessage } from './RegisterConfirmMessage';
-import { Loader } from '../ui/Loader';
+import { fr } from '@codegouvfr/react-dsfr';
+import { Button } from '@codegouvfr/react-dsfr/Button';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
+import { useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { Loader } from '../ui/Loader';
+import { UserInfos } from './RegisterForm';
 
 type Props = {
 	userInfos: UserInfos;
@@ -55,7 +54,7 @@ export const RegisterNotWhiteListed = (props: Props) => {
 
 	return (
 		<div>
-			<h5>Demande de création de compte</h5>
+			<h2 className={fr.cx('fr-h5')}>Demande de création de compte</h2>
 			<form
 				onSubmit={e => {
 					e.preventDefault();

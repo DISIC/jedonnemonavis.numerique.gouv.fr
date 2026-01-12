@@ -205,7 +205,7 @@ const NewAccess = ({ product }: Props) => {
 				}}
 			/>
 			{isModalSubmitted && (
-				<div role="status">
+				<div role="alert">
 					<Alert
 						closable
 						onClose={function noRefCheck() {

@@ -31,13 +31,11 @@ const ProductFormsPage = (props: Props) => {
 	const router = useRouter();
 	const { createdForm, reset: resetContext } = useOnboarding();
 
-	const alertTextQuery = router.query.alert as string | undefined;
-	const formCreated = router.query.formCreated as string | undefined;
-	const isAlertTextShown = useMemo(() => {
-		return Boolean(alertTextQuery);
+	const alertText = useMemo(() => {
+		return router.query.alert as string | undefined;
 	}, []);
-	const isFormAlertShown = useMemo(() => {
-		return Boolean(formCreated);
+	const isFormCreated = useMemo(() => {
+		return !!(router.query.formCreated as string | undefined);
 	}, []);
 
 	useEffect(() => {
@@ -128,40 +126,44 @@ const ProductFormsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					{isAlertTextShown && (
-						<Alert
-							className={fr.cx('fr-col-12', 'fr-mb-6v')}
-							description={alertTextQuery || ''}
-							severity="success"
-							small
-							closable
-						/>
+					{!!alertText && (
+						<div role="alert">
+							<Alert
+								className={fr.cx('fr-col-12', 'fr-mb-6v')}
+								description={alertText || ''}
+								severity="success"
+								small
+								closable
+							/>
+						</div>
 					)}
 
-					{isFormAlertShown && createdForm && (
-						<Alert
-							className={fr.cx('fr-col-12', 'fr-mb-8v')}
-							title="Votre formulaire a été créé avec succès !"
-							description={
-								<>
-									Pensez à copier le lien d’intégration sur votre site pour
-									rendre votre formulaire visible aux usagers
-									<Link
-										href={`/administration/dashboard/product/${product.id}/forms/${createdForm.id}?tab=links`}
-										className={fr.cx(
-											'fr-link--icon-right',
-											'fr-ml-2v',
-											'fr-icon-arrow-right-line',
-											'fr-link'
-										)}
-									>
-										Copier le lien d’intégration
-									</Link>
-								</>
-							}
-							severity="success"
-							closable
-						/>
+					{isFormCreated && createdForm && (
+						<div role="alert">
+							<Alert
+								className={fr.cx('fr-col-12', 'fr-mb-8v')}
+								title="Votre formulaire a été créé avec succès !"
+								description={
+									<>
+										Pensez à copier le lien d’intégration sur votre site pour
+										rendre votre formulaire visible aux usagers
+										<Link
+											href={`/administration/dashboard/product/${product.id}/forms/${createdForm.id}?tab=links`}
+											className={fr.cx(
+												'fr-link--icon-right',
+												'fr-ml-2v',
+												'fr-icon-arrow-right-line',
+												'fr-link'
+											)}
+										>
+											Copier le lien d’intégration
+										</Link>
+									</>
+								}
+								severity="success"
+								closable
+							/>
+						</div>
 					)}
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
@@ -377,47 +379,49 @@ const ProductFormsPage = (props: Props) => {
 												</div>
 
 												{form.buttons.some(b => b.closedButtonLog) && (
-													<Alert
-														severity="error"
-														title="Tentative de dépôt d'avis"
-														description={
-															<>
-																<small>
-																	Un ou plusieurs boutons “Je Donne Mon Avis”
-																	sont toujours visibles par les usagers. Nous
-																	vous invitons à supprimer le code HTML
-																	correspondant de la page concernée.
-																</small>
-																<ul>
-																	{form.buttons
-																		.filter(b => b.closedButtonLog)
-																		.map(b => (
-																			<li key={b.id}>
-																				<small>
-																					Lien d'intégration &laquo;
-																					<b>{b.title}</b>
-																					&raquo; — Dernière
-																					tentative&nbsp;:&nbsp;
-																					{formatDateToFrenchString(
-																						b.closedButtonLog?.updated_at.toString() ||
-																							''
-																					)}
-																					&nbsp; — Nombre total de
-																					tentatives&nbsp;:&nbsp;
-																					{b.closedButtonLog?.count}
-																				</small>
-																			</li>
-																		))}
-																</ul>
-															</>
-														}
-														closable
-														className={cx(
-															fr.cx('fr-mt-2w'),
-															classes.alertButtonLog
-														)}
-														as="h4"
-													/>
+													<div role="status">
+														<Alert
+															severity="error"
+															title="Tentative de dépôt d'avis"
+															description={
+																<>
+																	<small>
+																		Un ou plusieurs boutons “Je Donne Mon Avis”
+																		sont toujours visibles par les usagers. Nous
+																		vous invitons à supprimer le code HTML
+																		correspondant de la page concernée.
+																	</small>
+																	<ul>
+																		{form.buttons
+																			.filter(b => b.closedButtonLog)
+																			.map(b => (
+																				<li key={b.id}>
+																					<small>
+																						Lien d'intégration &laquo;
+																						<b>{b.title}</b>
+																						&raquo; — Dernière
+																						tentative&nbsp;:&nbsp;
+																						{formatDateToFrenchString(
+																							b.closedButtonLog?.updated_at.toString() ||
+																								''
+																						)}
+																						&nbsp; — Nombre total de
+																						tentatives&nbsp;:&nbsp;
+																						{b.closedButtonLog?.count}
+																					</small>
+																				</li>
+																			))}
+																	</ul>
+																</>
+															}
+															closable
+															className={cx(
+																fr.cx('fr-mt-2w'),
+																classes.alertButtonLog
+															)}
+															as="h4"
+														/>
+													</div>
 												)}
 											</div>
 										))}

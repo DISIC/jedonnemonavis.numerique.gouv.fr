@@ -21,13 +21,15 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 			<p className={fr.cx('fr-mb-4v')}>
 				1. Choisissez le thème à intégrer et copier le code correspondant
 			</p>
-			<Alert
-				isClosed={!displayToastTheme}
-				severity="success"
-				description={`Le lien du thème ${displayToastTheme} a été copié dans le presse papier`}
-				small
-				className={fr.cx('fr-mb-4v')}
-			/>
+			<div role="alert">
+				<Alert
+					isClosed={!displayToastTheme}
+					severity="success"
+					description={`Le lien du thème ${displayToastTheme} a été copié dans le presse papier`}
+					small
+					className={fr.cx('fr-mb-4v')}
+				/>
+			</div>
 			<div className={fr.cx('fr-grid-row')}>
 				{['clair', 'sombre'].map(theme => {
 					return (
@@ -41,7 +43,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 								)}
 							>
 								<div className={fr.cx('fr-grid-row')}>
-									<h5>Thème {theme}</h5>
+									<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
 									<div className={fr.cx('fr-col', 'fr-col-12')}>
 										<div
 											className={cx(
@@ -91,6 +93,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 												label={''}
 												textArea
 												nativeTextAreaProps={{
+													'aria-label': 'Code du bouton Je Donne Mon Avis',
 													name: 'button-code',
 													value:
 														theme === 'clair'

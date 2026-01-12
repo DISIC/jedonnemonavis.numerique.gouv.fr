@@ -104,7 +104,7 @@ const ProductStatPage = (props: Props) => {
 		return (
 			<div className={fr.cx('fr-container')}>
 				<h1 className={fr.cx('fr-mt-20v')}>Statistiques</h1>
-				<div role="status">
+				<div role="alert">
 					<Alert
 						severity="info"
 						title="Cette démarche n'existe pas ou n'est pas publique"
@@ -400,7 +400,9 @@ const ProductStatPage = (props: Props) => {
 				{transformDateToFrenchReadable(debouncedStartDate)} et le{' '}
 				{transformDateToFrenchReadable(debouncedEndDate)}
 				{!!nbReviews
-					? `, auprès de ${formatNumberWithSpaces(nbReviewsWithFilters)} internautes.`
+					? `, auprès de ${formatNumberWithSpaces(
+							nbReviewsWithFilters
+					  )} internautes.`
 					: '.'}
 			</p>
 			<form
@@ -470,11 +472,13 @@ const ProductStatPage = (props: Props) => {
 			</form>
 			{!isLoadingReviewsDataWithFilters &&
 			nbReviewsWithFilters > nbMaxReviews ? (
-				<div className={fr.cx('fr-mt-10v')} role="status">
+				<div className={fr.cx('fr-mt-10v')} role="alert">
 					<Alert
 						title=""
 						severity="error"
-						description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(nbMaxReviews)} avis). Réduisez la fenêtre de temps.`}
+						description={`Votre recherche contient trop de résultats (plus de ${formatNumberWithSpaces(
+							nbMaxReviews
+						)} avis). Réduisez la fenêtre de temps.`}
 					/>
 				</div>
 			) : (

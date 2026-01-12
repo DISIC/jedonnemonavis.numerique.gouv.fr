@@ -152,8 +152,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -161,8 +161,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -170,8 +170,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		return messages;
@@ -258,7 +258,7 @@ export const RegisterForm = (props: Props) => {
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
 			{errors.email.conflict && (
-				<div role="status">
+				<div role="alert">
 					<Alert
 						className={fr.cx('fr-mb-4v', 'fr-text--sm')}
 						closable
@@ -293,7 +293,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.firstName,
 						name: 'firstName',
 						ref: firstNameRef,
-						autoComplete: 'firstName'
+						autoComplete: 'given-name'
 					}}
 					state={hasErrors('firstName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -312,7 +312,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.lastName,
 						name: 'lastName',
 						ref: lastNameRef,
-						autoComplete: 'lastName'
+						autoComplete: 'family-name'
 					}}
 					state={hasErrors('lastName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -358,7 +358,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.password,
 						role: 'alert',
 						ref: passwordRef,
-						autoComplete: 'password'
+						autoComplete: 'new-password'
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={

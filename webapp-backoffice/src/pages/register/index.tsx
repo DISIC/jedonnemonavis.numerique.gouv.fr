@@ -72,7 +72,7 @@ export default function Register() {
 					<h1 className={fr.cx('fr-mb-12v')}>Création de compte</h1>
 					{/* {!registered && !otp && !request && <AlertObservatoire />} */}
 					{!!request && (
-						<div role="status">
+						<div role="alert">
 							<Alert
 								className={fr.cx('fr-mb-16v')}
 								closable
@@ -204,7 +204,7 @@ const useStyles = tss
 	.withParams<{ backgroundColor: string }>()
 	.create(({ backgroundColor }) => ({
 		formContainer: {
-			backgroundColor,
+			backgroundColor
 		},
 		buttonNext: {
 			display: 'flex',
