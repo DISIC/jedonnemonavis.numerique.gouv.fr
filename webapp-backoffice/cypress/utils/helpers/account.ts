@@ -72,7 +72,7 @@ export function testEmail({
 	clickModifyCard(selectors.card.credentials);
 	fillAccountForm({ email: email, emailConfirmation: confirmationEmail });
 	cy.contains('button', selectors.action.save).click({ force: true });
-	cy.contains('button', selectors.action.confirm).click();
+	cy.contains('button', selectors.action.confirm).click({ force: true });
 	cy.wait(500);
 
 	if (expectedMEssage !== '') {
