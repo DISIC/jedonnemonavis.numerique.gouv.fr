@@ -7,7 +7,7 @@ import {
 } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { tss } from 'tss-react/dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Loader } from '../ui/Loader';
@@ -27,6 +27,8 @@ const regexAtLeastOneNumber = /\d/;
 
 export const ResetForm = () => {
 	const router = useRouter();
+	const passwordRef = useRef<HTMLInputElement>(null);
+	const passwordConfirmRef = useRef<HTMLInputElement>(null);
 	const defaultErrors = {
 		password: {
 			required: false,
@@ -58,10 +60,47 @@ export const ResetForm = () => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: 'Veuillez renseigner un mot de passe.',
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
+		}
+
+		// When format error is triggered (after form submission), return only the first unmet requirement
+		if (errors.password.format && userInfos.password) {
+			if (userInfos.password.length < 12) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 12 caractères.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+			if (!regexAtLeastOneSpecialCharacter.test(userInfos.password)) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 1 caractère spécial.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+			if (!regexAtLeastOneNumber.test(userInfos.password)) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 1 chiffre.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
 		}
 
 		messages.push({
@@ -118,6 +157,33 @@ export const ResetForm = () => {
 	});
 
 	const sendNewPassword = () => {
+		const nextErrors: FormErrors = {
+			password: {
+				required: false,
+				format: false
+			}
+		};
+
+		if (!userInfos.password) {
+			nextErrors.password.required = true;
+		} else {
+			nextErrors.password.format =
+				userInfos.password.length < 12 ||
+				!regexAtLeastOneSpecialCharacter.test(userInfos.password) ||
+				!regexAtLeastOneNumber.test(userInfos.password);
+		}
+
+		if (nextErrors.password.required || nextErrors.password.format) {
+			setErrors(nextErrors);
+			passwordRef.current?.focus();
+			return;
+		}
+
+		if (userInfos.password !== userInfosVerif.password) {
+			passwordConfirmRef.current?.focus();
+			return;
+		}
+
 		resetPassword.mutate({
 			token: router.query.token as string,
 			password: userInfos.password
@@ -149,7 +215,9 @@ export const ResetForm = () => {
 									setUserInfos({ ...userInfos, password: e.target.value });
 									resetErrors('password');
 								},
-								value: userInfos.password
+								value: userInfos.password,
+								ref: passwordRef,
+								autoComplete: 'new-password'
 							}}
 							messages={getPasswordMessages()}
 							messagesHint={
@@ -170,7 +238,9 @@ export const ResetForm = () => {
 									});
 									resetErrors('password');
 								},
-								value: userInfosVerif.password
+								value: userInfosVerif.password,
+								ref: passwordConfirmRef,
+								autoComplete: 'new-password'
 							}}
 							messages={
 								userInfos.password !== userInfosVerif.password

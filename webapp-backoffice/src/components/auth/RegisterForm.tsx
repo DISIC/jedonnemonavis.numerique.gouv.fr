@@ -139,39 +139,75 @@ export const RegisterForm = (props: Props) => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: (
-					<span role="status">Veuillez renseigner un mot de passe.</span>
-				),
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
 		}
 
+		// When format error is triggered (after form submission), return only the first unmet requirement
+		if (errors.password.format && userInfos.password) {
+			if (userInfos.password.length < 12) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 12 caractères.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+			if (!regexAtLeastOneSpecialCharacter.test(userInfos.password)) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 1 caractère spécial.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+			if (!regexAtLeastOneNumber.test(userInfos.password)) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins 1 chiffre.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+		}
+
+		// Default hint messages when typing (no form submission error)
 		messages.push({
-			message: <span role="status">12 caractères minimum</span>,
+			message: '12 caractères minimum',
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
-			message: <span role="status">1 caractère spécial</span>,
+			message: '1 caractère spécial',
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
-			message: <span role="status">1 chiffre minimum</span>,
+			message: '1 chiffre minimum',
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		return messages;
@@ -356,16 +392,10 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('password');
 						},
 						value: userInfos.password,
-						role: 'alert',
 						ref: passwordRef,
 						autoComplete: 'new-password'
 					}}
 					messages={getPasswordMessages()}
-					messagesHint={
-						errors.password.required
-							? ''
-							: 'Votre mot de passe doit contenir au moins :'
-					}
 				/>
 				<Button className={cx(classes.button)} type="submit">
 					{registerUser.isLoading ? <Loader size="sm" white /> : 'Valider'}
