@@ -1,4 +1,5 @@
 import { PasswordMessages } from '@/src/types/custom';
+import { Toast } from '@/src/components/ui/Toast';
 import {
 	getMissingPasswordRequirements,
 	isValidEmail,
@@ -72,6 +73,8 @@ export const RegisterForm = (props: Props) => {
 	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [registered, setRegistered] = useState<RegisterValidationMessage>();
+	const [displayRegisterToast, setDisplayRegisterToast] =
+		useState<boolean>(false);
 	const firstNameRef = useRef<HTMLInputElement>(null);
 	const lastNameRef = useRef<HTMLInputElement>(null);
 	const emailRef = useRef<HTMLInputElement>(null);
@@ -81,6 +84,7 @@ export const RegisterForm = (props: Props) => {
 		onSuccess: result => {
 			if (result.data) {
 				const registerMode = result.data.active ? 'from_otp' : 'classic';
+				setDisplayRegisterToast(true);
 				router.query.registered = registerMode;
 				router.push(router);
 				setRegistered(registerMode);
@@ -253,11 +257,28 @@ export const RegisterForm = (props: Props) => {
 	}
 
 	if (registered) {
+		const registerSuccessMessage =
+			registered === 'from_otp'
+				? 'Compte configuré avec succès. Vous pouvez maintenant vous connecter.'
+				: 'Compte créé avec succès.';
+
 		return (
-			<RegisterValidationMessage
-				mode={registered}
-				isUserInvited={userInfos.inviteToken !== undefined}
-			/>
+			<>
+				<div className={fr.cx('fr-sr-only')} role="alert">
+					{displayRegisterToast ? registerSuccessMessage : ''}
+				</div>
+				<Toast
+					isOpen={displayRegisterToast}
+					setIsOpen={setDisplayRegisterToast}
+					autoHideDuration={3000}
+					severity="success"
+					message={registerSuccessMessage}
+				/>
+				<RegisterValidationMessage
+					mode={registered}
+					isUserInvited={userInfos.inviteToken !== undefined}
+				/>
+			</>
 		);
 	}
 
