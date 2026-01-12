@@ -19,10 +19,13 @@ import {
 describe('jdma-account', () => {
 	it('change identity parameters', () => {
 		login(invitedEmailBis, userPassword);
+		cy.injectAxe();
 		cy.wait(500);
 		checkAccountHeader('John Doe', invitedEmailBis);
 		cy.contains('li', selectors.menu.account).click({ force: true });
 		clickModifyCard(selectors.card.identity);
+		cy.wait(500);
+		cy.auditA11y();
 		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });
 		cy.contains('button', selectors.action.save).click();
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
@@ -68,8 +71,10 @@ describe('jdma-account', () => {
 
 	it('delete account', () => {
 		login(newEmailTest, userPassword);
+		cy.injectAxe();
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, newEmailTest);
 		cy.contains('li', selectors.menu.account).click({ force: true });
+		cy.injectAxe();
 		deleteAccount();
 		cy.url().should('include', '/login');
 		cy.get(selectors.loginForm.email).type(newEmailTest);

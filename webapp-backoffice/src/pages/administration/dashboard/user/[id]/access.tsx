@@ -172,8 +172,9 @@ const UserAccess: React.FC<Props> = props => {
 			setDisplayToast(
 				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${
 					ar.status.includes('admin') ? 'utilisateur' : 'administrateur'
-				} du service "${user?.accessRights.find(aer => aer.id === id)?.product
-					.title}".`
+				} du service "${
+					user?.accessRights.find(aer => aer.id === id)?.product.title
+				}".`
 			);
 		}
 	};
@@ -200,19 +201,18 @@ const UserAccess: React.FC<Props> = props => {
 				admin_entity_right_id: id
 			});
 			setDisplayToast(
-				`L'accès à l'organisation "${user?.adminEntityRights.find(
-					aer => aer.id === id
-				)?.entity
-					.name}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès à l'organisation "${
+					user?.adminEntityRights.find(aer => aer.id === id)?.entity.name
+				}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		} else {
 			removeAccessRight.mutate({
 				access_right_id: id
 			});
 			setDisplayToast(
-				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)
-					?.product
-					.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès au service "${
+					user?.accessRights.find(aer => aer.id === id)?.product.title
+				}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		}
 	};
@@ -433,7 +433,7 @@ const UserAccess: React.FC<Props> = props => {
 									{sortedEntities.map((entity, index) => (
 										<li key={entity.name} className={fr.cx('fr-mb-12v')}>
 											<React.Fragment key={index}>
-												<h5>{entity.name}</h5>
+												<h4 className={fr.cx('fr-h5')}>{entity.name}</h4>
 												<hr />
 												<ul className={cx(classes.ulContainer)}>
 													{entity.products.map((product, productIndex) => (

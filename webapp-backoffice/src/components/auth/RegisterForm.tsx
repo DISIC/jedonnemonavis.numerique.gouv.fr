@@ -293,7 +293,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.firstName,
 						name: 'firstName',
 						ref: firstNameRef,
-						autoComplete: 'firstName'
+						autoComplete: 'given-name'
 					}}
 					state={hasErrors('firstName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -312,7 +312,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.lastName,
 						name: 'lastName',
 						ref: lastNameRef,
-						autoComplete: 'lastName'
+						autoComplete: 'family-name'
 					}}
 					state={hasErrors('lastName') ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -358,7 +358,7 @@ export const RegisterForm = (props: Props) => {
 						value: userInfos.password,
 						role: 'alert',
 						ref: passwordRef,
-						autoComplete: 'password'
+						autoComplete: 'new-password'
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={

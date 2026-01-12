@@ -146,7 +146,6 @@ export const Pagination = memo(
 										classes.link,
 										getPageLinkProps(1).className
 									)}
-									aria-disabled={true}
 									role="link"
 								>
 									Première page
@@ -158,6 +157,7 @@ export const Pagination = memo(
 										classes.link
 									)}
 									role="link"
+									aria-disabled={true}
 								>
 									Première page
 								</a>
@@ -176,7 +176,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage - 1)}
-								aria-disabled={true}
 								role="link"
 							>
 								page précédente
@@ -191,6 +190,7 @@ export const Pagination = memo(
 									),
 									classes.link
 								)}
+								aria-disabled={true}
 								role="link"
 							>
 								page précédente
@@ -257,7 +257,6 @@ export const Pagination = memo(
 										classes.link
 									)}
 									{...getPageLinkProps(count)}
-									aria-disabled={true}
 									role="link"
 								>
 									Dernière page
@@ -269,6 +268,7 @@ export const Pagination = memo(
 										classes.link
 									)}
 									role="link"
+									aria-disabled={true}
 								>
 									Dernière page
 								</a>

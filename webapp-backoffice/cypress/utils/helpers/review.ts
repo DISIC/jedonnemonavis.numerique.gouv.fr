@@ -1,6 +1,14 @@
 import { appUrl } from '../variables';
 
-export function fillFormStep1(isSimplicityHidden?: boolean) {
+export function fillFormStep1(
+	isSimplicityHidden?: boolean,
+	shouldauditA11y = false
+) {
+	if (shouldauditA11y) {
+		cy.injectAxe();
+		cy.wait(500);
+		cy.auditA11y(null, { withDetails: true });
+	}
 	cy.get('[class*="formSection"]').within(() => {
 		cy.get('h1').contains('Je donne mon avis');
 		cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);
@@ -17,7 +25,11 @@ export function fillFormStep1(isSimplicityHidden?: boolean) {
 	}
 }
 
-export function fillFormStep2() {
+export function fillFormStep2(shouldauditA11y = false) {
+	if (shouldauditA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 	cy.get('[class*="radioContainer"]')
 		.find('fieldset')
 		.find('li')
@@ -29,12 +41,17 @@ export function fillFormStep2() {
 	cy.get('h1').contains('Aides');
 }
 
-export function fillFormStep3() {
+export function fillFormStep3(shouldauditA11y = false) {
 	cy.get('form').within(() => {
 		cy.get('input[name="contact_tried-0"]').check({ force: true });
 		cy.get('input[name="contact_tried-1"]').check({ force: true });
 		cy.get('input[name="contact_tried-2"]').check({ force: true });
 	});
+
+	if (shouldauditA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 
 	cy.get('[class*="FormStepper-field"]')
 		.eq(2)
@@ -57,7 +74,11 @@ export function fillFormStep3() {
 		});
 }
 
-export function fillFormStep4() {
+export function fillFormStep4(shouldauditA11y = false) {
+	if (shouldauditA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 	cy.get("[class*='reviews']")
 		.should('be.visible')
 		.within(() => {
@@ -75,6 +96,10 @@ export function fillFormStep4() {
 		});
 
 	cy.get('button').contains('Continuer').click();
+	if (shouldauditA11y) {
+		cy.wait(500);
+		cy.auditA11y();
+	}
 	cy.get('h1').contains('Commentaire').should('exist');
 	cy.get('form').within(() => {
 		cy.get('textarea').type('e2e test content');

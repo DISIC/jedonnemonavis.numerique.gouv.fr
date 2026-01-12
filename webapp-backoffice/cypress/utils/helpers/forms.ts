@@ -1,8 +1,27 @@
 import { selectors } from '../selectors';
 import { createOrEditProduct } from './common';
 
-export const tryCloseHelpModal = () => {
+type FormTab = 'dashboard' | 'reviews' | 'stats' | 'links' | 'settings';
+
+type GoToTabFormProps = {
+	isCurrentFormPage?: boolean;
+	isRenamed?: boolean;
+	shouldCheckA11y?: boolean;
+};
+
+const TAB_LABELS: Record<FormTab, string> = {
+	dashboard: 'Tableau de bord',
+	reviews: 'Réponses',
+	stats: 'Statistiques',
+	links: "Liens d'intégration",
+	settings: 'Paramètres'
+};
+
+export const tryCloseHelpModal = (shouldCheckA11y = false) => {
 	cy.wait(1000);
+	if (shouldCheckA11y) {
+		cy.auditA11y();
+	}
 	cy.get('body').then(body => {
 		if (body.find('dialog#form-help-modal').length > 0) {
 			cy.get('dialog#form-help-modal')
@@ -56,28 +75,31 @@ export function ensureTestServiceExistsAndGoToForms() {
 	});
 }
 
-export function goToSettingsTabOfForm(isCurrentFormPage?: boolean) {
+export function goToTabOfForm(tab: FormTab, props: GoToTabFormProps = {}) {
+	const { isCurrentFormPage, isRenamed } = props;
+
 	if (isCurrentFormPage) {
-		cy.contains('button', 'Paramètres').click();
+		cy.contains('button', TAB_LABELS[tab]).click();
 	} else {
-		cy.get(`a:contains("${selectors.dashboard.nameTestForm1}")`).then($link => {
-			cy.visit($link.prop('href') + '?tab=settings');
+		const formTitle = isRenamed
+			? selectors.dashboard.renamedTestForm
+			: selectors.dashboard.nameTestForm1;
+
+		cy.get(`a:contains("${formTitle}")`).then($link => {
+			const baseUrl = $link.prop('href');
+			const urlWithTab =
+				tab === 'dashboard' ? baseUrl : `${baseUrl}?tab=${tab}`;
+			cy.visit(urlWithTab);
 		});
 	}
 }
 
-export function goToLinksTabOfForm(isCurrentFormPage?: boolean) {
-	if (isCurrentFormPage) {
-		cy.contains('button', "Liens d'intégration").click();
-	} else {
-		cy.get(`a:contains("${selectors.dashboard.nameTestForm1}")`).then($link => {
-			cy.visit($link.prop('href') + '?tab=links');
-		});
-	}
-}
+export function goToCurrentFormReviewPage(
+	props: GoToTabFormProps = {}
+): Cypress.Chainable<string> {
+	const { isCurrentFormPage } = props;
 
-export function goToCurrentFormReviewPage(isCurrentFormPage?: boolean) {
-	goToLinksTabOfForm(isCurrentFormPage);
+	goToTabOfForm('links', { isCurrentFormPage });
 	let copiedUrl = '';
 
 	cy.window().then(win => {
@@ -94,10 +116,13 @@ export function goToCurrentFormReviewPage(isCurrentFormPage?: boolean) {
 
 	cy.get('@clipboardWrite').should('have.been.called');
 
-	cy.then(() => {
-		cy.log(`Visiting copied URL: ${copiedUrl}`);
-		cy.visit(copiedUrl);
-	});
+	return cy
+		.then(() => copiedUrl)
+		.then(url => {
+			cy.log(`Visiting copied URL: ${url}`);
+			cy.visit(url);
+			return cy.wrap(url);
+		});
 }
 
 export function editFormIntroductionText() {
@@ -115,4 +140,19 @@ export function publishForm() {
 		.within(() => {
 			cy.get(selectors.modalFooter).contains('button', 'Confirmer').click();
 		});
+}
+
+export function deleteForm() {
+	cy.contains('button', 'Fermer le formulaire').click({ force: true });
+	cy.wait(500);
+	cy.auditA11y();
+}
+
+export function checkAllTabsA11y(withData = false) {
+	Object.keys(TAB_LABELS).forEach((tab: FormTab, i: number) => {
+		goToTabOfForm(tab, { isCurrentFormPage: i !== 0 });
+		if (i === 0) cy.injectAxe();
+		cy.wait(withData && (i === 0 || i === 2) ? 5000 : 500);
+		cy.auditA11y(undefined, { withDetails: true });
+	});
 }

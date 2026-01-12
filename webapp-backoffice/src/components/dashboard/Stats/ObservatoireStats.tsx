@@ -294,7 +294,9 @@ const ObservatoireStats = ({
 						tabIndex={0}
 						enterTouchDelay={0}
 					>
-						<span
+						<button
+							type="button"
+							aria-label={'Aucune donnée pour calculer cette note'}
 							className={cx(
 								fr.cx('ri-question-line', 'fr-icon--lg'),
 								classes.noData
@@ -384,7 +386,9 @@ const ObservatoireStats = ({
 										tabIndex={0}
 										enterTouchDelay={0}
 									>
-										<span
+										<button
+											type="button"
+											aria-label={field.tooltip}
 											className={fr.cx(
 												'fr-icon-information-line',
 												'fr-icon--md',

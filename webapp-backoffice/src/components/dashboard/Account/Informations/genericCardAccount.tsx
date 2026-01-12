@@ -16,6 +16,7 @@ interface Props {
 	smallScreenShowHr?: boolean;
 	editButtonTitle?: string;
 	propsIsModifying?: Boolean;
+	titleLevel?: number;
 }
 
 const GenericCardInfos = (props: Props) => {
@@ -29,7 +30,8 @@ const GenericCardInfos = (props: Props) => {
 		smallScreenShowHr = true,
 		customModifyButton,
 		editButtonTitle,
-		propsIsModifying
+		propsIsModifying,
+		titleLevel
 	} = props;
 	const [internalModifying, setInternalModifying] =
 		React.useState<Boolean>(false);
@@ -64,7 +66,12 @@ const GenericCardInfos = (props: Props) => {
 							)
 						)}
 					>
-						<h3 className={cx(fr.cx('fr-mb-0', 'fr-h4'))}>{title}</h3>
+						<h3
+							aria-level={titleLevel}
+							className={cx(fr.cx('fr-mb-0', 'fr-h4'))}
+						>
+							{title}
+						</h3>
 						{hint && <p className={cx(fr.cx('fr-mb-0', 'fr-mt-4v'))}>{hint}</p>}
 					</div>
 

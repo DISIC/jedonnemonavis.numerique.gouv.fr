@@ -6,26 +6,19 @@ import { adminEmail, adminPassword } from '../../../utils/variables';
 describe('jdma-users', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
+		cy.injectAxe();
 	});
 
 	it('should create a service and attach an organization', () => {
 		createOrEditProduct('e2e-jdma-service-test-users');
 	});
 
-	it('should navigate to created product access page', () => {
-		navigateToCreatedProduct();
-	});
-
-	it('should display service administrators', () => {
-		navigateToCreatedProduct();
+	it('should display service and organization administrators', () => {
+		navigateToCreatedProduct(true);
 		cy.get('div.fr-card div.fr-grid-row div.fr-col span').should(
 			'contain',
 			'admin@example.com'
 		);
-	});
-
-	it('should display organization administrators', () => {
-		navigateToCreatedProduct();
 		cy.get('div.fr-card').should('contain', 'admin@example.com');
 	});
 
@@ -59,6 +52,9 @@ describe('jdma-users', () => {
 			.filter(':contains("user 3")')
 			.first()
 			.click();
+		cy.injectAxe();
+		cy.wait(500);
+		cy.auditA11y();
 
 		cy.url().should('include', '/administration/dashboard/user/');
 		cy.get(selectors.sideMenu.menu)
@@ -66,8 +62,10 @@ describe('jdma-users', () => {
 			.within(() => {
 				cy.get(selectors.sideMenu.menuItem).contains('Accès').click();
 			});
+		cy.contains('h2', 'Accès').should('exist');
+		cy.auditA11y();
 
-		cy.get('h5')
+		cy.get('h4')
 			.filter(':contains("e2e-jdma-entity-test")')
 			.should('exist')
 			.parent('li')
@@ -80,6 +78,8 @@ describe('jdma-users', () => {
 					.click();
 			});
 		cy.contains("Retirer l'accès").click({ force: true });
+		cy.wait(500);
+		cy.auditA11y();
 		cy.get('#user-switch-role-modal')
 			.should('be.visible')
 			.within(() => {

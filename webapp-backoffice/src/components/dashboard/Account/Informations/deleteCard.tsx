@@ -140,6 +140,7 @@ const DeleteCard = (props: Props) => {
 			</OnConfirmModal>
 			<GenericCardInfos
 				title={'Suppression du compte'}
+				titleLevel={2}
 				hint={'Cette action est irréversible.'}
 				modifiable={false}
 				smallScreenShowHr={false}

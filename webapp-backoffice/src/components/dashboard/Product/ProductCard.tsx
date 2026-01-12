@@ -434,6 +434,7 @@ const ProductCard = ({
 													href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
 													className={classes.formLink}
 													onClick={() => clearFilters()}
+													aria-label="Aller sur la page de gestion du formulaire"
 												/>
 												<div
 													className={cx(

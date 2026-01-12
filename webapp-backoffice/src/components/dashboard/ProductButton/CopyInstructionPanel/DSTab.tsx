@@ -43,7 +43,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 								)}
 							>
 								<div className={fr.cx('fr-grid-row')}>
-									<h5>Thème {theme}</h5>
+									<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
 									<div className={fr.cx('fr-col', 'fr-col-12')}>
 										<div
 											className={cx(
@@ -93,6 +93,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 												label={''}
 												textArea
 												nativeTextAreaProps={{
+													'aria-label': 'Code du bouton Je Donne Mon Avis',
 													name: 'button-code',
 													value:
 														theme === 'clair'
