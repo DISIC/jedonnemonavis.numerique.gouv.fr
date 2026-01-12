@@ -95,7 +95,7 @@ describe('jdma-register', () => {
 		});
 
 		// Cas d'e-mail whitelisté
-		it.only('should submit the form WITH whitelisted email', () => {
+		it('should submit the form WITH whitelisted email', () => {
 			fillSignupForm({ password: userPassword, email });
 
 			cy.get(selectors.signupForm.submitButton).click();

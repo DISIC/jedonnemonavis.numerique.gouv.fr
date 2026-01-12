@@ -24,7 +24,12 @@ import {
 	fillFormStep4
 } from '../../../utils/helpers/review';
 import { selectors } from '../../../utils/selectors';
-import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
+import {
+	adminEmail,
+	adminPassword,
+	appFormUrl,
+	appUrl
+} from '../../../utils/variables';
 
 const FORM_TITLES = [
 	selectors.dashboard.nameTestForm1,
@@ -87,7 +92,8 @@ describe('jdma-forms', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		cy.injectAxe();
-		tryCloseHelpModal();
+		tryCloseHelpModal(true);
+		cy.wait(500);
 		cy.auditA11y();
 		cy.contains('button', 'Étape suivante').click();
 		cy.auditA11y();
@@ -135,6 +141,6 @@ describe('jdma-forms', () => {
 			false,
 			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service «${selectors.dashboard.nameTestService}»`
 		);
-		checkReviewForm(false);
+		checkReviewForm(false, `${appFormUrl}/Demarches/5?button=5`);
 	});
 });

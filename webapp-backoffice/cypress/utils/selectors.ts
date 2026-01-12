@@ -36,7 +36,7 @@ export const selectors = {
 		checkbox: 'input[type="checkbox"]'
 	},
 	url: {
-		productTestService: '/administration/dashboard/product/4/forms',
+		productTestService: '/administration/dashboard/product/5/forms',
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',

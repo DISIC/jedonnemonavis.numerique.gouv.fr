@@ -17,9 +17,11 @@ const TAB_LABELS: Record<FormTab, string> = {
 	settings: 'Paramètres'
 };
 
-export const tryCloseHelpModal = () => {
+export const tryCloseHelpModal = (shouldCheckA11y = false) => {
 	cy.wait(1000);
-	cy.auditA11y();
+	if (shouldCheckA11y) {
+		cy.auditA11y();
+	}
 	cy.get('body').then(body => {
 		if (body.find('dialog#form-help-modal').length > 0) {
 			cy.get('dialog#form-help-modal')
