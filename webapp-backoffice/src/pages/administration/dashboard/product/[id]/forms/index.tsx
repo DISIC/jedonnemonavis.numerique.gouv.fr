@@ -31,13 +31,11 @@ const ProductFormsPage = (props: Props) => {
 	const router = useRouter();
 	const { createdForm, reset: resetContext } = useOnboarding();
 
-	const alertTextQuery = router.query.alert as string | undefined;
-	const formCreated = router.query.formCreated as string | undefined;
-	const isAlertTextShown = useMemo(() => {
-		return Boolean(alertTextQuery);
+	const alertText = useMemo(() => {
+		return router.query.alert as string | undefined;
 	}, []);
-	const isFormAlertShown = useMemo(() => {
-		return Boolean(formCreated);
+	const isFormCreated = useMemo(() => {
+		return !!(router.query.formCreated as string | undefined);
 	}, []);
 
 	useEffect(() => {
@@ -88,9 +86,9 @@ const ProductFormsPage = (props: Props) => {
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-			  (reviewsCountData?.countsByForm['1'] ?? 0) +
-			  (reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+				(reviewsCountData?.countsByForm['1'] ?? 0) +
+				(reviewsCountData?.countsByForm['2'] ?? 0)
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
@@ -128,11 +126,11 @@ const ProductFormsPage = (props: Props) => {
 				<NoFormsPanel product={product} />
 			) : (
 				<>
-					{isAlertTextShown && (
+					{!!alertText && (
 						<div role="alert">
 							<Alert
 								className={fr.cx('fr-col-12', 'fr-mb-6v')}
-								description={alertTextQuery || ''}
+								description={alertText || ''}
 								severity="success"
 								small
 								closable
@@ -140,7 +138,7 @@ const ProductFormsPage = (props: Props) => {
 						</div>
 					)}
 
-					{isFormAlertShown && createdForm && (
+					{isFormCreated && createdForm && (
 						<div role="alert">
 							<Alert
 								className={fr.cx('fr-col-12', 'fr-mb-8v')}

@@ -6,14 +6,13 @@ import {
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { linksFaqContents } from '@/src/utils/content';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
@@ -44,9 +43,11 @@ const LinksTab = ({
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const linkCreated = router.query.linkCreated as string | undefined;
 
-	const [isLinkCreated, setIsLinkCreated] = useState(linkCreated);
+	const isLinkCreated = useMemo(
+		() => !!(router.query.linkCreated as string | undefined),
+		[]
+	);
 
 	useEffect(() => {
 		if (router.query.linkCreated) {
@@ -133,7 +134,6 @@ const LinksTab = ({
 						isClosed={!isAlertShown}
 						onClose={() => {
 							setIsAlertShown(false);
-							setIsLinkCreated(undefined);
 						}}
 					/>
 				</div>
