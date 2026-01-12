@@ -1,22 +1,25 @@
-import { isValidEmail } from '@/src/utils/tools';
+import { PasswordMessages } from '@/src/types/custom';
+import {
+	getMissingPasswordRequirements,
+	isValidEmail,
+	regexAtLeastOneNumber,
+	regexAtLeastOneSpecialCharacter
+} from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import {
-	PasswordInput,
-	PasswordInputProps
-} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { Prisma } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { Loader } from '../ui/Loader';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
-import { trpc } from '@/src/utils/trpc';
-import { Prisma } from '@prisma/client';
-import { Loader } from '../ui/Loader';
-import { push } from '@socialgouv/matomo-next';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -41,14 +44,6 @@ type FormErrors = {
 	};
 	password: { required: boolean; format: boolean };
 };
-
-type PasswordMessages = {
-	severity: PasswordInputProps.Severity;
-	message: ReactNode;
-}[];
-
-const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-const regexAtLeastOneNumber = /\d/;
 
 export const RegisterForm = (props: Props) => {
 	const { otp, userPresetInfos } = props;
@@ -145,35 +140,14 @@ export const RegisterForm = (props: Props) => {
 			return messages;
 		}
 
-		// When format error is triggered (after form submission), return only the first unmet requirement
+		// When format error is triggered (after form submission), announce exactly what's missing
 		if (errors.password.format && userInfos.password) {
-			if (userInfos.password.length < 12) {
+			const missing = getMissingPasswordRequirements(userInfos.password);
+			if (missing.length > 0) {
 				messages.push({
 					message: (
 						<span role="alert">
-							Le mot de passe doit contenir au moins 12 caractères.
-						</span>
-					),
-					severity: 'error'
-				});
-				return messages;
-			}
-			if (!regexAtLeastOneSpecialCharacter.test(userInfos.password)) {
-				messages.push({
-					message: (
-						<span role="alert">
-							Le mot de passe doit contenir au moins 1 caractère spécial.
-						</span>
-					),
-					severity: 'error'
-				});
-				return messages;
-			}
-			if (!regexAtLeastOneNumber.test(userInfos.password)) {
-				messages.push({
-					message: (
-						<span role="alert">
-							Le mot de passe doit contenir au moins 1 chiffre.
+							Le mot de passe doit contenir au moins : {missing.join(', ')}.
 						</span>
 					),
 					severity: 'error'
@@ -396,6 +370,13 @@ export const RegisterForm = (props: Props) => {
 						autoComplete: 'new-password'
 					}}
 					messages={getPasswordMessages()}
+					messagesHint={
+						getPasswordMessages().length === 1 ||
+						getPasswordMessages().filter(m => m.severity === 'valid').length ===
+							3
+							? ''
+							: undefined
+					}
 				/>
 				<Button className={cx(classes.button)} type="submit">
 					{registerUser.isLoading ? <Loader size="sm" white /> : 'Valider'}

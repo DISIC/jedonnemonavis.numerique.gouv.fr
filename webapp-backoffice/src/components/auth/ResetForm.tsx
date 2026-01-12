@@ -1,29 +1,24 @@
+import { PasswordMessages } from '@/src/types/custom';
+import {
+	getMissingPasswordRequirements,
+	regexAtLeastOneNumber,
+	regexAtLeastOneSpecialCharacter
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import {
-	PasswordInput,
-	PasswordInputProps
-} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { push } from '@socialgouv/matomo-next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Loader } from '../ui/Loader';
-import { push } from '@socialgouv/matomo-next';
 
 type FormErrors = {
 	password: { required: boolean; format: boolean };
 };
-
-type PasswordMessages = {
-	severity: PasswordInputProps.Severity;
-	message: ReactNode;
-}[];
-
-const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-const regexAtLeastOneNumber = /\d/;
 
 export const ResetForm = () => {
 	const router = useRouter();
@@ -66,35 +61,14 @@ export const ResetForm = () => {
 			return messages;
 		}
 
-		// When format error is triggered (after form submission), return only the first unmet requirement
+		// When format error is triggered (after form submission), announce exactly what's missing
 		if (errors.password.format && userInfos.password) {
-			if (userInfos.password.length < 12) {
+			const missing = getMissingPasswordRequirements(userInfos.password);
+			if (missing.length > 0) {
 				messages.push({
 					message: (
 						<span role="alert">
-							Le mot de passe doit contenir au moins 12 caractères.
-						</span>
-					),
-					severity: 'error'
-				});
-				return messages;
-			}
-			if (!regexAtLeastOneSpecialCharacter.test(userInfos.password)) {
-				messages.push({
-					message: (
-						<span role="alert">
-							Le mot de passe doit contenir au moins 1 caractère spécial.
-						</span>
-					),
-					severity: 'error'
-				});
-				return messages;
-			}
-			if (!regexAtLeastOneNumber.test(userInfos.password)) {
-				messages.push({
-					message: (
-						<span role="alert">
-							Le mot de passe doit contenir au moins 1 chiffre.
+							Le mot de passe doit contenir au moins : {missing.join(', ')}.
 						</span>
 					),
 					severity: 'error'
@@ -221,9 +195,11 @@ export const ResetForm = () => {
 							}}
 							messages={getPasswordMessages()}
 							messagesHint={
-								errors.password.required
-									? 'Tous les champs sont obligatoires'
-									: 'Votre mot de passe doit contenir au moins :'
+								getPasswordMessages().length === 1 ||
+								getPasswordMessages().filter(m => m.severity === 'valid')
+									.length === 3
+									? ''
+									: undefined
 							}
 						/>
 
@@ -260,8 +236,7 @@ export const ResetForm = () => {
 							disabled={
 								!userInfos.password ||
 								!userInfosVerif.password ||
-								userInfos.password !== userInfosVerif.password ||
-								getPasswordMessages().some(m => m.severity === 'error')
+								userInfos.password !== userInfosVerif.password
 							}
 						>
 							Confirmer
