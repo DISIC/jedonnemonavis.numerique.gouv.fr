@@ -39,21 +39,23 @@ export function fillAccountForm({
 }) {
 	if (firstName !== '') {
 		cy.get(selectors.accountForm.firstName)
-			.clear()
+			.clear({ force: true })
 			.type(firstName, { force: true });
 	}
 	if (lastName !== '') {
 		cy.get(selectors.accountForm.lastName)
-			.clear()
+			.clear({ force: true })
 			.type(lastName, { force: true });
 	}
 	if (email !== '') {
-		cy.get(selectors.accountForm.email).clear().type(email, { force: true });
+		cy.get(selectors.accountForm.email)
+			.clear({ force: true })
+			.type(email, { force: true });
 	}
 	if (emailConfirmation !== '') {
 		cy.get(selectors.accountForm.emailConfirmation)
-			.clear()
-			.type(emailConfirmation);
+			.clear({ force: true })
+			.type(emailConfirmation, { force: true });
 	}
 }
 
