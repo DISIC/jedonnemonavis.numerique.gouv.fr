@@ -164,7 +164,7 @@ export const adminEntityRightRouter = router({
 				);
 			}
 
-			const deleteLinkedAccessrights = await ctx.prisma.accessRight.deleteMany({
+			await ctx.prisma.accessRight.deleteMany({
 				where: {
 					OR: [
 						{ user_email: user_email.toLowerCase() },
