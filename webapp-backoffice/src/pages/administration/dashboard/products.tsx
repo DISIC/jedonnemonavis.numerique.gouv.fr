@@ -240,7 +240,7 @@ const DashBoard = () => {
 	}
 
 	const displayFilters =
-		nbPages > 1 ||
+		countTotalUserScope > 0 ||
 		search !== '' ||
 		filters.filterOnlyFavorites ||
 		filters.filterOnlyArchived ||
@@ -346,7 +346,7 @@ const DashBoard = () => {
 					</div>
 				)}
 
-				{(displayFilters || !!countArchivedUserScope) && (
+				{displayFilters && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
@@ -556,7 +556,7 @@ const DashBoard = () => {
 									search === '' &&
 									!filters.filterEntity.length
 										? 'Aucun service dans vos favoris'
-										: undefined
+										: 'Aucun service actif trouvé'
 								}
 							/>
 						</div>
