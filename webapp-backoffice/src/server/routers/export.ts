@@ -8,20 +8,27 @@ export const exportRouter = router({
 			z.object({
 				user_id: z.number(),
 				status: z.array(StatusExportSchema).optional(),
-				product_id: z.number().optional()
+				product_id: z.number().optional(),
+				form_id: z.number().optional()
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			const { user_id, status, product_id } = input;
-			const exportCsv = await ctx.prisma.export.findMany({
+			const { user_id, status, product_id, form_id } = input;
+			const exports = await ctx.prisma.export.findMany({
 				where: {
 					user_id: user_id,
 					...(status && { status: { in: status } }),
-					...(product_id && { product_id: product_id })
+					...(product_id && { product_id: product_id }),
+					...(form_id && { form_id: form_id })
+				},
+				orderBy: { created_at: 'desc' },
+				take: 10,
+				include: {
+					user: { select: { firstName: true, lastName: true, email: true } }
 				}
 			});
 
-			return { data: exportCsv };
+			return { data: exports };
 		}),
 
 	create: protectedProcedure
@@ -30,6 +37,7 @@ export const exportRouter = router({
 				user_id: z.number(),
 				params: z.string(),
 				product_id: z.number(),
+				form_id: z.number(),
 				type: TypeExportSchema
 			})
 		)

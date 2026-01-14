@@ -32,6 +32,7 @@ import React, { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
+import ExportHistory from '../../Reviews/ExportHistory';
 
 interface Props {
 	form: FormWithElements;
@@ -296,16 +297,17 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} complété`;
+				return `${
+					FILTER_LABELS.find(filter => filter.value === key)?.label
+				} complété`;
 			case 'iconbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} : ${displayIntention(
-					(value ?? 'neutral') as AnswerIntention
-				)}`;
+				return `${
+					FILTER_LABELS.find(filter => filter.value === key)?.label
+				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
-					?.title}`;
+				return `Source : ${
+					buttons.find(b => b.id === parseInt(value as string))?.title
+				}`;
 			default:
 				return '';
 		}
@@ -460,7 +462,8 @@ const ReviewsTab = (props: Props) => {
 							filters={filters.productReviews.filters}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
-						></ExportReviews>
+						/>
+						<ExportHistory product_id={form.product_id} />
 					</div>
 				)}
 			</div>
@@ -744,6 +747,7 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		width: '100%',
 		[fr.breakpoints.up('lg')]: {
 			display: 'flex',
+			gap: fr.spacing('2v'),
 			justifyContent: 'flex-end',
 			'.fr-btn': {
 				justifySelf: 'flex-end'

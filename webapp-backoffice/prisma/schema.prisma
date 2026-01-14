@@ -448,6 +448,8 @@ model Export {
   user_id    Int?
   product    Product      @relation(fields: [product_id], references: [id])
   product_id Int
+  form       Form?        @relation(fields: [form_id], references: [id])
+  form_id    Int?
   params     String?
   status     StatusExport
   type       TypeExport   @default(csv)
@@ -562,6 +564,7 @@ model Form {
   updated_at       DateTime     @default(now())
   deleted_at       DateTime?
   isDeleted        Boolean?     @default(false)
+  exports          Export[]
 }
 
 model FormConfig {

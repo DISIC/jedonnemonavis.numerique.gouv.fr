@@ -44,6 +44,7 @@ const ExportReviews = (props: Props) => {
 					countAll: reviewsCountAll
 				}}
 				product_id={product_id!}
+				form_id={form_id!}
 				params={JSON.stringify({
 					startDate,
 					endDate,
