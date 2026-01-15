@@ -40,7 +40,7 @@ export const getExportPeriodLabel = (params: ExportParams): string => {
 	if (start) return start;
 	if (end) return end;
 
-	return '';
+	return 'Depuis le début';
 };
 
 export function getExportFiltersLabel(

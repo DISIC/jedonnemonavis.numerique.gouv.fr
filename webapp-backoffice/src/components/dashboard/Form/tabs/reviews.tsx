@@ -192,6 +192,8 @@ const ReviewsTab = (props: Props) => {
 		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
 			.length > 0;
 
+	const { cx, classes } = useStyles();
+
 	const currentExport =
 		exports?.data.find(e => e.status === 'processing' || e.status === 'idle') ||
 		exports?.data.find(e => e.id === currentExportId);
@@ -216,43 +218,58 @@ const ReviewsTab = (props: Props) => {
 			endDate: parsedParams.endDate
 		});
 		const filters = getExportFiltersLabel(parsedParams, true, buttons);
+		const finalFilters = currentExport.params
+			? [`Période : ${periodLabel}`, ...filters]
+			: undefined;
 
 		switch (currentExport.status) {
 			case 'idle':
 				return {
 					severity: 'info',
 					title: (
-						<>
-							Préparation de l'export{' '}
+						<div className={cx(classes.titleContainer)}>
+							Préparation de l'export
 							<span
 								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
 							>
-								- Cela peut prendre quelques minutes
+								&nbsp;—&nbsp;
 							</span>
-						</>
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								Cela peut prendre quelques minutes
+							</span>
+							<Loader size="sm" />
+						</div>
 					),
-					filters: [`Période : ${periodLabel}`, ...filters]
+					filters: finalFilters
 				};
 			case 'processing':
 				return {
 					severity: 'info',
 					title: (
-						<>
-							Export en cours{' '}
+						<div className={cx(classes.titleContainer)}>
+							Export en cours
 							<span
 								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
 							>
-								- Cela peut prendre quelques minutes
+								&nbsp;—&nbsp;
 							</span>
-						</>
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								Cela peut prendre quelques minutes
+							</span>
+							<Loader size="sm" />
+						</div>
 					),
-					filters: [`Période : ${periodLabel}`, ...filters]
+					filters: finalFilters
 				};
 			case 'done': {
 				return {
 					severity: 'success',
 					title: 'Export finalisé',
-					filters: [`Période : ${periodLabel}`, ...filters],
+					filters: finalFilters,
 					isClosable: true
 				};
 			}
@@ -291,8 +308,6 @@ const ReviewsTab = (props: Props) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
 		return regex.test(date);
 	};
-
-	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
@@ -600,16 +615,14 @@ const ReviewsTab = (props: Props) => {
 					description={
 						<div
 							className={fr.cx(
-								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
+								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v',
+								!currentExportAlert.filters &&
+									!currentExport.link &&
+									'fr-hidden'
 							)}
 						>
-							{currentExport.status !== 'done' && (
-								<div className={classes.alertLoading}>
-									<Loader size="sm" />
-								</div>
-							)}
 							{currentExport.link && (
-								<p className={fr.cx('fr-mb-4v')}>
+								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
 									Téléchargez l'export :{' '}
 									<Link
 										href={currentExport.link}
@@ -624,12 +637,16 @@ const ReviewsTab = (props: Props) => {
 									</Link>
 								</p>
 							)}
-							<strong>Filtres sélectionnés:</strong>
-							<ul>
-								{currentExportAlert.filters?.map((filter, index) => (
-									<li key={index}>{filter}</li>
-								))}
-							</ul>
+							{currentExportAlert.filters && (
+								<>
+									<strong>Filtres sélectionnés:</strong>
+									<ul>
+										{currentExportAlert.filters.map((filter, index) => (
+											<li key={index}>{filter}</li>
+										))}
+									</ul>
+								</>
+							)}
 						</div>
 					}
 					closable={currentExportAlert.isClosable}
@@ -858,8 +875,6 @@ const ReviewsTab = (props: Props) => {
 	);
 };
 
-export default ReviewsTab;
-
 const useStyles = tss.withName(ReviewsTab.name).create({
 	boldText: {
 		fontWeight: 'bold'
@@ -936,9 +951,12 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 			position: 'absolute'
 		}
 	},
-	alertLoading: {
-		position: 'absolute',
-		right: 6,
-		top: 6
+	titleContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: fr.spacing('2v')
 	}
 });
+
+export default ReviewsTab;
