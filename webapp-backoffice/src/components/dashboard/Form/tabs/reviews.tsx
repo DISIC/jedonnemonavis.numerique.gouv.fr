@@ -28,12 +28,19 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import { AnswerIntention, Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 import ExportHistory from '../../Reviews/ExportHistory';
 import { useSession } from 'next-auth/react';
+import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
+import {
+	getExportFiltersLabel,
+	getExportPeriodLabel,
+	parseExportParams
+} from '@/src/utils/export';
+import Link from 'next/link';
 
 interface Props {
 	form: FormWithElements;
@@ -77,6 +84,7 @@ const ReviewsTab = (props: Props) => {
 	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
+	const [currentExportId, setCurrentExportId] = useState<number>();
 
 	const filter_modal = createModal({
 		id: 'filter-modal',
@@ -183,6 +191,73 @@ const ReviewsTab = (props: Props) => {
 	const hasExportsInProgress =
 		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
 			.length > 0;
+
+	const currentExport =
+		exports?.data.find(e => e.status === 'processing' || e.status === 'idle') ||
+		exports?.data.find(e => e.id === currentExportId);
+
+	const currentExportAlert = useMemo((): {
+		severity: AlertProps.Severity;
+		title: NonNullable<ReactNode>;
+		filters?: string[];
+		isClosable?: boolean;
+	} => {
+		if (!currentExport) {
+			return {
+				severity: 'info',
+				title: ''
+			};
+		}
+
+		const parsedParams = parseExportParams(currentExport.params);
+		const periodLabel = getExportPeriodLabel({
+			...parsedParams,
+			startDate: parsedParams.startDate,
+			endDate: parsedParams.endDate
+		});
+		const filters = getExportFiltersLabel(parsedParams, true, buttons);
+
+		switch (currentExport.status) {
+			case 'idle':
+				return {
+					severity: 'info',
+					title: (
+						<>
+							Préparation de l'export{' '}
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								- Cela peut prendre quelques minutes
+							</span>
+						</>
+					),
+					filters: [`Période : ${periodLabel}`, ...filters]
+				};
+			case 'processing':
+				return {
+					severity: 'info',
+					title: (
+						<>
+							Export en cours{' '}
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								- Cela peut prendre quelques minutes
+							</span>
+						</>
+					),
+					filters: [`Période : ${periodLabel}`, ...filters]
+				};
+			case 'done': {
+				return {
+					severity: 'success',
+					title: 'Export finalisé',
+					filters: [`Période : ${periodLabel}`, ...filters],
+					isClosable: true
+				};
+			}
+		}
+	}, [currentExport]);
 
 	const { data: reviewLog } = reviewLogResults;
 
@@ -396,10 +471,21 @@ const ReviewsTab = (props: Props) => {
 			if (hasExportsInProgress) {
 				refetchExports();
 			}
-		}, 5000);
+		}, 2000);
 
 		return () => clearInterval(interval);
 	}, [hasExportsInProgress, refetchExports]);
+
+	useEffect(() => {
+		if (hasExportsInProgress && !currentExportId) {
+			const inProgressExport = exports?.data.find(
+				e => e.status === 'processing' || e.status === 'idle'
+			);
+			if (inProgressExport) {
+				setCurrentExportId(inProgressExport.id);
+			}
+		}
+	}, [exports]);
 
 	const handleSendInvitation = () => {
 		router.push({
@@ -500,12 +586,56 @@ const ReviewsTab = (props: Props) => {
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
 							onExportCreated={() => refetchExports()}
-							isDisabled={hasExportsInProgress}
+							isDisabled={hasExportsInProgress || isLoading || isLoadingExports}
 						/>
-						<ExportHistory exports={exports.data} />
+						<ExportHistory exports={exports.data} buttons={buttons} />
 					</div>
 				)}
 			</div>
+
+			{currentExport && (
+				<Alert
+					severity={currentExportAlert.severity}
+					title={currentExportAlert.title}
+					description={
+						<div
+							className={fr.cx(
+								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
+							)}
+						>
+							{currentExport.status !== 'done' && (
+								<div className={classes.alertLoading}>
+									<Loader size="sm" />
+								</div>
+							)}
+							{currentExport.link && (
+								<p className={fr.cx('fr-mb-4v')}>
+									Téléchargez l'export :{' '}
+									<Link
+										href={currentExport.link}
+										className={fr.cx('fr-link')}
+										rel="noopener noreferrer"
+									>
+										Export du {currentExport.created_at.toLocaleDateString()}{' '}
+										<i
+											className={fr.cx('fr-icon-download-line', 'fr-icon--sm')}
+											aria-hidden="true"
+										/>
+									</Link>
+								</p>
+							)}
+							<strong>Filtres sélectionnés:</strong>
+							<ul>
+								{currentExportAlert.filters?.map((filter, index) => (
+									<li key={index}>{filter}</li>
+								))}
+							</ul>
+						</div>
+					}
+					closable={currentExportAlert.isClosable}
+				/>
+			)}
+
 			{isLoading ? (
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
@@ -805,5 +935,10 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		'p.fr-error-text': {
 			position: 'absolute'
 		}
+	},
+	alertLoading: {
+		position: 'absolute',
+		right: 6,
+		top: 6
 	}
 });

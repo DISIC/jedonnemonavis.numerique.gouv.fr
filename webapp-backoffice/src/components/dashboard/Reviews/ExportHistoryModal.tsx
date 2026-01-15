@@ -8,9 +8,8 @@ import {
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Table from '@codegouvfr/react-dsfr/Table';
-import { useSession } from 'next-auth/react';
+import { Button as ButtonModel } from '@prisma/client';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -18,6 +17,7 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	modal: CustomModalProps;
 	exports: ExportWithPartialRelations[];
+	buttons: ButtonModel[];
 }
 
 type SortColumn = 'date' | 'user' | 'period' | null;
@@ -27,10 +27,8 @@ type ExportWithLabels = ExportWithPartialRelations & {
 	filtersLabel: string;
 };
 
-const ExportHistoryModal = ({ modal, exports }: Props) => {
+const ExportHistoryModal = ({ modal, exports, buttons }: Props) => {
 	const { classes, cx } = useStyles();
-	const { data: session } = useSession({ required: true });
-	const modalOpen = useIsModalOpen(modal);
 
 	const [sortColumn, setSortColumn] = useState<SortColumn>(null);
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
@@ -43,7 +41,7 @@ const ExportHistoryModal = ({ modal, exports }: Props) => {
 				startDate: parsedParams.startDate,
 				endDate: parsedParams.endDate
 			});
-			const filtersLabel = getExportFiltersLabel(parsedParams);
+			const filtersLabel = getExportFiltersLabel(parsedParams, false, buttons);
 
 			return {
 				...record,

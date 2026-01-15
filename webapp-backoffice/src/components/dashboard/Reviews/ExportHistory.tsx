@@ -2,9 +2,11 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ExportHistoryModal from './ExportHistoryModal';
 import { ExportWithPartialRelations } from '@/prisma/generated/zod';
+import { Button as ButtonModel } from '@prisma/client';
 
 interface Props {
 	exports: ExportWithPartialRelations[];
+	buttons: ButtonModel[];
 }
 
 const export_modal = createModal({
@@ -13,11 +15,15 @@ const export_modal = createModal({
 });
 
 const ExportHistory = (props: Props) => {
-	const { exports } = props;
+	const { exports, buttons } = props;
 
 	return (
 		<>
-			<ExportHistoryModal modal={export_modal} exports={exports} />
+			<ExportHistoryModal
+				modal={export_modal}
+				exports={exports}
+				buttons={buttons}
+			/>
 
 			<Button
 				priority="tertiary"

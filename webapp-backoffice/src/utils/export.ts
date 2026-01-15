@@ -1,5 +1,7 @@
 import { ReviewFiltersType } from '@/src/types/custom';
 import { formatDateToFrenchString } from './tools';
+import { displayIntention } from './stats';
+import { Button } from '@prisma/client';
 
 export type ExportParams = Partial<{
 	startDate: string;
@@ -41,22 +43,53 @@ export const getExportPeriodLabel = (params: ExportParams): string => {
 	return '';
 };
 
-export const getExportFiltersLabel = (params: ExportParams): string => {
+export function getExportFiltersLabel(
+	params: ExportParams,
+	asArray: true,
+	buttons?: Button[]
+): string[];
+export function getExportFiltersLabel(
+	params: ExportParams,
+	asArray?: false,
+	buttons?: Button[]
+): string;
+export function getExportFiltersLabel(
+	params: ExportParams,
+	asArray?: boolean,
+	buttons?: Button[]
+): string | string[] {
 	const labels: string[] = [];
 	const { filters } = params;
 
-	if (params.search) labels.push(`Recherche : ${params.search}`);
-	if (filters?.needVerbatim) labels.push('Avec commentaires');
-	if (params.button_id) labels.push(`Bouton ${params.button_id}`);
-	if (filters?.buttonId?.length)
-		labels.push(`Bouton ${filters.buttonId.join(', ')}`);
-	if (filters?.satisfaction?.length)
-		labels.push(`Satisfaction : ${filters.satisfaction.join(', ')}`);
-	if (filters?.comprehension?.length)
-		labels.push(`Compréhension : ${filters.comprehension.join(', ')}`);
-	if (filters?.help?.length) labels.push(`Aide : ${filters.help.join(', ')}`);
-	if (filters?.needOtherHelp) labels.push('Autre aide');
-	if (filters?.needOtherDifficulties) labels.push('Autres difficultés');
+	const addLabel = (condition: boolean, label: string) => {
+		if (condition) labels.push(label);
+	};
 
-	return labels.join(' · ');
-};
+	addLabel(!!params.search, `Recherche : ${params.search}`);
+	addLabel(!!filters?.needVerbatim, 'Avec commentaires');
+	addLabel(!!params.button_id, `Bouton ${params.button_id}`);
+
+	if (filters?.buttonId?.length) {
+		const sources = filters.buttonId
+			.map(b => buttons?.find(button => button.id === parseInt(b))?.title || b)
+			.join(', ');
+		addLabel(true, `Source :  ${sources}`);
+	}
+
+	if (filters?.satisfaction?.length) {
+		const satisfaction = filters.satisfaction
+			.map(s => displayIntention(s))
+			.join(', ');
+		addLabel(true, `Satisfaction : ${satisfaction}`);
+	}
+
+	addLabel(
+		!!filters?.comprehension?.length,
+		`Note clarté : ${filters?.comprehension?.join(', ')}`
+	);
+	addLabel(!!filters?.help?.length, `Aide : ${filters?.help?.join(', ')}`);
+	addLabel(!!filters?.needOtherHelp, 'Autre aide');
+	addLabel(!!filters?.needOtherDifficulties, 'Autres difficultés');
+
+	return asArray ? labels : labels.join('; ');
+}
