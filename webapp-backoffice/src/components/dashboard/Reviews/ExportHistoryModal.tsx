@@ -1,12 +1,10 @@
-import { Loader } from '@/src/components/ui/Loader';
-import { Export, ExportWithPartialRelations } from '@/prisma/generated/zod';
+import { ExportWithPartialRelations } from '@/prisma/generated/zod';
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	getExportFiltersLabel,
 	getExportPeriodLabel,
 	parseExportParams
 } from '@/src/utils/export';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -14,13 +12,12 @@ import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import Table from '@codegouvfr/react-dsfr/Table';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	modal: CustomModalProps;
-	product_id: number;
-	form_id: number;
+	exports: ExportWithPartialRelations[];
 }
 
 type SortColumn = 'date' | 'user' | 'period' | null;
@@ -30,7 +27,7 @@ type ExportWithLabels = ExportWithPartialRelations & {
 	filtersLabel: string;
 };
 
-const ExportHistoryModal = ({ modal, product_id, form_id }: Props) => {
+const ExportHistoryModal = ({ modal, exports }: Props) => {
 	const { classes, cx } = useStyles();
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
@@ -38,27 +35,8 @@ const ExportHistoryModal = ({ modal, product_id, form_id }: Props) => {
 	const [sortColumn, setSortColumn] = useState<SortColumn>(null);
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
-	const {
-		data: exportData,
-		isLoading: isLoadingData,
-		refetch: refetchData
-	} = trpc.export.getByUser.useQuery(
-		{
-			user_id: parseInt(session?.user?.id as string),
-			product_id: product_id,
-			form_id: form_id
-		},
-		{
-			enabled: modalOpen,
-
-			initialData: {
-				data: []
-			}
-		}
-	);
-
 	const exportsWithLabels: ExportWithLabels[] = useMemo(() => {
-		return (exportData?.data || []).map(record => {
+		return exports.map(record => {
 			const parsedParams = parseExportParams(record.params);
 			const periodLabel = getExportPeriodLabel({
 				...parsedParams,
@@ -73,23 +51,7 @@ const ExportHistoryModal = ({ modal, product_id, form_id }: Props) => {
 				filtersLabel: filtersLabel || ''
 			};
 		});
-	}, [exportData]);
-
-	useEffect(() => {
-		if (!modalOpen) return;
-
-		const interval = setInterval(() => {
-			const hasIncompleteExports = (exportData?.data || []).some(
-				exp => exp.status !== 'done'
-			);
-
-			if (hasIncompleteExports) {
-				refetchData();
-			}
-		}, 5000);
-
-		return () => clearInterval(interval);
-	}, [modalOpen, refetchData, exportData]);
+	}, [exports]);
 
 	const handleSort = (column: SortColumn) => {
 		if (sortColumn === column) {
@@ -161,11 +123,7 @@ const ExportHistoryModal = ({ modal, product_id, form_id }: Props) => {
 			size="large"
 		>
 			<div className={fr.cx('fr-col-12')}>
-				{isLoadingData ? (
-					<div className={cx(classes.loaderContainer)}>
-						<Loader />
-					</div>
-				) : finalData.length === 0 ? (
+				{finalData.length === 0 ? (
 					<div className={cx(classes.emptyStateContainer)}>
 						<p className={fr.cx('fr-grid-row--center')}>
 							Aucun export trouvé pour ce formulaire

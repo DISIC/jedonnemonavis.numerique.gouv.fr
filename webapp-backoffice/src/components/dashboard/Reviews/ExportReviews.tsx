@@ -14,7 +14,14 @@ interface Props {
 	filters: ReviewFiltersType;
 	reviewsCountfiltered: number;
 	reviewsCountAll: number;
+	onExportCreated: () => void;
+	isDisabled?: boolean;
 }
+
+const export_modal = createModal({
+	id: 'export-modal',
+	isOpenedByDefault: false
+});
 
 const ExportReviews = (props: Props) => {
 	const {
@@ -27,13 +34,10 @@ const ExportReviews = (props: Props) => {
 		button_id,
 		filters,
 		reviewsCountfiltered,
-		reviewsCountAll
+		reviewsCountAll,
+		isDisabled,
+		onExportCreated
 	} = props;
-
-	const export_modal = createModal({
-		id: 'export-modal',
-		isOpenedByDefault: false
-	});
 
 	return (
 		<>
@@ -53,7 +57,9 @@ const ExportReviews = (props: Props) => {
 					button_id,
 					filters
 				})}
-			></ExportModal>
+				onExportCreated={onExportCreated}
+				hasExportsInProgress={isDisabled || false}
+			/>
 
 			<Button
 				priority="tertiary"
@@ -61,6 +67,7 @@ const ExportReviews = (props: Props) => {
 				iconPosition="right"
 				type="button"
 				nativeButtonProps={export_modal.buttonProps}
+				disabled={isDisabled}
 			>
 				Télécharger les données
 			</Button>

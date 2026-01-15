@@ -33,6 +33,7 @@ import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 import ExportHistory from '../../Reviews/ExportHistory';
+import { useSession } from 'next-auth/react';
 
 interface Props {
 	form: FormWithElements;
@@ -65,6 +66,8 @@ const ReviewsTab = (props: Props) => {
 		buttons
 	} = props;
 	const router = useRouter();
+	const { data: session } = useSession({ required: true });
+
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
@@ -158,6 +161,28 @@ const ReviewsTab = (props: Props) => {
 				enabled: nbReviews > 0 && !isLoading
 			}
 		);
+
+	const {
+		data: exports,
+		isLoading: isLoadingExports,
+		refetch: refetchExports
+	} = trpc.export.getByUser.useQuery(
+		{
+			user_id: parseInt(session?.user?.id as string),
+			product_id: form.product_id,
+			form_id: form.id
+		},
+		{
+			enabled: nbReviews > 0 && !isLoading,
+			initialData: {
+				data: []
+			}
+		}
+	);
+
+	const hasExportsInProgress =
+		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
+			.length > 0;
 
 	const { data: reviewLog } = reviewLogResults;
 
@@ -364,6 +389,18 @@ const ReviewsTab = (props: Props) => {
 		}
 	}, [filters]);
 
+	useEffect(() => {
+		if (!hasExportsInProgress) return;
+
+		const interval = setInterval(() => {
+			if (hasExportsInProgress) {
+				refetchExports();
+			}
+		}, 5000);
+
+		return () => clearInterval(interval);
+	}, [hasExportsInProgress, refetchExports]);
+
 	const handleSendInvitation = () => {
 		router.push({
 			pathname: `/administration/dashboard/product/${form.product_id}/access`,
@@ -445,7 +482,7 @@ const ReviewsTab = (props: Props) => {
 				submitFilters={handleSubmitfilters}
 				form_id={form.id}
 				setButtonId={setButtonId}
-			></ReviewFiltersModal>
+			/>
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
@@ -462,8 +499,10 @@ const ReviewsTab = (props: Props) => {
 							filters={filters.productReviews.filters}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
+							onExportCreated={() => refetchExports()}
+							isDisabled={hasExportsInProgress}
 						/>
-						<ExportHistory product_id={form.product_id} />
+						<ExportHistory exports={exports.data} />
 					</div>
 				)}
 			</div>

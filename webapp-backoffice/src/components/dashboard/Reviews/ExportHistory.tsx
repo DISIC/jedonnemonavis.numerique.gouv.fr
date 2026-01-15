@@ -1,27 +1,23 @@
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ExportHistoryModal from './ExportHistoryModal';
+import { ExportWithPartialRelations } from '@/prisma/generated/zod';
 
 interface Props {
-	product_id?: number;
-	form_id?: number;
+	exports: ExportWithPartialRelations[];
 }
 
-const ExportHistory = (props: Props) => {
-	const { product_id, form_id } = props;
+const export_modal = createModal({
+	id: 'export-history-modal',
+	isOpenedByDefault: false
+});
 
-	const export_modal = createModal({
-		id: 'export-history-modal',
-		isOpenedByDefault: false
-	});
+const ExportHistory = (props: Props) => {
+	const { exports } = props;
 
 	return (
 		<>
-			<ExportHistoryModal
-				modal={export_modal}
-				product_id={product_id!}
-				form_id={form_id!}
-			/>
+			<ExportHistoryModal modal={export_modal} exports={exports} />
 
 			<Button
 				priority="tertiary"

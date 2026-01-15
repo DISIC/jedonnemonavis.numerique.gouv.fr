@@ -17,10 +17,20 @@ interface Props {
 	product_id: number;
 	form_id: number;
 	params: string;
+	onExportCreated: () => void;
+	hasExportsInProgress: boolean;
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, product_id, form_id, params } = props;
+	const {
+		modal,
+		counts,
+		product_id,
+		form_id,
+		params,
+		onExportCreated,
+		hasExportsInProgress
+	} = props;
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
 
@@ -31,29 +41,9 @@ const ExportModal = (props: Props) => {
 	const [startDate, setStartDate] = React.useState<string | null>(null);
 	const [endDate, setEndDate] = React.useState<string | null>(null);
 
-	const {
-		data: exportCsv,
-		isFetching: isLoadingExport,
-		refetch: refetchExport
-	} = trpc.export.getByUser.useQuery(
-		{
-			user_id: parseInt(session?.user?.id as string),
-			status: ['idle', 'processing'],
-			product_id: product_id
-		},
-		{
-			enabled: modalOpen,
-			initialData: {
-				data: []
-			}
-		}
-	);
-
-	const hasExportsInProgress = exportCsv?.data.length > 0;
-
 	const createExport = trpc.export.create.useMutation({
 		onSuccess: () => {
-			refetchExport();
+			onExportCreated();
 		}
 	});
 
@@ -73,13 +63,6 @@ const ExportModal = (props: Props) => {
 	}, [params]);
 
 	const getModalContent = () => {
-		if (isLoadingExport)
-			return (
-				<div className={fr.cx('fr-pb-10v', 'fr-pt-10w')}>
-					<Loader />
-				</div>
-			);
-
 		if (!hasExportsInProgress) {
 			return (
 				<>
