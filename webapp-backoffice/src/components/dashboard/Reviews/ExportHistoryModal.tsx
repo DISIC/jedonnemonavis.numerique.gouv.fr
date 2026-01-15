@@ -259,12 +259,8 @@ const useStyles = tss.create({
 			width: 'calc(1100% / 12)',
 			maxWidth: 'calc(1100% / 12)'
 		},
-		'table,thead,tbody,tr,td,th': {
-			width: '100%'
-		},
-		'td,th': {
-			display: 'flex',
-			flex: 1
+		table: {
+			display: 'table'
 		}
 	},
 	loaderContainer: {
