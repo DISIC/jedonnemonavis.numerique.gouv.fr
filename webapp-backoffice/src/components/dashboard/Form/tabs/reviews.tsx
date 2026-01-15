@@ -600,7 +600,10 @@ const ReviewsTab = (props: Props) => {
 							filters={filters.productReviews.filters}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
-							onExportCreated={() => refetchExports()}
+							onExportCreated={() => {
+								setCurrentExportId(undefined);
+								refetchExports();
+							}}
 							isDisabled={hasExportsInProgress || isLoading || isLoadingExports}
 						/>
 						<ExportHistory exports={exports.data} buttons={buttons} />
