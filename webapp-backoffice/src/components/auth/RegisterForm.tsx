@@ -1,22 +1,26 @@
-import { isValidEmail } from '@/src/utils/tools';
+import { PasswordMessages } from '@/src/types/custom';
+import { Toast } from '@/src/components/ui/Toast';
+import {
+	getMissingPasswordRequirements,
+	isValidEmail,
+	regexAtLeastOneNumber,
+	regexAtLeastOneSpecialCharacter
+} from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import {
-	PasswordInput,
-	PasswordInputProps
-} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { Prisma } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { Loader } from '../ui/Loader';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
-import { trpc } from '@/src/utils/trpc';
-import { Prisma } from '@prisma/client';
-import { Loader } from '../ui/Loader';
-import { push } from '@socialgouv/matomo-next';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -41,14 +45,6 @@ type FormErrors = {
 	};
 	password: { required: boolean; format: boolean };
 };
-
-type PasswordMessages = {
-	severity: PasswordInputProps.Severity;
-	message: ReactNode;
-}[];
-
-const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-const regexAtLeastOneNumber = /\d/;
 
 export const RegisterForm = (props: Props) => {
 	const { otp, userPresetInfos } = props;
@@ -77,6 +73,8 @@ export const RegisterForm = (props: Props) => {
 	const [userNotWhiteListed, setUserNotWhiteListed] = useState<boolean>(false);
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [registered, setRegistered] = useState<RegisterValidationMessage>();
+	const [displayRegisterToast, setDisplayRegisterToast] =
+		useState<boolean>(false);
 	const firstNameRef = useRef<HTMLInputElement>(null);
 	const lastNameRef = useRef<HTMLInputElement>(null);
 	const emailRef = useRef<HTMLInputElement>(null);
@@ -86,6 +84,7 @@ export const RegisterForm = (props: Props) => {
 		onSuccess: result => {
 			if (result.data) {
 				const registerMode = result.data.active ? 'from_otp' : 'classic';
+				setDisplayRegisterToast(true);
 				router.query.registered = registerMode;
 				router.push(router);
 				setRegistered(registerMode);
@@ -139,39 +138,54 @@ export const RegisterForm = (props: Props) => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: (
-					<span role="status">Veuillez renseigner un mot de passe.</span>
-				),
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
 		}
 
+		// When format error is triggered (after form submission), announce exactly what's missing
+		if (errors.password.format && userInfos.password) {
+			const missing = getMissingPasswordRequirements(userInfos.password);
+			if (missing.length > 0) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins : {missing.join(', ')}.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
+		}
+
+		// Default hint messages when typing (no form submission error)
 		messages.push({
-			message: <span role="status">12 caractères minimum</span>,
+			message: '12 caractères minimum',
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
-			message: <span role="status">1 caractère spécial</span>,
+			message: '1 caractère spécial',
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		messages.push({
-			message: <span role="status">1 chiffre minimum</span>,
+			message: '1 chiffre minimum',
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-				? 'valid'
-				: 'error'
+					? 'valid'
+					: 'error'
 		});
 
 		return messages;
@@ -243,11 +257,28 @@ export const RegisterForm = (props: Props) => {
 	}
 
 	if (registered) {
+		const registerSuccessMessage =
+			registered === 'from_otp'
+				? 'Compte configuré avec succès. Vous pouvez maintenant vous connecter.'
+				: 'Compte créé avec succès.';
+
 		return (
-			<RegisterValidationMessage
-				mode={registered}
-				isUserInvited={userInfos.inviteToken !== undefined}
-			/>
+			<>
+				<div className={fr.cx('fr-sr-only')} role="alert">
+					{displayRegisterToast ? registerSuccessMessage : ''}
+				</div>
+				<Toast
+					isOpen={displayRegisterToast}
+					setIsOpen={setDisplayRegisterToast}
+					autoHideDuration={3000}
+					severity="success"
+					message={registerSuccessMessage}
+				/>
+				<RegisterValidationMessage
+					mode={registered}
+					isUserInvited={userInfos.inviteToken !== undefined}
+				/>
+			</>
 		);
 	}
 
@@ -356,15 +387,16 @@ export const RegisterForm = (props: Props) => {
 							resetErrors('password');
 						},
 						value: userInfos.password,
-						role: 'alert',
 						ref: passwordRef,
 						autoComplete: 'new-password'
 					}}
 					messages={getPasswordMessages()}
 					messagesHint={
-						errors.password.required
+						getPasswordMessages().length === 1 ||
+						getPasswordMessages().filter(m => m.severity === 'valid').length ===
+							3
 							? ''
-							: 'Votre mot de passe doit contenir au moins :'
+							: undefined
 					}
 				/>
 				<Button className={cx(classes.button)} type="submit">

@@ -1,20 +1,19 @@
+import { Toast } from '@/src/components/ui/Toast';
 import { isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
 import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { push } from '@socialgouv/matomo-next';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Toast } from '@/src/components/ui/Toast';
-import { push } from '@socialgouv/matomo-next';
-import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
 
 type FormCredentials = {
 	email: string;
@@ -35,9 +34,10 @@ const defaultErrors = {
 	userInactive: false
 };
 
+const loginSuccessMessage = 'Connexion réussie. Vous êtes maintenant connecté.';
+
 export const LoginForm = () => {
 	const router = useRouter();
-
 	const [credentials, setCredentials] = useState<FormCredentials>({
 		email: '',
 		password: ''
@@ -47,6 +47,7 @@ export const LoginForm = () => {
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 	const [displayToast, setDisplayToast] = useState<boolean>(false);
+	const [displayLoginToast, setDisplayLoginToast] = useState<boolean>(false);
 
 	const emailRef = useRef<HTMLInputElement | null>(null);
 	const passwordRef = useRef<HTMLInputElement | null>(null);
@@ -138,7 +139,10 @@ export const LoginForm = () => {
 					const callbackUrl =
 						router.query.callbackUrl?.toString() ||
 						'/administration/dashboard/products';
-					router.push(callbackUrl);
+					setDisplayLoginToast(true);
+					window.setTimeout(() => {
+						router.push(callbackUrl);
+					}, 1000);
 				}
 			})
 			.finally(() => {
@@ -160,6 +164,16 @@ export const LoginForm = () => {
 
 	return (
 		<div>
+			<div className={fr.cx('fr-sr-only')} role="alert">
+				{displayLoginToast ? loginSuccessMessage : ''}
+			</div>
+			<Toast
+				isOpen={displayLoginToast}
+				setIsOpen={setDisplayLoginToast}
+				autoHideDuration={1000}
+				severity="success"
+				message={loginSuccessMessage}
+			/>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -264,11 +278,11 @@ export const LoginForm = () => {
 								? [
 										{
 											message: (
-												<span role="status">Mot de passe incorrect.</span>
+												<span role="alert">Mot de passe incorrect.</span>
 											),
 											severity: 'error'
 										}
-								  ]
+									]
 								: []
 						}
 						messagesHint=""
