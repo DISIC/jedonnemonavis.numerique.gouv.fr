@@ -1,14 +1,12 @@
+import { CustomModalProps } from '@/src/types/custom';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import { Alert } from '@codegouvfr/react-dsfr/Alert';
-import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import React from 'react';
 import { Loader } from '../../ui/Loader';
-import { push } from '@socialgouv/matomo-next';
-import { CustomModalProps } from '@/src/types/custom';
 
 interface Props {
 	modal: CustomModalProps;
@@ -17,11 +15,22 @@ interface Props {
 		countAll: number;
 	};
 	product_id: number;
+	form_id: number;
 	params: string;
+	onExportCreated: () => void;
+	hasExportsInProgress: boolean;
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, product_id, params } = props;
+	const {
+		modal,
+		counts,
+		product_id,
+		form_id,
+		params,
+		onExportCreated,
+		hasExportsInProgress
+	} = props;
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
 
@@ -32,29 +41,9 @@ const ExportModal = (props: Props) => {
 	const [startDate, setStartDate] = React.useState<string | null>(null);
 	const [endDate, setEndDate] = React.useState<string | null>(null);
 
-	const {
-		data: exportCsv,
-		isFetching: isLoadingExport,
-		refetch: refetchExport
-	} = trpc.export.getByUser.useQuery(
-		{
-			user_id: parseInt(session?.user?.id as string),
-			status: ['idle', 'processing'],
-			product_id: product_id
-		},
-		{
-			enabled: modalOpen,
-			initialData: {
-				data: []
-			}
-		}
-	);
-
-	const hasExportsInProgress = exportCsv?.data.length > 0;
-
 	const createExport = trpc.export.create.useMutation({
 		onSuccess: () => {
-			refetchExport();
+			onExportCreated();
 		}
 	});
 
@@ -63,6 +52,7 @@ const ExportModal = (props: Props) => {
 			user_id: parseInt(session?.user?.id as string),
 			params: choice == 'filtered' ? params : '',
 			product_id: product_id,
+			form_id: form_id,
 			type: format ?? 'csv'
 		});
 	};
@@ -73,13 +63,6 @@ const ExportModal = (props: Props) => {
 	}, [params]);
 
 	const getModalContent = () => {
-		if (isLoadingExport)
-			return (
-				<div className={fr.cx('fr-pb-10v', 'fr-pt-10w')}>
-					<Loader />
-				</div>
-			);
-
 		if (!hasExportsInProgress) {
 			return (
 				<>

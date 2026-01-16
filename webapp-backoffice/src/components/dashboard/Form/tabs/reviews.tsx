@@ -28,10 +28,20 @@ import Tag from '@codegouvfr/react-dsfr/Tag';
 import { AnswerIntention, Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
+import ExportHistory from '../../Reviews/ExportHistory';
+import { useSession } from 'next-auth/react';
+import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
+import {
+	getExportFiltersLabel,
+	getExportPeriodLabel,
+	parseExportParams
+} from '@/src/utils/export';
+import Link from 'next/link';
+import { LinearProgress } from '@mui/material';
 
 interface Props {
 	form: FormWithElements;
@@ -64,6 +74,8 @@ const ReviewsTab = (props: Props) => {
 		buttons
 	} = props;
 	const router = useRouter();
+	const { data: session } = useSession({ required: true });
+
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
@@ -73,6 +85,7 @@ const ReviewsTab = (props: Props) => {
 	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
+	const [currentExportId, setCurrentExportId] = useState<number>();
 
 	const filter_modal = createModal({
 		id: 'filter-modal',
@@ -158,6 +171,112 @@ const ReviewsTab = (props: Props) => {
 			}
 		);
 
+	const {
+		data: exports,
+		isLoading: isLoadingExports,
+		refetch: refetchExports
+	} = trpc.export.getByUser.useQuery(
+		{
+			user_id: parseInt(session?.user?.id as string),
+			product_id: form.product_id,
+			form_id: form.id
+		},
+		{
+			enabled: nbReviews > 0 && !isLoading,
+			initialData: {
+				data: []
+			}
+		}
+	);
+
+	const hasExportsInProgress =
+		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
+			.length > 0;
+
+	const { cx, classes } = useStyles();
+
+	const currentExport =
+		exports?.data.find(e => e.status === 'processing' || e.status === 'idle') ||
+		exports?.data.find(e => e.id === currentExportId);
+
+	const currentExportAlert = useMemo((): {
+		severity: AlertProps.Severity;
+		title: NonNullable<ReactNode>;
+		filters?: string[];
+		isClosable?: boolean;
+	} => {
+		if (!currentExport) {
+			return {
+				severity: 'info',
+				title: ''
+			};
+		}
+
+		const parsedParams = parseExportParams(currentExport.params);
+		const periodLabel = getExportPeriodLabel({
+			...parsedParams,
+			startDate: parsedParams.startDate,
+			endDate: parsedParams.endDate
+		});
+		const filters = getExportFiltersLabel(parsedParams, true, buttons);
+		const finalFilters = currentExport.params
+			? [`Période : ${periodLabel}`, ...filters]
+			: undefined;
+
+		switch (currentExport.status) {
+			case 'idle':
+				return {
+					severity: 'info',
+					title: (
+						<div className={cx(classes.titleContainer)}>
+							Préparation de l'export
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								&nbsp;—&nbsp;
+							</span>
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								Cela peut prendre quelques minutes
+							</span>
+							<Loader size="sm" />
+						</div>
+					),
+					filters: finalFilters
+				};
+			case 'processing':
+				return {
+					severity: 'info',
+					title: (
+						<div className={cx(classes.titleContainer)}>
+							Export en cours
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								&nbsp;—&nbsp;
+							</span>
+							<span
+								className={fr.cx('fr-text--md', 'fr-text--regular', 'fr-m-0')}
+							>
+								Cela peut prendre quelques minutes
+							</span>
+							<Loader size="sm" />
+						</div>
+					),
+					filters: finalFilters
+				};
+			case 'done': {
+				return {
+					severity: 'success',
+					title: 'Export finalisé',
+					filters: finalFilters,
+					isClosable: true
+				};
+			}
+		}
+	}, [currentExport]);
+
 	const { data: reviewLog } = reviewLogResults;
 
 	const {
@@ -190,8 +309,6 @@ const ReviewsTab = (props: Props) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
 		return regex.test(date);
 	};
-
-	const { cx, classes } = useStyles();
 
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
@@ -296,16 +413,17 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} complété`;
+				return `${
+					FILTER_LABELS.find(filter => filter.value === key)?.label
+				} complété`;
 			case 'iconbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} : ${displayIntention(
-					(value ?? 'neutral') as AnswerIntention
-				)}`;
+				return `${
+					FILTER_LABELS.find(filter => filter.value === key)?.label
+				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
 			case 'select':
-				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
-					?.title}`;
+				return `Source : ${
+					buttons.find(b => b.id === parseInt(value as string))?.title
+				}`;
 			default:
 				return '';
 		}
@@ -361,6 +479,29 @@ const ReviewsTab = (props: Props) => {
 			setCurrentPage(1);
 		}
 	}, [filters]);
+
+	useEffect(() => {
+		if (!hasExportsInProgress) return;
+
+		const interval = setInterval(() => {
+			if (hasExportsInProgress) {
+				refetchExports();
+			}
+		}, 2000);
+
+		return () => clearInterval(interval);
+	}, [hasExportsInProgress, refetchExports]);
+
+	useEffect(() => {
+		if (hasExportsInProgress && !currentExportId) {
+			const inProgressExport = exports?.data.find(
+				e => e.status === 'processing' || e.status === 'idle'
+			);
+			if (inProgressExport) {
+				setCurrentExportId(inProgressExport.id);
+			}
+		}
+	}, [exports]);
 
 	const handleSendInvitation = () => {
 		router.push({
@@ -443,7 +584,7 @@ const ReviewsTab = (props: Props) => {
 				submitFilters={handleSubmitfilters}
 				form_id={form.id}
 				setButtonId={setButtonId}
-			></ReviewFiltersModal>
+			/>
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
@@ -460,10 +601,69 @@ const ReviewsTab = (props: Props) => {
 							filters={filters.productReviews.filters}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
-						></ExportReviews>
+							onExportCreated={() => {
+								setCurrentExportId(undefined);
+								refetchExports();
+							}}
+							isDisabled={hasExportsInProgress || isLoading || isLoadingExports}
+						/>
+						<ExportHistory exports={exports.data} buttons={buttons} />
 					</div>
 				)}
 			</div>
+
+			{currentExport && (
+				<Alert
+					severity={currentExportAlert.severity}
+					title={currentExportAlert.title}
+					description={
+						<div
+							className={fr.cx(
+								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
+								// !currentExportAlert.filters &&
+								// 	!currentExport.link &&
+								// 	'fr-hidden'
+							)}
+						>
+							{currentExport.link && (
+								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
+									Téléchargez l'export :{' '}
+									<Link
+										href={currentExport.link}
+										className={fr.cx('fr-link')}
+										rel="noopener noreferrer"
+									>
+										Export du {currentExport.created_at.toLocaleDateString()}{' '}
+										<i
+											className={fr.cx('fr-icon-download-line', 'fr-icon--sm')}
+											aria-hidden="true"
+										/>
+									</Link>
+								</p>
+							)}
+							{currentExportAlert.filters && (
+								<>
+									<strong>Filtres sélectionnés:</strong>
+									<ul>
+										{currentExportAlert.filters.map((filter, index) => (
+											<li key={index}>{filter}</li>
+										))}
+									</ul>
+								</>
+							)}
+							{/* {currentExport.status !== 'done' && (
+								<LinearProgress
+									value={currentExport.progress}
+									variant="determinate"
+									className={fr.cx('fr-my-8v', 'fr-p-1v')}
+								/>
+							)} */}
+						</div>
+					}
+					closable={currentExportAlert.isClosable}
+				/>
+			)}
+
 			{isLoading ? (
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
@@ -686,8 +886,6 @@ const ReviewsTab = (props: Props) => {
 	);
 };
 
-export default ReviewsTab;
-
 const useStyles = tss.withName(ReviewsTab.name).create({
 	boldText: {
 		fontWeight: 'bold'
@@ -744,6 +942,7 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		width: '100%',
 		[fr.breakpoints.up('lg')]: {
 			display: 'flex',
+			gap: fr.spacing('2v'),
 			justifyContent: 'flex-end',
 			'.fr-btn': {
 				justifySelf: 'flex-end'
@@ -762,5 +961,13 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		'p.fr-error-text': {
 			position: 'absolute'
 		}
+	},
+	titleContainer: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: fr.spacing('2v')
 	}
 });
+
+export default ReviewsTab;

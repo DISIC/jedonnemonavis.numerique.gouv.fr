@@ -31,7 +31,7 @@ const ReviewFiltersModal = (props: Props) => {
 		page: 1,
 		numberPerPage: 1000,
 		form_id: form_id,
-		isTest: true
+		isTest: false
 	});
 
 	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
