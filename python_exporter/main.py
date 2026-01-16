@@ -153,7 +153,7 @@ def generate_download_link(bucket, object_name, expiration=2592000):
         return None
 
 def sanitize_filename(filename):
-    return re.sub(r'[^\w\-]', '_', filename)
+    return re.sub(r'[^\w\-]', '_', str(filename))
 
 def send_email(to_email, download_link, product_name, switch_to_zip=False):
     msg = MIMEMultipart('alternative')
@@ -536,7 +536,7 @@ def process_exports(conn):
 
     start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     update_status_query = """
-    UPDATE public."Export" SET status = 'processing'::"StatusExport", "startDate" = %s WHERE id = %s
+    UPDATE public."Export" SET status = 'processing'::"StatusExport", "startDate" = %s, progress = 0 WHERE id = %s
     """
     execute_query(conn, update_status_query, (start_date, export_id))
 
@@ -677,6 +677,16 @@ def process_exports(conn):
                 retrieved_reviews += len(results_reviews)
                 print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
+                if total_reviews > 0:
+                    progress_percent = min(100, int((retrieved_reviews * 100) / total_reviews))
+                    progress_update_query = """
+                    UPDATE public."Export" SET progress = %s WHERE id = %s
+                    """
+                    try:
+                        execute_query(conn, progress_update_query, (progress_percent, export_id))
+                    except ConnectionError as conn_error:
+                        print(f"Erreur de connexion lors de la mise à jour du progrès: {conn_error}")
+
                 offset += PAGE_SIZE
 
     desired_order = [
@@ -746,7 +756,7 @@ def process_exports(conn):
                 # Toujours mettre à jour le statut même si l'email a échoué
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """
-                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s WHERE id = %s
+                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s, progress = 100 WHERE id = %s
                 """
                 try:
                     execute_query(conn, update_query, (end_date, download_link, export_id))

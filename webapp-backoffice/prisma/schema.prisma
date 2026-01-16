@@ -456,6 +456,7 @@ model Export {
   startDate  DateTime?
   endDate    DateTime?
   link       String?
+  progress   Int          @default(0)
 }
 
 model LimiterReporting {

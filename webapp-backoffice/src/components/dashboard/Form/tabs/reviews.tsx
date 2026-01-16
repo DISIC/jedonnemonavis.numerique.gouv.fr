@@ -41,6 +41,7 @@ import {
 	parseExportParams
 } from '@/src/utils/export';
 import Link from 'next/link';
+import { LinearProgress } from '@mui/material';
 
 interface Props {
 	form: FormWithElements;
@@ -618,10 +619,10 @@ const ReviewsTab = (props: Props) => {
 					description={
 						<div
 							className={fr.cx(
-								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v',
-								!currentExportAlert.filters &&
-									!currentExport.link &&
-									'fr-hidden'
+								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
+								// !currentExportAlert.filters &&
+								// 	!currentExport.link &&
+								// 	'fr-hidden'
 							)}
 						>
 							{currentExport.link && (
@@ -650,6 +651,13 @@ const ReviewsTab = (props: Props) => {
 									</ul>
 								</>
 							)}
+							{/* {currentExport.status !== 'done' && (
+								<LinearProgress
+									value={currentExport.progress}
+									variant="determinate"
+									className={fr.cx('fr-my-8v', 'fr-p-1v')}
+								/>
+							)} */}
 						</div>
 					}
 					closable={currentExportAlert.isClosable}
