@@ -287,6 +287,16 @@ def fetch_query_with_filters(conn, query, params):
             print(f"Erreur récupération résultats avec filtres: {e}")
             return []
 
+def update_export_progress(conn, export_id, progress):
+    """Met à jour la progression de l'export sans faire échouer le flux"""
+    progress_update_query = """
+    UPDATE public."Export" SET progress = %s WHERE id = %s
+    """
+    try:
+        execute_query(conn, progress_update_query, (progress, export_id))
+    except ConnectionError as conn_error:
+        print(f"Erreur de connexion lors de la mise à jour du progrès: {conn_error}")
+
 def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
@@ -678,14 +688,9 @@ def process_exports(conn):
                 print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
                 if total_reviews > 0:
-                    progress_percent = min(100, int((retrieved_reviews * 100) / total_reviews))
-                    progress_update_query = """
-                    UPDATE public."Export" SET progress = %s WHERE id = %s
-                    """
-                    try:
-                        execute_query(conn, progress_update_query, (progress_percent, export_id))
-                    except ConnectionError as conn_error:
-                        print(f"Erreur de connexion lors de la mise à jour du progrès: {conn_error}")
+                    # Plafonner la progression à 95% pendant la phase de récupération
+                    progress_percent = min(95, int((retrieved_reviews * 95) / total_reviews))
+                    update_export_progress(conn, export_id, progress_percent)
 
                 offset += PAGE_SIZE
 
@@ -716,9 +721,14 @@ def process_exports(conn):
     
     upload_buffer = None
     try:
+        # Indiquer la fin de la phase de récupération sans atteindre 100%
+        update_export_progress(conn, export_id, 95)
         print(f"Début génération fichier {export_format}...")
         upload_buffer, file_name = main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, name_product, current_date)
         print(f"Fichier {file_name} généré avec succès")
+
+        # Progression après génération du fichier
+        update_export_progress(conn, export_id, 98)
         
         log_memory_usage("AFTER_FILE_GENERATION")
         
@@ -732,6 +742,9 @@ def process_exports(conn):
         # Upload to S3
         if upload_to_s3(upload_buffer, env_vars['BUCKET_NAME'], file_name):
             print(f"Fichier {file_name} uploadé avec succès sur le bucket {env_vars['BUCKET_NAME']}.")
+
+            # Progression après upload
+            update_export_progress(conn, export_id, 99)
             
             # Libérer immédiatement le buffer après upload pour libérer la mémoire
             if isinstance(upload_buffer, BytesIO):
