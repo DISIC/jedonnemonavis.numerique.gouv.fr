@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
+import { PasswordMessages } from '@/src/types/custom';
 
 type FormCredentials = {
 	email: string;
@@ -127,6 +128,24 @@ export const LoginForm = () => {
 		checkEmailUser.mutate({
 			email: credentials.email
 		});
+	};
+
+	const getPasswordMessages = (): PasswordMessages => {
+		if (passwordIncorrect) {
+			return [
+				{
+					message: <span role="alert">Mot de passe incorrect.</span>,
+					severity: 'error'
+				}
+			];
+		}
+		// Invisible placeholder message to keep container mounted
+		return [
+			{
+				message: <span aria-hidden="true"></span>,
+				severity: 'info'
+			}
+		];
 	};
 
 	const login = (): void => {
@@ -263,7 +282,7 @@ export const LoginForm = () => {
 				{showPassword && (
 					<PasswordInput
 						label="Mot de passe"
-						className={cx(classes.password)}
+						className={cx(classes.password, fr.cx('fr-card--no-icon'))}
 						nativeInputProps={{
 							'aria-required': true,
 							ref: passwordRef,
@@ -271,21 +290,11 @@ export const LoginForm = () => {
 								setCredentials({ ...credentials, password: e.target.value });
 								setPasswordIncorrect(false);
 							},
-							autoComplete: 'current-password'
+							autoComplete: 'current-password',
+							name: 'password'
 						}}
-						messages={
-							passwordIncorrect
-								? [
-										{
-											message: (
-												<span role="alert">Mot de passe incorrect.</span>
-											),
-											severity: 'error'
-										}
-									]
-								: []
-						}
-						messagesHint=""
+						messages={getPasswordMessages()}
+						messagesHint={''}
 					/>
 				)}
 				{showPassword && (
@@ -343,7 +352,10 @@ const useStyles = tss
 			pointerEvents: isLoading ? 'none' : 'auto'
 		},
 		password: {
-			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0
+			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0,
+			'& ::before': {
+				display: passwordIncorrect ? 'block' : 'none'
+			}
 		},
 		actionModal: {
 			display: 'flex',
