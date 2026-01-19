@@ -75,6 +75,7 @@ const ReviewsTab = (props: Props) => {
 	} = props;
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
+	const { cx, classes } = useStyles();
 
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
@@ -175,9 +176,8 @@ const ReviewsTab = (props: Props) => {
 		data: exports,
 		isLoading: isLoadingExports,
 		refetch: refetchExports
-	} = trpc.export.getByUser.useQuery(
+	} = trpc.export.getList.useQuery(
 		{
-			user_id: parseInt(session?.user?.id as string),
 			product_id: form.product_id,
 			form_id: form.id
 		},
@@ -189,15 +189,18 @@ const ReviewsTab = (props: Props) => {
 		}
 	);
 
-	const hasExportsInProgress =
+	const formHasExportsInProgress =
 		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
 			.length > 0;
 
-	const { cx, classes } = useStyles();
+	const userExportInProgress = exports?.data.find(
+		e =>
+			e.user_id === parseInt(session?.user?.id as string) &&
+			(e.status === 'processing' || e.status === 'idle')
+	);
 
 	const currentExport =
-		exports?.data.find(e => e.status === 'processing' || e.status === 'idle') ||
-		exports?.data.find(e => e.id === currentExportId);
+		userExportInProgress || exports?.data.find(e => e.id === currentExportId);
 
 	const currentExportAlert = useMemo((): {
 		severity: AlertProps.Severity;
@@ -481,25 +484,20 @@ const ReviewsTab = (props: Props) => {
 	}, [filters]);
 
 	useEffect(() => {
-		if (!hasExportsInProgress) return;
+		if (!formHasExportsInProgress) return;
 
 		const interval = setInterval(() => {
-			if (hasExportsInProgress) {
+			if (formHasExportsInProgress) {
 				refetchExports();
 			}
 		}, 2000);
 
 		return () => clearInterval(interval);
-	}, [hasExportsInProgress, refetchExports]);
+	}, [formHasExportsInProgress, refetchExports]);
 
 	useEffect(() => {
-		if (hasExportsInProgress && !currentExportId) {
-			const inProgressExport = exports?.data.find(
-				e => e.status === 'processing' || e.status === 'idle'
-			);
-			if (inProgressExport) {
-				setCurrentExportId(inProgressExport.id);
-			}
+		if (formHasExportsInProgress && userExportInProgress && !currentExportId) {
+			setCurrentExportId(userExportInProgress.id);
 		}
 	}, [exports]);
 
@@ -605,7 +603,9 @@ const ReviewsTab = (props: Props) => {
 								setCurrentExportId(undefined);
 								refetchExports();
 							}}
-							isDisabled={hasExportsInProgress || isLoading || isLoadingExports}
+							isDisabled={
+								!!userExportInProgress || isLoading || isLoadingExports
+							}
 						/>
 						<ExportHistory exports={exports.data} buttons={buttons} />
 					</div>
@@ -620,9 +620,6 @@ const ReviewsTab = (props: Props) => {
 						<div
 							className={fr.cx(
 								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
-								// !currentExportAlert.filters &&
-								// 	!currentExport.link &&
-								// 	'fr-hidden'
 							)}
 						>
 							{currentExport.link && (
@@ -651,13 +648,28 @@ const ReviewsTab = (props: Props) => {
 									</ul>
 								</>
 							)}
-							{/* {currentExport.status !== 'done' && (
-								<LinearProgress
-									value={currentExport.progress}
-									variant="determinate"
-									className={fr.cx('fr-my-8v', 'fr-p-1v')}
-								/>
-							)} */}
+							{currentExport.status !== 'done' && (
+								<div className={cx(classes.progressBarContainer)}>
+									<span
+										className={cx(classes.progressBarLabel)}
+										style={{
+											color: currentExport.progress < 5 ? 'black' : undefined
+										}}
+									>
+										{currentExport.progress}%
+									</span>
+									<LinearProgress
+										value={currentExport.progress}
+										variant="determinate"
+										className={fr.cx('fr-mt-3v', 'fr-mb-2v', 'fr-p-3v')}
+										sx={{
+											color: fr.colors.decisions.text.title.blueFrance.default,
+											backgroundColor:
+												fr.colors.decisions.background.default.grey.active
+										}}
+									/>
+								</div>
+							)}
 						</div>
 					}
 					closable={currentExportAlert.isClosable}
@@ -967,6 +979,18 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		flexWrap: 'wrap',
 		alignItems: 'center',
 		gap: fr.spacing('2v')
+	},
+	progressBarContainer: {
+		position: 'relative'
+	},
+	progressBarLabel: {
+		position: 'absolute',
+		top: '50%',
+		left: 25,
+		transform: 'translate(-50%, -50%)',
+		fontWeight: 'bold',
+		color: 'white',
+		zIndex: 1
 	}
 });
 
