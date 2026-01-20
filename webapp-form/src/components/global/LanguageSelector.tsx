@@ -46,19 +46,17 @@ export const LanguageSelector = memo((props: Props) => {
         <ul className={fr.cx("fr-menu__list")}>
           {languages.map((lang_i) => (
             <li key={lang_i}>
-              <a
+              <button
+                type="button"
+                role="menuitem"
                 className={fr.cx("fr-translate__language", "fr-nav__link")}
-                href="#"
                 lang={lang_i}
                 aria-current={lang_i === lang ? "true" : undefined}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setLang(lang_i);
-                }}
+                onClick={() => setLang(lang_i)}
               >
                 <span className={classes.langShort}>{lang_i}</span>
                 &nbsp;-&nbsp;{fullNameByLang[lang_i]}
-              </a>
+              </button>
             </li>
           ))}
         </ul>
@@ -76,6 +74,14 @@ const useStyles = tss.withName({ LanguageSelector }).create({
     ul: {
       display: "flex",
       flexWrap: "wrap",
+    },
+    button: {
+      background: "none",
+      border: 0,
+      padding: 0,
+      cursor: "pointer",
+      font: "inherit",
+      textAlign: "left",
     },
   },
   langShort: {

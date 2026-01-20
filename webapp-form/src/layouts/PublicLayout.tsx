@@ -181,6 +181,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 						<a
 							href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
 							target="_blank"
+							rel="noopener noreferrer"
 						>
 							code source
 						</a>{' '}

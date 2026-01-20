@@ -155,7 +155,11 @@ export const Field = (props: Props) => {
 							{templateField.downLabel}
 						</p>
 					)}
-					<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
+					<div
+						className={cx(classes.textCount, fr.cx('fr-hint-text'))}
+						aria-live="polite"
+						aria-atomic="true"
+					>
 						{opinion[field.name]?.length || 0} / 15000
 					</div>
 				</div>

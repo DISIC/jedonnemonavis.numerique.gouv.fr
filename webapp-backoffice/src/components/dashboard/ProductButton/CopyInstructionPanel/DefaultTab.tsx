@@ -16,9 +16,9 @@ const DefaultTab = ({
 	const { cx, classes } = useStyles();
 	const [displayToastTheme, setDisplayToastTheme] = useState<string>();
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank'\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />\n\n</a>`;
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />\n\n</a>`;
 
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank'\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />\n\n</a>`;
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />\n\n</a>`;
 
 	return (
 		<div>

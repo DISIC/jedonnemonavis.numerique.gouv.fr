@@ -533,8 +533,16 @@ const DashBoard = () => {
 				isLoadingEntities ||
 				isLoadingFavorites ||
 				isRefetchingProducts ? (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+					<div
+						className={fr.cx('fr-py-20v', 'fr-mt-4w')}
+						role="status"
+						aria-live="polite"
+						aria-busy="true"
+					>
 						<Loader />
+						<span className={fr.cx('fr-sr-only')}>
+							Chargement des données...
+						</span>
 					</div>
 				) : (
 					<div>
