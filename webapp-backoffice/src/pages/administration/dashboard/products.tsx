@@ -1,4 +1,3 @@
-import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EssentialProductModal from '@/src/components/dashboard/Product/EssentialProductModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
@@ -53,7 +52,6 @@ const DashBoard = () => {
 		isLoading: isLoadingSettings
 	} = useUserSettings();
 	const router = useRouter();
-	const onboardingDone = router.query.onboardingDone as string | undefined;
 	const { createdProduct, createdForm, reset: resetContext } = useOnboarding();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
@@ -70,7 +68,7 @@ const DashBoard = () => {
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
 
 	const isOnboardingDone = useMemo(() => {
-		return Boolean(onboardingDone);
+		return !!(router.query.onboardingDone as string | undefined);
 	}, []);
 
 	const { data: session } = useSession({ required: true });
@@ -242,7 +240,7 @@ const DashBoard = () => {
 	}
 
 	const displayFilters =
-		nbPages > 1 ||
+		countTotalUserScope > 0 ||
 		search !== '' ||
 		filters.filterOnlyFavorites ||
 		filters.filterOnlyArchived ||
@@ -324,7 +322,7 @@ const DashBoard = () => {
 					<div role="alert">
 						<Alert
 							className={fr.cx('fr-col-12', 'fr-mb-8v')}
-							title="Votre service et votre formulaire ont été créé avec succès !"
+							title="Votre service et votre formulaire ont été créés avec succès !"
 							description={
 								<>
 									Pensez à copier le lien d’intégration sur votre site pour
@@ -348,7 +346,7 @@ const DashBoard = () => {
 					</div>
 				)}
 
-				{(displayFilters || !!countArchivedUserScope) && (
+				{displayFilters && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
@@ -566,7 +564,7 @@ const DashBoard = () => {
 									search === '' &&
 									!filters.filterEntity.length
 										? 'Aucun service dans vos favoris'
-										: undefined
+										: 'Aucun service actif trouvé'
 								}
 							/>
 						</div>

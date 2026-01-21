@@ -122,8 +122,8 @@ const NewProduct = () => {
 				isEditingStep
 					? 'Modifier un service numérique'
 					: shouldShowStepper
-					? 'Étapier parcours de création'
-					: 'Ajouter un service numérique'
+						? 'Étapier parcours de création'
+						: 'Ajouter un service numérique'
 			}
 			onConfirm={handleSubmit(onLocalSubmit)}
 			isStepperLayout={shouldShowStepper}
@@ -178,7 +178,7 @@ const NewProduct = () => {
 										selectedEntityValue
 											? entityOptions.find(
 													option => option.value === selectedEntityValue
-											  )
+												)
 											: { label: '', value: undefined }
 									}
 									renderInput={params => (
@@ -308,8 +308,8 @@ const useStyles = tss.withName(NewProduct.name).create(() => ({
 		width: '100%'
 	},
 	popperOverride: {
-		'.MuiPopper-root': {
-			transform: 'translate3d(0px, 100px, 0px)!important'
+		'.base-Popper-root': {
+			top: '-35px !important'
 		}
 	},
 	fieldset: {

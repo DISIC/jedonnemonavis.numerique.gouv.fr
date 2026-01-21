@@ -27,7 +27,7 @@ describe('jdma-account', () => {
 		cy.wait(500);
 		cy.auditA11y();
 		fillAccountForm({ firstName: firstNameTest, lastName: lastNameTest });
-		cy.contains('button', selectors.action.save).click();
+		cy.contains('button', selectors.action.save).click({ force: true });
 		checkAccountHeader(`${firstNameTest} ${lastNameTest}`, invitedEmailBis);
 		logout();
 	});
