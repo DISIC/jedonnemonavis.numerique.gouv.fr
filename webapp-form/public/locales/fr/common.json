@@ -1,292 +1,292 @@
 {
-  "first_block": {
-    "title": "Je donne mon avis",
-    "subtitle_part_1": "Aidez-nous à améliorer le service",
-    "subtitle_part_2": "en répondant à quelques questions. Vos réponses sont anonymes.",
-    "product": "Démarche",
-    "validate": "Envoyer mon avis"
-  },
-  "second_block": {
-    "title": "Merci !",
-    "subtitle": "Pouvez-vous nous en dire plus ?",
-    "validate": "Valider mon avis"
-  },
-  "success_block": {
-    "title": "Merci beaucoup !",
-    "thanks": "Merci. Votre avis nous permettra d’améliorer la qualité du service. ",
-    "question": "Des questions pour le service ",
-    "support": "Contactez le support.",
-    "further": "Vous souhaitez aller plus loin ?",
-    "share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
-    "link": "Partager mon expérience publiquement",
-    "alert": "Merci. Votre avis a bien été transmis au service qui s'occupe de cette démarche."
-  },
-  "smileys": {
-    "good": "Très bien",
-    "medium": "Moyen",
-    "bad": "Pas bien"
-  },
-  "steps": {
-    "A_1": {
-      "name": "Clarté",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "A_2": {
-      "name": "Aides",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "A_3": {
-      "name": "Commentaire",
-      "button": "Terminer",
-      "buttonBack": "Précédent"
-    },
-    "B_1": {
-      "name": "Expérience générale",
-      "button": "Envoyer mon avis"
-    },
-    "B_2": {
-      "name": "Compréhension",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "B_3": {
-      "name": "Aides",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "B_4": {
-      "name": "Joignabilité",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "B_5": {
-      "name": "Efficacité",
-      "button": "Continuer",
-      "buttonBack": "Précédent"
-    },
-    "B_6": {
-      "name": "Commentaires supplémentaires",
-      "button": "Terminer",
-      "buttonBack": "Précédent"
-    }
-  },
-  "fields": {
-    "satisfaction": {
-      "label": "De façon générale, comment ça s’est passé ?",
-      "hint": "Ce champ est obligatoire."
-    },
-    "comprehension": {
-      "label": "Qu'avez-vous pensé des informations et des instructions fournies ?",
-      "hint": "Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
-      "hintLeft": "Pas clair du tout",
-      "hintRight": "Très clair",
-      "options": [
-        {
-          "label": "1"
-        },
-        {
-          "label": "2"
-        },
-        {
-          "label": "3"
-        },
-        {
-          "label": "4"
-        },
-        {
-          "label": "5"
-        }
-      ]
-    },
-    "contact_tried": {
-      "label": "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
-      "hint": "Plusieurs choix possibles",
-      "options": [
-        {
-          "label": "Au guichet avec l’administration"
-        },
-        {
-          "label": "Par téléphone avec l’administration"
-        },
-        {
-          "label": "Par e-mail avec l’administration"
-        },
-        {
-          "label": "Par chat avec l’administration"
-        },
-        {
-          "label": "Une personne proche"
-        },
-        {
-          "label": "Une association"
-        },
-        {
-          "label": "Des sites internet"
-        },
-        {
-          "label": "Autres, précisez"
-        },
-        {
-          "label": "Je n'ai pas eu besoin d'aide"
-        }
-      ]
-    },
-    "contact_reached": {
-      "label": "Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
-      "options": [
-        {
-          "label": "Oui"
-        },
-        {
-          "label": "Non"
-        }
-      ]
-    },
-    "contact_satisfaction": {
-      "label": "Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
-      "hint": "Sur une échelle de 1 à 5, 1 est très mauvaise et 5 est excellente.",
-      "options": [
-        {
-          "label": "Très mauvaise"
-        },
-        {
-          "label": "Mauvaise"
-        },
-        {
-          "label": "Ni bonne, ni mauvaise"
-        },
-        {
-          "label": "Bonne"
-        },
-        {
-          "label": "Excellente"
-        }
-      ]
-    },
-    "difficulties": {
-      "label": "Avez-vous rencontré des difficultés ?",
-      "options": [
-        {
-          "label": "Oui"
-        },
-        {
-          "label": "Non"
-        }
-      ]
-    },
-    "difficulties_details": {
-      "label": "Quelles ont été ces difficultés ?",
-      "options": [
-        {
-          "label": "J’ai manqué d’information avant de commencer la démarche"
-        },
-        {
-          "label": "La démarche n’a pas fonctionné"
-        },
-        {
-          "label": "Le site ne s’affichait pas bien sur mobile"
-        },
-        {
-          "label": "J’ai eu des difficultés à joindre des documents"
-        },
-        {
-          "label": "Il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)"
-        },
-        {
-          "label": "Autre"
-        }
-      ]
-    },
-    "difficulties_details_verbatim": {
-      "label": "Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?",
-      "hint": "Maximum 250 caractères."
-    },
-    "contact": {
-      "label": "Avez-vous tenté de contacter le service d'aide en charge de la démarche ?",
-      "options": [
-        {
-          "label": "Non"
-        },
-        {
-          "label": "Oui"
-        },
-        {
-          "label": "Oui, mais je n'ai pas trouvé comment les contacter"
-        }
-      ]
-    },
-    "contact_channels": {
-      "label": "Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?",
-      "options": [
-        {
-          "label": "Téléphone"
-        },
-        {
-          "label": "Email ou messagerie"
-        },
-        {
-          "label": "Agence ou guichet"
-        },
-        {
-          "label": "Autre"
-        }
-      ]
-    },
-    "contact_tried_verbatim": {
-      "label": "Quels autres types d'aide avez-vous utilisés ?",
-      "hint": "Maximum 250 caractères."
-    },
-    "contact_details": {
-      "label": "Avez-vous réussi à les joindre ?",
-      "options": [
-        {
-          "label": "Je n’ai pas trouvé comment les contacter"
-        },
-        {
-          "label": "Je les ai contacté mais je n’ai pas réussi à les joindre"
-        },
-        {
-          "label": "Je les ai contacté et ils m’ont répondu"
-        }
-      ]
-    },
-    "help": {
-      "label": "Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?",
-      "options": [
-        {
-          "label": "Oui"
-        },
-        {
-          "label": "Non"
-        }
-      ]
-    },
-    "help_details": {
-      "label": "De quelle aide avez vous eu besoin ?",
-      "options": [
-        {
-          "label": "J'ai fait une recherche sur internet (site, forum)"
-        },
-        {
-          "label": "J'ai demandé de l’aide à un proche (famille, ami)"
-        },
-        {
-          "label": "J'ai demandé de l’aide à une association"
-        },
-        {
-          "label": "Autre"
-        }
-      ]
-    },
-    "help_details_verbatim": {
-      "label": "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?",
-      "hint": "Maximum 250 caractères."
-    },
-    "verbatim": {
-      "label": "Souhaitez-vous nous en dire plus ?",
-      "hint": "Ne partagez pas d’information personnelle."
-    }
-  }
+	"first_block": {
+		"title": "Je donne mon avis",
+		"subtitle_part_1": "Aidez-nous à améliorer le service",
+		"subtitle_part_2": "en répondant à quelques questions. Vos réponses sont anonymes.",
+		"product": "Démarche",
+		"validate": "Envoyer mon avis"
+	},
+	"second_block": {
+		"title": "Merci !",
+		"subtitle": "Pouvez-vous nous en dire plus ?",
+		"validate": "Valider mon avis"
+	},
+	"success_block": {
+		"title": "Merci beaucoup !",
+		"thanks": "Merci. Votre avis nous permettra d’améliorer la qualité du service. ",
+		"question": "Des questions pour le service ",
+		"support": "Contactez le support.",
+		"further": "Vous souhaitez aller plus loin ?",
+		"share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
+		"link": "Partager mon expérience publiquement",
+		"alert": "Merci. Votre avis a bien été transmis au service qui s'occupe de cette démarche."
+	},
+	"smileys": {
+		"good": "Très bien",
+		"medium": "Moyen",
+		"bad": "Pas bien"
+	},
+	"steps": {
+		"A_1": {
+			"name": "Clarté",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"A_2": {
+			"name": "Aides",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"A_3": {
+			"name": "Commentaire",
+			"button": "Terminer",
+			"buttonBack": "Précédent"
+		},
+		"B_1": {
+			"name": "Expérience générale",
+			"button": "Envoyer mon avis"
+		},
+		"B_2": {
+			"name": "Compréhension",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"B_3": {
+			"name": "Aides",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"B_4": {
+			"name": "Joignabilité",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"B_5": {
+			"name": "Efficacité",
+			"button": "Continuer",
+			"buttonBack": "Précédent"
+		},
+		"B_6": {
+			"name": "Commentaires supplémentaires",
+			"button": "Terminer",
+			"buttonBack": "Précédent"
+		}
+	},
+	"fields": {
+		"satisfaction": {
+			"label": "De façon générale, comment ça s’est passé ?",
+			"hint": "Ce champ est obligatoire."
+		},
+		"comprehension": {
+			"label": "Qu'avez-vous pensé des informations et des instructions fournies ?",
+			"hint": "Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
+			"hintLeft": "Pas clair du tout",
+			"hintRight": "Très clair",
+			"options": [
+				{
+					"label": "1"
+				},
+				{
+					"label": "2"
+				},
+				{
+					"label": "3"
+				},
+				{
+					"label": "4"
+				},
+				{
+					"label": "5"
+				}
+			]
+		},
+		"contact_tried": {
+			"label": "Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?",
+			"hint": "Plusieurs choix possibles",
+			"options": [
+				{
+					"label": "Au guichet avec l’administration"
+				},
+				{
+					"label": "Par téléphone avec l’administration"
+				},
+				{
+					"label": "Par e-mail avec l’administration"
+				},
+				{
+					"label": "Par chat avec l’administration"
+				},
+				{
+					"label": "Une personne proche"
+				},
+				{
+					"label": "Une association"
+				},
+				{
+					"label": "Des sites internet"
+				},
+				{
+					"label": "Autres, précisez"
+				},
+				{
+					"label": "Je n'ai pas eu besoin d'aide"
+				}
+			]
+		},
+		"contact_reached": {
+			"label": "Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
+			"options": [
+				{
+					"label": "Oui"
+				},
+				{
+					"label": "Non"
+				}
+			]
+		},
+		"contact_satisfaction": {
+			"label": "Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
+			"hint": "Sur une échelle de 1 à 5, 1 est très mauvaise et 5 est excellente.",
+			"options": [
+				{
+					"label": "Très mauvaise"
+				},
+				{
+					"label": "Mauvaise"
+				},
+				{
+					"label": "Ni bonne, ni mauvaise"
+				},
+				{
+					"label": "Bonne"
+				},
+				{
+					"label": "Excellente"
+				}
+			]
+		},
+		"difficulties": {
+			"label": "Avez-vous rencontré des difficultés ?",
+			"options": [
+				{
+					"label": "Oui"
+				},
+				{
+					"label": "Non"
+				}
+			]
+		},
+		"difficulties_details": {
+			"label": "Quelles ont été ces difficultés ?",
+			"options": [
+				{
+					"label": "J’ai manqué d’information avant de commencer la démarche"
+				},
+				{
+					"label": "La démarche n’a pas fonctionné"
+				},
+				{
+					"label": "Le site ne s’affichait pas bien sur mobile"
+				},
+				{
+					"label": "J’ai eu des difficultés à joindre des documents"
+				},
+				{
+					"label": "Il manquait des informations sur les suites de ma demande ou de ma démarche (délai, etc.)"
+				},
+				{
+					"label": "Autre"
+				}
+			]
+		},
+		"difficulties_details_verbatim": {
+			"label": "Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?",
+			"hint": "Maximum 250 caractères."
+		},
+		"contact": {
+			"label": "Avez-vous tenté de contacter le service d'aide en charge de la démarche ?",
+			"options": [
+				{
+					"label": "Non"
+				},
+				{
+					"label": "Oui"
+				},
+				{
+					"label": "Oui, mais je n'ai pas trouvé comment les contacter"
+				}
+			]
+		},
+		"contact_channels": {
+			"label": "Par quel(s) moyen(s) avez-vous tenté de contacter le service de la démarche ?",
+			"options": [
+				{
+					"label": "Téléphone"
+				},
+				{
+					"label": "Email ou messagerie"
+				},
+				{
+					"label": "Agence ou guichet"
+				},
+				{
+					"label": "Autre"
+				}
+			]
+		},
+		"contact_tried_verbatim": {
+			"label": "Quels autres types d'aide avez-vous utilisés ?",
+			"hint": "Maximum 250 caractères."
+		},
+		"contact_details": {
+			"label": "Avez-vous réussi à les joindre ?",
+			"options": [
+				{
+					"label": "Je n’ai pas trouvé comment les contacter"
+				},
+				{
+					"label": "Je les ai contacté mais je n’ai pas réussi à les joindre"
+				},
+				{
+					"label": "Je les ai contacté et ils m’ont répondu"
+				}
+			]
+		},
+		"help": {
+			"label": "Avez-vous eu besoin d'une aide supplémentaire pour cette démarche ?",
+			"options": [
+				{
+					"label": "Oui"
+				},
+				{
+					"label": "Non"
+				}
+			]
+		},
+		"help_details": {
+			"label": "De quelle aide avez vous eu besoin ?",
+			"options": [
+				{
+					"label": "J'ai fait une recherche sur internet (site, forum)"
+				},
+				{
+					"label": "J'ai demandé de l’aide à un proche (famille, ami)"
+				},
+				{
+					"label": "J'ai demandé de l’aide à une association"
+				},
+				{
+					"label": "Autre"
+				}
+			]
+		},
+		"help_details_verbatim": {
+			"label": "Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?",
+			"hint": "Maximum 250 caractères."
+		},
+		"verbatim": {
+			"label": "Souhaitez-vous nous en dire plus ?",
+			"hint": "Ne partagez pas d’information personnelle."
+		}
+	}
 }
