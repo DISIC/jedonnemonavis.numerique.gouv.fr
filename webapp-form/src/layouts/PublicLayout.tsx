@@ -4,15 +4,15 @@ import {
 	languages,
 	LanguageSelector,
 } from '@/src/components/global/LanguageSelector';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
+import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
 import { i18n, useTranslation } from 'next-i18next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
-import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode, useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 const isReactElement = (element: ReactNode): element is ReactElement => {
@@ -26,7 +26,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
 	const headerId = 'fr-header-public-header';
 
-	const [isMobile, setIsMobile] = useState(false);
+	const { isMobile, isHydrated } = useIsMobile('md');
 
 	const onToggleLanguageClick = (newLocale: Language) => {
 		const { pathname, asPath, query } = router;
@@ -51,51 +51,50 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 	};
 
 	const lang = (i18n?.language || 'fr') as Language;
-	const quickAccesItems: HeaderProps.QuickAccessItem[] | ReactNode[] = isMobile
-		? languages.map(lang_i => ({
-				buttonProps: {
-					lang: lang_i,
-					'aria-current': lang_i === lang ? 'true' : undefined,
-					onClick: e => {
-						e.preventDefault();
-						onToggleLanguageClick(lang_i);
-					},
-					className: cx(
-						classes.langButton,
-						fr.cx('fr-translate__language', 'fr-nav__link'),
-					),
+	const desktopQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] = [
+		{
+			buttonProps: {
+				'aria-controls': 'translate-select',
+				'aria-expanded': false,
+				title: t('Sélectionner une langue'),
+				className: fr.cx('fr-btn--tertiary', 'fr-translate', 'fr-nav'),
+			},
+			iconId: 'fr-icon-translate-2',
+			text: <LanguageSelector lang={lang} setLang={onToggleLanguageClick} />,
+		},
+	];
+
+	const mobileQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
+		languages.map(lang_i => ({
+			buttonProps: {
+				lang: lang_i,
+				'aria-current': lang_i === lang ? 'true' : undefined,
+				onClick: e => {
+					e.preventDefault();
+					onToggleLanguageClick(lang_i);
 				},
-				iconId: 'fr-icon-translate-2',
-				text: (
-					<>
-						<span className={classes.langShort}>{lang_i}</span>
-						&nbsp;-&nbsp;{fullNameByLang[lang_i]}
-					</>
+				className: cx(
+					classes.langButton,
+					fr.cx('fr-translate__language', 'fr-nav__link'),
 				),
-		  }))
-		: [
-				{
-					buttonProps: {
-						'aria-controls': 'translate-select',
-						'aria-expanded': false,
-						title: t('Sélectionner une langue'),
-						className: fr.cx('fr-btn--tertiary', 'fr-translate', 'fr-nav'),
-					},
-					iconId: 'fr-icon-translate-2',
-					text: (
-						<LanguageSelector lang={lang} setLang={onToggleLanguageClick} />
-					),
-				},
-		  ];
+			},
+			iconId: 'fr-icon-translate-2',
+			text: (
+				<>
+					<span className={classes.langShort}>{lang_i}</span>
+					&nbsp;-&nbsp;{fullNameByLang[lang_i]}
+				</>
+			),
+		}));
+
+	const quickAccesItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
+		isHydrated
+			? isMobile
+				? mobileQuickAccessItems
+				: desktopQuickAccessItems
+			: [];
 
 	useEffect(() => {
-		setIsMobile(window.innerWidth <= fr.breakpoints.getPxValues().md);
-	}, []);
-
-	useEffect(() => {
-		// Workaround for DSFR Header menu modal markup:
-		// axe flags `aria-labelledby` on a <div> without a valid role.
-		// This element is a modal dialog (mobile menu), so ensuring role/aria-modal is appropriate.
 		const ensureHeaderMenuModalA11y = () => {
 			const modalId = `header-menu-modal-${headerId}`;
 			const modal = document.getElementById(modalId);
