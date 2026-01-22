@@ -1,5 +1,5 @@
 import { Toast } from '@/src/components/ui/Toast';
-import { isValidEmail } from '@/src/utils/tools';
+import { getSafeCallbackUrl, isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
@@ -155,9 +155,7 @@ export const LoginForm = () => {
 				if (res?.error) {
 					if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
 				} else {
-					const callbackUrl =
-						router.query.callbackUrl?.toString() ||
-						'/administration/dashboard/products';
+					const callbackUrl = getSafeCallbackUrl(router.query.callbackUrl);
 					setDisplayLoginToast(true);
 					window.setTimeout(() => {
 						router.push(callbackUrl);

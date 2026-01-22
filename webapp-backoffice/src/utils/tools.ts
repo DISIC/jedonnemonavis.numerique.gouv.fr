@@ -611,3 +611,18 @@ export const getMissingPasswordRequirements = (password: string): string[] => {
 
 	return missing;
 };
+
+export const getSafeCallbackUrl = (rawCallback: unknown): string => {
+	const defaultUrl = '/administration/dashboard/products';
+	if (typeof rawCallback !== 'string') {
+		return defaultUrl;
+	}
+	// Only allow same-origin relative paths; reject protocol-relative and absolute URLs.
+	if (!rawCallback.startsWith('/')) {
+		return defaultUrl;
+	}
+	if (rawCallback.startsWith('//')) {
+		return defaultUrl;
+	}
+	return rawCallback;
+};
