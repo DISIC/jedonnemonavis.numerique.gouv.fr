@@ -31,7 +31,6 @@ type NavigationItem = {
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
 	const { settings } = useUserSettings();
-	const headerId = 'fr-header-public-header';
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -104,68 +103,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		);
 
-		const { classes, cx } = useStyles({
-			countUserRequests: userRequestsResult.metadata.count
-		});
-
-		useEffect(() => {
-			const modalId = `header-menu-modal-${headerId}`;
-
-			const ensureHeaderMenuModalA11y = (modal: HTMLElement | null) => {
-				if (!modal) return;
-
-				if (!modal.getAttribute('role')) {
-					modal.setAttribute('role', 'dialog');
-				}
-
-				if (!modal.getAttribute('aria-modal')) {
-					modal.setAttribute('aria-modal', 'true');
-				}
-
-				if (!modal.getAttribute('aria-labelledby') && !modal.getAttribute('aria-label')) {
-					const labelledById = 'button-account';
-					const labelledByEl = document.getElementById(labelledById);
-					if (labelledByEl && labelledByEl.textContent && labelledByEl.textContent.trim()) {
-						modal.setAttribute('aria-labelledby', labelledById);
-					} else {
-						const headerEl = document.getElementById(headerId);
-						const serviceTitleEl = headerEl?.querySelector('.fr-header__service-title') as
-							| HTMLElement
-							| null;
-						const fallbackLabel = serviceTitleEl?.textContent?.trim() || 'Menu';
-						modal.setAttribute('aria-label', fallbackLabel);
-					}
-				}
-			};
-
-			const runEnsure = () => {
-				const modal = document.getElementById(modalId);
-				ensureHeaderMenuModalA11y(modal);
-			};
-
-			const raf = window.requestAnimationFrame(runEnsure);
-
-			const observer = new MutationObserver(mutations => {
-				for (const m of mutations) {
-					for (const node of Array.from(m.addedNodes)) {
-						if (!(node instanceof HTMLElement)) continue;
-						if (node.id === modalId || node.querySelector?.(`#${modalId}`)) {
-							const modal = document.getElementById(modalId);
-							ensureHeaderMenuModalA11y(modal);
-							return;
-						}
-					}
-				}
-				runEnsure();
-			});
-
-			observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-			return () => {
-				window.cancelAnimationFrame(raf);
-				observer.disconnect();
-			};
-		}, [headerId]);
+	const { classes, cx } = useStyles({
+		countUserRequests: userRequestsResult.metadata.count
+	});
 
 	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		!session?.user
