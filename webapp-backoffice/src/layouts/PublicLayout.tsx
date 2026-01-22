@@ -104,54 +104,68 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		);
 
-	const { classes, cx } = useStyles({
-		countUserRequests: userRequestsResult.metadata.count
-	});
+		const { classes, cx } = useStyles({
+			countUserRequests: userRequestsResult.metadata.count
+		});
 
-	useEffect(() => {
-		const ensureHeaderMenuModalA11y = () => {
+		useEffect(() => {
 			const modalId = `header-menu-modal-${headerId}`;
-			const modal = document.getElementById(modalId);
 
-			if (!modal) return;
+			const ensureHeaderMenuModalA11y = (modal: HTMLElement | null) => {
+				if (!modal) return;
 
-			if (!modal.getAttribute('role')) {
-				modal.setAttribute('role', 'dialog');
-			}
-
-			if (!modal.getAttribute('aria-modal')) {
-				modal.setAttribute('aria-modal', 'true');
-			}
-
-			// Ensure the dialog has an accessible name: prefer aria-labelledby to the
-			// account button, fallback to aria-label using header/service text.
-			if (
-				!modal.getAttribute('aria-labelledby') &&
-				!modal.getAttribute('aria-label')
-			) {
-				const labelledById = 'button-account';
-				const labelledByEl = document.getElementById(labelledById);
-				if (
-					labelledByEl &&
-					labelledByEl.textContent &&
-					labelledByEl.textContent.trim()
-				) {
-					modal.setAttribute('aria-labelledby', labelledById);
-				} else {
-					// Fallback: derive a label from the header/service title if available
-					const headerEl = document.getElementById(headerId);
-					const serviceTitleEl = headerEl?.querySelector(
-						'.fr-header__service-title'
-					) as HTMLElement | null;
-					const fallbackLabel = serviceTitleEl?.textContent?.trim() || 'Menu';
-					modal.setAttribute('aria-label', fallbackLabel);
+				if (!modal.getAttribute('role')) {
+					modal.setAttribute('role', 'dialog');
 				}
-			}
-		};
 
-		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
-		return () => window.cancelAnimationFrame(raf);
-	}, [headerId]);
+				if (!modal.getAttribute('aria-modal')) {
+					modal.setAttribute('aria-modal', 'true');
+				}
+
+				if (!modal.getAttribute('aria-labelledby') && !modal.getAttribute('aria-label')) {
+					const labelledById = 'button-account';
+					const labelledByEl = document.getElementById(labelledById);
+					if (labelledByEl && labelledByEl.textContent && labelledByEl.textContent.trim()) {
+						modal.setAttribute('aria-labelledby', labelledById);
+					} else {
+						const headerEl = document.getElementById(headerId);
+						const serviceTitleEl = headerEl?.querySelector('.fr-header__service-title') as
+							| HTMLElement
+							| null;
+						const fallbackLabel = serviceTitleEl?.textContent?.trim() || 'Menu';
+						modal.setAttribute('aria-label', fallbackLabel);
+					}
+				}
+			};
+
+			const runEnsure = () => {
+				const modal = document.getElementById(modalId);
+				ensureHeaderMenuModalA11y(modal);
+			};
+
+			const raf = window.requestAnimationFrame(runEnsure);
+
+			const observer = new MutationObserver(mutations => {
+				for (const m of mutations) {
+					for (const node of Array.from(m.addedNodes)) {
+						if (!(node instanceof HTMLElement)) continue;
+						if (node.id === modalId || node.querySelector?.(`#${modalId}`)) {
+							const modal = document.getElementById(modalId);
+							ensureHeaderMenuModalA11y(modal);
+							return;
+						}
+					}
+				}
+				runEnsure();
+			});
+
+			observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+			return () => {
+				window.cancelAnimationFrame(raf);
+				observer.disconnect();
+			};
+		}, [headerId]);
 
 	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		!session?.user
@@ -244,7 +258,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							)}
 						>
 							<Button
-								id="button-logout"
+								id="button-account"
 								iconId={'fr-icon-logout-box-r-line'}
 								title={`Déconnexion`}
 								aria-label={`Déconnexion`}
@@ -398,7 +412,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					title: "Je donne mon avis, retour à l'accueil"
 				}}
 				className={classes.navigation}
-				id={headerId}
+				id="fr-header-public-header"
 				quickAccessItems={light ? undefined : quickAccessItems}
 				navigation={
 					!!navigationItems.length && !pathname.startsWith('/public')
