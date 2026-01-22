@@ -340,7 +340,7 @@ const EntityRightsModal = (props: Props) => {
 							Pour devenir administrateur, contacter l’une de ces personnes.
 						</p>
 					)}
-					<h6 className={fr.cx('fr-mt-2v')}>{entity?.name}</h6>
+					<h2 className={fr.cx('fr-mt-2v', 'fr-h6')}>{entity?.name}</h2>
 					{displayRightsTable()}
 				</div>
 			);

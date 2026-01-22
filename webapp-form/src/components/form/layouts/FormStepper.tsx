@@ -2,12 +2,23 @@ import { secondSectionA } from '@/src/utils/form';
 import { FormField, Opinion, Product, Step } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
+import {
+	Stepper,
+	addStepperTranslations,
+} from '@codegouvfr/react-dsfr/Stepper';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Field } from '../elements/Field';
+
+addStepperTranslations({
+	lang: 'es',
+	messages: {
+		progress: ({ currentStep, stepCount }) =>
+			`Paso ${currentStep} de ${stepCount}`,
+	},
+});
 
 type Props = {
 	product: Product;

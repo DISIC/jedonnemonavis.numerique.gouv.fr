@@ -35,7 +35,7 @@ const HomeActionButton = (props: HomeActionButtonProps) => {
 						<i className={fr.cx('fr-icon-mail-line', 'fr-mr-1v')} />
 						<span>{props.buttonText}</span>{' '}
 						<Link
-							href={`mailto:props.buttonLink`}
+							href={`mailto:${props.buttonLink}`}
 							className={cx(fr.cx('fr-link'))}
 						>
 							{props.buttonLink}

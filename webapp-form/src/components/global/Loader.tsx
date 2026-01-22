@@ -11,9 +11,15 @@ export const Loader = (props: LoaderProps) => {
   const { cx, classes } = useStyles({ size, white });
 
   return (
-    <div className={classes.loaderContainer}>
+    <div
+      className={classes.loaderContainer}
+      role="status"
+      aria-live="polite"
+      aria-label="Chargement en cours"
+      aria-busy="true"
+    >
       <div>
-        <i className={fr.cx("ri-loader-4-line")} />
+        <i className={fr.cx("ri-loader-4-line")} aria-hidden="true" />
       </div>
     </div>
   );

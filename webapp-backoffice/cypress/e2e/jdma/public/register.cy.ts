@@ -61,7 +61,7 @@ describe('jdma-register', () => {
 			it('should not submit the form if the password is too short', () => {
 				testPasswordValidation({
 					password: 'Short1!',
-					message: '12 caractères minimum'
+					message: '12 caractères'
 				});
 			});
 
@@ -75,7 +75,7 @@ describe('jdma-register', () => {
 			it('should not submit the form if the password lacks a digit', () => {
 				testPasswordValidation({
 					password: 'Password!@#',
-					message: '1 chiffre minimum'
+					message: '1 chiffre'
 				});
 			});
 		});

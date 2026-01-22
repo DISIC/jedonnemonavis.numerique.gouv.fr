@@ -146,7 +146,6 @@ export const Pagination = memo(
 										classes.link,
 										getPageLinkProps(1).className
 									)}
-									role="link"
 								>
 									Première page
 								</Link>
@@ -156,8 +155,8 @@ export const Pagination = memo(
 										fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
 										classes.link
 									)}
-									role="link"
 									aria-disabled={true}
+									tabIndex={-1}
 								>
 									Première page
 								</a>
@@ -176,7 +175,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage - 1)}
-								role="link"
 							>
 								page précédente
 							</Link>
@@ -191,7 +189,7 @@ export const Pagination = memo(
 									classes.link
 								)}
 								aria-disabled={true}
-								role="link"
+								tabIndex={-1}
 							>
 								page précédente
 							</a>
@@ -200,9 +198,12 @@ export const Pagination = memo(
 					{parts.map(part => (
 						<li key={part.number}>
 							{part.number === null ? (
-								<a className={cx(fr.cx('fr-pagination__link'), classes.link)}>
+								<span
+									className={cx(fr.cx('fr-pagination__link'), classes.link)}
+									aria-hidden="true"
+								>
 									...
-								</a>
+								</span>
 							) : (
 								<Link
 									className={cx(fr.cx('fr-pagination__link'), classes.link)}
@@ -227,7 +228,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage + 1)}
-								role="link"
 							>
 								page suivante
 							</Link>
@@ -242,7 +242,7 @@ export const Pagination = memo(
 									classes.link
 								)}
 								aria-disabled={true}
-								role="link"
+								tabIndex={-1}
 							>
 								page suivante
 							</a>
@@ -257,7 +257,6 @@ export const Pagination = memo(
 										classes.link
 									)}
 									{...getPageLinkProps(count)}
-									role="link"
 								>
 									Dernière page
 								</Link>
@@ -267,8 +266,8 @@ export const Pagination = memo(
 										fr.cx('fr-pagination__link', 'fr-pagination__link--last'),
 										classes.link
 									)}
-									role="link"
 									aria-disabled={true}
+									tabIndex={-1}
 								>
 									Dernière page
 								</a>

@@ -1,13 +1,13 @@
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
+import { addDays } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import { matchSorter } from 'match-sorter';
+import { z } from 'zod';
+import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
-import { addDays } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
-import { z } from 'zod';
-import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -598,3 +598,31 @@ export function computeItemFraction(
 	const raw = (progress - start) / range;
 	return Math.max(0, Math.min(1, raw));
 }
+
+export const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
+export const regexAtLeastOneNumber = /\d/;
+export const getMissingPasswordRequirements = (password: string): string[] => {
+	const missing: string[] = [];
+
+	if (password.length < 12) missing.push('12 caractères');
+	if (!regexAtLeastOneSpecialCharacter.test(password))
+		missing.push('1 caractère spécial');
+	if (!regexAtLeastOneNumber.test(password)) missing.push('1 chiffre');
+
+	return missing;
+};
+
+export const getSafeCallbackUrl = (rawCallback: unknown): string => {
+	const defaultUrl = '/administration/dashboard/products';
+	if (typeof rawCallback !== 'string') {
+		return defaultUrl;
+	}
+	// Only allow same-origin relative paths; reject protocol-relative and absolute URLs.
+	if (!rawCallback.startsWith('/')) {
+		return defaultUrl;
+	}
+	if (rawCallback.startsWith('//')) {
+		return defaultUrl;
+	}
+	return rawCallback;
+};

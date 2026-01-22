@@ -67,6 +67,7 @@ const Contact = () => {
               <a
                 href="https://twitter.com"
                 target="_blank"
+                rel="noopener noreferrer"
                 className="twitter-button"
               >
                 <span
@@ -74,13 +75,21 @@ const Contact = () => {
                   aria-hidden="true"
                 ></span>
               </a>
-              <a href="https://linkedin.com" target="_blank">
+              <a
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span
                   className="fr-icon-linkedin-box-fill fr-icon--lg"
                   aria-hidden="true"
                 ></span>
               </a>
-              <a href="https://youtube.com" target="_blank">
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span
                   className="fr-icon-youtube-fill fr-icon--lg"
                   aria-hidden="true"

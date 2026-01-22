@@ -383,7 +383,7 @@ const DashBoardEntities = () => {
 					</div>
 				) : (
 					<div>
-						<div className={fr.cx('fr-col-8', 'fr-pt-3w')}>
+						<div className={fr.cx('fr-col-12', 'fr-pt-3w')}>
 							<PageItemsCounter
 								label="organisation"
 								isFeminine

@@ -397,6 +397,7 @@ export default function JDMAForm({
 									'https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2'
 								}
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								{t('success_block.link')}
 							</Link>
@@ -469,8 +470,14 @@ export default function JDMAForm({
 					)}
 				</>
 			) : (
-				<div className={fr.cx('fr-mt-10v')}>
+				<div
+					className={fr.cx('fr-mt-10v')}
+					role="status"
+					aria-live="polite"
+					aria-busy="true"
+				>
 					<Loader size="md" />
+					<span className={fr.cx('fr-sr-only')}>Chargement...</span>
 				</div>
 			);
 		}
