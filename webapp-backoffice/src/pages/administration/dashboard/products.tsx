@@ -323,6 +323,7 @@ const DashBoard = () => {
 						<Alert
 							className={fr.cx('fr-col-12', 'fr-mb-8v')}
 							title="Votre service et votre formulaire ont été créés avec succès !"
+							as="h2"
 							description={
 								<>
 									Pensez à copier le lien d’intégration sur votre site pour
