@@ -336,6 +336,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 
 			if (!modal.getAttribute('role')) {
 				modal.setAttribute('role', 'dialog');
+			}
+
+			if (!modal.getAttribute('aria-label')) {
 				modal.setAttribute('aria-label', 'Menu');
 			}
 
