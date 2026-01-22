@@ -619,7 +619,11 @@ const ReviewsTab = (props: Props) => {
 					description={
 						<div
 							className={fr.cx(
-								currentExport.link === null ? 'fr-mt-4v' : 'fr-mt-2v'
+								currentExport.link === null && currentExport.params
+									? 'fr-mt-4v'
+									: currentExport.link
+										? 'fr-mt-2v'
+										: 'fr-hidden'
 							)}
 						>
 							{currentExport.link && (
@@ -648,7 +652,7 @@ const ReviewsTab = (props: Props) => {
 									</ul>
 								</>
 							)}
-							{currentExport.status !== 'done' && (
+							{currentExport.status === 'processing' && (
 								<div className={cx(classes.progressBarContainer)}>
 									<span
 										className={cx(classes.progressBarLabel)}

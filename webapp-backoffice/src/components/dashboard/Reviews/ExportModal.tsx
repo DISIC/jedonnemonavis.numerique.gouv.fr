@@ -62,86 +62,6 @@ const ExportModal = (props: Props) => {
 		setEndDate(JSON.parse(params).endDate || null);
 	}, [params]);
 
-	const getModalContent = () => {
-		if (!hasExportsInProgress) {
-			return (
-				<>
-					<RadioButtons
-						legend="Mode d'exportation"
-						name="choice"
-						hintText={`Le délais des exports volumineux peut prendre jusqu'à une heure. ${
-							!startDate || !endDate
-								? `Les formats de date de vos filtres sont actuellement invalides`
-								: ''
-						}`}
-						options={[
-							{
-								label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
-								nativeInputProps: {
-									value: 'filtered',
-									checked: choice === 'filtered',
-									onChange: () => {
-										setChoice('filtered');
-									},
-									disabled: !startDate || !endDate
-								}
-							},
-							{
-								label: `Tous les avis (${counts.countAll} réponses)`,
-								nativeInputProps: {
-									value: 'all',
-									checked: choice === 'all',
-									onChange: () => {
-										setChoice('all');
-									}
-								}
-							}
-						]}
-						className={fr.cx('fr-mt-10v')}
-					/>
-					<RadioButtons
-						legend="Format de fichier"
-						name="format"
-						options={[
-							{
-								label: `Fichier .XLSX`,
-								hintText: `Format Excel`,
-								nativeInputProps: {
-									value: 'xls',
-									checked: format === 'xls',
-									onChange: () => {
-										setFormat('xls');
-									}
-								}
-							},
-							{
-								label: `Fichier .CSV`,
-								nativeInputProps: {
-									value: 'csv',
-									checked: format === 'csv',
-									onChange: () => {
-										setFormat('csv');
-									}
-								}
-							}
-						]}
-						className={fr.cx('fr-mt-10v')}
-					/>
-				</>
-			);
-		} else {
-			return (
-				<>
-					<p className={fr.cx('fr-mt-10v')}>
-						Vous avez un export en cours de traitement sur ce service, vous
-						recevrez un lien de téléchargement par email à l'adresse{' '}
-						<b>{session?.user.email}</b> dès qu'il sera prêt.
-					</p>
-				</>
-			);
-		}
-	};
-
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -151,32 +71,84 @@ const ExportModal = (props: Props) => {
 				'fr-my-0'
 			)}
 			buttons={[
-				!hasExportsInProgress
-					? {
-							children: 'Recevoir un lien de téléchargement par e-mail',
-							type: 'submit',
-							doClosesModal: false,
-							priority: 'primary',
-							disabled: choice === null || format === null,
-							onClick: () => {
-								if (choice) {
-									validateExport();
-									push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
-								}
-							}
+				{
+					children: 'Recevoir un lien de téléchargement par e-mail',
+					type: 'submit',
+					priority: 'primary',
+					disabled: choice === null || format === null,
+					onClick: () => {
+						if (choice) {
+							validateExport();
+							push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
 						}
-					: {
-							children: 'Fermer',
-							type: 'button',
-							doClosesModal: true,
-							priority: 'secondary'
-						}
+					}
+				}
 			]}
 			concealingBackdrop={false}
 			title={'Exporter les réponses'}
 			size="large"
 		>
-			{getModalContent()}
+			<RadioButtons
+				legend="Mode d'exportation"
+				name="choice"
+				hintText={`Le délais des exports volumineux peut prendre jusqu'à une heure. ${
+					!startDate || !endDate
+						? `Les formats de date de vos filtres sont actuellement invalides`
+						: ''
+				}`}
+				options={[
+					{
+						label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
+						nativeInputProps: {
+							value: 'filtered',
+							checked: choice === 'filtered',
+							onChange: () => {
+								setChoice('filtered');
+							},
+							disabled: !startDate || !endDate
+						}
+					},
+					{
+						label: `Tous les avis (${counts.countAll} réponses)`,
+						nativeInputProps: {
+							value: 'all',
+							checked: choice === 'all',
+							onChange: () => {
+								setChoice('all');
+							}
+						}
+					}
+				]}
+				className={fr.cx('fr-mt-10v')}
+			/>
+			<RadioButtons
+				legend="Format de fichier"
+				name="format"
+				options={[
+					{
+						label: `Fichier .XLSX`,
+						hintText: `Format Excel`,
+						nativeInputProps: {
+							value: 'xls',
+							checked: format === 'xls',
+							onChange: () => {
+								setFormat('xls');
+							}
+						}
+					},
+					{
+						label: `Fichier .CSV`,
+						nativeInputProps: {
+							value: 'csv',
+							checked: format === 'csv',
+							onChange: () => {
+								setFormat('csv');
+							}
+						}
+					}
+				]}
+				className={fr.cx('fr-mt-10v')}
+			/>
 		</modal.Component>
 	);
 };
