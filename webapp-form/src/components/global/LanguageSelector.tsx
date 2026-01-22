@@ -36,7 +36,6 @@ export const LanguageSelector = memo((props: Props) => {
 		<>
 			<div className={classes.root}>
 				{' '}
-				<span className={classes.langShort}>{lang}</span>
 				<span className={fr.cx('fr-hidden-lg')}>
 					{' '}
 					-{fullNameByLang[lang]}
@@ -76,6 +75,7 @@ const useStyles = tss.withName({ LanguageSelector }).create({
 		right: 0,
 		ul: {
 			display: 'flex',
+			flexDirection: 'column',
 			flexWrap: 'wrap',
 		},
 		button: {

@@ -6,6 +6,7 @@ import {
 } from '@/src/components/global/LanguageSelector';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
 import { Header, HeaderProps } from '@codegouvfr/react-dsfr/Header';
 import { SkipLinks } from '@codegouvfr/react-dsfr/SkipLinks';
@@ -52,16 +53,21 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
 	const lang = (i18n?.language || 'fr') as Language;
 	const desktopQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] = [
-		{
-			buttonProps: {
-				'aria-controls': 'translate-select',
-				'aria-expanded': false,
-				title: t('Sélectionner une langue'),
-				className: fr.cx('fr-btn--tertiary', 'fr-translate', 'fr-nav'),
-			},
-			iconId: 'fr-icon-translate-2',
-			text: <LanguageSelector lang={lang} setLang={onToggleLanguageClick} />,
-		},
+		<>
+			<Button
+				nativeButtonProps={{
+					'aria-controls': 'translate-select',
+					'aria-expanded': false,
+					title: t('Sélectionner une langue'),
+				}}
+				priority="tertiary"
+				className={cx(classes.langShort, fr.cx('fr-translate', 'fr-nav'))}
+				iconId="fr-icon-translate-2"
+			>
+				{lang}
+			</Button>
+			<LanguageSelector lang={lang} setLang={onToggleLanguageClick} />
+		</>,
 	];
 
 	const mobileQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
