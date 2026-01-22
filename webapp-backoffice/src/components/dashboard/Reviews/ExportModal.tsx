@@ -72,7 +72,7 @@ const ExportModal = (props: Props) => {
 			)}
 			buttons={[
 				{
-					children: 'Recevoir un lien de téléchargement par e-mail',
+					children: 'Exporter les réponses',
 					type: 'submit',
 					priority: 'primary',
 					disabled: choice === null || format === null,

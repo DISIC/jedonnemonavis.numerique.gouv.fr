@@ -31,6 +31,7 @@ type NavigationItem = {
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
 	const { settings } = useUserSettings();
+	const headerId = 'fr-header-public-header';
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -106,6 +107,26 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
+
+	useEffect(() => {
+		const ensureHeaderMenuModalA11y = () => {
+			const modalId = `header-menu-modal-${headerId}`;
+			const modal = document.getElementById(modalId);
+
+			if (!modal) return;
+
+			if (!modal.getAttribute('role')) {
+				modal.setAttribute('role', 'dialog');
+			}
+
+			if (!modal.getAttribute('aria-modal')) {
+				modal.setAttribute('aria-modal', 'true');
+			}
+		};
+
+		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
+		return () => window.cancelAnimationFrame(raf);
+	}, [headerId]);
 
 	const quickAccessItems: (HeaderProps.QuickAccessItem | JSX.Element | null)[] =
 		!session?.user
@@ -352,7 +373,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					title: "Je donne mon avis, retour à l'accueil"
 				}}
 				className={classes.navigation}
-				id="fr-header-public-header"
+				id={headerId}
 				quickAccessItems={light ? undefined : quickAccessItems}
 				navigation={
 					!!navigationItems.length && !pathname.startsWith('/public')
