@@ -122,6 +122,31 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			if (!modal.getAttribute('aria-modal')) {
 				modal.setAttribute('aria-modal', 'true');
 			}
+
+			// Ensure the dialog has an accessible name: prefer aria-labelledby to the
+			// account button, fallback to aria-label using header/service text.
+			if (
+				!modal.getAttribute('aria-labelledby') &&
+				!modal.getAttribute('aria-label')
+			) {
+				const labelledById = 'button-account';
+				const labelledByEl = document.getElementById(labelledById);
+				if (
+					labelledByEl &&
+					labelledByEl.textContent &&
+					labelledByEl.textContent.trim()
+				) {
+					modal.setAttribute('aria-labelledby', labelledById);
+				} else {
+					// Fallback: derive a label from the header/service title if available
+					const headerEl = document.getElementById(headerId);
+					const serviceTitleEl = headerEl?.querySelector(
+						'.fr-header__service-title'
+					) as HTMLElement | null;
+					const fallbackLabel = serviceTitleEl?.textContent?.trim() || 'Menu';
+					modal.setAttribute('aria-label', fallbackLabel);
+				}
+			}
 		};
 
 		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
@@ -219,7 +244,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							)}
 						>
 							<Button
-								id="button-account"
+								id="button-logout"
 								iconId={'fr-icon-logout-box-r-line'}
 								title={`Déconnexion`}
 								aria-label={`Déconnexion`}
