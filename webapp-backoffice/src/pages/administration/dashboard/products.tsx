@@ -323,6 +323,7 @@ const DashBoard = () => {
 						<Alert
 							className={fr.cx('fr-col-12', 'fr-mb-8v')}
 							title="Votre service et votre formulaire ont été créés avec succès !"
+							as="h2"
 							description={
 								<>
 									Pensez à copier le lien d’intégration sur votre site pour
@@ -531,8 +532,16 @@ const DashBoard = () => {
 				isLoadingEntities ||
 				isLoadingFavorites ||
 				isRefetchingProducts ? (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+					<div
+						className={fr.cx('fr-py-20v', 'fr-mt-4w')}
+						role="status"
+						aria-live="polite"
+						aria-busy="true"
+					>
 						<Loader />
+						<span className={fr.cx('fr-sr-only')}>
+							Chargement des données...
+						</span>
 					</div>
 				) : (
 					<div>

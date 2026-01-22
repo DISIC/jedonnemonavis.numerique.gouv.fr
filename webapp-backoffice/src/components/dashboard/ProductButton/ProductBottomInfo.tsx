@@ -61,7 +61,7 @@ const ProductBottomInfo = ({
 						>
 							<Image
 								src={content.image}
-								alt={content.image}
+								alt={content.text}
 								width={120}
 								height={120}
 							/>
@@ -71,8 +71,8 @@ const ProductBottomInfo = ({
 							<Link
 								className={fr.cx('fr-link')}
 								href={content.link}
-								role="link"
 								target="_blank"
+								rel="noopener noreferrer"
 							>
 								{content.link}
 							</Link>

@@ -150,7 +150,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
 		>
 			<div className={cx(fr.cx('fr-mb-1v'), classes.titleContainer)}>
-				<h3 className={fr.cx('fr-mb-2v')}>Filtres</h3>
+				<span className={fr.cx('fr-mb-2v', 'fr-h4')}>Filtres</span>
 				{topRight}
 			</div>
 			<div
@@ -343,11 +343,7 @@ const useStyles = tss.create({
 	},
 	titleContainer: {
 		display: 'flex',
-		justifyContent: 'space-between',
-		h3: {
-			fontSize: '1.5rem',
-			lineHeight: '2rem'
-		}
+		justifyContent: 'space-between'
 	},
 	dateShortcuts: {
 		backgroundColor: fr.colors.decisions.background.default.grey.default,

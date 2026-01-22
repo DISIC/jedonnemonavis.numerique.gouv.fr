@@ -1,13 +1,11 @@
+import { PasswordMessages } from '@/src/types/custom';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import {
-	PasswordInput,
-	PasswordInputProps
-} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
-import { ReactNode, useState } from 'react';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -62,10 +60,7 @@ export const OTPForm = (props: Props) => {
 		onSuccess: () => {}
 	});
 
-	const getPasswordInputMessages = (): {
-		severity: PasswordInputProps.Severity;
-		message: ReactNode;
-	}[] => {
+	const getPasswordInputMessages = (): PasswordMessages => {
 		if (errors.otpInvalid)
 			return [
 				{

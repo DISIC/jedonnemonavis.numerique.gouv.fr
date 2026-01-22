@@ -80,7 +80,10 @@ const ReviewFiltersModal = (props: Props) => {
 							}}
 						>
 							<Image
-								alt=""
+								alt={
+									'Image:' +
+									displayIntention((intention ?? 'neutral') as AnswerIntention)
+								}
 								src={`/assets/smileys/${getStatsIcon({
 									intention: (intention ?? 'neutral') as AnswerIntention
 								})}.svg`}
@@ -97,9 +100,12 @@ const ReviewFiltersModal = (props: Props) => {
 				<p className={cx(classes.subtitle)}>
 					Qu'avez-vous pensé des informations et des instructions fournies ?
 				</p>
-				<div className={cx(classes.rating)}>
+				<div className={cx(classes.rating)} id="comprehension-help">
 					<span>Pas clair du tout</span>
-					<fieldset className={fr.cx('fr-fieldset')}>
+					<fieldset
+						className={fr.cx('fr-fieldset')}
+						aria-describedby="comprehension-help"
+					>
 						<ul>
 							{['1', '2', '3', '4', '5'].map(rating => (
 								<li key={rating}>
@@ -107,6 +113,7 @@ const ReviewFiltersModal = (props: Props) => {
 										id={`radio-rating-${rating}`}
 										className={fr.cx('fr-sr-only')}
 										type="checkbox"
+										aria-label={`Note ${rating}`}
 										onClick={() => {
 											setTmpFilters({
 												...tmpFilters,

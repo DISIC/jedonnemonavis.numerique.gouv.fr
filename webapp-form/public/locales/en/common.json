@@ -1,284 +1,292 @@
 {
-  "first_block": {
-    "title": "Give Your Feedback",
-    "subtitle_part_1": "Help us improve the service",
-    "subtitle_part_2": "by answering a few questions. Your responses are anonymous.",
-    "product": "Procedure",
-    "validate": "Submit my feedback"
-  },
-  "second_block": {
-    "title": "Thank You!",
-    "subtitle": "Can you tell us more?",
-    "validate": "Submit my feedback"
-  },
-  "success_block": {
-    "title": "Thank you very much!",
-    "thanks": "Your feedback will help us improve the quality of service.",
-    "question": "Questions about the service",
-    "support": "Contact support.",
-    "further": "Do you want to go further?",
-    "share": "Share your experience publicly anonymously. The administration will respond and use your experience to improve its services.",
-    "link": "Share my experience publicly",
-    "alert": "Your feedback has been successfully transmitted to the department handling this procedure."
-  },
-  "smileys": {
-    "good": "Very good",
-    "medium": "Average",
-    "bad": "Not good"
-  },
-  "steps": {
-    "A_1": {
-      "name": "Clarity",
-      "button": "Continue"
-    },
-    "A_2": {
-      "name": "Help",
-      "button": "Continue"
-    },
-    "A_3": {
-      "name": "Additional Information",
-      "button": "Finish"
-    },
-    "B_1": {
-      "name": "General Experience",
-      "button": "Submit my feedback"
-    },
-    "B_2": {
-      "name": "Understanding",
-      "button": "Continue"
-    },
-    "B_3": {
-      "name": "Help",
-      "button": "Continue"
-    },
-    "B_4": {
-      "name": "Accessibility",
-      "button": "Continue"
-    },
-    "B_5": {
-      "name": "Efficiency",
-      "button": "Continue"
-    },
-    "B_6": {
-      "name": "Additional Comments",
-      "button": "Finish"
-    }
-  },
-  "fields": {
-    "satisfaction": {
-      "label": "Overall, how was your experience?",
-      "hint": "This field is required."
-    },
-    "comprehension": {
-      "label": "What did you think of the information and instructions provided?",
-      "hint": "On a scale of 1 to 5; 1 being incomprehensible and 5 being very clear.",
-      "hintLeft": "Incomprehensible",
-      "hintRight": "Very clear",
-      "options": [
-        {
-          "label": "1"
-        },
-        {
-          "label": "2"
-        },
-        {
-          "label": "3"
-        },
-        {
-          "label": "4"
-        },
-        {
-          "label": "5"
-        }
-      ]
-    },
-    "contact_tried": {
-      "label": "Along the way, did you try to get help through any of the following means?",
-      "hint": "Multiple choices possible",
-      "options": [
-        {
-          "label": "At a help desk with the administration"
-        },
-        {
-          "label": "By phone with the administration"
-        },
-        {
-          "label": "By email with the administration"
-        },
-        {
-          "label": "By chat with the administration"
-        },
-        {
-          "label": "Friends or family"
-        },
-        {
-          "label": "An association"
-        },
-        {
-          "label": "Websites"
-        },
-        {
-          "label": "Other, please specify"
-        },
-        {
-          "label": "I did not need help"
-        }
-      ]
-    },
-    "contact_reached": {
-      "label": "When you sought help, were you able to reach the administration?",
-      "options": [
-        {
-          "label": "Yes"
-        },
-        {
-          "label": "No"
-        }
-      ]
-    },
-    "contact_satisfaction": {
-      "label": "How do you rate the quality of the help you received from the administration?",
-      "hint": "On a scale of 1 to 5, 1 being very bad and 5 being excellent.",
-      "options": [
-        {
-          "label": "Very bad"
-        },
-        {
-          "label": "Bad"
-        },
-        {
-          "label": "Neither good nor bad"
-        },
-        {
-          "label": "Good"
-        },
-        {
-          "label": "Excellent"
-        }
-      ]
-    },
-    "difficulties": {
-      "label": "Did you encounter any difficulties?",
-      "options": [
-        {
-          "label": "Yes"
-        },
-        {
-          "label": "No"
-        }
-      ]
-    },
-    "difficulties_details": {
-      "label": "What were these difficulties?",
-      "options": [
-        {
-          "label": "I lacked information before starting the procedure"
-        },
-        {
-          "label": "The procedure did not work"
-        },
-        {
-          "label": "The site did not display well on mobile"
-        },
-        {
-          "label": "I had difficulties attaching documents"
-        },
-        {
-          "label": "There was missing information about the follow-up of my request or procedure (deadline, etc.)"
-        },
-        {
-          "label": "Other"
-        }
-      ]
-    },
-    "difficulties_details_verbatim": {
-      "label": "Can you specify what other difficulties you encountered?",
-      "hint": "Maximum 250 characters."
-    },
-    "contact": {
-      "label": "Did you try to contact the assistance service responsible for the procedure?",
-      "options": [
-        {
-          "label": "No"
-        },
-        {
-          "label": "Yes"
-        },
-        {
-          "label": "Yes, but I couldn't find how to contact them"
-        }
-      ]
-    },
-    "contact_channels": {
-      "label": "By what means did you try to contact the procedure service?",
-      "options": [
-        {
-          "label": "Telephone"
-        },
-        {
-          "label": "Email or messaging"
-        },
-        {
-          "label": "Agency or counter"
-        },
-        {
-          "label": "Other"
-        }
-      ]
-    },
-    "contact_tried_verbatim": {
-      "label": "What other types of assistance did you use?",
-      "hint": "Maximum 250 characters."
-    },
-    "contact_details": {
-      "label": "Were you able to reach them?",
-      "options": [
-        {
-          "label": "I couldn't find how to contact them"
-        },
-        {
-          "label": "I contacted them but I couldn't reach them"
-        },
-        {
-          "label": "I contacted them and they responded"
-        }
-      ]
-    },
-    "help": {
-      "label": "Did you need additional help for this procedure?",
-      "options": [
-        {
-          "label": "Yes"
-        },
-        {
-          "label": "No"
-        }
-      ]
-    },
-    "help_details": {
-      "label": "What help did you need?",
-      "options": [
-        {
-          "label": "I searched the internet (website, forum)"
-        },
-        {
-          "label": "I asked for help from a family member or friend"
-        },
-        {
-          "label": "I asked for help from an association"
-        },
-        {
-          "label": "Other"
-        }
-      ]
-    },
-    "help_details_verbatim": {
-      "label": "Can you specify what other help you needed?",
-      "hint": "Maximum 250 characters."
-    },
-    "verbatim": {
-      "label": "Do you want to tell us more?",
-      "hint": "Do not share personal information."
-    }
-  }
+	"first_block": {
+		"title": "Give Your Feedback",
+		"subtitle_part_1": "Help us improve the service",
+		"subtitle_part_2": "by answering a few questions. Your responses are anonymous.",
+		"product": "Procedure",
+		"validate": "Submit my feedback"
+	},
+	"second_block": {
+		"title": "Thank You!",
+		"subtitle": "Can you tell us more?",
+		"validate": "Submit my feedback"
+	},
+	"success_block": {
+		"title": "Thank you very much!",
+		"thanks": "Your feedback will help us improve the quality of service.",
+		"question": "Questions about the service",
+		"support": "Contact support.",
+		"further": "Do you want to go further?",
+		"share": "Share your experience publicly anonymously. The administration will respond and use your experience to improve its services.",
+		"link": "Share my experience publicly",
+		"alert": "Your feedback has been successfully transmitted to the department handling this procedure."
+	},
+	"smileys": {
+		"good": "Very good",
+		"medium": "Average",
+		"bad": "Not good"
+	},
+	"steps": {
+		"A_1": {
+			"name": "Clarity",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"A_2": {
+			"name": "Help",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"A_3": {
+			"name": "Additional Information",
+			"button": "Finish",
+			"buttonBack": "Previous"
+		},
+		"B_1": {
+			"name": "General Experience",
+			"button": "Submit my feedback"
+		},
+		"B_2": {
+			"name": "Understanding",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"B_3": {
+			"name": "Help",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"B_4": {
+			"name": "Accessibility",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"B_5": {
+			"name": "Efficiency",
+			"button": "Continue",
+			"buttonBack": "Previous"
+		},
+		"B_6": {
+			"name": "Additional Comments",
+			"button": "Finish",
+			"buttonBack": "Previous"
+		}
+	},
+	"fields": {
+		"satisfaction": {
+			"label": "Overall, how was your experience?",
+			"hint": "This field is required."
+		},
+		"comprehension": {
+			"label": "What did you think of the information and instructions provided?",
+			"hint": "On a scale of 1 to 5; 1 being incomprehensible and 5 being very clear.",
+			"hintLeft": "Incomprehensible",
+			"hintRight": "Very clear",
+			"options": [
+				{
+					"label": "1"
+				},
+				{
+					"label": "2"
+				},
+				{
+					"label": "3"
+				},
+				{
+					"label": "4"
+				},
+				{
+					"label": "5"
+				}
+			]
+		},
+		"contact_tried": {
+			"label": "Along the way, did you try to get help through any of the following means?",
+			"hint": "Multiple choices possible",
+			"options": [
+				{
+					"label": "At a help desk with the administration"
+				},
+				{
+					"label": "By phone with the administration"
+				},
+				{
+					"label": "By email with the administration"
+				},
+				{
+					"label": "By chat with the administration"
+				},
+				{
+					"label": "Friends or family"
+				},
+				{
+					"label": "An association"
+				},
+				{
+					"label": "Websites"
+				},
+				{
+					"label": "Other, please specify"
+				},
+				{
+					"label": "I did not need help"
+				}
+			]
+		},
+		"contact_reached": {
+			"label": "When you sought help, were you able to reach the administration?",
+			"options": [
+				{
+					"label": "Yes"
+				},
+				{
+					"label": "No"
+				}
+			]
+		},
+		"contact_satisfaction": {
+			"label": "How do you rate the quality of the help you received from the administration?",
+			"hint": "On a scale of 1 to 5, 1 being very bad and 5 being excellent.",
+			"options": [
+				{
+					"label": "Very bad"
+				},
+				{
+					"label": "Bad"
+				},
+				{
+					"label": "Neither good nor bad"
+				},
+				{
+					"label": "Good"
+				},
+				{
+					"label": "Excellent"
+				}
+			]
+		},
+		"difficulties": {
+			"label": "Did you encounter any difficulties?",
+			"options": [
+				{
+					"label": "Yes"
+				},
+				{
+					"label": "No"
+				}
+			]
+		},
+		"difficulties_details": {
+			"label": "What were these difficulties?",
+			"options": [
+				{
+					"label": "I lacked information before starting the procedure"
+				},
+				{
+					"label": "The procedure did not work"
+				},
+				{
+					"label": "The site did not display well on mobile"
+				},
+				{
+					"label": "I had difficulties attaching documents"
+				},
+				{
+					"label": "There was missing information about the follow-up of my request or procedure (deadline, etc.)"
+				},
+				{
+					"label": "Other"
+				}
+			]
+		},
+		"difficulties_details_verbatim": {
+			"label": "Can you specify what other difficulties you encountered?",
+			"hint": "Maximum 250 characters."
+		},
+		"contact": {
+			"label": "Did you try to contact the assistance service responsible for the procedure?",
+			"options": [
+				{
+					"label": "No"
+				},
+				{
+					"label": "Yes"
+				},
+				{
+					"label": "Yes, but I couldn't find how to contact them"
+				}
+			]
+		},
+		"contact_channels": {
+			"label": "By what means did you try to contact the procedure service?",
+			"options": [
+				{
+					"label": "Telephone"
+				},
+				{
+					"label": "Email or messaging"
+				},
+				{
+					"label": "Agency or counter"
+				},
+				{
+					"label": "Other"
+				}
+			]
+		},
+		"contact_tried_verbatim": {
+			"label": "What other types of assistance did you use?",
+			"hint": "Maximum 250 characters."
+		},
+		"contact_details": {
+			"label": "Were you able to reach them?",
+			"options": [
+				{
+					"label": "I couldn't find how to contact them"
+				},
+				{
+					"label": "I contacted them but I couldn't reach them"
+				},
+				{
+					"label": "I contacted them and they responded"
+				}
+			]
+		},
+		"help": {
+			"label": "Did you need additional help for this procedure?",
+			"options": [
+				{
+					"label": "Yes"
+				},
+				{
+					"label": "No"
+				}
+			]
+		},
+		"help_details": {
+			"label": "What help did you need?",
+			"options": [
+				{
+					"label": "I searched the internet (website, forum)"
+				},
+				{
+					"label": "I asked for help from a family member or friend"
+				},
+				{
+					"label": "I asked for help from an association"
+				},
+				{
+					"label": "Other"
+				}
+			]
+		},
+		"help_details_verbatim": {
+			"label": "Can you specify what other help you needed?",
+			"hint": "Maximum 250 characters."
+		},
+		"verbatim": {
+			"label": "Do you want to tell us more?",
+			"hint": "Do not share personal information."
+		}
+	}
 }

@@ -84,7 +84,7 @@ export const SmileyInput = (props: Props) => {
 									}}
 								>
 									<Image
-										alt={t(`smileys.${smiley.value}`)}
+										alt={`Image: ${t(`smileys.${smiley.value}`)}`}
 										src={smiley.img}
 										width={56}
 										height={56}

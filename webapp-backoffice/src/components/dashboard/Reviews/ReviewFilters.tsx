@@ -111,6 +111,7 @@ const ReviewFilters = (props: Props) => {
 									: classes.badgeVerbatim
 							)}
 							key={`fake_div_${index}`}
+							aria-hidden="true"
 						></th>
 					))}
 			</tr>
