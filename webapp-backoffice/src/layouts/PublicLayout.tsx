@@ -327,31 +327,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
-	useEffect(() => {
-		const ensureHeaderMenuModalA11y = () => {
-			const modalId = `header-menu-modal-fr-header-public-header`;
-			const modal = document.getElementById(modalId);
-
-			if (!modal) return;
-
-			if (!modal.getAttribute('role')) {
-				modal.setAttribute('role', 'dialog');
-			}
-
-			if (!modal.getAttribute('aria-label')) {
-				modal.setAttribute('aria-label', 'Menu');
-			}
-
-			if (!modal.getAttribute('aria-modal')) {
-				modal.setAttribute('aria-modal', 'true');
-			}
-		};
-
-		// Run after paint to avoid racing with DSFR/react-dsfr hydration.
-		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
-		return () => window.cancelAnimationFrame(raf);
-	}, []);
-
 	return (
 		<>
 			<SkipLinks
