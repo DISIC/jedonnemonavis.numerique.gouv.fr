@@ -333,7 +333,13 @@ def format_excel(writer, df, sheet_name):
 
     # Adjust column widths
     for i, col in enumerate(df.columns):
-        max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
+        try:
+            # Handle NaN and float values by converting to string first
+            col_values = df[col].fillna('').astype(str)
+            max_len = max(col_values.str.len().max(), len(col)) + 2
+        except (ValueError, TypeError):
+            # Fallback to a default width if calculation fails
+            max_len = len(col) + 2
         worksheet.set_column(i, i, max_len)
 
     # Define header format
