@@ -237,9 +237,6 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
     msg.attach(part1)
     msg.attach(part2)
 
-    print(to_email)
-    print(msg.as_string())
-
     try:
         server = smtplib.SMTP(env_vars['NODEMAILER_HOST'], NODEMAILER_PORT)
         server.starttls()
@@ -562,8 +559,8 @@ def process_exports(conn):
     product_id = first_result_export[5]
     filter_params_raw = first_result_export[3]
     export_format = first_result_export[9]
-    name_product = first_result_export[11]
-    email_user = first_result_export[10]
+    name_product = first_result_export[13]
+    email_user = first_result_export[12]
 
     filters_query = ""
     filters_values = []
