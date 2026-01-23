@@ -237,6 +237,9 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
     msg.attach(part1)
     msg.attach(part2)
 
+    print(to_email)
+    print(msg.as_string())
+
     try:
         server = smtplib.SMTP(env_vars['NODEMAILER_HOST'], NODEMAILER_PORT)
         server.starttls()
