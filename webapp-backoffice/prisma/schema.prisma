@@ -501,10 +501,12 @@ model FormTemplateBlock {
   form_template_step_id Int
   position              Int
   type_bloc             Typebloc
+  field_code            String?
   label                 String?
   content               String?
   downLabel             String?
   upLabel               String?
+  isMainBlock           Boolean                   @default(false)
   isRequired            Boolean                   @default(false)
   isUpdatable           Boolean                   @default(false)
   isHideable            Boolean                   @default(false)
@@ -518,6 +520,7 @@ model FormTemplateBlockOption {
   position   Int
   label      String?
   value      String?
+  alias      String?
   isOther    Boolean           @default(false)
   isIsolated Boolean           @default(false)
   isHideable Boolean           @default(false)

@@ -5,6 +5,7 @@ const createBugOptions =
 		{
 			label: "J'ai un problème technique avec le site",
 			value: "J'ai un problème technique avec le site",
+			alias: 'BUG',
 			position: 0
 		},
 		{
@@ -12,11 +13,13 @@ const createBugOptions =
 				"J'ai un problème avec ma situation, mes informations ou le résultat de ma démarche",
 			value:
 				"J'ai un problème avec ma situation, mes informations ou le résultat de ma démarche",
+			alias: 'SITUATION',
 			position: 1
 		},
 		{
 			label: "J'ai une suggestion d'amélioration pour le site",
 			value: "J'ai une suggestion d'amélioration pour le site",
+			alias: 'AMÉLIORATION',
 			position: 2
 		}
 	];
@@ -38,8 +41,10 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label: 'Que souhaitez-vous remonter ?',
 							type_bloc: 'radio',
+							field_code: 'bug_kind',
 							position: 0,
 							isRequired: true,
+							isMainBlock: true,
 							options: {
 								create: createBugOptions()
 							}
@@ -58,6 +63,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label: 'Pouvez-vous nous en dire plus ?',
 							type_bloc: 'input_text_area',
+							field_code: 'verbatim',
 							position: 0,
 							isRequired: false
 						}
