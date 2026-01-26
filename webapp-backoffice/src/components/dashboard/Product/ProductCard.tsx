@@ -1,6 +1,9 @@
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
-import { formatNumberWithSpaces } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
@@ -172,14 +175,6 @@ const ProductCard = ({
 			);
 		}
 
-		if (isDisabled) {
-			badges.push(
-				<Badge key="archived" noIcon small>
-					Service archivé
-				</Badge>
-			);
-		}
-
 		if (product.forms.length === 0) {
 			badges.push(
 				<Badge key="no-forms" severity="warning" small noIcon>
@@ -296,8 +291,14 @@ const ProductCard = ({
 			</OnConfirmModal>{' '}
 			<div
 				className={cx(
-					fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w'),
-					classes.productCard
+					fr.cx(
+						'fr-card',
+						isDisabled && 'fr-card--grey',
+						'fr-my-3w',
+						'fr-p-2w'
+					),
+					classes.productCard,
+					isDisabled && 'productDisabled'
 				)}
 			>
 				<div
@@ -316,30 +317,40 @@ const ProductCard = ({
 					<div
 						className={cx(fr.cx('fr-col-12', 'fr-pb-1v'), classes.titleSection)}
 					>
-						<div className={cx(fr.cx('fr-col-9'), classes.titleWithBadges)}>
+						<div className={cx(classes.titleWithBadges)}>
 							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 							{renderProductBadges()}
 						</div>
 						<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
 							{isDisabled && (
-								<div className={cx(classes.buttonsCol)}>
-									<Button
-										className={classes.actionButton}
-										iconId={'ri-inbox-unarchive-line'}
-										iconPosition="right"
-										title={`Restaurer le produit « ${product.title} »`}
-										aria-label={`Restaurer le produit « ${product.title} »`}
-										priority="secondary"
-										size="small"
-										onClick={e => {
-											e.preventDefault();
-											onConfirmModalRestore.open();
-											push(['trackEvent', 'BO - Product', `Restore`]);
-										}}
-									>
-										Restaurer
-									</Button>
-								</div>
+								<>
+									<div>
+										<span className={cx(classes.smallText)}>
+											Archivé&nbsp;le&nbsp;
+										</span>
+										<span className={fr.cx('fr-text--bold')}>
+											{formatDateToFrenchString(product.updated_at.toString())}
+										</span>
+									</div>
+									<div className={cx(classes.buttonsCol)}>
+										<Button
+											className={classes.actionButton}
+											iconId={'ri-inbox-unarchive-line'}
+											iconPosition="right"
+											title={`Restaurer le produit « ${product.title} »`}
+											aria-label={`Restaurer le produit « ${product.title} »`}
+											priority="secondary"
+											size="small"
+											onClick={e => {
+												e.preventDefault();
+												onConfirmModalRestore.open();
+												push(['trackEvent', 'BO - Product', `Restore`]);
+											}}
+										>
+											Restaurer
+										</Button>
+									</div>
+								</>
 							)}
 							{!isDisabled && (
 								<Button
@@ -371,7 +382,6 @@ const ProductCard = ({
 											: `Ajouter le produit « ${product.title} » aux favoris`
 									}
 									className={cx(
-										fr.cx('fr-ml-2v'),
 										classes.buttonWrapper,
 										classes.actionButton,
 										'actionButton'
@@ -537,16 +547,20 @@ const useStyles = tss.withName(ProductCard.name).create({
 	productCard: {
 		position: 'relative',
 		transition: 'background-color 0.2s ease-in-out',
-		'&:hover': {
+		'&:hover:not(.productDisabled)': {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
 			cursor: 'pointer'
 		},
-		'&:hover:not(:has(.formCard:hover, .actionButton:hover)) h2': {
-			textDecoration: 'underline'
-		},
+		'&:hover:not(.productDisabled, :has(.formCard:hover, .actionButton:hover)) h2':
+			{
+				textDecoration: 'underline'
+			},
 		'&:hover .formCard': {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.hover
 		}
+	},
+	'.productDisabled': {
+		backgroundColor: 'red!important'
 	},
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
@@ -574,6 +588,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	entitySection: {},
 	actionsSection: {
 		display: 'flex',
+		gap: fr.spacing('3v'),
 		alignItems: 'center',
 		justifyContent: 'end'
 	},
@@ -586,13 +601,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 	productLink: {
 		backgroundImage: 'none',
 		position: 'relative',
-		zIndex: 4,
-		'&:hover': {
-			textDecoration: 'underline'
-		},
-		'&:hover, &:focus': {
-			textDecoration: 'underline'
-		}
+		zIndex: 4
 	},
 	formLink: {
 		backgroundImage: 'none',
@@ -635,10 +644,7 @@ const useStyles = tss.withName(ProductCard.name).create({
 		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
-		marginBottom: 0,
-		'&:hover': {
-			textDecoration: 'underline'
-		}
+		marginBottom: 0
 	},
 	titleWithBadges: {
 		display: 'flex',
