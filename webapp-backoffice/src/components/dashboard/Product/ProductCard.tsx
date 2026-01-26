@@ -18,7 +18,8 @@ import OnConfirmModal from '../../ui/modal/OnConfirm';
 import { Toast } from '../../ui/Toast';
 import starFill from '.././../../../public/assets/star-fill.svg';
 import starOutline from '.././../../../public/assets/star-outline.svg';
-import NoFormsPanel from '../Pannels/NoFormsPanel';
+import { useRouter } from 'next/router';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface CreateModalProps {
 	buttonProps: {
@@ -64,6 +65,8 @@ const ProductCard = ({
 
 	const [validateDelete, setValidateDelete] = useState(false);
 
+	const router = useRouter();
+	const { reset: resetContext } = useOnboarding();
 	const utils = trpc.useUtils();
 	const { classes, cx } = useStyles();
 
@@ -116,9 +119,9 @@ const ProductCard = ({
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-			  (reviewsCountData?.countsByForm['1'] ?? 0) +
-			  (reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+				(reviewsCountData?.countsByForm['1'] ?? 0) +
+				(reviewsCountData?.countsByForm['2'] ?? 0)
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
@@ -291,35 +294,37 @@ const ProductCard = ({
 					)}
 				</div>
 			</OnConfirmModal>{' '}
-			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+			<div
+				className={cx(
+					fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w'),
+					classes.productCard
+				)}
+			>
 				<div
 					className={cx(
 						fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
 						classes.gridProduct
 					)}
 				>
+					<Link
+						href={`/administration/dashboard/product/${product.id}/forms`}
+						className={classes.productOverlay}
+						onClick={() => clearFilters()}
+						aria-label={`Aller sur la page de gestion du service ${product.title}`}
+						style={{ pointerEvents: isDisabled ? 'none' : 'auto' }}
+					/>
 					<div
 						className={cx(fr.cx('fr-col-12', 'fr-pb-1v'), classes.titleSection)}
 					>
 						<div className={cx(fr.cx('fr-col-9'), classes.titleWithBadges)}>
-							<Link
-								href={`/administration/dashboard/product/${product.id}/forms`}
-								tabIndex={0}
-								title={`Voir les statistiques pour le service ${product.title}`}
-								className={cx(classes.productLink, fr.cx('fr-link'))}
-								onClick={() => clearFilters()}
-								style={{
-									pointerEvents: isDisabled ? 'none' : 'auto'
-								}}
-							>
-								<h2 className={cx(classes.productTitle)}>{product.title}</h2>
-							</Link>
+							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 							{renderProductBadges()}
 						</div>
 						<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
 							{isDisabled && (
 								<div className={cx(classes.buttonsCol)}>
 									<Button
+										className={classes.actionButton}
 										iconId={'ri-inbox-unarchive-line'}
 										iconPosition="right"
 										title={`Restaurer le produit « ${product.title} »`}
@@ -336,6 +341,23 @@ const ProductCard = ({
 									</Button>
 								</div>
 							)}
+							{!isDisabled && (
+								<Button
+									className={cx(classes.actionButton, 'actionButton')}
+									priority="tertiary"
+									size="small"
+									iconId="fr-icon-file-add-line"
+									iconPosition="right"
+									onClick={() => {
+										resetContext();
+										router.push(
+											`/administration/dashboard/product/${product.id}/forms/new`
+										);
+									}}
+								>
+									Générer un formulaire
+								</Button>
+							)}
 							{showFavoriteButton && !isDisabled && (
 								<Button
 									title={
@@ -348,7 +370,12 @@ const ProductCard = ({
 											? `Supprimer le produit « ${product.title} » des favoris`
 											: `Ajouter le produit « ${product.title} » aux favoris`
 									}
-									className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
+									className={cx(
+										fr.cx('fr-ml-2v'),
+										classes.buttonWrapper,
+										classes.actionButton,
+										'actionButton'
+									)}
 									priority="tertiary"
 									size="small"
 									onClick={e => {
@@ -422,7 +449,8 @@ const ProductCard = ({
 												key={form.id}
 												className={cx(
 													fr.cx('fr-grid-row', 'fr-p-4v'),
-													classes.formCard
+													classes.formCard,
+													'formCard'
 												)}
 												style={{
 													backgroundColor: form.isDeleted
@@ -506,6 +534,20 @@ const ProductCard = ({
 };
 
 const useStyles = tss.withName(ProductCard.name).create({
+	productCard: {
+		position: 'relative',
+		transition: 'background-color 0.2s ease-in-out',
+		'&:hover': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			cursor: 'pointer'
+		},
+		'&:hover:not(:has(.formCard:hover, .actionButton:hover)) h2': {
+			textDecoration: 'underline'
+		},
+		'&:hover .formCard': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.hover
+		}
+	},
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
 			'.buttonsWrapper': {
@@ -543,7 +585,12 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	productLink: {
 		backgroundImage: 'none',
+		position: 'relative',
+		zIndex: 4,
 		'&:hover': {
+			textDecoration: 'underline'
+		},
+		'&:hover, &:focus': {
 			textDecoration: 'underline'
 		}
 	},
@@ -556,7 +603,27 @@ const useStyles = tss.withName(ProductCard.name).create({
 		height: '100%',
 		'&:active': {
 			opacity: 0.2
+		},
+		zIndex: 3,
+		'&:hover, &:focus': {
+			textDecoration: 'underline'
 		}
+	},
+	productOverlay: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		width: '100%',
+		height: '100%',
+		backgroundImage: 'none',
+		zIndex: 1,
+		'&:active': {
+			opacity: 0.2
+		}
+	},
+	actionButton: {
+		position: 'relative',
+		zIndex: 4
 	},
 	productTitleContainer: {
 		display: 'flex',
@@ -600,8 +667,12 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
+		transition: 'all 0.2s ease-in-out',
 		':nth-of-type(2), :last-child': {
 			marginBottom: '0.5rem'
+		},
+		'&:hover h3': {
+			textDecoration: 'underline'
 		},
 		'&:hover > div:first-of-type span:first-of-type': {
 			textDecoration: 'underline'
