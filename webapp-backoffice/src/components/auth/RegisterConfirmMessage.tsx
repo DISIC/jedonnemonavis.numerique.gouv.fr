@@ -15,17 +15,19 @@ type Props = {
 export const RegisterValidationMessage = (props: Props) => {
 	const { mode, isUserInvited, email } = props;
 	const [hasTheEmailBeenResent, setHasTheEmailBeenResent] = useState(false);
+	const [canResendEmail, setCanResendEmail] = useState(true);
 	const [cooldown, setCooldown] = useState<number | null>(null);
 
 	const resendValidationEmail = trpc.user.resendValidationEmail.useMutation({
 		onSuccess: () => {
 			setHasTheEmailBeenResent(true);
-			setCooldown(600); // 10 minutes in seconds
+			setCanResendEmail(false);
+			setCooldown(60);
 		}
 	});
 
 	useEffect(() => {
-		if (cooldown === null) return;
+		if (cooldown === null) return setCanResendEmail(true);
 
 		const interval = setInterval(() => {
 			setCooldown(prev => (prev && prev > 0 ? prev - 1 : null));
@@ -51,8 +53,8 @@ export const RegisterValidationMessage = (props: Props) => {
 								dans les prochaines minutes.
 							</p>
 							<hr className={fr.cx('fr-mt-6v')} />
-							<p role="status" tabIndex={-1} className={fr.cx('fr-mb-2v')}>
-								{hasTheEmailBeenResent
+							<p role="status" tabIndex={-1} className={fr.cx('fr-mb-3v')}>
+								{!canResendEmail
 									? 'Email renvoyé !'
 									: "Vous n'avez pas reçu d'email ?"}
 							</p>
@@ -60,24 +62,41 @@ export const RegisterValidationMessage = (props: Props) => {
 								size="small"
 								priority="tertiary"
 								onClick={() => resendValidationEmail.mutate({ email })}
-								disabled={
-									hasTheEmailBeenResent || resendValidationEmail.isLoading
-								}
+								disabled={resendValidationEmail.isLoading || !canResendEmail}
 							>
 								{resendValidationEmail.isLoading
 									? 'Envoi en cours...'
 									: "Renvoyer l'email de validation"}
 							</Button>
-							{cooldown !== null && (
-								<p
-									className={fr.cx(
-										'fr-message--info',
-										'fr-text--xs',
-										'fr-mt-3v'
-									)}
-								>
-									Vous pouvez renvoyer le mail dans {Math.floor(cooldown / 60)}:
-									{cooldown % 60}
+							{hasTheEmailBeenResent &&
+								(cooldown !== null || canResendEmail) && (
+									<p
+										className={fr.cx(
+											canResendEmail ? 'fr-message--valid' : 'fr-message--info',
+											'fr-text--xs',
+											'fr-mt-3v',
+											'fr-mb-0'
+										)}
+									>
+										Vous {cooldown !== null ? 'pourrez' : 'pouvez'} renvoyer le
+										mail{' '}
+										{cooldown !== null
+											? ` dans ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
+											: ''}
+									</p>
+								)}
+							{hasTheEmailBeenResent && (
+								<p className={fr.cx('fr-text--xs', 'fr-mt-6v')}>
+									Vous n’avez toujours pas reçu le mail ? Pensez à vérifier dans
+									vos courriels indésirables. <br />
+									En cas de problème persistant, contactez-nous à
+									l’adresse&nbsp;:&nbsp;
+									<a
+										href="mailto:contact.jdma@design.numerique.gouv.fr"
+										className={fr.cx('fr-link', 'fr-text--xs')}
+									>
+										contact.jdma@design.numerique.gouv.fr
+									</a>
 								</p>
 							)}
 						</>
