@@ -52,7 +52,8 @@ export const exportRouter = router({
 			await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
-				product_id: input.product_id
+				product_id: input.product_id,
+				authorizeCarrierUser: true
 			});
 
 			const exportCsv = await ctx.prisma.export.create({
