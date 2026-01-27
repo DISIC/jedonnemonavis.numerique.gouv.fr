@@ -68,7 +68,7 @@ function App({ Component, pageProps }: AppProps) {
 		<>
 			<Script
 				id="matomo-tag-manager"
-				strategy="afterInteractive"
+				strategy="beforeInteractive"
 				dangerouslySetInnerHTML={{
 					__html: `
             var _mtm = window._mtm = window._mtm || [];

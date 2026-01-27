@@ -89,7 +89,7 @@ function App({ Component, pageProps }: AppProps) {
 									<OnboardingProvider>
 										<Script
 											id="matomo-tag-manager"
-											strategy="afterInteractive"
+											strategy="beforeInteractive"
 											dangerouslySetInnerHTML={{
 												__html: `
 													var _mtm = window._mtm = window._mtm || [];
