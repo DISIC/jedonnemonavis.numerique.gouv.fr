@@ -29,12 +29,14 @@ export const checkRightToProceed = async ({
 	prisma,
 	session,
 	product_id,
-	form_id
+	form_id,
+	authorizeCarrierUser = false
 }: {
 	prisma: PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>;
 	session: Session;
 	product_id?: number;
 	form_id?: number;
+	authorizeCarrierUser?: boolean;
 }) => {
 	const orFilters: Prisma.ProductWhereInput[] = [];
 	if (typeof product_id === 'number') {
@@ -62,7 +64,9 @@ export const checkRightToProceed = async ({
 		where: {
 			product_id: product_id,
 			user_email: session.user.email,
-			status: 'carrier_admin'
+			status: authorizeCarrierUser
+				? { in: ['carrier_admin', 'carrier_user'] }
+				: 'carrier_admin'
 		}
 	});
 	const adminEntityRight = await prisma.adminEntityRight.findFirst({

@@ -18,7 +18,8 @@ export const exportRouter = router({
 			await checkRightToProceed({
 				prisma: ctx.prisma,
 				session: ctx.session,
-				product_id: product_id
+				product_id: product_id,
+				authorizeCarrierUser: true
 			});
 
 			const exports = await ctx.prisma.export.findMany({
