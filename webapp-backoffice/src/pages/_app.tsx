@@ -17,6 +17,7 @@ import { StatsTotalsProvider } from '../contexts/StatsContext';
 import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
+import Script from 'next/script';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -86,6 +87,20 @@ function App({ Component, pageProps }: AppProps) {
 							<FiltersContextProvider>
 								<RootFormTemplateProvider>
 									<OnboardingProvider>
+										<Script
+											id="matomo-tag-manager"
+											strategy="afterInteractive"
+											dangerouslySetInnerHTML={{
+												__html: `
+													var _mtm = window._mtm = window._mtm || [];
+													_mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+													(function() {
+														var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+														g.async=true; g.src='https://stats.beta.gouv.fr/js/container_jChgl2JT.js'; s.parentNode.insertBefore(g,s);
+													})();
+												`
+											}}
+										/>
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>
 								</RootFormTemplateProvider>

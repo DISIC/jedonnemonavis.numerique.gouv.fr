@@ -11,6 +11,7 @@ import '../utils/keyframes.css';
 import { init } from '@socialgouv/matomo-next';
 import React from 'react';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
@@ -63,7 +64,25 @@ function App({ Component, pageProps }: AppProps) {
 			});
 	}, []);
 
-	return getLayout(<Component {...pageProps} />);
+	return (
+		<>
+			<Script
+				id="matomo-tag-manager"
+				strategy="afterInteractive"
+				dangerouslySetInnerHTML={{
+					__html: `
+            var _mtm = window._mtm = window._mtm || [];
+            _mtm.push({'mtm.startTime': (new Date().getTime()), 'event': 'mtm.Start'});
+            (function() {
+              var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+              g.async=true; g.src='https://stats.beta.gouv.fr/js/container_ldHLkZMS.js'; s.parentNode.insertBefore(g,s);
+            })();
+          `,
+				}}
+			/>
+			{getLayout(<Component {...pageProps} />)}
+		</>
+	);
 }
 
 export default trpc.withTRPC(
