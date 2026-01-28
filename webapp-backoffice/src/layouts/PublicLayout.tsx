@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -14,6 +14,7 @@ import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import { useUserSettings } from '../contexts/UserSettingsContext';
+import UserDetailsForm from '../components/auth/UserDetailsForm';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -102,6 +103,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				}
 			}
 		);
+
+	const { data: userDetails, refetch: refetchUserDetails } =
+		trpc.userDetails.getByUserId.useQuery(
+			{ user_id: parseInt(session?.user?.id as string) },
+			{
+				enabled: session?.user?.id !== undefined
+			}
+		);
+
+	const userHasDetails = useMemo(() => {
+		return !!userDetails?.data;
+	}, [userDetails?.data]);
 
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
@@ -390,7 +403,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					/>
 				)}
-				{children}
+				{userHasDetails || !session?.user ? children : <UserDetailsForm />}
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer

@@ -18,6 +18,7 @@ import { reviewCustomRouter } from './reviewCustom';
 import { reviewViewLogRouter } from './reviewViewLog';
 import { formRouter } from './form';
 import { formConfigRouter } from './formConfig';
+import { userDetailsRouter } from './userDetails';
 
 export const appRouter = router({
 	user: userRouter,
@@ -31,6 +32,7 @@ export const appRouter = router({
 	domain: domainRouter,
 	userRequest: userRequestRouter,
 	userEvent: userEventRouter,
+	userDetails: userDetailsRouter,
 	answer: answerRouter,
 	openAPI: openAPIRouter,
 	apiKey: apiKeyRouter,
