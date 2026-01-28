@@ -38,7 +38,6 @@ const ReviewFilters = (props: Props) => {
 				{
 					label: 'Source'
 				},
-
 				{
 					label: 'Satisfaction'
 				},

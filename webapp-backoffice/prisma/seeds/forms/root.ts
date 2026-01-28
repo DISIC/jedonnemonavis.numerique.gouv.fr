@@ -63,13 +63,16 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							content:
 								'<p>Aidez-nous à améliorer le service <b>{{title}}</b> en répondant à quelques questions.</p><p>Vos réponses sont <b>anonymes</b>.</p>',
 							type_bloc: 'paragraph',
+							field_code: 'introduction',
 							position: 0,
 							isUpdatable: true
 						},
 						{
 							label: "De façon générale, comment ça s'est passé ?",
 							type_bloc: 'smiley_input',
+							field_code: 'satisfaction',
 							position: 1,
+							isMainBlock: true,
 							isRequired: true
 						}
 					]
@@ -91,6 +94,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							content:
 								"Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
 							type_bloc: 'mark_input',
+							field_code: 'comprehension',
 							options: {
 								create: [
 									{
@@ -138,6 +142,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 								'Durant votre parcours, avez-vous tenté d’obtenir de l’aide par l’un des moyens suivants ?',
 							content: 'Plusieurs choix possibles',
 							type_bloc: 'checkbox',
+							field_code: 'contact_tried',
 							position: 0,
 							options: {
 								create: [
@@ -186,6 +191,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							label:
 								"Quand vous avez cherché de l'aide, avez-vous réussi à joindre l'administration ?",
 							type_bloc: 'heading_3',
+							field_code: 'contact_reached',
 							position: 1
 						},
 						...contactMethods.map((method, index) =>
@@ -195,6 +201,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							label:
 								"Comment évaluez-vous la qualité de l'aide que vous avez obtenue de la part de l'administration ?",
 							type_bloc: 'heading_3',
+							field_code: 'contact_satisfaction',
 							position: contactMethods.length + 2
 						},
 						...simpleContactMethods.map((method, index) =>
@@ -219,6 +226,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							label: 'Souhaitez-vous nous en dire plus ?',
 							content: "Ne partagez pas d'information personnelle.",
 							type_bloc: 'input_text_area',
+							field_code: 'verbatim',
 							position: 0,
 							upLabel:
 								'Si vous le souhaitez, vous pouvez partager votre expérience avec notre service en ligne. Vos commentaires nous aideront à l’améliorer et à mieux répondre à vos attentes.<br/><br/>Ce formulaire étant anonyme, les informations fournies ne permettent pas de traiter votre situation personnelle lors du dépôt de votre démarche.',

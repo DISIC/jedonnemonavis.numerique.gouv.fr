@@ -73,7 +73,7 @@ const ProductButtonCard = (props: Props) => {
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.deleted_at
 									? `Fermé le ${button.deleted_at.toLocaleDateString()}` +
-										(button.delete_reason ? ` : ${button.delete_reason}` : '')
+									  (button.delete_reason ? ` : ${button.delete_reason}` : '')
 									: button.description}
 							</p>
 						)}
@@ -151,7 +151,11 @@ const ProductButtonCard = (props: Props) => {
 										<MenuItem
 											onClick={() => {
 												navigator.clipboard.writeText(
-													`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${button.form.product_id}?button=${button.id}`
+													`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+														button.form.form_template.slug !== 'root'
+															? 'avis/'
+															: ''
+													}${button.form.product_id}?button=${button.id}`
 												);
 												handleClose();
 											}}
@@ -231,8 +235,8 @@ const useStyles = tss
 			backgroundColor: isTest
 				? fr.colors.decisions.border.default.grey.default
 				: isClosed
-					? fr.colors.decisions.background.default.grey.hover
-					: fr.colors.decisions.background.alt.blueFrance.default,
+				? fr.colors.decisions.background.default.grey.hover
+				: fr.colors.decisions.background.alt.blueFrance.default,
 			height: 'auto!important',
 			backgroundImage: 'none!important'
 		},

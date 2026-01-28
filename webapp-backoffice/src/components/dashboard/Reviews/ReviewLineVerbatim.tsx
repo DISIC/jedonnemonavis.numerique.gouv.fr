@@ -1,4 +1,7 @@
-import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import {
+	FormConfigWithChildren,
+	FormTemplateWithElements
+} from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
@@ -51,7 +54,8 @@ const ReviewLineVerbatim = ({
 	review,
 	search,
 	formConfigHelper,
-	hasManyVersions
+	hasManyVersions,
+	formTemplate
 }: {
 	review: ExtendedReview;
 	search: string;
@@ -60,12 +64,17 @@ const ReviewLineVerbatim = ({
 		versionNumber: number;
 	};
 	hasManyVersions: boolean;
+	formTemplate: FormTemplateWithElements;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
 	const { mutate: createReviewViewLog } =
 		trpc.reviewViewLog.create.useMutation();
+
+	useEffect(() => {
+		console.log('formTemplate:', formTemplate);
+	}, [formTemplate]);
 
 	useEffect(() => {
 		if (displayMoreInfo)

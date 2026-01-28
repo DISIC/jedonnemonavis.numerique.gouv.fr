@@ -860,6 +860,7 @@ const ReviewsTab = (props: Props) => {
 																key={index}
 																review={review}
 																search={validatedSearch}
+																formTemplate={form.form_template}
 																formConfigHelper={getFormConfigHelperFromDate(
 																	review.created_at || new Date()
 																)}
