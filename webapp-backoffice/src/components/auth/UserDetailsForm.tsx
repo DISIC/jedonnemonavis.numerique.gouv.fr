@@ -3,8 +3,31 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Autocomplete } from '@mui/material';
+import { UserDesignLevel } from '@prisma/client';
 import React, { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+
+const levelMapping: { title: string; value: UserDesignLevel }[] = [
+	{
+		title: 'Débutant : nous n’avons pas de pratique design structurée',
+		value: 'beginner'
+	},
+	{
+		title:
+			'Intermédiaire : nous faisons ponctuellement du recueil d’avis ou des tests, sans aide d’un designer',
+		value: 'intermediate'
+	},
+	{
+		title:
+			'Avancé : nous avons une démarche régulière (tests, analyses, prototypes…)',
+		value: 'advanced'
+	},
+	{
+		title:
+			'Expert : nous avons une ou plusieurs personnes dédiées au design dans l’équipe',
+		value: 'expert'
+	}
+];
 
 const UserDetailsForm = () => {
 	const { classes, cx } = useStyles();
@@ -99,13 +122,26 @@ const UserDetailsForm = () => {
 								noOptionsText="Aucune organisation trouvée"
 							/>
 							<RadioButtons
+								name="design-level-radio"
 								legend={
-									<p className={fr.cx('fr-mb-0')}>
+									<p>
 										Quel est le niveau de maturité design de votre équipe ?{' '}
 										<span className={cx(classes.asterisk)}>*</span>
 									</p>
 								}
-								options={[]}
+								options={levelMapping.map(level => ({
+									label: level.title,
+									nativeInputProps: {
+										value: level.value,
+										checked: userDetails.level === level.value,
+										onChange: () => {
+											setUserDetails(prev => ({
+												...prev,
+												level: level.value
+											}));
+										}
+									}
+								}))}
 							/>
 						</div>
 					</div>
