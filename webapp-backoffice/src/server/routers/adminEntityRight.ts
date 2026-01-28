@@ -139,6 +139,7 @@ export const adminEntityRightRouter = router({
 					baseUrl: process.env.NODEMAILER_BASEURL
 				});
 
+				console.log('Trying to send invite mail to:', user_email);
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
 					user_email.toLowerCase(),
@@ -159,7 +160,7 @@ export const adminEntityRightRouter = router({
 				console.log('Trying to send mail to:', user_email);
 				await sendMail(
 					`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
-					user_email,
+					user_email.toLowerCase(),
 					emailHtml,
 					`Cliquez sur ce lien pour rejoindre l'organisation "${newAdminEntityRight.entity.name}" : ${process.env.NODEMAILER_BASEURL}`
 				);
