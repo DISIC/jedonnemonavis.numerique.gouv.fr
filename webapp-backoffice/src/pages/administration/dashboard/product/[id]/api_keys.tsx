@@ -28,11 +28,14 @@ const ProductApiKeysPage = (props: Props) => {
 			</Head>
 			<div className={classes.headerWrapper}>
 				<h2>Gérer les clés API</h2>
+			</div>
+			<p>
+				Une clé API est un identifiant unique qui permet à un outil tiers
+				d'utiliser les données issues de Je Donne Mon Avis.&nbsp;
 				<Link className={fr.cx('fr-link')} target="_blank" href="/open-api">
 					Voir la documentation de l'API
 				</Link>
-			</div>
-			<h3 className={fr.cx('fr-mt-10v')}>Clés API</h3>
+			</p>
 			<ApiKeyHandler product={product} ownRight={ownRight}></ApiKeyHandler>
 		</ProductLayout>
 	);
@@ -45,7 +48,7 @@ const useStyles = tss.withName(ProductApiKeysPage.name).create({
 		justifyContent: 'space-between',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
-			alignItems: 'flex-start',
+			alignItems: 'flex-start'
 		}
 	}
 });
