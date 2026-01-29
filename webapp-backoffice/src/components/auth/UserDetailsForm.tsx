@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const levelMapping: { title: string; value: UserDesignLevel }[] = [
+const levelMapping: readonly { title: string; value: UserDesignLevel }[] = [
 	{
 		title: 'Débutant : nous n’avons pas de pratique design structurée',
 		value: 'beginner'
