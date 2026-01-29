@@ -11,13 +11,65 @@ import { ReviewWithButtonAndProduct } from "@/prisma/augmented";
 import { TRPCError } from "@trpc/server";
 import { FormStepNames } from "@/src/pages/[id]";
 
+async function formatDynamicAnswer(
+  prisma: PrismaClient,
+  answer: {
+    block_id: number;
+    answer_item_id?: number;
+    answer_text?: string;
+  },
+): Promise<Prisma.AnswerCreateInput> {
+  const block = await prisma.formTemplateBlock.findUnique({
+    where: { id: answer.block_id },
+    include: { options: true },
+  });
+
+  if (!block) {
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: `Block ${answer.block_id} not found`,
+    });
+  }
+
+  let answerText = answer.answer_text || "";
+  let intention = "neutral";
+  let answerItemId = 0;
+
+  if (answer.answer_item_id) {
+    const option = block.options.find(
+      (opt) => opt.id === answer.answer_item_id,
+    );
+    if (option) {
+      answerText = option.value || "";
+      answerItemId = option.id;
+    }
+  }
+
+  const kind =
+    block.type_bloc === "input_text" || block.type_bloc === "input_text_area"
+      ? "text"
+      : block.type_bloc === "checkbox"
+        ? "checkbox"
+        : "radio";
+
+  return {
+    field_code: (block as any).field_code || `block_${block.id}`,
+    field_label: block.label || "",
+    kind,
+    answer_text: answerText,
+    intention,
+    answer_item_id: answerItemId,
+    review: {},
+  } as Prisma.AnswerCreateInput;
+}
+
 export async function createOrUpdateAnswers(
   ctx: { prisma: PrismaClient; elkClient: Client },
   input: {
     answers: Prisma.AnswerCreateInput[];
     review: ReviewWithButtonAndProduct;
     step_name?: FormStepNames;
-  }
+  },
 ) {
   const { prisma, elkClient } = ctx;
   const { review, answers, step_name } = input;
@@ -155,7 +207,7 @@ export async function createOrUpdateAnswers(
           return newAnswer;
         });
       });
-    })
+    }),
   );
 
   await promises.then((responses) => {
@@ -185,7 +237,7 @@ export async function createOrUpdateAnswers(
             });
           }
         })
-        .flat()
+        .flat(),
     );
   });
 }
@@ -195,7 +247,7 @@ export async function createReview(
   input: {
     review: Prisma.ReviewUncheckedCreateInput;
     answers: Prisma.AnswerCreateInput[];
-  }
+  },
 ) {
   const { prisma } = ctx;
   const { review, answers } = input;
@@ -223,7 +275,7 @@ export const reviewRouter = router({
       z.object({
         review: ReviewUncheckedCreateInputSchema,
         answers: z.array(AnswerCreateInputSchema),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const newReview = await createReview(ctx, input);
@@ -244,7 +296,7 @@ export const reviewRouter = router({
           "verbatim",
           "contact",
         ]),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { user_id, product_id, button_id, answers, step_name } = input;
@@ -279,5 +331,99 @@ export const reviewRouter = router({
           message: "Review not found",
         });
       }
+    }),
+
+  dynamicCreate: limitedProcedure
+    .input(
+      z.object({
+        review: ReviewUncheckedCreateInputSchema,
+        answers: z.array(
+          z.object({
+            block_id: z.number(),
+            answer_item_id: z.number().optional(),
+            answer_text: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { prisma } = ctx;
+      const { review, answers } = input;
+
+      const newReview = await prisma.review.create({
+        data: review,
+        include: {
+          product: true,
+          button: true,
+        },
+      });
+
+      const formattedAnswers = await Promise.all(
+        answers.map((answer) => formatDynamicAnswer(prisma, answer)),
+      );
+
+      try {
+        await createOrUpdateAnswers(ctx, {
+          answers: formattedAnswers,
+          review: newReview,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+
+      return { data: newReview };
+    }),
+
+  dynamicInsertOrUpdate: publicProcedure
+    .input(
+      z.object({
+        user_id: z.string(),
+        product_id: z.number(),
+        button_id: z.number(),
+        answers: z.array(
+          z.object({
+            block_id: z.number(),
+            answer_item_id: z.number().optional(),
+            answer_text: z.string().optional(),
+          }),
+        ),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { prisma } = ctx;
+      const { user_id, product_id, button_id, answers } = input;
+
+      const existingReview = await prisma.review.findFirst({
+        where: {
+          product_id,
+          button_id,
+          user_id,
+          created_at: {
+            gte: new Date(Date.now() - 60 * 60 * 1000),
+          },
+        },
+        include: {
+          button: true,
+          product: true,
+        },
+      });
+
+      if (!existingReview) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Review not found",
+        });
+      }
+
+      const formattedAnswers = await Promise.all(
+        answers.map((answer) => formatDynamicAnswer(prisma, answer)),
+      );
+
+      await createOrUpdateAnswers(ctx, {
+        answers: formattedAnswers,
+        review: existingReview,
+      });
+
+      return { data: existingReview };
     }),
 });
