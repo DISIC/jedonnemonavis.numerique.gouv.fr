@@ -49,7 +49,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		setAnchorEl(null);
 	};
 
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 
 	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
 		{
@@ -104,13 +104,16 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		);
 
-	const { data: userDetails, refetch: refetchUserDetails } =
-		trpc.userDetails.getByUserId.useQuery(
-			{ user_id: parseInt(session?.user?.id as string) },
-			{
-				enabled: session?.user?.id !== undefined
-			}
-		);
+	const {
+		data: userDetails,
+		refetch: refetchUserDetails,
+		isLoading: isUserDetailsLoading
+	} = trpc.userDetails.getByUserId.useQuery(
+		{ user_id: parseInt(session?.user?.id as string) },
+		{
+			enabled: session?.user?.id !== undefined
+		}
+	);
 
 	const userHasDetails = useMemo(() => {
 		return !!userDetails?.data;
@@ -340,6 +343,15 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
+	let mainContent = children;
+	if (status !== 'loading' && session !== null) {
+		mainContent = isUserDetailsLoading ? null : userHasDetails ? (
+			children
+		) : (
+			<UserDetailsForm onCreated={() => refetchUserDetails()} />
+		);
+	}
+
 	return (
 		<>
 			<SkipLinks
@@ -403,7 +415,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					/>
 				)}
-				{userHasDetails || !session?.user ? children : <UserDetailsForm />}
+				{mainContent}
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer
