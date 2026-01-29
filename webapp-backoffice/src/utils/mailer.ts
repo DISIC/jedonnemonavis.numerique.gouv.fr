@@ -6,13 +6,24 @@ export async function sendMail(
 	html: string,
 	text: string
 ) {
+	const host = process.env.NODEMAILER_HOST;
+	const port = Number(process.env.NODEMAILER_PORT);
+	const user = process.env.NODEMAILER_USER || process.env.MAILPACE_API_KEY;
+	const pass = process.env.NODEMAILER_PASSWORD || process.env.MAILPACE_API_KEY;
+	const hasAuth = !!user && !!pass && user !== 'null' && pass !== 'null';
+
 	var transporter = nodemailer.createTransport({
-		host: process.env.NODEMAILER_HOST,
-		port: process.env.NODEMAILER_PORT,
-		auth: {
-			user: process.env.NODEMAILER_USER || process.env.MAILPACE_API_KEY,
-			pass: process.env.NODEMAILER_PASSWORD || process.env.MAILPACE_API_KEY
-		}
+		host,
+		port,
+		secure: port === 465,
+		...(hasAuth
+			? {
+					auth: {
+						user,
+						pass
+					}
+				}
+			: {})
 	});
 
 	var mailOptions = {
@@ -23,12 +34,18 @@ export async function sendMail(
 		text
 	};
 
-	transporter.sendMail(mailOptions, function (error: any) {
-		if (error) {
-			throw new Error(error);
-		} else {
-			console.log(`Email sent to ${toEmail}`);
-			return true;
-		}
-	});
+	try {
+		await transporter.sendMail(mailOptions);
+		console.log(`Email sent to ${toEmail}`);
+		return true;
+	} catch (error: any) {
+		const details = {
+			message: error?.message,
+			code: error?.code,
+			responseCode: error?.responseCode,
+			response: error?.response,
+			command: error?.command
+		};
+		throw new Error(`MailerError: ${JSON.stringify(details)}`);
+	}
 }

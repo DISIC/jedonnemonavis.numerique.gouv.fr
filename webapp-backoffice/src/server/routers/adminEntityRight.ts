@@ -139,16 +139,6 @@ export const adminEntityRightRouter = router({
 					baseUrl: process.env.NODEMAILER_BASEURL
 				});
 
-				console.log('Trying to send invite mail to:', {
-					toEmail: user_email.toLowerCase(),
-					emailHtml,
-					inviteTitle: `Cliquez sur ce lien pour créer votre compte : ${
-						process.env.NODEMAILER_BASEURL
-					}/register?${new URLSearchParams({
-						email: user_email.toLowerCase(),
-						inviteToken: token
-					})}`
-				});
 				await sendMail(
 					'Invitation à rejoindre « Je donne mon avis »',
 					user_email.toLowerCase(),
