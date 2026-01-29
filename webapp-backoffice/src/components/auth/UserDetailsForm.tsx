@@ -147,8 +147,8 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 										required: true
 									}}
 								>
-									<option value="" selected disabled hidden>
-										Selectionnez une option
+									<option value="" disabled hidden>
+										Sélectionner une option
 									</option>
 									{sourceOptions.map(option => (
 										<option key={option} value={option}>
