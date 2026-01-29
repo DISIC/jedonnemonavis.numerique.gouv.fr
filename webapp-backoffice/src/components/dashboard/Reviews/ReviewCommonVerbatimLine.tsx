@@ -238,6 +238,7 @@ const useStyles = tss.create({
 	content: {
 		...fr.typography[17].style,
 		fontWeight: 400,
+		wordBreak: 'break-word',
 		marginBottom: 0
 	},
 	verbatimContent: {

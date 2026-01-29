@@ -221,6 +221,7 @@ const useStyles = tss.create({
 	},
 	contentVerbatim: {
 		...fr.typography[18].style,
+		wordBreak: 'break-word',
 		margin: 0
 	},
 	button: {
