@@ -35,26 +35,34 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
   const currentStep = steps[currentStepIndex];
 
   const createReview = trpc.review.dynamicCreate.useMutation({
-    onSuccess: () => {
-      console.log("Review created");
-    },
     onError: (error) => {
       console.error("Error creating review:", error);
     },
   });
 
   const insertOrUpdateReview = trpc.review.dynamicInsertOrUpdate.useMutation({
-    onSuccess: () => {
-      console.log("Review updated");
-    },
     onError: (error) => {
       console.error("Error updating review:", error);
     },
   });
 
-  const handleNext = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    const isLastStep = currentStepIndex === steps.length - 1;
+
     saveCurrentStep();
-    if (currentStepIndex < steps.length - 1) {
+
+    if (isLastStep) {
+      localStorage.removeItem("userId");
+      setIsSubmitted(true);
+    } else {
       setCurrentStepIndex(currentStepIndex + 1);
     }
   };
@@ -76,7 +84,6 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
       });
     });
 
-    console.log("Current step answers:", currentStepAnswers);
     if (currentStepAnswers.length === 0) return;
 
     const userId = localStorage.getItem("userId");
@@ -102,12 +109,6 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
         answers: currentStepAnswers,
       });
     }
-  };
-
-  const handleSubmit = () => {
-    saveCurrentStep();
-    localStorage.removeItem("userId");
-    setIsSubmitted(true);
   };
 
   if (isSubmitted) {
@@ -144,53 +145,56 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
         <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
           <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
             <div className={classes.formSection}>
-              <FormStepRenderer
-                step={currentStep}
-                form={form}
-                answers={answers}
-                setAnswers={setAnswers}
-                currentStepIndex={currentStepIndex}
-                totalSteps={steps.length}
-              />
+              <form onSubmit={handleSubmit}>
+                <FormStepRenderer
+                  step={currentStep}
+                  form={form}
+                  answers={answers}
+                  setAnswers={setAnswers}
+                  currentStepIndex={currentStepIndex}
+                  totalSteps={steps.length}
+                />
 
-              {process.env.NODE_ENV === "development" && (
-                <details className={fr.cx("fr-mt-4v")}>
-                  <summary>Debug: Current Answers</summary>
-                  <pre>{JSON.stringify(answers, null, 2)}</pre>
-                  <summary>Debug: Answers Array</summary>
-                  <pre>{JSON.stringify(getAnswersArray(), null, 2)}</pre>
-                </details>
-              )}
-
-              <div className={classes.buttonsContainer}>
-                {currentStepIndex > 0 ? (
-                  <Button
-                    priority="secondary"
-                    iconId="fr-icon-arrow-left-line"
-                    iconPosition="left"
-                    onClick={handlePrevious}
-                  >
-                    Étape précédente
-                  </Button>
-                ) : (
-                  <div />
+                {process.env.NODE_ENV === "development" && (
+                  <details className={fr.cx("fr-mt-4v")}>
+                    <summary>Debug: Current Answers</summary>
+                    <pre>{JSON.stringify(answers, null, 2)}</pre>
+                    <summary>Debug: Answers Array</summary>
+                    <pre>{JSON.stringify(getAnswersArray(), null, 2)}</pre>
+                  </details>
                 )}
 
-                {currentStepIndex < steps.length - 1 ? (
-                  <Button
-                    priority="primary"
-                    iconId="fr-icon-arrow-right-line"
-                    iconPosition="right"
-                    onClick={handleNext}
-                  >
-                    Étape suivante
-                  </Button>
-                ) : (
-                  <Button priority="primary" onClick={handleSubmit}>
-                    Envoyer
-                  </Button>
-                )}
-              </div>
+                <div className={classes.buttonsContainer}>
+                  {currentStepIndex > 0 ? (
+                    <Button
+                      priority="secondary"
+                      iconId="fr-icon-arrow-left-line"
+                      iconPosition="left"
+                      onClick={handlePrevious}
+                      type="button"
+                    >
+                      Précédent
+                    </Button>
+                  ) : (
+                    <div />
+                  )}
+
+                  {currentStepIndex < steps.length - 1 ? (
+                    <Button
+                      priority="primary"
+                      iconId="fr-icon-arrow-right-line"
+                      iconPosition="right"
+                      type="submit"
+                    >
+                      Suivant
+                    </Button>
+                  ) : (
+                    <Button priority="primary" type="submit">
+                      Envoyer mon avis
+                    </Button>
+                  )}
+                </div>
+              </form>
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ export const FormBlockRenderer = (props: Props) => {
           <SmileyInput
             label={displayLabel}
             name={fieldKey}
-            hint={block.upLabel || undefined}
+            hint={block.content || undefined}
             value={smileyValue}
             onChange={(feeling) => {
               const smileyItemId =
@@ -69,19 +69,22 @@ export const FormBlockRenderer = (props: Props) => {
         const textareaValue = textareaAnswer?.answer_text || "";
         return (
           <div className={classes.inputContainer}>
+            <label
+              htmlFor={`textarea-${block.id}`}
+              className={fr.cx("fr-label", "fr-text--md")}
+            >
+              {displayLabel}
+            </label>
+            {block.content && <p className={classes.hint}>{block.content}</p>}
             <Input
-              hintText={
-                block.upLabel ? (
-                  <p dangerouslySetInnerHTML={{ __html: block.upLabel }} />
-                ) : undefined
-              }
-              label={<h3>{displayLabel}</h3>}
-              state={textareaValue.length > 15000 ? "error" : "default"}
-              stateRelatedMessage="Maximum 15000 caractères"
+              label=""
               nativeTextAreaProps={{
+                id: `textarea-${block.id}`,
                 value: textareaValue,
+                maxLength: 15000,
+                required: block.isRequired,
                 onChange: (e) => {
-                  const value = e.target.value.slice(0, 15000);
+                  const value = e.target.value;
                   setAnswers((prev) => ({
                     ...prev,
                     [fieldKey]: {
@@ -91,14 +94,10 @@ export const FormBlockRenderer = (props: Props) => {
                   }));
                 },
               }}
+              state={textareaValue.length > 15000 ? "error" : "default"}
+              stateRelatedMessage="Maximum 15000 caractères"
               textArea
             />
-            {block.downLabel && (
-              <p className={cx(classes.infoText, fr.cx("fr-mt-0"))}>
-                <span className={fr.cx("fr-icon-info-fill", "fr-mr-1v")} />
-                {block.downLabel}
-              </p>
-            )}
             <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
               {textareaValue.length} / 15000
             </div>
@@ -109,25 +108,35 @@ export const FormBlockRenderer = (props: Props) => {
         const inputAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
         const inputValue = inputAnswer?.answer_text || "";
         return (
-          <Input
-            hintText={block.upLabel || undefined}
-            label={<h3>{displayLabel}</h3>}
-            state={inputValue.length > 250 ? "error" : "default"}
-            stateRelatedMessage="Maximum 250 caractères"
-            nativeInputProps={{
-              value: inputValue,
-              maxLength: 250,
-              onChange: (e) => {
-                setAnswers((prev) => ({
-                  ...prev,
-                  [fieldKey]: {
-                    block_id: block.id,
-                    answer_text: e.target.value,
-                  },
-                }));
-              },
-            }}
-          />
+          <div>
+            <label
+              htmlFor={`input-${block.id}`}
+              className={fr.cx("fr-label", "fr-text--md")}
+            >
+              {displayLabel}
+            </label>
+            {block.content && <p className={classes.hint}>{block.content}</p>}
+            <Input
+              label=""
+              nativeInputProps={{
+                id: `input-${block.id}`,
+                value: inputValue,
+                maxLength: 250,
+                required: block.isRequired,
+                onChange: (e) => {
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [fieldKey]: {
+                      block_id: block.id,
+                      answer_text: e.target.value,
+                    },
+                  }));
+                },
+              }}
+              state={inputValue.length > 250 ? "error" : "default"}
+              stateRelatedMessage="Maximum 250 caractères"
+            />
+          </div>
         );
 
       case "radio":
@@ -136,14 +145,21 @@ export const FormBlockRenderer = (props: Props) => {
         const radioValue = radioAnswer?.answer_item_id;
         return (
           <div>
-            <h3>{displayLabel}</h3>
-            {block.upLabel && <p className={classes.hint}>{block.upLabel}</p>}
+            <label
+              htmlFor={`radio-${block.id}`}
+              className={fr.cx("fr-label", "fr-text--md")}
+            >
+              {displayLabel}
+            </label>
+            {block.content && <p className={classes.hint}>{block.content}</p>}
             <RadioButtons
+              id={`radio-${block.id}`}
               options={block.options.map((opt) => ({
                 label: opt.label || "",
                 nativeInputProps: {
                   value: opt.id.toString(),
                   checked: radioValue === opt.id,
+                  required: block.isRequired,
                   onChange: () => {
                     setAnswers((prev) => ({
                       ...prev,
@@ -167,14 +183,24 @@ export const FormBlockRenderer = (props: Props) => {
           checkboxAnswers?.map((a) => a.answer_item_id) || [];
         return (
           <div>
-            <h3>{displayLabel}</h3>
-            {block.upLabel && <p className={classes.hint}>{block.upLabel}</p>}
+            <label
+              htmlFor={`checkbox-${block.id}`}
+              className={fr.cx("fr-label", "fr-text--md")}
+            >
+              {displayLabel}
+            </label>
+            {block.content && <p className={classes.hint}>{block.content}</p>}
             <Checkbox
-              options={block.options.map((opt) => ({
+              options={block.options.map((opt, index) => ({
                 label: opt.label || "",
                 nativeInputProps: {
+                  id: index === 0 ? `checkbox-${block.id}` : undefined,
                   value: opt.id.toString(),
                   checked: checkboxValues.includes(opt.id),
+                  required:
+                    block.isRequired &&
+                    checkboxValues.length === 0 &&
+                    index === 0,
                   onChange: (e) => {
                     const currentAnswers =
                       (answers[fieldKey] as DynamicAnswerData[]) || [];
