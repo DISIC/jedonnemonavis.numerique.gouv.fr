@@ -48,6 +48,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: 'Évaluation de la satisfaction usager',
 	slug: 'root',
 	active: true,
+	hasStepper: true,
 	form_template_steps: {
 		create: [
 			{

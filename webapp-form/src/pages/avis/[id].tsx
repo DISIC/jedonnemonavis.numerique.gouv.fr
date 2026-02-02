@@ -155,15 +155,6 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
                   totalSteps={steps.length}
                 />
 
-                {process.env.NODE_ENV === "development" && (
-                  <details className={fr.cx("fr-mt-4v")}>
-                    <summary>Debug: Current Answers</summary>
-                    <pre>{JSON.stringify(answers, null, 2)}</pre>
-                    <summary>Debug: Answers Array</summary>
-                    <pre>{JSON.stringify(getAnswersArray(), null, 2)}</pre>
-                  </details>
-                )}
-
                 <div className={classes.buttonsContainer}>
                   {currentStepIndex > 0 ? (
                     <Button

@@ -28,6 +28,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: "Remontées d'informations",
 	slug: 'bug',
 	active: true,
+	hasStepper: false,
 	form_template_steps: {
 		create: [
 			{

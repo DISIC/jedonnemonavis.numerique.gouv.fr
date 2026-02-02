@@ -41,7 +41,7 @@ export const FormStepRenderer = (props: Props) => {
 
   return (
     <div className={cx(classes.container)}>
-      {totalSteps > 1 && (
+      {form.form_template.hasStepper && totalSteps > 1 && (
         <>
           <h1 className={cx(classes.title, fr.cx("fr-mb-12v"))}>
             {step.title}
@@ -55,8 +55,8 @@ export const FormStepRenderer = (props: Props) => {
         </>
       )}
 
-      {totalSteps === 1 && (
-        <h2 className={cx(classes.subtitle)}>{step.title}</h2>
+      {(!form.form_template.hasStepper || totalSteps === 1) && (
+        <h1 className={cx(classes.subtitle)}>{step.title}</h1>
       )}
 
       {step.form_template_blocks.map((block) => {
@@ -99,5 +99,6 @@ const useStyles = tss.withName(FormStepRenderer.name).create(() => ({
   subtitle: {
     color: fr.colors.decisions.background.flat.blueFrance.default,
     marginBottom: fr.spacing("4v"),
+    textAlign: "center",
   },
 }));

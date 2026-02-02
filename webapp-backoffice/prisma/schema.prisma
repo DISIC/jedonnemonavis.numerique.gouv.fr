@@ -477,6 +477,7 @@ model FormTemplate {
   title               String
   slug                String             @unique
   active              Boolean            @default(false)
+  hasStepper          Boolean            @default(false)
   form_template_steps FormTemplateStep[]
   forms               Form[]
   ReviewCustom        ReviewCustom[]
