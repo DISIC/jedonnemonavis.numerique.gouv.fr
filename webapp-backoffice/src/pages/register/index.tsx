@@ -51,6 +51,12 @@ export default function Register() {
 			setUserPresetInfos(getCurrentUser.data as UserPresetInfos);
 	}, [getCurrentUser?.data]);
 
+	useEffect(() => {
+		if (router.query.registered || router.query.request) {
+			router.replace(router.pathname, undefined, { shallow: true });
+		}
+	}, []);
+
 	return (
 		<div className={fr.cx('fr-container')}>
 			<Head>
