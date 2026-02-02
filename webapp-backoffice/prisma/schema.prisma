@@ -585,6 +585,7 @@ model Form {
   updated_at       DateTime     @default(now())
   deleted_at       DateTime?
   isDeleted        Boolean?     @default(false)
+  last_review_at   DateTime?
   exports          Export[]
 }
 

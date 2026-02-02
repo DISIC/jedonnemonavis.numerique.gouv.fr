@@ -1,6 +1,11 @@
 import { useFilters } from '@/src/contexts/FiltersContext';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { ProductWithForms } from '@/src/types/prismaTypesExtended';
-import { formatNumberWithSpaces } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	formatNumberWithSpaces
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Badge } from '@codegouvfr/react-dsfr/Badge';
@@ -9,16 +14,13 @@ import { Input } from '@codegouvfr/react-dsfr/Input';
 import { createModal, ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { Entity } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import OnConfirmModal from '../../ui/modal/OnConfirm';
 import { Toast } from '../../ui/Toast';
-import starFill from '.././../../../public/assets/star-fill.svg';
-import starOutline from '.././../../../public/assets/star-outline.svg';
-import NoFormsPanel from '../Pannels/NoFormsPanel';
 
 interface CreateModalProps {
 	buttonProps: {
@@ -64,8 +66,12 @@ const ProductCard = ({
 
 	const [validateDelete, setValidateDelete] = useState(false);
 
+	const router = useRouter();
+	const { reset: resetContext } = useOnboarding();
 	const utils = trpc.useUtils();
 	const { classes, cx } = useStyles();
+
+	const { isMobile } = useIsMobile();
 
 	const {
 		control,
@@ -116,9 +122,9 @@ const ProductCard = ({
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-			  (reviewsCountData?.countsByForm['1'] ?? 0) +
-			  (reviewsCountData?.countsByForm['2'] ?? 0)
-			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
+				(reviewsCountData?.countsByForm['1'] ?? 0) +
+				(reviewsCountData?.countsByForm['2'] ?? 0)
+			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 
@@ -169,14 +175,6 @@ const ProductCard = ({
 			);
 		}
 
-		if (isDisabled) {
-			badges.push(
-				<Badge key="archived" noIcon small>
-					Service archivé
-				</Badge>
-			);
-		}
-
 		if (product.forms.length === 0) {
 			badges.push(
 				<Badge key="no-forms" severity="warning" small noIcon>
@@ -189,6 +187,113 @@ const ProductCard = ({
 			<div className={classes.badgesContainer}>{badges}</div>
 		) : null;
 	};
+
+	const renderActionsSection = () => (
+		<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
+			{!isDisabled && isMobile && (
+				<Button
+					className={cx(classes.actionButton, 'actionButton')}
+					iconId="fr-icon-arrow-right-line"
+					iconPosition="right"
+					linkProps={{
+						href: `/administration/dashboard/product/${product.id}/forms`
+					}}
+				>
+					Accéder
+				</Button>
+			)}
+			{isDisabled && (
+				<>
+					<div>
+						<span className={cx(classes.smallText)}>Archivé&nbsp;le&nbsp;</span>
+						<span className={fr.cx('fr-text--bold')}>
+							{formatDateToFrenchString(product.updated_at.toString())}
+						</span>
+					</div>
+					<div className={cx(classes.buttonsCol)}>
+						<Button
+							className={cx(classes.actionButton, 'actionButton')}
+							iconId={'ri-inbox-unarchive-line'}
+							iconPosition="right"
+							title={`Restaurer le produit « ${product.title} »`}
+							aria-label={`Restaurer le produit « ${product.title} »`}
+							priority="secondary"
+							size={isMobile ? 'medium' : 'small'}
+							onClick={e => {
+								e.preventDefault();
+								onConfirmModalRestore.open();
+								push(['trackEvent', 'BO - Product', `Restore`]);
+							}}
+						>
+							Restaurer
+						</Button>
+					</div>
+				</>
+			)}
+			{!isDisabled && (
+				<Button
+					className={cx(classes.actionButton, 'actionButton')}
+					priority="tertiary"
+					size={isMobile ? 'medium' : 'small'}
+					iconId="fr-icon-file-add-line"
+					iconPosition="right"
+					onClick={() => {
+						resetContext();
+						router.push(
+							`/administration/dashboard/product/${product.id}/forms/new`
+						);
+					}}
+				>
+					Générer un formulaire
+				</Button>
+			)}
+			{showFavoriteButton && !isDisabled && (
+				<Button
+					title={
+						isFavorite
+							? `Supprimer le produit « ${product.title} » des favoris`
+							: `Ajouter le produit « ${product.title} » aux favoris`
+					}
+					aria-label={
+						isFavorite
+							? `Supprimer le produit « ${product.title} » des favoris`
+							: `Ajouter le produit « ${product.title} » aux favoris`
+					}
+					className={cx(
+						classes.buttonWrapper,
+						classes.actionButton,
+						'actionButton'
+					)}
+					priority="tertiary"
+					size={isMobile ? 'medium' : 'small'}
+					onClick={e => {
+						e.preventDefault();
+						if (isFavorite) {
+							deleteFavorite.mutate({
+								product_id: product.id,
+								user_id: userId
+							});
+							push(['trackEvent', 'BO - Product', `Set-Favorite`]);
+						} else {
+							createFavorite.mutate({
+								product_id: product.id,
+								user_id: userId
+							});
+							push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
+						}
+					}}
+					iconId={isFavorite ? 'ri-star-fill' : 'ri-star-line'}
+					iconPosition="right"
+				>
+					{isMobile
+						? isFavorite
+							? 'Retirer des favoris'
+							: 'Ajouter aux favoris'
+						: null}
+				</Button>
+			)}
+		</div>
+	);
 
 	return (
 		<>
@@ -291,91 +396,39 @@ const ProductCard = ({
 					)}
 				</div>
 			</OnConfirmModal>{' '}
-			<div className={fr.cx('fr-card', 'fr-my-3w', 'fr-p-2w')}>
+			<div
+				className={cx(
+					fr.cx(
+						'fr-card',
+						isDisabled && 'fr-card--grey',
+						'fr-my-3w',
+						'fr-p-2w'
+					),
+					classes.productCard,
+					isDisabled && 'productDisabled'
+				)}
+			>
 				<div
 					className={cx(
 						fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
 						classes.gridProduct
 					)}
 				>
+					<Link
+						href={`/administration/dashboard/product/${product.id}/forms`}
+						className={classes.productOverlay}
+						onClick={() => clearFilters()}
+						aria-label={`Aller sur la page de gestion du service ${product.title}`}
+						style={{ pointerEvents: isDisabled ? 'none' : 'auto' }}
+					/>
 					<div
 						className={cx(fr.cx('fr-col-12', 'fr-pb-1v'), classes.titleSection)}
 					>
-						<div className={cx(fr.cx('fr-col-9'), classes.titleWithBadges)}>
-							<Link
-								href={`/administration/dashboard/product/${product.id}/forms`}
-								tabIndex={0}
-								title={`Voir les statistiques pour le service ${product.title}`}
-								className={cx(classes.productLink, fr.cx('fr-link'))}
-								onClick={() => clearFilters()}
-								style={{
-									pointerEvents: isDisabled ? 'none' : 'auto'
-								}}
-							>
-								<h2 className={cx(classes.productTitle)}>{product.title}</h2>
-							</Link>
+						<div className={cx(classes.titleWithBadges)}>
+							<h2 className={cx(classes.productTitle)}>{product.title}</h2>
 							{renderProductBadges()}
 						</div>
-						<div className={cx(fr.cx('fr-col'), classes.actionsSection)}>
-							{isDisabled && (
-								<div className={cx(classes.buttonsCol)}>
-									<Button
-										iconId={'ri-inbox-unarchive-line'}
-										iconPosition="right"
-										title={`Restaurer le produit « ${product.title} »`}
-										aria-label={`Restaurer le produit « ${product.title} »`}
-										priority="secondary"
-										size="small"
-										onClick={e => {
-											e.preventDefault();
-											onConfirmModalRestore.open();
-											push(['trackEvent', 'BO - Product', `Restore`]);
-										}}
-									>
-										Restaurer
-									</Button>
-								</div>
-							)}
-							{showFavoriteButton && !isDisabled && (
-								<Button
-									title={
-										isFavorite
-											? `Supprimer le produit « ${product.title} » des favoris`
-											: `Ajouter le produit « ${product.title} » aux favoris`
-									}
-									aria-label={
-										isFavorite
-											? `Supprimer le produit « ${product.title} » des favoris`
-											: `Ajouter le produit « ${product.title} » aux favoris`
-									}
-									className={cx(fr.cx('fr-ml-2v'), classes.buttonWrapper)}
-									priority="tertiary"
-									size="small"
-									onClick={e => {
-										e.preventDefault();
-										if (isFavorite) {
-											deleteFavorite.mutate({
-												product_id: product.id,
-												user_id: userId
-											});
-											push(['trackEvent', 'BO - Product', `Set-Favorite`]);
-										} else {
-											createFavorite.mutate({
-												product_id: product.id,
-												user_id: userId
-											});
-											push(['trackEvent', 'BO - Product', `Unset-Favorite`]);
-										}
-									}}
-								>
-									{isFavorite ? (
-										<Image alt="favoris ajouté" src={starFill} />
-									) : (
-										<Image alt="favoris retiré" src={starOutline} />
-									)}
-								</Button>
-							)}
-						</div>
+						{!isMobile && renderActionsSection()}
 					</div>
 					<div
 						className={cx(
@@ -387,6 +440,8 @@ const ProductCard = ({
 							{entity?.name}
 						</p>
 					</div>
+
+					{isMobile && renderActionsSection()}
 
 					{!isDisabled &&
 						!isLoadingReviewsCount &&
@@ -411,6 +466,22 @@ const ProductCard = ({
 												(a.deleted_at?.getTime() ?? 0)
 										)
 								]
+									.sort((a, b) => {
+										if (a.isDeleted && !b.isDeleted) return 1;
+										if (!a.isDeleted && b.isDeleted) return -1;
+
+										if (!a.isDeleted && !b.isDeleted) {
+											const dateA = a.last_review_at
+												? new Date(a.last_review_at).getTime()
+												: 0;
+											const dateB = b.last_review_at
+												? new Date(b.last_review_at).getTime()
+												: 0;
+											return dateB - dateA;
+										}
+
+										return 0;
+									})
 									.slice(0, 2)
 									.map(form => {
 										const newReviewsCount = getFormNewReviewCount(
@@ -422,7 +493,8 @@ const ProductCard = ({
 												key={form.id}
 												className={cx(
 													fr.cx('fr-grid-row', 'fr-p-4v'),
-													classes.formCard
+													classes.formCard,
+													'formCard'
 												)}
 												style={{
 													backgroundColor: form.isDeleted
@@ -506,6 +578,24 @@ const ProductCard = ({
 };
 
 const useStyles = tss.withName(ProductCard.name).create({
+	productCard: {
+		position: 'relative',
+		transition: 'background-color 0.2s ease-in-out',
+		'&:hover:not(.productDisabled)': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			cursor: 'pointer'
+		},
+		'&:hover:not(.productDisabled, :has(.formCard:hover, .actionButton:hover)) h2':
+			{
+				textDecoration: 'underline'
+			},
+		'&:hover .formCard': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.hover
+		}
+	},
+	'.productDisabled': {
+		backgroundColor: 'red!important'
+	},
 	gridProduct: {
 		[fr.breakpoints.down('md')]: {
 			'.buttonsWrapper': {
@@ -527,23 +617,44 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	titleSection: {
 		display: 'flex',
-		justifyContent: 'space-between'
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('4v')
+		}
 	},
 	entitySection: {},
 	actionsSection: {
 		display: 'flex',
+		gap: fr.spacing('3v'),
 		alignItems: 'center',
-		justifyContent: 'end'
+		justifyContent: 'end',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			justifyContent: 'start',
+			gap: fr.spacing('4v'),
+			marginBottom: fr.spacing('2v'),
+			'.actionButton': {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
 	},
 	buttonWrapper: {
 		maxHeight: '32px !important',
-		'&::before': {
-			marginRight: '0 !important'
+		'::after': {
+			marginRight: '0 !important',
+			[fr.breakpoints.up('md')]: {
+				marginLeft: '0!important'
+			}
 		}
 	},
 	productLink: {
 		backgroundImage: 'none',
-		'&:hover': {
+		position: 'relative',
+		zIndex: 4,
+		':hover': {
 			textDecoration: 'underline'
 		}
 	},
@@ -556,7 +667,29 @@ const useStyles = tss.withName(ProductCard.name).create({
 		height: '100%',
 		'&:active': {
 			opacity: 0.2
+		},
+		zIndex: 3,
+		'&:hover, &:focus': {
+			textDecoration: 'underline'
 		}
+	},
+	productOverlay: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		width: '100%',
+		height: '100%',
+		backgroundImage: 'none',
+		zIndex: 1,
+		'&:active': {
+			opacity: 0.2
+		}
+	},
+	actionButton: {
+		position: 'relative',
+		zIndex: 4,
+		textWrap: 'nowrap',
+		':hover': { background: 'white!important' }
 	},
 	productTitleContainer: {
 		display: 'flex',
@@ -568,15 +701,16 @@ const useStyles = tss.withName(ProductCard.name).create({
 		lineHeight: '1.5rem',
 		fontWeight: 'bold',
 		color: fr.colors.decisions.text.title.blueFrance.default,
-		marginBottom: 0,
-		'&:hover': {
-			textDecoration: 'underline'
-		}
+		marginBottom: 0
 	},
 	titleWithBadges: {
 		display: 'flex',
 		gap: fr.spacing('2v'),
-		alignItems: 'center'
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start'
+		}
 	},
 	entityName: {
 		color: '#666666'
@@ -600,11 +734,19 @@ const useStyles = tss.withName(ProductCard.name).create({
 		marginLeft: 0,
 		marginRight: 0,
 		marginBottom: '1.5rem',
+		transition: 'all 0.2s ease-in-out',
 		':nth-of-type(2), :last-child': {
 			marginBottom: '0.5rem'
 		},
+		'&:hover h3': {
+			textDecoration: 'underline'
+		},
 		'&:hover > div:first-of-type span:first-of-type': {
 			textDecoration: 'underline'
+		},
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('2v')
 		}
 	},
 	formStatsWrapper: {
@@ -621,7 +763,6 @@ const useStyles = tss.withName(ProductCard.name).create({
 		gap: fr.spacing('1v'),
 		textWrap: 'nowrap',
 		[fr.breakpoints.down('md')]: {
-			marginTop: fr.spacing('4v'),
 			justifyContent: 'start',
 			flexWrap: 'wrap'
 		}
@@ -631,7 +772,10 @@ const useStyles = tss.withName(ProductCard.name).create({
 		fontSize: '0.8rem'
 	},
 	buttonsCol: {
-		textAlign: 'right'
+		textAlign: 'right',
+		[fr.breakpoints.down('md')]: {
+			width: '100%'
+		}
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default

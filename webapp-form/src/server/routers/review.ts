@@ -208,6 +208,12 @@ export async function createReview(
     },
   });
 
+  // Update last_review_at on the form
+  await prisma.form.update({
+    where: { id: review.form_id },
+    data: { last_review_at: newReview.created_at }
+  });
+
   try {
     await createOrUpdateAnswers(ctx, { answers, review: newReview });
   } catch (e) {
