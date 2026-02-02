@@ -7,6 +7,7 @@ import { FormWithElements } from "@/src/utils/types";
 import { useState } from "react";
 import { FormStepRenderer } from "@/src/components/form/layouts/FormStepRenderer";
 import Button from "@codegouvfr/react-dsfr/Button";
+import Success from "@codegouvfr/react-dsfr/picto/Success";
 import { trpc } from "@/src/utils/trpc";
 import { v4 as uuidv4 } from "uuid";
 
@@ -113,23 +114,28 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
 
   if (isSubmitted) {
     return (
-      <div
-        className={cx(
-          classes.container,
-          fr.cx("fr-container--fluid", "fr-container"),
-        )}
-      >
-        <div className={classes.blueSection}>
-          <h1>Merci !</h1>
-        </div>
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-          <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
-            <div className={classes.formSection}>
-              <p>Votre avis a bien été pris en compte.</p>
+      <>
+        <div className={classes.blueSection} />
+        <div
+          className={cx(
+            classes.container,
+            fr.cx("fr-container--fluid", "fr-container"),
+          )}
+        >
+          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+            <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
+              <div className={cx(classes.formSection, classes.thanksSection)}>
+                <Success className={fr.cx("fr-mt-6v", "fr-mb-2v")} />
+                <h1>Merci beacoup !</h1>
+                <p className={fr.cx("fr-mt-8v")}>
+                  Merci, votre avis nous permettra d’améliorer la qualité du
+                  service.
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -291,6 +297,7 @@ const useStyles = tss.withName(AvisPage.name).create(() => ({
     },
   },
   blueSection: {
+    display: "none",
     backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
     ...fr.spacing("padding", { topBottom: "6v", rightLeft: "10v" }),
     h1: {
@@ -300,6 +307,7 @@ const useStyles = tss.withName(AvisPage.name).create(() => ({
       color: fr.colors.decisions.background.flat.blueFrance.default,
     },
     [fr.breakpoints.up("md")]: {
+      display: "block",
       height: `${blueSectionPxHeight}px`,
     },
   },
@@ -318,5 +326,15 @@ const useStyles = tss.withName(AvisPage.name).create(() => ({
     display: "flex",
     justifyContent: "space-between",
     marginTop: fr.spacing("8v"),
+  },
+  thanksSection: {
+    textAlign: "center",
+    h1: {
+      color: fr.colors.decisions.background.flat.blueFrance.default,
+    },
+    svg: {
+      width: fr.spacing("20v"),
+      height: fr.spacing("20v"),
+    },
   },
 }));

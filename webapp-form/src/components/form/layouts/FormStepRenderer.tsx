@@ -98,7 +98,7 @@ const useStyles = tss.withName(FormStepRenderer.name).create(() => ({
   },
   subtitle: {
     color: fr.colors.decisions.background.flat.blueFrance.default,
-    marginBottom: fr.spacing("4v"),
+    marginBottom: fr.spacing("10v"),
     textAlign: "center",
   },
 }));
