@@ -108,12 +108,9 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		data: userDetails,
 		refetch: refetchUserDetails,
 		isLoading: isUserDetailsLoading
-	} = trpc.userDetails.getByUserId.useQuery(
-		{ user_id: parseInt(session?.user?.id as string) },
-		{
-			enabled: session?.user?.id !== undefined
-		}
-	);
+	} = trpc.userDetails.getByUser.useQuery(undefined, {
+		enabled: session?.user?.id !== undefined
+	});
 
 	const userHasDetails = useMemo(() => {
 		return !!userDetails?.data;
@@ -344,12 +341,13 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	}
 
 	let mainContent = children;
-	if (status !== 'loading' && session !== null) {
-		mainContent = isUserDetailsLoading ? null : userHasDetails ? (
-			children
-		) : (
-			<UserDetailsForm onCreated={() => refetchUserDetails()} />
-		);
+	if (
+		status !== 'loading' &&
+		session !== null &&
+		!isUserDetailsLoading &&
+		!userHasDetails
+	) {
+		mainContent = <UserDetailsForm onCreated={() => refetchUserDetails()} />;
 	}
 
 	return (

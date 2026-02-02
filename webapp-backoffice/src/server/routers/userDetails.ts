@@ -1,18 +1,16 @@
 import { UserDetailsUncheckedCreateInputSchema } from '@/prisma/generated/zod';
 import { protectedProcedure, router } from '@/src/server/trpc';
-import { z } from 'zod';
 
 export const userDetailsRouter = router({
-	getByUserId: protectedProcedure
-		.input(z.object({ user_id: z.number() }))
-		.query(async ({ ctx, input }) => {
-			const userDetails = await ctx.prisma.userDetails.findFirst({
-				where: {
-					userId: input.user_id
-				}
-			});
-			return { data: userDetails };
-		}),
+	getByUser: protectedProcedure.query(async ({ ctx }) => {
+		const userId = ctx.session.user.id;
+		const userDetails = await ctx.prisma.userDetails.findFirst({
+			where: {
+				userId: parseInt(userId)
+			}
+		});
+		return { data: userDetails };
+	}),
 	create: protectedProcedure
 		.input(UserDetailsUncheckedCreateInputSchema)
 		.mutation(async ({ ctx, input }) => {

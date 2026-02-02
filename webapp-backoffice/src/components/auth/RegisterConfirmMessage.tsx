@@ -23,6 +23,11 @@ export const RegisterValidationMessage = (props: Props) => {
 			setHasTheEmailBeenResent(true);
 			setCanResendEmail(false);
 			setCooldown(60);
+		},
+		onError: () => {
+			setHasTheEmailBeenResent(false);
+			setCanResendEmail(true);
+			setCooldown(null);
 		}
 	});
 
@@ -37,6 +42,11 @@ export const RegisterValidationMessage = (props: Props) => {
 	}, [cooldown]);
 
 	if (!mode || !email) return;
+
+	const formatCooldown = () =>
+		cooldown !== null
+			? `dans ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
+			: '';
 
 	return (
 		<div>
@@ -79,10 +89,7 @@ export const RegisterValidationMessage = (props: Props) => {
 										)}
 									>
 										Vous {cooldown !== null ? 'pourrez' : 'pouvez'} renvoyer le
-										mail{' '}
-										{cooldown !== null
-											? ` dans ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
-											: ''}
+										mail {formatCooldown()}
 									</p>
 								)}
 							{hasTheEmailBeenResent && (
