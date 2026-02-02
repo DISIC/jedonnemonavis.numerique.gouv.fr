@@ -49,42 +49,46 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   };
 
   const lang = (i18n?.language || "fr") as Language;
-  const quickAccesItems: HeaderProps.QuickAccessItem[] | ReactNode[] = isMobile
-    ? languages.map((lang_i) => ({
-        buttonProps: {
-          lang: lang_i,
-          "aria-current": lang_i === lang ? "true" : undefined,
-          onClick: (e) => {
-            e.preventDefault();
-            onToggleLanguageClick(lang_i);
-          },
-          className: cx(
-            classes.langButton,
-            fr.cx("fr-translate__language", "fr-nav__link")
-          ),
-        },
-        iconId: "fr-icon-translate-2",
-        text: (
-          <>
-            <span className={classes.langShort}>{lang_i}</span>
-            &nbsp;-&nbsp;{fullNameByLang[lang_i]}
-          </>
-        ),
-      }))
-    : [
-        {
-          buttonProps: {
-            "aria-controls": "translate-select",
-            "aria-expanded": false,
-            title: t("Sélectionner une langue"),
-            className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
-          },
-          iconId: "fr-icon-translate-2",
-          text: (
-            <LanguageSelector lang={lang} setLang={onToggleLanguageClick} />
-          ),
-        },
-      ];
+  const isAvisRoute = router.pathname.startsWith("/avis");
+  const quickAccesItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
+    isAvisRoute
+      ? []
+      : isMobile
+        ? languages.map((lang_i) => ({
+            buttonProps: {
+              lang: lang_i,
+              "aria-current": lang_i === lang ? "true" : undefined,
+              onClick: (e) => {
+                e.preventDefault();
+                onToggleLanguageClick(lang_i);
+              },
+              className: cx(
+                classes.langButton,
+                fr.cx("fr-translate__language", "fr-nav__link"),
+              ),
+            },
+            iconId: "fr-icon-translate-2",
+            text: (
+              <>
+                <span className={classes.langShort}>{lang_i}</span>
+                &nbsp;-&nbsp;{fullNameByLang[lang_i]}
+              </>
+            ),
+          }))
+        : [
+            {
+              buttonProps: {
+                "aria-controls": "translate-select",
+                "aria-expanded": false,
+                title: t("Sélectionner une langue"),
+                className: fr.cx("fr-btn--tertiary", "fr-translate", "fr-nav"),
+              },
+              iconId: "fr-icon-translate-2",
+              text: (
+                <LanguageSelector lang={lang} setLang={onToggleLanguageClick} />
+              ),
+            },
+          ];
 
   useEffect(() => {
     setIsMobile(window.innerWidth <= fr.breakpoints.getPxValues().md);
