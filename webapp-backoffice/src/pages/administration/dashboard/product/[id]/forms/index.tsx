@@ -210,6 +210,15 @@ const ProductFormsPage = (props: Props) => {
 							)}
 							{product.forms
 								.filter(f => !f.isDeleted)
+								.sort((a, b) => {
+									const dateA = a.last_review_at
+										? new Date(a.last_review_at).getTime()
+										: 0;
+									const dateB = b.last_review_at
+										? new Date(b.last_review_at).getTime()
+										: 0;
+									return dateB - dateA;
+								})
 								.map(form => {
 									const newReviewsCount = getFormNewReviewCount(
 										form.id,

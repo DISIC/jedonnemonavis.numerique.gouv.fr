@@ -466,6 +466,22 @@ const ProductCard = ({
 												(a.deleted_at?.getTime() ?? 0)
 										)
 								]
+									.sort((a, b) => {
+										if (a.isDeleted && !b.isDeleted) return 1;
+										if (!a.isDeleted && b.isDeleted) return -1;
+
+										if (!a.isDeleted && !b.isDeleted) {
+											const dateA = a.last_review_at
+												? new Date(a.last_review_at).getTime()
+												: 0;
+											const dateB = b.last_review_at
+												? new Date(b.last_review_at).getTime()
+												: 0;
+											return dateB - dateA;
+										}
+
+										return 0;
+									})
 									.slice(0, 2)
 									.map(form => {
 										const newReviewsCount = getFormNewReviewCount(
@@ -637,7 +653,10 @@ const useStyles = tss.withName(ProductCard.name).create({
 	productLink: {
 		backgroundImage: 'none',
 		position: 'relative',
-		zIndex: 4
+		zIndex: 4,
+		':hover': {
+			textDecoration: 'underline'
+		}
 	},
 	formLink: {
 		backgroundImage: 'none',
@@ -668,7 +687,9 @@ const useStyles = tss.withName(ProductCard.name).create({
 	},
 	actionButton: {
 		position: 'relative',
-		zIndex: 4
+		zIndex: 4,
+		textWrap: 'nowrap',
+		':hover': { background: 'white!important' }
 	},
 	productTitleContainer: {
 		display: 'flex',
