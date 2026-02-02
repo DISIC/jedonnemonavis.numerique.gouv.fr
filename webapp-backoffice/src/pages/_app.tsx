@@ -7,21 +7,27 @@ import { SessionProvider } from 'next-auth/react';
 import type { AppProps } from 'next/app';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Script from 'next/script';
 import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
-import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
 import { OnboardingProvider } from '../contexts/OnboardingContext';
+import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
 import { StatsTotalsProvider } from '../contexts/StatsContext';
 import { UserSettingsProvider } from '../contexts/UserSettingsContext';
 import '../utils/global.css';
 import '../utils/keyframes.css';
-import Script from 'next/script';
 
 declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	interface RegisterLink {
 		Link: typeof Link;
+	}
+}
+
+declare global {
+	interface Window {
+		_mtm?: Record<string, unknown>[];
 	}
 }
 
