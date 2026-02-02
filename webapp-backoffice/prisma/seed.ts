@@ -10,7 +10,8 @@ import { Domain } from 'domain';
 import { getRandomObjectFromArray, normalizeString } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { entities } from './seeds/entities';
-import { createRootForm } from './seeds/form';
+import { createRootForm } from './seeds/forms/root';
+import { createBugForm } from './seeds/forms/bug';
 import { products } from './seeds/products';
 import { users } from './seeds/users';
 import { whiteListedDomains } from './seeds/white-listed-domains';
@@ -21,11 +22,14 @@ async function main() {
 	const command = process.argv[2];
 
 	switch (command) {
+		case 'seedBugFormTemplate':
+			await seed_bug_form_template();
 		case 'seedRootFormTemplate':
 			await seed_root_form_template();
 			break;
 		case 'seedUsersProducts':
 			await seed_root_form_template();
+			await seed_bug_form_template();
 			await seed_users_products();
 			break;
 		case 'seedFormattedTitles':
@@ -36,6 +40,7 @@ async function main() {
 			break;
 		default:
 			await seed_root_form_template();
+			await seed_bug_form_template();
 			await seed_users_products();
 			await formatted_title();
 	}
@@ -59,6 +64,14 @@ function getWLDPromises() {
 	});
 
 	return promisesWLDs;
+}
+
+async function seed_bug_form_template() {
+	await prisma.formTemplate.upsert({
+		where: { slug: 'bug' },
+		update: createBugForm,
+		create: createBugForm
+	});
 }
 
 async function seed_root_form_template() {
