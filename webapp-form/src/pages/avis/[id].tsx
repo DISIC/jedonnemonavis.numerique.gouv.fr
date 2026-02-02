@@ -133,68 +133,69 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
   }
 
   return (
-    <div
-      className={cx(
-        classes.container,
-        fr.cx("fr-container--fluid", "fr-container"),
-      )}
-    >
-      <div className={classes.blueSection}>
-        <h1>{currentStep.title}</h1>
-      </div>
+    <>
+      <div className={classes.blueSection} />
+      <div
+        className={cx(
+          classes.container,
+          fr.cx("fr-container--fluid", "fr-container"),
+        )}
+      >
+        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
+          <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
+            <div className={classes.formSection}>
+              <FormStepRenderer
+                step={currentStep}
+                form={form}
+                answers={answers}
+                setAnswers={setAnswers}
+                currentStepIndex={currentStepIndex}
+                totalSteps={steps.length}
+              />
 
-      <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-        <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
-          <div className={classes.formSection}>
-            <FormStepRenderer
-              step={currentStep}
-              form={form}
-              answers={answers}
-              setAnswers={setAnswers}
-            />
-
-            {process.env.NODE_ENV === "development" && (
-              <details className={fr.cx("fr-mt-4v")}>
-                <summary>Debug: Current Answers</summary>
-                <pre>{JSON.stringify(answers, null, 2)}</pre>
-                <summary>Debug: Answers Array</summary>
-                <pre>{JSON.stringify(getAnswersArray(), null, 2)}</pre>
-              </details>
-            )}
-
-            <div className={classes.buttonsContainer}>
-              {currentStepIndex > 0 ? (
-                <Button
-                  priority="secondary"
-                  iconId="fr-icon-arrow-left-line"
-                  iconPosition="left"
-                  onClick={handlePrevious}
-                >
-                  Étape précédente
-                </Button>
-              ) : (
-                <div />
+              {process.env.NODE_ENV === "development" && (
+                <details className={fr.cx("fr-mt-4v")}>
+                  <summary>Debug: Current Answers</summary>
+                  <pre>{JSON.stringify(answers, null, 2)}</pre>
+                  <summary>Debug: Answers Array</summary>
+                  <pre>{JSON.stringify(getAnswersArray(), null, 2)}</pre>
+                </details>
               )}
 
-              {currentStepIndex < steps.length - 1 ? (
-                <Button
-                  priority="primary"
-                  iconId="fr-icon-arrow-right-line"
-                  iconPosition="right"
-                  onClick={handleNext}
-                >
-                  Étape suivante
-                </Button>
-              ) : (
-                <Button priority="primary" onClick={handleSubmit}>
-                  Envoyer
-                </Button>
-              )}
+              <div className={classes.buttonsContainer}>
+                {currentStepIndex > 0 ? (
+                  <Button
+                    priority="secondary"
+                    iconId="fr-icon-arrow-left-line"
+                    iconPosition="left"
+                    onClick={handlePrevious}
+                  >
+                    Étape précédente
+                  </Button>
+                ) : (
+                  <div />
+                )}
+
+                {currentStepIndex < steps.length - 1 ? (
+                  <Button
+                    priority="primary"
+                    iconId="fr-icon-arrow-right-line"
+                    iconPosition="right"
+                    onClick={handleNext}
+                  >
+                    Étape suivante
+                  </Button>
+                ) : (
+                  <Button priority="primary" onClick={handleSubmit}>
+                    Envoyer
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

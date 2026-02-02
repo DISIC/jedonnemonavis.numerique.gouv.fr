@@ -3,6 +3,7 @@ import { fr } from "@codegouvfr/react-dsfr";
 import { SetStateAction } from "react";
 import { tss } from "tss-react/dsfr";
 import { FormBlockRenderer } from "./FormBlockRenderer";
+import { Stepper } from "@codegouvfr/react-dsfr/Stepper";
 
 type Step = FormWithElements["form_template"]["form_template_steps"][0];
 
@@ -19,10 +20,13 @@ interface Props {
   form: FormWithElements;
   answers: FormAnswers;
   setAnswers: (value: SetStateAction<FormAnswers>) => void;
+  currentStepIndex: number;
+  totalSteps: number;
 }
 
 export const FormStepRenderer = (props: Props) => {
-  const { step, form, answers, setAnswers } = props;
+  const { step, form, answers, setAnswers, currentStepIndex, totalSteps } =
+    props;
   const { classes, cx } = useStyles();
 
   const formConfig = form.form_configs[0];
@@ -37,7 +41,23 @@ export const FormStepRenderer = (props: Props) => {
 
   return (
     <div className={cx(classes.container)}>
-      <h2 className={cx(classes.title)}>{step.title}</h2>
+      {totalSteps > 1 && (
+        <>
+          <h1 className={cx(classes.title, fr.cx("fr-mb-12v"))}>
+            {step.title}
+          </h1>
+          <Stepper
+            currentStep={currentStepIndex + 1}
+            stepCount={totalSteps}
+            title={step.title}
+            className={fr.cx("fr-mb-12v")}
+          />
+        </>
+      )}
+
+      {totalSteps === 1 && (
+        <h2 className={cx(classes.subtitle)}>{step.title}</h2>
+      )}
 
       {step.form_template_blocks.map((block) => {
         const isBlockHidden = formConfig?.form_config_displays?.some(
@@ -69,6 +89,14 @@ const useStyles = tss.withName(FormStepRenderer.name).create(() => ({
     gap: fr.spacing("6v"),
   },
   title: {
+    textAlign: "center",
+    color: fr.colors.decisions.background.flat.blueFrance.default,
+    marginBottom: 0,
+    [fr.breakpoints.down("md")]: {
+      display: "none",
+    },
+  },
+  subtitle: {
     color: fr.colors.decisions.background.flat.blueFrance.default,
     marginBottom: fr.spacing("4v"),
   },
