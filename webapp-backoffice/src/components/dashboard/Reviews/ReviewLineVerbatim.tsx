@@ -124,7 +124,14 @@ const ReviewLineVerbatim = ({
 					<p
 						className={cx(classes.content, classes.contentVerbatim)}
 						dangerouslySetInnerHTML={{
-							__html: `${review.verbatim ? highlightSearchTerms(review.verbatim.answer_text || '', search) : '-'}`
+							__html: `${
+								review.verbatim
+									? highlightSearchTerms(
+											review.verbatim.answer_text || '',
+											search
+									  )
+									: '-'
+							}`
 						}}
 					></p>
 				</td>
@@ -136,6 +143,12 @@ const ReviewLineVerbatim = ({
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
+							window._mtm?.push({
+								category: 'reviews',
+								action_type: 'read',
+								action: `review_detail_display`,
+								ui_source: 'review_button'
+							});
 						}}
 						className={classes.button}
 						style={{

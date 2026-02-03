@@ -131,6 +131,15 @@ const StatsTab = ({
 	);
 
 	useEffect(() => {
+		window._mtm?.push({
+			category: 'stats',
+			action_type: 'read',
+			action: 'stats_display',
+			ui_source: 'onglet'
+		});
+	}, []);
+
+	useEffect(() => {
 		setSelectedButton(filters['productStats'].buttonId);
 	}, [filters['productStats'].buttonId]);
 
