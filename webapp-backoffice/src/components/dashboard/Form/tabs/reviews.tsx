@@ -165,27 +165,6 @@ const ReviewsTab = (props: Props) => {
 		metadata: { countFiltered: reviewsCountFiltered, countAll: reviewsCountAll }
 	} = reviewResults;
 
-	const reviewsExtended = reviews.map(review => {
-		if (review.answers) {
-			return {
-				...review,
-				satisfaction: review.answers.find(
-					answer => answer.field_code === 'satisfaction'
-				),
-				easy: review.answers.find(answer => answer.field_code === 'easy'),
-				comprehension: review.answers.find(
-					answer => answer.field_code === 'comprehension'
-				),
-				verbatim: review.answers.find(
-					answer => answer.field_code === 'verbatim'
-				),
-				contact_satisfaction: review.answers.find(
-					answer => answer.field_code === 'contact_satisfaction'
-				)
-			};
-		}
-	});
-
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
 		return regex.test(date);
@@ -634,31 +613,28 @@ const ReviewsTab = (props: Props) => {
 								)}
 							</div>
 							<div>
-								{reviewsExtended.length > 0 ? (
+								{reviews.length > 0 ? (
 									<>
 										<table className={cx(classes.tableContainer)}>
 											<ReviewFilters
-												displayMode={'verbatim'}
 												sort={sort}
 												onClick={handleSortChange}
-												hasManyVersions={formConfigs.length > 0}
+												form={form}
 											/>
 											<tbody>
-												{reviewsExtended.map((review, index) => {
-													if (review) {
-														return (
-															<ReviewLineVerbatim
-																key={index}
-																review={review}
-																search={validatedSearch}
-																formTemplate={form.form_template}
-																formConfigHelper={getFormConfigHelperFromDate(
-																	review.created_at || new Date()
-																)}
-																hasManyVersions={formConfigs.length > 0}
-															/>
-														);
-													}
+												{reviews.map((review, index) => {
+													return (
+														<ReviewLineVerbatim
+															key={index}
+															review={review}
+															search={validatedSearch}
+															formTemplate={form.form_template}
+															formConfigHelper={getFormConfigHelperFromDate(
+																review.created_at || new Date()
+															)}
+															hasManyVersions={formConfigs.length > 0}
+														/>
+													);
 												})}
 											</tbody>
 										</table>
@@ -675,7 +651,7 @@ const ReviewsTab = (props: Props) => {
 									</div>
 								)}
 							</div>
-							{reviewsExtended.length > 0 && (
+							{reviews.length > 0 && (
 								<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 									<Pagination
 										count={nbPages}

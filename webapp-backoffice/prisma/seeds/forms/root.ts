@@ -72,6 +72,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							label: "De façon générale, comment ça s'est passé ?",
 							type_bloc: 'smiley_input',
 							field_code: 'satisfaction',
+							alias: 'Satisfaction',
 							position: 1,
 							isMainBlock: true,
 							isRequired: true

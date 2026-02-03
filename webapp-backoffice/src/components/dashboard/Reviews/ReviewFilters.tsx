@@ -1,66 +1,44 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import { useEffect, useState } from 'react';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	onClick: (sort: string) => void;
 	sort: string;
-	hasManyVersions: boolean;
-	displayMode: 'reviews' | 'verbatim';
+	form: FormWithElements;
 }
 
 const ReviewFilters = (props: Props) => {
-	const { onClick, displayMode, hasManyVersions } = props;
+	const { onClick, form } = props;
 
 	const { cx, classes } = useStyles({});
 
-	const [sortList, setSortList] = useState<
-		{
-			label: string;
-			code?: string;
-		}[]
-	>([]);
+	const mainBlocks = form.form_template.form_template_steps
+		.flatMap(step => step.form_template_blocks)
+		.filter(block => block.isMainBlock);
 
-	useEffect(() => {
-		if (displayMode === 'reviews') {
-			setSortList([
-				{
-					label: 'Date',
-					code: 'created_at'
-				},
-				{
-					label: 'Heure'
-				},
-				...(hasManyVersions ? [{ label: 'Formulaire' }] : []),
-				{
-					label: 'Id'
-				},
-				{
-					label: 'Source'
-				},
-				{
-					label: 'Satisfaction'
-				},
-				{
-					label: 'Commentaire'
-				}
-			]);
-		} else {
-			setSortList([
-				{
-					label: 'Date',
-					code: 'created_at'
-				},
-				{
-					label: 'Satisfaction',
-					code: 'satisfaction'
-				},
-				{
-					label: 'Commentaire'
-				}
-			]);
-		}
-	}, [displayMode]);
+	const hasVerbatimBlock = form.form_template.form_template_steps
+		.flatMap(step => step.form_template_blocks)
+		.some(block => block.field_code === 'verbatim');
+
+	const sortList = [
+		{
+			label: 'Date',
+			code: 'created_at'
+		},
+		...mainBlocks.map(block => ({
+			label: block.alias ? block.alias : (block.label ?? ''),
+			code: block.type_bloc || ''
+		})),
+		...(hasVerbatimBlock
+			? [
+					{
+						label: 'Commentaire',
+						code: 'verbatim'
+					}
+				]
+			: [])
+	];
 
 	return (
 		<thead className={cx(classes.lineContainer)}>
@@ -73,7 +51,7 @@ const ReviewFilters = (props: Props) => {
 				{sortList.map((sort, index) => (
 					<th
 						className={cx(
-							displayMode === 'reviews' ? classes.badge : classes.badgeVerbatim,
+							classes.badgeVerbatim,
 							sort.code ? classes.pointer : '',
 							fr.cx('fr-hidden', 'fr-unhidden-lg'),
 							classes.thContainer
@@ -99,18 +77,12 @@ const ReviewFilters = (props: Props) => {
 						</span>
 					</th>
 				))}
-				{new Array(displayMode === 'reviews' ? 1 : 3)
-					.fill(0)
-					.map((i, index) => (
-						<th
-							className={cx(
-								displayMode === 'reviews'
-									? classes.badge
-									: classes.badgeVerbatim
-							)}
-							key={`fake_div_${index}`}
-						></th>
-					))}
+				{new Array(3).fill(0).map((i, index) => (
+					<th
+						className={cx(classes.badgeVerbatim)}
+						key={`fake_div_${index}`}
+					></th>
+				))}
 			</tr>
 		</thead>
 	);

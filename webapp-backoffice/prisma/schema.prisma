@@ -504,6 +504,7 @@ model FormTemplateBlock {
   type_bloc             Typebloc
   field_code            String?
   label                 String?
+  alias                 String?
   content               String?
   downLabel             String?
   upLabel               String?

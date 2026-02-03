@@ -1,7 +1,7 @@
 import { retrieveButtonName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import { ExtendedReview } from './interface';
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
 import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 
@@ -11,7 +11,7 @@ const ReviewVerbatimMoreInfos = ({
 	hasManyVersions,
 	search
 }: {
-	review: ExtendedReview;
+	review: ReviewPartialWithRelations;
 	formConfigHelper: {
 		formConfig?: FormConfigWithChildren;
 		versionNumber: number;
