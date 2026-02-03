@@ -3,10 +3,10 @@ import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfi
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
-import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
+import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHeader';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
 import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
-import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
+import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
@@ -616,7 +616,7 @@ const ReviewsTab = (props: Props) => {
 								{reviews.length > 0 ? (
 									<>
 										<table className={cx(classes.tableContainer)}>
-											<ReviewFilters
+											<ReviewTableHeader
 												sort={sort}
 												onClick={handleSortChange}
 												form={form}
@@ -624,7 +624,7 @@ const ReviewsTab = (props: Props) => {
 											<tbody>
 												{reviews.map((review, index) => {
 													return (
-														<ReviewLineVerbatim
+														<ReviewTableRow
 															key={index}
 															review={review}
 															search={validatedSearch}

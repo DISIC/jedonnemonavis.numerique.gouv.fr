@@ -11,7 +11,7 @@ import { generateRandomString } from '@/src/utils/tools';
 import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 
-const ReviewCommonVerbatimLine = ({
+const ReviewDetailPanelRoot = ({
 	review,
 	type,
 	formConfig,
@@ -276,4 +276,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewCommonVerbatimLine;
+export default ReviewDetailPanelRoot;

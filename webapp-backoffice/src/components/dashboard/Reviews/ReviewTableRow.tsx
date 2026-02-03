@@ -15,7 +15,7 @@ import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
-import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
+import ReviewDetailPanel from './ReviewDetailPanel';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 
@@ -50,7 +50,7 @@ const highlightSearchTerms = (text: string, search: string): string => {
 	return highlightedText;
 };
 
-const ReviewLineVerbatim = ({
+const ReviewTableRow = ({
 	review,
 	search,
 	formConfigHelper,
@@ -199,7 +199,7 @@ const ReviewLineVerbatim = ({
 				</td>
 			</div>
 			{displayMoreInfo && (
-				<ReviewVerbatimMoreInfos
+				<ReviewDetailPanel
 					review={review}
 					formConfigHelper={formConfigHelper}
 					hasManyVersions={hasManyVersions}
@@ -281,4 +281,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewLineVerbatim;
+export default ReviewTableRow;

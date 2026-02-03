@@ -8,7 +8,7 @@ interface Props {
 	form: FormWithElements;
 }
 
-const ReviewFilters = (props: Props) => {
+const ReviewTableHeader = (props: Props) => {
 	const { onClick, form } = props;
 
 	const { cx, classes } = useStyles({});
@@ -132,4 +132,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewFilters;
+export default ReviewTableHeader;

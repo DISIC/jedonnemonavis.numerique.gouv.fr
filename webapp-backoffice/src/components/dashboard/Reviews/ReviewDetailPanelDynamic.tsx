@@ -3,7 +3,7 @@ import { tss } from 'tss-react/dsfr';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { FormTemplateWithElements } from '@/src/types/prismaTypesExtended';
 
-const ReviewDynamicVerbatimLine = ({
+const ReviewDetailPanelDynamic = ({
 	review,
 	formTemplate
 }: {
@@ -70,4 +70,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewDynamicVerbatimLine;
+export default ReviewDetailPanelDynamic;

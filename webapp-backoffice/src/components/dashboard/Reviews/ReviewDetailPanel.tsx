@@ -2,15 +2,15 @@ import { retrieveButtonName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
-import ReviewDynamicVerbatimLine from './ReviewDynamicVerbatimLine';
+import ReviewDetailPanelRoot from './ReviewDetailPanelRoot';
+import ReviewDetailPanelDynamic from './ReviewDetailPanelDynamic';
 import {
 	FormConfigWithChildren,
 	FormTemplateWithElements
 } from '@/src/types/prismaTypesExtended';
 import { ExtendedReview } from './interface';
 
-const ReviewVerbatimMoreInfos = ({
+const ReviewDetailPanel = ({
 	review,
 	formConfigHelper,
 	hasManyVersions,
@@ -73,14 +73,14 @@ const ReviewVerbatimMoreInfos = ({
 					</p>
 				</div>
 				{formTemplate.slug === 'root' ? (
-					<ReviewCommonVerbatimLine
+					<ReviewDetailPanelRoot
 						review={review as ExtendedReview}
 						type={'Line'}
 						formConfig={formConfigHelper.formConfig}
 						search={search}
 					/>
 				) : (
-					<ReviewDynamicVerbatimLine
+					<ReviewDetailPanelDynamic
 						review={review}
 						formTemplate={formTemplate}
 					/>
@@ -112,4 +112,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewVerbatimMoreInfos;
+export default ReviewDetailPanel;
