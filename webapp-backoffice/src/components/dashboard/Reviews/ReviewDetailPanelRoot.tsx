@@ -5,11 +5,22 @@ import {
 } from '@/src/utils/helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import { ExtendedReview } from './interface';
 import React from 'react';
 import { generateRandomString } from '@/src/utils/tools';
 import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
+import {
+	AnswerPartialWithRelations,
+	ReviewPartialWithRelations
+} from '@/prisma/generated/zod';
+
+export interface ExtendedReview extends ReviewPartialWithRelations {
+	satisfaction: AnswerPartialWithRelations | undefined;
+	easy: AnswerPartialWithRelations | undefined;
+	comprehension: AnswerPartialWithRelations | undefined;
+	verbatim: AnswerPartialWithRelations | undefined;
+	contact_satisfaction: AnswerPartialWithRelations | undefined;
+}
 
 const ReviewDetailPanelRoot = ({
 	review,

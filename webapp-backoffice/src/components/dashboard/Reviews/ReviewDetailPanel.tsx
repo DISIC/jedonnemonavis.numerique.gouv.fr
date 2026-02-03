@@ -8,7 +8,7 @@ import {
 	FormConfigWithChildren,
 	FormTemplateWithElements
 } from '@/src/types/prismaTypesExtended';
-import { ExtendedReview } from './interface';
+import { ExtendedReview } from './ReviewDetailPanelRoot';
 
 const ReviewDetailPanel = ({
 	review,
