@@ -36,6 +36,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     if (isReactElement(children) && children.props?.product?.title) {
       return children.props.product.title;
     }
+    if (isReactElement(children) && children.props?.form?.product?.title) {
+      return children.props.form.product?.title;
+    }
     return "";
   };
 

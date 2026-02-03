@@ -263,6 +263,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
       product: {
         select: {
           id: true,
+          title: true,
         },
       },
     },
