@@ -3,13 +3,19 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
-import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import ReviewDynamicVerbatimLine from './ReviewDynamicVerbatimLine';
+import {
+	FormConfigWithChildren,
+	FormTemplateWithElements
+} from '@/src/types/prismaTypesExtended';
+import { ExtendedReview } from './interface';
 
 const ReviewVerbatimMoreInfos = ({
 	review,
 	formConfigHelper,
 	hasManyVersions,
-	search
+	search,
+	formTemplate
 }: {
 	review: ReviewPartialWithRelations;
 	formConfigHelper: {
@@ -18,6 +24,7 @@ const ReviewVerbatimMoreInfos = ({
 	};
 	hasManyVersions: boolean;
 	search: string;
+	formTemplate: FormTemplateWithElements;
 }) => {
 	const { cx, classes } = useStyles();
 
@@ -65,12 +72,19 @@ const ReviewVerbatimMoreInfos = ({
 							: 'Pas de source'}
 					</p>
 				</div>
-				<ReviewCommonVerbatimLine
-					review={review}
-					type={'Line'}
-					formConfig={formConfigHelper.formConfig}
-					search={search}
-				></ReviewCommonVerbatimLine>
+				{formTemplate.slug === 'root' ? (
+					<ReviewCommonVerbatimLine
+						review={review as ExtendedReview}
+						type={'Line'}
+						formConfig={formConfigHelper.formConfig}
+						search={search}
+					/>
+				) : (
+					<ReviewDynamicVerbatimLine
+						review={review}
+						formTemplate={formTemplate}
+					/>
+				)}
 			</div>
 		</div>
 	);
@@ -95,11 +109,6 @@ const useStyles = tss.create({
 		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0
-	},
-	badge: {
-		fontSize: 12,
-		width: 100,
-		paddingVertical: 4
 	}
 });
 

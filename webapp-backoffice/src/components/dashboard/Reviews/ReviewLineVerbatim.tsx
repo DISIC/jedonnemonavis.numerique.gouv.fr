@@ -204,6 +204,7 @@ const ReviewLineVerbatim = ({
 					formConfigHelper={formConfigHelper}
 					hasManyVersions={hasManyVersions}
 					search={search}
+					formTemplate={formTemplate}
 				/>
 			)}
 			<hr />
