@@ -5,6 +5,7 @@ import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
 import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHeader';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
+import ReviewFiltersModalRoot from '@/src/components/dashboard/Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
@@ -417,13 +418,23 @@ const ReviewsTab = (props: Props) => {
 
 	return (
 		<>
-			<ReviewFiltersModal
-				modal={filter_modal}
-				filters={filters.productReviews.filters}
-				submitFilters={handleSubmitfilters}
-				form_id={form.id}
-				setButtonId={setButtonId}
-			></ReviewFiltersModal>
+			{form.form_template.slug === 'root' ? (
+				<ReviewFiltersModalRoot
+					modal={filter_modal}
+					filters={filters.productReviews.filters}
+					submitFilters={handleSubmitfilters}
+					form_id={form.id}
+					setButtonId={setButtonId}
+				/>
+			) : (
+				<ReviewFiltersModal
+					modal={filter_modal}
+					filters={filters.productReviews.filters}
+					submitFilters={handleSubmitfilters}
+					form={form}
+					setButtonId={setButtonId}
+				/>
+			)}
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
