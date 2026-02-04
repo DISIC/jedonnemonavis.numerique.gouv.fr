@@ -93,6 +93,8 @@ const NewAccess = ({ product }: Props) => {
 				...(createdUserAccesses || []),
 				{ ...createdValue.data }
 			]);
+
+			window._mtm?.push({ category: 'service', action: 'service_users_add' });
 		},
 		onError: (error, values) => {
 			setUserToInvite(prev => ({
@@ -163,6 +165,8 @@ const NewAccess = ({ product }: Props) => {
 				step.slug === 'access' ? { ...step, isSkipped: true } : step
 			)
 		);
+
+		window._mtm?.push({ category: 'service', action: 'user_step_skip' });
 	};
 
 	return (

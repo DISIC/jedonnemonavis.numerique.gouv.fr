@@ -66,6 +66,7 @@ const NewLink = (props: Props) => {
 	const createButton = trpc.button.create.useMutation({
 		onSuccess: async result => {
 			setCreatedButton(result.data);
+			window._mtm?.push({ category: 'service', action: 'form_link_create' });
 		}
 	});
 

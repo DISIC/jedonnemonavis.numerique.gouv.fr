@@ -262,6 +262,10 @@ const ButtonModal = (props: Props) => {
 															);
 															modal.close();
 															push(['trackEvent', 'BO - Product', `Copy-Code`]);
+															window._mtm?.push({
+																category: 'service',
+																action: 'param_page_link_copy'
+															});
 														}}
 													>
 														Copier le code
