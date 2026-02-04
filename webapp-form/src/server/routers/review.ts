@@ -377,9 +377,8 @@ export const reviewRouter = router({
   dynamicInsertOrUpdate: publicProcedure
     .input(
       z.object({
-        user_id: z.string(),
-        product_id: z.number(),
-        button_id: z.number(),
+        review_id: z.number(),
+        review_created_at: z.date(),
         answers: z.array(
           z.object({
             block_id: z.number(),
@@ -391,15 +390,13 @@ export const reviewRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const { prisma } = ctx;
-      const { user_id, product_id, button_id, answers } = input;
+      const { review_id, review_created_at, answers } = input;
 
-      const existingReview = await prisma.review.findFirst({
+      const existingReview = await prisma.review.findUnique({
         where: {
-          product_id,
-          button_id,
-          user_id,
-          created_at: {
-            gte: new Date(Date.now() - 60 * 60 * 1000),
+          id_created_at: {
+            id: review_id,
+            created_at: review_created_at,
           },
         },
         include: {

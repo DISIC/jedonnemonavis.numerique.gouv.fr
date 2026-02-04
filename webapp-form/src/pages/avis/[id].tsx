@@ -31,11 +31,21 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<FormAnswers>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [reviewId, setReviewId] = useState<{
+    id: number;
+    created_at: Date;
+  } | null>(null);
 
   const steps = form.form_template.form_template_steps;
   const currentStep = steps[currentStepIndex];
 
   const createReview = trpc.review.dynamicCreate.useMutation({
+    onSuccess: (data) => {
+      setReviewId({
+        id: data.data.id,
+        created_at: data.data.created_at,
+      });
+    },
     onError: (error) => {
       console.error("Error creating review:", error);
     },
@@ -61,7 +71,6 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
     saveCurrentStep();
 
     if (isLastStep) {
-      localStorage.removeItem("userId");
       setIsSubmitted(true);
     } else {
       setCurrentStepIndex(currentStepIndex + 1);
@@ -87,26 +96,26 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
 
     if (currentStepAnswers.length === 0) return;
 
-    const userId = localStorage.getItem("userId");
-
+    let userId = localStorage.getItem("userId");
     if (!userId) {
-      const newUserId = uuidv4();
-      localStorage.setItem("userId", newUserId);
+      userId = uuidv4();
+      localStorage.setItem("userId", userId);
+    }
 
+    if (!reviewId) {
       createReview.mutate({
         review: {
           product_id: productId,
           button_id: buttonId,
           form_id: form.id,
-          user_id: newUserId,
+          user_id: userId,
         },
         answers: currentStepAnswers,
       });
     } else {
       insertOrUpdateReview.mutate({
-        user_id: userId,
-        product_id: productId,
-        button_id: buttonId,
+        review_id: reviewId.id,
+        review_created_at: reviewId.created_at,
         answers: currentStepAnswers,
       });
     }
