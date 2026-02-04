@@ -146,13 +146,36 @@ const ProductFormPage = (props: Props) => {
 		setSelectedTabId(getValidTabSlug(router.query.tab as string | undefined));
 	}, [router.asPath]);
 
+	useEffect(() => {
+		if (!form) return;
+
+		const existingFormPageContext = window._mtm?.find(
+			(pageContext: any) =>
+				pageContext.container_type === 'backoffice' &&
+				pageContext.form_id === form.id
+		);
+
+		if (!existingFormPageContext) {
+			window._mtm?.push({
+				container_type: 'backoffice',
+				service_id: form.product_id,
+				form_id: form.id,
+				template_slug: form.form_template.slug
+			});
+		}
+	}, [form]);
+
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}</title>
+				<title>{`${form.product.title} | ${
+					form.title || form.form_template.title
+				} | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
+					content={`${form.product.title} | ${
+						form.title || form.form_template.title
+					} | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
@@ -243,7 +266,7 @@ const ProductFormPage = (props: Props) => {
 											? {
 													...router.query,
 													tab: tabSlug
-												}
+											  }
 											: restQuery
 								},
 								undefined,
@@ -273,7 +296,7 @@ const ProductFormPage = (props: Props) => {
 											tabId: 'settings',
 											label: 'Paramètres'
 										}
-									]
+								  ]
 								: [])
 						]}
 					>
