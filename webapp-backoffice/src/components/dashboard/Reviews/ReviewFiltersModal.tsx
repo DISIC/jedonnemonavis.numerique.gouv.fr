@@ -140,47 +140,48 @@ const ReviewFiltersModal = (props: Props) => {
 
 					{block.type_bloc === 'mark_input' && (
 						<div className={cx(classes.rating)}>
-							<span>{block.downLabel || 'Min'}</span>
+							<span>{block.downLabel || 'Minimum'}</span>
 							<fieldset className={fr.cx('fr-fieldset')}>
 								<ul>
-									{['1', '2', '3', '4', '5'].map(rating => (
-										<li key={rating}>
-											<input
-												id={`radio-${block.field_code}-${rating}`}
-												className={fr.cx('fr-sr-only')}
-												type="checkbox"
-												onClick={() => {
-													const fieldKey = block.field_code || '';
-													const currentValues =
-														(tmpFilters as any)[fieldKey] || [];
-													setTmpFilters({
-														...tmpFilters,
-														[fieldKey]: currentValues.includes(rating)
-															? currentValues.filter(
-																	(item: string) => item !== rating
-																)
-															: [...currentValues, rating]
-													});
-													push(['trackEvent', 'Avis', `Filtre-${fieldKey}`]);
-												}}
-											/>
-											<label
-												htmlFor={`radio-${block.field_code}-${rating}`}
-												className={
-													(
-														(tmpFilters as any)[block.field_code || ''] || []
-													).includes(rating)
-														? classes.selectedOption
-														: undefined
-												}
-											>
-												{rating}
-											</label>
-										</li>
-									))}
+									{block.options.map(option => {
+										const fieldKey = block.field_code || '';
+										const currentValues = (tmpFilters as any)[fieldKey] || [];
+										const optionValue = option.value || '';
+										const isSelected = currentValues.includes(optionValue);
+
+										return (
+											<li key={option.id}>
+												<input
+													id={`radio-${block.field_code}-${option.id}`}
+													className={fr.cx('fr-sr-only')}
+													type="checkbox"
+													checked={isSelected}
+													onChange={() => {
+														setTmpFilters({
+															...tmpFilters,
+															[fieldKey]: isSelected
+																? currentValues.filter(
+																		(item: string) => item !== optionValue
+																	)
+																: [...currentValues, optionValue]
+														});
+														push(['trackEvent', 'Avis', `Filtre-${fieldKey}`]);
+													}}
+												/>
+												<label
+													htmlFor={`radio-${block.field_code}-${option.id}`}
+													className={
+														isSelected ? classes.selectedOption : undefined
+													}
+												>
+													{option.value}
+												</label>
+											</li>
+										);
+									})}
 								</ul>
 							</fieldset>
-							<span>{block.upLabel || 'Max'}</span>
+							<span>{block.upLabel || 'Maximum'}</span>
 						</div>
 					)}
 

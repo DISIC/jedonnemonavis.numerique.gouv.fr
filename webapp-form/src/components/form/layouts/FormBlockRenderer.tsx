@@ -139,8 +139,69 @@ export const FormBlockRenderer = (props: Props) => {
           </div>
         );
 
-      case "radio":
       case "mark_input":
+        const markAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
+        const markValue = markAnswer?.answer_item_id;
+        return (
+          <div>
+            <label
+              htmlFor={`mark-${block.id}`}
+              className={fr.cx("fr-label", "fr-text--md")}
+            >
+              {displayLabel}
+            </label>
+            {block.content && <p className={classes.hint}>{block.content}</p>}
+            <div className={cx(classes.rating)}>
+              <span>{block.downLabel || "Minimum"}</span>
+              <fieldset className={fr.cx("fr-fieldset")}>
+                <ul>
+                  {["1", "2", "3", "4", "5"].map((rating) => {
+                    const ratingOption = block.options.find(
+                      (opt) => opt.value === rating,
+                    );
+                    if (!ratingOption) return null;
+
+                    return (
+                      <li key={rating}>
+                        <input
+                          id={`mark-${block.id}-${rating}`}
+                          className={fr.cx("fr-sr-only")}
+                          type="radio"
+                          name={fieldKey}
+                          value={ratingOption.id.toString()}
+                          checked={markValue === ratingOption.id}
+                          required={block.isRequired}
+                          onChange={() => {
+                            setAnswers((prev) => ({
+                              ...prev,
+                              [fieldKey]: {
+                                block_id: block.id,
+                                answer_item_id: ratingOption.id,
+                              },
+                            }));
+                          }}
+                        />
+                        <label
+                          htmlFor={`mark-${block.id}-${rating}`}
+                          className={
+                            markValue === ratingOption.id
+                              ? classes.selectedOption
+                              : undefined
+                          }
+                        >
+                          {rating}
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </fieldset>
+              <span>{block.upLabel || "Maximum"}</span>
+            </div>
+          </div>
+        );
+
+      case "radio":
         const radioAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
         const radioValue = radioAnswer?.answer_item_id;
         return (
@@ -282,5 +343,59 @@ const useStyles = tss.withName(FormBlockRenderer.name).create(() => ({
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
     marginBottom: fr.spacing("2v"),
+  },
+  rating: {
+    display: "flex",
+    alignItems: "center",
+    [fr.breakpoints.down("md")]: {
+      flexDirection: "column",
+    },
+    "& > span": {
+      ...fr.typography[18].style,
+      marginBottom: 0,
+    },
+    fieldset: {
+      margin: 0,
+      [fr.breakpoints.down("md")]: {
+        width: "100%",
+      },
+      ul: {
+        listStyleType: "none",
+        columns: 5,
+        gap: 10,
+        margin: "0 1rem",
+        padding: 0,
+        overflow: "hidden",
+        [fr.breakpoints.down("md")]: {
+          columns: "auto",
+          width: "100%",
+          margin: 0,
+        },
+        li: {
+          label: {
+            width: "3.5rem",
+            justifyContent: "center",
+            border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
+            padding: `${fr.spacing("1v")} ${fr.spacing("3v")}`,
+            display: "flex",
+            alignItems: "center",
+            cursor: "pointer",
+            ["&:hover"]: {
+              borderColor: fr.colors.decisions.background.alt.grey.active,
+              fontWeight: "bold",
+            },
+            [fr.breakpoints.down("md")]: {
+              width: "100%",
+            },
+          },
+        },
+      },
+    },
+  },
+  selectedOption: {
+    backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+    color: "white",
+    fontWeight: "bold",
+    borderColor: fr.colors.decisions.background.flat.blueFrance.default,
   },
 }));
