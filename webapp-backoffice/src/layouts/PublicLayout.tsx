@@ -355,9 +355,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 
 	useEffect(() => {
 		if (!session?.user) return;
-		const existingUserId = window._mtm?.find(
-			(item: any) => item.user_id !== undefined
-		);
+		const existingUserId = window._mtm?.find(item => 'user_id' in item);
 		if (!existingUserId) {
 			push(['setUserId', session.user.id]);
 			window._mtm?.push({ user_id: session.user.id });

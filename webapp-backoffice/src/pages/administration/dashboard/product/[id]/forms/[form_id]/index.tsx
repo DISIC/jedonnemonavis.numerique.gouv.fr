@@ -150,9 +150,8 @@ const ProductFormPage = (props: Props) => {
 		if (!form) return;
 
 		const existingFormPageContext = window._mtm?.find(
-			(pageContext: any) =>
-				pageContext.container_type === 'backoffice' &&
-				pageContext.form_id === form.id
+			pageContext =>
+				'container_type' in pageContext && pageContext.form_id === form.id
 		);
 
 		if (!existingFormPageContext) {

@@ -25,12 +25,6 @@ declare module '@codegouvfr/react-dsfr/next-pagesdir' {
 	}
 }
 
-declare global {
-	interface Window {
-		_mtm?: Record<string, unknown>[];
-	}
-}
-
 const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	defaultColorScheme: 'light',
 	doPersistDarkModePreferenceWithCookie: true,
