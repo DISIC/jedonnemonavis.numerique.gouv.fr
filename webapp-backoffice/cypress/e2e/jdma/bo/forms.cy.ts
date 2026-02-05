@@ -42,6 +42,7 @@ describe('jdma-forms', () => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
+		cy.wait(500000);
 		cy.injectAxe();
 	});
 
@@ -57,7 +58,7 @@ describe('jdma-forms', () => {
 				if (!exists) {
 					createOrEditForm(title, false, i === 0);
 					cy.visit(`${appUrl}${selectors.url.productTestService}`);
-					cy.contains('a', title).should('exist');
+					cy.contains('h3', title).should('exist');
 				} else {
 					cy.log(`Form "${title}" already exists`);
 				}

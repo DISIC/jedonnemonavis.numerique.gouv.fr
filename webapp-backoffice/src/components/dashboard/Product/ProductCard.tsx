@@ -420,6 +420,7 @@ const ProductCard = ({
 						onClick={() => clearFilters()}
 						aria-label={`Aller sur la page de gestion du service ${product.title}`}
 						style={{ pointerEvents: isDisabled ? 'none' : 'auto' }}
+						title={product.title}
 					/>
 					<div
 						className={cx(fr.cx('fr-col-12', 'fr-pb-1v'), classes.titleSection)}

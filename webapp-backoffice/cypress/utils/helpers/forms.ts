@@ -68,7 +68,7 @@ export function ensureTestServiceExistsAndGoToForms() {
 			cy.log(
 				`"${selectors.dashboard.nameTestService}" exists, skipping creation`
 			);
-			cy.contains(selectors.productTitle, selectors.dashboard.nameTestService)
+			cy.get('a[title*="' + selectors.dashboard.nameTestService + '"]')
 				.should('be.visible')
 				.click({ force: true });
 		}

@@ -11,8 +11,8 @@ export function login(email: string, password: string, loginOnly = false) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
-	if (!loginOnly) tryCloseNewsModal();
 	tryFillUserDetailsForm();
+	if (!loginOnly) tryCloseNewsModal();
 }
 
 export function logout() {
@@ -119,7 +119,7 @@ export function createOrEditProduct(
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
-		cy.contains(selectors.productTitle, selectors.dashboard.nameTestService)
+		cy.get('a[title*="' + selectors.dashboard.nameTestService + '"]')
 			.should('be.visible')
 			.click({ force: true });
 	}
