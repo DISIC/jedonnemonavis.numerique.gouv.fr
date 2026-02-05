@@ -42,7 +42,6 @@ describe('jdma-forms', () => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
-		cy.wait(500000);
 		cy.injectAxe();
 	});
 

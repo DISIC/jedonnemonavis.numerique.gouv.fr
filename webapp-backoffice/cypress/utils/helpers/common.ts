@@ -119,7 +119,7 @@ export function createOrEditProduct(
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
-		cy.get('a[title*="' + selectors.dashboard.nameTestService + '"]')
+		cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
 			.should('be.visible')
 			.click({ force: true });
 	}
