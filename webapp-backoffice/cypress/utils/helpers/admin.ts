@@ -5,7 +5,7 @@ export function deleteService(serviceName: string) {
 	cy.get(selectors.productTitle)
 		.contains(serviceName)
 		.should('be.visible')
-		.click();
+		.click({ force: true });
 
 	cy.injectAxe();
 

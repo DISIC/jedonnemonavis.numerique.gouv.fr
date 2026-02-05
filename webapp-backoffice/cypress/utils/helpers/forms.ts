@@ -70,7 +70,7 @@ export function ensureTestServiceExistsAndGoToForms() {
 			);
 			cy.contains(selectors.productTitle, selectors.dashboard.nameTestService)
 				.should('be.visible')
-				.click();
+				.click({ force: true });
 		}
 	});
 }

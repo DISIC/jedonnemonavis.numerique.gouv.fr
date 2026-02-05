@@ -12,7 +12,7 @@ export function navigateToCreatedProduct(shouldCheckA11y = false) {
 		.should('contain', 'e2e-jdma-service-test-users')
 		.closest('a')
 		.first()
-		.click();
+		.click({ force: true });
 	cy.url().should('include', '/administration/dashboard/product/');
 	cy.get(selectors.sideMenu.menu)
 		.should('be.visible')

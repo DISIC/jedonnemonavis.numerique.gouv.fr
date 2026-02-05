@@ -11,7 +11,7 @@ describe('jdma-logs', () => {
 		cy.get(selectors.productTitle)
 			.contains(selectors.dashboard.nameTestService)
 			.should('be.visible')
-			.click();
+			.click({ force: true });
 		cy.get('.fr-sidemenu__link[href*="/logs"]')
 			.and('contain', "Historique d'activité")
 			.click();

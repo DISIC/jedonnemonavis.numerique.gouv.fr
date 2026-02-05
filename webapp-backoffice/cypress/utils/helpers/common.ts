@@ -121,7 +121,7 @@ export function createOrEditProduct(
 		cy.visit(`${appUrl}${selectors.url.products}`);
 		cy.contains(selectors.productTitle, selectors.dashboard.nameTestService)
 			.should('be.visible')
-			.click();
+			.click({ force: true });
 	}
 }
 
