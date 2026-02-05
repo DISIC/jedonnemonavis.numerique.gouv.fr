@@ -1,6 +1,9 @@
 import { selectors } from '../selectors';
 import { appFormUrl, appUrl, mailerUrl, invitedEmail } from '../variables';
-import { editFormIntroductionText } from './forms';
+import {
+	editFormIntroductionText,
+	ensureTestServiceExistsAndGoToForms
+} from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 
 export function login(email: string, password: string, loginOnly = false) {
@@ -128,9 +131,16 @@ export function createOrEditProduct(
 export function createOrEditForm(
 	name: string,
 	isEdit = false,
-	shouldCheckA11y = false
+	shouldCheckA11y = false,
+	shouldGoToFormsPage = false
 ) {
-	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
+	if (!isEdit) {
+		if (shouldGoToFormsPage) {
+			ensureTestServiceExistsAndGoToForms();
+			cy.wait(1000);
+		}
+		cy.contains('button', 'Générer un formulaire').click();
+	}
 
 	cy.get(selectors.formCreation)
 		.should('be.visible')

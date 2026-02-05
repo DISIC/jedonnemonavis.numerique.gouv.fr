@@ -55,7 +55,8 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					createOrEditForm(title, false, i === 0);
+					cy.wait(1000);
+					createOrEditForm(title, false, i === 0, i !== 0);
 					cy.visit(`${appUrl}${selectors.url.productTestService}`);
 					cy.contains('h3', title).should('exist');
 				} else {
