@@ -22,7 +22,7 @@ export const RegisterValidationMessage = (props: Props) => {
 		onSuccess: () => {
 			setHasTheEmailBeenResent(true);
 			setCanResendEmail(false);
-			setCooldown(60);
+			setCooldown(300);
 		},
 		onError: () => {
 			setHasTheEmailBeenResent(false);
@@ -45,7 +45,10 @@ export const RegisterValidationMessage = (props: Props) => {
 
 	const formatCooldown = () =>
 		cooldown !== null
-			? `dans ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
+			? `dans ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(
+					2,
+					'0'
+			  )}`
 			: '';
 
 	return (

@@ -340,13 +340,14 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
-	let mainContent = children;
-	if (
+	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
 		session !== null &&
 		!isUserDetailsLoading &&
-		!userHasDetails
-	) {
+		!userHasDetails;
+
+	let mainContent = children;
+	if (shouldDisplayUserDetailsForm) {
 		mainContent = <UserDetailsForm onCreated={() => refetchUserDetails()} />;
 	}
 
@@ -364,30 +365,32 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 				]}
 			/>
-			<Header
-				brandTop={
-					<>
-						RÉPUBLIQUE <br /> FRANÇAISE
-					</>
-				}
-				homeLinkProps={{
-					href: !session?.user ? '/' : '/administration/dashboard/products',
-					title: "Je donne mon avis, retour à l'accueil"
-				}}
-				className={classes.navigation}
-				id="fr-header-public-header"
-				quickAccessItems={light ? undefined : quickAccessItems}
-				navigation={
-					!!navigationItems.length && !pathname.startsWith('/public')
-						? navigationItems
-						: undefined
-				}
-				serviceTitle="Je donne mon avis"
-				serviceTagline="La voix de vos usagers"
-			/>
+			{!shouldDisplayUserDetailsForm && (
+				<Header
+					brandTop={
+						<>
+							RÉPUBLIQUE <br /> FRANÇAISE
+						</>
+					}
+					homeLinkProps={{
+						href: !session?.user ? '/' : '/administration/dashboard/products',
+						title: "Je donne mon avis, retour à l'accueil"
+					}}
+					className={classes.navigation}
+					id="fr-header-public-header"
+					quickAccessItems={light ? undefined : quickAccessItems}
+					navigation={
+						!!navigationItems.length && !pathname.startsWith('/public')
+							? navigationItems
+							: undefined
+					}
+					serviceTitle="Je donne mon avis"
+					serviceTagline="La voix de vos usagers"
+				/>
+			)}
 
 			<main id="main" role="main" tabIndex={-1}>
-				{!!session?.user && (
+				{!!session?.user && !shouldDisplayUserDetailsForm && (
 					<Notice
 						isClosable
 						onClose={function noRefCheck() {}}
