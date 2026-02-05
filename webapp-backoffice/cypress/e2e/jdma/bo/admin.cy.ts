@@ -132,7 +132,7 @@ describe('jdma-admin', () => {
 	it('create service', () => {
 		createOrEditProduct(selectors.dashboard.nameTestService);
 		cy.visit(`${appUrl}`);
-		cy.get(selectors.productLink)
+		cy.get(selectors.productTitle)
 			.should('exist')
 			.then($productLink => {
 				cy.wrap($productLink).contains(selectors.dashboard.nameTestService);
@@ -150,13 +150,15 @@ describe('jdma-admin', () => {
 	it('login guest admin', () => {
 		logout();
 		login(invitedEmailBis, userPassword);
-		cy.get(selectors.productLink).contains(selectors.dashboard.nameTestService);
+		cy.get(selectors.productTitle).contains(
+			selectors.dashboard.nameTestService
+		);
 
 		cy.get('nav').contains('Organisations').click();
 		cy.get('p').contains(selectors.dashboard.nameTestOrga).should('be.visible');
 
 		cy.get('nav').contains('Services').click();
-		cy.get(selectors.productLink)
+		cy.get(selectors.productTitle)
 			.contains(selectors.dashboard.nameTestService)
 			.should('be.visible');
 	});

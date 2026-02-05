@@ -122,9 +122,9 @@ const ProductCard = ({
 	const getFormReviewCount = (formId: number, legacy: boolean) =>
 		legacy
 			? (reviewsCountData?.countsByForm[formId.toString()] ?? 0) +
-				(reviewsCountData?.countsByForm['1'] ?? 0) +
-				(reviewsCountData?.countsByForm['2'] ?? 0)
-			: (reviewsCountData?.countsByForm[formId.toString()] ?? 0);
+			  (reviewsCountData?.countsByForm['1'] ?? 0) +
+			  (reviewsCountData?.countsByForm['2'] ?? 0)
+			: reviewsCountData?.countsByForm[formId.toString()] ?? 0;
 	const getFormNewReviewCount = (formId: number, legacy: boolean) =>
 		reviewsCountData?.newCountsByForm[formId.toString()] ?? 0;
 

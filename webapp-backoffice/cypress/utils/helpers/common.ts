@@ -12,6 +12,7 @@ export function login(email: string, password: string, loginOnly = false) {
 	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	if (!loginOnly) tryCloseNewsModal();
+	tryFillUserDetailsForm();
 }
 
 export function logout() {
@@ -118,7 +119,7 @@ export function createOrEditProduct(
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
-		cy.contains(selectors.productLink, selectors.dashboard.nameTestService)
+		cy.contains(selectors.productTitle, selectors.dashboard.nameTestService)
 			.should('be.visible')
 			.click();
 	}
@@ -283,4 +284,46 @@ export function doTheOnboardingFlow() {
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true, false);
 	createButton('e2e-jdma-button-test-1', true);
+}
+
+type UserDetailsFormInput = {
+	jobTitle?: string;
+	referralSource?: string;
+	customReferralSource?: string;
+	designLevel?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+	submit?: boolean;
+};
+
+export function tryFillUserDetailsForm({
+	jobTitle = 'Chef de projet',
+	referralSource = 'Recherche Internet',
+	customReferralSource = 'Recommandation',
+	designLevel = 'beginner',
+	submit = true
+}: UserDetailsFormInput = {}) {
+	cy.wait(500);
+	cy.get('body').then($body => {
+		const hasForm = $body.find('select[name="referralSource"]').length > 0;
+		if (!hasForm) {
+			cy.log('User details form not found, skipping fill action.');
+			return;
+		}
+
+		cy.get('input[name="jobTitle"]').clear().type(jobTitle);
+		cy.get('select[name="referralSource"]').select(referralSource);
+
+		if (referralSource === 'Autre (précisez)') {
+			cy.get('input[name="customReferralSource"]')
+				.clear()
+				.type(customReferralSource);
+		}
+
+		cy.get(`input[name="design-level-radio"][value="${designLevel}"]`).check({
+			force: true
+		});
+
+		if (submit) {
+			cy.contains('button', 'Continuer').click();
+		}
+	});
 }

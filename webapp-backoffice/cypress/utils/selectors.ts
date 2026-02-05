@@ -63,6 +63,7 @@ export const selectors = {
 	},
 	modalFooter: '.fr-modal__footer',
 	productLink: '[class*="productLink"]',
+	productTitle: '[class*="productTitle"]',
 	productForm: '#product-form',
 	formCreation: '#form-creation-form',
 	sideMenu: {
