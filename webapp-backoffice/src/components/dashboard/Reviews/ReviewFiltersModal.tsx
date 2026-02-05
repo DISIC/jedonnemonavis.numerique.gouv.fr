@@ -53,15 +53,59 @@ const ReviewFiltersModal = (props: Props) => {
 		setTmpFilters(filters);
 	}, [filters]);
 
+	// Helper function to handle field filter updates
+	const updateFieldFilter = (
+		fieldCode: string,
+		value: string,
+		isSelected: boolean
+	) => {
+		const existingFieldIndex = tmpFilters.fields.findIndex(
+			f => f.field_code === fieldCode
+		);
+
+		if (existingFieldIndex >= 0) {
+			const updatedFields = [...tmpFilters.fields];
+			const currentValues = updatedFields[existingFieldIndex].values;
+
+			if (isSelected) {
+				updatedFields[existingFieldIndex].values = currentValues.filter(
+					v => v !== value
+				);
+				if (updatedFields[existingFieldIndex].values.length === 0) {
+					updatedFields.splice(existingFieldIndex, 1);
+				}
+			} else {
+				updatedFields[existingFieldIndex].values = [...currentValues, value];
+			}
+
+			setTmpFilters({
+				...tmpFilters,
+				fields: updatedFields
+			});
+		} else {
+			setTmpFilters({
+				...tmpFilters,
+				fields: [
+					...tmpFilters.fields,
+					{ field_code: fieldCode, values: [value] }
+				]
+			});
+		}
+	};
+
+	// Helper function to check if a value is selected
+	const isValueSelected = (fieldCode: string, value: string): boolean => {
+		const fieldFilter = tmpFilters.fields.find(f => f.field_code === fieldCode);
+		return fieldFilter?.values.includes(value) || false;
+	};
+
 	const handleReset = () => {
 		const emptyFilters: ReviewFiltersType = {
-			satisfaction: [],
-			comprehension: [],
 			needVerbatim: false,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
-			help: [],
-			buttonId: []
+			buttonId: [],
+			fields: []
 		};
 		setTmpFilters(emptyFilters);
 		push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
@@ -87,54 +131,46 @@ const ReviewFiltersModal = (props: Props) => {
 
 					{block.type_bloc === 'smiley_input' && (
 						<div className={classes.badgeContainer}>
-							{['good', 'medium', 'bad'].map(intention => (
-								<Button
-									onClick={() => {
-										const fieldKey = block.field_code || '';
-										const currentValues = (tmpFilters as any)[fieldKey] || [];
-										setTmpFilters({
-											...tmpFilters,
-											[fieldKey]: currentValues.includes(intention)
-												? currentValues.filter(
-														(item: string) => item !== intention
-													)
-												: [...currentValues, intention]
-										});
-										push([
-											'trackEvent',
-											'Product - Avis',
-											`Filtre-${fieldKey}`
-										]);
-									}}
-									priority="tertiary"
-									className={cx(
-										classes.badge,
-										(
-											(tmpFilters as any)[block.field_code || ''] || []
-										).includes(intention)
-											? classes.selectedSmileyOption
-											: undefined
-									)}
-									key={`${block.field_code}_${intention}`}
-									style={{
-										color: getStatsColor({
-											intention: (intention ?? 'neutral') as AnswerIntention
-										})
-									}}
-								>
-									<Image
-										alt=""
-										src={`/assets/smileys/${getStatsIcon({
-											intention: (intention ?? 'neutral') as AnswerIntention
-										})}.svg`}
-										width={15}
-										height={15}
-									/>
-									{displayIntention(
-										(intention ?? 'neutral') as AnswerIntention
-									)}
-								</Button>
-							))}
+							{['good', 'medium', 'bad'].map(intention => {
+								const fieldKey = block.field_code || '';
+								const isSelected = isValueSelected(fieldKey, intention);
+
+								return (
+									<Button
+										onClick={() => {
+											updateFieldFilter(fieldKey, intention, isSelected);
+											push([
+												'trackEvent',
+												'Product - Avis',
+												`Filtre-${fieldKey}`
+											]);
+										}}
+										priority="tertiary"
+										className={cx(
+											classes.badge,
+											isSelected ? classes.selectedSmileyOption : undefined
+										)}
+										key={`${block.field_code}_${intention}`}
+										style={{
+											color: getStatsColor({
+												intention: (intention ?? 'neutral') as AnswerIntention
+											})
+										}}
+									>
+										<Image
+											alt=""
+											src={`/assets/smileys/${getStatsIcon({
+												intention: (intention ?? 'neutral') as AnswerIntention
+											})}.svg`}
+											width={15}
+											height={15}
+										/>
+										{displayIntention(
+											(intention ?? 'neutral') as AnswerIntention
+										)}
+									</Button>
+								);
+							})}
 						</div>
 					)}
 
@@ -145,9 +181,8 @@ const ReviewFiltersModal = (props: Props) => {
 								<ul>
 									{block.options.map(option => {
 										const fieldKey = block.field_code || '';
-										const currentValues = (tmpFilters as any)[fieldKey] || [];
 										const optionValue = option.value || '';
-										const isSelected = currentValues.includes(optionValue);
+										const isSelected = isValueSelected(fieldKey, optionValue);
 
 										return (
 											<li key={option.id}>
@@ -157,14 +192,11 @@ const ReviewFiltersModal = (props: Props) => {
 													type="checkbox"
 													checked={isSelected}
 													onChange={() => {
-														setTmpFilters({
-															...tmpFilters,
-															[fieldKey]: isSelected
-																? currentValues.filter(
-																		(item: string) => item !== optionValue
-																	)
-																: [...currentValues, optionValue]
-														});
+														updateFieldFilter(
+															fieldKey,
+															optionValue,
+															isSelected
+														);
 														push(['trackEvent', 'Avis', `Filtre-${fieldKey}`]);
 													}}
 												/>
@@ -194,9 +226,8 @@ const ReviewFiltersModal = (props: Props) => {
 								<ul>
 									{block.options.map(option => {
 										const fieldKey = block.field_code || '';
-										const currentValues = (tmpFilters as any)[fieldKey] || [];
 										const optionValue = option.value || option.label || '';
-										const isSelected = currentValues.includes(optionValue);
+										const isSelected = isValueSelected(fieldKey, optionValue);
 
 										return (
 											<li key={option.id}>
@@ -206,14 +237,11 @@ const ReviewFiltersModal = (props: Props) => {
 													type="checkbox"
 													checked={isSelected}
 													onChange={() => {
-														setTmpFilters({
-															...tmpFilters,
-															[fieldKey]: isSelected
-																? currentValues.filter(
-																		(item: string) => item !== optionValue
-																	)
-																: [...currentValues, optionValue]
-														});
+														updateFieldFilter(
+															fieldKey,
+															optionValue,
+															isSelected
+														);
 														push([
 															'trackEvent',
 															'Product - Avis',

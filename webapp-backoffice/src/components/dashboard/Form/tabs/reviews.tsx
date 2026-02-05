@@ -8,13 +8,12 @@ import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFilters
 import ReviewFiltersModalRoot from '@/src/components/dashboard/Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '@/src/components/dashboard/Reviews/ReviewKeywordFilters';
 import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
+import ReviewFilterTags from '@/src/components/dashboard/Reviews/ReviewFilterTags';
 import { Loader } from '@/src/components/ui/Loader';
 import { Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { FILTER_LABELS } from '@/src/utils/helpers';
-import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import {
 	formatDateToFrenchStringWithHour,
 	getNbPages,
@@ -26,8 +25,7 @@ import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { AnswerIntention, Button, RightAccessStatus } from '@prisma/client';
+import { Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -127,7 +125,7 @@ const ReviewsTab = (props: Props) => {
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
-			needLogging: false, // On ne veut pas créer l'événement service_reviews_view ici
+			needLogging: false,
 			loggingFromMail: isFromMail
 		},
 		{
@@ -193,105 +191,6 @@ const ReviewsTab = (props: Props) => {
 		}
 	};
 
-	const renderTags = () => {
-		const tags = Object.keys(filters.productReviews.filters).flatMap(
-			(key, index) => {
-				const filterValue =
-					filters.productReviews.filters[key as keyof ReviewFiltersType];
-				if (!Array.isArray(filterValue) && filterValue !== false) {
-					return (
-						<Tag
-							key={index}
-							title={'Retirer le filtre : Réponse avec commentaire'}
-							dismissible
-							className={cx(classes.tagFilter)}
-							nativeButtonProps={{
-								onClick: () => {
-									updateFilters({
-										...filters,
-										productReviews: {
-											...filters.productReviews,
-											filters: {
-												...filters.productReviews.filters,
-												[key]: typeof filterValue === 'boolean' ? false : ''
-											}
-										}
-									});
-								}
-							}}
-						>
-							{renderLabel(
-								FILTER_LABELS.find(filter => filter.value === key)?.type,
-								key,
-								filterValue
-							)}
-						</Tag>
-					);
-				} else if (Array.isArray(filterValue) && filterValue.length > 0) {
-					return filterValue.map((value, subIndex) => {
-						const labelRendered = renderLabel(
-							FILTER_LABELS.find(filter => filter.value === key)?.type,
-							key,
-							value
-						);
-
-						return (
-							<Tag
-								key={`${key}-${subIndex}`}
-								title={`Retirer le filtre ${labelRendered}`}
-								dismissible
-								className={cx(classes.tagFilter)}
-								nativeButtonProps={{
-									onClick: () => {
-										updateFilters({
-											...filters,
-											productReviews: {
-												...filters.productReviews,
-												filters: {
-													...filters.productReviews.filters,
-													[key]: filterValue.filter(item => item !== value)
-												}
-											}
-										});
-									}
-								}}
-							>
-								{labelRendered}
-							</Tag>
-						);
-					});
-				} else {
-					return null;
-				}
-			}
-		);
-
-		return tags.length > 0 ? tags : null;
-	};
-
-	const renderLabel = (
-		type: string | undefined,
-		key: string,
-		value: string | string[] | boolean
-	) => {
-		switch (type) {
-			case 'checkbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} complété`;
-			case 'iconbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
-			case 'select':
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
-			default:
-				return '';
-		}
-	};
-
 	useEffect(() => {
 		if (filters.productReviews.displayNew) {
 			setInitialDateState({
@@ -342,13 +241,6 @@ const ReviewsTab = (props: Props) => {
 			setCurrentPage(1);
 		}
 	}, [filters]);
-
-	const handleSendInvitation = () => {
-		router.push({
-			pathname: `/administration/dashboard/product/${form.product_id}/access`,
-			query: { autoInvite: true }
-		});
-	};
 
 	const displayEmptyState = () => {
 		if (form.isDeleted) {
@@ -477,7 +369,9 @@ const ReviewsTab = (props: Props) => {
 									Plus de filtres
 								</ButtonDSFR>
 							}
-							renderTags={renderTags}
+							renderTags={() => (
+								<ReviewFilterTags buttons={buttons} form={form} />
+							)}
 						>
 							{reviewLog[0] && (
 								<Checkbox
@@ -736,10 +630,6 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 	filterView: {
 		display: 'flex',
 		flexDirection: 'column'
-	},
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
 	},
 	filtersWrapper: {
 		display: 'flex',

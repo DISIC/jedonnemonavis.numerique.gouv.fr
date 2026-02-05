@@ -39,6 +39,50 @@ const ReviewFiltersModalRoot = (props: Props) => {
 		setTmpFilters(filters);
 	}, [filters]);
 
+	const updateFieldFilter = (
+		fieldCode: string,
+		value: string,
+		isSelected: boolean
+	) => {
+		const existingFieldIndex = tmpFilters.fields.findIndex(
+			f => f.field_code === fieldCode
+		);
+
+		if (existingFieldIndex >= 0) {
+			const updatedFields = [...tmpFilters.fields];
+			const currentValues = updatedFields[existingFieldIndex].values;
+
+			if (isSelected) {
+				updatedFields[existingFieldIndex].values = currentValues.filter(
+					v => v !== value
+				);
+				if (updatedFields[existingFieldIndex].values.length === 0) {
+					updatedFields.splice(existingFieldIndex, 1);
+				}
+			} else {
+				updatedFields[existingFieldIndex].values = [...currentValues, value];
+			}
+
+			setTmpFilters({
+				...tmpFilters,
+				fields: updatedFields
+			});
+		} else {
+			setTmpFilters({
+				...tmpFilters,
+				fields: [
+					...tmpFilters.fields,
+					{ field_code: fieldCode, values: [value] }
+				]
+			});
+		}
+	};
+
+	const isValueSelected = (fieldCode: string, value: string): boolean => {
+		const fieldFilter = tmpFilters.fields.find(f => f.field_code === fieldCode);
+		return fieldFilter?.values.includes(value) || false;
+	};
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -54,42 +98,39 @@ const ReviewFiltersModalRoot = (props: Props) => {
 			<div className={fr.cx('fr-mt-4w')}>
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
 				<div className={classes.badgeContainer}>
-					{['good', 'medium', 'bad'].map(intention => (
-						<Button
-							onClick={() => {
-								setTmpFilters({
-									...tmpFilters,
-									satisfaction: tmpFilters.satisfaction.includes(intention)
-										? tmpFilters.satisfaction.filter(item => item !== intention)
-										: [...tmpFilters.satisfaction, intention]
-								});
-								push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
-							}}
-							priority="tertiary"
-							className={cx(
-								classes.badge,
-								tmpFilters.satisfaction.includes(intention)
-									? classes.selectedOption
-									: undefined
-							)}
-							key={`satisfaction_${intention}`}
-							style={{
-								color: getStatsColor({
-									intention: (intention ?? 'neutral') as AnswerIntention
-								})
-							}}
-						>
-							<Image
-								alt=""
-								src={`/assets/smileys/${getStatsIcon({
-									intention: (intention ?? 'neutral') as AnswerIntention
-								})}.svg`}
-								width={15}
-								height={15}
-							/>
-							{displayIntention((intention ?? 'neutral') as AnswerIntention)}
-						</Button>
-					))}
+					{['good', 'medium', 'bad'].map(intention => {
+						const isSelected = isValueSelected('satisfaction', intention);
+
+						return (
+							<Button
+								onClick={() => {
+									updateFieldFilter('satisfaction', intention, isSelected);
+									push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
+								}}
+								priority="tertiary"
+								className={cx(
+									classes.badge,
+									isSelected ? classes.selectedOption : undefined
+								)}
+								key={`satisfaction_${intention}`}
+								style={{
+									color: getStatsColor({
+										intention: (intention ?? 'neutral') as AnswerIntention
+									})
+								}}
+							>
+								<Image
+									alt=""
+									src={`/assets/smileys/${getStatsIcon({
+										intention: (intention ?? 'neutral') as AnswerIntention
+									})}.svg`}
+									width={15}
+									height={15}
+								/>
+								{displayIntention((intention ?? 'neutral') as AnswerIntention)}
+							</Button>
+						);
+					})}
 				</div>
 			</div>
 
@@ -101,36 +142,32 @@ const ReviewFiltersModalRoot = (props: Props) => {
 					<span>Pas clair du tout</span>
 					<fieldset className={fr.cx('fr-fieldset')}>
 						<ul>
-							{['1', '2', '3', '4', '5'].map(rating => (
-								<li key={rating}>
-									<input
-										id={`radio-rating-${rating}`}
-										className={fr.cx('fr-sr-only')}
-										type="checkbox"
-										onClick={() => {
-											setTmpFilters({
-												...tmpFilters,
-												comprehension: tmpFilters.comprehension.includes(rating)
-													? tmpFilters.comprehension.filter(
-															item => item !== rating
-														)
-													: [...tmpFilters.comprehension, rating]
-											});
-											push(['trackEvent', 'Avis', 'Filtre-Notation']);
-										}}
-									/>
-									<label
-										htmlFor={`radio-rating-${rating}`}
-										className={
-											tmpFilters.comprehension.includes(rating)
-												? classes.selectedNumberOption
-												: undefined
-										}
-									>
-										{rating}
-									</label>
-								</li>
-							))}
+							{['1', '2', '3', '4', '5'].map(rating => {
+								const isSelected = isValueSelected('comprehension', rating);
+
+								return (
+									<li key={rating}>
+										<input
+											id={`radio-rating-${rating}`}
+											className={fr.cx('fr-sr-only')}
+											type="checkbox"
+											checked={isSelected}
+											onChange={() => {
+												updateFieldFilter('comprehension', rating, isSelected);
+												push(['trackEvent', 'Avis', 'Filtre-Notation']);
+											}}
+										/>
+										<label
+											htmlFor={`radio-rating-${rating}`}
+											className={
+												isSelected ? classes.selectedNumberOption : undefined
+											}
+										>
+											{rating}
+										</label>
+									</li>
+								);
+							})}
 						</ul>
 					</fieldset>
 					<span>Très clair</span>
@@ -211,13 +248,11 @@ const ReviewFiltersModalRoot = (props: Props) => {
 							type="button"
 							onClick={() => {
 								setTmpFilters({
-									satisfaction: [],
-									comprehension: [],
 									needVerbatim: false,
 									needOtherDifficulties: false,
 									needOtherHelp: false,
-									help: [],
-									buttonId: []
+									buttonId: [],
+									fields: []
 								});
 								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
 							}}

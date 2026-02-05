@@ -64,13 +64,11 @@ const initialState: Filters = {
 	productReviews: {
 		displayNew: false,
 		filters: {
-			satisfaction: [],
-			comprehension: [],
 			needVerbatim: false,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
-			help: [],
-			buttonId: []
+			buttonId: [],
+			fields: []
 		}
 	},
 	productStats: {
