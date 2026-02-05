@@ -124,7 +124,8 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 											}));
 										},
 										value: userDetails.jobTitle || '',
-										name: 'jobTitle'
+										name: 'jobTitle',
+										maxLength: 64
 									}}
 								/>
 								<Select
