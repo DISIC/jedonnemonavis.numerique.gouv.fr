@@ -134,8 +134,8 @@ describe('jdma-admin', () => {
 		cy.visit(`${appUrl}`);
 		cy.get(selectors.productTitle)
 			.should('exist')
-			.then($productLink => {
-				cy.wrap($productLink).contains(selectors.dashboard.nameTestService);
+			.then($productTitle => {
+				cy.wrap($productTitle).contains(selectors.dashboard.nameTestService);
 			});
 	});
 

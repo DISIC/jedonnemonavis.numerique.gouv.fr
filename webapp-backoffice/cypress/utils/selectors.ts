@@ -62,7 +62,6 @@ export const selectors = {
 		deleteForm: 'dialog#delete-form-modal'
 	},
 	modalFooter: '.fr-modal__footer',
-	productLink: '[class*="productLink"]',
 	productTitle: '[class*="productTitle"]',
 	productForm: '#product-form',
 	formCreation: '#form-creation-form',

@@ -2,7 +2,7 @@ import { selectors } from '../selectors';
 import { mailerUrl } from '../variables';
 
 export function deleteService(serviceName: string) {
-	cy.get(selectors.productLink)
+	cy.get(selectors.productTitle)
 		.contains(serviceName)
 		.should('be.visible')
 		.click();

@@ -8,7 +8,7 @@ describe('jdma-logs', () => {
 	});
 
 	it('should display the logs page with events', () => {
-		cy.get(selectors.productLink)
+		cy.get(selectors.productTitle)
 			.contains(selectors.dashboard.nameTestService)
 			.should('be.visible')
 			.click();

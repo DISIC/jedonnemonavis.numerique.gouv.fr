@@ -49,6 +49,17 @@ Use these project-specific notes to work effectively in this monorepo.
   - Config in `webapp-backoffice/cypress.config.ts` with `baseUrl` bound to `NEXTAUTH_URL`.
   - Suites live under `webapp-backoffice/cypress/e2e/jdma/**`; coverage documented in `docs/cypress-test-coverage.md`.
 - Lint/format: Prettier via `yarn format` / `yarn lint`, run on pre-commit via Husky.
+- UI Components: Both apps use DSFR (`@codegouvfr/react-dsfr`) with `tss-react` for styling. Import `fr` from DSFR for classNames: `fr.cx('fr-container', 'fr-mt-4v')`. Custom styles use `tss.withName(name).create()`.
+- Cypress helpers: `webapp-backoffice/cypress/utils/helpers/*` organize reusable test functions (login, forms, onboarding, account, common actions). Selectors in `selectors.ts`, test variables in `variables.ts`.
+
+## Code Style Conventions
+
+- **React components**: Prefer functional components with hooks. Use `React.FC` sparingly; type props directly.
+- **TRPC procedures**: Always use type-safe input with Zod schemas. Prefix mutations with action verbs: `user.update`, `form.publish`.
+- **Database queries**: Use `ctx.prisma` in TRPC context; never instantiate clients in components.
+- **Imports**: Organize as: React → external libs → internal utils/types/components. Use absolute paths from `@/`.
+- **Error handling**: Return TRPC errors with `throw new TRPCError({ code: 'BAD_REQUEST', message: '...' })`.
+- **File naming**: Use kebab-case for files (`user-details-form.tsx`), PascalCase for exported React components.
 
 ## Integration Notes
 
@@ -73,6 +84,22 @@ Use these project-specific notes to work effectively in this monorepo.
 - Email: `NODEMAILER_HOST`, `NODEMAILER_PORT`, `NODEMAILER_USER`, `NODEMAILER_PASSWORD`, `NODEMAILER_FROM`
 - Elasticsearch: `ES_ADDON_URI`, `ES_ADDON_USER`, `ES_ADDON_PASSWORD`
 - Form rate limit: `LIMITER_ALLOWED_IPS`, `IP_HASH_SALT`
+
+## Testing Patterns
+
+- **E2E tests**: Cypress tests in `webapp-backoffice/cypress/e2e/jdma/**`, run with `npm run test` or `npm run test:reset` (includes DB reset).
+- **Helper utilities**: Use `cypress/utils/helpers/` functions (login, forms, onboarding) to avoid repeating selectors/actions.
+- **Axe accessibility**: Include `cy.injectAxe()` at test start, then `cy.auditA11y()` at key steps to catch WCAG violations.
+- **Async operations**: Use `cy.wait()` for timing; prefer `cy.intercept()` to stub/monitor API calls rather than hardcoded waits.
+- **Form testing**: Use `tryCloseNewsModal()` and `tryCloseModal()` to safely close overlays without test failures.
+
+## Common Troubleshooting
+
+- **"Document is not focused" in Cypress**: Stub clipboard with `cy.stub(win.navigator.clipboard, 'writeText').resolves()` before clicking copy buttons.
+- **DB migrations fail**: Run `npm run db:reset` to wipe and reseed; check `prisma/migrations/` for naming conflicts if custom migrations exist.
+- **Elasticsearch TLS errors**: Ensure `certs/ca/ca.crt` exists in both services' Docker mounts; copy from elasticsearch container if missing.
+- **TRPC type errors after schema change**: Run `prisma generate` and `yarn type-check` to sync generated types.
+- **"Form not found" in review page**: Forms must be published; check `form.isPublished` in DB and test with published forms only.
 
 ## Useful Examples
 
