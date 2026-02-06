@@ -88,25 +88,37 @@ const DashboardTab = ({
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
-			<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
-				<ObservatoireStats
-					productId={form.product_id}
-					formConfig={currentFormConfig}
-					formId={form.id}
-					startDate={startDate}
-					endDate={endDate}
-					slugsToDisplay={[
-						'satisfaction',
-						'comprehension',
-						'contactReachability',
-						'contactSatisfaction'
-					]}
-					noTitle
-					view="form-dashboard"
-				/>
-			</div>
-			<div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
-				<div className={cx(classes.chartContainer)}>
+			{form.form_template.slug === 'root' && (
+				<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
+					<ObservatoireStats
+						productId={form.product_id}
+						formConfig={currentFormConfig}
+						formId={form.id}
+						startDate={startDate}
+						endDate={endDate}
+						slugsToDisplay={[
+							'satisfaction',
+							'comprehension',
+							'contactReachability',
+							'contactSatisfaction'
+						]}
+						noTitle
+						view="form-dashboard"
+					/>
+				</div>
+			)}
+			<div
+				className={fr.cx(
+					'fr-col-12',
+					form.form_template.slug === 'root' ? 'fr-col-lg-8' : 'fr-col-lg-12'
+				)}
+			>
+				<div
+					className={
+						(cx(classes.chartContainer),
+						fr.cx(form.form_template.slug === 'root' ? 'fr-ml-4v' : 'fr-ml-0'))
+					}
+				>
 					<AnswersChart
 						fieldCode="satisfaction"
 						productId={form.product.id}
@@ -246,7 +258,6 @@ const useStyles = tss.withName(DashboardTab.name).create({
 	},
 	chartContainer: {
 		height: '100%',
-		marginLeft: fr.spacing('4v'),
 		[fr.breakpoints.down('lg')]: {
 			marginTop: fr.spacing('4v'),
 			marginLeft: 0
