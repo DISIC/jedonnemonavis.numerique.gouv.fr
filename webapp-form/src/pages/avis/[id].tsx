@@ -10,11 +10,13 @@ import Button from "@codegouvfr/react-dsfr/Button";
 import Success from "@codegouvfr/react-dsfr/picto/Success";
 import { trpc } from "@/src/utils/trpc";
 import { v4 as uuidv4 } from "uuid";
+import Notice from "@codegouvfr/react-dsfr/Notice";
 
 type AvisPageProps = {
   form: FormWithElements;
   buttonId: number;
   productId: number;
+  isIframe: boolean;
 };
 
 type DynamicAnswerData = {
@@ -25,7 +27,12 @@ type DynamicAnswerData = {
 
 type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
-export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
+export default function AvisPage({
+  form,
+  buttonId,
+  productId,
+  isIframe,
+}: AvisPageProps) {
   const { classes, cx } = useStyles();
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -88,6 +95,8 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
   };
 
   const saveCurrentStep = () => {
+    if (isIframe) return;
+
     const currentStepAnswers = getAnswersArray().filter((answer) => {
       return currentStep.form_template_blocks.some((block) => {
         return block.id === answer.block_id;
@@ -121,9 +130,26 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
     }
   };
 
+  const IFrameAlert = () => (
+    <Notice
+      className={cx(classes.notice)}
+      isClosable
+      onClose={function noRefCheck() {}}
+      title={
+        <>
+          <b>Vous prévisualisez une version non plubliée du formulaire.</b>
+          <span className={fr.cx("fr-ml-2v")}>
+            Vos réponses ne sont pas prises en compte.
+          </span>
+        </>
+      }
+    />
+  );
+
   if (isSubmitted) {
     return (
       <>
+        {isIframe && <IFrameAlert />}
         <div className={classes.blueSection} />
         <div
           className={cx(
@@ -150,6 +176,7 @@ export default function AvisPage({ form, buttonId, productId }: AvisPageProps) {
 
   return (
     <>
+      {isIframe && <IFrameAlert />}
       <div className={classes.blueSection} />
       <div
         className={cx(
@@ -221,9 +248,10 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
   }
 
   const formId = parseInt(params.id as string);
+  const isIframe = query.iframe === "true";
   const buttonId = parseInt(query.button as string);
 
-  if (!buttonId || isNaN(buttonId)) {
+  if (!isIframe && (!buttonId || isNaN(buttonId))) {
     return {
       notFound: true,
     };
@@ -231,16 +259,18 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
   await prisma.$connect();
 
-  const button = await prisma.button.findUnique({
-    where: { id: buttonId },
-    select: { id: true, form_id: true },
-  });
+  if (!isIframe) {
+    const button = await prisma.button.findUnique({
+      where: { id: buttonId },
+      select: { id: true, form_id: true },
+    });
 
-  if (!button || button.form_id !== formId) {
-    await prisma.$disconnect();
-    return {
-      notFound: true,
-    };
+    if (!button || button.form_id !== formId) {
+      await prisma.$disconnect();
+      return {
+        notFound: true,
+      };
+    }
   }
 
   const form = await prisma.form.findUnique({
@@ -289,8 +319,9 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
   return {
     props: {
       form: JSON.parse(JSON.stringify(form)),
-      buttonId: buttonId,
+      buttonId: buttonId || 0,
       productId: form.product.id,
+      isIframe,
       ...(await serverSideTranslations(locale ?? "fr", ["common"])),
     },
   };
@@ -345,6 +376,16 @@ const useStyles = tss.withName(AvisPage.name).create(() => ({
     svg: {
       width: fr.spacing("20v"),
       height: fr.spacing("20v"),
+    },
+  },
+  notice: {
+    ...fr.typography[19].style,
+    p: {
+      fontWeight: "normal",
+    },
+    ".fr-notice__title": {
+      marginLeft: `-${fr.spacing("2v")}`,
+      paddingTop: "1px",
     },
   },
 }));
