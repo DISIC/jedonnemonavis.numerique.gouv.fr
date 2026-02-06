@@ -85,6 +85,10 @@ const DefaultTab = ({
 													theme === 'clair' ? buttonCodeClair : buttonCodeSombre
 												);
 												push(['trackEvent', 'BO - Product', `Copy-Code`]);
+												window._mtm?.push({
+													category: 'service',
+													action: 'onboarding_link_copy'
+												});
 												setDisplayToastTheme(theme);
 											}}
 										>

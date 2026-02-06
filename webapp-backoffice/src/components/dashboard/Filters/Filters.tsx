@@ -184,6 +184,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 												}
 											});
 											push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
+											window._mtm?.push({
+												category: 'reviews',
+												action_type: 'filter',
+												action: `${ds.label.split(' ')[0]}_days_filter_apply`,
+												ui_source: 'quick_filter'
+											});
 										}}
 									/>
 									<label

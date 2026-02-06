@@ -342,6 +342,12 @@ const DashBoard = () => {
 											'fr-icon-arrow-right-line',
 											'fr-link'
 										)}
+										onClick={() => {
+											window._mtm?.push({
+												category: 'service',
+												action: 'service_page_link_copy'
+											});
+										}}
 									>
 										Copier le lien d’intégration
 									</Link>

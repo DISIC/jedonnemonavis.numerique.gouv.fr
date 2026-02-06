@@ -80,6 +80,13 @@ const ExportModal = (props: Props) => {
 						if (choice) {
 							validateExport();
 							push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
+							window._mtm?.push({
+								category: 'reviews',
+								action_type: 'export',
+								action: `review_export`,
+								value:
+									choice === 'filtered' ? counts.countFiltered : counts.countAll
+							});
 						}
 					}
 				}

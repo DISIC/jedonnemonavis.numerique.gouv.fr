@@ -120,7 +120,7 @@ const ReviewFiltersModal = (props: Props) => {
 												comprehension: tmpFilters.comprehension.includes(rating)
 													? tmpFilters.comprehension.filter(
 															item => item !== rating
-														)
+													  )
 													: [...tmpFilters.comprehension, rating]
 											});
 											push(['trackEvent', 'Avis', 'Filtre-Notation']);
@@ -241,6 +241,12 @@ const ReviewFiltersModal = (props: Props) => {
 								onClick={() => {
 									submitFilters(tmpFilters);
 									push(['trackEvent', 'Product - Avis', 'Apply-Filters']);
+									window._mtm?.push({
+										category: 'reviews',
+										action_type: 'filter',
+										action: 'filter_apply',
+										ui_source: 'filter_modal'
+									});
 								}}
 							>
 								Appliquer les filtres

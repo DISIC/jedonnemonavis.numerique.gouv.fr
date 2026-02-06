@@ -504,6 +504,15 @@ const ReviewsTab = (props: Props) => {
 		}
 	}, [exports]);
 
+	useEffect(() => {
+		window._mtm?.push({
+			category: 'reviews',
+			action_type: 'read',
+			action: 'review_list_display',
+			ui_source: 'onglet'
+		});
+	}, []);
+
 	const handleSendInvitation = () => {
 		router.push({
 			pathname: `/administration/dashboard/product/${form.product_id}/access`,
@@ -732,6 +741,14 @@ const ReviewsTab = (props: Props) => {
 															hasChanged: true
 														}
 													});
+
+													window._mtm?.push({
+														category: 'reviews',
+														action_type: 'read',
+														action: `only_new_review_apply`,
+														ui_source: 'quick_filter',
+														value: e.target.checked
+													});
 												}
 											}
 										}
@@ -888,6 +905,15 @@ const ReviewsTab = (props: Props) => {
 											onClick: event => {
 												event.preventDefault();
 												handlePageChange(pageNumber);
+												if (pageNumber !== currentPage) {
+													window._mtm?.push({
+														category: 'reviews',
+														action_type: 'read',
+														action: `review_other_page_display`,
+														ui_source: 'navigation',
+														value: pageNumber
+													});
+												}
 											},
 											href: '#',
 											classes: { link: fr.cx('fr-pagination__link') },

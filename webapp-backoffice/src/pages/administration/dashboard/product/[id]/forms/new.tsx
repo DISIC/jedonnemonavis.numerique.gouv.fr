@@ -83,7 +83,9 @@ const NewForm = (props: Props) => {
 		if (existingTemplateForms.length === 0)
 			return rootFormTemplate?.data?.title || '';
 
-		return `${rootFormTemplate?.data?.title} ${existingTemplateForms.length + 1}`;
+		return `${rootFormTemplate?.data?.title} ${
+			existingTemplateForms.length + 1
+		}`;
 	}, [product.forms, rootFormTemplate]);
 
 	const {
@@ -97,7 +99,11 @@ const NewForm = (props: Props) => {
 		}
 	});
 
-	const createFormConfig = trpc.formConfig.create.useMutation();
+	const createFormConfig = trpc.formConfig.create.useMutation({
+		onSuccess: () => {
+			window._mtm?.push({ category: 'service', action: 'form_edit' });
+		}
+	});
 
 	useEffect(() => {
 		reset({
@@ -110,12 +116,14 @@ const NewForm = (props: Props) => {
 	const createForm = trpc.form.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({ category: 'service', action: 'form_create' });
 		}
 	});
 
 	const updateForm = trpc.form.update.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({ category: 'service', action: 'form_edit' });
 		}
 	});
 
@@ -296,8 +304,8 @@ const NewForm = (props: Props) => {
 					title: isEditingStep
 						? 'Modifier un formulaire'
 						: shouldShowStepper
-							? 'Étapier parcours de création'
-							: 'Générer un formulaire',
+						? 'Étapier parcours de création'
+						: 'Générer un formulaire',
 					confirmAction: handleSubmit(onSubmitCreateForm),
 					confirmText: isEditingStep ? 'Enregistrer et continuer' : undefined
 				};
@@ -344,7 +352,11 @@ const NewForm = (props: Props) => {
 					headerActions: (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${product.id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+								product.id
+							}?iframe=true&formConfig=${encodeURIComponent(
+								JSON.stringify(tmpConfigHelper)
+							)}`}
 							target={'_blank'}
 						>
 							Prévisualiser
