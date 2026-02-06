@@ -14,6 +14,7 @@ const createBugOptions =
 			value:
 				"J'ai un problème avec ma situation, mes informations ou le résultat de ma démarche",
 			alias: 'SITUATION',
+			isHideable: true,
 			position: 1
 		},
 		{
