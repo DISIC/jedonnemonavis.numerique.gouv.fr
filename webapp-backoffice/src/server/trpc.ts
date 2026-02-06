@@ -34,7 +34,9 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 				ca: fs.readFileSync(caCrtPath),
 				rejectUnauthorized: false
 			}
-		: undefined;
+		: {
+				rejectUnauthorized: false
+			};
 
 	const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
