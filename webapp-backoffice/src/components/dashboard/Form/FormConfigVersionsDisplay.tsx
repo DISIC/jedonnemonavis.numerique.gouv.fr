@@ -37,7 +37,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 				<li>
 					<a
 						className={fr.cx('fr-link')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(zeroVersionFormConfig))}`}
+						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.form_template.slug !== 'root' ? `avis/${form.id}` : form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(zeroVersionFormConfig))}`}
 						target="_blank"
 						title="Accéder à la version 0 du formulaire, nouvelle fenêtre"
 					>
@@ -51,6 +51,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 						<a
 							className={fr.cx('fr-link')}
 							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.form_template.slug !== 'root' ? `avis/${form.id}` : form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify({ ...formConfig, displays: formConfig.form_config_displays, labels: formConfig.form_config_labels }))}`}
+							target="_blank"
 							title={`Accéder à la version ${index + 1} du formulaire, nouvelle fenêtre`}
 						>
 							<b>Version {index + 1}</b>
