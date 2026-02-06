@@ -132,14 +132,19 @@ export function createOrEditForm(
 	name: string,
 	isEdit = false,
 	shouldCheckA11y = false,
-	shouldGoToFormsPage = false
+	isOnboarding = true
 ) {
 	if (!isEdit) {
-		if (shouldGoToFormsPage) {
-			ensureTestServiceExistsAndGoToForms();
-			cy.wait(1000);
+		if (isOnboarding) {
+			cy.contains('button', 'Générer un formulaire').click();
+		} else {
+			cy.url().should('include', '/administration/dashboard/product/');
+			cy.contains('h1', 'service-test')
+				.should('be.visible')
+				.then(() => {
+					cy.contains('button', 'Générer un formulaire').click();
+				});
 		}
-		cy.contains('button', 'Générer un formulaire').click();
 	}
 
 	cy.get(selectors.formCreation)
@@ -173,6 +178,11 @@ export function createOrEditForm(
 
 		cy.get(actions).contains('button', selectors.onboarding.continue).click();
 		cy.get(actions).contains('button', selectors.onboarding.continue).click();
+
+		if (!isOnboarding) {
+			cy.get(actions).contains('button', selectors.onboarding.continue).click();
+			cy.get(actions).contains('button', selectors.onboarding.continue).click();
+		}
 	} else {
 		editFormIntroductionText();
 		cy.get(actions)
@@ -229,6 +239,7 @@ export function modifyButton() {
 		.within(() => {
 			cy.get('[class*="actionsContainer"]')
 				.find('button#button-options')
+				.first()
 				.click();
 		});
 	cy.get('div#option-menu').contains('Modifier').click();

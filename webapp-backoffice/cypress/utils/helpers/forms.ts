@@ -111,7 +111,7 @@ export function goToCurrentFormReviewPage(
 		).as('clipboardWrite');
 	});
 
-	cy.get('button#button-options').click();
+	cy.get('button#button-options').first().click();
 	cy.contains('Copier').click();
 
 	cy.get('@clipboardWrite').should('have.been.called');
