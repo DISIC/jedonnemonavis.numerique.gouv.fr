@@ -219,7 +219,7 @@ const ReviewsTab = (props: Props) => {
 		});
 		const filters = getExportFiltersLabel(parsedParams, true, buttons);
 		const finalFilters = currentExport.params
-			? [`Période : ${periodLabel}`, ...filters]
+			? [`Période : ${periodLabel}`, ...(filters as string[])]
 			: undefined;
 
 		switch (currentExport.status) {
