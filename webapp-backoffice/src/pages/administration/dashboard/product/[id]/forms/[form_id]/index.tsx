@@ -259,10 +259,14 @@ const ProductFormPage = (props: Props) => {
 								tabId: 'reviews',
 								label: 'Réponses'
 							},
-							{
-								tabId: 'stats',
-								label: 'Statistiques'
-							},
+							...(form.form_template.slug === 'root'
+								? [
+										{
+											tabId: 'stats',
+											label: 'Statistiques'
+										}
+									]
+								: []),
 							...(ownRight === 'carrier_admin'
 								? [
 										{

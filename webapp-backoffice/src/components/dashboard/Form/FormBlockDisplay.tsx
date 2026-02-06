@@ -68,7 +68,14 @@ const FormBlockDisplay = (props: Props) => {
 			case 'input_text_area':
 				return <Textarea block={block} form={form} />;
 			case 'radio':
-				return <Radios block={block} disabled={disabled} />;
+				return (
+					<Radios
+						block={block}
+						configHelper={configHelper}
+						disabled={disabled}
+						onConfigChange={onConfigChange}
+					/>
+				);
 			default:
 				return <p className={fr.cx('fr-mb-0')}>Type non implémenté</p>;
 		}
@@ -76,7 +83,10 @@ const FormBlockDisplay = (props: Props) => {
 
 	const [nbrModified, setNbrModified] = useState(
 		configHelper.displays.filter(
-			d => d.kind === 'blockOption' && block.id === d.parent_id && d.hidden
+			d =>
+				d.kind === 'blockOption' &&
+				block.options.map(opt => opt.id).includes(d.parent_id) &&
+				d.hidden
 		).length
 	);
 
@@ -85,7 +95,7 @@ const FormBlockDisplay = (props: Props) => {
 			configHelper.displays.filter(
 				d =>
 					d.kind === 'blockOption' &&
-					step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
+					block.options.map(opt => opt.id).includes(d.parent_id) &&
 					d.hidden
 			).length
 		);

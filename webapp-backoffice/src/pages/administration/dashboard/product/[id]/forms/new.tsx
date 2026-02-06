@@ -344,8 +344,7 @@ const NewForm = (props: Props) => {
 					headerActions: (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${product.id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
-							target={'_blank'}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${createdForm?.form_template.slug === 'root' ? `/Demarches/${product.id}` : `/Demarches/avis/${createdForm?.id}`}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
 						>
 							Prévisualiser
 						</Link>

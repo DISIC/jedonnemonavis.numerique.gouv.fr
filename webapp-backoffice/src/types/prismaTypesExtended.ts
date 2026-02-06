@@ -44,7 +44,11 @@ export type ProductWithForms = Prisma.ProductGetPayload<
 
 const ButtonWithForm = Prisma.validator<Prisma.ButtonDefaultArgs>()({
 	include: {
-		form: true
+		form: {
+			include: {
+				form_template: true
+			}
+		}
 	}
 });
 

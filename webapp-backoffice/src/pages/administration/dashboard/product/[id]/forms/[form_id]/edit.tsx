@@ -311,8 +311,8 @@ const ProductFormPage = (props: Props) => {
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
-							target={'_blank'}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${form.form_template.slug === 'root' ? `/Demarches/${form.product_id}` : `/Demarches/avis/${form.id}`}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
+							target="_blank"
 						>
 							Prévisualiser
 						</Link>

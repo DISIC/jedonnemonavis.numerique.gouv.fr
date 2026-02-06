@@ -247,6 +247,61 @@ def send_email(to_email, download_link, product_name, switch_to_zip=False):
     except Exception as e:
         print(f"Erreur lors de l'envoi de l'email: {e}")
 
+def translate_new_filters_to_old(new_filters):
+    """
+    Translate new filter format to old format for backward compatibility.
+    
+    New format:
+    {
+        "needVerbatim": false,
+        "needOtherDifficulties": false,
+        "needOtherHelp": false,
+        "buttonId": [],
+        "fields": [
+            {"field_code": "satisfaction", "values": ["Très bien", "Moyen"]},
+            {"field_code": "comprehension", "values": ["3", "4"]}
+        ]
+    }
+    
+    Old format:
+    {
+        "satisfaction": ["good", "medium"],
+        "comprehension": ["3", "4"],
+        "needVerbatim": false,
+        "needOtherDifficulties": false,
+        "needOtherHelp": false,
+        "help": [],
+        "buttonId": []
+    }
+    """
+    label_to_intention = {
+        "Très bien": "good",
+        "Moyen": "medium",
+        "Mauvais": "bad"
+    }
+    
+    old_filters = {
+        "needVerbatim": new_filters.get("needVerbatim", False),
+        "needOtherDifficulties": new_filters.get("needOtherDifficulties", False),
+        "needOtherHelp": new_filters.get("needOtherHelp", False),
+        "buttonId": new_filters.get("buttonId", []),
+        "help": new_filters.get("help", [])
+    }
+    
+    if "fields" in new_filters:
+        for field in new_filters["fields"]:
+            field_code = field.get("field_code")
+            values = field.get("values", [])
+            
+            if field_code == "satisfaction":
+                old_filters["satisfaction"] = [
+                    label_to_intention.get(value, value) for value in values
+                ]
+            else:
+                old_filters[field_code] = values
+    
+    return old_filters
+
 def build_filters_query(filters, search_term):
     conditions = []
     values = []
@@ -571,7 +626,15 @@ def process_exports(conn):
         try:
             filter_params = json.loads(filter_params_raw)
             search_term = filter_params.get('search', '')
-            filters_query, filters_values = build_filters_query(filter_params.get('filters', {}), search_term)
+            
+            raw_filters = filter_params.get('filters', {})
+            
+            if 'fields' in raw_filters:
+                translated_filters = translate_new_filters_to_old(raw_filters)
+            else:
+                translated_filters = raw_filters
+            
+            filters_query, filters_values = build_filters_query(translated_filters, search_term)
         except json.JSONDecodeError:
             print("Erreur lors du décodage des paramètres de filtre JSON. Aucun filtre ne sera appliqué.")
 

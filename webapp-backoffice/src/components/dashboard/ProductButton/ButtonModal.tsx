@@ -61,12 +61,12 @@ const ButtonModal = (props: Props) => {
 		ButtonCreationPayload | (ButtonWithForm & ButtonWithClosedLog)
 	>(defaultButton);
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
-      <img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
-</a>`;
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.form_template?.slug !== 'root' ? `avis/${button?.form.id}` : button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
+		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
+	</a>`;
 
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
-	<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.form_template?.slug !== 'root' ? `avis/${button?.form.id}` : button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
+		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
 	</a>`;
 
 	useEffect(() => {

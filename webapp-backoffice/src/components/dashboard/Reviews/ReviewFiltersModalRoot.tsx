@@ -1,0 +1,396 @@
+import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import {
+	displayIntention,
+	getStatsColor,
+	getStatsIcon
+} from '@/src/utils/stats/intention-helpers';
+import { trpc } from '@/src/utils/trpc';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import Select from '@codegouvfr/react-dsfr/Select';
+import { AnswerIntention } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import { tss } from 'tss-react/dsfr';
+
+interface Props {
+	modal: CustomModalProps;
+	filters: ReviewFiltersType;
+	form_id: number;
+	setButtonId: (buttonId: number | undefined) => void;
+	submitFilters: (filters: ReviewFiltersType) => void;
+}
+
+const ReviewFiltersModalRoot = (props: Props) => {
+	const { modal, filters, submitFilters, setButtonId, form_id } = props;
+	const { cx, classes } = useStyles();
+
+	const { data: buttonResults } = trpc.button.getList.useQuery({
+		page: 1,
+		numberPerPage: 1000,
+		form_id: form_id,
+		isTest: true
+	});
+
+	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
+	useEffect(() => {
+		setTmpFilters(filters);
+	}, [filters]);
+
+	const updateFieldFilter = (
+		fieldCode: string,
+		value: string,
+		isSelected: boolean
+	) => {
+		const existingFieldIndex = tmpFilters.fields.findIndex(
+			f => f.field_code === fieldCode
+		);
+
+		if (existingFieldIndex >= 0) {
+			const updatedFields = [...tmpFilters.fields];
+			const currentValues = updatedFields[existingFieldIndex].values;
+
+			if (isSelected) {
+				updatedFields[existingFieldIndex].values = currentValues.filter(
+					v => v !== value
+				);
+				if (updatedFields[existingFieldIndex].values.length === 0) {
+					updatedFields.splice(existingFieldIndex, 1);
+				}
+			} else {
+				updatedFields[existingFieldIndex].values = [...currentValues, value];
+			}
+
+			setTmpFilters({
+				...tmpFilters,
+				fields: updatedFields
+			});
+		} else {
+			setTmpFilters({
+				...tmpFilters,
+				fields: [
+					...tmpFilters.fields,
+					{ field_code: fieldCode, values: [value] }
+				]
+			});
+		}
+	};
+
+	const isValueSelected = (fieldCode: string, value: string): boolean => {
+		const fieldFilter = tmpFilters.fields.find(f => f.field_code === fieldCode);
+		return fieldFilter?.values.includes(value) || false;
+	};
+
+	return (
+		<modal.Component
+			className={fr.cx(
+				'fr-grid-row',
+				'fr-grid-row--center',
+				'fr-grid-row--gutters',
+				'fr-my-0'
+			)}
+			concealingBackdrop={false}
+			title={'Filtres'}
+			size="large"
+		>
+			<div className={fr.cx('fr-mt-4w')}>
+				<p className={cx(classes.subtitle)}>Satisfaction</p>
+				<div className={classes.badgeContainer}>
+					{['good', 'medium', 'bad'].map(intention => {
+						const label = displayIntention(
+							(intention ?? 'neutral') as AnswerIntention
+						);
+						const isSelected = isValueSelected('satisfaction', label);
+
+						return (
+							<Button
+								onClick={() => {
+									updateFieldFilter('satisfaction', label, isSelected);
+									push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
+								}}
+								priority="tertiary"
+								className={cx(
+									classes.badge,
+									isSelected ? classes.selectedOption : undefined
+								)}
+								key={`satisfaction_${intention}`}
+								style={{
+									color: getStatsColor({
+										intention: (intention ?? 'neutral') as AnswerIntention
+									})
+								}}
+							>
+								<Image
+									alt=""
+									src={`/assets/smileys/${getStatsIcon({
+										intention: (intention ?? 'neutral') as AnswerIntention
+									})}.svg`}
+									width={15}
+									height={15}
+								/>
+								{label}
+							</Button>
+						);
+					})}
+				</div>
+			</div>
+
+			<div className={fr.cx('fr-mt-4w')}>
+				<p className={cx(classes.subtitle)}>
+					Qu'avez-vous pensé des informations et des instructions fournies ?
+				</p>
+				<div className={cx(classes.rating)}>
+					<span>Pas clair du tout</span>
+					<fieldset className={fr.cx('fr-fieldset')}>
+						<ul>
+							{['1', '2', '3', '4', '5'].map(rating => {
+								const isSelected = isValueSelected('comprehension', rating);
+
+								return (
+									<li key={rating}>
+										<input
+											id={`radio-rating-${rating}`}
+											className={fr.cx('fr-sr-only')}
+											type="checkbox"
+											checked={isSelected}
+											onChange={() => {
+												updateFieldFilter('comprehension', rating, isSelected);
+												push(['trackEvent', 'Avis', 'Filtre-Notation']);
+											}}
+										/>
+										<label
+											htmlFor={`radio-rating-${rating}`}
+											className={
+												isSelected ? classes.selectedNumberOption : undefined
+											}
+										>
+											{rating}
+										</label>
+									</li>
+								);
+							})}
+						</ul>
+					</fieldset>
+					<span>Très clair</span>
+				</div>
+			</div>
+
+			<div className={fr.cx('fr-mt-4w')}>
+				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
+				<Select
+					label="Sélectionner une source"
+					nativeSelectProps={{
+						value: tmpFilters.buttonId[0],
+						onChange: e => {
+							setTmpFilters({
+								...tmpFilters,
+								buttonId: e.target.value !== 'undefined' ? [e.target.value] : []
+							});
+							push(['trackEvent', 'Avis', 'Sélection-bouton']);
+						}
+					}}
+				>
+					<option value="undefined">Toutes les sources</option>
+					{buttonResults?.data?.map(button => {
+						return (
+							<option key={button.id} value={button.id}>
+								{button.title}
+							</option>
+						);
+					})}
+				</Select>
+			</div>
+
+			<div className={fr.cx('fr-mt-4w')}>
+				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
+				<Checkbox
+					options={[
+						{
+							label: 'Réponse avec commentaire',
+							nativeInputProps: {
+								name: 'needVerbatim',
+								checked: tmpFilters.needVerbatim,
+								onChange: () => {
+									setTmpFilters({
+										...tmpFilters,
+										needVerbatim: !tmpFilters.needVerbatim
+									});
+									push(['trackEvent', 'Avis', 'Filtre-Complémentaire']);
+								}
+							}
+						}
+					]}
+					state="default"
+				/>
+			</div>
+
+			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
+				<ul className={cx(classes.listContainer)}>
+					<li>
+						<Button
+							priority="secondary"
+							className={fr.cx('fr-mt-1w')}
+							type="button"
+							onClick={() => {
+								setTmpFilters(filters);
+								modal.close();
+								push(['trackEvent', 'Product - Avis', 'Cancel-Filters']);
+							}}
+						>
+							Annuler
+						</Button>
+					</li>
+					<li>
+						<Button
+							priority="secondary"
+							className={fr.cx('fr-mt-1w')}
+							iconId="fr-icon-edit-line"
+							iconPosition="right"
+							type="button"
+							onClick={() => {
+								setTmpFilters({
+									needVerbatim: false,
+									needOtherDifficulties: false,
+									needOtherHelp: false,
+									buttonId: [],
+									fields: []
+								});
+								push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
+							}}
+						>
+							Réinitialiser
+						</Button>
+					</li>
+					<li>
+						<div className={cx(classes.applyWrapper)}>
+							<Button
+								priority="primary"
+								className={fr.cx('fr-mt-1w')}
+								type="button"
+								onClick={() => {
+									submitFilters(tmpFilters);
+									push(['trackEvent', 'Product - Avis', 'Apply-Filters']);
+								}}
+							>
+								Appliquer les filtres
+							</Button>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</modal.Component>
+	);
+};
+
+const useStyles = tss.withName(ReviewFiltersModalRoot.name).create(() => ({
+	applyWrapper: {
+		display: 'flex',
+		justifyContent: 'end'
+	},
+	wrapperMobile: {
+		[fr.breakpoints.down('sm')]: {
+			display: 'flex',
+			justifyContent: 'end'
+		}
+	},
+	listContainer: {
+		display: 'flex',
+		width: '100%',
+		gap: '1rem',
+		padding: 0,
+		margin: 0,
+		listStyle: 'none',
+		justifyContent: 'space-between',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column-reverse',
+			button: {
+				width: '100%',
+				justifyContent: 'center'
+			}
+		}
+	},
+	iconError: {
+		color: fr.colors.decisions.text.default.error.default
+	},
+	subtitle: {
+		...fr.typography[19].style,
+		marginBottom: 10,
+		fontWeight: 'bold'
+	},
+	badgeContainer: {
+		display: 'flex',
+		gap: 10,
+		[fr.breakpoints.down('md')]: {
+			justifyContent: 'space-between'
+		}
+	},
+	badge: {
+		justifyContent: 'center',
+		cursor: 'pointer',
+		gap: '0.25rem',
+		[fr.breakpoints.down('md')]: {
+			flex: '1 1 100%'
+		}
+	},
+	selectedOption: {
+		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
+		color: 'white'
+	},
+	selectedNumberOption: {
+		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
+		color: 'white',
+		fontWeight: 'bold'
+	},
+	rating: {
+		display: 'flex',
+		alignItems: 'center',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column'
+		},
+		'& > span': {
+			...fr.typography[18].style,
+			marginBottom: 0
+		},
+		fieldset: {
+			margin: 0,
+			[fr.breakpoints.down('md')]: {
+				width: '100%'
+			},
+			ul: {
+				listStyleType: 'none',
+				columns: 5,
+				gap: 10,
+				margin: '0 1rem',
+				padding: 0,
+				overflow: 'hidden',
+				[fr.breakpoints.down('md')]: {
+					columns: 'auto',
+					width: '100%',
+					margin: 0
+				},
+				li: {
+					label: {
+						width: '3.5rem',
+						justifyContent: 'center',
+						border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
+						padding: `${fr.spacing('1v')} ${fr.spacing('3v')}`,
+						display: 'flex',
+						alignItems: 'center',
+						cursor: 'pointer',
+						['&:hover']: {
+							borderColor: fr.colors.decisions.background.alt.grey.active,
+							fontWeight: 'bold'
+						},
+						[fr.breakpoints.down('md')]: {
+							width: '100%'
+						}
+					}
+				}
+			}
+		}
+	}
+}));
+
+export default ReviewFiltersModalRoot;

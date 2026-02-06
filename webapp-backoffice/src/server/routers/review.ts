@@ -31,13 +31,18 @@ export const reviewRouter = router({
 				loggingFromMail: z.boolean().optional(),
 				filters: z
 					.object({
-						satisfaction: z.array(z.string()).optional(),
-						comprehension: z.array(z.string()).optional(),
 						needVerbatim: z.boolean().optional(),
 						needOtherDifficulties: z.boolean().optional(),
 						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional(),
-						buttonId: z.array(z.string()).optional()
+						buttonId: z.array(z.string()).optional(),
+						fields: z
+							.array(
+								z.object({
+									field_code: z.string(),
+									values: z.array(z.string())
+								})
+							)
+							.optional()
 					})
 					.optional()
 			})
@@ -250,13 +255,18 @@ export const reviewRouter = router({
 				loggingFromMail: z.boolean().optional(),
 				filters: z
 					.object({
-						satisfaction: z.array(z.string()).optional(),
-						comprehension: z.array(z.string()).optional(),
 						needVerbatim: z.boolean().optional(),
 						needOtherDifficulties: z.boolean().optional(),
 						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional(),
-						buttonId: z.array(z.string()).optional()
+						buttonId: z.array(z.string()).optional(),
+						fields: z
+							.array(
+								z.object({
+									field_code: z.string(),
+									values: z.array(z.string())
+								})
+							)
+							.optional()
 					})
 					.optional()
 			})
@@ -327,12 +337,18 @@ export const reviewRouter = router({
 				button_id: z.number().optional(),
 				filters: z
 					.object({
-						satisfaction: z.array(z.string()).optional(),
-						comprehension: z.array(z.string()).optional(),
 						needVerbatim: z.boolean().optional(),
 						needOtherDifficulties: z.boolean().optional(),
 						needOtherHelp: z.boolean().optional(),
-						help: z.array(z.string()).optional()
+						buttonId: z.array(z.string()).optional(),
+						fields: z
+							.array(
+								z.object({
+									field_code: z.string(),
+									values: z.array(z.string())
+								})
+							)
+							.optional()
 					})
 					.optional(),
 				memoryKey: z.string()

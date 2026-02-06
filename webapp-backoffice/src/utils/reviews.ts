@@ -128,52 +128,35 @@ export const formatWhereAndOrder = (
 
 	let andConditions: Prisma.ReviewWhereInput[] = [];
 
-	if (filters) {
-		const fields: {
-			key: keyof typeof filters;
-			field: string;
-			isText?: boolean;
-		}[] = [
-			{ key: 'comprehension', field: 'comprehension' },
-			{ key: 'satisfaction', field: 'satisfaction' },
-			{ key: 'needOtherHelp', field: 'help_details_verbatim', isText: false },
-			{ key: 'difficulties', field: 'difficulties_details' },
-			{ key: 'help', field: 'help_details' }
-		];
-		Object.keys(filters).map(key => {
-			if (filters[key] && filters[key].length > 0) {
-				let condition: Prisma.ReviewWhereInput = {
-					answers: {
-						some: {
-							AND: [
-								!newReviews &&
-									end_date && {
-										created_at: getDateWhereFromUTCRange(
-											input.start_date,
-											input.end_date
-										)
-									},
-								{
-									field_code: fields.find(field => field.key === key)
-										?.field as string,
-									...(['satisfaction'].includes(key) && {
-										intention: {
-											in: filters[key] as AnswerIntention[]
-										}
-									}),
-									...(['comprehension'].includes(key) && {
+	if (filters?.fields && filters.fields.length > 0) {
+		filters.fields.forEach(
+			(field: { field_code: string; values: string[] }) => {
+				if (field.values && field.values.length > 0) {
+					let condition: Prisma.ReviewWhereInput = {
+						answers: {
+							some: {
+								AND: [
+									!newReviews &&
+										end_date && {
+											created_at: getDateWhereFromUTCRange(
+												input.start_date,
+												input.end_date
+											)
+										},
+									{
+										field_code: field.field_code,
 										answer_text: {
-											in: filters[key] as string[]
+											in: field.values
 										}
-									})
-								}
-							].filter(Boolean)
+									}
+								].filter(Boolean)
+							}
 						}
-					}
-				};
-				andConditions.push(condition);
+					};
+					andConditions.push(condition);
+				}
 			}
-		});
+		);
 	}
 
 	if (andConditions.length) {

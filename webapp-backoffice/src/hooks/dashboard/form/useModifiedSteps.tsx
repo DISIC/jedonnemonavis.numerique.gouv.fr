@@ -19,8 +19,10 @@ const useModifiedSteps = (
 			const hasDisplayModifications = configHelper.displays.some(d => {
 				if (d.kind === 'blockOption') {
 					return (
-						step.form_template_blocks.map(b => b.id).includes(d.parent_id) &&
-						d.hidden
+						step.form_template_blocks
+							.flatMap(block => block.options)
+							.map(b => b.id)
+							.includes(d.parent_id) && d.hidden
 					);
 				}
 
