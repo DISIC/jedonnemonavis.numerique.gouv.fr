@@ -53,7 +53,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 	renderTags
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
-	const { filters, updateFilters } = useFilters();
+	const { filters, updateFilters, resetSectionFilters } = useFilters();
 
 	const sectionFilters = filters[filterKey];
 	const sharedFilters = filters['sharedFilters'];
@@ -65,6 +65,11 @@ const GenericFilters = <T extends FilterSectionKey>({
 		sharedFilters.currentEndDate
 	);
 	const [errors, setErrors] = useState<FormError>({});
+
+	useEffect(() => {
+		setLocalStartDate(sharedFilters.currentStartDate);
+		setLocalEndDate(sharedFilters.currentEndDate);
+	}, [sharedFilters.currentStartDate, sharedFilters.currentEndDate]);
 
 	useEffect(() => {
 		if (sharedFilters.dateShortcut) {
@@ -274,34 +279,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 							iconId="ri-refresh-line"
 							onClick={() => {
 								setErrors({});
-								updateFilters({
-									...filters,
-									currentPage: 1,
-									[filterKey]: {
-										...('actionType' in filters[filterKey] && {
-											actionType: []
-										}),
-										...('buttonId' in filters[filterKey] && {
-											buttonId: null
-										}),
-										...(filterKey === 'productReviews' && {
-											filters: {
-												satisfaction: [],
-												comprehension: [],
-												needVerbatim: false,
-												needOtherDifficulties: false,
-												needOtherHelp: false,
-												help: [],
-												buttonId: []
-											}
-										})
-									},
-									sharedFilters: {
-										...filters['sharedFilters'],
-										dateShortcut: 'one-year',
-										hasChanged: false
-									}
-								});
+								resetSectionFilters(filterKey);
 							}}
 						>
 							Réinitialiser les filtres

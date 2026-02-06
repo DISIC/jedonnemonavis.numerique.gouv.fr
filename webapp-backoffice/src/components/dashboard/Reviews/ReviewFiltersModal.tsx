@@ -53,7 +53,6 @@ const ReviewFiltersModal = (props: Props) => {
 		setTmpFilters(filters);
 	}, [filters]);
 
-	// Helper function to handle field filter updates
 	const updateFieldFilter = (
 		fieldCode: string,
 		value: string,
@@ -93,7 +92,6 @@ const ReviewFiltersModal = (props: Props) => {
 		}
 	};
 
-	// Helper function to check if a value is selected
 	const isValueSelected = (fieldCode: string, value: string): boolean => {
 		const fieldFilter = tmpFilters.fields.find(f => f.field_code === fieldCode);
 		return fieldFilter?.values.includes(value) || false;

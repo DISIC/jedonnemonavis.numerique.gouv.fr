@@ -49,7 +49,7 @@ const ReviewFilterTags = (props: Props) => {
 			)}`;
 		}
 
-		return `${block.label || fieldCode} : ${value}`;
+		return `${block.alias || block.label || fieldCode} : ${value}`;
 	};
 
 	const renderTags = () => {
