@@ -20,6 +20,7 @@ interface Props {
   fieldKey: string;
   answers: FormAnswers;
   setAnswers: (value: SetStateAction<FormAnswers>) => void;
+  form: FormWithElements;
 }
 
 export const MarkInputBlock = ({
@@ -28,10 +29,19 @@ export const MarkInputBlock = ({
   fieldKey,
   answers,
   setAnswers,
+  form,
 }: Props) => {
   const { classes, cx } = useStyles();
   const markAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
   const markValue = markAnswer?.answer_item_id;
+
+  const formConfig = form.form_configs[0];
+  const visibleOptions = block.options.filter((opt) => {
+    const isHidden = formConfig?.form_config_displays?.some(
+      (d) => d.kind === "blockOption" && d.parent_id === opt.id && d.hidden,
+    );
+    return !isHidden;
+  });
 
   return (
     <div>
@@ -47,7 +57,7 @@ export const MarkInputBlock = ({
         <fieldset className={fr.cx("fr-fieldset")}>
           <ul>
             {["1", "2", "3", "4", "5"].map((rating) => {
-              const ratingOption = block.options.find(
+              const ratingOption = visibleOptions.find(
                 (opt) => opt.value === rating,
               );
               if (!ratingOption) return null;

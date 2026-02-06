@@ -5,10 +5,10 @@ type Block =
 
 interface Props {
   block: Block;
+  displayLabel?: string;
 }
 
-export const ParagraphBlock = ({ block }: Props) => {
-  return block.content ? (
-    <div dangerouslySetInnerHTML={{ __html: block.content }} />
-  ) : null;
+export const ParagraphBlock = ({ block, displayLabel }: Props) => {
+  const content = displayLabel || block.content;
+  return content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null;
 };

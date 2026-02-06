@@ -43,7 +43,15 @@ export default function AvisPage({
     created_at: Date;
   } | null>(null);
 
-  const steps = form.form_template.form_template_steps;
+  const formConfig = form.form_configs[0];
+  const allSteps = form.form_template.form_template_steps;
+  const steps = allSteps.filter((step) => {
+    const isHidden = formConfig?.form_config_displays?.some(
+      (d) => d.kind === "step" && d.parent_id === step.id && d.hidden,
+    );
+    return !isHidden;
+  });
+
   const currentStep = steps[currentStepIndex];
 
   const createReview = trpc.review.dynamicCreate.useMutation({
@@ -250,6 +258,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
   const formId = parseInt(params.id as string);
   const isIframe = query.iframe === "true";
   const buttonId = parseInt(query.button as string);
+  const formConfigParam = query.formConfig as string | undefined;
 
   if (!isIframe && (!buttonId || isNaN(buttonId))) {
     return {
@@ -316,9 +325,27 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
     };
   }
 
+  let formWithConfig = JSON.parse(JSON.stringify(form));
+
+  if (formConfigParam) {
+    try {
+      const parsedConfig = JSON.parse(formConfigParam);
+      formWithConfig.form_configs = [
+        {
+          form_config_displays:
+            parsedConfig.displays || parsedConfig.form_config_displays || [],
+          form_config_labels:
+            parsedConfig.labels || parsedConfig.form_config_labels || [],
+        },
+      ];
+    } catch (error) {
+      console.error("Failed to parse formConfig:", error);
+    }
+  }
+
   return {
     props: {
-      form: JSON.parse(JSON.stringify(form)),
+      form: formWithConfig,
       buttonId: buttonId || 0,
       productId: form.product.id,
       isIframe,

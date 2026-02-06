@@ -50,6 +50,7 @@ export const FormBlockRenderer = (props: Props) => {
       fieldKey,
       answers,
       setAnswers,
+      form,
     };
 
     switch (block.type_bloc) {
@@ -72,7 +73,7 @@ export const FormBlockRenderer = (props: Props) => {
         return <CheckboxBlock {...commonProps} />;
 
       case "paragraph":
-        return <ParagraphBlock block={block} />;
+        return <ParagraphBlock block={block} displayLabel={displayLabel} />;
 
       case "heading_1":
         return <HeadingBlock level={1} displayLabel={displayLabel} />;

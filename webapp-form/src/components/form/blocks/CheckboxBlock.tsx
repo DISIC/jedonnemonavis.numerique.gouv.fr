@@ -21,6 +21,7 @@ interface Props {
   fieldKey: string;
   answers: FormAnswers;
   setAnswers: (value: SetStateAction<FormAnswers>) => void;
+  form: FormWithElements;
 }
 
 export const CheckboxBlock = ({
@@ -29,10 +30,19 @@ export const CheckboxBlock = ({
   fieldKey,
   answers,
   setAnswers,
+  form,
 }: Props) => {
   const { classes } = useStyles();
   const checkboxAnswers = answers[fieldKey] as DynamicAnswerData[] | undefined;
   const checkboxValues = checkboxAnswers?.map((a) => a.answer_item_id) || [];
+
+  const formConfig = form.form_configs[0];
+  const visibleOptions = block.options.filter((opt) => {
+    const isHidden = formConfig?.form_config_displays?.some(
+      (d) => d.kind === "blockOption" && d.parent_id === opt.id && d.hidden,
+    );
+    return !isHidden;
+  });
 
   return (
     <div>
@@ -44,7 +54,7 @@ export const CheckboxBlock = ({
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <Checkbox
-        options={block.options.map((opt, index) => ({
+        options={visibleOptions.map((opt, index) => ({
           label: opt.label || "",
           nativeInputProps: {
             id: index === 0 ? `checkbox-${block.id}` : undefined,
