@@ -24,6 +24,7 @@ async function main() {
 	switch (command) {
 		case 'seedBugFormTemplate':
 			await seed_bug_form_template();
+			break;
 		case 'seedRootFormTemplate':
 			await seed_root_form_template();
 			break;
