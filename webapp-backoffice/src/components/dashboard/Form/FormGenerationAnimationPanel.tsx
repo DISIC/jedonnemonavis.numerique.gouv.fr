@@ -74,6 +74,7 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 				variant="determinate"
 				className={fr.cx('fr-my-8v', 'fr-p-1v')}
 				value={progress}
+				aria-label="Progression de la génération du formulaire"
 			/>
 			<div
 				className={cx(

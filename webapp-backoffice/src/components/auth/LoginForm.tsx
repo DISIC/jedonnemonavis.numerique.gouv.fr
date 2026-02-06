@@ -1,20 +1,20 @@
-import { isValidEmail } from '@/src/utils/tools';
+import { Toast } from '@/src/components/ui/Toast';
+import { getSafeCallbackUrl, isValidEmail } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
 import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { push } from '@socialgouv/matomo-next';
 import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
-import { Toast } from '@/src/components/ui/Toast';
-import { push } from '@socialgouv/matomo-next';
-import { ProConnectButton } from '@codegouvfr/react-dsfr/ProConnectButton';
+import { PasswordMessages } from '@/src/types/custom';
 
 type FormCredentials = {
 	email: string;
@@ -35,9 +35,10 @@ const defaultErrors = {
 	userInactive: false
 };
 
+const loginSuccessMessage = 'Connexion réussie. Vous êtes maintenant connecté.';
+
 export const LoginForm = () => {
 	const router = useRouter();
-
 	const [credentials, setCredentials] = useState<FormCredentials>({
 		email: '',
 		password: ''
@@ -47,6 +48,7 @@ export const LoginForm = () => {
 	const [showPassword, setShowPassword] = useState<boolean>(false);
 	const [isSignInLoading, setIsSignInLoading] = useState<boolean>(false);
 	const [displayToast, setDisplayToast] = useState<boolean>(false);
+	const [displayLoginToast, setDisplayLoginToast] = useState<boolean>(false);
 
 	const emailRef = useRef<HTMLInputElement | null>(null);
 	const passwordRef = useRef<HTMLInputElement | null>(null);
@@ -128,6 +130,24 @@ export const LoginForm = () => {
 		});
 	};
 
+	const getPasswordMessages = (): PasswordMessages => {
+		if (passwordIncorrect) {
+			return [
+				{
+					message: <span role="alert">Mot de passe incorrect.</span>,
+					severity: 'error'
+				}
+			];
+		}
+		// Invisible placeholder message to keep container mounted
+		return [
+			{
+				message: <span aria-hidden="true"></span>,
+				severity: 'info'
+			}
+		];
+	};
+
 	const login = (): void => {
 		setIsSignInLoading(true);
 		signIn('credentials', { ...credentials, redirect: false })
@@ -135,10 +155,11 @@ export const LoginForm = () => {
 				if (res?.error) {
 					if (res.error === 'CredentialsSignin') setPasswordIncorrect(true);
 				} else {
-					const callbackUrl =
-						router.query.callbackUrl?.toString() ||
-						'/administration/dashboard/products';
-					router.push(callbackUrl);
+					const callbackUrl = getSafeCallbackUrl(router.query.callbackUrl);
+					setDisplayLoginToast(true);
+					window.setTimeout(() => {
+						router.push(callbackUrl);
+					}, 1000);
 				}
 			})
 			.finally(() => {
@@ -160,6 +181,16 @@ export const LoginForm = () => {
 
 	return (
 		<div>
+			<div className={fr.cx('fr-sr-only')} role="alert">
+				{displayLoginToast ? loginSuccessMessage : ''}
+			</div>
+			<Toast
+				isOpen={displayLoginToast}
+				setIsOpen={setDisplayLoginToast}
+				autoHideDuration={1000}
+				severity="success"
+				message={loginSuccessMessage}
+			/>
 			<Toast
 				isOpen={displayToast}
 				setIsOpen={setDisplayToast}
@@ -209,10 +240,10 @@ export const LoginForm = () => {
 					</Button>
 				</div>
 			</modal.Component>
-			<h5>Avec ProConnect</h5>
+			<h2 className={fr.cx('fr-h5')}>Avec ProConnect</h2>
 			<ProConnectButton onClick={() => signIn('openid')} />
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-			<h5>Avec votre adresse mail</h5>
+			<h2 className={fr.cx('fr-h5')}>Avec votre adresse mail</h2>
 			<form
 				onSubmit={e => {
 					e.preventDefault();
@@ -236,7 +267,8 @@ export const LoginForm = () => {
 							resetErrors();
 						},
 						name: 'email',
-						autoComplete: 'email'
+						autoComplete: 'email',
+						type: 'email'
 					}}
 					state={hasErrors() ? 'error' : 'default'}
 					stateRelatedMessage={
@@ -248,7 +280,7 @@ export const LoginForm = () => {
 				{showPassword && (
 					<PasswordInput
 						label="Mot de passe"
-						className={cx(classes.password)}
+						className={cx(classes.password, fr.cx('fr-card--no-icon'))}
 						nativeInputProps={{
 							'aria-required': true,
 							ref: passwordRef,
@@ -256,21 +288,11 @@ export const LoginForm = () => {
 								setCredentials({ ...credentials, password: e.target.value });
 								setPasswordIncorrect(false);
 							},
-							autoComplete: 'current-password'
+							autoComplete: 'current-password',
+							name: 'password'
 						}}
-						messages={
-							passwordIncorrect
-								? [
-										{
-											message: (
-												<span role="status">Mot de passe incorrect.</span>
-											),
-											severity: 'error'
-										}
-									]
-								: []
-						}
-						messagesHint=""
+						messages={getPasswordMessages()}
+						messagesHint={''}
 					/>
 				)}
 				{showPassword && (
@@ -303,7 +325,7 @@ export const LoginForm = () => {
 				</Button>
 			</form>
 			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
-			<h5>Vous n&apos;avez pas de compte ?</h5>
+			<h2 className={fr.cx('fr-h5')}>Vous n&apos;avez pas de compte ?</h2>
 			<Link
 				className={cx(classes.button, fr.cx('fr-btn', 'fr-btn--secondary'))}
 				href="/register"
@@ -328,7 +350,10 @@ const useStyles = tss
 			pointerEvents: isLoading ? 'none' : 'auto'
 		},
 		password: {
-			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0
+			marginBottom: passwordIncorrect ? fr.spacing('5v') : 0,
+			'& ::before': {
+				display: passwordIncorrect ? 'block' : 'none'
+			}
 		},
 		actionModal: {
 			display: 'flex',

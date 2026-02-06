@@ -73,7 +73,13 @@ const SettingsTab = ({
 			})
 		);
 		router.push(
-			`/administration/dashboard/product/${form.product_id}/forms?alert=${encodeURIComponent(`Le formulaire "${form.title || form.form_template.title}" et tous les liens d'intégration associés ont bien été fermés.`)}`
+			`/administration/dashboard/product/${
+				form.product_id
+			}/forms?alert=${encodeURIComponent(
+				`Le formulaire "${
+					form.title || form.form_template.title
+				}" et tous les liens d'intégration associés ont bien été fermés.`
+			)}`
 		);
 	};
 
@@ -232,15 +238,17 @@ const SettingsTab = ({
 
 	return (
 		<div className={fr.cx('fr-grid-row')}>
-			<Alert
-				className={fr.cx('fr-col-12', 'fr-mb-6v')}
-				description={alertText}
-				severity="success"
-				small
-				closable
-				isClosed={!isAlertShown}
-				onClose={() => setIsAlertShown(false)}
-			/>
+			<div role="alert">
+				<Alert
+					className={fr.cx('fr-col-12', 'fr-mb-6v')}
+					description={alertText}
+					severity="success"
+					small
+					closable
+					isClosed={!isAlertShown}
+					onClose={() => setIsAlertShown(false)}
+				/>
+			</div>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-7v')}>Paramètres</h2>
 
 			{displaySettingsContent()}

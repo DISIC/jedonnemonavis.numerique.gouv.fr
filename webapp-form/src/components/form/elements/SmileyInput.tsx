@@ -55,7 +55,7 @@ export const SmileyInput = (props: Props) => {
 			<div className={cx(classes.smileysContainer)}>
 				<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 					<legend className={fr.cx('fr-fieldset__legend')}>
-						{<h3 className={fr.cx('fr-mb-2v')}>{label}</h3>}
+						<h2 className={fr.cx('fr-mb-2v', 'fr-h3')}>{label}</h2>
 						{hint && (
 							<span className={fr.cx('fr-hint-text', 'fr-my-4v')}>{hint}</span>
 						)}
@@ -84,7 +84,7 @@ export const SmileyInput = (props: Props) => {
 									}}
 								>
 									<Image
-										alt={t(`smileys.${smiley.value}`)}
+										alt={`Image: ${t(`smileys.${smiley.value}`)}`}
 										src={smiley.img}
 										width={56}
 										height={56}

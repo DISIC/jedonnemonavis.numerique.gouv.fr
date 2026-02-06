@@ -6,6 +6,7 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
@@ -40,6 +41,8 @@ const CredentialsCard = (props: Props) => {
 	const [modalType, setModalType] = React.useState<
 		'change-mail' | 'change-pwd'
 	>('change-mail');
+	const lastModalTriggerRef = React.useRef<HTMLButtonElement | null>(null);
+	const [modifying, setModifying] = React.useState<Boolean>(false);
 
 	const {
 		control,
@@ -93,6 +96,7 @@ const CredentialsCard = (props: Props) => {
 		return new Promise<boolean>(resolve => {
 			setResolvePromise(() => resolve);
 			setModalType('change-mail');
+			lastModalTriggerRef.current = null;
 			onConfirmModal.open();
 		});
 	};
@@ -111,11 +115,30 @@ const CredentialsCard = (props: Props) => {
 
 	const initResetPwd = trpc.user.initResetPwd.useMutation({});
 
+	useIsModalOpen(onConfirmModal, {
+		onConceal: () => {
+			window.setTimeout(() => lastModalTriggerRef.current?.focus(), 0);
+		}
+	});
+
+	const handleOpenResetPwdModal = (
+		event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+	) => {
+		lastModalTriggerRef.current = event.currentTarget;
+		setModalType('change-pwd');
+		onConfirmModal.open();
+		push(['trackEvent', 'BO - Account', `Credentials-Modal-Open`]);
+	};
+
 	return (
 		<>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title={`${modalType === 'change-mail' ? "Changer l'adresse mail" : 'Réinitialiser le mot de passe'}`}
+				title={`${
+					modalType === 'change-mail'
+						? "Changer l'adresse mail"
+						: 'Réinitialiser le mot de passe'
+				}`}
 				handleOnConfirm={() => {
 					if (modalType === 'change-mail') {
 						handleConfirm();
@@ -144,17 +167,15 @@ const CredentialsCard = (props: Props) => {
 			</OnConfirmModal>
 			<GenericCardInfos
 				title={'Identifiants de connexion'}
-				modifiable={true}
+				editButtonTitle="Modifier les informations de connexion"
+				modifiable={false}
 				onSubmit={onFormSubmit}
+				propsIsModifying={modifying}
 				customModifyButton={
 					user.proconnect_account ? (
 						<Button
 							priority="secondary"
-							onClick={() => {
-								setModalType('change-pwd');
-								onConfirmModal.open();
-								push(['trackEvent', 'BO - Account', `Credentials-Modal-Open`]);
-							}}
+							onClick={handleOpenResetPwdModal}
 							className={classes.buttonContainer}
 						>
 							Réinitialiser le mot de passe
@@ -164,7 +185,7 @@ const CredentialsCard = (props: Props) => {
 				viewModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+							<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 								<Alert
 									closable
 									onClose={function noRefCheck() {
@@ -196,14 +217,37 @@ const CredentialsCard = (props: Props) => {
 								{user.email}
 							</div>
 						</div>
-						{user.proconnect_account && (
-							<Alert
-								small
-								severity="info"
-								description="Vous ne pouvez pas modifier cet email car il s'agit de votre adresse ProConnect, que vous avez utilisé pour créer votre compte Je Donne Mon Avis. Si vous souhaitez vous connecter avec une autre adresse, vous devez créer un autre compte."
-								className={fr.cx('fr-col-12', 'fr-mb-6v')}
-								style={{ textAlign: 'justify' }}
-							/>
+
+						{user.proconnect_account ? (
+							<div role="status">
+								<Alert
+									small
+									severity="info"
+									description="Vous ne pouvez pas modifier cet email car il s'agit de votre adresse ProConnect, que vous avez utilisé pour créer votre compte Je Donne Mon Avis. Si vous souhaitez vous connecter avec une autre adresse, vous devez créer un autre compte."
+									className={fr.cx('fr-col-12', 'fr-mb-6v')}
+									style={{ textAlign: 'justify' }}
+								/>
+							</div>
+						) : (
+							<div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+								<Button
+									priority="secondary"
+									iconId="fr-icon-edit-line"
+									onClick={() => {
+										setModifying(true);
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Modify-Identifiants de connexion`
+										]);
+									}}
+									size="small"
+									className={classes.button}
+									title={`Modifier l'adresse e-mail`}
+								>
+									Modifier
+								</Button>
+							</div>
 						)}
 						<div
 							className={fr.cx(
@@ -218,13 +262,27 @@ const CredentialsCard = (props: Props) => {
 							<div className={fr.cx('fr-col-12', 'fr-pt-0')}>
 								*****************
 							</div>
+							<div
+								className={cx(
+									fr.cx('fr-col-md-12', 'fr-pt-0'),
+									classes.buttonContainer
+								)}
+							>
+								<Button
+									priority="secondary"
+									onClick={handleOpenResetPwdModal}
+									className={classes.buttonContainer}
+								>
+									Réinitialiser le mot de passe
+								</Button>
+							</div>
 						</div>
 					</>
 				}
 				editModeContent={
 					<>
 						{displayToast && (
-							<div className={cx(fr.cx('fr-mt-4v'))} role="status">
+							<div className={cx(fr.cx('fr-mt-4v'))} role="alert">
 								<Alert
 									closable
 									onClose={function noRefCheck() {
@@ -234,12 +292,7 @@ const CredentialsCard = (props: Props) => {
 									className={fr.cx('fr-mb-5w')}
 									small
 									description={
-										<>
-											<p role="status">
-												Email de réinitialisation du mot de passe envoyé avec
-												succès.
-											</p>
-										</>
+										'Email de réinitialisation du mot de passe envoyé avec succès.'
 									}
 								/>
 							</div>
@@ -252,6 +305,9 @@ const CredentialsCard = (props: Props) => {
 							)}
 						>
 							<div className={cx(fr.cx('fr-col-12'), classes.formContainer)}>
+								<p className={fr.cx('fr-hint-text')}>
+									Tous les champs sont obligatoires
+								</p>
 								<form id="credentials-form">
 									<div className={fr.cx('fr-input-group', 'fr-col-md-6')}>
 										<Input
@@ -289,14 +345,22 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Nouvelle adresse e-mail
+																	Nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
+															hintText="Exemple : nom@domaine.fr"
 															nativeInputProps={{
 																onChange,
 																value: value || '',
 																name,
 																required: true,
+																autoFocus: true,
 																placeholder:
 																	'Saisissez votre nouvelle adresse mail'
 															}}
@@ -322,7 +386,13 @@ const CredentialsCard = (props: Props) => {
 																<p
 																	className={fr.cx('fr-mb-0', 'fr-text--bold')}
 																>
-																	Confirmation de la nouvelle adresse e-mail
+																	Confirmation de la nouvelle adresse e-mail{' '}
+																	<span
+																		aria-hidden="true"
+																		className={classes.asterisk}
+																	>
+																		*
+																	</span>
 																</p>
 															}
 															nativeInputProps={{
@@ -343,6 +413,43 @@ const CredentialsCard = (props: Props) => {
 									)}
 								</form>
 							</div>
+							<div className={fr.cx('fr-col-12', 'fr-mb-4v')}>
+								<Button
+									priority="secondary"
+									onClick={() => {
+										setModifying(false);
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Cancel-Changes-Identifiants de connexion`
+										]);
+									}}
+									size="small"
+									className={cx(classes.button)}
+								>
+									Annuler
+								</Button>
+								<Button
+									priority="primary"
+									iconId="fr-icon-save-line"
+									iconPosition="right"
+									size="small"
+									className={cx(fr.cx('fr-ml-md-4v'), classes.button)}
+									onClick={async () => {
+										const isFormValid = await onFormSubmit();
+										push([
+											'trackEvent',
+											'BO - Account',
+											`Validate-Changes-Identifiants de connexion`
+										]);
+										if (isFormValid) {
+											setModifying(false);
+										}
+									}}
+								>
+									Sauvegarder
+								</Button>
+							</div>
 							<div className={fr.cx('fr-col-md-12', 'fr-text--bold')}>
 								Mot de passe
 							</div>
@@ -354,15 +461,7 @@ const CredentialsCard = (props: Props) => {
 							>
 								<Button
 									priority="secondary"
-									onClick={() => {
-										setModalType('change-pwd');
-										onConfirmModal.open();
-										push([
-											'trackEvent',
-											'BO - Account',
-											`Credentials-Modal-Open`
-										]);
-									}}
+									onClick={handleOpenResetPwdModal}
 									className={classes.buttonContainer}
 								>
 									Réinitialiser le mot de passe
@@ -383,6 +482,15 @@ const useStyles = tss.withName(CredentialsCard.name).create(() => ({
 		}
 	},
 	buttonContainer: {
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
+		}
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.title.redMarianne.default
+	},
+	button: {
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

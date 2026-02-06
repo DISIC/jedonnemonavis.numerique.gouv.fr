@@ -1,4 +1,5 @@
 import { login } from '../../../utils/helpers/common';
+import { displayViolationsTable } from '../../../utils/tools';
 import { adminEmail, adminPassword } from '../../../utils/variables';
 
 describe('jdma-answer-check', () => {

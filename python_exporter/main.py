@@ -153,7 +153,7 @@ def generate_download_link(bucket, object_name, expiration=2592000):
         return None
 
 def sanitize_filename(filename):
-    return re.sub(r'[^\w\-]', '_', filename)
+    return re.sub(r'[^\w\-]', '_', str(filename))
 
 def send_email(to_email, download_link, product_name, switch_to_zip=False):
     msg = MIMEMultipart('alternative')
@@ -342,6 +342,16 @@ def fetch_query_with_filters(conn, query, params):
             print(f"Erreur récupération résultats avec filtres: {e}")
             return []
 
+def update_export_progress(conn, export_id, progress):
+    """Met à jour la progression de l'export sans faire échouer le flux"""
+    progress_update_query = """
+    UPDATE public."Export" SET progress = %s WHERE id = %s
+    """
+    try:
+        execute_query(conn, progress_update_query, (progress, export_id))
+    except ConnectionError as conn_error:
+        print(f"Erreur de connexion lors de la mise à jour du progrès: {conn_error}")
+
 def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=50, fill='█'):
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filled_length = int(length * iteration // total)
@@ -378,7 +388,13 @@ def format_excel(writer, df, sheet_name):
 
     # Adjust column widths
     for i, col in enumerate(df.columns):
-        max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
+        try:
+            # Handle NaN and float values by converting to string first
+            col_values = df[col].fillna('').astype(str)
+            max_len = max(col_values.str.len().max(), len(col)) + 2
+        except (ValueError, TypeError):
+            # Fallback to a default width if calculation fails
+            max_len = len(col) + 2
         worksheet.set_column(i, i, max_len)
 
     # Define header format
@@ -591,15 +607,15 @@ def process_exports(conn):
 
     start_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     update_status_query = """
-    UPDATE public."Export" SET status = 'processing'::"StatusExport", "startDate" = %s WHERE id = %s
+    UPDATE public."Export" SET status = 'processing'::"StatusExport", "startDate" = %s, progress = 0 WHERE id = %s
     """
     execute_query(conn, update_status_query, (start_date, export_id))
 
     product_id = first_result_export[5]
     filter_params_raw = first_result_export[3]
     export_format = first_result_export[9]
-    name_product = first_result_export[11]
-    email_user = first_result_export[10]
+    name_product = first_result_export[13]
+    email_user = first_result_export[12]
 
     filters_query = ""
     filters_values = []
@@ -740,6 +756,11 @@ def process_exports(conn):
                 retrieved_reviews += len(results_reviews)
                 print_progress_bar(retrieved_reviews, total_reviews, prefix='Progress:', suffix='Complete', length=50)
 
+                if total_reviews > 0:
+                    # Plafonner la progression à 95% pendant la phase de récupération
+                    progress_percent = min(95, int((retrieved_reviews * 95) / total_reviews))
+                    update_export_progress(conn, export_id, progress_percent)
+
                 offset += PAGE_SIZE
 
     desired_order = [
@@ -769,9 +790,14 @@ def process_exports(conn):
     
     upload_buffer = None
     try:
+        # Indiquer la fin de la phase de récupération sans atteindre 100%
+        update_export_progress(conn, export_id, 95)
         print(f"Début génération fichier {export_format}...")
         upload_buffer, file_name = main_export_logic(switch_to_zip, export_format, all_reviews, all_reviews_by_year, field_labels, name_product, current_date)
         print(f"Fichier {file_name} généré avec succès")
+
+        # Progression après génération du fichier
+        update_export_progress(conn, export_id, 98)
         
         log_memory_usage("AFTER_FILE_GENERATION")
         
@@ -785,6 +811,9 @@ def process_exports(conn):
         # Upload to S3
         if upload_to_s3(upload_buffer, env_vars['BUCKET_NAME'], file_name):
             print(f"Fichier {file_name} uploadé avec succès sur le bucket {env_vars['BUCKET_NAME']}.")
+
+            # Progression après upload
+            update_export_progress(conn, export_id, 99)
             
             # Libérer immédiatement le buffer après upload pour libérer la mémoire
             if isinstance(upload_buffer, BytesIO):
@@ -809,7 +838,7 @@ def process_exports(conn):
                 # Toujours mettre à jour le statut même si l'email a échoué
                 end_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 update_query = """
-                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s WHERE id = %s
+                UPDATE public."Export" SET status = 'done'::"StatusExport", "endDate" = %s, link = %s, progress = 100 WHERE id = %s
                 """
                 try:
                     execute_query(conn, update_query, (end_date, download_link, export_id))

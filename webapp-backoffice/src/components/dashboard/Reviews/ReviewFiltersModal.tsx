@@ -32,7 +32,7 @@ const ReviewFiltersModal = (props: Props) => {
 		page: 1,
 		numberPerPage: 1000,
 		form_id: form.id,
-		isTest: true
+		isTest: false
 	});
 
 	const filterableBlocks = form.form_template.form_template_steps

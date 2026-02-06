@@ -88,7 +88,7 @@ export const FormFirstBlock = (props: Props) => {
 					</div>
 				))}
 				{isRateLimitReached && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {
@@ -105,10 +105,13 @@ export const FormFirstBlock = (props: Props) => {
 						<Button
 							type="button"
 							className={cx(classes.loading, classes.validateButton)}
+							aria-busy="true"
+							aria-label="Chargement en cours"
 						>
 							<div>
-								<i className={fr.cx('ri-loader-4-line')} />
+								<i className={fr.cx('ri-loader-4-line')} aria-hidden="true" />
 							</div>
+							<span className={fr.cx('fr-sr-only')}>Chargement en cours</span>
 						</Button>
 					) : (
 						<Button

@@ -14,8 +14,9 @@
 		"lhci:wizard": "lhci wizard",
 		"lhci:server": "LHCI_DB_PATH=${LHCI_DB_PATH:-./db.sql}; lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=$LHCI_DB_PATH",
 		"db:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed",
+		"db:reset:silent": "npx prisma migrate reset --force --skip-generate --skip-seed | awk '/Applying migration/{c++; next} /The following migration/ { next } /migrations\\// { next } /[└├│]─/ { next } {print} END {print \"Applied \" c \" migrations\"\n\n}'",
 		"test": "npx cypress run --browser chrome --headed",
-		"test:reset": "npx prisma migrate reset --force --skip-generate --skip-seed && npx prisma db seed && npx cypress run --browser chrome --headed",
+		"test:reset": "npm run db:reset:silent && npx prisma db seed && npx cypress run --browser chrome --headed",
 		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts"
 	},
 	"husky": {
@@ -103,7 +104,9 @@
 		"@types/escape-html": "1.0.4",
 		"@types/lodash": "4.17.15",
 		"@types/react-beautiful-dnd": "13.1.8",
-		"cypress": "13.13.1",
+    "axe-core": "4.10.3",
+		"cypress": "13.17.0",
+		"cypress-axe": "1.6.0",
 		"eslint-config-prettier": "9.0.0",
 		"eslint-plugin-prettier": "5.0.0",
 		"husky": "8.0.3",

@@ -1,13 +1,12 @@
+import type { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Badge } from '@codegouvfr/react-dsfr/Badge';
-import React from 'react';
 import { Menu, MenuItem } from '@mui/material';
-import type { AdminEntityRightWithUsers } from '@/src/types/prismaTypesExtended';
-import { tss } from 'tss-react/dsfr';
-import { useSession } from 'next-auth/react';
-import { AdminEntityRightActionType } from './EntityRightsModal';
 import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
+import React, { KeyboardEvent } from 'react';
+import { tss } from 'tss-react/dsfr';
+import { AdminEntityRightActionType } from './EntityRightsModal';
 
 interface Props {
 	adminEntityRight: AdminEntityRightWithUsers;
@@ -23,6 +22,8 @@ const EntityRightCard = (props: Props) => {
 	const { data: session } = useSession({ required: true });
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
+	const menuContainer = (anchorEl?.closest('dialog') ??
+		anchorEl?.closest('[role="dialog"]')) as HTMLElement | null;
 	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		setAnchorEl(event.currentTarget);
 		push(['trackEvent', 'BO - Entities', `Open-Options`]);
@@ -37,7 +38,7 @@ const EntityRightCard = (props: Props) => {
 
 	return (
 		<>
-			<li
+			<div
 				className={cx(
 					fr.cx('fr-card', 'fr-my-3v', 'fr-p-2w'),
 					classes.entityCard
@@ -118,6 +119,7 @@ const EntityRightCard = (props: Props) => {
 										id="option-menu"
 										open={menuOpen}
 										anchorEl={anchorEl}
+										container={menuContainer ?? undefined}
 										onClose={handleClose}
 										MenuListProps={{
 											'aria-labelledby': 'button-options-access-right'
@@ -146,7 +148,7 @@ const EntityRightCard = (props: Props) => {
 							))}
 					</div>
 				</div>
-			</li>
+			</div>
 		</>
 	);
 };

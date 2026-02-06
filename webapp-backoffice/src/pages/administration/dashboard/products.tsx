@@ -1,4 +1,3 @@
-import EntityModal from '@/src/components/dashboard/Entity/EntityModal';
 import EssentialProductModal from '@/src/components/dashboard/Product/EssentialProductModal';
 import ProductCard from '@/src/components/dashboard/Product/ProductCard';
 import ProductEmptyState from '@/src/components/dashboard/Product/ProductEmptyState';
@@ -53,7 +52,6 @@ const DashBoard = () => {
 		isLoading: isLoadingSettings
 	} = useUserSettings();
 	const router = useRouter();
-	const onboardingDone = router.query.onboardingDone as string | undefined;
 	const { createdProduct, createdForm, reset: resetContext } = useOnboarding();
 
 	const [search, setSearch] = React.useState<string>(filters.validatedSearch);
@@ -70,7 +68,7 @@ const DashBoard = () => {
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
 
 	const isOnboardingDone = useMemo(() => {
-		return Boolean(onboardingDone);
+		return !!(router.query.onboardingDone as string | undefined);
 	}, []);
 
 	const { data: session } = useSession({ required: true });
@@ -242,7 +240,7 @@ const DashBoard = () => {
 	}
 
 	const displayFilters =
-		nbPages > 1 ||
+		countTotalUserScope > 0 ||
 		search !== '' ||
 		filters.filterOnlyFavorites ||
 		filters.filterOnlyArchived ||
@@ -252,7 +250,7 @@ const DashBoard = () => {
 		<>
 			{isModalSubmitted && (
 				<div
-					role="status"
+					role="alert"
 					className={cx(classes.container, fr.cx('fr-container'))}
 				>
 					<Alert
@@ -321,32 +319,35 @@ const DashBoard = () => {
 					</div>
 				</div>
 				{isOnboardingDone && createdProduct && createdForm && (
-					<Alert
-						className={fr.cx('fr-col-12', 'fr-mb-8v')}
-						title="Votre service et votre formulaire ont été créé avec succès !"
-						description={
-							<>
-								Pensez à copier le lien d’intégration sur votre site pour rendre
-								votre formulaire visible aux usagers
-								<Link
-									href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
-									className={fr.cx(
-										'fr-link--icon-right',
-										'fr-ml-2v',
-										'fr-icon-arrow-right-line',
-										'fr-link'
-									)}
-								>
-									Copier le lien d’intégration
-								</Link>
-							</>
-						}
-						severity="success"
-						closable
-					/>
+					<div role="alert">
+						<Alert
+							className={fr.cx('fr-col-12', 'fr-mb-8v')}
+							title="Votre service et votre formulaire ont été créés avec succès !"
+							as="h2"
+							description={
+								<>
+									Pensez à copier le lien d’intégration sur votre site pour
+									rendre votre formulaire visible aux usagers
+									<Link
+										href={`/administration/dashboard/product/${createdProduct.id}/forms/${createdForm.id}?tab=links`}
+										className={fr.cx(
+											'fr-link--icon-right',
+											'fr-ml-2v',
+											'fr-icon-arrow-right-line',
+											'fr-link'
+										)}
+									>
+										Copier le lien d’intégration
+									</Link>
+								</>
+							}
+							severity="success"
+							closable
+						/>
+					</div>
 				)}
 
-				{(displayFilters || !!countArchivedUserScope) && (
+				{displayFilters && (
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
@@ -527,9 +528,20 @@ const DashBoard = () => {
 						)}
 					</div>
 				)}
-				{isLoadingProducts || isLoadingEntities || isLoadingFavorites ? (
-					<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
+				{isLoadingProducts ||
+				isLoadingEntities ||
+				isLoadingFavorites ||
+				isRefetchingProducts ? (
+					<div
+						className={fr.cx('fr-py-20v', 'fr-mt-4w')}
+						role="status"
+						aria-live="polite"
+						aria-busy="true"
+					>
 						<Loader />
+						<span className={fr.cx('fr-sr-only')}>
+							Chargement des données...
+						</span>
 					</div>
 				) : (
 					<div>
@@ -541,13 +553,20 @@ const DashBoard = () => {
 							)}
 						>
 							<PageItemsCounter
-								label="Services"
+								label="service"
 								startItemCount={numberPerPage * (filters.currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (filters.currentPage - 1) + products.length
 								}
 								totalItemsCount={productsResult.metadata.count}
 								additionalClasses={['fr-pt-3w']}
+								emptyStateMessage={
+									filters.filterOnlyFavorites &&
+									search === '' &&
+									!filters.filterEntity.length
+										? 'Aucun service dans vos favoris'
+										: 'Aucun service actif trouvé'
+								}
 							/>
 						</div>
 						<div
@@ -555,69 +574,43 @@ const DashBoard = () => {
 								products.length === 0 ? classes.productsContainer : ''
 							)}
 						>
-							{isRefetchingProducts ? (
-								<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
-									<Loader />
-								</div>
-							) : (
-								<ul className={classes.buttonList}>
-									{products.map((product, index) => (
-										<li key={index} role="list">
-											<ProductCard
-												product={product}
-												userId={parseInt(session?.user?.id as string)}
-												entity={
-													entities.find(
-														entity => product.entity_id === entity.id
-													) as Entity
-												}
-												isFavorite={
-													!!favorites.find(
-														favorite => favorite.product_id === product.id
-													)
-												}
-												showFavoriteButton={countTotalUserScope > 10}
-												onDeleteProduct={() => {
-													setStatusProductState({
-														msg: `Le service "${product.title}" a bien été supprimé`,
-														role: 'status'
-													});
-												}}
-												onRestoreProduct={() => {
-													updateFilters({
-														...filters,
-														filterOnlyArchived: false
-													});
-													setStatusProductState({
-														msg: `Le service "${product.title}" a bien été restauré`,
-														role: 'status'
-													});
-												}}
-											/>
-										</li>
-									))}
-								</ul>
-							)}
-
-							{products.length === 0 && !isRefetchingProducts && (
-								<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-									<div
-										className={cx(
-											fr.cx('fr-col-12', 'fr-col-md-5', 'fr-mt-30v'),
-											classes.textContainer
-										)}
-										role="status"
-									>
-										<p aria-live="assertive">
-											{filters.filterOnlyFavorites &&
-											search === '' &&
-											!filters.filterEntity.length
-												? 'Aucun service dans vos favoris'
-												: 'Aucun service trouvé'}
-										</p>
-									</div>
-								</div>
-							)}
+							<ul className={classes.buttonList}>
+								{products.map((product, index) => (
+									<li key={index}>
+										<ProductCard
+											product={product}
+											userId={parseInt(session?.user?.id as string)}
+											entity={
+												entities.find(
+													entity => product.entity_id === entity.id
+												) as Entity
+											}
+											isFavorite={
+												!!favorites.find(
+													favorite => favorite.product_id === product.id
+												)
+											}
+											showFavoriteButton={countTotalUserScope > 10}
+											onDeleteProduct={() => {
+												setStatusProductState({
+													msg: `Le service "${product.title}" a bien été supprimé`,
+													role: 'status'
+												});
+											}}
+											onRestoreProduct={() => {
+												updateFilters({
+													...filters,
+													filterOnlyArchived: false
+												});
+												setStatusProductState({
+													msg: `Le service "${product.title}" a bien été restauré`,
+													role: 'status'
+												});
+											}}
+										/>
+									</li>
+								))}
+							</ul>
 						</div>
 						<div
 							className={fr.cx(

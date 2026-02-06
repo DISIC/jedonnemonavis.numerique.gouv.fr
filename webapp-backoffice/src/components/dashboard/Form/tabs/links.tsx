@@ -6,14 +6,13 @@ import {
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { linksFaqContents } from '@/src/utils/content';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import { ButtonModalType } from '../../ProductButton/ButtonModal';
@@ -44,9 +43,11 @@ const LinksTab = ({
 }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
-	const linkCreated = router.query.linkCreated as string | undefined;
 
-	const [isLinkCreated, setIsLinkCreated] = useState(linkCreated);
+	const isLinkCreated = useMemo(
+		() => !!(router.query.linkCreated as string | undefined),
+		[]
+	);
 
 	useEffect(() => {
 		if (router.query.linkCreated) {
@@ -112,29 +113,30 @@ const LinksTab = ({
 			</div>
 
 			{isLinkCreated && !isAlertShown ? (
-				<Alert
-					className={fr.cx('fr-col-12', 'fr-mt-6v')}
-					title="Votre lien d’intégration a été créé avec succès !"
-					description={
-						'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
-					}
-					severity="success"
-					small
-					closable
-				/>
+				<div role="alert" className={fr.cx('fr-col-12', 'fr-mt-6v')}>
+					<Alert
+						title="Votre lien d’intégration a été créé avec succès !"
+						description={
+							'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
+						}
+						severity="success"
+						small
+						closable
+					/>
+				</div>
 			) : (
-				<Alert
-					className={fr.cx('fr-col-12', 'fr-mt-6v')}
-					description={alertText}
-					severity="success"
-					small
-					closable
-					isClosed={!isAlertShown}
-					onClose={() => {
-						setIsAlertShown(false);
-						setIsLinkCreated(undefined);
-					}}
-				/>
+				<div role="alert" className={fr.cx('fr-col-12', 'fr-mt-6v')}>
+					<Alert
+						description={alertText}
+						severity="success"
+						small
+						closable
+						isClosed={!isAlertShown}
+						onClose={() => {
+							setIsAlertShown(false);
+						}}
+					/>
+				</div>
 			)}
 
 			<div
@@ -147,6 +149,7 @@ const LinksTab = ({
 						<div
 							className={fr.cx('fr-col-12')}
 							style={{ display: 'flex', justifyContent: 'center' }}
+							role="status"
 						>
 							<span>Aucun lien d'intégration trouvé</span>
 						</div>

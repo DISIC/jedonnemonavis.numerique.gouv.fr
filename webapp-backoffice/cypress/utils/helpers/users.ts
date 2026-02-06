@@ -2,7 +2,7 @@ import { selectors } from '../selectors';
 import { appUrl } from '../variables';
 import { tryCloseNewsModal } from './common';
 
-export function navigateToCreatedProduct() {
+export function navigateToCreatedProduct(shouldCheckA11y = false) {
 	cy.visit(`${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
 	cy.url().should('include', selectors.url.products);
@@ -19,4 +19,9 @@ export function navigateToCreatedProduct() {
 		.within(() => {
 			cy.get(selectors.sideMenu.menuItem).contains("Droits d'accès").click();
 		});
+	if (shouldCheckA11y) {
+		cy.injectAxe();
+		cy.wait(500);
+		cy.auditA11y();
+	}
 }

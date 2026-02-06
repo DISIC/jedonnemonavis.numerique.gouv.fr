@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '.';
 import ProductLayout from '../../../../../layouts/Product/ProductLayout';
+import { Loader } from '@/src/components/ui/Loader';
 
 interface Props {
 	product: Product;
@@ -96,7 +97,8 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						<Tag
 							dismissible
 							className={cx(classes.tagFilter)}
-							title={`Retirer ${filtersLabel.find(f => f.value === action)?.label}`}
+							title={`Retirer ${filtersLabel.find(f => f.value === action)
+								?.label}`}
 							nativeButtonProps={{
 								onClick: () => {
 									updateFilters({
@@ -176,31 +178,27 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						)}
 					/>
 				</GenericFilters>
-				{isLoading || fullEvents?.data.length === 0 ? (
-					<div
-						className={cx(
-							fr.cx('fr-grid-row--center', 'fr-grid-row'),
-							classes.emptyState
-						)}
-					>
-						<p>Aucun événement trouvé</p>
-					</div>
+				{isLoading ? (
+					<Loader />
 				) : (
 					<>
-						<div className={fr.cx('fr-col-8', 'fr-pt-2w')}>
+						<div className={fr.cx('fr-col-12', 'fr-mt-2w')}>
 							<PageItemsCounter
-								label="Activités"
+								label="activité"
+								isFeminine
 								startItemCount={10 * (currentPage - 1) + 1}
 								endItemCount={10 * (currentPage - 1) + fullEvents.data.length}
 								totalItemsCount={fullEvents.pagination.total}
 							/>
 						</div>
-						<Table
-							data={tableData}
-							headers={headers}
-							bordered
-							className={classes.table}
-						/>
+						{fullEvents?.data.length > 0 && (
+							<Table
+								data={tableData}
+								headers={headers}
+								bordered
+								className={classes.table}
+							/>
+						)}
 						{nbPages > 1 && (
 							<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 								<Pagination
@@ -222,7 +220,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						)}
 					</>
 				)}
-				<p>
+				<p className={fr.cx('fr-mt-12v')}>
 					Cet historique existe depuis Novembre 2024. Les activités antérieures
 					à cette date ne seront pas affichées.
 				</p>

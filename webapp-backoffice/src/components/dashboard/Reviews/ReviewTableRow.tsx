@@ -192,8 +192,8 @@ const ReviewTableRow = ({
 								? fr.colors.decisions.background.alt.blueFrance.default
 								: undefined
 						}}
+						aria-expanded={displayMoreInfo}
 					>
-						{' '}
 						Voir le détail de la réponse
 					</Button>
 				</td>

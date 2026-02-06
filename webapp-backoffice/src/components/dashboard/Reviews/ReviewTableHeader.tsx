@@ -62,6 +62,7 @@ const ReviewTableHeader = (props: Props) => {
 								onClick(sort.code);
 							}
 						}}
+						scope="col"
 					>
 						<span>
 							{sort.label}{' '}
@@ -81,6 +82,7 @@ const ReviewTableHeader = (props: Props) => {
 					<th
 						className={cx(classes.badgeVerbatim)}
 						key={`fake_div_${index}`}
+						aria-hidden="true"
 					></th>
 				))}
 			</tr>

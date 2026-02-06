@@ -1,32 +1,29 @@
+import { PasswordMessages } from '@/src/types/custom';
+import {
+	getMissingPasswordRequirements,
+	regexAtLeastOneNumber,
+	regexAtLeastOneSpecialCharacter
+} from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Button } from '@codegouvfr/react-dsfr/Button';
-import {
-	PasswordInput,
-	PasswordInputProps
-} from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { PasswordInput } from '@codegouvfr/react-dsfr/blocks/PasswordInput';
+import { push } from '@socialgouv/matomo-next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode, useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Loader } from '../ui/Loader';
-import { push } from '@socialgouv/matomo-next';
 
 type FormErrors = {
 	password: { required: boolean; format: boolean };
 };
 
-type PasswordMessages = {
-	severity: PasswordInputProps.Severity;
-	message: ReactNode;
-}[];
-
-const regexAtLeastOneSpecialCharacter = /[^a-zA-Z0-9\s]/;
-const regexAtLeastOneNumber = /\d/;
-
 export const ResetForm = () => {
 	const router = useRouter();
+	const passwordRef = useRef<HTMLInputElement>(null);
+	const passwordConfirmRef = useRef<HTMLInputElement>(null);
 	const defaultErrors = {
 		password: {
 			required: false,
@@ -58,10 +55,26 @@ export const ResetForm = () => {
 
 		if (errors.password.required) {
 			messages.push({
-				message: 'Veuillez renseigner un mot de passe.',
+				message: <span role="alert">Veuillez renseigner un mot de passe.</span>,
 				severity: 'error'
 			});
 			return messages;
+		}
+
+		// When format error is triggered (after form submission), announce exactly what's missing
+		if (errors.password.format && userInfos.password) {
+			const missing = getMissingPasswordRequirements(userInfos.password);
+			if (missing.length > 0) {
+				messages.push({
+					message: (
+						<span role="alert">
+							Le mot de passe doit contenir au moins : {missing.join(', ')}.
+						</span>
+					),
+					severity: 'error'
+				});
+				return messages;
+			}
 		}
 
 		messages.push({
@@ -118,6 +131,33 @@ export const ResetForm = () => {
 	});
 
 	const sendNewPassword = () => {
+		const nextErrors: FormErrors = {
+			password: {
+				required: false,
+				format: false
+			}
+		};
+
+		if (!userInfos.password) {
+			nextErrors.password.required = true;
+		} else {
+			nextErrors.password.format =
+				userInfos.password.length < 12 ||
+				!regexAtLeastOneSpecialCharacter.test(userInfos.password) ||
+				!regexAtLeastOneNumber.test(userInfos.password);
+		}
+
+		if (nextErrors.password.required || nextErrors.password.format) {
+			setErrors(nextErrors);
+			passwordRef.current?.focus();
+			return;
+		}
+
+		if (userInfos.password !== userInfosVerif.password) {
+			passwordConfirmRef.current?.focus();
+			return;
+		}
+
 		resetPassword.mutate({
 			token: router.query.token as string,
 			password: userInfos.password
@@ -149,13 +189,17 @@ export const ResetForm = () => {
 									setUserInfos({ ...userInfos, password: e.target.value });
 									resetErrors('password');
 								},
-								value: userInfos.password
+								value: userInfos.password,
+								ref: passwordRef,
+								autoComplete: 'new-password'
 							}}
 							messages={getPasswordMessages()}
 							messagesHint={
-								errors.password.required
-									? 'Tous les champs sont obligatoires'
-									: 'Votre mot de passe doit contenir au moins :'
+								getPasswordMessages().length === 1 ||
+								getPasswordMessages().filter(m => m.severity === 'valid')
+									.length === 3
+									? ''
+									: undefined
 							}
 						/>
 
@@ -170,7 +214,9 @@ export const ResetForm = () => {
 									});
 									resetErrors('password');
 								},
-								value: userInfosVerif.password
+								value: userInfosVerif.password,
+								ref: passwordConfirmRef,
+								autoComplete: 'new-password'
 							}}
 							messages={
 								userInfos.password !== userInfosVerif.password
@@ -190,8 +236,7 @@ export const ResetForm = () => {
 							disabled={
 								!userInfos.password ||
 								!userInfosVerif.password ||
-								userInfos.password !== userInfosVerif.password ||
-								getPasswordMessages().some(m => m.severity === 'error')
+								userInfos.password !== userInfosVerif.password
 							}
 						>
 							Confirmer

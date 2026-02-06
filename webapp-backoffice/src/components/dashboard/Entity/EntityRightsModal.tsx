@@ -24,6 +24,7 @@ interface Props {
 	refetchEntities: () => void;
 	entity?: Entity;
 	onClose: () => void;
+	onConceal?: () => void;
 	fromSearch?: boolean;
 }
 
@@ -53,6 +54,7 @@ const EntityRightsModal = (props: Props) => {
 	useIsModalOpen(modal, {
 		onConceal: () => {
 			setActionType(null);
+			props.onConceal?.();
 		}
 	});
 
@@ -188,7 +190,7 @@ const EntityRightsModal = (props: Props) => {
 			!session?.user.role.includes('admin')
 		) {
 			return (
-				<div role="status">
+				<div role="alert">
 					<Alert
 						className={fr.cx('fr-mb-16v')}
 						description={
@@ -207,7 +209,7 @@ const EntityRightsModal = (props: Props) => {
 		return (
 			<>
 				{actionType && (
-					<div role="status">
+					<div role="alert">
 						<Alert
 							closable
 							onClose={function noRefCheck() {
@@ -220,13 +222,13 @@ const EntityRightsModal = (props: Props) => {
 						/>
 					</div>
 				)}
-				{adminEntityRightsCount !== 0 && (
+				{adminEntityRightsCount > 1 && (
 					<div
 						className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-pb-2w')}
 					>
 						<div className={fr.cx('fr-col-8')}>
 							<PageItemsCounter
-								label="Administrateurs"
+								label="administrateur"
 								startItemCount={numberPerPage * (currentPage - 1) + 1}
 								endItemCount={
 									numberPerPage * (currentPage - 1) +
@@ -338,7 +340,7 @@ const EntityRightsModal = (props: Props) => {
 							Pour devenir administrateur, contacter l’une de ces personnes.
 						</p>
 					)}
-					<h6 className={fr.cx('fr-mt-2v')}>{entity?.name}</h6>
+					<h2 className={fr.cx('fr-mt-2v', 'fr-h6')}>{entity?.name}</h2>
 					{displayRightsTable()}
 				</div>
 			);

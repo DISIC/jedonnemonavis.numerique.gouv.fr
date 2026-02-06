@@ -91,7 +91,10 @@ const getPaginationParts = ({
 /** @see <https://components.react-dsfr.codegouv.studio/?path=/docs/components-pagination> */
 export const Pagination = memo(
 	forwardRef<HTMLDivElement, PaginationProps>((props, ref) => {
-		const isMobile = useMemo(() => window.innerWidth <= fr.breakpoints.getPxValues().sm, []);
+		const isMobile = useMemo(
+			() => window.innerWidth <= fr.breakpoints.getPxValues().sm,
+			[]
+		);
 
 		const {
 			id: id_props,
@@ -114,8 +117,12 @@ export const Pagination = memo(
 		const parts = getPaginationParts({
 			count,
 			defaultPage,
-			maxVisiblePages: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : maxVisiblePages, 
-			slicesSize: isMobile ? Math.max(2, Math.floor(window.innerWidth / 140)) : slicesSize,
+			maxVisiblePages: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: maxVisiblePages,
+			slicesSize: isMobile
+				? Math.max(2, Math.floor(window.innerWidth / 140))
+				: slicesSize,
 			isMobile
 		});
 
@@ -139,8 +146,6 @@ export const Pagination = memo(
 										classes.link,
 										getPageLinkProps(1).className
 									)}
-									aria-disabled={true}
-									role="link"
 								>
 									Première page
 								</Link>
@@ -150,7 +155,8 @@ export const Pagination = memo(
 										fr.cx('fr-pagination__link', 'fr-pagination__link--first'),
 										classes.link
 									)}
-									role="link"
+									aria-disabled={true}
+									tabIndex={-1}
 								>
 									Première page
 								</a>
@@ -169,8 +175,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage - 1)}
-								aria-disabled={true}
-								role="link"
 							>
 								page précédente
 							</Link>
@@ -184,7 +188,8 @@ export const Pagination = memo(
 									),
 									classes.link
 								)}
-								role="link"
+								aria-disabled={true}
+								tabIndex={-1}
 							>
 								page précédente
 							</a>
@@ -193,9 +198,12 @@ export const Pagination = memo(
 					{parts.map(part => (
 						<li key={part.number}>
 							{part.number === null ? (
-								<a className={cx(fr.cx('fr-pagination__link'), classes.link)}>
+								<span
+									className={cx(fr.cx('fr-pagination__link'), classes.link)}
+									aria-hidden="true"
+								>
 									...
-								</a>
+								</span>
 							) : (
 								<Link
 									className={cx(fr.cx('fr-pagination__link'), classes.link)}
@@ -220,7 +228,6 @@ export const Pagination = memo(
 									classes.link
 								)}
 								{...getPageLinkProps(defaultPage + 1)}
-								role="link"
 							>
 								page suivante
 							</Link>
@@ -235,7 +242,7 @@ export const Pagination = memo(
 									classes.link
 								)}
 								aria-disabled={true}
-								role="link"
+								tabIndex={-1}
 							>
 								page suivante
 							</a>
@@ -250,8 +257,6 @@ export const Pagination = memo(
 										classes.link
 									)}
 									{...getPageLinkProps(count)}
-									aria-disabled={true}
-									role="link"
 								>
 									Dernière page
 								</Link>
@@ -261,7 +266,8 @@ export const Pagination = memo(
 										fr.cx('fr-pagination__link', 'fr-pagination__link--last'),
 										classes.link
 									)}
-									role="link"
+									aria-disabled={true}
+									tabIndex={-1}
 								>
 									Dernière page
 								</a>
@@ -282,6 +288,8 @@ type PageItemsCounterProps = {
 	endItemCount: number;
 	totalItemsCount: number;
 	additionalClasses?: FrCxArg[];
+	emptyStateMessage?: string;
+	isFeminine?: boolean;
 };
 
 export const PageItemsCounter = ({
@@ -289,19 +297,81 @@ export const PageItemsCounter = ({
 	startItemCount,
 	endItemCount,
 	totalItemsCount,
-	additionalClasses = []
+	additionalClasses = [],
+	emptyStateMessage,
+	isFeminine = false
 }: PageItemsCounterProps) => {
 	const { cx, classes } = useStyles();
+	const key = `${startItemCount}-${endItemCount}-${totalItemsCount}`;
 
-	if (totalItemsCount === 0) return null;
+	const getLabel = () => {
+		const uppercaseLabel = label.charAt(0).toUpperCase() + label.slice(1);
+		const pluralLabel = label.endsWith('s')
+			? uppercaseLabel
+			: uppercaseLabel + 's';
+		return totalItemsCount > 1 ? pluralLabel : uppercaseLabel;
+	};
+
+	const getSingleLabelMessage = () => {
+		const preLabel = isFeminine ? 'Une seule' : 'Un seul';
+		const verb = isFeminine ? 'trouvée' : 'trouvé';
+		return `${preLabel} ${label} ${verb}`;
+	};
+
+	const getEmptyStateMessage = () => {
+		return isFeminine ? `Aucune ${label} trouvée` : `Aucun ${label} trouvé`;
+	};
+
+	if (totalItemsCount === 0) {
+		return (
+			<p
+				key={key}
+				className={cx(
+					classes.noContent,
+					fr.cx('fr-col-12', 'fr-mt-15v', 'fr-mb-0', 'fr-ml-0')
+				)}
+				role="alert"
+				aria-live="assertive"
+				aria-atomic="true"
+				aria-relevant="additions text"
+			>
+				{emptyStateMessage ?? getEmptyStateMessage()}
+			</p>
+		);
+	}
+
+	if (totalItemsCount === 1) {
+		return (
+			<p
+				key={key}
+				className={fr.cx(
+					...additionalClasses,
+					'fr-col-12',
+					'fr-mb-0',
+					'fr-ml-0'
+				)}
+				role="alert"
+				aria-live="assertive"
+				aria-atomic="true"
+				aria-relevant="additions text"
+			>
+				{getSingleLabelMessage()}
+			</p>
+		);
+	}
+
 	return (
 		<div
-			aria-live="assertive"
-			role="status"
+			key={key}
+			role="alert"
+			aria-live="polite"
+			aria-atomic="true"
+			aria-relevant="additions text"
 			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
 		>
-			{label} de <span className={cx(classes.boldText)}>{startItemCount}</span>{' '}
-			à <span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
+			{getLabel()} de{' '}
+			<span className={cx(classes.boldText)}>{startItemCount}</span> à{' '}
+			<span className={cx(classes.boldText)}>{endItemCount}</span> sur{' '}
 			<span className={cx(classes.boldText)}>{totalItemsCount}</span>
 		</div>
 	);
@@ -309,6 +379,10 @@ export const PageItemsCounter = ({
 
 const useStyles = tss.create({
 	boldText: {
+		fontWeight: 'bold'
+	},
+	noContent: {
+		textAlign: 'center',
 		fontWeight: 'bold'
 	}
 });

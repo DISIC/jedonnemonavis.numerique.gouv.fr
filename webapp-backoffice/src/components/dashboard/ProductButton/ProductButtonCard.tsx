@@ -199,27 +199,28 @@ const ProductButtonCard = (props: Props) => {
 				</div>
 
 				{button.closedButtonLog && (
-					<Alert
-						severity="error"
-						title="Tentative de dépôt d'avis"
-						description={
-							<>
-								<p>
-									Une tentative de dépôt d'avis a été effectuée sur depuis ce
-									lien fermé. Nous vous invitons à supprimer le code HTML
-									correspondant de la page concernée.
-								</p>
-								<small>
-									Dernière tentative :{' '}
-									{button.closedButtonLog.updated_at.toLocaleString()} — Nombre
-									total de tentatives : {button.closedButtonLog.count}
-								</small>
-							</>
-						}
-						closable
-						className={cx(fr.cx('fr-mt-2w'), classes.alertButtonLog)}
-						as="h4"
-					/>
+					<div role="status">
+						<Alert
+							severity="error"
+							title="Tentative de dépôt d'avis"
+							description={
+								<>
+									<p>
+										Une tentative de dépôt d'avis a été effectuée sur depuis ce
+										lien fermé. Nous vous invitons à supprimer le code HTML
+										correspondant de la page concernée.
+									</p>
+									<small>
+										Dernière tentative :{' '}
+										{button.closedButtonLog.updated_at.toLocaleString()} —
+										Nombre total de tentatives : {button.closedButtonLog.count}
+									</small>
+								</>
+							}
+							closable
+							className={cx(fr.cx('fr-mt-2w'), classes.alertButtonLog)}
+						/>
+					</div>
 				)}
 			</div>
 		</>

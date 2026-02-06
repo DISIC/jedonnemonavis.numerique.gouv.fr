@@ -4,7 +4,7 @@ import {
 	fillFormStep3,
 	fillFormStep4
 } from '../../../utils/helpers/review';
-import { appFormUrl, appUrl } from '../../../utils/variables';
+import { appFormUrl } from '../../../utils/variables';
 
 describe('jdma-form-review', () => {
 	before(() => {
