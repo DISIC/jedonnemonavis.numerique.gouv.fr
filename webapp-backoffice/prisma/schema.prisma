@@ -144,6 +144,13 @@ enum FormConfigKind {
   blockOption
 }
 
+enum UserDesignLevel {
+  beginner
+  intermediate
+  advanced
+  expert
+}
+
 // Next auth
 model User {
   id                      Int                   @id @default(autoincrement())
@@ -174,8 +181,9 @@ model User {
   UserEvent               UserEvent[]
   proconnect_account      Boolean?
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  details    UserDetails?
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
 }
 
 model UserEvent {
@@ -250,6 +258,18 @@ model UserResetToken {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model UserDetails {
+  userId Int  @id
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  jobTitle       String?
+  referralSource String
+  level          UserDesignLevel
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Entity {
@@ -565,6 +585,7 @@ model Form {
   updated_at       DateTime     @default(now())
   deleted_at       DateTime?
   isDeleted        Boolean?     @default(false)
+  last_review_at   DateTime?
   exports          Export[]
 }
 

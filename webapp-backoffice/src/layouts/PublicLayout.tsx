@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -14,6 +14,7 @@ import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
 import { useUserSettings } from '../contexts/UserSettingsContext';
+import UserDetailsForm from '../components/auth/UserDetailsForm';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -48,7 +49,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		setAnchorEl(null);
 	};
 
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 
 	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
 		{
@@ -102,6 +103,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				}
 			}
 		);
+
+	const {
+		data: userDetails,
+		refetch: refetchUserDetails,
+		isLoading: isUserDetailsLoading
+	} = trpc.userDetails.getByUser.useQuery(undefined, {
+		enabled: session?.user?.id !== undefined
+	});
+
+	const userHasDetails = useMemo(() => {
+		return !!userDetails?.data;
+	}, [userDetails?.data]);
 
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
@@ -327,6 +340,17 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
+	const shouldDisplayUserDetailsForm =
+		status !== 'loading' &&
+		session !== null &&
+		!isUserDetailsLoading &&
+		!userHasDetails;
+
+	let mainContent = children;
+	if (shouldDisplayUserDetailsForm) {
+		mainContent = <UserDetailsForm onCreated={() => refetchUserDetails()} />;
+	}
+
 	return (
 		<>
 			<SkipLinks
@@ -341,30 +365,32 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 				]}
 			/>
-			<Header
-				brandTop={
-					<>
-						RÉPUBLIQUE <br /> FRANÇAISE
-					</>
-				}
-				homeLinkProps={{
-					href: !session?.user ? '/' : '/administration/dashboard/products',
-					title: "Je donne mon avis, retour à l'accueil"
-				}}
-				className={classes.navigation}
-				id="fr-header-public-header"
-				quickAccessItems={light ? undefined : quickAccessItems}
-				navigation={
-					!!navigationItems.length && !pathname.startsWith('/public')
-						? navigationItems
-						: undefined
-				}
-				serviceTitle="Je donne mon avis"
-				serviceTagline="La voix de vos usagers"
-			/>
+			{!shouldDisplayUserDetailsForm && (
+				<Header
+					brandTop={
+						<>
+							RÉPUBLIQUE <br /> FRANÇAISE
+						</>
+					}
+					homeLinkProps={{
+						href: !session?.user ? '/' : '/administration/dashboard/products',
+						title: "Je donne mon avis, retour à l'accueil"
+					}}
+					className={classes.navigation}
+					id="fr-header-public-header"
+					quickAccessItems={light ? undefined : quickAccessItems}
+					navigation={
+						!!navigationItems.length && !pathname.startsWith('/public')
+							? navigationItems
+							: undefined
+					}
+					serviceTitle="Je donne mon avis"
+					serviceTagline="La voix de vos usagers"
+				/>
+			)}
 
 			<main id="main" role="main" tabIndex={-1}>
-				{!!session?.user && (
+				{!!session?.user && !shouldDisplayUserDetailsForm && (
 					<Notice
 						isClosable
 						onClose={function noRefCheck() {}}
@@ -390,7 +416,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					/>
 				)}
-				{children}
+				{mainContent}
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer

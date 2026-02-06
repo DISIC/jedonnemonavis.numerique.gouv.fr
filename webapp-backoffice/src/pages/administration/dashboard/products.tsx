@@ -66,6 +66,7 @@ const DashBoard = () => {
 	const [productTitle, setProductTitle] = React.useState<string>('');
 	const [numberPerPage, _] = React.useState(10);
 	const [shouldModalOpen, setShouldModalOpen] = React.useState(false);
+	const hasOpenedNewsModalRef = React.useRef(false);
 
 	const isOnboardingDone = useMemo(() => {
 		return !!(router.query.onboardingDone as string | undefined);
@@ -92,12 +93,13 @@ const DashBoard = () => {
 	useEffect(() => {
 		if (isLoadingSettings) return;
 		setShouldModalOpen(!settings.newsModalSeen);
-	}, [isLoadingSettings]);
+	}, [isLoadingSettings, settings.newsModalSeen]);
 
 	useEffect(() => {
-		if (!shouldModalOpen || !newsModal) return;
+		if (!shouldModalOpen || !newsModal || hasOpenedNewsModalRef.current) return;
 		const timer = setTimeout(() => {
-			if (shouldModalOpen && newsModal) {
+			if (shouldModalOpen && newsModal && !hasOpenedNewsModalRef.current) {
+				hasOpenedNewsModalRef.current = true;
 				newsModal.open();
 			}
 		}, 500);
@@ -207,13 +209,17 @@ const DashBoard = () => {
 
 	useIsModalOpen(newsModal, {
 		onConceal: () => {
-			if (!settings.newsModalSeen && shouldModalOpen) {
-				setSettings({
-					...settings,
-					newsModalSeen: true,
-					newsVersionSeen: LATEST_NEWS_VERSION
-				});
-			}
+			if (
+				!hasOpenedNewsModalRef.current ||
+				settings.newsModalSeen ||
+				!shouldModalOpen
+			)
+				return;
+			setSettings({
+				...settings,
+				newsModalSeen: true,
+				newsVersionSeen: LATEST_NEWS_VERSION
+			});
 		}
 	});
 

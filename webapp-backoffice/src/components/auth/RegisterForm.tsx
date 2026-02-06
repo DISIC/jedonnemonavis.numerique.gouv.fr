@@ -277,6 +277,7 @@ export const RegisterForm = (props: Props) => {
 				<RegisterValidationMessage
 					mode={registered}
 					isUserInvited={userInfos.inviteToken !== undefined}
+					email={userInfos.email}
 				/>
 			</>
 		);
