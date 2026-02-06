@@ -99,12 +99,15 @@ const ReviewFiltersModalRoot = (props: Props) => {
 				<p className={cx(classes.subtitle)}>Satisfaction</p>
 				<div className={classes.badgeContainer}>
 					{['good', 'medium', 'bad'].map(intention => {
-						const isSelected = isValueSelected('satisfaction', intention);
+						const label = displayIntention(
+							(intention ?? 'neutral') as AnswerIntention
+						);
+						const isSelected = isValueSelected('satisfaction', label);
 
 						return (
 							<Button
 								onClick={() => {
-									updateFieldFilter('satisfaction', intention, isSelected);
+									updateFieldFilter('satisfaction', label, isSelected);
 									push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
 								}}
 								priority="tertiary"
@@ -127,7 +130,7 @@ const ReviewFiltersModalRoot = (props: Props) => {
 									width={15}
 									height={15}
 								/>
-								{displayIntention((intention ?? 'neutral') as AnswerIntention)}
+								{label}
 							</Button>
 						);
 					})}

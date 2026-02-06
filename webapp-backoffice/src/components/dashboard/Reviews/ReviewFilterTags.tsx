@@ -1,10 +1,9 @@
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
-import { AnswerIntention, Button } from '@prisma/client';
+import { Button } from '@prisma/client';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -26,11 +25,6 @@ const ReviewFilterTags = (props: Props) => {
 			)
 		);
 
-	const getBlockLabel = (fieldCode: string): string => {
-		const block = filterableBlocks.find(b => b.field_code === fieldCode);
-		return block?.label || fieldCode;
-	};
-
 	const renderLabel = (fieldCode: string, value: string): string => {
 		const block = filterableBlocks.find(b => b.field_code === fieldCode);
 
@@ -41,12 +35,6 @@ const ReviewFilterTags = (props: Props) => {
 				}`;
 			}
 			return value;
-		}
-
-		if (block.type_bloc === 'smiley_input') {
-			return `${block.label || fieldCode} : ${displayIntention(
-				(value ?? 'neutral') as AnswerIntention
-			)}`;
 		}
 
 		return `${block.alias || block.label || fieldCode} : ${value}`;

@@ -131,12 +131,15 @@ const ReviewFiltersModal = (props: Props) => {
 						<div className={classes.badgeContainer}>
 							{['good', 'medium', 'bad'].map(intention => {
 								const fieldKey = block.field_code || '';
-								const isSelected = isValueSelected(fieldKey, intention);
+								const label = displayIntention(
+									(intention ?? 'neutral') as AnswerIntention
+								);
+								const isSelected = isValueSelected(fieldKey, label);
 
 								return (
 									<Button
 										onClick={() => {
-											updateFieldFilter(fieldKey, intention, isSelected);
+											updateFieldFilter(fieldKey, label, isSelected);
 											push([
 												'trackEvent',
 												'Product - Avis',
@@ -163,9 +166,7 @@ const ReviewFiltersModal = (props: Props) => {
 											width={15}
 											height={15}
 										/>
-										{displayIntention(
-											(intention ?? 'neutral') as AnswerIntention
-										)}
+										{label}
 									</Button>
 								);
 							})}
