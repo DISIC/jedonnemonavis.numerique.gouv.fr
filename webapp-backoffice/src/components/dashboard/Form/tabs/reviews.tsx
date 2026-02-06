@@ -88,10 +88,14 @@ const ReviewsTab = (props: Props) => {
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
 
-	const filter_modal = createModal({
-		id: 'filter-modal',
-		isOpenedByDefault: false
-	});
+	const filter_modal = useMemo(
+		() =>
+			createModal({
+				id: 'filter-modal',
+				isOpenedByDefault: false
+			}),
+		[]
+	);
 
 	const { filters, updateFilters } = useFilters();
 
@@ -416,17 +420,16 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} complété`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} complété`;
 			case 'iconbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} : ${displayIntention(
+					(value ?? 'neutral') as AnswerIntention
+				)}`;
 			case 'select':
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
+				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			default:
 				return '';
 		}
@@ -622,8 +625,8 @@ const ReviewsTab = (props: Props) => {
 								currentExport.link === null && currentExport.params
 									? 'fr-mt-4v'
 									: currentExport.link
-										? 'fr-mt-2v'
-										: 'fr-hidden'
+									? 'fr-mt-2v'
+									: 'fr-hidden'
 							)}
 						>
 							{currentExport.link && (
