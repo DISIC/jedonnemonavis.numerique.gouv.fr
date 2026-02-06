@@ -21,8 +21,6 @@ const ReviewDetailPanelDynamic = ({
 						a => a.field_code === block.field_code
 					);
 
-					if (!answer && !block.isRequired) return null;
-
 					const isTextInput =
 						block.type_bloc === 'input_text' ||
 						block.type_bloc === 'input_text_area';
