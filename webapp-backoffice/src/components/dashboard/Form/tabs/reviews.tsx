@@ -330,7 +330,7 @@ const ReviewsTab = (props: Props) => {
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && (
+				{nbReviews > 0 && form.form_template.slug === 'root' && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							product_id={form.product_id}
