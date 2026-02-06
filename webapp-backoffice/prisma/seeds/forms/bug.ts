@@ -56,7 +56,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 				}
 			},
 			{
-				title: 'Décrivez votre remontée',
+				title: 'Commentaire',
 				description:
 					'Cette étape vous permet de détailler votre remarque si vous le souhaitez.',
 				position: 1,
