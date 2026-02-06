@@ -48,6 +48,8 @@ describe('jdma-forms', () => {
 	it('should create multiple forms for a single service', () => {
 		cy.auditA11y();
 		cy.wrap(FORM_TITLES).each((title: string, i: number) => {
+			cy.visit(`${appUrl}${selectors.url.productTestService}`);
+			cy.get('body').should('be.visible');
 			cy.get('body').then($body => {
 				const exists =
 					$body.find(`a:contains("${title}")`).filter(function () {
@@ -55,10 +57,10 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					cy.wait(1000);
 					createOrEditForm(title, false, i === 0, i !== 0);
 					cy.visit(`${appUrl}${selectors.url.productTestService}`);
-					cy.contains('h3', title).should('exist');
+					cy.get('h3', { timeout: 10000 }).should('exist');
+					cy.contains('h3', title, { timeout: 10000 }).should('be.visible');
 				} else {
 					cy.log(`Form "${title}" already exists`);
 				}
