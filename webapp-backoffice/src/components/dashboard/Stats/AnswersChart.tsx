@@ -11,7 +11,7 @@ const LineChart = dynamic(() => import('@/src/components/chart/LineChart'), {
 });
 
 type Props = {
-	fieldCode: FieldCodeSmiley;
+	fieldCode: string;
 	productId: number;
 	formId: number;
 	buttonId?: number;

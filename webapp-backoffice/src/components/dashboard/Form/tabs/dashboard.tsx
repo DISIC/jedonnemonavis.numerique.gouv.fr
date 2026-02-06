@@ -120,7 +120,11 @@ const DashboardTab = ({
 					}
 				>
 					<AnswersChart
-						fieldCode="satisfaction"
+						fieldCode={
+							form.form_template.form_template_steps
+								.flatMap(step => step.form_template_blocks)
+								.find(block => block.isMainBlock)?.field_code || 'satisfaction'
+						}
 						productId={form.product.id}
 						formId={form.id}
 						startDate={startDate}
