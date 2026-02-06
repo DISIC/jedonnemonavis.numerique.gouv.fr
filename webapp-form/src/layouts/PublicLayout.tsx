@@ -34,7 +34,6 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     router.push({ pathname, query }, asPath, { locale: newLocale });
   };
 
-  const isInIframe = router.query.iframe;
   const getProductTitle = () => {
     if (isReactElement(children) && children.props?.product?.title) {
       return children.props.product.title;
@@ -52,53 +51,63 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   };
 
   const lang = (i18n?.language || "fr") as Language;
-  const desktopQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] = [
-    <>
-      <Button
-        nativeButtonProps={{
-          "aria-controls": "translate-select",
-          "aria-expanded": false,
-          title: t("Sélectionner une langue"),
-        }}
-        priority="tertiary"
-        className={cx(classes.langShort, fr.cx("fr-translate", "fr-nav"))}
-        iconId="fr-icon-translate-2"
-      >
-        {lang}
-      </Button>
-      <LanguageSelector lang={lang} setLang={onToggleLanguageClick} />
-    </>,
-  ];
+  const shouldShowLanguageSelector = !router.asPath.startsWith("/avis");
 
-  const mobileQuickAccessItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
-    languages.map((lang_i) => ({
-      buttonProps: {
-        lang: lang_i,
-        "aria-current": lang_i === lang ? "true" : undefined,
-        onClick: (e) => {
-          e.preventDefault();
-          onToggleLanguageClick(lang_i);
-        },
-        className: cx(
-          classes.langButton,
-          fr.cx("fr-translate__language", "fr-nav__link"),
-        ),
-      },
-      iconId: "fr-icon-translate-2",
-      text: (
-        <>
-          <span className={classes.langShort}>{lang_i}</span>
-          &nbsp;-&nbsp;{fullNameByLang[lang_i]}
-        </>
-      ),
-    }));
+  const desktopQuickAccessItems: ReactNode[] = shouldShowLanguageSelector
+    ? [
+        <Button
+          key="lang-button"
+          nativeButtonProps={{
+            "aria-controls": "translate-select",
+            "aria-expanded": false,
+            title: t("Sélectionner une langue"),
+          }}
+          priority="tertiary"
+          className={cx(classes.langShort, fr.cx("fr-translate", "fr-nav"))}
+          iconId="fr-icon-translate-2"
+        >
+          {lang}
+        </Button>,
+        <LanguageSelector
+          key="lang-selector"
+          lang={lang}
+          setLang={onToggleLanguageClick}
+        />,
+      ]
+    : [];
 
-  const quickAccesItems: HeaderProps.QuickAccessItem[] | ReactNode[] =
+  const mobileQuickAccessItems: HeaderProps.QuickAccessItem[] =
+    shouldShowLanguageSelector
+      ? languages.map((lang_i) => ({
+          buttonProps: {
+            lang: lang_i,
+            "aria-current": lang_i === lang ? "true" : undefined,
+            onClick: (e) => {
+              e.preventDefault();
+              onToggleLanguageClick(lang_i);
+            },
+            className: cx(
+              classes.langButton,
+              fr.cx("fr-translate__language", "fr-nav__link"),
+            ),
+          },
+          iconId: "fr-icon-translate-2",
+          text: (
+            <>
+              <span className={classes.langShort}>{lang_i}</span>
+              &nbsp;-&nbsp;{fullNameByLang[lang_i]}
+            </>
+          ),
+        }))
+      : [];
+
+  const quickAccesItems = (
     isHydrated
       ? isMobile
         ? mobileQuickAccessItems
         : desktopQuickAccessItems
-      : [];
+      : []
+  ) as HeaderProps.QuickAccessItem[];
 
   useEffect(() => {
     const ensureHeaderMenuModalA11y = () => {
