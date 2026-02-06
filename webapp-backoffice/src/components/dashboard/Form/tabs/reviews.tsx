@@ -474,18 +474,7 @@ const ReviewsTab = (props: Props) => {
 						<>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
-									<FormConfigVersionsDisplay
-										formConfigs={formConfigs}
-										product={{
-											...form.product,
-											forms: [
-												{
-													...form,
-													buttons: []
-												}
-											]
-										}}
-									/>
+									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}
 							<div
