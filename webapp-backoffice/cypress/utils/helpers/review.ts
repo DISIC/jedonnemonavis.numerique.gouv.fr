@@ -15,7 +15,7 @@ export function fillFormStep1(
 
 	if (shouldauditA11y) {
 		cy.injectAxe();
-		cy.wait(100);
+		cy.wait(1000);
 		cy.auditA11y(null, { withDetails: true });
 	}
 
