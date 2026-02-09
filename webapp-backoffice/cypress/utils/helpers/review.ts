@@ -4,11 +4,6 @@ export function fillFormStep1(
 	isSimplicityHidden?: boolean,
 	shouldauditA11y = false
 ) {
-	if (shouldauditA11y) {
-		cy.injectAxe();
-		cy.wait(1000);
-		cy.auditA11y(null, { withDetails: true });
-	}
 	cy.get('[class*="formSection"]').within(() => {
 		cy.get('h1').contains('Je donne mon avis');
 		cy.get('[class*="smileysContainer"]').find('li').should('have.length', 3);
@@ -17,6 +12,12 @@ export function fillFormStep1(
 		cy.get('button').should('not.have.attr', 'disabled');
 		cy.get('button').contains('Envoyer mon avis').click();
 	});
+
+	if (shouldauditA11y) {
+		cy.injectAxe();
+		cy.wait(100);
+		cy.auditA11y(null, { withDetails: true });
+	}
 
 	if (isSimplicityHidden) {
 		cy.contains('h1', 'Clarté').should('not.exist');
@@ -27,7 +28,6 @@ export function fillFormStep1(
 
 export function fillFormStep2(shouldauditA11y = false) {
 	if (shouldauditA11y) {
-		cy.wait(1000);
 		cy.auditA11y();
 	}
 	cy.get('[class*="radioContainer"]')
@@ -49,7 +49,6 @@ export function fillFormStep3(shouldauditA11y = false) {
 	});
 
 	if (shouldauditA11y) {
-		cy.wait(1000);
 		cy.auditA11y();
 	}
 
@@ -76,7 +75,6 @@ export function fillFormStep3(shouldauditA11y = false) {
 
 export function fillFormStep4(shouldauditA11y = false) {
 	if (shouldauditA11y) {
-		cy.wait(1000);
 		cy.auditA11y();
 	}
 	cy.get("[class*='reviews']")
@@ -97,7 +95,6 @@ export function fillFormStep4(shouldauditA11y = false) {
 
 	cy.get('button').contains('Continuer').click();
 	if (shouldauditA11y) {
-		cy.wait(1000);
 		cy.auditA11y();
 	}
 	cy.get('h1').contains('Commentaire').should('exist');
