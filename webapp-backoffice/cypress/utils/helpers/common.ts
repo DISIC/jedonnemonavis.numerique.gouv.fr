@@ -139,7 +139,7 @@ export function createOrEditForm(
 			cy.contains('button', 'Générer un formulaire').click();
 		} else {
 			cy.url().should('include', '/administration/dashboard/product/');
-			cy.wait(1000);
+			cy.wait(2000);
 			cy.contains('h1', 'service-test')
 				.should('be.visible')
 				.then(() => {

@@ -13,8 +13,8 @@ import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
 import { tss } from 'tss-react/dsfr';
-import { useUserSettings } from '../contexts/UserSettingsContext';
 import UserDetailsForm from '../components/auth/UserDetailsForm';
+import { useUserSettings } from '../contexts/UserSettingsContext';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
 type NavigationItem = {
@@ -32,6 +32,8 @@ type NavigationItem = {
 export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
 	const { settings } = useUserSettings();
+
+	const headerId = 'fr-header-public-header';
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
@@ -131,7 +133,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						},
 						text: 'Connexion / Inscription'
 					}
-				]
+			  ]
 			: [
 					<Button
 						id="button-account"
@@ -225,7 +227,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							</Button>
 						</MenuItem>
 					</Menu>
-				];
+			  ];
 
 	const navigationItems: NavigationItem[] = [];
 
@@ -303,8 +305,12 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/user-requests',
 					target: '_self',
 					id: 'fr-header-public-header-main-navigation-link-badge',
-					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`,
-					'aria-label': `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
+					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${
+						userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'
+					})`,
+					'aria-label': `Demandes d'accès (${
+						userRequestsResult.metadata.count
+					} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
 			}
@@ -339,6 +345,27 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			isActive: pathname.startsWith('/administration/dashboard/news')
 		});
 	}
+
+	useEffect(() => {
+		const ensureHeaderMenuModalA11y = () => {
+			const modalId = `header-menu-modal-${headerId}`;
+			const modal = document.getElementById(modalId);
+
+			if (!modal) return;
+
+			if (!modal.getAttribute('role')) {
+				modal.setAttribute('role', 'dialog');
+			}
+
+			if (!modal.getAttribute('aria-modal')) {
+				modal.setAttribute('aria-modal', 'true');
+			}
+		};
+
+		// Run after paint to avoid racing with DSFR/react-dsfr hydration.
+		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
+		return () => window.cancelAnimationFrame(raf);
+	}, [headerId]);
 
 	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
@@ -377,7 +404,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						title: "Je donne mon avis, retour à l'accueil"
 					}}
 					className={classes.navigation}
-					id="fr-header-public-header"
+					id={headerId}
 					quickAccessItems={light ? undefined : quickAccessItems}
 					navigation={
 						!!navigationItems.length && !pathname.startsWith('/public')
