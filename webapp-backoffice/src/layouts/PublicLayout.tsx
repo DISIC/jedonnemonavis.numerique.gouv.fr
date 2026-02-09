@@ -360,6 +360,10 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			if (!modal.getAttribute('aria-modal')) {
 				modal.setAttribute('aria-modal', 'true');
 			}
+
+			if (!modal.getAttribute('aria-label')) {
+				modal.setAttribute('aria-label', 'Menu de navigation principal');
+			}
 		};
 
 		// Run after paint to avoid racing with DSFR/react-dsfr hydration.
