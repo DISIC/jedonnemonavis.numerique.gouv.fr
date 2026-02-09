@@ -93,6 +93,16 @@ const NewAccess = ({ product }: Props) => {
 				...(createdUserAccesses || []),
 				{ ...createdValue.data }
 			]);
+
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: 0,
+				template_slug: '',
+				category: 'service',
+				action: 'service_users_add'
+			});
 		},
 		onError: (error, values) => {
 			setUserToInvite(prev => ({
@@ -163,6 +173,16 @@ const NewAccess = ({ product }: Props) => {
 				step.slug === 'access' ? { ...step, isSkipped: true } : step
 			)
 		);
+
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: createdProduct?.id || 0,
+			form_id: 0,
+			template_slug: '',
+			category: 'service',
+			action: 'user_step_skip'
+		});
 	};
 
 	return (

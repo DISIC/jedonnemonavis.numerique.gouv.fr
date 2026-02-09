@@ -2,10 +2,10 @@ import { ReviewFiltersType } from '@/src/types/custom';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ExportModal from './ExportModal';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 
 interface Props {
-	product_id?: number;
-	form_id?: number;
+	form: FormWithElements;
 	startDate: string;
 	endDate: string;
 	mustHaveVerbatims: boolean;
@@ -25,8 +25,7 @@ const export_modal = createModal({
 
 const ExportReviews = (props: Props) => {
 	const {
-		product_id,
-		form_id,
+		form,
 		startDate,
 		endDate,
 		mustHaveVerbatims,
@@ -47,8 +46,7 @@ const ExportReviews = (props: Props) => {
 					countFiltered: reviewsCountfiltered,
 					countAll: reviewsCountAll
 				}}
-				product_id={product_id!}
-				form_id={form_id!}
+				form={form}
 				params={JSON.stringify({
 					startDate,
 					endDate,

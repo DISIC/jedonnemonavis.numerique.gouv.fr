@@ -7,6 +7,7 @@ import { debounce } from 'lodash';
 import Input from '@codegouvfr/react-dsfr/Input';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { getDatesByShortCut } from '@/src/utils/tools';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 
 const dateShortcuts = [
 	{
@@ -38,6 +39,7 @@ type FiltersProps<T extends FilterSectionKey> = {
 	children?: React.ReactNode;
 	topRight?: React.ReactNode;
 	renderTags?: () => (React.JSX.Element | null)[] | React.JSX.Element | null;
+	form?: FormWithElements;
 };
 
 type FormError = {
@@ -50,7 +52,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 	sticky,
 	children,
 	topRight,
-	renderTags
+	renderTags,
+	form
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
@@ -184,6 +187,17 @@ const GenericFilters = <T extends FilterSectionKey>({
 												}
 											});
 											push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
+											window._mtm?.push({
+												event: 'matomo_event',
+												container_type: 'backoffice',
+												service_id: form?.product_id || 0,
+												form_id: form?.id || 0,
+												template_slug: form?.form_template.slug || '',
+												category: 'reviews',
+												action_type: 'filter',
+												action: `${ds.label.split(' ')[0]}_days_filter_apply`,
+												ui_source: 'quick_filter'
+											});
 										}}
 									/>
 									<label

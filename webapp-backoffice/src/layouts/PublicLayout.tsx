@@ -1,5 +1,3 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react';
-
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -12,6 +10,7 @@ import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import UserDetailsForm from '../components/auth/UserDetailsForm';
 import { useUserSettings } from '../contexts/UserSettingsContext';
