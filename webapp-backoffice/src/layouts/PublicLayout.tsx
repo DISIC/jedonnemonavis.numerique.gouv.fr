@@ -32,8 +32,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	const { pathname } = useRouter();
 	const { settings } = useUserSettings();
 
-	const headerId = 'fr-header-public-header';
-
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const menuOpen = Boolean(anchorEl);
 	const handleMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -345,31 +343,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
-	useEffect(() => {
-		const ensureHeaderMenuModalA11y = () => {
-			const modalId = `header-menu-modal-${headerId}`;
-			const modal = document.getElementById(modalId);
-
-			if (!modal) return;
-
-			if (!modal.getAttribute('role')) {
-				modal.setAttribute('role', 'dialog');
-			}
-
-			if (!modal.getAttribute('aria-modal')) {
-				modal.setAttribute('aria-modal', 'true');
-			}
-
-			if (!modal.getAttribute('aria-label')) {
-				modal.setAttribute('aria-label', 'Menu de navigation principal');
-			}
-		};
-
-		// Run after paint to avoid racing with DSFR/react-dsfr hydration.
-		const raf = window.requestAnimationFrame(ensureHeaderMenuModalA11y);
-		return () => window.cancelAnimationFrame(raf);
-	}, [headerId]);
-
 	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
 		session !== null &&
@@ -407,7 +380,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						title: "Je donne mon avis, retour à l'accueil"
 					}}
 					className={classes.navigation}
-					id={headerId}
+					id={'fr-header-public-header'}
 					quickAccessItems={light ? undefined : quickAccessItems}
 					navigation={
 						!!navigationItems.length && !pathname.startsWith('/public')
