@@ -472,7 +472,7 @@ const StatsTab = ({
 				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
 			</div>
 			<div className={cx(classes.container)}>
-				<GenericFilters filterKey="productStats">
+				<GenericFilters filterKey="productStats" form={form}>
 					<Select
 						label="Sélectionner une source"
 						nativeSelectProps={{

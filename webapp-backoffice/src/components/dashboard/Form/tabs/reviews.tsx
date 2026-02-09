@@ -719,6 +719,7 @@ const ReviewsTab = (props: Props) => {
 								</ButtonDSFR>
 							}
 							renderTags={renderTags}
+							form={form}
 						>
 							{reviewLog[0] && (
 								<Checkbox

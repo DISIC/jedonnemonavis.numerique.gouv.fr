@@ -40,6 +40,7 @@ type FiltersProps<T extends FilterSectionKey> = {
 	topRight?: React.ReactNode;
 	renderTags?: () => (React.JSX.Element | null)[] | React.JSX.Element | null;
 	form?: FormWithElements;
+	productId?: number;
 };
 
 type FormError = {
@@ -53,7 +54,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 	children,
 	topRight,
 	renderTags,
-	form
+	form,
+	productId
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
@@ -190,7 +192,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 											window._mtm?.push({
 												event: 'matomo_event',
 												container_type: 'backoffice',
-												service_id: form?.product_id || 0,
+												service_id: form?.product_id || productId || 0,
 												form_id: form?.id || 0,
 												template_slug: form?.form_template.slug || '',
 												category: 'reviews',
