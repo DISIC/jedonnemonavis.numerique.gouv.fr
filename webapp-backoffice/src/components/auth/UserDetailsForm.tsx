@@ -7,6 +7,7 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import Select from '@codegouvfr/react-dsfr/Select';
 import { UserDesignLevel } from '@prisma/client';
 import { useSession } from 'next-auth/react';
+import Head from 'next/head';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -82,127 +83,132 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 	};
 
 	return (
-		<div className={fr.cx('fr-container', 'fr-mt-16v')}>
-			<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-					<div
-						className={cx(
-							classes.formContainer,
-							fr.cx(
-								'fr-grid-row',
-								'fr-grid-row--center',
-								'fr-py-16v',
-								'fr-mb-16v'
-							)
-						)}
-					>
+		<>
+			<Head>
+				<title>Je donne mon avis - Questionnaire de prise en main</title>
+			</Head>
+			<div className={fr.cx('fr-container', 'fr-mt-16v')}>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 						<div
-							className={fr.cx(
-								'fr-col-12',
-								'fr-col-md-8',
-								'fr-px-4v',
-								'fr-px-md-0'
+							className={cx(
+								classes.formContainer,
+								fr.cx(
+									'fr-grid-row',
+									'fr-grid-row--center',
+									'fr-py-16v',
+									'fr-mb-16v'
+								)
 							)}
 						>
-							<h1 className={fr.cx('fr-h2')}>
-								Aidez-nous à adapter l’interface à vos besoins !
-							</h1>
-							<p className={fr.cx('fr-hint-text')}>
-								Les champs marqués d&apos;un{' '}
-								<span className={cx(classes.asterisk)}>*</span> sont
-								obligatoires
-							</p>
-							<form onSubmit={handleSubmit}>
-								<Input
-									label="Quel est votre poste ?"
-									hintText="Exemple : chef de projet, développeur, designer, product owner, ..."
-									nativeInputProps={{
-										onChange: e => {
-											setUserDetails(prev => ({
-												...prev,
-												jobTitle: e.target.value
-											}));
-										},
-										value: userDetails.jobTitle || '',
-										name: 'jobTitle',
-										maxLength: 64
-									}}
-								/>
-								<Select
-									label={
-										<p className={fr.cx('fr-mb-0')}>
-											Comment avez-vous entendu parler de JDMA ?{' '}
-											<span className={cx(classes.asterisk)}>*</span>
-										</p>
-									}
-									nativeSelectProps={{
-										name: 'referralSource',
-										value: userDetails.referralSource,
-										onChange: e => {
-											const value = e.target.value;
-											setUserDetails(prev => ({
-												...prev,
-												referralSource: value
-											}));
-										},
-										required: true
-									}}
-								>
-									<option value="" disabled hidden>
-										Sélectionner une option
-									</option>
-									{sourceOptions.map(option => (
-										<option key={option} value={option}>
-											{option}
-										</option>
-									))}
-								</Select>
-								{userDetails.referralSource === 'Autre (précisez)' && (
+							<div
+								className={fr.cx(
+									'fr-col-12',
+									'fr-col-md-8',
+									'fr-px-4v',
+									'fr-px-md-0'
+								)}
+							>
+								<h1 className={fr.cx('fr-h2')}>
+									Aidez-nous à adapter l’interface à vos besoins !
+								</h1>
+								<p className={fr.cx('fr-hint-text')}>
+									Les champs marqués d&apos;un{' '}
+									<span className={cx(classes.asterisk)}>*</span> sont
+									obligatoires
+								</p>
+								<form onSubmit={handleSubmit}>
 									<Input
-										className={fr.cx('fr-mt-4v')}
-										label=""
+										label="Quel est votre poste ?"
+										hintText="Exemple : chef de projet, développeur, designer, product owner, ..."
 										nativeInputProps={{
 											onChange: e => {
-												setCustomReferralSource(e.target.value);
-											},
-											value: customReferralSource,
-											name: 'customReferralSource',
-											placeholder: 'Veuillez préciser',
-											required: true
-										}}
-									/>
-								)}
-								<RadioButtons
-									name="design-level-radio"
-									legend={
-										<p>
-											Quel est le niveau de maturité design de votre équipe ?{' '}
-											<span className={cx(classes.asterisk)}>*</span>
-										</p>
-									}
-									options={levelMapping.map(level => ({
-										label: level.title,
-										nativeInputProps: {
-											value: level.value,
-											checked: userDetails.level === level.value,
-											onChange: () => {
 												setUserDetails(prev => ({
 													...prev,
-													level: level.value
+													jobTitle: e.target.value
 												}));
-											}
+											},
+											value: userDetails.jobTitle || '',
+											name: 'jobTitle',
+											maxLength: 64
+										}}
+									/>
+									<Select
+										label={
+											<p className={fr.cx('fr-mb-0')}>
+												Comment avez-vous entendu parler de JDMA ?{' '}
+												<span className={cx(classes.asterisk)}>*</span>
+											</p>
 										}
-									}))}
-								/>
-								<div className={cx(classes.buttonNext)}>
-									<Button>Continuer</Button>
-								</div>
-							</form>
+										nativeSelectProps={{
+											name: 'referralSource',
+											value: userDetails.referralSource,
+											onChange: e => {
+												const value = e.target.value;
+												setUserDetails(prev => ({
+													...prev,
+													referralSource: value
+												}));
+											},
+											required: true
+										}}
+									>
+										<option value="" disabled hidden>
+											Sélectionner une option
+										</option>
+										{sourceOptions.map(option => (
+											<option key={option} value={option}>
+												{option}
+											</option>
+										))}
+									</Select>
+									{userDetails.referralSource === 'Autre (précisez)' && (
+										<Input
+											className={fr.cx('fr-mt-4v')}
+											label=""
+											nativeInputProps={{
+												onChange: e => {
+													setCustomReferralSource(e.target.value);
+												},
+												value: customReferralSource,
+												name: 'customReferralSource',
+												placeholder: 'Veuillez préciser',
+												required: true
+											}}
+										/>
+									)}
+									<RadioButtons
+										name="design-level-radio"
+										legend={
+											<p>
+												Quel est le niveau de maturité design de votre équipe ?{' '}
+												<span className={cx(classes.asterisk)}>*</span>
+											</p>
+										}
+										options={levelMapping.map(level => ({
+											label: level.title,
+											nativeInputProps: {
+												value: level.value,
+												checked: userDetails.level === level.value,
+												onChange: () => {
+													setUserDetails(prev => ({
+														...prev,
+														level: level.value
+													}));
+												}
+											}
+										}))}
+									/>
+									<div className={cx(classes.buttonNext)}>
+										<Button>Continuer</Button>
+									</div>
+								</form>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

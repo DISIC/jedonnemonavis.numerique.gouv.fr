@@ -3,7 +3,7 @@ name: Run Cypress Tests
 on:
   pull_request:
     branches:
-      - feat/clevercloud
+      - staging
       - main
 
 jobs:
