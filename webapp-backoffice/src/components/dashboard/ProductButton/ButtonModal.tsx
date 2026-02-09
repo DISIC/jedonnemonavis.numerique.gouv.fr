@@ -1,7 +1,8 @@
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	ButtonWithClosedLog,
-	ButtonWithForm
+	ButtonWithForm,
+	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -263,6 +264,12 @@ const ButtonModal = (props: Props) => {
 															modal.close();
 															push(['trackEvent', 'BO - Product', `Copy-Code`]);
 															window._mtm?.push({
+																event: 'matomo_event',
+																container_type: 'backoffice',
+																service_id: button?.form.product_id || 0,
+																form_id: button?.form.id || 0,
+																template_slug:
+																	button?.form.form_template.slug || '',
 																category: 'service',
 																action: 'param_page_link_copy'
 															});

@@ -1,4 +1,5 @@
 import { CustomModalProps } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -6,7 +7,6 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import React from 'react';
-import { Loader } from '../../ui/Loader';
 
 interface Props {
 	modal: CustomModalProps;
@@ -14,23 +14,15 @@ interface Props {
 		countFiltered: number;
 		countAll: number;
 	};
-	product_id: number;
-	form_id: number;
 	params: string;
 	onExportCreated: () => void;
 	hasExportsInProgress: boolean;
+	form: FormWithElements;
 }
 
 const ExportModal = (props: Props) => {
-	const {
-		modal,
-		counts,
-		product_id,
-		form_id,
-		params,
-		onExportCreated,
-		hasExportsInProgress
-	} = props;
+	const { modal, counts, form, params, onExportCreated, hasExportsInProgress } =
+		props;
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
 
@@ -51,8 +43,8 @@ const ExportModal = (props: Props) => {
 		createExport.mutate({
 			user_id: parseInt(session?.user?.id as string),
 			params: choice == 'filtered' ? params : '',
-			product_id: product_id,
-			form_id: form_id,
+			product_id: form.product_id,
+			form_id: form.id,
 			type: format ?? 'csv'
 		});
 	};
@@ -81,6 +73,11 @@ const ExportModal = (props: Props) => {
 							validateExport();
 							push(['trackEvent', 'Avis', 'Filtre-Téléchargement']);
 							window._mtm?.push({
+								event: 'matomo_event',
+								container_type: 'backoffice',
+								service_id: form.product_id,
+								form_id: form.id,
+								template_slug: form.form_template.slug,
 								category: 'reviews',
 								action_type: 'export',
 								action: `review_export`,

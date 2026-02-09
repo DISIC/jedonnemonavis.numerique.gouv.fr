@@ -132,6 +132,11 @@ const StatsTab = ({
 
 	useEffect(() => {
 		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
 			category: 'stats',
 			action_type: 'read',
 			action: 'stats_display',

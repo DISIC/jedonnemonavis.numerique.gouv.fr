@@ -1,4 +1,7 @@
-import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import {
+	FormConfigWithChildren,
+	FormWithElements
+} from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
@@ -51,7 +54,8 @@ const ReviewLineVerbatim = ({
 	review,
 	search,
 	formConfigHelper,
-	hasManyVersions
+	hasManyVersions,
+	form
 }: {
 	review: ExtendedReview;
 	search: string;
@@ -60,6 +64,7 @@ const ReviewLineVerbatim = ({
 		versionNumber: number;
 	};
 	hasManyVersions: boolean;
+	form: FormWithElements;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
@@ -144,6 +149,11 @@ const ReviewLineVerbatim = ({
 							setDisplayMoreInfo(!displayMoreInfo);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 							window._mtm?.push({
+								event: 'matomo_event',
+								container_type: 'backoffice',
+								service_id: form.product_id,
+								form_id: form.id,
+								template_slug: form.form_template.slug,
 								category: 'reviews',
 								action_type: 'read',
 								action: `review_detail_display`,

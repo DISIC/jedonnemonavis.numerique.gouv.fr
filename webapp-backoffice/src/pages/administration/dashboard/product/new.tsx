@@ -73,14 +73,30 @@ const NewProduct = () => {
 	const createProduct = trpc.product.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
-			window._mtm?.push({ category: 'service', action: 'new_service_create' });
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: 0,
+				template_slug: '',
+				category: 'service',
+				action: 'new_service_create'
+			});
 		}
 	});
 
 	const updateProduct = trpc.product.update.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
-			window._mtm?.push({ category: 'service', action: 'service_modify' });
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: 0,
+				template_slug: '',
+				category: 'service',
+				action: 'service_modify'
+			});
 		}
 	});
 

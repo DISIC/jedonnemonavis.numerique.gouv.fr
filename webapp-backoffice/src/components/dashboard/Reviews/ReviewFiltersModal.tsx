@@ -1,4 +1,5 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
@@ -18,19 +19,19 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
-	form_id: number;
+	form: FormWithElements;
 	setButtonId: (buttonId: number | undefined) => void;
 	submitFilters: (filters: ReviewFiltersType) => void;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters, setButtonId, form_id } = props;
+	const { modal, filters, submitFilters, setButtonId, form } = props;
 	const { cx, classes } = useStyles();
 
 	const { data: buttonResults } = trpc.button.getList.useQuery({
 		page: 1,
 		numberPerPage: 1000,
-		form_id: form_id,
+		form_id: form.id,
 		isTest: false
 	});
 
@@ -242,6 +243,11 @@ const ReviewFiltersModal = (props: Props) => {
 									submitFilters(tmpFilters);
 									push(['trackEvent', 'Product - Avis', 'Apply-Filters']);
 									window._mtm?.push({
+										event: 'matomo_event',
+										container_type: 'backoffice',
+										service_id: form.product_id,
+										form_id: form.id,
+										template_slug: form.form_template.slug,
 										category: 'reviews',
 										action_type: 'filter',
 										action: 'filter_apply',

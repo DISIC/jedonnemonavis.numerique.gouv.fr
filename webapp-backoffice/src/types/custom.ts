@@ -200,26 +200,18 @@ export type PasswordMessages = {
 	message: ReactNode;
 }[];
 
-type MtmPageContext = {
+type MtmType = {
+	event: string;
+	category: string;
+	action: string;
 	container_type: 'backoffice' | 'form';
 	service_id: number;
 	form_id: number;
 	template_slug: string;
-};
-
-type MtmUserContext = {
-	user_id: string;
-};
-
-type MtmActionTag = {
-	category: string;
-	action: string;
 	action_type?: string;
 	value?: number | string | boolean;
 	ui_source?: string;
 };
-
-type MtmType = MtmActionTag | MtmPageContext | MtmUserContext;
 
 declare global {
 	interface Window {

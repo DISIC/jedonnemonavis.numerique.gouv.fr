@@ -146,24 +146,6 @@ const ProductFormPage = (props: Props) => {
 		setSelectedTabId(getValidTabSlug(router.query.tab as string | undefined));
 	}, [router.asPath]);
 
-	useEffect(() => {
-		if (!form) return;
-
-		const existingFormPageContext = window._mtm?.find(
-			pageContext =>
-				'container_type' in pageContext && pageContext.form_id === form.id
-		);
-
-		if (!existingFormPageContext) {
-			window._mtm?.push({
-				container_type: 'backoffice',
-				service_id: form.product_id,
-				form_id: form.id,
-				template_slug: form.form_template.slug
-			});
-		}
-	}, [form]);
-
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
