@@ -6,13 +6,9 @@ export function navigateToCreatedProduct(shouldCheckA11y = false) {
 	cy.visit(`${appUrl}${selectors.url.products}`);
 	tryCloseNewsModal();
 	cy.url().should('include', selectors.url.products);
-	cy.get(selectors.productLink)
-		.filter(':contains("e2e-jdma-service-test-users")')
-		.should('have.length', 1)
-		.should('contain', 'e2e-jdma-service-test-users')
+	cy.get('a[title*="e2e-jdma-service-test-users"]')
 		.closest('a')
-		.first()
-		.click();
+		.click({ force: true });
 	cy.url().should('include', '/administration/dashboard/product/');
 	cy.get(selectors.sideMenu.menu)
 		.should('be.visible')

@@ -73,12 +73,30 @@ const NewProduct = () => {
 	const createProduct = trpc.product.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: 0,
+				template_slug: '',
+				category: 'service',
+				action: 'new_service_create'
+			});
 		}
 	});
 
 	const updateProduct = trpc.product.update.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: 0,
+				template_slug: '',
+				category: 'service',
+				action: 'service_modify'
+			});
 		}
 	});
 
@@ -122,8 +140,8 @@ const NewProduct = () => {
 				isEditingStep
 					? 'Modifier un service numérique'
 					: shouldShowStepper
-						? 'Étapier parcours de création'
-						: 'Ajouter un service numérique'
+					? 'Étapier parcours de création'
+					: 'Ajouter un service numérique'
 			}
 			onConfirm={handleSubmit(onLocalSubmit)}
 			isStepperLayout={shouldShowStepper}
@@ -178,7 +196,7 @@ const NewProduct = () => {
 										selectedEntityValue
 											? entityOptions.find(
 													option => option.value === selectedEntityValue
-												)
+											  )
 											: { label: '', value: undefined }
 									}
 									renderInput={params => (

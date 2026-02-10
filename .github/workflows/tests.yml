@@ -3,12 +3,15 @@ name: Run Cypress Tests
 on:
   pull_request:
     branches:
-      - feat/clevercloud
+      - staging
       - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
 
     services:
       db:
@@ -91,6 +94,9 @@ jobs:
       - name: Run Cypress tests for webapp-backoffice
         working-directory: ./webapp-backoffice
         run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.ts" --headed --browser chrome
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
 
       # 10. Vérifier si MailHog reçoit les emails
       - name: Check MailHog for received emails

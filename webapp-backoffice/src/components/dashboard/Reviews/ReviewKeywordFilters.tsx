@@ -1,5 +1,6 @@
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import Tooltip from '@codegouvfr/react-dsfr/Tooltip';
 import { push } from '@socialgouv/matomo-next';
@@ -77,6 +78,9 @@ const ReviewKeywordFilters = (props: Props) => {
 					kind="hover"
 					title="Les mots récurrents apparaissent à partir de 5 occurrences d'un mot, dans des réponses différentes"
 				/>
+				<Badge severity="new" className={fr.cx('fr-ml-2v')} small>
+					Beta
+				</Badge>
 			</p>
 			<div className={cx(classes.keywordsContainer)}>
 				{keywordsResults.data.map(keywordObject => {

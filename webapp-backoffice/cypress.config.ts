@@ -10,6 +10,7 @@ export default defineConfig({
 		screenshotOnRunFailure: false,
 		viewportWidth: 1280,
 		viewportHeight: 720,
+		projectId: process.env.CYPRESS_PROJECT_ID,
 		// La méthode `setupNodeEvents` est utilisée pour définir des événements Node côté serveur
 		setupNodeEvents(on, config) {
 			on('task', {

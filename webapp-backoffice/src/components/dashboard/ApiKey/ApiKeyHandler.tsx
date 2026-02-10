@@ -212,7 +212,7 @@ const ApiKeyHandler = (props: Props) => {
 					priority="secondary"
 					iconId="fr-icon-add-line"
 					className={fr.cx('fr-mt-1w')}
-					iconPosition="left"
+					iconPosition="right"
 					type="button"
 					onClick={() => handleCreateKey()}
 				>

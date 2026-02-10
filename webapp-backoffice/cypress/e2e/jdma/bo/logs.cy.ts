@@ -8,10 +8,9 @@ describe('jdma-logs', () => {
 	});
 
 	it('should display the logs page with events', () => {
-		cy.get(selectors.productLink)
-			.contains(selectors.dashboard.nameTestService)
+		cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
 			.should('be.visible')
-			.click();
+			.click({ force: true });
 		cy.get('.fr-sidemenu__link[href*="/logs"]')
 			.and('contain', "Historique d'activité")
 			.click();

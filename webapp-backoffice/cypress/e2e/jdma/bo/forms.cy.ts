@@ -48,6 +48,13 @@ describe('jdma-forms', () => {
 	it('should create multiple forms for a single service', () => {
 		cy.auditA11y();
 		cy.wrap(FORM_TITLES).each((title: string, i: number) => {
+			if (i > 0) {
+				cy.visit(`${appUrl}${selectors.url.products}`);
+				cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
+					.should('be.visible')
+					.click({ force: true });
+			}
+			cy.get('body').should('be.visible');
 			cy.get('body').then($body => {
 				const exists =
 					$body.find(`a:contains("${title}")`).filter(function () {
@@ -55,13 +62,17 @@ describe('jdma-forms', () => {
 					}).length > 0;
 
 				if (!exists) {
-					createOrEditForm(title, false, i === 0);
-					cy.visit(`${appUrl}${selectors.url.productTestService}`);
-					cy.contains('a', title).should('exist');
+					createOrEditForm(title, false, i === 0, false);
 				} else {
 					cy.log(`Form "${title}" already exists`);
 				}
 			});
+		});
+
+		cy.visit(`${appUrl}${selectors.url.products}`);
+		cy.get('h3').should('exist');
+		FORM_TITLES.forEach(title => {
+			cy.contains('h3', title).should('be.visible');
 		});
 		cy.injectAxe();
 		cy.auditA11y();

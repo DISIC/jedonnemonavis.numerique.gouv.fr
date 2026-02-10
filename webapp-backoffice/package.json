@@ -104,7 +104,7 @@
 		"@types/escape-html": "1.0.4",
 		"@types/lodash": "4.17.15",
 		"@types/react-beautiful-dnd": "13.1.8",
-    "axe-core": "4.10.3",
+		"axe-core": "4.10.3",
 		"cypress": "13.17.0",
 		"cypress-axe": "1.6.0",
 		"eslint-config-prettier": "9.0.0",

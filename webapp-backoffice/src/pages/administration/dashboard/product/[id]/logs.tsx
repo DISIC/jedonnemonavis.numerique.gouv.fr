@@ -134,7 +134,11 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			</Head>
 			<div className={classes.container}>
 				<h2 className={fr.cx('fr-mb-10v')}>Historique d'activité</h2>
-				<GenericFilters filterKey="productActivityLogs" renderTags={renderTags}>
+				<GenericFilters
+					filterKey="productActivityLogs"
+					renderTags={renderTags}
+					productId={product.id}
+				>
 					<Autocomplete
 						id="filter-action"
 						disablePortal

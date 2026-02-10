@@ -131,6 +131,20 @@ const StatsTab = ({
 	);
 
 	useEffect(() => {
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'stats',
+			action_type: 'read',
+			action: 'stats_display',
+			ui_source: 'onglet'
+		});
+	}, []);
+
+	useEffect(() => {
 		setSelectedButton(filters['productStats'].buttonId);
 	}, [filters['productStats'].buttonId]);
 
@@ -458,7 +472,7 @@ const StatsTab = ({
 				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
 			</div>
 			<div className={cx(classes.container)}>
-				<GenericFilters filterKey="productStats">
+				<GenericFilters filterKey="productStats" form={form}>
 					<Select
 						label="Sélectionner une source"
 						nativeSelectProps={{

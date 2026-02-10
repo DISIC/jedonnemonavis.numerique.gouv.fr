@@ -158,7 +158,7 @@ export const adminEntityRightRouter = router({
 				});
 				await sendMail(
 					`Accès à l'organisation « ${newAdminEntityRight.entity.name} » sur la plateforme « Je donne mon avis »`,
-					user_email,
+					user_email.toLowerCase(),
 					emailHtml,
 					`Cliquez sur ce lien pour rejoindre l'organisation "${newAdminEntityRight.entity.name}" : ${process.env.NODEMAILER_BASEURL}`
 				);
