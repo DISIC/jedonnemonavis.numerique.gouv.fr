@@ -48,6 +48,12 @@ describe('jdma-forms', () => {
 	it('should create multiple forms for a single service', () => {
 		cy.auditA11y();
 		cy.wrap(FORM_TITLES).each((title: string, i: number) => {
+			if (i > 0) {
+				cy.visit(`${appUrl}${selectors.url.products}`);
+				cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
+					.should('be.visible')
+					.click({ force: true });
+			}
 			cy.get('body').should('be.visible');
 			cy.get('body').then($body => {
 				const exists =

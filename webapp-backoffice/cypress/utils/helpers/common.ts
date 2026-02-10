@@ -135,11 +135,11 @@ export function createOrEditForm(
 	isOnboarding = true
 ) {
 	if (!isEdit) {
+		cy.wait(1000);
 		if (isOnboarding) {
 			cy.contains('button', 'Générer un formulaire').click();
 		} else {
 			cy.url().should('include', '/administration/dashboard/product/');
-			cy.wait(2000);
 			cy.contains('h1', 'service-test')
 				.should('be.visible')
 				.then(() => {
