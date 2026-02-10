@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { useRouter } from 'next/router';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
@@ -24,6 +25,27 @@ const FormLinkIntegrationPreview = ({
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<LinkIntegrationTypes>('button');
 	const { cx, classes } = useStyles();
+
+	const getPreviewContent = () => {
+		switch (selectedIntegrationType) {
+			case 'button':
+				return (
+					<a
+						href={`#`}
+						target="_blank"
+						rel="noopener noreferrer"
+						title="Je donne mon avis - nouvelle fenêtre"
+						className={fr.cx('fr-raw-link')}
+					>
+						<img
+							src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg"
+							alt="Je donne mon avis"
+						/>
+					</a>
+				);
+		}
+	};
+
 	return (
 		<div className={cx(fr.cx('fr-grid-row'))}>
 			<div className={cx(classes.sideMenu, fr.cx('fr-col-4'))}>
@@ -37,7 +59,14 @@ const FormLinkIntegrationPreview = ({
 					<RadioButtons
 						options={[
 							{
-								label: 'Intégré au contenu',
+								label: (
+									<>
+										<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
+											Beta
+										</Badge>
+										Intégré au contenu
+									</>
+								),
 								hintText:
 									'La 1ère question est visible directement dans la page de contenu',
 								nativeInputProps: {
@@ -72,28 +101,35 @@ const FormLinkIntegrationPreview = ({
 									/>
 								)
 							},
-							{
-								label: 'Flottant',
-								hintText:
-									'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
-								nativeInputProps: {
-									value: 'modal',
-									checked: selectedIntegrationType === 'modal',
-									onChange: () => setSelectedIntegrationType('modal')
-								},
-								illustration: (
-									<Image
-										alt="Illustration pleine page"
-										src={'/assets/integration-modal.svg'}
-										width={95}
-										height={71}
-									/>
-								)
-							},
+							// {
+							// 	label: (
+							// 		<>
+							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
+							// 				Beta
+							// 			</Badge>
+							// 			Flottant
+							// 		</>
+							// 	),
+							// 	hintText:
+							// 		'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
+							// 	nativeInputProps: {
+							// 		value: 'modal',
+							// 		checked: selectedIntegrationType === 'modal',
+							// 		onChange: () => setSelectedIntegrationType('modal')
+							// 	},
+							// 	illustration: (
+							// 		<Image
+							// 			alt="Illustration pleine page"
+							// 			src={'/assets/integration-modal.svg'}
+							// 			width={95}
+							// 			height={71}
+							// 		/>
+							// 	)
+							// },
 							{
 								label: 'Lien seul',
 								hintText:
-									'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière, ...)',
+									'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)',
 								nativeInputProps: {
 									value: 'link',
 									checked: selectedIntegrationType === 'link',
@@ -142,6 +178,7 @@ const FormLinkIntegrationPreview = ({
 				<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
 					<Skeleton height={400} />
 					<Skeleton height={200} />
+					<div className={classes.previewContent}>{getPreviewContent()}</div>
 					<Skeleton height={200} />
 					<Skeleton height={400} />
 				</div>
@@ -188,6 +225,12 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		display: 'flex',
 		flexDirection: 'column',
 		height: '50%'
+	},
+	previewContent: {
+		display: 'flex',
+		justifyContent: 'center',
+		...fr.spacing('margin', { topBottom: '4v' }),
+		zIndex: 10
 	},
 	actionsContainer: {
 		position: 'absolute',
