@@ -37,7 +37,6 @@ export const SmileyBlock = ({
       name={fieldKey}
       hint={block.content || undefined}
       value={smileyValue}
-      isRequired={block.isRequired}
       onChange={(feeling) => {
         const smileyItemId =
           feeling === "bad" ? 1 : feeling === "medium" ? 2 : 3;
