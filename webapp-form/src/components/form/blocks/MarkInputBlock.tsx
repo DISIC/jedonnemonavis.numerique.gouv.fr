@@ -107,7 +107,8 @@ const useStyles = tss.withName(MarkInputBlock.name).create(() => ({
   hint: {
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("2v"),
+    marginBottom: fr.spacing("6v"),
+    marginTop: `-${fr.spacing("2v")}`,
   },
   rating: {
     display: "flex",
