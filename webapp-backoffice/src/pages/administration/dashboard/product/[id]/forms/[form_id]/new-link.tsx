@@ -72,6 +72,7 @@ const NewLink = (props: Props) => {
 	const createButton = trpc.button.create.useMutation({
 		onSuccess: async result => {
 			setCreatedButton(result.data);
+			setCurrentStep('COPY');
 		}
 	});
 
@@ -150,9 +151,27 @@ const NewLink = (props: Props) => {
 		}
 	})();
 
+	console.log(
+		'form',
+		product.forms.find(f => f.id === Number(form_id))
+	);
+
 	return (
 		<OnboardingLayout
-			isCancelable
+			onCancel={
+				currentStep !== 'PREVIEW'
+					? () => {
+							switch (currentStep) {
+								case 'CREATION':
+									setCurrentStep('PREVIEW');
+									break;
+								case 'COPY':
+									setCurrentStep('CREATION');
+									break;
+							}
+					  }
+					: undefined
+			}
 			title={currentStepValues.title}
 			onConfirm={currentStepValues.onConfirm}
 			hideMainHintText={!!createdButton}
