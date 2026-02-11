@@ -50,7 +50,7 @@ export const RadioBlock = ({
         htmlFor={`radio-${block.id}`}
         className={fr.cx("fr-label", "fr-text--md")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <RadioButtons

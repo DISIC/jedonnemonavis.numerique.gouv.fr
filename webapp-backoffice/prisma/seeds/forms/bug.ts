@@ -71,7 +71,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							type_bloc: 'input_text_area',
 							field_code: 'verbatim',
 							position: 0,
-							isRequired: false
+							isRequired: true
 						}
 					]
 				}

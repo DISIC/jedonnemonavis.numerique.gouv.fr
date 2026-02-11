@@ -40,7 +40,7 @@ export const TextInputBlock = ({
         htmlFor={`input-${block.id}`}
         className={fr.cx("fr-label", "fr-text--md")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <Input
