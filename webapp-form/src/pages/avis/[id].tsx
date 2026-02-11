@@ -248,7 +248,7 @@ export default function AvisPage({
                       type="submit"
                       disabled={isRateLimitReached}
                     >
-                      Suivant
+                      Continuer
                     </Button>
                   ) : (
                     <Button priority="primary" type="submit">
