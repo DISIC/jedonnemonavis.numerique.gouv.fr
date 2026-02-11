@@ -526,6 +526,7 @@ model FormTemplateBlockOption {
   label      String?
   value      String?
   alias      String?
+  hint       String?
   isOther    Boolean           @default(false)
   isIsolated Boolean           @default(false)
   isHideable Boolean           @default(false)

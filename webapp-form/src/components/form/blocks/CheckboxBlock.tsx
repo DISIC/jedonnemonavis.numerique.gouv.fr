@@ -56,6 +56,7 @@ export const CheckboxBlock = ({
       <Checkbox
         options={visibleOptions.map((opt, index) => ({
           label: opt.label || "",
+          hintText: opt.hint,
           nativeInputProps: {
             id: index === 0 ? `checkbox-${block.id}` : undefined,
             value: opt.id.toString(),

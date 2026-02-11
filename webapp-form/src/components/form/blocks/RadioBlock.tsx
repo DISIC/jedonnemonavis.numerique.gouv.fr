@@ -57,6 +57,7 @@ export const RadioBlock = ({
         id={`radio-${block.id}`}
         options={visibleOptions.map((opt) => ({
           label: opt.label || "",
+          hintText: opt.hint,
           nativeInputProps: {
             value: opt.id.toString(),
             checked: radioValue === opt.id,
