@@ -312,9 +312,19 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
             include: {
               form_template_blocks: {
                 include: {
-                  options: true,
+                  options: {
+                    orderBy: {
+                      position: "asc",
+                    },
+                  },
+                },
+                orderBy: {
+                  position: "asc",
                 },
               },
+            },
+            orderBy: {
+              position: "asc",
             },
           },
         },
