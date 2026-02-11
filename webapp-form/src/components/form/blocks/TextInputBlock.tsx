@@ -1,6 +1,7 @@
 import { FormWithElements } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SetStateAction } from "react";
 import { tss } from "tss-react/dsfr";
 
@@ -30,7 +31,7 @@ export const TextInputBlock = ({
   answers,
   setAnswers,
 }: Props) => {
-  const { classes } = useStyles();
+  const { cx, classes } = useStyles();
   const inputAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
   const inputValue = inputAnswer?.answer_text || "";
 
@@ -45,6 +46,7 @@ export const TextInputBlock = ({
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <Input
         label=""
+        className={fr.cx("fr-mb-2v")}
         nativeInputProps={{
           id: `input-${block.id}`,
           value: inputValue,
@@ -63,6 +65,11 @@ export const TextInputBlock = ({
         state={inputValue.length > 250 ? "error" : "default"}
         stateRelatedMessage="Maximum 250 caractères"
       />
+
+      <Notice
+        className={cx(classes.notice)}
+        title="Ne partagez aucune information personnelle (exemple : nom, email, téléphone)"
+      ></Notice>
     </div>
   );
 };
@@ -73,5 +80,21 @@ const useStyles = tss.withName(TextInputBlock.name).create(() => ({
     color: fr.colors.decisions.text.mention.grey.default,
     marginBottom: fr.spacing("6v"),
     marginTop: `-${fr.spacing("2v")}`,
+  },
+  notice: {
+    background: "none",
+    padding: 0,
+    marginBottom: fr.spacing("4v"),
+    ".fr-container": {
+      padding: 0,
+      ".fr-notice__title": {
+        fontWeight: "normal",
+        fontSize: "0.75rem",
+        "&::before": {
+          "--icon-size": "1rem",
+          marginRight: fr.spacing("1v"),
+        },
+      },
+    },
   },
 }));
