@@ -179,7 +179,7 @@ export default function AvisPage({
             <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
               <div className={cx(classes.formSection, classes.thanksSection)}>
                 <Success className={fr.cx("fr-mt-6v", "fr-mb-2v")} />
-                <h1>Merci beacoup !</h1>
+                <h1>Merci beaucoup !</h1>
                 <p className={fr.cx("fr-mt-8v")}>
                   Merci, votre avis nous permettra d’améliorer la qualité du
                   service.
