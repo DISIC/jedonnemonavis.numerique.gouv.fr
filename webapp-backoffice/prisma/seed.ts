@@ -15,6 +15,7 @@ import { createBugForm } from './seeds/forms/bug';
 import { products } from './seeds/products';
 import { users } from './seeds/users';
 import { whiteListedDomains } from './seeds/white-listed-domains';
+import { take } from 'lodash';
 
 const prisma = new PrismaClient();
 
@@ -87,8 +88,8 @@ async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
-	const rootFormTemplate = await prisma.formTemplate.findUnique({
-		where: { slug: 'root' }
+	const formTemplates = await prisma.formTemplate.findMany({
+		take: 100
 	});
 
 	users.forEach(user => {
@@ -122,10 +123,16 @@ async function seed_users_products() {
 	Promise.all(promisesUsersAndEntities).then(usersAndEntitiesResponses => {
 		products.forEach((product, index) => {
 			const randomEntity = getRandomObjectFromArray(entities) as Entity;
+			const formTemplate = formTemplates.find(
+				ft => ft.slug === product.templateSlug
+			);
+
 			promisesProducts.push(
 				prisma.product.create({
 					data: {
-						...product,
+						title: product.title,
+						isPublic: product.isPublic,
+						urls: product.urls,
 						entity: {
 							connect: {
 								name: randomEntity.name
@@ -142,10 +149,10 @@ async function seed_users_products() {
 						forms: {
 							create: [
 								{
-									title: rootFormTemplate?.title,
+									title: formTemplate?.title,
 									form_template: {
 										connect: {
-											slug: 'root'
+											slug: formTemplate?.slug || 'root'
 										}
 									},
 									buttons: {
