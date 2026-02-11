@@ -11,6 +11,7 @@ import Success from "@codegouvfr/react-dsfr/picto/Success";
 import { trpc } from "@/src/utils/trpc";
 import { v4 as uuidv4 } from "uuid";
 import Notice from "@codegouvfr/react-dsfr/Notice";
+import Alert from "@codegouvfr/react-dsfr/Alert";
 
 type AvisPageProps = {
   form: FormWithElements;
@@ -38,6 +39,7 @@ export default function AvisPage({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<FormAnswers>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isRateLimitReached, setIsRateLimitReached] = useState<boolean>(false);
   const [reviewId, setReviewId] = useState<{
     id: number;
     created_at: Date;
@@ -60,8 +62,12 @@ export default function AvisPage({
         id: data.data.id,
         created_at: data.data.created_at,
       });
+      setIsRateLimitReached(false);
     },
     onError: (error) => {
+      if (error.data?.httpStatus === 429) {
+        setIsRateLimitReached(true);
+      }
       console.error("Error creating review:", error);
     },
   });
@@ -72,7 +78,7 @@ export default function AvisPage({
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = e.currentTarget;
@@ -83,12 +89,16 @@ export default function AvisPage({
 
     const isLastStep = currentStepIndex === steps.length - 1;
 
-    saveCurrentStep();
+    try {
+      await saveCurrentStep();
 
-    if (isLastStep) {
-      setIsSubmitted(true);
-    } else {
-      setCurrentStepIndex(currentStepIndex + 1);
+      if (isLastStep) {
+        setIsSubmitted(true);
+      } else {
+        setCurrentStepIndex(currentStepIndex + 1);
+      }
+    } catch (error) {
+      console.error("Error saving step:", error);
     }
   };
 
@@ -102,7 +112,7 @@ export default function AvisPage({
     return Object.values(answers).flat();
   };
 
-  const saveCurrentStep = () => {
+  const saveCurrentStep = async () => {
     if (isIframe) return;
 
     const currentStepAnswers = getAnswersArray().filter((answer) => {
@@ -120,7 +130,7 @@ export default function AvisPage({
     }
 
     if (!reviewId) {
-      createReview.mutate({
+      await createReview.mutateAsync({
         review: {
           product_id: productId,
           button_id: buttonId,
@@ -130,7 +140,7 @@ export default function AvisPage({
         answers: currentStepAnswers,
       });
     } else {
-      insertOrUpdateReview.mutate({
+      await insertOrUpdateReview.mutateAsync({
         review_id: reviewId.id,
         review_created_at: reviewId.created_at,
         answers: currentStepAnswers,
@@ -205,6 +215,16 @@ export default function AvisPage({
                   totalSteps={steps.length}
                 />
 
+                {isRateLimitReached && (
+                  <Alert
+                    severity="error"
+                    title="Détection d'activité suspecte"
+                    description="Vous semblez déposer beaucoup de réponses à la suite, vous avez été bloqué par l'anti-spam. Veuillez réessayer plus tard."
+                    closable
+                    onClose={() => setIsRateLimitReached(false)}
+                  />
+                )}
+
                 <div className={classes.buttonsContainer}>
                   {currentStepIndex > 0 ? (
                     <Button
@@ -226,6 +246,7 @@ export default function AvisPage({
                       iconId="fr-icon-arrow-right-line"
                       iconPosition="right"
                       type="submit"
+                      disabled={isRateLimitReached}
                     >
                       Suivant
                     </Button>
