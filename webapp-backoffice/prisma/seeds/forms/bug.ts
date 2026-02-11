@@ -44,7 +44,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 				form_template_blocks: {
 					create: [
 						{
-							label: 'Que souhaitez-vous remonter ?',
+							label: 'Quel type de retour souhaitez-vous nous faire ?',
 							type_bloc: 'radio',
 							field_code: 'bug_kind',
 							alias: 'Type de retour',
