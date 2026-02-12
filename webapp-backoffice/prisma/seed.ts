@@ -68,19 +68,203 @@ function getWLDPromises() {
 }
 
 async function seed_bug_form_template() {
-	await prisma.formTemplate.upsert({
+	const bugTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'bug' },
 		update: createBugForm,
 		create: createBugForm
 	});
+
+	await seed_bug_form_template_buttons(bugTemplate.id);
 }
 
 async function seed_root_form_template() {
-	await prisma.formTemplate.upsert({
+	const rootTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: createRootForm,
 		create: createRootForm
 	});
+
+	await seed_root_form_template_buttons(rootTemplate.id);
+}
+
+async function seed_root_form_template_buttons(formTemplateId: number) {
+	await prisma.formTemplateButton.upsert({
+		where: {
+			form_template_id_slug: {
+				form_template_id: formTemplateId,
+				slug: 'default'
+			}
+		},
+		update: {
+			label: 'Je donne mon avis',
+			order: 0,
+			isDefault: true,
+			variants: {
+				deleteMany: {},
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		},
+		create: {
+			form_template: {
+				connect: {
+					id: formTemplateId
+				}
+			},
+			label: 'Je donne mon avis',
+			slug: 'default',
+			order: 0,
+			isDefault: true,
+			variants: {
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		}
+	});
+}
+
+async function seed_bug_form_template_buttons(formTemplateId: number) {
+	const placeholderSolidUrl =
+		'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg';
+	const placeholderOutlineUrl =
+		'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg';
+
+	const bugButtons = [
+		{
+			label: 'Une remarque ?',
+			slug: 'une-remarque',
+			order: 0,
+			isDefault: true
+		},
+		{
+			label: 'Faire un retour',
+			slug: 'faire-un-retour',
+			order: 1,
+			isDefault: false
+		},
+		{
+			label: 'Signaler un problème',
+			slug: 'signaler-un-probleme',
+			order: 2,
+			isDefault: false
+		}
+	];
+
+	for (const bugButton of bugButtons) {
+		await prisma.formTemplateButton.upsert({
+			where: {
+				form_template_id_slug: {
+					form_template_id: formTemplateId,
+					slug: bugButton.slug
+				}
+			},
+			update: {
+				label: bugButton.label,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					deleteMany: {},
+					create: [
+						{
+							style: 'solid',
+							theme: null,
+							image_url: placeholderSolidUrl,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: null,
+							image_url: placeholderOutlineUrl,
+							alt_text: bugButton.label
+						}
+					]
+				}
+			},
+			create: {
+				form_template: {
+					connect: {
+						id: formTemplateId
+					}
+				},
+				label: bugButton.label,
+				slug: bugButton.slug,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					create: [
+						{
+							style: 'solid',
+							theme: null,
+							image_url: placeholderSolidUrl,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: null,
+							image_url: placeholderOutlineUrl,
+							alt_text: bugButton.label
+						}
+					]
+				}
+			}
+		});
+	}
 }
 
 async function seed_users_products() {

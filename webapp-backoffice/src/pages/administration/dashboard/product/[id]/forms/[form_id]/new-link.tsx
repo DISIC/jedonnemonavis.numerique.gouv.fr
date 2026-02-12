@@ -3,7 +3,6 @@ import ButtonForm from '@/src/components/dashboard/ProductButton/ButtonForm';
 import { ButtonCreationPayload } from '@/src/components/dashboard/ProductButton/ButtonModal';
 import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/CopyInstructionPanel';
 import {
-	ButtonStyle,
 	LinkCreationStep,
 	LinkIntegrationTypes
 } from '@/src/components/dashboard/ProductButton/interface';
@@ -21,6 +20,7 @@ import { useMemo, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
+import { FormTemplateButtonStyle } from '@prisma/client';
 
 interface Props {
 	product: ProductWithForms;
@@ -34,9 +34,9 @@ const NewLink = (props: Props) => {
 	const { createdProduct, createdForm } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
-		useState<ButtonStyle>('solid');
+		useState<FormTemplateButtonStyle>('solid');
 	const [createdButton, setCreatedButton] = useState<ButtonWithForm>();
-	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
+	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW'); // reset to preview
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<LinkIntegrationTypes>('button');
 
@@ -75,6 +75,13 @@ const NewLink = (props: Props) => {
 			setCurrentStep('COPY');
 		}
 	});
+
+	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
+		{ slug: currentForm?.form_template?.slug || '' },
+		{ enabled: !!currentForm?.form_template?.slug }
+	);
+
+	const { data: formTemplateData } = formTemplate;
 
 	const onSubmit: SubmitHandler<ButtonCreationPayload> = async data => {
 		await createButton.mutateAsync({ ...data, form_id: Number(form_id) });
@@ -133,6 +140,9 @@ const NewLink = (props: Props) => {
 							selectedButtonStyle={selectedButtonStyle}
 							setSelectedButtonStyle={setSelectedButtonStyle}
 							selectedIntegrationType={selectedIntegrationType}
+							formTemplateButtons={
+								formTemplateData?.data?.form_template_buttons
+							}
 						/>
 					),
 					title: "Créer un lien d'intégration",

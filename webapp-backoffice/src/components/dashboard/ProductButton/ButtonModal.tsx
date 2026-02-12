@@ -31,6 +31,7 @@ const defaultButton: ButtonCreationPayload | ButtonWithForm = {
 	description: '',
 	xwiki_title: null,
 	form_id: -1,
+	form_template_button_id: -1,
 	isTest: false,
 	delete_reason: null,
 	deleted_at: null,
@@ -61,11 +62,19 @@ const ButtonModal = (props: Props) => {
 		ButtonCreationPayload | (ButtonWithForm & ButtonWithClosedLog)
 	>(defaultButton);
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.form_template?.slug !== 'root' ? `avis/${button?.form.id}` : button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
+	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${
+		button?.form.form_template?.slug !== 'root'
+			? `avis/${button?.form.id}`
+			: button?.form.product_id
+	}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
 		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
 	</a>`;
 
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form.form_template?.slug !== 'root' ? `avis/${button?.form.id}` : button?.form.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
+	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${
+		button?.form.form_template?.slug !== 'root'
+			? `avis/${button?.form.id}`
+			: button?.form.product_id
+	}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
 		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
 	</a>`;
 

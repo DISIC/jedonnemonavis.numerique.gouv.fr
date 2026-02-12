@@ -154,6 +154,14 @@ export type FormTemplateWithElements = Prisma.FormTemplateGetPayload<
 	typeof FormTemplateWithElements
 >;
 
+const FormTemplateButtonWithVariants =
+	Prisma.validator<Prisma.FormTemplateButtonDefaultArgs>()({
+		include: { variants: true }
+	});
+
+export type FormTemplateButtonWithVariants =
+	Prisma.FormTemplateButtonGetPayload<typeof FormTemplateButtonWithVariants>;
+
 const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
 	{
 		include: {

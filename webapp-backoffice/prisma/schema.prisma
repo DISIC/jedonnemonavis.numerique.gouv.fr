@@ -144,6 +144,16 @@ enum FormConfigKind {
   blockOption
 }
 
+enum FormTemplateButtonStyle {
+  solid
+  outline
+}
+
+enum FormTemplateButtonTheme {
+  light
+  dark
+}
+
 // Next auth
 model User {
   id                      Int                   @id @default(autoincrement())
@@ -267,20 +277,22 @@ model Entity {
 }
 
 model Button {
-  id              Int              @id @default(autoincrement())
-  title           String
-  description     String?
-  xwiki_title     String?
-  isTest          Boolean?         @default(false)
-  form            Form             @relation(fields: [form_id], references: [id])
-  form_id         Int
-  delete_reason   String?
-  closedButtonLog ClosedButtonLog?
-  reviews         Review[]
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
-  deleted_at      DateTime?
-  isDeleted       Boolean?         @default(false)
+  id                      Int                 @id @default(autoincrement())
+  title                   String
+  description             String?
+  xwiki_title             String?
+  isTest                  Boolean?            @default(false)
+  form                    Form                @relation(fields: [form_id], references: [id])
+  form_id                 Int
+  form_template_button    FormTemplateButton? @relation(fields: [form_template_button_id], references: [id])
+  form_template_button_id Int?
+  delete_reason           String?
+  closedButtonLog         ClosedButtonLog?
+  reviews                 Review[]
+  created_at              DateTime            @default(now())
+  updated_at              DateTime            @updatedAt
+  deleted_at              DateTime?
+  isDeleted               Boolean?            @default(false)
 }
 
 model ClosedButtonLog {
@@ -472,18 +484,49 @@ model LimiterReporting {
 }
 
 model FormTemplate {
-  id                  Int                @id @default(autoincrement())
-  created_at          DateTime           @default(now())
-  updated_at          DateTime           @default(now())
-  user                User?              @relation(fields: [user_id], references: [id])
-  user_id             Int?
-  title               String
-  slug                String             @unique
-  active              Boolean            @default(false)
-  hasStepper          Boolean            @default(false)
-  form_template_steps FormTemplateStep[]
-  forms               Form[]
-  ReviewCustom        ReviewCustom[]
+  id                    Int                  @id @default(autoincrement())
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @default(now())
+  user                  User?                @relation(fields: [user_id], references: [id])
+  user_id               Int?
+  title                 String
+  slug                  String               @unique
+  active                Boolean              @default(false)
+  hasStepper            Boolean              @default(false)
+  form_template_steps   FormTemplateStep[]
+  form_template_buttons FormTemplateButton[]
+  ReviewCustom          ReviewCustom[]
+  forms                 Form[]
+}
+
+model FormTemplateButton {
+  id               Int                         @id @default(autoincrement())
+  created_at       DateTime                    @default(now())
+  updated_at       DateTime                    @updatedAt
+  form_template    FormTemplate                @relation(fields: [form_template_id], references: [id])
+  form_template_id Int
+  label            String
+  slug             String
+  order            Int                         @default(0)
+  isDefault        Boolean                     @default(false)
+  variants         FormTemplateButtonVariant[]
+  buttons          Button[]
+
+  @@unique([form_template_id, slug])
+}
+
+model FormTemplateButtonVariant {
+  id                      Int                      @id @default(autoincrement())
+  created_at              DateTime                 @default(now())
+  updated_at              DateTime                 @updatedAt
+  form_template_button    FormTemplateButton       @relation(fields: [form_template_button_id], references: [id], onDelete: Cascade)
+  form_template_button_id Int
+  style                   FormTemplateButtonStyle
+  theme                   FormTemplateButtonTheme?
+  image_url               String
+  alt_text                String?
+
+  @@unique([form_template_button_id, style, theme])
 }
 
 model FormTemplateStep {

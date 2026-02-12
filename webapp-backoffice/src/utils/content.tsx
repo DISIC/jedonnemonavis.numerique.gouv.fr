@@ -1,4 +1,5 @@
 import { FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import { FormTemplateButtonStyle } from '@prisma/client';
 
 interface MainStructure {
 	[key: string]: {
@@ -542,3 +543,29 @@ export const onboardingStepsContent: StepContent[] = [
 		actionsLabel: "Créer un lien d'intégration"
 	}
 ];
+
+export const buttonStylesMapping: Record<
+	FormTemplateButtonStyle,
+	{
+		label: React.ReactNode;
+		hintText?: React.ReactNode;
+	}
+> = {
+	solid: {
+		label: 'Plein',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				Le bouton par défaut, à placer sur un{' '}
+				<span className="fr-text--bold">fond blanc ou neutre</span>.
+			</p>
+		)
+	},
+	outline: {
+		label: 'Contour',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				À placer sur un <span className="fr-text--bold">fond coloré</span>.
+			</p>
+		)
+	}
+};

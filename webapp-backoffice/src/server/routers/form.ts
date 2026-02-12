@@ -56,7 +56,8 @@ export const formRouter = router({
 								}
 							}
 						}
-					}
+					},
+					form_template_buttons: { include: { variants: true } }
 				}
 			});
 			return { data: formTemplate };
@@ -254,10 +255,14 @@ export const formRouter = router({
 					});
 
 					await sendMail(
-						`Fermeture du formulaire «${deletedForm.title ?? deletedForm.form_template.title}» du service «${product?.title}»`,
+						`Fermeture du formulaire «${
+							deletedForm.title ?? deletedForm.form_template.title
+						}» du service «${product?.title}»`,
 						email,
 						emailHtml,
-						`Fermeture du formulaire «${deletedForm.title || deletedForm.form_template.title}» du service «${product?.title}»`
+						`Fermeture du formulaire «${
+							deletedForm.title || deletedForm.form_template.title
+						}» du service «${product?.title}»`
 					);
 				}
 			}

@@ -1,18 +1,26 @@
-import { ProductWithForms } from '@/src/types/prismaTypesExtended';
+import {
+	FormTemplateButtonWithVariants,
+	ProductWithForms
+} from '@/src/types/prismaTypesExtended';
+import { buttonStylesMapping } from '@/src/utils/content';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { FormTemplateButtonStyle } from '@prisma/client';
 import Image from 'next/image';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { ButtonCreationPayload } from './ButtonModal';
-import { ButtonStyle, LinkIntegrationTypes } from './interface';
+import { LinkIntegrationTypes } from './interface';
 
 type ButtonFormProps = {
 	currentForm?: ProductWithForms['forms'][number];
-	selectedButtonStyle: ButtonStyle;
-	setSelectedButtonStyle: React.Dispatch<React.SetStateAction<ButtonStyle>>;
+	formTemplateButtons?: FormTemplateButtonWithVariants[];
+	selectedButtonStyle: FormTemplateButtonStyle;
+	setSelectedButtonStyle: React.Dispatch<
+		React.SetStateAction<FormTemplateButtonStyle>
+	>;
 	selectedIntegrationType: LinkIntegrationTypes;
 };
 
@@ -20,9 +28,17 @@ const ButtonForm = ({
 	currentForm,
 	selectedButtonStyle,
 	setSelectedButtonStyle,
-	selectedIntegrationType
+	selectedIntegrationType,
+	formTemplateButtons
 }: ButtonFormProps) => {
 	const { cx, classes } = useStyles();
+
+	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
+		useState<FormTemplateButtonWithVariants>();
+
+	const showButtonStyleOptions = !['link', 'embed'].includes(
+		selectedIntegrationType
+	);
 
 	const defaultTitle = useMemo(() => {
 		const baseTitle = 'Lien d’intégration';
@@ -38,6 +54,15 @@ const ButtonForm = ({
 		return `${baseTitle} ${existingButtons.length + 1}`;
 	}, [currentForm]);
 
+	const buttonStyleOptions = useMemo(() => {
+		if (!formTemplateButtons) return [];
+		return (
+			selectedFormTemplateButton?.variants.filter(
+				v => v.theme === 'light' || v.theme === null
+			) || []
+		);
+	}, [selectedFormTemplateButton]);
+
 	const {
 		control,
 		handleSubmit,
@@ -48,6 +73,13 @@ const ButtonForm = ({
 			title: defaultTitle || ''
 		}
 	});
+
+	useEffect(() => {
+		if (formTemplateButtons) {
+			const defaultButton = formTemplateButtons.find(b => b.isDefault);
+			setSelectedFormTemplateButton(defaultButton);
+		}
+	}, [formTemplateButtons]);
 
 	return (
 		<>
@@ -108,61 +140,32 @@ const ButtonForm = ({
 					/>
 				</div>
 
-				<RadioButtons
-					legend="Style du bouton"
-					name={'button-style'}
-					className={cx(classes.buttonStyles, fr.cx('fr-mb-3v'))}
-					options={[
-						{
-							label: 'Plein',
-							hintText: (
-								<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-									Le bouton par défaut, à placer sur un{' '}
-									<span className="fr-text--bold">fond blanc ou neutre</span>.
-								</p>
-							),
+				{showButtonStyleOptions && selectedFormTemplateButton && (
+					<RadioButtons
+						legend="Style du bouton"
+						name={'button-style'}
+						className={cx(classes.buttonStyles, fr.cx('fr-mb-3v'))}
+						options={buttonStyleOptions.map(bsOption => ({
+							label: buttonStylesMapping[bsOption.style].label,
+							hintText: buttonStylesMapping[bsOption.style].hintText,
 							nativeInputProps: {
-								value: 'solid',
-								onChange: e => {
-									setSelectedButtonStyle(e.target.value as ButtonStyle);
+								value: bsOption.style,
+								onChange: () => {
+									setSelectedButtonStyle(bsOption.style);
 								},
-								checked: selectedButtonStyle === 'solid'
+								checked: selectedButtonStyle === bsOption.style
 							},
 							illustration: (
 								<Image
-									alt="bouton-je-donne-mon-avis"
-									src={`/assets/bouton-bleu-clair.svg`}
+									alt={bsOption.alt_text || selectedFormTemplateButton?.label}
+									src={bsOption.image_url}
 									width={200}
 									height={85}
 								/>
 							)
-						},
-						{
-							label: 'Contour',
-							hintText: (
-								<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-									À placer sur un{' '}
-									<span className="fr-text--bold">fond coloré</span>.
-								</p>
-							),
-							nativeInputProps: {
-								value: 'outline',
-								onChange: e => {
-									setSelectedButtonStyle(e.target.value as ButtonStyle);
-								},
-								checked: selectedButtonStyle === 'outline'
-							},
-							illustration: (
-								<Image
-									alt="bouton-je-donne-mon-avis"
-									src={`/assets/bouton-blanc-clair.svg`}
-									width={200}
-									height={85}
-								/>
-							)
-						}
-					]}
-				/>
+						}))}
+					/>
+				)}
 			</form>
 		</>
 	);
