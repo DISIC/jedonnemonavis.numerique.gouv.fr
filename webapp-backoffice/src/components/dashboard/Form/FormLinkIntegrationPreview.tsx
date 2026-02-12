@@ -1,30 +1,35 @@
+import { FormWithConfigAndTemplate } from '@/src/types/prismaTypesExtended';
+import { getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
 import Header from '@codegouvfr/react-dsfr/Header';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Skeleton } from '@mui/material';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { LinkIntegrationTypes } from '../ProductButton/interface';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import Image from 'next/image';
-import { useState } from 'react';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { useRouter } from 'next/router';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
 	description: JSX.Element;
 	onConfirm: (value: LinkIntegrationTypes) => void;
+	form?: FormWithConfigAndTemplate;
 };
 
 const FormLinkIntegrationPreview = ({
 	title,
 	description,
-	onConfirm
+	onConfirm,
+	form
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<LinkIntegrationTypes>('button');
 	const { cx, classes } = useStyles();
+
+	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);
 
 	const getPreviewContent = () => {
 		switch (selectedIntegrationType) {
@@ -43,6 +48,22 @@ const FormLinkIntegrationPreview = ({
 						/>
 					</a>
 				);
+			case 'embed':
+				return (
+					form && (
+						<iframe
+							title="Aperçu de l'intégration du formulaire"
+							src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
+								form.form_template?.slug === 'root'
+									? `/Demarches/${form.product_id}`
+									: `/Demarches/avis/${form.id}`
+							}?iframe=true&formConfig=${encodeURIComponent(
+								JSON.stringify(currentFormConfig)
+							)}`}
+							style={{ border: 'none', width: '100%', height: '500px' }}
+						/>
+					)
+				);
 		}
 	};
 
@@ -58,31 +79,31 @@ const FormLinkIntegrationPreview = ({
 				<div className={classes.scrollableContent}>
 					<RadioButtons
 						options={[
-							{
-								label: (
-									<>
-										<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
-											Beta
-										</Badge>
-										Intégré au contenu
-									</>
-								),
-								hintText:
-									'La 1ère question est visible directement dans la page de contenu',
-								nativeInputProps: {
-									value: 'embed',
-									checked: selectedIntegrationType === 'embed',
-									onChange: () => setSelectedIntegrationType('embed')
-								},
-								illustration: (
-									<Image
-										alt="Illustration intégré au contenu"
-										src={'/assets/integration-embed.svg'}
-										width={95}
-										height={71}
-									/>
-								)
-							},
+							// {
+							// 	label: (
+							// 		<>
+							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
+							// 				Beta
+							// 			</Badge>
+							// 			Intégré au contenu
+							// 		</>
+							// 	),
+							// 	hintText:
+							// 		'La 1ère question est visible directement dans la page de contenu',
+							// 	nativeInputProps: {
+							// 		value: 'embed',
+							// 		checked: selectedIntegrationType === 'embed',
+							// 		onChange: () => setSelectedIntegrationType('embed')
+							// 	},
+							// 	illustration: (
+							// 		<Image
+							// 			alt="Illustration intégré au contenu"
+							// 			src={'/assets/integration-embed.svg'}
+							// 			width={95}
+							// 			height={71}
+							// 		/>
+							// 	)
+							// },
 							{
 								label: 'Pleine page',
 								hintText:

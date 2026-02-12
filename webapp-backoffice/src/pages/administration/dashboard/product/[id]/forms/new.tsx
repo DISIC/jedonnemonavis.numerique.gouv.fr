@@ -83,7 +83,9 @@ const NewForm = (props: Props) => {
 		if (existingTemplateForms.length === 0)
 			return rootFormTemplate?.data?.title || '';
 
-		return `${rootFormTemplate?.data?.title} ${existingTemplateForms.length + 1}`;
+		return `${rootFormTemplate?.data?.title} ${
+			existingTemplateForms.length + 1
+		}`;
 	}, [product.forms, rootFormTemplate]);
 
 	const {
@@ -296,8 +298,8 @@ const NewForm = (props: Props) => {
 					title: isEditingStep
 						? 'Modifier un formulaire'
 						: shouldShowStepper
-							? 'Étapier parcours de création'
-							: 'Générer un formulaire',
+						? 'Étapier parcours de création'
+						: 'Générer un formulaire',
 					confirmAction: handleSubmit(onSubmitCreateForm),
 					confirmText: isEditingStep ? 'Enregistrer et continuer' : undefined
 				};
@@ -344,7 +346,13 @@ const NewForm = (props: Props) => {
 					headerActions: (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${createdForm?.form_template.slug === 'root' ? `/Demarches/${product.id}` : `/Demarches/avis/${createdForm?.id}`}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
+								createdForm?.form_template.slug === 'root'
+									? `/Demarches/${product.id}`
+									: `/Demarches/avis/${createdForm?.id}`
+							}?iframe=true&formConfig=${encodeURIComponent(
+								JSON.stringify(tmpConfigHelper)
+							)}`}
 						>
 							Prévisualiser
 						</Link>

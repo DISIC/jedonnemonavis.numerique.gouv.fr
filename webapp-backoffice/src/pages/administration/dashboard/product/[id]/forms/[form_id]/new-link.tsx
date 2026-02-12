@@ -98,9 +98,12 @@ const NewLink = (props: Props) => {
 		switch (currentStep) {
 			case 'PREVIEW':
 				return {
-					content: (
+					content: !currentForm ? (
+						<Loader />
+					) : (
 						<FormLinkIntegrationPreview
 							title="Choisir le type d'intégration"
+							form={currentForm}
 							description={
 								<>
 									<p className={fr.cx('fr-hint-text', 'fr-text--sm')}>
@@ -150,11 +153,6 @@ const NewLink = (props: Props) => {
 				};
 		}
 	})();
-
-	console.log(
-		'form',
-		product.forms.find(f => f.id === Number(form_id))
-	);
 
 	return (
 		<OnboardingLayout

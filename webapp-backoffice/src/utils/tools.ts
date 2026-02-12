@@ -434,17 +434,43 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service en tant <strong>${metadataTyped.json.status === 'carrier_admin' ? "qu'utilisateur" : "qu'administrateur"}</strong>`;
+			return `Invitation de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> au service en tant <strong>${
+				metadataTyped.json.status === 'carrier_admin'
+					? "qu'utilisateur"
+					: "qu'administrateur"
+			}</strong>`;
 		case TypeAction.service_uninvite:
-			return `Suppression des droits <strong>${metadataTyped.json.status === 'carrier_admin' ? "d'utilisateur" : "d'administrateur"}</strong> pour <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> sur le service`;
+			return `Suppression des droits <strong>${
+				metadataTyped.json.status === 'carrier_admin'
+					? "d'utilisateur"
+					: "d'administrateur"
+			}</strong> pour <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> sur le service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.organisation_update:
 			return `Modification sur l'organisation du service`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> à l'organisation`;
+			return `Invitation de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> à l'organisation`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
+			return `Retrait de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> de l'organisation <strong>${
+				metadataTyped.json.entity_name
+			}</strong>`;
 		case TypeAction.service_button_create:
 			return `Création du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
@@ -499,7 +525,7 @@ export const filtersLabel = [
 ];
 
 export const getHelperFromFormConfig = (
-	formConfig: FormConfigWithChildren | undefined
+	formConfig?: FormConfigWithChildren
 ): FormConfigHelper => {
 	return {
 		displays:
