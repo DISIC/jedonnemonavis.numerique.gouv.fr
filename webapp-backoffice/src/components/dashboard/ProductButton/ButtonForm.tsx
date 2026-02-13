@@ -7,10 +7,10 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { FormTemplateButtonStyle } from '@prisma/client';
-import Image from 'next/image';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
+import ImageWithFallback from '../../ui/ImageWithFallback';
 import { ButtonCreationPayload } from './ButtonModal';
 import { LinkIntegrationTypes } from './interface';
 
@@ -84,7 +84,7 @@ const ButtonForm = ({
 	return (
 		<>
 			<div
-				className={cx(classes.infoContainer, fr.cx('fr-my-8v', 'fr-p-6v'))}
+				className={cx(classes.infoContainer, fr.cx('fr-mb-8v', 'fr-p-6v'))}
 				style={{ justifyContent: 'start' }}
 			>
 				<div className={classes.iconContainer}>
@@ -140,6 +140,26 @@ const ButtonForm = ({
 					/>
 				</div>
 
+				{formTemplateButtons && formTemplateButtons.length > 1 && (
+					<RadioButtons
+						legend={
+							<>
+								Label du bouton <span className={cx(classes.asterisk)}>*</span>
+							</>
+						}
+						name={'button-label'}
+						className={cx(fr.cx('fr-my-8v'))}
+						options={formTemplateButtons.map(ftb => ({
+							label: ftb.label,
+							nativeInputProps: {
+								value: ftb.id,
+								onChange: () => setSelectedFormTemplateButton(ftb),
+								checked: selectedFormTemplateButton?.id === ftb.id
+							}
+						}))}
+					/>
+				)}
+
 				{showButtonStyleOptions && selectedFormTemplateButton && (
 					<RadioButtons
 						legend="Style du bouton"
@@ -156,9 +176,10 @@ const ButtonForm = ({
 								checked: selectedButtonStyle === bsOption.style
 							},
 							illustration: (
-								<Image
+								<ImageWithFallback
 									alt={bsOption.alt_text || selectedFormTemplateButton?.label}
 									src={bsOption.image_url}
+									fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton.slug}-${bsOption.style}-light.svg`}
 									width={200}
 									height={85}
 								/>

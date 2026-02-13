@@ -180,27 +180,22 @@ async function seed_root_form_template_buttons(formTemplateId: number) {
 }
 
 async function seed_bug_form_template_buttons(formTemplateId: number) {
-	const placeholderSolidUrl =
-		'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg';
-	const placeholderOutlineUrl =
-		'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg';
-
 	const bugButtons = [
 		{
 			label: 'Une remarque ?',
-			slug: 'une-remarque',
+			slug: 'remark',
 			order: 0,
 			isDefault: true
 		},
 		{
 			label: 'Faire un retour',
-			slug: 'faire-un-retour',
+			slug: 'feedback',
 			order: 1,
 			isDefault: false
 		},
 		{
 			label: 'Signaler un problème',
-			slug: 'signaler-un-probleme',
+			slug: 'problem',
 			order: 2,
 			isDefault: false
 		}
@@ -224,13 +219,13 @@ async function seed_bug_form_template_buttons(formTemplateId: number) {
 						{
 							style: 'solid',
 							theme: null,
-							image_url: placeholderSolidUrl,
+							image_url: '',
 							alt_text: bugButton.label
 						},
 						{
 							style: 'outline',
 							theme: null,
-							image_url: placeholderOutlineUrl,
+							image_url: '',
 							alt_text: bugButton.label
 						}
 					]
@@ -250,14 +245,26 @@ async function seed_bug_form_template_buttons(formTemplateId: number) {
 					create: [
 						{
 							style: 'solid',
-							theme: null,
-							image_url: placeholderSolidUrl,
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-light.svg`,
 							alt_text: bugButton.label
 						},
 						{
 							style: 'outline',
-							theme: null,
-							image_url: placeholderOutlineUrl,
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'solid',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-dark.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-dark.svg`,
 							alt_text: bugButton.label
 						}
 					]
@@ -271,9 +278,9 @@ async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
-	const rootFormTemplate = await prisma.formTemplate.findUnique({
-		where: { slug: 'root' }
-	});
+	const formTemplates = await prisma.formTemplate.findMany();
+	const rootFormTemplate = formTemplates.find(ft => ft.slug === 'root');
+	const bugFormTemplate = formTemplates.find(ft => ft.slug === 'bug');
 
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
@@ -335,7 +342,22 @@ async function seed_users_products() {
 									buttons: {
 										create: buttons as Button[]
 									}
-								}
+								},
+								...(index === 0
+									? [
+											{
+												title: bugFormTemplate?.title,
+												form_template: {
+													connect: {
+														slug: 'bug'
+													}
+												},
+												buttons: {
+													create: buttons as Button[]
+												}
+											}
+									  ]
+									: [])
 							]
 						}
 					}

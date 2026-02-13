@@ -241,9 +241,7 @@ const OnboardingLayout = ({
 							<div
 								className={cx(
 									classes.contentHeader,
-									fr.cx(
-										((hideTitle && !title) || !headerActions) && 'fr-hidden'
-									)
+									fr.cx(hideTitle && !title && 'fr-hidden')
 								)}
 							>
 								{!hideTitle && title && (
