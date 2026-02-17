@@ -1,4 +1,7 @@
-import { FormWithConfigAndTemplate } from '@/src/types/prismaTypesExtended';
+import {
+	FormTemplateButtonWithVariants,
+	FormWithConfigAndTemplate
+} from '@/src/types/prismaTypesExtended';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -9,6 +12,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ImageWithFallback from '../../ui/ImageWithFallback';
+import { Loader } from '../../ui/Loader';
 import { LinkIntegrationTypes } from '../ProductButton/interface';
 
 type FormLinkIntegrationPreviewProps = {
@@ -16,13 +21,15 @@ type FormLinkIntegrationPreviewProps = {
 	description: JSX.Element;
 	onConfirm: (value: LinkIntegrationTypes) => void;
 	form?: FormWithConfigAndTemplate;
+	defaultFormTemplateButton?: FormTemplateButtonWithVariants;
 };
 
 const FormLinkIntegrationPreview = ({
 	title,
 	description,
 	onConfirm,
-	form
+	form,
+	defaultFormTemplateButton
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
@@ -42,10 +49,21 @@ const FormLinkIntegrationPreview = ({
 						title="Je donne mon avis - nouvelle fenêtre"
 						className={fr.cx('fr-raw-link')}
 					>
-						<img
-							src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg"
-							alt="Je donne mon avis"
-						/>
+						{defaultFormTemplateButton ? (
+							<ImageWithFallback
+								alt={defaultFormTemplateButton.label}
+								src={
+									defaultFormTemplateButton.variants.find(
+										v => v.style === 'solid'
+									)?.image_url || ''
+								}
+								fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-solid-light.svg`}
+								width={200}
+								height={85}
+							/>
+						) : (
+							<Loader />
+						)}
 					</a>
 				);
 			case 'embed':

@@ -18,7 +18,6 @@ const ImageWithFallback = (props: ImageWithFallbackProps) => {
 			{...rest}
 			src={imgSrc}
 			onError={() => {
-				console.log('Error loading image, using fallback');
 				setImgSrc(fallbackSrc);
 			}}
 		/>

@@ -86,6 +86,11 @@ export const buttonRouter = router({
 						include: {
 							form_template: true
 						}
+					},
+					form_template_button: {
+						include: {
+							variants: true
+						}
 					}
 				}
 			});

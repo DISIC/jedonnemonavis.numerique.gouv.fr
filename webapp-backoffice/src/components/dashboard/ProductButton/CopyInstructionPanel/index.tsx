@@ -1,14 +1,14 @@
 import Tabs from '@codegouvfr/react-dsfr/Tabs';
 import React from 'react';
-import DefaultTab from './DefaultTab';
-import DSTab from './DSTab';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
 import { ButtonCopyInstructionsPanelProps } from './interface';
+import ButtonInstructionTab from './ButtonInstructionTab';
 
 const ButtonCopyInstructionsPanel = ({
-	buttonColor,
-	button
+	buttonStyle,
+	button,
+	formTemplateButton
 }: ButtonCopyInstructionsPanelProps) => {
 	const { cx, classes } = useStyles();
 	return (
@@ -16,11 +16,24 @@ const ButtonCopyInstructionsPanel = ({
 			tabs={[
 				{
 					label: 'Directement sur votre site',
-					content: <DefaultTab buttonColor={buttonColor} button={button} />
+					content: (
+						<ButtonInstructionTab
+							buttonStyle={buttonStyle}
+							button={button}
+							formTemplateButton={formTemplateButton}
+						/>
+					)
 				},
 				{
 					label: 'Via Démarches Simplifiées',
-					content: <DSTab buttonColor={buttonColor} button={button} />
+					content: (
+						<ButtonInstructionTab
+							buttonStyle={buttonStyle}
+							button={button}
+							formTemplateButton={formTemplateButton}
+							isForDemarchesSimplifiees
+						/>
+					)
 				}
 			]}
 			className={cx(classes.tabContainer)}

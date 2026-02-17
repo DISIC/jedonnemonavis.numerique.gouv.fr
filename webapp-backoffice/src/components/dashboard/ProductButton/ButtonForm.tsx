@@ -21,6 +21,10 @@ type ButtonFormProps = {
 	setSelectedButtonStyle: React.Dispatch<
 		React.SetStateAction<FormTemplateButtonStyle>
 	>;
+	selectedFormTemplateButton?: FormTemplateButtonWithVariants;
+	setSelectedFormTemplateButton: React.Dispatch<
+		React.SetStateAction<FormTemplateButtonWithVariants | undefined>
+	>;
 	selectedIntegrationType: LinkIntegrationTypes;
 };
 
@@ -29,12 +33,11 @@ const ButtonForm = ({
 	selectedButtonStyle,
 	setSelectedButtonStyle,
 	selectedIntegrationType,
+	selectedFormTemplateButton,
+	setSelectedFormTemplateButton,
 	formTemplateButtons
 }: ButtonFormProps) => {
 	const { cx, classes } = useStyles();
-
-	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
-		useState<FormTemplateButtonWithVariants>();
 
 	const showButtonStyleOptions = !['link', 'embed'].includes(
 		selectedIntegrationType

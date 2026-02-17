@@ -11,6 +11,8 @@ import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
 	ButtonWithForm,
+	ButtonWithTemplateButton,
+	FormTemplateButtonWithVariants,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
@@ -35,10 +37,14 @@ const NewLink = (props: Props) => {
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<FormTemplateButtonStyle>('solid');
-	const [createdButton, setCreatedButton] = useState<ButtonWithForm>();
+	const [createdButton, setCreatedButton] = useState<
+		ButtonWithForm & ButtonWithTemplateButton
+	>();
 	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW'); // reset to preview
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<LinkIntegrationTypes>('button');
+	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
+		useState<FormTemplateButtonWithVariants>();
 
 	const currentForm = useMemo(() => {
 		return product?.forms.find(form => form.id === Number(form_id));
@@ -128,6 +134,9 @@ const NewLink = (props: Props) => {
 								setSelectedIntegrationType(integrationType);
 								setCurrentStep('CREATION');
 							}}
+							defaultFormTemplateButton={formTemplateData?.data?.form_template_buttons.find(
+								b => b.isDefault
+							)}
 						/>
 					),
 					title: "Choisir le type d'intégration"
@@ -143,6 +152,8 @@ const NewLink = (props: Props) => {
 							formTemplateButtons={
 								formTemplateData?.data?.form_template_buttons
 							}
+							selectedFormTemplateButton={selectedFormTemplateButton}
+							setSelectedFormTemplateButton={setSelectedFormTemplateButton}
 						/>
 					),
 					title: "Créer un lien d'intégration",
@@ -152,8 +163,9 @@ const NewLink = (props: Props) => {
 				return {
 					content: createdButton ? (
 						<ButtonCopyInstructionsPanel
-							buttonColor={selectedButtonStyle === 'solid' ? 'bleu' : 'blanc'}
+							buttonStyle={selectedButtonStyle}
 							button={createdButton}
+							formTemplateButton={selectedFormTemplateButton}
 						/>
 					) : (
 						<Loader />
