@@ -277,22 +277,23 @@ model Entity {
 }
 
 model Button {
-  id                      Int                 @id @default(autoincrement())
+  id                      Int                      @id @default(autoincrement())
   title                   String
   description             String?
   xwiki_title             String?
-  isTest                  Boolean?            @default(false)
-  form                    Form                @relation(fields: [form_id], references: [id])
+  isTest                  Boolean?                 @default(false)
+  form                    Form                     @relation(fields: [form_id], references: [id])
   form_id                 Int
-  form_template_button    FormTemplateButton? @relation(fields: [form_template_button_id], references: [id])
+  form_template_button    FormTemplateButton?      @relation(fields: [form_template_button_id], references: [id])
   form_template_button_id Int?
+  last_selected_style     FormTemplateButtonStyle?
   delete_reason           String?
   closedButtonLog         ClosedButtonLog?
   reviews                 Review[]
-  created_at              DateTime            @default(now())
-  updated_at              DateTime            @updatedAt
+  created_at              DateTime                 @default(now())
+  updated_at              DateTime                 @updatedAt
   deleted_at              DateTime?
-  isDeleted               Boolean?            @default(false)
+  isDeleted               Boolean?                 @default(false)
 }
 
 model ClosedButtonLog {

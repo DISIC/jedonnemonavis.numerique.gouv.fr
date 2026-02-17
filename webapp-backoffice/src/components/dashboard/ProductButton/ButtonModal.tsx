@@ -1,29 +1,40 @@
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	ButtonWithClosedLog,
-	ButtonWithForm
+	ButtonWithForm,
+	ButtonWithTemplateButton,
+	FormTemplateButtonWithVariants
 } from '@/src/types/prismaTypesExtended';
+import { buttonStylesMapping } from '@/src/utils/content';
+import { getButtonCode } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
-import { Button as PrismaButtonType } from '@prisma/client';
+import {
+	FormTemplateButtonStyle,
+	Button as PrismaButtonType
+} from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
-import { tss } from 'tss-react/dsfr';
+import { useEffect, useMemo, useState } from 'react';
+import ImageWithFallback from '../../ui/ImageWithFallback';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
+import { tss } from 'tss-react/dsfr';
 
 export type ButtonModalType = 'install' | 'create' | 'edit' | 'delete';
 
 interface Props {
 	modal: CustomModalProps;
 	modalType?: ButtonModalType;
-	button?: ButtonWithForm | null;
-	onButtonMutation: (isTest: boolean, button: ButtonWithForm) => void;
+	button?: (ButtonWithForm & ButtonWithTemplateButton) | null;
+	onButtonMutation: (
+		isTest: boolean,
+		button: ButtonWithForm & ButtonWithTemplateButton
+	) => void;
 	form_id: number;
+	formTemplateButtons?: FormTemplateButtonWithVariants[];
 }
 
 const defaultButton: ButtonCreationPayload | ButtonWithForm = {
@@ -32,6 +43,7 @@ const defaultButton: ButtonCreationPayload | ButtonWithForm = {
 	xwiki_title: null,
 	form_id: -1,
 	form_template_button_id: -1,
+	last_selected_style: 'solid',
 	isTest: false,
 	delete_reason: null,
 	deleted_at: null,
@@ -55,32 +67,38 @@ export type ButtonCreationPayload = Omit<
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const { modal, modalType = 'create', button, onButtonMutation } = props;
-	const [buttonColor, setButtonColor] = useState<string>('bleu');
+	const {
+		modal,
+		modalType = 'create',
+		button,
+		onButtonMutation,
+		formTemplateButtons
+	} = props;
+
+	const [buttonStyle, setButtonStyle] =
+		useState<FormTemplateButtonStyle>('solid');
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<
 		ButtonCreationPayload | (ButtonWithForm & ButtonWithClosedLog)
 	>(defaultButton);
+	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
+		useState<FormTemplateButtonWithVariants>();
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${
-		button?.form.form_template?.slug !== 'root'
-			? `avis/${button?.form.id}`
-			: button?.form.product_id
-	}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
-		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />
-	</a>`;
-
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${
-		button?.form.form_template?.slug !== 'root'
-			? `avis/${button?.form.id}`
-			: button?.form.product_id
-	}?button=${button?.id}" target='_blank' rel="noopener noreferrer" title="Je donne mon avis - nouvelle fenêtre">
-		<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />
-	</a>`;
+	const defaultTemplateButton = useMemo(
+		() => formTemplateButtons?.find(b => b.isDefault),
+		[formTemplateButtons]
+	);
 
 	useEffect(() => {
 		if (button) {
 			setCurrentButton(button);
+			if (button.form_template_button && button.last_selected_style) {
+				setSelectedFormTemplateButton(button.form_template_button);
+				setButtonStyle(button.last_selected_style);
+			} else {
+				setSelectedFormTemplateButton(defaultTemplateButton);
+				setButtonStyle('solid');
+			}
 		} else {
 			setCurrentButton(defaultButton);
 		}
@@ -107,6 +125,15 @@ const ButtonModal = (props: Props) => {
 		}
 	});
 
+	const buttonStyleOptions = useMemo(() => {
+		if (!formTemplateButtons) return [];
+		return (
+			selectedFormTemplateButton?.variants.filter(
+				v => v.theme === 'light' || v.theme === null
+			) || []
+		);
+	}, [selectedFormTemplateButton, formTemplateButtons]);
+
 	const hasErrors = (key: keyof FormErrors): boolean => {
 		return Object.values(errors[key]).some(value => value === true);
 	};
@@ -130,7 +157,9 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const handleModalClose = (createdOrUpdatedButton: ButtonWithForm) => {
+	const handleModalClose = (
+		createdOrUpdatedButton: ButtonWithForm & ButtonWithTemplateButton
+	) => {
 		resetErrors('title');
 		onButtonMutation(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
@@ -169,6 +198,25 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
+	const buttonCodeClair =
+		(button &&
+			getButtonCode({
+				theme: 'clair',
+				buttonStyle,
+				button,
+				formTemplateButton: selectedFormTemplateButton
+			})) ||
+		'';
+	const buttonCodeSombre =
+		(button &&
+			getButtonCode({
+				theme: 'sombre',
+				buttonStyle,
+				button,
+				formTemplateButton: selectedFormTemplateButton
+			})) ||
+		'';
+
 	const displayModalContent = (): JSX.Element => {
 		switch (modalType) {
 			case 'install':
@@ -180,52 +228,52 @@ const ButtonModal = (props: Props) => {
 							dédié sur Démarche simplifiée.
 						</p>
 						<div className={fr.cx('fr-grid-row')}>
+							{formTemplateButtons && formTemplateButtons.length > 1 && (
+								<div className={fr.cx('fr-col', 'fr-col-12')}>
+									<RadioButtons
+										legend={<b>Label du bouton</b>}
+										name={'button-label'}
+										options={formTemplateButtons.map(ftb => ({
+											label: ftb.label,
+											nativeInputProps: {
+												value: ftb.id,
+												onChange: () => setSelectedFormTemplateButton(ftb),
+												checked: selectedFormTemplateButton?.id === ftb.id
+											}
+										}))}
+									/>
+								</div>
+							)}
 							<div className={fr.cx('fr-col', 'fr-col-12')}>
 								<RadioButtons
+									legend={<b>Style du bouton</b>}
+									name={'button-style'}
 									className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
-									legend="Type de bouton"
-									options={[
-										{
-											label: 'Plein',
-											hintText: (
-												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-													Le bouton par défaut, à placer sur un{' '}
-													<span className="fr-text--bold">
-														fond blanc ou neutre
-													</span>
-													.
-												</p>
-											),
-											nativeInputProps: {
-												defaultChecked: true,
-												value: 'blue',
-												onClick: () => setButtonColor('bleu')
-											}
-										},
-										{
-											label: 'Contour',
-											hintText: (
-												<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-													À placer sur un{' '}
-													<span className="fr-text--bold">fond coloré</span>.
-												</p>
-											),
-											nativeInputProps: {
-												value: 'white',
-												onClick: () => setButtonColor('blanc')
-											}
+									options={buttonStyleOptions.map(bsOption => ({
+										label: buttonStylesMapping[bsOption.style].label,
+										hintText: buttonStylesMapping[bsOption.style].hintText,
+										nativeInputProps: {
+											value: bsOption.style,
+											onChange: () => {
+												setButtonStyle(bsOption.style);
+											},
+											checked: buttonStyle === bsOption.style
 										}
-									]}
+									}))}
 								/>
 							</div>
 							{['clair', 'sombre'].map(theme => {
+								const isLight = theme === 'clair';
+								const enTheme = isLight ? 'light' : 'dark';
+								const currentVariant =
+									selectedFormTemplateButton?.variants.find(
+										v => v.theme === enTheme && v.style === buttonStyle
+									);
 								return (
 									<>
 										<div
 											className={cx(
-												theme === 'clair'
-													? classes.paddingRight
-													: classes.paddingLeft,
+												isLight ? classes.paddingRight : classes.paddingLeft,
 												fr.cx('fr-col-12', 'fr-col-md-6')
 											)}
 										>
@@ -235,13 +283,17 @@ const ButtonModal = (props: Props) => {
 													<div
 														className={cx(
 															classes.btnImgContainer,
-															theme !== 'clair' && classes.blackContainer,
+															!isLight && classes.blackContainer,
 															fr.cx('fr-card', 'fr-p-6v')
 														)}
 													>
-														<Image
-															alt="bouton-je-donne-mon-avis"
-															src={`/assets/bouton-${buttonColor}-${theme}.svg`}
+														<ImageWithFallback
+															alt={
+																selectedFormTemplateButton?.label ||
+																`bouton-je-donne-mon-avis`
+															}
+															src={currentVariant?.image_url || ''}
+															fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton?.slug}-${buttonStyle}-${enTheme}.svg`}
 															className={fr.cx('fr-my-8v')}
 															width={200}
 															height={85}
@@ -249,7 +301,7 @@ const ButtonModal = (props: Props) => {
 														<p
 															className={cx(
 																classes.smallText,
-																theme !== 'clair' && classes.darkerText,
+																!isLight && classes.darkerText,
 																fr.cx('fr-mb-0')
 															)}
 														>
@@ -264,10 +316,9 @@ const ButtonModal = (props: Props) => {
 														iconPosition="right"
 														className={fr.cx('fr-mt-8v')}
 														onClick={() => {
+															if (!buttonCodeClair || !buttonCodeSombre) return;
 															navigator.clipboard.writeText(
-																theme === 'clair'
-																	? buttonCodeClair
-																	: buttonCodeSombre
+																isLight ? buttonCodeClair : buttonCodeSombre
 															);
 															modal.close();
 															push(['trackEvent', 'BO - Product', `Copy-Code`]);
@@ -283,11 +334,11 @@ const ButtonModal = (props: Props) => {
 															textArea
 															nativeTextAreaProps={{
 																name: 'button-code',
-																value:
-																	theme === 'clair'
-																		? buttonCodeClair
-																		: buttonCodeSombre,
-																contentEditable: false
+																value: isLight
+																	? buttonCodeClair
+																	: buttonCodeSombre,
+																contentEditable: false,
+																readOnly: true
 															}}
 														/>
 													</div>

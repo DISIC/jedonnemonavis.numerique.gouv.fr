@@ -109,7 +109,8 @@ const ButtonInstructionTab = ({
 			</div>
 			<div className={fr.cx('fr-grid-row')}>
 				{['clair', 'sombre'].map(theme => {
-					const enTheme = theme === 'clair' ? 'light' : 'dark';
+					const isLight = theme === 'clair';
+					const enTheme = isLight ? 'light' : 'dark';
 					const currentVariant = formTemplateButton?.variants.find(
 						v => v.theme === enTheme && v.style === buttonStyle
 					);
@@ -118,9 +119,7 @@ const ButtonInstructionTab = ({
 						<>
 							<div
 								className={cx(
-									theme === 'clair'
-										? classes.paddingRight
-										: classes.paddingLeft,
+									isLight ? classes.paddingRight : classes.paddingLeft,
 									fr.cx('fr-col-12', 'fr-col-md-6')
 								)}
 							>
@@ -130,7 +129,7 @@ const ButtonInstructionTab = ({
 										<div
 											className={cx(
 												classes.btnImgContainer,
-												theme !== 'clair' && classes.blackContainer,
+												!isLight && classes.blackContainer,
 												fr.cx('fr-card', 'fr-p-6v')
 											)}
 										>
@@ -148,7 +147,7 @@ const ButtonInstructionTab = ({
 											<p
 												className={cx(
 													classes.smallText,
-													theme !== 'clair' && classes.darkerText,
+													!isLight && classes.darkerText,
 													fr.cx('fr-mb-0')
 												)}
 											>
@@ -164,7 +163,7 @@ const ButtonInstructionTab = ({
 											className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
 											onClick={() => {
 												navigator.clipboard.writeText(
-													theme === 'clair' ? buttonCodeClair : buttonCodeSombre
+													isLight ? buttonCodeClair : buttonCodeSombre
 												);
 												push(['trackEvent', 'BO - Product', `Copy-Code`]);
 												setDisplayToastTheme(theme);
@@ -181,10 +180,7 @@ const ButtonInstructionTab = ({
 												nativeTextAreaProps={{
 													'aria-label': 'Code du bouton Je Donne Mon Avis',
 													name: 'button-code',
-													value:
-														theme === 'clair'
-															? buttonCodeClair
-															: buttonCodeSombre,
+													value: isLight ? buttonCodeClair : buttonCodeSombre,
 													contentEditable: false,
 													readOnly: true
 												}}

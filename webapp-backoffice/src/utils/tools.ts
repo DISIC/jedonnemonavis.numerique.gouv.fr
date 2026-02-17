@@ -666,10 +666,7 @@ export const getButtonCode = ({
 			(v.theme === (theme === 'clair' ? 'light' : 'dark') || v.theme === null)
 	)?.image_url;
 
-	const buttonLabel =
-		button.form_template_button?.label ||
-		formTemplateButton?.label ||
-		'Je donne mon avis';
+	const buttonLabel = formTemplateButton?.label || 'Je donne mon avis';
 
 	const isRootFormTemplate = button.form.form_template.slug === 'root';
 	const reviewUrlParticle = isRootFormTemplate

@@ -8,6 +8,7 @@ import ButtonModal, {
 } from '@/src/components/dashboard/ProductButton/ButtonModal';
 import {
 	ButtonWithForm,
+	ButtonWithTemplateButton,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
@@ -46,9 +47,9 @@ const ProductFormPage = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const [modalType, setModalType] = useState<ButtonModalType>();
-	const [currentButton, setCurrentButton] = useState<ButtonWithForm | null>(
-		null
-	);
+	const [currentButton, setCurrentButton] = useState<
+		(ButtonWithForm & ButtonWithTemplateButton) | null
+	>(null);
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
 	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
@@ -103,12 +104,17 @@ const ProductFormPage = (props: Props) => {
 		}
 	);
 
+	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
+		{ slug: form.form_template.slug },
+		{ enabled: !!form.id && !isNaN(form.id) && selectedTabId === 'links' }
+	);
+
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
 	const handleModalOpening = (
 		modalType: ButtonModalType,
-		button?: ButtonWithForm
+		button?: ButtonWithForm & ButtonWithTemplateButton
 	) => {
 		setCurrentButton(button ? button : null);
 		setModalType(modalType);
@@ -117,7 +123,7 @@ const ProductFormPage = (props: Props) => {
 
 	const onButtonMutation = async (
 		isTest: boolean,
-		finalButton: ButtonWithForm
+		finalButton: ButtonWithForm & ButtonWithTemplateButton
 	) => {
 		buttonModal.close();
 		await refetchButtons();
@@ -149,14 +155,19 @@ const ProductFormPage = (props: Props) => {
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}</title>
+				<title>{`${form.product.title} | ${
+					form.title || form.form_template.title
+				} | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
+					content={`${form.product.title} | ${
+						form.title || form.form_template.title
+					} | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
 				form_id={form.id}
+				formTemplateButtons={formTemplate.data?.data?.form_template_buttons}
 				modal={buttonModal}
 				modalType={modalType}
 				button={currentButton}
@@ -243,7 +254,7 @@ const ProductFormPage = (props: Props) => {
 											? {
 													...router.query,
 													tab: tabSlug
-												}
+											  }
 											: restQuery
 								},
 								undefined,
@@ -265,7 +276,7 @@ const ProductFormPage = (props: Props) => {
 											tabId: 'stats',
 											label: 'Statistiques'
 										}
-									]
+								  ]
 								: []),
 							...(ownRight === 'carrier_admin'
 								? [
@@ -277,7 +288,7 @@ const ProductFormPage = (props: Props) => {
 											tabId: 'settings',
 											label: 'Paramètres'
 										}
-									]
+								  ]
 								: [])
 						]}
 					>

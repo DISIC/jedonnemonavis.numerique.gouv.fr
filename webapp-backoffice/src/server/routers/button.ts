@@ -47,6 +47,9 @@ export const buttonRouter = router({
 							form_template: true
 						}
 					},
+					form_template_button: {
+						include: { variants: true }
+					},
 					closedButtonLog: true
 				}
 			});
@@ -114,7 +117,12 @@ export const buttonRouter = router({
 				},
 				data: input,
 				include: {
-					form: { include: { form_template: true } }
+					form: { include: { form_template: true } },
+					form_template_button: {
+						include: {
+							variants: true
+						}
+					}
 				}
 			});
 
@@ -149,7 +157,12 @@ export const buttonRouter = router({
 				},
 				data: buttonPayload,
 				include: {
-					form: { include: { form_template: true } }
+					form: { include: { form_template: true } },
+					form_template_button: {
+						include: {
+							variants: true
+						}
+					}
 				}
 			});
 

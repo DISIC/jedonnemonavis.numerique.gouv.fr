@@ -90,7 +90,12 @@ const NewLink = (props: Props) => {
 	const { data: formTemplateData } = formTemplate;
 
 	const onSubmit: SubmitHandler<ButtonCreationPayload> = async data => {
-		await createButton.mutateAsync({ ...data, form_id: Number(form_id) });
+		await createButton.mutateAsync({
+			...data,
+			form_id: Number(form_id),
+			form_template_button_id: selectedFormTemplateButton?.id,
+			last_selected_style: selectedButtonStyle
+		});
 	};
 
 	const goNextStep = () => {
