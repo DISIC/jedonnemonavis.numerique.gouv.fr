@@ -49,7 +49,7 @@ export const MarkInputBlock = ({
         htmlFor={`mark-${block.id}`}
         className={fr.cx("fr-label", "fr-text--md")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <div className={cx(classes.rating)}>
@@ -107,7 +107,8 @@ const useStyles = tss.withName(MarkInputBlock.name).create(() => ({
   hint: {
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("2v"),
+    marginBottom: fr.spacing("6v"),
+    marginTop: `-${fr.spacing("2v")}`,
   },
   rating: {
     display: "flex",

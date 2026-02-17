@@ -1,6 +1,7 @@
 import { FormWithElements } from "@/src/utils/types";
 import { fr } from "@codegouvfr/react-dsfr";
 import { Input } from "@codegouvfr/react-dsfr/Input";
+import Notice from "@codegouvfr/react-dsfr/Notice";
 import { SetStateAction } from "react";
 import { tss } from "tss-react/dsfr";
 
@@ -38,13 +39,17 @@ export const TextAreaBlock = ({
     <div className={classes.inputContainer}>
       <label
         htmlFor={`textarea-${block.id}`}
-        className={fr.cx("fr-label", "fr-text--md")}
+        className={fr.cx("fr-label", "fr-text--md", "fr-mb-2v")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
+      <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
+        {textareaValue.length} / 15000
+      </div>
       <Input
         label=""
+        className={fr.cx("fr-mb-2v")}
         nativeTextAreaProps={{
           id: `textarea-${block.id}`,
           value: textareaValue,
@@ -65,9 +70,10 @@ export const TextAreaBlock = ({
         stateRelatedMessage="Maximum 15000 caractères"
         textArea
       />
-      <div className={cx(classes.textCount, fr.cx("fr-hint-text"))}>
-        {textareaValue.length} / 15000
-      </div>
+      <Notice
+        className={cx(classes.notice)}
+        title="Ne partagez aucune information personnelle (exemple : nom, email, téléphone)"
+      ></Notice>
     </div>
   );
 };
@@ -79,10 +85,29 @@ const useStyles = tss.withName(TextAreaBlock.name).create(() => ({
   },
   textCount: {
     alignSelf: "flex-end",
+    marginBottom: fr.spacing("1v"),
+    marginRight: fr.spacing("1v"),
   },
   hint: {
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("2v"),
+    marginBottom: fr.spacing("6v"),
+    marginTop: `-${fr.spacing("2v")}`,
+  },
+  notice: {
+    background: "none",
+    padding: 0,
+    marginBottom: fr.spacing("4v"),
+    ".fr-container": {
+      padding: 0,
+      ".fr-notice__title": {
+        fontWeight: "normal",
+        fontSize: "0.75rem",
+        "&::before": {
+          "--icon-size": "1rem",
+          marginRight: fr.spacing("1v"),
+        },
+      },
+    },
   },
 }));

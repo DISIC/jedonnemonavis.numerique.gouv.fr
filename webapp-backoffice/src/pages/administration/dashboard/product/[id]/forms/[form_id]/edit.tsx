@@ -271,23 +271,23 @@ const ProductFormPage = (props: Props) => {
 						<h1 className={fr.cx('fr-mb-0')}>
 							{form.title || form.form_template.title}
 						</h1>
-						<Tooltip
-							className={classes.tooltip}
-							kind="hover"
-							title={
-								<>
-									<b>Pourquoi ce modèle ?</b>
-									<br />
-									<span>
-										Évaluez le niveau de satisfaction de votre service numérique
-										et identifiez les problèmes rencontrés par vos usagers.
+						{form.form_template.description && (
+							<Tooltip
+								className={classes.tooltip}
+								kind="hover"
+								title={
+									<>
+										<b>Pourquoi ce modèle ?</b>
 										<br />
-										Récoltez des données sur les indicateurs clés définis par la
-										plateforme Vos démarches essentielles.
-									</span>
-								</>
-							}
-						/>
+										<span
+											dangerouslySetInnerHTML={{
+												__html: form.form_template.description
+											}}
+										/>
+									</>
+								}
+							/>
+						)}
 					</div>
 				</div>
 				<div className={cx(classes.headerButtons, fr.cx('fr-col-4'))}>

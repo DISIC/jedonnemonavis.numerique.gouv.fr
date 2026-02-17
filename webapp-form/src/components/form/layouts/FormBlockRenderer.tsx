@@ -1,17 +1,15 @@
 import { FormWithElements } from "@/src/utils/types";
-import { fr } from "@codegouvfr/react-dsfr";
 import { SetStateAction } from "react";
-import { tss } from "tss-react/dsfr";
+import { CheckboxBlock } from "../blocks/CheckboxBlock";
+import { DividerBlock } from "../blocks/DividerBlock";
+import { HeadingBlock } from "../blocks/HeadingBlock";
+import { MarkInputBlock } from "../blocks/MarkInputBlock";
+import { ParagraphBlock } from "../blocks/ParagraphBlock";
+import { RadioBlock } from "../blocks/RadioBlock";
+import { SelectBlock } from "../blocks/SelectBlock";
 import { SmileyBlock } from "../blocks/SmileyBlock";
 import { TextAreaBlock } from "../blocks/TextAreaBlock";
 import { TextInputBlock } from "../blocks/TextInputBlock";
-import { MarkInputBlock } from "../blocks/MarkInputBlock";
-import { RadioBlock } from "../blocks/RadioBlock";
-import { CheckboxBlock } from "../blocks/CheckboxBlock";
-import { ParagraphBlock } from "../blocks/ParagraphBlock";
-import { HeadingBlock } from "../blocks/HeadingBlock";
-import { DividerBlock } from "../blocks/DividerBlock";
-import { SelectBlock } from "../blocks/SelectBlock";
 
 type Block =
   FormWithElements["form_template"]["form_template_steps"][0]["form_template_blocks"][0];
@@ -33,7 +31,6 @@ interface Props {
 
 export const FormBlockRenderer = (props: Props) => {
   const { block, form, answers, setAnswers } = props;
-  const { classes, cx } = useStyles();
 
   const formConfig = form.form_configs[0];
   const labelConfig = formConfig?.form_config_labels?.find(
@@ -95,13 +92,5 @@ export const FormBlockRenderer = (props: Props) => {
     }
   };
 
-  return (
-    <div className={cx(classes.blockContainer)}>{renderBlockContent()}</div>
-  );
+  return renderBlockContent();
 };
-
-const useStyles = tss.withName(FormBlockRenderer.name).create(() => ({
-  blockContainer: {
-    marginBottom: fr.spacing("6v"),
-  },
-}));

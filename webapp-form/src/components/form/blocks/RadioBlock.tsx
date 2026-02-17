@@ -50,13 +50,14 @@ export const RadioBlock = ({
         htmlFor={`radio-${block.id}`}
         className={fr.cx("fr-label", "fr-text--md")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <RadioButtons
         id={`radio-${block.id}`}
         options={visibleOptions.map((opt) => ({
           label: opt.label || "",
+          hintText: opt.hint,
           nativeInputProps: {
             value: opt.id.toString(),
             checked: radioValue === opt.id,
@@ -81,6 +82,7 @@ const useStyles = tss.withName(RadioBlock.name).create(() => ({
   hint: {
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("2v"),
+    marginBottom: fr.spacing("6v"),
+    marginTop: `-${fr.spacing("2v")}`,
   },
 }));

@@ -492,6 +492,7 @@ model FormTemplate {
   user_id               Int?
   title                 String
   slug                  String               @unique
+  description           String?
   active                Boolean              @default(false)
   hasStepper            Boolean              @default(false)
   form_template_steps   FormTemplateStep[]
@@ -570,6 +571,7 @@ model FormTemplateBlockOption {
   label      String?
   value      String?
   alias      String?
+  hint       String?
   isOther    Boolean           @default(false)
   isIsolated Boolean           @default(false)
   isHideable Boolean           @default(false)

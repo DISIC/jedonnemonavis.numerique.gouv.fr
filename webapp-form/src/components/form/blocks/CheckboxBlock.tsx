@@ -50,12 +50,13 @@ export const CheckboxBlock = ({
         htmlFor={`checkbox-${block.id}`}
         className={fr.cx("fr-label", "fr-text--md")}
       >
-        {displayLabel}
+        {displayLabel} {!block.isRequired && "(optionnel)"}
       </label>
       {block.content && <p className={classes.hint}>{block.content}</p>}
       <Checkbox
         options={visibleOptions.map((opt, index) => ({
           label: opt.label || "",
+          hintText: opt.hint,
           nativeInputProps: {
             id: index === 0 ? `checkbox-${block.id}` : undefined,
             value: opt.id.toString(),
@@ -96,6 +97,7 @@ const useStyles = tss.withName(CheckboxBlock.name).create(() => ({
   hint: {
     fontSize: "0.9rem",
     color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("2v"),
+    marginBottom: fr.spacing("6v"),
+    marginTop: `-${fr.spacing("2v")}`,
   },
 }));

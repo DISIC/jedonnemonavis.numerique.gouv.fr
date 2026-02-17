@@ -200,7 +200,7 @@ const ProductFormPage = (props: Props) => {
 					<p className={fr.cx('fr-mb-0')}>
 						Vous pouvez&nbsp;
 						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.product_id}?iframe=true`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/${form.form_template.slug === 'root' ? `Demarches/${form.product_id}` : `/Demarches/avis/${form.id}`}?iframe=true`}
 							target={'_blank'}
 							style={{
 								color: fr.colors.decisions.text.title.blueFrance.default

@@ -39,6 +39,15 @@ export const FormStepRenderer = (props: Props) => {
     return null;
   }
 
+  const visibleBlocks = step.form_template_blocks.filter((block) => {
+    const isBlockHidden = formConfig?.form_config_displays?.some(
+      (d) => d.kind === "block" && d.parent_id === block.id && d.hidden,
+    );
+    return !isBlockHidden;
+  });
+
+  const allBlocksRequired = visibleBlocks.every((block) => block.isRequired);
+
   return (
     <div className={cx(classes.container)}>
       {form.form_template.hasStepper && totalSteps > 1 && (
@@ -57,6 +66,16 @@ export const FormStepRenderer = (props: Props) => {
 
       {(!form.form_template.hasStepper || totalSteps === 1) && (
         <h1 className={cx(classes.subtitle)}>{step.title}</h1>
+      )}
+
+      {allBlocksRequired ? (
+        <p className={fr.cx("fr-hint-text", "fr-mb-0")}>
+          Tous les champs sont obligatoires
+        </p>
+      ) : (
+        <p className={fr.cx("fr-hint-text", "fr-mb-0")}>
+          Tous les champs sont obligatoire sauf mention contraire
+        </p>
       )}
 
       {step.form_template_blocks.map((block) => {
