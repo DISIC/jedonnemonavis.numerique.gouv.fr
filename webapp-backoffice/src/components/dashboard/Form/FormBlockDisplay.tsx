@@ -143,9 +143,9 @@ const FormBlockDisplay = (props: Props) => {
 									{`option${nbrModified > 1 ? 's' : ''}`}
 								</p>
 								<p className={fr.cx('fr-mb-0')}>
-									Ces options ne sont pas visibles sur le formulaire usagers.
-									Les questions conditionnelles suivantes, si elles existent,
-									seront également masquées.
+									Ces options ne sont pas visibles sur le formulaire usagers. Si
+									elles existent, les questions conditionnelles associées seront
+									également masquées.
 								</p>
 							</div>
 						</div>
