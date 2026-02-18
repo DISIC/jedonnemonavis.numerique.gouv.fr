@@ -104,42 +104,40 @@ const ButtonForm = ({
 						control={control}
 						name="title"
 						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => {
-							return (
-								<>
-									<Input
-										id="button-create-title"
-										label={
-											<p className={fr.cx('fr-mb-0')}>
-												Nom du lien d’intégration{' '}
-												<span className={cx(classes.asterisk)}>*</span>
-											</p>
-										}
-										hintText={
-											<span className={fr.cx('fr-hint-text')}>
-												Visible uniquement par vous et les autres membres de
-												l’équipe.{' '}
-											</span>
-										}
-										nativeInputProps={{
-											onChange,
-											value,
-											name: 'button-create-title',
-											required: true
-										}}
-										state={'info'}
-										stateRelatedMessage={
-											'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
-										}
-									/>
-									{errors[name] && (
-										<p className={fr.cx('fr-error-text')}>
-											{errors[name]?.message}
+						render={({ field: { onChange, value, name } }) => (
+							<>
+								<Input
+									id="button-create-title"
+									label={
+										<p className={fr.cx('fr-mb-0')}>
+											Nom du lien d’intégration{' '}
+											<span className={cx(classes.asterisk)}>*</span>
 										</p>
-									)}
-								</>
-							);
-						}}
+									}
+									hintText={
+										<span className={fr.cx('fr-hint-text')}>
+											Visible uniquement par vous et les autres membres de
+											l’équipe.{' '}
+										</span>
+									}
+									nativeInputProps={{
+										onChange,
+										value,
+										name: 'button-create-title',
+										required: true
+									}}
+									state={'info'}
+									stateRelatedMessage={
+										'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
+									}
+								/>
+								{errors[name] && (
+									<p className={fr.cx('fr-error-text')}>
+										{errors[name]?.message}
+									</p>
+								)}
+							</>
+						)}
 					/>
 				</div>
 

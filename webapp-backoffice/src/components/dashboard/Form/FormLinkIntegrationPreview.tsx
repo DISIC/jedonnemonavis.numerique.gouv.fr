@@ -42,12 +42,11 @@ const FormLinkIntegrationPreview = ({
 		switch (selectedIntegrationType) {
 			case 'button':
 				return (
-					<a
-						href={`#`}
-						target="_blank"
-						rel="noopener noreferrer"
+					<button
 						title="Je donne mon avis - nouvelle fenêtre"
-						className={fr.cx('fr-raw-link')}
+						className={classes.previewButton}
+						disabled
+						aria-disabled
 					>
 						{defaultFormTemplateButton ? (
 							<ImageWithFallback
@@ -64,7 +63,7 @@ const FormLinkIntegrationPreview = ({
 						) : (
 							<Loader />
 						)}
-					</a>
+					</button>
 				);
 			case 'embed':
 				return (
@@ -78,7 +77,7 @@ const FormLinkIntegrationPreview = ({
 							}?iframe=true&formConfig=${encodeURIComponent(
 								JSON.stringify(currentFormConfig)
 							)}`}
-							style={{ border: 'none', width: '100%', height: '500px' }}
+							className={classes.previewEmbedContainer}
 						/>
 					)
 				);
@@ -217,9 +216,9 @@ const FormLinkIntegrationPreview = ({
 				<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
 					<Skeleton height={400} />
 					<Skeleton height={200} />
-					<div className={classes.previewContent}>{getPreviewContent()}</div>
 					<Skeleton height={200} />
 					<Skeleton height={400} />
+					<div className={classes.previewContent}>{getPreviewContent()}</div>
 				</div>
 			</div>
 		</div>
@@ -271,6 +270,11 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		...fr.spacing('margin', { topBottom: '4v' }),
 		zIndex: 10
 	},
+	previewButton: {
+		cursor: 'pointer!important',
+		userSelect: 'none'
+	},
+	previewEmbedContainer: { border: 'none', width: '100%', height: '500px' },
 	actionsContainer: {
 		position: 'absolute',
 		bottom: 0,
