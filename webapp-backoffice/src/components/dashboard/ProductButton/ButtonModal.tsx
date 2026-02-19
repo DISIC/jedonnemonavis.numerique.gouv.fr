@@ -12,6 +12,7 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { FormTemplateButtonStyle } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
@@ -131,7 +132,12 @@ const ButtonModal = (props: Props) => {
 
 		currentButton.form_id = props.form_id;
 
-		const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
+		const {
+			form,
+			closedButtonLog,
+			form_template_button,
+			...buttonWithoutForm
+		} = currentButton;
 		updateButton.mutate(buttonWithoutForm);
 	};
 
@@ -202,7 +208,13 @@ const ButtonModal = (props: Props) => {
 										label: ftb.label,
 										nativeInputProps: {
 											value: ftb.id,
-											onChange: () => setSelectedFormTemplateButton(ftb),
+											onChange: () => {
+												setSelectedFormTemplateButton(ftb);
+												setCurrentButton({
+													...currentButton,
+													form_template_button_id: ftb.id
+												});
+											},
 											checked: selectedFormTemplateButton?.id === ftb.id
 										}
 									}))}
@@ -213,7 +225,7 @@ const ButtonModal = (props: Props) => {
 							<RadioButtons
 								legend={<b>Style du bouton</b>}
 								name={'button-style'}
-								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
+								className={classes.buttonStyles}
 								options={buttonStyleOptions.map(bsOption => ({
 									label: buttonStylesMapping[bsOption.style].label,
 									hintText: buttonStylesMapping[bsOption.style].hintText,
@@ -221,9 +233,24 @@ const ButtonModal = (props: Props) => {
 										value: bsOption.style,
 										onChange: () => {
 											setButtonStyle(bsOption.style);
+											setCurrentButton({
+												...currentButton,
+												button_style: bsOption.style
+											});
 										},
 										checked: buttonStyle === bsOption.style
-									}
+									},
+									illustration: selectedFormTemplateButton && (
+										<ImageWithFallback
+											alt={
+												bsOption.alt_text || selectedFormTemplateButton?.label
+											}
+											src={bsOption.image_url}
+											fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton.slug}-${bsOption.style}-light.svg`}
+											width={200}
+											height={85}
+										/>
+									)
 								}))}
 							/>
 						</div>
@@ -382,6 +409,18 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	darkerText: {
 		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey
 			.active
+	},
+	buttonStyles: {
+		'.fr-radio-rich__img': {
+			width: 'auto',
+			img: {
+				width: 'auto',
+				maxWidth: '85%',
+				maxHeight: '85%',
+				minWidth: '3.5rem',
+				minHeight: '3.5rem'
+			}
+		}
 	}
 }));
 

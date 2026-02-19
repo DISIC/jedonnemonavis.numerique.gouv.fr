@@ -218,8 +218,9 @@ const useStyles = tss.withName(ButtonForm.name).create(() => ({
 	},
 	buttonStyles: {
 		'.fr-radio-rich__img': {
-			width: '14rem',
+			width: 'auto',
 			img: {
+				width: 'auto',
 				maxWidth: '85%',
 				maxHeight: '85%',
 				minWidth: '3.5rem',
