@@ -1,27 +1,33 @@
-import { ButtonCreationPayload } from '@/src/components/dashboard/ProductButton/ButtonModal';
+import FormLinkIntegrationPreview from '@/src/components/dashboard/Form/FormLinkIntegrationPreview';
+import ButtonForm from '@/src/components/dashboard/ProductButton/ButtonForm';
 import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/CopyInstructionPanel';
+import {
+	ButtonCreationPayload,
+	LinkCreationStep
+} from '@/src/components/dashboard/ProductButton/interface';
+import { Loader } from '@/src/components/ui/Loader';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
-	ButtonWithForm,
+	ButtonWithElements,
+	FormTemplateButtonWithVariants,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Input from '@codegouvfr/react-dsfr/Input';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import Image from 'next/image';
+import {
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle
+} from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
-import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 interface Props {
 	product: ProductWithForms;
 }
-
-type ButtonStyle = 'solid' | 'outline';
 
 const NewLink = (props: Props) => {
 	const { product } = props;
@@ -31,8 +37,13 @@ const NewLink = (props: Props) => {
 	const { createdProduct, createdForm } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
-		useState<ButtonStyle>('solid');
-	const [createdButton, setCreatedButton] = useState<ButtonWithForm>();
+		useState<FormTemplateButtonStyle>('solid');
+	const [createdButton, setCreatedButton] = useState<ButtonWithElements>();
+	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
+	const [selectedIntegrationType, setSelectedIntegrationType] =
+		useState<ButtonIntegrationTypes>('button');
+	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
+		useState<FormTemplateButtonWithVariants>();
 
 	const currentForm = useMemo(() => {
 		return product?.forms.find(form => form.id === Number(form_id));
@@ -66,11 +77,25 @@ const NewLink = (props: Props) => {
 	const createButton = trpc.button.create.useMutation({
 		onSuccess: async result => {
 			setCreatedButton(result.data);
+			setCurrentStep('COPY');
 		}
 	});
 
+	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
+		{ slug: currentForm?.form_template?.slug || '' },
+		{ enabled: !!currentForm?.form_template?.slug }
+	);
+
+	const { data: formTemplateData } = formTemplate;
+
 	const onSubmit: SubmitHandler<ButtonCreationPayload> = async data => {
-		await createButton.mutateAsync({ ...data, form_id: Number(form_id) });
+		await createButton.mutateAsync({
+			...data,
+			form_id: Number(form_id),
+			form_template_button_id: selectedFormTemplateButton?.id,
+			button_style: selectedButtonStyle,
+			integration_type: selectedIntegrationType
+		});
 	};
 
 	const goNextStep = () => {
@@ -87,139 +112,101 @@ const NewLink = (props: Props) => {
 		}
 	};
 
+	const currentStepValues = (() => {
+		switch (currentStep) {
+			case 'PREVIEW':
+				return {
+					content: !currentForm ? (
+						<Loader />
+					) : (
+						<FormLinkIntegrationPreview
+							title="Choisir le type d'intégration"
+							form={currentForm}
+							description={
+								<>
+									<p className={fr.cx('fr-hint-text', 'fr-text--sm')}>
+										Vous pouvez modifier le type d’intégration à tout moment à
+										partir de la page “Liens d’intégration” de votre formulaire.
+									</p>
+									<p className={fr.cx('fr-hint-text', 'fr-text--sm')}>
+										Les champs marqués d&apos;un{' '}
+										<span className={cx(classes.asterisk)}>*</span> sont
+										obligatoires
+									</p>
+								</>
+							}
+							onConfirm={integrationType => {
+								setSelectedIntegrationType(integrationType);
+								setCurrentStep('CREATION');
+							}}
+							defaultFormTemplateButton={formTemplateData?.data?.form_template_buttons.find(
+								b => b.isDefault
+							)}
+						/>
+					),
+					title: "Choisir le type d'intégration"
+				};
+			case 'CREATION':
+				return {
+					content: (
+						<ButtonForm
+							currentForm={currentForm}
+							selectedButtonStyle={selectedButtonStyle}
+							setSelectedButtonStyle={setSelectedButtonStyle}
+							selectedIntegrationType={selectedIntegrationType}
+							formTemplateButtons={
+								formTemplateData?.data?.form_template_buttons
+							}
+							selectedFormTemplateButton={selectedFormTemplateButton}
+							setSelectedFormTemplateButton={setSelectedFormTemplateButton}
+						/>
+					),
+					title: "Créer un lien d'intégration",
+					onConfirm: handleSubmit(onSubmit)
+				};
+			case 'COPY':
+				return {
+					content: createdButton ? (
+						<ButtonCopyInstructionsPanel
+							buttonStyle={selectedButtonStyle}
+							button={createdButton}
+							formTemplateButton={selectedFormTemplateButton}
+						/>
+					) : (
+						<Loader />
+					),
+					title: 'Copier le code',
+					onConfirm: goNextStep
+				};
+		}
+	})();
+
 	return (
 		<OnboardingLayout
-			isCancelable
-			title={createdButton ? 'Copier le code' : "Créer un lien d'intégration"}
-			onConfirm={createdButton ? goNextStep : handleSubmit(onSubmit)}
+			onCancel={
+				currentStep !== 'PREVIEW'
+					? () => {
+							switch (currentStep) {
+								case 'CREATION':
+									setCurrentStep('PREVIEW');
+									break;
+								case 'COPY':
+									setCurrentStep('CREATION');
+									break;
+							}
+					  }
+					: undefined
+			}
+			title={currentStepValues.title}
+			onConfirm={currentStepValues.onConfirm}
 			hideMainHintText={!!createdButton}
 			hideBackButton={!!createdButton}
+			hideActions={currentStep === 'PREVIEW'}
+			hideTitle={currentStep === 'PREVIEW'}
+			noBackground={currentStep === 'PREVIEW'}
+			isFullScreen={currentStep === 'PREVIEW'}
 		>
-			{createdButton ? (
-				<ButtonCopyInstructionsPanel
-					buttonColor={selectedButtonStyle === 'solid' ? 'bleu' : 'blanc'}
-					button={createdButton}
-				/>
-			) : (
-				<>
-					<div
-						className={cx(classes.infoContainer, fr.cx('fr-my-8v', 'fr-p-6v'))}
-						style={{ justifyContent: 'start' }}
-					>
-						<div className={classes.iconContainer}>
-							<i className={cx(fr.cx('ri-code-line', 'fr-icon--lg'))} />
-						</div>
-						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-							Le lien d’intégration est un code à copier sur votre site qui
-							s’affiche comme un bouton “Je donne mon avis”.
-						</p>
-					</div>
-					<form id="new-link-form">
-						<div className={fr.cx('fr-input-group')}>
-							<Controller
-								control={control}
-								name="title"
-								rules={{ required: 'Ce champ est obligatoire' }}
-								render={({ field: { onChange, value, name } }) => {
-									return (
-										<>
-											<Input
-												id="button-create-title"
-												label={
-													<p className={fr.cx('fr-mb-0')}>
-														Nom du lien d’intégration{' '}
-														<span className={cx(classes.asterisk)}>*</span>
-													</p>
-												}
-												hintText={
-													<span className={fr.cx('fr-hint-text')}>
-														Visible uniquement par vous et les autres membres de
-														l’équipe.{' '}
-													</span>
-												}
-												nativeInputProps={{
-													onChange,
-													value,
-													name: 'button-create-title',
-													required: true
-												}}
-												state={'info'}
-												stateRelatedMessage={
-													'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
-												}
-											/>
-											{errors[name] && (
-												<p className={fr.cx('fr-error-text')}>
-													{errors[name]?.message}
-												</p>
-											)}
-										</>
-									);
-								}}
-							/>
-						</div>
-
-						<RadioButtons
-							legend="Style du bouton"
-							name={'button-style'}
-							className={cx(classes.buttonStyles, fr.cx('fr-mb-3v'))}
-							options={[
-								{
-									label: 'Plein',
-									hintText: (
-										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-											Le bouton par défaut, à placer sur un{' '}
-											<span className="fr-text--bold">
-												fond blanc ou neutre
-											</span>
-											.
-										</p>
-									),
-									nativeInputProps: {
-										value: 'solid',
-										onChange: e => {
-											setSelectedButtonStyle(e.target.value as ButtonStyle);
-										},
-										checked: selectedButtonStyle === 'solid'
-									},
-									illustration: (
-										<Image
-											alt="bouton-je-donne-mon-avis"
-											src={`/assets/bouton-bleu-clair.svg`}
-											width={200}
-											height={85}
-										/>
-									)
-								},
-								{
-									label: 'Contour',
-									hintText: (
-										<p className={fr.cx('fr-text--xs', 'fr-mb-0')}>
-											À placer sur un{' '}
-											<span className="fr-text--bold">fond coloré</span>.
-										</p>
-									),
-									nativeInputProps: {
-										value: 'outline',
-										onChange: e => {
-											setSelectedButtonStyle(e.target.value as ButtonStyle);
-										},
-										checked: selectedButtonStyle === 'outline'
-									},
-									illustration: (
-										<Image
-											alt="bouton-je-donne-mon-avis"
-											src={`/assets/bouton-blanc-clair.svg`}
-											width={200}
-											height={85}
-										/>
-									)
-								}
-							]}
-						/>
-					</form>
-				</>
-			)}
+			{currentStepValues.content}
 		</OnboardingLayout>
 	);
 };

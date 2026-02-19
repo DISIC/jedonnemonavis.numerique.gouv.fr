@@ -69,19 +69,210 @@ function getWLDPromises() {
 }
 
 async function seed_bug_form_template() {
-	await prisma.formTemplate.upsert({
+	const bugTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'bug' },
 		update: createBugForm,
 		create: createBugForm
 	});
+
+	await seed_bug_form_template_buttons(bugTemplate.id);
 }
 
 async function seed_root_form_template() {
-	await prisma.formTemplate.upsert({
+	const rootTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: createRootForm,
 		create: createRootForm
 	});
+
+	await seed_root_form_template_buttons(rootTemplate.id);
+}
+
+async function seed_root_form_template_buttons(formTemplateId: number) {
+	await prisma.formTemplateButton.upsert({
+		where: {
+			form_template_id_slug: {
+				form_template_id: formTemplateId,
+				slug: 'default'
+			}
+		},
+		update: {
+			label: 'Je donne mon avis',
+			order: 0,
+			isDefault: true,
+			variants: {
+				deleteMany: {},
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		},
+		create: {
+			form_template: {
+				connect: {
+					id: formTemplateId
+				}
+			},
+			label: 'Je donne mon avis',
+			slug: 'jdma',
+			order: 0,
+			isDefault: true,
+			variants: {
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		}
+	});
+}
+
+async function seed_bug_form_template_buttons(formTemplateId: number) {
+	const bugButtons = [
+		{
+			label: 'Une remarque ?',
+			slug: 'remark',
+			order: 0,
+			isDefault: true
+		},
+		{
+			label: 'Faire un retour',
+			slug: 'feedback',
+			order: 1,
+			isDefault: false
+		},
+		{
+			label: 'Signaler un problème',
+			slug: 'problem',
+			order: 2,
+			isDefault: false
+		}
+	];
+
+	for (const bugButton of bugButtons) {
+		await prisma.formTemplateButton.upsert({
+			where: {
+				form_template_id_slug: {
+					form_template_id: formTemplateId,
+					slug: bugButton.slug
+				}
+			},
+			update: {
+				label: bugButton.label,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					deleteMany: {},
+					create: [
+						{
+							style: 'solid',
+							theme: null,
+							image_url: '',
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: null,
+							image_url: '',
+							alt_text: bugButton.label
+						}
+					]
+				}
+			},
+			create: {
+				form_template: {
+					connect: {
+						id: formTemplateId
+					}
+				},
+				label: bugButton.label,
+				slug: bugButton.slug,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					create: [
+						{
+							style: 'solid',
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'solid',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-dark.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-dark.svg`,
+							alt_text: bugButton.label
+						}
+					]
+				}
+			}
+		});
+	}
 }
 
 async function seed_users_products() {
@@ -91,6 +282,8 @@ async function seed_users_products() {
 	const formTemplates = await prisma.formTemplate.findMany({
 		take: 100
 	});
+	const rootFormTemplate = formTemplates.find(ft => ft.slug === 'root');
+	const bugFormTemplate = formTemplates.find(ft => ft.slug === 'bug');
 
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
@@ -158,7 +351,22 @@ async function seed_users_products() {
 									buttons: {
 										create: buttons as Button[]
 									}
-								}
+								},
+								...(index === 0
+									? [
+											{
+												title: bugFormTemplate?.title,
+												form_template: {
+													connect: {
+														slug: 'bug'
+													}
+												},
+												buttons: {
+													create: buttons as Button[]
+												}
+											}
+									  ]
+									: [])
 							]
 						}
 					}

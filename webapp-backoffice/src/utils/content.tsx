@@ -1,4 +1,8 @@
 import { FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
+import {
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle
+} from '@prisma/client';
 
 interface MainStructure {
 	[key: string]: {
@@ -542,3 +546,57 @@ export const onboardingStepsContent: StepContent[] = [
 		actionsLabel: "Créer un lien d'intégration"
 	}
 ];
+
+export const buttonStylesMapping: Record<
+	FormTemplateButtonStyle,
+	{
+		label: React.ReactNode;
+		hintText?: React.ReactNode;
+	}
+> = {
+	solid: {
+		label: 'Plein',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				Le bouton par défaut, à placer sur un{' '}
+				<span className="fr-text--bold">fond blanc ou neutre</span>.
+			</p>
+		)
+	},
+	outline: {
+		label: 'Contour',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				À placer sur un <span className="fr-text--bold">fond coloré</span>.
+			</p>
+		)
+	}
+};
+
+export const buttonIntegrationTypesMapping: Record<
+	ButtonIntegrationTypes,
+	{
+		label: React.ReactNode;
+		hintText?: React.ReactNode;
+	}
+> = {
+	button: {
+		label: 'Pleine page',
+		hintText:
+			'Depuis un bouton, le formulaire s’ouvre dans un nouvel onglet. C’est le seul format compatible avec l’utilisation de Démarches Simplifiées'
+	},
+	embed: {
+		label: 'Intégré au contenu',
+		hintText: 'La 1ère question est visible directement dans la page de contenu'
+	},
+	modal: {
+		label: 'Flottant',
+		hintText:
+			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu'
+	},
+	link: {
+		label: 'Lien seul',
+		hintText:
+			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)'
+	}
+};

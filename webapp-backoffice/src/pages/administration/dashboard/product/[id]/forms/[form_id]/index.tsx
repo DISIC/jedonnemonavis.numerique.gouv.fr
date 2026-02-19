@@ -3,11 +3,10 @@ import LinksTab from '@/src/components/dashboard/Form/tabs/links';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
-import ButtonModal, {
-	ButtonModalType
-} from '@/src/components/dashboard/ProductButton/ButtonModal';
+import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
+import { ButtonModalType } from '@/src/components/dashboard/ProductButton/interface';
 import {
-	ButtonWithForm,
+	ButtonWithElements,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
@@ -46,9 +45,7 @@ const ProductFormPage = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const [modalType, setModalType] = useState<ButtonModalType>();
-	const [currentButton, setCurrentButton] = useState<ButtonWithForm | null>(
-		null
-	);
+	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
 	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
@@ -103,41 +100,35 @@ const ProductFormPage = (props: Props) => {
 		}
 	);
 
+	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
+		{ slug: form.form_template.slug },
+		{ enabled: !!form.id && !isNaN(form.id) && selectedTabId === 'links' }
+	);
+
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
 	const handleModalOpening = (
 		modalType: ButtonModalType,
-		button?: ButtonWithForm
+		button: ButtonWithElements
 	) => {
-		setCurrentButton(button ? button : null);
+		setCurrentButton(button);
 		setModalType(modalType);
 		buttonModal.open();
 	};
 
 	const onButtonMutation = async (
 		isTest: boolean,
-		finalButton: ButtonWithForm
+		finalButton: ButtonWithElements
 	) => {
 		buttonModal.close();
 		await refetchButtons();
 
-		switch (modalType) {
-			case 'create': {
-				setAlertText(
-					`Le lien d'intégration "${finalButton.title}" a été créé avec succès.`
-				);
-				setIsAlertShown(true);
-				handleModalOpening('install', finalButton);
-				break;
-			}
-			case 'delete': {
-				setAlertText(
-					`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
-				);
-				setIsAlertShown(true);
-				break;
-			}
+		if (modalType === 'delete') {
+			setAlertText(
+				`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
+			);
+			setIsAlertShown(true);
 		}
 	};
 
@@ -149,14 +140,19 @@ const ProductFormPage = (props: Props) => {
 	return (
 		<div className={fr.cx('fr-container', 'fr-my-4w')}>
 			<Head>
-				<title>{`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}</title>
+				<title>{`${form.product.title} | ${
+					form.title || form.form_template.title
+				} | Je donne mon avis`}</title>
 				<meta
 					name="description"
-					content={`${form.product.title} | ${form.title || form.form_template.title} | Je donne mon avis`}
+					content={`${form.product.title} | ${
+						form.title || form.form_template.title
+					} | Je donne mon avis`}
 				/>
 			</Head>
 			<ButtonModal
 				form_id={form.id}
+				formTemplateButtons={formTemplate.data?.data?.form_template_buttons}
 				modal={buttonModal}
 				modalType={modalType}
 				button={currentButton}
@@ -189,7 +185,11 @@ const ProductFormPage = (props: Props) => {
 					<p className={fr.cx('fr-mb-0')}>
 						Vous pouvez&nbsp;
 						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/${form.form_template.slug === 'root' ? `Demarches/${form.product_id}` : `/Demarches/avis/${form.id}`}?iframe=true`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/${
+								form.form_template.slug === 'root'
+									? `Demarches/${form.product_id}`
+									: `Demarches/avis/${form.id}`
+							}?iframe=true`}
 							target={'_blank'}
 							style={{
 								color: fr.colors.decisions.text.title.blueFrance.default
@@ -243,7 +243,7 @@ const ProductFormPage = (props: Props) => {
 											? {
 													...router.query,
 													tab: tabSlug
-												}
+											  }
 											: restQuery
 								},
 								undefined,
@@ -265,7 +265,7 @@ const ProductFormPage = (props: Props) => {
 											tabId: 'stats',
 											label: 'Statistiques'
 										}
-									]
+								  ]
 								: []),
 							...(ownRight === 'carrier_admin'
 								? [
@@ -277,7 +277,7 @@ const ProductFormPage = (props: Props) => {
 											tabId: 'settings',
 											label: 'Paramètres'
 										}
-									]
+								  ]
 								: [])
 						]}
 					>
@@ -291,7 +291,6 @@ const ProductFormPage = (props: Props) => {
 									isLoadingButtons ||
 									isRefetchingButtons
 								}
-								handleModalOpening={handleModalOpening}
 								onClickGoToReviews={() => {
 									tabsRef.current
 										?.querySelector<HTMLButtonElement>(
@@ -305,7 +304,6 @@ const ProductFormPage = (props: Props) => {
 							<ReviewsTab
 								form={form}
 								ownRight={ownRight}
-								handleModalOpening={handleModalOpening}
 								hasButtons={nbButtons > 0}
 								isLoading={
 									isLoadingButtons ||
@@ -320,7 +318,6 @@ const ProductFormPage = (props: Props) => {
 							<StatsTab
 								form={form}
 								ownRight={ownRight}
-								handleModalOpening={handleModalOpening}
 								nbReviews={nbReviews}
 								isLoading={
 									isLoadingReviewsCount ||

@@ -29,6 +29,8 @@ interface OnboardingLayoutProps {
 	shouldDisplayLine?: boolean;
 	headerActions?: React.ReactNode;
 	hideTitle?: boolean;
+	hideActions?: boolean;
+	isFullScreen?: boolean;
 }
 
 const OnboardingLayout = ({
@@ -48,7 +50,9 @@ const OnboardingLayout = ({
 	isLarge,
 	shouldDisplayLine,
 	headerActions,
-	hideTitle
+	hideTitle,
+	hideActions,
+	isFullScreen
 }: OnboardingLayoutProps) => {
 	const router = useRouter();
 	const { data: session } = useSession();
@@ -210,15 +214,23 @@ const OnboardingLayout = ({
 				id="main"
 				role="main"
 				tabIndex={0}
-				className={cx(classes.mainContainer, fr.cx(hideTitle && 'fr-pt-0'))}
+				className={cx(
+					classes.mainContainer,
+					fr.cx(hideTitle && 'fr-pt-0', hideActions && 'fr-pb-0')
+				)}
 			>
 				<div
-					className={cx(classes.stepContent, fr.cx(hideTitle && 'fr-pt-0'))}
+					className={cx(
+						classes.stepContent,
+						fr.cx(hideTitle && 'fr-pt-0', isFullScreen && 'fr-p-0')
+					)}
 					style={{
 						background: noBackground ? 'transparent' : undefined,
 						width:
 							isLarge || isStepperLayout
 								? fr.breakpoints.values.lg
+								: isFullScreen
+								? '100%'
 								: fr.breakpoints.values.md
 					}}
 				>
@@ -226,7 +238,12 @@ const OnboardingLayout = ({
 						<OnboardingStepper />
 					) : (
 						<>
-							<div className={classes.contentHeader}>
+							<div
+								className={cx(
+									classes.contentHeader,
+									fr.cx(hideTitle && !title && 'fr-hidden')
+								)}
+							>
 								{!hideTitle && title && (
 									<div>
 										<h1
@@ -264,7 +281,7 @@ const OnboardingLayout = ({
 					)}
 				</div>
 			</main>
-			{!isStepperLayout && (
+			{!isStepperLayout && !hideActions && (
 				<section
 					id="onboarding-actions"
 					role="region"

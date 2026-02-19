@@ -1,46 +1,104 @@
-import {
-	ButtonWithClosedLog,
-	ButtonWithForm
-} from '@/src/types/prismaTypesExtended';
+import { Toast } from '@/src/components/ui/Toast';
+import { ButtonWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { Tag } from '@codegouvfr/react-dsfr/Tag';
-import { Menu, MenuItem } from '@mui/material';
 import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonModalType } from './ButtonModal';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import Alert from '@codegouvfr/react-dsfr/Alert';
+import { ButtonModalType } from './interface';
+import {
+	buttonIntegrationTypesMapping,
+	buttonStylesMapping
+} from '@/src/utils/content';
 
 interface Props {
-	button: ButtonWithForm & ButtonWithClosedLog;
-	onButtonClick: (modalType: ButtonModalType, button?: ButtonWithForm) => void;
+	button: ButtonWithElements;
+	onButtonClick: (
+		modalType: ButtonModalType,
+		button: ButtonWithElements
+	) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
 const ProductButtonCard = (props: Props) => {
 	const { button, onButtonClick, ownRight } = props;
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-	const menuOpen = Boolean(anchorEl);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		setAnchorEl(event.currentTarget);
-		push(['trackEvent', 'BO - Product', `Open-Menu`]);
-	};
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
+	const { data: session } = useSession();
+
+	const [displayToast, setDisplayToast] = React.useState(false);
 
 	const { cx, classes } = useStyles({
-		isTest: button.isTest || false,
 		isClosed: !!button.deleted_at
 	});
 
-	const isMobile = window.innerWidth <= fr.breakpoints.getPxValues().md;
+	const renderButtonTags = () => {
+		const tags = [];
+
+		if (button.integration_type) {
+			tags.push(
+				<span
+					key="integration-type"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Format : ${button.integration_type}`}
+				>
+					Format&nbsp;:&nbsp;
+					<b>{buttonIntegrationTypesMapping[button.integration_type].label}</b>
+				</span>
+			);
+		}
+
+		if (button.button_style) {
+			tags.push(
+				<span
+					key="button-style"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Style du bouton : ${button.button_style}`}
+				>
+					Style du bouton&nbsp;:&nbsp;
+					<b>{buttonStylesMapping[button.button_style].label}</b>
+				</span>
+			);
+		}
+
+		if (button.form_template_button) {
+			tags.push(
+				<span
+					key="button-template"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Label du bouton : ${button.form_template_button.label}`}
+				>
+					Label&nbsp;:&nbsp;
+					<b>{button.form_template_button.label}</b>
+				</span>
+			);
+		}
+
+		return tags.length > 0 ? (
+			<div
+				className={classes.tagsContainer}
+				role="region"
+				aria-label="Propriétés du bouton"
+			>
+				{tags}
+			</div>
+		) : null;
+	};
 
 	return (
 		<>
+			<Toast
+				isOpen={displayToast}
+				setIsOpen={setDisplayToast}
+				autoHideDuration={2000}
+				severity="info"
+				message="URL copiée dans le presse papier !"
+			/>
 			<div className={cx(classes.card, fr.cx('fr-card', 'fr-p-2w'))}>
 				<div
 					className={fr.cx(
@@ -49,149 +107,118 @@ const ProductButtonCard = (props: Props) => {
 						'fr-grid-row--middle'
 					)}
 				>
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-8')}>
-						<p
-							className={cx(
-								classes.title,
-								fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
-							)}
-						>
-							{button.title}{' '}
-							{button.isDeleted && (
-								<Badge
-									as="span"
-									severity="error"
-									noIcon
-									small
-									className="fr-ml-2v"
-								>
-									Fermé
-								</Badge>
-							)}
-						</p>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
+						<div className={classes.titleWithTags}>
+							<p
+								className={cx(
+									classes.title,
+									fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
+								)}
+							>
+								{button.title}&nbsp;
+								{button.isDeleted && (
+									<Badge
+										as="span"
+										severity="error"
+										noIcon
+										small
+										className="fr-ml-2v"
+									>
+										Fermé
+									</Badge>
+								)}
+							</p>
+							{renderButtonTags()}
+						</div>
 						{(button.description || button.isDeleted) && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.deleted_at
 									? `Fermé le ${button.deleted_at.toLocaleDateString()}` +
-										(button.delete_reason ? ` : ${button.delete_reason}` : '')
+									  (button.delete_reason ? ` : ${button.delete_reason}` : '')
 									: button.description}
 							</p>
 						)}
 					</div>
 
-					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-4')}>
+					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5')}>
 						<div className={cx(classes.actionsContainer)}>
 							{!button.isDeleted && (
 								<>
-									{button.isTest && <Tag className={cx(classes.tag)}>Test</Tag>}
 									<Button
 										priority="secondary"
 										size="small"
 										onClick={() => {
 											onButtonClick('install', button);
 											push(['trackEvent', 'Gestion boutons', 'Installer']);
-											handleClose();
 										}}
 										className="fr-mr-md-2v"
 									>
-										Voir le code
+										Copier le code
 									</Button>
-									<Button
-										id="button-options"
-										aria-controls={menuOpen ? 'option-menu' : undefined}
-										aria-haspopup="true"
-										aria-expanded={menuOpen ? 'true' : undefined}
-										title={`Ouvrir le menu contextuel du bouton « ${button.title} »`}
-										priority="secondary"
-										size="small"
-										onClick={handleClick}
-										iconId={
-											isMobile
-												? menuOpen
-													? 'ri-arrow-up-s-line'
-													: 'ri-arrow-down-s-line'
-												: 'ri-more-2-fill'
-										}
-										iconPosition={isMobile ? 'right' : undefined}
-										className={cx(classes.buttonWrapper)}
-									>
-										{isMobile && 'Options'}
-										<span
-											className={fr.cx('fr-hidden')}
-										>{`Ouvrir le menu contextuel du bouton « ${button.title} »`}</span>
-									</Button>
-									<Menu
-										id="option-menu"
-										open={menuOpen}
-										anchorEl={anchorEl}
-										onClose={handleClose}
-										MenuListProps={{
-											'aria-labelledby': 'button-options'
-										}}
-									>
-										{ownRight === 'carrier_admin' && (
-											<MenuItem
+									{ownRight === 'carrier_admin' && (
+										<>
+											<Button
+												priority="secondary"
+												size="small"
+												className="fr-mr-md-2v"
 												onClick={() => {
 													onButtonClick('edit', button);
-													handleClose();
+													push(['trackEvent', 'Gestion boutons', 'Modifier']);
 												}}
 											>
-												<i
-													className={cx(
-														fr.cx(
-															'fr-icon-edit-line',
-															'fr-mr-2v',
-															'fr-icon--sm'
-														)
-													)}
-												/>
 												Modifier
-											</MenuItem>
-										)}
-										<MenuItem
-											onClick={() => {
-												navigator.clipboard.writeText(
-													`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+											</Button>
+											{session?.user.role.includes('admin') && (
+												<Button
+													priority="secondary"
+													size="small"
+													className="fr-mr-md-2v"
+													onClick={() => {
+														navigator.clipboard.writeText(
+															`${
+																process.env.NEXT_PUBLIC_FORM_APP_URL
+															}/Demarches/${
+																button.form.form_template.slug !== 'root'
+																	? `avis/${button.form.id}`
+																	: button.form.product_id
+															}?button=${button.id}`
+														);
+														setDisplayToast(true);
+													}}
+													title={`${
+														process.env.NEXT_PUBLIC_FORM_APP_URL
+													}/Demarches/${
 														button.form.form_template.slug !== 'root'
 															? `avis/${button.form.id}`
 															: button.form.product_id
-													}?button=${button.id}`
-												);
-												handleClose();
-											}}
-										>
-											<i
-												className={cx(
-													fr.cx('ri-file-copy-line', 'fr-mr-2v', 'fr-icon--sm')
-												)}
-											/>
-											Copier l'URL
-										</MenuItem>
-										{ownRight === 'carrier_admin' && (
-											<MenuItem
+													}?button=${button.id}`}
+												>
+													Copier l'URL
+												</Button>
+											)}
+											<Button
+												priority="secondary"
+												size="small"
+												className={classes.deleteButton}
+												aria-label="Supprimer"
+												title="Supprimer"
 												onClick={() => {
 													onButtonClick('delete', button);
-													handleClose();
-												}}
-												style={{
-													color:
-														fr.colors.decisions.text.actionHigh.redMarianne
-															.default
+													push(['trackEvent', 'Gestion boutons', 'Supprimer']);
 												}}
 											>
+												<span className={fr.cx('fr-hidden-md', 'fr-mr-1v')}>
+													Supprimer
+												</span>
 												<i
+													aria-hidden="true"
 													className={cx(
-														fr.cx(
-															'fr-icon-delete-line',
-															'fr-mr-2v',
-															'fr-icon--sm'
-														)
+														fr.cx('fr-icon-delete-line', 'fr-icon--sm')
 													)}
 												/>
-												Fermer le lien
-											</MenuItem>
-										)}
-									</Menu>
+											</Button>
+										</>
+									)}
 								</>
 							)}
 						</div>
@@ -229,14 +256,12 @@ const ProductButtonCard = (props: Props) => {
 
 const useStyles = tss
 	.withName(ProductButtonCard.name)
-	.withParams<{ isTest: boolean; isClosed: boolean }>()
-	.create(({ isTest, isClosed }) => ({
+	.withParams<{ isClosed: boolean }>()
+	.create(({ isClosed }) => ({
 		card: {
-			backgroundColor: isTest
-				? fr.colors.decisions.border.default.grey.default
-				: isClosed
-					? fr.colors.decisions.background.default.grey.hover
-					: fr.colors.decisions.background.alt.blueFrance.default,
+			backgroundColor: isClosed
+				? fr.colors.decisions.background.default.grey.hover
+				: fr.colors.decisions.background.alt.blueFrance.default,
 			height: 'auto!important',
 			backgroundImage: 'none!important'
 		},
@@ -245,10 +270,13 @@ const useStyles = tss
 		},
 		actionsContainer: {
 			display: 'flex',
-			flexWrap: 'wrap',
 			alignItems: 'center',
 			justifyContent: 'flex-end',
 			paddingLeft: fr.spacing('11v'),
+			button: {
+				textOverflow: 'ellipsis',
+				whiteSpace: 'nowrap'
+			},
 			[fr.breakpoints.down('md')]: {
 				paddingLeft: 0,
 				flexDirection: 'column',
@@ -260,6 +288,20 @@ const useStyles = tss
 				}
 			}
 		},
+		titleWithTags: {
+			display: 'flex',
+			flexWrap: 'wrap',
+			gap: fr.spacing('2v')
+		},
+		tagsContainer: {
+			display: 'flex',
+			flexWrap: 'wrap',
+			gap: fr.spacing('1v')
+		},
+		infoTag: {
+			background: fr.colors.decisions.background.actionLow.blueFrance.default,
+			color: fr.colors.decisions.text.actionHigh.blueFrance.default
+		},
 		buttonWrapper: {
 			'&::before': {
 				marginRight: '0 !important'
@@ -270,7 +312,11 @@ const useStyles = tss
 				color: fr.colors.decisions.text.actionHigh.redMarianne.default
 			}
 		},
-		tag: {}
+		deleteButton: {
+			color: fr.colors.decisions.text.actionHigh.redMarianne.default,
+			boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`,
+			border: 'none'
+		}
 	}));
 
 export default ProductButtonCard;

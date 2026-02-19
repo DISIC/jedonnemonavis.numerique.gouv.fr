@@ -1,6 +1,15 @@
-import { ButtonWithForm } from '@/src/types/prismaTypesExtended';
+import { FormTemplateButtonStyleType } from '@/prisma/generated/zod';
+import {
+	ButtonWithElements,
+	FormTemplateButtonWithVariants
+} from '@/src/types/prismaTypesExtended';
 
 export interface ButtonCopyInstructionsPanelProps {
-	buttonColor: 'bleu' | 'blanc';
-	button: ButtonWithForm;
+	buttonStyle: FormTemplateButtonStyleType;
+	button: ButtonWithElements;
+	formTemplateButton?: FormTemplateButtonWithVariants;
 }
+
+export type ButtonInstructionTabProps = ButtonCopyInstructionsPanelProps & {
+	isForDemarchesSimplifiees?: boolean;
+};

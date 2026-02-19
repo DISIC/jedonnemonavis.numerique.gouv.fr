@@ -3,15 +3,20 @@ import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfi
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
-import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHeader';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import ReviewFilterTags from '@/src/components/dashboard/Reviews/ReviewFilterTags';
+import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHeader';
+import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import {
+	getExportFiltersLabel,
+	getExportPeriodLabel,
+	parseExportParams
+} from '@/src/utils/export';
 import {
 	formatDateToFrenchStringWithHour,
 	getNbPages,
@@ -19,33 +24,26 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import { LinearProgress } from '@mui/material';
 import { Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
-import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 import ExportHistory from '../../Reviews/ExportHistory';
-import { useSession } from 'next-auth/react';
-import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
-import {
-	getExportFiltersLabel,
-	getExportPeriodLabel,
-	parseExportParams
-} from '@/src/utils/export';
-import Link from 'next/link';
-import { LinearProgress } from '@mui/material';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
+import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	hasButtons: boolean;
 	nbReviews: number;
 	isLoading: boolean;
@@ -63,15 +61,7 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const {
-		form,
-		ownRight,
-		handleModalOpening,
-		hasButtons,
-		nbReviews,
-		isLoading,
-		buttons
-	} = props;
+	const { form, ownRight, hasButtons, nbReviews, isLoading, buttons } = props;
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
@@ -511,8 +501,8 @@ const ReviewsTab = (props: Props) => {
 								currentExport.link === null && currentExport.params
 									? 'fr-mt-4v'
 									: currentExport.link
-										? 'fr-mt-2v'
-										: 'fr-hidden'
+									? 'fr-mt-2v'
+									: 'fr-hidden'
 							)}
 						>
 							{currentExport.link && (

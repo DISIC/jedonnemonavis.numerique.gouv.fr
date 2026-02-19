@@ -4,6 +4,7 @@ import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { matchSorter } from 'match-sorter';
 import { z } from 'zod';
+import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/ProductButton/CopyInstructionPanel/interface';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormConfigWithChildren } from '../types/prismaTypesExtended';
@@ -434,17 +435,43 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> au service en tant <strong>${metadataTyped.json.status === 'carrier_admin' ? "qu'utilisateur" : "qu'administrateur"}</strong>`;
+			return `Invitation de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> au service en tant <strong>${
+				metadataTyped.json.status === 'carrier_admin'
+					? "qu'utilisateur"
+					: "qu'administrateur"
+			}</strong>`;
 		case TypeAction.service_uninvite:
-			return `Suppression des droits <strong>${metadataTyped.json.status === 'carrier_admin' ? "d'utilisateur" : "d'administrateur"}</strong> pour <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> sur le service`;
+			return `Suppression des droits <strong>${
+				metadataTyped.json.status === 'carrier_admin'
+					? "d'utilisateur"
+					: "d'administrateur"
+			}</strong> pour <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> sur le service`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
 		case TypeAction.organisation_update:
 			return `Modification sur l'organisation du service`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> à l'organisation`;
+			return `Invitation de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> à l'organisation`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait de l'utilisateur <strong>${metadataTyped.json.user_email !== null ? metadataTyped.json.user_email : metadataTyped.json.user_email_invite}</strong> de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
+			return `Retrait de l'utilisateur <strong>${
+				metadataTyped.json.user_email !== null
+					? metadataTyped.json.user_email
+					: metadataTyped.json.user_email_invite
+			}</strong> de l'organisation <strong>${
+				metadataTyped.json.entity_name
+			}</strong>`;
 		case TypeAction.service_button_create:
 			return `Création du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
 		case TypeAction.service_button_update:
@@ -499,7 +526,7 @@ export const filtersLabel = [
 ];
 
 export const getHelperFromFormConfig = (
-	formConfig: FormConfigWithChildren | undefined
+	formConfig?: FormConfigWithChildren
 ): FormConfigHelper => {
 	return {
 		displays:
@@ -625,4 +652,26 @@ export const getSafeCallbackUrl = (rawCallback: unknown): string => {
 		return defaultUrl;
 	}
 	return rawCallback;
+};
+
+export const getButtonCode = ({
+	buttonStyle,
+	button,
+	formTemplateButton,
+	theme
+}: ButtonCopyInstructionsPanelProps & { theme: 'clair' | 'sombre' }) => {
+	const variantImageUrl = formTemplateButton?.variants.find(
+		v =>
+			v.style === buttonStyle &&
+			(v.theme === (theme === 'clair' ? 'light' : 'dark') || v.theme === null)
+	)?.image_url;
+
+	const buttonLabel = formTemplateButton?.label || 'Je donne mon avis';
+
+	const isRootFormTemplate = button.form.form_template.slug === 'root';
+	const reviewUrlParticle = isRootFormTemplate
+		? `/${button.form.product_id}`
+		: `/avis/${button.form.id}`;
+
+	return `<a href="${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="${variantImageUrl}" alt="${buttonLabel}" />\n\n</a>`;
 };
