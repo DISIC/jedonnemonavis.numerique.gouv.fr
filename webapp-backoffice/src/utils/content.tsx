@@ -1,5 +1,8 @@
 import { FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
-import { FormTemplateButtonStyle } from '@prisma/client';
+import {
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle
+} from '@prisma/client';
 
 interface MainStructure {
 	[key: string]: {
@@ -567,5 +570,33 @@ export const buttonStylesMapping: Record<
 				À placer sur un <span className="fr-text--bold">fond coloré</span>.
 			</p>
 		)
+	}
+};
+
+export const buttonIntegrationTypesMapping: Record<
+	ButtonIntegrationTypes,
+	{
+		label: React.ReactNode;
+		hintText?: React.ReactNode;
+	}
+> = {
+	button: {
+		label: 'Pleine page',
+		hintText:
+			'Depuis un bouton, le formulaire s’ouvre dans un nouvel onglet. C’est le seul format compatible avec l’utilisation de Démarches Simplifiées'
+	},
+	embed: {
+		label: 'Intégré au contenu',
+		hintText: 'La 1ère question est visible directement dans la page de contenu'
+	},
+	modal: {
+		label: 'Flottant',
+		hintText:
+			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu'
+	},
+	link: {
+		label: 'Lien seul',
+		hintText:
+			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)'
 	}
 };

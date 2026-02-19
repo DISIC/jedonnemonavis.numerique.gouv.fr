@@ -47,28 +47,34 @@ const ButtonModal = (props: Props) => {
 		formTemplateButtons
 	} = props;
 
-	const [buttonStyle, setButtonStyle] =
-		useState<FormTemplateButtonStyle>('solid');
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
-	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
-		useState<FormTemplateButtonWithVariants>();
 
 	const defaultTemplateButton = useMemo(
-		() => formTemplateButtons?.find(b => b.isDefault),
-		[formTemplateButtons]
+		() =>
+			(button && button.form_template_button) ||
+			formTemplateButtons?.find(b => b.isDefault),
+		[button, formTemplateButtons]
 	);
+
+	const currentDefaultTemplateButton =
+		currentButton?.form_template_button || defaultTemplateButton;
 
 	useEffect(() => {
 		if (button) {
-			setCurrentButton(button);
-			if (button.form_template_button && button.button_style) {
-				setSelectedFormTemplateButton(button.form_template_button);
-				setButtonStyle(button.button_style);
-			} else {
-				setSelectedFormTemplateButton(defaultTemplateButton);
-				setButtonStyle('solid');
-			}
+			const hasManyTemplateButtons =
+				formTemplateButtons && formTemplateButtons.length > 1;
+
+			setCurrentButton({
+				...button,
+				button_style: button.button_style || 'solid',
+				form_template_button: hasManyTemplateButtons
+					? defaultTemplateButton || null
+					: null,
+				form_template_button_id: hasManyTemplateButtons
+					? defaultTemplateButton?.id || null
+					: null
+			});
 		}
 	}, [button]);
 
@@ -89,11 +95,11 @@ const ButtonModal = (props: Props) => {
 	const buttonStyleOptions = useMemo(() => {
 		if (!formTemplateButtons) return [];
 		return (
-			selectedFormTemplateButton?.variants.filter(
+			currentDefaultTemplateButton?.variants.filter(
 				v => v.theme === 'light' || v.theme === null
 			) || []
 		);
-	}, [selectedFormTemplateButton, formTemplateButtons]);
+	}, [currentButton, formTemplateButtons]);
 
 	const hasErrors = (key: keyof FormErrors): boolean => {
 		return Object.values(errors[key]).some(value => value === true);
@@ -167,8 +173,10 @@ const ButtonModal = (props: Props) => {
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
 								button={currentButton}
-								buttonStyle={buttonStyle}
-								formTemplateButton={selectedFormTemplateButton}
+								buttonStyle={currentButton.button_style || 'solid'}
+								formTemplateButton={
+									currentButton.form_template_button || defaultTemplateButton
+								}
 							/>
 						</div>
 					</div>
@@ -187,7 +195,6 @@ const ButtonModal = (props: Props) => {
 							nativeInputProps={{
 								value: currentButton.title || '',
 								name: 'button-create-title',
-
 								onChange: e => {
 									setCurrentButton({
 										...currentButton,
@@ -209,13 +216,12 @@ const ButtonModal = (props: Props) => {
 										nativeInputProps: {
 											value: ftb.id,
 											onChange: () => {
-												setSelectedFormTemplateButton(ftb);
 												setCurrentButton({
 													...currentButton,
 													form_template_button_id: ftb.id
 												});
 											},
-											checked: selectedFormTemplateButton?.id === ftb.id
+											checked: currentButton.form_template_button_id === ftb.id
 										}
 									}))}
 								/>
@@ -226,32 +232,44 @@ const ButtonModal = (props: Props) => {
 								legend={<b>Style du bouton</b>}
 								name={'button-style'}
 								className={classes.buttonStyles}
-								options={buttonStyleOptions.map(bsOption => ({
-									label: buttonStylesMapping[bsOption.style].label,
-									hintText: buttonStylesMapping[bsOption.style].hintText,
-									nativeInputProps: {
-										value: bsOption.style,
-										onChange: () => {
-											setButtonStyle(bsOption.style);
-											setCurrentButton({
-												...currentButton,
-												button_style: bsOption.style
-											});
+								options={buttonStyleOptions.map(bsOption => {
+									const altText =
+										bsOption.alt_text ||
+										currentButton.form_template_button?.label ||
+										currentDefaultTemplateButton?.label ||
+										'Illustration du bouton';
+
+									const buttonSlug =
+										formTemplateButtons?.find(
+											ftb => ftb.id === currentButton.form_template_button_id
+										)?.slug ||
+										currentDefaultTemplateButton?.slug ||
+										'jdma';
+
+									return {
+										label: buttonStylesMapping[bsOption.style].label,
+										hintText: buttonStylesMapping[bsOption.style].hintText,
+										nativeInputProps: {
+											value: bsOption.style,
+											onChange: () => {
+												setCurrentButton({
+													...currentButton,
+													button_style: bsOption.style
+												});
+											},
+											checked: currentButton.button_style === bsOption.style
 										},
-										checked: buttonStyle === bsOption.style
-									},
-									illustration: selectedFormTemplateButton && (
-										<ImageWithFallback
-											alt={
-												bsOption.alt_text || selectedFormTemplateButton?.label
-											}
-											src={bsOption.image_url}
-											fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton.slug}-${bsOption.style}-light.svg`}
-											width={200}
-											height={85}
-										/>
-									)
-								}))}
+										illustration: (
+											<ImageWithFallback
+												alt={altText}
+												src={bsOption.image_url}
+												fallbackSrc={`/assets/buttons/button-${buttonSlug}-${bsOption.style}-light.svg`}
+												width={200}
+												height={85}
+											/>
+										)
+									};
+								})}
 							/>
 						</div>
 					</div>

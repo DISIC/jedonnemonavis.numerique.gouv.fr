@@ -10,6 +10,10 @@ import { useSession } from 'next-auth/react';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from './interface';
+import {
+	buttonIntegrationTypesMapping,
+	buttonStylesMapping
+} from '@/src/utils/content';
 
 interface Props {
 	button: ButtonWithElements;
@@ -24,20 +28,67 @@ const ProductButtonCard = (props: Props) => {
 	const { button, onButtonClick, ownRight } = props;
 	const { data: session } = useSession();
 
-	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 	const [displayToast, setDisplayToast] = React.useState(false);
-	const menuOpen = Boolean(anchorEl);
-	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-		setAnchorEl(event.currentTarget);
-		push(['trackEvent', 'BO - Product', `Open-Menu`]);
-	};
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
 
 	const { cx, classes } = useStyles({
 		isClosed: !!button.deleted_at
 	});
+
+	const renderButtonTags = () => {
+		const tags = [];
+
+		if (button.integration_type) {
+			tags.push(
+				<span
+					key="integration-type"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Format : ${button.integration_type}`}
+				>
+					Format&nbsp;:&nbsp;
+					<b>{buttonIntegrationTypesMapping[button.integration_type].label}</b>
+				</span>
+			);
+		}
+
+		if (button.button_style) {
+			tags.push(
+				<span
+					key="button-style"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Style du bouton : ${button.button_style}`}
+				>
+					Style du bouton&nbsp;:&nbsp;
+					<b>{buttonStylesMapping[button.button_style].label}</b>
+				</span>
+			);
+		}
+
+		if (button.form_template_button) {
+			tags.push(
+				<span
+					key="button-template"
+					className={cx(classes.infoTag, fr.cx('fr-tag', 'fr-tag--sm'))}
+					role="status"
+					aria-label={`Label du bouton : ${button.form_template_button.label}`}
+				>
+					Label&nbsp;:&nbsp;
+					<b>{button.form_template_button.label}</b>
+				</span>
+			);
+		}
+
+		return tags.length > 0 ? (
+			<div
+				className={classes.tagsContainer}
+				role="region"
+				aria-label="Propriétés du bouton"
+			>
+				{tags}
+			</div>
+		) : null;
+	};
 
 	return (
 		<>
@@ -57,25 +108,28 @@ const ProductButtonCard = (props: Props) => {
 					)}
 				>
 					<div className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
-						<p
-							className={cx(
-								classes.title,
-								fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
-							)}
-						>
-							{button.title}{' '}
-							{button.isDeleted && (
-								<Badge
-									as="span"
-									severity="error"
-									noIcon
-									small
-									className="fr-ml-2v"
-								>
-									Fermé
-								</Badge>
-							)}
-						</p>
+						<div className={classes.titleWithTags}>
+							<p
+								className={cx(
+									classes.title,
+									fr.cx('fr-mb-0', 'fr-grid-row', 'fr-grid-row--middle')
+								)}
+							>
+								{button.title}&nbsp;
+								{button.isDeleted && (
+									<Badge
+										as="span"
+										severity="error"
+										noIcon
+										small
+										className="fr-ml-2v"
+									>
+										Fermé
+									</Badge>
+								)}
+							</p>
+							{renderButtonTags()}
+						</div>
 						{(button.description || button.isDeleted) && (
 							<p className={fr.cx('fr-mb-0', 'fr-mt-1v', 'fr-hint-text')}>
 								{button.deleted_at
@@ -96,7 +150,6 @@ const ProductButtonCard = (props: Props) => {
 										onClick={() => {
 											onButtonClick('install', button);
 											push(['trackEvent', 'Gestion boutons', 'Installer']);
-											handleClose();
 										}}
 										className="fr-mr-md-2v"
 									>
@@ -111,7 +164,6 @@ const ProductButtonCard = (props: Props) => {
 												onClick={() => {
 													onButtonClick('edit', button);
 													push(['trackEvent', 'Gestion boutons', 'Modifier']);
-													handleClose();
 												}}
 											>
 												Modifier
@@ -132,7 +184,6 @@ const ProductButtonCard = (props: Props) => {
 															}?button=${button.id}`
 														);
 														setDisplayToast(true);
-														handleClose();
 													}}
 													title={`${
 														process.env.NEXT_PUBLIC_FORM_APP_URL
@@ -154,7 +205,6 @@ const ProductButtonCard = (props: Props) => {
 												onClick={() => {
 													onButtonClick('delete', button);
 													push(['trackEvent', 'Gestion boutons', 'Supprimer']);
-													handleClose();
 												}}
 											>
 												<span className={fr.cx('fr-hidden-md', 'fr-mr-1v')}>
@@ -237,6 +287,20 @@ const useStyles = tss
 					justifyContent: 'center'
 				}
 			}
+		},
+		titleWithTags: {
+			display: 'flex',
+			flexWrap: 'wrap',
+			gap: fr.spacing('2v')
+		},
+		tagsContainer: {
+			display: 'flex',
+			flexWrap: 'wrap',
+			gap: fr.spacing('1v')
+		},
+		infoTag: {
+			background: fr.colors.decisions.background.actionLow.blueFrance.default,
+			color: fr.colors.decisions.text.actionHigh.blueFrance.default
 		},
 		buttonWrapper: {
 			'&::before': {

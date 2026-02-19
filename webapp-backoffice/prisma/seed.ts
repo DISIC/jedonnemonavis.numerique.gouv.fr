@@ -141,7 +141,7 @@ async function seed_root_form_template_buttons(formTemplateId: number) {
 				}
 			},
 			label: 'Je donne mon avis',
-			slug: 'default',
+			slug: 'jdma',
 			order: 0,
 			isDefault: true,
 			variants: {
