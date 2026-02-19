@@ -154,6 +154,13 @@ enum FormTemplateButtonTheme {
   dark
 }
 
+enum ButtonIntegrationTypes {
+  embed
+  button
+  modal
+  link
+}
+
 // Next auth
 model User {
   id                      Int                   @id @default(autoincrement())
@@ -286,7 +293,8 @@ model Button {
   form_id                 Int
   form_template_button    FormTemplateButton?      @relation(fields: [form_template_button_id], references: [id])
   form_template_button_id Int?
-  last_selected_style     FormTemplateButtonStyle?
+  button_style            FormTemplateButtonStyle?
+  integration_type        ButtonIntegrationTypes?
   delete_reason           String?
   closedButtonLog         ClosedButtonLog?
   reviews                 Review[]

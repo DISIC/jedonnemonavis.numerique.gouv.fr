@@ -7,8 +7,9 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import { FR_THEMES } from '../interface';
 import { ButtonInstructionTabProps } from './interface';
 
 const ButtonInstructionTab = ({
@@ -20,20 +21,7 @@ const ButtonInstructionTab = ({
 	const { cx, classes } = useStyles();
 	const [displayToastTheme, setDisplayToastTheme] = useState<string>();
 
-	const buttonCodeClair = getButtonCode({
-		theme: 'clair',
-		buttonStyle,
-		button,
-		formTemplateButton
-	});
-	const buttonCodeSombre = getButtonCode({
-		theme: 'sombre',
-		buttonStyle,
-		button,
-		formTemplateButton
-	});
-
-	const getInsctructionContent = () => {
+	const getInstructionContent = () => {
 		if (isForDemarchesSimplifiees) {
 			return (
 				<>
@@ -108,15 +96,20 @@ const ButtonInstructionTab = ({
 				/>
 			</div>
 			<div className={fr.cx('fr-grid-row')}>
-				{['clair', 'sombre'].map(theme => {
+				{FR_THEMES.map(theme => {
 					const isLight = theme === 'clair';
 					const enTheme = isLight ? 'light' : 'dark';
 					const currentVariant = formTemplateButton?.variants.find(
 						v => v.theme === enTheme && v.style === buttonStyle
 					);
-
+					const buttonCode = getButtonCode({
+						theme,
+						buttonStyle,
+						button,
+						formTemplateButton
+					});
 					return (
-						<>
+						<Fragment key={theme}>
 							<div
 								className={cx(
 									isLight ? classes.paddingRight : classes.paddingLeft,
@@ -162,9 +155,7 @@ const ButtonInstructionTab = ({
 											iconPosition="right"
 											className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
 											onClick={() => {
-												navigator.clipboard.writeText(
-													isLight ? buttonCodeClair : buttonCodeSombre
-												);
+												navigator.clipboard.writeText(buttonCode);
 												push(['trackEvent', 'BO - Product', `Copy-Code`]);
 												setDisplayToastTheme(theme);
 											}}
@@ -180,7 +171,7 @@ const ButtonInstructionTab = ({
 												nativeTextAreaProps={{
 													'aria-label': 'Code du bouton Je Donne Mon Avis',
 													name: 'button-code',
-													value: isLight ? buttonCodeClair : buttonCodeSombre,
+													value: buttonCode,
 													contentEditable: false,
 													readOnly: true
 												}}
@@ -189,12 +180,12 @@ const ButtonInstructionTab = ({
 									</div>
 								</div>
 							</div>
-						</>
+						</Fragment>
 					);
 				})}
 			</div>
 			<hr className={fr.cx('fr-mt-6v')} />
-			{getInsctructionContent()}
+			{getInstructionContent()}
 			<div className={classes.infoContainer}>
 				<div className={cx(classes.infoContent)}>
 					<div className={classes.iconContainer}>

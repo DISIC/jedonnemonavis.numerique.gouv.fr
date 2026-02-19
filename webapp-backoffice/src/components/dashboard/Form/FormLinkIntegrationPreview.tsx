@@ -8,18 +8,18 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Header from '@codegouvfr/react-dsfr/Header';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Skeleton } from '@mui/material';
+import { ButtonIntegrationTypes } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
-import { LinkIntegrationTypes } from '../ProductButton/interface';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
 	description: JSX.Element;
-	onConfirm: (value: LinkIntegrationTypes) => void;
+	onConfirm: (value: ButtonIntegrationTypes) => void;
 	form?: FormWithConfigAndTemplate;
 	defaultFormTemplateButton?: FormTemplateButtonWithVariants;
 };
@@ -33,7 +33,7 @@ const FormLinkIntegrationPreview = ({
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
-		useState<LinkIntegrationTypes>('button');
+		useState<ButtonIntegrationTypes>('button');
 	const { cx, classes } = useStyles();
 
 	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);

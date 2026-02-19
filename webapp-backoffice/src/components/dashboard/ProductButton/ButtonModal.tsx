@@ -1,54 +1,30 @@
 import { CustomModalProps } from '@/src/types/custom';
 import {
-	ButtonWithClosedLog,
-	ButtonWithForm,
-	ButtonWithTemplateButton,
+	ButtonWithElements,
 	FormTemplateButtonWithVariants
 } from '@/src/types/prismaTypesExtended';
 import { buttonStylesMapping } from '@/src/utils/content';
-import { getButtonCode } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
-import {
-	FormTemplateButtonStyle,
-	Button as PrismaButtonType
-} from '@prisma/client';
-import { push } from '@socialgouv/matomo-next';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { FormTemplateButtonStyle } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
-import ImageWithFallback from '../../ui/ImageWithFallback';
-import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import { tss } from 'tss-react/dsfr';
-
-export type ButtonModalType = 'install' | 'create' | 'edit' | 'delete';
+import { Loader } from '../../ui/Loader';
+import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
+import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
+import { ButtonModalType } from './interface';
 
 interface Props {
 	modal: CustomModalProps;
 	modalType?: ButtonModalType;
-	button?: (ButtonWithForm & ButtonWithTemplateButton) | null;
-	onButtonMutation: (
-		isTest: boolean,
-		button: ButtonWithForm & ButtonWithTemplateButton
-	) => void;
+	button?: ButtonWithElements;
+	onButtonMutation: (isTest: boolean, button: ButtonWithElements) => void;
 	form_id: number;
 	formTemplateButtons?: FormTemplateButtonWithVariants[];
 }
-
-const defaultButton: ButtonCreationPayload | ButtonWithForm = {
-	title: '',
-	description: '',
-	xwiki_title: null,
-	form_id: -1,
-	form_template_button_id: -1,
-	last_selected_style: 'solid',
-	isTest: false,
-	delete_reason: null,
-	deleted_at: null,
-	isDeleted: false
-};
 
 type FormErrors = {
 	title: { required: boolean };
@@ -60,16 +36,11 @@ const defaultErrors = {
 	}
 };
 
-export type ButtonCreationPayload = Omit<
-	PrismaButtonType,
-	'id' | 'created_at' | 'updated_at'
->;
-
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
 	const {
 		modal,
-		modalType = 'create',
+		modalType = 'edit',
 		button,
 		onButtonMutation,
 		formTemplateButtons
@@ -78,9 +49,7 @@ const ButtonModal = (props: Props) => {
 	const [buttonStyle, setButtonStyle] =
 		useState<FormTemplateButtonStyle>('solid');
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
-	const [currentButton, setCurrentButton] = useState<
-		ButtonCreationPayload | (ButtonWithForm & ButtonWithClosedLog)
-	>(defaultButton);
+	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
 	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
 		useState<FormTemplateButtonWithVariants>();
 
@@ -92,35 +61,26 @@ const ButtonModal = (props: Props) => {
 	useEffect(() => {
 		if (button) {
 			setCurrentButton(button);
-			if (button.form_template_button && button.last_selected_style) {
+			if (button.form_template_button && button.button_style) {
 				setSelectedFormTemplateButton(button.form_template_button);
-				setButtonStyle(button.last_selected_style);
+				setButtonStyle(button.button_style);
 			} else {
 				setSelectedFormTemplateButton(defaultTemplateButton);
 				setButtonStyle('solid');
 			}
-		} else {
-			setCurrentButton(defaultButton);
 		}
 	}, [button]);
 
-	const createButton = trpc.button.create.useMutation({
-		onSuccess: result => {
-			setCurrentButton(defaultButton);
-			handleModalClose(result.data);
-		}
-	});
-
 	const updateButton = trpc.button.update.useMutation({
 		onSuccess: result => {
-			setCurrentButton(defaultButton);
+			setCurrentButton(undefined);
 			handleModalClose(result.data);
 		}
 	});
 
 	const deleteButton = trpc.button.delete.useMutation({
 		onSuccess: result => {
-			setCurrentButton(defaultButton);
+			setCurrentButton(undefined);
 			handleModalClose(result.data);
 		}
 	});
@@ -146,8 +106,6 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				return 'Copier le code';
-			case 'create':
-				return "Créer un lien d'intégration";
 			case 'edit':
 				return "Modifier un lien d'intégration";
 			case 'delete':
@@ -157,15 +115,14 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const handleModalClose = (
-		createdOrUpdatedButton: ButtonWithForm & ButtonWithTemplateButton
-	) => {
+	const handleModalClose = (createdOrUpdatedButton: ButtonWithElements) => {
 		resetErrors('title');
 		onButtonMutation(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
 	};
 
-	const handleButtonCreateOrEdit = () => {
+	const handleButtonEdit = () => {
+		if (!currentButton) return;
 		if (!currentButton.title) {
 			errors.title.required = true;
 			setErrors({ ...errors });
@@ -174,16 +131,12 @@ const ButtonModal = (props: Props) => {
 
 		currentButton.form_id = props.form_id;
 
-		if ('id' in currentButton) {
-			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
-			updateButton.mutate(buttonWithoutForm);
-		} else {
-			createButton.mutate(currentButton);
-		}
+		const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
+		updateButton.mutate(buttonWithoutForm);
 	};
 
 	const handleButtonDelete = () => {
-		if ('id' in currentButton) {
+		if (currentButton && 'id' in currentButton) {
 			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
 			deleteButton.mutate({
 				product_id: form.product_id,
@@ -198,160 +151,22 @@ const ButtonModal = (props: Props) => {
 		}
 	};
 
-	const buttonCodeClair =
-		(button &&
-			getButtonCode({
-				theme: 'clair',
-				buttonStyle,
-				button,
-				formTemplateButton: selectedFormTemplateButton
-			})) ||
-		'';
-	const buttonCodeSombre =
-		(button &&
-			getButtonCode({
-				theme: 'sombre',
-				buttonStyle,
-				button,
-				formTemplateButton: selectedFormTemplateButton
-			})) ||
-		'';
-
 	const displayModalContent = (): JSX.Element => {
+		if (!currentButton) return <Loader />;
 		switch (modalType) {
 			case 'install':
 				return (
 					<div>
-						<p>
-							Pour installer le bouton JDMA et récolter les avis, copiez-collez
-							le code ci-dessous dans votre service numérique ou dans le champ
-							dédié sur Démarche simplifiée.
-						</p>
+						<hr />
 						<div className={fr.cx('fr-grid-row')}>
-							{formTemplateButtons && formTemplateButtons.length > 1 && (
-								<div className={fr.cx('fr-col', 'fr-col-12')}>
-									<RadioButtons
-										legend={<b>Label du bouton</b>}
-										name={'button-label'}
-										options={formTemplateButtons.map(ftb => ({
-											label: ftb.label,
-											nativeInputProps: {
-												value: ftb.id,
-												onChange: () => setSelectedFormTemplateButton(ftb),
-												checked: selectedFormTemplateButton?.id === ftb.id
-											}
-										}))}
-									/>
-								</div>
-							)}
-							<div className={fr.cx('fr-col', 'fr-col-12')}>
-								<RadioButtons
-									legend={<b>Style du bouton</b>}
-									name={'button-style'}
-									className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
-									options={buttonStyleOptions.map(bsOption => ({
-										label: buttonStylesMapping[bsOption.style].label,
-										hintText: buttonStylesMapping[bsOption.style].hintText,
-										nativeInputProps: {
-											value: bsOption.style,
-											onChange: () => {
-												setButtonStyle(bsOption.style);
-											},
-											checked: buttonStyle === bsOption.style
-										}
-									}))}
-								/>
-							</div>
-							{['clair', 'sombre'].map(theme => {
-								const isLight = theme === 'clair';
-								const enTheme = isLight ? 'light' : 'dark';
-								const currentVariant =
-									selectedFormTemplateButton?.variants.find(
-										v => v.theme === enTheme && v.style === buttonStyle
-									);
-								return (
-									<>
-										<div
-											className={cx(
-												isLight ? classes.paddingRight : classes.paddingLeft,
-												fr.cx('fr-col-12', 'fr-col-md-6')
-											)}
-										>
-											<div className={fr.cx('fr-grid-row')}>
-												<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
-												<div className={fr.cx('fr-col', 'fr-col-12')}>
-													<div
-														className={cx(
-															classes.btnImgContainer,
-															!isLight && classes.blackContainer,
-															fr.cx('fr-card', 'fr-p-6v')
-														)}
-													>
-														<ImageWithFallback
-															alt={
-																selectedFormTemplateButton?.label ||
-																`bouton-je-donne-mon-avis`
-															}
-															src={currentVariant?.image_url || ''}
-															fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton?.slug}-${buttonStyle}-${enTheme}.svg`}
-															className={fr.cx('fr-my-8v')}
-															width={200}
-															height={85}
-														/>
-														<p
-															className={cx(
-																classes.smallText,
-																!isLight && classes.darkerText,
-																fr.cx('fr-mb-0')
-															)}
-														>
-															Prévisualisation du bouton
-														</p>
-													</div>
-												</div>
-												<div className={fr.cx('fr-col', 'fr-col-12')}>
-													<Button
-														priority="secondary"
-														iconId="ri-file-copy-line"
-														iconPosition="right"
-														className={fr.cx('fr-mt-8v')}
-														onClick={() => {
-															if (!buttonCodeClair || !buttonCodeSombre) return;
-															navigator.clipboard.writeText(
-																isLight ? buttonCodeClair : buttonCodeSombre
-															);
-															modal.close();
-															push(['trackEvent', 'BO - Product', `Copy-Code`]);
-														}}
-													>
-														Copier le code
-													</Button>
-													<div className={fr.cx('fr-input-group', 'fr-mt-2v')}>
-														<Input
-															className={classes.textArea}
-															id="button-code"
-															label={`Code à intégrer: Thème ${theme}`}
-															textArea
-															nativeTextAreaProps={{
-																name: 'button-code',
-																value: isLight
-																	? buttonCodeClair
-																	: buttonCodeSombre,
-																contentEditable: false,
-																readOnly: true
-															}}
-														/>
-													</div>
-												</div>
-											</div>
-										</div>
-									</>
-								);
-							})}
+							<ButtonCopyInstructionsPanel
+								button={currentButton}
+								buttonStyle={buttonStyle}
+								formTemplateButton={selectedFormTemplateButton}
+							/>
 						</div>
 					</div>
 				);
-			case 'create':
 			case 'edit':
 				return (
 					<div>
@@ -378,20 +193,40 @@ const ButtonModal = (props: Props) => {
 							state={hasErrors('title') ? 'error' : 'default'}
 							stateRelatedMessage={'Veuillez compléter ce champ.'}
 						/>
-						<Input
-							id="button-create-description"
-							label="Description du lien d'intégration"
-							textArea
-							nativeTextAreaProps={{
-								value: currentButton.description || '',
-								onChange: e => {
-									setCurrentButton({
-										...currentButton,
-										description: e.target.value
-									});
-								}
-							}}
-						/>
+						{formTemplateButtons && formTemplateButtons.length > 1 && (
+							<div className={fr.cx('fr-col', 'fr-col-12')}>
+								<RadioButtons
+									legend={<b>Label du bouton</b>}
+									name={'button-label'}
+									options={formTemplateButtons.map(ftb => ({
+										label: ftb.label,
+										nativeInputProps: {
+											value: ftb.id,
+											onChange: () => setSelectedFormTemplateButton(ftb),
+											checked: selectedFormTemplateButton?.id === ftb.id
+										}
+									}))}
+								/>
+							</div>
+						)}
+						<div className={fr.cx('fr-col', 'fr-col-12')}>
+							<RadioButtons
+								legend={<b>Style du bouton</b>}
+								name={'button-style'}
+								className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-9')}
+								options={buttonStyleOptions.map(bsOption => ({
+									label: buttonStylesMapping[bsOption.style].label,
+									hintText: buttonStylesMapping[bsOption.style].hintText,
+									nativeInputProps: {
+										value: bsOption.style,
+										onChange: () => {
+											setButtonStyle(bsOption.style);
+										},
+										checked: buttonStyle === bsOption.style
+									}
+								}))}
+							/>
+						</div>
 					</div>
 				);
 			case 'delete':
@@ -426,35 +261,19 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				break;
-			case 'create':
-				return [
-					{
-						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(defaultButton);
-							resetErrors('title');
-						}
-					},
-					{
-						children: 'Créer',
-						onClick: handleButtonCreateOrEdit,
-						doClosesModal: false
-					}
-				];
 			case 'edit':
 				return [
 					{
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
-							setCurrentButton(defaultButton);
+							setCurrentButton(undefined);
 							resetErrors('title');
 						}
 					},
 					{
 						children: 'Modifier',
-						onClick: handleButtonCreateOrEdit,
+						onClick: handleButtonEdit,
 						doClosesModal: false
 					}
 				];
@@ -465,7 +284,7 @@ const ButtonModal = (props: Props) => {
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
-							setCurrentButton(defaultButton);
+							setCurrentButton(undefined);
 						}
 					},
 					{

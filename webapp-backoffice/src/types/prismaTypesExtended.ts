@@ -78,6 +78,10 @@ export type ButtonWithTemplateButton = Prisma.ButtonGetPayload<
 	typeof ButtonWithTemplateButton
 >;
 
+export type ButtonWithElements = ButtonWithForm &
+	ButtonWithTemplateButton &
+	Partial<ButtonWithClosedLog>;
+
 const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
 		entities: true

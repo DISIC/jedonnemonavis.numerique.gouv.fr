@@ -6,13 +6,15 @@ import { buttonStylesMapping } from '@/src/utils/content';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { FormTemplateButtonStyle } from '@prisma/client';
-import React, { useEffect, useMemo, useState } from 'react';
+import {
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle
+} from '@prisma/client';
+import React, { useEffect, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
-import { ButtonCreationPayload } from './ButtonModal';
-import { LinkIntegrationTypes } from './interface';
+import { ButtonCreationPayload } from './interface';
 
 type ButtonFormProps = {
 	currentForm?: ProductWithForms['forms'][number];
@@ -25,7 +27,7 @@ type ButtonFormProps = {
 	setSelectedFormTemplateButton: React.Dispatch<
 		React.SetStateAction<FormTemplateButtonWithVariants | undefined>
 	>;
-	selectedIntegrationType: LinkIntegrationTypes;
+	selectedIntegrationType: ButtonIntegrationTypes;
 };
 
 const ButtonForm = ({

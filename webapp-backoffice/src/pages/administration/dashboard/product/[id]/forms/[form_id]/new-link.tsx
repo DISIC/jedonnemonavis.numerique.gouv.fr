@@ -1,28 +1,29 @@
 import FormLinkIntegrationPreview from '@/src/components/dashboard/Form/FormLinkIntegrationPreview';
 import ButtonForm from '@/src/components/dashboard/ProductButton/ButtonForm';
-import { ButtonCreationPayload } from '@/src/components/dashboard/ProductButton/ButtonModal';
 import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/CopyInstructionPanel';
 import {
-	LinkCreationStep,
-	LinkIntegrationTypes
+	ButtonCreationPayload,
+	LinkCreationStep
 } from '@/src/components/dashboard/ProductButton/interface';
 import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
 import {
-	ButtonWithForm,
-	ButtonWithTemplateButton,
+	ButtonWithElements,
 	FormTemplateButtonWithVariants,
 	ProductWithForms
 } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import {
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle
+} from '@prisma/client';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
-import { FormTemplateButtonStyle } from '@prisma/client';
 
 interface Props {
 	product: ProductWithForms;
@@ -37,12 +38,10 @@ const NewLink = (props: Props) => {
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<FormTemplateButtonStyle>('solid');
-	const [createdButton, setCreatedButton] = useState<
-		ButtonWithForm & ButtonWithTemplateButton
-	>();
-	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW'); // reset to preview
+	const [createdButton, setCreatedButton] = useState<ButtonWithElements>();
+	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
 	const [selectedIntegrationType, setSelectedIntegrationType] =
-		useState<LinkIntegrationTypes>('button');
+		useState<ButtonIntegrationTypes>('button');
 	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
 		useState<FormTemplateButtonWithVariants>();
 
@@ -94,7 +93,8 @@ const NewLink = (props: Props) => {
 			...data,
 			form_id: Number(form_id),
 			form_template_button_id: selectedFormTemplateButton?.id,
-			last_selected_style: selectedButtonStyle
+			button_style: selectedButtonStyle,
+			integration_type: selectedIntegrationType
 		});
 	};
 

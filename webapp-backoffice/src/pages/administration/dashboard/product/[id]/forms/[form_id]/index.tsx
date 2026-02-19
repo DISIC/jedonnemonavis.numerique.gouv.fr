@@ -3,12 +3,10 @@ import LinksTab from '@/src/components/dashboard/Form/tabs/links';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
 import SettingsTab from '@/src/components/dashboard/Form/tabs/settings';
 import StatsTab from '@/src/components/dashboard/Form/tabs/stats';
-import ButtonModal, {
-	ButtonModalType
-} from '@/src/components/dashboard/ProductButton/ButtonModal';
+import ButtonModal from '@/src/components/dashboard/ProductButton/ButtonModal';
+import { ButtonModalType } from '@/src/components/dashboard/ProductButton/interface';
 import {
-	ButtonWithForm,
-	ButtonWithTemplateButton,
+	ButtonWithElements,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import prisma from '@/src/utils/db';
@@ -47,9 +45,7 @@ const ProductFormPage = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const [modalType, setModalType] = useState<ButtonModalType>();
-	const [currentButton, setCurrentButton] = useState<
-		(ButtonWithForm & ButtonWithTemplateButton) | null
-	>(null);
+	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
 	const [alertText, setAlertText] = useState<string>('');
 	const [isAlertShown, setIsAlertShown] = useState<boolean>(false);
 	const [selectedTabId, setSelectedTabId] = useState<TabsSlug>(
@@ -114,36 +110,25 @@ const ProductFormPage = (props: Props) => {
 
 	const handleModalOpening = (
 		modalType: ButtonModalType,
-		button?: ButtonWithForm & ButtonWithTemplateButton
+		button: ButtonWithElements
 	) => {
-		setCurrentButton(button ? button : null);
+		setCurrentButton(button);
 		setModalType(modalType);
 		buttonModal.open();
 	};
 
 	const onButtonMutation = async (
 		isTest: boolean,
-		finalButton: ButtonWithForm & ButtonWithTemplateButton
+		finalButton: ButtonWithElements
 	) => {
 		buttonModal.close();
 		await refetchButtons();
 
-		switch (modalType) {
-			case 'create': {
-				setAlertText(
-					`Le lien d'intégration "${finalButton.title}" a été créé avec succès.`
-				);
-				setIsAlertShown(true);
-				handleModalOpening('install', finalButton);
-				break;
-			}
-			case 'delete': {
-				setAlertText(
-					`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
-				);
-				setIsAlertShown(true);
-				break;
-			}
+		if (modalType === 'delete') {
+			setAlertText(
+				`Le lien d'intégration "${finalButton.title}" a bien été fermé.`
+			);
+			setIsAlertShown(true);
 		}
 	};
 
@@ -306,7 +291,6 @@ const ProductFormPage = (props: Props) => {
 									isLoadingButtons ||
 									isRefetchingButtons
 								}
-								handleModalOpening={handleModalOpening}
 								onClickGoToReviews={() => {
 									tabsRef.current
 										?.querySelector<HTMLButtonElement>(
@@ -320,7 +304,6 @@ const ProductFormPage = (props: Props) => {
 							<ReviewsTab
 								form={form}
 								ownRight={ownRight}
-								handleModalOpening={handleModalOpening}
 								hasButtons={nbButtons > 0}
 								isLoading={
 									isLoadingButtons ||
@@ -335,7 +318,6 @@ const ProductFormPage = (props: Props) => {
 							<StatsTab
 								form={form}
 								ownRight={ownRight}
-								handleModalOpening={handleModalOpening}
 								nbReviews={nbReviews}
 								isLoading={
 									isLoadingReviewsCount ||

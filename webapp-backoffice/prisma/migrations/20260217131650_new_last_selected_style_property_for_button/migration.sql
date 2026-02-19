@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE "Button" ADD COLUMN     "last_selected_style" "FormTemplateButtonStyle";
+ALTER TABLE "Button" ADD COLUMN     "button_style" "FormTemplateButtonStyle";

@@ -1,8 +1,7 @@
-import {
-	ButtonWithClosedLog,
-	ButtonWithForm
-} from '@/src/types/prismaTypesExtended';
+import { ButtonWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Tag } from '@codegouvfr/react-dsfr/Tag';
 import { Menu, MenuItem } from '@mui/material';
@@ -10,13 +9,14 @@ import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonModalType } from './ButtonModal';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import Alert from '@codegouvfr/react-dsfr/Alert';
+import { ButtonModalType } from './interface';
 
 interface Props {
-	button: ButtonWithForm & ButtonWithClosedLog;
-	onButtonClick: (modalType: ButtonModalType, button?: ButtonWithForm) => void;
+	button: ButtonWithElements;
+	onButtonClick: (
+		modalType: ButtonModalType,
+		button: ButtonWithElements
+	) => void;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -94,7 +94,7 @@ const ProductButtonCard = (props: Props) => {
 										}}
 										className="fr-mr-md-2v"
 									>
-										Voir le code
+										Copier le code
 									</Button>
 									<Button
 										id="button-options"
