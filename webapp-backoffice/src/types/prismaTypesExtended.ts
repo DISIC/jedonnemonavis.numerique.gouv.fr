@@ -129,6 +129,11 @@ const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
 							}
 						}
 					}
+				},
+				form_template_buttons: {
+					include: {
+						variants: true
+					}
 				}
 			}
 		}

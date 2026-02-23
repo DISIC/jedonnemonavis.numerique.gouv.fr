@@ -150,8 +150,10 @@ const ProductFormPage = (props: Props) => {
 					} | Je donne mon avis`}
 				/>
 			</Head>
+
 			<ButtonModal
 				form_id={form.id}
+				form={form}
 				formTemplateButtons={formTemplate.data?.data?.form_template_buttons}
 				modal={buttonModal}
 				modalType={modalType}
@@ -445,6 +447,11 @@ export const getServerSideProps: GetServerSideProps = async context => {
 
 						orderBy: {
 							position: 'asc'
+						}
+					},
+					form_template_buttons: {
+						include: {
+							variants: true
 						}
 					}
 				}

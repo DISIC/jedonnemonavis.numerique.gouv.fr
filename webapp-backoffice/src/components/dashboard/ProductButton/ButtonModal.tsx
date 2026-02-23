@@ -1,7 +1,8 @@
 import { CustomModalProps } from '@/src/types/custom';
 import {
 	ButtonWithElements,
-	FormTemplateButtonWithVariants
+	FormTemplateButtonWithVariants,
+	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { buttonStylesMapping } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
@@ -9,11 +10,11 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { FormTemplateButtonStyle } from '@prisma/client';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
+import FormLinkIntegrationPreview from '../Form/FormLinkIntegrationPreview';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
 import { ButtonModalType } from './interface';
@@ -24,6 +25,7 @@ interface Props {
 	button?: ButtonWithElements;
 	onButtonMutation: (isTest: boolean, button: ButtonWithElements) => void;
 	form_id: number;
+	form: FormWithElements;
 	formTemplateButtons?: FormTemplateButtonWithVariants[];
 }
 
@@ -136,7 +138,7 @@ const ButtonModal = (props: Props) => {
 			return;
 		}
 
-		currentButton.form_id = props.form_id;
+		currentButton.form_id = props.form.id;
 
 		const {
 			form,
@@ -184,6 +186,15 @@ const ButtonModal = (props: Props) => {
 			case 'edit':
 				return (
 					<div>
+						{/* <FormLinkIntegrationPreview
+							title="Choisir un type d'intégration"
+							form={form}
+							description={<></>}
+							onConfirm={() => {}}
+							defaultFormTemplateButton={props.form.form_template.form_template_buttons.find(
+								b => b.isDefault
+							)}
+						/> */}
 						<Input
 							id="button-create-title"
 							label={
@@ -312,7 +323,6 @@ const ButtonModal = (props: Props) => {
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
-							setCurrentButton(undefined);
 							resetErrors('title');
 						}
 					},
@@ -327,10 +337,7 @@ const ButtonModal = (props: Props) => {
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							setCurrentButton(undefined);
-						}
+						priority: 'secondary'
 					},
 					{
 						children: "Fermer le lien d'intégration",
