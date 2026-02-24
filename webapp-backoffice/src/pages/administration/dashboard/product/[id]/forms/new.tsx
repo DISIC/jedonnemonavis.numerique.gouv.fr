@@ -15,7 +15,9 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
-import { Form, Prisma, RightAccessStatus } from '@prisma/client';
+import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { Form, FormTemplate, Prisma, RightAccessStatus } from '@prisma/client';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -49,6 +51,8 @@ const NewForm = (props: Props) => {
 			form_id: createdForm?.id || 0,
 			status: 'published'
 		});
+	const [selectedFormTemplate, setSelectedFormTemplate] =
+		useState<FormTemplate>();
 
 	useEffect(() => {
 		formStep !== 'READY' && window.scrollTo(0, 0);
@@ -65,28 +69,27 @@ const NewForm = (props: Props) => {
 		!isEditingStep &&
 		formStep === 'CREATE';
 
-	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery({
-		slug: 'root'
-	});
+	const { data: formTemplates } = trpc.form.getFormTemplates.useQuery(
+		undefined,
+		{ initialData: { data: [] } }
+	);
 
 	const defaultTitle = useMemo(() => {
 		if (createdForm) return createdForm.title;
 		if (!product.forms || product.forms.length === 0)
-			return rootFormTemplate?.data?.title || '';
+			return selectedFormTemplate?.title || '';
 
 		const existingTemplateForms = product.forms.filter(
 			f =>
-				rootFormTemplate?.data?.title &&
-				f.form_template.title === rootFormTemplate.data.title
+				selectedFormTemplate?.title &&
+				f.form_template.title === selectedFormTemplate.title
 		);
 
 		if (existingTemplateForms.length === 0)
-			return rootFormTemplate?.data?.title || '';
+			return selectedFormTemplate?.title || '';
 
-		return `${rootFormTemplate?.data?.title} ${
-			existingTemplateForms.length + 1
-		}`;
-	}, [product.forms, rootFormTemplate]);
+		return `${selectedFormTemplate?.title} ${existingTemplateForms.length + 1}`;
+	}, [product.forms, selectedFormTemplate]);
 
 	const {
 		control,
@@ -95,15 +98,24 @@ const NewForm = (props: Props) => {
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
-			title: defaultTitle || rootFormTemplate?.data?.title || ''
+			title: defaultTitle || selectedFormTemplate?.title || ''
 		}
 	});
 
 	const createFormConfig = trpc.formConfig.create.useMutation();
 
 	useEffect(() => {
+		if (formTemplates && selectedFormTemplate === undefined) {
+			const rootTemplate = formTemplates.data.find(
+				template => template.slug === 'root'
+			);
+			setSelectedFormTemplate(rootTemplate || undefined);
+		}
+	}, [formTemplates]);
+
+	useEffect(() => {
 		reset({
-			title: defaultTitle || rootFormTemplate?.data?.title || ''
+			title: defaultTitle || selectedFormTemplate?.title || ''
 		});
 	}, [defaultTitle]);
 
@@ -122,7 +134,7 @@ const NewForm = (props: Props) => {
 	});
 
 	const onSubmitCreateForm: SubmitHandler<FormValues> = async data => {
-		if (!rootFormTemplate?.data?.id) return;
+		if (!selectedFormTemplate?.id) return;
 		let tmpForm: FormWithElements;
 
 		if (isEditingStep && createdForm) {
@@ -142,14 +154,14 @@ const NewForm = (props: Props) => {
 				.mutateAsync({
 					...data,
 					product_id: product.id,
-					form_template_id: rootFormTemplate?.data?.id
+					form_template_id: selectedFormTemplate?.id
 				})
 				.then(res => res.data);
 
 			setFormStep('GENERATING');
 		}
 
-		setFormTitle(data.title || rootFormTemplate?.data?.title || '');
+		setFormTitle(data.title || selectedFormTemplate?.title || '');
 		updateCreatedForm(tmpForm);
 	};
 
@@ -203,26 +215,34 @@ const NewForm = (props: Props) => {
 				return {
 					content: (
 						<>
-							<div
-								className={cx(
-									classes.infoContainer,
-									fr.cx('fr-mb-8v', 'fr-p-6v')
-								)}
-								style={{ justifyContent: 'start' }}
-							>
-								<div className={classes.iconContainer}>
-									<i
-										className={cx(
-											fr.cx('ri-emotion-happy-line', 'fr-icon--lg')
-										)}
-									/>
-								</div>
-								<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-									JDMA vous propose un formulaire pour évaluer la satisfaction
-									globale de vos usagers.
-								</p>
-							</div>
 							<form id="form-creation-form">
+								<RadioButtons
+									legend={
+										<>
+											Type de formulaire
+											<span className={classes.asterisk}>*</span>
+										</>
+									}
+									options={
+										formTemplates.data.map(template => ({
+											label: template.title,
+											hintText: template.description,
+											nativeInputProps: {
+												value: template.id,
+												checked: selectedFormTemplate?.id === template.id,
+												onChange: () => setSelectedFormTemplate(template)
+											},
+											illustration: (
+												<Image
+													alt={`Illustration type de formulaire ${template.slug}`}
+													src={`/assets/form-template-${template.slug}.svg`}
+													width={56}
+													height={56}
+												/>
+											)
+										})) || []
+									}
+								/>
 								<div className={fr.cx('fr-input-group')}>
 									<Controller
 										control={control}
@@ -237,7 +257,7 @@ const NewForm = (props: Props) => {
 													form =>
 														(
 															form?.title ||
-															rootFormTemplate?.data?.title ||
+															selectedFormTemplate?.title ||
 															''
 														).trim() === trimmedValue
 												);
@@ -353,6 +373,8 @@ const NewForm = (props: Props) => {
 							}?iframe=true&formConfig=${encodeURIComponent(
 								JSON.stringify(tmpConfigHelper)
 							)}`}
+							target="_blank"
+							rel="noopener noreferrer"
 						>
 							Prévisualiser
 						</Link>
