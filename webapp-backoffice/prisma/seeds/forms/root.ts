@@ -47,6 +47,8 @@ const simpleContactMethods = [
 export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: 'Évaluation de la satisfaction usager',
 	slug: 'root',
+	description:
+		'Permet de récolter une note sur la satisfaction globale, la clarté des informations et les aides apportées.',
 	active: true,
 	hasStepper: true,
 	form_template_steps: {

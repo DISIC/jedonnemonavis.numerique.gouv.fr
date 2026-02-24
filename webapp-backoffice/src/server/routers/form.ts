@@ -40,6 +40,29 @@ export const formRouter = router({
 			});
 			return { data: form };
 		}),
+	getFormTemplates: publicProcedure.query(async ({ ctx }) => {
+		const formTemplates = await ctx.prisma.formTemplate.findMany({
+			include: {
+				form_template_steps: {
+					include: {
+						form_template_blocks: {
+							include: {
+								options: true
+							},
+							orderBy: {
+								position: 'asc'
+							}
+						}
+					},
+					orderBy: {
+						position: 'asc'
+					}
+				},
+				form_template_buttons: { include: { variants: true } }
+			}
+		});
+		return { data: formTemplates };
+	}),
 
 	getFormTemplateBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
