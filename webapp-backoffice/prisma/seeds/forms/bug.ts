@@ -28,6 +28,27 @@ const createBugOptions =
 		}
 	];
 
+const bugButtons = [
+	{
+		label: 'Une remarque ?',
+		slug: 'remark',
+		order: 0,
+		isDefault: true
+	},
+	{
+		label: 'Faire un retour',
+		slug: 'feedback',
+		order: 1,
+		isDefault: false
+	},
+	{
+		label: 'Signaler un problème',
+		slug: 'problem',
+		order: 2,
+		isDefault: false
+	}
+];
+
 export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: "Remontées d'informations",
 	slug: 'bug',
@@ -79,5 +100,43 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 				}
 			}
 		]
-	}
+	},
+	form_template_buttons: {
+		create: bugButtons.map(button => ({
+			label: button.label,
+			slug: button.slug,
+			order: button.order,
+			isDefault: button.isDefault,
+			variants: {
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-solid-light.svg`,
+						alt_text: button.label
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-outline-light.svg`,
+						alt_text: button.label
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-solid-dark.svg`,
+						alt_text: button.label
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-outline-dark.svg`,
+						alt_text: button.label
+					}
+				]
+			}
+		}))
+	},
+	integration_types: ['modal', 'link'],
+	default_integration_type: 'modal'
 };

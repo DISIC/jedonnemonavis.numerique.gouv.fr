@@ -525,6 +525,8 @@ model FormTemplate {
   hasStepper            Boolean              @default(false)
   form_template_steps   FormTemplateStep[]
   form_template_buttons FormTemplateButton[]
+  integration_types     ButtonIntegrationTypes[]
+  default_integration_type ButtonIntegrationTypes?
   ReviewCustom          ReviewCustom[]
   forms                 Form[]
 }

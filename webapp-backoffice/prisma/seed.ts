@@ -81,23 +81,19 @@ function getWLDPromises() {
 }
 
 async function seed_bug_form_template() {
-	const bugTemplate = await prisma.formTemplate.upsert({
+	await prisma.formTemplate.upsert({
 		where: { slug: 'bug' },
 		update: createBugForm,
 		create: createBugForm
 	});
-
-	await seed_bug_form_template_buttons(bugTemplate.id);
 }
 
 async function seed_root_form_template() {
-	const rootTemplate = await prisma.formTemplate.upsert({
+	await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: createRootForm,
 		create: createRootForm
 	});
-
-	await seed_root_form_template_buttons(rootTemplate.id);
 }
 
 async function seed_root_form_template_buttons(formTemplateId: number) {
