@@ -169,7 +169,8 @@ const FormTemplateWithElements =
 						}
 					}
 				}
-			}
+			},
+			form_template_buttons: { include: { variants: true } }
 		}
 	});
 

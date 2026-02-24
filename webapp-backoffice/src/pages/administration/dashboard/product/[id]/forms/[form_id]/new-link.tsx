@@ -139,9 +139,7 @@ const NewLink = (props: Props) => {
 								setSelectedIntegrationType(integrationType);
 								setCurrentStep('CREATION');
 							}}
-							defaultFormTemplateButton={formTemplateData?.data?.form_template_buttons.find(
-								b => b.isDefault
-							)}
+							formTemplate={formTemplateData?.data}
 						/>
 					),
 					title: "Choisir le type d'intégration"

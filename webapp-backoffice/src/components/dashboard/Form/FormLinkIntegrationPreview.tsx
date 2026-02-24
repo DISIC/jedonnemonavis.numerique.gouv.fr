@@ -1,5 +1,6 @@
 import {
 	FormTemplateButtonWithVariants,
+	FormTemplateWithElements,
 	FormWithConfigAndTemplate
 } from '@/src/types/prismaTypesExtended';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
@@ -11,17 +12,19 @@ import { Skeleton } from '@mui/material';
 import { ButtonIntegrationTypes } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
+import { buttonIntegrationTypesMapping } from '@/src/utils/content';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
 	description: JSX.Element;
 	onConfirm: (value: ButtonIntegrationTypes) => void;
 	form?: FormWithConfigAndTemplate;
-	defaultFormTemplateButton?: FormTemplateButtonWithVariants;
+	formTemplate?: FormTemplateWithElements | null;
 };
 
 const FormLinkIntegrationPreview = ({
@@ -29,7 +32,7 @@ const FormLinkIntegrationPreview = ({
 	description,
 	onConfirm,
 	form,
-	defaultFormTemplateButton
+	formTemplate
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
@@ -37,6 +40,13 @@ const FormLinkIntegrationPreview = ({
 	const { cx, classes } = useStyles();
 
 	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);
+
+	const defaultFormTemplateButton = useMemo(() => {
+		setSelectedIntegrationType(
+			formTemplate?.default_integration_type || 'button'
+		);
+		return formTemplate?.form_template_buttons.find(b => b.isDefault);
+	}, [formTemplate]);
 
 	const getPreviewContent = () => {
 		switch (selectedIntegrationType) {
@@ -95,87 +105,47 @@ const FormLinkIntegrationPreview = ({
 				</p>
 				<div className={classes.scrollableContent}>
 					<RadioButtons
-						options={[
-							// {
-							// 	label: (
-							// 		<>
-							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
-							// 				Beta
-							// 			</Badge>
-							// 			Intégré au contenu
-							// 		</>
-							// 	),
-							// 	hintText:
-							// 		'La 1ère question est visible directement dans la page de contenu',
-							// 	nativeInputProps: {
-							// 		value: 'embed',
-							// 		checked: selectedIntegrationType === 'embed',
-							// 		onChange: () => setSelectedIntegrationType('embed')
-							// 	},
-							// 	illustration: (
-							// 		<Image
-							// 			alt="Illustration intégré au contenu"
-							// 			src={'/assets/integration-embed.svg'}
-							// 			width={95}
-							// 			height={71}
-							// 		/>
-							// 	)
-							// },
-							{
-								label: 'Pleine page',
-								hintText:
-									'Depuis un bouton, le formulaire s’ouvre dans un nouvel onglet. C’est le seul format compatible avec l’utilisation de Démarches Simplifiées',
-								nativeInputProps: {
-									value: 'button',
-									checked: selectedIntegrationType === 'button',
-									onChange: () => setSelectedIntegrationType('button')
-								},
-								illustration: (
-									<Image
-										alt="Illustration pleine page"
-										src={'/assets/integration-button.svg'}
-										width={95}
-										height={71}
-									/>
-								)
-							},
-							// {
-							// 	label: (
-							// 		<>
-							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
-							// 				Beta
-							// 			</Badge>
-							// 			Flottant
-							// 		</>
-							// 	),
-							// 	hintText:
-							// 		'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
-							// 	nativeInputProps: {
-							// 		value: 'modal',
-							// 		checked: selectedIntegrationType === 'modal',
-							// 		onChange: () => setSelectedIntegrationType('modal')
-							// 	},
-							// 	illustration: (
-							// 		<Image
-							// 			alt="Illustration pleine page"
-							// 			src={'/assets/integration-modal.svg'}
-							// 			width={95}
-							// 			height={71}
-							// 		/>
-							// 	)
-							// },
-							{
-								label: 'Lien seul',
-								hintText:
-									'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)',
-								nativeInputProps: {
-									value: 'link',
-									checked: selectedIntegrationType === 'link',
-									onChange: () => setSelectedIntegrationType('link')
-								}
-							}
-						]}
 						name="integration-type"
+						options={
+							formTemplate?.integration_types.map(type => {
+								const values = buttonIntegrationTypesMapping[type];
+								return {
+									label: (
+										<>
+											{values.isNew && (
+												<Badge
+													severity="new"
+													small
+													className={fr.cx('fr-mb-1v')}
+												>
+													Beta
+												</Badge>
+											)}
+											{values.label}
+										</>
+									),
+									hintText: values.hintText,
+									nativeInputProps: {
+										value: type,
+										checked: selectedIntegrationType === type,
+										onChange: () =>
+											setSelectedIntegrationType(type as ButtonIntegrationTypes)
+									},
+									...(values.noIllustration
+										? {}
+										: {
+												illustration: (
+													<Image
+														alt={`Illustration ${values.label}`}
+														src={`/assets/integration-${type}.svg`}
+														width={95}
+														height={71}
+													/>
+												)
+										  })
+								};
+							}) || []
+						}
 					/>
 				</div>
 				<section className={classes.actionsContainer}>
