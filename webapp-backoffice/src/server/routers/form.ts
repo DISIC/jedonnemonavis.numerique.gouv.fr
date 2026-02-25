@@ -106,7 +106,8 @@ export const formRouter = router({
 								orderBy: {
 									position: 'asc'
 								}
-							}
+							},
+							form_template_buttons: { include: { variants: true } }
 						}
 					}
 				}
@@ -176,7 +177,8 @@ export const formRouter = router({
 								orderBy: {
 									position: 'asc'
 								}
-							}
+							},
+							form_template_buttons: { include: { variants: true } }
 						}
 					}
 				}
