@@ -93,7 +93,7 @@ async function seed_root_form_template_buttons(formTemplateId: number) {
 		where: {
 			form_template_id_slug: {
 				form_template_id: formTemplateId,
-				slug: 'default'
+				slug: 'jdma'
 			}
 		},
 		update: {
