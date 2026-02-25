@@ -19,12 +19,11 @@ interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
 	form_id: number;
-	setButtonId: (buttonId: number | undefined) => void;
 	submitFilters: (filters: ReviewFiltersType) => void;
 }
 
 const ReviewFiltersModalRoot = (props: Props) => {
-	const { modal, filters, submitFilters, setButtonId, form_id } = props;
+	const { modal, filters, submitFilters, form_id } = props;
 	const { cx, classes } = useStyles();
 
 	const { data: buttonResults } = trpc.button.getList.useQuery({

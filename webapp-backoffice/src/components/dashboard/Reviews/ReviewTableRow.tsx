@@ -55,7 +55,8 @@ const ReviewTableRow = ({
 	search,
 	formConfigHelper,
 	hasManyVersions,
-	formTemplate
+	formTemplate,
+	onClickMoreInfo
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
@@ -65,6 +66,7 @@ const ReviewTableRow = ({
 	};
 	hasManyVersions: boolean;
 	formTemplate: FormTemplateWithElements;
+	onClickMoreInfo?: () => void;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
@@ -150,10 +152,10 @@ const ReviewTableRow = ({
 
 									{answer.field_code === 'satisfaction'
 										? displayIntention(answer.intention ?? 'neutral')
-										: (formTemplateBlockOption?.alias ??
-											formTemplateBlockOption?.label ??
-											answer.answer_text ??
-											'')}
+										: formTemplateBlockOption?.alias ??
+										  formTemplateBlockOption?.label ??
+										  answer.answer_text ??
+										  ''}
 								</Badge>
 							)}
 							{answer && !answer.intention && (
@@ -171,7 +173,14 @@ const ReviewTableRow = ({
 						<p
 							className={cx(classes.content, classes.contentVerbatim)}
 							dangerouslySetInnerHTML={{
-								__html: `${verbatimAnswer ? highlightSearchTerms(verbatimAnswer.answer_text || '', search) : '-'}`
+								__html: `${
+									verbatimAnswer
+										? highlightSearchTerms(
+												verbatimAnswer.answer_text || '',
+												search
+										  )
+										: '-'
+								}`
 							}}
 						></p>
 					</td>
@@ -185,6 +194,7 @@ const ReviewTableRow = ({
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
+							onClickMoreInfo?.();
 						}}
 						className={classes.button}
 						style={{

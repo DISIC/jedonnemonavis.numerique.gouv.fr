@@ -20,7 +20,6 @@ interface Props {
 	modal: CustomModalProps;
 	filters: ReviewFiltersType;
 	form: FormWithElements;
-	setButtonId: (buttonId: number | undefined) => void;
 	submitFilters: (filters: ReviewFiltersType) => void;
 }
 
@@ -356,6 +355,17 @@ const ReviewFiltersModal = (props: Props) => {
 								onClick={() => {
 									submitFilters(tmpFilters);
 									push(['trackEvent', 'Product - Avis', 'Apply-Filters']);
+									window._mtm?.push({
+										event: 'matomo_event',
+										container_type: 'backoffice',
+										service_id: form.product_id,
+										form_id: form.id,
+										template_slug: form.form_template.slug,
+										category: 'reviews',
+										action_type: 'filter',
+										action: 'filter_apply',
+										ui_source: 'filter_modal'
+									});
 								}}
 							>
 								Appliquer les filtres

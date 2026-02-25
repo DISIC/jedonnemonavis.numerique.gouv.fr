@@ -99,7 +99,19 @@ const NewForm = (props: Props) => {
 		}
 	});
 
-	const createFormConfig = trpc.formConfig.create.useMutation();
+	const createFormConfig = trpc.formConfig.create.useMutation({
+		onSuccess: () => {
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: createdForm?.id || 0,
+				template_slug: createdForm?.form_template.slug || '',
+				category: 'service',
+				action: 'form_edit'
+			});
+		}
+	});
 
 	useEffect(() => {
 		reset({
@@ -112,12 +124,30 @@ const NewForm = (props: Props) => {
 	const createForm = trpc.form.create.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: createdForm?.id || 0,
+				template_slug: createdForm?.form_template.slug || '',
+				category: 'service',
+				action: 'form_create'
+			});
 		}
 	});
 
 	const updateForm = trpc.form.update.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: createdForm?.id || 0,
+				template_slug: createdForm?.form_template.slug || '',
+				category: 'service',
+				action: 'form_edit'
+			});
 		}
 	});
 

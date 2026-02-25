@@ -78,6 +78,15 @@ const NewLink = (props: Props) => {
 		onSuccess: async result => {
 			setCreatedButton(result.data);
 			setCurrentStep('COPY');
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: createdProduct?.id || 0,
+				form_id: createdForm?.id || 0,
+				template_slug: createdForm?.form_template.slug || '',
+				category: 'service',
+				action: 'form_link_create'
+			});
 		}
 	});
 

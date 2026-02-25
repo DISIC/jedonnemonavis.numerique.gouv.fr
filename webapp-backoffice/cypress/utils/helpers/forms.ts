@@ -68,9 +68,9 @@ export function ensureTestServiceExistsAndGoToForms() {
 			cy.log(
 				`"${selectors.dashboard.nameTestService}" exists, skipping creation`
 			);
-			cy.contains(selectors.productLink, selectors.dashboard.nameTestService)
+			cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
 				.should('be.visible')
-				.click();
+				.click({ force: true });
 		}
 	});
 }
@@ -111,7 +111,7 @@ export function goToCurrentFormReviewPage(
 		).as('clipboardWrite');
 	});
 
-	cy.get('button#button-options').click();
+	cy.get('button#button-options').first().click();
 	cy.contains('Copier').click();
 
 	cy.get('@clipboardWrite').should('have.been.called');
