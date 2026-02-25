@@ -13,7 +13,6 @@ import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
 
@@ -23,7 +22,6 @@ interface Props {
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
 	hasButtons: boolean;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 }
 
 const DashboardTab = ({
@@ -31,8 +29,7 @@ const DashboardTab = ({
 	isLoading,
 	form,
 	onClickGoToReviews,
-	hasButtons,
-	handleModalOpening
+	hasButtons
 }: Props) => {
 	const { cx, classes } = useStyles();
 

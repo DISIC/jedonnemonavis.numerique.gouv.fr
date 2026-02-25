@@ -70,7 +70,7 @@ const FormStepDisplay = (props: Props) => {
 								parent_id: step.id,
 								kind: 'step' as FormConfigKind
 							}
-						]
+					  ]
 					: [])
 			],
 			labels: configHelper.labels

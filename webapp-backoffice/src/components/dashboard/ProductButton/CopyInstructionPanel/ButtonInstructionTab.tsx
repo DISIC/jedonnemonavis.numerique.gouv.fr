@@ -1,20 +1,85 @@
+import ImageWithFallback from '@/src/components/ui/ImageWithFallback';
+import { getButtonCode } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import { useState } from 'react';
+import Link from 'next/link';
+import { Fragment, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonCopyInstructionsPanelProps } from './interface';
+import { FR_THEMES } from '../interface';
+import { ButtonInstructionTabProps } from './interface';
 
-const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
+const ButtonInstructionTab = ({
+	buttonStyle,
+	button,
+	formTemplateButton,
+	isForDemarchesSimplifiees = false
+}: ButtonInstructionTabProps) => {
 	const { cx, classes } = useStyles();
 	const [displayToastTheme, setDisplayToastTheme] = useState<string>();
 
-	const buttonCodeClair = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-clair.svg" alt="Je donne mon avis" />\n\n</a>`;
-
-	const buttonCodeSombre = `<a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/${button?.form?.product_id}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="https://jedonnemonavis.numerique.gouv.fr/static/bouton-${buttonColor}-sombre.svg" alt="Je donne mon avis" />\n\n</a>`;
+	const getInstructionContent = () => {
+		if (isForDemarchesSimplifiees) {
+			return (
+				<>
+					<p>
+						2. Connectez-vous sur votre compte Démarches Simplifiées. Une fois
+						sur votre démarche, allez sur l’outil{' '}
+						<strong>Bouton “MonAvis”</strong> et cliquez sur&nbsp;
+						<strong>Modifier</strong>
+					</p>
+					<div className={classes.infoContainer}>
+						<div className={cx(classes.infoContent)}>
+							<Image
+								src="/assets/ds_integration.png"
+								alt=""
+								width={508}
+								height={224}
+								className={classes.image}
+							/>
+						</div>
+					</div>
+					<hr className={fr.cx('fr-mt-6v')} />
+					<p>
+						3. Collez le code dans le champ dédié et enregistrez. Le bouton Je
+						Donne Mon Avis apparaitra à la fin de votre démarche.
+					</p>
+					<div className={classes.infoContainer}>
+						<div className={cx(classes.infoContent)}>
+							<Image
+								src="/assets/ds_button_code.png"
+								alt=""
+								width={508}
+								height={215}
+								className={classes.image}
+							/>
+						</div>
+					</div>
+				</>
+			);
+		} else {
+			return (
+				<>
+					<p className={fr.cx('fr-mb-3v')}>
+						2. Coller le code à l’endroit où vous souhaitez placer votre bouton
+						Je Donne Mon Avis
+					</p>
+					<Link
+						href={
+							'https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff'
+						}
+						className={fr.cx('fr-link')}
+						target="_blank"
+					>
+						Comment définir le meilleur emplacement pour son bouton JDMA ?
+					</Link>
+				</>
+			);
+		}
+	};
 
 	return (
 		<div>
@@ -31,14 +96,23 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 				/>
 			</div>
 			<div className={fr.cx('fr-grid-row')}>
-				{['clair', 'sombre'].map(theme => {
+				{FR_THEMES.map(theme => {
+					const isLight = theme === 'clair';
+					const enTheme = isLight ? 'light' : 'dark';
+					const currentVariant = formTemplateButton?.variants.find(
+						v => v.theme === enTheme && v.style === buttonStyle
+					);
+					const buttonCode = getButtonCode({
+						theme,
+						buttonStyle,
+						button,
+						formTemplateButton
+					});
 					return (
-						<>
+						<Fragment key={theme}>
 							<div
 								className={cx(
-									theme === 'clair'
-										? classes.paddingRight
-										: classes.paddingLeft,
+									isLight ? classes.paddingRight : classes.paddingLeft,
 									fr.cx('fr-col-12', 'fr-col-md-6')
 								)}
 							>
@@ -48,13 +122,17 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 										<div
 											className={cx(
 												classes.btnImgContainer,
-												theme !== 'clair' && classes.blackContainer,
+												!isLight && classes.blackContainer,
 												fr.cx('fr-card', 'fr-p-6v')
 											)}
 										>
-											<Image
-												alt="bouton-je-donne-mon-avis"
-												src={`/assets/bouton-${buttonColor}-${theme}.svg`}
+											<ImageWithFallback
+												alt={
+													formTemplateButton?.label ||
+													`bouton-je-donne-mon-avis`
+												}
+												src={currentVariant?.image_url || ''}
+												fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${buttonStyle}-${enTheme}.svg`}
 												className={fr.cx('fr-my-8v')}
 												width={200}
 												height={85}
@@ -62,7 +140,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 											<p
 												className={cx(
 													classes.smallText,
-													theme !== 'clair' && classes.darkerText,
+													!isLight && classes.darkerText,
 													fr.cx('fr-mb-0')
 												)}
 											>
@@ -77,9 +155,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 											iconPosition="right"
 											className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
 											onClick={() => {
-												navigator.clipboard.writeText(
-													theme === 'clair' ? buttonCodeClair : buttonCodeSombre
-												);
+												navigator.clipboard.writeText(buttonCode);
 												push(['trackEvent', 'BO - Product', `Copy-Code`]);
 												setDisplayToastTheme(theme);
 											}}
@@ -95,10 +171,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 												nativeTextAreaProps={{
 													'aria-label': 'Code du bouton Je Donne Mon Avis',
 													name: 'button-code',
-													value:
-														theme === 'clair'
-															? buttonCodeClair
-															: buttonCodeSombre,
+													value: buttonCode,
 													contentEditable: false,
 													readOnly: true
 												}}
@@ -107,45 +180,12 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 									</div>
 								</div>
 							</div>
-						</>
+						</Fragment>
 					);
 				})}
 			</div>
 			<hr className={fr.cx('fr-mt-6v')} />
-			<p>
-				2. Connectez-vous sur votre compte Démarches Simplifiées. Une fois sur
-				votre démarche, allez sur l’outil <strong>Bouton “MonAvis”</strong> et
-				cliquez sur&nbsp;
-				<strong>Modifier</strong>
-			</p>
-			<div className={classes.infoContainer}>
-				<div className={cx(classes.infoContent)}>
-					<Image
-						src="/assets/ds_integration.png"
-						alt=""
-						width={508}
-						height={224}
-						className={classes.image}
-					/>
-				</div>
-			</div>
-			<hr className={fr.cx('fr-mt-6v')} />
-			<p>
-				3. Collez le code dans le champ dédié et enregistrez. Le bouton Je Donne
-				Mon Avis apparaitra à la fin de votre démarche.
-			</p>
-			<div className={classes.infoContainer}>
-				<div className={cx(classes.infoContent)}>
-					<Image
-						src="/assets/ds_button_code.png"
-						alt=""
-						width={508}
-						height={215}
-						className={classes.image}
-					/>
-				</div>
-			</div>
-
+			{getInstructionContent()}
 			<div className={classes.infoContainer}>
 				<div className={cx(classes.infoContent)}>
 					<div className={classes.iconContainer}>
@@ -181,7 +221,7 @@ const DSTab = ({ buttonColor, button }: ButtonCopyInstructionsPanelProps) => {
 	);
 };
 
-export default DSTab;
+export default ButtonInstructionTab;
 
 const useStyles = tss.create(() => ({
 	btnImgContainer: {
