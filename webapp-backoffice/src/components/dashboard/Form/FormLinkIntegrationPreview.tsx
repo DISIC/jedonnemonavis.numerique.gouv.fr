@@ -111,9 +111,11 @@ const FormLinkIntegrationPreview = ({
 								const values = buttonIntegrationTypesMapping[type];
 								return {
 									label: (
-										<>
+										<p className="fr-m-0">
+											{values.label}&nbsp;
 											{values.isNew && (
 												<Badge
+													as="span"
 													severity="new"
 													small
 													className={fr.cx('fr-mb-1v')}
@@ -121,8 +123,7 @@ const FormLinkIntegrationPreview = ({
 													Beta
 												</Badge>
 											)}
-											{values.label}
-										</>
+										</p>
 									),
 									hintText: values.hintText,
 									nativeInputProps: {
