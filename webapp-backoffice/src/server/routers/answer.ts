@@ -16,6 +16,7 @@ import {
 	ElkAnswer,
 	ElkAnswerDefaults
 } from '../../types/custom';
+import { excludeKeywords } from '../../utils/keywords';
 
 const checkAndGetProduct = async ({
 	ctx,
@@ -1422,7 +1423,7 @@ export const answerRouter = router({
 					keywords: {
 						terms: {
 							field: 'answer_tokens',
-							size: size
+							size: size + excludeKeywords.length
 						}
 					}
 				},
@@ -1433,7 +1434,12 @@ export const answerRouter = router({
 				(keywordsAggs?.aggregations?.keywords as any)?.buckets ?? [];
 
 			const data = buckets
-				.filter((bucket: any) => bucket.doc_count >= 5)
+				.filter(
+					(bucket: any) =>
+						bucket.doc_count >= 5 &&
+						!excludeKeywords.includes(bucket.key.toLowerCase())
+				)
+				.slice(0, size)
 				.map((bucket: any) => ({
 					keyword: bucket.key,
 					count: bucket.doc_count
