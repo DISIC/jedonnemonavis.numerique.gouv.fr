@@ -65,7 +65,10 @@ const ProductButtonCard = (props: Props) => {
 			);
 		}
 
-		if (button.form_template_button) {
+		if (
+			button.form.form_template.slug !== 'root' &&
+			button.form_template_button
+		) {
 			tags.push(
 				<span
 					key="button-template"
