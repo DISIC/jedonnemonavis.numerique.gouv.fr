@@ -23,6 +23,18 @@ async function main() {
 	const command = process.argv[2];
 
 	switch (command) {
+		case 'seedBugFormTemplateButtons':
+			const bugTemplate = await prisma.formTemplate.findFirst({
+				where: { slug: 'bug' }
+			});
+
+			if (!bugTemplate) {
+				console.log('Error : missing bug template form');
+				break;
+			}
+
+			await seed_bug_form_template_buttons(bugTemplate.id);
+			break;
 		case 'seedBugFormTemplate':
 			await seed_bug_form_template();
 			break;
