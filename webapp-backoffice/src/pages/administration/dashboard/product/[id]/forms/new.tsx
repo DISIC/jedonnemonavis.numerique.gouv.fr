@@ -25,6 +25,7 @@ import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface Props {
 	product: ProductWithForms;
@@ -225,7 +226,16 @@ const NewForm = (props: Props) => {
 									}
 									options={
 										formTemplates.data.map(template => ({
-											label: template.title,
+											label: (
+												<p className="fr-m-0">
+													{template.title}&nbsp;
+													{template.slug !== 'root' && (
+														<Badge as="span" small severity="new">
+															Beta
+														</Badge>
+													)}
+												</p>
+											),
 											hintText: template.description,
 											nativeInputProps: {
 												value: template.id,
