@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
 					usual_name: string;
 				};
 				// Cas ProConnect
-				token.email = profile.email;
+				token.email = profile.email?.toLowerCase();
 				token.firstName = proconnectProfile.given_name;
 				token.lastName = proconnectProfile.usual_name;
 				token.provider = 'proconnect';

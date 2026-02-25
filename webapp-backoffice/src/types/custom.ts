@@ -199,3 +199,22 @@ export type PasswordMessages = {
 	severity: PasswordInputProps.Severity;
 	message: ReactNode;
 }[];
+
+type MtmType = {
+	event: string;
+	category: string;
+	action: string;
+	container_type: 'backoffice' | 'form';
+	service_id: number;
+	form_id: number;
+	template_slug: string;
+	action_type?: string;
+	value?: number | string | boolean;
+	ui_source?: string;
+};
+
+declare global {
+	interface Window {
+		_mtm?: MtmType[];
+	}
+}

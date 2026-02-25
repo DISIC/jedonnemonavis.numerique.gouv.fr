@@ -1,5 +1,3 @@
-import { ReactNode, useEffect, useState } from 'react';
-
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
@@ -12,7 +10,9 @@ import { Menu, MenuItem } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { signOut, useSession } from 'next-auth/react';
 import router, { useRouter } from 'next/router';
+import { ReactNode, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import UserDetailsForm from '../components/auth/UserDetailsForm';
 import { useUserSettings } from '../contexts/UserSettingsContext';
 
 type PublicLayoutProps = { children: ReactNode; light: boolean };
@@ -48,7 +48,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		setAnchorEl(null);
 	};
 
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 
 	const { data: userRequestsResult } = trpc.userRequest.getList.useQuery(
 		{
@@ -103,6 +103,18 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		);
 
+	const {
+		data: userDetails,
+		refetch: refetchUserDetails,
+		isLoading: isUserDetailsLoading
+	} = trpc.userDetails.getByUser.useQuery(undefined, {
+		enabled: session?.user?.id !== undefined
+	});
+
+	const userHasDetails = useMemo(() => {
+		return !!userDetails?.data;
+	}, [userDetails?.data]);
+
 	const { classes, cx } = useStyles({
 		countUserRequests: userRequestsResult.metadata.count
 	});
@@ -118,7 +130,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						},
 						text: 'Connexion / Inscription'
 					}
-				]
+			  ]
 			: [
 					<Button
 						id="button-account"
@@ -212,7 +224,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 							</Button>
 						</MenuItem>
 					</Menu>
-				];
+			  ];
 
 	const navigationItems: NavigationItem[] = [];
 
@@ -290,8 +302,12 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					href: '/administration/dashboard/user-requests',
 					target: '_self',
 					id: 'fr-header-public-header-main-navigation-link-badge',
-					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`,
-					'aria-label': `Demandes d'accès (${userRequestsResult.metadata.count} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
+					title: `Demandes d'accès (${userRequestsResult.metadata.count} ${
+						userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'
+					})`,
+					'aria-label': `Demandes d'accès (${
+						userRequestsResult.metadata.count
+					} ${userRequestsResult.metadata.count > 1 ? 'demandes' : 'demande'})`
 				},
 				isActive: pathname == '/administration/dashboard/user-requests'
 			}
@@ -327,6 +343,17 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		});
 	}
 
+	const shouldDisplayUserDetailsForm =
+		status !== 'loading' &&
+		session !== null &&
+		!isUserDetailsLoading &&
+		!userHasDetails;
+
+	let mainContent = children;
+	if (shouldDisplayUserDetailsForm) {
+		mainContent = <UserDetailsForm onCreated={() => refetchUserDetails()} />;
+	}
+
 	return (
 		<>
 			<SkipLinks
@@ -341,30 +368,32 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					}
 				]}
 			/>
-			<Header
-				brandTop={
-					<>
-						RÉPUBLIQUE <br /> FRANÇAISE
-					</>
-				}
-				homeLinkProps={{
-					href: !session?.user ? '/' : '/administration/dashboard/products',
-					title: "Je donne mon avis, retour à l'accueil"
-				}}
-				className={classes.navigation}
-				id="fr-header-public-header"
-				quickAccessItems={light ? undefined : quickAccessItems}
-				navigation={
-					!!navigationItems.length && !pathname.startsWith('/public')
-						? navigationItems
-						: undefined
-				}
-				serviceTitle="Je donne mon avis"
-				serviceTagline="La voix de vos usagers"
-			/>
+			{!shouldDisplayUserDetailsForm && (
+				<Header
+					brandTop={
+						<>
+							RÉPUBLIQUE <br /> FRANÇAISE
+						</>
+					}
+					homeLinkProps={{
+						href: !session?.user ? '/' : '/administration/dashboard/products',
+						title: "Je donne mon avis, retour à l'accueil"
+					}}
+					className={classes.navigation}
+					id={'fr-header-public-header'}
+					quickAccessItems={light ? undefined : quickAccessItems}
+					navigation={
+						!!navigationItems.length && !pathname.startsWith('/public')
+							? navigationItems
+							: undefined
+					}
+					serviceTitle="Je donne mon avis"
+					serviceTagline="La voix de vos usagers"
+				/>
+			)}
 
 			<main id="main" role="main" tabIndex={-1}>
-				{!!session?.user && (
+				{!!session?.user && !shouldDisplayUserDetailsForm && (
 					<Notice
 						isClosable
 						onClose={function noRefCheck() {}}
@@ -390,7 +419,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 						}
 					/>
 				)}
-				{children}
+				{mainContent}
 			</main>
 			<div id="footer" tabIndex={-1}>
 				<Footer

@@ -333,7 +333,13 @@ def format_excel(writer, df, sheet_name):
 
     # Adjust column widths
     for i, col in enumerate(df.columns):
-        max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
+        try:
+            # Handle NaN and float values by converting to string first
+            col_values = df[col].fillna('').astype(str)
+            max_len = max(col_values.str.len().max(), len(col)) + 2
+        except (ValueError, TypeError):
+            # Fallback to a default width if calculation fails
+            max_len = len(col) + 2
         worksheet.set_column(i, i, max_len)
 
     # Define header format
@@ -350,6 +356,12 @@ def format_excel(writer, df, sheet_name):
         'text_wrap': True
     })
 
+    # Define date format for datetime columns
+    date_format = workbook.add_format({
+        'border': 1,
+        'num_format': 'dd/mm/yyyy hh:mm:ss'
+    })
+
     # Define cell format for empty cells
     empty_cell_format = workbook.add_format({
         'border': 0,
@@ -364,7 +376,12 @@ def format_excel(writer, df, sheet_name):
     for row_num in range(1, len(df) + 1):
         for col_num in range(len(df.columns)):
             cell_value = df.iloc[row_num - 1, col_num]
-            if pd.isna(cell_value) or cell_value == "":
+            col_name = df.columns[col_num]
+            
+            # Apply date format for 'Review Created At' column
+            if col_name == 'Review Created At' and isinstance(cell_value, pd.Timestamp):
+                worksheet.write_datetime(row_num, col_num, cell_value.to_pydatetime(), date_format)
+            elif pd.isna(cell_value) or cell_value == "":
                 worksheet.write(row_num, col_num, cell_value, cell_format)
             else:
                 worksheet.write(row_num, col_num, cell_value, cell_format)
@@ -395,7 +412,7 @@ def create_csv_buffer(reviews, field_labels):
                 review['product_id'],
                 review['button_id'],
                 review['xwiki_id'],
-                review['review_created_at']
+                pd.to_datetime(review['review_created_at'])
             ]
             for label in field_labels:
                 row.append(review['answers'].get(label, ''))
@@ -418,7 +435,7 @@ def create_xls_buffer(reviews, field_labels, product_name):
             'Product ID': review['product_id'],
             'Button ID': review['button_id'],
             'XWiki ID': review['xwiki_id'],
-            'Review Created At': review['review_created_at']
+            'Review Created At': pd.to_datetime(review['review_created_at'])
         }
         for label in field_labels:
             row[label] = review['answers'].get(label, '')
@@ -553,8 +570,8 @@ def process_exports(conn):
     product_id = first_result_export[5]
     filter_params_raw = first_result_export[3]
     export_format = first_result_export[9]
-    name_product = first_result_export[11]
-    email_user = first_result_export[10]
+    name_product = first_result_export[13]
+    email_user = first_result_export[12]
 
     filters_query = ""
     filters_values = []

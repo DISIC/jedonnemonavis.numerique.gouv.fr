@@ -88,10 +88,14 @@ const ReviewsTab = (props: Props) => {
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
 
-	const filter_modal = createModal({
-		id: 'filter-modal',
-		isOpenedByDefault: false
-	});
+	const filter_modal = useMemo(
+		() =>
+			createModal({
+				id: 'filter-modal',
+				isOpenedByDefault: false
+			}),
+		[]
+	);
 
 	const { filters, updateFilters } = useFilters();
 
@@ -416,17 +420,16 @@ const ReviewsTab = (props: Props) => {
 	) => {
 		switch (type) {
 			case 'checkbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} complété`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} complété`;
 			case 'iconbox':
-				return `${
-					FILTER_LABELS.find(filter => filter.value === key)?.label
-				} : ${displayIntention((value ?? 'neutral') as AnswerIntention)}`;
+				return `${FILTER_LABELS.find(filter => filter.value === key)
+					?.label} : ${displayIntention(
+					(value ?? 'neutral') as AnswerIntention
+				)}`;
 			case 'select':
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
+				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			default:
 				return '';
 		}
@@ -500,6 +503,20 @@ const ReviewsTab = (props: Props) => {
 			setCurrentExportId(userExportInProgress.id);
 		}
 	}, [exports]);
+
+	useEffect(() => {
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'reviews',
+			action_type: 'read',
+			action: 'review_list_display',
+			ui_source: 'onglet'
+		});
+	}, []);
 
 	const handleSendInvitation = () => {
 		router.push({
@@ -580,7 +597,7 @@ const ReviewsTab = (props: Props) => {
 				modal={filter_modal}
 				filters={filters.productReviews.filters}
 				submitFilters={handleSubmitfilters}
-				form_id={form.id}
+				form={form}
 				setButtonId={setButtonId}
 			/>
 
@@ -589,8 +606,7 @@ const ReviewsTab = (props: Props) => {
 				{nbReviews > 0 && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
-							product_id={form.product_id}
-							form_id={form.id}
+							form={form}
 							startDate={filters.sharedFilters.currentStartDate}
 							endDate={filters.sharedFilters.currentEndDate}
 							mustHaveVerbatims={true}
@@ -622,8 +638,8 @@ const ReviewsTab = (props: Props) => {
 								currentExport.link === null && currentExport.params
 									? 'fr-mt-4v'
 									: currentExport.link
-										? 'fr-mt-2v'
-										: 'fr-hidden'
+									? 'fr-mt-2v'
+									: 'fr-hidden'
 							)}
 						>
 							{currentExport.link && (
@@ -703,6 +719,7 @@ const ReviewsTab = (props: Props) => {
 								</ButtonDSFR>
 							}
 							renderTags={renderTags}
+							form={form}
 						>
 							{reviewLog[0] && (
 								<Checkbox
@@ -728,6 +745,19 @@ const ReviewsTab = (props: Props) => {
 															...filters.sharedFilters,
 															hasChanged: true
 														}
+													});
+
+													window._mtm?.push({
+														event: 'matomo_event',
+														container_type: 'backoffice',
+														service_id: form.product_id,
+														form_id: form.id,
+														template_slug: form.form_template.slug,
+														category: 'reviews',
+														action_type: 'read',
+														action: `only_new_review_apply`,
+														ui_source: 'quick_filter',
+														value: e.target.checked
 													});
 												}
 											}
@@ -859,6 +889,7 @@ const ReviewsTab = (props: Props) => {
 															<ReviewLineVerbatim
 																key={index}
 																review={review}
+																form={form}
 																search={validatedSearch}
 																formConfigHelper={getFormConfigHelperFromDate(
 																	review.created_at || new Date()
@@ -885,6 +916,20 @@ const ReviewsTab = (props: Props) => {
 											onClick: event => {
 												event.preventDefault();
 												handlePageChange(pageNumber);
+												if (pageNumber !== currentPage) {
+													window._mtm?.push({
+														event: 'matomo_event',
+														container_type: 'backoffice',
+														service_id: form.product_id,
+														form_id: form.id,
+														template_slug: form.form_template.slug,
+														category: 'reviews',
+														action_type: 'read',
+														action: `review_other_page_display`,
+														ui_source: 'navigation',
+														value: pageNumber
+													});
+												}
 											},
 											href: '#',
 											classes: { link: fr.cx('fr-pagination__link') },

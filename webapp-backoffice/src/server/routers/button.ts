@@ -42,7 +42,7 @@ export const buttonRouter = router({
 					title: filterByTitle === 'title:asc' ? 'asc' : 'desc'
 				},
 				include: {
-					form: true,
+					form: { include: { form_template: true } },
 					closedButtonLog: true
 				}
 			});
@@ -78,7 +78,7 @@ export const buttonRouter = router({
 			const newButton = await ctx.prisma.button.create({
 				data: input,
 				include: {
-					form: true
+					form: { include: { form_template: true } }
 				}
 			});
 

@@ -1,6 +1,9 @@
 import { selectors } from '../selectors';
 import { appFormUrl, appUrl, mailerUrl, invitedEmail } from '../variables';
-import { editFormIntroductionText } from './forms';
+import {
+	editFormIntroductionText,
+	ensureTestServiceExistsAndGoToForms
+} from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 
 export function login(email: string, password: string, loginOnly = false) {
@@ -11,6 +14,7 @@ export function login(email: string, password: string, loginOnly = false) {
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
+	tryFillUserDetailsForm();
 	if (!loginOnly) tryCloseNewsModal();
 }
 
@@ -118,18 +122,31 @@ export function createOrEditProduct(
 
 	if (onlyProductCreation) {
 		cy.visit(`${appUrl}${selectors.url.products}`);
-		cy.contains(selectors.productLink, selectors.dashboard.nameTestService)
+		cy.get('a[title="' + selectors.dashboard.nameTestService + '"]')
 			.should('be.visible')
-			.click();
+			.click({ force: true });
 	}
 }
 
 export function createOrEditForm(
 	name: string,
 	isEdit = false,
-	shouldCheckA11y = false
+	shouldCheckA11y = false,
+	isOnboarding = true
 ) {
-	if (!isEdit) cy.contains('button', 'Générer un formulaire').click();
+	if (!isEdit) {
+		cy.wait(1000);
+		if (isOnboarding) {
+			cy.contains('button', 'Générer un formulaire').click();
+		} else {
+			cy.url().should('include', '/administration/dashboard/product/');
+			cy.contains('h1', 'service-test')
+				.should('be.visible')
+				.then(() => {
+					cy.contains('button', 'Générer un formulaire').click();
+				});
+		}
+	}
 
 	cy.get(selectors.formCreation)
 		.should('be.visible')
@@ -162,6 +179,11 @@ export function createOrEditForm(
 
 		cy.get(actions).contains('button', selectors.onboarding.continue).click();
 		cy.get(actions).contains('button', selectors.onboarding.continue).click();
+
+		if (!isOnboarding) {
+			cy.get(actions).contains('button', selectors.onboarding.continue).click();
+			cy.get(actions).contains('button', selectors.onboarding.continue).click();
+		}
 	} else {
 		editFormIntroductionText();
 		cy.get(actions)
@@ -218,6 +240,7 @@ export function modifyButton() {
 		.within(() => {
 			cy.get('[class*="actionsContainer"]')
 				.find('button#button-options')
+				.first()
 				.click();
 		});
 	cy.get('div#option-menu').contains('Modifier').click();
@@ -283,4 +306,46 @@ export function doTheOnboardingFlow() {
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true, false);
 	createButton('e2e-jdma-button-test-1', true);
+}
+
+type UserDetailsFormInput = {
+	jobTitle?: string;
+	referralSource?: string;
+	customReferralSource?: string;
+	designLevel?: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+	submit?: boolean;
+};
+
+export function tryFillUserDetailsForm({
+	jobTitle = 'Chef de projet',
+	referralSource = 'Recherche Internet',
+	customReferralSource = 'Recommandation',
+	designLevel = 'beginner',
+	submit = true
+}: UserDetailsFormInput = {}) {
+	cy.wait(500);
+	cy.get('body').then($body => {
+		const hasForm = $body.find('select[name="referralSource"]').length > 0;
+		if (!hasForm) {
+			cy.log('User details form not found, skipping fill action.');
+			return;
+		}
+
+		cy.get('input[name="jobTitle"]').clear().type(jobTitle);
+		cy.get('select[name="referralSource"]').select(referralSource);
+
+		if (referralSource === 'Autre (précisez)') {
+			cy.get('input[name="customReferralSource"]')
+				.clear()
+				.type(customReferralSource);
+		}
+
+		cy.get(`input[name="design-level-radio"][value="${designLevel}"]`).check({
+			force: true
+		});
+
+		if (submit) {
+			cy.contains('button', 'Continuer').click();
+		}
+	});
 }
