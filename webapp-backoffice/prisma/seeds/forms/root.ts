@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const createYesNoOptions =
 	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
@@ -241,3 +241,98 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 		]
 	}
 };
+
+export async function seed_root_form_template_buttons(
+	prisma: PrismaClient,
+	formTemplateId: number
+) {
+	await prisma.formTemplateButton.upsert({
+		where: {
+			form_template_id_slug: {
+				form_template_id: formTemplateId,
+				slug: 'jdma'
+			}
+		},
+		update: {
+			label: 'Je donne mon avis',
+			order: 0,
+			isDefault: true,
+			variants: {
+				deleteMany: {},
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		},
+		create: {
+			form_template: {
+				connect: {
+					id: formTemplateId
+				}
+			},
+			label: 'Je donne mon avis',
+			slug: 'jdma',
+			order: 0,
+			isDefault: true,
+			variants: {
+				create: [
+					{
+						style: 'solid',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'solid',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'light',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
+						alt_text: 'Je donne mon avis'
+					},
+					{
+						style: 'outline',
+						theme: 'dark',
+						image_url:
+							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
+						alt_text: 'Je donne mon avis'
+					}
+				]
+			}
+		}
+	});
+}
