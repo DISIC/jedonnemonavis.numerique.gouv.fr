@@ -14,7 +14,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
-import FormLinkIntegrationPreview from '../Form/FormLinkIntegrationPreview';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
 import { ButtonModalType } from './interface';

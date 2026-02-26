@@ -1,8 +1,7 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { getServerSideProps } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]';
 import {
-	ButtonWithClosedLog,
-	ButtonWithForm,
+	ButtonWithElements,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { trpc } from '@/src/utils/trpc';
@@ -21,7 +20,7 @@ interface Props {
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
-	buttons: (ButtonWithForm & ButtonWithClosedLog)[];
+	buttons: ButtonWithElements[];
 	isLoading: boolean;
 }
 
@@ -63,7 +62,7 @@ const SettingsTab = ({
 	const deleteAllButtons = async () => {
 		await Promise.all(
 			buttons.map(button => {
-				const { form, closedButtonLog, ...data } = button;
+				const { form, closedButtonLog, form_template_button, ...data } = button;
 				return deleteButton.mutateAsync({
 					buttonPayload: { ...data, deleted_at: new Date(), isDeleted: true },
 					shouldLogEvent: false,

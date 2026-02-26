@@ -83,13 +83,7 @@ const ProductButtonCard = (props: Props) => {
 		}
 
 		return tags.length > 0 ? (
-			<div
-				className={classes.tagsContainer}
-				role="region"
-				aria-label="Propriétés du bouton"
-			>
-				{tags}
-			</div>
+			<div className={classes.tagsContainer}>{tags}</div>
 		) : null;
 	};
 
