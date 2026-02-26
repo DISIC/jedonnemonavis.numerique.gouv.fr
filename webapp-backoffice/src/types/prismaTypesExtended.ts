@@ -44,7 +44,11 @@ export type ProductWithForms = Prisma.ProductGetPayload<
 
 const ButtonWithForm = Prisma.validator<Prisma.ButtonDefaultArgs>()({
 	include: {
-		form: { include: { form_template: true } }
+		form: {
+			include: {
+				form_template: true
+			}
+		}
 	}
 });
 
@@ -59,6 +63,24 @@ const ButtonWithClosedLog = Prisma.validator<Prisma.ButtonDefaultArgs>()({
 export type ButtonWithClosedLog = Prisma.ButtonGetPayload<
 	typeof ButtonWithClosedLog
 >;
+
+const ButtonWithTemplateButton = Prisma.validator<Prisma.ButtonDefaultArgs>()({
+	include: {
+		form_template_button: {
+			include: {
+				variants: true
+			}
+		}
+	}
+});
+
+export type ButtonWithTemplateButton = Prisma.ButtonGetPayload<
+	typeof ButtonWithTemplateButton
+>;
+
+export type ButtonWithElements = ButtonWithForm &
+	ButtonWithTemplateButton &
+	Partial<ButtonWithClosedLog>;
 
 const UserWithEntities = Prisma.validator<Prisma.UserDefaultArgs>()({
 	include: {
@@ -107,6 +129,11 @@ const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
 							}
 						}
 					}
+				},
+				form_template_buttons: {
+					include: {
+						variants: true
+					}
 				}
 			}
 		}
@@ -114,6 +141,22 @@ const FormWithElements = Prisma.validator<Prisma.FormDefaultArgs>()({
 });
 
 export type FormWithElements = Prisma.FormGetPayload<typeof FormWithElements>;
+
+const FormWithConfigAndTemplate = Prisma.validator<Prisma.FormDefaultArgs>()({
+	include: {
+		form_configs: {
+			include: {
+				form_config_displays: true,
+				form_config_labels: true
+			}
+		},
+		form_template: true
+	}
+});
+
+export type FormWithConfigAndTemplate = Prisma.FormGetPayload<
+	typeof FormWithConfigAndTemplate
+>;
 
 const FormTemplateWithElements =
 	Prisma.validator<Prisma.FormTemplateDefaultArgs>()({
@@ -133,6 +176,14 @@ const FormTemplateWithElements =
 export type FormTemplateWithElements = Prisma.FormTemplateGetPayload<
 	typeof FormTemplateWithElements
 >;
+
+const FormTemplateButtonWithVariants =
+	Prisma.validator<Prisma.FormTemplateButtonDefaultArgs>()({
+		include: { variants: true }
+	});
+
+export type FormTemplateButtonWithVariants =
+	Prisma.FormTemplateButtonGetPayload<typeof FormTemplateButtonWithVariants>;
 
 const FormConfigWithChildren = Prisma.validator<Prisma.FormConfigDefaultArgs>()(
 	{

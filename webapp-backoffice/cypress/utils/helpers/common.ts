@@ -1,9 +1,6 @@
 import { selectors } from '../selectors';
-import { appFormUrl, appUrl, mailerUrl, invitedEmail } from '../variables';
-import {
-	editFormIntroductionText,
-	ensureTestServiceExistsAndGoToForms
-} from './forms';
+import { appFormUrl, appUrl, invitedEmail, mailerUrl } from '../variables';
+import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 
 export function login(email: string, password: string, loginOnly = false) {
@@ -237,20 +234,21 @@ export function modifyButton() {
 	cy.intercept('POST', '/api/trpc/button.update*').as('updateButton');
 	cy.get('[class*="ProductButtonCard"]')
 		.first()
+		.should('be.visible')
 		.within(() => {
-			cy.get('[class*="actionsContainer"]')
-				.find('button#button-options')
-				.first()
-				.click();
+			cy.contains('button', 'Modifier')
+				.should('be.visible')
+				.click({ force: true });
 		});
-	cy.get('div#option-menu').contains('Modifier').click();
 	cy.get('dialog#button-modal').within(() => {
 		cy.get('input[name="button-create-title"]')
+			.should('be.visible')
 			.clear()
 			.type('e2e-jdma-button-test-1');
-		cy.get('textarea')
-			.clear()
-			.type('Description du bouton e2e-jdma-button-test-1');
+
+		cy.get('fieldset[class*="buttonStyles"]').within(() => {
+			cy.get('input[type="radio"][value="outline"]').check({ force: true });
+		});
 	});
 	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);

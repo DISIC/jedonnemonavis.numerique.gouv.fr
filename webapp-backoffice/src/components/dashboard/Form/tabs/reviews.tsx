@@ -3,16 +3,20 @@ import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfi
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
 import NoReviewsPanel from '@/src/components/dashboard/Pannels/NoReviewsPanel';
 import ExportReviews from '@/src/components/dashboard/Reviews/ExportReviews';
-import ReviewFilters from '@/src/components/dashboard/Reviews/ReviewFilters';
 import ReviewFiltersModal from '@/src/components/dashboard/Reviews/ReviewFiltersModal';
-import ReviewLineVerbatim from '@/src/components/dashboard/Reviews/ReviewLineVerbatim';
+import ReviewFilterTags from '@/src/components/dashboard/Reviews/ReviewFilterTags';
+import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHeader';
+import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { FILTER_LABELS } from '@/src/utils/helpers';
-import { displayIntention } from '@/src/utils/stats/intention-helpers';
+import {
+	getExportFiltersLabel,
+	getExportPeriodLabel,
+	parseExportParams
+} from '@/src/utils/export';
 import {
 	formatDateToFrenchStringWithHour,
 	getNbPages,
@@ -20,33 +24,26 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import Tag from '@codegouvfr/react-dsfr/Tag';
-import { AnswerIntention, Button, RightAccessStatus } from '@prisma/client';
+import { LinearProgress } from '@mui/material';
+import { Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
-import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 import ExportHistory from '../../Reviews/ExportHistory';
-import { useSession } from 'next-auth/react';
-import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
-import {
-	getExportFiltersLabel,
-	getExportPeriodLabel,
-	parseExportParams
-} from '@/src/utils/export';
-import Link from 'next/link';
-import { LinearProgress } from '@mui/material';
+import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
+import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	hasButtons: boolean;
 	nbReviews: number;
 	isLoading: boolean;
@@ -64,15 +61,7 @@ const defaultErrors = {
 };
 
 const ReviewsTab = (props: Props) => {
-	const {
-		form,
-		ownRight,
-		handleModalOpening,
-		hasButtons,
-		nbReviews,
-		isLoading,
-		buttons
-	} = props;
+	const { form, ownRight, hasButtons, nbReviews, isLoading, buttons } = props;
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
@@ -144,7 +133,7 @@ const ReviewsTab = (props: Props) => {
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
-			needLogging: false, // On ne veut pas créer l'événement service_reviews_view ici
+			needLogging: false,
 			loggingFromMail: isFromMail
 		},
 		{
@@ -186,16 +175,13 @@ const ReviewsTab = (props: Props) => {
 			form_id: form.id
 		},
 		{
-			enabled: nbReviews > 0 && !isLoading,
-			initialData: {
-				data: []
-			}
+			enabled: nbReviews > 0 && !isLoading
 		}
 	);
 
 	const formHasExportsInProgress =
-		exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
-			.length > 0;
+		(exports?.data.filter(e => e.status === 'processing' || e.status === 'idle')
+			.length || 0) > 0;
 
 	const userExportInProgress = exports?.data.find(
 		e =>
@@ -227,7 +213,7 @@ const ReviewsTab = (props: Props) => {
 		});
 		const filters = getExportFiltersLabel(parsedParams, true, buttons);
 		const finalFilters = currentExport.params
-			? [`Période : ${periodLabel}`, ...filters]
+			? [`Période : ${periodLabel}`, ...(filters as string[])]
 			: undefined;
 
 		switch (currentExport.status) {
@@ -291,27 +277,6 @@ const ReviewsTab = (props: Props) => {
 		metadata: { countFiltered: reviewsCountFiltered, countAll: reviewsCountAll }
 	} = reviewResults;
 
-	const reviewsExtended = reviews.map(review => {
-		if (review.answers) {
-			return {
-				...review,
-				satisfaction: review.answers.find(
-					answer => answer.field_code === 'satisfaction'
-				),
-				easy: review.answers.find(answer => answer.field_code === 'easy'),
-				comprehension: review.answers.find(
-					answer => answer.field_code === 'comprehension'
-				),
-				verbatim: review.answers.find(
-					answer => answer.field_code === 'verbatim'
-				),
-				contact_satisfaction: review.answers.find(
-					answer => answer.field_code === 'contact_satisfaction'
-				)
-			};
-		}
-	});
-
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
 		return regex.test(date);
@@ -334,104 +299,6 @@ const ReviewsTab = (props: Props) => {
 			);
 		} else {
 			setSort(`${sort}:asc`);
-		}
-	};
-
-	const renderTags = () => {
-		const tags = Object.keys(filters.productReviews.filters).flatMap(
-			(key, index) => {
-				const filterValue =
-					filters.productReviews.filters[key as keyof ReviewFiltersType];
-				if (!Array.isArray(filterValue) && filterValue !== false) {
-					return (
-						<Tag
-							key={index}
-							title={'Retirer le filtre : Réponse avec commentaire'}
-							dismissible
-							className={cx(classes.tagFilter)}
-							nativeButtonProps={{
-								onClick: () => {
-									updateFilters({
-										...filters,
-										productReviews: {
-											...filters.productReviews,
-											filters: {
-												...filters.productReviews.filters,
-												[key]: typeof filterValue === 'boolean' ? false : ''
-											}
-										}
-									});
-								}
-							}}
-						>
-							{renderLabel(
-								FILTER_LABELS.find(filter => filter.value === key)?.type,
-								key,
-								filterValue
-							)}
-						</Tag>
-					);
-				} else if (Array.isArray(filterValue) && filterValue.length > 0) {
-					return filterValue.map((value, subIndex) => {
-						const labelRendered = renderLabel(
-							FILTER_LABELS.find(filter => filter.value === key)?.type,
-							key,
-							value
-						);
-
-						return (
-							<Tag
-								key={`${key}-${subIndex}`}
-								title={`Retirer le filtre ${labelRendered}`}
-								dismissible
-								className={cx(classes.tagFilter)}
-								nativeButtonProps={{
-									onClick: () => {
-										updateFilters({
-											...filters,
-											productReviews: {
-												...filters.productReviews,
-												filters: {
-													...filters.productReviews.filters,
-													[key]: filterValue.filter(item => item !== value)
-												}
-											}
-										});
-									}
-								}}
-							>
-								{labelRendered}
-							</Tag>
-						);
-					});
-				} else {
-					return null;
-				}
-			}
-		);
-
-		return tags.length > 0 ? tags : null;
-	};
-
-	const renderLabel = (
-		type: string | undefined,
-		key: string,
-		value: string | string[] | boolean
-	) => {
-		switch (type) {
-			case 'checkbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} complété`;
-			case 'iconbox':
-				return `${FILTER_LABELS.find(filter => filter.value === key)
-					?.label} : ${displayIntention(
-					(value ?? 'neutral') as AnswerIntention
-				)}`;
-			case 'select':
-				return `Source : ${buttons.find(b => b.id === parseInt(value as string))
-					?.title}`;
-			default:
-				return '';
 		}
 	};
 
@@ -593,17 +460,25 @@ const ReviewsTab = (props: Props) => {
 
 	return (
 		<>
-			<ReviewFiltersModal
-				modal={filter_modal}
-				filters={filters.productReviews.filters}
-				submitFilters={handleSubmitfilters}
-				form={form}
-				setButtonId={setButtonId}
-			/>
+			{form.form_template.slug === 'root' ? (
+				<ReviewFiltersModalRoot
+					modal={filter_modal}
+					filters={filters.productReviews.filters}
+					submitFilters={handleSubmitfilters}
+					form_id={form.id}
+				/>
+			) : (
+				<ReviewFiltersModal
+					modal={filter_modal}
+					filters={filters.productReviews.filters}
+					submitFilters={handleSubmitfilters}
+					form={form}
+				/>
+			)}
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && (
+				{nbReviews > 0 && form.form_template.slug === 'root' && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							form={form}
@@ -623,7 +498,10 @@ const ReviewsTab = (props: Props) => {
 								!!userExportInProgress || isLoading || isLoadingExports
 							}
 						/>
-						<ExportHistory exports={exports.data} buttons={buttons} />
+						<ExportHistory
+							exports={(exports?.data || []) as any}
+							buttons={buttons}
+						/>
 					</div>
 				)}
 			</div>
@@ -673,13 +551,16 @@ const ReviewsTab = (props: Props) => {
 									<span
 										className={cx(classes.progressBarLabel)}
 										style={{
-											color: currentExport.progress < 5 ? 'black' : undefined
+											color:
+												(currentExport as any).progress < 5
+													? 'black'
+													: undefined
 										}}
 									>
-										{currentExport.progress}%
+										{(currentExport as any).progress}%
 									</span>
 									<LinearProgress
-										value={currentExport.progress}
+										value={(currentExport as any).progress}
 										variant="determinate"
 										className={fr.cx('fr-mt-3v', 'fr-mb-2v', 'fr-p-3v')}
 										sx={{
@@ -718,8 +599,9 @@ const ReviewsTab = (props: Props) => {
 									Plus de filtres
 								</ButtonDSFR>
 							}
-							renderTags={renderTags}
-							form={form}
+							renderTags={() => (
+								<ReviewFilterTags buttons={buttons} form={form} />
+							)}
 						>
 							{reviewLog[0] && (
 								<Checkbox
@@ -840,18 +722,7 @@ const ReviewsTab = (props: Props) => {
 						<>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
-									<FormConfigVersionsDisplay
-										formConfigs={formConfigs}
-										product={{
-											...form.product,
-											forms: [
-												{
-													...form,
-													buttons: []
-												}
-											]
-										}}
-									/>
+									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}
 							<div
@@ -873,38 +744,48 @@ const ReviewsTab = (props: Props) => {
 								/>
 							</div>
 							<div>
-								{reviewsExtended.length > 0 && (
+								{reviews.length > 0 && (
 									<>
 										<table className={cx(classes.tableContainer)}>
-											<ReviewFilters
-												displayMode={'verbatim'}
+											<ReviewTableHeader
 												sort={sort}
 												onClick={handleSortChange}
-												hasManyVersions={formConfigs.length > 0}
+												form={form}
 											/>
 											<tbody>
-												{reviewsExtended.map((review, index) => {
-													if (review) {
-														return (
-															<ReviewLineVerbatim
-																key={index}
-																review={review}
-																form={form}
-																search={validatedSearch}
-																formConfigHelper={getFormConfigHelperFromDate(
-																	review.created_at || new Date()
-																)}
-																hasManyVersions={formConfigs.length > 0}
-															/>
-														);
-													}
+												{reviews.map((review, index) => {
+													return (
+														<ReviewTableRow
+															key={index}
+															review={review}
+															search={validatedSearch}
+															formTemplate={form.form_template}
+															formConfigHelper={getFormConfigHelperFromDate(
+																review.created_at || new Date()
+															)}
+															hasManyVersions={formConfigs.length > 0}
+															onClickMoreInfo={() => {
+																window._mtm?.push({
+																	event: 'matomo_event',
+																	container_type: 'backoffice',
+																	service_id: form.product_id,
+																	form_id: form.id,
+																	template_slug: form.form_template.slug,
+																	category: 'reviews',
+																	action_type: 'read',
+																	action: `review_detail_display`,
+																	ui_source: 'review_button'
+																});
+															}}
+														/>
+													);
 												})}
 											</tbody>
 										</table>
 									</>
 								)}
 							</div>
-							{reviewsExtended.length > 0 && (
+							{reviews.length > 0 && (
 								<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
 									<Pagination
 										count={nbPages}
@@ -990,10 +871,6 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 	filterView: {
 		display: 'flex',
 		flexDirection: 'column'
-	},
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
 	},
 	filtersWrapper: {
 		display: 'flex',

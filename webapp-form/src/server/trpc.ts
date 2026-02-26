@@ -19,7 +19,9 @@ export const createContext = async (opts: CreateNextContextOptions) => {
         ca: fs.readFileSync(caCrtPath),
         rejectUnauthorized: false,
       }
-    : undefined;
+    : {
+        rejectUnauthorized: false,
+      };
 
   const elkClient = new ElkClient({
     node: process.env.ES_ADDON_URI as string,
@@ -80,7 +82,7 @@ const transformIp = (ip: string) => {
 const extractIdsFromUrl = (url: string) => {
   const urlObj = new URL(url);
   const pathParts = urlObj.pathname.split("/");
-  const product_id = pathParts[2];
+  const product_id = pathParts[2] === "avis" ? pathParts[3] : pathParts[2];
   const button_id = urlObj.searchParams.get("button");
   return [product_id, button_id];
 };
@@ -112,8 +114,8 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const ip = xClientIp
       ? xClientIp.split(",")[0]
       : xForwardedFor
-        ? xForwardedFor.split(",")[0]
-        : defaultFingerPrint(ctx.req);
+      ? xForwardedFor.split(",")[0]
+      : defaultFingerPrint(ctx.req);
 
     return ip;
   },
@@ -125,8 +127,8 @@ const limiter = createTRPCStoreLimiter<typeof t>({
     const ip = xClientIp
       ? xClientIp.split(",")[0]
       : xForwardedFor
-        ? xForwardedFor.split(",")[0]
-        : defaultFingerPrint(ctx.req);
+      ? xForwardedFor.split(",")[0]
+      : defaultFingerPrint(ctx.req);
     const referer = ctx.req.headers["referer"] || ctx.req.headers["referrer"];
     const hashedIp = hashIp(ip);
     const currentTime = new Date();
@@ -175,7 +177,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
           total_attempts: 5,
           first_attempt: currentTime,
           last_attempt: currentTime,
-          url: referer as string
+          url: referer as string,
         },
       });
     }
@@ -193,8 +195,8 @@ const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
   const ip = xClientIp
     ? xClientIp.split(",")[0]
     : xForwardedFor
-      ? xForwardedFor.split(",")[0]
-      : defaultFingerPrint(ctx.req);
+    ? xForwardedFor.split(",")[0]
+    : defaultFingerPrint(ctx.req);
 
   if (isIpAllowed(ip)) {
     return next();

@@ -40,6 +40,12 @@ interface FiltersContextProps {
 	filters: Filters;
 	updateFilters: (newFilters: Partial<Filters>) => void;
 	clearFilters: () => void;
+	resetSectionFilters: (
+		section: keyof Pick<
+			Filters,
+			'productActivityLogs' | 'productReviews' | 'productStats'
+		>
+	) => void;
 }
 
 const FiltersContext = createContext<FiltersContextProps | undefined>(
@@ -64,13 +70,11 @@ const initialState: Filters = {
 	productReviews: {
 		displayNew: false,
 		filters: {
-			satisfaction: [],
-			comprehension: [],
 			needVerbatim: false,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
-			help: [],
-			buttonId: []
+			buttonId: [],
+			fields: []
 		}
 	},
 	productStats: {
@@ -105,8 +109,26 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 
 	const clearFilters = () => setFilters(initialState);
 
+	const resetSectionFilters = (
+		section: keyof Pick<
+			Filters,
+			'productActivityLogs' | 'productReviews' | 'productStats'
+		>
+	) => {
+		setFilters(prevFilters => ({
+			...prevFilters,
+			[section]: initialState[section],
+			sharedFilters: {
+				...initialState.sharedFilters
+			},
+			currentPage: 1
+		}));
+	};
+
 	return (
-		<FiltersContext.Provider value={{ filters, updateFilters, clearFilters }}>
+		<FiltersContext.Provider
+			value={{ filters, updateFilters, clearFilters, resetSectionFilters }}
+		>
 			{children}
 		</FiltersContext.Provider>
 	);

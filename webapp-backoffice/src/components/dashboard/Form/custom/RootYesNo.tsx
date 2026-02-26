@@ -1,7 +1,7 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import Radios from '../blocks/Radios';
+import RadioTiles from '../blocks/RadioTiles';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 
@@ -56,7 +56,7 @@ const RootYesNo = (props: Props) => {
 								</Badge>
 							)}
 						</label>
-						<Radios
+						<RadioTiles
 							block={childBlock}
 							disabled={disabled || isParentHidden}
 							nbItems={2}

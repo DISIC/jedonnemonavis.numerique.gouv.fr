@@ -42,7 +42,14 @@ export const buttonRouter = router({
 					title: filterByTitle === 'title:asc' ? 'asc' : 'desc'
 				},
 				include: {
-					form: { include: { form_template: true } },
+					form: {
+						include: {
+							form_template: true
+						}
+					},
+					form_template_button: {
+						include: { variants: true }
+					},
 					closedButtonLog: true
 				}
 			});
@@ -78,7 +85,16 @@ export const buttonRouter = router({
 			const newButton = await ctx.prisma.button.create({
 				data: input,
 				include: {
-					form: { include: { form_template: true } }
+					form: {
+						include: {
+							form_template: true
+						}
+					},
+					form_template_button: {
+						include: {
+							variants: true
+						}
+					}
 				}
 			});
 
@@ -101,7 +117,12 @@ export const buttonRouter = router({
 				},
 				data: input,
 				include: {
-					form: { include: { form_template: true } }
+					form: { include: { form_template: true } },
+					form_template_button: {
+						include: {
+							variants: true
+						}
+					}
 				}
 			});
 
@@ -136,7 +157,12 @@ export const buttonRouter = router({
 				},
 				data: buttonPayload,
 				include: {
-					form: { include: { form_template: true } }
+					form: { include: { form_template: true } },
+					form_template_button: {
+						include: {
+							variants: true
+						}
+					}
 				}
 			});
 

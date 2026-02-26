@@ -29,6 +29,7 @@ const FormConfigurator = (props: Props) => {
 	const [tmpConfigHelper, setTmpConfigHelper] = useState<FormConfigHelper>(
 		getHelperFromFormConfig(formConfig)
 	);
+
 	const { isStepModified, modifiedSteps, recalculateModifiedSteps } =
 		useModifiedSteps(
 			form.form_template.form_template_steps,

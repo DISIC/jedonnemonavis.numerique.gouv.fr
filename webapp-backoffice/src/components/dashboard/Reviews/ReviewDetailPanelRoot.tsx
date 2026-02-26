@@ -5,13 +5,24 @@ import {
 } from '@/src/utils/helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import { ExtendedReview } from './interface';
 import React from 'react';
 import { generateRandomString } from '@/src/utils/tools';
 import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
+import {
+	AnswerPartialWithRelations,
+	ReviewPartialWithRelations
+} from '@/prisma/generated/zod';
 
-const ReviewCommonVerbatimLine = ({
+export interface ExtendedReview extends ReviewPartialWithRelations {
+	satisfaction: AnswerPartialWithRelations | undefined;
+	easy: AnswerPartialWithRelations | undefined;
+	comprehension: AnswerPartialWithRelations | undefined;
+	verbatim: AnswerPartialWithRelations | undefined;
+	contact_satisfaction: AnswerPartialWithRelations | undefined;
+}
+
+const ReviewDetailPanelRoot = ({
 	review,
 	type,
 	formConfig,
@@ -238,6 +249,7 @@ const useStyles = tss.create({
 	content: {
 		...fr.typography[17].style,
 		fontWeight: 400,
+		wordBreak: 'break-word',
 		marginBottom: 0
 	},
 	verbatimContent: {
@@ -275,4 +287,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewCommonVerbatimLine;
+export default ReviewDetailPanelRoot;

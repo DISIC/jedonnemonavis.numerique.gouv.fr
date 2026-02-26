@@ -46,7 +46,7 @@ const ExportHistoryModal = ({ modal, exports, buttons }: Props) => {
 			return {
 				...record,
 				periodLabel: periodLabel || '',
-				filtersLabel: filtersLabel || ''
+				filtersLabel: (filtersLabel as string) || ''
 			};
 		});
 	}, [exports]);

@@ -1,8 +1,7 @@
 import { Loader } from '@/src/components/ui/Loader';
 import { CustomModalProps } from '@/src/types/custom';
 import {
-	ButtonWithClosedLog,
-	ButtonWithForm,
+	ButtonWithElements,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
 import { linksFaqContents } from '@/src/utils/content';
@@ -15,18 +14,21 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
+import { ButtonModalType } from '../../ProductButton/interface';
 import ProductButtonCard from '../../ProductButton/ProductButtonCard';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	modal: CustomModalProps;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
+	handleModalOpening: (
+		modalType: ButtonModalType,
+		button: ButtonWithElements
+	) => void;
 	alertText: string;
 	isAlertShown: boolean;
 	setIsAlertShown: (value: boolean) => void;
-	buttons: (ButtonWithForm & ButtonWithClosedLog)[];
+	buttons: ButtonWithElements[];
 	isLoading: boolean;
 }
 

@@ -117,26 +117,3 @@ export const HELP_LABELS = [
 		value: 'Autre'
 	}
 ] as const;
-
-export const FILTER_LABELS = [
-	{
-		label: 'Satisfaction',
-		value: 'satisfaction',
-		type: 'iconbox'
-	},
-	{
-		label: 'Compréhension',
-		value: 'comprehension',
-		type: 'iconbox'
-	},
-	{
-		label: 'Commentaire',
-		value: 'needVerbatim',
-		type: 'checkbox'
-	},
-	{
-		label: 'Bouton',
-		value: 'buttonId',
-		type: 'select'
-	}
-];
