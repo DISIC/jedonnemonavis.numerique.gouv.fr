@@ -193,16 +193,9 @@ const NewLink = (props: Props) => {
 	return (
 		<OnboardingLayout
 			onCancel={
-				currentStep !== 'PREVIEW'
+				currentStep === 'COPY'
 					? () => {
-							switch (currentStep) {
-								case 'CREATION':
-									setCurrentStep('PREVIEW');
-									break;
-								case 'COPY':
-									setCurrentStep('CREATION');
-									break;
-							}
+							setCurrentStep('CREATION');
 					  }
 					: undefined
 			}
