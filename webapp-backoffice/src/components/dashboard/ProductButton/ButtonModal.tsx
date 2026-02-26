@@ -151,7 +151,13 @@ const ButtonModal = (props: Props) => {
 
 	const handleButtonDelete = () => {
 		if (currentButton && 'id' in currentButton) {
-			const { form, closedButtonLog, ...buttonWithoutForm } = currentButton;
+			const {
+				form,
+				closedButtonLog,
+				form_template_button,
+				...buttonWithoutForm
+			} = currentButton;
+
 			deleteButton.mutate({
 				product_id: form.product_id,
 				title: buttonWithoutForm.title,
