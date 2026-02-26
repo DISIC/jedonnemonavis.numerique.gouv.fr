@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 const createBugOptions =
 	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
@@ -140,3 +140,101 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 	integration_types: ['modal', 'link'],
 	default_integration_type: 'modal'
 };
+
+export async function seed_bug_form_template_buttons(
+	prisma: PrismaClient,
+	formTemplateId: number
+) {
+	const bugButtons = [
+		{
+			label: 'Une remarque ?',
+			slug: 'remark',
+			order: 0,
+			isDefault: true
+		},
+		{
+			label: 'Faire un retour',
+			slug: 'feedback',
+			order: 1,
+			isDefault: false
+		},
+		{
+			label: 'Signaler un problème',
+			slug: 'problem',
+			order: 2,
+			isDefault: false
+		}
+	];
+
+	for (const bugButton of bugButtons) {
+		await prisma.formTemplateButton.upsert({
+			where: {
+				form_template_id_slug: {
+					form_template_id: formTemplateId,
+					slug: bugButton.slug
+				}
+			},
+			update: {
+				label: bugButton.label,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					deleteMany: {},
+					create: [
+						{
+							style: 'solid',
+							theme: null,
+							image_url: '',
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: null,
+							image_url: '',
+							alt_text: bugButton.label
+						}
+					]
+				}
+			},
+			create: {
+				form_template: {
+					connect: {
+						id: formTemplateId
+					}
+				},
+				label: bugButton.label,
+				slug: bugButton.slug,
+				order: bugButton.order,
+				isDefault: bugButton.isDefault,
+				variants: {
+					create: [
+						{
+							style: 'solid',
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'solid',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-dark.svg`,
+							alt_text: bugButton.label
+						},
+						{
+							style: 'outline',
+							theme: 'dark',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-outline-dark.svg`,
+							alt_text: bugButton.label
+						}
+					]
+				}
+			}
+		});
+	}
+}
