@@ -104,7 +104,7 @@ async function seed_bug_form_template() {
 		create: createBugForm
 	});
 
-	await seed_bug_form_template_buttons(bugTemplate.id);
+	await seed_bug_form_template_buttons(prisma, bugTemplate.id);
 }
 
 async function seed_root_form_template() {
@@ -114,7 +114,7 @@ async function seed_root_form_template() {
 		create: createRootForm
 	});
 
-	await seed_root_form_template_buttons(rootTemplate.id);
+	await seed_root_form_template_buttons(prisma, rootTemplate.id);
 }
 
 async function seed_users_products() {
