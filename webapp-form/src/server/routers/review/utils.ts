@@ -1,17 +1,11 @@
-import { z } from "zod";
-import { router, publicProcedure, limitedProcedure } from "@/src/server/trpc";
+import { ReviewWithButtonAndProduct } from "@/prisma/augmented";
 import { Answer, Prisma, PrismaClient } from "@prisma/client";
-import {
-  ReviewUncheckedCreateInputSchema,
-  AnswerCreateInputSchema,
-} from "@/prisma/generated/zod";
 import { Client } from "@elastic/elasticsearch";
 import { ElkAnswer } from "@/src/utils/types";
-import { ReviewWithButtonAndProduct } from "@/prisma/augmented";
 import { TRPCError } from "@trpc/server";
 import { FormStepNames } from "@/src/pages/[id]";
 
-async function formatDynamicAnswer(
+export async function formatDynamicAnswer(
   prisma: PrismaClient,
   answer: {
     block_id: number;
@@ -49,8 +43,8 @@ async function formatDynamicAnswer(
     block.type_bloc === "input_text" || block.type_bloc === "input_text_area"
       ? "text"
       : block.type_bloc === "checkbox"
-        ? "checkbox"
-        : "radio";
+      ? "checkbox"
+      : "radio";
 
   return {
     field_code: (block as any).field_code || `block_${block.id}`,
@@ -263,7 +257,7 @@ export async function createReview(
   // Update last_review_at on the form
   await prisma.form.update({
     where: { id: review.form_id },
-    data: { last_review_at: newReview.created_at }
+    data: { last_review_at: newReview.created_at },
   });
 
   try {
@@ -274,159 +268,3 @@ export async function createReview(
 
   return newReview;
 }
-
-export const reviewRouter = router({
-  create: limitedProcedure
-    .input(
-      z.object({
-        review: ReviewUncheckedCreateInputSchema,
-        answers: z.array(AnswerCreateInputSchema),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const newReview = await createReview(ctx, input);
-
-      return { data: newReview };
-    }),
-
-  insertOrUpdate: publicProcedure
-    .input(
-      z.object({
-        answers: z.array(AnswerCreateInputSchema),
-        user_id: z.string(),
-        product_id: z.number(),
-        button_id: z.number(),
-        step_name: z.enum([
-          "satisfaction",
-          "comprehension",
-          "verbatim",
-          "contact",
-        ]),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { user_id, product_id, button_id, answers, step_name } = input;
-      const { prisma } = ctx;
-
-      const existingReview = await prisma.review.findFirst({
-        where: {
-          product_id,
-          button_id,
-          user_id,
-          created_at: {
-            gte: new Date(Date.now() - 60 * 60 * 1000),
-          },
-        },
-        include: {
-          button: true,
-          product: true,
-        },
-      });
-
-      if (existingReview) {
-        await createOrUpdateAnswers(ctx, {
-          answers: answers,
-          review: existingReview,
-          step_name,
-        });
-
-        return { data: existingReview };
-      } else {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Review not found",
-        });
-      }
-    }),
-
-  dynamicCreate: limitedProcedure
-    .input(
-      z.object({
-        review: ReviewUncheckedCreateInputSchema,
-        answers: z.array(
-          z.object({
-            block_id: z.number(),
-            answer_item_id: z.number().optional(),
-            answer_text: z.string().optional(),
-          }),
-        ),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { prisma } = ctx;
-      const { review, answers } = input;
-
-      const newReview = await prisma.review.create({
-        data: review,
-        include: {
-          product: true,
-          button: true,
-        },
-      });
-
-      const formattedAnswers = await Promise.all(
-        answers.map((answer) => formatDynamicAnswer(prisma, answer)),
-      );
-
-      try {
-        await createOrUpdateAnswers(ctx, {
-          answers: formattedAnswers,
-          review: newReview,
-        });
-      } catch (e) {
-        console.log(e);
-      }
-
-      return { data: newReview };
-    }),
-
-  dynamicInsertOrUpdate: publicProcedure
-    .input(
-      z.object({
-        review_id: z.number(),
-        review_created_at: z.date(),
-        answers: z.array(
-          z.object({
-            block_id: z.number(),
-            answer_item_id: z.number().optional(),
-            answer_text: z.string().optional(),
-          }),
-        ),
-      }),
-    )
-    .mutation(async ({ ctx, input }) => {
-      const { prisma } = ctx;
-      const { review_id, review_created_at, answers } = input;
-
-      const existingReview = await prisma.review.findUnique({
-        where: {
-          id_created_at: {
-            id: review_id,
-            created_at: review_created_at,
-          },
-        },
-        include: {
-          button: true,
-          product: true,
-        },
-      });
-
-      if (!existingReview) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Review not found",
-        });
-      }
-
-      const formattedAnswers = await Promise.all(
-        answers.map((answer) => formatDynamicAnswer(prisma, answer)),
-      );
-
-      await createOrUpdateAnswers(ctx, {
-        answers: formattedAnswers,
-        review: existingReview,
-      });
-
-      return { data: existingReview };
-    }),
-});
