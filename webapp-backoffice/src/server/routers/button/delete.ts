@@ -24,7 +24,7 @@ export const deleteButtonMutation = async ({
 
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		form_id: buttonPayload.form_id as number
 	});
 

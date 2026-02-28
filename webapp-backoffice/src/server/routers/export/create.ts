@@ -20,7 +20,7 @@ export const createExportMutation = async ({
 }) => {
 	await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		product_id: input.product_id,
 		authorizeCarrierUser: true
 	});

@@ -23,7 +23,7 @@ export const deleteFormMutation = async ({
 
 	const { product } = await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		product_id: product_id
 	});
 

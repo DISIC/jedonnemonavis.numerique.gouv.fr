@@ -17,7 +17,7 @@ export const archiveProductMutation = async ({
 
 	await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		product_id
 	});
 

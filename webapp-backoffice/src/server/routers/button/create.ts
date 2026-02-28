@@ -14,7 +14,7 @@ export const createButtonMutation = async ({
 }) => {
 	await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		form_id: input.form_id as number
 	});
 

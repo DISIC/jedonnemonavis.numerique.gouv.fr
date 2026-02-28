@@ -24,7 +24,7 @@ export const updateFormMutation = async ({
 
 	await checkRightToProceed({
 		prisma: ctx.prisma,
-		session: ctx.session,
+		session: ctx.session!,
 		product_id: form.product_id
 	});
 
