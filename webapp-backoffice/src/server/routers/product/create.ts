@@ -44,7 +44,7 @@ export const createProductMutation = async ({
 
 	await ctx.prisma.userEvent.create({
 		data: {
-			user_id: parseInt(ctx.session.user.id),
+			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_create',
 			product_id: product.id,
 			metadata: input

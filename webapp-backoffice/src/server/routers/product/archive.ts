@@ -47,7 +47,7 @@ export const archiveProductMutation = async ({
 
 	for (const email of emails) {
 		const emailHtml = await renderProductArchivedEmail({
-			userName: ctx.session.user.name || "Quelqu'un",
+			userName: ctx.session!.user.name || "Quelqu'un",
 			productTitle: updatedProduct.title,
 			baseUrl: process.env.NODEMAILER_BASEURL
 		});

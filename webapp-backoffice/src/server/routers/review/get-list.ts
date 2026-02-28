@@ -81,7 +81,7 @@ export const getReviewListQuery = async ({
 	if (newReviews && form_id) {
 		const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
 			where: {
-				user_id: parseInt(ctx.session?.user?.id),
+				user_id: parseInt(ctx.session!.user.id),
 				action: 'form_reviews_view',
 				product_id: product_id,
 				metadata: {
@@ -96,7 +96,7 @@ export const getReviewListQuery = async ({
 		if (lastSeenFormReview.length === 0) {
 			const lastSeenProductReview = await ctx.prisma.userEvent.findMany({
 				where: {
-					user_id: parseInt(ctx.session?.user?.id),
+					user_id: parseInt(ctx.session!.user.id),
 					action: 'service_reviews_view',
 					product_id: product_id
 				},
@@ -127,7 +127,7 @@ export const getReviewListQuery = async ({
 
 	const lastSeenReview = await ctx.prisma.userEvent.findMany({
 		where: {
-			user_id: parseInt(ctx.session?.user?.id),
+			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_reviews_view',
 			product_id: product_id
 		},

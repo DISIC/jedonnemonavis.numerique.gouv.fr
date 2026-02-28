@@ -13,7 +13,7 @@ export const deleteApiKeyMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof deleteApiKeyInputSchema>;
 }) => {
-	const ctx_user = ctx.session.user;
+	const ctx_user = ctx.session!.user;
 	const { key, product_id } = input;
 
 	const keyFound = await ctx.prisma.apiKey.findFirst({

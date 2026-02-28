@@ -18,7 +18,7 @@ export const resendAdminEntityRightEmailMutation = async ({
 	input: z.infer<typeof resendAdminEntityRightEmailInputSchema>;
 }) => {
 	const { user_email, entity_id } = input;
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 
 	const entity = await ctx.prisma.entity.findUnique({
 		where: { id: entity_id }

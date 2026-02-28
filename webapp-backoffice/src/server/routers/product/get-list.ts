@@ -24,7 +24,7 @@ export const getProductListQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getProductListInputSchema>;
 }) => {
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 	const {
 		numberPerPage,
 		page,

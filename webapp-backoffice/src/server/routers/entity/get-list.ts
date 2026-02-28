@@ -7,8 +7,6 @@ export const getEntityListInputSchema = z.object({
 	numberPerPage: z.number(),
 	page: z.number().default(1),
 	isMine: z.boolean().optional(),
-	// NOTE: sort is an opaque "field:direction" string parsed at runtime.
-	// Dynamic field access is intentional here; type-unsafe by design.
 	sort: z.string().optional(),
 	search: z.string().optional(),
 	userCanCreateProduct: z.boolean().optional()
@@ -21,7 +19,7 @@ export const getEntityListQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getEntityListInputSchema>;
 }) => {
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 	const { numberPerPage, page, search, sort, isMine, userCanCreateProduct } =
 		input;
 
@@ -60,8 +58,6 @@ export const getEntityListQuery = async ({
 		}
 	}
 
-	// NOTE: take: 10000 is a known performance concern for large datasets.
-	// This fetches all entities the user manages for the metadata response.
 	const myEntities = await ctx.prisma.entity.findMany({
 		take: 10000,
 		where: {

@@ -41,7 +41,7 @@ export const getCountsByFormQuery = async ({
 
 	const lastSeenReview = await ctx.prisma.userEvent.findMany({
 		where: {
-			user_id: parseInt(ctx.session?.user?.id),
+			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_reviews_view',
 			product_id: product_id
 		},
@@ -65,7 +65,7 @@ export const getCountsByFormQuery = async ({
 
 		const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
 			where: {
-				user_id: parseInt(ctx.session?.user?.id),
+				user_id: parseInt(ctx.session!.user.id),
 				action: 'form_reviews_view',
 				product_id: product_id,
 				metadata: {

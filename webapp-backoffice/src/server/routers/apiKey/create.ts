@@ -14,9 +14,8 @@ export const createApiKeyMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof createApiKeyInputSchema>;
 }) => {
-	const ctx_user = ctx.session.user;
+	const ctx_user = ctx.session!.user;
 
-	// Uses cryptographically secure random bytes instead of Math.random().
 	const key = crypto.randomBytes(24).toString('hex');
 
 	const newKey = await ctx.prisma.apiKey.create({

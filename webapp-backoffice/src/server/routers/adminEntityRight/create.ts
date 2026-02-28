@@ -5,8 +5,6 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { generateInviteToken } from '../helpers';
 
-// NOTE: entity_name is received but not used in the mutation body.
-// It is kept to preserve the existing API contract.
 export const createAdminEntityRightInputSchema = z.object({
 	user_email: z.string().email(),
 	entity_id: z.number(),
@@ -20,7 +18,7 @@ export const createAdminEntityRightMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof createAdminEntityRightInputSchema>;
 }) => {
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 	const { user_email, entity_id } = input;
 
 	const adminEntityRightAlreadyExists =

@@ -18,7 +18,7 @@ export const resendAccessRightEmailMutation = async ({
 	input: z.infer<typeof resendAccessRightEmailInputSchema>;
 }) => {
 	const { user_email, product_id } = input;
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 
 	const product = await ctx.prisma.product.findUnique({
 		where: { id: product_id }

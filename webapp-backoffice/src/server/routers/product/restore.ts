@@ -47,7 +47,7 @@ export const restoreProductMutation = async ({
 
 	for (const email of emails) {
 		const emailHtml = await renderProductRestoredEmail({
-			userName: ctx.session.user.name || "Quelqu'un",
+			userName: ctx.session!.user.name || "Quelqu'un",
 			productTitle: updatedProduct.title,
 			productId: updatedProduct.id,
 			baseUrl: process.env.NODEMAILER_BASEURL

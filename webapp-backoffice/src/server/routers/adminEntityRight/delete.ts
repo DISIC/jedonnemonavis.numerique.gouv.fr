@@ -1,8 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 
-// NOTE: entity_name and user_email are received but not used.
-// Kept to preserve the existing API contract.
 export const deleteAdminEntityRightInputSchema = z.object({
 	admin_entity_right_id: z.number(),
 	entity_name: z.string().optional(),

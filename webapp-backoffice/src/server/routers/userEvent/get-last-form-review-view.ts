@@ -17,9 +17,9 @@ export const getLastFormReviewViewQuery = async ({
 
 	const lastSeenFormReview = await ctx.prisma.userEvent.findMany({
 		where: {
-			user_id: parseInt(ctx.session?.user?.id),
+			user_id: parseInt(ctx.session!.user.id),
 			// NOTE: 'form_reviews_view' is not yet in the TypeAction Prisma enum; pending schema update
-			action: 'form_reviews_view' as any,
+			action: 'form_reviews_view',
 			product_id: product_id,
 			metadata: {
 				path: ['form_id'],
@@ -35,7 +35,7 @@ export const getLastFormReviewViewQuery = async ({
 	if (lastSeenFormReview.length === 0) {
 		const lastSeenProductReview = await ctx.prisma.userEvent.findMany({
 			where: {
-				user_id: parseInt(ctx.session?.user?.id),
+				user_id: parseInt(ctx.session!.user.id),
 				action: 'service_reviews_view',
 				product_id: product_id
 			},

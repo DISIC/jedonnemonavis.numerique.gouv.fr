@@ -17,7 +17,7 @@ export const getAdminEntityRightUserListQuery = async ({
 	const { numberPerPage, page } = input;
 
 	const where: Prisma.AdminEntityRightWhereInput = {
-		user: { id: parseInt(ctx.session.user.id) }
+		user: { id: parseInt(ctx.session!.user.id) }
 	};
 
 	const adminEntityRights = await ctx.prisma.adminEntityRight.findMany({

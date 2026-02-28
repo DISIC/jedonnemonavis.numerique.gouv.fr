@@ -18,7 +18,7 @@ export const createAccessRightMutation = async ({
 	ctx: Context;
 	input: z.infer<typeof createAccessRightInputSchema>;
 }) => {
-	const contextUser = ctx.session.user;
+	const contextUser = ctx.session!.user;
 	const { user_email, product_id, role } = input;
 
 	const accessRightAlreadyExists = await ctx.prisma.accessRight.findFirst({

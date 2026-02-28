@@ -19,7 +19,7 @@ export const getLastReviewViewQuery = async ({
 
 	if (product_id) {
 		where = {
-			user_id: parseInt(ctx.session?.user?.id),
+			user_id: parseInt(ctx.session!.user.id),
 			action: 'service_reviews_view',
 			product_id: product_id
 		};

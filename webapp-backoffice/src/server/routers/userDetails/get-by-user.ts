@@ -4,9 +4,8 @@ export const getUserDetailsByUserQuery = async ({
 	ctx
 }: {
 	ctx: Context;
-	input: {};
 }) => {
-	const userId = ctx.session.user.id;
+	const userId = ctx.session!.user.id;
 	const userDetails = await ctx.prisma.userDetails.findFirst({
 		where: { userId: parseInt(userId) }
 	});

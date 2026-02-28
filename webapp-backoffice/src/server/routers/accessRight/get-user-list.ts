@@ -17,7 +17,7 @@ export const getAccessRightUserListQuery = async ({
 	const { numberPerPage, page } = input;
 
 	const where: Prisma.AccessRightWhereInput = {
-		user_email: ctx.session.user.email
+		user_email: ctx.session!.user.email
 	};
 
 	const accessRights = await ctx.prisma.accessRight.findMany({

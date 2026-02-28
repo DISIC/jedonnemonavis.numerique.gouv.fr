@@ -17,7 +17,7 @@ export const createReviewViewLogMutation = async ({
 
 	const reviewViewLog = await ctx.prisma.reviewViewLog.create({
 		data: {
-			user_id: parseInt(ctx.session.user.id),
+			user_id: parseInt(ctx.session!.user.id),
 			review_id,
 			review_created_at
 		}

@@ -5,8 +5,6 @@ import { z } from 'zod';
 export const getUserRequestListInputSchema = z.object({
 	numberPerPage: z.number(),
 	page: z.number().default(1),
-	// NOTE: sort is an opaque "field:direction" string parsed at runtime.
-	// Dynamic field access is intentional here; type-unsafe by design.
 	sort: z.string().optional(),
 	displayProcessed: z.boolean()
 });

@@ -74,7 +74,7 @@ export const deleteButtonMutation = async ({
 
 		for (const email of emails) {
 			const emailHtml = await renderClosedButtonOrFormEmail({
-				userName: ctx.session.user.name || "Quelqu'un",
+				userName: ctx.session!.user.name || "Quelqu'un",
 				buttonTitle: deletedButton.title,
 				form: {
 					id: deletedButton.form.id,

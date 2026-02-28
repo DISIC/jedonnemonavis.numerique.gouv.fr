@@ -14,7 +14,7 @@ export const getApiKeyListQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getApiKeyListInputSchema>;
 }) => {
-	const ctx_user = ctx.session.user;
+	const ctx_user = ctx.session!.user;
 
 	if (input.product_id && !ctx_user.role.includes('admin')) {
 		const accessRight = await ctx.prisma.accessRight.findFirst({
