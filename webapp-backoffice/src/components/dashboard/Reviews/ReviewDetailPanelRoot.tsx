@@ -100,11 +100,11 @@ const ReviewDetailPanelRoot = ({
 				FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'easy'),
 				FIELD_CODE_DETAILS_VALUES.find(fcsv => fcsv.slug === 'difficulties'),
 				FIELD_CODE_DETAILS_VALUES.find(fcsv => fcsv.slug === 'help')
-			]
+		  ]
 		: [
 				FIELD_CODE_SMILEY_VALUES.find(fcsv => fcsv.slug === 'comprehension'),
 				FIELD_CODE_DETAILS_VALUES.find(fcdv => fcdv.slug === 'contact_tried')
-			];
+		  ];
 
 	const tableFieldCodeHelper = review.xwiki_id
 		? []
@@ -114,17 +114,21 @@ const ReviewDetailPanelRoot = ({
 				FIELD_CODE_DETAILS_VALUES.find(
 					fcdv => fcdv.slug === 'contact_satisfaction'
 				)
-			];
+		  ];
 
 	const tableAdministrationItems = getFieldCodeTexts(
 		tableFieldCodeHelper[0]?.slug || ''
 	).filter(row => row.includes('administration'));
 
 	const createMarkup = () => {
-		if (review.verbatim?.answer_text) {
+		const verbatimAnswer = review.answers?.find(
+			answer => answer.field_code === 'verbatim'
+		);
+
+		if (verbatimAnswer?.answer_text) {
 			const words = search.split(/\s+/).filter(Boolean);
 			const regex = new RegExp(`(${words.join('|')})`, 'gi');
-			const highlightedText = review.verbatim.answer_text
+			const highlightedText = verbatimAnswer.answer_text
 				.replace(regex, `<span>$1</span>`)
 				.replace(/\n/g, '<br />');
 
@@ -175,6 +179,16 @@ const ReviewDetailPanelRoot = ({
 							{tableFieldCodeHelper.slice(1).map(tfch => (
 								<div key={tfch?.slug} className={fr.cx('fr-col-12')}>
 									<h3 className={cx(classes.subtitle2)}>{tfch?.question}</h3>
+									{tfch?.slug === 'contact_satisfaction' &&
+										tableAdministrationItems.every(
+											row =>
+												getConditionnalValueText(
+													'contact_tried',
+													row,
+													'contact_reached'
+												) === 'Non'
+										) &&
+										'-'}
 									{tableAdministrationItems.map(row => {
 										const answer = getConditionnalValueText(
 											tableFieldCodeHelper[0]?.slug || '',
