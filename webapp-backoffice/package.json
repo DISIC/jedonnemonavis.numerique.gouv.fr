@@ -95,7 +95,12 @@
 	"overrides": {
 		"zod-prisma-types": {
 			"zod": "3.23.8"
-		}
+		},
+		"zod-to-json-schema": "3.22.4"
+	},
+	"resolutions": {
+		"zod-to-json-schema": "3.22.4",
+		"zod-prisma-types/zod": "3.23.8"
 	},
 	"devDependencies": {
 		"@babel/core": "7.22.15",
