@@ -92,6 +92,11 @@
 		"zod": "3.21.1",
 		"zod-prisma-types": "3.1.8"
 	},
+	"overrides": {
+		"zod-prisma-types": {
+			"zod": "3.23.8"
+		}
+	},
 	"devDependencies": {
 		"@babel/core": "7.22.15",
 		"@babel/eslint-parser": "7.22.15",
