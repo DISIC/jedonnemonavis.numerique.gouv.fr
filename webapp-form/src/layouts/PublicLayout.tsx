@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
   const headerId = "fr-header-public-header";
 
-  const { isMobile, isHydrated } = useIsMobile("md");
+  const { isMobile, isHydrated } = useIsMobile("lg");
 
   const onToggleLanguageClick = (newLocale: Language) => {
     const { pathname, asPath, query } = router;
@@ -58,24 +58,26 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
   const desktopQuickAccessItems: ReactNode[] = shouldShowLanguageSelector
     ? [
-        <Button
-          key="lang-button"
-          nativeButtonProps={{
-            "aria-controls": "translate-select",
-            "aria-expanded": false,
-            title: t("Sélectionner une langue"),
-          }}
-          priority="tertiary"
-          className={cx(classes.langShort, fr.cx("fr-translate", "fr-nav"))}
-          iconId="fr-icon-translate-2"
-        >
-          {lang}
-        </Button>,
-        <LanguageSelector
-          key="lang-selector"
-          lang={lang}
-          setLang={onToggleLanguageClick}
-        />,
+        <div style={{ position: "relative" }}>
+          <Button
+            key="lang-button"
+            nativeButtonProps={{
+              "aria-controls": "translate-select",
+              "aria-expanded": false,
+              title: t("Sélectionner une langue"),
+            }}
+            priority="tertiary"
+            className={cx(classes.langShort, fr.cx("fr-translate", "fr-nav"))}
+            iconId="fr-icon-translate-2"
+          >
+            {lang}
+          </Button>
+          <LanguageSelector
+            key="lang-selector"
+            lang={lang}
+            setLang={onToggleLanguageClick}
+          />
+        </div>,
       ]
     : [];
 
