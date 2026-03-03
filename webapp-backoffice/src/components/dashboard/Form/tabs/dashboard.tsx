@@ -13,7 +13,6 @@ import Image from 'next/image';
 import { tss } from 'tss-react/dsfr';
 import NoButtonsPanel from '../../Pannels/NoButtonsPanel';
 import NoReviewsPanel from '../../Pannels/NoReviewsPanel';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
 import AnswersChart from '../../Stats/AnswersChart';
 import ObservatoireStats from '../../Stats/ObservatoireStats';
 
@@ -23,7 +22,6 @@ interface Props {
 	form: FormWithElements;
 	onClickGoToReviews?: () => void;
 	hasButtons: boolean;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 }
 
 const DashboardTab = ({
@@ -31,8 +29,7 @@ const DashboardTab = ({
 	isLoading,
 	form,
 	onClickGoToReviews,
-	hasButtons,
-	handleModalOpening
+	hasButtons
 }: Props) => {
 	const { cx, classes } = useStyles();
 
@@ -88,27 +85,43 @@ const DashboardTab = ({
 		<div className={fr.cx('fr-grid-row')}>
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
-			<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
-				<ObservatoireStats
-					productId={form.product_id}
-					formConfig={currentFormConfig}
-					formId={form.id}
-					startDate={startDate}
-					endDate={endDate}
-					slugsToDisplay={[
-						'satisfaction',
-						'comprehension',
-						'contactReachability',
-						'contactSatisfaction'
-					]}
-					noTitle
-					view="form-dashboard"
-				/>
-			</div>
-			<div className={fr.cx('fr-col-12', 'fr-col-lg-8')}>
-				<div className={cx(classes.chartContainer)}>
+			{form.form_template.slug === 'root' && (
+				<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
+					<ObservatoireStats
+						productId={form.product_id}
+						formConfig={currentFormConfig}
+						formId={form.id}
+						startDate={startDate}
+						endDate={endDate}
+						slugsToDisplay={[
+							'satisfaction',
+							'comprehension',
+							'contactReachability',
+							'contactSatisfaction'
+						]}
+						noTitle
+						view="form-dashboard"
+					/>
+				</div>
+			)}
+			<div
+				className={fr.cx(
+					'fr-col-12',
+					form.form_template.slug === 'root' ? 'fr-col-lg-8' : 'fr-col-lg-12'
+				)}
+			>
+				<div
+					className={
+						(cx(classes.chartContainer),
+						fr.cx(form.form_template.slug === 'root' ? 'fr-ml-4v' : 'fr-ml-0'))
+					}
+				>
 					<AnswersChart
-						fieldCode="satisfaction"
+						fieldCode={
+							form.form_template.form_template_steps
+								.flatMap(step => step.form_template_blocks)
+								.find(block => block.isMainBlock)?.field_code || 'satisfaction'
+						}
 						productId={form.product.id}
 						formId={form.id}
 						startDate={startDate}
@@ -246,7 +259,6 @@ const useStyles = tss.withName(DashboardTab.name).create({
 	},
 	chartContainer: {
 		height: '100%',
-		marginLeft: fr.spacing('4v'),
 		[fr.breakpoints.down('lg')]: {
 			marginTop: fr.spacing('4v'),
 			marginLeft: 0

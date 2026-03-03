@@ -33,12 +33,10 @@ import {
 import { push } from '@socialgouv/matomo-next';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ButtonModalType } from '../../ProductButton/ButtonModal';
 
 interface Props {
 	form: FormWithElements;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
-	handleModalOpening: (modalType: ButtonModalType, button?: any) => void;
 	onClickGoToReviews?: () => void;
 	nbReviews: number;
 	buttons: Button[];
@@ -114,7 +112,6 @@ const nbMaxReviews = 500000;
 const StatsTab = ({
 	form,
 	ownRight,
-	handleModalOpening,
 	onClickGoToReviews,
 	nbReviews,
 	buttons,

@@ -135,13 +135,14 @@ export interface ProductBuilder {
 }
 
 export type ReviewFiltersType = {
-	satisfaction: string[];
-	comprehension: string[];
 	needVerbatim: boolean;
 	needOtherDifficulties: boolean;
 	needOtherHelp: boolean;
-	help: string[];
 	buttonId: string[];
+	fields: Array<{
+		field_code: string;
+		values: string[];
+	}>;
 };
 
 const ZBaseHitSchema = z.object({

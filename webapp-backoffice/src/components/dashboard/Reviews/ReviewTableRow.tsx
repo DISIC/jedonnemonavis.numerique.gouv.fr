@@ -1,6 +1,6 @@
 import {
 	FormConfigWithChildren,
-	FormWithElements
+	FormTemplateWithElements
 } from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
@@ -15,9 +15,9 @@ import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React, { useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { ExtendedReview } from './interface';
-import ReviewVerbatimMoreInfos from './ReviewVerbatimMoreInfos';
+import ReviewDetailPanel from './ReviewDetailPanel';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 
 const highlightSearchTerms = (text: string, search: string): string => {
 	if (!search.trim()) return text;
@@ -50,27 +50,41 @@ const highlightSearchTerms = (text: string, search: string): string => {
 	return highlightedText;
 };
 
-const ReviewLineVerbatim = ({
+const ReviewTableRow = ({
 	review,
 	search,
 	formConfigHelper,
 	hasManyVersions,
-	form
+	formTemplate,
+	onClickMoreInfo
 }: {
-	review: ExtendedReview;
+	review: ReviewPartialWithRelations;
 	search: string;
 	formConfigHelper: {
 		formConfig?: FormConfigWithChildren;
 		versionNumber: number;
 	};
 	hasManyVersions: boolean;
-	form: FormWithElements;
+	formTemplate: FormTemplateWithElements;
+	onClickMoreInfo?: () => void;
 }) => {
 	const { cx, classes } = useStyles();
 	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
 	const { mutate: createReviewViewLog } =
 		trpc.reviewViewLog.create.useMutation();
+
+	const mainBlocks = formTemplate.form_template_steps
+		.flatMap(step => step.form_template_blocks)
+		.filter(block => block.isMainBlock);
+
+	const hasVerbatimBlock = formTemplate.form_template_steps
+		.flatMap(step => step.form_template_blocks)
+		.some(block => block.field_code === 'verbatim');
+
+	const verbatimAnswer = hasVerbatimBlock
+		? review.answers?.find(answer => answer.field_code === 'verbatim')
+		: undefined;
 
 	useEffect(() => {
 		if (displayMoreInfo)
@@ -96,50 +110,82 @@ const ReviewLineVerbatim = ({
 				>
 					{formatDateToFrenchString(review.created_at?.toString() || '')}
 				</td>
-				<td
-					className={cx(
-						classes.label,
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
-					)}
-					style={{
-						color: getStatsColor({
-							intention: review.satisfaction?.intention ?? 'neutral'
-						})
-					}}
-				>
-					{review.satisfaction && review.satisfaction.intention && (
-						<Badge
-							className={cx(classes.badge)}
-							noIcon={true}
-							severity={getSeverity(review.satisfaction.intention || '')}
+
+				{mainBlocks.map((block, index) => {
+					const answer = review.answers?.find(
+						answer => answer.field_code === block.field_code
+					);
+
+					const formTemplateBlockOption = block.options.find(
+						opt => opt.id === answer?.answer_item_id
+					);
+
+					return (
+						<td
+							key={index}
+							className={cx(
+								classes.label,
+								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+							)}
+							style={{
+								color: answer?.intention
+									? getStatsColor({ intention: answer.intention })
+									: undefined
+							}}
 						>
-							<Image
-								alt=""
-								src={`/assets/smileys/${getStatsIcon({
-									intention: review.satisfaction.intention ?? 'neutral'
-								})}.svg`}
-								width={16}
-								height={16}
-							/>
-							{displayIntention(review.satisfaction.intention ?? 'neutral')}
-						</Badge>
-					)}
-				</td>
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5', 'fr-pr-3v')}>
-					<p
-						className={cx(classes.content, classes.contentVerbatim)}
-						dangerouslySetInnerHTML={{
-							__html: `${
-								review.verbatim
-									? highlightSearchTerms(
-											review.verbatim.answer_text || '',
-											search
-									  )
-									: '-'
-							}`
-						}}
-					></p>
-				</td>
+							{answer && answer.intention && (
+								<Badge
+									className={cx(classes.badge)}
+									noIcon={true}
+									severity={getSeverity(answer.intention || '')}
+								>
+									{answer.field_code === 'satisfaction' && (
+										<Image
+											alt=""
+											src={`/assets/smileys/${getStatsIcon({
+												intention: answer.intention ?? 'neutral'
+											})}.svg`}
+											width={16}
+											height={16}
+										/>
+									)}
+
+									{answer.field_code === 'satisfaction'
+										? displayIntention(answer.intention ?? 'neutral')
+										: formTemplateBlockOption?.alias ??
+										  formTemplateBlockOption?.label ??
+										  answer.answer_text ??
+										  ''}
+								</Badge>
+							)}
+							{answer && !answer.intention && (
+								<span>{answer.answer_text || '-'}</span>
+							)}
+							{!answer && <span>-</span>}
+						</td>
+					);
+				})}
+
+				{hasVerbatimBlock && (
+					<td
+						className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5', 'fr-pr-3v')}
+					>
+						<p
+							className={cx(classes.content, classes.contentVerbatim)}
+							dangerouslySetInnerHTML={{
+								__html: `${
+									verbatimAnswer
+										? highlightSearchTerms(
+												verbatimAnswer.answer_text || '',
+												search
+										  )
+										: '-'
+								}`
+							}}
+						></p>
+					</td>
+				)}
+
 				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
 					<Button
 						priority="tertiary no outline"
@@ -148,17 +194,7 @@ const ReviewLineVerbatim = ({
 						onClick={() => {
 							setDisplayMoreInfo(!displayMoreInfo);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
-							window._mtm?.push({
-								event: 'matomo_event',
-								container_type: 'backoffice',
-								service_id: form.product_id,
-								form_id: form.id,
-								template_slug: form.form_template.slug,
-								category: 'reviews',
-								action_type: 'read',
-								action: `review_detail_display`,
-								ui_source: 'review_button'
-							});
+							onClickMoreInfo?.();
 						}}
 						className={classes.button}
 						style={{
@@ -173,11 +209,12 @@ const ReviewLineVerbatim = ({
 				</td>
 			</div>
 			{displayMoreInfo && (
-				<ReviewVerbatimMoreInfos
+				<ReviewDetailPanel
 					review={review}
 					formConfigHelper={formConfigHelper}
 					hasManyVersions={hasManyVersions}
 					search={search}
+					formTemplate={formTemplate}
 				/>
 			)}
 			<hr />
@@ -235,6 +272,7 @@ const useStyles = tss.create({
 	},
 	contentVerbatim: {
 		...fr.typography[18].style,
+		wordBreak: 'break-word',
 		margin: 0
 	},
 	button: {
@@ -253,4 +291,4 @@ const useStyles = tss.create({
 	}
 });
 
-export default ReviewLineVerbatim;
+export default ReviewTableRow;

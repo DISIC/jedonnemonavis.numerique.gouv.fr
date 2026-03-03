@@ -21,6 +21,12 @@ const FormWithElementsQuery = Prisma.validator<Prisma.FormDefaultArgs>()({
         },
       },
     },
+    product: {
+      select: {
+        id: true,
+        title: true,
+      },
+    },
   },
 });
 
@@ -29,10 +35,10 @@ type RawFormWithElements = Prisma.FormGetPayload<typeof FormWithElementsQuery>;
 type DateToString<T> = T extends Date
   ? string
   : T extends Array<infer U>
-    ? Array<DateToString<U>>
-    : T extends object
-      ? { [K in keyof T]: DateToString<T[K]> }
-      : T;
+  ? Array<DateToString<U>>
+  : T extends object
+  ? { [K in keyof T]: DateToString<T[K]> }
+  : T;
 
 export type FormWithElements = DateToString<RawFormWithElements>;
 

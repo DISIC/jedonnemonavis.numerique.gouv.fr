@@ -1,23 +1,30 @@
 import { retrieveButtonName } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
-import { ExtendedReview } from './interface';
-import ReviewCommonVerbatimLine from './ReviewCommonVerbatimLine';
-import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
+import ReviewDetailPanelRoot from './ReviewDetailPanelRoot';
+import ReviewDetailPanelDynamic from './ReviewDetailPanelDynamic';
+import {
+	FormConfigWithChildren,
+	FormTemplateWithElements
+} from '@/src/types/prismaTypesExtended';
+import { ExtendedReview } from './ReviewDetailPanelRoot';
 
-const ReviewVerbatimMoreInfos = ({
+const ReviewDetailPanel = ({
 	review,
 	formConfigHelper,
 	hasManyVersions,
-	search
+	search,
+	formTemplate
 }: {
-	review: ExtendedReview;
+	review: ReviewPartialWithRelations;
 	formConfigHelper: {
 		formConfig?: FormConfigWithChildren;
 		versionNumber: number;
 	};
 	hasManyVersions: boolean;
 	search: string;
+	formTemplate: FormTemplateWithElements;
 }) => {
 	const { cx, classes } = useStyles();
 
@@ -65,12 +72,19 @@ const ReviewVerbatimMoreInfos = ({
 							: 'Pas de source'}
 					</p>
 				</div>
-				<ReviewCommonVerbatimLine
-					review={review}
-					type={'Line'}
-					formConfig={formConfigHelper.formConfig}
-					search={search}
-				></ReviewCommonVerbatimLine>
+				{formTemplate.slug === 'root' ? (
+					<ReviewDetailPanelRoot
+						review={review as ExtendedReview}
+						type={'Line'}
+						formConfig={formConfigHelper.formConfig}
+						search={search}
+					/>
+				) : (
+					<ReviewDetailPanelDynamic
+						review={review}
+						formTemplate={formTemplate}
+					/>
+				)}
 			</div>
 		</div>
 	);
@@ -95,12 +109,7 @@ const useStyles = tss.create({
 		...fr.typography[17].style,
 		fontWeight: 400,
 		marginBottom: 0
-	},
-	badge: {
-		fontSize: 12,
-		width: 100,
-		paddingVertical: 4
 	}
 });
 
-export default ReviewVerbatimMoreInfos;
+export default ReviewDetailPanel;

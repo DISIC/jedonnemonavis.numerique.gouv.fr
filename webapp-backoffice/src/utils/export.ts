@@ -45,16 +45,6 @@ export const getExportPeriodLabel = (params: ExportParams): string => {
 
 export function getExportFiltersLabel(
 	params: ExportParams,
-	asArray: true,
-	buttons?: Button[]
-): string[];
-export function getExportFiltersLabel(
-	params: ExportParams,
-	asArray?: false,
-	buttons?: Button[]
-): string;
-export function getExportFiltersLabel(
-	params: ExportParams,
 	asArray?: boolean,
 	buttons?: Button[]
 ): string | string[] {
@@ -76,18 +66,17 @@ export function getExportFiltersLabel(
 		addLabel(true, `Source :  ${sources}`);
 	}
 
-	if (filters?.satisfaction?.length) {
-		const satisfaction = filters.satisfaction
-			.map(s => displayIntention(s))
-			.join(', ');
-		addLabel(true, `Satisfaction : ${satisfaction}`);
+	if (filters?.fields?.length) {
+		filters.fields.forEach(field => {
+			if (field.values?.length) {
+				const fieldLabel =
+					field.field_code.charAt(0).toUpperCase() + field.field_code.slice(1);
+				const values = field.values.join(', ');
+				addLabel(true, `${fieldLabel} : ${values}`);
+			}
+		});
 	}
 
-	addLabel(
-		!!filters?.comprehension?.length,
-		`Note clarté : ${filters?.comprehension?.join(', ')}`
-	);
-	addLabel(!!filters?.help?.length, `Aide : ${filters?.help?.join(', ')}`);
 	addLabel(!!filters?.needOtherHelp, 'Autre aide');
 	addLabel(!!filters?.needOtherDifficulties, 'Autres difficultés');
 

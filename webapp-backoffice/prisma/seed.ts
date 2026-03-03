@@ -10,7 +10,14 @@ import { Domain } from 'domain';
 import { getRandomObjectFromArray, normalizeString } from '../src/utils/tools';
 import { buttons } from './seeds/buttons';
 import { entities } from './seeds/entities';
-import { createRootForm } from './seeds/form';
+import {
+	createBugForm,
+	seed_bug_form_template_buttons
+} from './seeds/forms/bug';
+import {
+	createRootForm,
+	seed_root_form_template_buttons
+} from './seeds/forms/root';
 import { products } from './seeds/products';
 import { users } from './seeds/users';
 import { whiteListedDomains } from './seeds/white-listed-domains';
@@ -21,11 +28,39 @@ async function main() {
 	const command = process.argv[2];
 
 	switch (command) {
+		case 'seedRootFormTemplateButtons':
+			const rootTemplate = await prisma.formTemplate.findFirst({
+				where: { slug: 'root' }
+			});
+
+			if (!rootTemplate) {
+				console.log('Error : missing root template form');
+				break;
+			}
+
+			await seed_root_form_template_buttons(prisma, rootTemplate.id);
+			break;
+		case 'seedBugFormTemplateButtons':
+			const bugTemplate = await prisma.formTemplate.findFirst({
+				where: { slug: 'bug' }
+			});
+
+			if (!bugTemplate) {
+				console.log('Error : missing bug template form');
+				break;
+			}
+
+			await seed_bug_form_template_buttons(prisma, bugTemplate.id);
+			break;
+		case 'seedBugFormTemplate':
+			await seed_bug_form_template();
+			break;
 		case 'seedRootFormTemplate':
 			await seed_root_form_template();
 			break;
 		case 'seedUsersProducts':
 			await seed_root_form_template();
+			await seed_bug_form_template();
 			await seed_users_products();
 			break;
 		case 'seedFormattedTitles':
@@ -36,6 +71,7 @@ async function main() {
 			break;
 		default:
 			await seed_root_form_template();
+			await seed_bug_form_template();
 			await seed_users_products();
 			await formatted_title();
 	}
@@ -61,21 +97,35 @@ function getWLDPromises() {
 	return promisesWLDs;
 }
 
+async function seed_bug_form_template() {
+	const bugTemplate = await prisma.formTemplate.upsert({
+		where: { slug: 'bug' },
+		update: createBugForm,
+		create: createBugForm
+	});
+
+	await seed_bug_form_template_buttons(prisma, bugTemplate.id);
+}
+
 async function seed_root_form_template() {
-	await prisma.formTemplate.upsert({
+	const rootTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: createRootForm,
 		create: createRootForm
 	});
+
+	await seed_root_form_template_buttons(prisma, rootTemplate.id);
 }
 
 async function seed_users_products() {
 	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
 	const promisesProducts: Promise<Product>[] = [];
 	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
-	const rootFormTemplate = await prisma.formTemplate.findUnique({
-		where: { slug: 'root' }
+	const formTemplates = await prisma.formTemplate.findMany({
+		take: 100
 	});
+	const rootFormTemplate = formTemplates.find(ft => ft.slug === 'root');
+	const bugFormTemplate = formTemplates.find(ft => ft.slug === 'bug');
 
 	users.forEach(user => {
 		promisesUsersAndEntities.push(
@@ -108,10 +158,16 @@ async function seed_users_products() {
 	Promise.all(promisesUsersAndEntities).then(usersAndEntitiesResponses => {
 		products.forEach((product, index) => {
 			const randomEntity = getRandomObjectFromArray(entities) as Entity;
+			const formTemplate = formTemplates.find(
+				ft => ft.slug === product.templateSlug
+			);
+
 			promisesProducts.push(
 				prisma.product.create({
 					data: {
-						...product,
+						title: product.title,
+						isPublic: product.isPublic,
+						urls: product.urls,
 						entity: {
 							connect: {
 								name: randomEntity.name
@@ -128,16 +184,31 @@ async function seed_users_products() {
 						forms: {
 							create: [
 								{
-									title: rootFormTemplate?.title,
+									title: formTemplate?.title,
 									form_template: {
 										connect: {
-											slug: 'root'
+											slug: formTemplate?.slug || 'root'
 										}
 									},
 									buttons: {
 										create: buttons as Button[]
 									}
-								}
+								},
+								...(index === 0
+									? [
+											{
+												title: bugFormTemplate?.title,
+												form_template: {
+													connect: {
+														slug: 'bug'
+													}
+												},
+												buttons: {
+													create: buttons as Button[]
+												}
+											}
+									  ]
+									: [])
 							]
 						}
 					}

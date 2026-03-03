@@ -127,8 +127,8 @@ export default function JDMAForm({
         value === field.values.bad
           ? "bad"
           : value === field.values.medium
-            ? "medium"
-            : "good";
+          ? "medium"
+          : "good";
       const smileyLabel = t(`smileys.${smileyIntention}`, { lng: "fr" });
       return {
         label: smileyLabel,
@@ -223,9 +223,9 @@ export default function JDMAForm({
             fieldInSection.kind === "smiley"
               ? "radio"
               : fieldInSection.kind !== "input-text" &&
-                  fieldInSection.kind !== "input-textarea"
-                ? fieldInSection.kind
-                : "text",
+                fieldInSection.kind !== "input-textarea"
+              ? fieldInSection.kind
+              : "text",
           review: {},
         } as Prisma.AnswerCreateInput;
 
@@ -588,6 +588,12 @@ export const getServerSideProps: GetServerSideProps<{
         // Si buttonFormId est défini, on filtre les forms, sinon on les laisse tous
         where: buttonFormId ? { id: buttonFormId } : undefined,
         include: {
+          product: {
+            select: {
+              id: true,
+              title: true,
+            },
+          },
           form_configs: {
             // Pareil ici : si on a un formId ciblé via le bouton, on le filtre
             where: buttonFormId ? { form_id: buttonFormId } : undefined,
