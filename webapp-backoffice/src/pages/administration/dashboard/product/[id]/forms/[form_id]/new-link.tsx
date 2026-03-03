@@ -37,7 +37,7 @@ const NewLink = (props: Props) => {
 	const { createdProduct, createdForm } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
-		useState<FormTemplateButtonStyle>('solid');
+		useState<FormTemplateButtonStyle>();
 	const [createdButton, setCreatedButton] = useState<ButtonWithElements>();
 	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
 	const [selectedIntegrationType, setSelectedIntegrationType] =
@@ -182,7 +182,9 @@ const NewLink = (props: Props) => {
 					) : (
 						<Loader />
 					),
-					title: 'Copier le code',
+					title: `Copier le ${
+						selectedIntegrationType === 'link' ? 'lien' : 'code'
+					}`,
 					onConfirm: goNextStep
 				};
 		}

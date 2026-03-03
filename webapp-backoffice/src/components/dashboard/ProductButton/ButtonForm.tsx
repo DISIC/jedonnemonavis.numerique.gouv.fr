@@ -19,9 +19,9 @@ import { ButtonCreationPayload } from './interface';
 type ButtonFormProps = {
 	currentForm?: ProductWithForms['forms'][number];
 	formTemplateButtons?: FormTemplateButtonWithVariants[];
-	selectedButtonStyle: FormTemplateButtonStyle;
+	selectedButtonStyle?: FormTemplateButtonStyle;
 	setSelectedButtonStyle: React.Dispatch<
-		React.SetStateAction<FormTemplateButtonStyle>
+		React.SetStateAction<FormTemplateButtonStyle | undefined>
 	>;
 	selectedFormTemplateButton?: FormTemplateButtonWithVariants;
 	setSelectedFormTemplateButton: React.Dispatch<
@@ -41,7 +41,7 @@ const ButtonForm = ({
 }: ButtonFormProps) => {
 	const { cx, classes } = useStyles();
 
-	const showButtonStyleOptions = !['link', 'embed'].includes(
+	const showFormattingOptions = !['link', 'embed'].includes(
 		selectedIntegrationType
 	);
 
@@ -80,7 +80,7 @@ const ButtonForm = ({
 	});
 
 	useEffect(() => {
-		if (formTemplateButtons) {
+		if (selectedIntegrationType !== 'link' && formTemplateButtons) {
 			const defaultButton = formTemplateButtons.find(b => b.isDefault);
 			setSelectedFormTemplateButton(defaultButton);
 		}
@@ -143,27 +143,30 @@ const ButtonForm = ({
 					/>
 				</div>
 
-				{formTemplateButtons && formTemplateButtons.length > 1 && (
-					<RadioButtons
-						legend={
-							<>
-								Label du bouton <span className={cx(classes.asterisk)}>*</span>
-							</>
-						}
-						name={'button-label'}
-						className={cx(fr.cx('fr-my-8v'))}
-						options={formTemplateButtons.map(ftb => ({
-							label: ftb.label,
-							nativeInputProps: {
-								value: ftb.id,
-								onChange: () => setSelectedFormTemplateButton(ftb),
-								checked: selectedFormTemplateButton?.id === ftb.id
+				{formTemplateButtons &&
+					formTemplateButtons.length > 1 &&
+					showFormattingOptions && (
+						<RadioButtons
+							legend={
+								<>
+									Label du bouton{' '}
+									<span className={cx(classes.asterisk)}>*</span>
+								</>
 							}
-						}))}
-					/>
-				)}
+							name={'button-label'}
+							className={cx(fr.cx('fr-my-8v'))}
+							options={formTemplateButtons.map(ftb => ({
+								label: ftb.label,
+								nativeInputProps: {
+									value: ftb.id,
+									onChange: () => setSelectedFormTemplateButton(ftb),
+									checked: selectedFormTemplateButton?.id === ftb.id
+								}
+							}))}
+						/>
+					)}
 
-				{showButtonStyleOptions && selectedFormTemplateButton && (
+				{showFormattingOptions && selectedFormTemplateButton && (
 					<RadioButtons
 						legend="Style du bouton"
 						name={'button-style'}

@@ -11,6 +11,9 @@ const ButtonCopyInstructionsPanel = ({
 	formTemplateButton
 }: ButtonCopyInstructionsPanelProps) => {
 	const { cx, classes } = useStyles();
+
+	if (!buttonStyle) return <ButtonInstructionTab button={button} />;
+
 	return (
 		<Tabs
 			tabs={[

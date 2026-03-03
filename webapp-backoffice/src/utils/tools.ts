@@ -7,7 +7,10 @@ import { z } from 'zod';
 import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/ProductButton/CopyInstructionPanel/interface';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
-import { FormConfigWithChildren } from '../types/prismaTypesExtended';
+import {
+	ButtonWithElements,
+	FormConfigWithChildren
+} from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
@@ -674,4 +677,13 @@ export const getButtonCode = ({
 		: `/avis/${button.form.id}`;
 
 	return `<a href="${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="${variantImageUrl}" alt="${buttonLabel}" />\n\n</a>`;
+};
+
+export const getButtonUrl = (button: ButtonWithElements) => {
+	const isRootFormTemplate = button.form.form_template.slug === 'root';
+	const reviewUrlParticle = isRootFormTemplate
+		? `/${button.form.product_id}`
+		: `/avis/${button.form.id}`;
+
+	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
 };
