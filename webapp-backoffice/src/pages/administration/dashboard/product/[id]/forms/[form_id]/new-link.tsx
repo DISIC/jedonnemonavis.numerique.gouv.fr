@@ -39,7 +39,7 @@ const NewLink = (props: Props) => {
 	const [selectedButtonStyle, setSelectedButtonStyle] =
 		useState<FormTemplateButtonStyle>('solid');
 	const [createdButton, setCreatedButton] = useState<ButtonWithElements>();
-	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('CREATION');
+	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<ButtonIntegrationTypes>('button');
 	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
