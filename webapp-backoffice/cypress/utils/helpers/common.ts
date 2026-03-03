@@ -5,9 +5,13 @@ import { addUserToProduct, editStep, skipStep } from './onboarding';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
-	cy.get(selectors.loginForm.email).type(email);
+	cy.get(selectors.loginForm.email, { timeout: 15000 })
+		.should('be.visible')
+		.type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).type(password);
+	cy.get(selectors.loginForm.password, { timeout: 15000 })
+		.should('be.visible')
+		.type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
 	cy.wait(1000);
 	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
@@ -257,23 +261,22 @@ export function modifyButton() {
 export function checkMail(click = false, topic = '') {
 	cy.visit(mailerUrl);
 	cy.get('button[ng-click="refresh()"]').click();
-	cy.get('.msglist-message')
-		.contains('span', topic)
-		.should('exist')
-		.then($message => {
-			if (click) {
-				cy.wrap($message).click();
-				cy.get('ul.nav-tabs').contains('Plain text').click();
-				cy.get('#preview-plain')
-					.find('a')
-					.each($link => {
-						const href = $link.attr('href');
-						if (href && href.includes('/register')) {
-							cy.wrap($link).invoke('removeAttr', 'target').click();
-						}
-					});
-			}
-		});
+	cy.wait(1000);
+	if (click) {
+		cy.get('.msglist-message').contains('span', topic).should('exist');
+		cy.get('.msglist-message').contains('span', topic).click();
+		cy.get('ul.nav-tabs').contains('Plain text').click();
+		cy.get('#preview-plain')
+			.find('a')
+			.each($link => {
+				const href = $link.attr('href');
+				if (href && href.includes('/register')) {
+					cy.wrap($link).invoke('removeAttr', 'target').click();
+				}
+			});
+	} else {
+		cy.get('.msglist-message').contains('span', topic).should('exist');
+	}
 }
 
 export function checkReviewForm(shouldWork = false, url?: string) {

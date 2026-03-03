@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
@@ -82,13 +82,20 @@ jobs:
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
-          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for webapp-backoffice..."; sleep 5; done
+          until curl -sf http://localhost:3000 > /dev/null 2>&1; do echo "Waiting for webapp-backoffice..."; sleep 5; done
+          echo "webapp-backoffice is up, warming up..."
+          curl -sf http://localhost:3000/login > /dev/null 2>&1 || true
+          sleep 3
 
           echo "Waiting for webapp-form to be ready..."
-          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
+          until curl -sf http://localhost:3001 > /dev/null 2>&1; do echo "Waiting for webapp-form..."; sleep 5; done
+          echo "webapp-form is up, warming up..."
+          sleep 3
 
           echo "Waiting for MailHog to be ready..."
-          until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
+          until curl -sf http://localhost:8025 > /dev/null 2>&1; do echo "Waiting for MailHog..."; sleep 5; done
+
+          echo "All services ready."
 
       # 9. Exécuter les tests Cypress pour `webapp-backoffice`
       - name: Run Cypress tests for webapp-backoffice
