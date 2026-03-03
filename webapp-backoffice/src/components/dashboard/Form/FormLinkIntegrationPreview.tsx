@@ -87,6 +87,33 @@ const FormLinkIntegrationPreview = ({
 						)}
 					</button>
 				);
+			case 'modal':
+				return (
+					<div className={classes.previewModalContainer}>
+						<button
+							title="Je donne mon avis - nouvelle fenêtre"
+							className={classes.previewButtonModal}
+							disabled
+							aria-disabled
+						>
+							{defaultFormTemplateButton ? (
+								<ImageWithFallback
+									alt={defaultFormTemplateButton.label}
+									src={
+										defaultFormTemplateButton.variants.find(
+											v => v.style === 'outline'
+										)?.image_url || ''
+									}
+									fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-outline-light.svg`}
+									width={200}
+									height={85}
+								/>
+							) : (
+								<Loader />
+							)}
+						</button>
+					</div>
+				);
 			case 'embed':
 				return (
 					form && (
@@ -105,7 +132,7 @@ const FormLinkIntegrationPreview = ({
 				);
 			case 'link':
 				return (
-					<div className={classes.linkPreview}>
+					<div className={classes.linkPreviewContainer}>
 						<p>
 							Le lien n’a pas de design associé. Il est à intégrer dans un
 							composant existant de votre site (bouton, bannière, ...)
@@ -223,6 +250,9 @@ const FormLinkIntegrationPreview = ({
 					/>
 					<Placeholder height={100} marginBottom={fr.spacing('4v')} />
 					<Placeholder height={100} marginBottom={fr.spacing('4v')} />
+					{selectedIntegrationType === 'modal' && (
+						<Placeholder height={220} marginBottom={fr.spacing('4v')} />
+					)}
 					<div className={classes.previewContent}>{getPreviewContent()}</div>
 				</div>
 			</div>
@@ -266,8 +296,7 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 	},
 	fakeMainContent: {
 		display: 'flex',
-		flexDirection: 'column',
-		height: '50%'
+		flexDirection: 'column'
 	},
 	previewContent: {
 		display: 'flex',
@@ -280,7 +309,7 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		userSelect: 'none'
 	},
 	previewEmbedContainer: { border: 'none', width: '100%', height: '500px' },
-	linkPreview: {
+	linkPreviewContainer: {
 		width: '100%',
 		height: '100%',
 		position: 'absolute',
@@ -296,6 +325,21 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		p: {
 			maxWidth: '500px',
 			color: fr.colors.decisions.text.default.grey.default
+		}
+	},
+	previewModalContainer: {
+		width: '100%',
+		height: '100%',
+		position: 'absolute',
+		top: 0,
+		left: 0
+	},
+	previewButtonModal: {
+		position: 'absolute',
+		bottom: 32,
+		right: 32,
+		img: {
+			height: 'auto'
 		}
 	},
 	actionsContainer: {
