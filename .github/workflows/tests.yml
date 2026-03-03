@@ -69,32 +69,28 @@ jobs:
         run: |
           cd webapp-backoffice
           yarn build
-          nohup yarn start &
+          nohup yarn start > /tmp/backoffice.log 2>&1 &
 
       # 7. Construire `webapp-form`
       - name: Build webapp-form
         run: |
           cd webapp-form
           yarn build
-          nohup yarn startB &
+          nohup yarn startB > /tmp/webapp-form.log 2>&1 &
 
       # 8. Attendre que les services soient prêts
       - name: Wait for services to be ready
         run: |
           echo "Waiting for webapp-backoffice to be ready..."
-          until curl -sf http://localhost:3000 > /dev/null 2>&1; do echo "Waiting for webapp-backoffice..."; sleep 5; done
-          echo "webapp-backoffice is up, warming up..."
-          curl -sf http://localhost:3000/login > /dev/null 2>&1 || true
-          sleep 3
+          timeout 120 bash -c 'until curl -sf http://localhost:3000 > /dev/null 2>&1; do sleep 5; done' || { echo "webapp-backoffice failed to start:"; cat /tmp/backoffice.log; exit 1; }
+          echo "webapp-backoffice is up."
 
           echo "Waiting for webapp-form to be ready..."
-          until curl -sf http://localhost:3001 > /dev/null 2>&1; do echo "Waiting for webapp-form..."; sleep 5; done
-          echo "webapp-form is up, warming up..."
-          sleep 3
+          timeout 120 bash -c 'until curl -sf http://localhost:3001/Demarches/legalNotice > /dev/null 2>&1; do sleep 5; done' || { echo "webapp-form failed to start:"; cat /tmp/webapp-form.log; exit 1; }
+          echo "webapp-form is up."
 
           echo "Waiting for MailHog to be ready..."
-          until curl -sf http://localhost:8025 > /dev/null 2>&1; do echo "Waiting for MailHog..."; sleep 5; done
-
+          timeout 60 bash -c 'until curl -sf http://localhost:8025 > /dev/null 2>&1; do sleep 5; done' || { echo "MailHog failed to start"; exit 1; }
           echo "All services ready."
 
       # 9. Exécuter les tests Cypress pour `webapp-backoffice`
