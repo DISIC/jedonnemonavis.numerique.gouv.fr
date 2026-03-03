@@ -27,7 +27,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 
   const headerId = "fr-header-public-header";
 
-  const { isMobile, isHydrated } = useIsMobile("md");
+  const { isMobile, isHydrated } = useIsMobile("lg");
 
   const onToggleLanguageClick = (newLocale: Language) => {
     const { pathname, asPath, query } = router;
