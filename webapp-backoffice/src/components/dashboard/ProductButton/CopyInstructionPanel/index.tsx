@@ -8,11 +8,27 @@ import ButtonInstructionTab from './ButtonInstructionTab';
 const ButtonCopyInstructionsPanel = ({
 	buttonStyle,
 	button,
-	formTemplateButton
+	formTemplateButton,
+	integrationType
 }: ButtonCopyInstructionsPanelProps) => {
 	const { cx, classes } = useStyles();
 
-	if (!buttonStyle) return <ButtonInstructionTab button={button} />;
+	if (!buttonStyle) {
+		return (
+			<ButtonInstructionTab button={button} integrationType={integrationType} />
+		);
+	}
+
+	if (integrationType === 'modal') {
+		return (
+			<ButtonInstructionTab
+				buttonStyle={buttonStyle}
+				button={button}
+				formTemplateButton={formTemplateButton}
+				integrationType={integrationType}
+			/>
+		);
+	}
 
 	return (
 		<Tabs
@@ -24,6 +40,7 @@ const ButtonCopyInstructionsPanel = ({
 							buttonStyle={buttonStyle}
 							button={button}
 							formTemplateButton={formTemplateButton}
+							integrationType={integrationType}
 						/>
 					)
 				},
@@ -34,6 +51,7 @@ const ButtonCopyInstructionsPanel = ({
 							buttonStyle={buttonStyle}
 							button={button}
 							formTemplateButton={formTemplateButton}
+							integrationType={integrationType}
 							isForDemarchesSimplifiees
 						/>
 					)

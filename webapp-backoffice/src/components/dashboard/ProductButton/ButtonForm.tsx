@@ -57,7 +57,10 @@ const ButtonForm = ({
 		if (selectedIntegrationType !== 'link' && formTemplateButtons) {
 			const defaultButton = formTemplateButtons.find(b => b.isDefault);
 			setSelectedFormTemplateButton(defaultButton);
-			if (!selectedButtonStyle) setSelectedButtonStyle('solid');
+			if (!selectedButtonStyle)
+				setSelectedButtonStyle(
+					selectedIntegrationType === 'modal' ? 'outline' : 'solid'
+				);
 		}
 	}, [formTemplateButtons]);
 

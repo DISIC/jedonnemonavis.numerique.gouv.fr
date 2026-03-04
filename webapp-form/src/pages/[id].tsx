@@ -70,6 +70,7 @@ export default function JDMAForm({
   );
 
   const isInIframe = router.query.iframe === "true";
+  const isWidgetMode = router.query.mode === "widget";
 
   const { classes, cx } = useStyles({ isInIframe });
 
@@ -256,7 +257,7 @@ export default function JDMAForm({
   };
 
   const handleCreateReview = async (opinion: Partial<Opinion>) => {
-    if (!isInIframe) {
+    if (!isInIframe || isWidgetMode) {
       const answers = formatAnswers(opinion);
 
       const userIdExists = localStorage.getItem("userId");
@@ -451,6 +452,13 @@ export default function JDMAForm({
                 if (isLastStep) {
                   localStorage.removeItem("userId");
                   setIsFormSubmitted(true);
+                  // Notify parent window when embedded as a widget
+                  if (isWidgetMode && window.parent !== window) {
+                    window.parent.postMessage(
+                      { source: 'jdma-widget', type: 'submitted' },
+                      '*'
+                    );
+                  }
                 }
               }}
             />

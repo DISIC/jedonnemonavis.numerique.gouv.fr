@@ -270,6 +270,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 							buttonStyle={selectedButtonStyle}
 							button={createdButton}
 							formTemplateButton={selectedFormTemplateButton}
+							integrationType={selectedIntegrationType}
 						/>
 					) : (
 						<Loader />

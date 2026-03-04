@@ -17,6 +17,7 @@ type AvisPageProps = {
   buttonId: number;
   productId: number;
   isIframe: boolean;
+  isWidget: boolean;
 };
 
 type DynamicAnswerData = {
@@ -32,6 +33,7 @@ export default function AvisPage({
   buttonId,
   productId,
   isIframe,
+  isWidget,
 }: AvisPageProps) {
   const { classes, cx } = useStyles();
 
@@ -87,6 +89,13 @@ export default function AvisPage({
 
     if (isLastStep) {
       setIsSubmitted(true);
+      // Notify parent window when embedded as a widget
+      if (isWidget && window.parent !== window) {
+        window.parent.postMessage(
+          { source: 'jdma-widget', type: 'submitted' },
+          '*'
+        );
+      }
     } else {
       setCurrentStepIndex(currentStepIndex + 1);
     }
@@ -103,7 +112,7 @@ export default function AvisPage({
   };
 
   const saveCurrentStep = () => {
-    if (isIframe) return;
+    if (isIframe && !isWidget) return;
 
     const currentStepAnswers = getAnswersArray().filter((answer) => {
       return currentStep.form_template_blocks.some((block) => {
@@ -257,10 +266,11 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
   const formId = parseInt(params.id as string);
   const isIframe = query.iframe === "true";
+  const isWidget = query.mode === "widget";
   const buttonId = parseInt(query.button as string);
   const formConfigParam = query.formConfig as string | undefined;
 
-  if (!isIframe && (!buttonId || isNaN(buttonId))) {
+  if (!isIframe && !isWidget && (!buttonId || isNaN(buttonId))) {
     return {
       notFound: true,
     };
@@ -268,7 +278,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
   await prisma.$connect();
 
-  if (!isIframe) {
+  if (!isIframe && !isWidget) {
     const button = await prisma.button.findUnique({
       where: { id: buttonId },
       select: { id: true, form_id: true },
@@ -349,6 +359,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
       buttonId: buttonId || 0,
       productId: form.product.id,
       isIframe,
+      isWidget,
       ...(await serverSideTranslations(locale ?? "fr", ["common"])),
     },
   };

@@ -159,6 +159,7 @@ const ButtonModal = (props: Props) => {
 								button={currentButton}
 								buttonStyle={currentButton.button_style}
 								formTemplateButton={currentButton.form_template_button}
+								integrationType={currentButton.integration_type || undefined}
 							/>
 						</div>
 					</div>

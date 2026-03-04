@@ -1,5 +1,5 @@
 import ImageWithFallback from '@/src/components/ui/ImageWithFallback';
-import { getButtonCode, getButtonUrl } from '@/src/utils/tools';
+import { getButtonCode, getButtonUrl, getModalCode } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -17,13 +17,18 @@ const ButtonInstructionTab = ({
 	buttonStyle,
 	button,
 	formTemplateButton,
+	integrationType,
 	isForDemarchesSimplifiees = false
 }: ButtonInstructionTabProps) => {
 	const { cx, classes } = useStyles();
 	const { createdProduct } = useOnboarding();
 	const [copyToastMessage, setCopyToastMessage] = useState<string>();
+
+	const isModal = integrationType === 'modal';
 	const copyLabel = buttonStyle
-		? '1. Choisissez le thème à intégrer et copier le code correspondant'
+		? isModal
+			? '1. Choisissez le thème et copiez le code du widget flottant'
+			: '1. Choisissez le thème à intégrer et copier le code correspondant'
 		: '1. Copier le lien ci-dessous';
 
 	const getInstructionContent = () => {
@@ -33,6 +38,22 @@ const ButtonInstructionTab = ({
 					<p className={fr.cx('fr-mb-0')}>
 						2. Envoyez ce lien à votre équipe technique pour intégrer le
 						formulaire sur le site
+					</p>
+				</>
+			);
+		}
+
+		if (isModal) {
+			return (
+				<>
+					<p className={fr.cx('fr-mb-0')}>
+						2. Collez la balise <code>&lt;script&gt;</code> juste avant la
+						balise fermante <code>&lt;/body&gt;</code> de votre page HTML
+					</p>
+					<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
+						Le widget injectera automatiquement un bouton flottant en bas à
+						droite de la page. Un clic ouvrira le formulaire dans une fenêtre
+						modale par-dessus votre contenu.
 					</p>
 				</>
 			);
@@ -141,12 +162,19 @@ const ButtonInstructionTab = ({
 			const currentVariant = formTemplateButton?.variants.find(
 				v => v.theme === enTheme && v.style === buttonStyle
 			);
-			const buttonCode = getButtonCode({
-				theme,
-				buttonStyle,
-				button,
-				formTemplateButton
-			});
+			const codeSnippet = isModal
+				? getModalCode({
+						theme,
+						buttonStyle,
+						button,
+						formTemplateButton
+				  })
+				: getButtonCode({
+						theme,
+						buttonStyle,
+						button,
+						formTemplateButton
+				  });
 			return (
 				<Fragment key={theme}>
 					<div
@@ -193,7 +221,7 @@ const ButtonInstructionTab = ({
 									iconPosition="right"
 									className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
 									onClick={() => {
-										navigator.clipboard.writeText(buttonCode);
+										navigator.clipboard.writeText(codeSnippet);
 										push(['trackEvent', 'BO - Product', `Copy-Code`]);
 										window._mtm?.push({
 											event: 'matomo_event',
@@ -220,7 +248,7 @@ const ButtonInstructionTab = ({
 										nativeTextAreaProps={{
 											'aria-label': 'Code du bouton Je Donne Mon Avis',
 											name: 'button-code',
-											value: buttonCode,
+											value: codeSnippet,
 											contentEditable: false,
 											readOnly: true
 										}}
