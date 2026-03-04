@@ -56,7 +56,7 @@ const NoButtonsPanel = (props: Props) => {
 					onClick: event => {
 						event.preventDefault();
 						push(['trackEvent', 'BO - EmptyState', `Create-button`]);
-						router.push(`${router.asPath.split('?')[0]}/new-link`);
+						router.push(`${router.asPath.split('?')[0]}/link/new`);
 					}
 				}}
 			>

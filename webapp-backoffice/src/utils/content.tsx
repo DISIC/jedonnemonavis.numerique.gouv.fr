@@ -534,7 +534,7 @@ export const onboardingStepsContent: StepContent[] = [
 		slug: 'link',
 		title: 'Intégrer le formulaire sur votre site',
 		iconId: 'ri-link',
-		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
+		url: '/administration/dashboard/product/[id]/forms/[form_id]/link/new',
 		details: [
 			{ title: 'Créez votre premier lien d’intégration', iconId: 'ri-link' },
 			{

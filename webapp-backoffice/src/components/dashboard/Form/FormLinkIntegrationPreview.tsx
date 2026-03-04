@@ -23,6 +23,7 @@ type FormLinkIntegrationPreviewProps = {
 	onConfirm: (value: ButtonIntegrationTypes) => void;
 	form?: FormWithConfigAndTemplate;
 	formTemplate?: FormTemplateWithElements | null;
+	preSelectedIntegrationType?: ButtonIntegrationTypes;
 };
 
 const Placeholder = (styleProps: CSSProperties) => (
@@ -41,20 +42,25 @@ const FormLinkIntegrationPreview = ({
 	description,
 	onConfirm,
 	form,
-	formTemplate
+	formTemplate,
+	preSelectedIntegrationType
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
-		useState<ButtonIntegrationTypes>('button');
+		useState<ButtonIntegrationTypes>(preSelectedIntegrationType || 'button');
 	const { cx, classes } = useStyles();
 
 	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);
 
 	useEffect(() => {
+		if (preSelectedIntegrationType) {
+			setSelectedIntegrationType(preSelectedIntegrationType);
+			return;
+		}
 		if (formTemplate?.default_integration_type) {
 			setSelectedIntegrationType(formTemplate.default_integration_type);
 		}
-	}, [formTemplate?.default_integration_type]);
+	}, [formTemplate?.default_integration_type, preSelectedIntegrationType]);
 
 	const defaultFormTemplateButton = useMemo(() => {
 		return formTemplate?.form_template_buttons.find(b => b.isDefault);

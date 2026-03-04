@@ -40,13 +40,8 @@ const defaultErrors = {
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const {
-		modal,
-		modalType = 'edit',
-		button,
-		onButtonMutation,
-		formTemplateButtons
-	} = props;
+	const { modal, modalType, button, onButtonMutation, formTemplateButtons } =
+		props;
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
@@ -117,8 +112,6 @@ const ButtonModal = (props: Props) => {
 				return `Copier le ${
 					button?.integration_type === 'link' ? 'lien' : 'code'
 				}`;
-			case 'edit':
-				return "Modifier un lien d'intégration";
 			case 'delete':
 				return "Fermer le lien d'intégration";
 			default:
@@ -130,25 +123,6 @@ const ButtonModal = (props: Props) => {
 		resetErrors('title');
 		onButtonMutation(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
-	};
-
-	const handleButtonEdit = () => {
-		if (!currentButton) return;
-		if (!currentButton.title) {
-			errors.title.required = true;
-			setErrors({ ...errors });
-			return;
-		}
-
-		currentButton.form_id = props.form.id;
-
-		const {
-			form,
-			closedButtonLog,
-			form_template_button,
-			...buttonWithoutForm
-		} = currentButton;
-		updateButton.mutate(buttonWithoutForm);
 	};
 
 	const handleButtonDelete = () => {
@@ -189,108 +163,6 @@ const ButtonModal = (props: Props) => {
 						</div>
 					</div>
 				);
-			case 'edit':
-				return (
-					<div>
-						{/* <FormLinkIntegrationPreview
-							title="Choisir un type d'intégration"
-							form={form}
-							description={<></>}
-							onConfirm={() => {}}
-							defaultFormTemplateButton={props.form.form_template.form_template_buttons.find(
-								b => b.isDefault
-							)}
-						/> */}
-						<Input
-							id="button-create-title"
-							label={
-								<p className={fr.cx('fr-mb-0')}>
-									Nom du lien d'intégration{' '}
-									<span className={cx(classes.asterisk)}>*</span>
-								</p>
-							}
-							nativeInputProps={{
-								value: currentButton.title || '',
-								name: 'button-create-title',
-								onChange: e => {
-									setCurrentButton({
-										...currentButton,
-										title: e.target.value
-									});
-									resetErrors('title');
-								}
-							}}
-							state={hasErrors('title') ? 'error' : 'default'}
-							stateRelatedMessage={'Veuillez compléter ce champ.'}
-						/>
-						{formTemplateButtons && formTemplateButtons.length > 1 && (
-							<div className={fr.cx('fr-col', 'fr-col-12')}>
-								<RadioButtons
-									legend={<b>Label du bouton</b>}
-									name={'button-label'}
-									options={formTemplateButtons.map(ftb => ({
-										label: ftb.label,
-										nativeInputProps: {
-											value: ftb.id,
-											onChange: () => {
-												setCurrentButton({
-													...currentButton,
-													form_template_button_id: ftb.id
-												});
-											},
-											checked: currentButton.form_template_button_id === ftb.id
-										}
-									}))}
-								/>
-							</div>
-						)}
-						<div className={fr.cx('fr-col', 'fr-col-12')}>
-							<RadioButtons
-								legend={<b>Style du bouton</b>}
-								name={'button-style'}
-								className={classes.buttonStyles}
-								options={buttonStyleOptions.map(bsOption => {
-									const altText =
-										bsOption.alt_text ||
-										currentButton.form_template_button?.label ||
-										currentDefaultTemplateButton?.label ||
-										'Illustration du bouton';
-
-									const buttonSlug =
-										formTemplateButtons?.find(
-											ftb => ftb.id === currentButton.form_template_button_id
-										)?.slug ||
-										currentDefaultTemplateButton?.slug ||
-										'jdma';
-
-									return {
-										label: buttonStylesMapping[bsOption.style].label,
-										hintText: buttonStylesMapping[bsOption.style].hintText,
-										nativeInputProps: {
-											value: bsOption.style,
-											onChange: () => {
-												setCurrentButton({
-													...currentButton,
-													button_style: bsOption.style
-												});
-											},
-											checked: currentButton.button_style === bsOption.style
-										},
-										illustration: (
-											<ImageWithFallback
-												alt={altText}
-												src={bsOption.image_url}
-												fallbackSrc={`/assets/buttons/button-${buttonSlug}-${bsOption.style}-light.svg`}
-												width={200}
-												height={85}
-											/>
-										)
-									};
-								})}
-							/>
-						</div>
-					</div>
-				);
 			case 'delete':
 				return (
 					<div>
@@ -323,22 +195,6 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				break;
-			case 'edit':
-				return [
-					{
-						children: 'Annuler',
-						priority: 'secondary',
-						onClick: () => {
-							resetErrors('title');
-						}
-					},
-					{
-						children: 'Modifier',
-						onClick: handleButtonEdit,
-						doClosesModal: false
-					}
-				];
-
 			case 'delete':
 				return [
 					{

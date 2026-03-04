@@ -11,6 +11,7 @@ import { Fragment, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { FR_THEMES } from '../interface';
 import { ButtonInstructionTabProps } from './interface';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 
 const ButtonInstructionTab = ({
 	buttonStyle,
@@ -19,6 +20,7 @@ const ButtonInstructionTab = ({
 	isForDemarchesSimplifiees = false
 }: ButtonInstructionTabProps) => {
 	const { cx, classes } = useStyles();
+	const { createdProduct } = useOnboarding();
 	const [copyToastMessage, setCopyToastMessage] = useState<string>();
 	const copyLabel = buttonStyle
 		? '1. Choisissez le thème à intégrer et copier le code correspondant'
@@ -28,7 +30,7 @@ const ButtonInstructionTab = ({
 		if (!buttonStyle) {
 			return (
 				<>
-					<p className={fr.cx('fr-mb-3v')}>
+					<p className={fr.cx('fr-mb-0')}>
 						2. Envoyez ce lien à votre équipe technique pour intégrer le
 						formulaire sur le site
 					</p>
@@ -78,19 +80,10 @@ const ButtonInstructionTab = ({
 
 		return (
 			<>
-				<p className={fr.cx('fr-mb-3v')}>
-					2. Coller le code à l’endroit où vous souhaitez placer votre bouton Je
-					Donne Mon Avis
+				<p className={fr.cx('fr-mb-0')}>
+					2. Envoyez ce code à votre équipe technique pour intégrer le
+					formulaire sur le site
 				</p>
-				<Link
-					href={
-						'https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff'
-					}
-					className={fr.cx('fr-link')}
-					target="_blank"
-				>
-					Comment définir le meilleur emplacement pour son bouton JDMA ?
-				</Link>
 			</>
 		);
 	};
@@ -256,37 +249,39 @@ const ButtonInstructionTab = ({
 			<div className={fr.cx('fr-grid-row')}>{getCopyContent()}</div>
 			<hr className={fr.cx('fr-mt-6v')} />
 			{getInstructionContent()}
-			<div className={classes.infoContainer}>
-				<div className={cx(classes.infoContent)}>
-					<div className={classes.iconContainer}>
-						<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+			{createdProduct && (
+				<div className={classes.infoContainer}>
+					<div className={cx(classes.infoContent)}>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							Si vous modifiez le formulaire après la publication, vous n’avez
+							pas besoin de recréer de lien d’intégration : les changements
+							seront automatiquement visibles par les usagers
+						</p>
 					</div>
-					<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-						Si vous modifiez le formulaire après la publication, vous n’avez pas
-						besoin de recréer de lien d’intégration : les changements seront
-						automatiquement visibles par les usagers
-					</p>
-				</div>
-				<div className={cx(classes.infoContent)}>
-					<div className={classes.iconContainer}>
-						<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+					<div className={cx(classes.infoContent)}>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							Vous pouvez retrouver ce code à n’importe quel moment dans votre
+							formulaire, sur l’onglet “Liens d’intégration” en cliquant sur le
+							bouton “Copier le code”
+						</p>
 					</div>
-					<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-						Vous pouvez retrouver ce code à n’importe quel moment dans votre
-						formulaire, sur l’onglet “Liens d’intégration” en cliquant sur le
-						bouton “Copier le code”
-					</p>
+					<div className={cx(classes.infoContent)}>
+						<Image
+							src="/assets/news-feature/links-tab.png"
+							alt=""
+							width={508}
+							height={180}
+							className={classes.image}
+						/>
+					</div>
 				</div>
-				<div className={cx(classes.infoContent)}>
-					<Image
-						src="/assets/news-feature/links-tab.png"
-						alt=""
-						width={508}
-						height={180}
-						className={classes.image}
-					/>
-				</div>
-			</div>
+			)}
 		</div>
 	);
 };

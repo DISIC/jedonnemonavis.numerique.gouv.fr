@@ -238,7 +238,7 @@ const NewForm = (props: Props) => {
 
 		if (!createdProduct) {
 			return router.push(
-				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}/new-link`
+				`/administration/dashboard/product/${product.id}/forms/${createdForm.id}/link/new`
 			);
 		}
 		updateSteps(

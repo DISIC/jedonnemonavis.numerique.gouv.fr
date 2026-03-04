@@ -1,7 +1,4 @@
-import {
-	FormTemplateButtonWithVariants,
-	ProductWithForms
-} from '@/src/types/prismaTypesExtended';
+import { FormTemplateButtonWithVariants } from '@/src/types/prismaTypesExtended';
 import { buttonStylesMapping } from '@/src/utils/content';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
@@ -11,13 +8,13 @@ import {
 	FormTemplateButtonStyle
 } from '@prisma/client';
 import React, { useEffect, useMemo } from 'react';
-import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
-import { ButtonCreationPayload } from './interface';
 
 type ButtonFormProps = {
-	currentForm?: ProductWithForms['forms'][number];
+	title: string;
+	setTitle: React.Dispatch<React.SetStateAction<string>>;
+	titleError: boolean;
 	formTemplateButtons?: FormTemplateButtonWithVariants[];
 	selectedButtonStyle?: FormTemplateButtonStyle;
 	setSelectedButtonStyle: React.Dispatch<
@@ -31,7 +28,9 @@ type ButtonFormProps = {
 };
 
 const ButtonForm = ({
-	currentForm,
+	title,
+	setTitle,
+	titleError,
 	selectedButtonStyle,
 	setSelectedButtonStyle,
 	selectedIntegrationType,
@@ -45,20 +44,6 @@ const ButtonForm = ({
 		selectedIntegrationType
 	);
 
-	const defaultTitle = useMemo(() => {
-		const baseTitle = 'Lien d’intégration';
-		if (!currentForm || currentForm.buttons.length === 0)
-			return `${baseTitle} 1`;
-
-		const existingButtons = currentForm.buttons.filter(b =>
-			b.title.startsWith(baseTitle)
-		);
-
-		if (existingButtons.length === 0) return `${baseTitle} 1`;
-
-		return `${baseTitle} ${existingButtons.length + 1}`;
-	}, [currentForm]);
-
 	const buttonStyleOptions = useMemo(() => {
 		if (!formTemplateButtons) return [];
 		return (
@@ -68,21 +53,11 @@ const ButtonForm = ({
 		);
 	}, [selectedFormTemplateButton]);
 
-	const {
-		control,
-		handleSubmit,
-		reset,
-		formState: { errors }
-	} = useForm<ButtonCreationPayload>({
-		defaultValues: {
-			title: defaultTitle || ''
-		}
-	});
-
 	useEffect(() => {
 		if (selectedIntegrationType !== 'link' && formTemplateButtons) {
 			const defaultButton = formTemplateButtons.find(b => b.isDefault);
 			setSelectedFormTemplateButton(defaultButton);
+			if (!selectedButtonStyle) setSelectedButtonStyle('solid');
 		}
 	}, [formTemplateButtons]);
 
@@ -102,44 +77,33 @@ const ButtonForm = ({
 			</div>
 			<form id="new-link-form">
 				<div className={fr.cx('fr-input-group')}>
-					<Controller
-						control={control}
-						name="title"
-						rules={{ required: 'Ce champ est obligatoire' }}
-						render={({ field: { onChange, value, name } }) => (
-							<>
-								<Input
-									id="button-create-title"
-									label={
-										<p className={fr.cx('fr-mb-0')}>
-											Nom du lien d’intégration{' '}
-											<span className={cx(classes.asterisk)}>*</span>
-										</p>
-									}
-									hintText={
-										<span className={fr.cx('fr-hint-text')}>
-											Visible uniquement par vous et les autres membres de
-											l’équipe.{' '}
-										</span>
-									}
-									nativeInputProps={{
-										onChange,
-										value,
-										name: 'button-create-title',
-										required: true
-									}}
-									state={'info'}
-									stateRelatedMessage={
-										'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
-									}
-								/>
-								{errors[name] && (
-									<p className={fr.cx('fr-error-text')}>
-										{errors[name]?.message}
-									</p>
-								)}
-							</>
-						)}
+					<Input
+						id="button-create-title"
+						label={
+							<p className={fr.cx('fr-mb-0')}>
+								Nom du lien d’intégration{' '}
+								<span className={cx(classes.asterisk)}>*</span>
+							</p>
+						}
+						hintText={
+							<span className={fr.cx('fr-hint-text')}>
+								Visible uniquement par vous et les autres membres de l’équipe.{' '}
+							</span>
+						}
+						nativeInputProps={{
+							onChange: event => {
+								setTitle(event.target.value);
+							},
+							value: title,
+							name: 'button-create-title',
+							required: true
+						}}
+						state={titleError ? 'error' : 'info'}
+						stateRelatedMessage={
+							titleError
+								? 'Ce champ est obligatoire'
+								: 'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
+						}
 					/>
 				</div>
 
