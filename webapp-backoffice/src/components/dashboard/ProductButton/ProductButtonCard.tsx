@@ -150,7 +150,8 @@ const ProductButtonCard = (props: Props) => {
 										}}
 										className="fr-mr-md-2v"
 									>
-										Copier le code
+										Copier le{' '}
+										{button.integration_type === 'link' ? 'lien' : 'code'}
 									</Button>
 									{ownRight === 'carrier_admin' && (
 										<>

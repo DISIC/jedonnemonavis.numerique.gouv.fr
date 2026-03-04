@@ -5,9 +5,9 @@ import {
 } from '@/src/types/prismaTypesExtended';
 
 export interface ButtonCopyInstructionsPanelProps {
-	buttonStyle?: FormTemplateButtonStyleType;
+	buttonStyle?: FormTemplateButtonStyleType | null;
 	button: ButtonWithElements;
-	formTemplateButton?: FormTemplateButtonWithVariants;
+	formTemplateButton?: FormTemplateButtonWithVariants | null;
 }
 
 export type ButtonInstructionTabProps = ButtonCopyInstructionsPanelProps & {

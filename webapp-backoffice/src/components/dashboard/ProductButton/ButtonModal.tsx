@@ -64,11 +64,12 @@ const ButtonModal = (props: Props) => {
 	useEffect(() => {
 		if (button) {
 			const hasManyTemplateButtons =
-				formTemplateButtons && formTemplateButtons.length > 1;
+				button.integration_type !== 'link' &&
+				formTemplateButtons &&
+				formTemplateButtons.length > 1;
 
 			setCurrentButton({
 				...button,
-				button_style: button.button_style || 'solid',
 				form_template_button: hasManyTemplateButtons
 					? defaultTemplateButton || null
 					: null,
@@ -113,7 +114,9 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'install':
-				return 'Copier le code';
+				return `Copier le ${
+					button?.integration_type === 'link' ? 'lien' : 'code'
+				}`;
 			case 'edit':
 				return "Modifier un lien d'intégration";
 			case 'delete':
@@ -180,10 +183,8 @@ const ButtonModal = (props: Props) => {
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
 								button={currentButton}
-								buttonStyle={currentButton.button_style || 'solid'}
-								formTemplateButton={
-									currentButton.form_template_button || defaultTemplateButton
-								}
+								buttonStyle={currentButton.button_style}
+								formTemplateButton={currentButton.form_template_button}
 							/>
 						</div>
 					</div>
