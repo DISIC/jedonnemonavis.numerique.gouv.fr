@@ -138,7 +138,7 @@ const ProductCard = ({
 	const deleteFavorite = trpc.favorite.delete.useMutation({
 		onSuccess: result => {
 			utils.product.getList.invalidate({ filterByUserFavorites: true });
-			utils.favorite.getByUser.invalidate({ user_id: result.data.user_id });
+			utils.favorite.getByUser.invalidate({ user_id: userId });
 		}
 	});
 
