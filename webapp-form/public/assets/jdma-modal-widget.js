@@ -93,10 +93,11 @@
 		'.jdma-widget-panel {',
 		'  position: fixed;',
 		'  z-index: 999995;',
-		'  bottom: 100px;',
+		'  bottom: 75px;',
 		isLeft ? '  left: 24px;' : '  right: 24px;',
-		'  width: 400px;',
-		'  height: 600px;',
+		'  width: 500px;',
+		'  height: 550px;',
+		'  max-height: calc(100vh - 130px);',
 		'  background: #fff;',
 		'  border-radius: 12px;',
 		'  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);',
@@ -110,44 +111,49 @@
 		'.jdma-widget-header {',
 		'  display: flex;',
 		'  align-items: center;',
-		'  justify-content: space-between;',
-		'  padding: 12px 16px;',
-		'  background: #000091;',
-		'  color: #fff;',
+		'  justify-content: flex-end;',
+		'  padding: 8px 12px;',
 		'  flex-shrink: 0;',
-		'}',
-		'.jdma-widget-header-title {',
-		'  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
-		'  font-size: 14px;',
-		'  font-weight: 600;',
-		'  margin: 0;',
-		'  line-height: 1.3;',
 		'}',
 
 		/* Close button */
 		'.jdma-widget-close {',
-		'  width: 28px;',
-		'  height: 28px;',
-		'  border-radius: 50%;',
 		'  border: none;',
-		'  background: rgba(255, 255, 255, 0.15);',
+		'  border-radius: 0.3em;',
+		'  background: none;',
 		'  cursor: pointer;',
-		'  display: flex;',
+		'  display: inline-flex;',
 		'  align-items: center;',
-		'  justify-content: center;',
-		'  font-size: 16px;',
-		'  line-height: 1;',
-		'  color: #fff;',
-		'  transition: background 0.15s ease;',
+		'  gap: 4px;',
+		'  padding: 4px;',
+		'  font-family: "Marianne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
+		'  font-size: 14px;',
+		'  line-height: 1.5;',
+		'  color: #000091;',
+		'  text-underline-offset: 4px;',
 		'  flex-shrink: 0;',
-		'  margin-left: 8px;',
 		'}',
 		'.jdma-widget-close:hover {',
-		'  background: rgba(255, 255, 255, 0.3);',
+		'  color: #1212ff;',
+		'}',
+		'.jdma-widget-close:active {',
+		'  color: #000091;',
 		'}',
 		'.jdma-widget-close:focus-visible {',
-		'  outline: 2px solid #fff;',
+		'  outline: 3px solid #000091;',
 		'  outline-offset: 2px;',
+		'}',
+
+		/* Close cross icon */
+		'.jdma-widget-close-cross {',
+		'  display: inline-flex;',
+		'  align-items: center;',
+		'  justify-content: center;',
+		'  width: 28px;',
+		'  height: 28px;',
+		'  font-size: 14px;',
+		'  font-weight: bold;',
+		'  line-height: 1;',
 		'}',
 
 		/* Iframe fills the rest of the panel */
@@ -234,16 +240,20 @@
 		var header = document.createElement('div');
 		header.className = 'jdma-widget-header';
 
-		var titleEl = document.createElement('span');
-		titleEl.className = 'jdma-widget-header-title';
-		titleEl.textContent = buttonLabel;
-		header.appendChild(titleEl);
-
 		var closeBtn = document.createElement('button');
 		closeBtn.className = 'jdma-widget-close';
 		closeBtn.setAttribute('type', 'button');
-		closeBtn.setAttribute('aria-label', 'Fermer');
-		closeBtn.innerHTML = '&#10005;';
+		closeBtn.setAttribute('aria-label', 'Réduire / Fermer');
+
+		var closeLabelText = document.createTextNode('Réduire / Fermer');
+		closeBtn.appendChild(closeLabelText);
+
+		var crossSpan = document.createElement('span');
+		crossSpan.className = 'jdma-widget-close-cross';
+		crossSpan.setAttribute('aria-hidden', 'true');
+		crossSpan.textContent = '\u2715';
+		closeBtn.appendChild(crossSpan);
+
 		closeBtn.addEventListener('click', closePanel);
 		header.appendChild(closeBtn);
 
@@ -311,9 +321,7 @@
 				break;
 
 			case 'submitted':
-				closePanel();
-				// Hide the trigger so the user isn't prompted again
-				trigger.classList.add('jdma-widget-hidden');
+				// closePanel();
 				break;
 		}
 	});
