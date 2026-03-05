@@ -98,7 +98,7 @@ function getWLDPromises() {
 }
 
 async function seed_bug_form_template() {
-	await prisma.formTemplate.upsert({
+	const bugTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'bug' },
 		update: createBugForm,
 		create: createBugForm
@@ -108,7 +108,7 @@ async function seed_bug_form_template() {
 }
 
 async function seed_root_form_template() {
-	await prisma.formTemplate.upsert({
+	const rootTemplate = await prisma.formTemplate.upsert({
 		where: { slug: 'root' },
 		update: createRootForm,
 		create: createRootForm
