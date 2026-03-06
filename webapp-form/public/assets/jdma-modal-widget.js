@@ -78,6 +78,7 @@
 		'}',
 		'.jdma-widget-trigger:hover {',
 		'  transform: scale(1.05);',
+		'  background: transparent!important;',
 		'}',
 		'.jdma-widget-trigger:focus-visible {',
 		'  outline: 3px solid #000091;',

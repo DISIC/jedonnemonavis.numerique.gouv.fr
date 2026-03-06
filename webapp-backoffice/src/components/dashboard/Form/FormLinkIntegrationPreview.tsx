@@ -341,10 +341,14 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		left: 0
 	},
 	previewButtonModal: {
+		display: 'flex',
 		position: 'absolute',
-		bottom: 32,
-		right: 32,
+		padding: 0,
+		bottom: 24,
+		right: 24,
 		img: {
+			maxWidth: '200px',
+			width: 'auto',
 			height: 'auto'
 		}
 	},

@@ -101,42 +101,6 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 			}
 		]
 	},
-	form_template_buttons: {
-		create: bugButtons.map(button => ({
-			label: button.label,
-			slug: button.slug,
-			order: button.order,
-			isDefault: button.isDefault,
-			variants: {
-				create: [
-					{
-						style: 'solid',
-						theme: 'light',
-						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-solid-light.svg`,
-						alt_text: button.label
-					},
-					{
-						style: 'outline',
-						theme: 'light',
-						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-outline-light.svg`,
-						alt_text: button.label
-					},
-					{
-						style: 'solid',
-						theme: 'dark',
-						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-solid-dark.svg`,
-						alt_text: button.label
-					},
-					{
-						style: 'outline',
-						theme: 'dark',
-						image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${button.slug}-outline-dark.svg`,
-						alt_text: button.label
-					}
-				]
-			}
-		}))
-	},
 	integration_types: ['modal', 'link'],
 	default_integration_type: 'modal'
 };
@@ -174,28 +138,7 @@ export async function seed_bug_form_template_buttons(
 					slug: bugButton.slug
 				}
 			},
-			update: {
-				label: bugButton.label,
-				order: bugButton.order,
-				isDefault: bugButton.isDefault,
-				variants: {
-					deleteMany: {},
-					create: [
-						{
-							style: 'solid',
-							theme: null,
-							image_url: '',
-							alt_text: bugButton.label
-						},
-						{
-							style: 'outline',
-							theme: null,
-							image_url: '',
-							alt_text: bugButton.label
-						}
-					]
-				}
-			},
+			update: {},
 			create: {
 				form_template: {
 					connect: {
