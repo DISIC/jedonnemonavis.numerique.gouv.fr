@@ -208,9 +208,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 		switch (currentStep) {
 			case 'PREVIEW':
 				return {
-					content: !currentForm ? (
-						<Loader />
-					) : (
+					content: (
 						<FormLinkIntegrationPreview
 							title="Choisir le type d'intégration"
 							form={currentForm}
@@ -265,15 +263,13 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 				};
 			case 'COPY':
 				return {
-					content: createdButton ? (
+					content: (
 						<ButtonCopyInstructionsPanel
 							buttonStyle={selectedButtonStyle}
 							button={createdButton}
 							formTemplateButton={selectedFormTemplateButton}
 							integrationType={selectedIntegrationType}
 						/>
-					) : (
-						<Loader />
 					),
 					title: `Copier le ${
 						selectedIntegrationType === 'link' ? 'lien' : 'code'
@@ -284,18 +280,6 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 				};
 		}
 	})();
-
-	if (
-		!currentForm ||
-		formTemplate.isLoading ||
-		(mode === 'edit' && buttonById.isLoading)
-	) {
-		return (
-			<OnboardingLayout title="Chargement..." hideActions>
-				<Loader />
-			</OnboardingLayout>
-		);
-	}
 
 	return (
 		<OnboardingLayout

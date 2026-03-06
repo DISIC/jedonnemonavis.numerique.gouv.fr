@@ -264,10 +264,6 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},
-	iframe: {
-		width: '100%',
-		height: '80vh'
-	},
 	btnImgContainer: {
 		display: 'flex',
 		alignItems: 'center'

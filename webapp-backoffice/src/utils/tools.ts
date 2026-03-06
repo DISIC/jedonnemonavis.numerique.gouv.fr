@@ -663,6 +663,7 @@ export const getButtonCode = ({
 	formTemplateButton,
 	theme
 }: ButtonCopyInstructionsPanelProps & { theme: 'clair' | 'sombre' }) => {
+	if (!button) return '';
 	const variantImageUrl = formTemplateButton?.variants.find(
 		v =>
 			v.style === buttonStyle &&
@@ -679,7 +680,8 @@ export const getButtonCode = ({
 	return `<a href="${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="${variantImageUrl}" alt="${buttonLabel}" />\n\n</a>`;
 };
 
-export const getButtonUrl = (button: ButtonWithElements) => {
+export const getButtonUrl = (button?: ButtonWithElements) => {
+	if (!button) return '';
 	const isRootFormTemplate = button.form.form_template.slug === 'root';
 	const reviewUrlParticle = isRootFormTemplate
 		? `/${button.form.product_id}`
@@ -698,6 +700,7 @@ export const getModalCode = ({
 	theme: 'clair' | 'sombre';
 	position?: 'bottom-right' | 'bottom-left';
 }) => {
+	if (!button) return '';
 	const enTheme = theme === 'clair' ? 'light' : 'dark';
 	const variantImageUrl = formTemplateButton?.variants.find(
 		v => v.style === buttonStyle && (v.theme === enTheme || v.theme === null)

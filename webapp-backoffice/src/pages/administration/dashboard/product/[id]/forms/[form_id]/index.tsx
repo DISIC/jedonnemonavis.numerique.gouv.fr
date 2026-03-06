@@ -191,7 +191,7 @@ const ProductFormPage = (props: Props) => {
 								form.form_template.slug === 'root'
 									? `Demarches/${form.product_id}`
 									: `Demarches/avis/${form.id}`
-							}?iframe=true`}
+							}?mode=preview`}
 							target={'_blank'}
 							style={{
 								color: fr.colors.decisions.text.title.blueFrance.default

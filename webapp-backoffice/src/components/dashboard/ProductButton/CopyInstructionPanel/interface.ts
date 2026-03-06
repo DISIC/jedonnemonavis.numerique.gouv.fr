@@ -7,7 +7,7 @@ import { ButtonIntegrationTypes } from '@prisma/client';
 
 export interface ButtonCopyInstructionsPanelProps {
 	buttonStyle?: FormTemplateButtonStyleType | null;
-	button: ButtonWithElements;
+	button?: ButtonWithElements;
 	formTemplateButton?: FormTemplateButtonWithVariants | null;
 	integrationType?: ButtonIntegrationTypes;
 }

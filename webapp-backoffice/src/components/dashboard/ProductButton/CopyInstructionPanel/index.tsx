@@ -4,6 +4,7 @@ import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
 import { ButtonCopyInstructionsPanelProps } from './interface';
 import ButtonInstructionTab from './ButtonInstructionTab';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 
 const ButtonCopyInstructionsPanel = ({
 	buttonStyle,
@@ -12,6 +13,21 @@ const ButtonCopyInstructionsPanel = ({
 	integrationType
 }: ButtonCopyInstructionsPanelProps) => {
 	const { cx, classes } = useStyles();
+
+	if (!button)
+		return (
+			<Notice
+				title="Aucun bouton trouvé"
+				severity="alert"
+				description={
+					<>
+						Il semblerait que le bouton que vous avez créé n'ait pas été
+						retrouvé. Veuillez réessayer ou contacter le support si le problème
+						persiste.
+					</>
+				}
+			/>
+		);
 
 	if (!buttonStyle) {
 		return (

@@ -16,7 +16,7 @@ type AvisPageProps = {
 	form: FormWithElements;
 	buttonId: number;
 	productId: number;
-	isIframe: boolean;
+	isPreview: boolean;
 	isWidget: boolean;
 };
 
@@ -32,7 +32,7 @@ export default function AvisPage({
 	form,
 	buttonId,
 	productId,
-	isIframe,
+	isPreview,
 	isWidget,
 }: AvisPageProps) {
 	const { classes, cx } = useStyles({ isWidget });
@@ -112,7 +112,7 @@ export default function AvisPage({
 	};
 
 	const saveCurrentStep = () => {
-		if (isIframe && !isWidget) return;
+		if (isPreview) return;
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
@@ -147,7 +147,7 @@ export default function AvisPage({
 		}
 	};
 
-	const IFrameAlert = () => (
+	const PreviewAlert = () => (
 		<Notice
 			className={cx(classes.notice)}
 			isClosable
@@ -166,7 +166,7 @@ export default function AvisPage({
 	if (isSubmitted) {
 		return (
 			<>
-				{isIframe && <IFrameAlert />}
+				{isPreview && <PreviewAlert />}
 				<div className={classes.blueSection} />
 				<div
 					className={cx(
@@ -193,7 +193,7 @@ export default function AvisPage({
 
 	return (
 		<>
-			{isIframe && <IFrameAlert />}
+			{isPreview && <PreviewAlert />}
 			<div className={classes.blueSection} />
 			<div
 				className={cx(
@@ -266,12 +266,12 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	}
 
 	const formId = parseInt(params.id as string);
-	const isIframe = query.iframe === 'true';
+	const isPreview = query.mode === 'preview';
 	const isWidget = query.mode === 'widget';
 	const buttonId = parseInt(query.button as string);
 	const formConfigParam = query.formConfig as string | undefined;
 
-	if (!isIframe && !isWidget && (!buttonId || isNaN(buttonId))) {
+	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
 		return {
 			notFound: true,
 		};
@@ -279,7 +279,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	await prisma.$connect();
 
-	if (!isIframe && !isWidget) {
+	if (!isPreview && !isWidget) {
 		const button = await prisma.button.findUnique({
 			where: { id: buttonId },
 			select: { id: true, form_id: true },
@@ -359,7 +359,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			form: formWithConfig,
 			buttonId: buttonId || 0,
 			productId: form.product.id,
-			isIframe,
+			isPreview,
 			isWidget,
 			...(await serverSideTranslations(locale ?? 'fr', ['common'])),
 		},

@@ -129,7 +129,7 @@ const FormLinkIntegrationPreview = ({
 								form.form_template?.slug === 'root'
 									? `/Demarches/${form.product_id}`
 									: `/Demarches/avis/${form.id}`
-							}?iframe=true&formConfig=${encodeURIComponent(
+							}?mode=preview&formConfig=${encodeURIComponent(
 								JSON.stringify(currentFormConfig)
 							)}`}
 							className={classes.previewEmbedContainer}
@@ -346,10 +346,15 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		padding: 0,
 		bottom: 24,
 		right: 24,
+		cursor: 'pointer!important',
+		transition: 'transform 0.2s ease',
 		img: {
 			maxWidth: '200px',
 			width: 'auto',
 			height: 'auto'
+		},
+		':hover': {
+			transform: 'scale(1.05)'
 		}
 	},
 	actionsContainer: {
