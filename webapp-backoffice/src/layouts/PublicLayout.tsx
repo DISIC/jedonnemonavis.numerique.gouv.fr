@@ -391,6 +391,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					serviceTagline="La voix de vos usagers"
 				/>
 			)}
+			<div id="jdma-widget-anchor" className={classes.widgetAnchor} />
 
 			<main id="main" role="main" tabIndex={-1}>
 				{!!session?.user && !shouldDisplayUserDetailsForm && (
@@ -519,5 +520,10 @@ const useStyles = tss
 			'.fr-notice__body': {
 				alignItems: 'center'
 			}
+		},
+		widgetAnchor: {
+			position: 'absolute',
+			top: 0,
+			right: 0
 		}
 	}));

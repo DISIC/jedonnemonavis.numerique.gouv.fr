@@ -17,6 +17,7 @@
  *   data-jdma-button-image   (required)  URL of the floating button image
  *   data-jdma-button-label   (optional)  Accessible label — default "Je donne mon avis"
  *   data-jdma-position       (optional)  "bottom-right" (default) | "bottom-left"
+ *   data-jdma-anchor         (optional)  CSS selector of the element to append the trigger into (e.g. "#my-nav") — places it in the natural tab order of that container instead of appending to <body>
  *
  * The widget:
  *   1. Injects a minimal scoped CSS block (all rules prefixed with .jdma-*)
@@ -44,6 +45,8 @@
 		currentScript.getAttribute('data-jdma-button-label') || 'Je donne mon avis';
 	var position =
 		currentScript.getAttribute('data-jdma-position') || 'bottom-right';
+	var anchorSelector = currentScript.getAttribute('data-jdma-anchor');
+	var anchorEl = anchorSelector ? document.querySelector(anchorSelector) : null;
 
 	if (!formUrl) {
 		console.error(
@@ -55,7 +58,26 @@
 	// Append mode=widget to the form URL so the form app renders without chrome
 	var separator = formUrl.indexOf('?') === -1 ? '?' : '&';
 	var iframeUrl = formUrl + separator + 'mode=widget';
-	var iframeOrigin = new URL(iframeUrl).origin;
+
+	var iframeOrigin;
+	try {
+		iframeOrigin = new URL(iframeUrl).origin;
+	} catch (e) {
+		console.error('[JDMA Widget] Invalid data-jdma-form-url:', formUrl);
+		return;
+	}
+
+	// Only accept URLs from the same origin as this script
+	var expectedOrigin = new URL(currentScript.src).origin;
+	if (iframeOrigin !== expectedOrigin) {
+		console.error(
+			'[JDMA Widget] Untrusted data-jdma-form-url origin:',
+			iframeOrigin,
+			'— expected:',
+			expectedOrigin,
+		);
+		return;
+	}
 
 	var isLeft = position === 'bottom-left';
 
@@ -223,7 +245,7 @@
 		trigger.textContent = buttonLabel;
 	}
 
-	document.body.appendChild(trigger);
+	(anchorEl || document.body).appendChild(trigger);
 
 	// ---------------------------------------------------------------------------
 	// 4. Modal open / close logic
@@ -324,7 +346,6 @@
 				break;
 
 			case 'submitted':
-				// closePanel();
 				break;
 		}
 	});
