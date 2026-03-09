@@ -249,7 +249,7 @@ export function createButton(
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
 }
 
-export function modifyButton() {
+export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 	cy.intercept('POST', '/api/trpc/button.update*').as('updateButton');
 	cy.get('[class*="ProductButtonCard"]')
 		.first()
@@ -259,18 +259,44 @@ export function modifyButton() {
 				.should('be.visible')
 				.click({ force: true });
 		});
-	cy.get('dialog#button-modal').within(() => {
-		cy.get('input[name="button-create-title"]')
-			.should('be.visible')
-			.clear()
-			.type('e2e-jdma-button-test-1');
 
-		cy.get('fieldset[class*="buttonStyles"]').within(() => {
-			cy.get('input[type="radio"][value="outline"]').check({ force: true });
-		});
+	// Edit flow now opens on a dedicated URL: /.../link/{link_id}
+	cy.url().should('match', /\/link\/\d+(\?|$)/);
+
+	cy.get('body').then($body => {
+		if ($body.find('input[name="integration-type"]').length > 0) {
+			if (integrationType) {
+				cy.get(
+					`input[name="integration-type"][value="${integrationType}"]`
+				).check({ force: true });
+			}
+			cy.contains('button', 'Continuer').click();
+		}
 	});
-	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
+
+	cy.get('input[name="button-create-title"]')
+		.should('be.visible')
+		.clear()
+		.type('e2e-jdma-button-test-1');
+
+	cy.get('body').then($body => {
+		if ($body.find('fieldset[class*="buttonStyles"]').length > 0) {
+			cy.get('fieldset[class*="buttonStyles"]').within(() => {
+				cy.get('input[type="radio"][value="outline"]').check({ force: true });
+			});
+		}
+	});
+
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
+		.click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
+
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Terminer')
+		.click();
+
+	cy.url().should('include', 'tab=links');
 }
 
 export function checkMail(click = false, topic = '') {
