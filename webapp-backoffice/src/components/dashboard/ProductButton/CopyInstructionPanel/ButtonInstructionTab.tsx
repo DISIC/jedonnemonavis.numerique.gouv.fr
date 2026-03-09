@@ -53,7 +53,8 @@ const ButtonInstructionTab = ({
 					<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
 						Le widget injectera automatiquement un bouton flottant en bas à
 						droite de la page. Un clic ouvrira le formulaire dans une fenêtre
-						modale par-dessus votre contenu.
+						modale par-dessus votre contenu. Vérifiez que votre politique CSP
+						autorise le script et l&apos;iframe JDMA.
 					</p>
 				</>
 			);

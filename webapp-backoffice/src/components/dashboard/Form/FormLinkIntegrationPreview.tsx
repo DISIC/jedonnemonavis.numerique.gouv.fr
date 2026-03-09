@@ -16,6 +16,7 @@ import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
 import { buttonIntegrationTypesMapping } from '@/src/utils/content';
 import Badge from '@codegouvfr/react-dsfr/Badge';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
@@ -49,6 +50,7 @@ const FormLinkIntegrationPreview = ({
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<ButtonIntegrationTypes>(preSelectedIntegrationType || 'button');
 	const { cx, classes } = useStyles();
+	const { isMobile } = useIsMobile('lg');
 
 	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);
 
@@ -207,7 +209,7 @@ const FormLinkIntegrationPreview = ({
 						}
 					/>
 				</div>
-				<section className={classes.actionsContainer}>
+				<section id="onboarding-actions" className={classes.actionsContainer}>
 					<Button
 						size="large"
 						iconPosition="right"
@@ -228,7 +230,11 @@ const FormLinkIntegrationPreview = ({
 					</Button>
 				</section>
 			</div>
-			<div className={cx(classes.previewContainer, fr.cx('fr-col-8'))}>
+			<div
+				className={cx(classes.previewContainer, fr.cx('fr-col-8'))}
+				role="presentation"
+				aria-hidden="true"
+			>
 				<div className={classes.previewMask} />
 				<Header
 					brandTop={
@@ -236,8 +242,14 @@ const FormLinkIntegrationPreview = ({
 							RÉPUBLIQUE <br /> FRANÇAISE
 						</>
 					}
-					homeLinkProps={{ href: '#', title: 'example', tabIndex: -1 }}
-					serviceTitle={<Placeholder width={200} height={32} />}
+					homeLinkProps={{
+						href: '#',
+						title: 'example',
+						tabIndex: -1
+					}}
+					serviceTitle={
+						!isMobile ? <Placeholder width={200} height={32} /> : undefined
+					}
 					navigation={
 						<Placeholder
 							width={'100%'}

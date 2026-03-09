@@ -72,7 +72,9 @@ const NewForm = (props: Props) => {
 
 	const { data: formTemplates } = trpc.form.getFormTemplates.useQuery(
 		undefined,
-		{ initialData: { data: [] } }
+		{
+			initialData: { data: [] }
+		}
 	);
 
 	const defaultTitle = useMemo(() => {
@@ -247,42 +249,44 @@ const NewForm = (props: Props) => {
 					content: (
 						<>
 							<form id="form-creation-form">
-								<RadioButtons
-									legend={
-										<>
-											Type de formulaire
-											<span className={classes.asterisk}>*</span>
-										</>
-									}
-									options={
-										formTemplates.data.map(template => ({
-											label: (
-												<p className="fr-m-0">
-													{template.title}&nbsp;
-													{template.slug !== 'root' && (
-														<Badge as="span" small severity="new">
-															Beta
-														</Badge>
-													)}
-												</p>
-											),
-											hintText: template.description,
-											nativeInputProps: {
-												value: template.id,
-												checked: selectedFormTemplate?.id === template.id,
-												onChange: () => setSelectedFormTemplate(template)
-											},
-											illustration: (
-												<Image
-													alt={`Illustration type de formulaire ${template.slug}`}
-													src={`/assets/form-template-${template.slug}.svg`}
-													width={56}
-													height={56}
-												/>
-											)
-										})) || []
-									}
-								/>
+								{formTemplates.data.length > 0 && (
+									<RadioButtons
+										legend={
+											<>
+												Type de formulaire
+												<span className={classes.asterisk}>*</span>
+											</>
+										}
+										options={
+											formTemplates.data.map(template => ({
+												label: (
+													<p className="fr-m-0">
+														{template.title}&nbsp;
+														{template.slug !== 'root' && (
+															<Badge as="span" small severity="new">
+																Beta
+															</Badge>
+														)}
+													</p>
+												),
+												hintText: template.description,
+												nativeInputProps: {
+													value: template.id,
+													checked: selectedFormTemplate?.id === template.id,
+													onChange: () => setSelectedFormTemplate(template)
+												},
+												illustration: (
+													<Image
+														alt={`Illustration type de formulaire ${template.slug}`}
+														src={`/assets/form-template-${template.slug}.svg`}
+														width={56}
+														height={56}
+													/>
+												)
+											})) || []
+										}
+									/>
+								)}
 								<div className={fr.cx('fr-input-group')}>
 									<Controller
 										control={control}

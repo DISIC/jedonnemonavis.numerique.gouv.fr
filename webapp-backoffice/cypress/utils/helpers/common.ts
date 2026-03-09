@@ -2,6 +2,7 @@ import { selectors } from '../selectors';
 import { appFormUrl, appUrl, invitedEmail, mailerUrl } from '../variables';
 import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
+import { ButtonIntegrationTypes } from '@prisma/client';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
@@ -189,7 +190,11 @@ export function createOrEditForm(
 	}
 }
 
-export function createButton(name: string, shouldCheckA11y = false) {
+export function createButton(
+	name: string,
+	shouldCheckA11y = false,
+	integrationType: ButtonIntegrationTypes = 'button'
+) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click({
 		force: true
@@ -199,6 +204,18 @@ export function createButton(name: string, shouldCheckA11y = false) {
 		cy.wait(500);
 		cy.auditA11y();
 	}
+
+	// New flow: first screen asks for integration type choice.
+	cy.get('body').then($body => {
+		if ($body.find('input[name="integration-type"]').length > 0) {
+			cy.get(
+				`input[name="integration-type"][value="${integrationType}"]`
+			).check({
+				force: true
+			});
+			cy.contains('button', 'Continuer').click();
+		}
+	});
 
 	cy.wait(1000);
 	cy.get('input[name="button-create-title"]').clear().type(name);
@@ -217,13 +234,15 @@ export function createButton(name: string, shouldCheckA11y = false) {
 		cy.stub(win.navigator.clipboard, 'writeText').resolves();
 	});
 
-	cy.contains('button', 'Copier le code').first().click();
+	cy.contains('button', /^Copier( le code)?$/)
+		.first()
+		.click();
 
 	cy.wait(200);
 
 	cy.get('div.fr-alert').should('be.visible');
 
-	cy.get(actions).contains('button', 'Continuer').click();
+	cy.get(actions).contains('button', 'Terminer').click();
 
 	cy.wait(500);
 
@@ -290,7 +309,9 @@ export function checkReviewForm(shouldWork = false, url?: string) {
 	}
 }
 
-export function doTheOnboardingFlow() {
+export function doTheOnboardingFlow(
+	integrationType: ButtonIntegrationTypes = 'button'
+) {
 	cy.injectAxe();
 	createOrEditProduct('e2e-jdma-service-test-1');
 	editStep(selectors.onboarding.step.product);
@@ -303,7 +324,7 @@ export function doTheOnboardingFlow() {
 	createOrEditForm('form-test-1', false, true);
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true, false);
-	createButton('e2e-jdma-button-test-1', true);
+	createButton('e2e-jdma-button-test-1', true, integrationType);
 }
 
 type UserDetailsFormInput = {
