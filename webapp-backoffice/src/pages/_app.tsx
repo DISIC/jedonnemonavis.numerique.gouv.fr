@@ -59,8 +59,12 @@ const LIGHT_MODE_PATHS = ['/public', '/open-api'] as const;
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
+	const isOutOfAdminLayout = OFF_ADMIN_PATHS.some(path =>
+		router.pathname.startsWith(path)
+	);
+
 	const getLayout = (children: ReactNode) => {
-		if (OFF_ADMIN_PATHS.some(path => router.pathname.startsWith(path))) {
+		if (isOutOfAdminLayout) {
 			return children;
 		}
 
@@ -78,6 +82,11 @@ function App({ Component, pageProps }: AppProps) {
 				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
 			});
 	}, []);
+
+	React.useEffect(() => {
+		const trigger = document.querySelector<HTMLElement>('.jdma-widget-trigger');
+		if (trigger) trigger.style.display = isOutOfAdminLayout ? 'none' : '';
+	}, [isOutOfAdminLayout]);
 
 	return (
 		<MuiDsfrThemeProvider>
@@ -102,6 +111,18 @@ function App({ Component, pageProps }: AppProps) {
 												`
 											}}
 										/>
+										{!isOutOfAdminLayout && (
+											<Script
+												id="jdma-widget"
+												src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`}
+												data-jdma-form-url={
+													process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
+												}
+												data-jdma-button-image={`${process.env.NEXT_PUBLIC_BO_APP_URL}/assets/buttons/button-remark-solid-light.svg`}
+												data-jdma-button-label="Une remarque ?"
+												data-jdma-position="bottom-right"
+											/>
+										)}
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>
 								</RootFormTemplateProvider>
