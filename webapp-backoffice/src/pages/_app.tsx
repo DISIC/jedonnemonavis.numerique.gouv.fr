@@ -49,7 +49,6 @@ const OFF_ADMIN_PATHS = [
 	'/administration/dashboard/onboarding',
 	'/administration/dashboard/product/new',
 	'/administration/dashboard/product/[id]/forms/new',
-	'/administration/dashboard/product/[id]/forms/[form_id]/new-link',
 	'/administration/dashboard/product/[id]/forms/[form_id]/link/new',
 	'/administration/dashboard/product/[id]/forms/[form_id]/link/[link_id]',
 	'/administration/dashboard/product/[id]/access/new'

@@ -127,15 +127,6 @@ const NewForm = (props: Props) => {
 	}, [formTemplates]);
 
 	useEffect(() => {
-		if (formTemplates && selectedFormTemplate === undefined) {
-			const rootTemplate = formTemplates.data.find(
-				template => template.slug === 'root'
-			);
-			setSelectedFormTemplate(rootTemplate || undefined);
-		}
-	}, [formTemplates]);
-
-	useEffect(() => {
 		reset({
 			title: defaultTitle || selectedFormTemplate?.title || ''
 		});

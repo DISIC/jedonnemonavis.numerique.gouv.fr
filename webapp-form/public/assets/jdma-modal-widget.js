@@ -55,6 +55,7 @@
 	// Append mode=widget to the form URL so the form app renders without chrome
 	var separator = formUrl.indexOf('?') === -1 ? '?' : '&';
 	var iframeUrl = formUrl + separator + 'mode=widget';
+	var iframeOrigin = new URL(iframeUrl).origin;
 
 	var isLeft = position === 'bottom-left';
 
@@ -313,6 +314,7 @@
 	// 5. Listen for postMessage from the iframe
 	// ---------------------------------------------------------------------------
 	window.addEventListener('message', function (event) {
+		if (event.origin !== iframeOrigin) return;
 		if (!event.data || typeof event.data !== 'object') return;
 		if (event.data.source !== 'jdma-widget') return;
 
