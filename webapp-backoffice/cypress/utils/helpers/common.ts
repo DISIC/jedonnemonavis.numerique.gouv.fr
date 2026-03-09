@@ -205,19 +205,11 @@ export function createButton(
 		cy.auditA11y();
 	}
 
-	// New flow: first screen asks for integration type choice.
-	cy.get('body').then($body => {
-		if ($body.find('input[name="integration-type"]').length > 0) {
-			cy.get(
-				`input[name="integration-type"][value="${integrationType}"]`
-			).check({
-				force: true
-			});
-			cy.contains('button', 'Continuer').click();
-		}
+	cy.get(`input[name="integration-type"][value="${integrationType}"]`).check({
+		force: true
 	});
+	cy.contains('button', 'Continuer').click();
 
-	cy.wait(1000);
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;
@@ -260,11 +252,10 @@ export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 				.click({ force: true });
 		});
 
-	// Edit flow now opens on a dedicated URL: /.../link/{link_id}
 	cy.url().should('match', /\/link\/\d+(\?|$)/);
 
-	cy.get('body').then($body => {
-		if ($body.find('input[name="integration-type"]').length > 0) {
+	cy.get('input[name="integration-type"]').then($inputs => {
+		if ($inputs.length > 0) {
 			if (integrationType) {
 				cy.get(
 					`input[name="integration-type"][value="${integrationType}"]`
