@@ -11,6 +11,7 @@ import Script from 'next/script';
 import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
+import { useJdmaWidget } from '../hooks/useJdmaWidget';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
@@ -83,10 +84,7 @@ function App({ Component, pageProps }: AppProps) {
 			});
 	}, []);
 
-	React.useEffect(() => {
-		const trigger = document.querySelector<HTMLElement>('.jdma-widget-trigger');
-		if (trigger) trigger.style.display = isOutOfAdminLayout ? 'none' : '';
-	}, [isOutOfAdminLayout]);
+	useJdmaWidget(isOutOfAdminLayout);
 
 	return (
 		<MuiDsfrThemeProvider>
@@ -111,19 +109,17 @@ function App({ Component, pageProps }: AppProps) {
 												`
 											}}
 										/>
-										{!isOutOfAdminLayout && (
-											<Script
-												id="jdma-widget"
-												src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`}
-												data-jdma-form-url={
-													process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
-												}
-												data-jdma-button-image={`${process.env.NEXT_PUBLIC_BO_APP_URL}/assets/buttons/button-remark-solid-light.svg`}
-												data-jdma-button-label="Une remarque ?"
-												data-jdma-position="bottom-right"
-												data-jdma-anchor="#jdma-widget-anchor"
-											/>
-										)}
+										<Script
+											id="jdma-widget"
+											src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`}
+											data-jdma-form-url={
+												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
+											}
+											data-jdma-button-image={`${process.env.NEXT_PUBLIC_BO_APP_URL}/assets/buttons/button-remark-solid-light.svg`}
+											data-jdma-button-label="Une remarque ?"
+											data-jdma-position="bottom-right"
+											data-jdma-anchor="#jdma-widget-anchor"
+										/>
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>
 								</RootFormTemplateProvider>
