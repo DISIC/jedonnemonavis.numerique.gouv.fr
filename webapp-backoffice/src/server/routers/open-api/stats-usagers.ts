@@ -69,7 +69,6 @@ export const statsUsagersQuery = async ({
 		interval
 	};
 
-	// Resolve authorized form_ids
 	let authorizedFormIds: number[] = [];
 	if (form_ids.length > 0) {
 		const forms = await ctx.prisma.form.findMany({
@@ -114,7 +113,6 @@ export const statsUsagersQuery = async ({
 		? fetchParams.product_ids || []
 		: product_ids;
 
-	// Count total "sources": product_ids + unique products from form_ids
 	const formProductIds =
 		form_ids.length > 0
 			? (
