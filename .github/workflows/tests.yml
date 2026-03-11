@@ -29,81 +29,61 @@ jobs:
           - 1025:1025
 
     steps:
-      # 1. Checkout du code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Copier le fichier .env.example vers .env
-      - name: Copy .env.example to .env
+      - name: Copy .env files
         run: |
           cp webapp-backoffice/.env.example webapp-backoffice/.env
           cp webapp-form/.env.example webapp-form/.env
 
-      # 3. Configuration de Node.js
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
 
-      # 4. Installer les dépendances et générer le client Prisma pour `webapp-backoffice`
-      - name: Install dependencies and generate Prisma client for webapp-backoffice
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('webapp-backoffice/yarn.lock') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-
+
+      - name: Install dependencies
         run: |
-          cd webapp-backoffice
-          yarn install
-          npx prisma generate
-          npx prisma migrate reset --force
+          (cd webapp-backoffice && yarn install)
+          (cd webapp-form && yarn install)
 
-      # 5. Installer les dépendances et générer le client Prisma pour `webapp-form`
-      - name: Install dependencies and generate Prisma client for webapp-form
+      - name: Generate Prisma clients and seed database
         run: |
-          cd webapp-form
-          yarn install
-          npx prisma generate
+          (cd webapp-backoffice && npx prisma generate && npx prisma migrate reset --force) &
+          (cd webapp-form && npx prisma generate) &
+          wait -n || exit 1
+          wait -n || exit 1
 
-      # 6. Construire `webapp-backoffice`
-      - name: Build webapp-backoffice
+      - name: Build apps
         run: |
-          cd webapp-backoffice
-          yarn build
-          nohup yarn start &
+          (cd webapp-backoffice && yarn build) &
+          (cd webapp-form && yarn build) &
+          wait -n || exit 1
+          wait -n || exit 1
 
-      # 7. Construire `webapp-form`
-      - name: Build webapp-form
+      - name: Start apps and wait for readiness
         run: |
-          cd webapp-form
-          yarn build
-          nohup yarn startB &
+          cd webapp-backoffice && nohup yarn start &
+          cd webapp-form && nohup yarn startB &
+          until curl -s http://localhost:3000 > /dev/null 2>&1; do sleep 2; done
+          until curl -s http://localhost:3001 > /dev/null 2>&1; do sleep 2; done
+          until curl -s http://localhost:8025 > /dev/null 2>&1; do sleep 2; done
 
-      # 8. Attendre que les services soient prêts
-      - name: Wait for services to be ready
-        run: |
-          echo "Waiting for webapp-backoffice to be ready..."
-          until curl -s http://localhost:3000 > /dev/null; do echo "Waiting for webapp-backoffice..."; sleep 5; done
-
-          echo "Waiting for webapp-form to be ready..."
-          until curl -s http://localhost:3001 > /dev/null; do echo "Waiting for webapp-form..."; sleep 5; done
-
-          echo "Waiting for MailHog to be ready..."
-          until curl -s http://localhost:8025 > /dev/null; do echo "Waiting for MailHog..."; sleep 5; done
-
-      # 9. Exécuter les tests Cypress pour `webapp-backoffice`
-      - name: Run Cypress tests for webapp-backoffice
+      - name: Run Cypress tests
         working-directory: ./webapp-backoffice
-        run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.ts" --headed --browser chrome
+        run: npx cypress run --spec "cypress/e2e/jdma/launcher.cy.ts" --browser chrome
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           CYPRESS_PROJECT_ID: ${{ secrets.CYPRESS_PROJECT_ID }}
-
-      # 10. Vérifier si MailHog reçoit les emails
-      - name: Check MailHog for received emails
-        run: curl http://localhost:8025/api/v2/messages
-
-      # 11. Arrêter les applications démarrées
-      - name: Stop applications
-        run: |
-          pkill -f "yarn start" || true
-          pkill -f "yarn startB" || true
