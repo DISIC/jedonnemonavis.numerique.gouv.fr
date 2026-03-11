@@ -41,7 +41,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'yarn'
+          cache: "yarn"
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
@@ -56,8 +56,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          (cd webapp-backoffice && yarn install --frozen-lockfile) &
-          (cd webapp-form && yarn install --frozen-lockfile) &
+          (cd webapp-backoffice && yarn install) &
+          (cd webapp-form && yarn install) &
           wait -n || exit 1
           wait -n || exit 1
 
