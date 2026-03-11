@@ -141,7 +141,8 @@ async function seed_users_products() {
 	}
 
 	// Create products sequentially for deterministic IDs
-	for (const [index, product] of products.entries()) {
+	for (let index = 0; index < products.length; index++) {
+		const product = products[index];
 		const randomEntity = getRandomObjectFromArray(entities) as Entity;
 		const formTemplate = formTemplates.find(
 			ft => ft.slug === product.templateSlug
