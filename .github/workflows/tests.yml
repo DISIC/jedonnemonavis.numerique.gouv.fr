@@ -56,8 +56,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd webapp-backoffice && yarn install
-          cd webapp-form && yarn install
+          (cd webapp-backoffice && yarn install)
+          (cd webapp-form && yarn install)
 
       - name: Generate Prisma clients and seed database
         run: |
