@@ -6,12 +6,13 @@ import { ButtonIntegrationTypes } from '@prisma/client';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
-	cy.get(selectors.loginForm.email).type(email);
+	cy.get(selectors.loginForm.email).should('be.visible').type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password).type(password);
+	cy.get(selectors.loginForm.password, { timeout: 30000 })
+		.should('be.visible')
+		.type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-	cy.wait(1000);
-	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
+	cy.url({ timeout: 30000 }).should('eq', `${appUrl}${selectors.url.products}`);
 	tryFillUserDetailsForm();
 	if (!loginOnly) tryCloseNewsModal();
 }
@@ -293,27 +294,24 @@ export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 export function checkMail(click = false, topic = '') {
 	cy.visit(mailerUrl);
 	cy.get('button[ng-click="refresh()"]').click();
-	cy.get('.msglist-message')
-		.contains('span', topic)
-		.should('exist')
-		.then($message => {
-			if (click) {
-				cy.wrap($message).click();
-				cy.get('ul.nav-tabs').contains('Plain text').click();
-				cy.get('#preview-plain')
-					.find('a')
-					.each($link => {
-						const href = $link.attr('href');
-						if (href && href.includes('/register')) {
-							cy.wrap($link).invoke('removeAttr', 'target').click();
-						}
-					});
-			}
-		});
+	cy.wait(2000);
+	cy.get('.msglist-message').contains('span', topic).should('be.visible');
+	if (click) {
+		cy.get('.msglist-message').contains('span', topic).click();
+		cy.get('ul.nav-tabs').contains('Plain text').click();
+		cy.get('#preview-plain')
+			.find('a')
+			.each($link => {
+				const href = $link.attr('href');
+				if (href && href.includes('/register')) {
+					cy.wrap($link).invoke('removeAttr', 'target').click();
+				}
+			});
+	}
 }
 
 export function checkReviewForm(shouldWork = false, url?: string) {
-	cy.visit(url ?? `${appFormUrl}/Demarches/4?button=7`, {
+	cy.visit(url ?? `${appFormUrl}/Demarches/1?button=1`, {
 		failOnStatusCode: false
 	});
 	if (shouldWork) {
