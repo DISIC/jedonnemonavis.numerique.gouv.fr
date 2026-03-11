@@ -15,7 +15,8 @@ declare global {
 }
 
 Cypress.Commands.add('submitCompleteReview', () => {
-	cy.visit(`${appFormUrl}/Demarches/2?button=3`);
+	// Use deterministic seed URL: Product 1, Button 1 (root form template)
+	cy.visit(`${appFormUrl}/Demarches/1?button=1`);
 	fillFormStep1();
 	fillFormStep2();
 	fillFormStep3();

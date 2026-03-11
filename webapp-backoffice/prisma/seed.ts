@@ -2,8 +2,6 @@ import {
 	Button,
 	Entity,
 	PrismaClient,
-	Product,
-	User,
 	WhiteListedDomain
 } from '@prisma/client';
 import { Domain } from 'domain';
@@ -118,117 +116,91 @@ async function seed_root_form_template() {
 }
 
 async function seed_users_products() {
-	const promisesUsersAndEntities: Promise<User | Entity>[] = [];
-	const promisesProducts: Promise<Product>[] = [];
-	const promisesWLDs: Promise<WhiteListedDomain>[] = [];
 	const formTemplates = await prisma.formTemplate.findMany({
 		take: 100
 	});
 	const rootFormTemplate = formTemplates.find(ft => ft.slug === 'root');
 	const bugFormTemplate = formTemplates.find(ft => ft.slug === 'bug');
 
-	users.forEach(user => {
-		promisesUsersAndEntities.push(
-			prisma.user.upsert({
-				where: {
-					email: user.email
-				},
-				update: {},
-				create: {
-					...user
-				}
-			})
+	// Create users sequentially for deterministic IDs
+	for (const user of users) {
+		await prisma.user.upsert({
+			where: { email: user.email },
+			update: {},
+			create: { ...user }
+		});
+	}
+
+	// Create entities sequentially for deterministic IDs
+	for (const entity of entities) {
+		await prisma.entity.upsert({
+			where: { name: entity.name },
+			update: { acronym: entity.acronym },
+			create: entity
+		});
+	}
+
+	// Create products sequentially for deterministic IDs
+	for (const [index, product] of products.entries()) {
+		const randomEntity = getRandomObjectFromArray(entities) as Entity;
+		const formTemplate = formTemplates.find(
+			ft => ft.slug === product.templateSlug
 		);
-	});
 
-	entities.forEach(entity => {
-		promisesUsersAndEntities.push(
-			prisma.entity.upsert({
-				where: {
-					name: entity.name
-				},
-				update: {
-					acronym: entity.acronym
-				},
-				create: entity
-			})
-		);
-	});
-
-	Promise.all(promisesUsersAndEntities).then(usersAndEntitiesResponses => {
-		products.forEach((product, index) => {
-			const randomEntity = getRandomObjectFromArray(entities) as Entity;
-			const formTemplate = formTemplates.find(
-				ft => ft.slug === product.templateSlug
-			);
-
-			promisesProducts.push(
-				prisma.product.create({
-					data: {
-						title: product.title,
-						isPublic: product.isPublic,
-						urls: product.urls,
-						entity: {
-							connect: {
-								name: randomEntity.name
-							}
-						},
-						accessRights: {
-							create: {
-								user_email: users.filter(u => u.active && u?.role !== 'admin')[
-									index % 2
-								].email,
-								status: 'carrier_admin'
-							}
-						},
-						forms: {
-							create: [
-								{
-									title: formTemplate?.title,
-									form_template: {
-										connect: {
-											slug: formTemplate?.slug || 'root'
-										}
-									},
-									buttons: {
-										create: buttons as Button[]
-									}
-								},
-								...(index === 0
-									? [
-											{
-												title: bugFormTemplate?.title,
-												form_template: {
-													connect: {
-														slug: 'bug'
-													}
-												},
-												buttons: {
-													create: buttons as Button[]
-												}
-											}
-									  ]
-									: [])
-							]
-						}
+		await prisma.product.create({
+			data: {
+				title: product.title,
+				isPublic: product.isPublic,
+				urls: product.urls,
+				entity: {
+					connect: {
+						name: randomEntity.name
 					}
-				})
-			);
+				},
+				accessRights: {
+					create: {
+						user_email: users.filter(u => u.active && u?.role !== 'admin')[
+							index % 2
+						].email,
+						status: 'carrier_admin'
+					}
+				},
+				forms: {
+					create: [
+						{
+							title: formTemplate?.title,
+							form_template: {
+								connect: {
+									slug: formTemplate?.slug || 'root'
+								}
+							},
+							buttons: {
+								create: buttons as Button[]
+							}
+						},
+						...(index === 0
+							? [
+									{
+										title: bugFormTemplate?.title,
+										form_template: {
+											connect: {
+												slug: 'bug'
+											}
+										},
+										buttons: {
+											create: buttons as Button[]
+										}
+									}
+							  ]
+							: [])
+					]
+				}
+			}
 		});
+	}
 
-		const promisesWLDs = getWLDPromises();
-
-		Promise.all([...promisesProducts, ...promisesWLDs]).then(responses => {
-			let log: { [key: string]: User | Product | Entity | Domain | string } =
-				{};
-			usersAndEntitiesResponses.concat(responses as any).forEach((r, i) => {
-				if ('email' in r) log[`${i}] user added`] = r.email;
-				if ('domain' in r) log[`${i}] domain added : `] = r.domain as Domain;
-				if ('title' in r) log[`product ${r.title}`] = r;
-				if ('name' in r) log[`owner ${r.name}`] = r;
-			});
-		});
-	});
+	// Create whitelisted domains
+	await Promise.all(getWLDPromises());
 }
 
 async function formatted_title() {

@@ -91,6 +91,10 @@ describe('jdma-forms', () => {
 	it('should go to form review url from button copy then create a form review on first version of the first form', () => {
 		goToCurrentFormReviewPage().then(url => {
 			copiedReviewUrl = url;
+			// Save the review URL for other test suites (review.cy.ts, delete check)
+			cy.writeFile('cypress/fixtures/dynamicTestData.json', {
+				formReviewUrl: url
+			});
 		});
 		cy.wait(1000);
 		fillFormStep1(false, true);
@@ -152,6 +156,9 @@ describe('jdma-forms', () => {
 			false,
 			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service «${selectors.dashboard.nameTestService}»`
 		);
-		checkReviewForm(false, `${appFormUrl}/Demarches/5?button=5`);
+		// Use the dynamically captured form review URL instead of hardcoded IDs
+		cy.readFile('cypress/fixtures/dynamicTestData.json').then(data => {
+			checkReviewForm(false, data.formReviewUrl);
+		});
 	});
 });

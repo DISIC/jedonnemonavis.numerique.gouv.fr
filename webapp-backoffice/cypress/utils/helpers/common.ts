@@ -278,7 +278,7 @@ export function checkMail(click = false, topic = '') {
 }
 
 export function checkReviewForm(shouldWork = false, url?: string) {
-	cy.visit(url ?? `${appFormUrl}/Demarches/4?button=7`, {
+	cy.visit(url ?? `${appFormUrl}/Demarches/1?button=1`, {
 		failOnStatusCode: false
 	});
 	if (shouldWork) {
