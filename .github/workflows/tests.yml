@@ -54,7 +54,6 @@ jobs:
           restore-keys: |
             cypress-${{ runner.os }}-
 
-      # Install both apps in parallel
       - name: Install dependencies
         run: |
           (cd webapp-backoffice && yarn install --frozen-lockfile) &
@@ -62,7 +61,6 @@ jobs:
           wait -n || exit 1
           wait -n || exit 1
 
-      # Prisma generate for both + DB reset (seed) in parallel
       - name: Generate Prisma clients and seed database
         run: |
           (cd webapp-backoffice && npx prisma generate && npx prisma migrate reset --force) &
@@ -70,7 +68,6 @@ jobs:
           wait -n || exit 1
           wait -n || exit 1
 
-      # Build both apps in parallel
       - name: Build apps
         run: |
           (cd webapp-backoffice && yarn build) &

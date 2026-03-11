@@ -8,7 +8,6 @@ import { appFormUrl } from '../../../utils/variables';
 
 describe('jdma-form-review', () => {
 	before(() => {
-		// Use deterministic seed URL: Product 1, Button 1 (root form template)
 		cy.visit(`${appFormUrl}/Demarches/1?button=1`, {
 			failOnStatusCode: false
 		});

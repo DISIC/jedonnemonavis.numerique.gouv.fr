@@ -122,7 +122,6 @@ async function seed_users_products() {
 	const rootFormTemplate = formTemplates.find(ft => ft.slug === 'root');
 	const bugFormTemplate = formTemplates.find(ft => ft.slug === 'bug');
 
-	// Create users sequentially for deterministic IDs
 	for (const user of users) {
 		await prisma.user.upsert({
 			where: { email: user.email },
@@ -131,7 +130,6 @@ async function seed_users_products() {
 		});
 	}
 
-	// Create entities sequentially for deterministic IDs
 	for (const entity of entities) {
 		await prisma.entity.upsert({
 			where: { name: entity.name },
@@ -140,7 +138,6 @@ async function seed_users_products() {
 		});
 	}
 
-	// Create products sequentially for deterministic IDs
 	for (let index = 0; index < products.length; index++) {
 		const product = products[index];
 		const randomEntity = getRandomObjectFromArray(entities) as Entity;
@@ -200,7 +197,6 @@ async function seed_users_products() {
 		});
 	}
 
-	// Create whitelisted domains
 	await Promise.all(getWLDPromises());
 }
 

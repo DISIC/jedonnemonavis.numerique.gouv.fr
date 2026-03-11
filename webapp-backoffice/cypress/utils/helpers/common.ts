@@ -7,7 +7,6 @@ export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
 	cy.get(selectors.loginForm.email).should('be.visible').type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	// Wait for the password field to appear after server validation
 	cy.get(selectors.loginForm.password, { timeout: 30000 })
 		.should('be.visible')
 		.type(password);
@@ -259,11 +258,9 @@ export function modifyButton() {
 export function checkMail(click = false, topic = '') {
 	cy.visit(mailerUrl);
 	cy.get('button[ng-click="refresh()"]').click();
-	// Wait for MailHog to finish re-rendering after refresh
 	cy.wait(2000);
 	cy.get('.msglist-message').contains('span', topic).should('be.visible');
 	if (click) {
-		// Re-query the element to avoid detached DOM issues after MailHog re-render
 		cy.get('.msglist-message').contains('span', topic).click();
 		cy.get('ul.nav-tabs').contains('Plain text').click();
 		cy.get('#preview-plain')
