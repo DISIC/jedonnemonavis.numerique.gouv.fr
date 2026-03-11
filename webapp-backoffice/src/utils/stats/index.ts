@@ -13,6 +13,7 @@ export type FetchAndFormatDataProps = {
 	ctx: Context;
 	field_codes: FieldCodeHelper[];
 	product_ids?: string[] | number[];
+	form_ids?: number[];
 	start_date: string;
 	end_date: string;
 	interval: 'day' | 'week' | 'month' | 'year' | 'none';
@@ -22,6 +23,7 @@ export const fetchAndFormatData = async ({
 	ctx,
 	field_codes,
 	product_ids,
+	form_ids,
 	start_date,
 	end_date,
 	interval
@@ -57,12 +59,32 @@ export const fetchAndFormatData = async ({
 		}
 	};
 
-	if (!!product_ids && query?.bool?.must && Array.isArray(query.bool.must)) {
-		query.bool.must.push({
-			terms: {
-				product_id: product_ids
-			}
-		});
+	const hasProductIds = !!product_ids && product_ids.length > 0;
+	const hasFormIds = !!form_ids && form_ids.length > 0;
+
+	if (
+		(hasProductIds || hasFormIds) &&
+		query?.bool?.must &&
+		Array.isArray(query.bool.must)
+	) {
+		if (hasProductIds && hasFormIds) {
+			query.bool.must.push({
+				bool: {
+					should: [
+						{ terms: { product_id: product_ids! } },
+						{ terms: { form_id: form_ids! } }
+					]
+				}
+			});
+		} else if (hasProductIds) {
+			query.bool.must.push({
+				terms: { product_id: product_ids! }
+			});
+		} else if (hasFormIds) {
+			query.bool.must.push({
+				terms: { form_id: form_ids! }
+			});
+		}
 	}
 
 	const fieldCodeAggs = await ctx.elkClient.search<ElkAnswer[]>({
@@ -103,10 +125,19 @@ export const fetchAndFormatData = async ({
 		}))
 	);
 
+	const formsWhereConditions: any[] = [];
+	if (hasProductIds) {
+		formsWhereConditions.push({ product_id: { in: product_ids as number[] } });
+	}
+	if (hasFormIds) {
+		formsWhereConditions.push({ id: { in: form_ids! } });
+	}
+
 	const formsHelper = await ctx.prisma.form.findMany({
-		where: {
-			product_id: { in: product_ids as number[] }
-		},
+		where:
+			formsWhereConditions.length > 0
+				? { OR: formsWhereConditions }
+				: { product_id: { in: product_ids as number[] } },
 		select: {
 			id: true,
 			product_id: true,
