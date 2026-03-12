@@ -17,6 +17,7 @@ import { Loader } from '../../ui/Loader';
 import { buttonIntegrationTypesMapping } from '@/src/utils/content';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
@@ -235,7 +236,14 @@ const FormLinkIntegrationPreview = ({
 				role="presentation"
 				aria-hidden="true"
 			>
-				<div className={classes.previewMask} />
+				<Notice
+					title="Cet aperçu ne reflète pas le rendu final"
+					description={`Le libellé et le style affichés ici sont illustratifs. Cet aperçu
+							permet uniquement de visualiser l’emplacement et le mode
+							d’affichage de l’entrée du formulaire.`}
+					className={classes.previewNotice}
+					iconDisplayed={false}
+				/>
 				<Header
 					brandTop={
 						<>
@@ -273,6 +281,7 @@ const FormLinkIntegrationPreview = ({
 					)}
 					<div className={classes.previewContent}>{getPreviewContent()}</div>
 				</div>
+				<div className={classes.previewMask} />
 			</div>
 		</div>
 	);
@@ -309,8 +318,15 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		left: 0,
 		width: '100%',
 		height: '100%',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		zIndex: 5
+		zIndex: 5,
+		boxShadow: 'inset -10px 0px 50px 1.99px #00000017'
+	},
+	previewNotice: {
+		'.fr-notice__body p': {
+			display: 'inline-flex',
+			flexDirection: 'column',
+			gap: fr.spacing('2v')
+		}
 	},
 	fakeMainContent: {
 		display: 'flex',

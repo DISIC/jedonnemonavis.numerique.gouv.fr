@@ -1,27 +1,49 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Manages the JDMA feedback widget visibility and DOM placement.
  * Hides the widget on off-admin pages and re-attaches it to the
  * #jdma-widget-anchor (inside PublicLayout) when coming back.
+ * Defaults to hidden so the widget never flashes on non-admin pages.
  */
 export function useJdmaWidget(isOutOfAdminLayout: boolean) {
-	const triggerRef = useRef<HTMLElement | null>(null);
+	const [trigger, setTrigger] = useState<HTMLElement | null>(null);
 
-	// Capture the widget trigger once the script creates it
+	const syncWidget = useCallback(
+		(el: HTMLElement) => {
+			el.style.display = isOutOfAdminLayout ? 'none' : '';
+
+			const panel = document.querySelector<HTMLElement>('.jdma-widget-panel');
+			if (panel && isOutOfAdminLayout) panel.style.display = 'none';
+
+			if (!isOutOfAdminLayout) {
+				const anchor = document.getElementById('jdma-widget-anchor');
+				if (anchor && el.parentElement !== anchor) {
+					anchor.appendChild(el);
+				}
+			}
+		},
+		[isOutOfAdminLayout]
+	);
+
+	// Capture the widget trigger once the script creates it,
+	// hide it immediately so it never flashes on non-admin pages.
 	useEffect(() => {
-		if (triggerRef.current) return;
+		function capture(el: HTMLElement) {
+			el.style.display = 'none';
+			setTrigger(el);
+		}
 
 		const found = document.querySelector<HTMLElement>('.jdma-widget-trigger');
 		if (found) {
-			triggerRef.current = found;
+			capture(found);
 			return;
 		}
 
 		const observer = new MutationObserver(() => {
 			const el = document.querySelector<HTMLElement>('.jdma-widget-trigger');
 			if (el) {
-				triggerRef.current = el;
+				capture(el);
 				observer.disconnect();
 			}
 		});
@@ -29,28 +51,10 @@ export function useJdmaWidget(isOutOfAdminLayout: boolean) {
 		return () => observer.disconnect();
 	}, []);
 
+	// Sync visibility whenever the trigger is found or layout changes
 	useEffect(() => {
-		const trigger = triggerRef.current;
-
-		function syncWidget() {
-			if (!trigger) return;
-
-			trigger.style.display = isOutOfAdminLayout ? 'none' : '';
-
-			const panel = document.querySelector<HTMLElement>(
-				'.jdma-widget-panel'
-			);
-			if (panel && isOutOfAdminLayout) panel.style.display = 'none';
-
-			if (!isOutOfAdminLayout) {
-				const anchor = document.getElementById('jdma-widget-anchor');
-				if (anchor && trigger.parentElement !== anchor) {
-					anchor.appendChild(trigger);
-				}
-			}
-		}
-
-		const rafId = requestAnimationFrame(syncWidget);
+		if (!trigger) return;
+		const rafId = requestAnimationFrame(() => syncWidget(trigger));
 		return () => cancelAnimationFrame(rafId);
-	}, [isOutOfAdminLayout]);
+	}, [trigger, syncWidget]);
 }
