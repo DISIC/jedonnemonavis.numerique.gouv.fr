@@ -96,12 +96,19 @@
 		'  background: transparent;',
 		'  padding: 0;',
 		'  margin: 0;',
-		'  transition: transform 0.2s ease, opacity 0.2s ease;',
-		'  animation: jdma-fadein 0.4s ease;',
+		'  min-width: 44px;',
+		'  min-height: 44px;',
+		'  filter: drop-shadow(0 6px 18px rgba(0, 0, 18, 0.16));',
+		'  transition: opacity 0.2s ease, filter 0.2s ease;',
+		'  will-change: transform;',
 		'}',
 		'.jdma-widget-trigger:hover {',
 		'  transform: scale(1.05);',
+		'  filter: drop-shadow(0 8px 24px rgba(0, 0, 18, 0.22));',
 		'  background: transparent!important;',
+		'}',
+		'.jdma-widget-trigger:active {',
+		'  transform: scale(0.97) translateY(2%);',
 		'}',
 		'.jdma-widget-trigger:focus-visible {',
 		'  outline: 3px solid #000091;',
@@ -117,18 +124,16 @@
 		'.jdma-widget-panel {',
 		'  position: fixed;',
 		'  z-index: 999995;',
-		'  bottom: 75px;',
+		'  bottom: 24px;',
 		isLeft ? '  left: 24px;' : '  right: 24px;',
 		'  width: 500px;',
 		'  height: 550px;',
-		'  max-height: calc(100vh - 130px);',
+		'  max-height: calc(100vh - 48px);',
 		'  background: #fff;',
-		'  border-radius: 12px;',
-		'  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);',
+		'  box-shadow: 0 6px 18px rgba(0, 0, 18, 0.16);',
 		'  overflow: hidden;',
 		'  display: flex;',
 		'  flex-direction: column;',
-		'  animation: jdma-slideup 0.3s ease;',
 		'}',
 
 		/* Panel header bar */
@@ -136,7 +141,7 @@
 		'  display: flex;',
 		'  align-items: center;',
 		'  justify-content: flex-end;',
-		'  padding: 8px 12px;',
+		'  padding: 16px 16px 0 16px;',
 		'  flex-shrink: 0;',
 		'}',
 
@@ -148,8 +153,11 @@
 		'  cursor: pointer;',
 		'  display: inline-flex;',
 		'  align-items: center;',
-		'  gap: 4px;',
-		'  padding: 4px;',
+		'  gap: 8px;',
+		'  padding: 4px 8px 4px 12px;',
+		'  min-width: 44px;',
+		'  min-height: 28px;',
+		'  font-weight: 500;',
 		'  font-family: "Marianne", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;',
 		'  font-size: 14px;',
 		'  line-height: 1.5;',
@@ -168,16 +176,10 @@
 		'  outline-offset: 2px;',
 		'}',
 
-		/* Close cross icon */
-		'.jdma-widget-close-cross {',
+		/* Close icon (SVG) */
+		'.jdma-widget-close-icon {',
 		'  display: inline-flex;',
-		'  align-items: center;',
-		'  justify-content: center;',
-		'  width: 28px;',
-		'  height: 28px;',
-		'  font-size: 14px;',
-		'  font-weight: bold;',
-		'  line-height: 1;',
+		'  flex-shrink: 0;',
 		'}',
 
 		/* Iframe fills the rest of the panel */
@@ -192,7 +194,7 @@
 		'  display: none !important;',
 		'}',
 
-		/* Animations */
+		/* Reduced motion: no animations by default */
 		'@keyframes jdma-fadein {',
 		'  from { opacity: 0; }',
 		'  to { opacity: 1; }',
@@ -200,6 +202,17 @@
 		'@keyframes jdma-slideup {',
 		'  from { opacity: 0; transform: translateY(16px) scale(0.96); }',
 		'  to { opacity: 1; transform: translateY(0) scale(1); }',
+		'}',
+
+		/* Only animate when the user has no motion preference */
+		'@media (prefers-reduced-motion: no-preference) {',
+		'  .jdma-widget-trigger {',
+		'    animation: jdma-fadein 0.4s ease;',
+		'    transition: transform 0.2s ease, opacity 0.2s ease;',
+		'  }',
+		'  .jdma-widget-panel {',
+		'    animation: jdma-slideup 0.3s ease;',
+		'  }',
 		'}',
 
 		/* Responsive — on mobile, go full-screen */
@@ -235,6 +248,8 @@
 		buttonLabel + ' - ouvre le formulaire dans une fenêtre flottante',
 	);
 	trigger.setAttribute('aria-label', buttonLabel);
+	trigger.setAttribute('aria-haspopup', 'dialog');
+	trigger.setAttribute('aria-expanded', 'false');
 
 	if (buttonImage) {
 		var img = document.createElement('img');
@@ -252,12 +267,41 @@
 	// ---------------------------------------------------------------------------
 	var panel = null;
 
+	// ---------------------------------------------------------------------------
+	// Focus-trap helper: keeps Tab cycling within the panel
+	// ---------------------------------------------------------------------------
+	function trapFocus(e) {
+		if (e.key !== 'Tab' && e.keyCode !== 9) return;
+		if (!panel) return;
+
+		var focusable = panel.querySelectorAll(
+			'button, [href], input, select, textarea, iframe, [tabindex]:not([tabindex="-1"])',
+		);
+		if (focusable.length === 0) return;
+
+		var first = focusable[0];
+		var last = focusable[focusable.length - 1];
+
+		if (e.shiftKey) {
+			if (document.activeElement === first) {
+				e.preventDefault();
+				last.focus();
+			}
+		} else {
+			if (document.activeElement === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		}
+	}
+
 	function openPanel() {
 		if (panel) return;
 
 		panel = document.createElement('div');
 		panel.className = 'jdma-widget-panel';
 		panel.setAttribute('role', 'dialog');
+		panel.setAttribute('aria-modal', 'true');
 		panel.setAttribute('aria-label', buttonLabel);
 
 		// Header bar
@@ -267,16 +311,31 @@
 		var closeBtn = document.createElement('button');
 		closeBtn.className = 'jdma-widget-close';
 		closeBtn.setAttribute('type', 'button');
-		closeBtn.setAttribute('aria-label', 'Réduire / Fermer');
+		closeBtn.setAttribute('aria-label', 'Fermer');
 
-		var closeLabelText = document.createTextNode('Réduire / Fermer');
+		var closeLabelText = document.createTextNode('Fermer');
 		closeBtn.appendChild(closeLabelText);
 
-		var crossSpan = document.createElement('span');
-		crossSpan.className = 'jdma-widget-close-cross';
-		crossSpan.setAttribute('aria-hidden', 'true');
-		crossSpan.textContent = '\u2715';
-		closeBtn.appendChild(crossSpan);
+		var closeSvg = document.createElementNS(
+			'http://www.w3.org/2000/svg',
+			'svg',
+		);
+		closeSvg.setAttribute('viewBox', '0 0 24 24');
+		closeSvg.setAttribute('width', '16');
+		closeSvg.setAttribute('height', '16');
+		closeSvg.setAttribute('fill', 'currentColor');
+		closeSvg.setAttribute('aria-hidden', 'true');
+		closeSvg.classList.add('jdma-widget-close-icon');
+		var closePath = document.createElementNS(
+			'http://www.w3.org/2000/svg',
+			'path',
+		);
+		closePath.setAttribute(
+			'd',
+			'M12 10.586l4.95-4.95 1.414 1.414L13.414 12l4.95 4.95-1.414 1.414L12 13.414l-4.95 4.95-1.414-1.414L10.586 12 5.636 7.05l1.414-1.414z',
+		);
+		closeSvg.appendChild(closePath);
+		closeBtn.appendChild(closeSvg);
 
 		closeBtn.addEventListener('click', closePanel);
 		header.appendChild(closeBtn);
@@ -293,11 +352,15 @@
 
 		document.body.appendChild(panel);
 
+		// Update trigger state
+		trigger.setAttribute('aria-expanded', 'true');
+
 		// Focus the close button
 		closeBtn.focus();
 
-		// ESC key handler
+		// Keyboard handlers
 		document.addEventListener('keydown', handleEscape);
+		document.addEventListener('keydown', trapFocus);
 
 		// Close when clicking outside the panel
 		document.addEventListener('mousedown', handleClickOutside);
@@ -307,7 +370,9 @@
 		if (!panel) return;
 		document.body.removeChild(panel);
 		panel = null;
+		trigger.setAttribute('aria-expanded', 'false');
 		document.removeEventListener('keydown', handleEscape);
+		document.removeEventListener('keydown', trapFocus);
 		document.removeEventListener('mousedown', handleClickOutside);
 		trigger.focus();
 	}

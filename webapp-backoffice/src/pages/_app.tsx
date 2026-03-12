@@ -115,7 +115,7 @@ function App({ Component, pageProps }: AppProps) {
 											data-jdma-form-url={
 												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
 											}
-											data-jdma-button-image={`${process.env.NEXT_PUBLIC_BO_APP_URL}/assets/buttons/button-remark-solid-light.svg`}
+											data-jdma-button-image={`${process.env.NEXT_PUBLIC_BO_APP_URL}/assets/buttons/button-feedback-outline-light.svg`}
 											data-jdma-button-label="Une remarque ?"
 											data-jdma-position="bottom-right"
 											data-jdma-anchor="#jdma-widget-anchor"
