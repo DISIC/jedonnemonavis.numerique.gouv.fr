@@ -31,9 +31,10 @@ type FormLinkIntegrationPreviewProps = {
 const Placeholder = (styleProps: CSSProperties) => (
 	<span
 		style={{
-			backgroundColor: '#f0f0f0',
+			backgroundColor: '#DFDFDF',
 			borderRadius: '0.3em',
 			display: 'inline-block',
+			width: '80%',
 			...styleProps
 		}}
 	/>
@@ -88,7 +89,7 @@ const FormLinkIntegrationPreview = ({
 									)?.image_url || ''
 								}
 								fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-solid-light.svg`}
-								width={200}
+								width={175}
 								height={85}
 							/>
 						) : (
@@ -244,44 +245,47 @@ const FormLinkIntegrationPreview = ({
 					className={classes.previewNotice}
 					iconDisplayed={false}
 				/>
-				<Header
-					brandTop={
-						<>
-							RÉPUBLIQUE <br /> FRANÇAISE
-						</>
-					}
-					homeLinkProps={{
-						href: '#',
-						title: 'example',
-						tabIndex: -1
-					}}
-					serviceTitle={
-						!isMobile ? <Placeholder width={200} height={32} /> : undefined
-					}
-					navigation={
+				<div className={classes.fakeSiteContainer}>
+					<Header
+						brandTop={
+							<>
+								RÉPUBLIQUE <br /> FRANÇAISE
+							</>
+						}
+						homeLinkProps={{
+							href: '#',
+							title: 'example',
+							tabIndex: -1
+						}}
+						serviceTitle={
+							!isMobile ? <Placeholder width={200} height={32} /> : undefined
+						}
+						navigation={
+							<Placeholder
+								width={'100%'}
+								height={10}
+								marginTop={fr.spacing('6v')}
+								marginBottom={fr.spacing('4v')}
+							/>
+						}
+						style={{ zIndex: 0 }}
+					/>
+					<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
 						<Placeholder
-							width={'100%'}
-							height={10}
+							minHeight={20}
+							flex={'1 1 140px'}
 							marginTop={fr.spacing('6v')}
 							marginBottom={fr.spacing('4v')}
 						/>
-					}
-					style={{ zIndex: 0 }}
-				/>
-				<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
-					<Placeholder
-						height={220}
-						marginTop={fr.spacing('6v')}
-						marginBottom={fr.spacing('4v')}
-					/>
-					<Placeholder height={100} marginBottom={fr.spacing('4v')} />
-					<Placeholder height={100} marginBottom={fr.spacing('4v')} />
-					{selectedIntegrationType === 'modal' && (
-						<Placeholder height={220} marginBottom={fr.spacing('4v')} />
-					)}
-					<div className={classes.previewContent}>{getPreviewContent()}</div>
+						<Placeholder
+							minHeight={20}
+							flex={'1 1 140px'}
+							marginBottom={fr.spacing('4v')}
+						/>
+						<div className={classes.previewContent}>{getPreviewContent()}</div>
+					</div>
+					<div className={classes.previewMask} />
 				</div>
-				<div className={classes.previewMask} />
 			</div>
 		</div>
 	);
@@ -312,6 +316,14 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		overflow: 'hidden',
 		backgroundColor: 'white'
 	},
+	fakeSiteContainer: {
+		margin: fr.spacing('10v'),
+		border: `solid 2px ${fr.colors.decisions.border.default.grey.default}`,
+		display: 'flex',
+		flexDirection: 'column',
+		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 60px)`,
+		overflow: 'hidden'
+	},
 	previewMask: {
 		position: 'absolute',
 		top: 0,
@@ -330,13 +342,18 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 	},
 	fakeMainContent: {
 		display: 'flex',
-		flexDirection: 'column'
+		alignItems: 'center',
+		flexDirection: 'column',
+		flex: 1,
+		minHeight: 0,
+		overflow: 'hidden'
 	},
 	previewContent: {
 		display: 'flex',
 		justifyContent: 'center',
 		...fr.spacing('margin', { topBottom: '4v' }),
-		zIndex: 10
+		zIndex: 10,
+		flexShrink: 0
 	},
 	previewButton: {
 		cursor: 'pointer!important',
