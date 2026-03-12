@@ -281,21 +281,19 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				text: (
 					<div>
 						Demandes d'accès
-						<Badge
-							severity="warning"
-							noIcon
-							small={true}
-							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-						>
-							<i
-								className={fr.cx(
-									'fr-icon-notification-3-line',
-									'fr-mr-1v',
-									'fr-p-1v'
-								)}
-							/>
-							{` ${userRequestsResult.metadata.count}`}
-						</Badge>
+						{userRequestsResult.metadata.count > 0 && (
+							<Badge
+								severity="warning"
+								noIcon
+								small
+								className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+							>
+								<i
+									className={fr.cx('fr-icon-notification-3-line', 'fr-mr-1v')}
+								/>
+								{` ${userRequestsResult.metadata.count}`}
+							</Badge>
+						)}
 					</div>
 				),
 				linkProps: {
@@ -322,18 +320,19 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 	) {
 		navigationItems.push({
 			text: (
-				<>
+				<div>
 					Nouveautés
 					{!settings.newsPageSeen && (
 						<Badge
 							severity="new"
 							small
+							noIcon
 							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
 						>
-							1
+							<i className={fr.cx('fr-icon-flashlight-fill', 'fr-mr-1v')} />1
 						</Badge>
 					)}
-				</>
+				</div>
 			),
 			linkProps: {
 				href: '/administration/dashboard/news',
@@ -487,7 +486,7 @@ const useStyles = tss
 		badgeAccess: {
 			i: {
 				['&::before']: {
-					'--icon-size': '1rem'
+					'--icon-size': '0.75rem'
 				}
 			}
 		},

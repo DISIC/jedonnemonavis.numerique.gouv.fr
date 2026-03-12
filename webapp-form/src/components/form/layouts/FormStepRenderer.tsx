@@ -82,11 +82,11 @@ export const FormStepRenderer = (props: Props) => {
 			)}
 
 			{allBlocksRequired ? (
-				<p className={fr.cx('fr-hint-text')}>
+				<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
 					Tous les champs sont obligatoires
 				</p>
 			) : (
-				<p className={fr.cx('fr-hint-text')}>
+				<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
 					Tous les champs sont obligatoire sauf mention contraire
 				</p>
 			)}
@@ -127,17 +127,21 @@ const useStyles = tss
 		},
 		title: {
 			textAlign: isWidget ? 'left' : 'center',
-			color: fr.colors.decisions.background.flat.blueFrance.default,
+			color: isWidget
+				? fr.colors.decisions.text.title.grey.default
+				: fr.colors.decisions.background.flat.blueFrance.default,
 			marginBottom: 0,
-			...(isWidget && { fontSize: '1.25rem', lineHeight: '1.4' }),
+			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' }),
 			[fr.breakpoints.down('md')]: {
 				display: isWidget ? 'block' : 'none',
 			},
 		},
 		subtitle: {
-			color: fr.colors.decisions.background.flat.blueFrance.default,
+			color: isWidget
+				? fr.colors.decisions.text.title.grey.default
+				: fr.colors.decisions.background.flat.blueFrance.default,
 			marginBottom: isWidget ? 0 : fr.spacing('10v'),
 			textAlign: isWidget ? 'left' : 'center',
-			...(isWidget && { fontSize: '1.25rem', lineHeight: '1.4' }),
+			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' }),
 		},
 	}));

@@ -41,21 +41,24 @@ export const TextAreaBlock = ({
 		<div className={classes.inputContainer}>
 			<label
 				htmlFor={`textarea-${block.id}`}
-				className={fr.cx(
-					'fr-label',
-					isWidget ? 'fr-text--sm' : 'fr-text--md',
-					'fr-mb-2v',
-				)}
+				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
-			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
-				{textareaValue.length} / 15000
-			</div>
 			<Input
 				label=""
-				className={fr.cx('fr-mb-2v')}
+				className={fr.cx('fr-mb-0')}
+				hintText={
+					<>
+						Pour nous aider à comprendre, vous pouvez préciser : <br /> - si
+						vous êtes sur un ordinateur ou un téléphone, <br />- ce que vous
+						cherchiez à faire, <br />- ce qui s’est réellement passé ou ce qui
+						pourrait être amélioré. <br />
+						Plus votre description est précise, plus nous pourrons agir
+						efficacement.
+					</>
+				}
 				nativeTextAreaProps={{
 					id: `textarea-${block.id}`,
 					value: textareaValue,
@@ -71,15 +74,19 @@ export const TextAreaBlock = ({
 							},
 						}));
 					},
+					autoFocus: true,
 				}}
 				state={textareaValue.length > 15000 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 15000 caractères"
 				textArea
 			/>
+			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
+				{textareaValue.length} / 15000
+			</div>
 			<Notice
 				className={cx(classes.notice)}
 				title="Ne partagez aucune information personnelle (exemple : nom, email, téléphone)"
-			></Notice>
+			/>
 		</div>
 	);
 };
@@ -91,7 +98,8 @@ const useStyles = tss.withName(TextAreaBlock.name).create(() => ({
 	},
 	textCount: {
 		alignSelf: 'flex-end',
-		marginBottom: fr.spacing('1v'),
+		marginTop: fr.spacing('1v'),
+		marginBottom: 0,
 		marginRight: fr.spacing('1v'),
 	},
 	hint: {

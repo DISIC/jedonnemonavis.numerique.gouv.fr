@@ -50,15 +50,13 @@ export const RadioBlock = ({
 		<div>
 			<label
 				htmlFor={`radio-${block.id}`}
-				className={fr.cx('fr-label', isWidget ? 'fr-text--sm' : 'fr-text--md')}
+				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-4v')}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<RadioButtons
 				id={`radio-${block.id}`}
-				small={!!isWidget}
-				className={isWidget ? classes.smallFix : undefined}
 				options={visibleOptions.map(opt => ({
 					label: opt.label || '',
 					hintText: opt.hint,

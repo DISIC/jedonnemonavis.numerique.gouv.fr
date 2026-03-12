@@ -191,6 +191,8 @@ export default function AvisPage({
 		);
 	}
 
+	const isFirstStep = currentStepIndex === 0;
+
 	return (
 		<>
 			{isPreview && <PreviewAlert />}
@@ -215,21 +217,13 @@ export default function AvisPage({
 									isWidget={isWidget}
 								/>
 
-								<div className={classes.buttonsContainer}>
-									{currentStepIndex > 0 ? (
-										<Button
-											priority="secondary"
-											iconId="fr-icon-arrow-left-line"
-											iconPosition="left"
-											onClick={handlePrevious}
-											type="button"
-										>
-											Précédent
-										</Button>
-									) : (
-										<div />
-									)}
-
+								<div
+									className={classes.buttonsContainer}
+									style={{
+										justifyContent:
+											isFirstStep && isWidget ? 'center' : 'space-between',
+									}}
+								>
 									{currentStepIndex < steps.length - 1 ? (
 										<Button
 											priority="primary"
@@ -243,6 +237,20 @@ export default function AvisPage({
 										<Button priority="primary" type="submit">
 											Envoyer mon avis
 										</Button>
+									)}
+
+									{currentStepIndex > 0 ? (
+										<Button
+											priority="secondary"
+											iconId="fr-icon-arrow-left-line"
+											iconPosition="left"
+											onClick={handlePrevious}
+											type="button"
+										>
+											Précédent
+										</Button>
+									) : (
+										<div className={fr.cx(isWidget && 'fr-hidden')} />
 									)}
 								</div>
 							</form>
@@ -408,6 +416,7 @@ const useStyles = tss
 		},
 		buttonsContainer: {
 			display: 'flex',
+			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
 			marginTop: fr.spacing('8v'),
 			...(isWidget && {
@@ -416,9 +425,8 @@ const useStyles = tss
 				left: 0,
 				right: 0,
 				backgroundColor: fr.colors.decisions.background.default.grey.default,
-				padding: `${fr.spacing('2v')} ${fr.spacing('4v')}`,
+				...fr.spacing('padding', { rightLeft: '4v', bottom: '4v' }),
 				marginTop: 0,
-				boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.1)',
 				zIndex: 10,
 			}),
 		},
