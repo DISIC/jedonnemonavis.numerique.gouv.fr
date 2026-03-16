@@ -166,7 +166,7 @@ export default function AvisPage({
 	if (isSubmitted) {
 		return (
 			<>
-				{isPreview && <PreviewAlert />}
+				{isPreview && !isWidget && <PreviewAlert />}
 				<div className={classes.blueSection} />
 				<div
 					className={cx(
@@ -195,7 +195,7 @@ export default function AvisPage({
 
 	return (
 		<>
-			{isPreview && <PreviewAlert />}
+			{isPreview && !isWidget && <PreviewAlert />}
 			<div className={classes.blueSection} />
 			<div
 				className={cx(
@@ -274,7 +274,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	}
 
 	const formId = parseInt(params.id as string);
-	const isPreview = query.mode === 'preview';
+	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
 	const buttonId = parseInt(query.button as string);
 	const formConfigParam = query.formConfig as string | undefined;
@@ -425,7 +425,7 @@ const useStyles = tss
 				left: 0,
 				right: 0,
 				backgroundColor: fr.colors.decisions.background.default.grey.default,
-				...fr.spacing('padding', { rightLeft: '4v', bottom: '4v' }),
+				...fr.spacing('padding', { top: '2v', rightLeft: '4v', bottom: '4v' }),
 				marginTop: 0,
 				zIndex: 10,
 			}),

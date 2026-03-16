@@ -103,7 +103,7 @@ export const FormStepper = (props: Props) => {
 						type="submit"
 						disabled={
 							!tmpOpinion.satisfaction ||
-							(router.query.mode === 'preview' &&
+							(router.query.preview === 'true' &&
 								t(steps[currentStep].name) === 'Informations complémentaires')
 						}
 						className={classes.stepButton}

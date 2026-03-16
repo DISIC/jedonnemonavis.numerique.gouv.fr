@@ -106,8 +106,8 @@ Dev email (Mailhog) is available at `http://localhost:8025` when using the test 
 
 ### Form app rendering modes
 
-The public form page (`webapp-form/src/pages/[id].tsx`) reads `router.query.mode`:
-- `mode=preview` → preview mode (disables submission)
+The public form page (`webapp-form/src/pages/[id].tsx`) reads query parameters:
+- `preview=true` → preview mode (disables submission)
 - `mode=widget` → embedded in the floating widget panel (strips chrome)
 
 ### Component patterns

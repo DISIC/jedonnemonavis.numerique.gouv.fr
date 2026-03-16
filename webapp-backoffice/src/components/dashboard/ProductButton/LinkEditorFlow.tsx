@@ -61,15 +61,17 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 	}, [currentForm]);
 
 	const parsedLinkId = Number(link_id);
-	const buttonById = trpc.button.getById.useQuery(
-		{ id: parsedLinkId },
-		{ enabled: mode === 'edit' && !!link_id && !isNaN(parsedLinkId) }
-	);
+	const { data: buttonById, isLoading: isLoadingButton } =
+		trpc.button.getById.useQuery(
+			{ id: parsedLinkId },
+			{ enabled: mode === 'edit' && !!link_id && !isNaN(parsedLinkId) }
+		);
 
-	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
-		{ slug: currentForm?.form_template?.slug || '' },
-		{ enabled: !!currentForm?.form_template?.slug }
-	);
+	const { data: formTemplate, isLoading: isLoadingFormTemplate } =
+		trpc.form.getFormTemplateBySlug.useQuery(
+			{ slug: currentForm?.form_template?.slug || '' },
+			{ enabled: !!currentForm?.form_template?.slug }
+		);
 
 	const createButton = trpc.button.create.useMutation({
 		onSuccess: result => {
@@ -112,14 +114,12 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 
 	useEffect(() => {
 		if (mode !== 'edit') return;
-		if (!buttonById.data?.data) return;
+		if (!buttonById?.data) return;
 
-		setSelectedIntegrationType(
-			buttonById.data.data.integration_type || 'button'
-		);
-		setSelectedButtonStyle(buttonById.data.data.button_style || undefined);
-		setTitle(buttonById.data.data.title || '');
-	}, [buttonById.data?.data, mode]);
+		setSelectedIntegrationType(buttonById.data.integration_type || 'button');
+		setSelectedButtonStyle(buttonById.data.button_style || undefined);
+		setTitle(buttonById.data.title || '');
+	}, [buttonById?.data, mode]);
 
 	useEffect(() => {
 		if (
@@ -131,12 +131,12 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 			return;
 		}
 
-		if (!formTemplate.data?.data?.form_template_buttons?.length) return;
+		if (!formTemplate?.data?.form_template_buttons?.length) return;
 
-		if (mode === 'edit' && buttonById.data?.data?.form_template_button_id) {
+		if (mode === 'edit' && buttonById?.data?.form_template_button_id) {
 			const existingTemplateButton =
-				formTemplate.data.data.form_template_buttons.find(
-					button => button.id === buttonById.data?.data?.form_template_button_id
+				formTemplate.data.form_template_buttons.find(
+					button => button.id === buttonById?.data?.form_template_button_id
 				);
 			if (existingTemplateButton) {
 				setSelectedFormTemplateButton(existingTemplateButton);
@@ -145,13 +145,11 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 		}
 
 		setSelectedFormTemplateButton(
-			formTemplate.data.data.form_template_buttons.find(
-				button => button.isDefault
-			)
+			formTemplate.data.form_template_buttons.find(button => button.isDefault)
 		);
 	}, [
-		buttonById.data?.data?.form_template_button_id,
-		formTemplate.data?.data?.form_template_buttons,
+		buttonById?.data?.form_template_button_id,
+		formTemplate?.data?.form_template_buttons,
 		mode,
 		selectedIntegrationType
 	]);
@@ -207,6 +205,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 	const currentStepValues = (() => {
 		switch (currentStep) {
 			case 'PREVIEW':
+				const isLoadingPreview = isLoadingButton || isLoadingFormTemplate;
 				return {
 					content: (
 						<FormLinkIntegrationPreview
@@ -229,10 +228,11 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 								setSelectedIntegrationType(integrationType);
 								setCurrentStep('CREATION');
 							}}
-							formTemplate={formTemplate.data?.data}
+							formTemplate={formTemplate?.data}
 							preSelectedIntegrationType={
-								buttonById.data?.data?.integration_type || undefined
+								buttonById?.data?.integration_type || undefined
 							}
+							isLoading={isLoadingPreview}
 						/>
 					),
 					title: "Choisir le type d'intégration"
@@ -247,9 +247,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 							selectedButtonStyle={selectedButtonStyle}
 							setSelectedButtonStyle={setSelectedButtonStyle}
 							selectedIntegrationType={selectedIntegrationType}
-							formTemplateButtons={
-								formTemplate.data?.data?.form_template_buttons
-							}
+							formTemplateButtons={formTemplate?.data?.form_template_buttons}
 							selectedFormTemplateButton={selectedFormTemplateButton}
 							setSelectedFormTemplateButton={setSelectedFormTemplateButton}
 						/>

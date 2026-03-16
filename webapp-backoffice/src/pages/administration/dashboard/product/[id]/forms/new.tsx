@@ -414,7 +414,7 @@ const NewForm = (props: Props) => {
 								createdForm?.form_template.slug === 'root'
 									? `/Demarches/${product.id}`
 									: `/Demarches/avis/${createdForm?.id}`
-							}?mode=preview&formConfig=${encodeURIComponent(
+							}?preview=true&formConfig=${encodeURIComponent(
 								JSON.stringify(tmpConfigHelper)
 							)}`}
 							target="_blank"

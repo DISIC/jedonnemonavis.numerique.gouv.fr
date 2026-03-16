@@ -10,7 +10,13 @@ import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { ButtonIntegrationTypes } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useMemo, useState, useEffect, CSSProperties } from 'react';
+import {
+	useMemo,
+	useState,
+	useEffect,
+	useCallback,
+	CSSProperties
+} from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
@@ -18,6 +24,7 @@ import { buttonIntegrationTypesMapping } from '@/src/utils/content';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import ModalIntegrationPreview from './ModalIntegrationPreview';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
@@ -26,6 +33,7 @@ type FormLinkIntegrationPreviewProps = {
 	form?: FormWithConfigAndTemplate;
 	formTemplate?: FormTemplateWithElements | null;
 	preSelectedIntegrationType?: ButtonIntegrationTypes;
+	isLoading: boolean;
 };
 
 const Placeholder = (styleProps: CSSProperties) => (
@@ -70,17 +78,23 @@ const FormLinkIntegrationPreview = ({
 		return formTemplate?.form_template_buttons.find(b => b.isDefault);
 	}, [formTemplate]);
 
+	const [isModalDimmed, setIsModalDimmed] = useState(false);
+
+	const handleModalDimmedChange = useCallback((isDimmed: boolean) => {
+		setIsModalDimmed(isDimmed);
+	}, []);
+
 	const getPreviewContent = () => {
 		switch (selectedIntegrationType) {
 			case 'button':
 				return (
-					<button
-						title="Je donne mon avis - nouvelle fenêtre"
-						className={classes.previewButton}
-						disabled
-						aria-disabled
-					>
-						{defaultFormTemplateButton ? (
+					defaultFormTemplateButton && (
+						<button
+							title="Je donne mon avis - nouvelle fenêtre"
+							className={classes.previewButton}
+							disabled
+							aria-disabled
+						>
 							<ImageWithFallback
 								alt={defaultFormTemplateButton.label}
 								src={
@@ -92,37 +106,8 @@ const FormLinkIntegrationPreview = ({
 								width={175}
 								height={85}
 							/>
-						) : (
-							<Loader />
-						)}
-					</button>
-				);
-			case 'modal':
-				return (
-					<div className={classes.previewModalContainer}>
-						<button
-							title="Je donne mon avis - nouvelle fenêtre"
-							className={classes.previewButtonModal}
-							disabled
-							aria-disabled
-						>
-							{defaultFormTemplateButton ? (
-								<ImageWithFallback
-									alt={defaultFormTemplateButton.label}
-									src={
-										defaultFormTemplateButton.variants.find(
-											v => v.style === 'outline'
-										)?.image_url || ''
-									}
-									fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-outline-light.svg`}
-									width={200}
-									height={85}
-								/>
-							) : (
-								<Loader />
-							)}
 						</button>
-					</div>
+					)
 				);
 			case 'embed':
 				return (
@@ -133,7 +118,7 @@ const FormLinkIntegrationPreview = ({
 								form.form_template?.slug === 'root'
 									? `/Demarches/${form.product_id}`
 									: `/Demarches/avis/${form.id}`
-							}?mode=preview&formConfig=${encodeURIComponent(
+							}?preview=true&formConfig=${encodeURIComponent(
 								JSON.stringify(currentFormConfig)
 							)}`}
 							className={classes.previewEmbedContainer}
@@ -232,11 +217,7 @@ const FormLinkIntegrationPreview = ({
 					</Button>
 				</section>
 			</div>
-			<div
-				className={cx(classes.previewContainer, fr.cx('fr-col-8'))}
-				role="presentation"
-				aria-hidden="true"
-			>
+			<div className={cx(classes.previewContainer, fr.cx('fr-col-8'))}>
 				<Notice
 					title="Cet aperçu ne reflète pas le rendu final"
 					description={`Le libellé et le style affichés ici sont illustratifs. Cet aperçu
@@ -245,47 +226,65 @@ const FormLinkIntegrationPreview = ({
 					className={classes.previewNotice}
 					iconDisplayed={false}
 				/>
-				<div className={classes.fakeSiteContainer}>
-					<Header
-						brandTop={
-							<>
-								RÉPUBLIQUE <br /> FRANÇAISE
-							</>
-						}
-						homeLinkProps={{
-							href: '#',
-							title: 'example',
-							tabIndex: -1
-						}}
-						serviceTitle={
-							!isMobile ? <Placeholder width={200} height={32} /> : undefined
-						}
-						navigation={
+				<div className={classes.fakeSiteWrapper}>
+					<div
+						className={cx(
+							classes.fakeSiteContainer,
+							isModalDimmed &&
+								selectedIntegrationType === 'modal' &&
+								classes.fakeSiteDimmed
+						)}
+						role="presentation"
+						aria-hidden="true"
+					>
+						<Header
+							brandTop={
+								<>
+									RÉPUBLIQUE <br /> FRANÇAISE
+								</>
+							}
+							homeLinkProps={{
+								href: '#',
+								title: 'example',
+								tabIndex: -1
+							}}
+							serviceTitle={
+								!isMobile ? <Placeholder width={200} height={32} /> : undefined
+							}
+							navigation={
+								<Placeholder
+									width={'100%'}
+									height={10}
+									marginTop={fr.spacing('6v')}
+									marginBottom={fr.spacing('4v')}
+								/>
+							}
+							style={{ zIndex: 0 }}
+						/>
+						<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
 							<Placeholder
-								width={'100%'}
-								height={10}
+								minHeight={20}
+								flex={'1 1 140px'}
 								marginTop={fr.spacing('6v')}
 								marginBottom={fr.spacing('4v')}
 							/>
-						}
-						style={{ zIndex: 0 }}
-					/>
-					<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
-						<Placeholder
-							minHeight={20}
-							flex={'1 1 140px'}
-							marginTop={fr.spacing('6v')}
-							marginBottom={fr.spacing('4v')}
-						/>
-						<Placeholder
-							minHeight={20}
-							flex={'1 1 140px'}
-							marginBottom={fr.spacing('4v')}
-						/>
-						<div className={classes.previewContent}>{getPreviewContent()}</div>
+							<Placeholder
+								minHeight={20}
+								flex={'1 1 140px'}
+								marginBottom={fr.spacing('4v')}
+							/>
+							<div className={classes.previewContent}>
+								{getPreviewContent()}
+							</div>
+						</div>
 					</div>
-					<div className={classes.previewMask} />
+					<ModalIntegrationPreview
+						isActive={selectedIntegrationType === 'modal'}
+						defaultFormTemplateButton={defaultFormTemplateButton}
+						onDimmedChange={handleModalDimmedChange}
+					/>
 				</div>
+				<div className={classes.previewMask} />
 			</div>
 		</div>
 	);
@@ -316,13 +315,20 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		overflow: 'hidden',
 		backgroundColor: 'white'
 	},
-	fakeSiteContainer: {
+	fakeSiteWrapper: {
+		position: 'relative',
 		margin: fr.spacing('10v'),
+		height: '90%',
+		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 60px)`
+	},
+	fakeSiteContainer: {
+		position: 'relative',
 		border: `solid 2px ${fr.colors.decisions.border.default.grey.default}`,
 		display: 'flex',
 		flexDirection: 'column',
-		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 60px)`,
-		overflow: 'hidden'
+		height: '100%',
+		overflow: 'hidden',
+		transition: 'opacity 0.4s ease'
 	},
 	previewMask: {
 		position: 'absolute',
@@ -378,29 +384,9 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 			color: fr.colors.decisions.text.default.grey.default
 		}
 	},
-	previewModalContainer: {
-		width: '100%',
-		height: '100%',
-		position: 'absolute',
-		top: 0,
-		left: 0
-	},
-	previewButtonModal: {
-		display: 'flex',
-		position: 'absolute',
-		padding: 0,
-		bottom: 24,
-		right: 24,
-		cursor: 'pointer!important',
-		transition: 'transform 0.2s ease',
-		img: {
-			maxWidth: '200px',
-			width: 'auto',
-			height: 'auto'
-		},
-		':hover': {
-			transform: 'scale(1.05)'
-		}
+	fakeSiteDimmed: {
+		opacity: 0.4,
+		pointerEvents: 'none'
 	},
 	actionsContainer: {
 		position: 'absolute',

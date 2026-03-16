@@ -69,7 +69,7 @@ export default function JDMAForm({
 		),
 	);
 
-	const isPreview = router.query.mode === 'preview';
+	const isPreview = router.query.preview === 'true';
 	const isWidgetMode = router.query.mode === 'widget';
 
 	const { classes, cx } = useStyles({ isPreview });
@@ -567,7 +567,7 @@ export const getServerSideProps: GetServerSideProps<{
 	const buttonId = query.button as string;
 	const formConfig = query.formConfig as string;
 	const xwikiButtonName = query.nd_source as string;
-	const isPreview = (query.mode as string) === 'preview';
+	const isPreview = (query.preview as string) === 'true';
 
 	const isXWikiLink = !buttonId && !isPreview;
 
