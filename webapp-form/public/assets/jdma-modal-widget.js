@@ -32,12 +32,15 @@
 	// ---------------------------------------------------------------------------
 	// 1. Read configuration from the <script> tag's data attributes
 	// ---------------------------------------------------------------------------
-	var currentScript =
-		document.currentScript ||
-		(function () {
-			var scripts = document.getElementsByTagName('script');
-			return scripts[scripts.length - 1];
-		})();
+	var currentScript = document.currentScript;
+
+	if (!currentScript) {
+		console.error(
+			'[JDMA Widget] Unable to detect script element. ' +
+				'This browser does not support document.currentScript.',
+		);
+		return;
+	}
 
 	var formUrl = currentScript.getAttribute('data-jdma-form-url');
 	var buttonImage = currentScript.getAttribute('data-jdma-button-image');
@@ -47,6 +50,7 @@
 		currentScript.getAttribute('data-jdma-position') || 'bottom-right';
 	var anchorSelector = currentScript.getAttribute('data-jdma-anchor');
 	var anchorEl = anchorSelector ? document.querySelector(anchorSelector) : null;
+	var devMode = currentScript.hasAttribute('data-jdma-dev-mode');
 
 	if (!formUrl) {
 		console.error(
@@ -55,9 +59,24 @@
 		return;
 	}
 
-	// Append mode=widget to the form URL so the form app renders without chrome
+	// Generate a cryptographic nonce for postMessage verification
+	var widgetNonce = (function () {
+		var array = new Uint8Array(16);
+		crypto.getRandomValues(array);
+		var hex = '';
+		for (var i = 0; i < array.length; i++) {
+			hex += ('0' + array[i].toString(16)).slice(-2);
+		}
+		return hex;
+	})();
 	var separator = formUrl.indexOf('?') === -1 ? '?' : '&';
-	var iframeUrl = formUrl + separator + 'mode=widget';
+	var iframeUrl = formUrl + separator + 'mode=widget&nonce=' + widgetNonce;
+
+	var ALLOWED_ORIGINS = [
+		'https://jedonnemonavis.numerique.gouv.fr',
+		'https://jdma-staging.cleverapps.io',
+		'https://jdma-develop.cleverapps.io',
+	];
 
 	var iframeOrigin;
 	try {
@@ -67,16 +86,50 @@
 		return;
 	}
 
-	// Only accept URLs from the same origin as this script
-	var expectedOrigin = new URL(currentScript.src).origin;
-	if (iframeOrigin !== expectedOrigin) {
+	var iframeHost = new URL(iframeUrl).hostname;
+	var pageHost = window.location.hostname;
+	var isLocalDev =
+		devMode &&
+		(iframeHost === 'localhost' || iframeHost === '127.0.0.1') &&
+		(pageHost === 'localhost' || pageHost === '127.0.0.1');
+
+	if (isLocalDev) {
+		console.warn(
+			'[JDMA Widget] Dev mode active — local origin accepted. ' +
+				'Remove data-jdma-dev-mode before deploying to production.',
+		);
+	}
+
+	// Validate iframe origin against the allowlist, unless we're in local dev mode
+	if (ALLOWED_ORIGINS.indexOf(iframeOrigin) === -1 && !isLocalDev) {
 		console.error(
 			'[JDMA Widget] Untrusted data-jdma-form-url origin:',
 			iframeOrigin,
-			'— expected:',
-			expectedOrigin,
 		);
 		return;
+	}
+
+	// Validate buttonImage origin against the same allowlist
+	if (buttonImage) {
+		try {
+			var imgOrigin = new URL(buttonImage).origin;
+			var imgHost = new URL(buttonImage).hostname;
+			var isImgLocal =
+				(imgHost === 'localhost' || imgHost === '127.0.0.1') && isLocalDev;
+			if (ALLOWED_ORIGINS.indexOf(imgOrigin) === -1 && !isImgLocal) {
+				console.error(
+					'[JDMA Widget] Untrusted data-jdma-button-image origin:',
+					imgOrigin,
+				);
+				buttonImage = null;
+			}
+		} catch (e) {
+			console.error(
+				'[JDMA Widget] Invalid data-jdma-button-image:',
+				buttonImage,
+			);
+			buttonImage = null;
+		}
 	}
 
 	var isLeft = position === 'bottom-left';
@@ -243,6 +296,12 @@
 
 	var style = document.createElement('style');
 	style.setAttribute('data-jdma-widget', 'true');
+
+	var scriptNonce = currentScript.nonce || currentScript.getAttribute('nonce');
+	if (scriptNonce) {
+		style.setAttribute('nonce', scriptNonce);
+	}
+
 	style.textContent = CSS;
 	document.head.appendChild(style);
 
@@ -357,6 +416,10 @@
 		iframe.setAttribute('src', iframeUrl);
 		iframe.setAttribute('title', buttonLabel);
 		iframe.setAttribute('allow', 'clipboard-write');
+		iframe.setAttribute(
+			'sandbox',
+			'allow-scripts allow-forms allow-same-origin allow-popups',
+		);
 		panel.appendChild(iframe);
 
 		document.body.appendChild(panel);
@@ -413,6 +476,7 @@
 		if (event.origin !== iframeOrigin) return;
 		if (!event.data || typeof event.data !== 'object') return;
 		if (event.data.source !== 'jdma-widget') return;
+		if (event.data.nonce !== widgetNonce) return;
 
 		switch (event.data.type) {
 			case 'close':

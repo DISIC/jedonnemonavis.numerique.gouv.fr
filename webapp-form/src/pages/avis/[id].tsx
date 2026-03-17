@@ -18,6 +18,7 @@ type AvisPageProps = {
 	productId: number;
 	isPreview: boolean;
 	isWidget: boolean;
+	widgetNonce: string | null;
 };
 
 type DynamicAnswerData = {
@@ -34,6 +35,7 @@ export default function AvisPage({
 	productId,
 	isPreview,
 	isWidget,
+	widgetNonce,
 }: AvisPageProps) {
 	const { classes, cx } = useStyles({ isWidget });
 
@@ -92,7 +94,7 @@ export default function AvisPage({
 			// Notify parent window when embedded as a widget
 			if (isWidget && window.parent !== window) {
 				window.parent.postMessage(
-					{ source: 'jdma-widget', type: 'submitted' },
+					{ source: 'jdma-widget', type: 'submitted', nonce: widgetNonce },
 					'*',
 				);
 			}
@@ -276,6 +278,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	const formId = parseInt(params.id as string);
 	const isPreview = query.preview === 'true';
 	const isWidget = query.mode === 'widget';
+	const widgetNonce = isWidget ? (query.nonce as string) || null : null;
 	const buttonId = parseInt(query.button as string);
 	const formConfigParam = query.formConfig as string | undefined;
 
@@ -369,6 +372,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			productId: form.product.id,
 			isPreview,
 			isWidget,
+			widgetNonce,
 			...(await serverSideTranslations(locale ?? 'fr', ['common'])),
 		},
 	};

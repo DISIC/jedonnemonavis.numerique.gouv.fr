@@ -31,8 +31,10 @@ type JDMAFormProps = {
 	product: Product;
 	isPreviewPublished: boolean;
 	isPreviewUnpublished: boolean;
+	isWidget: boolean;
 	isButtonDeleted: boolean;
 	buttonId: number;
+	widgetNonce: string | null;
 };
 
 export type FormStepNames =
@@ -49,8 +51,10 @@ export default function JDMAForm({
 	product,
 	isPreviewPublished,
 	isPreviewUnpublished,
+	isWidget,
 	isButtonDeleted,
 	buttonId,
+	widgetNonce,
 }: JDMAFormProps) {
 	const { t } = useTranslation('common');
 	const router = useRouter();
@@ -69,8 +73,7 @@ export default function JDMAForm({
 		),
 	);
 
-	const isPreview = router.query.preview === 'true';
-	const isWidgetMode = router.query.mode === 'widget';
+	const isPreview = isPreviewPublished || isPreviewUnpublished;
 
 	const { classes, cx } = useStyles({ isPreview });
 
@@ -257,7 +260,7 @@ export default function JDMAForm({
 	};
 
 	const handleCreateReview = async (opinion: Partial<Opinion>) => {
-		if (!isPreview || isWidgetMode) {
+		if (!isPreview || isWidget) {
 			const answers = formatAnswers(opinion);
 
 			const userIdExists = localStorage.getItem('userId');
@@ -453,9 +456,13 @@ export default function JDMAForm({
 									localStorage.removeItem('userId');
 									setIsFormSubmitted(true);
 									// Notify parent window when embedded as a widget
-									if (isWidgetMode && window.parent !== window) {
+									if (isWidget && window.parent !== window) {
 										window.parent.postMessage(
-											{ source: 'jdma-widget', type: 'submitted' },
+											{
+												source: 'jdma-widget',
+												type: 'submitted',
+												nonce: widgetNonce,
+											},
 											'*',
 										);
 									}
@@ -567,7 +574,8 @@ export const getServerSideProps: GetServerSideProps<{
 	const buttonId = query.button as string;
 	const formConfig = query.formConfig as string;
 	const xwikiButtonName = query.nd_source as string;
-	const isPreview = (query.preview as string) === 'true';
+	const isPreview = query.preview === 'true';
+	const isWidget = query.mode === 'widget';
 
 	const isXWikiLink = !buttonId && !isPreview;
 
@@ -686,6 +694,7 @@ export const getServerSideProps: GetServerSideProps<{
 				},
 				isPreviewPublished: !formConfig && isPreview,
 				isPreviewUnpublished: !!formConfig && isPreview,
+				isWidget,
 				isButtonDeleted: isButtonDeleted,
 				buttonId: parseInt(buttonId),
 				...(await serverSideTranslations(locale ?? 'fr', ['common'])),
