@@ -427,9 +427,7 @@ const ReviewsTab = (props: Props) => {
 		const foundConfig =
 			matchIndex >= 0 ? chronologicalConfigs[matchIndex] : undefined;
 
-		return foundConfig
-			? { ...foundConfig, version: matchIndex + 1 }
-			: undefined;
+		return foundConfig ? { ...foundConfig, version: matchIndex } : undefined;
 	};
 
 	const submitSearch = (tmpSearch?: string) => {
