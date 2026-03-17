@@ -278,11 +278,14 @@ const FormLinkIntegrationPreview = ({
 							</div>
 						</div>
 					</div>
-					<ModalIntegrationPreview
-						isActive={selectedIntegrationType === 'modal'}
-						defaultFormTemplateButton={defaultFormTemplateButton}
-						onDimmedChange={handleModalDimmedChange}
-					/>
+					{form?.id && (
+						<ModalIntegrationPreview
+							isActive={selectedIntegrationType === 'modal'}
+							defaultFormTemplateButton={defaultFormTemplateButton}
+							onDimmedChange={handleModalDimmedChange}
+							formId={form.id}
+						/>
+					)}
 				</div>
 				<div className={classes.previewMask} />
 			</div>

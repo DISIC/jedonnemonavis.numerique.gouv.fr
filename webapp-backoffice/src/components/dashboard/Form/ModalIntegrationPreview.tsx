@@ -16,6 +16,7 @@ type ModalIntegrationPreviewProps = {
 	isActive: boolean;
 	defaultFormTemplateButton?: FormTemplateButtonWithVariants;
 	onDimmedChange: (isDimmed: boolean) => void;
+	formId: number;
 };
 
 const Placeholder = (styleProps: CSSProperties) => (
@@ -33,7 +34,8 @@ const Placeholder = (styleProps: CSSProperties) => (
 const ModalIntegrationPreview = ({
 	isActive,
 	defaultFormTemplateButton,
-	onDimmedChange
+	onDimmedChange,
+	formId
 }: ModalIntegrationPreviewProps) => {
 	const { cx, classes } = useStyles();
 
@@ -160,7 +162,7 @@ const ModalIntegrationPreview = ({
 								}}
 							>
 								<iframe
-									src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/avis/3?&mode=widget&preview=true`}
+									src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/avis/${formId}?&mode=widget&preview=true`}
 									title="Prévisualisation de la modale dépôt d'avis"
 									className={classes.previewEmbedContainer}
 								/>
