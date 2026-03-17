@@ -413,23 +413,23 @@ const ReviewsTab = (props: Props) => {
 	};
 
 	const getFormConfigHelperFromDate = (date: Date) => {
-		const formConfig = form.form_configs
+		const chronologicalConfigs = formConfigs
 			.slice()
-			.reverse()
-			.find(
-				formConfig =>
-					new Date(formConfig.created_at).getTime() < new Date(date).getTime()
+			.sort(
+				(a, b) =>
+					new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 			);
 
-		let formConfigIndex = -1;
+		const matchIndex = chronologicalConfigs.findLastIndex(
+			fc => new Date(fc.created_at).getTime() < new Date(date).getTime()
+		);
 
-		if (formConfig) {
-			formConfigIndex = form.form_configs
-				.map(formConfig => formConfig.id)
-				.indexOf(formConfig.id);
-		}
+		const foundConfig =
+			matchIndex >= 0 ? chronologicalConfigs[matchIndex] : undefined;
 
-		return { formConfig, versionNumber: formConfigIndex + 1 };
+		return foundConfig
+			? { ...foundConfig, version: matchIndex + 1 }
+			: undefined;
 	};
 
 	const submitSearch = (tmpSearch?: string) => {
@@ -760,7 +760,7 @@ const ReviewsTab = (props: Props) => {
 															review={review}
 															search={validatedSearch}
 															formTemplate={form.form_template}
-															formConfigHelper={getFormConfigHelperFromDate(
+															formConfig={getFormConfigHelperFromDate(
 																review.created_at || new Date()
 															)}
 															hasManyVersions={formConfigs.length > 0}

@@ -297,14 +297,16 @@ const NewForm = (props: Props) => {
 												const trimmedValue = value?.trim();
 												if (!trimmedValue) return 'Ce champ est obligatoire';
 												if (isEditingStep) return true;
-												const isDuplicate = product.forms.some(
-													form =>
-														(
-															form?.title ||
-															selectedFormTemplate?.title ||
-															''
-														).trim() === trimmedValue
-												);
+												const isDuplicate = product.forms
+													.filter(f => !f.isDeleted)
+													.some(
+														form =>
+															(
+																form?.title ||
+																selectedFormTemplate?.title ||
+																''
+															).trim() === trimmedValue
+													);
 												return (
 													!isDuplicate ||
 													'Un formulaire avec ce nom existe déjà'
@@ -331,7 +333,13 @@ const NewForm = (props: Props) => {
 															onChange,
 															value: value || '',
 															name,
-															required: true
+															required: true,
+															onKeyDown: e => {
+																if (e.key === 'Enter') {
+																	e.preventDefault();
+																	handleSubmit(onSubmitCreateForm)();
+																}
+															}
 														}}
 														hintText={
 															<>
