@@ -78,15 +78,27 @@
 		'https://jdma-develop.cleverapps.io',
 	];
 
-	var iframeOrigin;
+	var parsedIframeUrl;
 	try {
-		iframeOrigin = new URL(iframeUrl).origin;
+		parsedIframeUrl = new URL(iframeUrl);
 	} catch (e) {
 		console.error('[JDMA Widget] Invalid data-jdma-form-url:', formUrl);
 		return;
 	}
 
-	var iframeHost = new URL(iframeUrl).hostname;
+	// Block non-HTTP(S) protocols (e.g. javascript:, data:)
+	if (parsedIframeUrl.protocol !== 'https:' && parsedIframeUrl.protocol !== 'http:') {
+		console.error(
+			'[JDMA Widget] Unsafe data-jdma-form-url protocol:',
+			parsedIframeUrl.protocol,
+		);
+		return;
+	}
+
+	// Reconstruct from parsed URL to break taint chain
+	iframeUrl = parsedIframeUrl.href;
+	var iframeOrigin = parsedIframeUrl.origin;
+	var iframeHost = parsedIframeUrl.hostname;
 	var pageHost = window.location.hostname;
 	var isLocalDev =
 		devMode &&
@@ -112,11 +124,23 @@
 	// Validate buttonImage origin against the same allowlist
 	if (buttonImage) {
 		try {
-			var imgOrigin = new URL(buttonImage).origin;
-			var imgHost = new URL(buttonImage).hostname;
+			var imgUrl = new URL(buttonImage);
+			var imgOrigin = imgUrl.origin;
+			var imgHost = imgUrl.hostname;
 			var isImgLocal =
 				(imgHost === 'localhost' || imgHost === '127.0.0.1') && isLocalDev;
-			if (ALLOWED_ORIGINS.indexOf(imgOrigin) === -1 && !isImgLocal) {
+			// Block non-HTTP(S) protocols (e.g. javascript:, data:)
+			if (imgUrl.protocol !== 'https:' && imgUrl.protocol !== 'http:') {
+				console.error(
+					'[JDMA Widget] Unsafe data-jdma-button-image protocol:',
+					imgUrl.protocol,
+				);
+				buttonImage = null;
+			// Reconstruct from parsed URL to break taint chain
+			} else {
+				buttonImage = imgUrl.href;
+			}
+			if (buttonImage && ALLOWED_ORIGINS.indexOf(imgOrigin) === -1 && !isImgLocal) {
 				console.error(
 					'[JDMA Widget] Untrusted data-jdma-button-image origin:',
 					imgOrigin,
