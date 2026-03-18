@@ -79,6 +79,7 @@ const openAPIRouter = router({
 						start_date: '2024-01-01',
 						end_date: new Date().toISOString().split('T')[0],
 						product_ids: [],
+						form_ids: [],
 						field_codes: ['satisfaction', 'comprehension', 'contact_tried'],
 						interval: 'none'
 					}

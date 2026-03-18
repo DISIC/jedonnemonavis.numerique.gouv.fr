@@ -115,6 +115,20 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 								</tr>
 								<tr>
 									<td>
+										<code>form_ids</code>
+									</td>
+									<td>
+										IDs des formulaires à filtrer
+										<br />
+										<span className={fr.cx('fr-hint-text')}>
+											Défaut: [] (tous les formulaires accessibles)
+										</span>
+									</td>
+									<td>Array[number]</td>
+									<td>Non</td>
+								</tr>
+								<tr>
+									<td>
 										<code>field_codes</code>
 									</td>
 									<td>
@@ -187,10 +201,10 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 														)
 															? 'success'
 															: FIELD_CODE_BOOLEAN_VALUES.some(
-																		boolean => boolean.slug === code.slug
-																  )
-																? 'info'
-																: 'new'
+																	boolean => boolean.slug === code.slug
+															  )
+															? 'info'
+															: 'new'
 													}
 												>
 													{FIELD_CODE_SMILEY_VALUES.some(
@@ -198,10 +212,10 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 													)
 														? 'Smiley'
 														: FIELD_CODE_BOOLEAN_VALUES.some(
-																	boolean => boolean.slug === code.slug
-															  )
-															? 'Oui/Non'
-															: 'Texte'}
+																boolean => boolean.slug === code.slug
+														  )
+														? 'Oui/Non'
+														: 'Texte'}
 												</Badge>
 											</td>
 										</tr>
