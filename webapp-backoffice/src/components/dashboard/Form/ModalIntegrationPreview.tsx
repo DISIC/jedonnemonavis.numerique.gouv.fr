@@ -214,8 +214,8 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 		display: 'flex',
 		position: 'absolute',
 		padding: 0,
-		bottom: 16,
-		right: 16,
+		bottom: fr.spacing('4v'),
+		right: fr.spacing('4v'),
 		zIndex: 1,
 		cursor: 'default',
 		border: 'none',
@@ -232,8 +232,8 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 	},
 	fakePanel: {
 		position: 'absolute',
-		bottom: 16,
-		right: 16,
+		bottom: fr.spacing('4v'),
+		right: fr.spacing('4v'),
 		padding: fr.spacing('1v'),
 		width: '50%',
 		maxWidth: '760px',
@@ -271,10 +271,10 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 	fakePanelHeader: {
 		display: 'flex',
 		justifyContent: 'flex-end',
-		padding: '8px 12px'
+		...fr.spacing('padding', { topBottom: '2v', rightLeft: '3v' })
 	},
 	fakeClose: {
-		fontSize: '0.75rem',
+		fontSize: fr.spacing('3v'),
 		color: '#000091',
 		fontWeight: 500
 	},

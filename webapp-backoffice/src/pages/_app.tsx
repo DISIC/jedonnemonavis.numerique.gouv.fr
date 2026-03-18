@@ -109,6 +109,8 @@ function App({ Component, pageProps }: AppProps) {
 												`
 											}}
 										/>
+
+										{/* Widget JDMA intégré sur notre propre backoffice pour le formulaire de remontée d'infos */}
 										<Script
 											id="jdma-widget"
 											src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`}
