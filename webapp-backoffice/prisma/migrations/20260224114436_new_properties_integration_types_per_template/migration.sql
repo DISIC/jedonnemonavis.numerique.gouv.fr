@@ -15,7 +15,7 @@ WHERE slug = 'root'
 UPDATE "FormTemplate"
 SET
   integration_types = ARRAY['modal', 'link']::"ButtonIntegrationTypes"[],
-  default_integration_type = 'modal'::"ButtonIntegrationTypes",
+  default_integration_type = 'modal'::"ButtonIntegrationTypes"
 WHERE slug = 'bug'
   AND (integration_types IS NULL OR default_integration_type IS NULL);
 
