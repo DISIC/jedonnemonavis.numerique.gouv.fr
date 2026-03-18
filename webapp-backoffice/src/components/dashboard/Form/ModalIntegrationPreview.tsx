@@ -42,6 +42,7 @@ const ModalIntegrationPreview = ({
 	const [phase, setPhase] = useState<ModalAnimationPhase>('idle');
 	const [animDone, setAnimDone] = useState(false);
 	const [iframeScale, setIframeScale] = useState(1);
+	const [iframeLoaded, setIframeLoaded] = useState(false);
 	const hasPlayedRef = useRef(false);
 	const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 	const panelBodyRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,7 @@ const ModalIntegrationPreview = ({
 			clearTimers();
 			setPhase('idle');
 			setAnimDone(false);
+			setIframeLoaded(false);
 			hasPlayedRef.current = false;
 			onDimmedChange(false);
 		}
@@ -161,10 +163,16 @@ const ModalIntegrationPreview = ({
 									transformOrigin: 'top left'
 								}}
 							>
+								{!iframeLoaded && (
+									<div className={classes.iframeLoader}>
+										<Loader />
+									</div>
+								)}
 								<iframe
 									src={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/avis/${formId}?&mode=widget&preview=true`}
 									title="Prévisualisation de la modale dépôt d'avis"
 									className={classes.previewEmbedContainer}
+									onLoad={() => setIframeLoaded(true)}
 								/>
 							</div>
 						</div>
@@ -246,6 +254,18 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 		overflow: 'hidden',
 		transformOrigin: 'bottom right',
 		zIndex: 6
+	},
+	iframeLoader: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		width: '100%',
+		height: '100%',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		background: '#fff',
+		zIndex: 1
 	},
 	iframeWrapper: {
 		position: 'absolute',

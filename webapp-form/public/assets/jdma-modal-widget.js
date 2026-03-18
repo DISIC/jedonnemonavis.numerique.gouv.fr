@@ -87,7 +87,10 @@
 	}
 
 	// Block non-HTTP(S) protocols (e.g. javascript:, data:)
-	if (parsedIframeUrl.protocol !== 'https:' && parsedIframeUrl.protocol !== 'http:') {
+	if (
+		parsedIframeUrl.protocol !== 'https:' &&
+		parsedIframeUrl.protocol !== 'http:'
+	) {
 		console.error(
 			'[JDMA Widget] Unsafe data-jdma-form-url protocol:',
 			parsedIframeUrl.protocol,
@@ -136,11 +139,15 @@
 					imgUrl.protocol,
 				);
 				buttonImage = null;
-			// Reconstruct from parsed URL to break taint chain
+				// Reconstruct from parsed URL to break taint chain
 			} else {
 				buttonImage = imgUrl.href;
 			}
-			if (buttonImage && ALLOWED_ORIGINS.indexOf(imgOrigin) === -1 && !isImgLocal) {
+			if (
+				buttonImage &&
+				ALLOWED_ORIGINS.indexOf(imgOrigin) === -1 &&
+				!isImgLocal
+			) {
 				console.error(
 					'[JDMA Widget] Untrusted data-jdma-button-image origin:',
 					imgOrigin,
@@ -267,6 +274,29 @@
 		'  flex: 1;',
 		'  width: 100%;',
 		'  border: none;',
+		'  opacity: 0;',
+		'  transition: opacity 0.2s ease;',
+		'}',
+
+		'.jdma-widget-iframe.jdma-widget-loaded {',
+		'  opacity: 1;',
+		'}',
+
+		/* Loading spinner */
+		'.jdma-widget-loader {',
+		'  position: absolute;',
+		'  top: 50%;',
+		'  left: 50%;',
+		'  transform: translate(-50%, -50%);',
+		'  width: 36px;',
+		'  height: 36px;',
+		'  border: 3px solid #e5e5e5;',
+		'  border-top-color: #000091;',
+		'  border-radius: 50%;',
+		'  animation: jdma-spin 0.8s linear infinite;',
+		'}',
+		'@keyframes jdma-spin {',
+		'  to { transform: translate(-50%, -50%) rotate(360deg); }',
 		'}',
 
 		/* Hidden state */
@@ -434,6 +464,13 @@
 
 		panel.appendChild(header);
 
+		// Loader
+		var loader = document.createElement('div');
+		loader.className = 'jdma-widget-loader';
+		loader.setAttribute('role', 'status');
+		loader.setAttribute('aria-label', 'Chargement du formulaire');
+		panel.appendChild(loader);
+
 		// Iframe
 		var iframe = document.createElement('iframe');
 		iframe.className = 'jdma-widget-iframe';
@@ -444,6 +481,12 @@
 			'sandbox',
 			'allow-scripts allow-forms allow-same-origin allow-popups',
 		);
+		iframe.addEventListener('load', function () {
+			iframe.classList.add('jdma-widget-loaded');
+			if (loader.parentNode) {
+				loader.parentNode.removeChild(loader);
+			}
+		});
 		panel.appendChild(iframe);
 
 		document.body.appendChild(panel);
