@@ -95,8 +95,8 @@
 		return;
 	}
 
-	// Reconstruct from parsed URL to break taint chain
-	iframeUrl = parsedIframeUrl.href;
+	// Reconstruct from parsed URL into a new variable to break taint chain
+	var safeIframeUrl = parsedIframeUrl.href;
 	var iframeOrigin = parsedIframeUrl.origin;
 	var iframeHost = parsedIframeUrl.hostname;
 	var pageHost = window.location.hostname;
@@ -437,7 +437,7 @@
 		// Iframe
 		var iframe = document.createElement('iframe');
 		iframe.className = 'jdma-widget-iframe';
-		iframe.setAttribute('src', iframeUrl);
+		iframe.setAttribute('src', safeIframeUrl);
 		iframe.setAttribute('title', buttonLabel);
 		iframe.setAttribute('allow', 'clipboard-write');
 		iframe.setAttribute(
