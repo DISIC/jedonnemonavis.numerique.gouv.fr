@@ -95,6 +95,15 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							field_code: 'verbatim',
 							position: 0,
 							isRequired: true
+						},
+						{
+							label: 'Adresse mail',
+							content:
+								'À renseigner si vous acceptez d’être recontacté. Nous ne pourrons pas répondre à toutes les demandes.',
+							type_bloc: 'input_text',
+							field_code: 'contact_email',
+							position: 1,
+							isRequired: false
 						}
 					]
 				}
