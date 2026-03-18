@@ -28,9 +28,32 @@ const createBugOptions =
 		}
 	];
 
+const bugButtons = [
+	{
+		label: 'Une remarque ?',
+		slug: 'remark',
+		order: 0,
+		isDefault: true
+	},
+	{
+		label: 'Faire un retour',
+		slug: 'feedback',
+		order: 1,
+		isDefault: false
+	},
+	{
+		label: 'Signaler un problème',
+		slug: 'problem',
+		order: 2,
+		isDefault: false
+	}
+];
+
 export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: "Remontées d'informations",
 	slug: 'bug',
+	description:
+		"Permet à vos usagers de signaler des problèmes techniques, problèmes avec leur situation ou de faire des suggestions d'amélioration.",
 	active: true,
 	hasStepper: false,
 	form_template_steps: {
@@ -77,7 +100,9 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 				}
 			}
 		]
-	}
+	},
+	integration_types: ['modal', 'link'],
+	default_integration_type: 'modal'
 };
 
 export async function seed_bug_form_template_buttons(
@@ -113,28 +138,7 @@ export async function seed_bug_form_template_buttons(
 					slug: bugButton.slug
 				}
 			},
-			update: {
-				label: bugButton.label,
-				order: bugButton.order,
-				isDefault: bugButton.isDefault,
-				variants: {
-					deleteMany: {},
-					create: [
-						{
-							style: 'solid',
-							theme: null,
-							image_url: '',
-							alt_text: bugButton.label
-						},
-						{
-							style: 'outline',
-							theme: null,
-							image_url: '',
-							alt_text: bugButton.label
-						}
-					]
-				}
-			},
+			update: {},
 			create: {
 				form_template: {
 					connect: {

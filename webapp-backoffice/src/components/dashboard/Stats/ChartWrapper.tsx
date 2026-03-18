@@ -304,7 +304,7 @@ const ChartWrapper = ({
 						</p>
 					)}
 				</div>
-				<div className={classes.flexAlignCenter}>
+				<div className={classes.flexAlignCenter} role="tablist">
 					<Button
 						priority="secondary"
 						nativeButtonProps={{ role: 'tab' }}

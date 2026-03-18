@@ -3,11 +3,13 @@ import {
 	ButtonWithElements,
 	FormTemplateButtonWithVariants
 } from '@/src/types/prismaTypesExtended';
+import { ButtonIntegrationTypes } from '@prisma/client';
 
 export interface ButtonCopyInstructionsPanelProps {
-	buttonStyle: FormTemplateButtonStyleType;
-	button: ButtonWithElements;
-	formTemplateButton?: FormTemplateButtonWithVariants;
+	buttonStyle?: FormTemplateButtonStyleType | null;
+	button?: ButtonWithElements;
+	formTemplateButton?: FormTemplateButtonWithVariants | null;
+	integrationType?: ButtonIntegrationTypes;
 }
 
 export type ButtonInstructionTabProps = ButtonCopyInstructionsPanelProps & {

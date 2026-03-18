@@ -58,7 +58,7 @@ export function testEmailSubmission(
 export function performPostRegistrationFlow(email: string) {
 	getEmail();
 	login(email, userPassword);
-	doTheOnboardingFlow();
+	doTheOnboardingFlow('button');
 }
 
 export function checkExistingAccountError() {

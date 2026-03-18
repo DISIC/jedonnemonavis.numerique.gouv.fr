@@ -534,7 +534,7 @@ export const onboardingStepsContent: StepContent[] = [
 		slug: 'link',
 		title: 'Intégrer le formulaire sur votre site',
 		iconId: 'ri-link',
-		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
+		url: '/administration/dashboard/product/[id]/forms/[form_id]/link/new',
 		details: [
 			{ title: 'Créez votre premier lien d’intégration', iconId: 'ri-link' },
 			{
@@ -578,6 +578,8 @@ export const buttonIntegrationTypesMapping: Record<
 	{
 		label: React.ReactNode;
 		hintText?: React.ReactNode;
+		noIllustration?: boolean;
+		isNew?: boolean;
 	}
 > = {
 	button: {
@@ -587,16 +589,20 @@ export const buttonIntegrationTypesMapping: Record<
 	},
 	embed: {
 		label: 'Intégré au contenu',
-		hintText: 'La 1ère question est visible directement dans la page de contenu'
+		hintText:
+			'La 1ère question est visible directement dans la page de contenu',
+		isNew: true
 	},
 	modal: {
 		label: 'Flottant',
 		hintText:
-			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu'
+			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
+		isNew: true
 	},
 	link: {
 		label: 'Lien seul',
 		hintText:
-			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)'
+			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)',
+		noIllustration: true
 	}
 };

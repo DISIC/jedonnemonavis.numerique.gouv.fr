@@ -48,12 +48,17 @@ const LinksTab = ({
 
 	const isLinkCreated = useMemo(
 		() => !!(router.query.linkCreated as string | undefined),
-		[]
+		[router.query.linkCreated]
+	);
+
+	const isLinkUpdated = useMemo(
+		() => !!(router.query.linkUpdated as string | undefined),
+		[router.query.linkUpdated]
 	);
 
 	useEffect(() => {
-		if (router.query.linkCreated) {
-			const { linkCreated, ...restQuery } = router.query;
+		if (router.query.linkCreated || router.query.linkUpdated) {
+			const { linkCreated, linkUpdated, ...restQuery } = router.query;
 			router.replace(
 				{
 					pathname: router.pathname,
@@ -105,7 +110,7 @@ const LinksTab = ({
 						iconPosition="right"
 						onClick={() => {
 							router.push(
-								`/administration/dashboard/product/${form.product_id}/forms/${form.id}/new-link`
+								`/administration/dashboard/product/${form.product_id}/forms/${form.id}/link/new`
 							);
 						}}
 					>
@@ -114,12 +119,18 @@ const LinksTab = ({
 				)}
 			</div>
 
-			{isLinkCreated && !isAlertShown ? (
+			{(isLinkCreated || isLinkUpdated) && !isAlertShown ? (
 				<div role="alert" className={fr.cx('fr-col-12', 'fr-mt-6v')}>
 					<Alert
-						title="Votre lien d’intégration a été créé avec succès !"
+						title={
+							isLinkUpdated
+								? 'Votre lien d’intégration a été modifié avec succès !'
+								: 'Votre lien d’intégration a été créé avec succès !'
+						}
 						description={
-							'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
+							isLinkUpdated
+								? 'Pensez à mettre à jour votre intégration sur votre site si nécessaire.'
+								: 'Pensez à le coller sur votre site pour rendre votre formulaire visible aux usagers'
 						}
 						severity="success"
 						small

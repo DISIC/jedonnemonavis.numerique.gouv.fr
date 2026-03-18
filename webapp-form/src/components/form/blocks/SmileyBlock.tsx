@@ -1,53 +1,56 @@
-import { FormWithElements } from "@/src/utils/types";
-import { SetStateAction } from "react";
-import { SmileyInput } from "../elements/SmileyInput";
+import { FormWithElements } from '@/src/utils/types';
+import { SetStateAction } from 'react';
+import { SmileyInput } from '../elements/SmileyInput';
 
 type Block =
-  FormWithElements["form_template"]["form_template_steps"][0]["form_template_blocks"][0];
+	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 
 type DynamicAnswerData = {
-  block_id: number;
-  answer_item_id?: number;
-  answer_text?: string;
+	block_id: number;
+	answer_item_id?: number;
+	answer_text?: string;
 };
 
 type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
-  block: Block;
-  displayLabel: string;
-  fieldKey: string;
-  answers: FormAnswers;
-  setAnswers: (value: SetStateAction<FormAnswers>) => void;
+	block: Block;
+	displayLabel: string;
+	fieldKey: string;
+	answers: FormAnswers;
+	setAnswers: (value: SetStateAction<FormAnswers>) => void;
+	isWidget?: boolean;
 }
 
 export const SmileyBlock = ({
-  block,
-  displayLabel,
-  fieldKey,
-  answers,
-  setAnswers,
+	block,
+	displayLabel,
+	fieldKey,
+	answers,
+	setAnswers,
+	isWidget,
 }: Props) => {
-  const smileyAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
-  const smileyValue = smileyAnswer?.answer_item_id;
+	const smileyAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
+	const smileyValue = smileyAnswer?.answer_item_id;
 
-  return (
-    <SmileyInput
-      label={displayLabel}
-      name={fieldKey}
-      hint={block.content || undefined}
-      value={smileyValue}
-      onChange={(feeling) => {
-        const smileyItemId =
-          feeling === "bad" ? 1 : feeling === "medium" ? 2 : 3;
-        setAnswers((prev) => ({
-          ...prev,
-          [fieldKey]: {
-            block_id: block.id,
-            answer_item_id: smileyItemId,
-          },
-        }));
-      }}
-    />
-  );
+	return (
+		<SmileyInput
+			label={displayLabel}
+			name={fieldKey}
+			hint={block.content || undefined}
+			value={smileyValue}
+			isWidget={isWidget}
+			onChange={feeling => {
+				const smileyItemId =
+					feeling === 'bad' ? 1 : feeling === 'medium' ? 2 : 3;
+				setAnswers(prev => ({
+					...prev,
+					[fieldKey]: {
+						block_id: block.id,
+						answer_item_id: smileyItemId,
+					},
+				}));
+			}}
+		/>
+	);
 };

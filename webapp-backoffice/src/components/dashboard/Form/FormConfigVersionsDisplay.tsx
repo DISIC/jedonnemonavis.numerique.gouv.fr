@@ -15,7 +15,10 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 
 	const { classes } = useStyles();
 
-	const formConfigs = form.form_configs;
+	const formConfigs = form.form_configs.sort(
+		(a, b) =>
+			new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+	);
 
 	if (!formConfigs.length) return;
 
@@ -37,7 +40,13 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 				<li>
 					<a
 						className={fr.cx('fr-link')}
-						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.form_template.slug !== 'root' ? `avis/${form.id}` : form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(zeroVersionFormConfig))}`}
+						href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+							form.form_template.slug !== 'root'
+								? `avis/${form.id}`
+								: form.product_id
+						}?preview=true&formConfig=${encodeURIComponent(
+							JSON.stringify(zeroVersionFormConfig)
+						)}`}
 						target="_blank"
 						title="Accéder à la version 0 du formulaire, nouvelle fenêtre"
 					>
@@ -50,16 +59,34 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 					<li key={formConfig.id}>
 						<a
 							className={fr.cx('fr-link')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${form.form_template.slug !== 'root' ? `avis/${form.id}` : form.product_id}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify({ ...formConfig, displays: formConfig.form_config_displays, labels: formConfig.form_config_labels }))}`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/${
+								form.form_template.slug !== 'root'
+									? `avis/${form.id}`
+									: form.product_id
+							}?iframe=true&formConfig=${encodeURIComponent(
+								JSON.stringify({
+									...formConfig,
+									displays: formConfig.form_config_displays,
+									labels: formConfig.form_config_labels
+								})
+							)}`}
 							target="_blank"
-							title={`Accéder à la version ${index + 1} du formulaire, nouvelle fenêtre`}
+							title={`Accéder à la version ${
+								index + 1
+							} du formulaire, nouvelle fenêtre`}
 						>
 							<b>Version {index + 1}</b>
 						</a>{' '}
 						:{' '}
 						{index < formConfigs.length - 1
-							? `en vigueur du ${formatDateToFrenchString(formConfig.created_at.toString())} au ${formatDateToFrenchString(formConfigs[index + 1]?.created_at.toString())}`
-							: `en vigueur à compter du ${formatDateToFrenchString(formConfig.created_at.toString())}`}
+							? `en vigueur du ${formatDateToFrenchString(
+									formConfig.created_at.toString()
+							  )} au ${formatDateToFrenchString(
+									formConfigs[index + 1]?.created_at.toString()
+							  )}`
+							: `en vigueur à compter du ${formatDateToFrenchString(
+									formConfig.created_at.toString()
+							  )}`}
 					</li>
 				))}
 			</ul>

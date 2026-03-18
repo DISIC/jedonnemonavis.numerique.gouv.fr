@@ -4,6 +4,7 @@ import {
 	getFormTemplateBySlugInputSchema,
 	getFormTemplateBySlugQuery
 } from './get-form-template-by-slug';
+import { getFormTemplatesQuery } from './get-form-templates';
 import { createFormInputSchema, createFormMutation } from './create';
 import { updateFormInputSchema, updateFormMutation } from './update';
 import { deleteFormInputSchema, deleteFormMutation } from './delete';
@@ -16,6 +17,8 @@ export const formRouter = router({
 	getFormTemplateBySlug: publicProcedure
 		.input(getFormTemplateBySlugInputSchema)
 		.query(getFormTemplateBySlugQuery),
+
+	getFormTemplates: publicProcedure.query(getFormTemplatesQuery),
 
 	create: protectedProcedure
 		.meta({ logEvent: true })

@@ -1,5 +1,5 @@
 import {
-	FormTemplateButtonWithVariants,
+	FormTemplateWithElements,
 	FormWithConfigAndTemplate
 } from '@/src/types/prismaTypesExtended';
 import { getHelperFromFormConfig } from '@/src/utils/tools';
@@ -7,48 +7,94 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Header from '@codegouvfr/react-dsfr/Header';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
-import { Skeleton } from '@mui/material';
 import { ButtonIntegrationTypes } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import {
+	useMemo,
+	useState,
+	useEffect,
+	useCallback,
+	CSSProperties
+} from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
+import { buttonIntegrationTypesMapping } from '@/src/utils/content';
+import Badge from '@codegouvfr/react-dsfr/Badge';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
+import Notice from '@codegouvfr/react-dsfr/Notice';
+import ModalIntegrationPreview from './ModalIntegrationPreview';
 
 type FormLinkIntegrationPreviewProps = {
 	title: string;
 	description: JSX.Element;
 	onConfirm: (value: ButtonIntegrationTypes) => void;
 	form?: FormWithConfigAndTemplate;
-	defaultFormTemplateButton?: FormTemplateButtonWithVariants;
+	formTemplate?: FormTemplateWithElements | null;
+	preSelectedIntegrationType?: ButtonIntegrationTypes;
+	isLoading: boolean;
 };
+
+const Placeholder = (styleProps: CSSProperties) => (
+	<span
+		style={{
+			backgroundColor: '#DFDFDF',
+			borderRadius: '0.3em',
+			display: 'inline-block',
+			width: '80%',
+			...styleProps
+		}}
+	/>
+);
 
 const FormLinkIntegrationPreview = ({
 	title,
 	description,
 	onConfirm,
 	form,
-	defaultFormTemplateButton
+	formTemplate,
+	preSelectedIntegrationType
 }: FormLinkIntegrationPreviewProps) => {
 	const router = useRouter();
 	const [selectedIntegrationType, setSelectedIntegrationType] =
-		useState<ButtonIntegrationTypes>('button');
+		useState<ButtonIntegrationTypes>(preSelectedIntegrationType || 'button');
 	const { cx, classes } = useStyles();
+	const { isMobile } = useIsMobile('lg');
 
 	const currentFormConfig = getHelperFromFormConfig(form?.form_configs[0]);
+
+	useEffect(() => {
+		if (preSelectedIntegrationType) {
+			setSelectedIntegrationType(preSelectedIntegrationType);
+			return;
+		}
+		if (formTemplate?.default_integration_type) {
+			setSelectedIntegrationType(formTemplate.default_integration_type);
+		}
+	}, [formTemplate?.default_integration_type, preSelectedIntegrationType]);
+
+	const defaultFormTemplateButton = useMemo(() => {
+		return formTemplate?.form_template_buttons.find(b => b.isDefault);
+	}, [formTemplate]);
+
+	const [isModalDimmed, setIsModalDimmed] = useState(false);
+
+	const handleModalDimmedChange = useCallback((isDimmed: boolean) => {
+		setIsModalDimmed(isDimmed);
+	}, []);
 
 	const getPreviewContent = () => {
 		switch (selectedIntegrationType) {
 			case 'button':
 				return (
-					<button
-						title="Je donne mon avis - nouvelle fenêtre"
-						className={classes.previewButton}
-						disabled
-						aria-disabled
-					>
-						{defaultFormTemplateButton ? (
+					defaultFormTemplateButton && (
+						<button
+							title="Je donne mon avis - nouvelle fenêtre"
+							className={classes.previewButton}
+							disabled
+							aria-disabled
+						>
 							<ImageWithFallback
 								alt={defaultFormTemplateButton.label}
 								src={
@@ -57,13 +103,11 @@ const FormLinkIntegrationPreview = ({
 									)?.image_url || ''
 								}
 								fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-solid-light.svg`}
-								width={200}
+								width={175}
 								height={85}
 							/>
-						) : (
-							<Loader />
-						)}
-					</button>
+						</button>
+					)
 				);
 			case 'embed':
 				return (
@@ -74,12 +118,21 @@ const FormLinkIntegrationPreview = ({
 								form.form_template?.slug === 'root'
 									? `/Demarches/${form.product_id}`
 									: `/Demarches/avis/${form.id}`
-							}?iframe=true&formConfig=${encodeURIComponent(
+							}?preview=true&formConfig=${encodeURIComponent(
 								JSON.stringify(currentFormConfig)
 							)}`}
 							className={classes.previewEmbedContainer}
 						/>
 					)
+				);
+			case 'link':
+				return (
+					<div className={classes.linkPreviewContainer}>
+						<p>
+							Le lien n’a pas de design associé. Il est à intégrer dans un
+							composant existant de votre site (bouton, bannière, ...)
+						</p>
+					</div>
 				);
 		}
 	};
@@ -95,90 +148,55 @@ const FormLinkIntegrationPreview = ({
 				</p>
 				<div className={classes.scrollableContent}>
 					<RadioButtons
-						options={[
-							// {
-							// 	label: (
-							// 		<>
-							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
-							// 				Beta
-							// 			</Badge>
-							// 			Intégré au contenu
-							// 		</>
-							// 	),
-							// 	hintText:
-							// 		'La 1ère question est visible directement dans la page de contenu',
-							// 	nativeInputProps: {
-							// 		value: 'embed',
-							// 		checked: selectedIntegrationType === 'embed',
-							// 		onChange: () => setSelectedIntegrationType('embed')
-							// 	},
-							// 	illustration: (
-							// 		<Image
-							// 			alt="Illustration intégré au contenu"
-							// 			src={'/assets/integration-embed.svg'}
-							// 			width={95}
-							// 			height={71}
-							// 		/>
-							// 	)
-							// },
-							{
-								label: 'Pleine page',
-								hintText:
-									'Depuis un bouton, le formulaire s’ouvre dans un nouvel onglet. C’est le seul format compatible avec l’utilisation de Démarches Simplifiées',
-								nativeInputProps: {
-									value: 'button',
-									checked: selectedIntegrationType === 'button',
-									onChange: () => setSelectedIntegrationType('button')
-								},
-								illustration: (
-									<Image
-										alt="Illustration pleine page"
-										src={'/assets/integration-button.svg'}
-										width={95}
-										height={71}
-									/>
-								)
-							},
-							// {
-							// 	label: (
-							// 		<>
-							// 			<Badge severity="new" small className={fr.cx('fr-mb-1v')}>
-							// 				Beta
-							// 			</Badge>
-							// 			Flottant
-							// 		</>
-							// 	),
-							// 	hintText:
-							// 		'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
-							// 	nativeInputProps: {
-							// 		value: 'modal',
-							// 		checked: selectedIntegrationType === 'modal',
-							// 		onChange: () => setSelectedIntegrationType('modal')
-							// 	},
-							// 	illustration: (
-							// 		<Image
-							// 			alt="Illustration pleine page"
-							// 			src={'/assets/integration-modal.svg'}
-							// 			width={95}
-							// 			height={71}
-							// 		/>
-							// 	)
-							// },
-							{
-								label: 'Lien seul',
-								hintText:
-									'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)',
-								nativeInputProps: {
-									value: 'link',
-									checked: selectedIntegrationType === 'link',
-									onChange: () => setSelectedIntegrationType('link')
-								}
-							}
-						]}
 						name="integration-type"
+						options={
+							formTemplate?.integration_types
+								.filter(type => type !== 'embed')
+								.map(type => {
+									const values = buttonIntegrationTypesMapping[type];
+									return {
+										label: (
+											<p className="fr-m-0">
+												{values.label}&nbsp;
+												{values.isNew && (
+													<Badge
+														as="span"
+														severity="new"
+														small
+														className={fr.cx('fr-mb-1v')}
+													>
+														Beta
+													</Badge>
+												)}
+											</p>
+										),
+										hintText: values.hintText,
+										nativeInputProps: {
+											value: type,
+											checked: selectedIntegrationType === type,
+											onChange: () =>
+												setSelectedIntegrationType(
+													type as ButtonIntegrationTypes
+												)
+										},
+										...(values.noIllustration
+											? {}
+											: {
+													illustration: (
+														<Image
+															alt={`Illustration ${values.label}`}
+															src={`/assets/integration-${type}.svg`}
+															width={95}
+															height={71}
+														/>
+													)
+											  })
+									};
+								}) || []
+						}
 					/>
 				</div>
-				<section className={classes.actionsContainer}>
+				<section id="onboarding-actions" className={classes.actionsContainer}>
 					<Button
 						size="large"
 						iconPosition="right"
@@ -200,26 +218,76 @@ const FormLinkIntegrationPreview = ({
 				</section>
 			</div>
 			<div className={cx(classes.previewContainer, fr.cx('fr-col-8'))}>
-				<div className={classes.previewMask} />
-				<Header
-					brandTop={
-						<>
-							RÉPUBLIQUE <br /> FRANÇAISE
-						</>
-					}
-					homeLinkProps={{ href: '#', title: 'example', tabIndex: -1 }}
-					serviceTitle={<Skeleton width={200} />}
-					serviceTagline={<Skeleton />}
-					navigation={<Skeleton width={'100%'} height={50} />}
-					style={{ zIndex: 0 }}
+				<Notice
+					title="Cet aperçu ne reflète pas le rendu final"
+					description={`Le libellé et le style affichés ici sont illustratifs. Cet aperçu
+							permet uniquement de visualiser l’emplacement et le mode
+							d’affichage de l’entrée du formulaire.`}
+					className={classes.previewNotice}
+					iconDisplayed={false}
 				/>
-				<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
-					<Skeleton height={400} />
-					<Skeleton height={200} />
-					<Skeleton height={200} />
-					<Skeleton height={400} />
-					<div className={classes.previewContent}>{getPreviewContent()}</div>
+				<div className={classes.fakeSiteWrapper}>
+					<div
+						className={cx(
+							classes.fakeSiteContainer,
+							isModalDimmed &&
+								selectedIntegrationType === 'modal' &&
+								classes.fakeSiteDimmed
+						)}
+						role="presentation"
+						aria-hidden="true"
+					>
+						<Header
+							brandTop={
+								<>
+									RÉPUBLIQUE <br /> FRANÇAISE
+								</>
+							}
+							homeLinkProps={{
+								href: '#',
+								title: 'example',
+								tabIndex: -1
+							}}
+							serviceTitle={
+								!isMobile ? <Placeholder width={200} height={32} /> : undefined
+							}
+							navigation={
+								<Placeholder
+									width={'100%'}
+									height={10}
+									marginTop={fr.spacing('6v')}
+									marginBottom={fr.spacing('4v')}
+								/>
+							}
+							style={{ zIndex: 0 }}
+						/>
+						<div className={cx(classes.fakeMainContent, fr.cx('fr-container'))}>
+							<Placeholder
+								minHeight={20}
+								flex={'1 1 140px'}
+								marginTop={fr.spacing('6v')}
+								marginBottom={fr.spacing('4v')}
+							/>
+							<Placeholder
+								minHeight={20}
+								flex={'1 1 140px'}
+								marginBottom={fr.spacing('4v')}
+							/>
+							<div className={classes.previewContent}>
+								{getPreviewContent()}
+							</div>
+						</div>
+					</div>
+					{form?.id && (
+						<ModalIntegrationPreview
+							isActive={selectedIntegrationType === 'modal'}
+							defaultFormTemplateButton={defaultFormTemplateButton}
+							onDimmedChange={handleModalDimmedChange}
+							formId={form.id}
+						/>
+					)}
 				</div>
+				<div className={classes.previewMask} />
 			</div>
 		</div>
 	);
@@ -250,31 +318,79 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		overflow: 'hidden',
 		backgroundColor: 'white'
 	},
+	fakeSiteWrapper: {
+		position: 'relative',
+		margin: fr.spacing('10v'),
+		height: '90%',
+		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 60px)`
+	},
+	fakeSiteContainer: {
+		position: 'relative',
+		border: `solid 2px ${fr.colors.decisions.border.default.grey.default}`,
+		display: 'flex',
+		flexDirection: 'column',
+		height: '100%',
+		overflow: 'hidden',
+		transition: 'opacity 0.4s ease'
+	},
 	previewMask: {
 		position: 'absolute',
 		top: 0,
 		left: 0,
 		width: '100%',
 		height: '100%',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-		zIndex: 5
+		zIndex: 5,
+		boxShadow: 'inset -10px 0px 50px 1.99px #00000017'
+	},
+	previewNotice: {
+		'.fr-notice__body p': {
+			display: 'inline-flex',
+			flexDirection: 'column',
+			gap: fr.spacing('2v')
+		}
 	},
 	fakeMainContent: {
 		display: 'flex',
+		alignItems: 'center',
 		flexDirection: 'column',
-		height: '50%'
+		flex: 1,
+		minHeight: 0,
+		overflow: 'hidden'
 	},
 	previewContent: {
 		display: 'flex',
 		justifyContent: 'center',
 		...fr.spacing('margin', { topBottom: '4v' }),
-		zIndex: 10
+		zIndex: 10,
+		flexShrink: 0
 	},
 	previewButton: {
 		cursor: 'pointer!important',
 		userSelect: 'none'
 	},
 	previewEmbedContainer: { border: 'none', width: '100%', height: '500px' },
+	linkPreviewContainer: {
+		width: '100%',
+		height: '100%',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		background: 'white',
+		textAlign: 'center',
+		display: 'flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		zIndex: 10,
+		boxShadow: 'inset 10px 0px 50px 1.99px #00000017',
+		p: {
+			maxWidth: '500px',
+			color: fr.colors.decisions.text.default.grey.default
+		}
+	},
+	fakeSiteDimmed: {
+		opacity: 0.4,
+		pointerEvents: 'none'
+	},
 	actionsContainer: {
 		position: 'absolute',
 		bottom: 0,

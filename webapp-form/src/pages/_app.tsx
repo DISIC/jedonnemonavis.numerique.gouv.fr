@@ -53,7 +53,17 @@ const MATOMO_URL = process.env.NEXT_PUBLIC_MATOMO_URL;
 const MATOMO_SITE_ID = process.env.NEXT_PUBLIC_MATOMO_SITE_ID;
 
 function App({ Component, pageProps }: AppProps) {
+	const router = useRouter();
+	const isWidgetMode = router.query.mode === 'widget';
+
 	const getLayout = (children: ReactNode) => {
+		if (isWidgetMode) {
+			return (
+				<main id="main" role="main" style={{ overflow: 'auto' }}>
+					{children}
+				</main>
+			);
+		}
 		return <PublicLayout>{children}</PublicLayout>;
 	};
 	React.useEffect(() => {

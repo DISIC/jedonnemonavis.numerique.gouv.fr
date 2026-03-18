@@ -7,7 +7,10 @@ import { z } from 'zod';
 import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/ProductButton/CopyInstructionPanel/interface';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
 import { FormConfigHelper } from '../pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
-import { FormConfigWithChildren } from '../types/prismaTypesExtended';
+import {
+	ButtonWithElements,
+	FormConfigWithChildren
+} from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
 
 export function isValidDate(dateString: string) {
@@ -660,6 +663,7 @@ export const getButtonCode = ({
 	formTemplateButton,
 	theme
 }: ButtonCopyInstructionsPanelProps & { theme: 'clair' | 'sombre' }) => {
+	if (!button) return '';
 	const variantImageUrl = formTemplateButton?.variants.find(
 		v =>
 			v.style === buttonStyle &&
@@ -674,4 +678,43 @@ export const getButtonCode = ({
 		: `/avis/${button.form.id}`;
 
 	return `<a href="${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}" target='_blank' rel="noopener noreferrer"\ntitle="Je donne mon avis - nouvelle fenêtre">\n\n<img src="${variantImageUrl}" alt="${buttonLabel}" />\n\n</a>`;
+};
+
+export const getButtonUrl = (button?: ButtonWithElements) => {
+	if (!button) return '';
+	const isRootFormTemplate = button.form.form_template.slug === 'root';
+	const reviewUrlParticle = isRootFormTemplate
+		? `/${button.form.product_id}`
+		: `/avis/${button.form.id}`;
+
+	return `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
+};
+
+export const getModalCode = ({
+	buttonStyle,
+	button,
+	formTemplateButton,
+	theme,
+	position = 'bottom-right'
+}: ButtonCopyInstructionsPanelProps & {
+	theme: 'clair' | 'sombre';
+	position?: 'bottom-right' | 'bottom-left';
+}) => {
+	if (!button) return '';
+	const enTheme = theme === 'clair' ? 'light' : 'dark';
+	const variantImageUrl = formTemplateButton?.variants.find(
+		v => v.style === buttonStyle && (v.theme === enTheme || v.theme === null)
+	)?.image_url;
+
+	const buttonLabel = formTemplateButton?.label || 'Je donne mon avis';
+
+	const isRootFormTemplate = button.form.form_template.slug === 'root';
+	const reviewUrlParticle = isRootFormTemplate
+		? `/${button.form.product_id}`
+		: `/avis/${button.form.id}`;
+
+	const formUrl = `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
+	const widgetScriptUrl = `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`;
+
+	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
 };

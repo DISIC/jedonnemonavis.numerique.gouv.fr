@@ -7,6 +7,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ButtonModalType } from './interface';
@@ -27,6 +28,7 @@ interface Props {
 const ProductButtonCard = (props: Props) => {
 	const { button, onButtonClick, ownRight } = props;
 	const { data: session } = useSession();
+	const router = useRouter();
 
 	const [displayToast, setDisplayToast] = React.useState(false);
 
@@ -150,7 +152,8 @@ const ProductButtonCard = (props: Props) => {
 										}}
 										className="fr-mr-md-2v"
 									>
-										Copier le code
+										Copier le{' '}
+										{button.integration_type === 'link' ? 'lien' : 'code'}
 									</Button>
 									{ownRight === 'carrier_admin' && (
 										<>
@@ -159,7 +162,9 @@ const ProductButtonCard = (props: Props) => {
 												size="small"
 												className="fr-mr-md-2v"
 												onClick={() => {
-													onButtonClick('edit', button);
+													router.push(
+														`/administration/dashboard/product/${button.form.product_id}/forms/${button.form_id}/link/${button.id}`
+													);
 													push(['trackEvent', 'Gestion boutons', 'Modifier']);
 												}}
 											>
