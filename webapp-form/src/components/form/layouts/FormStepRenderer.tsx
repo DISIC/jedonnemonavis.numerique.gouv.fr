@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/utils/types';
+import { FormAnswers, getVisibleBlocks } from '@/src/utils/form-validation';
 import { fr } from '@codegouvfr/react-dsfr';
 import { SetStateAction } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -6,14 +7,6 @@ import { FormBlockRenderer } from './FormBlockRenderer';
 import { Stepper } from '@codegouvfr/react-dsfr/Stepper';
 
 type Step = FormWithElements['form_template']['form_template_steps'][0];
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
 	step: Step;
@@ -47,12 +40,10 @@ export const FormStepRenderer = (props: Props) => {
 		return null;
 	}
 
-	const visibleBlocks = step.form_template_blocks.filter(block => {
-		const isBlockHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'block' && d.parent_id === block.id && d.hidden,
-		);
-		return !isBlockHidden;
-	});
+	const visibleBlocks = getVisibleBlocks(
+		step.form_template_blocks,
+		formConfig,
+	);
 
 	const allBlocksRequired = visibleBlocks.every(block => block.isRequired);
 
@@ -87,30 +78,21 @@ export const FormStepRenderer = (props: Props) => {
 				</p>
 			) : (
 				<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
-					Tous les champs sont obligatoire sauf mention contraire
+					Les champs marqués d'un <span className={classes.asterisk}>*</span>{' '}
+					sont obligatoires
 				</p>
 			)}
 
-			{step.form_template_blocks.map(block => {
-				const isBlockHidden = formConfig?.form_config_displays?.some(
-					d => d.kind === 'block' && d.parent_id === block.id && d.hidden,
-				);
-
-				if (isBlockHidden) {
-					return null;
-				}
-
-				return (
-					<FormBlockRenderer
-						key={block.id}
-						block={block}
-						form={form}
-						answers={answers}
-						setAnswers={setAnswers}
-						isWidget={isWidget}
-					/>
-				);
-			})}
+			{visibleBlocks.map(block => (
+				<FormBlockRenderer
+					key={block.id}
+					block={block}
+					form={form}
+					answers={answers}
+					setAnswers={setAnswers}
+					isWidget={isWidget}
+				/>
+			))}
 		</div>
 	);
 };
@@ -143,5 +125,8 @@ const useStyles = tss
 			marginBottom: isWidget ? 0 : fr.spacing('10v'),
 			textAlign: isWidget ? 'left' : 'center',
 			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' }),
+		},
+		asterisk: {
+			color: fr.colors.decisions.text.actionHigh.redMarianne.default,
 		},
 	}));

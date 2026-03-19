@@ -210,7 +210,10 @@ const ButtonInstructionTab = ({
 										}
 										src={currentVariant?.image_url || ''}
 										fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${finalButtonStyle}-${enTheme}.svg`}
-										className={fr.cx('fr-my-8v')}
+										className={cx(
+											fr.cx('fr-my-8v'),
+											integrationType === 'modal' && classes.fabImage
+										)}
 										width={200}
 										height={85}
 									/>
@@ -384,6 +387,9 @@ const useStyles = tss.create(() => ({
 	darkerText: {
 		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey
 			.active
+	},
+	fabImage: {
+		filter: 'drop-shadow(0px 5px 12px rgba(0, 0, 18, 0.16))'
 	},
 	textArea: {
 		'.fr-input': {

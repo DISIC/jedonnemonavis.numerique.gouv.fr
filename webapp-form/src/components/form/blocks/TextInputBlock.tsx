@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/utils/types';
+import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import Notice from '@codegouvfr/react-dsfr/Notice';
@@ -7,14 +8,6 @@ import { tss } from 'tss-react/dsfr';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
 	block: Block;

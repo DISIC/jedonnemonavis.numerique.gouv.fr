@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/utils/types';
+import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
 import { fr } from '@codegouvfr/react-dsfr';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { SetStateAction } from 'react';
@@ -6,14 +7,6 @@ import { tss } from 'tss-react/dsfr';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
 	block: Block;
@@ -52,7 +45,12 @@ export const RadioBlock = ({
 				htmlFor={`radio-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-4v')}
 			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
+				{displayLabel}{' '}
+				{block.isRequired ? (
+					<span className={classes.asterisk}>*</span>
+				) : (
+					'(optionnel)'
+				)}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<RadioButtons
@@ -91,5 +89,8 @@ const useStyles = tss.withName(RadioBlock.name).create(() => ({
 		'& .fr-fieldset__content .fr-radio-group--sm input[type=radio] + label': {
 			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important',
 		},
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default,
 	},
 }));

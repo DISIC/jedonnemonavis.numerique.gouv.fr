@@ -11,6 +11,13 @@ import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import {
+	DynamicAnswerData,
+	FormAnswers,
+	getVisibleBlocks,
+	hasBlockAnswer,
+	hasAllRequiredBlockAnswers,
+} from '@/src/utils/form-validation';
 
 type AvisPageProps = {
 	form: FormWithElements;
@@ -20,14 +27,6 @@ type AvisPageProps = {
 	isWidget: boolean;
 	widgetNonce: string | null;
 };
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 export default function AvisPage({
 	form,
@@ -195,6 +194,23 @@ export default function AvisPage({
 
 	const isFirstStep = currentStepIndex === 0;
 
+	const visibleBlocks = getVisibleBlocks(
+		currentStep.form_template_blocks,
+		formConfig,
+	);
+	const firstVisibleBlock = visibleBlocks[0];
+
+	const isFirstAnswerEmpty =
+		isFirstStep &&
+		!!firstVisibleBlock &&
+		!hasBlockAnswer(answers[`block_${firstVisibleBlock.id}`]);
+
+	const hasAllRequiredAnswers = hasAllRequiredBlockAnswers(
+		currentStep.form_template_blocks,
+		answers,
+		formConfig,
+	);
+
 	return (
 		<>
 			{isPreview && !isWidget && <PreviewAlert />}
@@ -231,12 +247,17 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
+											disabled={isFirstAnswerEmpty}
 											type="submit"
 										>
-											Suivant
+											Continuer
 										</Button>
 									) : (
-										<Button priority="primary" type="submit">
+										<Button
+											priority="primary"
+											type="submit"
+											disabled={!hasAllRequiredAnswers}
+										>
 											Envoyer mon avis
 										</Button>
 									)}

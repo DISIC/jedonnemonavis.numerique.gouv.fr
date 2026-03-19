@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/utils/types';
+import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import Notice from '@codegouvfr/react-dsfr/Notice';
@@ -7,14 +8,6 @@ import { tss } from 'tss-react/dsfr';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
 	block: Block;
@@ -43,7 +36,12 @@ export const TextAreaBlock = ({
 				htmlFor={`textarea-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
+				{displayLabel}{' '}
+				{block.isRequired ? (
+					<span className={classes.asterisk}>*</span>
+				) : (
+					'(optionnel)'
+				)}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<Input
@@ -123,5 +121,8 @@ const useStyles = tss.withName(TextAreaBlock.name).create(() => ({
 				},
 			},
 		},
+	},
+	asterisk: {
+		color: fr.colors.decisions.text.actionHigh.redMarianne.default,
 	},
 }));

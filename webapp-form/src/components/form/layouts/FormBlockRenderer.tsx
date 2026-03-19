@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/utils/types';
+import { FormAnswers } from '@/src/utils/form-validation';
 import { SetStateAction } from 'react';
 import { CheckboxBlock } from '../blocks/CheckboxBlock';
 import { DividerBlock } from '../blocks/DividerBlock';
@@ -13,14 +14,6 @@ import { TextInputBlock } from '../blocks/TextInputBlock';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
-
-type DynamicAnswerData = {
-	block_id: number;
-	answer_item_id?: number;
-	answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 interface Props {
 	block: Block;

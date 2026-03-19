@@ -158,6 +158,11 @@ const ButtonForm = ({
 									fallbackSrc={`/assets/buttons/button-${selectedFormTemplateButton.slug}-${bsOption.style}-light.svg`}
 									width={200}
 									height={85}
+									className={
+										selectedIntegrationType === 'modal'
+											? classes.fabImage
+											: undefined
+									}
 								/>
 							)
 						}))}
@@ -200,6 +205,9 @@ const useStyles = tss.withName(ButtonForm.name).create(() => ({
 				minHeight: '3.5rem'
 			}
 		}
+	},
+	fabImage: {
+		filter: 'drop-shadow(0px 5px 12px rgba(0, 0, 18, 0.16))'
 	}
 }));
 
