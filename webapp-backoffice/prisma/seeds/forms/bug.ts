@@ -173,6 +173,12 @@ export async function seed_bug_form_template_buttons(
 							alt_text: bugButton.label
 						},
 						{
+							style: 'ghost',
+							theme: 'light',
+							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-ghost-light.svg`,
+							alt_text: bugButton.label
+						},
+						{
 							style: 'solid',
 							theme: 'dark',
 							image_url: `https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-${bugButton.slug}-solid-dark.svg`,

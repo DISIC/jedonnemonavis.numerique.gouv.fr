@@ -570,7 +570,26 @@ export const buttonStylesMapping: Record<
 				À placer sur un <span className="fr-text--bold">fond coloré</span>.
 			</p>
 		)
+	},
+	ghost: {
+		label: 'Contour',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				Bouton avec un contour léger, à placer sur un{' '}
+				<span className="fr-text--bold">fond clair</span>.
+			</p>
+		)
 	}
+};
+
+export const allowedStylesByIntegrationType: Record<
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle[] | null
+> = {
+	button: ['solid', 'outline'],
+	modal: ['ghost', 'solid'],
+	embed: null,
+	link: null
 };
 
 export const buttonIntegrationTypesMapping: Record<

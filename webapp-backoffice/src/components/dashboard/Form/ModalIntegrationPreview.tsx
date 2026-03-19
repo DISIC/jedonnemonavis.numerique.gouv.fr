@@ -1,7 +1,7 @@
 import { FormTemplateButtonWithVariants } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { useState, useEffect, useCallback, useRef, CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
@@ -18,18 +18,6 @@ type ModalIntegrationPreviewProps = {
 	onDimmedChange: (isDimmed: boolean) => void;
 	formId: number;
 };
-
-const Placeholder = (styleProps: CSSProperties) => (
-	<span
-		style={{
-			backgroundColor: '#DFDFDF',
-			borderRadius: '0.3em',
-			display: 'inline-block',
-			width: '80%',
-			...styleProps
-		}}
-	/>
-);
 
 const ModalIntegrationPreview = ({
 	isActive,
@@ -130,10 +118,10 @@ const ModalIntegrationPreview = ({
 							alt={defaultFormTemplateButton.label}
 							src={
 								defaultFormTemplateButton.variants.find(
-									v => v.style === 'outline'
+									v => v.style === 'ghost'
 								)?.image_url || ''
 							}
-							fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-outline-light.svg`}
+							fallbackSrc={`/assets/buttons/button-${defaultFormTemplateButton.slug}-ghost-light.svg`}
 							width={200}
 							height={85}
 						/>
@@ -228,6 +216,7 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 		cursor: 'default',
 		border: 'none',
 		background: 'transparent',
+		filter: 'drop-shadow(0 5px 13px rgba(0, 0, 18, 0.16))',
 		img: {
 			maxWidth: '200px',
 			width: 'auto',

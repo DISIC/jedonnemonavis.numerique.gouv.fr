@@ -1,4 +1,5 @@
 import ImageWithFallback from '@/src/components/ui/ImageWithFallback';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import { getButtonCode, getButtonUrl, getModalCode } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
@@ -6,12 +7,12 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { FR_THEMES } from '../interface';
 import { ButtonInstructionTabProps } from './interface';
-import { useOnboarding } from '@/src/contexts/OnboardingContext';
+import { FormTemplateButtonStyle } from '@prisma/client';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 const ButtonInstructionTab = ({
 	buttonStyle,
@@ -46,16 +47,22 @@ const ButtonInstructionTab = ({
 		if (isModal) {
 			return (
 				<>
-					<p className={fr.cx('fr-mb-0')}>
-						2. Collez la balise <code>&lt;script&gt;</code> juste avant la
-						balise fermante <code>&lt;/body&gt;</code> de votre page HTML
+					<p>
+						2. Envoyez ce code à votre équipe technique pour intégrer le
+						formulaire sur le site. Le bouton flottant sera affiché
+						automatiquement en bas à droite de la page.
 					</p>
-					<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
-						Le widget injectera automatiquement un bouton flottant en bas à
-						droite de la page. Un clic ouvrira le formulaire dans une fenêtre
-						modale par-dessus votre contenu. Vérifiez que votre politique CSP
-						autorise le script et l&apos;iframe JDMA.
-					</p>
+					<Accordion label="Informations pour les développeurs">
+						<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
+							Collez la balise <code>&lt;script&gt;</code> juste avant la balise
+							fermante <code>&lt;/body&gt;</code> de votre page HTML
+						</p>
+						<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
+							Un clic ouvrira le formulaire dans une fenêtre modale par-dessus
+							votre contenu. Vérifiez que votre politique CSP autorise le script
+							et l&apos;iframe JDMA.
+						</p>
+					</Accordion>
 				</>
 			);
 		}
@@ -160,19 +167,22 @@ const ButtonInstructionTab = ({
 		return FR_THEMES.map(theme => {
 			const isLight = theme === 'clair';
 			const enTheme = isLight ? 'light' : 'dark';
+			const finalButtonStyle: FormTemplateButtonStyle =
+				buttonStyle === 'ghost' && !isLight ? 'outline' : buttonStyle;
+
 			const currentVariant = formTemplateButton?.variants.find(
-				v => v.theme === enTheme && v.style === buttonStyle
+				v => v.theme === enTheme && v.style === finalButtonStyle
 			);
 			const codeSnippet = isModal
 				? getModalCode({
 						theme,
-						buttonStyle,
+						buttonStyle: finalButtonStyle,
 						button,
 						formTemplateButton
 				  })
 				: getButtonCode({
 						theme,
-						buttonStyle,
+						buttonStyle: finalButtonStyle,
 						button,
 						formTemplateButton
 				  });
@@ -199,7 +209,7 @@ const ButtonInstructionTab = ({
 											formTemplateButton?.label || `bouton-je-donne-mon-avis`
 										}
 										src={currentVariant?.image_url || ''}
-										fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${buttonStyle}-${enTheme}.svg`}
+										fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${finalButtonStyle}-${enTheme}.svg`}
 										className={fr.cx('fr-my-8v')}
 										width={200}
 										height={85}

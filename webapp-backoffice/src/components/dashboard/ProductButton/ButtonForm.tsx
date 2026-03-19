@@ -1,5 +1,8 @@
 import { FormTemplateButtonWithVariants } from '@/src/types/prismaTypesExtended';
-import { buttonStylesMapping } from '@/src/utils/content';
+import {
+	allowedStylesByIntegrationType,
+	buttonStylesMapping
+} from '@/src/utils/content';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
@@ -40,27 +43,27 @@ const ButtonForm = ({
 }: ButtonFormProps) => {
 	const { cx, classes } = useStyles();
 
-	const showFormattingOptions = !['link', 'embed'].includes(
-		selectedIntegrationType
-	);
+	const allowedStyles = allowedStylesByIntegrationType[selectedIntegrationType];
+	const showFormattingOptions = allowedStyles !== null;
 
 	const buttonStyleOptions = useMemo(() => {
-		if (!formTemplateButtons) return [];
-		return (
+		if (!formTemplateButtons || !allowedStyles) return [];
+		const filtered =
 			selectedFormTemplateButton?.variants.filter(
-				v => v.theme === 'light' || v.theme === null
-			) || []
+				v =>
+					(v.theme === 'light' || v.theme === null) &&
+					allowedStyles.includes(v.style)
+			) || [];
+		return filtered.sort(
+			(a, b) => allowedStyles.indexOf(a.style) - allowedStyles.indexOf(b.style)
 		);
-	}, [selectedFormTemplateButton]);
+	}, [selectedFormTemplateButton, allowedStyles]);
 
 	useEffect(() => {
-		if (selectedIntegrationType !== 'link' && formTemplateButtons) {
+		if (allowedStyles && formTemplateButtons) {
 			const defaultButton = formTemplateButtons.find(b => b.isDefault);
 			setSelectedFormTemplateButton(defaultButton);
-			if (!selectedButtonStyle)
-				setSelectedButtonStyle(
-					selectedIntegrationType === 'modal' ? 'outline' : 'solid'
-				);
+			if (!selectedButtonStyle) setSelectedButtonStyle(allowedStyles[0]);
 		}
 	}, [formTemplateButtons]);
 

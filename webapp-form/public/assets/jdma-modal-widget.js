@@ -210,7 +210,7 @@
 		'  z-index: 1705;',
 		'  bottom: 24px;',
 		isLeft ? '  left: 24px;' : '  right: 24px;',
-		'  width: 500px;',
+		'  width: 550px;',
 		'  height: 600px;',
 		'  padding: 1rem;',
 		'  max-height: calc(100vh - 3rem);',
