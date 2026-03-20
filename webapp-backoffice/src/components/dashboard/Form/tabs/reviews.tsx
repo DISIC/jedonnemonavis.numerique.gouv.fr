@@ -665,6 +665,7 @@ const ReviewsTab = (props: Props) => {
 								? undefined
 								: filters.sharedFilters.currentEndDate
 						}
+						fields={filters.productReviews.filters.fields}
 						selectedKeyword={validatedSearch}
 						onClick={keyword => {
 							push([

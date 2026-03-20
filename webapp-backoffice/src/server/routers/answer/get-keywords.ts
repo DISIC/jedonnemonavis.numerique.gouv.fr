@@ -9,6 +9,14 @@ export const getKeywordsInputSchema = z.object({
 	form_id: z.number(),
 	start_date: z.string().optional(),
 	end_date: z.string().optional(),
+	fields: z
+		.array(
+			z.object({
+				field_code: z.string(),
+				values: z.array(z.string())
+			})
+		)
+		.optional(),
 	size: z.number().optional().default(10)
 });
 
@@ -19,7 +27,7 @@ export const getKeywordsQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getKeywordsInputSchema>;
 }) => {
-	const { product_id, form_id, start_date, end_date, size } = input;
+	const { product_id, form_id, start_date, end_date, size, fields } = input;
 
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
@@ -50,6 +58,18 @@ export const getKeywordsQuery = async ({
 					lte: end_date
 				}
 			}
+		});
+	}
+
+	if (fields && fields.length > 0) {
+		fields.forEach(field => {
+			field.values.forEach(value => {
+				mustClauses.push({
+					term: {
+						[`review_answers.${field.field_code}`]: value
+					}
+				});
+			});
 		});
 	}
 

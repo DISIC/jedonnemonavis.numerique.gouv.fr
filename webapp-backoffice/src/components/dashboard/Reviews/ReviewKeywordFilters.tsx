@@ -14,6 +14,7 @@ interface Props {
 	end_date?: string;
 	onClick: (keyword: string) => void;
 	selectedKeyword?: string;
+	fields?: Array<{ field_code: string; values: string[] }>;
 }
 
 const ReviewKeywordFilters = (props: Props) => {
@@ -23,7 +24,8 @@ const ReviewKeywordFilters = (props: Props) => {
 		start_date,
 		end_date,
 		onClick,
-		selectedKeyword
+		selectedKeyword,
+		fields
 	} = props;
 
 	const [size, setSize] = useState(10);
@@ -34,6 +36,7 @@ const ReviewKeywordFilters = (props: Props) => {
 			form_id,
 			start_date,
 			end_date,
+			fields,
 			size: 1
 		},
 		{
@@ -49,6 +52,7 @@ const ReviewKeywordFilters = (props: Props) => {
 			form_id,
 			start_date,
 			end_date,
+			fields,
 			size
 		},
 		{
