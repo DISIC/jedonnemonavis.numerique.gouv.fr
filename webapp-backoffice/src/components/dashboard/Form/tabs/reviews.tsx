@@ -725,7 +725,8 @@ const ReviewsTab = (props: Props) => {
 							</div>
 						</form>
 					</div>
-					{isInitialLoadingReviews ? (
+					{!isInitialLoadingReviews ||
+					(isFetchingReviews && reviews.length === 0) ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
