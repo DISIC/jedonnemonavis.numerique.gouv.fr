@@ -10,10 +10,10 @@ export const buildSearchWhereRaw = (
 	if (isExactPhraseSearch(search)) {
 		const phrase = stripAccents(getExactPhrase(search)).toLowerCase();
 		return Prisma.sql`(
-			unaccent(lower("answer_text")) LIKE '%' || ' ' || ${phrase} || ' ' || '%'
-			OR unaccent(lower("answer_text")) LIKE ${phrase + ' %'}
-			OR unaccent(lower("answer_text")) LIKE ${'% ' + phrase}
-			OR unaccent(lower("answer_text")) = ${phrase}
+			public.immutable_unaccent(lower("answer_text")) LIKE '%' || ' ' || ${phrase} || ' ' || '%'
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${phrase + ' %'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + phrase}
+			OR public.immutable_unaccent(lower("answer_text")) = ${phrase}
 		)`;
 	}
 
@@ -23,10 +23,10 @@ export const buildSearchWhereRaw = (
 	const conditions = words.map(word => {
 		const stripped = stripAccents(word).toLowerCase();
 		return Prisma.sql`(
-			unaccent(lower("answer_text")) LIKE ${'% ' + stripped + '%'}
-			OR unaccent(lower("answer_text")) LIKE ${stripped + ' %'}
-			OR unaccent(lower("answer_text")) LIKE ${'% ' + stripped}
-			OR unaccent(lower("answer_text")) = ${stripped}
+			public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped + '%'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${stripped + ' %'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped}
+			OR public.immutable_unaccent(lower("answer_text")) = ${stripped}
 		)`;
 	});
 
