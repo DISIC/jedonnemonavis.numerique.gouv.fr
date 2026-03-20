@@ -19,8 +19,7 @@ import {
 } from '@/src/utils/export';
 import {
 	formatDateToFrenchStringWithHour,
-	getNbPages,
-	normalizeString
+	getNbPages
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -455,7 +454,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(normalizeString(tmpSearch ?? search));
+			setValidatedSearch((tmpSearch ?? search).trim());
 			setCurrentPage(1);
 		}
 	};
@@ -725,7 +724,7 @@ const ReviewsTab = (props: Props) => {
 							</div>
 						</form>
 					</div>
-					{!isInitialLoadingReviews ||
+					{isInitialLoadingReviews ||
 					(isFetchingReviews && reviews.length === 0) ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />

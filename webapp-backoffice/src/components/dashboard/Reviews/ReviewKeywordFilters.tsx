@@ -30,24 +30,7 @@ const ReviewKeywordFilters = (props: Props) => {
 
 	const [size, setSize] = useState(10);
 
-	const { data: hasKeywords, isFetching: isFetchingHasKeywords } =
-		trpc.answer.getKeywords.useQuery(
-			{
-				product_id,
-				form_id,
-				start_date,
-				end_date,
-				fields,
-				size: 1
-			},
-			{
-				initialData: {
-					data: []
-				}
-			}
-		);
-
-	const { data: keywordsResults, isFetching: isFetchingKeywords } =
+	const { data: keywordsResults, isFetching: isKeywordsLoading } =
 		trpc.answer.getKeywords.useQuery(
 			{
 				product_id,
@@ -60,12 +43,9 @@ const ReviewKeywordFilters = (props: Props) => {
 			{
 				initialData: {
 					data: []
-				},
-				enabled: hasKeywords.data.length > 0
+				}
 			}
 		);
-
-	const isKeywordsLoading = isFetchingHasKeywords || isFetchingKeywords;
 
 	const handleLoadMore = () => {
 		push(['trackEvent', 'Product - Reviews', 'Load-More-Keywords']);
@@ -74,7 +54,7 @@ const ReviewKeywordFilters = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
-	if (!hasKeywords.data.length) {
+	if (!keywordsResults.data.length) {
 		return null;
 	}
 

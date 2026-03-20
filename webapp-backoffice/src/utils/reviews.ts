@@ -1,75 +1,36 @@
 import { Prisma } from '@prisma/client';
+import { getExactPhrase, isExactPhraseSearch, stripAccents } from './search';
 import { getDateWhereFromUTCRange } from './tools';
 
-const isExactPhraseSearch = (search: string): boolean =>
-	search.startsWith('"') && search.endsWith('"') && search.length > 2;
-
-const getExactPhrase = (search: string): string => search.slice(1, -1);
-
-const buildSearchConditions = (
+export const buildSearchWhereRaw = (
 	search: string
-): Prisma.AnswerWhereInput[] => {
+): Prisma.Sql | null => {
+	if (!search) return null;
+
 	if (isExactPhraseSearch(search)) {
-		const phrase = getExactPhrase(search);
-		return [
-			{
-				answer_text: {
-					contains: phrase,
-					mode: 'insensitive'
-				}
-			}
-		];
+		const phrase = stripAccents(getExactPhrase(search)).toLowerCase();
+		return Prisma.sql`(
+			unaccent(lower("answer_text")) LIKE '%' || ' ' || ${phrase} || ' ' || '%'
+			OR unaccent(lower("answer_text")) LIKE ${phrase + ' %'}
+			OR unaccent(lower("answer_text")) LIKE ${'% ' + phrase}
+			OR unaccent(lower("answer_text")) = ${phrase}
+		)`;
 	}
 
-	return [
-		{
-			AND: search
-				.split(' ')
-				.filter(Boolean)
-				.flatMap((word: string) => [
-					{
-						OR: [
-							{
-								answer_text: {
-									contains: ` ${word}`,
-									mode: 'insensitive' as const
-								}
-							},
-							{
-								answer_text: {
-									contains: `${word} `,
-									mode: 'insensitive' as const
-								}
-							},
-							{
-								answer_text: {
-									contains: ` ${word} `,
-									mode: 'insensitive' as const
-								}
-							},
-							{
-								answer_text: {
-									startsWith: word,
-									mode: 'insensitive' as const
-								}
-							},
-							{
-								answer_text: {
-									endsWith: word,
-									mode: 'insensitive' as const
-								}
-							},
-							{
-								answer_text: {
-									equals: word,
-									mode: 'insensitive' as const
-								}
-							}
-						]
-					}
-				])
-		}
-	];
+	const words = search.split(' ').filter(Boolean);
+	if (words.length === 0) return null;
+
+	const conditions = words.map(word => {
+		const stripped = stripAccents(word).toLowerCase();
+		return Prisma.sql`(
+			unaccent(lower("answer_text")) LIKE ${'% ' + stripped + '%'}
+			OR unaccent(lower("answer_text")) LIKE ${stripped + ' %'}
+			OR unaccent(lower("answer_text")) LIKE ${'% ' + stripped}
+			OR unaccent(lower("answer_text")) = ${stripped}
+		)`;
+	});
+
+	return Prisma.join(conditions, ' AND ');
 };
 
 export const formatWhereAndOrder = (
@@ -81,7 +42,6 @@ export const formatWhereAndOrder = (
 		form_id,
 		mustHaveVerbatims,
 		mustHaveVerbatimsOptimzed,
-		search,
 		sort,
 		start_date,
 		end_date,
@@ -131,23 +91,6 @@ export const formatWhereAndOrder = (
 					}
 				}
 			]
-		}),
-		...(search && {
-			answers: {
-				some: {
-					AND: [
-						...buildSearchConditions(search),
-						{ field_code: 'verbatim' },
-						!newReviews &&
-							end_date && {
-								created_at: getDateWhereFromUTCRange(
-									input.start_date,
-									input.end_date
-								)
-							}
-					].filter(Boolean)
-				}
-			}
 		})
 	};
 
