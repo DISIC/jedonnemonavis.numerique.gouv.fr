@@ -63,12 +63,14 @@ export const getKeywordsQuery = async ({
 
 	if (fields && fields.length > 0) {
 		fields.forEach(field => {
-			field.values.forEach(value => {
-				mustClauses.push({
-					term: {
-						[`review_answers.${field.field_code}`]: value
-					}
-				});
+			mustClauses.push({
+				bool: {
+					should: field.values.map(value => ({
+						term: {
+							[`review_answers.${field.field_code}`]: value
+						}
+					}))
+				}
 			});
 		});
 	}
