@@ -674,8 +674,14 @@ const ReviewsTab = (props: Props) => {
 								'Product - Reviews',
 								'Keyword-Filter-Clicked'
 							]);
-							setSearch(keyword);
-							submitSearch(keyword);
+							if (keyword) {
+								setSearch(`"${keyword}"`);
+								submitSearch(`"${keyword}"`);
+							} else {
+								setSearch('');
+								setValidatedSearch('');
+								setCurrentPage(1);
+							}
 						}}
 					/>
 					<div

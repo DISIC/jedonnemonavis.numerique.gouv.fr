@@ -22,6 +22,16 @@ import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 const highlightSearchTerms = (text: string, search: string): string => {
 	if (!search.trim()) return text;
 
+	const isExactPhrase =
+		search.startsWith('"') && search.endsWith('"') && search.length > 2;
+
+	if (isExactPhrase) {
+		const phrase = search.slice(1, -1);
+		const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const regex = new RegExp(escapedPhrase, 'gi');
+		return text.replace(regex, match => `<span>${match}</span>`);
+	}
+
 	const words = search.split(' ').filter(Boolean);
 	let highlightedText = text;
 

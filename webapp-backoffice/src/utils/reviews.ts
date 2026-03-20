@@ -1,5 +1,76 @@
-import { AnswerIntention, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { getDateWhereFromUTCRange } from './tools';
+
+const isExactPhraseSearch = (search: string): boolean =>
+	search.startsWith('"') && search.endsWith('"') && search.length > 2;
+
+const getExactPhrase = (search: string): string => search.slice(1, -1);
+
+const buildSearchConditions = (
+	search: string
+): Prisma.AnswerWhereInput[] => {
+	if (isExactPhraseSearch(search)) {
+		const phrase = getExactPhrase(search);
+		return [
+			{
+				answer_text: {
+					contains: phrase,
+					mode: 'insensitive'
+				}
+			}
+		];
+	}
+
+	return [
+		{
+			AND: search
+				.split(' ')
+				.filter(Boolean)
+				.flatMap((word: string) => [
+					{
+						OR: [
+							{
+								answer_text: {
+									contains: ` ${word}`,
+									mode: 'insensitive' as const
+								}
+							},
+							{
+								answer_text: {
+									contains: `${word} `,
+									mode: 'insensitive' as const
+								}
+							},
+							{
+								answer_text: {
+									contains: ` ${word} `,
+									mode: 'insensitive' as const
+								}
+							},
+							{
+								answer_text: {
+									startsWith: word,
+									mode: 'insensitive' as const
+								}
+							},
+							{
+								answer_text: {
+									endsWith: word,
+									mode: 'insensitive' as const
+								}
+							},
+							{
+								answer_text: {
+									equals: word,
+									mode: 'insensitive' as const
+								}
+							}
+						]
+					}
+				])
+		}
+	];
+};
 
 export const formatWhereAndOrder = (
 	input: { [key: string]: any },
@@ -65,53 +136,7 @@ export const formatWhereAndOrder = (
 			answers: {
 				some: {
 					AND: [
-						{
-							AND: search
-								.split(' ')
-								.filter(Boolean)
-								.flatMap((word: string) => [
-									{
-										OR: [
-											{
-												answer_text: {
-													contains: ` ${word}`,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													contains: `${word} `,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													contains: ` ${word} `,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													startsWith: word,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													endsWith: word,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													equals: word,
-													mode: 'insensitive'
-												}
-											}
-										]
-									}
-								])
-						},
+						...buildSearchConditions(search),
 						{ field_code: 'verbatim' },
 						!newReviews &&
 							end_date && {

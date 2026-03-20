@@ -99,13 +99,16 @@ const ReviewKeywordFilters = (props: Props) => {
 			</p>
 			<div className={cx(classes.keywordsContainer)}>
 				{keywordsResults.data.map(keywordObject => {
-					const isSelected = selectedKeyword === keywordObject.keyword;
+					const isSelected =
+					selectedKeyword === `"${keywordObject.keyword}"`;
 					return (
 						<Tag
 							pressed={isSelected}
 							nativeButtonProps={{
 								onClick: () => {
-									onClick(keywordObject.keyword);
+									onClick(
+										isSelected ? '' : keywordObject.keyword
+									);
 								}
 							}}
 							key={keywordObject.keyword}
