@@ -30,38 +30,42 @@ const ReviewKeywordFilters = (props: Props) => {
 
 	const [size, setSize] = useState(10);
 
-	const { data: hasKeywords } = trpc.answer.getKeywords.useQuery(
-		{
-			product_id,
-			form_id,
-			start_date,
-			end_date,
-			fields,
-			size: 1
-		},
-		{
-			initialData: {
-				data: []
-			}
-		}
-	);
-
-	const { data: keywordsResults } = trpc.answer.getKeywords.useQuery(
-		{
-			product_id,
-			form_id,
-			start_date,
-			end_date,
-			fields,
-			size
-		},
-		{
-			initialData: {
-				data: []
+	const { data: hasKeywords, isFetching: isFetchingHasKeywords } =
+		trpc.answer.getKeywords.useQuery(
+			{
+				product_id,
+				form_id,
+				start_date,
+				end_date,
+				fields,
+				size: 1
 			},
-			enabled: hasKeywords.data.length > 0
-		}
-	);
+			{
+				initialData: {
+					data: []
+				}
+			}
+		);
+
+	const { data: keywordsResults, isFetching: isFetchingKeywords } =
+		trpc.answer.getKeywords.useQuery(
+			{
+				product_id,
+				form_id,
+				start_date,
+				end_date,
+				fields,
+				size
+			},
+			{
+				initialData: {
+					data: []
+				},
+				enabled: hasKeywords.data.length > 0
+			}
+		);
+
+	const isKeywordsLoading = isFetchingHasKeywords || isFetchingKeywords;
 
 	const handleLoadMore = () => {
 		push(['trackEvent', 'Product - Reviews', 'Load-More-Keywords']);
@@ -75,7 +79,14 @@ const ReviewKeywordFilters = (props: Props) => {
 	}
 
 	return (
-		<div className={cx(classes.keywordsBox, fr.cx('fr-p-4v', 'fr-mb-8v'))}>
+		<div
+			className={cx(classes.keywordsBox, fr.cx('fr-p-4v', 'fr-mb-8v'))}
+			style={{
+				opacity: isKeywordsLoading ? 0.5 : 1,
+				transition: 'opacity 0.2s ease',
+				pointerEvents: isKeywordsLoading ? 'none' : 'auto'
+			}}
+		>
 			<p className={fr.cx('fr-mb-0')}>
 				<strong>Filtrer par mot récurrent</strong>{' '}
 				<Tooltip

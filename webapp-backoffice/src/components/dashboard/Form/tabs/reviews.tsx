@@ -114,7 +114,8 @@ const ReviewsTab = (props: Props) => {
 
 	const {
 		data: reviewResults,
-		isFetching: isLoadingReviews,
+		isFetching: isFetchingReviews,
+		isLoading: isInitialLoadingReviews,
 		error: errorReviews
 	} = trpc.review.getList.useQuery(
 		{
@@ -718,12 +719,18 @@ const ReviewsTab = (props: Props) => {
 							</div>
 						</form>
 					</div>
-					{isLoadingReviews ? (
+					{isInitialLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
 					) : (
-						<>
+						<div
+							style={{
+								opacity: isFetchingReviews ? 0.5 : 1,
+								transition: 'opacity 0.2s ease',
+								pointerEvents: isFetchingReviews ? 'none' : 'auto'
+							}}
+						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
 									<FormConfigVersionsDisplay form={form} />
@@ -824,7 +831,7 @@ const ReviewsTab = (props: Props) => {
 									/>
 								</div>
 							)}
-						</>
+						</div>
 					)}
 				</>
 			)}
