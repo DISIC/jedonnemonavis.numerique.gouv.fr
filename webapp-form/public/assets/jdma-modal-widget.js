@@ -211,7 +211,7 @@
 		'  bottom: 24px;',
 		isLeft ? '  left: 24px;' : '  right: 24px;',
 		'  width: 37.5rem;',
-		'  height: 37.5rem;',
+		'  height: auto;',
 		'  padding: 1rem;',
 		'  max-height: calc(100vh - 3rem);',
 		'  max-width: calc(100vw - 3rem);',
@@ -271,11 +271,11 @@
 
 		/* Iframe fills the rest of the panel */
 		'.jdma-widget-iframe {',
-		'  flex: 1;',
 		'  width: 100%;',
 		'  border: none;',
 		'  opacity: 0;',
-		'  transition: opacity 0.2s ease;',
+		'  transition: opacity 0.2s ease, height 0.2s ease;',
+		'  min-height: 200px;',
 		'}',
 
 		'.jdma-widget-iframe.jdma-widget-loaded {',
@@ -551,6 +551,15 @@
 				break;
 
 			case 'submitted':
+				break;
+
+			case 'resize':
+				if (panel && typeof event.data.height === 'number') {
+					var iframe = panel.querySelector('.jdma-widget-iframe');
+					if (iframe) {
+						iframe.style.height = event.data.height + 'px';
+					}
+				}
 				break;
 		}
 	});

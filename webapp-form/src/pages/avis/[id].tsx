@@ -4,7 +4,7 @@ import { tss } from 'tss-react/dsfr';
 import prisma from '../../utils/db';
 import { fr } from '@codegouvfr/react-dsfr';
 import { FormWithElements } from '@/src/utils/types';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
@@ -45,6 +45,29 @@ export default function AvisPage({
 		id: number;
 		created_at: Date;
 	} | null>(null);
+
+	// Send content height to parent widget for dynamic resizing
+	const contentRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() => {
+		if (!isWidget || window.parent === window || !contentRef.current) return;
+
+		const el = contentRef.current;
+
+		const sendHeight = () => {
+			const height = el.offsetHeight;
+			window.parent.postMessage(
+				{ source: 'jdma-widget', type: 'resize', height, nonce: widgetNonce },
+				'*',
+			);
+		};
+
+		const observer = new ResizeObserver(sendHeight);
+		observer.observe(el);
+		sendHeight();
+
+		return () => observer.disconnect();
+	}, [isWidget, widgetNonce, currentStepIndex, isSubmitted]);
 
 	const formConfig = form.form_configs[0];
 	const allSteps = form.form_template.form_template_steps;
@@ -166,7 +189,7 @@ export default function AvisPage({
 
 	if (isSubmitted) {
 		return (
-			<>
+			<div ref={contentRef}>
 				{isPreview && !isWidget && <PreviewAlert />}
 				<div className={classes.blueSection} />
 				<div
@@ -188,7 +211,7 @@ export default function AvisPage({
 						</div>
 					</div>
 				</div>
-			</>
+			</div>
 		);
 	}
 
@@ -212,7 +235,7 @@ export default function AvisPage({
 	);
 
 	return (
-		<>
+		<div ref={contentRef}>
 			{isPreview && !isWidget && <PreviewAlert />}
 			<div className={classes.blueSection} />
 			<div
@@ -281,7 +304,7 @@ export default function AvisPage({
 					</div>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
 
@@ -433,7 +456,7 @@ const useStyles = tss
 				topBottom: isWidget ? '2v' : 'auto',
 				rightLeft: isWidget ? '4v' : '6v',
 			}),
-			...(isWidget && { paddingBottom: '80px' }),
+			// ...(isWidget && { paddingBottom: '80px' }),
 			[fr.breakpoints.up('md')]: {
 				transform: `translateY(-${blueSectionPxHeight / 2}px)`,
 				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' }),
@@ -443,17 +466,7 @@ const useStyles = tss
 			display: 'flex',
 			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
-			marginTop: fr.spacing('8v'),
-			...(isWidget && {
-				position: 'fixed',
-				bottom: 0,
-				left: 0,
-				right: 0,
-				backgroundColor: fr.colors.decisions.background.default.grey.default,
-				...fr.spacing('padding', { top: '2v', rightLeft: '4v', bottom: '4v' }),
-				marginTop: 0,
-				zIndex: 10,
-			}),
+			marginTop: fr.spacing(isWidget ? '4v' : '8v'),
 		},
 		thanksSection: {
 			textAlign: 'center',

@@ -34,11 +34,17 @@ export const TextInputBlock = ({
 		<div>
 			<label
 				htmlFor={`input-${block.id}`}
-				className={fr.cx('fr-label', isWidget ? 'fr-text--sm' : 'fr-text--md')}
+				className={fr.cx(
+					'fr-label',
+					isWidget ? 'fr-text--sm' : 'fr-text--md',
+					'fr-mb-0',
+				)}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
 			</label>
-			{block.content && <p className={classes.hint}>{block.content}</p>}
+			{block.content && (
+				<p className={fr.cx('fr-hint-text', 'fr-mb-1v')}>{block.content}</p>
+			)}
 			<Input
 				label=""
 				className={fr.cx('fr-mb-2v')}
@@ -60,22 +66,11 @@ export const TextInputBlock = ({
 				state={inputValue.length > 250 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 250 caractères"
 			/>
-
-			<Notice
-				className={cx(classes.notice)}
-				title="Ne partagez aucune information personnelle (exemple : nom, email, téléphone)"
-			></Notice>
 		</div>
 	);
 };
 
 const useStyles = tss.withName(TextInputBlock.name).create(() => ({
-	hint: {
-		fontSize: '0.9rem',
-		color: fr.colors.decisions.text.mention.grey.default,
-		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`,
-	},
 	notice: {
 		background: 'none',
 		padding: 0,

@@ -81,10 +81,6 @@ export const TextAreaBlock = ({
 			<div className={cx(classes.textCount, fr.cx('fr-hint-text'))}>
 				{textareaValue.length} / 15000
 			</div>
-			<Notice
-				className={cx(classes.notice)}
-				title="Ne partagez aucune information personnelle (exemple : nom, email, téléphone)"
-			/>
 		</div>
 	);
 };
