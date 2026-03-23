@@ -31,6 +31,9 @@ const ModalIntegrationPreview = ({
 	const [animDone, setAnimDone] = useState(false);
 	const [iframeScale, setIframeScale] = useState(1);
 	const [iframeLoaded, setIframeLoaded] = useState(false);
+	const [iframeContentHeight, setIframeContentHeight] = useState<number | null>(
+		null
+	);
 	const hasPlayedRef = useRef(false);
 	const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 	const panelBodyRef = useRef<HTMLDivElement>(null);
@@ -48,6 +51,21 @@ const ModalIntegrationPreview = ({
 		return () => observer.disconnect();
 	}, [phase]);
 
+	// Listen for dynamic height from the iframe form
+	useEffect(() => {
+		const handleMessage = (event: MessageEvent) => {
+			if (
+				event.data?.source === 'jdma-widget' &&
+				event.data?.type === 'resize' &&
+				typeof event.data.height === 'number'
+			) {
+				setIframeContentHeight(event.data.height);
+			}
+		};
+		window.addEventListener('message', handleMessage);
+		return () => window.removeEventListener('message', handleMessage);
+	}, []);
+
 	const clearTimers = useCallback(() => {
 		timersRef.current.forEach(clearTimeout);
 		timersRef.current = [];
@@ -60,12 +78,12 @@ const ModalIntegrationPreview = ({
 		setPhase('show-trigger');
 
 		const t1 = setTimeout(() => setPhase('open-panel'), 600);
-		const t2 = setTimeout(() => setPhase('close-panel'), 3500);
+		const t2 = setTimeout(() => setPhase('close-panel'), 10000);
 		const t3 = setTimeout(() => {
 			setPhase('idle');
 			setAnimDone(true);
 			onDimmedChange(true);
-		}, 4000);
+		}, 10500);
 
 		timersRef.current = [t1, t2, t3];
 	}, [clearTimers, onDimmedChange]);
@@ -83,6 +101,7 @@ const ModalIntegrationPreview = ({
 			setPhase('idle');
 			setAnimDone(false);
 			setIframeLoaded(false);
+			setIframeContentHeight(null);
 			hasPlayedRef.current = false;
 			onDimmedChange(false);
 		}
@@ -141,12 +160,20 @@ const ModalIntegrationPreview = ({
 						<div className={classes.fakePanelHeader}>
 							<span className={classes.fakeClose}>Fermer ✕</span>
 						</div>
-						<div className={classes.fakePanelBody} ref={panelBodyRef}>
+						<div
+							className={classes.fakePanelBody}
+							ref={panelBodyRef}
+							style={
+								iframeContentHeight
+									? { height: iframeContentHeight * iframeScale }
+									: undefined
+							}
+						>
 							<div
 								className={classes.iframeWrapper}
 								style={{
 									width: `${100 / iframeScale}%`,
-									height: `${100 / iframeScale}%`,
+									height: iframeContentHeight || '100%',
 									transform: `scale(${iframeScale})`,
 									transformOrigin: 'top left'
 								}}
@@ -202,7 +229,7 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 			left: 0,
 			width: '100%',
 			height: '100%',
-			background: 'rgba(255, 255, 255, 0.45)',
+			background: 'rgba(255, 255, 255, 0.6)',
 			zIndex: 2
 		}
 	},
@@ -210,13 +237,13 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 		display: 'flex',
 		position: 'absolute',
 		padding: 0,
-		bottom: fr.spacing('4v'),
-		right: fr.spacing('4v'),
+		bottom: fr.spacing('6v'),
+		right: fr.spacing('6v'),
 		zIndex: 1,
 		cursor: 'default',
 		border: 'none',
 		background: 'transparent',
-		filter: 'drop-shadow(0 5px 13px rgba(0, 0, 18, 0.16))',
+		filter: 'drop-shadow(0 6px 18px rgba(0, 0, 18, 0.16))',
 		img: {
 			maxWidth: '200px',
 			width: 'auto',
@@ -229,18 +256,17 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 	},
 	fakePanel: {
 		position: 'absolute',
-		bottom: fr.spacing('4v'),
-		right: fr.spacing('4v'),
-		padding: fr.spacing('1v'),
+		bottom: fr.spacing('6v'),
+		right: fr.spacing('6v'),
+		padding: fr.spacing('4v'),
 		width: '50%',
 		maxWidth: '760px',
-		height: '75%',
-		maxHeight: '600px',
 		background: '#fff',
 		boxShadow: '0 6px 18px rgba(0, 0, 18, 0.16)',
 		display: 'flex',
 		flexDirection: 'column',
 		overflow: 'hidden',
+		overscrollBehavior: 'contain',
 		transformOrigin: 'bottom right',
 		zIndex: 6
 	},
@@ -279,8 +305,9 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 	},
 	fakePanelHeader: {
 		display: 'flex',
+		alignItems: 'center',
 		justifyContent: 'flex-end',
-		...fr.spacing('padding', { topBottom: '2v', rightLeft: '3v' })
+		flexShrink: 0
 	},
 	fakeClose: {
 		fontSize: fr.spacing('3v'),
@@ -288,10 +315,10 @@ const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
 		fontWeight: 500
 	},
 	fakePanelBody: {
-		...fr.spacing('padding', { rightLeft: '4v', bottom: '3v' }),
 		position: 'relative',
-		flex: 1,
-		overflow: 'hidden'
+		overflow: 'hidden',
+		transition: 'height 0.2s ease',
+		minHeight: '200px'
 	},
 	replayOverlay: {
 		position: 'absolute',

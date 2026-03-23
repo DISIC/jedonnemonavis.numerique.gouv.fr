@@ -126,27 +126,20 @@ const FormLinkIntegrationPreview = ({
 					)
 				);
 			case 'link':
-				return (
-					<div className={classes.linkPreviewContainer}>
-						<p>
-							Le lien n’a pas de design associé. Il est à intégrer dans un
-							composant existant de votre site (bouton, bannière, ...)
-						</p>
-					</div>
-				);
+				return null;
 		}
 	};
 
 	return (
-		<div className={cx(fr.cx('fr-grid-row'))}>
-			<div className={cx(classes.sideMenu, fr.cx('fr-col-4'))}>
-				<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
-				{description}
-				<p className={fr.cx('fr-mb-4v', 'fr-mt-4v')}>
-					Format du formulaire&nbsp;
-					<span className={cx(classes.asterisk)}>*</span>
-				</p>
+		<div className={cx(fr.cx('fr-grid-row'), classes.mainContainer)}>
+			<div className={cx(classes.sideMenu, fr.cx('fr-col-12', 'fr-col-lg-4'))}>
 				<div className={classes.scrollableContent}>
+					<h1 className={fr.cx('fr-h3', 'fr-mb-1v')}>{title}</h1>
+					{description}
+					<p className={fr.cx('fr-mb-4v', 'fr-mt-4v')}>
+						Format du formulaire&nbsp;
+						<span className={cx(classes.asterisk)}>*</span>
+					</p>
 					<RadioButtons
 						name="integration-type"
 						options={
@@ -217,19 +210,37 @@ const FormLinkIntegrationPreview = ({
 					</Button>
 				</section>
 			</div>
-			<div className={cx(classes.previewContainer, fr.cx('fr-col-8'))}>
+			<div
+				className={cx(
+					classes.previewContainer,
+					fr.cx('fr-col-lg-8', isMobile && 'fr-hidden')
+				)}
+			>
+				{selectedIntegrationType === 'link' && (
+					<div className={classes.linkPreviewContainer}>
+						<p>
+							Le lien n'a pas de design associé. Il est à intégrer dans un
+							composant existant de votre site (bouton, bannière, ...)
+						</p>
+					</div>
+				)}
+
 				<Notice
 					title="Cet aperçu ne reflète pas le rendu final"
 					description={`Le libellé et le style affichés ici sont illustratifs. Cet aperçu
-							permet uniquement de visualiser l’emplacement et le mode
-							d’affichage de l’entrée du formulaire.`}
-					className={classes.previewNotice}
+							permet uniquement de visualiser l'emplacement et le mode
+							d'affichage de l'entrée du formulaire.`}
+					className={cx(
+						classes.previewNotice,
+						fr.cx(selectedIntegrationType === 'link' && 'fr-hidden')
+					)}
 					iconDisplayed={false}
 				/>
 				<div className={classes.fakeSiteWrapper}>
 					<div
 						className={cx(
 							classes.fakeSiteContainer,
+							fr.cx(selectedIntegrationType === 'link' && 'fr-hidden'),
 							isModalDimmed &&
 								selectedIntegrationType === 'modal' &&
 								classes.fakeSiteDimmed
@@ -294,6 +305,12 @@ const FormLinkIntegrationPreview = ({
 };
 
 const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
+	mainContainer: {
+		display: 'flex',
+		'& .fr-unhidden-lg': {
+			display: 'block!important'
+		}
+	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},
@@ -313,6 +330,7 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 		paddingBottom: fr.spacing('8v')
 	},
 	previewContainer: {
+		display: 'block',
 		position: 'relative',
 		height: '100vh',
 		overflow: 'hidden',
@@ -320,9 +338,9 @@ const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
 	},
 	fakeSiteWrapper: {
 		position: 'relative',
-		margin: fr.spacing('10v'),
+		margin: '5rem',
 		height: '90%',
-		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 60px)`
+		maxHeight: `calc(100vh - ${fr.spacing('30v')} - 10rem)`
 	},
 	fakeSiteContainer: {
 		position: 'relative',
