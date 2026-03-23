@@ -1,0 +1,46 @@
+{
+	"version": "2.0.0",
+	"options": {
+		"env": {
+			"PATH": "${env:HOME}/.nvm/versions/node/v20.20.1/bin:${env:PATH}"
+		}
+	},
+	"tasks": [
+		{
+			"label": "Back-Office",
+			"type": "shell",
+			"command": "npm run dev",
+			"options": {
+				"cwd": "${workspaceFolder}/webapp-backoffice"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Form",
+			"type": "shell",
+			"command": "npm run dev",
+			"options": {
+				"cwd": "${workspaceFolder}/webapp-form"
+			},
+			"isBackground": true
+		},
+		{
+			"label": "Start JDMA",
+			"dependsOn": ["Back-Office", "Form"],
+			"dependsOrder": "parallel",
+			"problemMatcher": []
+		},
+		{
+			"label": "DB Reset (Back-Office)",
+			"type": "shell",
+			"command": "npm run db:reset",
+			"options": {
+				"cwd": "${workspaceFolder}/webapp-backoffice"
+			},
+			"presentation": {
+				"close": true
+			},
+			"problemMatcher": []
+		}
+	]
+}
