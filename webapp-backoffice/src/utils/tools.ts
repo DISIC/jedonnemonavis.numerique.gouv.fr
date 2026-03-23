@@ -12,6 +12,7 @@ import {
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
+import React, { ReactNode } from 'react';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -574,6 +575,17 @@ export const normalizeHtml = (html: string): string => {
 		.replace(/&quot;/g, '"')
 		.replace(/&#39;/g, "'")
 		.trim(); // Supprime les espaces en début et fin
+};
+
+export const parseBoldLabel = (text: string): ReactNode => {
+	const parts = text.split(/\*([^*]+)\*/g);
+	return React.createElement(
+		'span',
+		null,
+		...parts.map((part, i) =>
+			i % 2 === 1 ? React.createElement('b', { key: i }, part) : part
+		)
+	);
 };
 
 export const shouldSendEmailsAboutDeletion = (
