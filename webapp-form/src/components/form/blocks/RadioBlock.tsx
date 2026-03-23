@@ -1,12 +1,10 @@
 import { FormWithElements } from '@/src/utils/types';
 import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
+import { parseBoldLabel } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
 import { SetStateAction } from 'react';
 import { tss } from 'tss-react/dsfr';
-
-const sanitizeBold = (html: string): string =>
-	html.replace(/<\/?(?!b>|\/b>|strong>|\/strong>)[^>]*>/gi, '');
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -59,15 +57,7 @@ export const RadioBlock = ({
 			<RadioButtons
 				id={`radio-${block.id}`}
 				options={visibleOptions.map(opt => ({
-					label: opt.label ? (
-						<span
-							dangerouslySetInnerHTML={{
-								__html: sanitizeBold(opt.label),
-							}}
-						/>
-					) : (
-						''
-					),
+					label: opt.label ? parseBoldLabel(opt.label) : '',
 					hintText: opt.hint,
 					nativeInputProps: {
 						value: opt.id.toString(),

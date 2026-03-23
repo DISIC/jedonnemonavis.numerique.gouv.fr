@@ -3,24 +3,23 @@ import { Prisma, PrismaClient } from '@prisma/client';
 const createBugOptions =
 	(): Prisma.FormTemplateBlockOptionCreateWithoutBlockInput[] => [
 		{
-			label: 'Je rencontre un problème <b>technique</b>',
+			label: 'Je rencontre un problème *technique*',
 			value: 'Je rencontre un problème technique',
 			hint: 'Exemples : pages qui ne s’affichent pas correctement, lenteurs, quelque chose qui ne fonctionne pas, message d’erreur, ...',
 			alias: 'BUG',
 			position: 0
 		},
 		{
-			label:
-				'J’ai un problème lié à <b>ma situation</b> ou à <b>mes informations</b>',
-			value: 'J’ai un problème lié à ma situation ou à mes informations',
+			label: "J'ai un problème lié à *ma situation* ou à *mes informations*",
+			value: "J'ai un problème lié à ma situation ou à mes informations",
 			hint: 'Exemples : données incorrectes, difficulté à accéder à un service, incohérence dans les informations affichées...',
 			alias: 'SITUATION',
 			isHideable: true,
 			position: 1
 		},
 		{
-			label: 'J’ai une <b>suggestion pour améliorer</b> le site',
-			value: 'J’ai une suggestion pour améliorer le site',
+			label: "J'ai une *suggestion pour améliorer* le site",
+			value: "J'ai une suggestion pour améliorer le site",
 			hint: 'Exemples : nouvelle fonctionnalité, amélioration d’un parcours, clarification d’un contenu...',
 			alias: 'AMÉLIORATION',
 			position: 2
