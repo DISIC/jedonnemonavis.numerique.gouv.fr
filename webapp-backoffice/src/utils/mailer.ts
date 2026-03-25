@@ -31,8 +31,7 @@ export async function sendMail(
 		to: toEmail,
 		subject: subject,
 		html,
-		text,
-		textEncoding: 'quoted-printable' as const
+		text
 	};
 
 	try {

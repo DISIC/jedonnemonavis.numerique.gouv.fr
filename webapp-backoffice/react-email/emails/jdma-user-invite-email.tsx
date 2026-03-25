@@ -40,7 +40,7 @@ export const JdmaUserInviteEmail = ({
 			</Text>
 
 			<Link href={link} target="_blank" style={buttonLink}>
-				{link}
+				Créer mon compte
 			</Link>
 		</JdmaLayout>
 	);
