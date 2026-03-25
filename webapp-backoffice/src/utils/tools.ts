@@ -726,7 +726,7 @@ export const getModalCode = ({
 		: `/avis/${button.form.id}`;
 
 	const formUrl = `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches${reviewUrlParticle}?button=${button?.id}`;
-	const widgetScriptUrl = `${process.env.NEXT_PUBLIC_FORM_APP_URL}/Demarches/assets/jdma-modal-widget.js`;
+	const widgetScriptUrl = `https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`;
 
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
 };
