@@ -93,7 +93,7 @@ export const statsUsagersQuery = async ({
 		fetchParams.form_ids =
 			authorizedFormIds.length > 0 ? authorizedFormIds : undefined;
 	} else {
-		fetchParams.product_ids = product_ids;
+		fetchParams.product_ids = product_ids.length > 0 ? product_ids : undefined;
 		fetchParams.form_ids = form_ids.length > 0 ? form_ids : undefined;
 	}
 
@@ -123,6 +123,7 @@ export const statsUsagersQuery = async ({
 					})
 			  ).map(f => f.product_id)
 			: [];
+
 	const allRelevantProductIds = Array.from(
 		new Set([...relevantProductIds, ...formProductIds])
 	);

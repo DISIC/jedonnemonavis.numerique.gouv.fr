@@ -1,27 +1,72 @@
 import ImageWithFallback from '@/src/components/ui/ImageWithFallback';
-import { getButtonCode } from '@/src/utils/tools';
+import { useOnboarding } from '@/src/contexts/OnboardingContext';
+import { getButtonCode, getButtonUrl, getModalCode } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { FR_THEMES } from '../interface';
 import { ButtonInstructionTabProps } from './interface';
+import { FormTemplateButtonStyle } from '@prisma/client';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 const ButtonInstructionTab = ({
 	buttonStyle,
 	button,
 	formTemplateButton,
+	integrationType,
 	isForDemarchesSimplifiees = false
 }: ButtonInstructionTabProps) => {
 	const { cx, classes } = useStyles();
-	const [displayToastTheme, setDisplayToastTheme] = useState<string>();
+	const { createdProduct } = useOnboarding();
+	const [copyToastMessage, setCopyToastMessage] = useState<string>();
+
+	const isModal = integrationType === 'modal';
+	const copyLabel = buttonStyle
+		? isModal
+			? '1. Choisissez le thème et copiez le code du widget flottant'
+			: '1. Choisissez le thème à intégrer et copier le code correspondant'
+		: '1. Copier le lien ci-dessous';
 
 	const getInstructionContent = () => {
+		if (!buttonStyle) {
+			return (
+				<>
+					<p className={fr.cx('fr-mb-0')}>
+						2. Envoyez ce lien à votre équipe technique pour intégrer le
+						formulaire sur le site
+					</p>
+				</>
+			);
+		}
+
+		if (isModal) {
+			return (
+				<>
+					<p>
+						2. Envoyez ce code à votre équipe technique pour intégrer le
+						formulaire sur le site. Le bouton flottant sera affiché
+						automatiquement en bas à droite de la page.
+					</p>
+					<Accordion label="Informations pour les développeurs">
+						<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
+							Collez la balise <code>&lt;script&gt;</code> juste avant la balise
+							fermante <code>&lt;/body&gt;</code> de votre page HTML
+						</p>
+						<p className={fr.cx('fr-mt-2v', 'fr-text--sm', 'fr-mb-0')}>
+							Un clic ouvrira le formulaire dans une fenêtre modale par-dessus
+							votre contenu. Vérifiez que votre politique CSP autorise le script
+							et l&apos;iframe JDMA.
+						</p>
+					</Accordion>
+				</>
+			);
+		}
+
 		if (isForDemarchesSimplifiees) {
 			return (
 				<>
@@ -60,172 +105,225 @@ const ButtonInstructionTab = ({
 					</div>
 				</>
 			);
-		} else {
+		}
+
+		return (
+			<>
+				<p className={fr.cx('fr-mb-0')}>
+					2. Envoyez ce code à votre équipe technique pour intégrer le
+					formulaire sur le site
+				</p>
+			</>
+		);
+	};
+
+	const getCopyContent = () => {
+		if (!buttonStyle) {
+			const buttonUrl = getButtonUrl(button);
 			return (
-				<>
-					<p className={fr.cx('fr-mb-3v')}>
-						2. Coller le code à l’endroit où vous souhaitez placer votre bouton
-						Je Donne Mon Avis
-					</p>
-					<Link
-						href={
-							'https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff'
-						}
-						className={fr.cx('fr-link')}
-						target="_blank"
-					>
-						Comment définir le meilleur emplacement pour son bouton JDMA ?
-					</Link>
-				</>
+				<div className={cx(fr.cx('fr-col-12'), classes.linkCopyContainer)}>
+					<div className={classes.linkInputContainer}>
+						<Input
+							id="button-code"
+							label={''}
+							nativeInputProps={{
+								'aria-label': 'Code du bouton Je Donne Mon Avis',
+								name: 'button-code',
+								value: buttonUrl,
+								contentEditable: false,
+								readOnly: true
+							}}
+						/>
+					</div>
+					<div className={classes.linkCopyButtonContainer}>
+						<Button
+							priority="secondary"
+							iconId="ri-file-copy-line"
+							iconPosition="right"
+							onClick={() => {
+								navigator.clipboard.writeText(buttonUrl);
+								push(['trackEvent', 'BO - Product', `Copy-Link`]);
+								window._mtm?.push({
+									event: 'matomo_event',
+									container_type: 'backoffice',
+									service_id: button?.form.product_id || 0,
+									form_id: button?.form.id || 0,
+									template_slug: button?.form.form_template.slug || '',
+									category: 'service',
+									action: 'onboarding_link_copy'
+								});
+								setCopyToastMessage(
+									'Le lien a été copié dans le presse-papiers'
+								);
+							}}
+						>
+							Copier
+						</Button>
+					</div>
+				</div>
 			);
 		}
+
+		return FR_THEMES.map(theme => {
+			const isLight = theme === 'clair';
+			const enTheme = isLight ? 'light' : 'dark';
+			const finalButtonStyle: FormTemplateButtonStyle =
+				buttonStyle === 'ghost' && !isLight ? 'outline' : buttonStyle;
+
+			const currentVariant = formTemplateButton?.variants.find(
+				v => v.theme === enTheme && v.style === finalButtonStyle
+			);
+			const codeSnippet = isModal
+				? getModalCode({
+						theme,
+						buttonStyle: finalButtonStyle,
+						button,
+						formTemplateButton
+				  })
+				: getButtonCode({
+						theme,
+						buttonStyle: finalButtonStyle,
+						button,
+						formTemplateButton
+				  });
+			return (
+				<Fragment key={theme}>
+					<div
+						className={cx(
+							isLight ? classes.paddingRight : classes.paddingLeft,
+							fr.cx('fr-col-12', 'fr-col-md-6')
+						)}
+					>
+						<div className={fr.cx('fr-grid-row')}>
+							<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
+							<div className={fr.cx('fr-col', 'fr-col-12')}>
+								<div
+									className={cx(
+										classes.btnImgContainer,
+										!isLight && classes.blackContainer,
+										fr.cx('fr-card', 'fr-p-6v')
+									)}
+								>
+									<ImageWithFallback
+										alt={
+											formTemplateButton?.label || `bouton-je-donne-mon-avis`
+										}
+										src={currentVariant?.image_url || ''}
+										fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${finalButtonStyle}-${enTheme}.svg`}
+										className={cx(
+											fr.cx('fr-my-8v'),
+											integrationType === 'modal' && classes.fabImage
+										)}
+										width={200}
+										height={85}
+									/>
+									<p
+										className={cx(
+											classes.smallText,
+											!isLight && classes.darkerText,
+											fr.cx('fr-mb-0')
+										)}
+									>
+										Prévisualisation du bouton
+									</p>
+								</div>
+							</div>
+							<div className={fr.cx('fr-col', 'fr-col-12')}>
+								<Button
+									priority="secondary"
+									iconId="ri-file-copy-line"
+									iconPosition="right"
+									className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
+									onClick={() => {
+										navigator.clipboard.writeText(codeSnippet);
+										push(['trackEvent', 'BO - Product', `Copy-Code`]);
+										window._mtm?.push({
+											event: 'matomo_event',
+											container_type: 'backoffice',
+											service_id: button?.form.product_id || 0,
+											form_id: button?.form.id || 0,
+											template_slug: button?.form.form_template.slug || '',
+											category: 'service',
+											action: 'onboarding_link_copy'
+										});
+										setCopyToastMessage(
+											`Le code du thème ${theme} a été copié dans le presse-papiers`
+										);
+									}}
+								>
+									Copier le code
+								</Button>
+								<div className={fr.cx('fr-input-group', 'fr-mt-4v')}>
+									<Input
+										className={classes.textArea}
+										id="button-code"
+										label={''}
+										textArea
+										nativeTextAreaProps={{
+											'aria-label': 'Code du bouton Je Donne Mon Avis',
+											name: 'button-code',
+											value: codeSnippet,
+											contentEditable: false,
+											readOnly: true
+										}}
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+				</Fragment>
+			);
+		});
 	};
 
 	return (
 		<div>
-			<p className={fr.cx('fr-mb-4v')}>
-				1. Choisissez le thème à intégrer et copier le code correspondant
-			</p>
+			<p className={fr.cx('fr-mb-4v')}>{copyLabel}</p>
 			<div role="alert">
 				<Alert
-					isClosed={!displayToastTheme}
+					isClosed={!copyToastMessage}
 					severity="success"
-					description={`Le lien du thème ${displayToastTheme} a été copié dans le presse papier`}
+					description={copyToastMessage || ''}
 					small
 					className={fr.cx('fr-mb-4v')}
 				/>
 			</div>
-			<div className={fr.cx('fr-grid-row')}>
-				{FR_THEMES.map(theme => {
-					const isLight = theme === 'clair';
-					const enTheme = isLight ? 'light' : 'dark';
-					const currentVariant = formTemplateButton?.variants.find(
-						v => v.theme === enTheme && v.style === buttonStyle
-					);
-					const buttonCode = getButtonCode({
-						theme,
-						buttonStyle,
-						button,
-						formTemplateButton
-					});
-					return (
-						<Fragment key={theme}>
-							<div
-								className={cx(
-									isLight ? classes.paddingRight : classes.paddingLeft,
-									fr.cx('fr-col-12', 'fr-col-md-6')
-								)}
-							>
-								<div className={fr.cx('fr-grid-row')}>
-									<h2 className={fr.cx('fr-h5')}>Thème {theme}</h2>
-									<div className={fr.cx('fr-col', 'fr-col-12')}>
-										<div
-											className={cx(
-												classes.btnImgContainer,
-												!isLight && classes.blackContainer,
-												fr.cx('fr-card', 'fr-p-6v')
-											)}
-										>
-											<ImageWithFallback
-												alt={
-													formTemplateButton?.label ||
-													`bouton-je-donne-mon-avis`
-												}
-												src={currentVariant?.image_url || ''}
-												fallbackSrc={`/assets/buttons/button-${formTemplateButton?.slug}-${buttonStyle}-${enTheme}.svg`}
-												className={fr.cx('fr-my-8v')}
-												width={200}
-												height={85}
-											/>
-											<p
-												className={cx(
-													classes.smallText,
-													!isLight && classes.darkerText,
-													fr.cx('fr-mb-0')
-												)}
-											>
-												Prévisualisation du bouton
-											</p>
-										</div>
-									</div>
-									<div className={fr.cx('fr-col', 'fr-col-12')}>
-										<Button
-											priority="secondary"
-											iconId="ri-file-copy-line"
-											iconPosition="right"
-											className={cx(classes.copyButton, fr.cx('fr-mt-8v'))}
-											onClick={() => {
-												navigator.clipboard.writeText(buttonCode);
-												push(['trackEvent', 'BO - Product', `Copy-Code`]);
-												window._mtm?.push({
-													event: 'matomo_event',
-													container_type: 'backoffice',
-													service_id: button?.form.product_id || 0,
-													form_id: button?.form.id || 0,
-													template_slug: button?.form.form_template.slug || '',
-													category: 'service',
-													action: 'onboarding_link_copy'
-												});
-												setDisplayToastTheme(theme);
-											}}
-										>
-											Copier le code
-										</Button>
-										<div className={fr.cx('fr-input-group', 'fr-mt-4v')}>
-											<Input
-												className={classes.textArea}
-												id="button-code"
-												label={''}
-												textArea
-												nativeTextAreaProps={{
-													'aria-label': 'Code du bouton Je Donne Mon Avis',
-													name: 'button-code',
-													value: buttonCode,
-													contentEditable: false,
-													readOnly: true
-												}}
-											/>
-										</div>
-									</div>
-								</div>
-							</div>
-						</Fragment>
-					);
-				})}
-			</div>
+			<div className={fr.cx('fr-grid-row')}>{getCopyContent()}</div>
 			<hr className={fr.cx('fr-mt-6v')} />
 			{getInstructionContent()}
-			<div className={classes.infoContainer}>
-				<div className={cx(classes.infoContent)}>
-					<div className={classes.iconContainer}>
-						<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+			{createdProduct && (
+				<div className={classes.infoContainer}>
+					<div className={cx(classes.infoContent)}>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							Si vous modifiez le formulaire après la publication, vous n’avez
+							pas besoin de recréer de lien d’intégration : les changements
+							seront automatiquement visibles par les usagers
+						</p>
 					</div>
-					<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-						Si vous modifiez le formulaire après la publication, vous n’avez pas
-						besoin de recréer de lien d’intégration : les changements seront
-						automatiquement visibles par les usagers
-					</p>
-				</div>
-				<div className={cx(classes.infoContent)}>
-					<div className={classes.iconContainer}>
-						<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+					<div className={cx(classes.infoContent)}>
+						<div className={classes.iconContainer}>
+							<i className={cx(fr.cx('ri-lightbulb-line', 'fr-icon--lg'))} />
+						</div>
+						<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
+							Vous pouvez retrouver ce code à n’importe quel moment dans votre
+							formulaire, sur l’onglet “Liens d’intégration” en cliquant sur le
+							bouton “Copier le code”
+						</p>
 					</div>
-					<p className={fr.cx('fr-mb-0', 'fr-ml-6v', 'fr-col--middle')}>
-						Vous pouvez retrouver ce code à n’importe quel moment dans votre
-						formulaire, sur l’onglet “Liens d’intégration” en cliquant sur le
-						bouton “Copier le code”
-					</p>
+					<div className={cx(classes.infoContent)}>
+						<Image
+							src="/assets/news-feature/links-tab.png"
+							alt=""
+							width={508}
+							height={180}
+							className={classes.image}
+						/>
+					</div>
 				</div>
-				<div className={cx(classes.infoContent)}>
-					<Image
-						src="/assets/news-feature/links-tab.png"
-						alt=""
-						width={508}
-						height={180}
-						className={classes.image}
-					/>
-				</div>
-			</div>
+			)}
 		</div>
 	);
 };
@@ -233,6 +331,27 @@ const ButtonInstructionTab = ({
 export default ButtonInstructionTab;
 
 const useStyles = tss.create(() => ({
+	linkCopyContainer: {
+		display: 'flex',
+		alignItems: 'flex-end',
+		gap: fr.spacing('3v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch'
+		}
+	},
+	linkInputContainer: {
+		flex: 1,
+		'> .fr-input-group': {
+			marginBottom: 0
+		}
+	},
+	linkCopyButtonContainer: {
+		flexShrink: 0,
+		button: {
+			whiteSpace: 'nowrap'
+		}
+	},
 	btnImgContainer: {
 		display: 'flex',
 		alignItems: 'center'
@@ -268,6 +387,9 @@ const useStyles = tss.create(() => ({
 	darkerText: {
 		color: fr.colors.getHex({ isDark: false }).decisions.background.alt.grey
 			.active
+	},
+	fabImage: {
+		filter: 'drop-shadow(0px 5px 12px rgba(0, 0, 18, 0.16))'
 	},
 	textArea: {
 		'.fr-input': {

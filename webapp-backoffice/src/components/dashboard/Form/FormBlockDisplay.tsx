@@ -11,6 +11,7 @@ import Smiley from './blocks/Smiley';
 import Textarea from './blocks/Textarea';
 import Radios from './blocks/Radios';
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
+import TextInput from './blocks/TextInput';
 
 const Editor = dynamic(() => import('../../ui/Editor'), { ssr: false });
 
@@ -67,6 +68,8 @@ const FormBlockDisplay = (props: Props) => {
 				);
 			case 'input_text_area':
 				return <Textarea block={block} form={form} />;
+			case 'input_text':
+				return <TextInput block={block} form={form} />;
 			case 'radio':
 				return (
 					<Radios

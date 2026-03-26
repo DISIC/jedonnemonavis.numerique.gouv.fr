@@ -47,6 +47,8 @@ const simpleContactMethods = [
 export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 	title: 'Évaluation de la satisfaction usager',
 	slug: 'root',
+	description:
+		'Permet de récolter une note sur la satisfaction globale, la clarté des informations et les aides apportées.',
 	active: true,
 	hasStepper: true,
 	form_template_steps: {
@@ -239,7 +241,9 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 				}
 			}
 		]
-	}
+	},
+	integration_types: ['embed', 'button', 'link'],
+	default_integration_type: 'button'
 };
 
 export async function seed_root_form_template_buttons(
@@ -253,44 +257,7 @@ export async function seed_root_form_template_buttons(
 				slug: 'jdma'
 			}
 		},
-		update: {
-			label: 'Je donne mon avis',
-			order: 0,
-			isDefault: true,
-			variants: {
-				deleteMany: {},
-				create: [
-					{
-						style: 'solid',
-						theme: 'light',
-						image_url:
-							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-clair.svg',
-						alt_text: 'Je donne mon avis'
-					},
-					{
-						style: 'solid',
-						theme: 'dark',
-						image_url:
-							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-bleu-sombre.svg',
-						alt_text: 'Je donne mon avis'
-					},
-					{
-						style: 'outline',
-						theme: 'light',
-						image_url:
-							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-clair.svg',
-						alt_text: 'Je donne mon avis'
-					},
-					{
-						style: 'outline',
-						theme: 'dark',
-						image_url:
-							'https://jedonnemonavis.numerique.gouv.fr/static/bouton-blanc-sombre.svg',
-						alt_text: 'Je donne mon avis'
-					}
-				]
-			}
-		},
+		update: {},
 		create: {
 			form_template: {
 				connect: {

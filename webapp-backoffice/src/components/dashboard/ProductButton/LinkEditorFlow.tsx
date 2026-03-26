@@ -1,10 +1,7 @@
 import FormLinkIntegrationPreview from '@/src/components/dashboard/Form/FormLinkIntegrationPreview';
 import ButtonForm from '@/src/components/dashboard/ProductButton/ButtonForm';
 import ButtonCopyInstructionsPanel from '@/src/components/dashboard/ProductButton/CopyInstructionPanel';
-import {
-	ButtonCreationPayload,
-	LinkCreationStep
-} from '@/src/components/dashboard/ProductButton/interface';
+import { LinkCreationStep } from '@/src/components/dashboard/ProductButton/interface';
 import { Loader } from '@/src/components/ui/Loader';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import OnboardingLayout from '@/src/layouts/Onboarding/OnboardingLayout';
@@ -20,34 +17,34 @@ import {
 	FormTemplateButtonStyle
 } from '@prisma/client';
 import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '..';
 
 interface Props {
 	product: ProductWithForms;
+	mode: 'create' | 'edit';
 }
 
-const NewLink = (props: Props) => {
-	const { product } = props;
+const LinkEditorFlow = ({ product, mode }: Props) => {
 	const router = useRouter();
-	const { form_id } = router.query;
+	const { form_id, link_id } = router.query;
 	const { cx, classes } = useStyles();
 	const { createdProduct, createdForm } = useOnboarding();
 
 	const [selectedButtonStyle, setSelectedButtonStyle] =
-		useState<FormTemplateButtonStyle>('solid');
+		useState<FormTemplateButtonStyle>();
 	const [createdButton, setCreatedButton] = useState<ButtonWithElements>();
-	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('CREATION');
+	const [currentStep, setCurrentStep] = useState<LinkCreationStep>('PREVIEW');
 	const [selectedIntegrationType, setSelectedIntegrationType] =
 		useState<ButtonIntegrationTypes>('button');
 	const [selectedFormTemplateButton, setSelectedFormTemplateButton] =
 		useState<FormTemplateButtonWithVariants>();
+	const [title, setTitle] = useState('');
+	const [titleError, setTitleError] = useState(false);
 
 	const currentForm = useMemo(() => {
 		return product?.forms.find(form => form.id === Number(form_id));
-	}, [product?.forms]);
+	}, [form_id, product?.forms]);
 
 	const defaultTitle = useMemo(() => {
 		const baseTitle = 'Lien d’intégration';
@@ -63,19 +60,21 @@ const NewLink = (props: Props) => {
 		return `${baseTitle} ${existingButtons.length + 1}`;
 	}, [currentForm]);
 
-	const {
-		control,
-		handleSubmit,
-		reset,
-		formState: { errors }
-	} = useForm<ButtonCreationPayload>({
-		defaultValues: {
-			title: defaultTitle || ''
-		}
-	});
+	const parsedLinkId = Number(link_id);
+	const { data: buttonById, isLoading: isLoadingButton } =
+		trpc.button.getById.useQuery(
+			{ id: parsedLinkId },
+			{ enabled: mode === 'edit' && !!link_id && !isNaN(parsedLinkId) }
+		);
+
+	const { data: formTemplate, isLoading: isLoadingFormTemplate } =
+		trpc.form.getFormTemplateBySlug.useQuery(
+			{ slug: currentForm?.form_template?.slug || '' },
+			{ enabled: !!currentForm?.form_template?.slug }
+		);
 
 	const createButton = trpc.button.create.useMutation({
-		onSuccess: async result => {
+		onSuccess: result => {
 			setCreatedButton(result.data);
 			setCurrentStep('COPY');
 			window._mtm?.push({
@@ -90,24 +89,79 @@ const NewLink = (props: Props) => {
 		}
 	});
 
-	const formTemplate = trpc.form.getFormTemplateBySlug.useQuery(
-		{ slug: currentForm?.form_template?.slug || '' },
-		{ enabled: !!currentForm?.form_template?.slug }
-	);
+	const updateButton = trpc.button.update.useMutation({
+		onSuccess: result => {
+			setCreatedButton(result.data);
+			setCurrentStep('COPY');
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: product.id,
+				form_id: Number(form_id),
+				template_slug: currentForm?.form_template.slug || '',
+				category: 'service',
+				action: 'form_link_update'
+			});
+		}
+	});
 
-	const { data: formTemplateData } = formTemplate;
+	useEffect(() => {
+		if (mode !== 'create') return;
+		if (!title) {
+			setTitle(defaultTitle || '');
+		}
+	}, [defaultTitle, mode, title]);
 
-	const onSubmit: SubmitHandler<ButtonCreationPayload> = async data => {
-		await createButton.mutateAsync({
-			...data,
-			form_id: Number(form_id),
-			form_template_button_id: selectedFormTemplateButton?.id,
-			button_style: selectedButtonStyle,
-			integration_type: selectedIntegrationType
-		});
-	};
+	useEffect(() => {
+		if (mode !== 'edit') return;
+		if (!buttonById?.data) return;
+
+		setSelectedIntegrationType(buttonById.data.integration_type || 'button');
+		setSelectedButtonStyle(buttonById.data.button_style || undefined);
+		setTitle(buttonById.data.title || '');
+	}, [buttonById?.data, mode]);
+
+	useEffect(() => {
+		if (
+			selectedIntegrationType === 'link' ||
+			selectedIntegrationType === 'embed'
+		) {
+			setSelectedFormTemplateButton(undefined);
+			setSelectedButtonStyle(undefined);
+			return;
+		}
+
+		if (!formTemplate?.data?.form_template_buttons?.length) return;
+
+		if (mode === 'edit' && buttonById?.data?.form_template_button_id) {
+			const existingTemplateButton =
+				formTemplate.data.form_template_buttons.find(
+					button => button.id === buttonById?.data?.form_template_button_id
+				);
+			if (existingTemplateButton) {
+				setSelectedFormTemplateButton(existingTemplateButton);
+				return;
+			}
+		}
+
+		setSelectedFormTemplateButton(
+			formTemplate.data.form_template_buttons.find(button => button.isDefault)
+		);
+	}, [
+		buttonById?.data?.form_template_button_id,
+		formTemplate?.data?.form_template_buttons,
+		mode,
+		selectedIntegrationType
+	]);
 
 	const goNextStep = () => {
+		if (mode === 'edit') {
+			router.push(
+				`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkUpdated=true`
+			);
+			return;
+		}
+
 		if (!createdProduct && !createdForm) {
 			router.push(
 				`/administration/dashboard/product/${product.id}/forms/${form_id}?tab=links&linkCreated=true`
@@ -117,17 +171,43 @@ const NewLink = (props: Props) => {
 				`/administration/dashboard/product/${product.id}/forms?formCreated=true`
 			);
 		} else {
-			router.push(`/administration/dashboard/products?onboardingDone=true`);
+			router.push('/administration/dashboard/products?onboardingDone=true');
 		}
+	};
+
+	const onSubmit = async () => {
+		if (!title.trim()) {
+			setTitleError(true);
+			return;
+		}
+
+		setTitleError(false);
+
+		const payload = {
+			title,
+			form_id: Number(form_id),
+			form_template_button_id: selectedFormTemplateButton?.id || null,
+			button_style: selectedButtonStyle || null,
+			integration_type: selectedIntegrationType
+		};
+
+		if (mode === 'edit' && !isNaN(parsedLinkId)) {
+			await updateButton.mutateAsync({
+				id: parsedLinkId,
+				...payload
+			});
+			return;
+		}
+
+		await createButton.mutateAsync(payload);
 	};
 
 	const currentStepValues = (() => {
 		switch (currentStep) {
 			case 'PREVIEW':
+				const isLoadingPreview = isLoadingButton || isLoadingFormTemplate;
 				return {
-					content: !currentForm ? (
-						<Loader />
-					) : (
+					content: (
 						<FormLinkIntegrationPreview
 							title="Choisir le type d'intégration"
 							form={currentForm}
@@ -148,9 +228,11 @@ const NewLink = (props: Props) => {
 								setSelectedIntegrationType(integrationType);
 								setCurrentStep('CREATION');
 							}}
-							defaultFormTemplateButton={formTemplateData?.data?.form_template_buttons.find(
-								b => b.isDefault
-							)}
+							formTemplate={formTemplate?.data}
+							preSelectedIntegrationType={
+								buttonById?.data?.integration_type || undefined
+							}
+							isLoading={isLoadingPreview}
 						/>
 					),
 					title: "Choisir le type d'intégration"
@@ -159,50 +241,52 @@ const NewLink = (props: Props) => {
 				return {
 					content: (
 						<ButtonForm
-							currentForm={currentForm}
+							title={title}
+							setTitle={setTitle}
+							titleError={titleError}
 							selectedButtonStyle={selectedButtonStyle}
 							setSelectedButtonStyle={setSelectedButtonStyle}
 							selectedIntegrationType={selectedIntegrationType}
-							formTemplateButtons={
-								formTemplateData?.data?.form_template_buttons
-							}
+							formTemplateButtons={formTemplate?.data?.form_template_buttons}
 							selectedFormTemplateButton={selectedFormTemplateButton}
 							setSelectedFormTemplateButton={setSelectedFormTemplateButton}
 						/>
 					),
-					title: "Créer un lien d'intégration",
-					onConfirm: handleSubmit(onSubmit)
+					title:
+						mode === 'edit'
+							? "Modifier un lien d'intégration"
+							: "Créer un lien d'intégration",
+					onConfirm: onSubmit,
+					onCancel: () => setCurrentStep('PREVIEW')
 				};
 			case 'COPY':
 				return {
-					content: createdButton ? (
+					content: (
 						<ButtonCopyInstructionsPanel
 							buttonStyle={selectedButtonStyle}
 							button={createdButton}
 							formTemplateButton={selectedFormTemplateButton}
+							integrationType={selectedIntegrationType}
 						/>
-					) : (
-						<Loader />
 					),
-					title: 'Copier le code',
-					onConfirm: goNextStep
+					title: `Copier le ${
+						selectedIntegrationType === 'link' ? 'lien' : 'code'
+					}`,
+					confirmText: 'Terminer',
+					onConfirm: goNextStep,
+					onCancel: () => setCurrentStep('CREATION')
 				};
 		}
 	})();
 
 	return (
 		<OnboardingLayout
-			onCancel={
-				currentStep === 'COPY'
-					? () => {
-							setCurrentStep('CREATION');
-					  }
-					: undefined
-			}
+			onCancel={currentStepValues.onCancel}
 			title={currentStepValues.title}
+			confirmText={currentStepValues.confirmText}
 			onConfirm={currentStepValues.onConfirm}
 			hideMainHintText={!!createdButton}
-			hideBackButton={!!createdButton}
+			hideBackButton={!!createdButton && !parsedLinkId}
 			hideActions={currentStep === 'PREVIEW'}
 			hideTitle={currentStep === 'PREVIEW'}
 			noBackground={currentStep === 'PREVIEW'}
@@ -213,40 +297,10 @@ const NewLink = (props: Props) => {
 	);
 };
 
-export default NewLink;
-
-const useStyles = tss.withName(NewLink.name).create(() => ({
+const useStyles = tss.withName(LinkEditorFlow.name).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
-	},
-	infoContainer: {
-		display: 'flex',
-		justifyContent: 'center',
-		width: '100%',
-		backgroundColor: fr.colors.options.blueEcume._950_100.default
-	},
-	iconContainer: {
-		width: fr.spacing('12v'),
-		height: fr.spacing('12v'),
-		backgroundColor: 'white',
-		color: fr.colors.decisions.background.flat.blueFrance.default,
-		borderRadius: '50%',
-		flexShrink: 0,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center'
-	},
-	buttonStyles: {
-		'.fr-radio-rich__img': {
-			width: '14rem',
-			img: {
-				maxWidth: '85%',
-				maxHeight: '85%',
-				minWidth: '3.5rem',
-				minHeight: '3.5rem'
-			}
-		}
 	}
 }));
 
-export { getServerSideProps };
+export default LinkEditorFlow;

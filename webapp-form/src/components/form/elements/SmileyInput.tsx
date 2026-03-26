@@ -11,6 +11,7 @@ type Props = {
 	value?: number;
 	hint?: string;
 	onChange: (smileySelected: Feeling) => void;
+	isWidget?: boolean;
 };
 
 type Smiley = {
@@ -39,7 +40,7 @@ const smileys: Smiley[] = [
 
 export const SmileyInput = (props: Props) => {
 	const { classes, cx } = useStyles({ nbItems: smileys.length });
-	const { label, name, hint, onChange, value } = props;
+	const { label, name, hint, onChange, value, isWidget } = props;
 	const { t } = useTranslation();
 
 	const [smileySelected, setSmileySelected] = useState<Feeling | undefined>(
@@ -55,7 +56,9 @@ export const SmileyInput = (props: Props) => {
 			<div className={cx(classes.smileysContainer)}>
 				<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 					<legend className={fr.cx('fr-fieldset__legend')}>
-						<h2 className={fr.cx('fr-mb-2v', 'fr-h3')}>{label}</h2>
+						<h2 className={fr.cx('fr-mb-2v', isWidget ? 'fr-h5' : 'fr-h3')}>
+							{label}
+						</h2>
 						{hint && (
 							<span className={fr.cx('fr-hint-text', 'fr-my-4v')}>{hint}</span>
 						)}

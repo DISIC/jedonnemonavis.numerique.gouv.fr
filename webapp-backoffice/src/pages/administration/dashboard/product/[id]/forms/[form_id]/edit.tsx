@@ -137,9 +137,10 @@ const ProductFormPage = (props: Props) => {
 		if (createConfig) {
 			try {
 				setIsPublishing(true);
-				const maxVersion = Math.max(
-					...form.form_configs.map(fc => fc.version ?? 0)
-				);
+				const maxVersion =
+					form.form_configs.length > 0
+						? Math.max(...form.form_configs.map(fc => fc.version ?? 0))
+						: 0;
 				createFormConfig.mutate({
 					...createConfig,
 					version: maxVersion + 1
@@ -311,7 +312,13 @@ const ProductFormPage = (props: Props) => {
 					{hasConfigChanged && (
 						<Link
 							className={fr.cx('fr-btn', 'fr-btn--secondary', 'fr-btn--lg')}
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${form.form_template.slug === 'root' ? `/Demarches/${form.product_id}` : `/Demarches/avis/${form.id}`}?iframe=true&formConfig=${encodeURIComponent(JSON.stringify(tmpConfigHelper))}`}
+							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}${
+								form.form_template.slug === 'root'
+									? `/Demarches/${form.product_id}`
+									: `/Demarches/avis/${form.id}`
+							}?preview=true&formConfig=${encodeURIComponent(
+								JSON.stringify(tmpConfigHelper)
+							)}`}
 							target="_blank"
 						>
 							Prévisualiser

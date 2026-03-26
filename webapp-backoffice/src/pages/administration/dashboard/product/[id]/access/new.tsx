@@ -49,7 +49,7 @@ const NewAccess = ({ product }: Props) => {
 		updateCreatedUserAccesses,
 		steps,
 		updateSteps,
-		reset
+		reset: clearContext
 	} = useOnboarding();
 
 	const [userToInvite, setUserToInvite] = useState<UserToAdd>(emptyUser);
@@ -77,7 +77,10 @@ const NewAccess = ({ product }: Props) => {
 
 	useEffect(() => {
 		setIsMounted(true);
-	}, [isMounted]);
+		return () => {
+			if (!Boolean(createdProduct)) clearContext();
+		};
+	}, []);
 
 	useEffect(() => {
 		if (isEditingStep !== undefined) setShouldShowStepper(!isEditingStep);
@@ -150,9 +153,8 @@ const NewAccess = ({ product }: Props) => {
 	const onConfirm = async () => {
 		if (userToInvite.email.trim() !== '') await onSubmit();
 		if (!Boolean(createdProduct)) {
-			router.push(`/administration/dashboard/product/${id}/access`).then(() => {
-				reset();
-			});
+			await router.push(`/administration/dashboard/product/${id}/access`);
+			clearContext();
 			return;
 		}
 
@@ -358,6 +360,12 @@ const NewAccess = ({ product }: Props) => {
 										role: e.target.value as RoleType
 									}));
 								},
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										onSubmit();
+									}
+								},
 								checked: userToInvite.role === 'carrier_user'
 							}
 						},
@@ -372,6 +380,12 @@ const NewAccess = ({ product }: Props) => {
 										...prev,
 										role: e.target.value as RoleType
 									}));
+								},
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										onSubmit();
+									}
 								},
 								checked: userToInvite.role === 'carrier_admin'
 							}

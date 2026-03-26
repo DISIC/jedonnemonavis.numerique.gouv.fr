@@ -53,17 +53,14 @@ const highlightSearchTerms = (text: string, search: string): string => {
 const ReviewTableRow = ({
 	review,
 	search,
-	formConfigHelper,
+	formConfig,
 	hasManyVersions,
 	formTemplate,
 	onClickMoreInfo
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
-	formConfigHelper: {
-		formConfig?: FormConfigWithChildren;
-		versionNumber: number;
-	};
+	formConfig?: FormConfigWithChildren;
 	hasManyVersions: boolean;
 	formTemplate: FormTemplateWithElements;
 	onClickMoreInfo?: () => void;
@@ -211,7 +208,7 @@ const ReviewTableRow = ({
 			{displayMoreInfo && (
 				<ReviewDetailPanel
 					review={review}
-					formConfigHelper={formConfigHelper}
+					formConfig={formConfig}
 					hasManyVersions={hasManyVersions}
 					search={search}
 					formTemplate={formTemplate}

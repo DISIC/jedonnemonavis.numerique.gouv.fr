@@ -12,16 +12,13 @@ import { ExtendedReview } from './ReviewDetailPanelRoot';
 
 const ReviewDetailPanel = ({
 	review,
-	formConfigHelper,
+	formConfig,
 	hasManyVersions,
 	search,
 	formTemplate
 }: {
 	review: ReviewPartialWithRelations;
-	formConfigHelper: {
-		formConfig?: FormConfigWithChildren;
-		versionNumber: number;
-	};
+	formConfig?: FormConfigWithChildren;
 	hasManyVersions: boolean;
 	search: string;
 	formTemplate: FormTemplateWithElements;
@@ -56,7 +53,7 @@ const ReviewDetailPanel = ({
 					<div className={fr.cx('fr-col-6', 'fr-col-md-2')}>
 						<h2 className={cx(classes.subtitle)}>Formulaire</h2>
 						<p className={cx(classes.content)}>
-							Version {formConfigHelper.versionNumber}
+							Version {formConfig?.version ?? 0}
 						</p>
 					</div>
 				)}
@@ -76,7 +73,7 @@ const ReviewDetailPanel = ({
 					<ReviewDetailPanelRoot
 						review={review as ExtendedReview}
 						type={'Line'}
-						formConfig={formConfigHelper.formConfig}
+						formConfig={formConfig}
 						search={search}
 					/>
 				) : (

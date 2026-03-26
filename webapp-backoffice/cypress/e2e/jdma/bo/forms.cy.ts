@@ -84,7 +84,7 @@ describe('jdma-forms', () => {
 
 	it('should create and modify a button from the forms page', () => {
 		goToTabOfForm('links');
-		createButton("Lien d'intégration 1");
+		createButton("Lien d'intégration 1", false, 'button');
 		modifyButton();
 	});
 

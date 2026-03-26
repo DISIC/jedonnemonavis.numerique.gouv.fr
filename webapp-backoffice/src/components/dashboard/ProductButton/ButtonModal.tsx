@@ -4,19 +4,17 @@ import {
 	FormTemplateButtonWithVariants,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
-import { buttonStylesMapping } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
 import { ButtonModalType } from './interface';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	modal: CustomModalProps;
@@ -40,13 +38,8 @@ const defaultErrors = {
 
 const ButtonModal = (props: Props) => {
 	const { cx, classes } = useStyles();
-	const {
-		modal,
-		modalType = 'edit',
-		button,
-		onButtonMutation,
-		formTemplateButtons
-	} = props;
+	const { modal, modalType, button, onButtonMutation, formTemplateButtons } =
+		props;
 
 	const [errors, setErrors] = useState<FormErrors>({ ...defaultErrors });
 	const [currentButton, setCurrentButton] = useState<ButtonWithElements>();
@@ -64,11 +57,12 @@ const ButtonModal = (props: Props) => {
 	useEffect(() => {
 		if (button) {
 			const hasManyTemplateButtons =
-				formTemplateButtons && formTemplateButtons.length > 1;
+				button.integration_type !== 'link' &&
+				formTemplateButtons &&
+				formTemplateButtons.length > 1;
 
 			setCurrentButton({
 				...button,
-				button_style: button.button_style || 'solid',
 				form_template_button: hasManyTemplateButtons
 					? defaultTemplateButton || null
 					: null,
@@ -113,9 +107,11 @@ const ButtonModal = (props: Props) => {
 	const displayModalTitle = (): string => {
 		switch (modalType) {
 			case 'install':
-				return 'Copier le code';
-			case 'edit':
-				return "Modifier un lien d'intégration";
+				return `Copier le ${
+					button?.integration_type === 'link' ? 'lien' : 'code'
+				}`;
+			case 'rename':
+				return 'Renommer';
 			case 'delete':
 				return "Fermer le lien d'intégration";
 			default:
@@ -137,7 +133,7 @@ const ButtonModal = (props: Props) => {
 			return;
 		}
 
-		currentButton.form_id = props.form.id;
+		currentButton.form_id = props.form_id;
 
 		const {
 			form,
@@ -180,28 +176,18 @@ const ButtonModal = (props: Props) => {
 						<div className={fr.cx('fr-grid-row')}>
 							<ButtonCopyInstructionsPanel
 								button={currentButton}
-								buttonStyle={currentButton.button_style || 'solid'}
-								formTemplateButton={
-									currentButton.form_template_button || defaultTemplateButton
-								}
+								buttonStyle={currentButton.button_style}
+								formTemplateButton={currentButton.form_template_button}
+								integrationType={currentButton.integration_type || undefined}
 							/>
 						</div>
 					</div>
 				);
-			case 'edit':
+			case 'rename':
 				return (
 					<div>
-						{/* <FormLinkIntegrationPreview
-							title="Choisir un type d'intégration"
-							form={form}
-							description={<></>}
-							onConfirm={() => {}}
-							defaultFormTemplateButton={props.form.form_template.form_template_buttons.find(
-								b => b.isDefault
-							)}
-						/> */}
 						<Input
-							id="button-create-title"
+							id="button-rename-title"
 							label={
 								<p className={fr.cx('fr-mb-0')}>
 									Nom du lien d'intégration{' '}
@@ -210,7 +196,13 @@ const ButtonModal = (props: Props) => {
 							}
 							nativeInputProps={{
 								value: currentButton.title || '',
-								name: 'button-create-title',
+								name: 'button-rename-title',
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										handleButtonEdit();
+									}
+								},
 								onChange: e => {
 									setCurrentButton({
 										...currentButton,
@@ -219,75 +211,43 @@ const ButtonModal = (props: Props) => {
 									resetErrors('title');
 								}
 							}}
-							state={hasErrors('title') ? 'error' : 'default'}
-							stateRelatedMessage={'Veuillez compléter ce champ.'}
+							hintText="Visible uniquement par vous et les autres membres de l’équipe"
+							state={hasErrors('title') ? 'error' : 'info'}
+							stateRelatedMessage={
+								hasErrors('title')
+									? 'Veuillez compléter ce champ.'
+									: 'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
+							}
 						/>
-						{formTemplateButtons && formTemplateButtons.length > 1 && (
-							<div className={fr.cx('fr-col', 'fr-col-12')}>
-								<RadioButtons
-									legend={<b>Label du bouton</b>}
-									name={'button-label'}
-									options={formTemplateButtons.map(ftb => ({
-										label: ftb.label,
-										nativeInputProps: {
-											value: ftb.id,
-											onChange: () => {
-												setCurrentButton({
-													...currentButton,
-													form_template_button_id: ftb.id
-												});
-											},
-											checked: currentButton.form_template_button_id === ftb.id
-										}
-									}))}
-								/>
+						<Accordion label="Comment nommer un lien d’intégration ?">
+							<div className={cx(classes.accordionContent)}>
+								<p>
+									Nous vous conseillons d’utiliser un nom qui indique l’
+									<strong>emplacement</strong> du lien sur votre site, ou le
+									<strong> parcours</strong> dans lequel il est placé, afin de
+									pouvoir l'identifier facilement.
+								</p>
+								<p>
+									Le <strong>format</strong> du formulaire est toujours affiché
+									à côté du nom (parfois avec le style de bouton choisi, si
+									l'option est proposée).
+								</p>
+								<p>
+									Un nom clair vous permettra également{' '}
+									<strong>
+										d’identifier facilement la source des réponses dans les
+										statistiques.
+									</strong>
+									<br />
+									<a
+										href="https://docs.numerique.gouv.fr/docs/e6e0fbd2-40f5-4fc5-906f-8043e7f9359b"
+										target="_blank"
+									>
+										En savoir plus
+									</a>
+								</p>
 							</div>
-						)}
-						<div className={fr.cx('fr-col', 'fr-col-12')}>
-							<RadioButtons
-								legend={<b>Style du bouton</b>}
-								name={'button-style'}
-								className={classes.buttonStyles}
-								options={buttonStyleOptions.map(bsOption => {
-									const altText =
-										bsOption.alt_text ||
-										currentButton.form_template_button?.label ||
-										currentDefaultTemplateButton?.label ||
-										'Illustration du bouton';
-
-									const buttonSlug =
-										formTemplateButtons?.find(
-											ftb => ftb.id === currentButton.form_template_button_id
-										)?.slug ||
-										currentDefaultTemplateButton?.slug ||
-										'jdma';
-
-									return {
-										label: buttonStylesMapping[bsOption.style].label,
-										hintText: buttonStylesMapping[bsOption.style].hintText,
-										nativeInputProps: {
-											value: bsOption.style,
-											onChange: () => {
-												setCurrentButton({
-													...currentButton,
-													button_style: bsOption.style
-												});
-											},
-											checked: currentButton.button_style === bsOption.style
-										},
-										illustration: (
-											<ImageWithFallback
-												alt={altText}
-												src={bsOption.image_url}
-												fallbackSrc={`/assets/buttons/button-${buttonSlug}-${bsOption.style}-light.svg`}
-												width={200}
-												height={85}
-											/>
-										)
-									};
-								})}
-							/>
-						</div>
+						</Accordion>
 					</div>
 				);
 			case 'delete':
@@ -322,27 +282,31 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				break;
-			case 'edit':
+
+			case 'rename':
 				return [
 					{
 						children: 'Annuler',
 						priority: 'secondary',
 						onClick: () => {
+							setCurrentButton(undefined);
 							resetErrors('title');
 						}
 					},
 					{
-						children: 'Modifier',
+						children: 'Renommer',
 						onClick: handleButtonEdit,
 						doClosesModal: false
 					}
 				];
-
 			case 'delete':
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary'
+						priority: 'secondary',
+						onClick: () => {
+							setCurrentButton(undefined);
+						}
 					},
 					{
 						children: "Fermer le lien d'intégration",
@@ -360,11 +324,14 @@ const ButtonModal = (props: Props) => {
 			title={displayModalTitle()}
 			concealingBackdrop={false}
 			size="large"
-			className={fr.cx(
-				'fr-grid-row',
-				'fr-grid-row--center',
-				'fr-grid-row--gutters',
-				'fr-my-0'
+			className={cx(
+				classes.modal,
+				fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--center',
+					'fr-grid-row--gutters',
+					'fr-my-0'
+				)
 			)}
 			buttons={displayModalButtons()}
 		>
@@ -374,6 +341,11 @@ const ButtonModal = (props: Props) => {
 };
 
 const useStyles = tss.withName(ButtonModal.name).create(() => ({
+	modal: {
+		'.fr-modal__header': {
+			paddingBottom: 0
+		}
+	},
 	textArea: {
 		'.fr-input': {
 			height: '300px',
@@ -384,20 +356,23 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
-	accordion: {
-		'.fr-accordion__btn': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default
-		},
-		'.fr-accordion__btn[aria-expanded=true]': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default,
-			'&:hover': {
-				backgroundColor: '#FFF'
-			},
-			'&:active': {
-				backgroundColor: '#FFF'
+	accordionContent: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('2v'),
+		padding: fr.spacing('6v'),
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		p: {
+			marginBottom: fr.spacing('3v'),
+			':last-child': {
+				marginBottom: 0
 			}
+		},
+		a: {
+			display: 'inline-block',
+			marginTop: fr.spacing('2v'),
+			color: fr.colors.decisions.text.title.blueFrance.default,
+			fontSize: '14px'
 		}
 	},
 	boldText: {
@@ -405,10 +380,6 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 	},
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
-	},
-	iframe: {
-		width: '100%',
-		height: '80vh'
 	},
 	btnImgContainer: {
 		display: 'flex',

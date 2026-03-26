@@ -2,6 +2,7 @@ import { selectors } from '../selectors';
 import { appFormUrl, appUrl, invitedEmail, mailerUrl } from '../variables';
 import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
+import { ButtonIntegrationTypes } from '@prisma/client';
 
 export function login(email: string, password: string, loginOnly = false) {
 	cy.visit(`${appUrl}/login`);
@@ -190,7 +191,11 @@ export function createOrEditForm(
 	}
 }
 
-export function createButton(name: string, shouldCheckA11y = false) {
+export function createButton(
+	name: string,
+	shouldCheckA11y = false,
+	integrationType: ButtonIntegrationTypes = 'button'
+) {
 	cy.intercept('POST', '/api/trpc/button.create*').as('createButton');
 	cy.contains('button', "Créer un lien d'intégration").click({
 		force: true
@@ -201,7 +206,11 @@ export function createButton(name: string, shouldCheckA11y = false) {
 		cy.auditA11y();
 	}
 
-	cy.wait(1000);
+	cy.get(`input[name="integration-type"][value="${integrationType}"]`).check({
+		force: true
+	});
+	cy.contains('button', 'Continuer').click();
+
 	cy.get('input[name="button-create-title"]').clear().type(name);
 
 	const actions = selectors.onboarding.actionsContainer;
@@ -218,20 +227,22 @@ export function createButton(name: string, shouldCheckA11y = false) {
 		cy.stub(win.navigator.clipboard, 'writeText').resolves();
 	});
 
-	cy.contains('button', 'Copier le code').first().click();
+	cy.contains('button', /^Copier( le code)?$/)
+		.first()
+		.click();
 
 	cy.wait(200);
 
 	cy.get('div.fr-alert').should('be.visible');
 
-	cy.get(actions).contains('button', 'Continuer').click();
+	cy.get(actions).contains('button', 'Terminer').click();
 
 	cy.wait(500);
 
 	cy.wait('@createButton').its('response.statusCode').should('eq', 200);
 }
 
-export function modifyButton() {
+export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 	cy.intercept('POST', '/api/trpc/button.update*').as('updateButton');
 	cy.get('[class*="ProductButtonCard"]')
 		.first()
@@ -241,18 +252,43 @@ export function modifyButton() {
 				.should('be.visible')
 				.click({ force: true });
 		});
-	cy.get('dialog#button-modal').within(() => {
-		cy.get('input[name="button-create-title"]')
-			.should('be.visible')
-			.clear()
-			.type('e2e-jdma-button-test-1');
 
-		cy.get('fieldset[class*="buttonStyles"]').within(() => {
-			cy.get('input[type="radio"][value="outline"]').check({ force: true });
-		});
+	cy.url().should('match', /\/link\/\d+(\?|$)/);
+
+	cy.get('input[name="integration-type"]').then($inputs => {
+		if ($inputs.length > 0) {
+			if (integrationType) {
+				cy.get(
+					`input[name="integration-type"][value="${integrationType}"]`
+				).check({ force: true });
+			}
+			cy.contains('button', 'Continuer').click();
+		}
 	});
-	cy.get(selectors.modalFooter).contains('button', 'Modifier').click();
+
+	cy.get('input[name="button-create-title"]')
+		.should('be.visible')
+		.clear()
+		.type('e2e-jdma-button-test-1');
+
+	cy.get('body').then($body => {
+		if ($body.find('fieldset[class*="buttonStyles"]').length > 0) {
+			cy.get('fieldset[class*="buttonStyles"]').within(() => {
+				cy.get('input[type="radio"][value="outline"]').check({ force: true });
+			});
+		}
+	});
+
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Continuer')
+		.click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
+
+	cy.get(selectors.onboarding.actionsContainer)
+		.contains('button', 'Terminer')
+		.click();
+
+	cy.url().should('include', 'tab=links');
 }
 
 export function checkMail(click = false, topic = '') {
@@ -288,7 +324,9 @@ export function checkReviewForm(shouldWork = false, url?: string) {
 	}
 }
 
-export function doTheOnboardingFlow() {
+export function doTheOnboardingFlow(
+	integrationType: ButtonIntegrationTypes = 'button'
+) {
 	cy.injectAxe();
 	createOrEditProduct('e2e-jdma-service-test-1');
 	editStep(selectors.onboarding.step.product);
@@ -301,7 +339,7 @@ export function doTheOnboardingFlow() {
 	createOrEditForm('form-test-1', false, true);
 	editStep(selectors.onboarding.step.form);
 	createOrEditForm('form-test-1-edited', true, false);
-	createButton('e2e-jdma-button-test-1', true);
+	createButton('e2e-jdma-button-test-1', true, integrationType);
 }
 
 type UserDetailsFormInput = {

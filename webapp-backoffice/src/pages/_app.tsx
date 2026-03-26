@@ -11,6 +11,7 @@ import Script from 'next/script';
 import React, { ReactNode } from 'react';
 import { createEmotionSsrAdvancedApproach } from 'tss-react/next';
 import { AuthProvider } from '../contexts/AuthContext';
+import { useJdmaWidget } from '../hooks/useJdmaWidget';
 import { FiltersContextProvider } from '../contexts/FiltersContext';
 import { OnboardingProvider } from '../contexts/OnboardingContext';
 import { RootFormTemplateProvider } from '../contexts/RootFormTemplateContext';
@@ -49,7 +50,8 @@ const OFF_ADMIN_PATHS = [
 	'/administration/dashboard/onboarding',
 	'/administration/dashboard/product/new',
 	'/administration/dashboard/product/[id]/forms/new',
-	'/administration/dashboard/product/[id]/forms/[form_id]/new-link',
+	'/administration/dashboard/product/[id]/forms/[form_id]/link/new',
+	'/administration/dashboard/product/[id]/forms/[form_id]/link/[link_id]',
 	'/administration/dashboard/product/[id]/access/new'
 ] as const;
 
@@ -58,8 +60,12 @@ const LIGHT_MODE_PATHS = ['/public', '/open-api'] as const;
 function App({ Component, pageProps }: AppProps) {
 	const router = useRouter();
 
+	const isOutOfAdminLayout = OFF_ADMIN_PATHS.some(path =>
+		router.pathname.startsWith(path)
+	);
+
 	const getLayout = (children: ReactNode) => {
-		if (OFF_ADMIN_PATHS.some(path => router.pathname.startsWith(path))) {
+		if (isOutOfAdminLayout) {
 			return children;
 		}
 
@@ -77,6 +83,8 @@ function App({ Component, pageProps }: AppProps) {
 				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
 			});
 	}, []);
+
+	useJdmaWidget(isOutOfAdminLayout);
 
 	return (
 		<MuiDsfrThemeProvider>
@@ -100,6 +108,19 @@ function App({ Component, pageProps }: AppProps) {
 													})();
 												`
 											}}
+										/>
+
+										{/* Widget JDMA intégré sur notre propre backoffice pour le formulaire de remontée d'infos */}
+										<Script
+											id="jdma-widget"
+											src={`https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`}
+											data-jdma-form-url={
+												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
+											}
+											data-jdma-button-image={`https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-feedback-ghost-light.svg`}
+											data-jdma-button-label="Une remarque ?"
+											data-jdma-position="bottom-right"
+											data-jdma-anchor="#jdma-widget-anchor"
 										/>
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>
