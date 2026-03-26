@@ -121,7 +121,6 @@ function App({ Component, pageProps }: AppProps) {
 											data-jdma-button-label="Une remarque ?"
 											data-jdma-position="bottom-right"
 											data-jdma-anchor="#jdma-widget-anchor"
-											data-jdma-dev-mode
 										/>
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>

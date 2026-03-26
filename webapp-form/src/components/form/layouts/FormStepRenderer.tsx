@@ -40,10 +40,7 @@ export const FormStepRenderer = (props: Props) => {
 		return null;
 	}
 
-	const visibleBlocks = getVisibleBlocks(
-		step.form_template_blocks,
-		formConfig,
-	);
+	const visibleBlocks = getVisibleBlocks(step.form_template_blocks, formConfig);
 
 	const allBlocksRequired = visibleBlocks.every(block => block.isRequired);
 
@@ -72,16 +69,9 @@ export const FormStepRenderer = (props: Props) => {
 				<h1 className={cx(classes.subtitle)}>{step.title}</h1>
 			)}
 
-			{allBlocksRequired ? (
-				<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
-					Tous les champs sont obligatoires
-				</p>
-			) : (
-				<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
-					Les champs marqués d'un <span className={classes.asterisk}>*</span>{' '}
-					sont obligatoires
-				</p>
-			)}
+			<p className={fr.cx('fr-hint-text', 'fr-text--sm', 'fr-mb-3v')}>
+				Sauf mention contraire, tous les champs sont obligatoires.
+			</p>
 
 			{visibleBlocks.map(block => (
 				<FormBlockRenderer

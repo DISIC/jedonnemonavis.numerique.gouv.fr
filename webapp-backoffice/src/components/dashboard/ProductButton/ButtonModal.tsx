@@ -4,19 +4,17 @@ import {
 	FormTemplateButtonWithVariants,
 	FormWithElements
 } from '@/src/types/prismaTypesExtended';
-import { buttonStylesMapping } from '@/src/utils/content';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
-import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
-import ImageWithFallback from '../../ui/ImageWithFallback';
 import { Loader } from '../../ui/Loader';
 import DeleteButtonOrFormPanel from '../Pannels/DeleteButtonOrFormPanel';
 import ButtonCopyInstructionsPanel from './CopyInstructionPanel';
 import { ButtonModalType } from './interface';
+import Accordion from '@codegouvfr/react-dsfr/Accordion';
 
 interface Props {
 	modal: CustomModalProps;
@@ -112,6 +110,8 @@ const ButtonModal = (props: Props) => {
 				return `Copier le ${
 					button?.integration_type === 'link' ? 'lien' : 'code'
 				}`;
+			case 'rename':
+				return 'Renommer';
 			case 'delete':
 				return "Fermer le lien d'intégration";
 			default:
@@ -123,6 +123,25 @@ const ButtonModal = (props: Props) => {
 		resetErrors('title');
 		onButtonMutation(!!createdOrUpdatedButton.isTest, createdOrUpdatedButton);
 		modal.close();
+	};
+
+	const handleButtonEdit = () => {
+		if (!currentButton) return;
+		if (!currentButton.title) {
+			errors.title.required = true;
+			setErrors({ ...errors });
+			return;
+		}
+
+		currentButton.form_id = props.form_id;
+
+		const {
+			form,
+			closedButtonLog,
+			form_template_button,
+			...buttonWithoutForm
+		} = currentButton;
+		updateButton.mutate(buttonWithoutForm);
 	};
 
 	const handleButtonDelete = () => {
@@ -164,6 +183,73 @@ const ButtonModal = (props: Props) => {
 						</div>
 					</div>
 				);
+			case 'rename':
+				return (
+					<div>
+						<Input
+							id="button-rename-title"
+							label={
+								<p className={fr.cx('fr-mb-0')}>
+									Nom du lien d'intégration{' '}
+									<span className={cx(classes.asterisk)}>*</span>
+								</p>
+							}
+							nativeInputProps={{
+								value: currentButton.title || '',
+								name: 'button-rename-title',
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										handleButtonEdit();
+									}
+								},
+								onChange: e => {
+									setCurrentButton({
+										...currentButton,
+										title: e.target.value
+									});
+									resetErrors('title');
+								}
+							}}
+							hintText="Visible uniquement par vous et les autres membres de l’équipe"
+							state={hasErrors('title') ? 'error' : 'info'}
+							stateRelatedMessage={
+								hasErrors('title')
+									? 'Veuillez compléter ce champ.'
+									: 'Vous pouvez modifier ce nom par défaut. Le nom du lien n’a pas d’influence sur le style du bouton'
+							}
+						/>
+						<Accordion label="Comment nommer un lien d’intégration ?">
+							<div className={cx(classes.accordionContent)}>
+								<p>
+									Nous vous conseillons d’utiliser un nom qui indique l’
+									<strong>emplacement</strong> du lien sur votre site, ou le
+									<strong> parcours</strong> dans lequel il est placé, afin de
+									pouvoir l'identifier facilement.
+								</p>
+								<p>
+									Le <strong>format</strong> du formulaire est toujours affiché
+									à côté du nom (parfois avec le style de bouton choisi, si
+									l'option est proposée).
+								</p>
+								<p>
+									Un nom clair vous permettra également{' '}
+									<strong>
+										d’identifier facilement la source des réponses dans les
+										statistiques.
+									</strong>
+									<br />
+									<a
+										href="https://docs.numerique.gouv.fr/docs/e6e0fbd2-40f5-4fc5-906f-8043e7f9359b"
+										target="_blank"
+									>
+										En savoir plus
+									</a>
+								</p>
+							</div>
+						</Accordion>
+					</div>
+				);
 			case 'delete':
 				return (
 					<div>
@@ -196,11 +282,31 @@ const ButtonModal = (props: Props) => {
 		switch (modalType) {
 			case 'install':
 				break;
+
+			case 'rename':
+				return [
+					{
+						children: 'Annuler',
+						priority: 'secondary',
+						onClick: () => {
+							setCurrentButton(undefined);
+							resetErrors('title');
+						}
+					},
+					{
+						children: 'Renommer',
+						onClick: handleButtonEdit,
+						doClosesModal: false
+					}
+				];
 			case 'delete':
 				return [
 					{
 						children: 'Annuler',
-						priority: 'secondary'
+						priority: 'secondary',
+						onClick: () => {
+							setCurrentButton(undefined);
+						}
 					},
 					{
 						children: "Fermer le lien d'intégration",
@@ -218,11 +324,14 @@ const ButtonModal = (props: Props) => {
 			title={displayModalTitle()}
 			concealingBackdrop={false}
 			size="large"
-			className={fr.cx(
-				'fr-grid-row',
-				'fr-grid-row--center',
-				'fr-grid-row--gutters',
-				'fr-my-0'
+			className={cx(
+				classes.modal,
+				fr.cx(
+					'fr-grid-row',
+					'fr-grid-row--center',
+					'fr-grid-row--gutters',
+					'fr-my-0'
+				)
 			)}
 			buttons={displayModalButtons()}
 		>
@@ -232,6 +341,11 @@ const ButtonModal = (props: Props) => {
 };
 
 const useStyles = tss.withName(ButtonModal.name).create(() => ({
+	modal: {
+		'.fr-modal__header': {
+			paddingBottom: 0
+		}
+	},
 	textArea: {
 		'.fr-input': {
 			height: '300px',
@@ -242,20 +356,23 @@ const useStyles = tss.withName(ButtonModal.name).create(() => ({
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
-	accordion: {
-		'.fr-accordion__btn': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default
-		},
-		'.fr-accordion__btn[aria-expanded=true]': {
-			backgroundColor: '#FFF',
-			color: fr.colors.decisions.text.active.grey.default,
-			'&:hover': {
-				backgroundColor: '#FFF'
-			},
-			'&:active': {
-				backgroundColor: '#FFF'
+	accordionContent: {
+		display: 'flex',
+		flexDirection: 'column',
+		gap: fr.spacing('2v'),
+		padding: fr.spacing('6v'),
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		p: {
+			marginBottom: fr.spacing('3v'),
+			':last-child': {
+				marginBottom: 0
 			}
+		},
+		a: {
+			display: 'inline-block',
+			marginTop: fr.spacing('2v'),
+			color: fr.colors.decisions.text.title.blueFrance.default,
+			fontSize: '14px'
 		}
 	},
 	boldText: {

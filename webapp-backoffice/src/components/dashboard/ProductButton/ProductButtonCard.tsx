@@ -162,13 +162,11 @@ const ProductButtonCard = (props: Props) => {
 												size="small"
 												className="fr-mr-md-2v"
 												onClick={() => {
-													router.push(
-														`/administration/dashboard/product/${button.form.product_id}/forms/${button.form_id}/link/${button.id}`
-													);
+													onButtonClick('rename', button);
 													push(['trackEvent', 'Gestion boutons', 'Modifier']);
 												}}
 											>
-												Modifier
+												Renommer
 											</Button>
 											{session?.user.role.includes('admin') && (
 												<Button
