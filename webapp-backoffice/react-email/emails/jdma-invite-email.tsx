@@ -12,17 +12,11 @@ const JdmaInviteEmail = ({
 	const accessType = productTitle
 		? `la démarche « ${productTitle} »`
 		: entityName
-			? `l'organisation « ${entityName} »`
-			: 'un service';
-
-	const previewText = productTitle
-		? `Accès à la démarche ${productTitle}`
-		: entityName
-			? `Accès à l'organisation ${entityName}`
-			: 'Accès à Je donne mon avis';
+		? `l'organisation « ${entityName} »`
+		: 'un service';
 
 	return (
-		<JdmaLayout preview={previewText} baseUrl={baseUrl}>
+		<JdmaLayout baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
