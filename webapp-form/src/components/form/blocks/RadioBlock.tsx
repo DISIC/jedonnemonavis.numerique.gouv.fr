@@ -46,12 +46,7 @@ export const RadioBlock = ({
 				htmlFor={`radio-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-4v')}
 			>
-				{displayLabel}{' '}
-				{block.isRequired ? (
-					<span className={classes.asterisk}>*</span>
-				) : (
-					'(optionnel)'
-				)}
+				{displayLabel} {!block.isRequired && '(optionnel)'}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<RadioButtons
@@ -90,8 +85,5 @@ const useStyles = tss.withName(RadioBlock.name).create(() => ({
 		'& .fr-fieldset__content .fr-radio-group--sm input[type=radio] + label': {
 			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important',
 		},
-	},
-	asterisk: {
-		color: fr.colors.decisions.text.actionHigh.redMarianne.default,
 	},
 }));

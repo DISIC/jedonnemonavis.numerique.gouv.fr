@@ -97,7 +97,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 						{
 							label: 'Adresse mail',
 							content:
-								'À renseigner si vous acceptez d’être recontacté. Nous ne pourrons pas répondre à toutes les demandes.',
+								'Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message.',
 							type_bloc: 'input_text',
 							field_code: 'contact_email',
 							position: 1,

@@ -36,12 +36,7 @@ export const TextAreaBlock = ({
 				htmlFor={`textarea-${block.id}`}
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
-				{displayLabel}{' '}
-				{block.isRequired ? (
-					<span className={classes.asterisk}>*</span>
-				) : (
-					'(optionnel)'
-				)}
+				{displayLabel} {!block.isRequired && '(optionnel)'}
 			</label>
 			{block.content && <p className={classes.hint}>{block.content}</p>}
 			<Input
@@ -117,8 +112,5 @@ const useStyles = tss.withName(TextAreaBlock.name).create(() => ({
 				},
 			},
 		},
-	},
-	asterisk: {
-		color: fr.colors.decisions.text.actionHigh.redMarianne.default,
 	},
 }));
