@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LATEST_NEWS_VERSION = 3; // Increment this when there are new features to announce
+export const LATEST_NEWS_VERSION = 4; // Increment this when there are new features to announce
 
 export const UserSettingsSchema = z.object({
 	formHelpModalSeen: z.boolean().optional(),

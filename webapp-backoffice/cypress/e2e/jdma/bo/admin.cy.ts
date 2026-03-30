@@ -6,7 +6,7 @@ import {
 	fillSignupForm,
 	login,
 	logout,
-	tryCloseNewsModal
+	tryCloseModal
 } from '../../../utils/helpers/common';
 import { selectors } from '../../../utils/selectors';
 import {
@@ -21,7 +21,7 @@ describe('jdma-admin', () => {
 	before(() => {
 		login(adminEmail, adminPassword, true);
 		cy.injectAxe();
-		tryCloseNewsModal();
+		tryCloseModal();
 		cy.wait(500);
 		cy.auditA11y();
 		logout();
@@ -29,12 +29,6 @@ describe('jdma-admin', () => {
 	beforeEach(() => {
 		login(adminEmail, adminPassword);
 		cy.injectAxe();
-	});
-
-	it('check a11y news page', () => {
-		cy.visit(`${appUrl}${selectors.url.news}`);
-		cy.injectAxe();
-		cy.auditA11y();
 	});
 
 	it('create and delete users', () => {

@@ -133,6 +133,21 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			  ]
 			: [
 					<Button
+						title={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+						aria-label={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+						linkProps={{
+							href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
+							target: '_blank',
+							rel: 'noopener noreferrer',
+							className: cx(
+								fr.cx('fr-icon-external-link-line', 'fr-link--icon-left'),
+								classes.externalLink
+							)
+						}}
+					>
+						Nouveautés
+					</Button>,
+					<Button
 						id="button-account"
 						iconId={'fr-icon-account-circle-line'}
 						title={`Ouvrir le menu mon compte`}
@@ -313,35 +328,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 		navigationItems.push(...adminNavigationItems);
 	}
 
-	if (
-		userAccessRights.metadata.count ||
-		userAdminEntityRights.metadata.count ||
-		session?.user.role.includes('admin')
-	) {
-		navigationItems.push({
-			text: (
-				<div>
-					Nouveautés
-					{!settings.newsPageSeen && (
-						<Badge
-							severity="new"
-							small
-							noIcon
-							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-						>
-							<i className={fr.cx('fr-icon-flashlight-fill', 'fr-mr-1v')} />1
-						</Badge>
-					)}
-				</div>
-			),
-			linkProps: {
-				href: '/administration/dashboard/news',
-				target: '_self'
-			},
-			isActive: pathname.startsWith('/administration/dashboard/news')
-		});
-	}
-
 	const shouldDisplayUserDetailsForm =
 		status !== 'loading' &&
 		session !== null &&
@@ -518,6 +504,11 @@ const useStyles = tss
 		notice: {
 			'.fr-notice__body': {
 				alignItems: 'center'
+			}
+		},
+		externalLink: {
+			'&::after': {
+				display: 'none!important'
 			}
 		},
 		widgetAnchor: {
