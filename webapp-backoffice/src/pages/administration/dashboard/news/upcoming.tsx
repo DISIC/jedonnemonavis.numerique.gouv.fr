@@ -44,7 +44,7 @@ export const getStaticProps: GetStaticProps = async () => {
 		const descriptionMatch = item.match(/\*\*Description\*\*: (.+)/);
 		const statusMatch = item.match(/\*\*Statut\*\*: (.+)/);
 
-		if (statusMatch?.[1]?.trim() !== 'A venir') return [];
+		if (statusMatch?.[1]?.trim() !== 'À venir') return [];
 
 		return [titleMatch?.[1]?.trim() || '', descriptionMatch?.[1]?.trim() || ''];
 	});

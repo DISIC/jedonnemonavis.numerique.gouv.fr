@@ -223,10 +223,11 @@ const useStyles = tss.withName(LinksTab.name).create({
 	accordionContent: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: fr.spacing('2v'),
+		gap: fr.spacing('1v'),
 		padding: fr.spacing('6v'),
 		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
 		p: {
+			marginBottom: fr.spacing('3v'),
 			':last-child': {
 				marginBottom: 0
 			}
@@ -236,6 +237,12 @@ const useStyles = tss.withName(LinksTab.name).create({
 			marginTop: fr.spacing('2v'),
 			color: fr.colors.decisions.text.title.blueFrance.default,
 			fontSize: '14px'
+		},
+		ul: {
+			marginTop: 0
+		},
+		'p + ul': {
+			marginTop: `-${fr.spacing('3v')}`
 		}
 	}
 });
