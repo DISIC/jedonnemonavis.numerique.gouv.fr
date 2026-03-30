@@ -258,10 +258,6 @@ export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 			.should('be.visible')
 			.clear()
 			.type('e2e-jdma-button-test-1');
-
-		cy.get('fieldset[class*="buttonStyles"]').within(() => {
-			cy.get('input[type="radio"][value="outline"]').check({ force: true });
-		});
 	});
 	cy.get(selectors.modalFooter).contains('button', 'Renommer').click();
 
