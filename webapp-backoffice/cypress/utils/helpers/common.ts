@@ -248,47 +248,24 @@ export function modifyButton(integrationType?: ButtonIntegrationTypes) {
 		.first()
 		.should('be.visible')
 		.within(() => {
-			cy.contains('button', 'Modifier')
+			cy.contains('button', 'Renommer')
 				.should('be.visible')
 				.click({ force: true });
 		});
 
-	cy.url().should('match', /\/link\/\d+(\?|$)/);
+	cy.get('dialog#button-modal').within(() => {
+		cy.get('input[name="button-rename-title"]')
+			.should('be.visible')
+			.clear()
+			.type('e2e-jdma-button-test-1');
 
-	cy.get('input[name="integration-type"]').then($inputs => {
-		if ($inputs.length > 0) {
-			if (integrationType) {
-				cy.get(
-					`input[name="integration-type"][value="${integrationType}"]`
-				).check({ force: true });
-			}
-			cy.contains('button', 'Continuer').click();
-		}
+		cy.get('fieldset[class*="buttonStyles"]').within(() => {
+			cy.get('input[type="radio"][value="outline"]').check({ force: true });
+		});
 	});
+	cy.get(selectors.modalFooter).contains('button', 'Renommer').click();
 
-	cy.get('input[name="button-create-title"]')
-		.should('be.visible')
-		.clear()
-		.type('e2e-jdma-button-test-1');
-
-	cy.get('body').then($body => {
-		if ($body.find('fieldset[class*="buttonStyles"]').length > 0) {
-			cy.get('fieldset[class*="buttonStyles"]').within(() => {
-				cy.get('input[type="radio"][value="outline"]').check({ force: true });
-			});
-		}
-	});
-
-	cy.get(selectors.onboarding.actionsContainer)
-		.contains('button', 'Continuer')
-		.click();
 	cy.wait('@updateButton').its('response.statusCode').should('eq', 200);
-
-	cy.get(selectors.onboarding.actionsContainer)
-		.contains('button', 'Terminer')
-		.click();
-
-	cy.url().should('include', 'tab=links');
 }
 
 export function checkMail(click = false, topic = '') {
