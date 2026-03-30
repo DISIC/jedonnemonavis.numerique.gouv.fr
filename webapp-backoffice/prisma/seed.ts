@@ -126,7 +126,10 @@ async function seed_users_products() {
 		await prisma.user.upsert({
 			where: { email: user.email },
 			update: {},
-			create: { ...user }
+			create: {
+				...user,
+				details: { create: { level: 'expert', referralSource: 'seeding' } }
+			}
 		});
 	}
 

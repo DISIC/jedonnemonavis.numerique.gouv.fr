@@ -1,47 +1,52 @@
 import { selectors } from '../selectors';
-import { appFormUrl, appUrl, invitedEmail, mailerUrl } from '../variables';
+import {
+	appFormUrl,
+	appUrl,
+	invitedEmail,
+	mailerUrl,
+	userSettings
+} from '../variables';
 import { editFormIntroductionText } from './forms';
 import { addUserToProduct, editStep, skipStep } from './onboarding';
 import { ButtonIntegrationTypes } from '@prisma/client';
 
-export function login(email: string, password: string, loginOnly = false) {
+export function login(
+	email: string,
+	password: string,
+	loginOnly = false,
+	customHelpModalSeen = true
+) {
+	cy.setCookie(
+		'jdma-user-settings',
+		JSON.stringify({ ...userSettings, formHelpModalSeen: customHelpModalSeen }),
+		{ expiry: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365 }
+	);
 	cy.visit(`${appUrl}/login`);
 	cy.get(selectors.loginForm.email).should('be.visible').type(email);
 	cy.get(selectors.loginForm.continueButton).contains('Continuer').click();
-	cy.get(selectors.loginForm.password, { timeout: 30000 })
-		.should('be.visible')
-		.type(password);
+	cy.get(selectors.loginForm.password).should('be.visible').type(password);
 	cy.get(selectors.loginForm.continueButton).contains('Se connecter').click();
-	cy.url({ timeout: 30000 }).should('eq', `${appUrl}${selectors.url.products}`);
+	cy.url().should('eq', `${appUrl}${selectors.url.products}`);
 	tryFillUserDetailsForm();
-	if (!loginOnly) tryCloseNewsModal();
+	if (!loginOnly) tryCloseModal();
 }
 
 export function logout() {
 	cy.reload();
-	tryCloseNewsModal();
+	tryCloseModal();
 	cy.get('header').should('be.visible');
 	cy.get('header').contains('Compte').click({ force: true });
 	cy.contains('button', 'Se déconnecter').click({ force: true });
 	cy.url().should('include', '/login');
 }
 
-export function tryCloseNewsModal() {
-	cy.wait(1000);
-	cy.get('body').then($body => {
-		const $modal = $body.find('dialog#news-modal');
-		if ($modal.length && $modal.is(':visible')) {
-			cy.wrap($modal).within(() => {
-				cy.contains('button', 'Fermer').click();
-			});
-		} else {
-			cy.log('News modal not found or not visible, skipping close action.');
-		}
-	});
-}
-
-export function tryCloseModal() {
-	cy.wait(500);
+export function tryCloseModal(shouldCheckA11y = false) {
+	// The news modal opens after a 500ms setTimeout in products.tsx,
+	// so we need to wait for that before checking.
+	cy.wait(600);
+	if (shouldCheckA11y) {
+		cy.auditA11y();
+	}
 	cy.get('body').then($body => {
 		const $modal = $body.find('dialog[open]');
 		if ($modal.length && $modal.is(':visible')) {
@@ -330,7 +335,7 @@ export function tryFillUserDetailsForm({
 	designLevel = 'beginner',
 	submit = true
 }: UserDetailsFormInput = {}) {
-	cy.wait(500);
+	cy.wait(100);
 	cy.get('body').then($body => {
 		const hasForm = $body.find('select[name="referralSource"]').length > 0;
 		if (!hasForm) {

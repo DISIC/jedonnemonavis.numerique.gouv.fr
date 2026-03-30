@@ -18,8 +18,10 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 			title={<>De nouvelles fonctionnalités sont disponibles&nbsp;!</>}
 			buttons={[
 				{
-					onClick: () => {
-						router.push('/administration/dashboard/news');
+					linkProps: {
+						href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
+						target: '_blank',
+						rel: 'noopener noreferrer'
 					},
 					children: 'Voir les nouveautés',
 					iconId: 'fr-icon-arrow-right-line',
@@ -30,20 +32,18 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 		>
 			<p className={fr.cx('fr-mb-4v')}>Vous pouvez désormais : </p>
 			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Analyser les réponses aux questionnaires à travers les mots clés les
-				plus employés
+				⭐️ Identifier les bugs sur vos services grâce à vos usagers. Créer des
+				formulaires de “Remontées d’informations” est maintenant possible. Plus
+				d’infos sur la page des nouveautés.
 			</p>
 			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Profiter d’un parcours fléché pour mieux comprendre comment
-				installer un questionnaire JDMA sur votre service numérique
-			</p>
-			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Récupérer les données agrégées de vos questionnaires avec une
-				granularité supplémentaire (formulaire)
+				⭐️ Affichez un bouton flottant sur votre site afin que vos usagers
+				trouvent le chemin de votre formulaire “Remontées d’informations” à
+				n’importe quel moment.
 			</p>
 			<div className={cx(classes.imageContainer, fr.cx('fr-mt-6v'))}>
 				<Image
-					src="/assets/news-feature/common-keywords.png"
+					src="/assets/news-feature/modal-bug.png"
 					alt=""
 					width={2030}
 					height={798}
@@ -54,7 +54,8 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 				className={fr.cx('fr-mb-0', 'fr-text--xs', 'fr-mt-1v')}
 				style={{ color: fr.colors.decisions.text.mention.grey.default }}
 			>
-				Mots-clés les plus récurrents dans les réponses aux questionnaires JDMA
+				Le modèle de “Remontées d’informations” intégré à votre site via un
+				bouton flottant
 			</p>
 		</modal.Component>
 	);

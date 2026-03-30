@@ -17,24 +17,6 @@ const TAB_LABELS: Record<FormTab, string> = {
 	settings: 'Paramètres'
 };
 
-export const tryCloseHelpModal = (shouldCheckA11y = false) => {
-	cy.wait(1000);
-	if (shouldCheckA11y) {
-		cy.auditA11y();
-	}
-	cy.get('body').then(body => {
-		if (body.find('dialog#form-help-modal').length > 0) {
-			cy.get('dialog#form-help-modal')
-				.should('be.visible')
-				.within(() => {
-					cy.contains('button', 'Fermer').click();
-				});
-		} else {
-			cy.log('Help modal not found, skipping close action.');
-		}
-	});
-};
-
 export function renameForm(newName: string) {
 	cy.get('button').contains('Renommer').click();
 

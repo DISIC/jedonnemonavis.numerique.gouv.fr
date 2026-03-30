@@ -1,10 +1,10 @@
 import { selectors } from '../selectors';
 import { appUrl } from '../variables';
-import { tryCloseNewsModal } from './common';
+import { tryCloseModal } from './common';
 
 export function navigateToCreatedProduct(shouldCheckA11y = false) {
 	cy.visit(`${appUrl}${selectors.url.products}`);
-	tryCloseNewsModal();
+	tryCloseModal();
 	cy.url().should('include', selectors.url.products);
 	cy.get('a[title*="e2e-jdma-service-test-users"]')
 		.closest('a')

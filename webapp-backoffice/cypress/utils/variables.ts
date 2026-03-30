@@ -9,6 +9,14 @@ const invitedEmailBis = Cypress.env('admin_guest_mail_bis');
 const firstNameTest = 'Stevie';
 const lastNameTest = 'Wonder';
 const newEmailTest = 'stevie-wonder@beta.gouv.fr';
+const latestNewsVersion = 4;
+
+const userSettings = {
+	newsVersionSeen: latestNewsVersion,
+	formHelpModalSeen: true,
+	newsModalSeen: true,
+	newsPageSeen: true
+};
 
 export {
 	appUrl,
@@ -21,5 +29,7 @@ export {
 	invitedEmailBis,
 	firstNameTest,
 	lastNameTest,
-	newEmailTest
+	newEmailTest,
+	latestNewsVersion,
+	userSettings
 };
