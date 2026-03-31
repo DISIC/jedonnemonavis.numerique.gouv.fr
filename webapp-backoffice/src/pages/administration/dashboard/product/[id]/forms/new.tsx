@@ -88,19 +88,25 @@ const NewForm = (props: Props) => {
 
 	const defaultTitle = useMemo(() => {
 		if (createdForm) return createdForm.title;
-		if (!product.forms || product.forms.length === 0)
-			return selectedFormTemplate?.title || '';
 
-		const existingTemplateForms = product.forms.filter(
-			f =>
-				selectedFormTemplate?.title &&
-				f.form_template.title === selectedFormTemplate.title
+		const templateTitle = selectedFormTemplate?.title;
+		if (!templateTitle) return '';
+
+		if (!product.forms || product.forms.length === 0) return templateTitle;
+
+		const existingTemplateForms = product.forms.filter(f =>
+			(f.title ?? f.form_template.title)?.includes(templateTitle)
 		);
 
-		if (existingTemplateForms.length === 0)
-			return selectedFormTemplate?.title || '';
+		if (existingTemplateForms.length === 0) return templateTitle;
 
-		return `${selectedFormTemplate?.title} ${existingTemplateForms.length + 1}`;
+		const maxSuffix = existingTemplateForms.reduce((max, f) => {
+			const title = f.title ?? f.form_template.title;
+			const match = title?.match(/(\d+)$/);
+			return Math.max(max, match ? parseInt(match[1], 10) : 1);
+		}, 1);
+
+		return `${templateTitle} ${maxSuffix + 1}`;
 	}, [product.forms, selectedFormTemplate]);
 
 	const {
