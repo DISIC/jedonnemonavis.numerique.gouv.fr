@@ -66,6 +66,14 @@ jobs:
           wait -n || exit 1
           wait -n || exit 1
 
+      - name: Cache Next.js build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            webapp-backoffice/.next/cache
+            webapp-form/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('webapp-backoffice/yarn.lock', 'webapp-form/yarn.lock') }}
+
       - name: Build apps
         run: |
           (cd webapp-backoffice && yarn build) &
