@@ -40,8 +40,15 @@ const NewForm = (props: Props) => {
 	const router = useRouter();
 	const { id } = router.query;
 	const { cx, classes } = useStyles();
-	const { createdProduct, createdForm, updateCreatedForm, steps, updateSteps } =
-		useOnboarding();
+	const {
+		createdProduct,
+		createdForm,
+		hasCreatedForm,
+		hasCreatedProduct,
+		updateCreatedForm,
+		steps,
+		updateSteps
+	} = useOnboarding();
 
 	const [formStep, setFormStep] = useState<FormCreationStep>('CREATE');
 	const [formTitle, setFormTitle] = useState<string>('');
@@ -60,13 +67,15 @@ const NewForm = (props: Props) => {
 	}, [formStep]);
 
 	const isEditingStep = useMemo(
-		() => steps.find(step => step.slug === 'form')?.isEditing,
+		() =>
+			steps.find(step => step.slug === 'form')?.isEditing ||
+			(!hasCreatedProduct && hasCreatedForm),
 		[steps]
 	);
 
 	const shouldShowStepper =
-		Boolean(createdProduct) &&
-		Boolean(createdForm) &&
+		hasCreatedProduct &&
+		hasCreatedForm &&
 		!isEditingStep &&
 		formStep === 'CREATE';
 
@@ -120,13 +129,17 @@ const NewForm = (props: Props) => {
 	});
 
 	useEffect(() => {
+		if (selectedFormTemplate === undefined && createdForm) {
+			setSelectedFormTemplate(createdForm.form_template);
+			return;
+		}
 		if (formTemplates && selectedFormTemplate === undefined) {
 			const rootTemplate = formTemplates.data.find(
 				template => template.slug === 'root'
 			);
 			setSelectedFormTemplate(rootTemplate || undefined);
 		}
-	}, [formTemplates]);
+	}, [formTemplates, createdForm]);
 
 	useEffect(() => {
 		reset({
@@ -257,6 +270,7 @@ const NewForm = (props: Props) => {
 												<span className={classes.asterisk}>*</span>
 											</>
 										}
+										disabled={hasCreatedForm}
 										options={
 											formTemplates.data.map(template => ({
 												label: (
