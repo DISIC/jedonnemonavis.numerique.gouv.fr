@@ -1,6 +1,8 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { FormConfigKind } from '@prisma/client';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
@@ -31,6 +33,40 @@ const FormBlockDisplay = (props: Props) => {
 	const { block, form, configHelper, disabled, step, onConfigChange } = props;
 
 	const [isUpdating, setIsUpdating] = useState(false);
+
+	const [isBlockHidden, setIsBlockHidden] = useState(
+		configHelper.displays.some(
+			d => d.kind === 'block' && d.parent_id === block.id && d.hidden
+		)
+	);
+
+	useEffect(() => {
+		setIsBlockHidden(
+			configHelper.displays.some(
+				d => d.kind === 'block' && d.parent_id === block.id && d.hidden
+			)
+		);
+	}, [block, configHelper]);
+
+	useEffect(() => {
+		onConfigChange({
+			displays: [
+				...configHelper.displays.filter(
+					d => !(d.parent_id === block.id && d.kind === 'block')
+				),
+				...(isBlockHidden
+					? [
+							{
+								hidden: true,
+								parent_id: block.id,
+								kind: 'block' as FormConfigKind
+							}
+					  ]
+					: [])
+			],
+			labels: configHelper.labels
+		});
+	}, [isBlockHidden]);
 
 	const { classes, cx } = useStyles();
 
@@ -109,27 +145,72 @@ const FormBlockDisplay = (props: Props) => {
 			<div className={cx(classes.header, fr.cx('fr-grid-row'))}>
 				<div
 					className={
-						block.isUpdatable
+						block.isUpdatable || block.isHideable
 							? fr.cx('fr-col-12', 'fr-col-md-8')
 							: fr.cx('fr-col-12')
 					}
 				>
-					<h3>{block.label}</h3>
-				</div>
-				{!disabled && block.isUpdatable && !isUpdating && (
-					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-						<Button
-							priority="secondary"
-							iconId={'ri-pencil-line'}
-							iconPosition="right"
-							onClick={() => setIsUpdating(true)}
-						>
-							Éditer
-						</Button>
+					<div className={cx(classes.headerInfo)}>
+						<h3>{block.label}</h3>
+						{isBlockHidden && (
+							<Badge
+								className={cx(classes.hiddenBadge, fr.cx('fr-ml-2v'))}
+								small
+							>
+								<span className={fr.cx('ri-eye-off-line', 'fr-mr-2v')} />
+								question masquée
+							</Badge>
+						)}
 					</div>
-				)}
+				</div>
+				{!disabled &&
+					(block.isUpdatable || block.isHideable) &&
+					!isUpdating && (
+						<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+							<div className={cx(classes.headerActions)}>
+								{block.isHideable && (
+									<Button
+										priority="secondary"
+										iconId={isBlockHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
+										iconPosition="right"
+										onClick={() => setIsBlockHidden(!isBlockHidden)}
+									>
+										{isBlockHidden
+											? 'Afficher la question'
+											: 'Masquer la question'}
+									</Button>
+								)}
+								{block.isUpdatable && !isBlockHidden && (
+									<Button
+										priority="secondary"
+										iconId={'ri-pencil-line'}
+										iconPosition="right"
+										onClick={() => setIsUpdating(true)}
+									>
+										Éditer
+									</Button>
+								)}
+							</div>
+						</div>
+					)}
 			</div>
-			{!NO_FIELD_BLOCKS.includes(block.type_bloc) && (
+			{isBlockHidden && (
+				<>
+					<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
+					<div className={cx(classes.boxDisabled)}>
+						<p
+							className={cx(
+								classes.disabledAlertMessage,
+								fr.cx('fr-mr-2v', 'fr-mb-0')
+							)}
+						>
+							<span className={fr.cx('ri-alert-fill', 'fr-mr-1v')} />
+							Cette question est masquée sur le formulaire
+						</p>
+					</div>
+				</>
+			)}
+			{!isBlockHidden && !NO_FIELD_BLOCKS.includes(block.type_bloc) && (
 				<>
 					<hr className={fr.cx('fr-mb-5v', 'fr-mt-6v', 'fr-pb-1v')} />
 					{!disabled && nbrModified > 0 && (
@@ -146,8 +227,8 @@ const FormBlockDisplay = (props: Props) => {
 									{`option${nbrModified > 1 ? 's' : ''}`}
 								</p>
 								<p className={fr.cx('fr-mb-0')}>
-									Ces options ne sont pas visibles sur le formulaire usagers. Si
-									elles existent, les questions conditionnelles associées seront
+									Ces options ne sont pas visibles sur le formulaire. Si elles
+									existent, les questions conditionnelles associées seront
 									également masquées.
 								</p>
 							</div>
@@ -169,6 +250,24 @@ const useStyles = tss.withName(FormBlockDisplay.name).create({
 	header: {
 		'& > div:nth-child(2)': {
 			textAlign: 'right'
+		}
+	},
+	headerInfo: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap' as const,
+		gap: fr.spacing('2v')
+	},
+	headerActions: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		gap: fr.spacing('2v'),
+		flexWrap: 'wrap' as const
+	},
+	hiddenBadge: {
+		backgroundColor: fr.colors.decisions.background.default.grey.active,
+		'.ri-eye-off-line::before': {
+			'--icon-size': '1rem'
 		}
 	},
 	boxDisabled: {

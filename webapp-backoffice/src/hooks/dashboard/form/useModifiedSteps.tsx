@@ -17,6 +17,14 @@ const useModifiedSteps = (
 
 		formTemplateSteps.forEach(step => {
 			const hasDisplayModifications = configHelper.displays.some(d => {
+				if (d.kind === 'block') {
+					return (
+						step.form_template_blocks
+							.map(b => b.id)
+							.includes(d.parent_id) && d.hidden
+					);
+				}
+
 				if (d.kind === 'blockOption') {
 					return (
 						step.form_template_blocks

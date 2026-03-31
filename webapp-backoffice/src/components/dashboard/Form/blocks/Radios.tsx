@@ -100,11 +100,16 @@ const Radios = (props: Props) => {
 										priority="secondary"
 										iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
 										iconPosition="right"
+										aria-label={
+											isHidden
+												? `Afficher l'option ${opt.label}`
+												: `Masquer l'option ${opt.label}`
+										}
 										onClick={() => {
 											onChangeDisplay(opt);
 										}}
 									>
-										{isHidden ? 'Afficher' : 'Masquer'}
+										{isHidden ? 'Afficher' : 'Masquer'}{' '}
 									</Button>
 								)}
 							</span>

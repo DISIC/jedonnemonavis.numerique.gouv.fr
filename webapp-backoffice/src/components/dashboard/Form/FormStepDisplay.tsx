@@ -101,9 +101,7 @@ const FormStepDisplay = (props: Props) => {
 				isHidden ? classes.containerHidden : null
 			)}
 		>
-			<div
-				className={cx(classes.box, !step.isHideable && classes.nonEditableBox)}
-			>
+			<div className={cx(classes.box)}>
 				<div className={cx(classes.header)}>
 					<div className={cx(classes.headerInfo)}>
 						<h2 className={fr.cx('fr-mr-2v')}>{step.title} </h2>
@@ -238,6 +236,7 @@ const FormStepDisplay = (props: Props) => {
 						className={cx(
 							classes.box,
 							!block.isUpdatable &&
+								!block.isHideable &&
 								block.options.length === 0 &&
 								classes.nonEditableBox
 						)}
