@@ -101,6 +101,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 							type_bloc: 'input_text',
 							field_code: 'contact_email',
 							position: 1,
+							isHideable: true,
 							isRequired: false
 						}
 					]
