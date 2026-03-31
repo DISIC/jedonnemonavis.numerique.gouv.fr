@@ -22,8 +22,13 @@ const entity_modal = createModal({
 
 const NewProduct = () => {
 	const { cx, classes } = useStyles();
-	const { createdProduct, updateCreatedProduct, steps, updateSteps } =
-		useOnboarding();
+	const {
+		createdProduct,
+		updateCreatedProduct,
+		hasCreatedProduct,
+		steps,
+		updateSteps
+	} = useOnboarding();
 
 	const [search, _] = useState<string>('');
 	const debouncedSearch = useDebounce(search, 500);
@@ -36,7 +41,7 @@ const NewProduct = () => {
 		[steps]
 	);
 
-	const shouldShowStepper = Boolean(createdProduct) && !isEditingStep;
+	const shouldShowStepper = hasCreatedProduct && !isEditingStep;
 
 	const {
 		control,
@@ -328,6 +333,9 @@ const useStyles = tss.withName(NewProduct.name).create(() => ({
 	popperOverride: {
 		'.base-Popper-root': {
 			top: '-35px !important'
+		},
+		'.MuiPopper-root': {
+			transform: 'translate3d(0px, 100px, 0px)!important'
 		}
 	},
 	fieldset: {

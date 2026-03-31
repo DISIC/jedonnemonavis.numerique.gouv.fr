@@ -20,6 +20,9 @@ interface OnboardingState {
 }
 
 interface OnboardingContextValue extends OnboardingState {
+	hasCreatedProduct: boolean;
+	hasCreatedForm: boolean;
+	hasCreatedUserAccesses: boolean;
 	updateCreatedProduct: (product: Product) => void;
 	updateCreatedForm: (form: FormWithElements) => void;
 	updateCreatedUserAccesses: (accesses: AccessRightWithUsers[]) => void;
@@ -122,6 +125,9 @@ export const OnboardingProvider = ({
 				createdForm,
 				createdUserAccesses,
 				steps,
+				hasCreatedProduct: Boolean(createdProduct),
+				hasCreatedForm: Boolean(createdForm),
+				hasCreatedUserAccesses: Boolean(createdUserAccesses?.length),
 				updateCreatedProduct,
 				updateCreatedForm,
 				updateCreatedUserAccesses,

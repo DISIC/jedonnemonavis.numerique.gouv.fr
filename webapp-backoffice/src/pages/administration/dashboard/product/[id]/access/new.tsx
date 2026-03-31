@@ -46,6 +46,8 @@ const NewAccess = ({ product }: Props) => {
 	const {
 		createdProduct,
 		createdUserAccesses,
+		hasCreatedProduct,
+		hasCreatedUserAccesses,
 		updateCreatedUserAccesses,
 		steps,
 		updateSteps,
@@ -68,9 +70,7 @@ const NewAccess = ({ product }: Props) => {
 	);
 	const [shouldShowStepper, setShouldShowStepper] = useState<boolean>(
 		isSkippedStep ||
-			(Boolean(createdProduct) &&
-				Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
-				!isEditingStep)
+			(hasCreatedProduct && hasCreatedUserAccesses && !isEditingStep)
 	);
 
 	const isModalOpen = useIsModalOpen(modal);
@@ -78,7 +78,7 @@ const NewAccess = ({ product }: Props) => {
 	useEffect(() => {
 		setIsMounted(true);
 		return () => {
-			if (!Boolean(createdProduct)) clearContext();
+			if (!hasCreatedProduct) clearContext();
 		};
 	}, []);
 
@@ -152,7 +152,7 @@ const NewAccess = ({ product }: Props) => {
 
 	const onConfirm = async () => {
 		if (userToInvite.email.trim() !== '') await onSubmit();
-		if (!Boolean(createdProduct)) {
+		if (!hasCreatedProduct) {
 			await router.push(`/administration/dashboard/product/${id}/access`);
 			clearContext();
 			return;
@@ -196,10 +196,7 @@ const NewAccess = ({ product }: Props) => {
 			}
 			onConfirm={onConfirm}
 			onSkip={
-				Boolean(createdProduct) &&
-				Boolean(!createdUserAccesses || createdUserAccesses.length === 0)
-					? onSkipAction
-					: undefined
+				hasCreatedProduct && !hasCreatedUserAccesses ? onSkipAction : undefined
 			}
 			isStepperLayout={shouldShowStepper}
 			confirmText={
