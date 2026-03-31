@@ -1,19 +1,9 @@
 import { fr } from '@codegouvfr/react-dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
-import { createModal } from '@codegouvfr/react-dsfr/Modal';
-import Link from 'next/link';
-import React from 'react';
-import { tss } from 'tss-react/dsfr';
-import FormCreationModal from '../Form/FormCreationModal';
 import { Product } from '@prisma/client';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-
-const new_form_modal = createModal({
-	id: 'new-form-modal',
-	isOpenedByDefault: false
-});
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	isSmall?: boolean;
@@ -26,8 +16,6 @@ const NoFormsPanel = ({ isSmall, product }: Props) => {
 
 	return (
 		<>
-			<FormCreationModal modal={new_form_modal} productId={product.id} />
-
 			<div
 				className={cx(
 					classes.container,

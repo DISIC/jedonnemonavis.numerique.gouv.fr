@@ -5,25 +5,21 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Form } from '@prisma/client';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
-import { Toast } from '../../ui/Toast';
 
 interface Props {
 	modal: CustomModalProps;
-	form?: Form;
+	form: Form;
 	productId: number;
-	defaultTitle?: string;
 }
 
 type FormValues = Omit<Form, 'id' | 'created_at' | 'updated_at'>;
 
-const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
+const FormEditModal = ({ modal, form, productId }: Props) => {
 	const router = useRouter();
 	const { cx, classes } = useStyles();
 	const modalOpen = useIsModalOpen(modal);
-	const [displayToast, setDisplayToast] = React.useState(false);
 
 	const { data: rootFormTemplate } = trpc.form.getFormTemplateBySlug.useQuery(
 		{ slug: 'root' },
@@ -39,23 +35,12 @@ const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 		formState: { errors }
 	} = useForm<FormValues>({
 		defaultValues: {
-			title: form?.title || defaultTitle || rootFormTemplate?.data?.title || ''
+			title: form?.title || rootFormTemplate?.data?.title || ''
 		}
 	});
-
-	useEffect(() => {
-		reset({
-			title: form?.title || defaultTitle || rootFormTemplate?.data?.title || ''
-		});
-	}, [defaultTitle]);
 
 	const utils = trpc.useUtils();
 
-	const saveFormTmp = trpc.form.create.useMutation({
-		onSuccess: () => {
-			utils.adminEntityRight.getUserList.invalidate();
-		}
-	});
 	const updateForm = trpc.form.update.useMutation({
 		onSuccess: () => {
 			utils.adminEntityRight.getUserList.invalidate();
@@ -63,41 +48,19 @@ const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 	});
 
 	const onLocalSubmit: SubmitHandler<FormValues> = async data => {
-		let formId;
-
-		if (form && form.id) {
-			await updateForm.mutateAsync({
-				id: form.id,
-				form: {
-					...data,
-					product_id: productId
-				}
-			});
-			router.reload();
-		} else {
-			if (!rootFormTemplate?.data?.id) return setDisplayToast(true);
-			const savedFormResponse = await saveFormTmp.mutateAsync({
+		await updateForm.mutateAsync({
+			id: form.id,
+			form: {
 				...data,
-				product_id: productId,
-				form_template_id: rootFormTemplate?.data?.id
-			});
-			formId = savedFormResponse.data.id;
-			router.push(`/administration/dashboard/product/${productId}/forms`);
-		}
-
+				product_id: productId
+			}
+		});
 		modal.close();
+		router.push(router.asPath);
 	};
 
 	return (
 		<>
-			<Toast
-				isOpen={displayToast}
-				setIsOpen={setDisplayToast}
-				autoHideDuration={4000}
-				severity="error"
-				message="Aucun modèle de formulaire n'a été trouvé."
-				placement={{ vertical: 'bottom', horizontal: 'center' }}
-			/>
 			<modal.Component
 				className={fr.cx(
 					'fr-grid-row',
@@ -106,11 +69,7 @@ const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 					'fr-my-0'
 				)}
 				concealingBackdrop={false}
-				title={
-					form
-						? 'Modifier le formulaire existant'
-						: 'Créer un nouveau formulaire'
-				}
+				title={'Renommer le formulaire existant'}
 				size="large"
 				buttons={[
 					{
@@ -119,11 +78,11 @@ const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 					{
 						doClosesModal: false,
 						onClick: handleSubmit(onLocalSubmit),
-						children: form ? 'Modifier' : 'Créer'
+						children: 'Renommer'
 					}
 				]}
 			>
-				<form id="form-creation-form">
+				<form id="form-edit-form">
 					<div className={fr.cx('fr-input-group')}>
 						<Controller
 							control={control}
@@ -163,10 +122,10 @@ const FormCreationModal = ({ modal, form, productId, defaultTitle }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormCreationModal.name).create(() => ({
+const useStyles = tss.withName(FormEditModal.name).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	}
 }));
 
-export default FormCreationModal;
+export default FormEditModal;

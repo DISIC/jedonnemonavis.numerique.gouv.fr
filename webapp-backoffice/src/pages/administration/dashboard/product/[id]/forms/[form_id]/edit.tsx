@@ -1,5 +1,5 @@
 import FormConfigurator from '@/src/components/dashboard/Form/FormConfigurator';
-import FormCreationModal from '@/src/components/dashboard/Form/FormCreationModal';
+import FormEditModal from '@/src/components/dashboard/Form/FormEditModal';
 import CustomFormHelpPanel from '@/src/components/dashboard/Pannels/CustomFormHelpPanel';
 import OnConfirmModal from '@/src/components/ui/modal/OnConfirm';
 import { useUserSettings } from '@/src/contexts/UserSettingsContext';
@@ -247,7 +247,7 @@ const ProductFormPage = (props: Props) => {
 				Vous pouvez publier votre formulaire modifié depuis l’écran de
 				configuration du formulaire.
 			</OnConfirmModal>
-			<FormCreationModal
+			<FormEditModal
 				form={form}
 				productId={form.product.id}
 				modal={rename_form_modal}
