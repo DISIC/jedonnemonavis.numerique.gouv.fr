@@ -85,6 +85,7 @@ enum Typebloc {
   heading_3
   input_text
   input_text_area
+  input_email
   mark_input
   smiley_input
   select

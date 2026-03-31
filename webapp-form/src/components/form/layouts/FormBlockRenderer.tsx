@@ -53,6 +53,7 @@ export const FormBlockRenderer = (props: Props) => {
 				return <TextAreaBlock {...commonProps} />;
 
 			case 'input_text':
+			case 'input_email':
 				return <TextInputBlock {...commonProps} />;
 
 			case 'mark_input':

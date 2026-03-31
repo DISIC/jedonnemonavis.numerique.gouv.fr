@@ -105,6 +105,7 @@ const FormBlockDisplay = (props: Props) => {
 			case 'input_text_area':
 				return <Textarea block={block} form={form} />;
 			case 'input_text':
+			case 'input_email':
 				return <TextInput block={block} form={form} />;
 			case 'radio':
 				return (

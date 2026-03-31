@@ -15,6 +15,7 @@ interface Props {
   fieldKey: string;
   answers: FormAnswers;
   setAnswers: (value: SetStateAction<FormAnswers>) => void;
+  form: FormWithElements;
   isWidget?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const TextInputBlock = ({
   const { cx, classes } = useStyles();
   const inputAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
   const inputValue = inputAnswer?.answer_text || "";
+  const isEmail = block.type_bloc === "input_email";
 
   return (
     <div>
@@ -50,6 +52,7 @@ export const TextInputBlock = ({
         className={fr.cx("fr-mb-2v")}
         nativeInputProps={{
           id: `input-${block.id}`,
+          type: isEmail ? "email" : "text",
           value: inputValue,
           maxLength: 250,
           required: block.isRequired,
