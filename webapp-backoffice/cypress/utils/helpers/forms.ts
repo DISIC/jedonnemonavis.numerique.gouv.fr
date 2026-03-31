@@ -24,8 +24,7 @@ export function renameForm(newName: string) {
 		.should('be.visible')
 		.within(() => {
 			cy.get('input[name="title"]').clear().type(newName);
-
-			cy.get('button').contains('Modifier').click();
+			cy.get('button').contains('Renommer').click();
 		});
 }
 
