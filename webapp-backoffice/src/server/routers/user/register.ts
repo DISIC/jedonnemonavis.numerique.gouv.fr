@@ -14,7 +14,10 @@ import {
 } from './utils';
 
 export const registerUserInputSchema = z.object({
-	user: UserCreateInputSchema,
+	user: UserCreateInputSchema.refine(data => data.password.length >= 12, {
+		message: 'Password must be at least 12 characters',
+		path: ['password']
+	}),
 	otp: z.string().optional(),
 	inviteToken: z.string().optional()
 });

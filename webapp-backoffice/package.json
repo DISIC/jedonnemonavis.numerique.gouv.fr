@@ -61,6 +61,7 @@
 		"eslint": "8.48.0",
 		"eslint-config-next": "13.5.5",
 		"gray-matter": "4.0.3",
+		"jose": "^6.2.2",
 		"jsonwebtoken": "9.0.2",
 		"lodash": "4.17.21",
 		"match-sorter": "6.3.4",

@@ -19,7 +19,7 @@ export default async function handler(
 		req,
 		secret: process.env.JWT_SECRET
 	});
-	if (!token || (token.exp as number) > new Date().getTime())
+	if (!token || (token.exp as number) * 1000 < Date.now())
 		return res.status(401).json({ msg: 'You shall not pass.' });
 
 	if (req.method === 'GET') {
