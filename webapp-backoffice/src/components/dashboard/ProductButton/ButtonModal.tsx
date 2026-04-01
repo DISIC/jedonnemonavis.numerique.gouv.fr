@@ -56,17 +56,17 @@ const ButtonModal = (props: Props) => {
 
 	useEffect(() => {
 		if (button) {
-			const hasManyTemplateButtons =
+			const hasTemplateButtons =
 				button.integration_type !== 'link' &&
 				formTemplateButtons &&
-				formTemplateButtons.length > 1;
+				formTemplateButtons.length > 0;
 
 			setCurrentButton({
 				...button,
-				form_template_button: hasManyTemplateButtons
+				form_template_button: hasTemplateButtons
 					? defaultTemplateButton || null
 					: null,
-				form_template_button_id: hasManyTemplateButtons
+				form_template_button_id: hasTemplateButtons
 					? defaultTemplateButton?.id || null
 					: null
 			});
