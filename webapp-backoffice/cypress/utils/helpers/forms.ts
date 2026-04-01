@@ -18,7 +18,7 @@ const TAB_LABELS: Record<FormTab, string> = {
 };
 
 export function renameForm(newName: string) {
-	cy.get('button').contains('Renommer').click();
+	cy.get('button').filter(':visible').contains('Renommer').click();
 
 	cy.get(selectors.modal.renameForm)
 		.should('be.visible')

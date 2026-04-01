@@ -228,7 +228,7 @@ const OnboardingLayout = ({
 						background: noBackground ? 'transparent' : undefined,
 						width:
 							isLarge || isStepperLayout
-								? fr.breakpoints.values.lg
+								? fr.breakpoints.values.xl
 								: isFullScreen
 								? '100%'
 								: fr.breakpoints.values.md
