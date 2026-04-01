@@ -1,88 +1,89 @@
-import { FormWithElements } from "@/src/utils/types";
-import { fr } from "@codegouvfr/react-dsfr";
-import { RadioButtons } from "@codegouvfr/react-dsfr/RadioButtons";
-import { SetStateAction } from "react";
-import { tss } from "tss-react/dsfr";
+import { FormWithElements } from '@/src/utils/types';
+import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
+import { parseBoldLabel } from '@/src/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
+import { RadioButtons } from '@codegouvfr/react-dsfr/RadioButtons';
+import { SetStateAction } from 'react';
+import { tss } from 'tss-react/dsfr';
 
 type Block =
-  FormWithElements["form_template"]["form_template_steps"][0]["form_template_blocks"][0];
-
-type DynamicAnswerData = {
-  block_id: number;
-  answer_item_id?: number;
-  answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
+	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
 
 interface Props {
-  block: Block;
-  displayLabel: string;
-  fieldKey: string;
-  answers: FormAnswers;
-  setAnswers: (value: SetStateAction<FormAnswers>) => void;
-  form: FormWithElements;
+	block: Block;
+	displayLabel: string;
+	fieldKey: string;
+	answers: FormAnswers;
+	setAnswers: (value: SetStateAction<FormAnswers>) => void;
+	form: FormWithElements;
+	isWidget?: boolean;
 }
 
 export const RadioBlock = ({
-  block,
-  displayLabel,
-  fieldKey,
-  answers,
-  setAnswers,
-  form,
+	block,
+	displayLabel,
+	fieldKey,
+	answers,
+	setAnswers,
+	form,
+	isWidget,
 }: Props) => {
-  const { classes } = useStyles();
-  const radioAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
-  const radioValue = radioAnswer?.answer_item_id;
+	const { classes } = useStyles();
+	const radioAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
+	const radioValue = radioAnswer?.answer_item_id;
 
-  const formConfig = form.form_configs[0];
-  const visibleOptions = block.options.filter((opt) => {
-    const isHidden = formConfig?.form_config_displays?.some(
-      (d) => d.kind === "blockOption" && d.parent_id === opt.id && d.hidden,
-    );
-    return !isHidden;
-  });
+	const formConfig = form.form_configs[0];
+	const visibleOptions = block.options.filter(opt => {
+		const isHidden = formConfig?.form_config_displays?.some(
+			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden,
+		);
+		return !isHidden;
+	});
 
-  return (
-    <div>
-      <label
-        htmlFor={`radio-${block.id}`}
-        className={fr.cx("fr-label", "fr-text--md")}
-      >
-        {displayLabel} {!block.isRequired && "(optionnel)"}
-      </label>
-      {block.content && <p className={classes.hint}>{block.content}</p>}
-      <RadioButtons
-        id={`radio-${block.id}`}
-        options={visibleOptions.map((opt) => ({
-          label: opt.label || "",
-          hintText: opt.hint,
-          nativeInputProps: {
-            value: opt.id.toString(),
-            checked: radioValue === opt.id,
-            required: block.isRequired,
-            onChange: () => {
-              setAnswers((prev) => ({
-                ...prev,
-                [fieldKey]: {
-                  block_id: block.id,
-                  answer_item_id: opt.id,
-                },
-              }));
-            },
-          },
-        }))}
-      />
-    </div>
-  );
+	return (
+		<div>
+			<label
+				htmlFor={`radio-${block.id}`}
+				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-4v')}
+			>
+				{displayLabel} {!block.isRequired && '(optionnel)'}
+			</label>
+			{block.content && <p className={classes.hint}>{block.content}</p>}
+			<RadioButtons
+				id={`radio-${block.id}`}
+				options={visibleOptions.map(opt => ({
+					label: opt.label ? parseBoldLabel(opt.label) : '',
+					hintText: opt.hint,
+					nativeInputProps: {
+						value: opt.id.toString(),
+						checked: radioValue === opt.id,
+						required: block.isRequired,
+						onChange: () => {
+							setAnswers(prev => ({
+								...prev,
+								[fieldKey]: {
+									block_id: block.id,
+									answer_item_id: opt.id,
+								},
+							}));
+						},
+					},
+				}))}
+			/>
+		</div>
+	);
 };
 
 const useStyles = tss.withName(RadioBlock.name).create(() => ({
-  hint: {
-    fontSize: "0.9rem",
-    color: fr.colors.decisions.text.mention.grey.default,
-    marginBottom: fr.spacing("6v"),
-    marginTop: `-${fr.spacing("2v")}`,
-  },
+	hint: {
+		fontSize: '0.9rem',
+		color: fr.colors.decisions.text.mention.grey.default,
+		marginBottom: fr.spacing('6v'),
+		marginTop: `-${fr.spacing('2v')}`,
+	},
+	smallFix: {
+		'& .fr-fieldset__content .fr-radio-group--sm input[type=radio] + label': {
+			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important',
+		},
+	},
 }));

@@ -133,6 +133,21 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			  ]
 			: [
 					<Button
+						title={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+						aria-label={`Ouvrir la page des nouveautés (nouvelle fenêtre)`}
+						linkProps={{
+							href: 'https://docs.numerique.gouv.fr/docs/0b3cd9e3-6a39-4980-ba5b-17c1d7634d50',
+							target: '_blank',
+							rel: 'noopener noreferrer',
+							className: cx(
+								fr.cx('fr-icon-external-link-line', 'fr-link--icon-left'),
+								classes.externalLink
+							)
+						}}
+					>
+						Nouveautés
+					</Button>,
+					<Button
 						id="button-account"
 						iconId={'fr-icon-account-circle-line'}
 						title={`Ouvrir le menu mon compte`}
@@ -281,21 +296,19 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 				text: (
 					<div>
 						Demandes d'accès
-						<Badge
-							severity="warning"
-							noIcon
-							small={true}
-							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-						>
-							<i
-								className={fr.cx(
-									'fr-icon-notification-3-line',
-									'fr-mr-1v',
-									'fr-p-1v'
-								)}
-							/>
-							{` ${userRequestsResult.metadata.count}`}
-						</Badge>
+						{userRequestsResult.metadata.count > 0 && (
+							<Badge
+								severity="warning"
+								noIcon
+								small
+								className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
+							>
+								<i
+									className={fr.cx('fr-icon-notification-3-line', 'fr-mr-1v')}
+								/>
+								{` ${userRequestsResult.metadata.count}`}
+							</Badge>
+						)}
 					</div>
 				),
 				linkProps: {
@@ -313,34 +326,6 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			}
 		];
 		navigationItems.push(...adminNavigationItems);
-	}
-
-	if (
-		userAccessRights.metadata.count ||
-		userAdminEntityRights.metadata.count ||
-		session?.user.role.includes('admin')
-	) {
-		navigationItems.push({
-			text: (
-				<>
-					Nouveautés
-					{!settings.newsPageSeen && (
-						<Badge
-							severity="new"
-							small
-							className={cx(classes.badgeAccess, fr.cx('fr-ml-2v'))}
-						>
-							1
-						</Badge>
-					)}
-				</>
-			),
-			linkProps: {
-				href: '/administration/dashboard/news',
-				target: '_self'
-			},
-			isActive: pathname.startsWith('/administration/dashboard/news')
-		});
 	}
 
 	const shouldDisplayUserDetailsForm =
@@ -391,6 +376,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 					serviceTagline="La voix de vos usagers"
 				/>
 			)}
+			<div id="jdma-widget-anchor" className={classes.widgetAnchor} />
 
 			<main id="main" role="main" tabIndex={-1}>
 				{!!session?.user && !shouldDisplayUserDetailsForm && (
@@ -486,7 +472,7 @@ const useStyles = tss
 		badgeAccess: {
 			i: {
 				['&::before']: {
-					'--icon-size': '1rem'
+					'--icon-size': '0.75rem'
 				}
 			}
 		},
@@ -519,5 +505,15 @@ const useStyles = tss
 			'.fr-notice__body': {
 				alignItems: 'center'
 			}
+		},
+		externalLink: {
+			'&::after': {
+				display: 'none!important'
+			}
+		},
+		widgetAnchor: {
+			position: 'absolute',
+			top: 0,
+			right: 0
 		}
 	}));

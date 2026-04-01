@@ -40,7 +40,7 @@ export async function formatDynamicAnswer(
   }
 
   const kind =
-    block.type_bloc === "input_text" || block.type_bloc === "input_text_area"
+    block.type_bloc === "input_text" || block.type_bloc === "input_text_area" || block.type_bloc === "input_email"
       ? "text"
       : block.type_bloc === "checkbox"
       ? "checkbox"

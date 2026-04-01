@@ -6,7 +6,7 @@ export default defineConfig({
 		reporterOptions: {
 			toConsole: true
 		},
-		defaultCommandTimeout: 20000,
+		defaultCommandTimeout: 15000,
 		pageLoadTimeout: 60000,
 		requestTimeout: 15000,
 		retries: {

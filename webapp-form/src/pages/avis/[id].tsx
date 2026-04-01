@@ -1,418 +1,491 @@
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { GetServerSideProps } from "next/types";
-import { tss } from "tss-react/dsfr";
-import prisma from "../../utils/db";
-import { fr } from "@codegouvfr/react-dsfr";
-import { FormWithElements } from "@/src/utils/types";
-import { useState } from "react";
-import { FormStepRenderer } from "@/src/components/form/layouts/FormStepRenderer";
-import Button from "@codegouvfr/react-dsfr/Button";
-import Success from "@codegouvfr/react-dsfr/picto/Success";
-import { trpc } from "@/src/utils/trpc";
-import { v4 as uuidv4 } from "uuid";
-import Notice from "@codegouvfr/react-dsfr/Notice";
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { GetServerSideProps } from 'next/types';
+import { tss } from 'tss-react/dsfr';
+import prisma from '../../utils/db';
+import { fr } from '@codegouvfr/react-dsfr';
+import { FormWithElements } from '@/src/utils/types';
+import { useState, useEffect, useRef } from 'react';
+import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Success from '@codegouvfr/react-dsfr/picto/Success';
+import { trpc } from '@/src/utils/trpc';
+import { v4 as uuidv4 } from 'uuid';
+import Notice from '@codegouvfr/react-dsfr/Notice';
+import {
+	DynamicAnswerData,
+	FormAnswers,
+	getVisibleBlocks,
+	hasBlockAnswer,
+	hasAllRequiredBlockAnswers,
+} from '@/src/utils/form-validation';
 
 type AvisPageProps = {
-  form: FormWithElements;
-  buttonId: number;
-  productId: number;
-  isIframe: boolean;
+	form: FormWithElements;
+	buttonId: number;
+	productId: number;
+	isPreview: boolean;
+	isWidget: boolean;
+	widgetNonce: string | null;
 };
-
-type DynamicAnswerData = {
-  block_id: number;
-  answer_item_id?: number;
-  answer_text?: string;
-};
-
-type FormAnswers = Record<string, DynamicAnswerData | DynamicAnswerData[]>;
 
 export default function AvisPage({
-  form,
-  buttonId,
-  productId,
-  isIframe,
+	form,
+	buttonId,
+	productId,
+	isPreview,
+	isWidget,
+	widgetNonce,
 }: AvisPageProps) {
-  const { classes, cx } = useStyles();
+	const { classes, cx } = useStyles({ isWidget });
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<FormAnswers>({});
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [reviewId, setReviewId] = useState<{
-    id: number;
-    created_at: Date;
-  } | null>(null);
+	const [currentStepIndex, setCurrentStepIndex] = useState(0);
+	const [answers, setAnswers] = useState<FormAnswers>({});
+	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [reviewId, setReviewId] = useState<{
+		id: number;
+		created_at: Date;
+	} | null>(null);
 
-  const formConfig = form.form_configs[0];
-  const allSteps = form.form_template.form_template_steps;
-  const steps = allSteps.filter((step) => {
-    const isHidden = formConfig?.form_config_displays?.some(
-      (d) => d.kind === "step" && d.parent_id === step.id && d.hidden,
-    );
-    return !isHidden;
-  });
+	// Send content height to parent widget for dynamic resizing
+	const contentRef = useRef<HTMLDivElement>(null);
 
-  const currentStep = steps[currentStepIndex];
+	useEffect(() => {
+		if (!isWidget || window.parent === window || !contentRef.current) return;
 
-  const createReview = trpc.review.dynamicCreate.useMutation({
-    onSuccess: (data) => {
-      setReviewId({
-        id: data.data.id,
-        created_at: data.data.created_at,
-      });
-    },
-    onError: (error) => {
-      console.error("Error creating review:", error);
-    },
-  });
+		const el = contentRef.current;
 
-  const insertOrUpdateReview = trpc.review.dynamicInsertOrUpdate.useMutation({
-    onError: (error) => {
-      console.error("Error updating review:", error);
-    },
-  });
+		const sendHeight = () => {
+			const height = el.offsetHeight;
+			window.parent.postMessage(
+				{ source: 'jdma-widget', type: 'resize', height, nonce: widgetNonce },
+				'*',
+			);
+		};
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+		const observer = new ResizeObserver(sendHeight);
+		observer.observe(el);
+		sendHeight();
 
-    const form = e.currentTarget;
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
+		return () => observer.disconnect();
+	}, [isWidget, widgetNonce, currentStepIndex, isSubmitted]);
 
-    const isLastStep = currentStepIndex === steps.length - 1;
+	const formConfig = form.form_configs[0];
+	const allSteps = form.form_template.form_template_steps;
+	const steps = allSteps.filter(step => {
+		const isHidden = formConfig?.form_config_displays?.some(
+			d => d.kind === 'step' && d.parent_id === step.id && d.hidden,
+		);
+		return !isHidden;
+	});
 
-    saveCurrentStep();
+	const currentStep = steps[currentStepIndex];
 
-    if (isLastStep) {
-      setIsSubmitted(true);
-    } else {
-      setCurrentStepIndex(currentStepIndex + 1);
-    }
-  };
+	const createReview = trpc.review.dynamicCreate.useMutation({
+		onSuccess: data => {
+			setReviewId({
+				id: data.data.id,
+				created_at: data.data.created_at,
+			});
+		},
+		onError: error => {
+			console.error('Error creating review:', error);
+		},
+	});
 
-  const handlePrevious = () => {
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex(currentStepIndex - 1);
-    }
-  };
+	const insertOrUpdateReview = trpc.review.dynamicInsertOrUpdate.useMutation({
+		onError: error => {
+			console.error('Error updating review:', error);
+		},
+	});
 
-  const getAnswersArray = (): DynamicAnswerData[] => {
-    return Object.values(answers).flat();
-  };
+	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+		e.preventDefault();
 
-  const saveCurrentStep = () => {
-    if (isIframe) return;
+		const form = e.currentTarget;
+		if (!form.checkValidity()) {
+			form.reportValidity();
+			return;
+		}
 
-    const currentStepAnswers = getAnswersArray().filter((answer) => {
-      return currentStep.form_template_blocks.some((block) => {
-        return block.id === answer.block_id;
-      });
-    });
+		const isLastStep = currentStepIndex === steps.length - 1;
 
-    if (currentStepAnswers.length === 0) return;
+		saveCurrentStep();
 
-    let userId = localStorage.getItem("userId");
-    if (!userId) {
-      userId = uuidv4();
-      localStorage.setItem("userId", userId);
-    }
+		if (isLastStep) {
+			setIsSubmitted(true);
+			// Notify parent window when embedded as a widget
+			if (isWidget && window.parent !== window) {
+				window.parent.postMessage(
+					{ source: 'jdma-widget', type: 'submitted', nonce: widgetNonce },
+					'*',
+				);
+			}
+		} else {
+			setCurrentStepIndex(currentStepIndex + 1);
+		}
+	};
 
-    if (!reviewId) {
-      createReview.mutate({
-        review: {
-          product_id: productId,
-          button_id: buttonId,
-          form_id: form.id,
-          user_id: userId,
-        },
-        answers: currentStepAnswers,
-      });
-    } else {
-      insertOrUpdateReview.mutate({
-        review_id: reviewId.id,
-        review_created_at: reviewId.created_at,
-        answers: currentStepAnswers,
-      });
-    }
-  };
+	const handlePrevious = () => {
+		if (currentStepIndex > 0) {
+			setCurrentStepIndex(currentStepIndex - 1);
+		}
+	};
 
-  const IFrameAlert = () => (
-    <Notice
-      className={cx(classes.notice)}
-      isClosable
-      onClose={function noRefCheck() {}}
-      title={
-        <>
-          <b>Vous prévisualisez une version non plubliée du formulaire.</b>
-          <span className={fr.cx("fr-ml-2v")}>
-            Vos réponses ne sont pas prises en compte.
-          </span>
-        </>
-      }
-    />
-  );
+	const getAnswersArray = (): DynamicAnswerData[] => {
+		return Object.values(answers).flat();
+	};
 
-  if (isSubmitted) {
-    return (
-      <>
-        {isIframe && <IFrameAlert />}
-        <div className={classes.blueSection} />
-        <div
-          className={cx(
-            classes.container,
-            fr.cx("fr-container--fluid", "fr-container"),
-          )}
-        >
-          <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-            <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
-              <div className={cx(classes.formSection, classes.thanksSection)}>
-                <Success className={fr.cx("fr-mt-6v", "fr-mb-2v")} />
-                <h1>Merci beaucoup !</h1>
-                <p className={fr.cx("fr-mt-8v")}>
-                  Merci, votre avis nous permettra d’améliorer la qualité du
-                  service.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </>
-    );
-  }
+	const saveCurrentStep = () => {
+		if (isPreview) return;
 
-  return (
-    <>
-      {isIframe && <IFrameAlert />}
-      <div className={classes.blueSection} />
-      <div
-        className={cx(
-          classes.container,
-          fr.cx("fr-container--fluid", "fr-container"),
-        )}
-      >
-        <div className={fr.cx("fr-grid-row", "fr-grid-row--center")}>
-          <div className={fr.cx("fr-col-12", "fr-col-lg-9")}>
-            <div className={classes.formSection}>
-              <form onSubmit={handleSubmit}>
-                <FormStepRenderer
-                  step={currentStep}
-                  form={form}
-                  answers={answers}
-                  setAnswers={setAnswers}
-                  currentStepIndex={currentStepIndex}
-                  totalSteps={steps.length}
-                />
+		const currentStepAnswers = getAnswersArray().filter(answer => {
+			return currentStep.form_template_blocks.some(block => {
+				return block.id === answer.block_id;
+			});
+		});
 
-                <div className={classes.buttonsContainer}>
-                  {currentStepIndex > 0 ? (
-                    <Button
-                      priority="secondary"
-                      iconId="fr-icon-arrow-left-line"
-                      iconPosition="left"
-                      onClick={handlePrevious}
-                      type="button"
-                    >
-                      Précédent
-                    </Button>
-                  ) : (
-                    <div />
-                  )}
+		if (currentStepAnswers.length === 0) return;
 
-                  {currentStepIndex < steps.length - 1 ? (
-                    <Button
-                      priority="primary"
-                      iconId="fr-icon-arrow-right-line"
-                      iconPosition="right"
-                      type="submit"
-                    >
-                      Suivant
-                    </Button>
-                  ) : (
-                    <Button priority="primary" type="submit">
-                      Envoyer mon avis
-                    </Button>
-                  )}
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+		let userId = localStorage.getItem('userId');
+		if (!userId) {
+			userId = uuidv4();
+			localStorage.setItem('userId', userId);
+		}
+
+		if (!reviewId) {
+			createReview.mutate({
+				review: {
+					product_id: productId,
+					button_id: buttonId,
+					form_id: form.id,
+					user_id: userId,
+				},
+				answers: currentStepAnswers,
+			});
+		} else {
+			insertOrUpdateReview.mutate({
+				review_id: reviewId.id,
+				review_created_at: reviewId.created_at,
+				answers: currentStepAnswers,
+			});
+		}
+	};
+
+	const PreviewAlert = () => (
+		<Notice
+			className={cx(classes.notice)}
+			isClosable
+			onClose={function noRefCheck() {}}
+			title={
+				<>
+					<b>Vous prévisualisez une version non plubliée du formulaire.</b>
+					<span className={fr.cx('fr-ml-2v')}>
+						Vos réponses ne sont pas prises en compte.
+					</span>
+				</>
+			}
+		/>
+	);
+
+	if (isSubmitted) {
+		return (
+			<div ref={contentRef}>
+				{isPreview && !isWidget && <PreviewAlert />}
+				<div className={classes.blueSection} />
+				<div
+					className={cx(
+						classes.container,
+						fr.cx('fr-container--fluid', 'fr-container'),
+					)}
+				>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
+							<div className={cx(classes.formSection, classes.thanksSection)}>
+								<Success className={fr.cx('fr-mt-6v', 'fr-mb-2v')} />
+								<h1>Merci beaucoup !</h1>
+								<p className={fr.cx('fr-mt-8v')}>
+									Merci, votre avis nous permettra d’améliorer la qualité du
+									service.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	const isFirstStep = currentStepIndex === 0;
+
+	const visibleBlocks = getVisibleBlocks(
+		currentStep.form_template_blocks,
+		formConfig,
+	);
+	const firstVisibleBlock = visibleBlocks[0];
+
+	const isFirstAnswerEmpty =
+		isFirstStep &&
+		!!firstVisibleBlock &&
+		!hasBlockAnswer(answers[`block_${firstVisibleBlock.id}`]);
+
+	const hasAllRequiredAnswers = hasAllRequiredBlockAnswers(
+		currentStep.form_template_blocks,
+		answers,
+		formConfig,
+	);
+
+	return (
+		<div ref={contentRef}>
+			{isPreview && !isWidget && <PreviewAlert />}
+			<div className={classes.blueSection} />
+			<div
+				className={cx(
+					classes.container,
+					fr.cx('fr-container--fluid', 'fr-container'),
+				)}
+			>
+				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
+						<div className={classes.formSection}>
+							<form onSubmit={handleSubmit}>
+								<FormStepRenderer
+									step={currentStep}
+									form={form}
+									answers={answers}
+									setAnswers={setAnswers}
+									currentStepIndex={currentStepIndex}
+									totalSteps={steps.length}
+									isWidget={isWidget}
+								/>
+
+								<div
+									className={classes.buttonsContainer}
+									style={{
+										justifyContent:
+											isFirstStep && isWidget ? 'center' : 'space-between',
+									}}
+								>
+									{currentStepIndex < steps.length - 1 ? (
+										<Button
+											priority="primary"
+											iconId="fr-icon-arrow-right-line"
+											iconPosition="right"
+											disabled={isFirstAnswerEmpty}
+											type="submit"
+										>
+											Continuer
+										</Button>
+									) : (
+										<Button
+											priority="primary"
+											type="submit"
+											disabled={!hasAllRequiredAnswers}
+										>
+											Envoyer mon avis
+										</Button>
+									)}
+
+									{currentStepIndex > 0 ? (
+										<Button
+											priority="secondary"
+											iconId="fr-icon-arrow-left-line"
+											iconPosition="left"
+											onClick={handlePrevious}
+											type="button"
+										>
+											Précédent
+										</Button>
+									) : (
+										<div className={fr.cx(isWidget && 'fr-hidden')} />
+									)}
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
-  params,
-  query,
-  locale,
+	params,
+	query,
+	locale,
 }) => {
-  if (!params?.id || isNaN(parseInt(params?.id as string))) {
-    return {
-      notFound: true,
-    };
-  }
+	if (!params?.id || isNaN(parseInt(params?.id as string))) {
+		return {
+			notFound: true,
+		};
+	}
 
-  const formId = parseInt(params.id as string);
-  const isIframe = query.iframe === "true";
-  const buttonId = parseInt(query.button as string);
-  const formConfigParam = query.formConfig as string | undefined;
+	const formId = parseInt(params.id as string);
+	const isPreview = query.preview === 'true';
+	const isWidget = query.mode === 'widget';
+	const widgetNonce = isWidget ? (query.nonce as string) || null : null;
+	const buttonId = parseInt(query.button as string);
+	const formConfigParam = query.formConfig as string | undefined;
 
-  if (!isIframe && (!buttonId || isNaN(buttonId))) {
-    return {
-      notFound: true,
-    };
-  }
+	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
+		return {
+			notFound: true,
+		};
+	}
 
-  await prisma.$connect();
+	await prisma.$connect();
 
-  if (!isIframe) {
-    const button = await prisma.button.findUnique({
-      where: { id: buttonId },
-      select: { id: true, form_id: true },
-    });
+	if (!isPreview && !isWidget) {
+		const button = await prisma.button.findUnique({
+			where: { id: buttonId },
+			select: { id: true, form_id: true },
+		});
 
-    if (!button || button.form_id !== formId) {
-      await prisma.$disconnect();
-      return {
-        notFound: true,
-      };
-    }
-  }
+		if (!button || button.form_id !== formId) {
+			await prisma.$disconnect();
+			return {
+				notFound: true,
+			};
+		}
+	}
 
-  const form = await prisma.form.findUnique({
-    where: { id: formId },
-    include: {
-      form_template: {
-        include: {
-          form_template_steps: {
-            include: {
-              form_template_blocks: {
-                include: {
-                  options: true,
-                },
-              },
-            },
-          },
-        },
-      },
-      form_configs: {
-        include: {
-          form_config_displays: true,
-          form_config_labels: true,
-        },
-        orderBy: {
-          created_at: "desc",
-        },
-        take: 1,
-      },
-      product: {
-        select: {
-          id: true,
-          title: true,
-        },
-      },
-    },
-  });
+	const form = await prisma.form.findUnique({
+		where: { id: formId },
+		include: {
+			form_template: {
+				include: {
+					form_template_steps: {
+						include: {
+							form_template_blocks: {
+								include: {
+									options: true,
+								},
+							},
+						},
+					},
+				},
+			},
+			form_configs: {
+				include: {
+					form_config_displays: true,
+					form_config_labels: true,
+				},
+				orderBy: {
+					created_at: 'desc',
+				},
+				take: 1,
+			},
+			product: {
+				select: {
+					id: true,
+					title: true,
+				},
+			},
+		},
+	});
 
-  await prisma.$disconnect();
+	await prisma.$disconnect();
 
-  if (!form) {
-    return {
-      notFound: true,
-    };
-  }
+	if (!form) {
+		return {
+			notFound: true,
+		};
+	}
 
-  let formWithConfig = JSON.parse(JSON.stringify(form));
+	let formWithConfig = JSON.parse(JSON.stringify(form));
 
-  if (formConfigParam) {
-    try {
-      const parsedConfig = JSON.parse(formConfigParam);
-      formWithConfig.form_configs = [
-        {
-          form_config_displays:
-            parsedConfig.displays || parsedConfig.form_config_displays || [],
-          form_config_labels:
-            parsedConfig.labels || parsedConfig.form_config_labels || [],
-        },
-      ];
-    } catch (error) {
-      console.error("Failed to parse formConfig:", error);
-    }
-  }
+	if (formConfigParam) {
+		try {
+			const parsedConfig = JSON.parse(formConfigParam);
+			formWithConfig.form_configs = [
+				{
+					form_config_displays:
+						parsedConfig.displays || parsedConfig.form_config_displays || [],
+					form_config_labels:
+						parsedConfig.labels || parsedConfig.form_config_labels || [],
+				},
+			];
+		} catch (error) {
+			console.error('Failed to parse formConfig:', error);
+		}
+	}
 
-  return {
-    props: {
-      form: formWithConfig,
-      buttonId: buttonId || 0,
-      productId: form.product.id,
-      isIframe,
-      ...(await serverSideTranslations(locale ?? "fr", ["common"])),
-    },
-  };
+	return {
+		props: {
+			form: formWithConfig,
+			buttonId: buttonId || 0,
+			productId: form.product.id,
+			isPreview,
+			isWidget,
+			widgetNonce,
+			...(await serverSideTranslations(locale ?? 'fr', ['common'])),
+		},
+	};
 };
 
 const blueSectionPxHeight = 200;
 
-const useStyles = tss.withName(AvisPage.name).create(() => ({
-  container: {
-    overflow: "inherit",
-    padding: `${fr.spacing("12v")} 0`,
-    [fr.breakpoints.up("md")]: {
-      padding: `0`,
-    },
-  },
-  blueSection: {
-    display: "none",
-    backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-    ...fr.spacing("padding", { topBottom: "6v", rightLeft: "10v" }),
-    h1: {
-      textAlign: "center",
-      fontSize: "2.5rem",
-      margin: 0,
-      color: fr.colors.decisions.background.flat.blueFrance.default,
-    },
-    [fr.breakpoints.up("md")]: {
-      display: "block",
-      height: `${blueSectionPxHeight}px`,
-    },
-  },
-  formSection: {
-    backgroundColor: fr.colors.decisions.background.default.grey.default,
-    ...fr.spacing("padding", {
-      topBottom: "auto",
-      rightLeft: "6v",
-    }),
-    [fr.breakpoints.up("md")]: {
-      transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-      ...fr.spacing("padding", { topBottom: "8v", rightLeft: "16v" }),
-    },
-  },
-  buttonsContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginTop: fr.spacing("8v"),
-  },
-  thanksSection: {
-    textAlign: "center",
-    h1: {
-      color: fr.colors.decisions.background.flat.blueFrance.default,
-    },
-    svg: {
-      width: fr.spacing("20v"),
-      height: fr.spacing("20v"),
-    },
-  },
-  notice: {
-    ...fr.typography[19].style,
-    p: {
-      fontWeight: "normal",
-    },
-    ".fr-notice__title": {
-      marginLeft: `-${fr.spacing("2v")}`,
-      paddingTop: "1px",
-    },
-  },
-}));
+const useStyles = tss
+	.withName(AvisPage.name)
+	.withParams<{ isWidget: boolean }>()
+	.create(({ isWidget }) => ({
+		container: {
+			overflow: 'inherit',
+			padding: isWidget ? `0` : `${fr.spacing('12v')} 0`,
+			[fr.breakpoints.up('md')]: {
+				padding: `0`,
+			},
+		},
+		blueSection: {
+			display: 'none',
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			...fr.spacing('padding', { topBottom: '6v', rightLeft: '10v' }),
+			h1: {
+				textAlign: 'center',
+				fontSize: '2.5rem',
+				margin: 0,
+				color: fr.colors.decisions.background.flat.blueFrance.default,
+			},
+			[fr.breakpoints.up('md')]: {
+				display: 'block',
+				height: `${blueSectionPxHeight}px`,
+			},
+		},
+		formSection: {
+			backgroundColor: fr.colors.decisions.background.default.grey.default,
+			...fr.spacing('padding', {
+				topBottom: isWidget ? '2v' : 'auto',
+				rightLeft: isWidget ? '4v' : '6v',
+			}),
+			// ...(isWidget && { paddingBottom: '80px' }),
+			[fr.breakpoints.up('md')]: {
+				transform: `translateY(-${blueSectionPxHeight / 2}px)`,
+				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' }),
+			},
+		},
+		buttonsContainer: {
+			display: 'flex',
+			flexDirection: 'row-reverse',
+			justifyContent: 'space-between',
+			marginTop: fr.spacing(isWidget ? '4v' : '8v'),
+		},
+		thanksSection: {
+			textAlign: 'center',
+			h1: {
+				color: fr.colors.decisions.background.flat.blueFrance.default,
+			},
+			svg: {
+				width: fr.spacing('20v'),
+				height: fr.spacing('20v'),
+			},
+		},
+		notice: {
+			...fr.typography[19].style,
+			p: {
+				fontWeight: 'normal',
+			},
+			'.fr-notice__title': {
+				marginLeft: `-${fr.spacing('2v')}`,
+				paddingTop: '1px',
+			},
+		},
+	}));

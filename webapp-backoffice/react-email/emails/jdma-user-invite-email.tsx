@@ -11,24 +11,20 @@ export const JdmaUserInviteEmail = ({
 	entityName,
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaUserInviteEmailProps) => {
-	const link = `${baseUrl}/register?${new URLSearchParams({ email: recipientEmail, inviteToken })}`;
+	const link = `${baseUrl}/register?${new URLSearchParams({
+		email: recipientEmail,
+		inviteToken
+	})}`;
 
 	const accessType = productTitle
 		? `la démarche « ${productTitle} »`
 		: entityName
-			? `l'organisation « ${entityName} »`
-			: 'un service';
-
-	const previewText = productTitle
-		? `Invitation à rejoindre la démarche ${productTitle}`
-		: entityName
-			? `Invitation à rejoindre l'organisation ${entityName}`
-			: 'Invitation à rejoindre Je donne mon avis';
+		? `l'organisation « ${entityName} »`
+		: 'un service';
 
 	return (
-		<JdmaLayout preview={previewText} baseUrl={baseUrl}>
+		<JdmaLayout baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
-
 			<Text style={paragraph}>
 				<strong>{inviterName}</strong> vous invite à rejoindre la plateforme
 				«&nbsp;
@@ -38,7 +34,6 @@ export const JdmaUserInviteEmail = ({
 				&nbsp; » et vous donne accès à {accessType}. Afin de créer votre compte,
 				veuillez cliquer sur le lien ci-dessous.
 			</Text>
-
 			<Link href={link} target="_blank" style={buttonLink}>
 				{link}
 			</Link>

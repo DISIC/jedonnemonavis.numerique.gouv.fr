@@ -1,5 +1,6 @@
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { parseBoldLabel } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -82,7 +83,7 @@ const Radios = (props: Props) => {
 						label: (
 							<span className={classes.radioLabel}>
 								<span>
-									{opt.label}
+									{opt.label && parseBoldLabel(opt.label)}
 									{isHidden && (
 										<Badge
 											className={cx(classes.hiddenBadge, fr.cx('fr-ml-4v'))}
@@ -99,11 +100,16 @@ const Radios = (props: Props) => {
 										priority="secondary"
 										iconId={isHidden ? 'ri-eye-line' : 'ri-eye-off-line'}
 										iconPosition="right"
+										aria-label={
+											isHidden
+												? `Afficher l'option ${opt.label}`
+												: `Masquer l'option ${opt.label}`
+										}
 										onClick={() => {
 											onChangeDisplay(opt);
 										}}
 									>
-										{isHidden ? 'Afficher' : 'Masquer'}
+										{isHidden ? 'Afficher' : 'Masquer'}{' '}
 									</Button>
 								)}
 							</span>

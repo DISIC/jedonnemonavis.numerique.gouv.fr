@@ -46,10 +46,12 @@ const NewAccess = ({ product }: Props) => {
 	const {
 		createdProduct,
 		createdUserAccesses,
+		hasCreatedProduct,
+		hasCreatedUserAccesses,
 		updateCreatedUserAccesses,
 		steps,
 		updateSteps,
-		reset
+		reset: clearContext
 	} = useOnboarding();
 
 	const [userToInvite, setUserToInvite] = useState<UserToAdd>(emptyUser);
@@ -68,16 +70,17 @@ const NewAccess = ({ product }: Props) => {
 	);
 	const [shouldShowStepper, setShouldShowStepper] = useState<boolean>(
 		isSkippedStep ||
-			(Boolean(createdProduct) &&
-				Boolean(createdUserAccesses && createdUserAccesses.length > 0) &&
-				!isEditingStep)
+			(hasCreatedProduct && hasCreatedUserAccesses && !isEditingStep)
 	);
 
 	const isModalOpen = useIsModalOpen(modal);
 
 	useEffect(() => {
 		setIsMounted(true);
-	}, [isMounted]);
+		return () => {
+			if (!hasCreatedProduct) clearContext();
+		};
+	}, []);
 
 	useEffect(() => {
 		if (isEditingStep !== undefined) setShouldShowStepper(!isEditingStep);
@@ -149,10 +152,9 @@ const NewAccess = ({ product }: Props) => {
 
 	const onConfirm = async () => {
 		if (userToInvite.email.trim() !== '') await onSubmit();
-		if (!Boolean(createdProduct)) {
-			router.push(`/administration/dashboard/product/${id}/access`).then(() => {
-				reset();
-			});
+		if (!hasCreatedProduct) {
+			await router.push(`/administration/dashboard/product/${id}/access`);
+			clearContext();
 			return;
 		}
 
@@ -194,10 +196,7 @@ const NewAccess = ({ product }: Props) => {
 			}
 			onConfirm={onConfirm}
 			onSkip={
-				Boolean(createdProduct) &&
-				Boolean(!createdUserAccesses || createdUserAccesses.length === 0)
-					? onSkipAction
-					: undefined
+				hasCreatedProduct && !hasCreatedUserAccesses ? onSkipAction : undefined
 			}
 			isStepperLayout={shouldShowStepper}
 			confirmText={
@@ -358,6 +357,12 @@ const NewAccess = ({ product }: Props) => {
 										role: e.target.value as RoleType
 									}));
 								},
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										onSubmit();
+									}
+								},
 								checked: userToInvite.role === 'carrier_user'
 							}
 						},
@@ -372,6 +377,12 @@ const NewAccess = ({ product }: Props) => {
 										...prev,
 										role: e.target.value as RoleType
 									}));
+								},
+								onKeyDown: e => {
+									if (e.key === 'Enter') {
+										e.preventDefault();
+										onSubmit();
+									}
 								},
 								checked: userToInvite.role === 'carrier_admin'
 							}

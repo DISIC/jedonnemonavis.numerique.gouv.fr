@@ -26,21 +26,21 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 
 	const infos = [
 		{
-			id: 'mask-steps',
-			iconClass: cx(classes.iconContainer, classes.blueIcon),
-			text: (
-				<>
-					Vous pouvez <strong>masquer certaines étapes</strong> ou options de
-					réponse
-				</>
-			)
-		},
-		{
 			id: 'edit-intro',
 			iconClass: cx(classes.iconContainer, classes.blueIcon),
 			text: (
 				<>
-					Vous pouvez <strong>éditer le texte d'introduction</strong>
+					Vous pouvez <strong>éditer certains textes</strong>
+				</>
+			)
+		},
+		{
+			id: 'mask-steps',
+			iconClass: cx(classes.iconContainer, classes.blueIcon),
+			text: (
+				<>
+					Vous pouvez <strong>masquer certaines options de réponse</strong> ou
+					étapes
 				</>
 			)
 		},
@@ -50,8 +50,7 @@ const FormGenerationAnimationPanel = ({ title, onFinish }: Props) => {
 			text: (
 				<>
 					Vous ne pouvez pas&nbsp;
-					<strong>modifier les questions existantes</strong> ou ajouter une
-					nouvelle question
+					<strong>ajouter de nouvelle question</strong>
 				</>
 			)
 		}

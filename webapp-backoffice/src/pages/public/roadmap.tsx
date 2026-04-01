@@ -98,7 +98,12 @@ const Roadmap: React.FC<HomeProps> = ({ intro, tableData }) => {
 						<h1 className={fr.cx('fr-mb-12v')}>Roadmap Je donne mon avis</h1>
 						<Table
 							caption={intro}
-							data={tableData}
+							data={tableData.map(row => [
+								row[0],
+								row[1],
+								<span style={{ whiteSpace: 'nowrap' }}>{row[2]}</span>,
+								row[3]
+							])}
 							headers={[
 								'Tag / Epic',
 								'Titre de la fonctionnalité',

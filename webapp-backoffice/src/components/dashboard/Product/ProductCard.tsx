@@ -560,14 +560,15 @@ const ProductCard = ({
 											</div>
 										);
 									})}
-								{product.forms.length > 2 && (
+								{product.forms.filter(f => !f.isDeleted).length > 2 && (
 									<Link
 										href={`/administration/dashboard/product/${product.id}/forms`}
 										title={`Voir les formulaires pour ${product.title}`}
 										className={cx(classes.productLink, fr.cx('fr-link'))}
 										onClick={() => clearFilters()}
 									>
-										Voir tous les formulaires ({product.forms.length})
+										Voir tous les formulaires (
+										{product.forms.filter(f => !f.isDeleted).length})
 									</Link>
 								)}
 							</div>

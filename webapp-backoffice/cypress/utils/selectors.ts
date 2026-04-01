@@ -40,7 +40,6 @@ export const selectors = {
 		products: '/administration/dashboard/products',
 		entities: '/administration/dashboard/entities',
 		users: '/administration/dashboard/users',
-		news: '/administration/dashboard/news',
 		newLink: '/administration/dashboard/product/5/forms/4/new-link'
 	},
 	dashboard: {

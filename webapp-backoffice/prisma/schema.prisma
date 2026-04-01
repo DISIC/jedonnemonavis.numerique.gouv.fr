@@ -85,6 +85,7 @@ enum Typebloc {
   heading_3
   input_text
   input_text_area
+  input_email
   mark_input
   smiley_input
   select
@@ -147,6 +148,7 @@ enum FormConfigKind {
 enum FormTemplateButtonStyle {
   solid
   outline
+  ghost
 }
 
 enum FormTemplateButtonTheme {
@@ -513,20 +515,22 @@ model LimiterReporting {
 }
 
 model FormTemplate {
-  id                    Int                  @id @default(autoincrement())
-  created_at            DateTime             @default(now())
-  updated_at            DateTime             @default(now())
-  user                  User?                @relation(fields: [user_id], references: [id])
-  user_id               Int?
-  title                 String
-  slug                  String               @unique
-  description           String?
-  active                Boolean              @default(false)
-  hasStepper            Boolean              @default(false)
-  form_template_steps   FormTemplateStep[]
-  form_template_buttons FormTemplateButton[]
-  ReviewCustom          ReviewCustom[]
-  forms                 Form[]
+  id                       Int                      @id @default(autoincrement())
+  created_at               DateTime                 @default(now())
+  updated_at               DateTime                 @default(now())
+  user                     User?                    @relation(fields: [user_id], references: [id])
+  user_id                  Int?
+  title                    String
+  slug                     String                   @unique
+  description              String?
+  active                   Boolean                  @default(false)
+  hasStepper               Boolean                  @default(false)
+  form_template_steps      FormTemplateStep[]
+  form_template_buttons    FormTemplateButton[]
+  integration_types        ButtonIntegrationTypes[]
+  default_integration_type ButtonIntegrationTypes?
+  ReviewCustom             ReviewCustom[]
+  forms                    Form[]
 }
 
 model FormTemplateButton {

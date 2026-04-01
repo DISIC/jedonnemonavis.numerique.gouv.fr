@@ -4,7 +4,8 @@ import {
 	createButton,
 	createOrEditForm,
 	login,
-	modifyButton
+	modifyButton,
+	tryCloseModal
 } from '../../../utils/helpers/common';
 import {
 	checkAllTabsA11y,
@@ -14,8 +15,7 @@ import {
 	goToCurrentFormReviewPage,
 	goToTabOfForm,
 	publishForm,
-	renameForm,
-	tryCloseHelpModal
+	renameForm
 } from '../../../utils/helpers/forms';
 import {
 	fillFormStep1,
@@ -24,12 +24,7 @@ import {
 	fillFormStep4
 } from '../../../utils/helpers/review';
 import { selectors } from '../../../utils/selectors';
-import {
-	adminEmail,
-	adminPassword,
-	appFormUrl,
-	appUrl
-} from '../../../utils/variables';
+import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 const FORM_TITLES = [
 	selectors.dashboard.nameTestForm1,
@@ -38,8 +33,9 @@ const FORM_TITLES = [
 
 describe('jdma-forms', () => {
 	let copiedReviewUrl = '';
+	let helpModalA11yChecked = false;
 	beforeEach(() => {
-		login(adminEmail, adminPassword);
+		login(adminEmail, adminPassword, false, helpModalA11yChecked);
 		cy.injectAxe();
 		ensureTestServiceExistsAndGoToForms();
 		cy.injectAxe();
@@ -84,7 +80,7 @@ describe('jdma-forms', () => {
 
 	it('should create and modify a button from the forms page', () => {
 		goToTabOfForm('links');
-		createButton("Lien d'intégration 1");
+		createButton("Lien d'intégration 1", false, 'button');
 		modifyButton();
 	});
 
@@ -106,7 +102,8 @@ describe('jdma-forms', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		cy.injectAxe();
-		tryCloseHelpModal(true);
+		tryCloseModal(true);
+		helpModalA11yChecked = true;
 		cy.wait(500);
 		cy.auditA11y();
 		cy.contains('button', 'Étape suivante').click();
@@ -120,7 +117,7 @@ describe('jdma-forms', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		cy.injectAxe();
-		tryCloseHelpModal();
+		tryCloseModal();
 		editFormIntroductionText();
 		cy.contains('button', 'Étape suivante').click();
 		cy.contains('button', "Masquer l'étape").click();
@@ -140,7 +137,7 @@ describe('jdma-forms', () => {
 		goToTabOfForm('settings');
 		cy.contains('button', 'Éditer le formulaire').click();
 		cy.injectAxe();
-		tryCloseHelpModal();
+		tryCloseModal();
 		renameForm(selectors.dashboard.renamedTestForm);
 		cy.visit(`${appUrl}${selectors.url.products}`);
 		ensureTestServiceExistsAndGoToForms();

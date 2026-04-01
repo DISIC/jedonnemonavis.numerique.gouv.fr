@@ -23,7 +23,8 @@ const ReviewDetailPanelDynamic = ({
 
 					const isTextInput =
 						block.type_bloc === 'input_text' ||
-						block.type_bloc === 'input_text_area';
+						block.type_bloc === 'input_text_area' ||
+						block.type_bloc === 'input_email';
 
 					return (
 						<div key={index} className={fr.cx('fr-col-12')}>

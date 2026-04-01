@@ -22,7 +22,7 @@ export async function sendMail(
 						user,
 						pass
 					}
-				}
+			  }
 			: {})
 	});
 
@@ -46,6 +46,10 @@ export async function sendMail(
 			response: error?.response,
 			command: error?.command
 		};
-		throw new Error(`MailerError: ${JSON.stringify(details)}`);
+		console.error(
+			`Failed to send email to ${toEmail}:`,
+			JSON.stringify(details)
+		);
+		return false;
 	}
 }

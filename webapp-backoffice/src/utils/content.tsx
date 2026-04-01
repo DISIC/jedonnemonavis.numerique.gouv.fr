@@ -355,27 +355,28 @@ export const linksFaqContents: { title: string; children: JSX.Element }[] = [
 		children: (
 			<>
 				<p>
-					Si vous souhaitez afficher plusieurs boutons Je donne mon avis, il est
-					recommandé de créer un lien d’intégration distinct pour chacun d’eux.
+					Créer plusieurs liens d'intégration permet de préciser d'où vient la
+					réponse de l'utilisateur.
 				</p>
+				<p>Cela permet par exemple de :</p>
+				<ul>
+					<li>
+						<strong>
+							Comparer l'expérience selon le parcours utilisateurs
+						</strong>
+					</li>
+					<li>
+						<strong>Comparer l’expérience selon le support</strong> (mobile,
+						ordinateur…)
+					</li>
+					<li>
+						Mesurer les résultats selon <strong>le canal utilisé</strong> (sur
+						le site, dans un email…)
+					</li>
+				</ul>
 				<p>
-					Cette approche vous permet d’obtenir des{' '}
-					<strong>données plus précises</strong>, de{' '}
-					<strong>comparer les statistiques</strong> grâce aux filtres
-					disponibles et de <strong>trier les réponses</strong> selon leur
-					origine — par exemple, selon le parcours emprunté par l’usager ou
-					selon qu’il réponde depuis un e-mail ou depuis la démarche en ligne.
-					<br />
-					Vous pouvez également vous en servir pour d’autres cas d’usages, comme
-					pour réaliser un AB testing (tester deux versions d'une page ou d'un
-					parcours en parallèle).
-				</p>
-				<p>
-					Note : Il n'est pas possible d'insérer plusieurs liens d'intégration
-					sur Démarche Simplifiée pour l'instant.
-					<br />
 					<a
-						href="https://docs.numerique.gouv.fr/docs/b824bc7b-fed3-4b75-91ca-1e6f9a5a6df1"
+						href="https://docs.numerique.gouv.fr/docs/e6e0fbd2-40f5-4fc5-906f-8043e7f9359b/"
 						target="_blank"
 					>
 						En savoir plus
@@ -386,27 +387,41 @@ export const linksFaqContents: { title: string; children: JSX.Element }[] = [
 	},
 	{
 		title:
-			'Comment définir le meilleur emplacement pour son bouton Je donne mon avis ?',
+			'Comment définir le meilleur emplacement pour intégrer un formulaire sur son site?',
 		children: (
 			<>
 				<p>
-					Idéalement, il faut placer le bouton JDMA sur une page de
-					confirmation, qui <strong>ne contient pas d’action principale</strong>{' '}
-					(bouton primaire) lui faisant quitter la page. <br />
-					Il est aussi important d’
-					<strong>
-						expliquer à quoi sert le bouton JDMA et de le mettre en valeur
-					</strong>
-					. Pour ce faire, il faut le distinguer visuellement (en jouant sur
-					l’espacement et/ou sur les couleurs) et le contextualiser avec une
-					phrase d’accroche.
+					L’emplacement du formulaire dépend{' '}
+					<strong>du type de retour que vous souhaitez recueillir</strong> et du
+					format choisi (avec un bouton, intégré au contenu, avec un bouton
+					flottant toujours visible).
 				</p>
 				<p>
-					Vous pouvez placer le bouton sur votre démarche, dans un email de
-					confirmation ou dans un email dédié.
-					<br />
+					Le bouton flottant doit être{' '}
+					<strong>visible sur la majorité des pages du site</strong> Il est
+					généralement utilisé avec{' '}
+					<strong>un seul lien d’intégration global.</strong>
+				</p>
+				<p>
+					Le formulaire intégré au contenu doit être placé{' '}
+					<strong>après un contenu </strong>
+					sur lequel vous souhaitez recueillir un avis ou{' '}
+					<strong>à la fin d’une page.</strong>
+				</p>
+				<p>
+					Le bouton avec ouverture du formulaire en pleine page peut être placé
+					à la fin d'une démarche, dans un email de confirmation ou dans un
+					email dédié. Il est important d’
+					<strong>
+						expliquer à quoi sert le bouton et le mettre en valeur
+					</strong>{' '}
+					en le distinguant visuellement du reste de la page. Idéalement, la
+					page sur lequel il est placé ne doit pas contenir d'autre action
+					(autre bouton).
+				</p>
+				<p>
 					<a
-						href="https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff"
+						href="https://docs.numerique.gouv.fr/docs/d9aab8c6-f70c-4cd7-9d07-0cf27b15cc17"
 						target="_blank"
 					>
 						En savoir plus
@@ -420,26 +435,31 @@ export const linksFaqContents: { title: string; children: JSX.Element }[] = [
 		children: (
 			<>
 				<p>
-					L’intégration d’un lien permet d’afficher le bouton{' '}
-					<strong>Je donne mon avis</strong> sur votre site.
-				</p>
-				<p>
-					<b>Étape 1</b>
-					<br />
-					Créer un lien d’intégration depuis l'onglet{' '}
-					<strong>Liens d'intégration</strong> du formulaire JDMA. Ce lien
+					Commencez par créer un lien d’intégration depuis l'onglet{' '}
+					<strong>Liens d'intégration</strong> de votre formulaire. Ce lien
 					correspond à un code à insérer sur le site de votre choix.
 				</p>
 				<p>
-					<b>Étape 2</b>
-					<br />
-					Coller le code à l’endroit souhaité sur le site, à l’emplacement où
-					vous souhaitez faire apparaître le bouton{' '}
-					<strong>Je donne mon avis</strong>. Vous pouvez aussi coller le code
-					sur le site de Démarche Simplifiée.
-					<br />
+					Ensuite, collez le code fourni à l’endroit souhaité sur votre site, à
+					l’emplacement où vous souhaitez faire apparaître le bouton ou le
+					formulaire.
+				</p>
+				<p>
+					N'hésitez pas à solliciter l’aide d’un développeur pour effectuer
+					cette intégration.
+				</p>
+				<p>
+					Pour le{' '}
+					<strong>
+						formulaire de Satisfaction utilisateur "Je donne mon avis"
+					</strong>
+					, vous pouvez également passer par le site Démarche Simplifiée et
+					coller le code dans le champ dédié. Le bouton sera automatiquement
+					placé à la fin de la démarche.
+				</p>
+				<p>
 					<a
-						href="https://docs.numerique.gouv.fr/docs/c6d84027-74e7-4df4-8f7e-fb33f0c60c91"
+						href="https://docs.numerique.gouv.fr/docs/8862e507-b41f-48c3-980a-ac67f9baa8f4"
 						target="_blank"
 					>
 						En savoir plus
@@ -534,7 +554,7 @@ export const onboardingStepsContent: StepContent[] = [
 		slug: 'link',
 		title: 'Intégrer le formulaire sur votre site',
 		iconId: 'ri-link',
-		url: '/administration/dashboard/product/[id]/forms/[form_id]/new-link',
+		url: '/administration/dashboard/product/[id]/forms/[form_id]/link/new',
 		details: [
 			{ title: 'Créez votre premier lien d’intégration', iconId: 'ri-link' },
 			{
@@ -570,7 +590,26 @@ export const buttonStylesMapping: Record<
 				À placer sur un <span className="fr-text--bold">fond coloré</span>.
 			</p>
 		)
+	},
+	ghost: {
+		label: 'Contour',
+		hintText: (
+			<p className={'fr-text--xs fr-mb-0'}>
+				Bouton avec un contour léger, à placer sur un{' '}
+				<span className="fr-text--bold">fond clair</span>.
+			</p>
+		)
 	}
+};
+
+export const allowedStylesByIntegrationType: Record<
+	ButtonIntegrationTypes,
+	FormTemplateButtonStyle[] | null
+> = {
+	button: ['solid', 'outline'],
+	modal: ['ghost', 'solid'],
+	embed: null,
+	link: null
 };
 
 export const buttonIntegrationTypesMapping: Record<
@@ -578,6 +617,8 @@ export const buttonIntegrationTypesMapping: Record<
 	{
 		label: React.ReactNode;
 		hintText?: React.ReactNode;
+		noIllustration?: boolean;
+		isNew?: boolean;
 	}
 > = {
 	button: {
@@ -587,16 +628,20 @@ export const buttonIntegrationTypesMapping: Record<
 	},
 	embed: {
 		label: 'Intégré au contenu',
-		hintText: 'La 1ère question est visible directement dans la page de contenu'
+		hintText:
+			'La 1ère question est visible directement dans la page de contenu',
+		isNew: true
 	},
 	modal: {
 		label: 'Flottant',
 		hintText:
-			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu'
+			'Le formulaire est accessible via un bouton flottant et s’affiche par dessus le contenu',
+		isNew: true
 	},
 	link: {
 		label: 'Lien seul',
 		hintText:
-			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)'
+			'Le lien n’a pas de design associé. Il est à intégrer dans un composant existant de votre site (bouton, bannière,...)',
+		noIllustration: true
 	}
 };

@@ -5,7 +5,7 @@ export type ButtonCreationPayload = Omit<
 	'id' | 'created_at' | 'updated_at'
 >;
 
-export type ButtonModalType = 'install' | 'edit' | 'delete';
+export type ButtonModalType = 'install' | 'rename' | 'delete';
 
 export const FR_THEMES = ['clair', 'sombre'] as const;
 

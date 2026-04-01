@@ -20,6 +20,9 @@ interface OnboardingState {
 }
 
 interface OnboardingContextValue extends OnboardingState {
+	hasCreatedProduct: boolean;
+	hasCreatedForm: boolean;
+	hasCreatedUserAccesses: boolean;
 	updateCreatedProduct: (product: Product) => void;
 	updateCreatedForm: (form: FormWithElements) => void;
 	updateCreatedUserAccesses: (accesses: AccessRightWithUsers[]) => void;
@@ -69,7 +72,7 @@ export const OnboardingProvider = ({
 			case 'link':
 				return {
 					isCompleted: false,
-					url: `/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}/new-link`
+					url: `/administration/dashboard/product/${createdProduct?.id}/forms/${createdForm?.id}/link/new`
 				};
 			default:
 				return {
@@ -122,6 +125,9 @@ export const OnboardingProvider = ({
 				createdForm,
 				createdUserAccesses,
 				steps,
+				hasCreatedProduct: Boolean(createdProduct),
+				hasCreatedForm: Boolean(createdForm),
+				hasCreatedUserAccesses: Boolean(createdUserAccesses?.length),
 				updateCreatedProduct,
 				updateCreatedForm,
 				updateCreatedUserAccesses,

@@ -26,7 +26,7 @@ const NoReviewsDashboardPanel = () => {
 					bouton de récolte d’avis :
 				</p>
 				<a
-					href="https://www.notion.so/designgouv/Augmenter-le-nombre-d-avis-r-colt-s-sur-votre-service-num-rique-avec-JDMA-21615cb9824180f89fcefa3d9a99d50f"
+					href="https://docs.numerique.gouv.fr/docs/68bd689e-4323-4fd4-aac6-135c750668ff"
 					target="_blank"
 				>
 					Améliorer le placement de votre bouton

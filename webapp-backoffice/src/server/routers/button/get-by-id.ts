@@ -15,7 +15,8 @@ export const getButtonByIdQuery = async ({
 	const { id } = input;
 
 	const button = await ctx.prisma.button.findUnique({
-		where: { id }
+		where: { id },
+		include: { form_template_button: { include: { variants: true } } }
 	});
 
 	return { data: button };
