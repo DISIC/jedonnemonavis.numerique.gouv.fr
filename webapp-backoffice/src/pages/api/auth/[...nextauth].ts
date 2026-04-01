@@ -9,9 +9,13 @@ import {
 import NextAuth, { getServerSession, type NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { getSiretInfo } from '@/src/utils/queries';
 import { generateRandomString } from '@/src/utils/tools';
+
+const JWKS = createRemoteJWKSet(
+	new URL(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/jwks`)
+);
 
 interface ProconnectProfile {
 	sub: string;
@@ -25,7 +29,7 @@ interface ProconnectProfile {
 }
 
 export const authOptions: NextAuthOptions = {
-	debug: true,
+	debug: process.env.NODE_ENV === 'development',
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
 		signIn: '/login',
@@ -223,7 +227,8 @@ export const authOptions: NextAuthOptions = {
 					try {
 						data = JSON.parse(responseText);
 					} catch (error) {
-						data = (jwt.decode(responseText) as Record<string, any>) || {}; // 🔥 Décode JWT
+						const { payload } = await jwtVerify(responseText, JWKS);
+						data = payload as Record<string, any>; // 🔥 Décode JWT
 					}
 					return data;
 				}
