@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 export const changePasswordInputSchema = z.object({
 	token: z.string(),
-	password: z.string()
+	password: z.string().min(12)
 });
 
 export const changePasswordMutation = async ({
