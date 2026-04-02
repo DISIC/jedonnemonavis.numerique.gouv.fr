@@ -106,6 +106,13 @@ const ReviewTableRow = ({
 					)}
 				>
 					{formatDateToFrenchString(review.created_at?.toString() || '')}
+					<br />
+					<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+						{formatDateToFrenchString(review.created_at?.toString() || '', {
+							hourOnly: true,
+							hourFormat: 'short'
+						})}
+					</span>
 				</td>
 
 				{mainBlocks.map((block, index) => {
@@ -201,7 +208,7 @@ const ReviewTableRow = ({
 						}}
 						aria-expanded={displayMoreInfo}
 					>
-						Voir le détail de la réponse
+						Voir l'avis
 					</Button>
 				</td>
 			</div>
@@ -214,7 +221,7 @@ const ReviewTableRow = ({
 					formTemplate={formTemplate}
 				/>
 			)}
-			<hr />
+			<hr className={fr.cx('fr-pb-1v')} />
 		</tr>
 	);
 };
@@ -223,7 +230,6 @@ const useStyles = tss.create({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',
-		marginBottom: 12,
 		width: '100%',
 		'td:last-of-type': {
 			textAlign: 'right'

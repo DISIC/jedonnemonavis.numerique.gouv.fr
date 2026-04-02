@@ -27,7 +27,7 @@ const ReviewTableHeader = (props: Props) => {
 			code: 'created_at'
 		},
 		...mainBlocks.map(block => ({
-			label: block.alias ? block.alias : (block.label ?? ''),
+			label: block.alias ? block.alias : block.label ?? '',
 			code: block.type_bloc || ''
 		})),
 		...(hasVerbatimBlock
@@ -36,7 +36,7 @@ const ReviewTableHeader = (props: Props) => {
 						label: 'Commentaire',
 						code: 'verbatim'
 					}
-				]
+			  ]
 			: [])
 	];
 
@@ -68,23 +68,34 @@ const ReviewTableHeader = (props: Props) => {
 							{sort.label}{' '}
 							{props.sort.includes(sort.code || sort.label) && (
 								<i
-									className={
+									className={cx(
 										props.sort.includes('asc')
 											? 'ri-arrow-drop-down-fill'
-											: 'ri-arrow-drop-up-fill'
-									}
+											: 'ri-arrow-drop-up-fill',
+										classes.thIcon
+									)}
 								></i>
 							)}
 						</span>
 					</th>
 				))}
-				{new Array(3).fill(0).map((i, index) => (
+				{new Array(2).fill(0).map((i, index) => (
 					<th
 						className={cx(classes.badgeVerbatim)}
 						key={`fake_div_${index}`}
 						aria-hidden="true"
 					></th>
 				))}
+				<th
+					className={cx(
+						classes.badgeVerbatim,
+						classes.thContainer,
+						fr.cx('fr-pr-8v')
+					)}
+					scope="col"
+				>
+					Action
+				</th>
 			</tr>
 		</thead>
 	);
@@ -97,14 +108,36 @@ const useStyles = tss.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		width: '100%',
-		padding: 12
+		padding: 12,
+		borderTop: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		borderRadius: 0,
+		[fr.breakpoints.down('lg')]: {
+			border: 'none'
+		}
 	},
 	trContainer: {
 		width: '100%',
-		display: 'flex'
+		display: 'flex',
+		'th:last-of-type': {
+			textAlign: 'right'
+		}
 	},
 	thContainer: {
-		width: 'max-content'
+		width: 'max-content',
+		lineHeight: 1,
+		span: {
+			position: 'relative'
+		},
+		[fr.breakpoints.down('lg')]: {
+			display: 'none'
+		}
+	},
+	thIcon: {
+		position: 'absolute',
+		top: '50%',
+		transform: 'translateY(-50%)',
+		fontSize: 12
 	},
 	pointer: {
 		cursor: 'pointer'

@@ -18,7 +18,7 @@ import {
 	parseExportParams
 } from '@/src/utils/export';
 import {
-	formatDateToFrenchStringWithHour,
+	formatDateToFrenchString,
 	getNbPages,
 	normalizeString
 } from '@/src/utils/tools';
@@ -613,8 +613,9 @@ const ReviewsTab = (props: Props) => {
 									options={[
 										{
 											label: 'Afficher uniquement les nouvelles réponses',
-											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(
-												reviewLog[0].created_at.toString()
+											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchString(
+												reviewLog[0].created_at.toString(),
+												{ withHour: true }
 											)})`,
 											nativeInputProps: {
 												name: 'favorites-products',
@@ -676,47 +677,7 @@ const ReviewsTab = (props: Props) => {
 							submitSearch(keyword);
 						}}
 					/>
-					<div
-						className={cx(
-							classes.filtersWrapper,
-							fr.cx('fr-col-12', 'fr-col-lg-4')
-						)}
-					>
-						<form
-							className={cx(classes.searchForm)}
-							onSubmit={e => {
-								e.preventDefault();
-								submitSearch();
-								push(['trackEvent', 'Form - Reviews', 'Search']);
-							}}
-						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
-								<Input
-									label="Rechercher un avis"
-									hideLabel
-									nativeInputProps={{
-										placeholder: 'Rechercher dans les commentaires',
-										type: 'search',
-										value: search,
-										onChange: event => {
-											if (!event.target.value) {
-												setValidatedSearch('');
-											}
-											setSearch(event.target.value);
-										}
-									}}
-								/>
-								<ButtonDSFR
-									priority="primary"
-									type="submit"
-									iconId="ri-search-2-line"
-									iconPosition="left"
-								>
-									Rechercher
-								</ButtonDSFR>
-							</div>
-						</form>
-					</div>
+
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
@@ -728,13 +689,7 @@ const ReviewsTab = (props: Props) => {
 									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}
-							<div
-								className={fr.cx(
-									'fr-grid-row',
-									'fr-grid-row--gutters',
-									'fr-grid-row--right'
-								)}
-							>
+							<div className={classes.paginationWrapper}>
 								<PageItemsCounter
 									label="réponse"
 									isFeminine
@@ -743,9 +698,47 @@ const ReviewsTab = (props: Props) => {
 										numberPerPage * (currentPage - 1) + reviews.length
 									}
 									totalItemsCount={reviewsCountFiltered}
-									additionalClasses={['fr-col-12', 'fr-mt-8v']}
+									fitContent
 								/>
+
+								<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-4'))}>
+									<form
+										className={cx(classes.searchForm)}
+										onSubmit={e => {
+											e.preventDefault();
+											submitSearch();
+											push(['trackEvent', 'Form - Reviews', 'Search']);
+										}}
+									>
+										<div role="search" className={fr.cx('fr-search-bar')}>
+											<Input
+												label="Rechercher un avis"
+												hideLabel
+												nativeInputProps={{
+													placeholder: 'Rechercher dans les commentaires',
+													type: 'search',
+													value: search,
+													onChange: event => {
+														if (!event.target.value) {
+															setValidatedSearch('');
+														}
+														setSearch(event.target.value);
+													}
+												}}
+											/>
+											<ButtonDSFR
+												priority="primary"
+												type="submit"
+												iconId="ri-search-2-line"
+												iconPosition="left"
+											>
+												Rechercher
+											</ButtonDSFR>
+										</div>
+									</form>
+								</div>
 							</div>
+
 							<div>
 								{reviews.length > 0 && (
 									<>
@@ -875,9 +868,16 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		display: 'flex',
 		flexDirection: 'column'
 	},
-	filtersWrapper: {
+	paginationWrapper: {
 		display: 'flex',
-		alignItems: 'end'
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginBottom: fr.spacing('2v'),
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'column-reverse',
+			alignItems: 'flex-start',
+			gap: fr.spacing('8v')
+		}
 	},
 	buttonContainer: {
 		width: '100%',
