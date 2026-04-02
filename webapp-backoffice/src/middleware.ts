@@ -23,14 +23,17 @@ export async function middleware(request: NextRequest) {
 	)
 		return NextResponse.next();
 
-	if (request.nextUrl.pathname.startsWith('/administration') && !token) {
+	const isTokenValid =
+		!!token && (token.exp as number) * 1000 > Date.now();
+
+	if (request.nextUrl.pathname.startsWith('/administration') && !isTokenValid) {
 		const url = request.nextUrl.clone();
 		url.pathname = '/login';
 		url.searchParams.set('callbackUrl', request.nextUrl.pathname);
 		return NextResponse.redirect(url);
 	} else if (
 		!request.nextUrl.pathname.startsWith('/administration') &&
-		!!token
+		isTokenValid
 	) {
 		return NextResponse.redirect(
 			new URL('/administration/dashboard/products', request.url)
