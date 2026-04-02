@@ -110,8 +110,19 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 	if (meta?.isAdminOrOwn) {
 		const currentUserId = ctx.session?.user?.id;
 
+		let requestId: string | number | undefined;
+
+		if (ctx.req.query.id) {
+			requestId = ctx.req.query.id as string;
+		} else if (ctx.req.body && typeof ctx.req.body === 'object') {
+			const bodyValue = Object.values(ctx.req.body)[0];
+			if (bodyValue && typeof bodyValue === 'object' && 'json' in bodyValue) {
+				requestId = (bodyValue as any).json?.id;
+			}
+		}
+
 		if (
-			ctx.req.query.id !== currentUserId &&
+			requestId?.toString() !== currentUserId?.toString() &&
 			!ctx.session?.user?.role.includes('admin')
 		) {
 			throw new TRPCError({
