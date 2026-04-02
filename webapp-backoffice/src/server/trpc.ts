@@ -33,10 +33,10 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 		? {
 				ca: fs.readFileSync(caCrtPath),
 				rejectUnauthorized: false
-			}
+		  }
 		: {
 				rejectUnauthorized: false
-			};
+		  };
 
 	const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
@@ -107,7 +107,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
-	if (meta?.idAdminOrOwn) {
+	if (meta?.isAdminOrOwn) {
 		const currentUserId = ctx.session?.user?.id;
 
 		if (
@@ -139,8 +139,8 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 							? JSON.parse(ctx.req.query.input as string)
 							: { defaultKey: 'defaultValue' }
 						: ctx.req.body && typeof ctx.req.body === 'string'
-							? JSON.parse(ctx.req.body)
-							: ctx.req.body || { defaultKey: 'defaultValue' };
+						? JSON.parse(ctx.req.body)
+						: ctx.req.body || { defaultKey: 'defaultValue' };
 
 					const action = actionMapping[query];
 					const input = inputObj[index] !== undefined ? inputObj[index] : {};
