@@ -102,7 +102,7 @@ const ReviewTableRow = ({
 				<td
 					className={cx(
 						classes.dateLabel,
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')
+						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
 					)}
 				>
 					{formatDateToFrenchString(review.created_at?.toString() || '')}
@@ -171,9 +171,7 @@ const ReviewTableRow = ({
 				})}
 
 				{hasVerbatimBlock && (
-					<td
-						className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5', 'fr-pr-3v')}
-					>
+					<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
 						<p
 							className={cx(classes.content, classes.contentVerbatim)}
 							dangerouslySetInnerHTML={{
@@ -190,7 +188,7 @@ const ReviewTableRow = ({
 					</td>
 				)}
 
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
 					<Button
 						priority="tertiary no outline"
 						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
@@ -252,7 +250,13 @@ const useStyles = tss.create({
 		fontWeight: 'bold',
 		display: 'flex',
 		alignItems: 'center',
-		gap: '0.3rem'
+		gap: '0.3rem',
+		marginRight: '-4rem',
+		marginLeft: '-2.5rem',
+		[fr.breakpoints.down('lg')]: {
+			marginRight: 0,
+			marginLeft: 0
+		}
 	},
 	verbatim: {
 		flexShrink: 1
@@ -264,7 +268,7 @@ const useStyles = tss.create({
 	},
 	content: {
 		display: '-webkit-box',
-		WebkitLineClamp: 3,
+		WebkitLineClamp: 10,
 		WebkitBoxOrient: 'vertical',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
@@ -280,6 +284,7 @@ const useStyles = tss.create({
 	},
 	button: {
 		textDecoration: 'underline',
+		textWrap: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

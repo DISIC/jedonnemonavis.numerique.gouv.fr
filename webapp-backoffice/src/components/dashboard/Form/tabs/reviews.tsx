@@ -70,7 +70,7 @@ const ReviewsTab = (props: Props) => {
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [numberPerPage, setNumberPerPage] = useState(10);
+	const [numberPerPage, setNumberPerPage] = useState(20);
 	const [sort, setSort] = useState<string>('created_at:desc');
 	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
@@ -829,7 +829,8 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		fontWeight: 'bold'
 	},
 	tableContainer: {
-		width: '100%'
+		width: '100%',
+		borderCollapse: 'collapse'
 	},
 	loaderContainer: {
 		display: 'flex',

@@ -45,7 +45,7 @@ const ReviewTableHeader = (props: Props) => {
 			<tr
 				className={cx(
 					classes.trContainer,
-					fr.cx('fr-hidden', 'fr-unhidden-lg')
+					fr.cx('fr-hidden', 'fr-unhidden-md')
 				)}
 			>
 				{sortList.map((sort, index) => (
@@ -53,7 +53,7 @@ const ReviewTableHeader = (props: Props) => {
 						className={cx(
 							classes.badgeVerbatim,
 							sort.code ? classes.pointer : '',
-							fr.cx('fr-hidden', 'fr-unhidden-lg'),
+							fr.cx('fr-hidden', 'fr-unhidden-md'),
 							classes.thContainer
 						)}
 						key={index}
@@ -90,7 +90,7 @@ const ReviewTableHeader = (props: Props) => {
 					className={cx(
 						classes.badgeVerbatim,
 						classes.thContainer,
-						fr.cx('fr-pr-8v')
+						classes.actionHeader
 					)}
 					scope="col"
 				>
@@ -112,7 +112,7 @@ const useStyles = tss.create({
 		borderTop: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		borderRadius: 0,
-		[fr.breakpoints.down('lg')]: {
+		[fr.breakpoints.down('md')]: {
 			border: 'none'
 		}
 	},
@@ -129,7 +129,7 @@ const useStyles = tss.create({
 		span: {
 			position: 'relative'
 		},
-		[fr.breakpoints.down('lg')]: {
+		[fr.breakpoints.down('md')]: {
 			display: 'none'
 		}
 	},
@@ -164,6 +164,12 @@ const useStyles = tss.create({
 		paddingVertical: 4,
 		fontSize: 14,
 		flex: '0 0 calc(100% / 6);'
+	},
+	actionHeader: {
+		paddingRight: fr.spacing('8v'),
+		[fr.breakpoints.down('lg')]: {
+			paddingRight: 0
+		}
 	}
 });
 
