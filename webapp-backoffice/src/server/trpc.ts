@@ -17,6 +17,7 @@ import { actionMapping } from '../utils/tools';
 interface Meta {
 	authRequired?: boolean;
 	isAdmin?: boolean;
+	isAdminOrOwn?: boolean;
 	logEvent?: boolean;
 	eventType?: string;
 }
@@ -33,10 +34,10 @@ export const createContext = async (opts: CreateNextContextOptions) => {
 		? {
 				ca: fs.readFileSync(caCrtPath),
 				rejectUnauthorized: false
-			}
+		  }
 		: {
 				rejectUnauthorized: false
-			};
+		  };
 
 	const elkClient = new ElkClient({
 		node: process.env.ES_ADDON_URI as string,
@@ -107,13 +108,25 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
-	if (meta?.idAdminOrOwn) {
+	if (meta?.isAdminOrOwn && !ctx.session?.user?.role.includes('admin')) {
 		const currentUserId = ctx.session?.user?.id;
 
-		if (
-			ctx.req.query.id !== currentUserId &&
-			!ctx.session?.user?.role.includes('admin')
-		) {
+		let rawInput: any = ctx.req.query.input;
+		if (typeof rawInput === 'string') {
+			try {
+				rawInput = JSON.parse(rawInput);
+			} catch {
+				rawInput = undefined;
+			}
+		}
+		if (!rawInput && ctx.req.body && typeof ctx.req.body === 'object') {
+			rawInput = Object.values(ctx.req.body)[0];
+		}
+
+		const requestId =
+			rawInput?.json?.id ?? rawInput?.id ?? rawInput?.[0]?.json?.id;
+
+		if (!requestId || requestId.toString() !== currentUserId?.toString()) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'You are not authorized to perform this action'
@@ -139,8 +152,8 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 							? JSON.parse(ctx.req.query.input as string)
 							: { defaultKey: 'defaultValue' }
 						: ctx.req.body && typeof ctx.req.body === 'string'
-							? JSON.parse(ctx.req.body)
-							: ctx.req.body || { defaultKey: 'defaultValue' };
+						? JSON.parse(ctx.req.body)
+						: ctx.req.body || { defaultKey: 'defaultValue' };
 
 					const action = actionMapping[query];
 					const input = inputObj[index] !== undefined ? inputObj[index] : {};
