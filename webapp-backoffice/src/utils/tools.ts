@@ -54,6 +54,7 @@ type FormatDateOptions = {
 	withHour?: boolean;
 	hourOnly?: boolean;
 	hourFormat?: HourFormat;
+	monthFormat?: 'default' | 'literal';
 };
 
 function formatHourPart(date: Date, format: HourFormat): string {
@@ -78,7 +79,8 @@ export function formatDateToFrenchString(
 	{
 		withHour = false,
 		hourOnly = false,
-		hourFormat = 'long'
+		hourFormat = 'long',
+		monthFormat = 'default'
 	}: FormatDateOptions = {}
 ) {
 	const date = new Date(tmpDate);
@@ -93,7 +95,7 @@ export function formatDateToFrenchString(
 
 	const datePart = new Intl.DateTimeFormat('fr-FR', {
 		year: 'numeric',
-		month: 'numeric',
+		month: monthFormat === 'literal' ? 'long' : 'numeric',
 		day: 'numeric'
 	}).format(date);
 
@@ -102,6 +104,18 @@ export function formatDateToFrenchString(
 	}
 
 	return datePart;
+}
+
+export function formatFullFrenchDateTime(date: string | Date): string {
+	const dateStr = typeof date === 'string' ? date : date.toISOString();
+	const datePart = formatDateToFrenchString(dateStr, {
+		monthFormat: 'literal'
+	});
+	const timePart = formatDateToFrenchString(dateStr, {
+		hourOnly: true,
+		hourFormat: 'short'
+	});
+	return `${datePart} à ${timePart}`;
 }
 
 export function getNbPages(count: number, numberPerPage: number) {

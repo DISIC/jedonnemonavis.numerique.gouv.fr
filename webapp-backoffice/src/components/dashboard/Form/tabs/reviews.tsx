@@ -1,3 +1,4 @@
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
@@ -38,6 +39,7 @@ import { useRouter } from 'next/router';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ExportHistory from '../../Reviews/ExportHistory';
+import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
@@ -76,6 +78,11 @@ const ReviewsTab = (props: Props) => {
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
+	const [selectedReview, setSelectedReview] =
+		useState<ReviewPartialWithRelations | null>(null);
+
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
 
 	const filter_modal = useMemo(
 		() =>
@@ -389,6 +396,14 @@ const ReviewsTab = (props: Props) => {
 		router.push({
 			pathname: `/administration/dashboard/product/${form.product_id}/access`,
 			query: { autoInvite: true }
+		});
+	};
+
+	const handleSelectReview = (review: ReviewPartialWithRelations) => {
+		setSelectedReview(review);
+		createReviewViewLog({
+			review_id: review.id as number,
+			review_created_at: review.created_at as Date
 		});
 	};
 
@@ -756,10 +771,8 @@ const ReviewsTab = (props: Props) => {
 															review={review}
 															search={validatedSearch}
 															formTemplate={form.form_template}
-															formConfig={getFormConfigHelperFromDate(
-																review.created_at || new Date()
-															)}
-															hasManyVersions={formConfigs.length > 0}
+															isSelected={selectedReview?.id === review.id}
+															onSelectReview={handleSelectReview}
 															onClickMoreInfo={() => {
 																window._mtm?.push({
 																	event: 'matomo_event',
@@ -820,6 +833,19 @@ const ReviewsTab = (props: Props) => {
 					)}
 				</>
 			)}
+			<ReviewDrawer
+				review={selectedReview}
+				formConfig={
+					selectedReview
+						? getFormConfigHelperFromDate(
+								selectedReview.created_at || new Date()
+						  )
+						: undefined
+				}
+				hasManyVersions={formConfigs.length > 0}
+				formTemplate={form.form_template}
+				onClose={() => setSelectedReview(null)}
+			/>
 		</>
 	);
 };
@@ -873,6 +899,7 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		display: 'flex',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		marginTop: fr.spacing('8v'),
 		marginBottom: fr.spacing('2v'),
 		[fr.breakpoints.down('lg')]: {
 			flexDirection: 'column-reverse',

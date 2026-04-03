@@ -1,21 +1,16 @@
-import {
-	FormConfigWithChildren,
-	FormTemplateWithElements
-} from '@/src/types/prismaTypesExtended';
+import { FormTemplateWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
 import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import ReviewDetailPanel from './ReviewDetailPanel';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 
@@ -53,23 +48,19 @@ const highlightSearchTerms = (text: string, search: string): string => {
 const ReviewTableRow = ({
 	review,
 	search,
-	formConfig,
-	hasManyVersions,
 	formTemplate,
+	isSelected,
+	onSelectReview,
 	onClickMoreInfo
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
-	formConfig?: FormConfigWithChildren;
-	hasManyVersions: boolean;
 	formTemplate: FormTemplateWithElements;
+	isSelected?: boolean;
+	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	onClickMoreInfo?: () => void;
 }) => {
 	const { cx, classes } = useStyles();
-	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
-
-	const { mutate: createReviewViewLog } =
-		trpc.reviewViewLog.create.useMutation();
 
 	const mainBlocks = formTemplate.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -82,14 +73,6 @@ const ReviewTableRow = ({
 	const verbatimAnswer = hasVerbatimBlock
 		? review.answers?.find(answer => answer.field_code === 'verbatim')
 		: undefined;
-
-	useEffect(() => {
-		if (displayMoreInfo)
-			createReviewViewLog({
-				review_id: review.id as number,
-				review_created_at: review.created_at as Date
-			});
-	}, [displayMoreInfo]);
 
 	return (
 		<tr className={cx(classes.container)}>
@@ -194,31 +177,21 @@ const ReviewTableRow = ({
 						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 						size="small"
 						onClick={() => {
-							setDisplayMoreInfo(!displayMoreInfo);
+							onSelectReview(review);
 							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 							onClickMoreInfo?.();
 						}}
 						className={classes.button}
 						style={{
-							backgroundColor: displayMoreInfo
+							backgroundColor: isSelected
 								? fr.colors.decisions.background.alt.blueFrance.default
 								: undefined
 						}}
-						aria-expanded={displayMoreInfo}
 					>
 						Voir l'avis
 					</Button>
 				</td>
 			</div>
-			{displayMoreInfo && (
-				<ReviewDetailPanel
-					review={review}
-					formConfig={formConfig}
-					hasManyVersions={hasManyVersions}
-					search={search}
-					formTemplate={formTemplate}
-				/>
-			)}
 			<hr className={fr.cx('fr-pb-1v')} />
 		</tr>
 	);
@@ -252,7 +225,7 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		gap: '0.3rem',
 		marginRight: '-4rem',
-		marginLeft: '-2.5rem',
+		marginLeft: '-2rem',
 		[fr.breakpoints.down('lg')]: {
 			marginRight: 0,
 			marginLeft: 0
