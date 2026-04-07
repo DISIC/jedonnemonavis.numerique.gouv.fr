@@ -43,6 +43,10 @@ type ReviewDrawerProps = {
 	hasManyVersions: boolean;
 	formTemplate: FormTemplateWithElements;
 	onClose: () => void;
+	onPrevious: () => void;
+	onNext: () => void;
+	hasPrevious: boolean;
+	hasNext: boolean;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -246,7 +250,11 @@ const ReviewDrawerContent = ({
 	formConfig,
 	hasManyVersions,
 	formTemplate,
-	onClose
+	onClose,
+	onPrevious,
+	onNext,
+	hasPrevious,
+	hasNext
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 
@@ -301,6 +309,8 @@ const ReviewDrawerContent = ({
 					priority="tertiary"
 					iconId="fr-icon-arrow-left-s-line"
 					size="small"
+					disabled={!hasPrevious}
+					onClick={onPrevious}
 				>
 					Voir l'avis précédent
 				</Button>
@@ -309,6 +319,8 @@ const ReviewDrawerContent = ({
 					iconId="fr-icon-arrow-right-s-line"
 					iconPosition="right"
 					size="small"
+					disabled={!hasNext}
+					onClick={onNext}
 				>
 					Voir l'avis suivant
 				</Button>

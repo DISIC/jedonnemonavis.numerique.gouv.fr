@@ -1,18 +1,22 @@
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { FormTemplateWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
-import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
+import {
+	formatDateToFrenchString,
+	formatFullFrenchDateTime,
+	getSeverity
+} from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
-import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 
 const highlightSearchTerms = (text: string, search: string): string => {
 	if (!search.trim()) return text;
@@ -51,7 +55,8 @@ const ReviewTableRow = ({
 	formTemplate,
 	isSelected,
 	onSelectReview,
-	onClickMoreInfo
+	onClickMoreInfo,
+	rowRef
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
@@ -59,6 +64,7 @@ const ReviewTableRow = ({
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	onClickMoreInfo?: () => void;
+	rowRef?: (el: HTMLTableRowElement | null) => void;
 }) => {
 	const { cx, classes } = useStyles();
 
@@ -74,8 +80,38 @@ const ReviewTableRow = ({
 		? review.answers?.find(answer => answer.field_code === 'verbatim')
 		: undefined;
 
+	const handleSelect = () => {
+		onSelectReview(review);
+		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
+		onClickMoreInfo?.();
+	};
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleSelect();
+		} else if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			const next = e.currentTarget.nextElementSibling as HTMLElement | null;
+			next?.focus();
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			const prev = e.currentTarget.previousElementSibling as HTMLElement | null;
+			prev?.focus();
+		}
+	};
+
 	return (
-		<tr className={cx(classes.container)}>
+		<tr
+			ref={rowRef}
+			className={cx(classes.container, isSelected && classes.containerSelected)}
+			onClick={handleSelect}
+			role="row"
+			tabIndex={0}
+			onKeyDown={handleKeyDown}
+			aria-selected={isSelected}
+			title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
+		>
 			<div
 				className={cx(
 					classes.line,
@@ -87,14 +123,19 @@ const ReviewTableRow = ({
 						classes.dateLabel,
 						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
 					)}
+					aria-label={`Avis du ${formatFullFrenchDateTime(
+						review.created_at?.toString() || ''
+					)}`}
 				>
-					{formatDateToFrenchString(review.created_at?.toString() || '')}
-					<br />
-					<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-						{formatDateToFrenchString(review.created_at?.toString() || '', {
-							hourOnly: true,
-							hourFormat: 'short'
-						})}
+					<span aria-hidden="true">
+						{formatDateToFrenchString(review.created_at?.toString() || '')}
+						<br />
+						<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+							{formatDateToFrenchString(review.created_at?.toString() || '', {
+								hourOnly: true,
+								hourFormat: 'short'
+							})}
+						</span>
 					</span>
 				</td>
 
@@ -171,28 +212,20 @@ const ReviewTableRow = ({
 					</td>
 				)}
 
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
-					<Button
-						priority="tertiary no outline"
+				<td
+					className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}
+					onClick={e => e.stopPropagation()}
+				>
+					<Link
 						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
-						size="small"
-						onClick={() => {
-							onSelectReview(review);
-							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
-							onClickMoreInfo?.();
-						}}
-						className={classes.button}
-						style={{
-							backgroundColor: isSelected
-								? fr.colors.decisions.background.alt.blueFrance.default
-								: undefined
-						}}
+						className={cx(classes.action, fr.cx('fr-link'))}
+						onClick={handleSelect}
+						href={'#'}
 					>
 						Voir l'avis
-					</Button>
+					</Link>
 				</td>
 			</div>
-			<hr className={fr.cx('fr-pb-1v')} />
 		</tr>
 	);
 };
@@ -202,9 +235,24 @@ const useStyles = tss.create({
 		display: 'flex',
 		flexDirection: 'column',
 		width: '100%',
+		cursor: 'pointer',
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		'td:last-of-type': {
 			textAlign: 'right'
+		},
+		'&:hover': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			'& .fr-link': {
+				backgroundSize: '100% 1.25px'
+			}
+		},
+		'&:focus-visible': {
+			outline: `2px solid ${fr.colors.decisions.border.active.blueFrance.default}`,
+			outlineOffset: '-2px'
 		}
+	},
+	containerSelected: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	line: {
 		fontSize: fr.spacing('4v'),
@@ -255,8 +303,7 @@ const useStyles = tss.create({
 		wordBreak: 'break-word',
 		margin: 0
 	},
-	button: {
-		textDecoration: 'underline',
+	action: {
 		textWrap: 'nowrap',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',

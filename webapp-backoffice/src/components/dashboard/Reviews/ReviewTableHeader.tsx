@@ -48,37 +48,36 @@ const ReviewTableHeader = (props: Props) => {
 					fr.cx('fr-hidden', 'fr-unhidden-md')
 				)}
 			>
-				{sortList.map((sort, index) => (
-					<th
-						className={cx(
-							classes.badgeVerbatim,
-							sort.code ? classes.pointer : '',
-							fr.cx('fr-hidden', 'fr-unhidden-md'),
-							classes.thContainer
-						)}
-						key={index}
-						onClick={() => {
-							if (sort.code) {
-								onClick(sort.code);
-							}
-						}}
-						scope="col"
-					>
-						<span>
-							{sort.label}{' '}
-							{props.sort.includes(sort.code || sort.label) && (
-								<i
-									className={cx(
-										props.sort.includes('asc')
-											? 'ri-arrow-drop-down-fill'
-											: 'ri-arrow-drop-up-fill',
-										classes.thIcon
-									)}
-								></i>
+				{sortList.map((sort, index) => {
+					const isSortable = props.sort.includes(sort.code || sort.label);
+					return (
+						<th
+							className={cx(
+								classes.badgeVerbatim,
+								isSortable ? classes.pointer : '',
+								fr.cx('fr-hidden', 'fr-unhidden-md'),
+								classes.thContainer
 							)}
-						</span>
-					</th>
-				))}
+							key={index}
+							onClick={isSortable ? () => onClick(sort.code) : undefined}
+							scope="col"
+						>
+							<span>
+								{sort.label}&nbsp;
+								{isSortable && (
+									<i
+										className={cx(
+											props.sort.includes('asc')
+												? 'ri-arrow-drop-down-fill'
+												: 'ri-arrow-drop-up-fill',
+											classes.thIcon
+										)}
+									></i>
+								)}
+							</span>
+						</th>
+					);
+				})}
 				{new Array(2).fill(0).map((i, index) => (
 					<th
 						className={cx(classes.badgeVerbatim)}

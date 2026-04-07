@@ -80,6 +80,14 @@ const ReviewsTab = (props: Props) => {
 	const [currentExportId, setCurrentExportId] = useState<number>();
 	const [selectedReview, setSelectedReview] =
 		useState<ReviewPartialWithRelations | null>(null);
+	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
+
+	useEffect(() => {
+		if (!selectedReview?.id) return;
+		rowRefsMap.current
+			.get(selectedReview.id)
+			?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+	}, [selectedReview?.id]);
 
 	const { mutate: createReviewViewLog } =
 		trpc.reviewViewLog.create.useMutation();
@@ -405,6 +413,22 @@ const ReviewsTab = (props: Props) => {
 			review_id: review.id as number,
 			review_created_at: review.created_at as Date
 		});
+	};
+
+	const selectedReviewIndex = selectedReview
+		? reviews.findIndex(r => r.id === selectedReview.id)
+		: -1;
+
+	const handlePreviousReview = () => {
+		if (selectedReviewIndex > 0) {
+			handleSelectReview(reviews[selectedReviewIndex - 1]);
+		}
+	};
+
+	const handleNextReview = () => {
+		if (selectedReviewIndex < reviews.length - 1) {
+			handleSelectReview(reviews[selectedReviewIndex + 1]);
+		}
 	};
 
 	const displayEmptyState = () => {
@@ -773,6 +797,11 @@ const ReviewsTab = (props: Props) => {
 															formTemplate={form.form_template}
 															isSelected={selectedReview?.id === review.id}
 															onSelectReview={handleSelectReview}
+															rowRef={el => {
+																if (review.id === undefined) return;
+																if (el) rowRefsMap.current.set(review.id, el);
+																else rowRefsMap.current.delete(review.id);
+															}}
 															onClickMoreInfo={() => {
 																window._mtm?.push({
 																	event: 'matomo_event',
@@ -795,7 +824,13 @@ const ReviewsTab = (props: Props) => {
 								)}
 							</div>
 							{reviews.length > 0 && (
-								<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+								<div
+									className={fr.cx(
+										'fr-grid-row--center',
+										'fr-grid-row',
+										'fr-mt-6v'
+									)}
+								>
 									<Pagination
 										count={nbPages}
 										showFirstLast
@@ -845,6 +880,10 @@ const ReviewsTab = (props: Props) => {
 				hasManyVersions={formConfigs.length > 0}
 				formTemplate={form.form_template}
 				onClose={() => setSelectedReview(null)}
+				onPrevious={handlePreviousReview}
+				onNext={handleNextReview}
+				hasPrevious={selectedReviewIndex > 0}
+				hasNext={selectedReviewIndex < reviews.length - 1}
 			/>
 		</>
 	);
