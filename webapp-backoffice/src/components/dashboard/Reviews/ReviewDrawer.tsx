@@ -235,6 +235,9 @@ const ReviewDrawer = (props: ReviewDrawerProps) => {
 			open={!!review}
 			onClose={onClose}
 			PaperProps={{
+				role: 'dialog',
+				'aria-modal': true,
+				'aria-labelledby': 'review-drawer-title',
 				sx: { width: { xs: '100%', md: '600px' } }
 			}}
 		>
@@ -297,7 +300,7 @@ const ReviewDrawerContent = ({
 				</Button>
 			</div>
 
-			<h1 className={cx(classes.title, fr.cx('fr-h4'))}>
+			<h1 id="review-drawer-title" className={cx(classes.title, fr.cx('fr-h4'))}>
 				Détail de l'avis du{' '}
 				{formatFullFrenchDateTime(review.created_at?.toString() || '')}
 			</h1>

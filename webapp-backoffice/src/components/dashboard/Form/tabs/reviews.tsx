@@ -731,11 +731,8 @@ const ReviewsTab = (props: Props) => {
 						</div>
 					) : (
 						<div
-							style={{
-								opacity: isFetchingReviews ? 0.5 : 1,
-								transition: 'opacity 0.2s ease',
-								pointerEvents: isFetchingReviews ? 'none' : 'auto'
-							}}
+							aria-busy={isFetchingReviews}
+							{...(isFetchingReviews ? { inert: '' } : {})}
 						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>

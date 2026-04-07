@@ -116,7 +116,12 @@ const ReviewTableRow = ({
 	return (
 		<tr
 			ref={rowRef}
-			className={cx(classes.container, isSelected && classes.containerSelected)}
+			className={cx(
+				classes.container,
+				classes.line,
+				fr.cx('fr-grid-row', 'fr-grid-row--middle'),
+				isSelected && classes.containerSelected
+			)}
 			onClick={handleSelect}
 			role="row"
 			tabIndex={0}
@@ -124,120 +129,113 @@ const ReviewTableRow = ({
 			aria-selected={isSelected}
 			title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
 		>
-			<div
+			<td
 				className={cx(
-					classes.line,
-					fr.cx('fr-grid-row', 'fr-grid-row--middle')
+					classes.dateLabel,
+					fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
 				)}
+				aria-label={`Avis du ${formatFullFrenchDateTime(
+					review.created_at?.toString() || ''
+				)}`}
 			>
-				<td
-					className={cx(
-						classes.dateLabel,
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
-					)}
-					aria-label={`Avis du ${formatFullFrenchDateTime(
-						review.created_at?.toString() || ''
-					)}`}
-				>
-					<span aria-hidden="true">
-						{formatDateToFrenchString(review.created_at?.toString() || '')}
-						<br />
-						<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-							{formatDateToFrenchString(review.created_at?.toString() || '', {
-								hourOnly: true,
-								hourFormat: 'short'
-							})}
-						</span>
+				<span aria-hidden="true">
+					{formatDateToFrenchString(review.created_at?.toString() || '')}
+					<br />
+					<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+						{formatDateToFrenchString(review.created_at?.toString() || '', {
+							hourOnly: true,
+							hourFormat: 'short'
+						})}
 					</span>
-				</td>
+				</span>
+			</td>
 
-				{mainBlocks.map((block, index) => {
-					const answer = review.answers?.find(
-						answer => answer.field_code === block.field_code
-					);
+			{mainBlocks.map((block, index) => {
+				const answer = review.answers?.find(
+					answer => answer.field_code === block.field_code
+				);
 
-					const formTemplateBlockOption = block.options.find(
-						opt => opt.id === answer?.answer_item_id
-					);
+				const formTemplateBlockOption = block.options.find(
+					opt => opt.id === answer?.answer_item_id
+				);
 
-					return (
-						<td
-							key={index}
-							className={cx(
-								classes.label,
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
-							)}
-							style={{
-								color: answer?.intention
-									? getStatsColor({ intention: answer.intention })
-									: undefined
-							}}
-						>
-							{answer && answer.intention && (
-								<Badge
-									className={cx(classes.badge)}
-									noIcon={true}
-									severity={getSeverity(answer.intention || '')}
-								>
-									{answer.field_code === 'satisfaction' && (
-										<Image
-											alt=""
-											src={`/assets/smileys/${getStatsIcon({
-												intention: answer.intention ?? 'neutral'
-											})}.svg`}
-											width={16}
-											height={16}
-										/>
-									)}
-
-									{answer.field_code === 'satisfaction'
-										? displayIntention(answer.intention ?? 'neutral')
-										: formTemplateBlockOption?.alias ??
-										  formTemplateBlockOption?.label ??
-										  answer.answer_text ??
-										  ''}
-								</Badge>
-							)}
-							{answer && !answer.intention && (
-								<span>{answer.answer_text || '-'}</span>
-							)}
-							{!answer && <span>-</span>}
-						</td>
-					);
-				})}
-
-				{hasVerbatimBlock && (
-					<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
-						<p
-							className={cx(classes.content, classes.contentVerbatim)}
-							dangerouslySetInnerHTML={{
-								__html: `${
-									verbatimAnswer
-										? highlightSearchTerms(
-												verbatimAnswer.answer_text || '',
-												search
-										  )
-										: '-'
-								}`
-							}}
-						></p>
-					</td>
-				)}
-
-				<td
-					className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}
-					onClick={e => e.stopPropagation()}
-				>
-					<Link
-						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
-						className={cx(classes.action, fr.cx('fr-link'))}
-						onClick={handleSelect}
-						href={'#'}
+				return (
+					<td
+						key={index}
+						className={cx(
+							classes.label,
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+						)}
+						style={{
+							color: answer?.intention
+								? getStatsColor({ intention: answer.intention })
+								: undefined
+						}}
 					>
-						Voir l'avis
-					</Link>
+						{answer && answer.intention && (
+							<Badge
+								className={cx(classes.badge)}
+								noIcon={true}
+								severity={getSeverity(answer.intention || '')}
+							>
+								{answer.field_code === 'satisfaction' && (
+									<Image
+										alt=""
+										src={`/assets/smileys/${getStatsIcon({
+											intention: answer.intention ?? 'neutral'
+										})}.svg`}
+										width={16}
+										height={16}
+									/>
+								)}
+
+								{answer.field_code === 'satisfaction'
+									? displayIntention(answer.intention ?? 'neutral')
+									: formTemplateBlockOption?.alias ??
+									  formTemplateBlockOption?.label ??
+									  answer.answer_text ??
+									  ''}
+							</Badge>
+						)}
+						{answer && !answer.intention && (
+							<span>{answer.answer_text || '-'}</span>
+						)}
+						{!answer && <span>-</span>}
+					</td>
+				);
+			})}
+
+			{hasVerbatimBlock && (
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
+					<p
+						className={cx(classes.content, classes.contentVerbatim)}
+						dangerouslySetInnerHTML={{
+							__html: `${
+								verbatimAnswer
+									? highlightSearchTerms(
+											verbatimAnswer.answer_text || '',
+											search
+									  )
+									: '-'
+							}`
+						}}
+					></p>
 				</td>
-			</div>
+			)}
+
+			<td
+				className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}
+				onClick={e => e.stopPropagation()}
+			>
+				<Link
+					title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
+					className={cx(classes.action, fr.cx('fr-link'))}
+					onClick={handleSelect}
+					href={'#'}
+				>
+					Voir l'avis
+				</Link>
+			</td>
 		</tr>
 	);
 };
