@@ -1,5 +1,37 @@
-import { AnswerIntention, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { getExactPhrase, isExactPhraseSearch, stripAccents } from './search';
 import { getDateWhereFromUTCRange } from './tools';
+
+export const buildSearchWhereRaw = (
+	search: string
+): Prisma.Sql | null => {
+	if (!search) return null;
+
+	if (isExactPhraseSearch(search)) {
+		const phrase = stripAccents(getExactPhrase(search)).toLowerCase();
+		return Prisma.sql`(
+			public.immutable_unaccent(lower("answer_text")) LIKE '%' || ' ' || ${phrase} || ' ' || '%'
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${phrase + ' %'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + phrase}
+			OR public.immutable_unaccent(lower("answer_text")) = ${phrase}
+		)`;
+	}
+
+	const words = search.split(' ').filter(Boolean);
+	if (words.length === 0) return null;
+
+	const conditions = words.map(word => {
+		const stripped = stripAccents(word).toLowerCase();
+		return Prisma.sql`(
+			public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped + '%'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${stripped + ' %'}
+			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped}
+			OR public.immutable_unaccent(lower("answer_text")) = ${stripped}
+		)`;
+	});
+
+	return Prisma.join(conditions, ' AND ');
+};
 
 export const formatWhereAndOrder = (
 	input: { [key: string]: any },
@@ -10,7 +42,6 @@ export const formatWhereAndOrder = (
 		form_id,
 		mustHaveVerbatims,
 		mustHaveVerbatimsOptimzed,
-		search,
 		sort,
 		start_date,
 		end_date,
@@ -60,69 +91,6 @@ export const formatWhereAndOrder = (
 					}
 				}
 			]
-		}),
-		...(search && {
-			answers: {
-				some: {
-					AND: [
-						{
-							AND: search
-								.split(' ')
-								.filter(Boolean)
-								.flatMap((word: string) => [
-									{
-										OR: [
-											{
-												answer_text: {
-													contains: ` ${word}`,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													contains: `${word} `,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													contains: ` ${word} `,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													startsWith: word,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													endsWith: word,
-													mode: 'insensitive'
-												}
-											},
-											{
-												answer_text: {
-													equals: word,
-													mode: 'insensitive'
-												}
-											}
-										]
-									}
-								])
-						},
-						{ field_code: 'verbatim' },
-						!newReviews &&
-							end_date && {
-								created_at: getDateWhereFromUTCRange(
-									input.start_date,
-									input.end_date
-								)
-							}
-					].filter(Boolean)
-				}
-			}
 		})
 	};
 

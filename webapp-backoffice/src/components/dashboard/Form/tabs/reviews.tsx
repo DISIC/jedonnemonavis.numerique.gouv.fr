@@ -19,8 +19,7 @@ import {
 } from '@/src/utils/export';
 import {
 	formatDateToFrenchStringWithHour,
-	getNbPages,
-	normalizeString
+	getNbPages
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -114,7 +113,8 @@ const ReviewsTab = (props: Props) => {
 
 	const {
 		data: reviewResults,
-		isFetching: isLoadingReviews,
+		isFetching: isFetchingReviews,
+		isLoading: isInitialLoadingReviews,
 		error: errorReviews
 	} = trpc.review.getList.useQuery(
 		{
@@ -454,7 +454,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(normalizeString(tmpSearch ?? search));
+			setValidatedSearch((tmpSearch ?? search).trim());
 			setCurrentPage(1);
 		}
 	};
@@ -665,6 +665,7 @@ const ReviewsTab = (props: Props) => {
 								? undefined
 								: filters.sharedFilters.currentEndDate
 						}
+						fields={filters.productReviews.filters.fields}
 						selectedKeyword={validatedSearch}
 						onClick={keyword => {
 							push([
@@ -672,8 +673,14 @@ const ReviewsTab = (props: Props) => {
 								'Product - Reviews',
 								'Keyword-Filter-Clicked'
 							]);
-							setSearch(keyword);
-							submitSearch(keyword);
+							if (keyword) {
+								setSearch(`"${keyword}"`);
+								submitSearch(`"${keyword}"`);
+							} else {
+								setSearch('');
+								setValidatedSearch('');
+								setCurrentPage(1);
+							}
 						}}
 					/>
 					<div
@@ -717,12 +724,19 @@ const ReviewsTab = (props: Props) => {
 							</div>
 						</form>
 					</div>
-					{isLoadingReviews ? (
+					{isInitialLoadingReviews ||
+					(isFetchingReviews && reviews.length === 0) ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
 					) : (
-						<>
+						<div
+							style={{
+								opacity: isFetchingReviews ? 0.5 : 1,
+								transition: 'opacity 0.2s ease',
+								pointerEvents: isFetchingReviews ? 'none' : 'auto'
+							}}
+						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
 									<FormConfigVersionsDisplay form={form} />
@@ -823,7 +837,7 @@ const ReviewsTab = (props: Props) => {
 									/>
 								</div>
 							)}
-						</>
+						</div>
 					)}
 				</>
 			)}

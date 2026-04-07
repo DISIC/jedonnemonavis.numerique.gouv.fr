@@ -3,6 +3,11 @@ import {
 	FormTemplateWithElements
 } from '@/src/types/prismaTypesExtended';
 import {
+	buildAccentAwarePattern,
+	getExactPhrase,
+	isExactPhraseSearch
+} from '@/src/utils/search';
+import {
 	displayIntention,
 	getStatsColor,
 	getStatsIcon
@@ -22,25 +27,32 @@ import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 const highlightSearchTerms = (text: string, search: string): string => {
 	if (!search.trim()) return text;
 
+	if (isExactPhraseSearch(search)) {
+		const phrase = getExactPhrase(search);
+		const pattern = buildAccentAwarePattern(phrase);
+		const regex = new RegExp(pattern, 'gi');
+		return text.replace(regex, match => `<span>${match}</span>`);
+	}
+
 	const words = search.split(' ').filter(Boolean);
 	let highlightedText = text;
 
 	words.forEach(word => {
-		const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const pattern = buildAccentAwarePattern(word);
 
 		const patterns = [
-			`\\b${escapedWord}(?=\\w)`,
-			`(?<=\\w)${escapedWord}\\b`,
-			`\\b${escapedWord}\\b`,
-			`^${escapedWord}(?=\\w)`,
-			`^${escapedWord}\\b`,
-			`(?<=\\w)${escapedWord}$`,
-			`\\b${escapedWord}$`,
-			`^${escapedWord}$`
+			`\\b${pattern}(?=\\w)`,
+			`(?<=\\w)${pattern}\\b`,
+			`\\b${pattern}\\b`,
+			`^${pattern}(?=\\w)`,
+			`^${pattern}\\b`,
+			`(?<=\\w)${pattern}$`,
+			`\\b${pattern}$`,
+			`^${pattern}$`
 		];
 
-		patterns.forEach(pattern => {
-			const regex = new RegExp(pattern, 'gi');
+		patterns.forEach(p => {
+			const regex = new RegExp(p, 'gi');
 			highlightedText = highlightedText.replace(regex, match => {
 				return `<span>${match}</span>`;
 			});
