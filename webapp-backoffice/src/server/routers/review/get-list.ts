@@ -1,7 +1,11 @@
 import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
-import { formatWhereAndOrder } from '@/src/utils/reviews';
+import {
+	buildSearchWhereRaw,
+	formatWhereAndOrder
+} from '@/src/utils/reviews';
 import { getDateWhereFromUTCRange } from '@/src/utils/tools';
+import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -124,6 +128,26 @@ export const getReviewListQuery = async ({
 		},
 		!!form?.legacy
 	);
+
+	// Use raw SQL with unaccent() for accent-insensitive search
+	const searchWhereRaw = buildSearchWhereRaw(input.search || '');
+	if (searchWhereRaw) {
+		const dateFilter =
+			!newReviews && input.start_date && input.end_date
+				? Prisma.sql`AND "created_at" >= ${new Date(input.start_date)}::timestamp AND "created_at" <= ${new Date(input.end_date)}::timestamp`
+				: Prisma.empty;
+
+		const matchingReviewIds: { review_id: number }[] =
+			await ctx.prisma.$queryRaw`
+				SELECT DISTINCT "review_id" FROM "Answer"
+				WHERE "field_code" = 'verbatim'
+				${dateFilter}
+				AND ${searchWhereRaw}
+			`;
+
+		const reviewIds = matchingReviewIds.map(r => r.review_id);
+		where.id = { in: reviewIds };
+	}
 
 	const lastSeenReview = await ctx.prisma.userEvent.findMany({
 		where: {

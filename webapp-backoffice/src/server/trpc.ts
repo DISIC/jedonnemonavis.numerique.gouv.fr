@@ -17,6 +17,7 @@ import { actionMapping } from '../utils/tools';
 interface Meta {
 	authRequired?: boolean;
 	isAdmin?: boolean;
+	isAdminOrOwn?: boolean;
 	logEvent?: boolean;
 	eventType?: string;
 }
@@ -107,13 +108,25 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 		});
 	}
 
-	if (meta?.isAdminOrOwn) {
+	if (meta?.isAdminOrOwn && !ctx.session?.user?.role.includes('admin')) {
 		const currentUserId = ctx.session?.user?.id;
 
-		if (
-			ctx.req.query.id !== currentUserId &&
-			!ctx.session?.user?.role.includes('admin')
-		) {
+		let rawInput: any = ctx.req.query.input;
+		if (typeof rawInput === 'string') {
+			try {
+				rawInput = JSON.parse(rawInput);
+			} catch {
+				rawInput = undefined;
+			}
+		}
+		if (!rawInput && ctx.req.body && typeof ctx.req.body === 'object') {
+			rawInput = Object.values(ctx.req.body)[0];
+		}
+
+		const requestId =
+			rawInput?.json?.id ?? rawInput?.id ?? rawInput?.[0]?.json?.id;
+
+		if (!requestId || requestId.toString() !== currentUserId?.toString()) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'You are not authorized to perform this action'

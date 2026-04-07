@@ -9,15 +9,15 @@ export const getIntentionFromAverage = (
 		return average >= 8.5
 			? AnswerIntention.good
 			: average >= 7
-				? AnswerIntention.medium
-				: AnswerIntention.bad;
+			? AnswerIntention.medium
+			: AnswerIntention.bad;
 	}
 
 	return average >= 8
 		? AnswerIntention.good
 		: average >= 5
-			? AnswerIntention.medium
-			: AnswerIntention.bad;
+		? AnswerIntention.medium
+		: AnswerIntention.bad;
 };
 
 export const getStatsColor = ({
@@ -86,7 +86,7 @@ export const getStatsAnswerText = ({
 export const displayIntention = (intention: string) => {
 	switch (intention) {
 		case 'bad':
-			return 'Mauvais';
+			return 'Pas bien';
 		case 'medium':
 			return 'Moyen';
 		case 'good':
