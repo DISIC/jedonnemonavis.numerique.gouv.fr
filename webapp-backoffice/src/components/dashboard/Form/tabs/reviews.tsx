@@ -130,7 +130,7 @@ const ReviewsTab = (props: Props) => {
 	const {
 		data: reviewResults,
 		isFetching: isFetchingReviews,
-		isLoading: isInitialLoadingReviews,
+		isLoading: isLoadingReviews,
 		error: errorReviews
 	} = trpc.review.getList.useQuery(
 		{
