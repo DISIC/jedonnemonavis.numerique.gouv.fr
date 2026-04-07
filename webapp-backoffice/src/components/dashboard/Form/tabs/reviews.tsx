@@ -631,20 +631,10 @@ const ReviewsTab = (props: Props) => {
 					<div className={fr.cx('fr-my-8v')}>
 						<GenericFilters
 							filterKey="productReviews"
-							topRight={
-								<ButtonDSFR
-									priority="tertiary"
-									iconId="fr-icon-filter-line"
-									iconPosition="right"
-									type="button"
-									nativeButtonProps={filter_modal.buttonProps}
-								>
-									Plus de filtres
-								</ButtonDSFR>
-							}
 							renderTags={() => (
 								<ReviewFilterTags buttons={buttons} form={form} />
 							)}
+							filterModal={filter_modal}
 						>
 							{reviewLog[0] && (
 								<Checkbox
@@ -739,7 +729,13 @@ const ReviewsTab = (props: Props) => {
 									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}
-							<div className={classes.paginationWrapper}>
+							<div
+								className={classes.paginationWrapper}
+								style={{
+									flexDirection:
+										reviews.length === 0 ? 'column-reverse' : undefined
+								}}
+							>
 								<PageItemsCounter
 									label="réponse"
 									isFeminine
@@ -751,129 +747,126 @@ const ReviewsTab = (props: Props) => {
 									fitContent
 								/>
 
-								<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-4'))}>
-									<form
-										className={cx(classes.searchForm)}
-										onSubmit={e => {
-											e.preventDefault();
-											submitSearch();
-											push(['trackEvent', 'Form - Reviews', 'Search']);
-										}}
-									>
-										<div role="search" className={fr.cx('fr-search-bar')}>
-											<Input
-												label="Rechercher un avis"
-												hideLabel
-												nativeInputProps={{
-													placeholder: 'Rechercher dans les commentaires',
-													type: 'search',
-													value: search,
-													onChange: event => {
-														if (!event.target.value) {
-															setValidatedSearch('');
-														}
-														setSearch(event.target.value);
+								<form
+									className={cx(
+										classes.searchForm,
+										fr.cx('fr-col-12', 'fr-col-lg-4')
+									)}
+									onSubmit={e => {
+										e.preventDefault();
+										submitSearch();
+										push(['trackEvent', 'Form - Reviews', 'Search']);
+									}}
+								>
+									<div role="search" className={fr.cx('fr-search-bar')}>
+										<Input
+											label="Rechercher un avis"
+											hideLabel
+											nativeInputProps={{
+												placeholder: 'Rechercher dans les commentaires',
+												type: 'search',
+												value: search,
+												onChange: event => {
+													if (!event.target.value) {
+														setValidatedSearch('');
 													}
-												}}
-											/>
-											<ButtonDSFR
-												priority="primary"
-												type="submit"
-												iconId="ri-search-2-line"
-												iconPosition="left"
-											>
-												Rechercher
-											</ButtonDSFR>
-										</div>
-									</form>
-								</div>
+													setSearch(event.target.value);
+												}
+											}}
+										/>
+										<ButtonDSFR
+											priority="primary"
+											type="submit"
+											iconId="ri-search-2-line"
+											iconPosition="left"
+										>
+											Rechercher
+										</ButtonDSFR>
+									</div>
+								</form>
 							</div>
 
-							<div>
-								{reviews.length > 0 && (
-									<>
-										<table className={cx(classes.tableContainer)}>
-											<ReviewTableHeader
-												sort={sort}
-												onClick={handleSortChange}
-												form={form}
-											/>
-											<tbody>
-												{reviews.map((review, index) => {
-													return (
-														<ReviewTableRow
-															key={index}
-															review={review}
-															search={validatedSearch}
-															formTemplate={form.form_template}
-															isSelected={selectedReview?.id === review.id}
-															onSelectReview={handleSelectReview}
-															rowRef={el => {
-																if (review.id === undefined) return;
-																if (el) rowRefsMap.current.set(review.id, el);
-																else rowRefsMap.current.delete(review.id);
-															}}
-															onClickMoreInfo={() => {
-																window._mtm?.push({
-																	event: 'matomo_event',
-																	container_type: 'backoffice',
-																	service_id: form.product_id,
-																	form_id: form.id,
-																	template_slug: form.form_template.slug,
-																	category: 'reviews',
-																	action_type: 'read',
-																	action: `review_detail_display`,
-																	ui_source: 'review_button'
-																});
-															}}
-														/>
-													);
-												})}
-											</tbody>
-										</table>
-									</>
-								)}
-							</div>
 							{reviews.length > 0 && (
-								<div
-									className={fr.cx(
-										'fr-grid-row--center',
-										'fr-grid-row',
-										'fr-mt-6v'
-									)}
-								>
-									<Pagination
-										count={nbPages}
-										showFirstLast
-										defaultPage={currentPage}
-										maxVisiblePages={6}
-										slicesSize={3}
-										getPageLinkProps={pageNumber => ({
-											onClick: event => {
-												event.preventDefault();
-												handlePageChange(pageNumber);
-												if (pageNumber !== currentPage) {
-													window._mtm?.push({
-														event: 'matomo_event',
-														container_type: 'backoffice',
-														service_id: form.product_id,
-														form_id: form.id,
-														template_slug: form.form_template.slug,
-														category: 'reviews',
-														action_type: 'read',
-														action: `review_other_page_display`,
-														ui_source: 'navigation',
-														value: pageNumber
-													});
-												}
-											},
-											href: '#',
-											classes: { link: fr.cx('fr-pagination__link') },
-											key: `pagination-link-${pageNumber}`
-										})}
-										className={fr.cx('fr-mt-1w')}
-									/>
-								</div>
+								<>
+									<table className={cx(classes.tableContainer)}>
+										<ReviewTableHeader
+											sort={sort}
+											onClick={handleSortChange}
+											form={form}
+										/>
+										<tbody>
+											{reviews.map((review, index) => {
+												return (
+													<ReviewTableRow
+														key={index}
+														review={review}
+														search={validatedSearch}
+														formTemplate={form.form_template}
+														isSelected={selectedReview?.id === review.id}
+														onSelectReview={handleSelectReview}
+														rowRef={el => {
+															if (review.id === undefined) return;
+															if (el) rowRefsMap.current.set(review.id, el);
+															else rowRefsMap.current.delete(review.id);
+														}}
+														onClickMoreInfo={() => {
+															window._mtm?.push({
+																event: 'matomo_event',
+																container_type: 'backoffice',
+																service_id: form.product_id,
+																form_id: form.id,
+																template_slug: form.form_template.slug,
+																category: 'reviews',
+																action_type: 'read',
+																action: `review_detail_display`,
+																ui_source: 'review_button'
+															});
+														}}
+													/>
+												);
+											})}
+										</tbody>
+									</table>
+									<div
+										className={fr.cx(
+											'fr-grid-row--center',
+											'fr-grid-row',
+											'fr-mt-6v'
+										)}
+									>
+										<Pagination
+											count={nbPages}
+											showFirstLast
+											defaultPage={currentPage}
+											maxVisiblePages={6}
+											slicesSize={3}
+											getPageLinkProps={pageNumber => ({
+												onClick: event => {
+													event.preventDefault();
+													handlePageChange(pageNumber);
+													if (pageNumber !== currentPage) {
+														window._mtm?.push({
+															event: 'matomo_event',
+															container_type: 'backoffice',
+															service_id: form.product_id,
+															form_id: form.id,
+															template_slug: form.form_template.slug,
+															category: 'reviews',
+															action_type: 'read',
+															action: `review_other_page_display`,
+															ui_source: 'navigation',
+															value: pageNumber
+														});
+													}
+												},
+												href: '#',
+												classes: { link: fr.cx('fr-pagination__link') },
+												key: `pagination-link-${pageNumber}`
+											})}
+											className={fr.cx('fr-mt-1w')}
+										/>
+									</div>
+								</>
 							)}
 						</div>
 					)}
@@ -916,8 +909,12 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		width: '100%'
 	},
 	searchForm: {
+		display: 'flex',
+		alignSelf: 'end',
 		width: '100%',
 		'.fr-search-bar': {
+			width: '100%',
+
 			'.fr-input-group': {
 				width: '100%',
 				marginBottom: 0

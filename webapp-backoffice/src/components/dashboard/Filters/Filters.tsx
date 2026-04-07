@@ -8,6 +8,8 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { getDatesByShortCut } from '@/src/utils/tools';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { CustomModalProps } from '@/src/types/custom';
+import Select from '@codegouvfr/react-dsfr/Select';
 
 const dateShortcuts = [
 	{
@@ -41,6 +43,7 @@ type FiltersProps<T extends FilterSectionKey> = {
 	renderTags?: () => (React.JSX.Element | null)[] | React.JSX.Element | null;
 	form?: FormWithElements;
 	productId?: number;
+	filterModal?: CustomModalProps;
 };
 
 type FormError = {
@@ -55,7 +58,8 @@ const GenericFilters = <T extends FilterSectionKey>({
 	topRight,
 	renderTags,
 	form,
-	productId
+	productId,
+	filterModal
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters, resetSectionFilters } = useFilters();
@@ -160,8 +164,25 @@ const GenericFilters = <T extends FilterSectionKey>({
 			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
 		>
 			<div className={cx(fr.cx('fr-mb-1v'), classes.titleContainer)}>
-				<span className={fr.cx('fr-mb-2v', 'fr-h4')}>Filtres</span>
+				<span className={fr.cx('fr-mb-2v', 'fr-h5')}>Filtrer</span>
 				{topRight}
+			</div>
+
+			<div className={cx(classes.filterButtonsContainer)}>
+				{/* <Select label="Lien d'intégration" nativeSelectProps={{}}>
+					<option value="default">test</option>
+				</Select> */}
+				{filterModal && (
+					<Button
+						priority="tertiary"
+						iconId="fr-icon-filter-line"
+						iconPosition="right"
+						type="button"
+						nativeButtonProps={filterModal.buttonProps}
+					>
+						Plus de filtres
+					</Button>
+				)}
 			</div>
 			<div
 				className={cx(
@@ -169,7 +190,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					classes.dateShortcuts
 				)}
 			>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+				{/* <div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
 					<fieldset id="date-filters" className={fr.cx('fr-fieldset')}>
 						<legend className={fr.cx('fr-label')}>Filtres rapides</legend>
 						<ul>
@@ -278,7 +299,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 							/>
 						</div>
 					</form>
-				</div>
+				</div> */}
 
 				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>{children}</div>
 
@@ -323,9 +344,7 @@ const useStyles = tss.create({
 	filterContainer: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: '0.5rem',
-		border: '1px solid #e0e0e0',
-		padding: '1rem'
+		gap: '0.5rem'
 	},
 	stickyContainer: {
 		[fr.breakpoints.up('md')]: {
@@ -339,8 +358,8 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
+	filterButtonsContainer: {},
 	dateShortcuts: {
-		backgroundColor: fr.colors.decisions.background.default.grey.default,
 		padding: `1rem 0`,
 		fieldset: {
 			width: '100%',

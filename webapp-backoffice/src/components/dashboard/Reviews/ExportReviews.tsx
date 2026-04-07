@@ -60,7 +60,7 @@ const ExportReviews = (props: Props) => {
 			/>
 
 			<Button
-				priority="tertiary"
+				priority="secondary"
 				iconId="fr-icon-file-download-line"
 				iconPosition="right"
 				type="button"
