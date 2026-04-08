@@ -1,6 +1,6 @@
 import { Worker, type Job } from 'bullmq';
 import JSZip from 'jszip';
-import { $Enums } from '@prisma/client';
+import { $Enums, type Prisma } from '@prisma/client';
 import redis from '@/src/lib/redis';
 import prisma from '@/src/utils/db';
 import type { ExportJobData } from '@/src/lib/queue';
@@ -52,7 +52,7 @@ type OldFilters = {
 // ---------------------------------------------------------------------------
 // Filter helpers
 // ---------------------------------------------------------------------------
-const LABEL_TO_INTENTION: Record<string, string> = {
+const LABEL_TO_INTENTION: Record<string, $Enums.AnswerIntention> = {
 	'Très bien': 'good',
 	Moyen: 'medium',
 	Mauvais: 'bad'
@@ -82,41 +82,66 @@ function translateNewFiltersToOld(raw: RawFilters): OldFilters {
 	return old;
 }
 
-function buildFiltersWhere(filters: OldFilters, searchTerm: string): string {
-	const parts: string[] = [];
+/**
+ * Builds a Prisma ReviewWhereInput from the parsed filter object.
+ * Each answer condition is stacked with AND so multiple EXISTS sub-queries
+ * are generated — matching the previous raw SQL behaviour exactly.
+ */
+function buildReviewWhere(
+	filters: OldFilters,
+	searchTerm: string
+): Prisma.ReviewWhereInput {
+	const andConditions: Prisma.ReviewWhereInput[] = [];
 
 	if (filters.satisfaction?.length) {
-		const placeholders = filters.satisfaction
-			.map(v => `'${v.replace(/'/g, "''")}'`)
-			.join(', ');
-		parts.push(
-			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[${placeholders}]::"AnswerIntention"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
+		const intentions = filters.satisfaction.filter(
+			(v): v is $Enums.AnswerIntention =>
+				Object.values($Enums.AnswerIntention).includes(v as $Enums.AnswerIntention)
 		);
+		if (intentions.length) {
+			andConditions.push({
+				answers: {
+					some: {
+						field_code: 'satisfaction',
+						intention: { in: intentions }
+					}
+				}
+			});
+		}
 	}
 
 	if (filters.comprehension?.length) {
-		const placeholders = filters.comprehension
-			.map(v => `'${v.replace(/'/g, "''")}'`)
-			.join(', ');
-		parts.push(
-			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'comprehension' AND a.answer_text = ANY(ARRAY[${placeholders}]::text[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
-		);
+		andConditions.push({
+			answers: {
+				some: {
+					field_code: 'comprehension',
+					answer_text: { in: filters.comprehension }
+				}
+			}
+		});
 	}
 
 	if (filters.needVerbatim) {
-		parts.push(
-			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
-		);
+		andConditions.push({
+			answers: { some: { field_code: 'verbatim' } }
+		});
 	}
 
 	if (searchTerm) {
-		const escaped = searchTerm.replace(/'/g, "''").replace(/%/g, '\\%').replace(/_/g, '\\_');
-		parts.push(
-			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.answer_text ILIKE '%${escaped}%' ESCAPE '\\' AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
-		);
+		andConditions.push({
+			answers: {
+				some: {
+					field_code: 'verbatim',
+					answer_text: { contains: searchTerm, mode: 'insensitive' }
+				}
+			}
+		});
 	}
 
-	return parts.join(' AND ');
+	// TODO: handle needOtherDifficulties and needOtherHelp
+	// once the corresponding field_codes in the Answer table are known.
+
+	return andConditions.length ? { AND: andConditions } : {};
 }
 
 // ---------------------------------------------------------------------------
@@ -130,10 +155,12 @@ function getMonthRanges(
 	let current = new Date(startDate);
 
 	while (current <= endDate) {
-		const monthStart =
-			current === startDate && startDate.getDate() === 1
-				? new Date(current.getTime() - 2 * 60 * 60 * 1000) // -2h for timezone fix
-				: new Date(current.getFullYear(), current.getMonth(), 1, 0, 0, 0, 0);
+		const monthStart = new Date(
+			current.getFullYear(),
+			current.getMonth(),
+			1,
+			0, 0, 0, 0
+		);
 
 		const lastDay = new Date(
 			current.getFullYear(),
@@ -144,10 +171,7 @@ function getMonthRanges(
 			current.getFullYear(),
 			current.getMonth(),
 			lastDay,
-			23,
-			59,
-			59,
-			999
+			23, 59, 59, 999
 		);
 		if (monthEnd > endDate) monthEnd = endDate;
 
@@ -261,7 +285,7 @@ async function processExportJob(
 	// 3. Parse filter params
 	// ------------------------------------------------------------------
 	let filterParams: FilterParams = {};
-	let filtersWhere = '';
+	let reviewWhere: Prisma.ReviewWhereInput = {};
 	let searchTerm = '';
 
 	if (exportRecord.params) {
@@ -275,7 +299,7 @@ async function processExportJob(
 					? translateNewFiltersToOld(rawFilters as RawFilters)
 					: (rawFilters as OldFilters);
 
-			filtersWhere = buildFiltersWhere(oldFilters, searchTerm);
+			reviewWhere = buildReviewWhere(oldFilters, searchTerm);
 		} catch {
 			console.error(
 				`[export-worker] Failed to parse params for export ${exportId}, proceeding without filters`
@@ -286,13 +310,9 @@ async function processExportJob(
 	// ------------------------------------------------------------------
 	// 4. Resolve date range
 	// ------------------------------------------------------------------
-	let startDate = filterParams.startDate
+	const startDate = filterParams.startDate
 		? new Date(filterParams.startDate)
-		: new Date('2018-01-01');
-
-	if (startDate.getDate() === 1) {
-		startDate = new Date(startDate.getTime() - 2 * 60 * 60 * 1000);
-	}
+		: new Date('2018-01-01T00:00:00.000Z');
 
 	const endDateRaw = filterParams.endDate
 		? new Date(filterParams.endDate)
@@ -301,23 +321,19 @@ async function processExportJob(
 		endDateRaw.getFullYear(),
 		endDateRaw.getMonth(),
 		endDateRaw.getDate(),
-		23,
-		59,
-		59,
-		999
+		23, 59, 59, 999
 	);
 
 	// ------------------------------------------------------------------
 	// 5. Count total reviews
 	// ------------------------------------------------------------------
-	const countResult = await prisma.$queryRawUnsafe<[{ count: bigint }]>(
-		`SELECT COUNT(*) as count
-		 FROM public."Review" r
-		 WHERE r.product_id = ${exportRecord.product_id}
-		   AND r.created_at BETWEEN '${startDate.toISOString()}' AND '${endDate.toISOString()}'
-		   ${filtersWhere ? `AND ${filtersWhere}` : ''}`
-	);
-	const totalReviews = Number(countResult[0]?.count ?? 0);
+	const totalReviews = await prisma.review.count({
+		where: {
+			product_id: exportRecord.product_id,
+			created_at: { gte: startDate, lte: endDate },
+			...reviewWhere
+		}
+	});
 	console.log(
 		`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`
 	);
@@ -350,81 +366,68 @@ async function processExportJob(
 		let offset = 0;
 
 		while (true) {
-			const reviewRows = await prisma.$queryRawUnsafe<
-				Array<{
-					review_id: bigint;
-					review_created_at: Date;
-				}>
-			>(
-				`SELECT
-					r.id AS review_id,
-					r.created_at AS review_created_at
-				 FROM public."Review" r
-				 WHERE r.product_id = ${exportRecord.product_id}
-				   AND r.created_at BETWEEN '${monthStart.toISOString()}' AND '${monthEnd.toISOString()}'
-				   ${filtersWhere ? `AND ${filtersWhere}` : ''}
-				 ORDER BY r.created_at DESC
-				 LIMIT ${PAGE_SIZE} OFFSET ${offset}`
-			);
+			// 7a. Fetch a page of review IDs + timestamps
+			const reviews = await prisma.review.findMany({
+				where: {
+					product_id: exportRecord.product_id,
+					created_at: { gte: monthStart, lte: monthEnd },
+					...reviewWhere
+				},
+				orderBy: { created_at: 'desc' },
+				skip: offset,
+				take: PAGE_SIZE,
+				select: { id: true, created_at: true }
+			});
 
-			if (reviewRows.length === 0) break;
+			if (reviews.length === 0) break;
 
-			const reviewIds = reviewRows.map(r => Number(r.review_id));
+			const reviewIds = reviews.map(r => r.id);
 
-			// Fetch all answers for this batch in one query
-			const answerRows = await prisma.$queryRawUnsafe<
-				Array<{
-					review_id: bigint;
-					answer_id: bigint;
-					parent_answer_id: bigint | null;
-					field_code: string | null;
-					field_label: string | null;
-					answer_text: string | null;
-				}>
-			>(
-				`SELECT
-					a.review_id,
-					a.id AS answer_id,
-					a.parent_answer_id,
-					a.field_code,
-					a.field_label,
-					a.answer_text
-				 FROM public."Answer" a
-				 WHERE a.review_id = ANY(ARRAY[${reviewIds.join(',')}]::bigint[])
-				   AND a.created_at BETWEEN '${monthStart.toISOString()}' AND '${monthEnd.toISOString()}'
-				 ORDER BY a.id ASC`
-			);
+			// 7b. Fetch all answers for this batch in one query.
+			// The review_created_at bound keeps the composite index active:
+			// @@index([review_id, review_created_at]) on Answer.
+			const answerRows = await prisma.answer.findMany({
+				where: {
+					review_id: { in: reviewIds },
+					review_created_at: { gte: monthStart, lte: monthEnd }
+				},
+				orderBy: { id: 'asc' },
+				select: {
+					review_id: true,
+					id: true,
+					parent_answer_id: true,
+					field_code: true,
+					field_label: true,
+					answer_text: true
+				}
+			});
 
 			// Group answers by review
-			const answersByReviewId = new Map<
-				number,
-				typeof answerRows
-			>();
+			const answersByReviewId = new Map<number, typeof answerRows>();
 			for (const answer of answerRows) {
-				const rid = Number(answer.review_id);
-				if (!answersByReviewId.has(rid)) answersByReviewId.set(rid, []);
-				answersByReviewId.get(rid)!.push(answer);
+				if (!answersByReviewId.has(answer.review_id))
+					answersByReviewId.set(answer.review_id, []);
+				answersByReviewId.get(answer.review_id)!.push(answer);
 			}
 
-			for (const row of reviewRows) {
-				const rid = Number(row.review_id);
-				const answers = answersByReviewId.get(rid) ?? [];
+			for (const review of reviews) {
+				const answers = answersByReviewId.get(review.id) ?? [];
 
 				// O(1) parent lookup
 				const answerById = new Map<number, typeof answers[0]>();
-				for (const a of answers) answerById.set(Number(a.answer_id), a);
+				for (const a of answers) answerById.set(a.id, a);
 
 				// Assemble answer map keyed by field_code;
 				// parent option text is prepended to child values
 				const answerAccumulator = new Map<string, string[]>();
 				for (const answer of answers) {
-					const code = answer.field_code ?? answer.field_label ?? '';
-					let text = answer.answer_text ?? '';
+					const code = answer.field_code || answer.field_label;
+					let text = answer.answer_text;
 
 					if (answer.parent_answer_id !== null) {
-						const parent = answerById.get(Number(answer.parent_answer_id));
+						const parent = answerById.get(answer.parent_answer_id);
 						if (parent) {
-							text = `${parent.answer_text ?? ''} : ${text}`;
+							text = `${parent.answer_text} : ${text}`;
 						}
 					}
 
@@ -433,7 +436,7 @@ async function processExportJob(
 					answerAccumulator.get(code)!.push(text);
 
 					if (isDynamic && code && !dynamicColumnMap.has(code)) {
-						dynamicColumnMap.set(code, answer.field_label ?? code);
+						dynamicColumnMap.set(code, answer.field_label);
 					}
 				}
 
@@ -442,23 +445,19 @@ async function processExportJob(
 					answersMap[code] = values.join(' / ');
 				});
 
-				// +2h timezone adjustment (mirrors Python)
-				const createdAt = new Date(
-					row.review_created_at.getTime() + 2 * 60 * 60 * 1000
-				);
 				const reviewRow: ReviewRow = {
-					review_id: Number(row.review_id).toString(16).slice(-7),
-					review_created_at: createdAt,
+					review_id: review.id.toString(16).slice(-7),
+					review_created_at: review.created_at,
 					answers: answersMap
 				};
 
 				allReviews.push(reviewRow);
-				const year = row.review_created_at.getFullYear();
+				const year = review.created_at.getFullYear();
 				if (!allReviewsByYear.has(year)) allReviewsByYear.set(year, []);
 				allReviewsByYear.get(year)!.push(reviewRow);
 			}
 
-			retrievedReviews += reviewRows.length;
+			retrievedReviews += reviews.length;
 			offset += PAGE_SIZE;
 
 			// Update progress (capped at 95% during fetch phase)
@@ -486,7 +485,7 @@ async function processExportJob(
 	const safeName = sanitizeFilename(productName);
 
 	// ------------------------------------------------------------------
-	// 7. Mark file generation start (95%)
+	// Mark file generation start (95%)
 	// ------------------------------------------------------------------
 	await prisma.export.update({
 		where: { id: exportId },
@@ -516,11 +515,7 @@ async function processExportJob(
 				yearBuffer = generateCsvBuffer(yearReviews, columns);
 				zip.file(`Avis_${year}.csv`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
 			} else {
-				yearBuffer = await generateXlsBuffer(
-					yearReviews,
-					columns,
-					productName
-				);
+				yearBuffer = await generateXlsBuffer(yearReviews, columns, productName);
 				zip.file(`Avis_${year}.xlsx`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
 			}
 		}
