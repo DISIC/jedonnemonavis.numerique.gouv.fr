@@ -1,5 +1,5 @@
 import ExcelJS from '@mui/x-internal-exceljs-fork';
-import type { ReviewRow } from './generate-csv';
+import type { ReviewRow, TemplateColumn } from './generate-csv';
 
 // Columns that contain " / "-separated answer values need list formatting
 function formatReviewContent(content: string): string {
@@ -14,22 +14,27 @@ function estimateLineCount(cellText: string, wrapLength = 30): number {
 	return lines.reduce((sum, line) => sum + Math.floor(line.length / wrapLength) + 1, 0);
 }
 
+// Fixed column indices (1-based, ExcelJS convention)
+const COL_REVIEW_ID = 1;
+const COL_REVIEW_DATE = 2;
+const FIXED_COLS = 2;
+
 export async function generateXlsBuffer(
 	reviews: ReviewRow[],
-	fieldLabels: string[],
+	columns: TemplateColumn[],
 	_productName: string
 ): Promise<Buffer> {
 	const workbook = new ExcelJS.Workbook();
 	const worksheet = workbook.addWorksheet('Avis');
 
-	const columns = [
+	const headers = [
 		'Review ID',
 		'Review Created At',
-		...fieldLabels
+		...columns.map(c => c.label)
 	];
 
 	// Header row
-	const headerRow = worksheet.addRow(columns);
+	const headerRow = worksheet.addRow(headers);
 	headerRow.eachCell(cell => {
 		cell.font = { bold: true, size: 12 };
 		cell.fill = {
@@ -50,19 +55,18 @@ export async function generateXlsBuffer(
 		const rowValues: (string | number | Date | null)[] = [
 			review.review_id,
 			new Date(review.review_created_at),
-			...fieldLabels.map(label => {
-				const val = review.answers[label] ?? '';
+			...columns.map(col => {
+				const val = review.answers[col.code] ?? '';
 				return formatReviewContent(val);
 			})
 		];
 
 		const dataRow = worksheet.addRow(rowValues);
 
-		// Format date cell
-		const dateCell = dataRow.getCell(6);
-		dateCell.numFmt = 'dd/mm/yyyy hh:mm:ss';
+		// Format date cell (column 2 = Review Created At)
+		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'dd/mm/yyyy hh:mm:ss';
 
-		// Apply border + wrap to all cells
+		// Apply border + wrap to all cells; estimate row height from answer columns
 		let maxLines = 1;
 		dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
 			cell.border = {
@@ -73,7 +77,7 @@ export async function generateXlsBuffer(
 			};
 			cell.alignment = { wrapText: true };
 
-			if (colNumber > 6) {
+			if (colNumber > FIXED_COLS) {
 				const lines = estimateLineCount(String(cell.value ?? ''), 50);
 				if (lines > maxLines) maxLines = lines;
 			}
@@ -84,7 +88,7 @@ export async function generateXlsBuffer(
 
 	// Auto column widths
 	worksheet.columns.forEach((column, index) => {
-		const header = columns[index] ?? '';
+		const header = headers[index] ?? '';
 		let maxLength = header.length + 2;
 
 		worksheet.eachRow((row, rowNumber) => {

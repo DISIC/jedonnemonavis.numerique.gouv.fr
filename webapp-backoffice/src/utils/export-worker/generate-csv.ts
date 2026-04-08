@@ -3,23 +3,28 @@ import { stringify } from 'csv-stringify/sync';
 export type ReviewRow = {
 	review_id: string;
 	review_created_at: string;
-	answers: Record<string, string>;
+	answers: Record<string, string>; // keyed by field_code
+};
+
+export type TemplateColumn = {
+	code: string;
+	label: string;
 };
 
 export function generateCsvBuffer(
 	reviews: ReviewRow[],
-	fieldLabels: string[]
+	columns: TemplateColumn[]
 ): Buffer {
 	const header = [
 		'Review ID',
 		'Review Created At',
-		...fieldLabels
+		...columns.map(c => c.label)
 	];
 
 	const rows = reviews.map(review => [
 		review.review_id,
 		review.review_created_at,
-		...fieldLabels.map(label => review.answers[label] ?? '')
+		...columns.map(c => review.answers[c.code] ?? '')
 	]);
 
 	const csv = stringify([header, ...rows]);

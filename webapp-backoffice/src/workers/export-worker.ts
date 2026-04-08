@@ -3,7 +3,7 @@ import JSZip from 'jszip';
 import redis from '@/src/lib/redis';
 import prisma from '@/src/utils/db';
 import type { ExportJobData } from '@/src/lib/queue';
-import { generateCsvBuffer, type ReviewRow } from '@/src/utils/export-worker/generate-csv';
+import { generateCsvBuffer, type ReviewRow, type TemplateColumn } from '@/src/utils/export-worker/generate-csv';
 import { generateXlsBuffer } from '@/src/utils/export-worker/generate-xls';
 import { uploadToS3, generateDownloadLink } from '@/src/utils/export-worker/upload-s3';
 import { sendExportReadyEmail, sendExportFailedEmail } from '@/src/utils/export-worker/send-email';
@@ -170,30 +170,59 @@ function formatDateForFilename(date: Date): string {
 }
 
 // ---------------------------------------------------------------------------
-// Desired column order (mirrors Python)
+// Dynamic column loader — derives ordered columns from the form template
 // ---------------------------------------------------------------------------
-const DESIRED_FIELD_ORDER = [
-	'De façon générale, comment ça s\'est passé ?',
-	'Qu\'avez-vous pensé des informations et des instructions fournies ?',
-	'Durant votre parcours, avez-vous tenté d\'obtenir de l\'aide par l\'un des moyens suivants ?',
-	'Quand vous avez cherché de l\'aide, avez-vous réussi à joindre l\'administration ?',
-	'Comment évaluez-vous la qualité de l\'aide que vous avez obtenue de la part de l\'administration ?',
-	'Souhaitez-vous nous en dire plus ?',
-	'De façon générale, comment ça s\'est passé ? ',
-	'Était-ce facile à utiliser ?',
-	'Avez-vous rencontré des difficultés ?',
-	'Pouvez-vous préciser quelle(s) autre(s) difficulté(s) vous avez rencontré ?',
-	'De quelle aide avez vous eu besoin ?',
-	'Pouvez-vous préciser de quelle autre aide vous avez eu besoin ?'
-];
 
-function sortFieldLabels(labels: Set<string>): string[] {
-	const orderMap = new Map(DESIRED_FIELD_ORDER.map((l, i) => [l, i]));
-	return Array.from(labels).sort(
-		(a, b) =>
-			(orderMap.get(a) ?? DESIRED_FIELD_ORDER.length) -
-			(orderMap.get(b) ?? DESIRED_FIELD_ORDER.length)
-	);
+// Input field types that produce Answer rows (excludes decorative blocks)
+const INPUT_BLOCK_TYPES = new Set([
+	'input_text',
+	'input_text_area',
+	'input_email',
+	'mark_input',
+	'smiley_input',
+	'select',
+	'radio',
+	'checkbox'
+]);
+
+/**
+ * Load ordered columns from a specific form's template.
+ * Steps and blocks are ordered by their `position` field so the export
+ * columns always match the visual order of the form.
+ */
+async function loadTemplateColumns(formId: number): Promise<TemplateColumn[]> {
+	const form = await prisma.form.findUnique({
+		where: { id: formId },
+		include: {
+			form_template: {
+				include: {
+					form_template_steps: {
+						orderBy: { position: 'asc' },
+						include: {
+							form_template_blocks: {
+								orderBy: { position: 'asc' }
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+
+	if (!form) return [];
+
+	const columns: TemplateColumn[] = [];
+	for (const step of form.form_template.form_template_steps) {
+		for (const block of step.form_template_blocks) {
+			if (block.field_code && INPUT_BLOCK_TYPES.has(block.type_bloc)) {
+				columns.push({
+					code: block.field_code,
+					label: block.label ?? block.field_code
+				});
+			}
+		}
+	}
+	return columns;
 }
 
 // ---------------------------------------------------------------------------
@@ -293,11 +322,24 @@ async function processExportJob(
 	);
 
 	// ------------------------------------------------------------------
-	// 6. Paginated fetch by month
+	// 6. Load template columns
+	// When the export is tied to a specific form, derive the ordered
+	// column list from its template (steps × blocks, ordered by position).
+	// Otherwise, accumulate columns dynamically from the answers seen.
+	// ------------------------------------------------------------------
+	let templateColumns: TemplateColumn[] | null = null;
+	if (exportRecord.form_id) {
+		templateColumns = await loadTemplateColumns(exportRecord.form_id);
+	}
+
+	// Fallback accumulator: field_code → label (first label seen wins)
+	const dynamicColumnMap = new Map<string, string>();
+
+	// ------------------------------------------------------------------
+	// 7. Paginated fetch by month
 	// ------------------------------------------------------------------
 	const allReviews: ReviewRow[] = [];
 	const allReviewsByYear: Map<number, ReviewRow[]> = new Map();
-	const fieldLabelsSet = new Set<string>();
 	const monthRanges = getMonthRanges(startDate, endDate);
 	let retrievedReviews = 0;
 
@@ -340,6 +382,7 @@ async function processExportJob(
 					review_id: bigint;
 					answer_id: bigint;
 					parent_answer_id: bigint | null;
+					field_code: string | null;
 					field_label: string | null;
 					answer_text: string | null;
 					review_created_at: Date;
@@ -349,6 +392,7 @@ async function processExportJob(
 					a.review_id,
 					a.id AS answer_id,
 					a.parent_answer_id,
+					a.field_code,
 					a.field_label,
 					a.answer_text,
 					r.created_at AS review_created_at
@@ -373,10 +417,11 @@ async function processExportJob(
 				const rid = Number(row.review_id);
 				const answers = answersByReviewId.get(rid) ?? [];
 
-				// Assemble answer map: parent values are prepended to child values
+				// Assemble answer map keyed by field_code;
+				// parent option text is prepended to child values
 				const answerAccumulator = new Map<string, string[]>();
 				for (const answer of answers) {
-					const label = answer.field_label ?? '';
+					const code = answer.field_code ?? answer.field_label ?? '';
 					let text = answer.answer_text ?? '';
 
 					if (answer.parent_answer_id !== null) {
@@ -388,14 +433,19 @@ async function processExportJob(
 						}
 					}
 
-					if (!answerAccumulator.has(label))
-						answerAccumulator.set(label, []);
-					answerAccumulator.get(label)!.push(text);
+					if (!answerAccumulator.has(code))
+						answerAccumulator.set(code, []);
+					answerAccumulator.get(code)!.push(text);
+
+					// Track field_code → label for the dynamic fallback
+					if (!templateColumns && code && !dynamicColumnMap.has(code)) {
+						dynamicColumnMap.set(code, answer.field_label ?? code);
+					}
 				}
 
 				const answersMap: Record<string, string> = {};
-				answerAccumulator.forEach((values, label) => {
-					answersMap[label] = values.join(' / ');
+				answerAccumulator.forEach((values, code) => {
+					answersMap[code] = values.join(' / ');
 				});
 
 				// +2h timezone adjustment (mirrors Python)
@@ -415,10 +465,6 @@ async function processExportJob(
 				const year = row.review_created_at.getFullYear();
 				if (!allReviewsByYear.has(year)) allReviewsByYear.set(year, []);
 				allReviewsByYear.get(year)!.push(reviewRow);
-
-				for (const label of Object.keys(answersMap)) {
-					fieldLabelsSet.add(label);
-				}
 			}
 
 			retrievedReviews += reviewRows.length;
@@ -439,7 +485,13 @@ async function processExportJob(
 		}
 	}
 
-	const fieldLabels = sortFieldLabels(fieldLabelsSet);
+	// Resolve final column list:
+	// - template-driven when form_id was set (ordered by step/block position)
+	// - dynamic (insertion order) otherwise
+	const columns: TemplateColumn[] =
+		templateColumns ??
+		Array.from(dynamicColumnMap.entries()).map(([code, label]) => ({ code, label }));
+
 	const switchToZip = totalReviews > MAX_LINES_SWITCH;
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
@@ -462,9 +514,9 @@ async function processExportJob(
 	if (!switchToZip) {
 		// Single file
 		if (exportFormat === 'csv') {
-			fileBuffer = generateCsvBuffer(allReviews, fieldLabels);
+			fileBuffer = generateCsvBuffer(allReviews, columns);
 		} else {
-			fileBuffer = await generateXlsBuffer(allReviews, fieldLabels, productName);
+			fileBuffer = await generateXlsBuffer(allReviews, columns, productName);
 		}
 		fileName = `Avis_${safeName}_${currentDate}.${ext}`;
 	} else {
@@ -473,12 +525,12 @@ async function processExportJob(
 		for (const [year, yearReviews] of Array.from(allReviewsByYear.entries())) {
 			let yearBuffer: Buffer;
 			if (exportFormat === 'csv') {
-				yearBuffer = generateCsvBuffer(yearReviews, fieldLabels);
+				yearBuffer = generateCsvBuffer(yearReviews, columns);
 				zip.file(`Avis_${year}.csv`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
 			} else {
 				yearBuffer = await generateXlsBuffer(
 					yearReviews,
-					fieldLabels,
+					columns,
 					productName
 				);
 				zip.file(`Avis_${year}.xlsx`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
