@@ -24,10 +24,6 @@ export async function generateXlsBuffer(
 
 	const columns = [
 		'Review ID',
-		'Form ID',
-		'Product ID',
-		'Button ID',
-		'XWiki ID',
 		'Review Created At',
 		...fieldLabels
 	];
@@ -53,10 +49,6 @@ export async function generateXlsBuffer(
 	for (const review of reviews) {
 		const rowValues: (string | number | Date | null)[] = [
 			review.review_id,
-			review.form_id,
-			review.product_id,
-			review.button_id,
-			review.xwiki_id,
 			new Date(review.review_created_at),
 			...fieldLabels.map(label => {
 				const val = review.answers[label] ?? '';

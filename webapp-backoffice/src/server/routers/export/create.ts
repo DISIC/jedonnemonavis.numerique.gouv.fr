@@ -36,7 +36,5 @@ export const createExportMutation = async ({
 		{ jobId: `export-${exportCsv.id}` }
 	);
 
-	console.log(`[createExportMutation] Enqueued export job with ID ${test.id} for export ID ${exportCsv.id}`);
-
 	return { data: exportCsv };
 };

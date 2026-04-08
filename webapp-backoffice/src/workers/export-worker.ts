@@ -204,8 +204,6 @@ async function processExportJob(
 ): Promise<void> {
 	const { exportId } = job.data;
 
-	console.log(`[export-worker] Starting export ${exportId}...`);
-
 	// ------------------------------------------------------------------
 	// 1. Load export record + related user & product
 	// ------------------------------------------------------------------
@@ -406,10 +404,6 @@ async function processExportJob(
 				);
 				const reviewRow: ReviewRow = {
 					review_id: Number(row.review_id).toString(16).slice(-7),
-					form_id: row.form_id,
-					product_id: row.product_id,
-					button_id: row.button_id,
-					xwiki_id: row.xwiki_id,
 					review_created_at: createdAt
 						.toISOString()
 						.replace('T', ' ')
