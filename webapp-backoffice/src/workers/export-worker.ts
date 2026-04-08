@@ -110,9 +110,9 @@ function buildFiltersWhere(filters: OldFilters, searchTerm: string): string {
 	}
 
 	if (searchTerm) {
-		const escaped = searchTerm.replace(/'/g, "''");
+		const escaped = searchTerm.replace(/'/g, "''").replace(/%/g, '\\%').replace(/_/g, '\\_');
 		parts.push(
-			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.answer_text ILIKE '%${escaped}%' AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
+			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'verbatim' AND a.answer_text ILIKE '%${escaped}%' ESCAPE '\\' AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
 		);
 	}
 
@@ -344,6 +344,7 @@ async function processExportJob(
 	const allReviewsByYear: Map<number, ReviewRow[]> = new Map();
 	const monthRanges = getMonthRanges(startDate, endDate);
 	let retrievedReviews = 0;
+	let lastProgressPercent = -1;
 
 	for (const [monthStart, monthEnd] of monthRanges) {
 		let offset = 0;
@@ -352,19 +353,11 @@ async function processExportJob(
 			const reviewRows = await prisma.$queryRawUnsafe<
 				Array<{
 					review_id: bigint;
-					form_id: number | null;
-					product_id: number;
-					button_id: string | null;
-					xwiki_id: string | null;
 					review_created_at: Date;
 				}>
 			>(
 				`SELECT
 					r.id AS review_id,
-					r.form_id,
-					r.product_id,
-					r.button_id,
-					r.xwiki_id,
 					r.created_at AS review_created_at
 				 FROM public."Review" r
 				 WHERE r.product_id = ${exportRecord.product_id}
@@ -387,7 +380,6 @@ async function processExportJob(
 					field_code: string | null;
 					field_label: string | null;
 					answer_text: string | null;
-					review_created_at: Date;
 				}>
 			>(
 				`SELECT
@@ -396,12 +388,11 @@ async function processExportJob(
 					a.parent_answer_id,
 					a.field_code,
 					a.field_label,
-					a.answer_text,
-					r.created_at AS review_created_at
+					a.answer_text
 				 FROM public."Answer" a
-				 JOIN public."Review" r ON r.id = a.review_id
 				 WHERE a.review_id = ANY(ARRAY[${reviewIds.join(',')}]::bigint[])
-				   AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day'`
+				   AND a.created_at BETWEEN '${monthStart.toISOString()}' AND '${monthEnd.toISOString()}'
+				 ORDER BY a.id ASC`
 			);
 
 			// Group answers by review
@@ -476,10 +467,13 @@ async function processExportJob(
 					95,
 					Math.floor((retrievedReviews * 95) / totalReviews)
 				);
-				await Promise.all([
-					job.updateProgress(percent),
-					prisma.export.update({ where: { id: exportId }, data: { progress: percent } })
-				]);
+				if (percent !== lastProgressPercent) {
+					lastProgressPercent = percent;
+					await Promise.all([
+						job.updateProgress(percent),
+						prisma.export.update({ where: { id: exportId }, data: { progress: percent } })
+					]);
+				}
 			}
 		}
 	}
@@ -512,7 +506,7 @@ async function processExportJob(
 		} else {
 			fileBuffer = await generateXlsBuffer(allReviews, columns, productName);
 		}
-		fileName = `Avis_${safeName}_${currentDate}.${exportFormat}`;
+		fileName = `Avis_${safeName}_${currentDate}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`;
 	} else {
 		// Multi-year zip
 		const zip = new JSZip();
