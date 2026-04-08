@@ -24,13 +24,11 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Accordion } from '@codegouvfr/react-dsfr/Accordion';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 import { Highlight } from '@codegouvfr/react-dsfr/Highlight';
-import Select from '@codegouvfr/react-dsfr/Select';
 import {
 	Button,
 	FormTemplateBlockOption,
 	RightAccessStatus
 } from '@prisma/client';
-import { push } from '@socialgouv/matomo-next';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -119,13 +117,9 @@ const StatsTab = ({
 }: Props) => {
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
-	const { filters, updateFilters } = useFilters();
+	const { filters } = useFilters();
 
 	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
-
-	const [selectedButton, setSelectedButton] = useState<number | undefined>(
-		filters['productStats'].buttonId
-	);
 
 	useEffect(() => {
 		window._mtm?.push({
@@ -140,10 +134,6 @@ const StatsTab = ({
 			ui_source: 'onglet'
 		});
 	}, []);
-
-	useEffect(() => {
-		setSelectedButton(filters['productStats'].buttonId);
-	}, [filters['productStats'].buttonId]);
 
 	const formConfigs = form.form_configs;
 	const currentFormConfig = formConfigs[0];
@@ -469,43 +459,11 @@ const StatsTab = ({
 				<h2 className={fr.cx('fr-mb-0')}>Statistiques</h2>
 			</div>
 			<div className={cx(classes.container)}>
-				<GenericFilters filterKey="productStats" form={form}>
-					<Select
-						label="Sélectionner une source"
-						nativeSelectProps={{
-							value: selectedButton ?? 'undefined',
-							onChange: e => {
-								const newValue =
-									e.target.value === 'undefined'
-										? undefined
-										: parseInt(e.target.value);
-
-								setSelectedButton(newValue);
-
-								updateFilters({
-									...filters,
-									productStats: {
-										...filters['productStats'],
-										buttonId: newValue
-									},
-									sharedFilters: {
-										...filters['sharedFilters'],
-										hasChanged: true
-									}
-								});
-
-								push(['trackEvent', 'Stats', 'Sélection-bouton']);
-							}
-						}}
-					>
-						<option value="undefined">Toutes les sources</option>
-						{buttons.map(button => (
-							<option key={button.id} value={button.id}>
-								{button.title}
-							</option>
-						))}
-					</Select>
-				</GenericFilters>
+				<GenericFilters
+					filterKey="productStats"
+					form={form}
+					buttons={buttons}
+				/>
 				{!isLoadingReviewsDataWithFilters &&
 				nbReviewsWithFilters > nbMaxReviews ? (
 					<div className={fr.cx('fr-mt-10v')} role="alert">

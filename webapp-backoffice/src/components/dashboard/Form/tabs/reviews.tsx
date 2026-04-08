@@ -18,16 +18,11 @@ import {
 	getExportPeriodLabel,
 	parseExportParams
 } from '@/src/utils/export';
-import {
-	formatDateToFrenchString,
-	getNbPages,
-	normalizeString
-} from '@/src/utils/tools';
+import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { LinearProgress } from '@mui/material';
@@ -635,53 +630,11 @@ const ReviewsTab = (props: Props) => {
 								<ReviewFilterTags buttons={buttons} form={form} />
 							)}
 							filterModal={filter_modal}
-						>
-							{reviewLog[0] && (
-								<Checkbox
-									style={{ userSelect: 'none' }}
-									className={fr.cx('fr-mb-0')}
-									options={[
-										{
-											label: 'Afficher uniquement les nouvelles réponses',
-											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchString(
-												reviewLog[0].created_at.toString(),
-												{ withHour: true }
-											)})`,
-											nativeInputProps: {
-												name: 'favorites-products',
-												checked: filters.productReviews.displayNew,
-												onChange: e => {
-													updateFilters({
-														...filters,
-														productReviews: {
-															...filters.productReviews,
-															displayNew: e.target.checked
-														},
-														sharedFilters: {
-															...filters.sharedFilters,
-															hasChanged: true
-														}
-													});
-
-													window._mtm?.push({
-														event: 'matomo_event',
-														container_type: 'backoffice',
-														service_id: form.product_id,
-														form_id: form.id,
-														template_slug: form.form_template.slug,
-														category: 'reviews',
-														action_type: 'read',
-														action: `only_new_review_apply`,
-														ui_source: 'quick_filter',
-														value: e.target.checked
-													});
-												}
-											}
-										}
-									]}
-								/>
-							)}
-						</GenericFilters>
+							buttons={buttons}
+							showNewReviewsOption={!!reviewLog[0]}
+							reviewLogDate={reviewLog[0]?.created_at.toString()}
+							form={form}
+						/>
 					</div>
 					<ReviewKeywordFilters
 						product_id={form.product_id}
