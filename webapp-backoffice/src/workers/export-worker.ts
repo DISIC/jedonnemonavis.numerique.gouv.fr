@@ -1,5 +1,6 @@
 import { Worker, type Job } from 'bullmq';
 import JSZip from 'jszip';
+import { $Enums } from '@prisma/client';
 import redis from '@/src/lib/redis';
 import prisma from '@/src/utils/db';
 import type { ExportJobData } from '@/src/lib/queue';
@@ -86,7 +87,7 @@ function buildFiltersWhere(filters: OldFilters, searchTerm: string): string {
 
 	if (filters.satisfaction?.length) {
 		const placeholders = filters.satisfaction
-			.map(v => `'${v}'`)
+			.map(v => `'${v.replace(/'/g, "''")}'`)
 			.join(', ');
 		parts.push(
 			`EXISTS (SELECT 1 FROM public."Answer" a WHERE a.review_id = r.id AND a.field_code = 'satisfaction' AND a.intention = ANY(ARRAY[${placeholders}]::"AnswerIntention"[]) AND a.created_at BETWEEN r.created_at - interval '1 day' AND r.created_at + interval '1 day')`
@@ -174,7 +175,7 @@ function formatDateForFilename(date: Date): string {
 // ---------------------------------------------------------------------------
 
 // Input field types that produce Answer rows (excludes decorative blocks)
-const INPUT_BLOCK_TYPES = new Set([
+const INPUT_BLOCK_TYPES = new Set<$Enums.Typebloc>([
 	'input_text',
 	'input_text_area',
 	'input_email',
@@ -332,7 +333,8 @@ async function processExportJob(
 		templateColumns = await loadTemplateColumns(exportRecord.form_id);
 	}
 
-	// Fallback accumulator: field_code → label (first label seen wins)
+	// Fallback accumulator used only when no template is available
+	const isDynamic = templateColumns === null;
 	const dynamicColumnMap = new Map<string, string>();
 
 	// ------------------------------------------------------------------
@@ -417,6 +419,10 @@ async function processExportJob(
 				const rid = Number(row.review_id);
 				const answers = answersByReviewId.get(rid) ?? [];
 
+				// O(1) parent lookup
+				const answerById = new Map<number, typeof answers[0]>();
+				for (const a of answers) answerById.set(Number(a.answer_id), a);
+
 				// Assemble answer map keyed by field_code;
 				// parent option text is prepended to child values
 				const answerAccumulator = new Map<string, string[]>();
@@ -425,9 +431,7 @@ async function processExportJob(
 					let text = answer.answer_text ?? '';
 
 					if (answer.parent_answer_id !== null) {
-						const parent = answers.find(
-							a => Number(a.answer_id) === Number(answer.parent_answer_id)
-						);
+						const parent = answerById.get(Number(answer.parent_answer_id));
 						if (parent) {
 							text = `${parent.answer_text ?? ''} : ${text}`;
 						}
@@ -437,8 +441,7 @@ async function processExportJob(
 						answerAccumulator.set(code, []);
 					answerAccumulator.get(code)!.push(text);
 
-					// Track field_code → label for the dynamic fallback
-					if (!templateColumns && code && !dynamicColumnMap.has(code)) {
+					if (isDynamic && code && !dynamicColumnMap.has(code)) {
 						dynamicColumnMap.set(code, answer.field_label ?? code);
 					}
 				}
@@ -454,10 +457,7 @@ async function processExportJob(
 				);
 				const reviewRow: ReviewRow = {
 					review_id: Number(row.review_id).toString(16).slice(-7),
-					review_created_at: createdAt
-						.toISOString()
-						.replace('T', ' ')
-						.substring(0, 19),
+					review_created_at: createdAt,
 					answers: answersMap
 				};
 
@@ -476,26 +476,20 @@ async function processExportJob(
 					95,
 					Math.floor((retrievedReviews * 95) / totalReviews)
 				);
-				await job.updateProgress(percent);
-				await prisma.export.update({
-					where: { id: exportId },
-					data: { progress: percent }
-				});
+				await Promise.all([
+					job.updateProgress(percent),
+					prisma.export.update({ where: { id: exportId }, data: { progress: percent } })
+				]);
 			}
 		}
 	}
 
-	// Resolve final column list:
-	// - template-driven when form_id was set (ordered by step/block position)
-	// - dynamic (insertion order) otherwise
-	const columns: TemplateColumn[] =
-		templateColumns ??
-		Array.from(dynamicColumnMap.entries()).map(([code, label]) => ({ code, label }));
+	const columns: TemplateColumn[] = templateColumns ??
+		Array.from(dynamicColumnMap, ([code, label]) => ({ code, label }));
 
 	const switchToZip = totalReviews > MAX_LINES_SWITCH;
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
-	const ext = exportFormat === 'csv' ? 'csv' : 'xlsx';
 
 	// ------------------------------------------------------------------
 	// 7. Mark file generation start (95%)
@@ -518,11 +512,11 @@ async function processExportJob(
 		} else {
 			fileBuffer = await generateXlsBuffer(allReviews, columns, productName);
 		}
-		fileName = `Avis_${safeName}_${currentDate}.${ext}`;
+		fileName = `Avis_${safeName}_${currentDate}.${exportFormat}`;
 	} else {
 		// Multi-year zip
 		const zip = new JSZip();
-		for (const [year, yearReviews] of Array.from(allReviewsByYear.entries())) {
+		for (const [year, yearReviews] of Array.from(allReviewsByYear)) {
 			let yearBuffer: Buffer;
 			if (exportFormat === 'csv') {
 				yearBuffer = generateCsvBuffer(yearReviews, columns);

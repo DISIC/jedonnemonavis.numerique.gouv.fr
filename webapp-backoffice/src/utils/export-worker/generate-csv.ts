@@ -2,8 +2,8 @@ import { stringify } from 'csv-stringify/sync';
 
 export type ReviewRow = {
 	review_id: string;
-	review_created_at: string;
-	answers: Record<string, string>; // keyed by field_code
+	review_created_at: Date;
+	answers: Record<string, string>;
 };
 
 export type TemplateColumn = {
@@ -23,7 +23,7 @@ export function generateCsvBuffer(
 
 	const rows = reviews.map(review => [
 		review.review_id,
-		review.review_created_at,
+		review.review_created_at.toISOString().replace('T', ' ').substring(0, 19),
 		...columns.map(c => review.answers[c.code] ?? '')
 	]);
 

@@ -1,9 +1,8 @@
 import ExcelJS from '@mui/x-internal-exceljs-fork';
 import type { ReviewRow, TemplateColumn } from './generate-csv';
 
-// Columns that contain " / "-separated answer values need list formatting
 function formatReviewContent(content: string): string {
-	if (typeof content === 'string' && content.includes(' / ')) {
+	if (content.includes(' / ')) {
 		return '- ' + content.replace(/ ?\/ ?([a-zA-ZÀ-ÿ])/g, '\n- $1');
 	}
 	return content;
@@ -14,8 +13,6 @@ function estimateLineCount(cellText: string, wrapLength = 30): number {
 	return lines.reduce((sum, line) => sum + Math.floor(line.length / wrapLength) + 1, 0);
 }
 
-// Fixed column indices (1-based, ExcelJS convention)
-const COL_REVIEW_ID = 1;
 const COL_REVIEW_DATE = 2;
 const FIXED_COLS = 2;
 
@@ -32,6 +29,9 @@ export async function generateXlsBuffer(
 		'Review Created At',
 		...columns.map(c => c.label)
 	];
+
+	// Track max content width per column in a single pass (avoids O(cols×rows) re-scan)
+	const colWidths = headers.map(h => h.length + 2);
 
 	// Header row
 	const headerRow = worksheet.addRow(headers);
@@ -54,19 +54,13 @@ export async function generateXlsBuffer(
 	for (const review of reviews) {
 		const rowValues: (string | number | Date | null)[] = [
 			review.review_id,
-			new Date(review.review_created_at),
-			...columns.map(col => {
-				const val = review.answers[col.code] ?? '';
-				return formatReviewContent(val);
-			})
+			review.review_created_at,
+			...columns.map(col => formatReviewContent(review.answers[col.code] ?? ''))
 		];
 
 		const dataRow = worksheet.addRow(rowValues);
-
-		// Format date cell (column 2 = Review Created At)
 		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'dd/mm/yyyy hh:mm:ss';
 
-		// Apply border + wrap to all cells; estimate row height from answer columns
 		let maxLines = 1;
 		dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
 			cell.border = {
@@ -77,8 +71,14 @@ export async function generateXlsBuffer(
 			};
 			cell.alignment = { wrapText: true };
 
+			const cellText = String(cell.value ?? '');
+			const longestLine = Math.max(...cellText.split('\n').map(l => l.length));
+			if (longestLine + 2 > colWidths[colNumber - 1]) {
+				colWidths[colNumber - 1] = longestLine + 2;
+			}
+
 			if (colNumber > FIXED_COLS) {
-				const lines = estimateLineCount(String(cell.value ?? ''), 50);
+				const lines = estimateLineCount(cellText, 50);
 				if (lines > maxLines) maxLines = lines;
 			}
 		});
@@ -86,20 +86,8 @@ export async function generateXlsBuffer(
 		dataRow.height = Math.max(15, 15 * maxLines);
 	}
 
-	// Auto column widths
-	worksheet.columns.forEach((column, index) => {
-		const header = headers[index] ?? '';
-		let maxLength = header.length + 2;
-
-		worksheet.eachRow((row, rowNumber) => {
-			if (rowNumber === 1) return;
-			const cell = row.getCell(index + 1);
-			const cellText = String(cell.value ?? '');
-			const longestLine = Math.max(...cellText.split('\n').map(l => l.length));
-			if (longestLine + 2 > maxLength) maxLength = longestLine + 2;
-		});
-
-		column.width = Math.min(maxLength, 80);
+	worksheet.columns.forEach((col, i) => {
+		col.width = Math.min(colWidths[i], 80);
 	});
 
 	const arrayBuffer = await workbook.xlsx.writeBuffer();
