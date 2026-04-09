@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "next dev",
+		"dev:worker": "tsx watch src/workers/run.ts",
 		"build": "next build",
 		"start": "next start",
 		"lint": "prettier --check .",
@@ -129,6 +130,7 @@
 		"husky": "8.0.3",
 		"prettier": "3.0.3",
 		"prisma": "5.14.0",
-		"ts-node": "10.9.1"
+		"ts-node": "10.9.1",
+		"tsx": "^4.21.0"
 	}
 }
