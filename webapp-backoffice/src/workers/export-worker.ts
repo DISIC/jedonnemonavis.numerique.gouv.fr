@@ -7,6 +7,7 @@ import { generateCsvBuffer, type ReviewRow, type TemplateColumn } from '@/src/ut
 import { generateXlsBuffer } from '@/src/utils/export-worker/generate-xls';
 import { uploadToS3, generateDownloadLink } from '@/src/utils/export-worker/upload-s3';
 import { sendExportReadyEmail, sendExportFailedEmail } from '@/src/utils/export-worker/send-email';
+import { ReviewFiltersType } from '@/src/types/custom';
 
 const PAGE_SIZE = parseInt(process.env.EXPORT_PAGE_SIZE ?? '500', 10);
 const CONCURRENCY_LIMIT = parseInt(process.env.EXPORT_CONCURRENCY_LIMIT ?? '2', 10);
@@ -14,77 +15,20 @@ const CONCURRENCY_LIMIT = parseInt(process.env.EXPORT_CONCURRENCY_LIMIT ?? '2', 
 type FilterParams = {
 	startDate?: string;
 	endDate?: string;
+	mustHaveVerbatims?: boolean;
 	search?: string;
-	filters?: RawFilters;
+	button_id?: number;
+	filters?: ReviewFiltersType;
 };
-
-// `fields[]` is the current format; flat keys (satisfaction, comprehension) are the legacy format
-type RawFilters = {
-	needVerbatim?: boolean;
-	needOtherDifficulties?: boolean;
-	needOtherHelp?: boolean;
-	buttonId?: string[];
-	help?: string[];
-	fields?: { field_code: string; values: string[] }[];
-	satisfaction?: string[];
-	comprehension?: string[];
-};
-
-type OldFilters = {
-	needVerbatim?: boolean;
-	needOtherDifficulties?: boolean;
-	needOtherHelp?: boolean;
-	buttonId?: string[];
-	help?: string[];
-	satisfaction?: string[];
-	comprehension?: string[];
-};
-
-// Maps French UI labels to AnswerIntention enum values
-const LABEL_TO_INTENTION: Record<string, $Enums.AnswerIntention> = {
-	'Très bien': 'good',
-	Moyen: 'medium',
-	Mauvais: 'bad'
-};
-
-function translateNewFiltersToOld(raw: RawFilters): OldFilters {
-	const old: OldFilters = {
-		needVerbatim: raw.needVerbatim ?? false,
-		needOtherDifficulties: raw.needOtherDifficulties ?? false,
-		needOtherHelp: raw.needOtherHelp ?? false,
-		buttonId: raw.buttonId ?? [],
-		help: raw.help ?? []
-	};
-
-	if (raw.fields) {
-		for (const field of raw.fields) {
-			if (field.field_code === 'satisfaction') {
-				old.satisfaction = field.values.map(v => LABEL_TO_INTENTION[v] ?? v);
-			} else {
-				(old as Record<string, unknown>)[field.field_code] = field.values;
-			}
-		}
-	}
-
-	return old;
-}
 
 // Each condition becomes a separate EXISTS sub-query via Prisma's `some` — stacked with AND
-function buildReviewWhere(filters: OldFilters, searchTerm: string): Prisma.ReviewWhereInput {
+function buildReviewWhere(filters: ReviewFiltersType, searchTerm: string): Prisma.ReviewWhereInput {
 	const andConditions: Prisma.ReviewWhereInput[] = [];
 
-	if (filters.satisfaction?.length) {
-		const intentions = filters.satisfaction.filter(
-			(v): v is $Enums.AnswerIntention =>
-				Object.values($Enums.AnswerIntention).includes(v as $Enums.AnswerIntention)
-		);
-		if (intentions.length) {
-			andConditions.push({ answers: { some: { field_code: 'satisfaction', intention: { in: intentions } } } });
+	if (filters.fields.length) {
+		for (const field of filters.fields) {
+			andConditions.push({ answers: { some: { field_code: field.field_code, answer_text: { in: field.values } } } });
 		}
-	}
-
-	if (filters.comprehension?.length) {
-		andConditions.push({ answers: { some: { field_code: 'comprehension', answer_text: { in: filters.comprehension } } } });
 	}
 
 	if (filters.needVerbatim) {
@@ -94,8 +38,6 @@ function buildReviewWhere(filters: OldFilters, searchTerm: string): Prisma.Revie
 	if (searchTerm) {
 		andConditions.push({ answers: { some: { field_code: 'verbatim', answer_text: { contains: searchTerm, mode: 'insensitive' } } } });
 	}
-
-	// TODO: handle needOtherDifficulties and needOtherHelp once their field_codes are confirmed
 
 	return andConditions.length ? { AND: andConditions } : {};
 }
@@ -186,11 +128,9 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	if (exportRecord.params) {
 		try {
 			filterParams = JSON.parse(exportRecord.params) as FilterParams;
-			const rawFilters = filterParams.filters ?? {};
-			const oldFilters = 'fields' in rawFilters
-				? translateNewFiltersToOld(rawFilters as RawFilters)
-				: (rawFilters as OldFilters);
-			reviewWhere = buildReviewWhere(oldFilters, filterParams.search ?? '');
+			if (filterParams.filters) {
+				reviewWhere = buildReviewWhere(filterParams.filters, filterParams.search ?? '');
+			}
 		} catch {
 			console.error(`[export-worker] Failed to parse params for export ${exportId}, proceeding without filters`);
 		}
@@ -206,6 +146,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	const totalReviews = await prisma.review.count({
 		where: { product_id: exportRecord.product_id, created_at: { gte: startDate, lte: endDate }, ...reviewWhere }
 	});
+	
 	console.log(`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`);
 
 	// Use form template column order when available; fall back to accumulating codes from seen answers
