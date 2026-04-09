@@ -1,5 +1,5 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import { FormTemplateWithElements } from '@/src/types/prismaTypesExtended';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	buildAccentAwarePattern,
 	getExactPhrase,
@@ -17,7 +17,6 @@ import {
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -63,21 +62,21 @@ const highlightSearchTerms = (text: string, search: string): string => {
 const ReviewTableRow = ({
 	review,
 	search,
-	formTemplate,
+	form,
 	isSelected,
 	onSelectReview,
-	onClickMoreInfo,
 	rowRef
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
-	formTemplate: FormTemplateWithElements;
+	form: FormWithElements;
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
-	onClickMoreInfo?: () => void;
 	rowRef?: (el: HTMLTableRowElement | null) => void;
 }) => {
 	const { cx, classes } = useStyles();
+
+	const formTemplate = form.form_template;
 
 	const mainBlocks = formTemplate.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -93,8 +92,6 @@ const ReviewTableRow = ({
 
 	const handleSelect = () => {
 		onSelectReview(review);
-		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
-		onClickMoreInfo?.();
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
