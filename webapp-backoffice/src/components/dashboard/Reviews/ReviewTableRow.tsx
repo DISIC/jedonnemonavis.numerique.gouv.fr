@@ -19,7 +19,6 @@ import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
-import Link from 'next/link';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -123,7 +122,6 @@ const ReviewTableRow = ({
 				isSelected && classes.containerSelected
 			)}
 			onClick={handleSelect}
-			role="row"
 			tabIndex={0}
 			onKeyDown={handleKeyDown}
 			aria-selected={isSelected}
@@ -223,18 +221,10 @@ const ReviewTableRow = ({
 				</td>
 			)}
 
-			<td
-				className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}
-				onClick={e => e.stopPropagation()}
-			>
-				<Link
-					title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
-					className={cx(classes.action, fr.cx('fr-link'))}
-					onClick={handleSelect}
-					href={'#'}
-				>
+			<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
+				<span className={classes.action} role="button">
 					Voir l'avis
-				</Link>
+				</span>
 			</td>
 		</tr>
 	);
@@ -252,8 +242,8 @@ const useStyles = tss.create({
 		},
 		'&:hover': {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
-			'& .fr-link': {
-				backgroundSize: '100% 1.25px'
+			'& td:last-of-type span': {
+				backgroundSize: '100% 2.25px'
 			}
 		},
 		'&:focus-visible': {
@@ -315,6 +305,11 @@ const useStyles = tss.create({
 	},
 	action: {
 		textWrap: 'nowrap',
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
+		backgroundSize: '100% 1px',
+		backgroundPosition: '0 100%',
+		backgroundRepeat: 'no-repeat',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

@@ -85,7 +85,7 @@ export function formatDateToFrenchString(
 ) {
 	const date = new Date(tmpDate);
 
-	if (!(date instanceof Date)) {
+	if (isNaN(date.getTime())) {
 		throw new Error('Input is not a valid Date object');
 	}
 

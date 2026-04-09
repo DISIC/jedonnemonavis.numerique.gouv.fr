@@ -2,6 +2,7 @@ import {
 	AnswerPartialWithRelations,
 	ReviewPartialWithRelations
 } from '@/prisma/generated/zod';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import {
 	FormConfigWithChildren,
 	FormTemplateWithElements
@@ -121,14 +122,14 @@ const AnswerValues = ({
 		return (
 			<ul className={cx(classes.answerList)}>
 				{values.map((v, i) => (
-					<li key={i} className={cx(classes.answerText)}>
+					<li key={i} className={cx(classes.boldText)}>
 						{v}
 					</li>
 				))}
 			</ul>
 		);
 	}
-	return <span className={cx(classes.answerText)}>{values[0] ?? '-'}</span>;
+	return <span className={cx(classes.boldText)}>{values[0] ?? '-'}</span>;
 };
 
 const ChildAnswerValue = ({
@@ -144,7 +145,7 @@ const ChildAnswerValue = ({
 		{value.parentOptionLabel && (
 			<span className={fr.cx('fr-text--sm')}>{value.parentOptionLabel} : </span>
 		)}
-		<span className={cx(classes.answerText)}>{value.text}</span>
+		<span className={cx(classes.boldText)}>{value.text}</span>
 	</>
 );
 
@@ -174,19 +175,21 @@ const InfoRow = ({
 	label,
 	value,
 	cx,
-	classes
+	classes,
+	hideHr
 }: {
 	label: string;
 	value: React.ReactNode;
 	cx: (...args: any[]) => string;
 	classes: ReturnType<typeof useStyles>['classes'];
+	hideHr?: boolean;
 }) => (
 	<>
 		<div className={cx(classes.infoLine)}>
-			<span className={cx(classes.infoLabel)}>{label}</span>
-			<span>{value}</span>
+			<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>{label}</span>
+			<span className={cx(classes.boldText)}>{value}</span>
 		</div>
-		<hr className="fr-pb-4v" />
+		{!hideHr && <hr className="fr-pb-4v" />}
 	</>
 );
 
@@ -260,6 +263,7 @@ const ReviewDrawerContent = ({
 	hasNext
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
+	const { isMobile } = useIsMobile('sm');
 
 	const buttonName = review.button_id
 		? retrieveButtonName(review.button_id)
@@ -285,7 +289,6 @@ const ReviewDrawerContent = ({
 
 	return (
 		<div className={cx(classes.container)}>
-			{/* Header */}
 			<div className={cx(classes.header)}>
 				<div />
 				<Button
@@ -300,18 +303,20 @@ const ReviewDrawerContent = ({
 				</Button>
 			</div>
 
-			<h1 id="review-drawer-title" className={cx(classes.title, fr.cx('fr-h4'))}>
+			<h1
+				id="review-drawer-title"
+				className={cx(classes.title, fr.cx('fr-h4'))}
+			>
 				Détail de l'avis du{' '}
 				{formatFullFrenchDateTime(review.created_at?.toString() || '')}
 			</h1>
 			<hr className={cx(classes.titleSeparator)} />
 
-			{/* Navigation */}
 			<div className={classes.actionsContainer}>
 				<Button
 					priority="tertiary"
 					iconId="fr-icon-arrow-left-s-line"
-					size="small"
+					size={isMobile ? 'medium' : 'small'}
 					disabled={!hasPrevious}
 					onClick={onPrevious}
 				>
@@ -321,7 +326,7 @@ const ReviewDrawerContent = ({
 					priority="tertiary"
 					iconId="fr-icon-arrow-right-s-line"
 					iconPosition="right"
-					size="small"
+					size={isMobile ? 'medium' : 'small'}
 					disabled={!hasNext}
 					onClick={onNext}
 				>
@@ -329,65 +334,10 @@ const ReviewDrawerContent = ({
 				</Button>
 			</div>
 
-			{/* Main satisfaction badge */}
-			{mainAnswer && mainAnswer.intention && (
-				<>
-					<div className={cx(classes.infoLine)}>
-						<span className={cx(classes.infoLabel)}>
-							{mainBlock?.alias || 'Satisfaction'} :
-						</span>
-						<SatisfactionBadge
-							answer={mainAnswer}
-							optionLabel={
-								mainBlockOption?.alias ??
-								mainBlockOption?.label ??
-								mainAnswer.answer_text ??
-								''
-							}
-							cx={cx}
-							classes={classes}
-						/>
-					</div>
-					<hr className="fr-pb-4v" />
-				</>
-			)}
-
-			{/* Metadata */}
-			{hasManyVersions && (
-				<InfoRow
-					label="Formulaire :"
-					value={`Version ${formConfig?.version ?? 0}`}
-					cx={cx}
-					classes={classes}
-				/>
-			)}
-			<InfoRow
-				label="Identifiant :"
-				value={review.id}
-				cx={cx}
-				classes={classes}
-			/>
-			<InfoRow
-				label="Lien d'intégration utilisé :"
-				value={buttonName || 'Pas de source'}
-				cx={cx}
-				classes={classes}
-			/>
-
-			{/* Answers section */}
-			<h2
-				className={cx(
-					classes.sectionTitle,
-					fr.cx('fr-h6', 'fr-mt-6v', 'fr-mb-4v')
-				)}
-			>
-				Réponses
-			</h2>
-
 			{answerBlocks.map((block, index) => {
 				const answers = getTopLevelAnswers(review.answers, block.field_code);
 				const childFields = groupChildAnswersByField(review.answers, answers);
-				const answerTexts = answers.map(a => a.answer_text || '-');
+				const boldTexts = answers.map(a => a.answer_text || '-');
 
 				return (
 					<React.Fragment key={index}>
@@ -397,7 +347,7 @@ const ReviewDrawerContent = ({
 								{block.label || block.field_code}
 							</span>
 							<AnswerValues
-								values={answerTexts.length ? answerTexts : ['-']}
+								values={boldTexts.length ? boldTexts : ['-']}
 								cx={cx}
 								classes={classes}
 							/>
@@ -425,6 +375,51 @@ const ReviewDrawerContent = ({
 					</React.Fragment>
 				);
 			})}
+			<div className={classes.metadataSection}>
+				{mainAnswer && mainAnswer.intention && (
+					<>
+						<div className={cx(classes.infoLine)}>
+							<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+								{mainBlock?.alias || 'Satisfaction'} :
+							</span>
+							<SatisfactionBadge
+								answer={mainAnswer}
+								optionLabel={
+									mainBlockOption?.alias ??
+									mainBlockOption?.label ??
+									mainAnswer.answer_text ??
+									''
+								}
+								cx={cx}
+								classes={classes}
+							/>
+						</div>
+						<hr className="fr-pb-4v" />
+					</>
+				)}
+
+				{hasManyVersions && (
+					<InfoRow
+						label="Formulaire :"
+						value={`Version ${formConfig?.version ?? 0}`}
+						cx={cx}
+						classes={classes}
+					/>
+				)}
+				<InfoRow
+					label="Identifiant :"
+					value={review.id}
+					cx={cx}
+					classes={classes}
+				/>
+				<InfoRow
+					label="Lien d'intégration utilisé :"
+					value={buttonName || 'Pas de source'}
+					cx={cx}
+					classes={classes}
+					hideHr
+				/>
+			</div>
 		</div>
 	);
 };
@@ -435,9 +430,20 @@ const ReviewDrawerContent = ({
 
 const useStyles = tss.create({
 	container: {
-		...fr.spacing('padding', { rightLeft: '12v', topBottom: '6v' }),
+		...fr.spacing('padding', {
+			rightLeft: '12v',
+			top: '6v',
+			bottom: '12v'
+		}),
 		height: '100%',
-		overflowY: 'auto'
+		overflowY: 'auto',
+		[fr.breakpoints.down('md')]: {
+			...fr.spacing('padding', {
+				rightLeft: '4v',
+				top: '4v',
+				bottom: '8v'
+			})
+		}
 	},
 	header: {
 		display: 'flex',
@@ -455,7 +461,12 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'space-between',
 		marginBottom: fr.spacing('6v'),
-		paddingBottom: fr.spacing('4v')
+		paddingBottom: fr.spacing('4v'),
+		[fr.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			gap: fr.spacing('3v'),
+			button: { width: '100%', justifyContent: 'center' }
+		}
 	},
 	sectionTitle: {
 		fontWeight: 'bold',
@@ -464,15 +475,21 @@ const useStyles = tss.create({
 	infoLine: {
 		display: 'flex',
 		alignItems: 'center',
+		flexWrap: 'wrap',
 		gap: fr.spacing('2v'),
-		marginBottom: fr.spacing('4v')
+		marginBottom: fr.spacing('4v'),
+		'&:last-child': {
+			marginBottom: 0
+		}
 	},
 	answerLine: {
 		display: 'flex',
 		flexDirection: 'column'
 	},
-	infoLabel: {
-		fontWeight: 'bold'
+	metadataSection: {
+		backgroundColor: fr.colors.decisions.background.default.grey.hover,
+		padding: fr.spacing('4v'),
+		marginTop: fr.spacing('4v')
 	},
 	badge: {
 		fontSize: 12,
@@ -480,9 +497,9 @@ const useStyles = tss.create({
 		alignItems: 'center',
 		gap: '0.25rem'
 	},
-	answerText: {
+	boldText: {
 		fontWeight: 'bold',
-		wordBreak: 'break-word' as const
+		wordBreak: 'break-word'
 	},
 	answerList: {
 		margin: 0,
