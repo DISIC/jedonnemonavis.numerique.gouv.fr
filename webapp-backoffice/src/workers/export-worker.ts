@@ -306,6 +306,13 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	const columns: TemplateColumn[] = templateColumns ??
 		Array.from(dynamicColumnMap, ([code, label]) => ({ code, label }));
 
+	// Global sort after month-by-month accumulation — each month is internally sorted
+	// but cross-month order is not guaranteed
+	allReviews.sort((a, b) => a.review_created_at.getTime() - b.review_created_at.getTime());
+	allReviewsByYear.forEach(rows =>
+		rows.sort((a, b) => a.review_created_at.getTime() - b.review_created_at.getTime())
+	);
+
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
 
