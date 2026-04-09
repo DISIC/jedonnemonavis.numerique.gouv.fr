@@ -151,11 +151,12 @@ async function loadTemplateColumns(formId: number): Promise<TemplateColumn[]> {
 	const columns: TemplateColumn[] = [];
 	for (const step of form.form_template.form_template_steps) {
 		for (const block of step.form_template_blocks) {
-			if (block.field_code && INPUT_BLOCK_TYPES.has(block.type_bloc)) {
+			if (block.field_code && (INPUT_BLOCK_TYPES.has(block.type_bloc) || (form.form_template.slug === "root" && block.type_bloc === "heading_3"))) {
 				columns.push({ code: block.field_code, label: block.label ?? block.field_code });
 			}
 		}
 	}
+
 	return columns;
 }
 
