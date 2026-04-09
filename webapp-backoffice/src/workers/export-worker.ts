@@ -6,8 +6,9 @@ import type { ExportJobData } from '@/src/lib/queue';
 import { generateCsvBuffer, type ReviewRow, type TemplateColumn } from '@/src/utils/export-worker/generate-csv';
 import { generateXlsBuffer } from '@/src/utils/export-worker/generate-xls';
 import { uploadToS3, generateDownloadLink } from '@/src/utils/export-worker/upload-s3';
-import { sendExportReadyEmail, sendExportFailedEmail } from '@/src/utils/export-worker/send-email';
 import { ReviewFiltersType } from '@/src/types/custom';
+import { renderExportFailedEmail, renderExportReadyEmail } from '../utils/emails';
+import { sendMail } from '../utils/mailer';
 
 const PAGE_SIZE = parseInt(process.env.EXPORT_PAGE_SIZE ?? '500', 10);
 const CONCURRENCY_LIMIT = parseInt(process.env.EXPORT_CONCURRENCY_LIMIT ?? '2', 10);
@@ -285,7 +286,10 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	});
 
 	try {
-		await sendExportReadyEmail(userEmail, productName, downloadLink);
+		const html = await renderExportReadyEmail({ productName, downloadLink });
+		const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA`;
+	
+		await sendMail(`Votre export est prêt : [${productName}]`, userEmail, html, text);
 	} catch (emailErr) {
 		console.error(`[export-worker] Failed to send ready email for export ${exportId}:`, emailErr);
 	}
@@ -324,8 +328,10 @@ export function startExportWorker(): void {
 				await prisma.export.update({ where: { id: exportId }, data: { status: 'idle', startDate: null, progress: 0 } });
 
 				if (exportRecord?.user?.email) {
-					await sendExportFailedEmail(exportRecord.user.email, exportRecord.product.title)
-						.catch(e => console.error(`[export-worker] Failed to send failure email:`, e));
+						const html = await renderExportFailedEmail({ productName: exportRecord.product.title });
+						const text = `Bonjour,\n\nNous n'avons pas pu générer votre export pour le service ${exportRecord.product.title}. Veuillez réessayer depuis le backoffice.\n\nCordialement,\nL'équipe JDMA`;
+					
+						await sendMail(`Votre export a échoué : [${exportRecord.product.title}]`, exportRecord.user.email, html, text).catch(e => console.error(`[export-worker] Failed to send failure email:`, e));
 				}
 			} catch (resetErr) {
 				console.error(`[export-worker] Failed to reset export ${exportId}:`, resetErr);
