@@ -15,9 +15,9 @@ import { DateShortcutName, FilterSectionKey } from './Filters';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 
 const dateShortcuts = [
-	{ label: '365 derniers jours', name: 'one-year' as const },
-	{ label: '30 derniers jours', name: 'one-month' as const },
-	{ label: '7 derniers jours', name: 'one-week' as const }
+	{ label: '1 an', name: 'one-year' as const },
+	{ label: '30 jours', name: 'one-month' as const },
+	{ label: '7 jours', name: 'one-week' as const }
 ];
 
 interface DateRangePickerButtonProps {
@@ -71,6 +71,10 @@ const DateRangePickerButton = ({
 				[filterKey]: {
 					...filters[filterKey]
 				},
+				productReviews: {
+					...filters.productReviews,
+					displayNew: false
+				},
 				sharedFilters: {
 					...filters.sharedFilters,
 					[key]: value,
@@ -115,6 +119,10 @@ const DateRangePickerButton = ({
 			[filterKey]: {
 				...filters[filterKey]
 			},
+			productReviews: {
+				...filters.productReviews,
+				displayNew: false
+			},
 			sharedFilters: {
 				...filters.sharedFilters,
 				hasChanged: true,
@@ -140,15 +148,25 @@ const DateRangePickerButton = ({
 
 	const handleNewReviewsClick = () => {
 		const newValue = !filters.productReviews.displayNew;
+		const today = new Date().toISOString().split('T')[0];
+		const startDate = reviewLogDate
+			? new Date(reviewLogDate).toISOString().split('T')[0]
+			: today;
+
 		updateFilters({
 			...filters,
+			currentPage: 1,
 			productReviews: {
 				...filters.productReviews,
 				displayNew: newValue
 			},
 			sharedFilters: {
 				...filters.sharedFilters,
-				hasChanged: true
+				hasChanged: true,
+				dateShortcut: undefined,
+				...(newValue
+					? { currentStartDate: startDate, currentEndDate: today }
+					: {})
 			}
 		});
 
@@ -170,11 +188,25 @@ const DateRangePickerButton = ({
 		const startDate = sharedFilters.currentStartDate;
 		const endDate = sharedFilters.currentEndDate;
 
-		if (filters.productReviews.displayNew && showNewReviewsOption) {
-			return 'Nouvelles réponses';
+		if (
+			filters.productReviews.displayNew &&
+			showNewReviewsOption &&
+			reviewLogDate
+		) {
+			const today = new Date().toISOString().split('T')[0];
+			return `${formatDateToFrenchString(reviewLogDate, {
+				monthFormat: 'literal'
+			})} - ${formatDateToFrenchString(today, {
+				monthFormat: 'literal'
+			})}`;
 		}
 
-		if (startDate && endDate && isValidDate(startDate) && isValidDate(endDate)) {
+		if (
+			startDate &&
+			endDate &&
+			isValidDate(startDate) &&
+			isValidDate(endDate)
+		) {
 			return `${formatDateToFrenchString(startDate, {
 				monthFormat: 'literal'
 			})} - ${formatDateToFrenchString(endDate, {
@@ -216,6 +248,7 @@ const DateRangePickerButton = ({
 				open={open}
 				anchorEl={anchorEl}
 				onClose={() => setAnchorEl(null)}
+				disableScrollLock
 				anchorOrigin={{
 					vertical: 'bottom',
 					horizontal: 'left'
@@ -231,39 +264,6 @@ const DateRangePickerButton = ({
 				}}
 			>
 				<div className={cx(classes.popoverContent)}>
-					<div className={cx(classes.shortcutsRow)}>
-						{dateShortcuts.map(ds => (
-							<button
-								key={ds.name}
-								type="button"
-								className={cx(
-									classes.shortcutButton,
-									sharedFilters.dateShortcut === ds.name &&
-										!filters.productReviews.displayNew
-										? classes.shortcutButtonSelected
-										: undefined
-								)}
-								onClick={() => handleShortcutClick(ds.name)}
-							>
-								{ds.label}
-							</button>
-						))}
-						{showNewReviewsOption && reviewLogDate && (
-							<button
-								type="button"
-								className={cx(
-									classes.shortcutButton,
-									filters.productReviews.displayNew
-										? classes.shortcutButtonSelected
-										: undefined
-								)}
-								onClick={handleNewReviewsClick}
-								title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(reviewLogDate, { withHour: true })})`}
-							>
-								Nouvelles réponses
-							</button>
-						)}
-					</div>
 					<div className={cx(classes.dateInputsRow)}>
 						<Input
 							label="Date de début"
@@ -294,6 +294,61 @@ const DateRangePickerButton = ({
 							}
 						/>
 					</div>
+
+					<div className={cx(classes.shortcutsRow)}>
+						{dateShortcuts.map(ds => (
+							<button
+								key={ds.name}
+								type="button"
+								className={cx(
+									classes.shortcutButton,
+									sharedFilters.dateShortcut === ds.name &&
+										!filters.productReviews.displayNew
+										? classes.shortcutButtonSelected
+										: undefined
+								)}
+								onClick={() => handleShortcutClick(ds.name)}
+							>
+								{ds.label}
+								{sharedFilters.dateShortcut === ds.name &&
+									!filters.productReviews.displayNew && (
+										<span
+											className={cx(
+												classes.selectedIcon,
+												fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+											)}
+										/>
+									)}
+							</button>
+						))}
+						{showNewReviewsOption && reviewLogDate && (
+							<button
+								type="button"
+								className={cx(
+									classes.shortcutButton,
+									filters.productReviews.displayNew
+										? classes.shortcutButtonSelected
+										: undefined
+								)}
+								onClick={handleNewReviewsClick}
+								title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
+									reviewLogDate,
+									{ withHour: true }
+								)})`}
+							>
+								Nouvelles réponses (du {formatDateToFrenchString(reviewLogDate)}{' '}
+								à aujourd'hui)
+								{filters.productReviews.displayNew && (
+									<span
+										className={cx(
+											classes.selectedIcon,
+											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+										)}
+									/>
+								)}
+							</button>
+						)}
+					</div>
 				</div>
 			</Popover>
 		</>
@@ -312,8 +367,16 @@ const useStyles = tss.create({
 	popoverContent: {
 		padding: fr.spacing('3w'),
 		display: 'flex',
-		flexDirection: 'column',
-		gap: fr.spacing('3v')
+		flexDirection: 'column'
+	},
+	dateInputsRow: {
+		display: 'flex',
+		gap: fr.spacing('6v'),
+		marginBottom: fr.spacing('4v'),
+		'.fr-input-group': {
+			marginBottom: 0,
+			flex: 1
+		}
 	},
 	shortcutsRow: {
 		display: 'flex',
@@ -321,7 +384,9 @@ const useStyles = tss.create({
 		gap: fr.spacing('2v')
 	},
 	shortcutButton: {
-		...fr.typography[17].style,
+		position: 'relative',
+		fontSize: '0.75rem !important',
+		lineHeight: '1.25rem !important',
 		backgroundColor:
 			fr.colors.decisions.background.actionLow.blueFrance.default,
 		color: fr.colors.decisions.background.actionHigh.blueFrance.default,
@@ -331,19 +396,27 @@ const useStyles = tss.create({
 		cursor: 'pointer',
 		textTransform: 'initial' as const,
 		'&:hover': {
-			backgroundColor:
-				fr.colors.decisions.background.actionLow.blueFrance.hover
+			backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.hover}!important`
 		}
 	},
 	shortcutButtonSelected: {
-		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.hover
-	},
-	dateInputsRow: {
-		display: 'flex',
-		gap: fr.spacing('2v'),
-		'.fr-input-group': {
-			marginBottom: 0
+		backgroundColor:
+			fr.colors.decisions.background.actionHigh.blueFrance.default,
+		color: 'white',
+		'&:hover': {
+			backgroundColor: `${fr.colors.decisions.background.actionHigh.blueFrance.hover}!important`
 		}
+	},
+	selectedIcon: {
+		position: 'absolute',
+		top: -4,
+		right: -4,
+		display: 'flex',
+		borderRadius: '200em',
+		height: '1rem',
+		width: '1rem',
+		backgroundColor: 'white',
+		color: fr.colors.decisions.background.actionHigh.blueFrance.default
 	}
 });
 

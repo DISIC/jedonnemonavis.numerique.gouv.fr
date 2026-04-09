@@ -320,31 +320,6 @@ const ReviewsTab = (props: Props) => {
 				endDate: filters.sharedFilters.currentEndDate,
 				dateShortcut: filters.sharedFilters.dateShortcut
 			});
-
-			updateFilters({
-				...filters,
-				sharedFilters: {
-					...filters.sharedFilters,
-					currentStartDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					).toISOString(),
-					currentEndDate: new Date(
-						reviewLog[0]
-							? reviewLog[0].created_at
-							: new Date(new Date().setFullYear(new Date().getFullYear() - 4))
-									.toISOString()
-									.split('T')[0]
-					)
-						.toISOString()
-						.split('T')[0],
-					dateShortcut: undefined
-				},
-				currentPage: 1
-			});
 		} else if (!filters.sharedFilters.dateShortcut) {
 			updateFilters({
 				...filters,
