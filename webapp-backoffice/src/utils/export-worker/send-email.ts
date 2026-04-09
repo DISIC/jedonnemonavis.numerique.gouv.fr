@@ -3,16 +3,11 @@ import { sendMail } from '@/src/utils/mailer';
 export async function sendExportReadyEmail(
 	toEmail: string,
 	productName: string,
-	downloadLink: string,
-	switchToZip: boolean
+	downloadLink: string
 ): Promise<void> {
-	const zipMessage = switchToZip
-		? ' Étant donné le volume important d\'avis concernés, nous les avons séparés par année et regroupés dans un fichier zip.'
-		: '';
-
 	const subject = `Votre export est prêt : [${productName}]`;
 
-	const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt.${zipMessage} Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA`;
+	const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA`;
 
 	const html = `<!DOCTYPE html>
 <html>
@@ -37,7 +32,7 @@ export async function sendExportReadyEmail(
             </div>
             <div>
                 <p>Bonjour,<br><br>
-                Votre export pour le service "${productName}" est prêt.${zipMessage} Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
+                Votre export pour le service "${productName}" est prêt. Vous pouvez le télécharger en utilisant le lien suivant :<br><br>
                 <a href="${downloadLink}">Télécharger le fichier</a><br><br>
                 Ce lien expirera dans 30 jours.<br><br>
                 </p>

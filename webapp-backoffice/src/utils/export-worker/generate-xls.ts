@@ -16,24 +16,20 @@ function estimateLineCount(cellText: string, wrapLength = 30): number {
 const COL_REVIEW_DATE = 2;
 const FIXED_COLS = 2;
 
-export async function generateXlsBuffer(
+function fillWorksheet(
+	worksheet: ExcelJS.Worksheet,
 	reviews: ReviewRow[],
-	columns: TemplateColumn[],
-	_productName: string
-): Promise<Buffer> {
-	const workbook = new ExcelJS.Workbook();
-	const worksheet = workbook.addWorksheet('Avis');
-
+	columns: TemplateColumn[]
+): void {
 	const headers = [
 		'Review ID',
 		'Review Created At',
 		...columns.map(c => c.label)
 	];
 
-	// Track max content width per column in a single pass (avoids O(cols×rows) re-scan)
+	// Track max content width per column in a single pass
 	const colWidths = headers.map(h => h.length + 2);
 
-	// Header row
 	const headerRow = worksheet.addRow(headers);
 	headerRow.eachCell(cell => {
 		cell.font = { bold: true, size: 12 };
@@ -50,7 +46,6 @@ export async function generateXlsBuffer(
 		};
 	});
 
-	// Data rows
 	for (const review of reviews) {
 		const rowValues: (string | number | Date | null)[] = [
 			review.review_id,
@@ -89,6 +84,24 @@ export async function generateXlsBuffer(
 	worksheet.columns.forEach((col, i) => {
 		col.width = Math.min(colWidths[i], 80);
 	});
+}
+
+/**
+ * Generates a single .xlsx workbook with one sheet per year, sorted chronologically.
+ * Each sheet is named after its year (e.g. "2024").
+ */
+export async function generateXlsBuffer(
+	reviewsByYear: Map<number, ReviewRow[]>,
+	columns: TemplateColumn[],
+	_productName: string
+): Promise<Buffer> {
+	const workbook = new ExcelJS.Workbook();
+
+	const sortedYears = Array.from(reviewsByYear.keys()).sort((a, b) => a - b);
+	for (const year of sortedYears) {
+		const worksheet = workbook.addWorksheet(String(year));
+		fillWorksheet(worksheet, reviewsByYear.get(year)!, columns);
+	}
 
 	const arrayBuffer = await workbook.xlsx.writeBuffer();
 	return Buffer.from(arrayBuffer);

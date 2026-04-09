@@ -1,5 +1,4 @@
 import { Worker, type Job } from 'bullmq';
-import JSZip from 'jszip';
 import { $Enums, type Prisma } from '@prisma/client';
 import redis from '@/src/lib/redis';
 import prisma from '@/src/utils/db';
@@ -10,7 +9,6 @@ import { uploadToS3, generateDownloadLink } from '@/src/utils/export-worker/uplo
 import { sendExportReadyEmail, sendExportFailedEmail } from '@/src/utils/export-worker/send-email';
 
 const PAGE_SIZE = parseInt(process.env.EXPORT_PAGE_SIZE ?? '500', 10);
-const MAX_LINES_SWITCH = parseInt(process.env.EXPORT_MAX_LINES_SWITCH ?? '10000', 10);
 const CONCURRENCY_LIMIT = parseInt(process.env.EXPORT_CONCURRENCY_LIMIT ?? '2', 10);
 
 type FilterParams = {
@@ -308,35 +306,22 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	const columns: TemplateColumn[] = templateColumns ??
 		Array.from(dynamicColumnMap, ([code, label]) => ({ code, label }));
 
-	const switchToZip = totalReviews > MAX_LINES_SWITCH;
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
 
 	await prisma.export.update({ where: { id: exportId }, data: { progress: 95 } });
 
+	// CSV → single flat file with all rows
+	// XLS → single workbook with one sheet per year (sorted chronologically)
 	let fileBuffer: Buffer;
 	let fileName: string;
 
-	if (!switchToZip) {
-		fileBuffer = exportFormat === 'csv'
-			? generateCsvBuffer(allReviews, columns)
-			: await generateXlsBuffer(allReviews, columns, productName);
-		fileName = `Avis_${safeName}_${currentDate}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`;
+	if (exportFormat === 'csv') {
+		fileBuffer = generateCsvBuffer(allReviews, columns);
+		fileName = `Avis_${safeName}_${currentDate}.csv`;
 	} else {
-		// Above MAX_LINES_SWITCH, split into one file per year inside a zip
-		const zip = new JSZip();
-		for (const [year, yearReviews] of Array.from(allReviewsByYear)) {
-			let yearBuffer: Buffer;
-			if (exportFormat === 'csv') {
-				yearBuffer = generateCsvBuffer(yearReviews, columns);
-				zip.file(`Avis_${year}.csv`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
-			} else {
-				yearBuffer = await generateXlsBuffer(yearReviews, columns, productName);
-				zip.file(`Avis_${year}.xlsx`, new Uint8Array(yearBuffer.buffer, yearBuffer.byteOffset, yearBuffer.byteLength));
-			}
-		}
-		fileBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
-		fileName = `Avis_${safeName}_${currentDate}.zip`;
+		fileBuffer = await generateXlsBuffer(allReviewsByYear, columns, productName);
+		fileName = `Avis_${safeName}_${currentDate}.xlsx`;
 	}
 
 	await prisma.export.update({ where: { id: exportId }, data: { progress: 98 } });
@@ -351,7 +336,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	});
 
 	try {
-		await sendExportReadyEmail(userEmail, productName, downloadLink, switchToZip);
+		await sendExportReadyEmail(userEmail, productName, downloadLink);
 	} catch (emailErr) {
 		console.error(`[export-worker] Failed to send ready email for export ${exportId}:`, emailErr);
 	}
@@ -404,5 +389,5 @@ export function startExportWorker(): void {
 	});
 
 	globalThis._exportWorker = worker;
-	console.log(`[export-worker] Started (concurrency=${CONCURRENCY_LIMIT}, maxLinesSwitch=${MAX_LINES_SWITCH})`);
+	console.log(`[export-worker] Started (concurrency=${CONCURRENCY_LIMIT})`);
 }
