@@ -18,11 +18,7 @@ import {
 	getExportPeriodLabel,
 	parseExportParams
 } from '@/src/utils/export';
-import {
-	formatDateToFrenchString,
-	getNbPages,
-	normalizeString
-} from '@/src/utils/tools';
+import { formatDateToFrenchString, getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
