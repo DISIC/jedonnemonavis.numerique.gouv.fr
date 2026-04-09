@@ -404,11 +404,26 @@ const ReviewsTab = (props: Props) => {
 		});
 	};
 
-	const handleSelectReview = (review: ReviewPartialWithRelations) => {
+	const handleSelectReview = (
+		review: ReviewPartialWithRelations,
+		source: '' | '_prev' | '_next' = ''
+	) => {
 		setSelectedReview(review);
 		createReviewViewLog({
 			review_id: review.id as number,
 			review_created_at: review.created_at as Date
+		});
+		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'reviews',
+			action_type: 'read',
+			action: 'review_detail_display',
+			ui_source: 'review_button' + source
 		});
 	};
 
@@ -418,13 +433,13 @@ const ReviewsTab = (props: Props) => {
 
 	const handlePreviousReview = () => {
 		if (selectedReviewIndex > 0) {
-			handleSelectReview(reviews[selectedReviewIndex - 1]);
+			handleSelectReview(reviews[selectedReviewIndex - 1], '_prev');
 		}
 	};
 
 	const handleNextReview = () => {
 		if (selectedReviewIndex < reviews.length - 1) {
-			handleSelectReview(reviews[selectedReviewIndex + 1]);
+			handleSelectReview(reviews[selectedReviewIndex + 1], '_next');
 		}
 	};
 
@@ -801,26 +816,13 @@ const ReviewsTab = (props: Props) => {
 															key={index}
 															review={review}
 															search={validatedSearch}
-															formTemplate={form.form_template}
+															form={form}
 															isSelected={selectedReview?.id === review.id}
 															onSelectReview={handleSelectReview}
 															rowRef={el => {
 																if (review.id === undefined) return;
 																if (el) rowRefsMap.current.set(review.id, el);
 																else rowRefsMap.current.delete(review.id);
-															}}
-															onClickMoreInfo={() => {
-																window._mtm?.push({
-																	event: 'matomo_event',
-																	container_type: 'backoffice',
-																	service_id: form.product_id,
-																	form_id: form.id,
-																	template_slug: form.form_template.slug,
-																	category: 'reviews',
-																	action_type: 'read',
-																	action: `review_detail_display`,
-																	ui_source: 'review_button'
-																});
 															}}
 														/>
 													);
