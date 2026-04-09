@@ -54,7 +54,7 @@ function fillWorksheet(
 		];
 
 		const dataRow = worksheet.addRow(rowValues);
-		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'dd/mm/yyyy hh:mm:ss';
+		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'dd-mm-yyyy hh:mm:ss';
 
 		let maxLines = 1;
 		dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
