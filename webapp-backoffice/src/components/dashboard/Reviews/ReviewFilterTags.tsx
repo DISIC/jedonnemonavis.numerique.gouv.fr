@@ -30,14 +30,13 @@ const ReviewFilterTags = (props: Props) => {
 
 		if (!block) {
 			if (fieldCode === 'buttonId') {
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
+				return `Source = ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			}
 			return value;
 		}
 
-		return `${block.alias || block.label || fieldCode} : ${value}`;
+		return `${block.alias || block.label || fieldCode} = ${value}`;
 	};
 
 	const renderTags = () => {
@@ -56,14 +55,15 @@ const ReviewFilterTags = (props: Props) => {
 					key === 'needVerbatim'
 						? 'Réponse avec commentaire'
 						: key === 'needOtherDifficulties'
-							? 'Difficultés autres complété'
-							: 'Aide autres complété';
+						? 'Difficultés autres complété'
+						: 'Aide autres complété';
 
 				tags.push(
 					<Tag
 						key={`bool-${index}`}
 						title={`Retirer le filtre : ${label}`}
 						dismissible
+						small
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
 							onClick: () => {
@@ -98,6 +98,7 @@ const ReviewFilterTags = (props: Props) => {
 						key={`button-${index}`}
 						title={`Retirer le filtre ${labelRendered}`}
 						dismissible
+						small
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
 							onClick: () => {
@@ -135,6 +136,7 @@ const ReviewFilterTags = (props: Props) => {
 							key={`field-${fieldIndex}-${valueIndex}`}
 							title={`Retirer le filtre ${labelRendered}`}
 							dismissible
+							small
 							className={cx(classes.tagFilter)}
 							nativeButtonProps={{
 								onClick: () => {
@@ -182,8 +184,5 @@ const ReviewFilterTags = (props: Props) => {
 export default ReviewFilterTags;
 
 const useStyles = tss.withName(ReviewFilterTags.name).create({
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
-	}
+	tagFilter: {}
 });

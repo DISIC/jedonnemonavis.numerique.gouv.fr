@@ -762,45 +762,45 @@ const ReviewsTab = (props: Props) => {
 								)}
 							</div>
 							{reviews.length > 0 && (
-									<div
-										className={fr.cx(
-											'fr-grid-row--center',
-											'fr-grid-row',
-											'fr-mt-6v'
-										)}
-									>
-										<Pagination
-											count={nbPages}
-											showFirstLast
-											defaultPage={currentPage}
-											maxVisiblePages={6}
-											slicesSize={3}
-											getPageLinkProps={pageNumber => ({
-												onClick: event => {
-													event.preventDefault();
-													handlePageChange(pageNumber);
-													if (pageNumber !== currentPage) {
-														window._mtm?.push({
-															event: 'matomo_event',
-															container_type: 'backoffice',
-															service_id: form.product_id,
-															form_id: form.id,
-															template_slug: form.form_template.slug,
-															category: 'reviews',
-															action_type: 'read',
-															action: `review_other_page_display`,
-															ui_source: 'navigation',
-															value: pageNumber
-														});
-													}
-												},
-												href: '#',
-												classes: { link: fr.cx('fr-pagination__link') },
-												key: `pagination-link-${pageNumber}`
-											})}
-											className={fr.cx('fr-mt-1w')}
-										/>
-									</div>
+								<div
+									className={fr.cx(
+										'fr-grid-row--center',
+										'fr-grid-row',
+										'fr-mt-6v'
+									)}
+								>
+									<Pagination
+										count={nbPages}
+										showFirstLast
+										defaultPage={currentPage}
+										maxVisiblePages={6}
+										slicesSize={3}
+										getPageLinkProps={pageNumber => ({
+											onClick: event => {
+												event.preventDefault();
+												handlePageChange(pageNumber);
+												if (pageNumber !== currentPage) {
+													window._mtm?.push({
+														event: 'matomo_event',
+														container_type: 'backoffice',
+														service_id: form.product_id,
+														form_id: form.id,
+														template_slug: form.form_template.slug,
+														category: 'reviews',
+														action_type: 'read',
+														action: `review_other_page_display`,
+														ui_source: 'navigation',
+														value: pageNumber
+													});
+												}
+											},
+											href: '#',
+											classes: { link: fr.cx('fr-pagination__link') },
+											key: `pagination-link-${pageNumber}`
+										})}
+										className={fr.cx('fr-mt-1w')}
+									/>
+								</div>
 							)}
 						</div>
 					)}

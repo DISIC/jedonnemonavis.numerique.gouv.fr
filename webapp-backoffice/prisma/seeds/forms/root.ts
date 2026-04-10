@@ -99,6 +99,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 								"Sur une échelle de 1 à 5, 1 n'est pas clair du tout et 5 est très clair.",
 							type_bloc: 'mark_input',
 							field_code: 'comprehension',
+							alias: 'Clarté des informations',
 							options: {
 								create: [
 									{

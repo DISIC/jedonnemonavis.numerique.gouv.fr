@@ -66,6 +66,26 @@ const GenericFilters = <T extends FilterSectionKey>({
 
 	const sharedFilters = filters['sharedFilters'];
 
+	const getActiveFilterCount = (): number => {
+		if (filterKey === 'productReviews') {
+			const reviewFilters = filters.productReviews.filters;
+			let count = 0;
+			if (reviewFilters.needVerbatim) count++;
+			if (reviewFilters.needOtherDifficulties) count++;
+			if (reviewFilters.needOtherHelp) count++;
+			if (reviewFilters.fields) {
+				count += reviewFilters.fields.reduce(
+					(acc, f) => acc + f.values.length,
+					0
+				);
+			}
+			return count;
+		}
+		return 0;
+	};
+
+	const activeFilterCount = getActiveFilterCount();
+
 	useEffect(() => {
 		if (sharedFilters.dateShortcut) {
 			const { startDate, endDate } = getDatesByShortCut(
@@ -110,10 +130,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					productId={productId}
 				/>
 				{buttons && buttons.length > 0 && (
-					<IntegrationLinksDropdown
-						buttons={buttons}
-						filterKey={filterKey}
-					/>
+					<IntegrationLinksDropdown buttons={buttons} filterKey={filterKey} />
 				)}
 				{filterModal && (
 					<Button
@@ -125,39 +142,30 @@ const GenericFilters = <T extends FilterSectionKey>({
 						nativeButtonProps={filterModal.buttonProps}
 					>
 						Plus de filtres
+						{activeFilterCount > 0 && (
+							<span className={cx(classes.filterCountBadge)}>
+								{activeFilterCount}
+							</span>
+						)}
 					</Button>
 				)}
-			</div>
-
-			{children && <div>{children}</div>}
-
-			{sharedFilters.hasChanged ? (
-				<div className={cx(classes.filterActionContainer)}>
+				{sharedFilters.hasChanged && (
 					<Button
 						priority="tertiary no outline"
 						iconPosition="right"
 						iconId="ri-refresh-line"
+						size="small"
 						onClick={() => {
 							resetSectionFilters(filterKey);
 						}}
 					>
-						Réinitialiser les filtres
+						Réinitialiser
 					</Button>
-				</div>
-			) : null}
+				)}
+				{renderTags && renderTags()}
+			</div>
 
-			{renderTags && (
-				<div
-					className={fr.cx(
-						'fr-col-12',
-						'fr-col--bottom',
-						'fr-py-0',
-						'fr-mt-2v'
-					)}
-				>
-					{renderTags()}
-				</div>
-			)}
+			{children && <div>{children}</div>}
 		</div>
 	);
 };
@@ -189,11 +197,18 @@ const useStyles = tss.create({
 	filterButton: {
 		border: '1px solid #DDDDDD'
 	},
-	filterActionContainer: {
-		display: 'flex',
-		justifyContent: 'flex-end',
-		alignContent: 'flex-end',
-		gap: '1rem'
+	filterCountBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		minWidth: '1.5rem',
+		height: '1.5rem',
+		borderRadius: '5rem',
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		color: fr.colors.decisions.text.label.grey.default,
+		fontSize: '0.75rem',
+		marginLeft: fr.spacing('1v'),
+		padding: `0 ${fr.spacing('1v')}`
 	}
 });
 
