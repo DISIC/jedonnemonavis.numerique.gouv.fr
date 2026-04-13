@@ -68,6 +68,52 @@ function formatDateForFilename(date: Date): string {
 	return date.toISOString().replace('T', '_').replace(/:/g, '-').substring(0, 19);
 }
 
+type AnswerRow = {
+	review_id: number;
+	id: number;
+	parent_answer_id: number | null;
+	field_code: string;
+	field_label: string;
+	answer_text: string;
+};
+
+function buildReviewRow(
+	review: { id: number; created_at: Date },
+	answers: AnswerRow[],
+	isDynamic: boolean,
+	dynamicColumnMap: Map<string, string>
+): ReviewRow {
+	const answerById = new Map<number, AnswerRow>();
+	for (const a of answers) answerById.set(a.id, a);
+
+	const answerAccumulator = new Map<string, string[]>();
+	for (const answer of answers) {
+		const code = answer.field_code || answer.field_label;
+		let text = answer.answer_text;
+
+		if (answer.parent_answer_id !== null) {
+			const parent = answerById.get(answer.parent_answer_id);
+			if (parent) text = `${parent.answer_text} : ${text}`;
+		}
+
+		if (!answerAccumulator.has(code)) answerAccumulator.set(code, []);
+		answerAccumulator.get(code)!.push(text);
+
+		if (isDynamic && code && !dynamicColumnMap.has(code)) {
+			dynamicColumnMap.set(code, answer.field_label);
+		}
+	}
+
+	const answersMap: Record<string, string> = {};
+	answerAccumulator.forEach((values, code) => { answersMap[code] = values.join(' / '); });
+
+	return {
+		review_id: review.id.toString(16).slice(-7),
+		review_created_at: review.created_at,
+		answers: answersMap
+	};
+}
+
 // Only block types that produce Answer rows; decorative blocks (paragraph, heading, divider) are excluded
 const INPUT_BLOCK_TYPES = new Set<$Enums.Typebloc>([
 	'input_text', 'input_text_area', 'input_email',
@@ -193,36 +239,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 			for (const review of reviews) {
 				const answers = answersByReviewId.get(review.id) ?? [];
-				const answerById = new Map<number, typeof answers[0]>();
-				for (const a of answers) answerById.set(a.id, a);
-
-				// Prepend parent answer text to child values (e.g. "Option : Sub-option")
-				const answerAccumulator = new Map<string, string[]>();
-				for (const answer of answers) {
-					const code = answer.field_code || answer.field_label;
-					let text = answer.answer_text;
-
-					if (answer.parent_answer_id !== null) {
-						const parent = answerById.get(answer.parent_answer_id);
-						if (parent) text = `${parent.answer_text} : ${text}`;
-					}
-
-					if (!answerAccumulator.has(code)) answerAccumulator.set(code, []);
-					answerAccumulator.get(code)!.push(text);
-
-					if (isDynamic && code && !dynamicColumnMap.has(code)) {
-						dynamicColumnMap.set(code, answer.field_label);
-					}
-				}
-
-				const answersMap: Record<string, string> = {};
-				answerAccumulator.forEach((values, code) => { answersMap[code] = values.join(' / '); });
-
-				const reviewRow: ReviewRow = {
-					review_id: review.id.toString(16).slice(-7),
-					review_created_at: review.created_at,
-					answers: answersMap
-				};
+				const reviewRow = buildReviewRow(review, answers, isDynamic, dynamicColumnMap);
 
 				allReviews.push(reviewRow);
 				const year = review.created_at.getFullYear();
