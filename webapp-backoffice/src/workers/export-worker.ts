@@ -9,6 +9,7 @@ import { uploadToS3, generateDownloadLink } from '@/src/utils/export-worker/uplo
 import { ReviewFiltersType } from '@/src/types/custom';
 import { renderExportFailedEmail, renderExportReadyEmail } from '../utils/emails';
 import { sendMail } from '../utils/mailer';
+import { formatWhereAndOrder } from '../utils/reviews';
 
 const PAGE_SIZE = parseInt(process.env.EXPORT_PAGE_SIZE ?? '500', 10);
 const CONCURRENCY_LIMIT = parseInt(process.env.EXPORT_CONCURRENCY_LIMIT ?? '2', 10);
@@ -21,44 +22,6 @@ type FilterParams = {
 	button_id?: number;
 	filters?: ReviewFiltersType;
 };
-
-// Each condition becomes a separate EXISTS sub-query via Prisma's `some` — stacked with AND
-function buildReviewWhere(filters: ReviewFiltersType, searchTerm: string): Prisma.ReviewWhereInput {
-	const andConditions: Prisma.ReviewWhereInput[] = [];
-
-	if (filters.fields.length) {
-		for (const field of filters.fields) {
-			andConditions.push({ answers: { some: { field_code: field.field_code, answer_text: { in: field.values } } } });
-		}
-	}
-
-	if (filters.needVerbatim) {
-		andConditions.push({ answers: { some: { field_code: 'verbatim' } } });
-	}
-
-	if (searchTerm) {
-		andConditions.push({ answers: { some: { field_code: 'verbatim', answer_text: { contains: searchTerm, mode: 'insensitive' } } } });
-	}
-
-	return andConditions.length ? { AND: andConditions } : {};
-}
-
-function getMonthRanges(startDate: Date, endDate: Date): Array<[Date, Date]> {
-	const ranges: Array<[Date, Date]> = [];
-	let current = new Date(startDate);
-
-	while (current <= endDate) {
-		const monthStart = new Date(current.getFullYear(), current.getMonth(), 1, 0, 0, 0, 0);
-		const lastDay = new Date(current.getFullYear(), current.getMonth() + 1, 0).getDate();
-		let monthEnd = new Date(current.getFullYear(), current.getMonth(), lastDay, 23, 59, 59, 999);
-		if (monthEnd > endDate) monthEnd = endDate;
-
-		ranges.push([monthStart, monthEnd]);
-		current = new Date(monthEnd.getTime() + 24 * 60 * 60 * 1000);
-	}
-
-	return ranges;
-}
 
 function sanitizeFilename(name: string): string {
 	return name.replace(/[^\w-]/g, '_');
@@ -156,7 +119,8 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		where: { id: exportId },
 		include: {
 			user: { select: { email: true } },
-			product: { select: { title: true } }
+			product: { select: { title: true } },
+			form: { select: { legacy: true } }
 		}
 	});
 
@@ -170,18 +134,22 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	});
 
 	let filterParams: FilterParams = {};
-	let reviewWhere: Prisma.ReviewWhereInput = {};
 
 	if (exportRecord.params) {
 		try {
 			filterParams = JSON.parse(exportRecord.params) as FilterParams;
-			if (filterParams.filters) {
-				reviewWhere = buildReviewWhere(filterParams.filters, filterParams.search ?? '');
-			}
 		} catch {
 			console.error(`[export-worker] Failed to parse params for export ${exportId}, proceeding without filters`);
 		}
 	}
+
+	const { where: baseReviewWhere } = formatWhereAndOrder({
+		...filterParams,
+		product_id: exportRecord.product_id,
+		form_id: exportRecord.form_id,
+		start_date: filterParams.startDate,
+		end_date: filterParams.endDate
+	}, exportRecord.form?.legacy ?? false);
 
 	const startDate = filterParams.startDate
 		? new Date(filterParams.startDate)
@@ -189,12 +157,6 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	const endDateRaw = filterParams.endDate ? new Date(filterParams.endDate) : new Date();
 	const endDate = new Date(endDateRaw.getFullYear(), endDateRaw.getMonth(), endDateRaw.getDate(), 23, 59, 59, 999);
-
-	const totalReviews = await prisma.review.count({
-		where: { product_id: exportRecord.product_id, created_at: { gte: startDate, lte: endDate }, ...reviewWhere }
-	});
-	
-	console.log(`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`);
 
 	// Use form template column order when available; fall back to accumulating codes from seen answers
 	let templateColumns: TemplateColumn[] | null = null;
@@ -206,72 +168,70 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	const dynamicColumnMap = new Map<string, string>();
 	const allReviews: ReviewRow[] = [];
 	const allReviewsByYear: Map<number, ReviewRow[]> = new Map();
-	const monthRanges = getMonthRanges(startDate, endDate);
 	let retrievedReviews = 0;
 	let lastProgressPercent = -1;
+	let offset = 0;
 
-	for (const [monthStart, monthEnd] of monthRanges) {
-		let offset = 0;
+	const totalReviews = await prisma.review.count({ where: baseReviewWhere });
+	
+	console.log(`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`);
 
-		while (true) {
-			const reviews = await prisma.review.findMany({
-				where: { product_id: exportRecord.product_id, created_at: { gte: monthStart, lte: monthEnd }, ...reviewWhere },
-				orderBy: { created_at: 'desc' },
-				skip: offset,
-				take: PAGE_SIZE,
-				select: { id: true, created_at: true }
-			});
+	// Simple paginated fetch — oldest first.
+	// The date range in the WHERE clause lets PostgreSQL prune the
+	// partitioned review / answer tables (e.g. answer_202602) automatically.
+	while (true) {
+		const reviews = await prisma.review.findMany({
+			where: baseReviewWhere,
+			orderBy: { created_at: 'asc' },
+			skip: offset,
+			take: PAGE_SIZE,
+			select: { id: true, created_at: true }
+		});
 
-			if (reviews.length === 0) break;
+		if (reviews.length === 0) break;
 
-			// review_created_at bound is required to hit the @@index([review_id, review_created_at]) composite index
-			const answerRows = await prisma.answer.findMany({
-				where: { review_id: { in: reviews.map(r => r.id) }, review_created_at: { gte: monthStart, lte: monthEnd } },
-				orderBy: { id: 'asc' },
-				select: { review_id: true, id: true, parent_answer_id: true, field_code: true, field_label: true, answer_text: true }
-			});
+		// review_created_at bound lets PostgreSQL prune the partitioned answer table
+		const answerRows = await prisma.answer.findMany({
+			where: { review_id: { in: reviews.map(r => r.id) }, review_created_at: { gte: startDate, lte: endDate } },
+			orderBy: { id: 'asc' },
+			select: { review_id: true, id: true, parent_answer_id: true, field_code: true, field_label: true, answer_text: true }
+		});
 
-			const answersByReviewId = new Map<number, typeof answerRows>();
-			for (const answer of answerRows) {
-				if (!answersByReviewId.has(answer.review_id)) answersByReviewId.set(answer.review_id, []);
-				answersByReviewId.get(answer.review_id)!.push(answer);
-			}
+		const answersByReviewId = new Map<number, typeof answerRows>();
+		for (const answer of answerRows) {
+			if (!answersByReviewId.has(answer.review_id)) answersByReviewId.set(answer.review_id, []);
+			answersByReviewId.get(answer.review_id)!.push(answer);
+		}
 
-			for (const review of reviews) {
-				const answers = answersByReviewId.get(review.id) ?? [];
-				const reviewRow = buildReviewRow(review, answers, isDynamic, dynamicColumnMap);
+		for (const review of reviews) {
+			const answers = answersByReviewId.get(review.id) ?? [];
+			const reviewRow = buildReviewRow(review, answers, isDynamic, dynamicColumnMap);
 
-				allReviews.push(reviewRow);
-				const year = review.created_at.getFullYear();
-				if (!allReviewsByYear.has(year)) allReviewsByYear.set(year, []);
-				allReviewsByYear.get(year)!.push(reviewRow);
-			}
+			allReviews.push(reviewRow);
+			const year = review.created_at.getFullYear();
+			if (!allReviewsByYear.has(year)) allReviewsByYear.set(year, []);
+			allReviewsByYear.get(year)!.push(reviewRow);
+		}
 
-			retrievedReviews += reviews.length;
-			offset += PAGE_SIZE;
+		console.log(`[export-worker] Export ${exportId}: Retrieved ${reviews.length} reviews (total ${retrievedReviews + reviews.length}/${totalReviews})`);
 
-			if (totalReviews > 0) {
-				const percent = Math.min(95, Math.floor((retrievedReviews * 95) / totalReviews));
-				if (percent !== lastProgressPercent) {
-					lastProgressPercent = percent;
-					await Promise.all([
-						job.updateProgress(percent),
-						prisma.export.update({ where: { id: exportId }, data: { progress: percent } })
-					]);
-				}
+		retrievedReviews += reviews.length;
+		offset += PAGE_SIZE;
+
+		if (totalReviews > 0) {
+			const percent = Math.min(95, Math.floor((retrievedReviews * 95) / totalReviews));
+			if (percent !== lastProgressPercent) {
+				lastProgressPercent = percent;
+				await Promise.all([
+					job.updateProgress(percent),
+					prisma.export.update({ where: { id: exportId }, data: { progress: percent } })
+				]);
 			}
 		}
 	}
 
 	const columns: TemplateColumn[] = templateColumns ??
 		Array.from(dynamicColumnMap, ([code, label]) => ({ code, label }));
-
-	// Global sort after month-by-month accumulation — each month is internally sorted
-	// but cross-month order is not guaranteed
-	allReviews.sort((a, b) => a.review_created_at.getTime() - b.review_created_at.getTime());
-	allReviewsByYear.forEach(rows =>
-		rows.sort((a, b) => a.review_created_at.getTime() - b.review_created_at.getTime())
-	);
 
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
@@ -281,14 +241,12 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 	// CSV → single flat file with all rows
 	// XLS → single workbook with one sheet per year (sorted chronologically)
 	let fileBuffer: Buffer;
-	let fileName: string;
+	let fileName: string = `Avis_${safeName}_${currentDate}.${exportFormat === 'csv' ? 'csv' : 'xlsx'}`;
 
 	if (exportFormat === 'csv') {
 		fileBuffer = generateCsvBuffer(allReviews, columns);
-		fileName = `Avis_${safeName}_${currentDate}.csv`;
 	} else {
 		fileBuffer = await generateXlsBuffer(allReviewsByYear, columns, productName);
-		fileName = `Avis_${safeName}_${currentDate}.xlsx`;
 	}
 
 	await prisma.export.update({ where: { id: exportId }, data: { progress: 98 } });
