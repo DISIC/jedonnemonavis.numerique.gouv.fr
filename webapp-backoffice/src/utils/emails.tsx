@@ -1,3 +1,5 @@
+// Import React Required: tsx (used by dev:worker) uses the classic JSX transform which needs React in scope
+import React from 'react';
 import { render } from '@react-email/components';
 import JdmaUserRequestAcceptedEmail from '@/react-email/emails/jdma-user-request-accepted-email';
 import JdmaUserRequestRefusedEmail from '@/react-email/emails/jdma-user-request-refused-email';
@@ -103,3 +105,4 @@ export async function renderExportFailedEmail(
 ): Promise<string> {
 	return await render(<JdmaExportFailedEmail {...props} />);
 }
+
