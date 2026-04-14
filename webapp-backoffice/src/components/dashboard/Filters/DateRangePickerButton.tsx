@@ -13,6 +13,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { DateShortcutName, FilterSectionKey } from './Filters';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import DateRangeCalendar from './DateRangeCalendar';
 
 const dateShortcuts = [
 	{ label: '1 an', name: 'one-year' as const },
@@ -52,11 +53,22 @@ const DateRangePickerButton = ({
 		startDate?: string;
 		endDate?: string;
 	}>({});
+	const [calendarRangeStart, setCalendarRangeStart] = useState<Date | null>(
+		null
+	);
+	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(null);
 
 	useEffect(() => {
 		setLocalStartDate(sharedFilters.currentStartDate);
 		setLocalEndDate(sharedFilters.currentEndDate);
 	}, [sharedFilters.currentStartDate, sharedFilters.currentEndDate]);
+
+	useEffect(() => {
+		if (!sharedFilters.hasChanged) {
+			setCalendarRangeStart(null);
+			setCalendarRangeEnd(null);
+		}
+	}, [sharedFilters.hasChanged]);
 
 	const isValidDate = (date: string) => {
 		if (!date) return false;
@@ -113,6 +125,8 @@ const DateRangePickerButton = ({
 		};
 
 	const handleShortcutClick = (shortcutName: DateShortcutName) => {
+		setCalendarRangeStart(null);
+		setCalendarRangeEnd(null);
 		updateFilters({
 			...filters,
 			currentPage: 1,
@@ -147,6 +161,8 @@ const DateRangePickerButton = ({
 	};
 
 	const handleNewReviewsClick = () => {
+		setCalendarRangeStart(null);
+		setCalendarRangeEnd(null);
 		const newValue = !filters.productReviews.displayNew;
 		const today = new Date().toISOString().split('T')[0];
 		const startDate = reviewLogDate
@@ -349,6 +365,68 @@ const DateRangePickerButton = ({
 							</button>
 						)}
 					</div>
+					<hr className={cx(classes.separator)} />
+					<DateRangeCalendar
+						rangeStart={calendarRangeStart}
+						rangeEnd={calendarRangeEnd}
+						onRangeChange={(start, end) => {
+							setCalendarRangeStart(start);
+							setCalendarRangeEnd(end);
+						}}
+						onApply={(start, end) => {
+							setLocalStartDate(start);
+							setLocalEndDate(end);
+							updateFilters({
+								...filters,
+								currentPage: 1,
+								[filterKey]: {
+									...filters[filterKey]
+								},
+								productReviews: {
+									...filters.productReviews,
+									displayNew: false
+								},
+								sharedFilters: {
+									...filters.sharedFilters,
+									currentStartDate: start,
+									currentEndDate: end,
+									hasChanged: true,
+									dateShortcut: undefined
+								}
+							});
+							setAnchorEl(null);
+						}}
+						onClear={() => {
+							setCalendarRangeStart(null);
+							setCalendarRangeEnd(null);
+
+							const reviewFilters = filters.productReviews.filters;
+							const hasOtherFilters =
+								reviewFilters.needVerbatim ||
+								reviewFilters.needOtherDifficulties ||
+								reviewFilters.needOtherHelp ||
+								(reviewFilters.buttonId && reviewFilters.buttonId.length > 0) ||
+								(reviewFilters.fields &&
+									reviewFilters.fields.some(f => f.values.length > 0));
+
+							updateFilters({
+								...filters,
+								currentPage: 1,
+								[filterKey]: {
+									...filters[filterKey]
+								},
+								productReviews: {
+									...filters.productReviews,
+									displayNew: false
+								},
+								sharedFilters: {
+									...filters.sharedFilters,
+									dateShortcut: 'one-year',
+									hasChanged: !!hasOtherFilters
+								}
+							});
+						}}
+					/>
 				</div>
 			</Popover>
 		</>
@@ -365,7 +443,7 @@ const useStyles = tss.create({
 		boxShadow: '0px 4px 12px rgba(0, 0, 18, 0.16)'
 	},
 	popoverContent: {
-		padding: fr.spacing('3w'),
+		...fr.spacing('padding', { topBottom: '3w' }),
 		display: 'flex',
 		flexDirection: 'column'
 	},
@@ -373,15 +451,20 @@ const useStyles = tss.create({
 		display: 'flex',
 		gap: fr.spacing('6v'),
 		marginBottom: fr.spacing('4v'),
+		...fr.spacing('padding', { rightLeft: '3w' }),
 		'.fr-input-group': {
 			marginBottom: 0,
 			flex: 1
 		}
 	},
+	separator: {
+		paddingBottom: fr.spacing('4v')
+	},
 	shortcutsRow: {
 		display: 'flex',
 		flexWrap: 'wrap',
-		gap: fr.spacing('2v')
+		gap: fr.spacing('2v'),
+		...fr.spacing('padding', { rightLeft: '3w', bottom: '2w' })
 	},
 	shortcutButton: {
 		position: 'relative',
