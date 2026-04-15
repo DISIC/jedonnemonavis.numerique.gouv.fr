@@ -88,7 +88,9 @@ const IntegrationLinksDropdown = ({
 				nativeButtonProps={{
 					onClick: (e: React.MouseEvent<HTMLElement>) => {
 						setAnchorEl(e.currentTarget);
-					}
+					},
+					'aria-expanded': open ? 'true' : 'false',
+					'aria-controls': 'source-select-menu'
 				}}
 			>
 				{getLabel()}
@@ -97,6 +99,8 @@ const IntegrationLinksDropdown = ({
 				open={open}
 				anchorEl={anchorEl}
 				onClose={() => setAnchorEl(null)}
+				disablePortal
+				disableScrollLock
 				anchorOrigin={{
 					vertical: 'bottom',
 					horizontal: 'left'
@@ -107,7 +111,8 @@ const IntegrationLinksDropdown = ({
 				}}
 				slotProps={{
 					paper: {
-						className: cx(classes.popoverPaper)
+						className: cx(classes.popoverPaper),
+						id: 'source-select-menu'
 					}
 				}}
 			>
@@ -123,10 +128,20 @@ const IntegrationLinksDropdown = ({
 							)}
 							onClick={() => handleSelect(undefined)}
 						>
-							Tous les liens d'intégration
+							<span
+								className={cx(
+									classes.optionItemLabel,
+									selectedButtonId === undefined
+										? classes.optionItemLabelSelected
+										: undefined
+								)}
+							>
+								Tous les liens d'intégration
+							</span>
 						</button>
+						<hr />
 					</li>
-					{buttons.map(button => (
+					{buttons.map((button, index) => (
 						<li key={button.id}>
 							<button
 								type="button"
@@ -138,8 +153,18 @@ const IntegrationLinksDropdown = ({
 								)}
 								onClick={() => handleSelect(button.id)}
 							>
-								{button.title}
+								<span
+									className={cx(
+										classes.optionItemLabel,
+										selectedButtonId === button.id
+											? classes.optionItemLabelSelected
+											: undefined
+									)}
+								>
+									{button.title}
+								</span>
 							</button>
+							{index < buttons.length - 1 && <hr />}
 						</li>
 					))}
 				</ul>
@@ -150,6 +175,18 @@ const IntegrationLinksDropdown = ({
 
 const useStyles = tss.create({
 	filterButton: {
+		display: 'inline-flex',
+		flexDirection: 'row',
+		alignItems: 'center',
+		width: 'fit-content',
+		fontWeight: 500,
+		fontSize: '1rem',
+		lineHeight: '1.5rem',
+		minHeight: '2.5rem',
+		padding: '0.5rem 1rem',
+		backgroundColor: 'transparent',
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+		boxShadow: `inset 0 0 0 1px #DDDDDD`,
 		border: '1px solid #DDDDDD'
 	},
 	popoverPaper: {
@@ -160,29 +197,37 @@ const useStyles = tss.create({
 	optionsList: {
 		listStyle: 'none',
 		margin: 0,
-		padding: `${fr.spacing('1v')} 0`,
-		minWidth: '250px'
+		padding: 0,
+		minWidth: '250px',
+		li: { paddingBottom: 0 },
+		hr: {
+			paddingBottom: 1,
+			...fr.spacing('margin', { rightLeft: '3w' })
+		}
 	},
 	optionItem: {
-		...fr.typography[17].style,
 		display: 'block',
 		width: '100%',
-		padding: `${fr.spacing('2v')} ${fr.spacing('3w')}`,
+		...fr.spacing('padding', { topBottom: '3v', right: '3w', left: 0 }),
+		...fr.spacing('margin', { topBottom: '1v' }),
 		border: 'none',
 		background: 'none',
 		textAlign: 'left',
 		cursor: 'pointer',
 		color: fr.colors.decisions.text.default.grey.default,
 		'&:hover': {
-			backgroundColor:
-				fr.colors.decisions.background.default.grey.hover
+			backgroundColor: fr.colors.decisions.background.default.grey.hover
 		}
 	},
 	optionItemSelected: {
-		backgroundColor:
-			fr.colors.decisions.background.actionLow.blueFrance.default,
 		color: fr.colors.decisions.background.actionHigh.blueFrance.default,
 		fontWeight: 'bold'
+	},
+	optionItemLabel: {
+		paddingLeft: fr.spacing('3w')
+	},
+	optionItemLabelSelected: {
+		borderLeft: `3px solid ${fr.colors.decisions.background.actionHigh.blueFrance.default}`
 	}
 });
 

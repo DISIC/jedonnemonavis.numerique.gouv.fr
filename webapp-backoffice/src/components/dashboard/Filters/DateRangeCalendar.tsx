@@ -132,8 +132,18 @@ const DateRangeCalendar = ({
 			color: fr.colors.decisions.text.disabled.grey.default,
 			pointerEvents: 'none'
 		},
+		'& .MuiDayCalendar-slideTransition': {
+			minHeight: 'auto',
+			height: 'auto',
+			overflow: 'visible'
+		},
 		'& .MuiPickersSlideTransition-root': {
-			minHeight: 200
+			minHeight: 'auto',
+			height: 'auto',
+			overflow: 'visible'
+		},
+		'& .MuiDayCalendar-monthContainer': {
+			position: 'relative'
 		}
 	};
 
