@@ -1,4 +1,5 @@
 import { TypeAction } from '@prisma/client';
+import { isEqual } from 'lodash';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import { DateShortcutName } from '../components/dashboard/Filters/Filters';
 import { ReviewFiltersType } from '../types/custom';
@@ -46,6 +47,13 @@ interface FiltersContextProps {
 			'productActivityLogs' | 'productReviews' | 'productStats'
 		>
 	) => void;
+	/**
+	 * Marks the filters as scoped to a given form. If the stored scope differs
+	 * from the incoming `formId`, the form-scoped slices (productReviews /
+	 * productStats) are reset to defaults. Shared filters (dates) survive.
+	 * Safe to call on every render — no-ops when scope already matches.
+	 */
+	scopeToForm: (formId: number) => void;
 }
 
 const FiltersContext = createContext<FiltersContextProps | undefined>(
@@ -56,7 +64,7 @@ interface FiltersContextProviderProps {
 	children: ReactNode;
 }
 
-const initialState: Filters = {
+export const initialFilterState: Filters = {
 	users: {
 		entity: [],
 		currentPage: 1,
@@ -95,10 +103,38 @@ const initialState: Filters = {
 	validatedSearch: ''
 };
 
+/**
+ * Checks whether any of the filter slices that affect dashboard results
+ * differ from their defaults. Ignores `sharedFilters.hasChanged` itself
+ * (it's a derived flag) and UI-only state like pagination / search text.
+ *
+ * Only `dateShortcut` is compared for shared filters — `currentStartDate`
+ * / `currentEndDate` are derived from it on mount (see the useEffect in
+ * Filters.tsx), so they are filled in even in the default state.
+ */
+export const hasAnyFilterChanged = (filters: Filters): boolean => {
+	const sharedDatesChanged =
+		filters.sharedFilters.dateShortcut !==
+		initialFilterState.sharedFilters.dateShortcut;
+
+	return (
+		sharedDatesChanged ||
+		!isEqual(filters.productReviews, initialFilterState.productReviews) ||
+		!isEqual(filters.productStats, initialFilterState.productStats) ||
+		!isEqual(
+			filters.productActivityLogs,
+			initialFilterState.productActivityLogs
+		)
+	);
+};
+
 export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 	children
 }) => {
-	const [filters, setFilters] = useState<Filters>(initialState);
+	const [filters, setFilters] = useState<Filters>(initialFilterState);
+	const [scopedFormId, setScopedFormId] = useState<number | undefined>(
+		undefined
+	);
 
 	const updateFilters = (newFilters: Partial<Filters>) => {
 		setFilters(prevFilters => ({
@@ -107,7 +143,7 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 		}));
 	};
 
-	const clearFilters = () => setFilters(initialState);
+	const clearFilters = () => setFilters(initialFilterState);
 
 	const resetSectionFilters = (
 		section: keyof Pick<
@@ -117,17 +153,34 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 	) => {
 		setFilters(prevFilters => ({
 			...prevFilters,
-			[section]: initialState[section],
+			[section]: initialFilterState[section],
 			sharedFilters: {
-				...initialState.sharedFilters
+				...initialFilterState.sharedFilters
 			},
 			currentPage: 1
 		}));
 	};
 
+	const scopeToForm = (formId: number) => {
+		if (scopedFormId === formId) return;
+		setScopedFormId(formId);
+		// Only reset the form-scoped slices; keep shared filters (dates) intact.
+		setFilters(prevFilters => ({
+			...prevFilters,
+			productReviews: initialFilterState.productReviews,
+			productStats: initialFilterState.productStats
+		}));
+	};
+
 	return (
 		<FiltersContext.Provider
-			value={{ filters, updateFilters, clearFilters, resetSectionFilters }}
+			value={{
+				filters,
+				updateFilters,
+				clearFilters,
+				resetSectionFilters,
+				scopeToForm
+			}}
 		>
 			{children}
 		</FiltersContext.Provider>

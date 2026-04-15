@@ -1,10 +1,8 @@
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Button } from '@prisma/client';
-import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -27,6 +25,9 @@ const ReviewFilterTags = (props: Props) => {
 
 	const renderLabel = (fieldCode: string, value: string): string => {
 		const block = filterableBlocks.find(b => b.field_code === fieldCode);
+		const formTemplateBlockOption = block?.options?.find(
+			o => o.value === value
+		);
 
 		if (!block) {
 			if (fieldCode === 'buttonId') {
@@ -36,7 +37,9 @@ const ReviewFilterTags = (props: Props) => {
 			return value;
 		}
 
-		return `${block.alias || block.label || fieldCode} = ${value}`;
+		return `${block.alias || block.label || fieldCode} = ${
+			formTemplateBlockOption?.alias || value
+		}`;
 	};
 
 	const renderTags = () => {
@@ -67,7 +70,7 @@ const ReviewFilterTags = (props: Props) => {
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
 							onClick: () => {
-								updateFilters({
+								const nextFilters: typeof filters = {
 									...filters,
 									productReviews: {
 										...filters.productReviews,
@@ -75,6 +78,13 @@ const ReviewFilterTags = (props: Props) => {
 											...filters.productReviews.filters,
 											[key]: false
 										}
+									}
+								};
+								updateFilters({
+									...nextFilters,
+									sharedFilters: {
+										...nextFilters.sharedFilters,
+										hasChanged: hasAnyFilterChanged(nextFilters)
 									}
 								});
 							}
@@ -102,7 +112,7 @@ const ReviewFilterTags = (props: Props) => {
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
 							onClick: () => {
-								updateFilters({
+								const nextFilters: typeof filters = {
 									...filters,
 									productReviews: {
 										...filters.productReviews,
@@ -112,6 +122,13 @@ const ReviewFilterTags = (props: Props) => {
 												item => item !== buttonIdStr
 											)
 										}
+									}
+								};
+								updateFilters({
+									...nextFilters,
+									sharedFilters: {
+										...nextFilters.sharedFilters,
+										hasChanged: hasAnyFilterChanged(nextFilters)
 									}
 								});
 							}
@@ -151,11 +168,10 @@ const ReviewFilterTags = (props: Props) => {
 											return f;
 										});
 
-									const filteredFields = updatedFields?.filter(
-										f => f.values.length > 0
-									);
+									const filteredFields =
+										updatedFields?.filter(f => f.values.length > 0) ?? [];
 
-									updateFilters({
+									const nextFilters: typeof filters = {
 										...filters,
 										productReviews: {
 											...filters.productReviews,
@@ -163,6 +179,13 @@ const ReviewFilterTags = (props: Props) => {
 												...filters.productReviews.filters,
 												fields: filteredFields
 											}
+										}
+									};
+									updateFilters({
+										...nextFilters,
+										sharedFilters: {
+											...nextFilters.sharedFilters,
+											hasChanged: hasAnyFilterChanged(nextFilters)
 										}
 									});
 								}

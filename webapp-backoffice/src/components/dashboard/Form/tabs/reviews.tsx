@@ -10,7 +10,7 @@ import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHea
 import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
@@ -96,7 +96,11 @@ const ReviewsTab = (props: Props) => {
 		[]
 	);
 
-	const { filters, updateFilters } = useFilters();
+	const { filters, updateFilters, scopeToForm } = useFilters();
+
+	useEffect(() => {
+		scopeToForm(form.id);
+	}, [form.id]);
 
 	const [initialDateState, setInitialDateState] = React.useState({
 		startDate: filters.sharedFilters.currentStartDate,
@@ -105,17 +109,21 @@ const ReviewsTab = (props: Props) => {
 	});
 
 	const handleSubmitfilters = (filtersT: ReviewFiltersType) => {
-		updateFilters({
+		const nextFilters: typeof filters = {
 			...filters,
 			productReviews: {
 				...filters.productReviews,
 				filters: {
 					...filtersT
 				}
-			},
+			}
+		};
+
+		updateFilters({
+			...nextFilters,
 			sharedFilters: {
 				...filters.sharedFilters,
-				hasChanged: true
+				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
 		filter_modal.close();

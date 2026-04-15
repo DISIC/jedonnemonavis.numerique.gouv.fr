@@ -1,4 +1,4 @@
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import {
 	formatDateToFrenchString,
 	getDatesByShortCut
@@ -53,10 +53,38 @@ const DateRangePickerButton = ({
 		startDate?: string;
 		endDate?: string;
 	}>({});
+
+	// Parse a "YYYY-MM-DD" string as a local-time Date (avoid UTC shift).
+	const parseLocalDate = (isoStr: string): Date | null => {
+		if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return null;
+		const [y, m, d] = isoStr.split('-').map(Number);
+		return new Date(y, m - 1, d);
+	};
+
+	// Restore calendar range from context when a custom range is active
+	// (dateShortcut is undefined with both dates set). This runs on mount
+	// so the selection survives page/tab navigation.
+	const getInitialCalendarRange = (): [Date | null, Date | null] => {
+		if (
+			sharedFilters.dateShortcut === undefined &&
+			sharedFilters.currentStartDate &&
+			sharedFilters.currentEndDate &&
+			!filters.productReviews.displayNew
+		) {
+			return [
+				parseLocalDate(sharedFilters.currentStartDate),
+				parseLocalDate(sharedFilters.currentEndDate)
+			];
+		}
+		return [null, null];
+	};
+
 	const [calendarRangeStart, setCalendarRangeStart] = useState<Date | null>(
-		null
+		() => getInitialCalendarRange()[0]
 	);
-	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(null);
+	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(
+		() => getInitialCalendarRange()[1]
+	);
 
 	useEffect(() => {
 		setLocalStartDate(sharedFilters.currentStartDate);
@@ -77,7 +105,7 @@ const DateRangePickerButton = ({
 
 	const updateDateFilter = useCallback(
 		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
-			updateFilters({
+			const nextFilters: typeof filters = {
 				...filters,
 				currentPage: 1,
 				[filterKey]: {
@@ -90,8 +118,14 @@ const DateRangePickerButton = ({
 				sharedFilters: {
 					...filters.sharedFilters,
 					[key]: value,
-					hasChanged: true,
 					dateShortcut: undefined
+				}
+			};
+			updateFilters({
+				...nextFilters,
+				sharedFilters: {
+					...nextFilters.sharedFilters,
+					hasChanged: hasAnyFilterChanged(nextFilters)
 				}
 			});
 		}, 1000),
@@ -127,7 +161,7 @@ const DateRangePickerButton = ({
 	const handleShortcutClick = (shortcutName: DateShortcutName) => {
 		setCalendarRangeStart(null);
 		setCalendarRangeEnd(null);
-		updateFilters({
+		const nextFilters: typeof filters = {
 			...filters,
 			currentPage: 1,
 			[filterKey]: {
@@ -139,8 +173,16 @@ const DateRangePickerButton = ({
 			},
 			sharedFilters: {
 				...filters.sharedFilters,
-				hasChanged: true,
+				currentStartDate: '',
+				currentEndDate: '',
 				dateShortcut: shortcutName
+			}
+		};
+		updateFilters({
+			...nextFilters,
+			sharedFilters: {
+				...nextFilters.sharedFilters,
+				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
 
@@ -169,7 +211,7 @@ const DateRangePickerButton = ({
 			? new Date(reviewLogDate).toISOString().split('T')[0]
 			: today;
 
-		updateFilters({
+		const nextFilters: typeof filters = {
 			...filters,
 			currentPage: 1,
 			productReviews: {
@@ -178,11 +220,25 @@ const DateRangePickerButton = ({
 			},
 			sharedFilters: {
 				...filters.sharedFilters,
-				hasChanged: true,
-				dateShortcut: undefined,
 				...(newValue
-					? { currentStartDate: startDate, currentEndDate: today }
-					: {})
+					? {
+							currentStartDate: startDate,
+							currentEndDate: today,
+							dateShortcut: undefined
+					  }
+					: {
+							currentStartDate: '',
+							currentEndDate: '',
+							dateShortcut: 'one-year'
+					  })
+			}
+		};
+
+		updateFilters({
+			...nextFilters,
+			sharedFilters: {
+				...nextFilters.sharedFilters,
+				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
 
@@ -376,7 +432,7 @@ const DateRangePickerButton = ({
 						onApply={(start, end) => {
 							setLocalStartDate(start);
 							setLocalEndDate(end);
-							updateFilters({
+							const nextFilters: typeof filters = {
 								...filters,
 								currentPage: 1,
 								[filterKey]: {
@@ -390,8 +446,14 @@ const DateRangePickerButton = ({
 									...filters.sharedFilters,
 									currentStartDate: start,
 									currentEndDate: end,
-									hasChanged: true,
 									dateShortcut: undefined
+								}
+							};
+							updateFilters({
+								...nextFilters,
+								sharedFilters: {
+									...nextFilters.sharedFilters,
+									hasChanged: hasAnyFilterChanged(nextFilters)
 								}
 							});
 							setAnchorEl(null);
@@ -400,16 +462,7 @@ const DateRangePickerButton = ({
 							setCalendarRangeStart(null);
 							setCalendarRangeEnd(null);
 
-							const reviewFilters = filters.productReviews.filters;
-							const hasOtherFilters =
-								reviewFilters.needVerbatim ||
-								reviewFilters.needOtherDifficulties ||
-								reviewFilters.needOtherHelp ||
-								(reviewFilters.buttonId && reviewFilters.buttonId.length > 0) ||
-								(reviewFilters.fields &&
-									reviewFilters.fields.some(f => f.values.length > 0));
-
-							updateFilters({
+							const nextFilters: typeof filters = {
 								...filters,
 								currentPage: 1,
 								[filterKey]: {
@@ -421,8 +474,17 @@ const DateRangePickerButton = ({
 								},
 								sharedFilters: {
 									...filters.sharedFilters,
-									dateShortcut: 'one-year',
-									hasChanged: !!hasOtherFilters
+									currentStartDate: '',
+									currentEndDate: '',
+									dateShortcut: 'one-year'
+								}
+							};
+
+							updateFilters({
+								...nextFilters,
+								sharedFilters: {
+									...nextFilters.sharedFilters,
+									hasChanged: hasAnyFilterChanged(nextFilters)
 								}
 							});
 						}}

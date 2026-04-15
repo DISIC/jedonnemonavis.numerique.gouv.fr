@@ -1,4 +1,4 @@
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Popover } from '@mui/material';
@@ -44,21 +44,19 @@ const IntegrationLinksDropdown = ({
 	};
 
 	const handleSelect = (buttonId: number | undefined) => {
+		let nextFilters: typeof filters | null = null;
+
 		if (filterKey === 'productStats') {
-			updateFilters({
+			nextFilters = {
 				...filters,
 				productStats: {
 					...filters.productStats,
 					buttonId: buttonId
-				},
-				sharedFilters: {
-					...filters.sharedFilters,
-					hasChanged: true
 				}
-			});
+			};
 			push(['trackEvent', 'Product - Stats', 'selection-source']);
 		} else if (filterKey === 'productReviews') {
-			updateFilters({
+			nextFilters = {
 				...filters,
 				productReviews: {
 					...filters.productReviews,
@@ -66,13 +64,19 @@ const IntegrationLinksDropdown = ({
 						...filters.productReviews.filters,
 						buttonId: buttonId ? [String(buttonId)] : []
 					}
-				},
+				}
+			};
+			push(['trackEvent', 'Product - Reviews', 'selection-source']);
+		}
+
+		if (nextFilters) {
+			updateFilters({
+				...nextFilters,
 				sharedFilters: {
-					...filters.sharedFilters,
-					hasChanged: true
+					...nextFilters.sharedFilters,
+					hasChanged: hasAnyFilterChanged(nextFilters)
 				}
 			});
-			push(['trackEvent', 'Product - Reviews', 'selection-source']);
 		}
 
 		setAnchorEl(null);

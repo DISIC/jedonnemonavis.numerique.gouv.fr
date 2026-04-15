@@ -117,7 +117,11 @@ const StatsTab = ({
 }: Props) => {
 	const { formTemplate } = useRootFormTemplateContext();
 	const { classes, cx } = useStyles();
-	const { filters } = useFilters();
+	const { filters, updateFilters, scopeToForm } = useFilters();
+
+	useEffect(() => {
+		scopeToForm(form.id);
+	}, [form.id]);
 
 	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
 

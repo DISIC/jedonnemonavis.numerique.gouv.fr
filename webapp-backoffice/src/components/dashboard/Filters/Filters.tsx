@@ -1,4 +1,8 @@
-import { Filters, useFilters } from '@/src/contexts/FiltersContext';
+import {
+	Filters,
+	initialFilterState,
+	useFilters
+} from '@/src/contexts/FiltersContext';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useEffect } from 'react';
@@ -86,6 +90,65 @@ const GenericFilters = <T extends FilterSectionKey>({
 
 	const activeFilterCount = getActiveFilterCount();
 
+	/**
+	 * True when any filter *that is actually rendered by this Filters instance*
+	 * differs from its default. Page-specific filters that this instance does
+	 * not surface (e.g. the "Plus de filtres" modal on pages without one) are
+	 * intentionally ignored.
+	 */
+	const isAnyVisibleFilterActive = (): boolean => {
+		// Shared date filters — always rendered
+		if (
+			sharedFilters.dateShortcut !==
+			initialFilterState.sharedFilters.dateShortcut
+		) {
+			return true;
+		}
+
+		// "Nouvelles réponses" toggle — rendered only when showNewReviewsOption
+		if (showNewReviewsOption && filters.productReviews.displayNew) {
+			return true;
+		}
+
+		// Integration links dropdown — rendered only when buttons are provided
+		if (buttons && buttons.length > 0) {
+			if (
+				filterKey === 'productStats' &&
+				filters.productStats.buttonId !== undefined
+			) {
+				return true;
+			}
+			if (
+				filterKey === 'productReviews' &&
+				filters.productReviews.filters.buttonId &&
+				filters.productReviews.filters.buttonId.length > 0
+			) {
+				return true;
+			}
+		}
+
+		// "Plus de filtres" modal — rendered only when filterModal is provided
+		if (filterModal && filterKey === 'productReviews') {
+			const rf = filters.productReviews.filters;
+			if (rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp) {
+				return true;
+			}
+			if (rf.fields && rf.fields.some(f => f.values.length > 0)) {
+				return true;
+			}
+		}
+
+		// Logs page filters (rendered via children on the logs page)
+		if (
+			filterKey === 'productActivityLogs' &&
+			filters.productActivityLogs.actionType.length > 0
+		) {
+			return true;
+		}
+
+		return false;
+	};
+
 	useEffect(() => {
 		if (sharedFilters.dateShortcut) {
 			const { startDate, endDate } = getDatesByShortCut(
@@ -149,7 +212,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 						)}
 					</Button>
 				)}
-				{sharedFilters.hasChanged && (
+				{isAnyVisibleFilterActive() && (
 					<Button
 						priority="tertiary no outline"
 						iconPosition="right"
