@@ -4,11 +4,9 @@ import {
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
-import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
@@ -25,13 +23,6 @@ interface Props {
 const ReviewFiltersModalRoot = (props: Props) => {
 	const { modal, filters, submitFilters, form_id } = props;
 	const { cx, classes } = useStyles();
-
-	const { data: buttonResults } = trpc.button.getList.useQuery({
-		page: 1,
-		numberPerPage: 1000,
-		form_id: form_id,
-		isTest: true
-	});
 
 	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
 	useEffect(() => {
@@ -91,7 +82,7 @@ const ReviewFiltersModalRoot = (props: Props) => {
 				'fr-my-0'
 			)}
 			concealingBackdrop={false}
-			title={'Filtres'}
+			title={'Plus de filtres'}
 			size="large"
 		>
 			<div className={fr.cx('fr-mt-4w')}>
@@ -174,32 +165,6 @@ const ReviewFiltersModalRoot = (props: Props) => {
 					</fieldset>
 					<span>Très clair</span>
 				</div>
-			</div>
-
-			<div className={fr.cx('fr-mt-4w')}>
-				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
-				<Select
-					label="Sélectionner une source"
-					nativeSelectProps={{
-						value: tmpFilters.buttonId[0],
-						onChange: e => {
-							setTmpFilters({
-								...tmpFilters,
-								buttonId: e.target.value !== 'undefined' ? [e.target.value] : []
-							});
-							push(['trackEvent', 'Avis', 'Sélection-bouton']);
-						}
-					}}
-				>
-					<option value="undefined">Toutes les sources</option>
-					{buttonResults?.data?.map(button => {
-						return (
-							<option key={button.id} value={button.id}>
-								{button.title}
-							</option>
-						);
-					})}
-				</Select>
 			</div>
 
 			<div className={fr.cx('fr-mt-4w')}>

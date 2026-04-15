@@ -492,7 +492,7 @@ const useStyles = tss.create({
 		border: `1px solid ${fr.colors.decisions.background.disabled.grey.default}`
 	},
 	observatoireStats: {
-		marginTop: fr.spacing('16v'),
+		marginTop: fr.spacing('8v'),
 		paddingBottom: fr.spacing('20v'),
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},

@@ -56,6 +56,7 @@ const IntegrationLinksDropdown = ({
 					hasChanged: true
 				}
 			});
+			push(['trackEvent', 'Product - Stats', 'selection-source']);
 		} else if (filterKey === 'productReviews') {
 			updateFilters({
 				...filters,
@@ -71,9 +72,9 @@ const IntegrationLinksDropdown = ({
 					hasChanged: true
 				}
 			});
+			push(['trackEvent', 'Product - Reviews', 'selection-source']);
 		}
 
-		push(['trackEvent', 'Filters', 'Sélection-lien-intégration']);
 		setAnchorEl(null);
 	};
 
