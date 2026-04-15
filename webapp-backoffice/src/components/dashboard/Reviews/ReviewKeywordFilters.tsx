@@ -14,6 +14,7 @@ interface Props {
 	end_date?: string;
 	onClick: (keyword: string) => void;
 	selectedKeyword?: string;
+	fields?: Array<{ field_code: string; values: string[] }>;
 }
 
 const ReviewKeywordFilters = (props: Props) => {
@@ -23,41 +24,28 @@ const ReviewKeywordFilters = (props: Props) => {
 		start_date,
 		end_date,
 		onClick,
-		selectedKeyword
+		selectedKeyword,
+		fields
 	} = props;
 
 	const [size, setSize] = useState(10);
 
-	const { data: hasKeywords } = trpc.answer.getKeywords.useQuery(
-		{
-			product_id,
-			form_id,
-			start_date,
-			end_date,
-			size: 1
-		},
-		{
-			initialData: {
-				data: []
-			}
-		}
-	);
-
-	const { data: keywordsResults } = trpc.answer.getKeywords.useQuery(
-		{
-			product_id,
-			form_id,
-			start_date,
-			end_date,
-			size
-		},
-		{
-			initialData: {
-				data: []
+	const { data: keywordsResults, isFetching: isKeywordsLoading } =
+		trpc.answer.getKeywords.useQuery(
+			{
+				product_id,
+				form_id,
+				start_date,
+				end_date,
+				fields,
+				size
 			},
-			enabled: hasKeywords.data.length > 0
-		}
-	);
+			{
+				initialData: {
+					data: []
+				}
+			}
+		);
 
 	const handleLoadMore = () => {
 		push(['trackEvent', 'Product - Reviews', 'Load-More-Keywords']);
@@ -66,12 +54,19 @@ const ReviewKeywordFilters = (props: Props) => {
 
 	const { cx, classes } = useStyles();
 
-	if (!hasKeywords.data.length) {
+	if (!keywordsResults.data.length) {
 		return null;
 	}
 
 	return (
-		<div className={cx(classes.keywordsBox, fr.cx('fr-p-4v', 'fr-mb-8v'))}>
+		<div
+			className={cx(classes.keywordsBox, fr.cx('fr-p-4v', 'fr-mb-8v'))}
+			style={{
+				opacity: isKeywordsLoading ? 0.5 : 1,
+				transition: 'opacity 0.2s ease',
+				pointerEvents: isKeywordsLoading ? 'none' : 'auto'
+			}}
+		>
 			<p className={fr.cx('fr-mb-0')}>
 				<strong>Filtrer par mot récurrent</strong>{' '}
 				<Tooltip
@@ -84,13 +79,16 @@ const ReviewKeywordFilters = (props: Props) => {
 			</p>
 			<div className={cx(classes.keywordsContainer)}>
 				{keywordsResults.data.map(keywordObject => {
-					const isSelected = selectedKeyword === keywordObject.keyword;
+					const isSelected =
+					selectedKeyword === `"${keywordObject.keyword}"`;
 					return (
 						<Tag
 							pressed={isSelected}
 							nativeButtonProps={{
 								onClick: () => {
-									onClick(keywordObject.keyword);
+									onClick(
+										isSelected ? '' : keywordObject.keyword
+									);
 								}
 							}}
 							key={keywordObject.keyword}

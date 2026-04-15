@@ -1,3 +1,4 @@
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import FormConfigVersionsDisplay from '@/src/components/dashboard/Form/FormConfigVersionsDisplay';
 import NoButtonsPanel from '@/src/components/dashboard/Pannels/NoButtonsPanel';
@@ -17,11 +18,7 @@ import {
 	getExportPeriodLabel,
 	parseExportParams
 } from '@/src/utils/export';
-import {
-	formatDateToFrenchStringWithHour,
-	getNbPages,
-	normalizeString
-} from '@/src/utils/tools';
+import { formatDateToFrenchString, getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
@@ -38,6 +35,7 @@ import { useRouter } from 'next/router';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import ExportHistory from '../../Reviews/ExportHistory';
+import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
 
@@ -70,12 +68,25 @@ const ReviewsTab = (props: Props) => {
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = useState(1);
-	const [numberPerPage, setNumberPerPage] = useState(10);
+	const [numberPerPage, setNumberPerPage] = useState(20);
 	const [sort, setSort] = useState<string>('created_at:desc');
 	const [buttonId, setButtonId] = useState<number>();
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
+	const [selectedReview, setSelectedReview] =
+		useState<ReviewPartialWithRelations | null>(null);
+	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
+
+	useEffect(() => {
+		if (!selectedReview?.id) return;
+		rowRefsMap.current
+			.get(selectedReview.id)
+			?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+	}, [selectedReview?.id]);
+
+	const { mutate: createReviewViewLog } =
+		trpc.reviewViewLog.create.useMutation();
 
 	const filter_modal = useMemo(
 		() =>
@@ -114,7 +125,8 @@ const ReviewsTab = (props: Props) => {
 
 	const {
 		data: reviewResults,
-		isFetching: isLoadingReviews,
+		isFetching: isFetchingReviews,
+		isLoading: isLoadingReviews,
 		error: errorReviews
 	} = trpc.review.getList.useQuery(
 		{
@@ -392,6 +404,45 @@ const ReviewsTab = (props: Props) => {
 		});
 	};
 
+	const handleSelectReview = (
+		review: ReviewPartialWithRelations,
+		source: '' | '_prev' | '_next' = ''
+	) => {
+		setSelectedReview(review);
+		createReviewViewLog({
+			review_id: review.id as number,
+			review_created_at: review.created_at as Date
+		});
+		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'reviews',
+			action_type: 'read',
+			action: 'review_detail_display',
+			ui_source: 'review_button' + source
+		});
+	};
+
+	const selectedReviewIndex = selectedReview
+		? reviews.findIndex(r => r.id === selectedReview.id)
+		: -1;
+
+	const handlePreviousReview = () => {
+		if (selectedReviewIndex > 0) {
+			handleSelectReview(reviews[selectedReviewIndex - 1], '_prev');
+		}
+	};
+
+	const handleNextReview = () => {
+		if (selectedReviewIndex < reviews.length - 1) {
+			handleSelectReview(reviews[selectedReviewIndex + 1], '_next');
+		}
+	};
+
 	const displayEmptyState = () => {
 		if (form.isDeleted) {
 			return (
@@ -454,7 +505,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
-			setValidatedSearch(normalizeString(tmpSearch ?? search));
+			setValidatedSearch((tmpSearch ?? search).trim());
 			setCurrentPage(1);
 		}
 	};
@@ -613,8 +664,9 @@ const ReviewsTab = (props: Props) => {
 									options={[
 										{
 											label: 'Afficher uniquement les nouvelles réponses',
-											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchStringWithHour(
-												reviewLog[0].created_at.toString()
+											hintText: `Depuis votre dernière consultation (le ${formatDateToFrenchString(
+												reviewLog[0].created_at.toString(),
+												{ withHour: true }
 											)})`,
 											nativeInputProps: {
 												name: 'favorites-products',
@@ -665,6 +717,7 @@ const ReviewsTab = (props: Props) => {
 								? undefined
 								: filters.sharedFilters.currentEndDate
 						}
+						fields={filters.productReviews.filters.fields}
 						selectedKeyword={validatedSearch}
 						onClick={keyword => {
 							push([
@@ -672,69 +725,32 @@ const ReviewsTab = (props: Props) => {
 								'Product - Reviews',
 								'Keyword-Filter-Clicked'
 							]);
-							setSearch(keyword);
-							submitSearch(keyword);
+							if (keyword) {
+								setSearch(`"${keyword}"`);
+								submitSearch(`"${keyword}"`);
+							} else {
+								setSearch('');
+								setValidatedSearch('');
+								setCurrentPage(1);
+							}
 						}}
 					/>
-					<div
-						className={cx(
-							classes.filtersWrapper,
-							fr.cx('fr-col-12', 'fr-col-lg-4')
-						)}
-					>
-						<form
-							className={cx(classes.searchForm)}
-							onSubmit={e => {
-								e.preventDefault();
-								submitSearch();
-								push(['trackEvent', 'Form - Reviews', 'Search']);
-							}}
-						>
-							<div role="search" className={fr.cx('fr-search-bar')}>
-								<Input
-									label="Rechercher un avis"
-									hideLabel
-									nativeInputProps={{
-										placeholder: 'Rechercher dans les commentaires',
-										type: 'search',
-										value: search,
-										onChange: event => {
-											if (!event.target.value) {
-												setValidatedSearch('');
-											}
-											setSearch(event.target.value);
-										}
-									}}
-								/>
-								<ButtonDSFR
-									priority="primary"
-									type="submit"
-									iconId="ri-search-2-line"
-									iconPosition="left"
-								>
-									Rechercher
-								</ButtonDSFR>
-							</div>
-						</form>
-					</div>
+
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
 					) : (
-						<>
+						<div
+							aria-busy={isFetchingReviews}
+							{...(isFetchingReviews ? { inert: '' } : {})}
+						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
 									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}
-							<div
-								className={fr.cx(
-									'fr-grid-row',
-									'fr-grid-row--gutters',
-									'fr-grid-row--right'
-								)}
-							>
+							<div className={classes.paginationWrapper}>
 								<PageItemsCounter
 									label="réponse"
 									isFeminine
@@ -743,9 +759,47 @@ const ReviewsTab = (props: Props) => {
 										numberPerPage * (currentPage - 1) + reviews.length
 									}
 									totalItemsCount={reviewsCountFiltered}
-									additionalClasses={['fr-col-12', 'fr-mt-8v']}
+									fitContent
 								/>
+
+								<div className={cx(fr.cx('fr-col-12', 'fr-col-lg-4'))}>
+									<form
+										className={cx(classes.searchForm)}
+										onSubmit={e => {
+											e.preventDefault();
+											submitSearch();
+											push(['trackEvent', 'Form - Reviews', 'Search']);
+										}}
+									>
+										<div role="search" className={fr.cx('fr-search-bar')}>
+											<Input
+												label="Rechercher un avis"
+												hideLabel
+												nativeInputProps={{
+													placeholder: 'Rechercher dans les commentaires',
+													type: 'search',
+													value: search,
+													onChange: event => {
+														if (!event.target.value) {
+															setValidatedSearch('');
+														}
+														setSearch(event.target.value);
+													}
+												}}
+											/>
+											<ButtonDSFR
+												priority="primary"
+												type="submit"
+												iconId="ri-search-2-line"
+												iconPosition="left"
+											>
+												Rechercher
+											</ButtonDSFR>
+										</div>
+									</form>
+								</div>
 							</div>
+
 							<div>
 								{reviews.length > 0 && (
 									<>
@@ -762,23 +816,13 @@ const ReviewsTab = (props: Props) => {
 															key={index}
 															review={review}
 															search={validatedSearch}
-															formTemplate={form.form_template}
-															formConfig={getFormConfigHelperFromDate(
-																review.created_at || new Date()
-															)}
-															hasManyVersions={formConfigs.length > 0}
-															onClickMoreInfo={() => {
-																window._mtm?.push({
-																	event: 'matomo_event',
-																	container_type: 'backoffice',
-																	service_id: form.product_id,
-																	form_id: form.id,
-																	template_slug: form.form_template.slug,
-																	category: 'reviews',
-																	action_type: 'read',
-																	action: `review_detail_display`,
-																	ui_source: 'review_button'
-																});
+															form={form}
+															isSelected={selectedReview?.id === review.id}
+															onSelectReview={handleSelectReview}
+															rowRef={el => {
+																if (review.id === undefined) return;
+																if (el) rowRefsMap.current.set(review.id, el);
+																else rowRefsMap.current.delete(review.id);
 															}}
 														/>
 													);
@@ -789,7 +833,13 @@ const ReviewsTab = (props: Props) => {
 								)}
 							</div>
 							{reviews.length > 0 && (
-								<div className={fr.cx('fr-grid-row--center', 'fr-grid-row')}>
+								<div
+									className={fr.cx(
+										'fr-grid-row--center',
+										'fr-grid-row',
+										'fr-mt-6v'
+									)}
+								>
 									<Pagination
 										count={nbPages}
 										showFirstLast
@@ -823,10 +873,27 @@ const ReviewsTab = (props: Props) => {
 									/>
 								</div>
 							)}
-						</>
+						</div>
 					)}
 				</>
 			)}
+			<ReviewDrawer
+				review={selectedReview}
+				formConfig={
+					selectedReview
+						? getFormConfigHelperFromDate(
+								selectedReview.created_at || new Date()
+						  )
+						: undefined
+				}
+				hasManyVersions={formConfigs.length > 0}
+				formTemplate={form.form_template}
+				onClose={() => setSelectedReview(null)}
+				onPrevious={handlePreviousReview}
+				onNext={handleNextReview}
+				hasPrevious={selectedReviewIndex > 0}
+				hasNext={selectedReviewIndex < reviews.length - 1}
+			/>
 		</>
 	);
 };
@@ -836,7 +903,8 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		fontWeight: 'bold'
 	},
 	tableContainer: {
-		width: '100%'
+		width: '100%',
+		borderCollapse: 'collapse'
 	},
 	loaderContainer: {
 		display: 'flex',
@@ -875,9 +943,17 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		display: 'flex',
 		flexDirection: 'column'
 	},
-	filtersWrapper: {
+	paginationWrapper: {
 		display: 'flex',
-		alignItems: 'end'
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginTop: fr.spacing('8v'),
+		marginBottom: fr.spacing('2v'),
+		[fr.breakpoints.down('lg')]: {
+			flexDirection: 'column-reverse',
+			alignItems: 'flex-start',
+			gap: fr.spacing('8v')
+		}
 	},
 	buttonContainer: {
 		width: '100%',

@@ -1,0 +1,3 @@
+[
+  "0 2 * * * $ROOT/docker/elasticsearch/bin/sync-verbatim-index.sh >> /tmp/jdma-es-sync.log 2>&1"
+]
