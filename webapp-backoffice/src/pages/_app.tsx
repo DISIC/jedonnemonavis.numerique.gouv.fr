@@ -64,6 +64,10 @@ function App({ Component, pageProps }: AppProps) {
 		router.pathname.startsWith(path)
 	);
 
+	const isAdminDashboard =
+		router.pathname.startsWith('/administration/dashboard') &&
+		!isOutOfAdminLayout;
+
 	const getLayout = (children: ReactNode) => {
 		if (isOutOfAdminLayout) {
 			return children;
@@ -84,7 +88,7 @@ function App({ Component, pageProps }: AppProps) {
 			});
 	}, []);
 
-	useJdmaWidget(isOutOfAdminLayout);
+	useJdmaWidget(!isAdminDashboard);
 
 	return (
 		<MuiDsfrThemeProvider>
@@ -117,8 +121,8 @@ function App({ Component, pageProps }: AppProps) {
 											data-jdma-form-url={
 												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
 											}
-											data-jdma-button-image={`https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-feedback-ghost-light.svg`}
-											data-jdma-button-label="Une remarque ?"
+											data-jdma-button-image={`https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-problem-solid-light.svg`}
+											data-jdma-button-label="Signaler un problème"
 											data-jdma-position="bottom-right"
 											data-jdma-anchor="#jdma-widget-anchor"
 										/>
