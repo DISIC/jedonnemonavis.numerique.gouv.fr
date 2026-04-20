@@ -1,6 +1,7 @@
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Button } from '@prisma/client';
 import { tss } from 'tss-react/dsfr';
@@ -201,11 +202,20 @@ const ReviewFilterTags = (props: Props) => {
 		return tags.length > 0 ? tags : null;
 	};
 
-	return <>{renderTags()}</>;
+	return (
+		<div className={cx(classes.container, fr.cx('fr-col-12'))}>
+			{renderTags()}
+		</div>
+	);
 };
 
 export default ReviewFilterTags;
 
 const useStyles = tss.withName(ReviewFilterTags.name).create({
+	container: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: '1rem'
+	},
 	tagFilter: {}
 });

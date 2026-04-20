@@ -73,6 +73,7 @@ const ReviewsTab = (props: Props) => {
 	const { fromMail } = router.query;
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
+	const [isUserFetching, setIsUserFetching] = useState(false);
 	const [selectedReview, setSelectedReview] =
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
@@ -128,12 +129,14 @@ const ReviewsTab = (props: Props) => {
 		});
 		filter_modal.close();
 		setCurrentPage(1);
+		setIsUserFetching(true);
 	};
 
 	const {
 		data: reviewResults,
 		isFetching: isFetchingReviews,
 		isLoading: isLoadingReviews,
+		isRefetching: isRefetchingReviews,
 		error: errorReviews
 	} = trpc.review.getList.useQuery(
 		{
@@ -156,19 +159,18 @@ const ReviewsTab = (props: Props) => {
 			loggingFromMail: isFromMail
 		},
 		{
-			initialData: {
-				data: [],
-				metadata: {
-					countFiltered: 0,
-					countAll: 0,
-					countNew: 0,
-					countForm1: 0,
-					countForm2: 0
-				}
-			},
+			keepPreviousData: true,
 			enabled: nbReviews > 0 && !isLoading
 		}
 	);
+
+	const reviews = reviewResults?.data ?? [];
+	const reviewsCountFiltered = reviewResults?.metadata?.countFiltered ?? 0;
+	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
+
+	useEffect(() => {
+		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
+	}, [isFetchingReviews, isRefetchingReviews]);
 
 	const { data: reviewLogResults } =
 		trpc.userEvent.getLastFormReviewView.useQuery(
@@ -291,11 +293,6 @@ const ReviewsTab = (props: Props) => {
 
 	const { data: reviewLog } = reviewLogResults;
 
-	const {
-		data: reviews,
-		metadata: { countFiltered: reviewsCountFiltered, countAll: reviewsCountAll }
-	} = reviewResults;
-
 	const validateDateFormat = (date: string) => {
 		const regex = /^\d{4}-\d{2}-\d{2}$/;
 		return regex.test(date);
@@ -304,10 +301,12 @@ const ReviewsTab = (props: Props) => {
 	const nbPages = getNbPages(reviewsCountFiltered, numberPerPage);
 
 	const handlePageChange = (pageNumber: number) => {
+		setIsUserFetching(true);
 		setCurrentPage(pageNumber);
 	};
 
 	const handleSortChange = (tmp_sort: string) => {
+		setIsUserFetching(true);
 		if (!sort.includes(tmp_sort)) {
 			setSort(`${tmp_sort}:asc`);
 			return;
@@ -487,6 +486,7 @@ const ReviewsTab = (props: Props) => {
 		setErrors(newErrors);
 
 		if (startDateValid && endDateValid) {
+			setIsUserFetching(true);
 			setValidatedSearch((tmpSearch ?? search).trim());
 			setCurrentPage(1);
 		}
@@ -621,19 +621,17 @@ const ReviewsTab = (props: Props) => {
 				displayEmptyState()
 			) : (
 				<>
-					<div className={fr.cx('fr-my-8v')}>
-						<GenericFilters
-							filterKey="productReviews"
-							renderTags={() => (
-								<ReviewFilterTags buttons={buttons} form={form} />
-							)}
-							filterModal={filter_modal}
-							buttons={buttons}
-							showNewReviewsOption={!!reviewLog[0]}
-							reviewLogDate={reviewLog[0]?.created_at.toString()}
-							form={form}
-						/>
-					</div>
+					<GenericFilters
+						filterKey="productReviews"
+						renderTags={() => (
+							<ReviewFilterTags buttons={buttons} form={form} />
+						)}
+						filterModal={filter_modal}
+						buttons={buttons}
+						showNewReviewsOption={!!reviewLog[0]}
+						reviewLogDate={reviewLog[0]?.created_at.toString()}
+						form={form}
+					/>
 					<ReviewKeywordFilters
 						product_id={form.product_id}
 						form_id={form.id}
@@ -672,8 +670,8 @@ const ReviewsTab = (props: Props) => {
 						</div>
 					) : (
 						<div
-							aria-busy={isFetchingReviews}
-							{...(isFetchingReviews ? { inert: '' } : {})}
+							aria-disabled={isUserFetching}
+							{...(isUserFetching ? { inert: '' } : {})}
 						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-8v')}>
@@ -687,16 +685,20 @@ const ReviewsTab = (props: Props) => {
 										reviews.length === 0 ? 'column-reverse' : undefined
 								}}
 							>
-								<PageItemsCounter
-									label="réponse"
-									isFeminine
-									startItemCount={numberPerPage * (currentPage - 1) + 1}
-									endItemCount={
-										numberPerPage * (currentPage - 1) + reviews.length
-									}
-									totalItemsCount={reviewsCountFiltered}
-									fitContent
-								/>
+								{!isUserFetching ? (
+									<PageItemsCounter
+										label="réponse"
+										isFeminine
+										startItemCount={numberPerPage * (currentPage - 1) + 1}
+										endItemCount={
+											numberPerPage * (currentPage - 1) + reviews.length
+										}
+										totalItemsCount={reviewsCountFiltered}
+										fitContent
+									/>
+								) : (
+									<div />
+								)}
 
 								<form
 									className={cx(
@@ -738,35 +740,41 @@ const ReviewsTab = (props: Props) => {
 							</div>
 
 							<div>
-								{reviews.length > 0 && (
-									<>
-										<table className={cx(classes.tableContainer)}>
-											<ReviewTableHeader
-												sort={sort}
-												onClick={handleSortChange}
-												form={form}
-											/>
-											<tbody>
-												{reviews.map((review, index) => {
-													return (
-														<ReviewTableRow
-															key={index}
-															review={review}
-															search={validatedSearch}
-															form={form}
-															isSelected={selectedReview?.id === review.id}
-															onSelectReview={handleSelectReview}
-															rowRef={el => {
-																if (review.id === undefined) return;
-																if (el) rowRefsMap.current.set(review.id, el);
-																else rowRefsMap.current.delete(review.id);
-															}}
-														/>
-													);
-												})}
-											</tbody>
-										</table>
-									</>
+								{isUserFetching ? (
+									<div className={fr.cx('fr-py-27v')}>
+										<Loader />
+									</div>
+								) : (
+									reviews.length > 0 && (
+										<>
+											<table className={cx(classes.tableContainer)}>
+												<ReviewTableHeader
+													sort={sort}
+													onClick={handleSortChange}
+													form={form}
+												/>
+												<tbody>
+													{reviews.map((review, index) => {
+														return (
+															<ReviewTableRow
+																key={index}
+																review={review}
+																search={validatedSearch}
+																form={form}
+																isSelected={selectedReview?.id === review.id}
+																onSelectReview={handleSelectReview}
+																rowRef={el => {
+																	if (review.id === undefined) return;
+																	if (el) rowRefsMap.current.set(review.id, el);
+																	else rowRefsMap.current.delete(review.id);
+																}}
+															/>
+														);
+													})}
+												</tbody>
+											</table>
+										</>
+									)
 								)}
 							</div>
 							{reviews.length > 0 && (

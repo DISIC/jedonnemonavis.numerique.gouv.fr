@@ -330,7 +330,7 @@ export const PageItemsCounter = ({
 				key={key}
 				className={cx(
 					classes.noContent,
-					fr.cx('fr-col-12', 'fr-mt-15v', 'fr-mb-0', 'fr-ml-0')
+					fr.cx('fr-col-12', 'fr-my-30v', 'fr-mb-0', 'fr-ml-0')
 				)}
 				role="alert"
 				aria-live="assertive"

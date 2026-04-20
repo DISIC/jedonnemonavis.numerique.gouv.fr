@@ -254,7 +254,7 @@ const useStyles = tss.create({
 	filterButtonsContainer: {
 		display: 'flex',
 		flexWrap: 'wrap',
-		gap: fr.spacing('2v'),
+		gap: fr.spacing('4v'),
 		alignItems: 'center'
 	},
 	filterButton: {
