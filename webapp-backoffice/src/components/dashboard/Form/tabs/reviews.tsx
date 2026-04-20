@@ -443,6 +443,16 @@ const ReviewsTab = (props: Props) => {
 		}
 	};
 
+	const handleCloseDrawer = () => {
+		const lastViewedId = selectedReview?.id;
+		setSelectedReview(null);
+		if (lastViewedId !== undefined) {
+			requestAnimationFrame(() => {
+				rowRefsMap.current.get(lastViewedId)?.focus();
+			});
+		}
+	};
+
 	const displayEmptyState = () => {
 		if (form.isDeleted) {
 			return (
@@ -888,7 +898,7 @@ const ReviewsTab = (props: Props) => {
 				}
 				hasManyVersions={formConfigs.length > 0}
 				formTemplate={form.form_template}
-				onClose={() => setSelectedReview(null)}
+				onClose={handleCloseDrawer}
 				onPrevious={handlePreviousReview}
 				onNext={handleNextReview}
 				hasPrevious={selectedReviewIndex > 0}

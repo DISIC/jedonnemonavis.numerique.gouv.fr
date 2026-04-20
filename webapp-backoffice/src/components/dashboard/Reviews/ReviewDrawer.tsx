@@ -21,7 +21,7 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { Drawer } from '@mui/material';
 import Image from 'next/image';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 // ---------------------------------------------------------------------------
@@ -237,12 +237,14 @@ const ReviewDrawer = (props: ReviewDrawerProps) => {
 			anchor="right"
 			open={!!review}
 			onClose={onClose}
+			disableRestoreFocus
 			PaperProps={{
 				role: 'dialog',
 				'aria-modal': true,
 				'aria-labelledby': 'review-drawer-title',
-				sx: { width: { xs: '100%', md: '600px' } }
+				sx: { width: { xs: '100%', md: '600px', zIndex: 1800 } }
 			}}
+			slotProps={{ root: { style: { zIndex: 1800 } } }}
 		>
 			{review && (
 				<ReviewDrawerContent review={review} onClose={onClose} {...rest} />
@@ -264,6 +266,18 @@ const ReviewDrawerContent = ({
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
+	const isFirstRender = useRef(true);
+	const [announcement, setAnnouncement] = useState('');
+
+	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return;
+		}
+		setAnnouncement(
+			`Détail de l'avis du ${formatFullFrenchDateTime(review.created_at?.toString() || '')}`
+		);
+	}, [review.id]);
 
 	const buttonName = review.button_id
 		? retrieveButtonName(review.button_id)
@@ -289,6 +303,9 @@ const ReviewDrawerContent = ({
 
 	return (
 		<div className={cx(classes.container)}>
+			<p role="status" aria-live="polite" aria-atomic="true" className={cx(classes.srOnly)}>
+				{announcement}
+			</p>
 			<div className={cx(classes.header)}>
 				<div />
 				<Button
@@ -315,15 +332,6 @@ const ReviewDrawerContent = ({
 			<div className={classes.actionsContainer}>
 				<Button
 					priority="tertiary"
-					iconId="fr-icon-arrow-left-s-line"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasPrevious}
-					onClick={onPrevious}
-				>
-					Voir l'avis précédent
-				</Button>
-				<Button
-					priority="tertiary"
 					iconId="fr-icon-arrow-right-s-line"
 					iconPosition="right"
 					size={isMobile ? 'medium' : 'small'}
@@ -331,6 +339,15 @@ const ReviewDrawerContent = ({
 					onClick={onNext}
 				>
 					Voir l'avis suivant
+				</Button>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-left-s-line"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasPrevious}
+					onClick={onPrevious}
+				>
+					Voir l'avis précédent
 				</Button>
 			</div>
 
@@ -459,11 +476,12 @@ const useStyles = tss.create({
 	},
 	actionsContainer: {
 		display: 'flex',
+		flexDirection: 'row-reverse',
 		justifyContent: 'space-between',
 		marginBottom: fr.spacing('6v'),
 		paddingBottom: fr.spacing('4v'),
 		[fr.breakpoints.down('sm')]: {
-			flexDirection: 'column',
+			flexDirection: 'column-reverse',
 			gap: fr.spacing('3v'),
 			button: { width: '100%', justifyContent: 'center' }
 		}
@@ -505,6 +523,17 @@ const useStyles = tss.create({
 		margin: 0,
 		paddingLeft: fr.spacing('4v'),
 		listStyleType: 'disc'
+	},
+	srOnly: {
+		position: 'absolute',
+		width: 1,
+		height: 1,
+		padding: 0,
+		margin: -1,
+		overflow: 'hidden',
+		clip: 'rect(0,0,0,0)',
+		whiteSpace: 'nowrap',
+		border: 0
 	}
 });
 

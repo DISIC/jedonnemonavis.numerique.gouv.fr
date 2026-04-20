@@ -125,6 +125,7 @@ function App({ Component, pageProps }: AppProps) {
 											data-jdma-button-label="Signaler un problème"
 											data-jdma-position="bottom-right"
 											data-jdma-anchor="#jdma-widget-anchor"
+											data-jdma-dev-mode={process.env.NODE_ENV !== 'production'}
 										/>
 										{getLayout(<Component {...pageProps} />)}
 									</OnboardingProvider>
