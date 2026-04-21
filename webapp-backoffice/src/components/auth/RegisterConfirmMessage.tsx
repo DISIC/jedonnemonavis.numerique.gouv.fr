@@ -53,7 +53,7 @@ export const RegisterValidationMessage = (props: Props) => {
 
 	return (
 		<div>
-			<h2>Valider votre compte</h2>
+			<h2>Validez votre compte</h2>
 			{mode === 'classic' ? (
 				<>
 					<p role="status" tabIndex={-1}>
