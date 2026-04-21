@@ -30,7 +30,7 @@ export const createExportMutation = async ({
 		data: { ...input, status: 'idle' }
 	});
 
-	const test = await exportQueue.add(
+	await exportQueue.add(
 		'process',
 		{ exportId: exportCsv.id },
 		{ jobId: `export-${exportCsv.id}` }
