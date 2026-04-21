@@ -67,7 +67,7 @@ export async function generateDownloadLink(objectName: string): Promise<string> 
 	const url = await getSignedUrl(
 		client,
 		new GetObjectCommand({ Bucket: getBucket(), Key: objectName }),
-		{ expiresIn: 604800 } // 7 days in seconds (SigV4 maximum)
+		{ expiresIn: 2592000 } // 30 days in seconds (SigV4 maximum)
 	);
 
 	return url;
