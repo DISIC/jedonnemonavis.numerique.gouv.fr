@@ -251,7 +251,7 @@ export const ResetForm = () => {
 							<Alert
 								description="Vous pouvez désormais vous connecter avec votre nouveau mot de passe."
 								severity="success"
-								title="Mot de passe réinitilialisé"
+								title="Mot de passe réinitialisé"
 							/>
 						) : (
 							<Alert
