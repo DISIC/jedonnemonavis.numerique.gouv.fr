@@ -10,6 +10,8 @@ import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Notice from '@codegouvfr/react-dsfr/Notice';
+import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -57,6 +59,24 @@ const SettingsTab = ({
 	const [isCopied, setIsCopied] = useState(false);
 
 	const deleteButton = trpc.button.delete.useMutation();
+
+	const { data: meData } = trpc.user.me.useQuery({});
+	const currentUser = meData?.data;
+	const alertsGloballyEnabled =
+		!!currentUser &&
+		'alerts_enabled' in currentUser &&
+		currentUser.alerts_enabled === true;
+	const currentUserId =
+		currentUser && 'id' in currentUser ? currentUser.id : undefined;
+
+	const subscriptionQuery = trpc.formAlert.getSubscription.useQuery({
+		form_id: form.id
+	});
+	const isSubscribed = subscriptionQuery.data?.data.enabled ?? false;
+
+	const setSubscription = trpc.formAlert.setSubscription.useMutation({
+		onSuccess: () => subscriptionQuery.refetch()
+	});
 
 	const isDisabled = form.product.isTop250 || !!form.isDeleted;
 
@@ -176,6 +196,54 @@ const SettingsTab = ({
 					</div>
 				</div>
 			</div>
+			{!form.isDeleted && (
+				<div className={fr.cx('fr-mt-3w', 'fr-col-12', 'fr-card', 'fr-p-6v')}>
+					<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
+						<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
+							<span className={classes.containerTitle}>
+								Recevoir des alertes par email
+							</span>
+							<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
+								Recevez un email peu de temps après l'arrivée de nouvelles
+								réponses sur ce formulaire (regroupées par lot).
+							</p>
+						</div>
+						<div
+							className={fr.cx('fr-col-12', 'fr-col-md-4')}
+							style={{ display: 'flex', justifyContent: 'end' }}
+						>
+							<ToggleSwitch
+								label=""
+								inputTitle={`Alertes pour le formulaire ${form.title || ''}`}
+								showCheckedHint={false}
+								disabled={!alertsGloballyEnabled || subscriptionQuery.isLoading}
+								checked={isSubscribed && alertsGloballyEnabled}
+								onChange={checked =>
+									setSubscription.mutate({ form_id: form.id, enabled: checked })
+								}
+							/>
+						</div>
+						{!alertsGloballyEnabled && currentUserId !== undefined && (
+							<div className={fr.cx('fr-col-12', 'fr-mt-3v')}>
+								<Notice
+									title={
+										<>
+											Vos alertes par email sont désactivées globalement.{' '}
+											<a
+												href={`/administration/dashboard/user/${currentUserId}/notifications`}
+												className={fr.cx('fr-link')}
+											>
+												Activer les alertes dans votre compte
+											</a>
+										</>
+									}
+								/>
+							</div>
+						)}
+					</div>
+				</div>
+			)}
+
 			{!form.isDeleted && (
 				<div className={fr.cx('fr-mt-3w', 'fr-col-12', 'fr-card', 'fr-p-6v')}>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>

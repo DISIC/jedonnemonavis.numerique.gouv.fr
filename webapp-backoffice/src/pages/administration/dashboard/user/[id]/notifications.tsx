@@ -44,6 +44,15 @@ const NotificationsAccount: React.FC<Props> = props => {
 		});
 	};
 
+	const handleAlertsEnabledChange = async (
+		alertsEnabled: boolean
+	): Promise<void> => {
+		await updateUser({
+			id: userId,
+			user: { alerts_enabled: alertsEnabled }
+		});
+	};
+
 	return (
 		<>
 			<AccountLayout isOwn={isOwn} user={user}>
@@ -66,6 +75,16 @@ const NotificationsAccount: React.FC<Props> = props => {
 
 						<hr />
 						<form className={classes.form}>
+							<ToggleSwitch
+								label="Recevoir des alertes peu de temps après l'arrivée de nouveaux avis sur les formulaires auxquels vous êtes abonné."
+								helperText="Vous pouvez vous abonner ou vous désabonner formulaire par formulaire depuis l'onglet Paramètres de chaque formulaire."
+								inputTitle="alerts_enabled"
+								defaultChecked={user.alerts_enabled}
+								onChange={handleAlertsEnabledChange}
+							/>
+
+							<hr />
+
 							<ToggleSwitch
 								label="Recevoir une synthèse des nouveaux avis sur les services que vous administrez."
 								inputTitle="notifications"
