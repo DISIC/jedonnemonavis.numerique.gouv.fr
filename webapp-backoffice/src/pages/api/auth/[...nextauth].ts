@@ -251,6 +251,7 @@ export const authOptions: NextAuthOptions = {
 					role: 'user',
 					notifications: false,
 					notifications_frequency: 'daily',
+					alerts_enabled: false,
 					created_at: new Date(),
 					updated_at: new Date(),
 					proconnect_account: false
