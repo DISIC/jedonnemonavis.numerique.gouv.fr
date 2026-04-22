@@ -44,6 +44,15 @@ services:
     ports:
       - "5433:5432"
 
+  redis:
+    image: redis:8.6-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - cache:/data
+
 networks:
   elastic:
 
@@ -51,3 +60,4 @@ volumes:
   jdma_kibana_data:
   jdma_es_data:
   jdma_es_certs:
+  cache:
