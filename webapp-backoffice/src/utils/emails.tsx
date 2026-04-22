@@ -10,7 +10,9 @@ import JdmaClosedButtonOrFormEmail from '@/react-email/emails/jdma-closed-button
 import JdmaProductArchivedEmail from '@/react-email/emails/jdma-product-archived-email';
 import JdmaProductRestoredEmail from '@/react-email/emails/jdma-product-restored-email';
 import JdmaNotificationsEmail from '@/react-email/emails/jdma-notifications-email';
+import JdmaAlertEmail from '@/react-email/emails/jdma-alert-email';
 import {
+	JdmaAlertEmailProps,
 	JdmaNotificationsEmailProps,
 	JdmaTokenEmailProps,
 	JdmaUserRequestRefusedEmailProps,
@@ -86,4 +88,10 @@ export async function renderNotificationsEmail(
 	props: JdmaNotificationsEmailProps
 ): Promise<string> {
 	return await render(<JdmaNotificationsEmail {...props} />);
+}
+
+export async function renderAlertEmail(
+	props: JdmaAlertEmailProps
+): Promise<string> {
+	return await render(<JdmaAlertEmail {...props} />);
 }
