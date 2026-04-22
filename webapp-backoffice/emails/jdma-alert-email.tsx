@@ -1,4 +1,4 @@
-import { Button, Hr, Link, Section, Text } from '@react-email/components';
+import { Button, Hr, Link, Section, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaAlertEmailProps } from './interface';
@@ -37,7 +37,9 @@ export const JdmaAlertEmail = ({
 				{' du service '}
 				<strong>{productTitle}</strong>
 				{nbReviewsWithComments > 0
-					? `, dont ${formatNumber(nbReviewsWithComments)} avec ${nbReviewsWithComments === 1 ? 'commentaire' : 'commentaires'}.`
+					? `, dont ${formatNumber(nbReviewsWithComments)} avec ${
+							nbReviewsWithComments === 1 ? 'commentaire' : 'commentaires'
+					  }.`
 					: '.'}
 			</Text>
 
