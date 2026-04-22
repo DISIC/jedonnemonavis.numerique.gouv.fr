@@ -190,3 +190,63 @@ SELECT COUNT(*) FROM "User" WHERE alerts_enabled = true;
 ```
 
 Once both gates are off, no alerts fire regardless of review activity.
+
+---
+
+## 7. Manual smoke test
+
+No unit test suite is set up for this feature. The end-to-end flow is short enough to walk through manually.
+
+### One-time setup
+
+- `docker compose up -d` — brings up Postgres, Elasticsearch, Kibana, **Redis** (added by this feature).
+- A MailHog instance listening on `localhost:1025` (SMTP) + `localhost:8025` (web UI). You can start one ad-hoc:
+  ```bash
+  docker run -d --name mailhog -p 1025:1025 -p 8025:8025 mailhog/mailhog
+  ```
+  (MailHog is already configured in `docker-compose.tests.yaml` if you prefer to use the full test stack.)
+- Confirm `REDIS_URL=redis://localhost:6379` is set in both apps' `.env`.
+- `webapp-backoffice/.env`: `NODEMAILER_HOST=localhost`, `NODEMAILER_PORT=1025`, `NODEMAILER_BASEURL=http://localhost:3000`.
+
+### Start the three processes (three terminals)
+
+```bash
+# terminal 1 — backoffice API + UI
+cd webapp-backoffice && yarn dev
+# terminal 2 — alert worker
+cd webapp-backoffice && yarn worker:dev
+# terminal 3 — public form app
+cd webapp-form && yarn dev
+```
+
+You should see `[alert-worker] Started (concurrency=5)` in terminal 2.
+
+### Happy path
+
+1. In the backoffice, sign in → user account → Notifications → toggle **"Recevoir des alertes…"** ON.
+2. Open a form's settings tab → toggle **"Recevoir des alertes par email"** ON.
+3. Submit one review on that form via the public form app (`http://localhost:3001/<form-id>`).
+4. Watch terminal 2 — a job appears with `jobId=form-alert:<formId>`, `delay=5min`. You can cut the wait to ~10 s by temporarily lowering `DEBOUNCE_DELAY_MS` in `webapp-form/src/server/services/alerts/on-review-created.ts`.
+5. After the delay elapses, the worker logs `Sent form … alert to 1 recipient(s)`.
+6. MailHog UI (`http://localhost:8025`) shows the email. Subject: *Nouveaux avis sur le formulaire … du service …*. Body contains the counts and a CTA link to `?tab=reviews`.
+
+### Things to verify (checklist)
+
+- [ ] **Sliding window**: submit review → within 5 min submit another → the clock resets (pending job gets `remove`d and re-added; Bull Board / Redis inspect confirms one delayed job with the new fire time).
+- [ ] **Hard cap**: set `form.alert_max_window_minutes = 1` in DB, submit a review, then keep submitting inside the 5 min window. After 1 min the next submission schedules with `delay: 0` → email fires.
+- [ ] **`withComments` count**: submit two reviews — one with a verbatim (free-text answer), one without. Email body reads *"…dont 1 avec commentaire."*
+- [ ] **Global kill-switch gate**: flip user's `alerts_enabled` OFF → submit review → no email, no `UserEvent` written.
+- [ ] **Per-form subscription gate**: disable subscription on the form → submit review → no email.
+- [ ] **Deleted form**: set `form.isDeleted = true` → submit review would fail anyway, but `processFormAlertBatch` logs *"Skipping form … (missing or deleted)"* if a job was already in flight.
+- [ ] **Access revocation**: remove the user's `AccessRight` (`status = 'removed'`) → subscription row stays, but email is skipped at send-time.
+- [ ] **UserEvent audit**: after each successful send, one row in `UserEvent` with `action = 'form_alert_sent'` per recipient, metadata showing `total` / `withComments` / `batch_start` / `batch_end`.
+- [ ] **Cursor advance**: `form.last_alert_sent_at` updates to the batch send time; next batch starts from there.
+- [ ] **Worker restart resilience**: kill the `worker:dev` process while a job is pending, restart it — BullMQ picks the job back up from Redis.
+
+### Preview the email template without a live flow
+
+```bash
+cd webapp-backoffice && yarn email:dev
+```
+
+Opens the react-email preview server at `localhost:3001` (or similar) with all templates including `jdma-alert-email`.

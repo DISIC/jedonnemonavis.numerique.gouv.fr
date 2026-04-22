@@ -17,7 +17,7 @@ export const DEBOUNCE_DELAY_MS = 5 * 60 * 1000; // 5 min sliding window
  */
 export async function onReviewCreated(
 	prisma: PrismaClient,
-	formId: number
+	formId: number,
 ): Promise<void> {
 	try {
 		const form = await prisma.form.findUnique({
@@ -27,8 +27,8 @@ export async function onReviewCreated(
 				isDeleted: true,
 				alert_max_window_minutes: true,
 				last_alert_sent_at: true,
-				created_at: true
-			}
+				created_at: true,
+			},
 		});
 
 		if (!form || form.isDeleted) return;
@@ -38,10 +38,10 @@ export async function onReviewCreated(
 		const oldestPending = await prisma.review.findFirst({
 			where: {
 				form_id: formId,
-				created_at: { gt: cursor }
+				created_at: { gt: cursor },
 			},
 			orderBy: { created_at: 'asc' },
-			select: { created_at: true }
+			select: { created_at: true },
 		});
 
 		if (!oldestPending) return;
@@ -58,15 +58,8 @@ export async function onReviewCreated(
 		// so the new one with a fresh delay can take its place. `remove` is a
 		// no-op when no such job exists.
 		await formAlertQueue.remove(jobId);
-		await formAlertQueue.add(
-			'process',
-			{ form_id: formId },
-			{ jobId, delay }
-		);
+		await formAlertQueue.add('process', { form_id: formId }, { jobId, delay });
 	} catch (err) {
-		console.error(
-			`[alerts] onReviewCreated failed for form ${formId}:`,
-			err
-		);
+		console.error(`[alerts] onReviewCreated failed for form ${formId}:`, err);
 	}
 }
