@@ -21,4 +21,4 @@ export const formAlertQueue = new Queue<FormAlertJobData>('form-alerts', {
 	},
 });
 
-export const formAlertJobId = (formId: number) => `form-alert:${formId}`;
+export const formAlertJobId = (formId: number) => `form-alert_${formId}`;

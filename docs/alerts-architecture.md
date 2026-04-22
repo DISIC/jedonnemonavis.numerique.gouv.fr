@@ -21,11 +21,13 @@ This document answers the architectural questions that came up during implementa
    - Otherwise → **sliding window**, enqueue with `delay: 5 minutes`
 
 4. **Push to Redis as a BullMQ delayed job:**
+
    ```ts
-   await formAlertQueue.remove(jobId);                          // drop any existing pending job
+   await formAlertQueue.remove(jobId); // drop any existing pending job
    await formAlertQueue.add('process', { form_id }, { jobId, delay });
    ```
-   The `jobId` is a stable string `form-alert:<formId>`. Each new review first removes the currently-pending delayed job and re-adds a fresh one with a fresh 5 min delay → **automatic sliding window**, handled by BullMQ itself. No timer in application code, no polling.
+
+   The `jobId` is a stable string `form-alert_<formId>`. Each new review first removes the currently-pending delayed job and re-adds a fresh one with a fresh 5 min delay → **automatic sliding window**, handled by BullMQ itself. No timer in application code, no polling.
 
 5. **Redis holds the delayed job until the countdown elapses.**
    - No more reviews for 5 min → BullMQ fires the job.
@@ -48,14 +50,17 @@ Only because of **steps 3–4** above — the producer side calls `queue.add(...
 ### Alternatives considered, and why they were rejected
 
 **HTTP call to a backoffice OpenAPI endpoint.** webapp-form could `fetch` a protected backoffice endpoint after each review-create; that endpoint would do the debounce decision and enqueue. No BullMQ/Redis in webapp-form at all.
+
 - Pros: single point of BullMQ/Redis usage, cleaner separation, matches the existing `/triggerMails` pattern.
 - Cons: extra network hop per review, new auth surface, extra failure mode.
 
 **Polling from the worker side.** A cron would tick every ~1 min on the backoffice; the handler would scan `Form` where `last_review_at > last_alert_sent_at` and apply the same debounce rule.
+
 - Pros: no producer needed anywhere, no Redis client in webapp-form.
 - Cons: loses sub-second reactivity (up to 1 min of polling lag), adds DB polling load, requires Clever Cloud cron to support a 1 min interval.
 
 **PostgreSQL `LISTEN`/`NOTIFY`.** webapp-form issues `NOTIFY form_alert, '<form_id>'` using the existing DB connection; the backoffice worker `LISTEN`s and enqueues.
+
 - Pros: no Redis client in webapp-form.
 - Cons: unusual pattern for this codebase, harder to reason about failure modes, no retry on the notify channel.
 
@@ -91,20 +96,20 @@ That's BullMQ's whole value prop: if those three agree, producer and consumer do
 
 ### So why the files in both apps?
 
-Because each side needs its own BullMQ handle to *talk to* that shared Redis:
+Because each side needs its own BullMQ handle to _talk to_ that shared Redis:
 
 - The producer needs a `Queue` object → needs a Redis connection → `redis.ts` + `queue.ts`.
 - The consumer needs a `Worker` object → also needs a Redis connection → same files on the other side.
 
-Both are ~18 lines of Redis singleton + ~20 lines of Queue declaration. They look identical because they *are* the same contract, re-declared per app.
+Both are ~18 lines of Redis singleton + ~20 lines of Queue declaration. They look identical because they _are_ the same contract, re-declared per app.
 
 ### Why not factor it out?
 
-| Option | Verdict |
-|---|---|
+| Option                                       | Verdict                                                                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **Shared workspace package** (`@jdma/queue`) | Clean, but the monorepo doesn't have yarn workspaces set up for shared TS. Heavier than the duplication for a one-queue feature. |
-| **Symlink** (like `prisma/schema.prisma`) | Works, but symlinks for `.ts` files can confuse TypeScript / bundlers. |
-| **Keep it duplicated** (current) | Matches the existing project convention: schema is the only thing shared, everything else is re-declared per app. |
+| **Symlink** (like `prisma/schema.prisma`)    | Works, but symlinks for `.ts` files can confuse TypeScript / bundlers.                                                           |
+| **Keep it duplicated** (current)             | Matches the existing project convention: schema is the only thing shared, everything else is re-declared per app.                |
 
 **Drift risk:** the only way drift matters is if the queue name or payload shape changed on one side and not the other — producers would pile up jobs on an orphaned queue, or the consumer would fail to deserialize. Small risk in practice: one-line string + one-line type, changed rarely.
 
@@ -119,6 +124,7 @@ Short answer: **`JobScheduler` is for recurring jobs (cron-like), which isn't wh
 ### What `JobScheduler` is designed for
 
 `upsertJobScheduler` (successor to the older `repeat` option) is for jobs that fire on a recurring schedule:
+
 - `{ pattern: '0 8 * * 1' }` → every Monday at 8 AM
 - `{ every: 60_000 }` → every 60 s forever
 - `{ pattern: '…', limit: 5 }` → 5 times total, then stop
@@ -133,18 +139,18 @@ It's cron-inside-BullMQ. Right fit for: daily synthesis emails, nightly ES reind
 
 BullMQ doesn't have a first-class debounce primitive, but it has the building blocks:
 
-| Need | BullMQ feature |
-|---|---|
-| "Fire once, N ms from now" | `queue.add(name, data, { delay: N })` |
+| Need                                              | BullMQ feature                                          |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| "Fire once, N ms from now"                        | `queue.add(name, data, { delay: N })`                   |
 | "If another one arrives, replace the pending one" | Stable `jobId` + `queue.remove(jobId)` before re-adding |
 
 ### Could `JobScheduler` be force-fit?
 
-Technically yes — `upsertJobScheduler('form-alert:123', { every: 5*60*1000, limit: 1 })` fires once after 5 min, and re-upserting resets. But:
+Technically yes — `upsertJobScheduler('form-alert_123', { every: 5*60*1000, limit: 1 })` fires once after 5 min, and re-upserting resets. But:
 
 1. **Semantics are wrong.** A "scheduler" implies "on a schedule"; `limit: 1` is a tell you're abusing the tool.
 2. **More state in Redis.** Schedulers persist metadata alongside the job, cleaned up lazily. Plain delayed jobs disappear the moment they're consumed or removed.
-3. **Worse ops visibility.** A scheduler shows up as "Repeatable" in Bull Board dashboards, looking like it should recur forever. A delayed job with `jobId: form-alert:42` tells on-call exactly what's pending.
+3. **Worse ops visibility.** A scheduler shows up as "Repeatable" in Bull Board dashboards, looking like it should recur forever. A delayed job with `jobId: form-alert_42` tells on-call exactly what's pending.
 4. **No power gained.**
 
 ### Verdict
@@ -179,10 +185,12 @@ Any other place in the codebase that builds a `User`-shaped object literal (seed
 ## 6. Strictly opt-in at launch
 
 Guaranteed by defaults, no code needed:
+
 - `User.alerts_enabled` defaults to `false` → every user starts with the global kill-switch off.
 - `FormAlertSubscription` table is empty at deploy time → no one is subscribed to anything.
 
 Post-deploy rollout check:
+
 ```sql
 SELECT COUNT(*) FROM "FormAlertSubscription" WHERE enabled = true;
 SELECT COUNT(*) FROM "User" WHERE alerts_enabled = true;
@@ -226,18 +234,18 @@ You should see `[alert-worker] Started (concurrency=5)` in terminal 2.
 1. In the backoffice, sign in → user account → Notifications → toggle **"Recevoir des alertes…"** ON.
 2. Open a form's settings tab → toggle **"Recevoir des alertes par email"** ON.
 3. Submit one review on that form via the public form app (`http://localhost:3001/<form-id>`).
-4. Watch terminal 2 — a job appears with `jobId=form-alert:<formId>`, `delay=5min`. You can cut the wait to ~10 s by temporarily lowering `DEBOUNCE_DELAY_MS` in `webapp-form/src/server/services/alerts/on-review-created.ts`.
+4. Watch terminal 2 — a job appears with `jobId=form-alert_<formId>`, `delay=5min`. You can cut the wait to ~10 s by temporarily lowering `DEBOUNCE_DELAY_MS` in `webapp-form/src/server/services/alerts/on-review-created.ts`.
 5. After the delay elapses, the worker logs `Sent form … alert to 1 recipient(s)`.
-6. MailHog UI (`http://localhost:8025`) shows the email. Subject: *Nouveaux avis sur le formulaire … du service …*. Body contains the counts and a CTA link to `?tab=reviews`.
+6. MailHog UI (`http://localhost:8025`) shows the email. Subject: _Nouveaux avis sur le formulaire … du service …_. Body contains the counts and a CTA link to `?tab=reviews`.
 
 ### Things to verify (checklist)
 
 - [ ] **Sliding window**: submit review → within 5 min submit another → the clock resets (pending job gets `remove`d and re-added; Bull Board / Redis inspect confirms one delayed job with the new fire time).
 - [ ] **Hard cap**: set `form.alert_max_window_minutes = 1` in DB, submit a review, then keep submitting inside the 5 min window. After 1 min the next submission schedules with `delay: 0` → email fires.
-- [ ] **`withComments` count**: submit two reviews — one with a verbatim (free-text answer), one without. Email body reads *"…dont 1 avec commentaire."*
+- [ ] **`withComments` count**: submit two reviews — one with a verbatim (free-text answer), one without. Email body reads _"…dont 1 avec commentaire."_
 - [ ] **Global kill-switch gate**: flip user's `alerts_enabled` OFF → submit review → no email, no `UserEvent` written.
 - [ ] **Per-form subscription gate**: disable subscription on the form → submit review → no email.
-- [ ] **Deleted form**: set `form.isDeleted = true` → submit review would fail anyway, but `processFormAlertBatch` logs *"Skipping form … (missing or deleted)"* if a job was already in flight.
+- [ ] **Deleted form**: set `form.isDeleted = true` → submit review would fail anyway, but `processFormAlertBatch` logs _"Skipping form … (missing or deleted)"_ if a job was already in flight.
 - [ ] **Access revocation**: remove the user's `AccessRight` (`status = 'removed'`) → subscription row stays, but email is skipped at send-time.
 - [ ] **UserEvent audit**: after each successful send, one row in `UserEvent` with `action = 'form_alert_sent'` per recipient, metadata showing `total` / `withComments` / `batch_start` / `batch_end`.
 - [ ] **Cursor advance**: `form.last_alert_sent_at` updates to the batch send time; next batch starts from there.
