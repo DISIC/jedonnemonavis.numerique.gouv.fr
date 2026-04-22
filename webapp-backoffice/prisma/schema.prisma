@@ -137,6 +137,7 @@ enum TypeAction {
   service_form_create
   service_form_edit
   service_form_delete
+  form_alert_sent
 }
 
 enum FormConfigKind {
@@ -197,6 +198,8 @@ model User {
   reviewViewLogs          ReviewViewLog[]
   notifications           Boolean               @default(false)
   notifications_frequency NotificationFrequency @default(daily)
+  alerts_enabled          Boolean               @default(false)
+  form_alert_subscriptions FormAlertSubscription[]
   UserEvent               UserEvent[]
   proconnect_account      Boolean?
 
@@ -631,25 +634,28 @@ model AnswerCustom {
 }
 
 model Form {
-  id               Int          @id @default(autoincrement())
-  title            String?
-  user             User?        @relation(fields: [user_id], references: [id])
-  user_id          Int?
-  form_template    FormTemplate @relation(fields: [form_template_id], references: [id])
-  form_template_id Int
-  product          Product      @relation(fields: [product_id], references: [id])
-  product_id       Int
-  form_configs     FormConfig[]
-  buttons          Button[]
-  UserEvent        UserEvent[]
-  legacy           Boolean      @default(false)
-  delete_reason    String?
-  created_at       DateTime     @default(now())
-  updated_at       DateTime     @default(now())
-  deleted_at       DateTime?
-  isDeleted        Boolean?     @default(false)
-  last_review_at   DateTime?
-  exports          Export[]
+  id                       Int                     @id @default(autoincrement())
+  title                    String?
+  user                     User?                   @relation(fields: [user_id], references: [id])
+  user_id                  Int?
+  form_template            FormTemplate            @relation(fields: [form_template_id], references: [id])
+  form_template_id         Int
+  product                  Product                 @relation(fields: [product_id], references: [id])
+  product_id               Int
+  form_configs             FormConfig[]
+  buttons                  Button[]
+  UserEvent                UserEvent[]
+  legacy                   Boolean                 @default(false)
+  delete_reason            String?
+  created_at               DateTime                @default(now())
+  updated_at               DateTime                @default(now())
+  deleted_at               DateTime?
+  isDeleted                Boolean?                @default(false)
+  last_review_at           DateTime?
+  alert_max_window_minutes Int?
+  last_alert_sent_at       DateTime?
+  form_alert_subscriptions FormAlertSubscription[]
+  exports                  Export[]
 }
 
 model FormConfig {
@@ -686,4 +692,18 @@ model FormConfigLabel {
   form_config_id Int
   created_at     DateTime       @default(now())
   updated_at     DateTime       @default(now())
+}
+
+model FormAlertSubscription {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int
+  form       Form     @relation(fields: [form_id], references: [id], onDelete: Cascade)
+  form_id    Int
+  enabled    Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, form_id])
+  @@index([form_id, enabled])
 }
