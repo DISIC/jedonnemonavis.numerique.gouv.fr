@@ -182,22 +182,19 @@ Any other place in the codebase that builds a `User`-shaped object literal (seed
 
 ---
 
-## 6. Strictly opt-in at launch
+## 6. Opt-in at the per-form level
 
-Guaranteed by defaults, no code needed:
-
-- `User.alerts_enabled` defaults to `false` → every user starts with the global kill-switch off.
+- `User.alerts_enabled` defaults to `true` → the global kill-switch ships ON so users can subscribe without first discovering the account notifications page. It remains a real opt-out (the "Mettre en pause les alertes" button in the account page flips it to `false`).
 - `FormAlertSubscription` table is empty at deploy time → no one is subscribed to anything.
+
+Because `process-batch.ts` gates sending on **both** `User.alerts_enabled = true` *and* a subscription row with `enabled = true`, the empty subscription table is what makes rollout safe. No user receives an alert until they explicitly toggle one on from a form's Settings tab.
 
 Post-deploy rollout check:
 
 ```sql
 SELECT COUNT(*) FROM "FormAlertSubscription" WHERE enabled = true;
-SELECT COUNT(*) FROM "User" WHERE alerts_enabled = true;
--- Both should be 0.
+-- Should be 0 until users start subscribing.
 ```
-
-Once both gates are off, no alerts fire regardless of review activity.
 
 ---
 

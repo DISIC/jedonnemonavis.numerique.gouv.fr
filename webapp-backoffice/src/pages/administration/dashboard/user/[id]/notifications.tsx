@@ -166,7 +166,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 											</li>
 										</ul>
 										<span
-											className={classes.previewButton}
+											className={classes.previewEmailButton}
 											role="button"
 											onClick={() => {}}
 										>
@@ -194,112 +194,120 @@ const NotificationsAccount: React.FC<Props> = props => {
 								</Button>
 							)}
 						</div>
-						<p className={fr.cx('fr-text--sm')}>
-							Recevez une alerte sur le formulaire de votre choix, dès que vous
-							recevez des avis
-						</p>
-						<hr />
-
-						<p
+						<div
 							className={cx(
-								fr.cx('fr-text--md', 'fr-mb-4v'),
-								classes.boldTitle
+								classes.alertsPausable,
+								!user.alerts_enabled && classes.paused
 							)}
+							aria-disabled={!user.alerts_enabled}
 						>
-							Services
-						</p>
-						{subscriptionsQuery.isLoading ? (
-							<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>Chargement…</p>
-						) : groups.length === 0 ? (
-							<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-								Vous n'êtes abonné à aucune alerte pour le moment. Activez-les
-								depuis l'onglet « Paramètres » d'un formulaire.
+							<p className={fr.cx('fr-text--sm')}>
+								Recevez une alerte sur le formulaire de votre choix, dès que
+								vous recevez des avis
 							</p>
-						) : (
-							<>
-								<div className={classes.services}>
-									{groups.map(group => {
-										const allEnabled = group.forms.every(f => f.enabled);
-										const anyEnabled = group.forms.some(f => f.enabled);
-										const partial = anyEnabled && !allEnabled;
+							<hr />
 
-										return (
-											<Accordion
-												key={group.product.id}
-												titleAs="h5"
-												label={
-													<span className={classes.accordionLabel}>
-														<span
-															className={cx(
-																classes.masterToggleGuard,
-																partial && classes.partialToggle
-															)}
-															onClick={e => e.stopPropagation()}
-														>
-															<ToggleSwitch
-																label={
-																	<span className="fr-sr-only">
-																		Alertes pour {group.product.title}
-																	</span>
-																}
-																inputTitle={`alerts-product-${group.product.id}`}
-																checked={anyEnabled}
-																onChange={() =>
-																	handleProductToggle(
-																		group.product.id,
-																		!allEnabled
-																	)
-																}
-																showCheckedHint={false}
-															/>
+							<p
+								className={cx(
+									fr.cx('fr-text--md', 'fr-mb-4v'),
+									classes.boldTitle
+								)}
+							>
+								Services
+							</p>
+							{subscriptionsQuery.isLoading ? (
+								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>Chargement…</p>
+							) : groups.length === 0 ? (
+								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+									Vous n'êtes abonné à aucune alerte pour le moment. Activez-les
+									depuis l'onglet « Paramètres » d'un formulaire.
+								</p>
+							) : (
+								<>
+									<div className={classes.services}>
+										{groups.map(group => {
+											const allEnabled = group.forms.every(f => f.enabled);
+											const anyEnabled = group.forms.some(f => f.enabled);
+											const partial = anyEnabled && !allEnabled;
+
+											return (
+												<Accordion
+													key={group.product.id}
+													titleAs="h5"
+													label={
+														<span className={classes.accordionLabel}>
+															<span
+																className={cx(
+																	classes.masterToggleGuard,
+																	partial && classes.partialToggle
+																)}
+																onClick={e => e.stopPropagation()}
+															>
+																<ToggleSwitch
+																	label={
+																		<span className="fr-sr-only">
+																			Alertes pour {group.product.title}
+																		</span>
+																	}
+																	inputTitle={`alerts-product-${group.product.id}`}
+																	checked={anyEnabled}
+																	onChange={() =>
+																		handleProductToggle(
+																			group.product.id,
+																			!allEnabled
+																		)
+																	}
+																	showCheckedHint={false}
+																/>
+															</span>
+															<strong className={classes.productTitle}>
+																{group.product.title}
+															</strong>
 														</span>
-														<strong className={classes.productTitle}>
-															{group.product.title}
-														</strong>
-													</span>
-												}
-											>
-												<ul className={classes.formsList}>
-													{group.forms.map(form => (
-														<li key={form.id} className={classes.formItem}>
-															<ToggleSwitch
-																label={form.title}
-																inputTitle={`alerts-form-${form.id}`}
-																checked={form.enabled}
-																onChange={checked =>
-																	handleFormToggle(form.id, checked)
-																}
-																showCheckedHint={false}
-																labelPosition="right"
-															/>
-														</li>
-													))}
-												</ul>
-											</Accordion>
-										);
-									})}
-								</div>
-								<div className={fr.cx('fr-callout', 'fr-mb-0', 'fr-mt-6v')}>
-									<ul>
-										<li>
-											Un mail d’alerte est envoyé pour{' '}
-											<strong>chaque formulaire, séparément</strong>
-										</li>
-										<li>
-											En l'absence de nouvelles alertes, aucun mail ne vous sera
-											envoyé
-										</li>
-									</ul>
-									<span
-										className={classes.previewButton}
-										role="button"
-										onClick={() => {}}
-									>
-										Voir un exemple de mail d’alerte
-									</span>
-								</div>
-							</>
-						)}
+													}
+												>
+													<ul className={classes.formsList}>
+														{group.forms.map(form => (
+															<li key={form.id} className={classes.formItem}>
+																<ToggleSwitch
+																	label={form.title}
+																	inputTitle={`alerts-form-${form.id}`}
+																	checked={form.enabled}
+																	onChange={checked =>
+																		handleFormToggle(form.id, checked)
+																	}
+																	showCheckedHint={false}
+																	labelPosition="right"
+																/>
+															</li>
+														))}
+													</ul>
+												</Accordion>
+											);
+										})}
+									</div>
+									<div className={fr.cx('fr-callout', 'fr-mb-0', 'fr-mt-6v')}>
+										<ul>
+											<li>
+												Un mail d’alerte est envoyé pour{' '}
+												<strong>chaque formulaire, séparément</strong>
+											</li>
+											<li>
+												En l'absence de nouvelles alertes, aucun mail ne vous
+												sera envoyé
+											</li>
+										</ul>
+										<span
+											className={classes.previewEmailButton}
+											role="button"
+											onClick={() => {}}
+										>
+											Voir un exemple de mail d’alerte
+										</span>
+									</div>
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 			</AccountLayout>
@@ -368,6 +376,16 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 		display: 'flex',
 		flexDirection: 'column'
 	},
+	alertsPausable: {
+		display: 'flex',
+		flexDirection: 'column',
+		transition: 'opacity 0.15s ease-in-out'
+	},
+	paused: {
+		opacity: 0.5,
+		pointerEvents: 'none',
+		userSelect: 'none'
+	},
 	accordionLabel: {
 		display: 'inline-flex',
 		alignItems: 'center',
@@ -400,7 +418,7 @@ const useStyles = tss.withName(NotificationsAccount.name).create({
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		'&:last-child': { borderBottom: 'none' }
 	},
-	previewButton: {
+	previewEmailButton: {
 		textWrap: 'nowrap',
 		fontSize: '0.875rem',
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default,

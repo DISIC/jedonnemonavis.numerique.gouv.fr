@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { render } from 'react-email';
 import JdmaUserRequestAcceptedEmail from '@/emails/jdma-user-request-accepted-email';
 import JdmaUserRequestRefusedEmail from '@/emails/jdma-user-request-refused-email';
