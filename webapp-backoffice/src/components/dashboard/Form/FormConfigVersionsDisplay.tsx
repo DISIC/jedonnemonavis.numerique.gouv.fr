@@ -15,7 +15,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 
 	const { classes } = useStyles();
 
-	const formConfigs = form.form_configs.sort(
+	const formConfigs = [...form.form_configs].sort(
 		(a, b) =>
 			new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 	);
