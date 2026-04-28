@@ -40,7 +40,7 @@
 		"@emotion/react": "11.11.1",
 		"@emotion/server": "11.11.0",
 		"@emotion/styled": "11.11.0",
-		"@mui/material": "5.14.10",
+		"@mui/material": "5.15.14",
 		"@mui/x-internal-exceljs-fork": "^4.4.5",
 		"@mui/x-date-pickers": "7.24.1",
 		"@prisma/client": "5.14.0",
