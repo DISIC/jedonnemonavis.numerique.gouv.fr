@@ -1,6 +1,4 @@
-import { dateToLocalISO } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
@@ -8,21 +6,18 @@ import { fr as frLocale } from 'date-fns/locale/fr';
 import { useState, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { addMonths, subMonths, isBefore, isAfter, isSameDay } from 'date-fns';
+import Button from '@codegouvfr/react-dsfr/Button';
 
 interface DateRangeCalendarProps {
 	rangeStart: Date | null;
 	rangeEnd: Date | null;
 	onRangeChange: (start: Date | null, end: Date | null) => void;
-	onApply: (start: string, end: string) => void;
-	onClear: () => void;
 }
 
 const DateRangeCalendar = ({
 	rangeStart,
 	rangeEnd,
-	onRangeChange,
-	onApply,
-	onClear
+	onRangeChange
 }: DateRangeCalendarProps) => {
 	const { classes, cx } = useStyles();
 
@@ -43,19 +38,6 @@ const DateRangeCalendar = ({
 				onRangeChange(rangeStart, date);
 			}
 		}
-	};
-
-	const handleApply = () => {
-		if (rangeStart && rangeEnd) {
-			onApply(dateToLocalISO(rangeStart), dateToLocalISO(rangeEnd));
-		} else if (rangeStart) {
-			onApply(dateToLocalISO(rangeStart), dateToLocalISO(rangeStart));
-		}
-	};
-
-	const handleClear = () => {
-		onRangeChange(null, null);
-		onClear();
 	};
 
 	const slotProps = useMemo(
@@ -213,26 +195,6 @@ const DateRangeCalendar = ({
 						/>
 					</div>
 				</div>
-				<div className={cx(classes.actionsRow)}>
-					<Button
-						priority="tertiary"
-						size="small"
-						type="button"
-						onClick={handleClear}
-						disabled={!rangeStart && !rangeEnd}
-					>
-						Effacer
-					</Button>
-					<Button
-						priority="primary"
-						size="small"
-						type="button"
-						onClick={handleApply}
-						disabled={!rangeStart}
-					>
-						Appliquer
-					</Button>
-				</div>
 			</div>
 		</LocalizationProvider>
 	);
@@ -267,12 +229,6 @@ const useStyles = tss.create({
 	navPlaceholder: {
 		width: 32,
 		height: 32
-	},
-	actionsRow: {
-		display: 'flex',
-		justifyContent: 'flex-end',
-		gap: fr.spacing('4v'),
-		...fr.spacing('padding', { rightLeft: '3w' })
 	}
 });
 

@@ -2,15 +2,16 @@ import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import {
 	dateToLocalISO,
 	formatDateToFrenchString,
-	getDatesByShortCut
+	getDatesByShortCut,
+	isValidDate,
+	parseLocalDate
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Popover } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import { debounce } from 'lodash';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { DateShortcutName, FilterSectionKey } from './Filters';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
@@ -44,112 +45,108 @@ const DateRangePickerButton = ({
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
 
+	// Pending (local) state — committed only on "Appliquer"
+	const [localShortcut, setLocalShortcut] = useState<DateShortcutName>(
+		sharedFilters.dateShortcut
+	);
+	const [localDisplayNew, setLocalDisplayNew] = useState(
+		filters.productReviews.displayNew
+	);
 	const [localStartDate, setLocalStartDate] = useState(
 		sharedFilters.currentStartDate
 	);
 	const [localEndDate, setLocalEndDate] = useState(
 		sharedFilters.currentEndDate
 	);
+	const [calendarRangeStart, setCalendarRangeStart] = useState<Date | null>(
+		null
+	);
+	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(null);
 	const [errors, setErrors] = useState<{
 		startDate?: string;
 		endDate?: string;
 	}>({});
 
-	// Parse a "YYYY-MM-DD" string as a local-time Date (avoid UTC shift).
-	const parseLocalDate = (isoStr: string): Date | null => {
-		if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return null;
-		const [y, m, d] = isoStr.split('-').map(Number);
-		return new Date(y, m - 1, d);
-	};
-
-	// Restore calendar range from context when a custom range is active
-	// (dateShortcut is undefined with both dates set). This runs on mount
-	// so the selection survives page/tab navigation.
-	const getInitialCalendarRange = (): [Date | null, Date | null] => {
+	// Sync local state from applied filters every time the popover opens.
+	useEffect(() => {
+		if (!open) return;
+		setLocalShortcut(sharedFilters.dateShortcut);
+		setLocalDisplayNew(filters.productReviews.displayNew);
+		setLocalStartDate(sharedFilters.currentStartDate);
+		setLocalEndDate(sharedFilters.currentEndDate);
 		if (
 			sharedFilters.dateShortcut === undefined &&
 			sharedFilters.currentStartDate &&
 			sharedFilters.currentEndDate &&
 			!filters.productReviews.displayNew
 		) {
-			return [
-				parseLocalDate(sharedFilters.currentStartDate),
-				parseLocalDate(sharedFilters.currentEndDate)
-			];
-		}
-		return [null, null];
-	};
-
-	const [calendarRangeStart, setCalendarRangeStart] = useState<Date | null>(
-		() => getInitialCalendarRange()[0]
-	);
-	const [calendarRangeEnd, setCalendarRangeEnd] = useState<Date | null>(
-		() => getInitialCalendarRange()[1]
-	);
-
-	useEffect(() => {
-		setLocalStartDate(sharedFilters.currentStartDate);
-		setLocalEndDate(sharedFilters.currentEndDate);
-	}, [sharedFilters.currentStartDate, sharedFilters.currentEndDate]);
-
-	useEffect(() => {
-		if (!sharedFilters.hasChanged) {
+			setCalendarRangeStart(parseLocalDate(sharedFilters.currentStartDate));
+			setCalendarRangeEnd(parseLocalDate(sharedFilters.currentEndDate));
+		} else {
 			setCalendarRangeStart(null);
 			setCalendarRangeEnd(null);
 		}
-	}, [sharedFilters.hasChanged]);
+		setErrors({});
+	}, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
-	const isValidDate = (date: string) => {
-		if (!date) return false;
-		return /^\d{4}-\d{2}-\d{2}$/.test(date);
+	const clearCustomDates = () => {
+		setLocalStartDate('');
+		setLocalEndDate('');
+		setCalendarRangeStart(null);
+		setCalendarRangeEnd(null);
+		setErrors({});
 	};
 
-	// Keep latest values accessible in the stable debounced closure.
-	const filtersRef = useRef(filters);
-	const updateFiltersRef = useRef(updateFilters);
-	useEffect(() => {
-		filtersRef.current = filters;
-	});
-	useEffect(() => {
-		updateFiltersRef.current = updateFilters;
-	});
+	const handleShortcutClick = (name: DateShortcutName) => {
+		setLocalShortcut(name);
+		setLocalDisplayNew(false);
+		if (name) {
+			const { startDate, endDate } = getDatesByShortCut(name);
+			setLocalStartDate(startDate);
+			setLocalEndDate(endDate);
+			setCalendarRangeStart(parseLocalDate(startDate));
+			setCalendarRangeEnd(parseLocalDate(endDate));
+			setErrors({});
+		} else {
+			clearCustomDates();
+		}
+	};
 
-	const debouncedUpdateDateFilter = useRef(
-		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
-			const f = filtersRef.current;
-			const nextFilters: typeof f = {
-				...f,
-				currentPage: 1,
-				[filterKey]: { ...f[filterKey] },
-				productReviews: { ...f.productReviews, displayNew: false },
-				sharedFilters: {
-					...f.sharedFilters,
-					[key]: value,
-					dateShortcut: undefined
-				}
-			};
-			updateFiltersRef.current({
-				...nextFilters,
-				sharedFilters: {
-					...nextFilters.sharedFilters,
-					hasChanged: hasAnyFilterChanged(nextFilters)
-				}
-			});
-		}, 1000)
-	).current;
+	const handleNewReviewsClick = () => {
+		const next = !localDisplayNew;
+		setLocalDisplayNew(next);
+		setLocalShortcut(undefined);
+		if (next && reviewLogDate) {
+			const start = dateToLocalISO(new Date(reviewLogDate));
+			const end = dateToLocalISO(new Date());
+			setLocalStartDate(start);
+			setLocalEndDate(end);
+			setCalendarRangeStart(parseLocalDate(start));
+			setCalendarRangeEnd(parseLocalDate(end));
+			setErrors({});
+		} else {
+			clearCustomDates();
+		}
+	};
 
 	const handleDateChange =
 		(key: 'currentStartDate' | 'currentEndDate') =>
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			const newDate = e.target.value;
+			setLocalShortcut(undefined);
+			setLocalDisplayNew(false);
 
 			if (key === 'currentStartDate') {
 				setLocalStartDate(newDate);
+				const parsed = parseLocalDate(newDate);
+				setCalendarRangeStart(parsed);
+				if (!parsed) setCalendarRangeEnd(null);
 			} else {
 				setLocalEndDate(newDate);
+				setCalendarRangeEnd(parseLocalDate(newDate));
 			}
 
-			if (!isValidDate(newDate)) {
+			if (!isValidDate(newDate) && newDate) {
 				setErrors(prev => ({
 					...prev,
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
@@ -160,28 +157,110 @@ const DateRangePickerButton = ({
 					...prev,
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']: undefined
 				}));
-				debouncedUpdateDateFilter(key, newDate);
 			}
 		};
 
-	const handleShortcutClick = (shortcutName: DateShortcutName) => {
-		setCalendarRangeStart(null);
-		setCalendarRangeEnd(null);
+	const handleApply = () => {
+		let nextFilters: typeof filters = {
+			...filters,
+			currentPage: 1,
+			[filterKey]: { ...filters[filterKey] }
+		};
+
+		if (localDisplayNew && showNewReviewsOption && reviewLogDate) {
+			const today = dateToLocalISO(new Date());
+			const startDate = dateToLocalISO(new Date(reviewLogDate));
+			nextFilters = {
+				...nextFilters,
+				productReviews: { ...filters.productReviews, displayNew: true },
+				sharedFilters: {
+					...filters.sharedFilters,
+					currentStartDate: startDate,
+					currentEndDate: today,
+					dateShortcut: undefined
+				}
+			};
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: form?.product_id || productId || 0,
+				form_id: form?.id || 0,
+				template_slug: form?.form_template.slug || '',
+				category: 'reviews',
+				action_type: 'read',
+				action: 'only_new_review_apply',
+				ui_source: 'quick_filter',
+				value: true
+			});
+		} else if (localShortcut) {
+			nextFilters = {
+				...nextFilters,
+				productReviews: { ...filters.productReviews, displayNew: false },
+				sharedFilters: {
+					...filters.sharedFilters,
+					currentStartDate: '',
+					currentEndDate: '',
+					dateShortcut: localShortcut
+				}
+			};
+			const shortcutLabel =
+				dateShortcuts.find(ds => ds.name === localShortcut)?.label || '';
+			push(['trackEvent', 'Logs', `Filtre-Date-${shortcutLabel}`]);
+			window._mtm?.push({
+				event: 'matomo_event',
+				container_type: 'backoffice',
+				service_id: form?.product_id || productId || 0,
+				form_id: form?.id || 0,
+				template_slug: form?.form_template.slug || '',
+				category: 'reviews',
+				action_type: 'filter',
+				action: `${shortcutLabel.split(' ')[0]}_days_filter_apply`,
+				ui_source: 'quick_filter'
+			});
+		} else if (calendarRangeStart || localStartDate) {
+			const start =
+				localStartDate ||
+				(calendarRangeStart ? dateToLocalISO(calendarRangeStart) : '');
+			const end =
+				localEndDate ||
+				(calendarRangeEnd ? dateToLocalISO(calendarRangeEnd) : start);
+			nextFilters = {
+				...nextFilters,
+				productReviews: { ...filters.productReviews, displayNew: false },
+				sharedFilters: {
+					...filters.sharedFilters,
+					currentStartDate: start,
+					currentEndDate: end,
+					dateShortcut: undefined
+				}
+			};
+		} else {
+			// Nothing selected — just close
+			setAnchorEl(null);
+			return;
+		}
+
+		updateFilters({
+			...nextFilters,
+			sharedFilters: {
+				...nextFilters.sharedFilters,
+				hasChanged: hasAnyFilterChanged(nextFilters)
+			}
+		});
+		setAnchorEl(null);
+	};
+
+	const handleClear = () => {
 		const nextFilters: typeof filters = {
 			...filters,
 			currentPage: 1,
-			[filterKey]: {
-				...filters[filterKey]
-			},
-			productReviews: {
-				...filters.productReviews,
-				displayNew: false
-			},
+			[filterKey]: { ...filters[filterKey] },
+			productReviews: { ...filters.productReviews, displayNew: false },
 			sharedFilters: {
 				...filters.sharedFilters,
 				currentStartDate: '',
 				currentEndDate: '',
-				dateShortcut: shortcutName
+				dateShortcut: 'one-year'
 			}
 		};
 		updateFilters({
@@ -191,75 +270,7 @@ const DateRangePickerButton = ({
 				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
-
-		const shortcutLabel =
-			dateShortcuts.find(ds => ds.name === shortcutName)?.label || '';
-		push(['trackEvent', 'Logs', `Filtre-Date-${shortcutLabel}`]);
-		window._mtm?.push({
-			event: 'matomo_event',
-			container_type: 'backoffice',
-			service_id: form?.product_id || productId || 0,
-			form_id: form?.id || 0,
-			template_slug: form?.form_template.slug || '',
-			category: 'reviews',
-			action_type: 'filter',
-			action: `${shortcutLabel.split(' ')[0]}_days_filter_apply`,
-			ui_source: 'quick_filter'
-		});
-	};
-
-	const handleNewReviewsClick = () => {
-		setCalendarRangeStart(null);
-		setCalendarRangeEnd(null);
-		const newValue = !filters.productReviews.displayNew;
-		const today = dateToLocalISO(new Date());
-		const startDate = reviewLogDate
-			? dateToLocalISO(new Date(reviewLogDate))
-			: today;
-
-		const nextFilters: typeof filters = {
-			...filters,
-			currentPage: 1,
-			productReviews: {
-				...filters.productReviews,
-				displayNew: newValue
-			},
-			sharedFilters: {
-				...filters.sharedFilters,
-				...(newValue
-					? {
-							currentStartDate: startDate,
-							currentEndDate: today,
-							dateShortcut: undefined
-					  }
-					: {
-							currentStartDate: '',
-							currentEndDate: '',
-							dateShortcut: 'one-year'
-					  })
-			}
-		};
-
-		updateFilters({
-			...nextFilters,
-			sharedFilters: {
-				...nextFilters.sharedFilters,
-				hasChanged: hasAnyFilterChanged(nextFilters)
-			}
-		});
-
-		window._mtm?.push({
-			event: 'matomo_event',
-			container_type: 'backoffice',
-			service_id: form?.product_id || productId || 0,
-			form_id: form?.id || 0,
-			template_slug: form?.form_template.slug || '',
-			category: 'reviews',
-			action_type: 'read',
-			action: 'only_new_review_apply',
-			ui_source: 'quick_filter',
-			value: newValue
-		});
+		setAnchorEl(null);
 	};
 
 	const getButtonLabel = () => {
@@ -327,18 +338,10 @@ const DateRangePickerButton = ({
 				anchorEl={anchorEl}
 				onClose={() => setAnchorEl(null)}
 				disableScrollLock
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'left'
-				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'left'
-				}}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'left' }}
 				slotProps={{
-					paper: {
-						className: cx(classes.popoverPaper)
-					}
+					paper: { className: cx(classes.popoverPaper) }
 				}}
 			>
 				<div className={cx(classes.popoverContent)}>
@@ -380,23 +383,21 @@ const DateRangePickerButton = ({
 								type="button"
 								className={cx(
 									classes.shortcutButton,
-									sharedFilters.dateShortcut === ds.name &&
-										!filters.productReviews.displayNew
+									localShortcut === ds.name && !localDisplayNew
 										? classes.shortcutButtonSelected
 										: undefined
 								)}
 								onClick={() => handleShortcutClick(ds.name)}
 							>
 								{ds.label}
-								{sharedFilters.dateShortcut === ds.name &&
-									!filters.productReviews.displayNew && (
-										<span
-											className={cx(
-												classes.selectedIcon,
-												fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
-											)}
-										/>
-									)}
+								{localShortcut === ds.name && !localDisplayNew && (
+									<span
+										className={cx(
+											classes.selectedIcon,
+											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+										)}
+									/>
+								)}
 							</button>
 						))}
 						{showNewReviewsOption && reviewLogDate && (
@@ -404,9 +405,7 @@ const DateRangePickerButton = ({
 								type="button"
 								className={cx(
 									classes.shortcutButton,
-									filters.productReviews.displayNew
-										? classes.shortcutButtonSelected
-										: undefined
+									localDisplayNew ? classes.shortcutButtonSelected : undefined
 								)}
 								onClick={handleNewReviewsClick}
 								title={`Depuis votre dernière consultation (le ${formatDateToFrenchString(
@@ -416,7 +415,7 @@ const DateRangePickerButton = ({
 							>
 								Nouvelles réponses (du {formatDateToFrenchString(reviewLogDate)}{' '}
 								à aujourd'hui)
-								{filters.productReviews.displayNew && (
+								{localDisplayNew && (
 									<span
 										className={cx(
 											classes.selectedIcon,
@@ -434,64 +433,30 @@ const DateRangePickerButton = ({
 						onRangeChange={(start, end) => {
 							setCalendarRangeStart(start);
 							setCalendarRangeEnd(end);
-						}}
-						onApply={(start, end) => {
-							setLocalStartDate(start);
-							setLocalEndDate(end);
-							const nextFilters: typeof filters = {
-								...filters,
-								currentPage: 1,
-								[filterKey]: {
-									...filters[filterKey]
-								},
-								productReviews: {
-									...filters.productReviews,
-									displayNew: false
-								},
-								sharedFilters: {
-									...filters.sharedFilters,
-									currentStartDate: start,
-									currentEndDate: end,
-									dateShortcut: undefined
-								}
-							};
-							updateFilters({
-								...nextFilters,
-								sharedFilters: {
-									...nextFilters.sharedFilters,
-									hasChanged: hasAnyFilterChanged(nextFilters)
-								}
-							});
-							setAnchorEl(null);
-						}}
-						onClear={() => {
-							const nextFilters: typeof filters = {
-								...filters,
-								currentPage: 1,
-								[filterKey]: {
-									...filters[filterKey]
-								},
-								productReviews: {
-									...filters.productReviews,
-									displayNew: false
-								},
-								sharedFilters: {
-									...filters.sharedFilters,
-									currentStartDate: '',
-									currentEndDate: '',
-									dateShortcut: 'one-year'
-								}
-							};
-
-							updateFilters({
-								...nextFilters,
-								sharedFilters: {
-									...nextFilters.sharedFilters,
-									hasChanged: hasAnyFilterChanged(nextFilters)
-								}
-							});
+							setLocalStartDate(start ? dateToLocalISO(start) : '');
+							setLocalEndDate(end ? dateToLocalISO(end) : '');
+							setLocalShortcut(undefined);
+							setLocalDisplayNew(false);
 						}}
 					/>
+					<div className={cx(classes.actionsRow)}>
+						<Button
+							priority="tertiary"
+							size="small"
+							type="button"
+							onClick={handleClear}
+						>
+							Effacer
+						</Button>
+						<Button
+							priority="primary"
+							size="small"
+							type="button"
+							onClick={handleApply}
+						>
+							Appliquer
+						</Button>
+					</div>
 				</div>
 			</Popover>
 		</>
@@ -530,6 +495,12 @@ const useStyles = tss.create({
 		flexWrap: 'wrap',
 		gap: fr.spacing('2v'),
 		...fr.spacing('padding', { rightLeft: '3w', bottom: '2w' })
+	},
+	actionsRow: {
+		display: 'flex',
+		justifyContent: 'flex-end',
+		gap: fr.spacing('4v'),
+		...fr.spacing('padding', { rightLeft: '3w', top: '3w' })
 	},
 	shortcutButton: {
 		position: 'relative',

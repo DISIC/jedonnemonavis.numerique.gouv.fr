@@ -113,6 +113,12 @@ export function dateToLocalISO(date: Date): string {
 	return `${y}-${m}-${d}`;
 }
 
+export function parseLocalDate(isoStr: string): Date | null {
+	if (!isValidDate(isoStr)) return null;
+	const [y, mo, d] = isoStr.split('-').map(Number);
+	return new Date(y, mo - 1, d);
+}
+
 export function formatFullFrenchDateTime(date: string | Date): string {
 	const dateStr = typeof date === 'string' ? date : date.toISOString();
 	const datePart = formatDateToFrenchString(dateStr, {
