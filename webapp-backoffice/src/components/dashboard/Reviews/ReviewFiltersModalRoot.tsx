@@ -1,17 +1,10 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
-import {
-	displayIntention,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats/intention-helpers';
-import { trpc } from '@/src/utils/trpc';
+import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -25,13 +18,6 @@ interface Props {
 const ReviewFiltersModalRoot = (props: Props) => {
 	const { modal, filters, submitFilters, form_id } = props;
 	const { cx, classes } = useStyles();
-
-	const { data: buttonResults } = trpc.button.getList.useQuery({
-		page: 1,
-		numberPerPage: 1000,
-		form_id: form_id,
-		isTest: true
-	});
 
 	const [tmpFilters, setTmpFilters] = useState<ReviewFiltersType>(filters);
 	useEffect(() => {
@@ -82,6 +68,45 @@ const ReviewFiltersModalRoot = (props: Props) => {
 		return fieldFilter?.values.includes(value) || false;
 	};
 
+	const satisfactionOptions = (
+		['good', 'medium', 'bad'] as AnswerIntention[]
+	).map(intention => {
+		const label = displayIntention(intention);
+		const checked = isValueSelected('satisfaction', label);
+		return {
+			label,
+			nativeInputProps: {
+				name: `satisfaction-${intention}`,
+				checked,
+				onChange: () => {
+					updateFieldFilter('satisfaction', label, checked);
+					push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
+				}
+			}
+		};
+	});
+
+	const comprehensionOptions = ['1', '2', '3', '4', '5'].map(rating => {
+		const checked = isValueSelected('comprehension', rating);
+		const label =
+			rating === '1'
+				? '1 (pas clair du tout)'
+				: rating === '5'
+				? '5 (très clair)'
+				: rating;
+		return {
+			label,
+			nativeInputProps: {
+				name: `comprehension-${rating}`,
+				checked,
+				onChange: () => {
+					updateFieldFilter('comprehension', rating, checked);
+					push(['trackEvent', 'Avis', 'Filtre-Notation']);
+				}
+			}
+		};
+	});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -91,123 +116,30 @@ const ReviewFiltersModalRoot = (props: Props) => {
 				'fr-my-0'
 			)}
 			concealingBackdrop={false}
-			title={'Filtres'}
+			title={'Plus de filtres'}
 			size="large"
 		>
-			<div className={fr.cx('fr-mt-4w')}>
-				<p className={cx(classes.subtitle)}>Satisfaction</p>
-				<div className={classes.badgeContainer}>
-					{['good', 'medium', 'bad'].map(intention => {
-						const label = displayIntention(
-							(intention ?? 'neutral') as AnswerIntention
-						);
-						const isSelected = isValueSelected('satisfaction', label);
-
-						return (
-							<Button
-								onClick={() => {
-									updateFieldFilter('satisfaction', label, isSelected);
-									push(['trackEvent', 'Product - Avis', 'Filtre-Satisfaction']);
-								}}
-								priority="tertiary"
-								className={cx(
-									classes.badge,
-									isSelected ? classes.selectedOption : undefined
-								)}
-								key={`satisfaction_${intention}`}
-								style={{
-									color: getStatsColor({
-										intention: (intention ?? 'neutral') as AnswerIntention
-									})
-								}}
-							>
-								<Image
-									alt=""
-									src={`/assets/smileys/${getStatsIcon({
-										intention: (intention ?? 'neutral') as AnswerIntention
-									})}.svg`}
-									width={15}
-									height={15}
-								/>
-								{label}
-							</Button>
-						);
-					})}
-				</div>
+			<div className={cx(classes.section)}>
+				<p className={cx(classes.subtitle)}>Satisfaction globale</p>
+				<Checkbox options={satisfactionOptions} state="default" />
 			</div>
 
-			<div className={fr.cx('fr-mt-4w')}>
+			<hr className={cx(classes.separator)} />
+
+			<div className={cx(classes.section)}>
 				<p className={cx(classes.subtitle)}>
-					Qu'avez-vous pensé des informations et des instructions fournies ?
+					Note donnée à la clarté des informations
 				</p>
-				<div className={cx(classes.rating)}>
-					<span>Pas clair du tout</span>
-					<fieldset className={fr.cx('fr-fieldset')}>
-						<ul>
-							{['1', '2', '3', '4', '5'].map(rating => {
-								const isSelected = isValueSelected('comprehension', rating);
-
-								return (
-									<li key={rating}>
-										<input
-											id={`radio-rating-${rating}`}
-											className={fr.cx('fr-sr-only')}
-											type="checkbox"
-											checked={isSelected}
-											onChange={() => {
-												updateFieldFilter('comprehension', rating, isSelected);
-												push(['trackEvent', 'Avis', 'Filtre-Notation']);
-											}}
-										/>
-										<label
-											htmlFor={`radio-rating-${rating}`}
-											className={
-												isSelected ? classes.selectedNumberOption : undefined
-											}
-										>
-											{rating}
-										</label>
-									</li>
-								);
-							})}
-						</ul>
-					</fieldset>
-					<span>Très clair</span>
-				</div>
+				<Checkbox options={comprehensionOptions} state="default" />
 			</div>
 
-			<div className={fr.cx('fr-mt-4w')}>
-				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
-				<Select
-					label="Sélectionner une source"
-					nativeSelectProps={{
-						value: tmpFilters.buttonId[0],
-						onChange: e => {
-							setTmpFilters({
-								...tmpFilters,
-								buttonId: e.target.value !== 'undefined' ? [e.target.value] : []
-							});
-							push(['trackEvent', 'Avis', 'Sélection-bouton']);
-						}
-					}}
-				>
-					<option value="undefined">Toutes les sources</option>
-					{buttonResults?.data?.map(button => {
-						return (
-							<option key={button.id} value={button.id}>
-								{button.title}
-							</option>
-						);
-					})}
-				</Select>
-			</div>
+			<hr className={cx(classes.separator)} />
 
-			<div className={fr.cx('fr-mt-4w')}>
-				<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
+			<div className={cx(classes.section)}>
 				<Checkbox
 					options={[
 						{
-							label: 'Réponse avec commentaire',
+							label: 'Avis avec commentaire complété',
 							nativeInputProps: {
 								name: 'needVerbatim',
 								checked: tmpFilters.needVerbatim,
@@ -229,7 +161,7 @@ const ReviewFiltersModalRoot = (props: Props) => {
 				<ul className={cx(classes.listContainer)}>
 					<li>
 						<Button
-							priority="secondary"
+							priority="tertiary"
 							className={fr.cx('fr-mt-1w')}
 							type="button"
 							onClick={() => {
@@ -245,8 +177,6 @@ const ReviewFiltersModalRoot = (props: Props) => {
 						<Button
 							priority="secondary"
 							className={fr.cx('fr-mt-1w')}
-							iconId="fr-icon-edit-line"
-							iconPosition="right"
 							type="button"
 							onClick={() => {
 								setTmpFilters({
@@ -284,15 +214,40 @@ const ReviewFiltersModalRoot = (props: Props) => {
 };
 
 const useStyles = tss.withName(ReviewFiltersModalRoot.name).create(() => ({
+	section: {
+		'& .fr-fieldset': {
+			marginBottom: 0,
+			'&  .fr-label': {
+				...fr.spacing('padding', { topBottom: '2v' }),
+				'&::before': {
+					top: '0.5rem!important'
+				}
+			}
+		},
+		'& .fr-fieldset__element': {
+			marginBottom: 0
+		}
+	},
+	subtitle: {
+		...fr.typography[19].style,
+		marginBottom: fr.spacing('2w'),
+		fontWeight: 'bold',
+		color: fr.colors.decisions.text.label.grey.default
+	},
+	separator: {
+		border: 'none',
+		borderTop: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		...fr.spacing('margin', { topBottom: '3w' }),
+		padding: 0,
+		height: 1,
+		backgroundColor: 'transparent',
+		':last-of-type': {
+			marginBottom: fr.spacing('4w')
+		}
+	},
 	applyWrapper: {
 		display: 'flex',
 		justifyContent: 'end'
-	},
-	wrapperMobile: {
-		[fr.breakpoints.down('sm')]: {
-			display: 'flex',
-			justifyContent: 'end'
-		}
 	},
 	listContainer: {
 		display: 'flex',
@@ -301,92 +256,12 @@ const useStyles = tss.withName(ReviewFiltersModalRoot.name).create(() => ({
 		padding: 0,
 		margin: 0,
 		listStyle: 'none',
-		justifyContent: 'space-between',
+		justifyContent: 'end',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column-reverse',
 			button: {
 				width: '100%',
 				justifyContent: 'center'
-			}
-		}
-	},
-	iconError: {
-		color: fr.colors.decisions.text.default.error.default
-	},
-	subtitle: {
-		...fr.typography[19].style,
-		marginBottom: 10,
-		fontWeight: 'bold'
-	},
-	badgeContainer: {
-		display: 'flex',
-		gap: 10,
-		[fr.breakpoints.down('md')]: {
-			justifyContent: 'space-between'
-		}
-	},
-	badge: {
-		justifyContent: 'center',
-		cursor: 'pointer',
-		gap: '0.25rem',
-		[fr.breakpoints.down('md')]: {
-			flex: '1 1 100%'
-		}
-	},
-	selectedOption: {
-		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
-		color: 'white'
-	},
-	selectedNumberOption: {
-		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-		color: 'white',
-		fontWeight: 'bold'
-	},
-	rating: {
-		display: 'flex',
-		alignItems: 'center',
-		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column'
-		},
-		'& > span': {
-			...fr.typography[18].style,
-			marginBottom: 0
-		},
-		fieldset: {
-			margin: 0,
-			[fr.breakpoints.down('md')]: {
-				width: '100%'
-			},
-			ul: {
-				listStyleType: 'none',
-				columns: 5,
-				gap: 10,
-				margin: '0 1rem',
-				padding: 0,
-				overflow: 'hidden',
-				[fr.breakpoints.down('md')]: {
-					columns: 'auto',
-					width: '100%',
-					margin: 0
-				},
-				li: {
-					label: {
-						width: '3.5rem',
-						justifyContent: 'center',
-						border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-						padding: `${fr.spacing('1v')} ${fr.spacing('3v')}`,
-						display: 'flex',
-						alignItems: 'center',
-						cursor: 'pointer',
-						['&:hover']: {
-							borderColor: fr.colors.decisions.background.alt.grey.active,
-							fontWeight: 'bold'
-						},
-						[fr.breakpoints.down('md')]: {
-							width: '100%'
-						}
-					}
-				}
 			}
 		}
 	}

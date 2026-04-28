@@ -1,10 +1,9 @@
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import Tag from '@codegouvfr/react-dsfr/Tag';
 import { Button } from '@prisma/client';
-import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -27,17 +26,21 @@ const ReviewFilterTags = (props: Props) => {
 
 	const renderLabel = (fieldCode: string, value: string): string => {
 		const block = filterableBlocks.find(b => b.field_code === fieldCode);
+		const formTemplateBlockOption = block?.options?.find(
+			o => o.value === value
+		);
 
 		if (!block) {
 			if (fieldCode === 'buttonId') {
-				return `Source : ${
-					buttons.find(b => b.id === parseInt(value as string))?.title
-				}`;
+				return `Source = ${buttons.find(b => b.id === parseInt(value as string))
+					?.title}`;
 			}
 			return value;
 		}
 
-		return `${block.alias || block.label || fieldCode} : ${value}`;
+		return `${block.alias || block.label || fieldCode} = ${
+			formTemplateBlockOption?.alias || value
+		}`;
 	};
 
 	const renderTags = () => {
@@ -56,18 +59,19 @@ const ReviewFilterTags = (props: Props) => {
 					key === 'needVerbatim'
 						? 'Réponse avec commentaire'
 						: key === 'needOtherDifficulties'
-							? 'Difficultés autres complété'
-							: 'Aide autres complété';
+						? 'Difficultés autres complété'
+						: 'Aide autres complété';
 
 				tags.push(
 					<Tag
 						key={`bool-${index}`}
 						title={`Retirer le filtre : ${label}`}
 						dismissible
+						small
 						className={cx(classes.tagFilter)}
 						nativeButtonProps={{
 							onClick: () => {
-								updateFilters({
+								const nextFilters: typeof filters = {
 									...filters,
 									productReviews: {
 										...filters.productReviews,
@@ -75,6 +79,13 @@ const ReviewFilterTags = (props: Props) => {
 											...filters.productReviews.filters,
 											[key]: false
 										}
+									}
+								};
+								updateFilters({
+									...nextFilters,
+									sharedFilters: {
+										...nextFilters.sharedFilters,
+										hasChanged: hasAnyFilterChanged(nextFilters)
 									}
 								});
 							}
@@ -85,42 +96,6 @@ const ReviewFilterTags = (props: Props) => {
 				);
 			}
 		});
-
-		if (
-			filters.productReviews.filters.buttonId &&
-			filters.productReviews.filters.buttonId.length > 0
-		) {
-			filters.productReviews.filters.buttonId.forEach((buttonIdStr, index) => {
-				const labelRendered = renderLabel('buttonId', buttonIdStr);
-
-				tags.push(
-					<Tag
-						key={`button-${index}`}
-						title={`Retirer le filtre ${labelRendered}`}
-						dismissible
-						className={cx(classes.tagFilter)}
-						nativeButtonProps={{
-							onClick: () => {
-								updateFilters({
-									...filters,
-									productReviews: {
-										...filters.productReviews,
-										filters: {
-											...filters.productReviews.filters,
-											buttonId: filters.productReviews.filters.buttonId?.filter(
-												item => item !== buttonIdStr
-											)
-										}
-									}
-								});
-							}
-						}}
-					>
-						{labelRendered}
-					</Tag>
-				);
-			});
-		}
 
 		if (
 			filters.productReviews.filters.fields &&
@@ -135,6 +110,7 @@ const ReviewFilterTags = (props: Props) => {
 							key={`field-${fieldIndex}-${valueIndex}`}
 							title={`Retirer le filtre ${labelRendered}`}
 							dismissible
+							small
 							className={cx(classes.tagFilter)}
 							nativeButtonProps={{
 								onClick: () => {
@@ -149,11 +125,10 @@ const ReviewFilterTags = (props: Props) => {
 											return f;
 										});
 
-									const filteredFields = updatedFields?.filter(
-										f => f.values.length > 0
-									);
+									const filteredFields =
+										updatedFields?.filter(f => f.values.length > 0) ?? [];
 
-									updateFilters({
+									const nextFilters: typeof filters = {
 										...filters,
 										productReviews: {
 											...filters.productReviews,
@@ -161,6 +136,13 @@ const ReviewFilterTags = (props: Props) => {
 												...filters.productReviews.filters,
 												fields: filteredFields
 											}
+										}
+									};
+									updateFilters({
+										...nextFilters,
+										sharedFilters: {
+											...nextFilters.sharedFilters,
+											hasChanged: hasAnyFilterChanged(nextFilters)
 										}
 									});
 								}
@@ -176,14 +158,20 @@ const ReviewFilterTags = (props: Props) => {
 		return tags.length > 0 ? tags : null;
 	};
 
-	return <>{renderTags()}</>;
+	return (
+		<div className={cx(classes.container, fr.cx('fr-col-12'))}>
+			{renderTags()}
+		</div>
+	);
 };
 
 export default ReviewFilterTags;
 
 const useStyles = tss.withName(ReviewFilterTags.name).create({
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
-	}
+	container: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		gap: '1rem'
+	},
+	tagFilter: {}
 });
