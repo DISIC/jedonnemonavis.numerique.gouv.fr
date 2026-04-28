@@ -98,50 +98,6 @@ const ReviewFilterTags = (props: Props) => {
 		});
 
 		if (
-			filters.productReviews.filters.buttonId &&
-			filters.productReviews.filters.buttonId.length > 0
-		) {
-			filters.productReviews.filters.buttonId.forEach((buttonIdStr, index) => {
-				const labelRendered = renderLabel('buttonId', buttonIdStr);
-
-				tags.push(
-					<Tag
-						key={`button-${index}`}
-						title={`Retirer le filtre ${labelRendered}`}
-						dismissible
-						small
-						className={cx(classes.tagFilter)}
-						nativeButtonProps={{
-							onClick: () => {
-								const nextFilters: typeof filters = {
-									...filters,
-									productReviews: {
-										...filters.productReviews,
-										filters: {
-											...filters.productReviews.filters,
-											buttonId: filters.productReviews.filters.buttonId?.filter(
-												item => item !== buttonIdStr
-											)
-										}
-									}
-								};
-								updateFilters({
-									...nextFilters,
-									sharedFilters: {
-										...nextFilters.sharedFilters,
-										hasChanged: hasAnyFilterChanged(nextFilters)
-									}
-								});
-							}
-						}}
-					>
-						{labelRendered}
-					</Tag>
-				);
-			});
-		}
-
-		if (
 			filters.productReviews.filters.fields &&
 			filters.productReviews.filters.fields.length > 0
 		) {

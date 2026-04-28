@@ -1,4 +1,8 @@
-import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
+import {
+	hasAnyFilterChanged,
+	initialFilterState,
+	useFilters
+} from '@/src/contexts/FiltersContext';
 import {
 	dateToLocalISO,
 	formatDateToFrenchString,
@@ -75,10 +79,11 @@ const DateRangePickerButton = ({
 		setLocalStartDate(sharedFilters.currentStartDate);
 		setLocalEndDate(sharedFilters.currentEndDate);
 		if (
-			sharedFilters.dateShortcut === undefined &&
 			sharedFilters.currentStartDate &&
 			sharedFilters.currentEndDate &&
-			!filters.productReviews.displayNew
+			!filters.productReviews.displayNew &&
+			sharedFilters.dateShortcut !==
+				initialFilterState.sharedFilters.dateShortcut
 		) {
 			setCalendarRangeStart(parseLocalDate(sharedFilters.currentStartDate));
 			setCalendarRangeEnd(parseLocalDate(sharedFilters.currentEndDate));
@@ -320,7 +325,7 @@ const DateRangePickerButton = ({
 	return (
 		<>
 			<Button
-				className={cx(classes.filterButton)}
+				className={cx(classes.filterButton, open && classes.filterButtonActive)}
 				priority="tertiary"
 				iconId="ri-calendar-event-fill"
 				iconPosition="right"
@@ -467,6 +472,9 @@ const useStyles = tss.create({
 	filterButton: {
 		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},
+	filterButtonActive: {
+		backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.default} !important`
+	},
 	popoverPaper: {
 		marginTop: fr.spacing('1v'),
 		borderRadius: 0,
@@ -488,7 +496,8 @@ const useStyles = tss.create({
 		}
 	},
 	separator: {
-		paddingBottom: fr.spacing('4v')
+		paddingBottom: fr.spacing('4v'),
+		...fr.spacing('margin', { rightLeft: '6v' })
 	},
 	shortcutsRow: {
 		display: 'flex',

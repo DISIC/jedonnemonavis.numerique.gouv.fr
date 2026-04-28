@@ -27,7 +27,13 @@ const IntegrationLinksDropdown = ({
 	const menuRef = useRef<HTMLUListElement | null>(null);
 
 	// All options: "all" first, then each button.
-	const allOptions = [{ id: undefined as number | undefined, title: "Tous les liens d'intégration" }, ...buttons.map(b => ({ id: b.id as number | undefined, title: b.title }))];
+	const allOptions = [
+		{
+			id: undefined as number | undefined,
+			title: "Tous les liens d'intégration"
+		},
+		...buttons.map(b => ({ id: b.id as number | undefined, title: b.title }))
+	];
 
 	const getSelectedButtonId = (): number | undefined => {
 		if (filterKey === 'productStats') return filters.productStats.buttonId;
@@ -43,7 +49,7 @@ const IntegrationLinksDropdown = ({
 	const getLabel = () => {
 		if (selectedButtonId !== undefined) {
 			const found = buttons.find(b => b.id === selectedButtonId);
-			if (found) return found.title;
+			if (found) return `Source : ${found.title}`;
 		}
 		return "Tous les liens d'intégration";
 	};
@@ -94,12 +100,15 @@ const IntegrationLinksDropdown = ({
 	};
 
 	const focusItemAt = (index: number) => {
-		const items = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]');
+		const items =
+			menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]');
 		items?.[index]?.focus();
 	};
 
 	const handleMenuKeyDown = (e: React.KeyboardEvent) => {
-		const items = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+		const items = Array.from(
+			menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []
+		);
 		const current = document.activeElement;
 		const currentIndex = items.indexOf(current as HTMLElement);
 
@@ -133,7 +142,7 @@ const IntegrationLinksDropdown = ({
 	return (
 		<>
 			<Button
-				className={cx(classes.filterButton)}
+				className={cx(classes.filterButton, open && classes.filterButtonActive)}
 				priority="tertiary"
 				iconId="ri-arrow-down-s-line"
 				iconPosition="right"
@@ -146,7 +155,7 @@ const IntegrationLinksDropdown = ({
 					'aria-controls': open ? MENU_ID : undefined
 				}}
 			>
-				{getLabel()}
+				<span className={cx(classes.buttonLabel)}>{getLabel()}</span>
 			</Button>
 			<Popover
 				open={open}
@@ -155,8 +164,11 @@ const IntegrationLinksDropdown = ({
 				disableScrollLock
 				TransitionProps={{
 					onEntered: () => {
-						const selected = menuRef.current?.querySelector<HTMLElement>('[aria-checked="true"]');
-						const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+						const selected = menuRef.current?.querySelector<HTMLElement>(
+							'[aria-checked="true"]'
+						);
+						const first =
+							menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
 						(selected ?? first)?.focus();
 					}
 				}}
@@ -212,7 +224,19 @@ const IntegrationLinksDropdown = ({
 
 const useStyles = tss.create({
 	filterButton: {
-		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		width: '18rem'
+	},
+	filterButtonActive: {
+		backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.default} !important`
+	},
+	buttonLabel: {
+		flex: 1,
+		minWidth: 0,
+		overflow: 'hidden',
+		textOverflow: 'ellipsis',
+		textAlign: 'left' as const,
+		whiteSpace: 'nowrap' as const
 	},
 	popoverPaper: {
 		marginTop: fr.spacing('1v'),

@@ -1,6 +1,7 @@
 import { TypeAction } from '@prisma/client';
 import { isEqual } from 'lodash';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { getDatesByShortCut } from '../utils/tools';
 import { DateShortcutName } from '../components/dashboard/Filters/Filters';
 import { ReviewFiltersType } from '../types/custom';
 
@@ -151,11 +152,17 @@ export const FiltersContextProvider: React.FC<FiltersContextProviderProps> = ({
 			'productActivityLogs' | 'productReviews' | 'productStats'
 		>
 	) => {
+		const defaultShortcut = initialFilterState.sharedFilters.dateShortcut;
+		const { startDate, endDate } = defaultShortcut
+			? getDatesByShortCut(defaultShortcut)
+			: { startDate: '', endDate: '' };
 		setFilters(prevFilters => ({
 			...prevFilters,
 			[section]: initialFilterState[section],
 			sharedFilters: {
-				...initialFilterState.sharedFilters
+				...initialFilterState.sharedFilters,
+				currentStartDate: startDate,
+				currentEndDate: endDate
 			},
 			currentPage: 1
 		}));
