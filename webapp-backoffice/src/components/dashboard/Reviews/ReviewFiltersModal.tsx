@@ -1,19 +1,12 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import {
-	displayIntention,
-	getStatsColor,
-	getStatsIcon
-} from '@/src/utils/stats/intention-helpers';
-import { trpc } from '@/src/utils/trpc';
+import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import Select from '@codegouvfr/react-dsfr/Select';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 interface Props {
@@ -26,13 +19,6 @@ interface Props {
 const ReviewFiltersModal = (props: Props) => {
 	const { modal, filters, submitFilters, form } = props;
 	const { cx, classes } = useStyles();
-
-	const { data: buttonResults } = trpc.button.getList.useQuery({
-		page: 1,
-		numberPerPage: 1000,
-		form_id: form.id,
-		isTest: false
-	});
 
 	const filterableBlocks = form.form_template.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -108,6 +94,74 @@ const ReviewFiltersModal = (props: Props) => {
 		push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
 	};
 
+	const buildSmileyOptions = (fieldCode: string) =>
+		(['good', 'medium', 'bad'] as AnswerIntention[]).map(intention => {
+			const label = displayIntention(intention);
+			const checked = isValueSelected(fieldCode, label);
+			return {
+				label,
+				nativeInputProps: {
+					name: `${fieldCode}-${intention}`,
+					checked,
+					onChange: () => {
+						updateFieldFilter(fieldCode, label, checked);
+						push(['trackEvent', 'Product - Avis', `Filtre-${fieldCode}`]);
+					}
+				}
+			};
+		});
+
+	const buildMarkOptions = (
+		fieldCode: string,
+		options: { id: string | number; value: string | null }[],
+		downLabel?: string | null,
+		upLabel?: string | null
+	) =>
+		options.map((option, index) => {
+			const optionValue = option.value || '';
+			const checked = isValueSelected(fieldCode, optionValue);
+			let label: string = optionValue;
+			if (index === 0 && downLabel) label = `${optionValue} (${downLabel})`;
+			else if (index === options.length - 1 && upLabel)
+				label = `${optionValue} (${upLabel})`;
+			return {
+				label,
+				nativeInputProps: {
+					name: `${fieldCode}-${option.id}`,
+					checked,
+					onChange: () => {
+						updateFieldFilter(fieldCode, optionValue, checked);
+						push(['trackEvent', 'Avis', `Filtre-${fieldCode}`]);
+					}
+				}
+			};
+		});
+
+	const buildOptionChoices = (
+		fieldCode: string,
+		options: {
+			id: string | number;
+			value: string | null;
+			label: string | null;
+		}[]
+	) =>
+		options.map(option => {
+			const optionValue = option.value || option.label || '';
+			const checked = isValueSelected(fieldCode, optionValue);
+			const cleanedLabel = (option.label || '').replace(/\*/g, '');
+			return {
+				label: cleanedLabel || optionValue,
+				nativeInputProps: {
+					name: `${fieldCode}-${option.id}`,
+					checked,
+					onChange: () => {
+						updateFieldFilter(fieldCode, optionValue, checked);
+						push(['trackEvent', 'Product - Avis', `Filtre-${fieldCode}`]);
+					}
+				}
+			};
+		});
+
 	return (
 		<modal.Component
 			className={fr.cx(
@@ -117,188 +171,55 @@ const ReviewFiltersModal = (props: Props) => {
 				'fr-my-0'
 			)}
 			concealingBackdrop={false}
-			title={'Filtres'}
+			title={'Plus de filtres'}
 			size="large"
 		>
-			{filterableBlocks.map((block, index) => (
-				<div key={index} className={fr.cx('fr-mt-4w')}>
-					<p className={cx(classes.subtitle)}>
-						{block.label || block.field_code}
-					</p>
+			{filterableBlocks.map((block, index) => {
+				const fieldKey = block.field_code || '';
+				let options: { label: string; nativeInputProps: any }[] | null = null;
 
-					{block.type_bloc === 'smiley_input' && (
-						<div className={classes.badgeContainer}>
-							{['good', 'medium', 'bad'].map(intention => {
-								const fieldKey = block.field_code || '';
-								const label = displayIntention(
-									(intention ?? 'neutral') as AnswerIntention
-								);
-								const isSelected = isValueSelected(fieldKey, label);
+				if (block.type_bloc === 'smiley_input') {
+					options = buildSmileyOptions(fieldKey);
+				} else if (block.type_bloc === 'mark_input') {
+					options = buildMarkOptions(
+						fieldKey,
+						block.options,
+						block.downLabel,
+						block.upLabel
+					);
+				} else if (
+					['select', 'radio', 'checkbox'].includes(block.type_bloc) &&
+					block.options &&
+					block.options.length > 0
+				) {
+					options = buildOptionChoices(fieldKey, block.options);
+				}
 
-								return (
-									<Button
-										onClick={() => {
-											updateFieldFilter(fieldKey, label, isSelected);
-											push([
-												'trackEvent',
-												'Product - Avis',
-												`Filtre-${fieldKey}`
-											]);
-										}}
-										priority="tertiary"
-										className={cx(
-											classes.badge,
-											isSelected ? classes.selectedSmileyOption : undefined
-										)}
-										key={`${block.field_code}_${intention}`}
-										style={{
-											color: getStatsColor({
-												intention: (intention ?? 'neutral') as AnswerIntention
-											})
-										}}
-									>
-										<Image
-											alt=""
-											src={`/assets/smileys/${getStatsIcon({
-												intention: (intention ?? 'neutral') as AnswerIntention
-											})}.svg`}
-											width={15}
-											height={15}
-										/>
-										{label}
-									</Button>
-								);
-							})}
+				if (!options || options.length === 0) return null;
+
+				return (
+					<Fragment key={index}>
+						{index > 0 && <hr className={cx(classes.separator)} />}
+						<div className={cx(classes.section)}>
+							<p className={cx(classes.subtitle)}>
+								{block.label || block.field_code}
+							</p>
+							<Checkbox options={options} state="default" />
 						</div>
+					</Fragment>
+				);
+			})}
+
+			{hasVerbatimBlock && (
+				<>
+					{filterableBlocks.length > 0 && (
+						<hr className={cx(classes.separator)} />
 					)}
-
-					{block.type_bloc === 'mark_input' && (
-						<div className={cx(classes.rating)}>
-							<span>{block.downLabel || 'Minimum'}</span>
-							<fieldset className={fr.cx('fr-fieldset')}>
-								<ul>
-									{block.options.map(option => {
-										const fieldKey = block.field_code || '';
-										const optionValue = option.value || '';
-										const isSelected = isValueSelected(fieldKey, optionValue);
-
-										return (
-											<li key={option.id}>
-												<input
-													id={`radio-${block.field_code}-${option.id}`}
-													className={fr.cx('fr-sr-only')}
-													type="checkbox"
-													checked={isSelected}
-													onChange={() => {
-														updateFieldFilter(
-															fieldKey,
-															optionValue,
-															isSelected
-														);
-														push(['trackEvent', 'Avis', `Filtre-${fieldKey}`]);
-													}}
-												/>
-												<label
-													htmlFor={`radio-${block.field_code}-${option.id}`}
-													className={
-														isSelected ? classes.selectedOption : undefined
-													}
-												>
-													{option.value}
-												</label>
-											</li>
-										);
-									})}
-								</ul>
-							</fieldset>
-							<span>{block.upLabel || 'Maximum'}</span>
-						</div>
-					)}
-
-					{['select', 'radio', 'checkbox'].includes(block.type_bloc) &&
-						block.options &&
-						block.options.length > 0 && (
-							<fieldset
-								className={cx(fr.cx('fr-fieldset'), classes.optionsFieldset)}
-							>
-								<ul>
-									{block.options.map(option => {
-										const fieldKey = block.field_code || '';
-										const optionValue = option.value || option.label || '';
-										const isSelected = isValueSelected(fieldKey, optionValue);
-
-										return (
-											<li key={option.id}>
-												<input
-													id={`option-${block.field_code}-${option.id}`}
-													className={fr.cx('fr-sr-only')}
-													type="checkbox"
-													checked={isSelected}
-													onChange={() => {
-														updateFieldFilter(
-															fieldKey,
-															optionValue,
-															isSelected
-														);
-														push([
-															'trackEvent',
-															'Product - Avis',
-															`Filtre-${fieldKey}`
-														]);
-													}}
-												/>
-												<label
-													htmlFor={`option-${block.field_code}-${option.id}`}
-													className={
-														isSelected ? classes.selectedOption : undefined
-													}
-												>
-													{option.label}
-												</label>
-											</li>
-										);
-									})}
-								</ul>
-							</fieldset>
-						)}
-				</div>
-			))}
-			{(buttonResults && buttonResults.data && buttonResults.data.length > 1) ||
-			hasVerbatimBlock ? (
-				<div className={fr.cx('fr-mt-4w')}>
-					<p className={cx(classes.subtitle)}>Filtres complémentaires</p>
-
-					{buttonResults &&
-						buttonResults.data &&
-						buttonResults.data.length > 1 && (
-							<Select
-								label="Sélectionner une source"
-								nativeSelectProps={{
-									value: tmpFilters.buttonId[0],
-									onChange: e => {
-										setTmpFilters({
-											...tmpFilters,
-											buttonId:
-												e.target.value !== 'undefined' ? [e.target.value] : []
-										});
-										push(['trackEvent', 'Avis', 'Sélection-bouton']);
-									}
-								}}
-							>
-								<option value="undefined">Toutes les sources</option>
-								{buttonResults.data.map(button => (
-									<option key={button.id} value={button.id}>
-										{button.title}
-									</option>
-								))}
-							</Select>
-						)}
-
-					{hasVerbatimBlock && (
+					<div className={cx(classes.section)}>
 						<Checkbox
 							options={[
 								{
-									label: 'Réponse avec commentaire',
+									label: 'Avis avec commentaire complété',
 									nativeInputProps: {
 										name: 'needVerbatim',
 										checked: tmpFilters.needVerbatim,
@@ -314,15 +235,15 @@ const ReviewFiltersModal = (props: Props) => {
 							]}
 							state="default"
 						/>
-					)}
-				</div>
-			) : null}
+					</div>
+				</>
+			)}
 
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
 				<ul className={cx(classes.listContainer)}>
 					<li>
 						<Button
-							priority="secondary"
+							priority="tertiary"
 							className={fr.cx('fr-mt-1w')}
 							type="button"
 							onClick={() => {
@@ -338,8 +259,6 @@ const ReviewFiltersModal = (props: Props) => {
 						<Button
 							priority="secondary"
 							className={fr.cx('fr-mt-1w')}
-							iconId="fr-icon-edit-line"
-							iconPosition="right"
 							type="button"
 							onClick={handleReset}
 						>
@@ -379,6 +298,37 @@ const ReviewFiltersModal = (props: Props) => {
 };
 
 const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
+	section: {
+		'& .fr-fieldset': {
+			marginBottom: 0,
+			'&  .fr-label': {
+				...fr.spacing('padding', { topBottom: '2v' }),
+				'&::before': {
+					top: '0.5rem!important'
+				}
+			}
+		},
+		'& .fr-fieldset__element': {
+			marginBottom: 0
+		}
+	},
+	subtitle: {
+		...fr.typography[19].style,
+		marginBottom: fr.spacing('2w'),
+		fontWeight: 'bold',
+		color: fr.colors.decisions.text.label.grey.default
+	},
+	separator: {
+		border: 'none',
+		borderTop: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		...fr.spacing('margin', { topBottom: '3w' }),
+		padding: 0,
+		height: 1,
+		backgroundColor: 'transparent',
+		':last-of-type': {
+			marginBottom: fr.spacing('4w')
+		}
+	},
 	applyWrapper: {
 		display: 'flex',
 		justifyContent: 'end'
@@ -390,123 +340,12 @@ const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
 		padding: 0,
 		margin: 0,
 		listStyle: 'none',
-		justifyContent: 'space-between',
+		justifyContent: 'end',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column-reverse',
 			button: {
 				width: '100%',
 				justifyContent: 'center'
-			}
-		}
-	},
-	subtitle: {
-		...fr.typography[19].style,
-		marginBottom: 10,
-		fontWeight: 'bold'
-	},
-	badgeContainer: {
-		display: 'flex',
-		gap: 10,
-		flexWrap: 'wrap',
-		[fr.breakpoints.down('md')]: {
-			justifyContent: 'space-between'
-		}
-	},
-	badge: {
-		justifyContent: 'center',
-		cursor: 'pointer',
-		gap: '0.25rem',
-		border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-		['&:hover']: {
-			borderColor: fr.colors.decisions.background.alt.grey.active,
-			fontWeight: 'bold'
-		},
-		[fr.breakpoints.down('md')]: {
-			flex: '1 1 auto'
-		}
-	},
-	selectedSmileyOption: {
-		backgroundColor: fr.colors.decisions.background.alt.grey.hover,
-		color: 'white'
-	},
-	selectedOption: {
-		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-		color: 'white',
-		fontWeight: 'bold',
-		borderColor: fr.colors.decisions.background.flat.blueFrance.default
-	},
-	rating: {
-		display: 'flex',
-		alignItems: 'center',
-		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column'
-		},
-		'& > span': {
-			...fr.typography[18].style,
-			marginBottom: 0
-		},
-		fieldset: {
-			margin: 0,
-			[fr.breakpoints.down('md')]: {
-				width: '100%'
-			},
-			ul: {
-				listStyleType: 'none',
-				columns: 5,
-				gap: 10,
-				margin: '0 1rem',
-				padding: 0,
-				overflow: 'hidden',
-				[fr.breakpoints.down('md')]: {
-					columns: 'auto',
-					width: '100%',
-					margin: 0
-				},
-				li: {
-					label: {
-						width: '3.5rem',
-						justifyContent: 'center',
-						border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-						padding: `${fr.spacing('1v')} ${fr.spacing('3v')}`,
-						display: 'flex',
-						alignItems: 'center',
-						cursor: 'pointer',
-						['&:hover']: {
-							borderColor: fr.colors.decisions.background.alt.grey.active,
-							fontWeight: 'bold'
-						},
-						[fr.breakpoints.down('md')]: {
-							width: '100%'
-						}
-					}
-				}
-			}
-		}
-	},
-	optionsFieldset: {
-		margin: 0,
-		padding: 0,
-		ul: {
-			listStyleType: 'none',
-			display: 'flex',
-			flexWrap: 'wrap',
-			gap: 10,
-			padding: 0,
-			margin: 0,
-			li: {
-				label: {
-					minWidth: '80px',
-					justifyContent: 'center',
-					border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-					padding: `${fr.spacing('1v')} ${fr.spacing('3v')}`,
-					display: 'flex',
-					alignItems: 'center',
-					cursor: 'pointer',
-					['&:hover']: {
-						borderColor: fr.colors.decisions.background.alt.grey.active,
-						fontWeight: 'bold'
-					}
-				}
 			}
 		}
 	}

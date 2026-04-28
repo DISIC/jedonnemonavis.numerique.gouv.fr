@@ -48,39 +48,87 @@ export function generateRandomString(length: number = 8): string {
 	return otp;
 }
 
-export function formatDateToFrenchString(tmpDate: string) {
-	const date = new Date(tmpDate);
+type HourFormat = 'long' | 'short';
 
-	if (!(date instanceof Date)) {
-		throw new Error('Input is not a valid Date object');
+type FormatDateOptions = {
+	withHour?: boolean;
+	hourOnly?: boolean;
+	hourFormat?: HourFormat;
+	monthFormat?: 'default' | 'literal';
+};
+
+function formatHourPart(date: Date, format: HourFormat): string {
+	if (format === 'short') {
+		const parts = new Intl.DateTimeFormat('fr-FR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		}).formatToParts(date);
+		const hour = parts.find(p => p.type === 'hour')?.value ?? '00';
+		const minute = parts.find(p => p.type === 'minute')?.value ?? '00';
+		return `${hour}h${minute}`;
 	}
-
-	const formatter = new Intl.DateTimeFormat('fr-FR', {
-		year: 'numeric',
-		month: 'numeric',
-		day: 'numeric'
-	});
-
-	return formatter.format(date);
-}
-
-export function formatDateToFrenchStringWithHour(tmpDate: string) {
-	const date = new Date(tmpDate);
-
-	if (!(date instanceof Date)) {
-		throw new Error('Input is not a valid Date object');
-	}
-
-	const formatter = new Intl.DateTimeFormat('fr-FR', {
-		year: 'numeric',
-		month: 'numeric',
-		day: 'numeric',
+	return new Intl.DateTimeFormat('fr-FR', {
 		hour: '2-digit',
 		minute: '2-digit',
 		second: '2-digit'
-	});
+	}).format(date);
+}
 
-	return formatter.format(date);
+export function formatDateToFrenchString(
+	tmpDate: string,
+	{
+		withHour = false,
+		hourOnly = false,
+		hourFormat = 'long',
+		monthFormat = 'default'
+	}: FormatDateOptions = {}
+) {
+	const date = new Date(tmpDate);
+
+	if (isNaN(date.getTime())) {
+		throw new Error('Input is not a valid Date object');
+	}
+
+	if (hourOnly) {
+		return formatHourPart(date, hourFormat);
+	}
+
+	const datePart = new Intl.DateTimeFormat('fr-FR', {
+		year: 'numeric',
+		month: monthFormat === 'literal' ? 'long' : 'numeric',
+		day: 'numeric'
+	}).format(date);
+
+	if (withHour) {
+		return `${datePart} ${formatHourPart(date, hourFormat)}`;
+	}
+
+	return datePart;
+}
+
+export function dateToLocalISO(date: Date): string {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+}
+
+export function parseLocalDate(isoStr: string): Date | null {
+	if (!isValidDate(isoStr)) return null;
+	const [y, mo, d] = isoStr.split('-').map(Number);
+	return new Date(y, mo - 1, d);
+}
+
+export function formatFullFrenchDateTime(date: string | Date): string {
+	const dateStr = typeof date === 'string' ? date : date.toISOString();
+	const datePart = formatDateToFrenchString(dateStr, {
+		monthFormat: 'literal'
+	});
+	const timePart = formatDateToFrenchString(dateStr, {
+		hourOnly: true,
+		hourFormat: 'short'
+	});
+	return `${datePart} à ${timePart}`;
 }
 
 export function getNbPages(count: number, numberPerPage: number) {

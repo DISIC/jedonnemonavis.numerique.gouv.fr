@@ -290,6 +290,7 @@ type PageItemsCounterProps = {
 	additionalClasses?: FrCxArg[];
 	emptyStateMessage?: string;
 	isFeminine?: boolean;
+	fitContent?: boolean;
 };
 
 export const PageItemsCounter = ({
@@ -299,7 +300,8 @@ export const PageItemsCounter = ({
 	totalItemsCount,
 	additionalClasses = [],
 	emptyStateMessage,
-	isFeminine = false
+	isFeminine = false,
+	fitContent = false
 }: PageItemsCounterProps) => {
 	const { cx, classes } = useStyles();
 	const key = `${startItemCount}-${endItemCount}-${totalItemsCount}`;
@@ -328,7 +330,7 @@ export const PageItemsCounter = ({
 				key={key}
 				className={cx(
 					classes.noContent,
-					fr.cx('fr-col-12', 'fr-mt-15v', 'fr-mb-0', 'fr-ml-0')
+					fr.cx('fr-col-12', 'fr-my-30v', 'fr-mb-0', 'fr-ml-0')
 				)}
 				role="alert"
 				aria-live="assertive"
@@ -346,7 +348,7 @@ export const PageItemsCounter = ({
 				key={key}
 				className={fr.cx(
 					...additionalClasses,
-					'fr-col-12',
+					!fitContent && 'fr-col-12',
 					'fr-mb-0',
 					'fr-ml-0'
 				)}
@@ -367,7 +369,12 @@ export const PageItemsCounter = ({
 			aria-live="polite"
 			aria-atomic="true"
 			aria-relevant="additions text"
-			className={fr.cx(...additionalClasses, 'fr-col-12', 'fr-ml-0')}
+			className={fr.cx(
+				...additionalClasses,
+				!fitContent && 'fr-col-12',
+				'fr-ml-0',
+				'fr-mb-0'
+			)}
 		>
 			{getLabel()} de{' '}
 			<span className={cx(classes.boldText)}>{startItemCount}</span> à{' '}

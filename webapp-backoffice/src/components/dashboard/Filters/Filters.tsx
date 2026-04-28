@@ -1,13 +1,18 @@
-import { Filters, useFilters } from '@/src/contexts/FiltersContext';
-import { push } from '@socialgouv/matomo-next';
+import {
+	Filters,
+	initialFilterState,
+	useFilters
+} from '@/src/contexts/FiltersContext';
 import { tss } from 'tss-react/dsfr';
 import { fr } from '@codegouvfr/react-dsfr';
-import { useEffect, useState, useCallback } from 'react';
-import { debounce } from 'lodash';
-import Input from '@codegouvfr/react-dsfr/Input';
+import { useEffect, useMemo } from 'react';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { getDatesByShortCut } from '@/src/utils/tools';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { CustomModalProps } from '@/src/types/custom';
+import { Button as PrismaButton } from '@prisma/client';
+import DateRangePickerButton from './DateRangePickerButton';
+import IntegrationLinksDropdown from './IntegrationLinksDropdown';
 
 const dateShortcuts = [
 	{
@@ -41,11 +46,10 @@ type FiltersProps<T extends FilterSectionKey> = {
 	renderTags?: () => (React.JSX.Element | null)[] | React.JSX.Element | null;
 	form?: FormWithElements;
 	productId?: number;
-};
-
-type FormError = {
-	startDate?: boolean;
-	endDate?: boolean;
+	filterModal?: CustomModalProps;
+	buttons?: PrismaButton[];
+	showNewReviewsOption?: boolean;
+	reviewLogDate?: string;
 };
 
 const GenericFilters = <T extends FilterSectionKey>({
@@ -55,26 +59,76 @@ const GenericFilters = <T extends FilterSectionKey>({
 	topRight,
 	renderTags,
 	form,
-	productId
+	productId,
+	filterModal,
+	buttons,
+	showNewReviewsOption,
+	reviewLogDate
 }: FiltersProps<T>) => {
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters, resetSectionFilters } = useFilters();
 
-	const sectionFilters = filters[filterKey];
 	const sharedFilters = filters['sharedFilters'];
 
-	const [localStartDate, setLocalStartDate] = useState(
-		sharedFilters.currentStartDate
-	);
-	const [localEndDate, setLocalEndDate] = useState(
-		sharedFilters.currentEndDate
-	);
-	const [errors, setErrors] = useState<FormError>({});
+	const getActiveFilterCount = (): number => {
+		if (filterKey === 'productReviews') {
+			const reviewFilters = filters.productReviews.filters;
+			let count = 0;
+			if (reviewFilters.needVerbatim) count++;
+			if (reviewFilters.needOtherDifficulties) count++;
+			if (reviewFilters.needOtherHelp) count++;
+			if (reviewFilters.fields) {
+				count += reviewFilters.fields.reduce(
+					(acc, f) => acc + f.values.length,
+					0
+				);
+			}
+			return count;
+		}
+		return 0;
+	};
 
-	useEffect(() => {
-		setLocalStartDate(sharedFilters.currentStartDate);
-		setLocalEndDate(sharedFilters.currentEndDate);
-	}, [sharedFilters.currentStartDate, sharedFilters.currentEndDate]);
+	const activeFilterCount = getActiveFilterCount();
+
+	const isAnyVisibleFilterActive = useMemo((): boolean => {
+		if (
+			sharedFilters.dateShortcut !==
+			initialFilterState.sharedFilters.dateShortcut
+		)
+			return true;
+		if (showNewReviewsOption && filters.productReviews.displayNew) return true;
+		if (buttons && buttons.length > 0) {
+			if (
+				filterKey === 'productStats' &&
+				filters.productStats.buttonId !== undefined
+			)
+				return true;
+			if (
+				filterKey === 'productReviews' &&
+				filters.productReviews.filters.buttonId?.length > 0
+			)
+				return true;
+		}
+		if (filterModal && filterKey === 'productReviews') {
+			const rf = filters.productReviews.filters;
+			if (rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
+				return true;
+			if (rf.fields?.some(f => f.values.length > 0)) return true;
+		}
+		if (
+			filterKey === 'productActivityLogs' &&
+			filters.productActivityLogs.actionType.length > 0
+		)
+			return true;
+		return false;
+	}, [
+		sharedFilters.dateShortcut,
+		filters,
+		filterKey,
+		showNewReviewsOption,
+		buttons,
+		filterModal
+	]);
 
 	useEffect(() => {
 		if (sharedFilters.dateShortcut) {
@@ -86,9 +140,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 				startDate !== sharedFilters.currentStartDate ||
 				endDate !== sharedFilters.currentEndDate
 			) {
-				setLocalStartDate(startDate);
-				setLocalEndDate(endDate);
-
 				updateFilters({
 					...filters,
 					[filterKey]: {
@@ -105,216 +156,60 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 	}, [sharedFilters.hasChanged, sharedFilters.dateShortcut]);
 
-	const isValidDate = (date: string) => {
-		if (!date) return false;
-		return /^\d{4}-\d{2}-\d{2}$/.test(date);
-	};
-
-	const updateDateFilter = useCallback(
-		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
-			updateFilters({
-				...filters,
-				currentPage: 1,
-				[filterKey]: {
-					...filters[filterKey]
-				},
-				sharedFilters: {
-					...filters['sharedFilters'],
-					[key]: value,
-					hasChanged: true,
-					dateShortcut: undefined
-				}
-			});
-		}, 1000),
-		[updateFilters, filterKey, filters]
-	);
-
-	const handleDateChange =
-		(key: 'currentStartDate' | 'currentEndDate') =>
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const newDate = e.target.value;
-
-			if (key === 'currentStartDate') {
-				setLocalStartDate(newDate);
-			} else {
-				setLocalEndDate(newDate);
-			}
-
-			if (!isValidDate(newDate)) {
-				setErrors(prev => ({
-					...prev,
-					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
-						'Format attendu : JJ/MM/AAAA'
-				}));
-			} else {
-				setErrors(prev => ({
-					...prev,
-					[key === 'currentStartDate' ? 'startDate' : 'endDate']: undefined
-				}));
-				updateDateFilter(key, newDate);
-			}
-		};
-
 	return (
 		<div
 			className={cx(classes.filterContainer, sticky && classes.stickyContainer)}
 		>
 			<div className={cx(fr.cx('fr-mb-1v'), classes.titleContainer)}>
-				<span className={fr.cx('fr-mb-2v', 'fr-h4')}>Filtres</span>
+				<span className={fr.cx('fr-mb-2v', 'fr-h5')}>Filtrer</span>
 				{topRight}
 			</div>
-			<div
-				className={cx(
-					fr.cx('fr-grid-row', 'fr-grid-row--gutters'),
-					classes.dateShortcuts
+
+			<div className={cx(classes.filterButtonsContainer)}>
+				<DateRangePickerButton
+					filterKey={filterKey}
+					showNewReviewsOption={showNewReviewsOption}
+					reviewLogDate={reviewLogDate}
+					form={form}
+					productId={productId}
+				/>
+				{buttons && buttons.length > 0 && (
+					<IntegrationLinksDropdown buttons={buttons} filterKey={filterKey} />
 				)}
-			>
-				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
-					<fieldset id="date-filters" className={fr.cx('fr-fieldset')}>
-						<legend className={fr.cx('fr-label')}>Filtres rapides</legend>
-						<ul>
-							{dateShortcuts.map(ds => (
-								<li key={ds.name}>
-									<input
-										id={`radio-${ds.name}`}
-										type="radio"
-										name={ds.name}
-										checked={sharedFilters.dateShortcut === ds.name}
-										onChange={() => {
-											updateFilters({
-												...filters,
-												currentPage: 1,
-												[filterKey]: {
-													...filters[filterKey]
-												},
-												sharedFilters: {
-													...filters['sharedFilters'],
-													hasChanged: true,
-													dateShortcut: ds.name
-												}
-											});
-											push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
-											window._mtm?.push({
-												event: 'matomo_event',
-												container_type: 'backoffice',
-												service_id: form?.product_id || productId || 0,
-												form_id: form?.id || 0,
-												template_slug: form?.form_template.slug || '',
-												category: 'reviews',
-												action_type: 'filter',
-												action: `${ds.label.split(' ')[0]}_days_filter_apply`,
-												ui_source: 'quick_filter'
-											});
-										}}
-									/>
-									<label
-										className={cx(
-											fr.cx('fr-tag', 'fr-mt-2v'),
-
-											classes.dateShortcutTag,
-											sharedFilters.dateShortcut === ds.name
-												? classes.dateShortcutTagSelected
-												: undefined
-										)}
-										htmlFor={`radio-${ds.name}`}
-										tabIndex={0}
-										onKeyDown={e => {
-											if (e.key === 'Enter' || e.key === ' ') {
-												updateFilters({
-													...filters,
-													currentPage: 1,
-													[filterKey]: {
-														...filters[filterKey]
-													},
-													sharedFilters: {
-														...filters['sharedFilters'],
-														hasChanged: true,
-														dateShortcut: ds.name
-													}
-												});
-												push(['trackEvent', 'Logs', `Filtre-Date-${ds.label}`]);
-											}
-										}}
-									>
-										{ds.label}
-									</label>
-								</li>
-							))}
-						</ul>
-					</fieldset>
-				</div>
-				<div className={fr.cx('fr-col-12', 'fr-col-lg-6')}>
-					<form className={cx(fr.cx('fr-grid-row'), classes.formContainer)}>
-						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
-							<Input
-								label="Date de début"
-								nativeInputProps={{
-									type: 'date',
-									value: localStartDate,
-									onChange: handleDateChange('currentStartDate')
-								}}
-								state={errors.startDate ? 'error' : 'default'}
-								stateRelatedMessage={
-									errors.startDate ? (
-										<span role="alert">{errors.startDate}</span>
-									) : null
-								}
-							/>
-						</div>
-						<div className={fr.cx('fr-col-12', 'fr-col-sm-6', 'fr-mb-2v')}>
-							<Input
-								label="Date de fin"
-								nativeInputProps={{
-									type: 'date',
-									value: localEndDate,
-									onChange: handleDateChange('currentEndDate')
-								}}
-								state={errors.endDate ? 'error' : 'default'}
-								stateRelatedMessage={
-									errors.endDate ? (
-										<span role="alert">{errors.endDate}</span>
-									) : null
-								}
-							/>
-						</div>
-					</form>
-				</div>
-
-				<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>{children}</div>
-
-				{sharedFilters.hasChanged ? (
-					<div
-						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-6'),
-							classes.filterActionContainer
-						)}
+				{filterModal && (
+					<Button
+						priority="tertiary"
+						className={cx(classes.filterButton)}
+						iconId="fr-icon-filter-line"
+						iconPosition="right"
+						type="button"
+						nativeButtonProps={filterModal.buttonProps}
 					>
-						<Button
-							priority="tertiary no outline"
-							iconPosition="right"
-							iconId="ri-refresh-line"
-							onClick={() => {
-								setErrors({});
-								resetSectionFilters(filterKey);
-							}}
-						>
-							Réinitialiser les filtres
-						</Button>
-					</div>
-				) : null}
-				{renderTags && (
-					<div
-						className={fr.cx(
-							'fr-col-12',
-							'fr-col--bottom',
-							'fr-py-0',
-							'fr-mt-2v'
+						Plus de filtres
+						{activeFilterCount > 0 && (
+							<span className={cx(classes.filterCountBadge)}>
+								{activeFilterCount}
+							</span>
 						)}
-					>
-						{renderTags()}
-					</div>
+					</Button>
 				)}
+				{isAnyVisibleFilterActive && (
+					<Button
+						priority="tertiary no outline"
+						iconPosition="right"
+						iconId="ri-refresh-line"
+						size="small"
+						onClick={() => {
+							resetSectionFilters(filterKey);
+						}}
+					>
+						Réinitialiser
+					</Button>
+				)}
+				{renderTags && renderTags()}
 			</div>
+
+			{children && <div>{children}</div>}
 		</div>
 	);
 };
@@ -323,9 +218,7 @@ const useStyles = tss.create({
 	filterContainer: {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: '0.5rem',
-		border: '1px solid #e0e0e0',
-		padding: '1rem'
+		gap: '0.5rem'
 	},
 	stickyContainer: {
 		[fr.breakpoints.up('md')]: {
@@ -339,74 +232,27 @@ const useStyles = tss.create({
 		display: 'flex',
 		justifyContent: 'space-between'
 	},
-	dateShortcuts: {
-		backgroundColor: fr.colors.decisions.background.default.grey.default,
-		padding: `1rem 0`,
-		fieldset: {
-			width: '100%',
-			margin: 0,
-			ul: {
-				listStyle: 'none',
-				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
-				paddingLeft: 0,
-				width: '100%',
-				li: {
-					display: 'inline',
-					marginRight: fr.spacing('2v'),
-					input: {
-						display: 'none'
-					}
-				}
-			}
-		}
-	},
-	dateShortcutTag: {
-		...fr.typography[17].style,
-		backgroundColor:
-			fr.colors.decisions.background.actionLow.blueFrance.default,
-		color: fr.colors.decisions.background.actionHigh.blueFrance.default,
-		textTransform: 'initial',
-		'&:hover': {
-			backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.hover
-		}
-	},
-	dateShortcutTagSelected: {
-		backgroundColor: fr.colors.decisions.background.actionLow.blueFrance.hover
-	},
-	applyContainer: {
-		paddingTop: fr.spacing('8v'),
-		".fr-btn--icon-left[class*=' ri-']::before": {
-			'--icon-size': '1.5rem',
-			marginRight: 0
-		}
-	},
-	formContainer: {
-		marginLeft: '-0.4rem',
-		marginRight: '-0.4rem',
-		'& > div': {
-			paddingLeft: '0.4rem',
-			paddingRight: '0.4rem'
-		}
-	},
-	filterActionContainer: {
-		display: 'flex',
-		justifyContent: 'flex-end',
-		alignContent: 'flex-end',
-		gap: '1rem'
-	},
-	tagFilter: {
-		marginRight: '0.5rem',
-		marginBottom: '0.5rem'
-	},
-	tagContainer: {
+	filterButtonsContainer: {
 		display: 'flex',
 		flexWrap: 'wrap',
-		width: '100%',
-		gap: '0.5rem',
-		padding: 0,
-		margin: 0,
-		listStyle: 'none',
-		justifyContent: 'flex-start'
+		gap: fr.spacing('4v'),
+		alignItems: 'center'
+	},
+	filterButton: {
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
+	},
+	filterCountBadge: {
+		display: 'inline-flex',
+		alignItems: 'center',
+		justifyContent: 'center',
+		minWidth: '1.5rem',
+		height: '1.5rem',
+		borderRadius: '5rem',
+		backgroundColor: fr.colors.decisions.background.contrast.grey.default,
+		color: fr.colors.decisions.text.label.grey.default,
+		fontSize: '0.75rem',
+		marginLeft: fr.spacing('1v'),
+		padding: `0 ${fr.spacing('1v')}`
 	}
 });
 
