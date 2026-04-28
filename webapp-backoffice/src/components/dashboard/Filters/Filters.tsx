@@ -234,22 +234,24 @@ const GenericFilters = <T extends FilterSectionKey>({
 					</>
 				)}
 
-				<div className={cx(classes.tagsContainer, fr.cx('fr-col-12'))}>
-					{renderTags && renderTags()}
-					{isAnyVisibleFilterActive && (
-						<Button
-							priority="tertiary no outline"
-							iconPosition="right"
-							iconId="ri-refresh-line"
-							size="small"
-							onClick={() => {
-								resetSectionFilters(filterKey);
-							}}
-						>
-							Réinitialiser les filtres
-						</Button>
-					)}
-				</div>
+				{isAnyVisibleFilterActive && (
+					<div className={cx(classes.tagsContainer, fr.cx('fr-col-12'))}>
+						{renderTags && renderTags()}
+						{isAnyVisibleFilterActive && (
+							<Button
+								priority="tertiary no outline"
+								iconPosition="right"
+								iconId="ri-refresh-line"
+								size="small"
+								onClick={() => {
+									resetSectionFilters(filterKey);
+								}}
+							>
+								Réinitialiser les filtres
+							</Button>
+						)}
+					</div>
+				)}
 			</div>
 
 			{children && <div>{children}</div>}
