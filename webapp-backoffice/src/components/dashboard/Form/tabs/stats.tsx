@@ -121,7 +121,7 @@ const StatsTab = ({
 
 	useEffect(() => {
 		scopeToForm(form.id);
-	}, [form.id]);
+	}, [form.id, scopeToForm]);
 
 	const [oldSectionExpanded, setOldSectionExpanded] = useState(false);
 

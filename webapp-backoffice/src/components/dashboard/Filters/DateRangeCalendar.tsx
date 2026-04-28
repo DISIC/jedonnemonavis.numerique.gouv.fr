@@ -1,10 +1,11 @@
+import { dateToLocalISO } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { fr as frLocale } from 'date-fns/locale/fr';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { addMonths, subMonths, isBefore, isAfter, isSameDay } from 'date-fns';
 
@@ -14,13 +15,6 @@ interface DateRangeCalendarProps {
 	onRangeChange: (start: Date | null, end: Date | null) => void;
 	onApply: (start: string, end: string) => void;
 	onClear: () => void;
-}
-
-function formatToISO(date: Date): string {
-	const y = date.getFullYear();
-	const m = String(date.getMonth() + 1).padStart(2, '0');
-	const d = String(date.getDate()).padStart(2, '0');
-	return `${y}-${m}-${d}`;
 }
 
 const DateRangeCalendar = ({
@@ -53,9 +47,9 @@ const DateRangeCalendar = ({
 
 	const handleApply = () => {
 		if (rangeStart && rangeEnd) {
-			onApply(formatToISO(rangeStart), formatToISO(rangeEnd));
+			onApply(dateToLocalISO(rangeStart), dateToLocalISO(rangeEnd));
 		} else if (rangeStart) {
-			onApply(formatToISO(rangeStart), formatToISO(rangeStart));
+			onApply(dateToLocalISO(rangeStart), dateToLocalISO(rangeStart));
 		}
 	};
 
@@ -64,47 +58,47 @@ const DateRangeCalendar = ({
 		onClear();
 	};
 
-	const isInRange = (day: Date): boolean => {
-		if (!rangeStart || !rangeEnd) return false;
-		return isAfter(day, rangeStart) && isBefore(day, rangeEnd);
-	};
+	const slotProps = useMemo(
+		() => ({
+			day: (ownerState: { day: Date }) => {
+				const { day } = ownerState;
+				const inRange = !!(
+					rangeStart &&
+					rangeEnd &&
+					isAfter(day, rangeStart) &&
+					isBefore(day, rangeEnd)
+				);
+				const edge = !!(
+					(rangeStart && isSameDay(day, rangeStart)) ||
+					(rangeEnd && isSameDay(day, rangeEnd))
+				);
 
-	const isEdge = (day: Date): boolean => {
-		if (rangeStart && isSameDay(day, rangeStart)) return true;
-		if (rangeEnd && isSameDay(day, rangeEnd)) return true;
-		return false;
-	};
-
-	const getSlotProps = () => ({
-		day: (ownerState: { day: Date }) => {
-			const { day } = ownerState;
-			const inRange = isInRange(day);
-			const edge = isEdge(day);
-
-			return {
-				sx: {
-					fontSize: '0.75rem',
-					fontWeight: 700,
-					fontFamily: 'Marianne, sans-serif',
-					borderRadius: 0,
-					...(inRange && {
-						backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.default} !important`,
-						color: `${fr.colors.decisions.background.actionHigh.blueFrance.default} !important`,
-						'&:hover': {
-							backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.hover} !important`
-						}
-					}),
-					...(edge && {
-						backgroundColor: `${fr.colors.decisions.background.actionHigh.blueFrance.default} !important`,
-						color: 'white !important',
-						'&:hover': {
-							backgroundColor: `${fr.colors.decisions.background.actionHigh.blueFrance.hover} !important`
-						}
-					})
-				}
-			};
-		}
-	});
+				return {
+					sx: {
+						fontSize: '0.75rem',
+						fontWeight: 700,
+						fontFamily: 'Marianne, sans-serif',
+						borderRadius: 0,
+						...(inRange && {
+							backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.default} !important`,
+							color: `${fr.colors.decisions.background.actionHigh.blueFrance.default} !important`,
+							'&:hover': {
+								backgroundColor: `${fr.colors.decisions.background.actionLow.blueFrance.hover} !important`
+							}
+						}),
+						...(edge && {
+							backgroundColor: `${fr.colors.decisions.background.actionHigh.blueFrance.default} !important`,
+							color: 'white !important',
+							'&:hover': {
+								backgroundColor: `${fr.colors.decisions.background.actionHigh.blueFrance.hover} !important`
+							}
+						})
+					}
+				};
+			}
+		}),
+		[rangeStart, rangeEnd]
+	);
 
 	const calendarSx = {
 		width: '100%',
@@ -178,7 +172,7 @@ const DateRangeCalendar = ({
 							showDaysOutsideCurrentMonth
 							sx={calendarSx}
 							views={['day']}
-							slotProps={getSlotProps()}
+							slotProps={slotProps}
 						/>
 					</div>
 					<div className={cx(classes.calendarSection)}>
@@ -215,7 +209,7 @@ const DateRangeCalendar = ({
 							showDaysOutsideCurrentMonth
 							sx={calendarSx}
 							views={['day']}
-							slotProps={getSlotProps()}
+							slotProps={slotProps}
 						/>
 					</div>
 				</div>

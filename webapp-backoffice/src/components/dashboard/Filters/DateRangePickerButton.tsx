@@ -1,5 +1,6 @@
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import {
+	dateToLocalISO,
 	formatDateToFrenchString,
 	getDatesByShortCut
 } from '@/src/utils/tools';
@@ -9,7 +10,7 @@ import Input from '@codegouvfr/react-dsfr/Input';
 import { Popover } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
 import { debounce } from 'lodash';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { DateShortcutName, FilterSectionKey } from './Filters';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
@@ -103,34 +104,39 @@ const DateRangePickerButton = ({
 		return /^\d{4}-\d{2}-\d{2}$/.test(date);
 	};
 
-	const updateDateFilter = useCallback(
+	// Keep latest values accessible in the stable debounced closure.
+	const filtersRef = useRef(filters);
+	const updateFiltersRef = useRef(updateFilters);
+	useEffect(() => {
+		filtersRef.current = filters;
+	});
+	useEffect(() => {
+		updateFiltersRef.current = updateFilters;
+	});
+
+	const debouncedUpdateDateFilter = useRef(
 		debounce((key: 'currentStartDate' | 'currentEndDate', value: string) => {
-			const nextFilters: typeof filters = {
-				...filters,
+			const f = filtersRef.current;
+			const nextFilters: typeof f = {
+				...f,
 				currentPage: 1,
-				[filterKey]: {
-					...filters[filterKey]
-				},
-				productReviews: {
-					...filters.productReviews,
-					displayNew: false
-				},
+				[filterKey]: { ...f[filterKey] },
+				productReviews: { ...f.productReviews, displayNew: false },
 				sharedFilters: {
-					...filters.sharedFilters,
+					...f.sharedFilters,
 					[key]: value,
 					dateShortcut: undefined
 				}
 			};
-			updateFilters({
+			updateFiltersRef.current({
 				...nextFilters,
 				sharedFilters: {
 					...nextFilters.sharedFilters,
 					hasChanged: hasAnyFilterChanged(nextFilters)
 				}
 			});
-		}, 1000),
-		[updateFilters, filterKey, filters]
-	);
+		}, 1000)
+	).current;
 
 	const handleDateChange =
 		(key: 'currentStartDate' | 'currentEndDate') =>
@@ -147,14 +153,14 @@ const DateRangePickerButton = ({
 				setErrors(prev => ({
 					...prev,
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
-						'Format attendu : JJ/MM/AAAA'
+						'Date invalide'
 				}));
 			} else {
 				setErrors(prev => ({
 					...prev,
 					[key === 'currentStartDate' ? 'startDate' : 'endDate']: undefined
 				}));
-				updateDateFilter(key, newDate);
+				debouncedUpdateDateFilter(key, newDate);
 			}
 		};
 
@@ -206,9 +212,9 @@ const DateRangePickerButton = ({
 		setCalendarRangeStart(null);
 		setCalendarRangeEnd(null);
 		const newValue = !filters.productReviews.displayNew;
-		const today = new Date().toISOString().split('T')[0];
+		const today = dateToLocalISO(new Date());
 		const startDate = reviewLogDate
-			? new Date(reviewLogDate).toISOString().split('T')[0]
+			? dateToLocalISO(new Date(reviewLogDate))
 			: today;
 
 		const nextFilters: typeof filters = {
@@ -265,7 +271,7 @@ const DateRangePickerButton = ({
 			showNewReviewsOption &&
 			reviewLogDate
 		) {
-			const today = new Date().toISOString().split('T')[0];
+			const today = dateToLocalISO(new Date());
 			return `${formatDateToFrenchString(reviewLogDate, {
 				monthFormat: 'literal'
 			})} - ${formatDateToFrenchString(today, {
@@ -459,9 +465,6 @@ const DateRangePickerButton = ({
 							setAnchorEl(null);
 						}}
 						onClear={() => {
-							setCalendarRangeStart(null);
-							setCalendarRangeEnd(null);
-
 							const nextFilters: typeof filters = {
 								...filters,
 								currentPage: 1,
@@ -497,7 +500,7 @@ const DateRangePickerButton = ({
 
 const useStyles = tss.create({
 	filterButton: {
-		border: '1px solid #DDDDDD'
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},
 	popoverPaper: {
 		marginTop: fr.spacing('1v'),

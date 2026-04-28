@@ -101,7 +101,7 @@ const ReviewsTab = (props: Props) => {
 
 	useEffect(() => {
 		scopeToForm(form.id);
-	}, [form.id]);
+	}, [form.id, scopeToForm]);
 
 	const [initialDateState, setInitialDateState] = React.useState({
 		startDate: filters.sharedFilters.currentStartDate,

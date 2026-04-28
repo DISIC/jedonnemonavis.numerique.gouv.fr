@@ -4,7 +4,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { Popover } from '@mui/material';
 import { Button as PrismaButton } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { FilterSectionKey } from './Filters';
 
@@ -12,6 +12,8 @@ interface IntegrationLinksDropdownProps {
 	buttons: PrismaButton[];
 	filterKey: FilterSectionKey;
 }
+
+const MENU_ID = 'source-select-menu';
 
 const IntegrationLinksDropdown = ({
 	buttons,
@@ -21,11 +23,14 @@ const IntegrationLinksDropdown = ({
 	const { filters, updateFilters } = useFilters();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
+	const triggerRef = useRef<HTMLButtonElement | null>(null);
+	const menuRef = useRef<HTMLUListElement | null>(null);
+
+	// All options: "all" first, then each button.
+	const allOptions = [{ id: undefined as number | undefined, title: "Tous les liens d'intégration" }, ...buttons.map(b => ({ id: b.id as number | undefined, title: b.title }))];
 
 	const getSelectedButtonId = (): number | undefined => {
-		if (filterKey === 'productStats') {
-			return filters.productStats.buttonId;
-		}
+		if (filterKey === 'productStats') return filters.productStats.buttonId;
 		if (filterKey === 'productReviews') {
 			const ids = filters.productReviews.filters.buttonId;
 			return ids.length === 1 ? parseInt(ids[0]) : undefined;
@@ -36,11 +41,20 @@ const IntegrationLinksDropdown = ({
 	const selectedButtonId = getSelectedButtonId();
 
 	const getLabel = () => {
-		if (selectedButtonId) {
+		if (selectedButtonId !== undefined) {
 			const found = buttons.find(b => b.id === selectedButtonId);
 			if (found) return found.title;
 		}
 		return "Tous les liens d'intégration";
+	};
+
+	const handleOpen = (e: React.MouseEvent<HTMLElement>) => {
+		setAnchorEl(e.currentTarget);
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+		triggerRef.current?.focus();
 	};
 
 	const handleSelect = (buttonId: number | undefined) => {
@@ -49,10 +63,7 @@ const IntegrationLinksDropdown = ({
 		if (filterKey === 'productStats') {
 			nextFilters = {
 				...filters,
-				productStats: {
-					...filters.productStats,
-					buttonId: buttonId
-				}
+				productStats: { ...filters.productStats, buttonId }
 			};
 			push(['trackEvent', 'Product - Stats', 'selection-source']);
 		} else if (filterKey === 'productReviews') {
@@ -79,7 +90,44 @@ const IntegrationLinksDropdown = ({
 			});
 		}
 
-		setAnchorEl(null);
+		handleClose();
+	};
+
+	const focusItemAt = (index: number) => {
+		const items = menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]');
+		items?.[index]?.focus();
+	};
+
+	const handleMenuKeyDown = (e: React.KeyboardEvent) => {
+		const items = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+		const current = document.activeElement;
+		const currentIndex = items.indexOf(current as HTMLElement);
+
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				focusItemAt(currentIndex < items.length - 1 ? currentIndex + 1 : 0);
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				focusItemAt(currentIndex > 0 ? currentIndex - 1 : items.length - 1);
+				break;
+			case 'Home':
+				e.preventDefault();
+				focusItemAt(0);
+				break;
+			case 'End':
+				e.preventDefault();
+				focusItemAt(items.length - 1);
+				break;
+			case 'Escape':
+				e.preventDefault();
+				handleClose();
+				break;
+			case 'Tab':
+				handleClose();
+				break;
+		}
 	};
 
 	return (
@@ -91,11 +139,11 @@ const IntegrationLinksDropdown = ({
 				iconPosition="right"
 				type="button"
 				nativeButtonProps={{
-					onClick: (e: React.MouseEvent<HTMLElement>) => {
-						setAnchorEl(e.currentTarget);
-					},
+					ref: triggerRef,
+					onClick: handleOpen,
+					'aria-haspopup': 'menu',
 					'aria-expanded': open ? 'true' : 'false',
-					'aria-controls': 'source-select-menu'
+					'aria-controls': open ? MENU_ID : undefined
 				}}
 			>
 				{getLabel()}
@@ -103,75 +151,59 @@ const IntegrationLinksDropdown = ({
 			<Popover
 				open={open}
 				anchorEl={anchorEl}
-				onClose={() => setAnchorEl(null)}
-				disablePortal
+				onClose={handleClose}
 				disableScrollLock
-				anchorOrigin={{
-					vertical: 'bottom',
-					horizontal: 'left'
+				TransitionProps={{
+					onEntered: () => {
+						const selected = menuRef.current?.querySelector<HTMLElement>('[aria-checked="true"]');
+						const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+						(selected ?? first)?.focus();
+					}
 				}}
-				transformOrigin={{
-					vertical: 'top',
-					horizontal: 'left'
-				}}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'left' }}
 				slotProps={{
 					paper: {
-						className: cx(classes.popoverPaper),
-						id: 'source-select-menu'
+						className: cx(classes.popoverPaper)
 					}
 				}}
 			>
-				<ul className={cx(classes.optionsList)}>
-					<li>
-						<button
-							type="button"
-							className={cx(
-								classes.optionItem,
-								selectedButtonId === undefined
-									? classes.optionItemSelected
-									: undefined
-							)}
-							onClick={() => handleSelect(undefined)}
-						>
-							<span
-								className={cx(
-									classes.optionItemLabel,
-									selectedButtonId === undefined
-										? classes.optionItemLabelSelected
-										: undefined
-								)}
-							>
-								Tous les liens d'intégration
-							</span>
-						</button>
-						<hr />
-					</li>
-					{buttons.map((button, index) => (
-						<li key={button.id}>
-							<button
-								type="button"
-								className={cx(
-									classes.optionItem,
-									selectedButtonId === button.id
-										? classes.optionItemSelected
-										: undefined
-								)}
-								onClick={() => handleSelect(button.id)}
-							>
-								<span
+				<ul
+					ref={menuRef}
+					id={MENU_ID}
+					role="menu"
+					aria-label="Sélectionner une source"
+					className={cx(classes.optionsList)}
+					onKeyDown={handleMenuKeyDown}
+				>
+					{allOptions.map((option, index) => {
+						const isSelected = option.id === selectedButtonId;
+						const isLast = index === allOptions.length - 1;
+						return (
+							<li key={option.id ?? 'all'} role="none">
+								<button
+									type="button"
+									role="menuitem"
+									aria-checked={isSelected}
 									className={cx(
-										classes.optionItemLabel,
-										selectedButtonId === button.id
-											? classes.optionItemLabelSelected
-											: undefined
+										classes.optionItem,
+										isSelected ? classes.optionItemSelected : undefined
 									)}
+									onClick={() => handleSelect(option.id)}
 								>
-									{button.title}
-								</span>
-							</button>
-							{index < buttons.length - 1 && <hr />}
-						</li>
-					))}
+									<span
+										className={cx(
+											classes.optionItemLabel,
+											isSelected ? classes.optionItemLabelSelected : undefined
+										)}
+									>
+										{option.title}
+									</span>
+								</button>
+								{!isLast && <hr />}
+							</li>
+						);
+					})}
 				</ul>
 			</Popover>
 		</>
@@ -180,19 +212,7 @@ const IntegrationLinksDropdown = ({
 
 const useStyles = tss.create({
 	filterButton: {
-		display: 'inline-flex',
-		flexDirection: 'row',
-		alignItems: 'center',
-		width: 'fit-content',
-		fontWeight: 500,
-		fontSize: '1rem',
-		lineHeight: '1.5rem',
-		minHeight: '2.5rem',
-		padding: '0.5rem 1rem',
-		backgroundColor: 'transparent',
-		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
-		boxShadow: `inset 0 0 0 1px #DDDDDD`,
-		border: '1px solid #DDDDDD'
+		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
 	},
 	popoverPaper: {
 		marginTop: fr.spacing('1v'),
@@ -222,6 +242,10 @@ const useStyles = tss.create({
 		color: fr.colors.decisions.text.default.grey.default,
 		'&:hover': {
 			backgroundColor: fr.colors.decisions.background.default.grey.hover
+		},
+		'&:focus-visible': {
+			outline: `2px solid ${fr.colors.decisions.border.active.blueFrance.default}`,
+			outlineOffset: -2
 		}
 	},
 	optionItemSelected: {

@@ -6,7 +6,6 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
-import { replace } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 
@@ -149,7 +148,7 @@ const ReviewFiltersModal = (props: Props) => {
 		options.map(option => {
 			const optionValue = option.value || option.label || '';
 			const checked = isValueSelected(fieldCode, optionValue);
-			const cleanedLabel = replace(option.label || '', /\*/g, '');
+			const cleanedLabel = (option.label || '').replace(/\*/g, '');
 			return {
 				label: cleanedLabel || optionValue,
 				nativeInputProps: {
