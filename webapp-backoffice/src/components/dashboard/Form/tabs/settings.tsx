@@ -7,9 +7,9 @@ import {
 import { trpc } from '@/src/utils/trpc';
 import { fr, FrIconClassName, RiIconClassName } from '@codegouvfr/react-dsfr';
 import Alert from '@codegouvfr/react-dsfr/Alert';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -57,6 +57,18 @@ const SettingsTab = ({
 	const [isCopied, setIsCopied] = useState(false);
 
 	const deleteButton = trpc.button.delete.useMutation();
+
+	const { data: meData } = trpc.user.me.useQuery({});
+	const currentUser = meData?.data;
+
+	const subscriptionQuery = trpc.formAlert.getSubscription.useQuery({
+		form_id: form.id
+	});
+	const isSubscribed = subscriptionQuery.data?.data.enabled ?? false;
+
+	const setSubscription = trpc.formAlert.setSubscription.useMutation({
+		onSuccess: () => subscriptionQuery.refetch()
+	});
 
 	const isDisabled = form.product.isTop250 || !!form.isDeleted;
 
@@ -112,7 +124,7 @@ const SettingsTab = ({
 				onDelete={deleteAllButtons}
 			/>
 
-			<div className={fr.cx('fr-col-12', 'fr-mb-7v')}>
+			<div className={fr.cx('fr-col-12', 'fr-mb-10v')}>
 				<span className={fr.cx('fr-text--bold')} style={{ userSelect: 'none' }}>
 					Identifiant de formulaire
 				</span>
@@ -133,8 +145,8 @@ const SettingsTab = ({
 				</ButtonDSFR>
 			</div>
 
-			<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
-				<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
+			{/* <div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
+				<h3 className={fr.cx('fr-mb-6v', 'fr-h4')}>Gérer le formulaire</h3>
 			</div>
 
 			<div className={cx(classes.container, fr.cx('fr-col-12', 'fr-p-6v'))}>
@@ -175,43 +187,88 @@ const SettingsTab = ({
 						</ButtonDSFR>
 					</div>
 				</div>
-			</div>
+			</div> */}
 			{!form.isDeleted && (
-				<div className={fr.cx('fr-mt-3w', 'fr-col-12', 'fr-card', 'fr-p-6v')}>
+				<>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-6v')}>
+						<h3 className={fr.cx('fr-mb-0', 'fr-h4')}>
+							Configurer des alertes
+						</h3>
+					</div>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
-						<div className="fr-col-8">
-							<span className={classes.containerTitle}>
-								Fermer le formulaire
-							</span>
-							<p className={fr.cx('fr-mb-0', 'fr-mt-2v')}>
-								Le formulaire n'enregistrera plus de nouvelles réponses. Cette
-								action est irréversible.
+						<div className={fr.cx('fr-col-12', 'fr-mb-10v')}>
+							<p className={fr.cx('fr-mb-2v')}>
+								<strong>
+									Définissez les types de réponse qui ont besoin d’une attention
+									particulière
+								</strong>{' '}
+								et soyez averti par email lorsqu’ils sont déposés. Vous pouvez
+								également activer ou désactiver les alertes de tous vos
+								formulaires et services numériques depuis le menu Notifications
+								de votre compte.
 							</p>
-						</div>
-						<div
-							className={fr.cx('fr-col-4')}
-							style={{ display: 'flex', justifyContent: 'end' }}
-						>
-							<ButtonDSFR
-								priority="tertiary"
-								iconId="fr-icon-delete-line"
-								style={{
-									color: isDisabled
-										? undefined
-										: fr.colors.decisions.text.default.error.default
-								}}
-								className={fr.cx('fr-ml-auto')}
-								iconPosition="right"
-								disabled={isDisabled}
-								onClick={() => {
-									delete_form_modal.open();
-								}}
+							<span
+								className={classes.previewEmailButton}
+								role="button"
+								onClick={() => {}}
 							>
-								Fermer le formulaire
-							</ButtonDSFR>
+								Voir un exemple de mail d’alerte
+							</span>
+						</div>
+
+						<ToggleSwitch
+							label="Activer les alertes sur le formulaire"
+							inputTitle={`Alertes pour le formulaire ${form.title || ''}`}
+							showCheckedHint={false}
+							helperText={`Les emails d’alerte seront envoyées à l’email ${currentUser?.email}`}
+							disabled={subscriptionQuery.isLoading}
+							checked={isSubscribed}
+							onChange={checked =>
+								setSubscription.mutate({
+									form_id: form.id,
+									enabled: checked
+								})
+							}
+							className={fr.cx('fr-mb-12v')}
+						/>
+					</div>
+					<hr className={fr.cx('fr-col-12', 'fr-pb-12v')} />
+					<div className={fr.cx('fr-col-12', 'fr-col-md-8', 'fr-mb-6v')}>
+						<h3 className={fr.cx('fr-mb-0', 'fr-h4')}>Fermer le formulaire</h3>
+					</div>
+					<div className={fr.cx('fr-col-12', 'fr-card', 'fr-p-6v')}>
+						<div className={fr.cx('fr-grid-row', 'fr-grid-row--middle')}>
+							<div className="fr-col-8">
+								<p className={fr.cx('fr-mb-0')}>
+									Le formulaire n'enregistrera plus de nouvelles réponses. Cette
+									action est irréversible.
+								</p>
+							</div>
+							<div
+								className={fr.cx('fr-col-4')}
+								style={{ display: 'flex', justifyContent: 'end' }}
+							>
+								<ButtonDSFR
+									priority="tertiary"
+									iconId="fr-icon-delete-line"
+									style={{
+										color: isDisabled
+											? undefined
+											: fr.colors.decisions.text.default.error.default
+									}}
+									className={fr.cx('fr-ml-auto')}
+									iconPosition="right"
+									disabled={isDisabled}
+									onClick={() => {
+										delete_form_modal.open();
+									}}
+								>
+									Fermer le formulaire
+								</ButtonDSFR>
+							</div>
 						</div>
 					</div>
-				</div>
+				</>
 			)}
 		</div>
 	);
@@ -276,6 +333,23 @@ const useStyles = tss.withName(SettingsTab.name).create({
 		color: fr.colors.decisions.background.flat.blueFrance.default,
 		'::before': {
 			'--icon-size': fr.spacing('7v')
+		}
+	},
+	previewEmailButton: {
+		textWrap: 'nowrap',
+		fontSize: '0.875rem',
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
+		backgroundSize: '100% 1px',
+		backgroundPosition: '0 100%',
+		backgroundRepeat: 'no-repeat',
+		'&:hover': {
+			cursor: 'pointer',
+			backgroundSize: '100% 2.25px'
+		},
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			justifyContent: 'center'
 		}
 	},
 	containerTitle: {

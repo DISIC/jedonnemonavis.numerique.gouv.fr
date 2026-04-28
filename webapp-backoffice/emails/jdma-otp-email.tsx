@@ -1,4 +1,4 @@
-import { Link, Text } from '@react-email/components';
+import { Link, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaOtpEmailProps } from './interface';

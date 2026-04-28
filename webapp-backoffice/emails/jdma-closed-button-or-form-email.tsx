@@ -1,4 +1,4 @@
-import { Column, Img, Link, Row, Section, Text } from '@react-email/components';
+import { Column, Img, Link, Row, Section, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaClosedButtonOrFormEmailProps } from './interface';
@@ -24,7 +24,9 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`Fermeture ${buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"} du service « ${product.title} »`}
+			preview={`Fermeture ${
+				buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"
+			} du service « ${product.title} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>

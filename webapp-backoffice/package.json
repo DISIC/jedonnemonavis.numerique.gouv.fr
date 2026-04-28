@@ -6,6 +6,7 @@
 		"dev": "next dev",
 		"build": "next build",
 		"start": "next start",
+		"email:dev": "email dev",
 		"lint": "prettier --check .",
 		"predev": "only-include-used-icons",
 		"prebuild": "only-include-used-icons",
@@ -17,7 +18,9 @@
 		"db:reset:silent": "npx prisma migrate reset --force --skip-generate --skip-seed | awk '/Applying migration/{c++; next} /The following migration/ { next } /migrations\\// { next } /[└├│]─/ { next } {print} END {print \"Applied \" c \" migrations\"\n\n}'",
 		"test": "npx cypress run --browser chrome --headed",
 		"test:reset": "npm run db:reset:silent && npx prisma db seed && npx cypress run --browser chrome --headed",
-		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts"
+		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts",
+		"worker:dev": "tsx watch src/workers/run.ts",
+		"worker:start": "tsx src/workers/run.ts"
 	},
 	"husky": {
 		"hooks": {
@@ -53,6 +56,7 @@
 		"@types/react-dom": "18.2.7",
 		"@types/swagger-ui-react": "4.18.3",
 		"bcrypt": "5.1.1",
+		"bullmq": "^5.73.1",
 		"csv-writer": "1.6.0",
 		"date-fns": "4.1.0",
 		"date-fns-tz": "3.2.0",
@@ -61,6 +65,7 @@
 		"eslint": "8.48.0",
 		"eslint-config-next": "13.5.5",
 		"gray-matter": "4.0.3",
+		"ioredis": "^5.10.1",
 		"jose": "^6.2.2",
 		"jsonwebtoken": "9.0.2",
 		"lodash": "4.17.21",
@@ -74,6 +79,7 @@
 		"react-dnd": "16.0.1",
 		"react-dnd-html5-backend": "16.0.1",
 		"react-dom": "18.2.0",
+		"react-email": "6.0.0",
 		"react-hook-form": "7.47.0",
 		"recharts": "2.12.7",
 		"remark": "15.0.1",
@@ -112,6 +118,7 @@
 		"@babel/preset-typescript": "7.22.15",
 		"@lhci/cli": "0.12.0",
 		"@lhci/server": "0.12.0",
+		"@react-email/ui": "6.0.0",
 		"@types/escape-html": "1.0.4",
 		"@types/lodash": "4.17.15",
 		"@types/react-beautiful-dnd": "13.1.8",
@@ -123,6 +130,7 @@
 		"husky": "8.0.3",
 		"prettier": "3.0.3",
 		"prisma": "5.14.0",
-		"ts-node": "10.9.1"
+		"ts-node": "10.9.1",
+		"tsx": "^4.21.0"
 	}
 }

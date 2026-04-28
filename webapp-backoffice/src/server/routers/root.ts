@@ -18,6 +18,7 @@ import { reviewCustomRouter } from './reviewCustom';
 import { reviewViewLogRouter } from './reviewViewLog';
 import { formRouter } from './form';
 import { formConfigRouter } from './formConfig';
+import { formAlertRouter } from './formAlert';
 import { userDetailsRouter } from './userDetails';
 
 export const appRouter = router({
@@ -40,7 +41,8 @@ export const appRouter = router({
 	reviewCustom: reviewCustomRouter,
 	reviewViewLog: reviewViewLogRouter,
 	form: formRouter,
-	formConfig: formConfigRouter
+	formConfig: formConfigRouter,
+	formAlert: formAlertRouter
 });
 
 export type AppRouter = typeof appRouter;

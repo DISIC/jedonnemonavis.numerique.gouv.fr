@@ -1,4 +1,4 @@
-import { Column, Link, Row, Section, Text } from '@react-email/components';
+import { Column, Link, Row, Section, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaNotificationsEmailProps } from './interface';
@@ -44,9 +44,13 @@ export const JdmaNotificationsEmail = ({
 			case 'daily':
 				return `en date du ${formatDate(startDate)}`;
 			case 'weekly':
-				return `dans les 7 derniers jours (du ${formatDate(startDate)} au ${formatDate(endDate)})`;
+				return `dans les 7 derniers jours (du ${formatDate(
+					startDate
+				)} au ${formatDate(endDate)})`;
 			case 'monthly':
-				return `dans le dernier mois calendaire (du ${formatDate(startDate)} au ${formatDate(endDate)})`;
+				return `dans le dernier mois calendaire (du ${formatDate(
+					startDate
+				)} au ${formatDate(endDate)})`;
 			default:
 				return `en date du ${formatDate(startDate)}`;
 		}
@@ -54,7 +58,9 @@ export const JdmaNotificationsEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`${formatNumber(totalNbReviews)} ${totalNbReviews === 1 ? 'nouvelle réponse' : 'nouvelles réponses'} sur vos services`}
+			preview={`${formatNumber(totalNbReviews)} ${
+				totalNbReviews === 1 ? 'nouvelle réponse' : 'nouvelles réponses'
+			} sur vos services`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
