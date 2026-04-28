@@ -73,3 +73,14 @@ export interface JdmaUserRequestRefusedEmailProps {
 	message?: string;
 	baseUrl?: string;
 }
+
+export interface JdmaExportReadyEmailProps {
+	productName: string;
+	downloadLink: string;
+	baseUrl?: string;
+}
+
+export interface JdmaExportFailedEmailProps {
+	productName: string;
+	baseUrl?: string;
+}

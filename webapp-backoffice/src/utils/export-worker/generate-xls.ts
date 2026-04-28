@@ -1,0 +1,108 @@
+import ExcelJS from '@mui/x-internal-exceljs-fork';
+import type { ReviewRow, TemplateColumn } from './generate-csv';
+
+function formatReviewContent(content: string): string {
+	if (content.includes(' / ')) {
+		return '- ' + content.replace(/ ?\/ ?([a-zA-ZÀ-ÿ])/g, '\n- $1');
+	}
+	return content;
+}
+
+function estimateLineCount(cellText: string, wrapLength = 30): number {
+	const lines = cellText.split('\n');
+	return lines.reduce((sum, line) => sum + Math.floor(line.length / wrapLength) + 1, 0);
+}
+
+const COL_REVIEW_DATE = 2;
+const FIXED_COLS = 2;
+
+function fillWorksheet(
+	worksheet: ExcelJS.Worksheet,
+	reviews: ReviewRow[],
+	columns: TemplateColumn[]
+): void {
+	const headers = [
+		'Review ID',
+		'Review Created At',
+		...columns.map(c => c.label)
+	];
+
+	// Track max content width per column in a single pass
+	const colWidths = headers.map(h => h.length + 2);
+
+	const headerRow = worksheet.addRow(headers);
+	headerRow.eachCell(cell => {
+		cell.font = { bold: true, size: 12 };
+		cell.fill = {
+			type: 'pattern',
+			pattern: 'solid',
+			fgColor: { argb: 'FFD4D3D3' }
+		};
+		cell.border = {
+			top: { style: 'thin' },
+			left: { style: 'thin' },
+			bottom: { style: 'thin' },
+			right: { style: 'thin' }
+		};
+	});
+
+	for (const review of reviews) {
+		const rowValues: (string | number | Date | null)[] = [
+			review.review_id,
+			review.review_created_at,
+			...columns.map(col => formatReviewContent(review.answers[col.code] ?? ''))
+		];
+
+		const dataRow = worksheet.addRow(rowValues);
+		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'yyyy-mm-dd hh:mm:ss';
+
+		let maxLines = 1;
+		dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+			cell.border = {
+				top: { style: 'thin' },
+				left: { style: 'thin' },
+				bottom: { style: 'thin' },
+				right: { style: 'thin' }
+			};
+			cell.alignment = { wrapText: true };
+
+			const cellText = String(cell.value ?? '');
+			const longestLine = Math.max(...cellText.split('\n').map(l => l.length));
+			if (longestLine + 2 > colWidths[colNumber - 1]) {
+				colWidths[colNumber - 1] = longestLine + 2;
+			}
+
+			if (colNumber > FIXED_COLS) {
+				const lines = estimateLineCount(cellText, 50);
+				if (lines > maxLines) maxLines = lines;
+			}
+		});
+
+		dataRow.height = Math.max(15, 15 * maxLines);
+	}
+
+	worksheet.columns.forEach((col, i) => {
+		col.width = Math.min(colWidths[i], 80);
+	});
+}
+
+/**
+ * Generates a single .xlsx workbook with one sheet per year, sorted chronologically.
+ * Each sheet is named after its year (e.g. "2024").
+ */
+export async function generateXlsBuffer(
+	reviewsByYear: Map<number, ReviewRow[]>,
+	columns: TemplateColumn[],
+	_productName: string
+): Promise<Buffer> {
+	const workbook = new ExcelJS.Workbook();
+
+	const sortedYears = Array.from(reviewsByYear.keys()).sort((a, b) => a - b);
+	for (const year of sortedYears) {
+		const worksheet = workbook.addWorksheet(String(year));
+		fillWorksheet(worksheet, reviewsByYear.get(year)!, columns);
+	}
+
+	const arrayBuffer = await workbook.xlsx.writeBuffer();
+	return Buffer.from(arrayBuffer);
+}
