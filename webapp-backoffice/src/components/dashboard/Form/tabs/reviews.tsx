@@ -684,7 +684,7 @@ const ReviewsTab = (props: Props) => {
 							{...(isUserFetching ? { inert: '' } : {})}
 						>
 							{formConfigs.some(fc => fc.version !== 0) && (
-								<div className={fr.cx('fr-mt-8v')}>
+								<div className={fr.cx('fr-mt-6v')}>
 									<FormConfigVersionsDisplay form={form} />
 								</div>
 							)}

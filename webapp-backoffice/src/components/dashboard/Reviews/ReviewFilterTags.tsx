@@ -47,7 +47,6 @@ const ReviewFilterTags = (props: Props) => {
 		const tags: JSX.Element[] = [];
 
 		const booleanKeys: (keyof ReviewFiltersType)[] = [
-			'needVerbatim',
 			'needOtherDifficulties',
 			'needOtherHelp'
 		];
@@ -158,11 +157,7 @@ const ReviewFilterTags = (props: Props) => {
 		return tags.length > 0 ? tags : null;
 	};
 
-	return (
-		<div className={cx(classes.container, fr.cx('fr-col-12'))}>
-			{renderTags()}
-		</div>
-	);
+	return <>{renderTags()}</>;
 };
 
 export default ReviewFilterTags;

@@ -210,35 +210,6 @@ const ReviewFiltersModal = (props: Props) => {
 				);
 			})}
 
-			{hasVerbatimBlock && (
-				<>
-					{filterableBlocks.length > 0 && (
-						<hr className={cx(classes.separator)} />
-					)}
-					<div className={cx(classes.section)}>
-						<Checkbox
-							options={[
-								{
-									label: 'Avis avec commentaire complété',
-									nativeInputProps: {
-										name: 'needVerbatim',
-										checked: tmpFilters.needVerbatim,
-										onChange: () => {
-											setTmpFilters({
-												...tmpFilters,
-												needVerbatim: !tmpFilters.needVerbatim
-											});
-											push(['trackEvent', 'Avis', 'Filtre-Complémentaire']);
-										}
-									}
-								}
-							]}
-							state="default"
-						/>
-					</div>
-				</>
-			)}
-
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
 				<ul className={cx(classes.listContainer)}>
 					<li>

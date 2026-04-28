@@ -13,6 +13,8 @@ import { CustomModalProps } from '@/src/types/custom';
 import { Button as PrismaButton } from '@prisma/client';
 import DateRangePickerButton from './DateRangePickerButton';
 import IntegrationLinksDropdown from './IntegrationLinksDropdown';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import { push } from '@socialgouv/matomo-next';
 
 const dateShortcuts = [
 	{
@@ -74,7 +76,6 @@ const GenericFilters = <T extends FilterSectionKey>({
 		if (filterKey === 'productReviews') {
 			const reviewFilters = filters.productReviews.filters;
 			let count = 0;
-			if (reviewFilters.needVerbatim) count++;
 			if (reviewFilters.needOtherDifficulties) count++;
 			if (reviewFilters.needOtherHelp) count++;
 			if (reviewFilters.fields) {
@@ -87,6 +88,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 		return 0;
 	};
+
+	const hasVerbatimBlock =
+		form &&
+		form.form_template.form_template_steps
+			.flatMap(step => step.form_template_blocks)
+			.some(block => block.field_code === 'verbatim');
 
 	const activeFilterCount = getActiveFilterCount();
 
@@ -177,36 +184,72 @@ const GenericFilters = <T extends FilterSectionKey>({
 					<IntegrationLinksDropdown buttons={buttons} filterKey={filterKey} />
 				)}
 				{filterModal && (
-					<Button
-						priority="tertiary"
-						className={cx(classes.filterButton)}
-						iconId="fr-icon-filter-line"
-						iconPosition="right"
-						type="button"
-						nativeButtonProps={filterModal.buttonProps}
-					>
-						Plus de filtres
-						{activeFilterCount > 0 && (
-							<span className={cx(classes.filterCountBadge)}>
-								{activeFilterCount}
-							</span>
+					<>
+						<Button
+							priority="tertiary"
+							className={cx(classes.filterButton)}
+							iconId="fr-icon-filter-line"
+							iconPosition="right"
+							type="button"
+							nativeButtonProps={filterModal.buttonProps}
+						>
+							Plus de filtres
+							{activeFilterCount > 0 && (
+								<span className={cx(classes.filterCountBadge)}>
+									{activeFilterCount}
+								</span>
+							)}
+						</Button>
+						{hasVerbatimBlock && (
+							<div className={cx(classes.section)}>
+								<Checkbox
+									small
+									options={[
+										{
+											label: 'Avis avec commentaire complété',
+											nativeInputProps: {
+												name: 'needVerbatim',
+												checked: filters.productReviews.filters.needVerbatim,
+												onChange: () => {
+													updateFilters({
+														...filters,
+														productReviews: {
+															...filters.productReviews,
+															filters: {
+																...filters.productReviews.filters,
+																needVerbatim:
+																	!filters.productReviews.filters.needVerbatim
+															}
+														}
+													});
+													push(['trackEvent', 'Avis', 'Filtre-Complémentaire']);
+												}
+											}
+										}
+									]}
+									state="default"
+								/>
+							</div>
 						)}
-					</Button>
+					</>
 				)}
-				{isAnyVisibleFilterActive && (
-					<Button
-						priority="tertiary no outline"
-						iconPosition="right"
-						iconId="ri-refresh-line"
-						size="small"
-						onClick={() => {
-							resetSectionFilters(filterKey);
-						}}
-					>
-						Réinitialiser
-					</Button>
-				)}
-				{renderTags && renderTags()}
+
+				<div className={cx(classes.tagsContainer, fr.cx('fr-col-12'))}>
+					{renderTags && renderTags()}
+					{isAnyVisibleFilterActive && (
+						<Button
+							priority="tertiary no outline"
+							iconPosition="right"
+							iconId="ri-refresh-line"
+							size="small"
+							onClick={() => {
+								resetSectionFilters(filterKey);
+							}}
+						>
+							Réinitialiser les filtres
+						</Button>
+					)}
+				</div>
 			</div>
 
 			{children && <div>{children}</div>}
@@ -253,6 +296,33 @@ const useStyles = tss.create({
 		fontSize: '0.75rem',
 		marginLeft: fr.spacing('1v'),
 		padding: `0 ${fr.spacing('1v')}`
+	},
+	section: {
+		position: 'relative',
+		display: 'flex',
+		justifyContent: 'center',
+		alignItems: 'center',
+		'& .fr-fieldset': {
+			marginBottom: 0,
+			'&  .fr-label': {
+				...fr.spacing('padding', { topBottom: 0 }),
+				'&::before': {
+					top: '0!important'
+				}
+			}
+		},
+		'& .fr-fieldset__element': {
+			margin: 0
+		},
+		'& .fr-checkbox-group': {
+			margin: '0!important'
+		}
+	},
+	tagsContainer: {
+		display: 'flex',
+		alignItems: 'center',
+		flexWrap: 'wrap',
+		gap: '1rem'
 	}
 });
 
