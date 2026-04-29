@@ -167,6 +167,7 @@ const ReviewsTab = (props: Props) => {
 	const reviews = reviewResults?.data ?? [];
 	const reviewsCountFiltered = reviewResults?.metadata?.countFiltered ?? 0;
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
+	const isTableFetching = isFetchingReviews && !isLoadingReviews;
 
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
@@ -642,37 +643,39 @@ const ReviewsTab = (props: Props) => {
 						reviewLogDate={reviewLog[0]?.created_at.toString()}
 						form={form}
 					/>
-					<ReviewKeywordFilters
-						product_id={form.product_id}
-						form_id={form.id}
-						start_date={
-							filters.productReviews.displayNew
-								? undefined
-								: filters.sharedFilters.currentStartDate
-						}
-						end_date={
-							filters.productReviews.displayNew
-								? undefined
-								: filters.sharedFilters.currentEndDate
-						}
-						fields={filters.productReviews.filters.fields}
-						selectedKeyword={validatedSearch}
-						onClick={keyword => {
-							push([
-								'trackEvent',
-								'Product - Reviews',
-								'Keyword-Filter-Clicked'
-							]);
-							if (keyword) {
-								setSearch(`"${keyword}"`);
-								submitSearch(`"${keyword}"`);
-							} else {
-								setSearch('');
-								setValidatedSearch('');
-								setCurrentPage(1);
+					{reviewsCountFiltered > 0 && (
+						<ReviewKeywordFilters
+							product_id={form.product_id}
+							form_id={form.id}
+							start_date={
+								filters.productReviews.displayNew
+									? undefined
+									: filters.sharedFilters.currentStartDate
 							}
-						}}
-					/>
+							end_date={
+								filters.productReviews.displayNew
+									? undefined
+									: filters.sharedFilters.currentEndDate
+							}
+							fields={filters.productReviews.filters.fields}
+							selectedKeyword={validatedSearch}
+							onClick={keyword => {
+								push([
+									'trackEvent',
+									'Product - Reviews',
+									'Keyword-Filter-Clicked'
+								]);
+								if (keyword) {
+									setSearch(`"${keyword}"`);
+									submitSearch(`"${keyword}"`);
+								} else {
+									setSearch('');
+									setValidatedSearch('');
+									setCurrentPage(1);
+								}
+							}}
+						/>
+					)}
 
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -680,8 +683,8 @@ const ReviewsTab = (props: Props) => {
 						</div>
 					) : (
 						<div
-							aria-disabled={isUserFetching}
-							{...(isUserFetching ? { inert: '' } : {})}
+							aria-disabled={isTableFetching}
+							{...(isTableFetching ? { inert: '' } : {})}
 						>
 							{formConfigs.some(fc => fc.version !== 0) && (
 								<div className={fr.cx('fr-mt-6v')}>
@@ -695,62 +698,65 @@ const ReviewsTab = (props: Props) => {
 										reviews.length === 0 ? 'column-reverse' : undefined
 								}}
 							>
-								{!isUserFetching ? (
-									<PageItemsCounter
-										label="réponse"
-										isFeminine
-										startItemCount={numberPerPage * (currentPage - 1) + 1}
-										endItemCount={
-											numberPerPage * (currentPage - 1) + reviews.length
-										}
-										totalItemsCount={reviewsCountFiltered}
-										fitContent
-									/>
+								{!isTableFetching ? (
+									<>
+										<PageItemsCounter
+											label="réponse"
+											isFeminine
+											startItemCount={numberPerPage * (currentPage - 1) + 1}
+											endItemCount={
+												numberPerPage * (currentPage - 1) + reviews.length
+											}
+											totalItemsCount={reviewsCountFiltered}
+											fitContent
+										/>
+										{reviewsCountFiltered > 0 && (
+											<form
+												className={cx(
+													classes.searchForm,
+													fr.cx('fr-col-12', 'fr-col-lg-4')
+												)}
+												onSubmit={e => {
+													e.preventDefault();
+													submitSearch();
+													push(['trackEvent', 'Form - Reviews', 'Search']);
+												}}
+											>
+												<div role="search" className={fr.cx('fr-search-bar')}>
+													<Input
+														label="Rechercher un avis"
+														hideLabel
+														nativeInputProps={{
+															placeholder: 'Rechercher dans les commentaires',
+															type: 'search',
+															value: search,
+															onChange: event => {
+																if (!event.target.value) {
+																	setValidatedSearch('');
+																}
+																setSearch(event.target.value);
+															}
+														}}
+													/>
+													<ButtonDSFR
+														priority="primary"
+														type="submit"
+														iconId="ri-search-2-line"
+														iconPosition="left"
+													>
+														Rechercher
+													</ButtonDSFR>
+												</div>
+											</form>
+										)}
+									</>
 								) : (
 									<div />
 								)}
-
-								<form
-									className={cx(
-										classes.searchForm,
-										fr.cx('fr-col-12', 'fr-col-lg-4')
-									)}
-									onSubmit={e => {
-										e.preventDefault();
-										submitSearch();
-										push(['trackEvent', 'Form - Reviews', 'Search']);
-									}}
-								>
-									<div role="search" className={fr.cx('fr-search-bar')}>
-										<Input
-											label="Rechercher un avis"
-											hideLabel
-											nativeInputProps={{
-												placeholder: 'Rechercher dans les commentaires',
-												type: 'search',
-												value: search,
-												onChange: event => {
-													if (!event.target.value) {
-														setValidatedSearch('');
-													}
-													setSearch(event.target.value);
-												}
-											}}
-										/>
-										<ButtonDSFR
-											priority="primary"
-											type="submit"
-											iconId="ri-search-2-line"
-											iconPosition="left"
-										>
-											Rechercher
-										</ButtonDSFR>
-									</div>
-								</form>
 							</div>
 
 							<div>
-								{isUserFetching ? (
+								{isTableFetching ? (
 									<div className={fr.cx('fr-py-27v')}>
 										<Loader />
 									</div>

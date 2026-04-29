@@ -198,13 +198,15 @@ const DateRangePickerButton = ({
 				value: true
 			});
 		} else if (localShortcut) {
+			const { startDate: shortcutStart, endDate: shortcutEnd } =
+				getDatesByShortCut(localShortcut);
 			nextFilters = {
 				...nextFilters,
 				productReviews: { ...filters.productReviews, displayNew: false },
 				sharedFilters: {
 					...filters.sharedFilters,
-					currentStartDate: '',
-					currentEndDate: '',
+					currentStartDate: shortcutStart,
+					currentEndDate: shortcutEnd,
 					dateShortcut: localShortcut
 				}
 			};
