@@ -275,7 +275,9 @@ const ReviewDrawerContent = ({
 			return;
 		}
 		setAnnouncement(
-			`Détail de l'avis du ${formatFullFrenchDateTime(review.created_at?.toString() || '')}`
+			`Détail de l'avis du ${formatFullFrenchDateTime(
+				review.created_at?.toString() || ''
+			)}`
 		);
 	}, [review.id]);
 
@@ -303,7 +305,12 @@ const ReviewDrawerContent = ({
 
 	return (
 		<div className={cx(classes.container)}>
-			<p role="status" aria-live="polite" aria-atomic="true" className={cx(classes.srOnly)}>
+			<p
+				role="status"
+				aria-live="polite"
+				aria-atomic="true"
+				className={cx(classes.srOnly)}
+			>
 				{announcement}
 			</p>
 			<div className={cx(classes.header)}>
@@ -328,28 +335,6 @@ const ReviewDrawerContent = ({
 				{formatFullFrenchDateTime(review.created_at?.toString() || '')}
 			</h1>
 			<hr className={cx(classes.titleSeparator)} />
-
-			<div className={classes.actionsContainer}>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-right-s-line"
-					iconPosition="right"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasNext}
-					onClick={onNext}
-				>
-					Voir l'avis suivant
-				</Button>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-left-s-line"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasPrevious}
-					onClick={onPrevious}
-				>
-					Voir l'avis précédent
-				</Button>
-			</div>
 
 			{answerBlocks.map((block, index) => {
 				const answers = getTopLevelAnswers(review.answers, block.field_code);
@@ -436,6 +421,30 @@ const ReviewDrawerContent = ({
 					classes={classes}
 					hideHr
 				/>
+			</div>
+
+			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
+
+			<div className={classes.actionsContainer}>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-right-s-line"
+					iconPosition="right"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasNext}
+					onClick={onNext}
+				>
+					Voir l'avis suivant
+				</Button>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-left-s-line"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasPrevious}
+					onClick={onPrevious}
+				>
+					Voir l'avis précédent
+				</Button>
 			</div>
 		</div>
 	);

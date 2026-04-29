@@ -301,6 +301,7 @@ const useStyles = tss.create({
 		margin: 0
 	},
 	action: {
+		fontSize: '0.875rem',
 		textWrap: 'nowrap',
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
 		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,

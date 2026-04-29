@@ -165,7 +165,7 @@ const useStyles = tss.create({
 		flex: '0 0 calc(100% / 6);'
 	},
 	actionHeader: {
-		paddingRight: fr.spacing('8v'),
+		paddingRight: fr.spacing('4v'),
 		[fr.breakpoints.down('lg')]: {
 			paddingRight: 0
 		}
