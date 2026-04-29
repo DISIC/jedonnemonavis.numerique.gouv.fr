@@ -15,7 +15,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { Popover } from '@mui/material';
 import { push } from '@socialgouv/matomo-next';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { DateShortcutName, FilterSectionKey } from './Filters';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
@@ -48,6 +48,11 @@ const DateRangePickerButton = ({
 
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
+	const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
 
 	// Pending (local) state — committed only on "Appliquer"
 	const [localShortcut, setLocalShortcut] = useState<DateShortcutName>(
@@ -131,6 +136,12 @@ const DateRangePickerButton = ({
 			setErrors({});
 		} else {
 			clearCustomDates();
+		}
+	};
+
+	const preventPickerKeyboard = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if ((e.altKey && e.key === 'ArrowDown') || e.key === 'F4') {
+			e.preventDefault();
 		}
 	};
 
@@ -243,7 +254,7 @@ const DateRangePickerButton = ({
 			};
 		} else {
 			// Nothing selected — just close
-			setAnchorEl(null);
+			handleClose();
 			return;
 		}
 
@@ -254,7 +265,7 @@ const DateRangePickerButton = ({
 				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
-		setAnchorEl(null);
+		handleClose();
 	};
 
 	const handleClear = () => {
@@ -277,7 +288,7 @@ const DateRangePickerButton = ({
 				hasChanged: hasAnyFilterChanged(nextFilters)
 			}
 		});
-		setAnchorEl(null);
+		handleClose();
 	};
 
 	const getButtonLabel = () => {
@@ -333,9 +344,13 @@ const DateRangePickerButton = ({
 				iconPosition="right"
 				type="button"
 				nativeButtonProps={{
+					ref: triggerRef,
 					onClick: (e: React.MouseEvent<HTMLElement>) => {
 						setAnchorEl(e.currentTarget);
-					}
+					},
+					'aria-haspopup': 'dialog',
+					'aria-expanded': open ? 'true' : 'false',
+					'aria-controls': open ? 'date-range-dialog' : undefined
 				}}
 			>
 				{getButtonLabel()}
@@ -343,22 +358,39 @@ const DateRangePickerButton = ({
 			<Popover
 				open={open}
 				anchorEl={anchorEl}
-				onClose={() => setAnchorEl(null)}
+				onClose={handleClose}
 				disableScrollLock
+				disableRestoreFocus
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
 				transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+				TransitionProps={{
+					onEntered: () => {
+						const firstInput = document.querySelector<HTMLElement>(
+							'#date-range-dialog input'
+						);
+						firstInput?.focus();
+					},
+					onExited: () => triggerRef.current?.focus()
+				}}
 				slotProps={{
 					paper: { className: cx(classes.popoverPaper) }
 				}}
 			>
-				<div className={cx(classes.popoverContent)}>
+				<div
+					id="date-range-dialog"
+					role="dialog"
+					aria-modal="true"
+					aria-label="Sélectionner une période"
+					className={cx(classes.popoverContent)}
+				>
 					<div className={cx(classes.dateInputsRow)}>
 						<Input
 							label="Date de début"
 							nativeInputProps={{
 								type: 'date',
 								value: localStartDate,
-								onChange: handleDateChange('currentStartDate')
+								onChange: handleDateChange('currentStartDate'),
+								onKeyDown: preventPickerKeyboard
 							}}
 							state={errors.startDate ? 'error' : 'default'}
 							stateRelatedMessage={
@@ -372,7 +404,8 @@ const DateRangePickerButton = ({
 							nativeInputProps={{
 								type: 'date',
 								value: localEndDate,
-								onChange: handleDateChange('currentEndDate')
+								onChange: handleDateChange('currentEndDate'),
+								onKeyDown: preventPickerKeyboard
 							}}
 							state={errors.endDate ? 'error' : 'default'}
 							stateRelatedMessage={
@@ -384,32 +417,36 @@ const DateRangePickerButton = ({
 					</div>
 
 					<div className={cx(classes.shortcutsRow)}>
-						{dateShortcuts.map(ds => (
-							<button
-								key={ds.name}
-								type="button"
-								className={cx(
-									classes.shortcutButton,
-									localShortcut === ds.name && !localDisplayNew
-										? classes.shortcutButtonSelected
-										: undefined
-								)}
-								onClick={() => handleShortcutClick(ds.name)}
-							>
-								{ds.label}
-								{localShortcut === ds.name && !localDisplayNew && (
-									<span
-										className={cx(
-											classes.selectedIcon,
-											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
-										)}
-									/>
-								)}
-							</button>
-						))}
+						{dateShortcuts.map(ds => {
+							const isSelected = localShortcut === ds.name && !localDisplayNew;
+							return (
+								<button
+									key={ds.name}
+									type="button"
+									aria-pressed={isSelected}
+									className={cx(
+										classes.shortcutButton,
+										isSelected ? classes.shortcutButtonSelected : undefined
+									)}
+									onClick={() => handleShortcutClick(ds.name)}
+								>
+									{ds.label}
+									{isSelected && (
+										<span
+											aria-hidden="true"
+											className={cx(
+												classes.selectedIcon,
+												fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
+											)}
+										/>
+									)}
+								</button>
+							);
+						})}
 						{showNewReviewsOption && reviewLogDate && (
 							<button
 								type="button"
+								aria-pressed={localDisplayNew}
 								className={cx(
 									classes.shortcutButton,
 									localDisplayNew ? classes.shortcutButtonSelected : undefined
@@ -424,6 +461,7 @@ const DateRangePickerButton = ({
 								à aujourd'hui)
 								{localDisplayNew && (
 									<span
+										aria-hidden="true"
 										className={cx(
 											classes.selectedIcon,
 											fr.cx('fr-icon-checkbox-circle-line', 'fr-icon--sm')
@@ -495,6 +533,14 @@ const useStyles = tss.create({
 		'.fr-input-group': {
 			marginBottom: 0,
 			flex: 1
+		},
+		'& input[type="date"]::-webkit-calendar-picker-indicator': {
+			display: 'none',
+			appearance: 'none'
+		},
+		'& input[type="date"]::-webkit-inner-spin-button': {
+			display: 'none',
+			appearance: 'none'
 		}
 	},
 	separator: {

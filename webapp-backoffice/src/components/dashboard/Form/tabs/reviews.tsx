@@ -74,6 +74,8 @@ const ReviewsTab = (props: Props) => {
 	const isFromMail = fromMail === 'true';
 	const [currentExportId, setCurrentExportId] = useState<number>();
 	const [isUserFetching, setIsUserFetching] = useState(false);
+	const [filterAnnouncement, setFilterAnnouncement] = useState('');
+	const prevFetchingRef = React.useRef(false);
 	const [selectedReview, setSelectedReview] =
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
@@ -172,6 +174,17 @@ const ReviewsTab = (props: Props) => {
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
 	}, [isFetchingReviews, isRefetchingReviews]);
+
+	useEffect(() => {
+		if (prevFetchingRef.current && !isFetchingReviews && reviewResults) {
+			setFilterAnnouncement(
+				reviewsCountFiltered === 0
+					? 'Aucun résultat'
+					: `${reviewsCountFiltered} résultat${reviewsCountFiltered > 1 ? 's' : ''} trouvé${reviewsCountFiltered > 1 ? 's' : ''}`
+			);
+		}
+		prevFetchingRef.current = isFetchingReviews;
+	}, [isFetchingReviews]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	const { data: reviewLogResults } =
 		trpc.userEvent.getLastFormReviewView.useQuery(
@@ -507,6 +520,14 @@ const ReviewsTab = (props: Props) => {
 
 	return (
 		<>
+			<p
+				role="status"
+				aria-live="polite"
+				aria-atomic="true"
+				className={cx(classes.srOnly)}
+			>
+				{filterAnnouncement}
+			</p>
 			{form.form_template.slug === 'root' ? (
 				<ReviewFiltersModalRoot
 					modal={filter_modal}
@@ -961,6 +982,17 @@ const useStyles = tss.withName(ReviewsTab.name).create({
 		fontWeight: 'bold',
 		color: 'white',
 		zIndex: 1
+	},
+	srOnly: {
+		position: 'absolute',
+		width: 1,
+		height: 1,
+		padding: 0,
+		margin: -1,
+		overflow: 'hidden',
+		clip: 'rect(0,0,0,0)',
+		whiteSpace: 'nowrap',
+		border: 0
 	}
 });
 

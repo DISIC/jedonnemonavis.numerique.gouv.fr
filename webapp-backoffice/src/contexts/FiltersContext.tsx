@@ -79,7 +79,7 @@ export const initialFilterState: Filters = {
 	productReviews: {
 		displayNew: false,
 		filters: {
-			needVerbatim: false,
+			needVerbatim: true,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
 			buttonId: [],

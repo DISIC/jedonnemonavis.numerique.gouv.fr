@@ -60,7 +60,6 @@ const IntegrationLinksDropdown = ({
 
 	const handleClose = () => {
 		setAnchorEl(null);
-		triggerRef.current?.focus();
 	};
 
 	const handleSelect = (buttonId: number | undefined) => {
@@ -162,6 +161,7 @@ const IntegrationLinksDropdown = ({
 				anchorEl={anchorEl}
 				onClose={handleClose}
 				disableScrollLock
+				disableRestoreFocus
 				TransitionProps={{
 					onEntered: () => {
 						const selected = menuRef.current?.querySelector<HTMLElement>(
@@ -170,7 +170,8 @@ const IntegrationLinksDropdown = ({
 						const first =
 							menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
 						(selected ?? first)?.focus();
-					}
+					},
+					onExited: () => triggerRef.current?.focus()
 				}}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
 				transformOrigin={{ vertical: 'top', horizontal: 'left' }}

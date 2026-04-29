@@ -267,6 +267,8 @@ const ReviewDrawerContent = ({
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
 	const isFirstRender = useRef(true);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const titleRef = useRef<HTMLHeadingElement>(null);
 	const [announcement, setAnnouncement] = useState('');
 
 	useEffect(() => {
@@ -279,6 +281,8 @@ const ReviewDrawerContent = ({
 				review.created_at?.toString() || ''
 			)}`
 		);
+		containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+		titleRef.current?.focus();
 	}, [review.id]);
 
 	const buttonName = review.button_id
@@ -304,7 +308,7 @@ const ReviewDrawerContent = ({
 	);
 
 	return (
-		<div className={cx(classes.container)}>
+		<div ref={containerRef} className={cx(classes.container)}>
 			<p
 				role="status"
 				aria-live="polite"
@@ -328,7 +332,9 @@ const ReviewDrawerContent = ({
 			</div>
 
 			<h1
+				ref={titleRef}
 				id="review-drawer-title"
+				tabIndex={-1}
 				className={cx(classes.title, fr.cx('fr-h4'))}
 			>
 				Détail de l'avis du{' '}
@@ -478,7 +484,8 @@ const useStyles = tss.create({
 		marginBottom: fr.spacing('4v')
 	},
 	title: {
-		color: fr.colors.decisions.artwork.major.blueFrance.default
+		color: fr.colors.decisions.artwork.major.blueFrance.default,
+		'&:focus': { outline: 'none' }
 	},
 	titleSeparator: {
 		backgroundImage: `linear-gradient(0deg, ${fr.colors.decisions.artwork.major.blueFrance.default}, ${fr.colors.decisions.artwork.major.blueFrance.default})`

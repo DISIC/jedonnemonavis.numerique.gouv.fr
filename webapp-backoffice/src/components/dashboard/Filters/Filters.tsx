@@ -118,7 +118,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 		if (filterModal && filterKey === 'productReviews') {
 			const rf = filters.productReviews.filters;
-			if (rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
+			if (!rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
 				return true;
 			if (rf.fields?.some(f => f.values.length > 0)) return true;
 		}
@@ -206,7 +206,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 									small
 									options={[
 										{
-											label: 'Avis avec commentaire complété',
+											label: 'Avis avec commentaire',
 											nativeInputProps: {
 												name: 'needVerbatim',
 												checked: filters.productReviews.filters.needVerbatim,
