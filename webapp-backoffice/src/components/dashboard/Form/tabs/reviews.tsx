@@ -180,7 +180,9 @@ const ReviewsTab = (props: Props) => {
 			setFilterAnnouncement(
 				reviewsCountFiltered === 0
 					? 'Aucun résultat'
-					: `${reviewsCountFiltered} résultat${reviewsCountFiltered > 1 ? 's' : ''} trouvé${reviewsCountFiltered > 1 ? 's' : ''}`
+					: `${reviewsCountFiltered} résultat${
+							reviewsCountFiltered > 1 ? 's' : ''
+					  } trouvé${reviewsCountFiltered > 1 ? 's' : ''}`
 			);
 		}
 		prevFetchingRef.current = isFetchingReviews;
@@ -578,6 +580,7 @@ const ReviewsTab = (props: Props) => {
 				<Alert
 					severity={currentExportAlert.severity}
 					title={currentExportAlert.title}
+					className="fr-mb-4v"
 					description={
 						<div
 							className={fr.cx(
