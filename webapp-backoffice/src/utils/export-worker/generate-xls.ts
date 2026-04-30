@@ -16,6 +16,28 @@ function estimateLineCount(cellText: string, wrapLength = 30): number {
 const COL_REVIEW_DATE = 2;
 const FIXED_COLS = 2;
 
+const THIN_BORDER: Partial<ExcelJS.Borders> = {
+	top: { style: 'thin' },
+	left: { style: 'thin' },
+	bottom: { style: 'thin' },
+	right: { style: 'thin' }
+};
+const WRAP_ALIGNMENT: Partial<ExcelJS.Alignment> = { wrapText: true };
+const HEADER_FILL: ExcelJS.Fill = {
+	type: 'pattern',
+	pattern: 'solid',
+	fgColor: { argb: 'FFD4D3D3' }
+};
+const HEADER_FONT: Partial<ExcelJS.Font> = { bold: true, size: 12 };
+
+function longestLineLength(text: string): number {
+	let max = 0;
+	for (const line of text.split('\n')) {
+		if (line.length > max) max = line.length;
+	}
+	return max;
+}
+
 function fillWorksheet(
 	worksheet: ExcelJS.Worksheet,
 	reviews: ReviewRow[],
@@ -27,24 +49,16 @@ function fillWorksheet(
 		...columns.map(c => c.label)
 	];
 
-	// Track max content width per column in a single pass
 	const colWidths = headers.map(h => h.length + 2);
 
 	const headerRow = worksheet.addRow(headers);
 	headerRow.eachCell(cell => {
-		cell.font = { bold: true, size: 12 };
-		cell.fill = {
-			type: 'pattern',
-			pattern: 'solid',
-			fgColor: { argb: 'FFD4D3D3' }
-		};
-		cell.border = {
-			top: { style: 'thin' },
-			left: { style: 'thin' },
-			bottom: { style: 'thin' },
-			right: { style: 'thin' }
-		};
+		cell.font = HEADER_FONT;
+		cell.fill = HEADER_FILL;
+		cell.border = THIN_BORDER;
 	});
+
+	worksheet.getColumn(COL_REVIEW_DATE).numFmt = 'yyyy-mm-dd hh:mm:ss';
 
 	for (const review of reviews) {
 		const rowValues: (string | number | Date | null)[] = [
@@ -54,22 +68,18 @@ function fillWorksheet(
 		];
 
 		const dataRow = worksheet.addRow(rowValues);
-		dataRow.getCell(COL_REVIEW_DATE).numFmt = 'yyyy-mm-dd hh:mm:ss';
 
 		let maxLines = 1;
 		dataRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-			cell.border = {
-				top: { style: 'thin' },
-				left: { style: 'thin' },
-				bottom: { style: 'thin' },
-				right: { style: 'thin' }
-			};
-			cell.alignment = { wrapText: true };
+			cell.border = THIN_BORDER;
+			cell.alignment = WRAP_ALIGNMENT;
 
-			const cellText = String(cell.value ?? '');
-			const longestLine = Math.max(...cellText.split('\n').map(l => l.length));
-			if (longestLine + 2 > colWidths[colNumber - 1]) {
-				colWidths[colNumber - 1] = longestLine + 2;
+			if (cell.value == null) return;
+
+			const cellText = String(cell.value);
+			const longest = longestLineLength(cellText);
+			if (longest + 2 > colWidths[colNumber - 1]) {
+				colWidths[colNumber - 1] = longest + 2;
 			}
 
 			if (colNumber > FIXED_COLS) {

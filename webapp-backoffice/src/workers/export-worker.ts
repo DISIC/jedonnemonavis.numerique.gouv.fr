@@ -28,6 +28,29 @@ const CONCURRENCY_LIMIT = parseInt(
 	10
 );
 
+// Asymptotic ticker: each tick covers 20% of remaining distance toward (to - 1),
+// so progress always moves but never reaches `to` — the real operation completing
+// snaps it to `to`. No need to predict how long the operation takes.
+function startProgressTicker(
+	exportId: number,
+	from: number,
+	to: number,
+	intervalMs: number
+): () => void {
+	let current = from;
+	const ceiling = to - 1;
+	const timer = setInterval(async () => {
+		current += (ceiling - current) * 0.2;
+		await prisma.export
+			.update({
+				where: { id: exportId },
+				data: { progress: Math.floor(current) }
+			})
+			.catch(() => {});
+	}, intervalMs);
+	return () => clearInterval(timer);
+}
+
 type FilterParams = {
 	startDate?: string;
 	endDate?: string;
@@ -329,24 +352,38 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		exportFormat === 'csv' ? 'csv' : 'xlsx'
 	}`;
 
-	if (exportFormat === 'csv') {
-		fileBuffer = generateCsvBuffer(allReviews, columns);
-	} else {
-		fileBuffer = await generateXlsBuffer(
-			allReviewsByYear,
-			columns,
-			productName
-		);
+	// Tick 60→84 every 2s during file generation (can be slow for large XLS)
+	const stopGenTicker = startProgressTicker(exportId, 60, 85, 2000);
+	try {
+		if (exportFormat === 'csv') {
+			fileBuffer = generateCsvBuffer(allReviews, columns);
+		} else {
+			fileBuffer = await generateXlsBuffer(
+				allReviewsByYear,
+				columns,
+				productName
+			);
+		}
+	} finally {
+		stopGenTicker();
 	}
 
 	await prisma.export.update({
 		where: { id: exportId },
 		data: { progress: 85 }
 	});
-	const contentType = exportFormat === 'csv'
-		? 'text/csv; charset=utf-8'
-		: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-	await uploadToS3(fileBuffer, fileName, contentType);
+	const contentType =
+		exportFormat === 'csv'
+			? 'text/csv; charset=utf-8'
+			: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+	// Tick 85→97 every 1s during S3 upload
+	const stopUploadTicker = startProgressTicker(exportId, 85, 98, 1000);
+	try {
+		await uploadToS3(fileBuffer, fileName, contentType);
+	} finally {
+		stopUploadTicker();
+	}
 
 	await prisma.export.update({
 		where: { id: exportId },
