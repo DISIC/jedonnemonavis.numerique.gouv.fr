@@ -12,8 +12,11 @@ import {
 } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
-import Input from '@codegouvfr/react-dsfr/Input';
 import { Popover } from '@mui/material';
+import { DateField } from '@mui/x-date-pickers/DateField';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { fr as frLocale } from 'date-fns/locale/fr';
 import { push } from '@socialgouv/matomo-next';
 import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -45,6 +48,7 @@ const DateRangePickerButton = ({
 	const { classes, cx } = useStyles();
 	const { filters, updateFilters } = useFilters();
 	const sharedFilters = filters.sharedFilters;
+	const today = new Date();
 
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const open = Boolean(anchorEl);
@@ -139,41 +143,33 @@ const DateRangePickerButton = ({
 		}
 	};
 
-	const preventPickerKeyboard = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if ((e.altKey && e.key === 'ArrowDown') || e.key === 'F4') {
-			e.preventDefault();
-		}
-	};
-
-	const handleDateChange =
-		(key: 'currentStartDate' | 'currentEndDate') =>
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const newDate = e.target.value;
+	const handleDateFieldChange =
+		(key: 'currentStartDate' | 'currentEndDate') => (value: Date | null) => {
 			setLocalShortcut(undefined);
 			setLocalDisplayNew(false);
 
+			const valid = value instanceof Date && !isNaN(value.getTime());
+			const maxForKey =
+				key === 'currentEndDate'
+					? today
+					: (localEndDate && parseLocalDate(localEndDate)) || today;
+			const clamped = valid && value! > maxForKey ? maxForKey : value;
+			const isoDate = valid ? dateToLocalISO(clamped!) : '';
+
 			if (key === 'currentStartDate') {
-				setLocalStartDate(newDate);
-				const parsed = parseLocalDate(newDate);
-				setCalendarRangeStart(parsed);
-				if (!parsed) setCalendarRangeEnd(null);
+				setLocalStartDate(isoDate);
+				setCalendarRangeStart(valid ? clamped : null);
+				if (!valid) setCalendarRangeEnd(null);
 			} else {
-				setLocalEndDate(newDate);
-				setCalendarRangeEnd(parseLocalDate(newDate));
+				setLocalEndDate(isoDate);
+				setCalendarRangeEnd(valid ? clamped : null);
 			}
 
-			if (!isValidDate(newDate) && newDate) {
-				setErrors(prev => ({
-					...prev,
-					[key === 'currentStartDate' ? 'startDate' : 'endDate']:
-						'Date invalide'
-				}));
-			} else {
-				setErrors(prev => ({
-					...prev,
-					[key === 'currentStartDate' ? 'startDate' : 'endDate']: undefined
-				}));
-			}
+			setErrors(prev => ({
+				...prev,
+				[key === 'currentStartDate' ? 'startDate' : 'endDate']:
+					value && !valid ? 'Date invalide' : undefined
+			}));
 		};
 
 	const handleApply = () => {
@@ -383,38 +379,66 @@ const DateRangePickerButton = ({
 					aria-label="Sélectionner une période"
 					className={cx(classes.popoverContent)}
 				>
-					<div className={cx(classes.dateInputsRow)}>
-						<Input
-							label="Date de début"
-							nativeInputProps={{
-								type: 'date',
-								value: localStartDate,
-								onChange: handleDateChange('currentStartDate'),
-								onKeyDown: preventPickerKeyboard
-							}}
-							state={errors.startDate ? 'error' : 'default'}
-							stateRelatedMessage={
-								errors.startDate ? (
-									<span role="alert">{errors.startDate}</span>
-								) : null
-							}
-						/>
-						<Input
-							label="Date de fin"
-							nativeInputProps={{
-								type: 'date',
-								value: localEndDate,
-								onChange: handleDateChange('currentEndDate'),
-								onKeyDown: preventPickerKeyboard
-							}}
-							state={errors.endDate ? 'error' : 'default'}
-							stateRelatedMessage={
-								errors.endDate ? (
-									<span role="alert">{errors.endDate}</span>
-								) : null
-							}
-						/>
-					</div>
+					<LocalizationProvider
+						dateAdapter={AdapterDateFns}
+						adapterLocale={frLocale}
+					>
+						<div className={cx(classes.dateInputsRow)}>
+							<div
+								className={cx(fr.cx('fr-input-group'), classes.dateFieldGroup)}
+							>
+								<label id="date-debut-label" className={fr.cx('fr-label')}>
+									Date de début
+								</label>
+								<DateField
+									aria-labelledby="date-debut-label"
+									value={localStartDate ? parseLocalDate(localStartDate) : null}
+									onChange={handleDateFieldChange('currentStartDate')}
+									maxDate={
+										(localEndDate && parseLocalDate(localEndDate)) || today
+									}
+									format="dd / MM / yyyy"
+									className={fr.cx('fr-input')}
+									sx={{ width: '100%' }}
+									slotProps={{
+										textField: {
+											InputProps: { className: fr.cx('fr-input') },
+											sx: {
+												'& .MuiFormLabel-root': { display: 'none' },
+												'& fieldset': { display: 'none' }
+											}
+										}
+									}}
+								/>
+							</div>
+							<div
+								className={cx(fr.cx('fr-input-group'), classes.dateFieldGroup)}
+							>
+								<label id="date-fin-label" className={fr.cx('fr-label')}>
+									Date de fin
+								</label>
+								<DateField
+									aria-labelledby="date-fin-label"
+									value={localEndDate ? parseLocalDate(localEndDate) : null}
+									onChange={handleDateFieldChange('currentEndDate')}
+									maxDate={today}
+									format="dd / MM / yyyy"
+									className={fr.cx('fr-input')}
+									sx={{ width: '100%' }}
+									slotProps={{
+										textField: {
+											variant: 'outlined',
+											InputProps: { className: fr.cx('fr-input') },
+											sx: {
+												'& .MuiFormLabel-root': { display: 'none' },
+												'& fieldset': { display: 'none' }
+											}
+										}
+									}}
+								/>
+							</div>
+						</div>
+					</LocalizationProvider>
 
 					<div className={cx(classes.shortcutsRow)}>
 						{dateShortcuts.map(ds => {
@@ -529,18 +553,27 @@ const useStyles = tss.create({
 		display: 'flex',
 		gap: fr.spacing('6v'),
 		marginBottom: fr.spacing('4v'),
-		...fr.spacing('padding', { rightLeft: '3w' }),
-		'.fr-input-group': {
-			marginBottom: 0,
-			flex: 1
+		...fr.spacing('padding', { rightLeft: '3w' })
+	},
+	dateFieldGroup: {
+		flex: 1,
+		marginBottom: '0!important',
+		// DSFR fr-input:focus doesn't fire on a div — replicate it via Mui-focused
+		'& .fr-input.Mui-focused': {
+			outlineWidth: '2px',
+			outlineStyle: 'solid',
+			outlineColor: fr.colors.decisions.border.active.blueFrance.default,
+			outlineOffset: '2px'
 		},
-		'& input[type="date"]::-webkit-calendar-picker-indicator': {
-			display: 'none',
-			appearance: 'none'
-		},
-		'& input[type="date"]::-webkit-inner-spin-button': {
-			display: 'none',
-			appearance: 'none'
+		// Restore flex display overridden by fr-input's display:block
+		'& .fr-input.MuiInputBase-root': {
+			display: 'flex',
+			alignItems: 'center',
+			borderRadius: '0.25rem 0.25rem 0 0',
+			input: {
+				padding: 0,
+				paddingLeft: fr.spacing('1v')
+			}
 		}
 	},
 	separator: {
