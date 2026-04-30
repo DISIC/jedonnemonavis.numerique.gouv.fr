@@ -12,6 +12,12 @@ const REQUIRED_S3_ENV_VARS = [
 	'BUCKET_NAME'
 ] as const;
 
+export function validateS3EnvVars(): void {
+	for (const name of REQUIRED_S3_ENV_VARS) {
+		if (!process.env[name]) throw new Error(`[export-worker] Missing required env var: ${name}`);
+	}
+}
+
 function getRequiredEnv(name: string): string {
 	const value = process.env[name];
 	if (!value) {
@@ -67,7 +73,7 @@ export async function generateDownloadLink(objectName: string): Promise<string> 
 	const url = await getSignedUrl(
 		client,
 		new GetObjectCommand({ Bucket: getBucket(), Key: objectName }),
-		{ expiresIn: 2592000 } // 30 days in seconds (SigV4 maximum)
+		{ expiresIn: 604800 } // 7 days in seconds (SigV4 maximum)
 	);
 
 	return url;
