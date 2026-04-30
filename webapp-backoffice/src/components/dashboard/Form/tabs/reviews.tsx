@@ -548,7 +548,7 @@ const ReviewsTab = (props: Props) => {
 
 			<div className={cx(classes.title)}>
 				<h2 className={fr.cx('fr-mb-0')}>Réponses</h2>
-				{nbReviews > 0 && form.form_template.slug === 'root' && (
+				{nbReviews > 0 && (
 					<div className={cx(classes.buttonContainer)}>
 						<ExportReviews
 							form={form}
@@ -583,7 +583,13 @@ const ReviewsTab = (props: Props) => {
 					className="fr-mb-4v"
 					description={
 						<div
-							className={fr.cx(currentExport.link ? 'fr-mt-2v' : 'fr-mt-4v')}
+							className={fr.cx(
+								currentExport.link
+									? 'fr-mt-2v'
+									: currentExport.status === 'processing'
+									? 'fr-mt-4v'
+									: undefined
+							)}
 						>
 							{currentExport.link && (
 								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
@@ -616,10 +622,7 @@ const ReviewsTab = (props: Props) => {
 									<span
 										className={cx(classes.progressBarLabel)}
 										style={{
-											color:
-												currentExport.progress < 5
-													? 'black'
-													: undefined
+											color: currentExport.progress < 5 ? 'black' : undefined
 										}}
 									>
 										{currentExport.progress}%
