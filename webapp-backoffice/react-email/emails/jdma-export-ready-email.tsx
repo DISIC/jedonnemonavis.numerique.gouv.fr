@@ -25,7 +25,7 @@ const JdmaExportReadyEmail = ({
 				Télécharger le fichier
 			</Link>
 
-			<Text style={paragraph}>Ce lien expirera dans 30 jours.</Text>
+			<Text style={paragraph}>Ce lien expirera dans 7 jours.</Text>
 		</JdmaLayout>
 	);
 };

@@ -560,8 +560,8 @@ const ReviewsTab = (props: Props) => {
 							filters={filters.productReviews.filters}
 							reviewsCountfiltered={reviewsCountFiltered}
 							reviewsCountAll={reviewsCountAll}
-							onExportCreated={() => {
-								setCurrentExportId(undefined);
+							onExportCreated={exportId => {
+								setCurrentExportId(exportId);
 								refetchExports();
 							}}
 							isDisabled={
@@ -583,13 +583,7 @@ const ReviewsTab = (props: Props) => {
 					className="fr-mb-4v"
 					description={
 						<div
-							className={fr.cx(
-								currentExport.link === null && currentExport.params
-									? 'fr-mt-4v'
-									: currentExport.link
-									? 'fr-mt-2v'
-									: 'fr-hidden'
-							)}
+							className={fr.cx(currentExport.link ? 'fr-mt-2v' : 'fr-mt-4v')}
 						>
 							{currentExport.link && (
 								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
@@ -623,15 +617,15 @@ const ReviewsTab = (props: Props) => {
 										className={cx(classes.progressBarLabel)}
 										style={{
 											color:
-												(currentExport as any).progress < 5
+												currentExport.progress < 5
 													? 'black'
 													: undefined
 										}}
 									>
-										{(currentExport as any).progress}%
+										{currentExport.progress}%
 									</span>
 									<LinearProgress
-										value={(currentExport as any).progress}
+										value={currentExport.progress}
 										variant="determinate"
 										className={fr.cx('fr-mt-3v', 'fr-mb-2v', 'fr-p-3v')}
 										sx={{

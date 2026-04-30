@@ -14,7 +14,7 @@ interface Props {
 	filters: ReviewFiltersType;
 	reviewsCountfiltered: number;
 	reviewsCountAll: number;
-	onExportCreated: () => void;
+	onExportCreated: (exportId: number) => void;
 	isDisabled?: boolean;
 }
 

@@ -294,8 +294,8 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 		if (totalReviews > 0) {
 			const percent = Math.min(
-				95,
-				Math.floor((retrievedReviews * 95) / totalReviews)
+				60,
+				Math.floor((retrievedReviews * 60) / totalReviews)
 			);
 			if (percent !== lastProgressPercent) {
 				lastProgressPercent = percent;
@@ -319,7 +319,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	await prisma.export.update({
 		where: { id: exportId },
-		data: { progress: 95 }
+		data: { progress: 60 }
 	});
 
 	// CSV → single flat file with all rows
@@ -341,13 +341,16 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	await prisma.export.update({
 		where: { id: exportId },
-		data: { progress: 98 }
+		data: { progress: 85 }
 	});
-	await uploadToS3(fileBuffer, fileName);
+	const contentType = exportFormat === 'csv'
+		? 'text/csv; charset=utf-8'
+		: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+	await uploadToS3(fileBuffer, fileName, contentType);
 
 	await prisma.export.update({
 		where: { id: exportId },
-		data: { progress: 99 }
+		data: { progress: 98 }
 	});
 	const downloadLink = await generateDownloadLink(fileName);
 
@@ -363,7 +366,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	try {
 		const html = await renderExportReadyEmail({ productName, downloadLink });
-		const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 30 jours.\n\nCordialement,\nL'équipe JDMA`;
+		const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 7 jours.\n\nCordialement,\nL'équipe JDMA`;
 
 		await sendMail(
 			`Votre export est prêt : [${productName}]`,

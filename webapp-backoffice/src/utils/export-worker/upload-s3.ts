@@ -14,7 +14,8 @@ const REQUIRED_S3_ENV_VARS = [
 
 export function validateS3EnvVars(): void {
 	for (const name of REQUIRED_S3_ENV_VARS) {
-		if (!process.env[name]) throw new Error(`[export-worker] Missing required env var: ${name}`);
+		if (!process.env[name])
+			throw new Error(`[export-worker] Missing required env var: ${name}`);
 	}
 }
 
@@ -53,7 +54,8 @@ function getBucket(): string {
 
 export async function uploadToS3(
 	buffer: Buffer,
-	objectName: string
+	objectName: string,
+	contentType: string
 ): Promise<void> {
 	const client = getS3Client();
 
@@ -61,13 +63,16 @@ export async function uploadToS3(
 		new PutObjectCommand({
 			Bucket: getBucket(),
 			Key: objectName,
-			Body: buffer
+			Body: buffer,
+			ContentType: contentType
 		})
 	);
 }
 
 /** Generates a pre-signed GET URL valid for 7 days (SigV4 maximum). */
-export async function generateDownloadLink(objectName: string): Promise<string> {
+export async function generateDownloadLink(
+	objectName: string
+): Promise<string> {
 	const client = getS3Client();
 
 	const url = await getSignedUrl(
