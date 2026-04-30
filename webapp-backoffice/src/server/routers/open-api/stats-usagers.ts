@@ -52,6 +52,29 @@ export const statsUsagersQuery = async ({
 
 	const authorized_products_ids: number[] = await getAuthorizedProductIds();
 
+	if (product_ids.length > 0) {
+		const existingProducts = await ctx.prisma.product.findMany({
+			where: {
+				id: { in: product_ids }
+			},
+			select: { id: true }
+		});
+
+		const existingProductIds = existingProducts.map(product => product.id);
+		const missingProductIds = product_ids.filter(
+			productId => !existingProductIds.includes(productId)
+		);
+
+		if (missingProductIds.length > 0) {
+			throw new TRPCError({
+				code: 'BAD_REQUEST',
+				message: `Les product_ids suivants n'existent pas en base : ${missingProductIds.join(
+					', '
+				)}`
+			});
+		}
+	}
+
 	const allFields = [
 		...FIELD_CODE_BOOLEAN_VALUES,
 		...FIELD_CODE_SMILEY_VALUES,
@@ -70,17 +93,37 @@ export const statsUsagersQuery = async ({
 	};
 
 	let authorizedFormIds: number[] = [];
+	let legacyProductIds: number[] = [];
 	if (form_ids.length > 0) {
-		const forms = await ctx.prisma.form.findMany({
+		const existingForms = await ctx.prisma.form.findMany({
 			where: {
-				id: { in: form_ids },
-				...(ctx.api_key?.scope.includes('admin')
-					? {}
-					: { product_id: { in: authorized_products_ids } })
+				id: { in: form_ids }
 			},
-			select: { id: true, product_id: true }
+			select: { id: true, product_id: true, legacy: true }
 		});
+
+		const existingFormIds = existingForms.map(form => form.id);
+		const missingFormIds = form_ids.filter(
+			formId => !existingFormIds.includes(formId)
+		);
+
+		if (missingFormIds.length > 0) {
+			throw new TRPCError({
+				code: 'BAD_REQUEST',
+				message: `Les form_ids suivants n'existent pas en base : ${missingFormIds.join(
+					', '
+				)}`
+			});
+		}
+
+		const forms = ctx.api_key?.scope.includes('admin')
+			? existingForms
+			: existingForms.filter(form =>
+					authorized_products_ids.includes(form.product_id)
+			  );
+
 		authorizedFormIds = forms.map(f => f.id);
+		legacyProductIds = forms.filter(f => f.legacy).map(f => f.product_id);
 	}
 
 	if (!ctx.api_key?.scope.includes('admin')) {
@@ -95,6 +138,10 @@ export const statsUsagersQuery = async ({
 	} else {
 		fetchParams.product_ids = product_ids.length > 0 ? product_ids : undefined;
 		fetchParams.form_ids = form_ids.length > 0 ? form_ids : undefined;
+	}
+
+	if (legacyProductIds.length > 0) {
+		fetchParams.legacy_product_ids = legacyProductIds;
 	}
 
 	if (
@@ -125,7 +172,7 @@ export const statsUsagersQuery = async ({
 			: [];
 
 	const allRelevantProductIds = Array.from(
-		new Set([...relevantProductIds, ...formProductIds])
+		new Set([...relevantProductIds, ...formProductIds, ...legacyProductIds])
 	);
 
 	if (

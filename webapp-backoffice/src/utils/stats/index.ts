@@ -14,6 +14,7 @@ export type FetchAndFormatDataProps = {
 	field_codes: FieldCodeHelper[];
 	product_ids?: string[] | number[];
 	form_ids?: number[];
+	legacy_product_ids?: number[];
 	start_date: string;
 	end_date: string;
 	interval: 'day' | 'week' | 'month' | 'year' | 'none';
@@ -24,6 +25,7 @@ export const fetchAndFormatData = async ({
 	field_codes,
 	product_ids,
 	form_ids,
+	legacy_product_ids,
 	start_date,
 	end_date,
 	interval
@@ -61,28 +63,45 @@ export const fetchAndFormatData = async ({
 
 	const hasProductIds = !!product_ids && product_ids.length > 0;
 	const hasFormIds = !!form_ids && form_ids.length > 0;
+	const hasLegacyProductIds =
+		!!legacy_product_ids && legacy_product_ids.length > 0;
 
 	if (
 		(hasProductIds || hasFormIds) &&
 		query?.bool?.must &&
 		Array.isArray(query.bool.must)
 	) {
-		if (hasProductIds && hasFormIds) {
-			query.bool.must.push({
+		const shouldClauses: QueryDslQueryContainer[] = [];
+
+		if (hasProductIds) {
+			shouldClauses.push({ terms: { product_id: product_ids! } });
+		}
+		if (hasFormIds) {
+			shouldClauses.push({ terms: { form_id: form_ids! } });
+		}
+		if (hasLegacyProductIds) {
+			shouldClauses.push({
 				bool: {
-					should: [
-						{ terms: { product_id: product_ids! } },
-						{ terms: { form_id: form_ids! } }
+					must: [
+						{
+							bool: {
+								should: [
+									{ term: { form_id: 2 } },
+									{ bool: { must_not: [{ exists: { field: 'form_id' } }] } }
+								]
+							}
+						},
+						{ terms: { product_id: legacy_product_ids! } }
 					]
 				}
 			});
-		} else if (hasProductIds) {
+		}
+
+		if (shouldClauses.length === 1) {
+			query.bool.must.push(shouldClauses[0]);
+		} else {
 			query.bool.must.push({
-				terms: { product_id: product_ids! }
-			});
-		} else if (hasFormIds) {
-			query.bool.must.push({
-				terms: { form_id: form_ids! }
+				bool: { should: shouldClauses }
 			});
 		}
 	}
@@ -131,6 +150,12 @@ export const fetchAndFormatData = async ({
 	}
 	if (hasFormIds) {
 		formsWhereConditions.push({ id: { in: form_ids! } });
+	}
+	if (hasLegacyProductIds) {
+		formsWhereConditions.push({
+			id: 2,
+			product_id: { in: legacy_product_ids! }
+		});
 	}
 
 	const formsHelper = await ctx.prisma.form.findMany({

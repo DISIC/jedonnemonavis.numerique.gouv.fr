@@ -27,7 +27,7 @@ const ReviewTableHeader = (props: Props) => {
 			code: 'created_at'
 		},
 		...mainBlocks.map(block => ({
-			label: block.alias ? block.alias : (block.label ?? ''),
+			label: block.alias ? block.alias : block.label ?? '',
 			code: block.type_bloc || ''
 		})),
 		...(hasVerbatimBlock
@@ -36,7 +36,7 @@ const ReviewTableHeader = (props: Props) => {
 						label: 'Commentaire',
 						code: 'verbatim'
 					}
-				]
+			  ]
 			: [])
 	];
 
@@ -45,46 +45,56 @@ const ReviewTableHeader = (props: Props) => {
 			<tr
 				className={cx(
 					classes.trContainer,
-					fr.cx('fr-hidden', 'fr-unhidden-lg')
+					fr.cx('fr-hidden', 'fr-unhidden-md')
 				)}
 			>
-				{sortList.map((sort, index) => (
-					<th
-						className={cx(
-							classes.badgeVerbatim,
-							sort.code ? classes.pointer : '',
-							fr.cx('fr-hidden', 'fr-unhidden-lg'),
-							classes.thContainer
-						)}
-						key={index}
-						onClick={() => {
-							if (sort.code) {
-								onClick(sort.code);
-							}
-						}}
-						scope="col"
-					>
-						<span>
-							{sort.label}{' '}
-							{props.sort.includes(sort.code || sort.label) && (
-								<i
-									className={
-										props.sort.includes('asc')
-											? 'ri-arrow-drop-down-fill'
-											: 'ri-arrow-drop-up-fill'
-									}
-								></i>
+				{sortList.map((sort, index) => {
+					const isSortable = props.sort.includes(sort.code || sort.label);
+					return (
+						<th
+							className={cx(
+								classes.badgeVerbatim,
+								isSortable ? classes.pointer : '',
+								fr.cx('fr-hidden', 'fr-unhidden-md'),
+								classes.thContainer
 							)}
-						</span>
-					</th>
-				))}
-				{new Array(3).fill(0).map((i, index) => (
+							key={index}
+							onClick={isSortable ? () => onClick(sort.code) : undefined}
+							scope="col"
+						>
+							<span>
+								{sort.label}&nbsp;
+								{isSortable && (
+									<i
+										className={cx(
+											props.sort.includes('asc')
+												? 'ri-arrow-drop-down-fill'
+												: 'ri-arrow-drop-up-fill',
+											classes.thIcon
+										)}
+									></i>
+								)}
+							</span>
+						</th>
+					);
+				})}
+				{new Array(2).fill(0).map((i, index) => (
 					<th
 						className={cx(classes.badgeVerbatim)}
 						key={`fake_div_${index}`}
 						aria-hidden="true"
 					></th>
 				))}
+				<th
+					className={cx(
+						classes.badgeVerbatim,
+						classes.thContainer,
+						classes.actionHeader
+					)}
+					scope="col"
+				>
+					Action
+				</th>
 			</tr>
 		</thead>
 	);
@@ -97,14 +107,36 @@ const useStyles = tss.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		width: '100%',
-		padding: 12
+		padding: 12,
+		borderTop: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
+		borderRadius: 0,
+		[fr.breakpoints.down('md')]: {
+			border: 'none'
+		}
 	},
 	trContainer: {
 		width: '100%',
-		display: 'flex'
+		display: 'flex',
+		'th:last-of-type': {
+			textAlign: 'right'
+		}
 	},
 	thContainer: {
-		width: 'max-content'
+		width: 'max-content',
+		lineHeight: 1,
+		span: {
+			position: 'relative'
+		},
+		[fr.breakpoints.down('md')]: {
+			display: 'none'
+		}
+	},
+	thIcon: {
+		position: 'absolute',
+		top: '50%',
+		transform: 'translateY(-50%)',
+		fontSize: 12
 	},
 	pointer: {
 		cursor: 'pointer'
@@ -131,6 +163,12 @@ const useStyles = tss.create({
 		paddingVertical: 4,
 		fontSize: 14,
 		flex: '0 0 calc(100% / 6);'
+	},
+	actionHeader: {
+		paddingRight: fr.spacing('4v'),
+		[fr.breakpoints.down('lg')]: {
+			paddingRight: 0
+		}
 	}
 });
 

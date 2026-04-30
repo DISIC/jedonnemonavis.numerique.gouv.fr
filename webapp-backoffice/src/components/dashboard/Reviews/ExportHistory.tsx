@@ -26,7 +26,7 @@ const ExportHistory = (props: Props) => {
 			/>
 
 			<Button
-				priority="tertiary"
+				priority="secondary"
 				type="button"
 				nativeButtonProps={export_modal.buttonProps}
 			>

@@ -1,4 +1,5 @@
 import { TypeExportSchema } from '@/prisma/generated/zod';
+import { exportQueue } from '@/src/lib/queue';
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
@@ -28,6 +29,12 @@ export const createExportMutation = async ({
 	const exportCsv = await ctx.prisma.export.create({
 		data: { ...input, status: 'idle' }
 	});
+
+	await exportQueue.add(
+		'process',
+		{ exportId: exportCsv.id },
+		{ jobId: `export-${exportCsv.id}` }
+	);
 
 	return { data: exportCsv };
 };

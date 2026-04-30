@@ -1,7 +1,5 @@
-import {
-	FormConfigWithChildren,
-	FormTemplateWithElements
-} from '@/src/types/prismaTypesExtended';
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	buildAccentAwarePattern,
 	getExactPhrase,
@@ -12,17 +10,16 @@ import {
 	getStatsColor,
 	getStatsIcon
 } from '@/src/utils/stats/intention-helpers';
-import { formatDateToFrenchString, getSeverity } from '@/src/utils/tools';
-import { trpc } from '@/src/utils/trpc';
+import {
+	formatDateToFrenchString,
+	formatFullFrenchDateTime,
+	getSeverity
+} from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { push } from '@socialgouv/matomo-next';
-import Image from 'next/image';
-import React, { useEffect } from 'react';
-import { tss } from 'tss-react/dsfr';
-import ReviewDetailPanel from './ReviewDetailPanel';
 import Badge from '@codegouvfr/react-dsfr/Badge';
-import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
+import Image from 'next/image';
+import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 const highlightSearchTerms = (text: string, search: string): string => {
 	if (!search.trim()) return text;
@@ -65,23 +62,21 @@ const highlightSearchTerms = (text: string, search: string): string => {
 const ReviewTableRow = ({
 	review,
 	search,
-	formConfig,
-	hasManyVersions,
-	formTemplate,
-	onClickMoreInfo
+	form,
+	isSelected,
+	onSelectReview,
+	rowRef
 }: {
 	review: ReviewPartialWithRelations;
 	search: string;
-	formConfig?: FormConfigWithChildren;
-	hasManyVersions: boolean;
-	formTemplate: FormTemplateWithElements;
-	onClickMoreInfo?: () => void;
+	form: FormWithElements;
+	isSelected?: boolean;
+	onSelectReview: (review: ReviewPartialWithRelations) => void;
+	rowRef?: (el: HTMLTableRowElement | null) => void;
 }) => {
 	const { cx, classes } = useStyles();
-	const [displayMoreInfo, setDisplayMoreInfo] = React.useState(false);
 
-	const { mutate: createReviewViewLog } =
-		trpc.reviewViewLog.create.useMutation();
+	const formTemplate = form.form_template;
 
 	const mainBlocks = formTemplate.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -95,138 +90,139 @@ const ReviewTableRow = ({
 		? review.answers?.find(answer => answer.field_code === 'verbatim')
 		: undefined;
 
-	useEffect(() => {
-		if (displayMoreInfo)
-			createReviewViewLog({
-				review_id: review.id as number,
-				review_created_at: review.created_at as Date
-			});
-	}, [displayMoreInfo]);
+	const handleSelect = () => {
+		onSelectReview(review);
+	};
+
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			handleSelect();
+		} else if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			const next = e.currentTarget.nextElementSibling as HTMLElement | null;
+			next?.focus();
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			const prev = e.currentTarget.previousElementSibling as HTMLElement | null;
+			prev?.focus();
+		}
+	};
 
 	return (
-		<tr className={cx(classes.container)}>
-			<div
+		<tr
+			ref={rowRef}
+			className={cx(
+				classes.container,
+				classes.line,
+				fr.cx('fr-grid-row', 'fr-grid-row--middle'),
+				isSelected && classes.containerSelected
+			)}
+			onClick={handleSelect}
+			tabIndex={0}
+			onKeyDown={handleKeyDown}
+			aria-selected={isSelected}
+			title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
+		>
+			<td
 				className={cx(
-					classes.line,
-					fr.cx('fr-grid-row', 'fr-grid-row--middle')
+					classes.dateLabel,
+					fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
 				)}
+				aria-label={`Avis du ${formatFullFrenchDateTime(
+					review.created_at?.toString() || ''
+				)}`}
 			>
-				<td
-					className={cx(
-						classes.dateLabel,
-						fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2', 'fr-pr-2v')
-					)}
-				>
+				<span aria-hidden="true">
 					{formatDateToFrenchString(review.created_at?.toString() || '')}
-				</td>
+					<br />
+					<span className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+						{formatDateToFrenchString(review.created_at?.toString() || '', {
+							hourOnly: true,
+							hourFormat: 'short'
+						})}
+					</span>
+				</span>
+			</td>
 
-				{mainBlocks.map((block, index) => {
-					const answer = review.answers?.find(
-						answer => answer.field_code === block.field_code
-					);
+			{mainBlocks.map((block, index) => {
+				const answer = review.answers?.find(
+					answer => answer.field_code === block.field_code
+				);
 
-					const formTemplateBlockOption = block.options.find(
-						opt => opt.id === answer?.answer_item_id
-					);
+				const formTemplateBlockOption = block.options.find(
+					opt => opt.id === answer?.answer_item_id
+				);
 
-					return (
-						<td
-							key={index}
-							className={cx(
-								classes.label,
-								fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
-							)}
-							style={{
-								color: answer?.intention
-									? getStatsColor({ intention: answer.intention })
-									: undefined
-							}}
-						>
-							{answer && answer.intention && (
-								<Badge
-									className={cx(classes.badge)}
-									noIcon={true}
-									severity={getSeverity(answer.intention || '')}
-								>
-									{answer.field_code === 'satisfaction' && (
-										<Image
-											alt=""
-											src={`/assets/smileys/${getStatsIcon({
-												intention: answer.intention ?? 'neutral'
-											})}.svg`}
-											width={16}
-											height={16}
-										/>
-									)}
-
-									{answer.field_code === 'satisfaction'
-										? displayIntention(answer.intention ?? 'neutral')
-										: formTemplateBlockOption?.alias ??
-										  formTemplateBlockOption?.label ??
-										  answer.answer_text ??
-										  ''}
-								</Badge>
-							)}
-							{answer && !answer.intention && (
-								<span>{answer.answer_text || '-'}</span>
-							)}
-							{!answer && <span>-</span>}
-						</td>
-					);
-				})}
-
-				{hasVerbatimBlock && (
+				return (
 					<td
-						className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-5', 'fr-pr-3v')}
-					>
-						<p
-							className={cx(classes.content, classes.contentVerbatim)}
-							dangerouslySetInnerHTML={{
-								__html: `${
-									verbatimAnswer
-										? highlightSearchTerms(
-												verbatimAnswer.answer_text || '',
-												search
-										  )
-										: '-'
-								}`
-							}}
-						></p>
-					</td>
-				)}
-
-				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-3')}>
-					<Button
-						priority="tertiary no outline"
-						title={`Plus d'infos sur l'avis ${review.id?.toString(16)}`}
-						size="small"
-						onClick={() => {
-							setDisplayMoreInfo(!displayMoreInfo);
-							push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
-							onClickMoreInfo?.();
-						}}
-						className={classes.button}
+						key={index}
+						className={cx(
+							classes.label,
+							fr.cx('fr-col', 'fr-col-12', 'fr-col-md-2')
+						)}
 						style={{
-							backgroundColor: displayMoreInfo
-								? fr.colors.decisions.background.alt.blueFrance.default
+							color: answer?.intention
+								? getStatsColor({ intention: answer.intention })
 								: undefined
 						}}
-						aria-expanded={displayMoreInfo}
 					>
-						Voir le détail de la réponse
-					</Button>
+						{answer && answer.intention && (
+							<Badge
+								className={cx(classes.badge)}
+								noIcon={true}
+								severity={getSeverity(answer.intention || '')}
+							>
+								{answer.field_code === 'satisfaction' && (
+									<Image
+										alt=""
+										src={`/assets/smileys/${getStatsIcon({
+											intention: answer.intention ?? 'neutral'
+										})}.svg`}
+										width={16}
+										height={16}
+									/>
+								)}
+
+								{answer.field_code === 'satisfaction'
+									? displayIntention(answer.intention ?? 'neutral')
+									: formTemplateBlockOption?.alias ??
+									  formTemplateBlockOption?.label ??
+									  answer.answer_text ??
+									  ''}
+							</Badge>
+						)}
+						{answer && !answer.intention && (
+							<span>{answer.answer_text || '-'}</span>
+						)}
+						{!answer && <span>-</span>}
+					</td>
+				);
+			})}
+
+			{hasVerbatimBlock && (
+				<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-7')}>
+					<p
+						className={cx(classes.content, classes.contentVerbatim)}
+						dangerouslySetInnerHTML={{
+							__html: `${
+								verbatimAnswer
+									? highlightSearchTerms(
+											verbatimAnswer.answer_text || '',
+											search
+									  )
+									: '-'
+							}`
+						}}
+					></p>
 				</td>
-			</div>
-			{displayMoreInfo && (
-				<ReviewDetailPanel
-					review={review}
-					formConfig={formConfig}
-					hasManyVersions={hasManyVersions}
-					search={search}
-					formTemplate={formTemplate}
-				/>
 			)}
-			<hr />
+
+			<td className={fr.cx('fr-col', 'fr-col-12', 'fr-col-md-1')}>
+				<span className={classes.action} role="button">
+					Voir l'avis
+				</span>
+			</td>
 		</tr>
 	);
 };
@@ -235,11 +231,25 @@ const useStyles = tss.create({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',
-		marginBottom: 12,
 		width: '100%',
+		cursor: 'pointer',
+		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		'td:last-of-type': {
 			textAlign: 'right'
+		},
+		'&:hover': {
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			'& td:last-of-type span': {
+				backgroundSize: '100% 2.25px'
+			}
+		},
+		'&:focus-visible': {
+			outline: `2px solid ${fr.colors.decisions.border.active.blueFrance.default}`,
+			outlineOffset: '-2px'
 		}
+	},
+	containerSelected: {
+		backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 	},
 	line: {
 		fontSize: fr.spacing('4v'),
@@ -258,7 +268,13 @@ const useStyles = tss.create({
 		fontWeight: 'bold',
 		display: 'flex',
 		alignItems: 'center',
-		gap: '0.3rem'
+		gap: '0.3rem',
+		marginRight: '-4rem',
+		marginLeft: '-2rem',
+		[fr.breakpoints.down('lg')]: {
+			marginRight: 0,
+			marginLeft: 0
+		}
 	},
 	verbatim: {
 		flexShrink: 1
@@ -270,7 +286,7 @@ const useStyles = tss.create({
 	},
 	content: {
 		display: '-webkit-box',
-		WebkitLineClamp: 3,
+		WebkitLineClamp: 10,
 		WebkitBoxOrient: 'vertical',
 		overflow: 'hidden',
 		textOverflow: 'ellipsis',
@@ -284,8 +300,14 @@ const useStyles = tss.create({
 		wordBreak: 'break-word',
 		margin: 0
 	},
-	button: {
-		textDecoration: 'underline',
+	action: {
+		fontSize: '0.875rem',
+		textWrap: 'nowrap',
+		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
+		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,
+		backgroundSize: '100% 1px',
+		backgroundPosition: '0 100%',
+		backgroundRepeat: 'no-repeat',
 		[fr.breakpoints.down('md')]: {
 			width: '100%',
 			justifyContent: 'center'

@@ -1,3 +1,5 @@
+// Import React Required: tsx (used by dev:worker) uses the classic JSX transform which needs React in scope
+import React from 'react';
 import { render } from '@react-email/components';
 import JdmaUserRequestAcceptedEmail from '@/react-email/emails/jdma-user-request-accepted-email';
 import JdmaUserRequestRefusedEmail from '@/react-email/emails/jdma-user-request-refused-email';
@@ -10,6 +12,8 @@ import JdmaClosedButtonOrFormEmail from '@/react-email/emails/jdma-closed-button
 import JdmaProductArchivedEmail from '@/react-email/emails/jdma-product-archived-email';
 import JdmaProductRestoredEmail from '@/react-email/emails/jdma-product-restored-email';
 import JdmaNotificationsEmail from '@/react-email/emails/jdma-notifications-email';
+import JdmaExportReadyEmail from '@/react-email/emails/jdma-export-ready-email';
+import JdmaExportFailedEmail from '@/react-email/emails/jdma-export-failed-email';
 import {
 	JdmaNotificationsEmailProps,
 	JdmaTokenEmailProps,
@@ -19,7 +23,9 @@ import {
 	JdmaOtpEmailProps,
 	JdmaProductArchivedEmailProps,
 	JdmaProductRestoredEmailProps,
-	JdmaUserInviteEmailProps
+	JdmaUserInviteEmailProps,
+	JdmaExportReadyEmailProps,
+	JdmaExportFailedEmailProps
 } from '@/react-email/emails/interface';
 
 export async function renderUserRequestAcceptedEmail(
@@ -87,3 +93,16 @@ export async function renderNotificationsEmail(
 ): Promise<string> {
 	return await render(<JdmaNotificationsEmail {...props} />);
 }
+
+export async function renderExportReadyEmail(
+	props: JdmaExportReadyEmailProps
+): Promise<string> {
+	return await render(<JdmaExportReadyEmail {...props} />);
+}
+
+export async function renderExportFailedEmail(
+	props: JdmaExportFailedEmailProps
+): Promise<string> {
+	return await render(<JdmaExportFailedEmail {...props} />);
+}
+

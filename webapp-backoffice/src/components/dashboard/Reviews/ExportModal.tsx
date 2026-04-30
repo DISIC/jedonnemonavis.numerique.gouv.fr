@@ -15,7 +15,7 @@ interface Props {
 		countAll: number;
 	};
 	params: string;
-	onExportCreated: () => void;
+	onExportCreated: (exportId: number) => void;
 	hasExportsInProgress: boolean;
 	form: FormWithElements;
 }
@@ -34,8 +34,8 @@ const ExportModal = (props: Props) => {
 	const [endDate, setEndDate] = React.useState<string | null>(null);
 
 	const createExport = trpc.export.create.useMutation({
-		onSuccess: () => {
-			onExportCreated();
+		onSuccess: data => {
+			onExportCreated(data.data.id);
 		}
 	});
 
