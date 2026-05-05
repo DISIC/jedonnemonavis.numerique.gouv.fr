@@ -17,11 +17,30 @@ export const updateUserMutation = async ({
 	input: z.infer<typeof updateUserInputSchema>;
 }) => {
 	const { id, user } = input;
-	const { role, ...userWithoutRole } = user;
+	const isAdmin = ctx.session?.user?.role.includes('admin');
 
-	const dataToUpdate = ctx.session?.user?.role.includes('admin')
-		? { ...userWithoutRole, role }
-		: { ...userWithoutRole };
+	const {
+		role,
+		password,
+		active,
+		xwiki_account,
+		proconnect_account,
+		created_at,
+		updated_at,
+		id: _ignoredId,
+		...userWithoutSensitive
+	} = user;
+
+	const dataToUpdate = isAdmin
+		? {
+				...userWithoutSensitive,
+				role,
+				password,
+				active,
+				xwiki_account,
+				proconnect_account
+		  }
+		: { ...userWithoutSensitive };
 
 	if (dataToUpdate.email) {
 		const userHasConflict = await ctx.prisma.user.findUnique({

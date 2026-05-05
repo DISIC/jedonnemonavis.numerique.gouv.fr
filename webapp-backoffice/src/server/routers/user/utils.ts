@@ -53,6 +53,17 @@ export async function registerUserFromOTP(
 
 	if (!userOTP || !userOTP.user) return;
 
+	if (
+		!user.email ||
+		user.email.toLowerCase() !== userOTP.user.email.toLowerCase()
+	) {
+		return;
+	}
+
+	if (userOTP.expiration_date < new Date()) {
+		return;
+	}
+
 	const updatedUser = await prisma.user.update({
 		where: {
 			id: userOTP.user.id
