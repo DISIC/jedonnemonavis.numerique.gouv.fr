@@ -1,6 +1,8 @@
 # Je donne mon avis
 
 ![CI Workflow](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/actions/workflows/ci.yml/badge.svg)
+![Cypress Tests](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/actions/workflows/tests.yml/badge.svg)
+![CodeQL](https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr/actions/workflows/github-code-scanning/codeql/badge.svg)
 
 ## Developpement
 

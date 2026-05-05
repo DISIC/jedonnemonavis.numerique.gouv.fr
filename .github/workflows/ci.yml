@@ -21,14 +21,23 @@ jobs:
         node-version: [22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: webapp-backoffice/package-lock.json
+
+      - name: Cache Next.js build
+        uses: actions/cache@v5
+        with:
+          path: webapp-backoffice/.next/cache
+          key: nextjs-bo-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('webapp-backoffice/package-lock.json') }}-${{ hashFiles('webapp-backoffice/src/**/*.[jt]s', 'webapp-backoffice/src/**/*.[jt]sx') }}
+          restore-keys: |
+            nextjs-bo-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('webapp-backoffice/package-lock.json') }}-
+            nextjs-bo-${{ runner.os }}-node${{ matrix.node-version }}-
 
       - name: Build webapp-backoffice
         working-directory: webapp-backoffice
@@ -47,14 +56,23 @@ jobs:
         node-version: [22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
           cache-dependency-path: webapp-form/yarn.lock
+
+      - name: Cache Next.js build
+        uses: actions/cache@v5
+        with:
+          path: webapp-form/.next/cache
+          key: nextjs-form-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('webapp-form/yarn.lock') }}-${{ hashFiles('webapp-form/src/**/*.[jt]s', 'webapp-form/src/**/*.[jt]sx') }}
+          restore-keys: |
+            nextjs-form-${{ runner.os }}-node${{ matrix.node-version }}-${{ hashFiles('webapp-form/yarn.lock') }}-
+            nextjs-form-${{ runner.os }}-node${{ matrix.node-version }}-
 
       - name: Build webapp-form
         working-directory: webapp-form
@@ -62,3 +80,68 @@ jobs:
           yarn install
           npx prisma generate
           yarn build
+
+  lockfile-check:
+    name: Lockfile drift check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: webapp-backoffice — verify package-lock is in sync
+        working-directory: webapp-backoffice
+        run: |
+          cp package-lock.json package-lock.json.bak
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          if ! diff -q package-lock.json.bak package-lock.json >/dev/null 2>&1; then
+            echo "::error::webapp-backoffice/package-lock.json is out of sync with package.json"
+            diff package-lock.json.bak package-lock.json | head -40 || true
+            exit 1
+          fi
+
+      - name: webapp-form — verify yarn.lock is in sync
+        working-directory: webapp-form
+        run: |
+          cp yarn.lock yarn.lock.bak
+          yarn install --ignore-scripts >/dev/null 2>&1 || true
+          if ! diff -q yarn.lock.bak yarn.lock >/dev/null 2>&1; then
+            echo "::error::webapp-form/yarn.lock is out of sync with package.json"
+            diff yarn.lock.bak yarn.lock | head -40 || true
+            exit 1
+          fi
+
+  license-check:
+    name: License check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [webapp-backoffice, webapp-form]
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24.x
+
+      - name: Install ${{ matrix.app }}
+        working-directory: ${{ matrix.app }}
+        run: |
+          if [ -f package-lock.json ]; then npm install --ignore-scripts --no-audit --no-fund; else yarn install --ignore-scripts; fi
+
+      - name: Audit licenses
+        working-directory: ${{ matrix.app }}
+        run: |
+          npx --yes license-checker@25.0.1 \
+            --production \
+            --excludePrivatePackages \
+            --failOn "GPL-2.0;GPL-3.0;AGPL-1.0;AGPL-3.0;LGPL-2.1;LGPL-3.0;SSPL-1.0;CC-BY-NC-1.0;CC-BY-NC-2.0;CC-BY-NC-3.0;CC-BY-NC-4.0;CC-BY-NC-SA-1.0;CC-BY-NC-SA-2.0;CC-BY-NC-SA-3.0;CC-BY-NC-SA-4.0;CC-BY-NC-ND-1.0;CC-BY-NC-ND-2.0;CC-BY-NC-ND-3.0;CC-BY-NC-ND-4.0;UNKNOWN;UNLICENSED" \
+            --summary
