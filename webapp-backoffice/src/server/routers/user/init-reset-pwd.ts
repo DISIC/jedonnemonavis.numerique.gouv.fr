@@ -6,7 +6,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 export const initResetPwdInputSchema = z.object({
-	email: z.string(),
+	email: z.string().trim().toLowerCase().email().max(254),
 	forgot: z.boolean().optional()
 });
 
