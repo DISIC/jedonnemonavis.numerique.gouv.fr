@@ -120,13 +120,35 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 			}
 		}
 		if (!rawInput && ctx.req.body && typeof ctx.req.body === 'object') {
-			rawInput = Object.values(ctx.req.body)[0];
+			rawInput = ctx.req.body;
 		}
 
-		const requestId =
-			rawInput?.json?.id ?? rawInput?.id ?? rawInput?.[0]?.json?.id;
+		const extractPayloads = (bag: any): any[] => {
+			if (!bag) return [];
+			if (Array.isArray(bag)) return bag;
+			if (bag.json !== undefined || bag.id !== undefined) return [bag];
+			return Object.values(bag);
+		};
 
-		if (!requestId || requestId.toString() !== currentUserId?.toString()) {
+		const payloads = extractPayloads(rawInput);
+
+		if (payloads.length === 0) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'You are not authorized to perform this action'
+			});
+		}
+
+		const allOwn = payloads.every(payload => {
+			const requestId = payload?.json?.id ?? payload?.id;
+			return (
+				requestId !== undefined &&
+				requestId !== null &&
+				requestId.toString() === currentUserId?.toString()
+			);
+		});
+
+		if (!allOwn) {
 			throw new TRPCError({
 				code: 'UNAUTHORIZED',
 				message: 'You are not authorized to perform this action'
@@ -209,7 +231,14 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 
 const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 	if (ctx.req.headers.authorization) {
-		const apiKey = ctx.req.headers.authorization.split(' ')[1];
+		const [scheme, apiKey] = ctx.req.headers.authorization.split(' ');
+
+		if (scheme !== 'Bearer' || !apiKey) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'Please provide a valid API key'
+			});
+		}
 
 		const checkApiKey = await ctx.prisma.apiKey.findFirst({
 			where: {

@@ -2,6 +2,22 @@ import escapeHtml from 'escape-html';
 import { Descendant, Text } from 'slate';
 import { jsx } from 'slate-hyperscript';
 
+const ALLOWED_LINK_SCHEMES = ['http:', 'https:', 'mailto:', 'tel:'];
+
+const sanitizeLinkUrl = (url: unknown): string => {
+	if (typeof url !== 'string') return '';
+	const trimmed = url.trim();
+	if (!trimmed) return '';
+	if (trimmed.startsWith('/') || trimmed.startsWith('#')) return trimmed;
+	try {
+		const parsed = new URL(trimmed);
+		if (ALLOWED_LINK_SCHEMES.includes(parsed.protocol.toLowerCase())) {
+			return parsed.toString();
+		}
+	} catch {}
+	return '';
+};
+
 export const deserialize = (
 	el: any,
 	markAttributes: any = {}
@@ -81,8 +97,11 @@ export const serialize = (node: any) => {
 			return `<blockquote><p>${children}</p></blockquote>`;
 		case 'paragraph':
 			return `<p>${children}</p>`;
-		case 'link':
-			return `<a href="${escapeHtml(node.url)}">${children}</a>`;
+		case 'link': {
+			const safeUrl = sanitizeLinkUrl(node.url);
+			if (!safeUrl) return children;
+			return `<a href="${escapeHtml(safeUrl)}">${children}</a>`;
+		}
 		default:
 			return children;
 	}
