@@ -34,6 +34,7 @@ jobs:
         working-directory: webapp-backoffice
         run: |
           npm install
+          npx prisma generate
           npm run build
 
   build-webapp-form:
@@ -59,4 +60,5 @@ jobs:
         working-directory: webapp-form
         run: |
           yarn install
+          npx prisma generate
           yarn build
