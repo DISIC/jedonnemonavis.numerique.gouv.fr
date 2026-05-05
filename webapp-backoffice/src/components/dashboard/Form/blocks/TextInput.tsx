@@ -1,4 +1,5 @@
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { tss } from 'tss-react';
@@ -17,7 +18,7 @@ const TextInput = (props: Props) => {
 			{block.upLabel && (
 				<p
 					dangerouslySetInnerHTML={{
-						__html: block.upLabel
+						__html: sanitizeRichHtml(block.upLabel)
 					}}
 				></p>
 			)}
