@@ -1,5 +1,5 @@
 import type { Context } from '@/src/server/trpc';
-import { getMemoryValue } from '@/src/utils/memoryStorage';
+import { buildUserScopedKey, getMemoryValue } from '@/src/utils/memoryStorage';
 import { z } from 'zod';
 
 export const getProgressionExportInputSchema = z.object({
@@ -17,5 +17,6 @@ export const getProgressionExportQuery = async ({
 	ctx: Context;
 	input: z.infer<typeof getProgressionExportInputSchema>;
 }) => {
-	return { progress: getMemoryValue(input.memoryKey) || 0 };
+	const scopedKey = buildUserScopedKey(ctx.session?.user?.id, input.memoryKey);
+	return { progress: getMemoryValue(scopedKey) || 0 };
 };

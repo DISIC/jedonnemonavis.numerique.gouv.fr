@@ -1,6 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
-import { setMemoryValue } from '@/src/utils/memoryStorage';
+import { buildUserScopedKey, setMemoryValue } from '@/src/utils/memoryStorage';
 import { formatDateToFrenchString } from '@/src/utils/tools';
 import { createObjectCsvWriter as createCsvWriter } from 'csv-writer';
 import path from 'path';
@@ -66,6 +66,10 @@ export const exportReviewDataMutation = async ({
 	);
 
 	const { form_id } = input;
+	const scopedMemoryKey = buildUserScopedKey(
+		ctx.session?.user?.id,
+		input.memoryKey
+	);
 
 	const form = await ctx.prisma.form.findUnique({
 		where: {
@@ -133,7 +137,7 @@ export const exportReviewDataMutation = async ({
 
 		processedRows += batch.length;
 
-		setMemoryValue(input.memoryKey, (processedRows * 100) / totalRows);
+		setMemoryValue(scopedMemoryKey, (processedRows * 100) / totalRows);
 
 		if (processedRows >= totalRows) {
 			const csvWriter = createCsvWriter({
