@@ -2326,27 +2326,25 @@
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
-"@trpc/client@10.41.0":
-  version "10.41.0"
-  resolved "https://registry.npmjs.org/@trpc/client/-/client-10.41.0.tgz"
-  integrity sha512-W4lYULb7//2yXkULCKim49slXsBwiBq48rfge1yOWXdq0Ed8VxzXvZt8+uWOkxmHbQAw4lq8G5fCNYFB+Za6vQ==
+"@trpc/client@10.45.4":
+  version "10.45.4"
+  resolved "https://registry.npmjs.org/@trpc/client/-/client-10.45.4.tgz"
+  integrity sha512-ItpH5FMIJFt862kbAgC8hf5NJnDLo0FwEvMEX6zSLCenzWD0UH6H/fvAX1suFo1e0wcAmMhiEU1Tl6xKk/Pd1g==
 
-"@trpc/next@10.41.0":
-  version "10.41.0"
-  resolved "https://registry.npmjs.org/@trpc/next/-/next-10.41.0.tgz"
-  integrity sha512-QwvZrvDjRFEzErmLZ4hMdYfX13nsH0SpijjuTNPIlSIyFISCIfDCqmBvWC07O6fCG/swh+XM19FhJN6RMqTlKQ==
-  dependencies:
-    react-ssr-prepass "^1.5.0"
+"@trpc/next@10.45.4":
+  version "10.45.4"
+  resolved "https://registry.npmjs.org/@trpc/next/-/next-10.45.4.tgz"
+  integrity sha512-lsuFpZFIf4iFo71fWLS0F5s33fZrvvbblbXffFJBQw20wTQP5fZuZ6hXRbCgiUD+dLsZP1wDMKhky3mqZ5dKgA==
 
-"@trpc/react-query@10.41.0":
-  version "10.41.0"
-  resolved "https://registry.npmjs.org/@trpc/react-query/-/react-query-10.41.0.tgz"
-  integrity sha512-pCLZfIgcnneq1AocPLvstALawZYWS/sbhujd4mwUwA3UXFBWC/D31ysPlbz7R1dhjxhhPaIM+C6pz8vmr2ctpw==
+"@trpc/react-query@10.45.4":
+  version "10.45.4"
+  resolved "https://registry.npmjs.org/@trpc/react-query/-/react-query-10.45.4.tgz"
+  integrity sha512-/JfbkFMztsYbpl94P9TWritMjbHqWxeHz4uwjHM3W2zUcIKT88FiFXVmD/jLitPLrKhi4yAONoaRks5SUm12fQ==
 
-"@trpc/server@10.41.0":
-  version "10.41.0"
-  resolved "https://registry.npmjs.org/@trpc/server/-/server-10.41.0.tgz"
-  integrity sha512-uC0xLelzOuoFwxbBQ3GzX4DaWNucO9lW2vlGPdKu8ycXu2ObSa739oQ/lNF6qWDNUKXS0tQvGnDCAxEd178EzQ==
+"@trpc/server@10.45.4":
+  version "10.45.4"
+  resolved "https://registry.npmjs.org/@trpc/server/-/server-10.45.4.tgz"
+  integrity sha512-5MuyK5sDuFVGHOT9EMVHgRjP5I5j3RqGymcb5D47UOp8tzn6LH0g1lEgYrAsOZ12vmk1gpxMw/v/y4xHHK/Qdg==
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
@@ -7554,7 +7552,7 @@ prisma@5.14.0:
 
 prismjs@1.30.0, prismjs@^1.27.0, prismjs@^1.30.0, prismjs@~1.27.0:
   version "1.30.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.30.0.tgz#d9709969d9d4e16403f6f348c63553b19f0975a9"
+  resolved "https://registry.npmjs.org/prismjs/-/prismjs-1.30.0.tgz"
   integrity sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==
 
 process-nextick-args@~2.0.0:
@@ -7855,11 +7853,6 @@ react-smooth@^4.0.0:
     fast-equals "^5.0.1"
     prop-types "^15.8.1"
     react-transition-group "^4.4.5"
-
-react-ssr-prepass@^1.5.0:
-  version "1.6.0"
-  resolved "https://registry.npmjs.org/react-ssr-prepass/-/react-ssr-prepass-1.6.0.tgz"
-  integrity sha512-M10nxc95Sfm00fXm+tLkC1MWG5NLWEBgWoGrPSnAqEFM4BUaoy97JvVw+m3iL74ZHzj86M33rPiFi738hEFLWg==
 
 react-syntax-highlighter@^15.5.0:
   version "15.5.0"
