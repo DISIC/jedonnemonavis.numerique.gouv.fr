@@ -272,7 +272,10 @@ export const authOptions: NextAuthOptions = {
 					try {
 						data = JSON.parse(responseText);
 					} catch (error) {
-						const { payload } = await jwtVerify(responseText, JWKS);
+						const { payload } = await jwtVerify(responseText, JWKS, {
+							issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+							audience: process.env.PROCONNECT_CLIENT_ID
+						});
 						data = payload as Record<string, any>; // 🔥 Décode JWT
 					}
 					return data;
