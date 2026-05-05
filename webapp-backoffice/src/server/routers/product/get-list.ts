@@ -1,4 +1,5 @@
 import type { Context } from '@/src/server/trpc';
+import { buildOrderBy } from '@/src/server/utils/order-by';
 import {
 	alternativeString,
 	buildSearchQuery,
@@ -6,6 +7,13 @@ import {
 } from '@/src/utils/tools';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+
+const PRODUCT_SORT_FIELDS = [
+	'title',
+	'created_at',
+	'updated_at',
+	'entity.name'
+] as const;
 
 export const getProductListInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -110,28 +118,9 @@ export const getProductListQuery = async ({
 		};
 	}
 
-	if (sort) {
-		const values = sort.split(':');
-		if (values.length === 2) {
-			if (values[0].includes('.')) {
-				const subValues = values[0].split('.');
-				if (subValues.length === 2) {
-					orderBy = [
-						{
-							[subValues[0]]: {
-								[subValues[1]]: values[1]
-							}
-						}
-					];
-				}
-			} else {
-				orderBy = [
-					{
-						[values[0]]: values[1]
-					}
-				];
-			}
-		}
+	const safeOrderBy = buildOrderBy(sort, PRODUCT_SORT_FIELDS);
+	if (safeOrderBy) {
+		orderBy = [safeOrderBy as Prisma.ProductOrderByWithAggregationInput];
 	}
 
 	try {

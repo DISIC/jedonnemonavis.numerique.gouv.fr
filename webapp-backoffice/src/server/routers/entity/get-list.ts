@@ -1,7 +1,15 @@
 import type { Context } from '@/src/server/trpc';
+import { buildOrderBy } from '@/src/server/utils/order-by';
 import { Prisma } from '@prisma/client';
 import { normalizeString } from '@/src/utils/tools';
 import { z } from 'zod';
+
+const ENTITY_SORT_FIELDS = [
+	'name',
+	'acronym',
+	'created_at',
+	'updated_at'
+] as const;
 
 export const getEntityListInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -86,18 +94,9 @@ export const getEntityListQuery = async ({
 
 	let orderBy: Prisma.EntityOrderByWithAggregationInput[] = [{ name: 'asc' }];
 
-	if (sort) {
-		const values = sort.split(':');
-		if (values.length === 2) {
-			if (values[0].includes('.')) {
-				const subValues = values[0].split('.');
-				if (subValues.length === 2) {
-					orderBy = [{ [subValues[0]]: { [subValues[1]]: values[1] } }];
-				}
-			} else {
-				orderBy = [{ [values[0]]: values[1] }];
-			}
-		}
+	const safeOrderBy = buildOrderBy(sort, ENTITY_SORT_FIELDS);
+	if (safeOrderBy) {
+		orderBy = [safeOrderBy as Prisma.EntityOrderByWithAggregationInput];
 	}
 
 	const entities = await ctx.prisma.entity.findMany({
