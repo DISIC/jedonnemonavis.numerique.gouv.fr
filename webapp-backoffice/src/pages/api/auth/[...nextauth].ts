@@ -28,6 +28,10 @@ interface ProconnectProfile {
 	idp_id?: string;
 }
 
+const useSecureCookies = (process.env.NEXTAUTH_URL ?? '').startsWith('https://');
+const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+const hostPrefix = useSecureCookies ? '__Host-' : '';
+
 export const authOptions: NextAuthOptions = {
 	debug: process.env.NODE_ENV === 'development',
 	secret: process.env.NEXTAUTH_SECRET,
@@ -35,6 +39,35 @@ export const authOptions: NextAuthOptions = {
 		signIn: '/login',
 		signOut: '/login',
 		error: '/login'
+	},
+	useSecureCookies,
+	cookies: {
+		sessionToken: {
+			name: `${cookiePrefix}next-auth.session-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		},
+		callbackUrl: {
+			name: `${cookiePrefix}next-auth.callback-url`,
+			options: {
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		},
+		csrfToken: {
+			name: `${hostPrefix}next-auth.csrf-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		}
 	},
 	callbacks: {
 		async session({ session, token }) {
@@ -76,9 +109,19 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async redirect({ url, baseUrl }) {
-			if (url.startsWith(baseUrl)) {
-				return url;
+			if (url.startsWith('/')) {
+				return `${baseUrl}${url}`;
 			}
+			try {
+				const target = new URL(url);
+				const base = new URL(baseUrl);
+				if (
+					target.protocol === base.protocol &&
+					target.host === base.host
+				) {
+					return target.toString();
+				}
+			} catch {}
 			return baseUrl;
 		},
 
