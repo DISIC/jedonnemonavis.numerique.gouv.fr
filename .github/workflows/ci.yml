@@ -6,56 +6,57 @@ on:
   pull_request:
     branches: ["main"]
 
-jobs:
-  # lighthouseci:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18
-  #     - run: npm install && npm install -g @lhci/cli@0.11.x
-  #     - run: npm run build
-  #     - run: lhci autorun
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
+jobs:
   build-webapp-backoffice:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: webapp-backoffice/package-lock.json
 
       - name: Build webapp-backoffice
+        working-directory: webapp-backoffice
         run: |
-          cd webapp-backoffice
           npm install
           npm run build
 
   build-webapp-form:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: "yarn"
+          cache-dependency-path: webapp-form/yarn.lock
 
       - name: Build webapp-form
+        working-directory: webapp-form
         run: |
-          cd webapp-form
-          npm install
-          npm run build
+          yarn install
+          yarn build
