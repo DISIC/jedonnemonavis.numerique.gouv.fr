@@ -64,5 +64,5 @@ export const initResetPwdMutation = async ({
 		}/reset-password?${new URLSearchParams({ token })}`
 	);
 
-	return { data: token };
+	return { data: 'ok' };
 };
