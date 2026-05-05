@@ -1,8 +1,11 @@
 import { Client as ElkClient } from '@elastic/elasticsearch';
-import { ApiKey, TypeAction } from '@prisma/client';
+import { ApiKey } from '@prisma/client';
+import { defaultFingerPrint } from '@trpc-limiter/memory';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
+import crypto from 'crypto';
 import fs from 'fs';
+import ipaddr from 'ipaddr.js';
 import { Session } from 'next-auth';
 import path from 'path';
 import SuperJSON from 'superjson';
@@ -12,6 +15,7 @@ import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
 import prisma from '../utils/db';
 import { actionMapping } from '../utils/tools';
+import { createTRPCStoreLimiter } from '../utils/trpcRateLimiter';
 
 // Metadata for protected procedures
 interface Meta {
@@ -275,12 +279,123 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 	}
 });
 
+// Rate limiting
+const getRequestIp = (req: Context['req']): string => {
+	const xClientIp = req.headers['x-client-ip'] as string;
+	const xForwardedFor = req.headers['x-forwarded-for'] as string;
+	if (xClientIp) return xClientIp.split(',')[0].trim();
+	if (xForwardedFor) return xForwardedFor.split(',')[0].trim();
+	return defaultFingerPrint(req);
+};
+
+const hashIp = (ip: string): string => {
+	const now = new Date();
+	const dateHour = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+		2,
+		'0'
+	)}-${String(now.getDate()).padStart(2, '0')}-${String(
+		now.getHours()
+	).padStart(2, '0')}`;
+	return crypto
+		.createHash('sha256')
+		.update(`${ip}-${dateHour}${process.env.IP_HASH_SALT || ''}`)
+		.digest('hex');
+};
+
+const transformIp = (ip: string): string => {
+	const parts = ip.split('.');
+	if (parts.length !== 4) return ip;
+	parts[3] = '0';
+	return parts.join('.');
+};
+
+const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '')
+	.split(',')
+	.map(s => s.trim())
+	.filter(Boolean);
+
+const ipToNumber = (ip: string): number =>
+	ipaddr
+		.parse(ip)
+		.toByteArray()
+		.reduce((acc, byte) => (acc << 8) + byte, 0);
+
+const isIpAllowed = (ip: string): boolean =>
+	allowedIps.some(allowedIp => {
+		if (allowedIp.includes('-')) {
+			const [startIp, endIp] = allowedIp.split('-');
+			try {
+				const ipNum = ipToNumber(ip);
+				return ipNum >= ipToNumber(startIp) && ipNum <= ipToNumber(endIp);
+			} catch {
+				return false;
+			}
+		}
+		return allowedIp === ip;
+	});
+
+const limiter = createTRPCStoreLimiter<typeof t>({
+	fingerprint: ctx => getRequestIp(ctx.req),
+	windowMs: 60000,
+	max: 10,
+	onLimit: async (retryAfter, ctx) => {
+		const ip = getRequestIp(ctx.req);
+		const hashedIp = hashIp(ip);
+		const referer = (ctx.req.headers['referer'] ||
+			ctx.req.headers['referrer']) as string | undefined;
+		const now = new Date();
+
+		try {
+			const existing = await prisma.limiterReporting.findUnique({
+				where: { ip_id: hashedIp }
+			});
+
+			if (existing) {
+				await prisma.limiterReporting.update({
+					where: { id: existing.id },
+					data: {
+						total_attempts: existing.total_attempts + 1,
+						last_attempt: now
+					}
+				});
+			} else {
+				await prisma.limiterReporting.create({
+					data: {
+						ip_id: hashedIp,
+						ip_adress: transformIp(ip),
+						total_attempts: 10,
+						first_attempt: now,
+						last_attempt: now,
+						url: referer ?? null
+					}
+				});
+			}
+		} catch (err) {
+			console.error('[rate-limit] Failed to log abuse', err);
+		}
+
+		throw new TRPCError({
+			code: 'TOO_MANY_REQUESTS',
+			message: `Trop de requêtes, réessayez dans ${retryAfter}s.`
+		});
+	}
+});
+
+const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
+	const ip = getRequestIp(ctx.req);
+	if (isIpAllowed(ip)) return next();
+	return limiter({ ctx, next });
+});
+
 // Base router and middleware helpers
 export const router = t.router;
 export const middleware = t.middleware;
 
 // Unprotected procedure
 export const publicProcedure = t.procedure;
+
+// Rate-limited public procedure (per IP)
+export const limitedProcedure = t.procedure.use(bypassLimiterForAllowedIps);
 
 // Protected procedure
 export const protectedProcedure = t.procedure.use(isAuthed);

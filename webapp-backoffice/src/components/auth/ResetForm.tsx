@@ -121,7 +121,7 @@ export const ResetForm = () => {
 		}
 	}, [loadingError]);
 
-	const resetPassword = trpc.user.changePAssword.useMutation({
+	const resetPassword = trpc.user.changePassword.useMutation({
 		onSuccess: () => {
 			setSuccessChange('Ok');
 		},

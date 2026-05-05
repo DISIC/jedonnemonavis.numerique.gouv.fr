@@ -1,4 +1,9 @@
-import { protectedProcedure, publicProcedure, router } from '@/src/server/trpc';
+import {
+	limitedProcedure,
+	protectedProcedure,
+	publicProcedure,
+	router
+} from '@/src/server/trpc';
 import { getUserListInputSchema, getUserListQuery } from './get-list';
 import { getUserByIdInputSchema, getUserByIdQuery } from './get-by-id';
 import {
@@ -85,7 +90,7 @@ export const userRouter = router({
 
 	getOtp: publicProcedure.input(getOtpInputSchema).mutation(getOtpMutation),
 
-	initResetPwd: publicProcedure
+	initResetPwd: limitedProcedure
 		.input(initResetPwdInputSchema)
 		.mutation(initResetPwdMutation),
 
@@ -93,7 +98,7 @@ export const userRouter = router({
 		.input(checkTokenInputSchema)
 		.query(checkTokenQuery),
 
-	changePAssword: publicProcedure
+	changePassword: publicProcedure
 		.input(changePasswordInputSchema)
 		.mutation(changePasswordMutation),
 

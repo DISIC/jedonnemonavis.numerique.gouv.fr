@@ -506,8 +506,8 @@ model LimiterReporting {
   id             Int      @id @default(autoincrement())
   ip_id          String   @unique
   ip_adress      String
-  product_id     Int
-  button_id      Int
+  product_id     Int?
+  button_id      Int?
   url            String?
   total_attempts Int
   first_attempt  DateTime

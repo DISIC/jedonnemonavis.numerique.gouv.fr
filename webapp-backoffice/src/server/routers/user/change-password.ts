@@ -46,7 +46,7 @@ export const changePasswordMutation = async ({
 	const salt = bcrypt.genSaltSync(10);
 	const hashedPassword = bcrypt.hashSync(password, salt);
 
-	const updatedUser = await ctx.prisma.user.update({
+	await ctx.prisma.user.update({
 		where: {
 			id: userResetToken.user_id
 		},
@@ -61,5 +61,5 @@ export const changePasswordMutation = async ({
 		}
 	});
 
-	return { data: updatedUser };
+	return { data: { success: true } };
 };
