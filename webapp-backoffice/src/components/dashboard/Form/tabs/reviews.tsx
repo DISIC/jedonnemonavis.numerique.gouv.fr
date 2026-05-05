@@ -37,6 +37,7 @@ import ExportHistory from '../../Reviews/ExportHistory';
 import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 interface Props {
 	form: FormWithElements;
@@ -62,6 +63,8 @@ const ReviewsTab = (props: Props) => {
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
+	const { isMobile } = useIsMobile();
+	const progressStyleTreshold = useMemo(() => (isMobile ? 4 : 2), [isMobile]);
 
 	const [search, setSearch] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
@@ -622,7 +625,10 @@ const ReviewsTab = (props: Props) => {
 									<span
 										className={cx(classes.progressBarLabel)}
 										style={{
-											color: currentExport.progress < 5 ? 'black' : undefined
+											color:
+												currentExport.progress < progressStyleTreshold
+													? 'black'
+													: undefined
 										}}
 									>
 										{currentExport.progress}%

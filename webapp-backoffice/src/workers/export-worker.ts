@@ -3,16 +3,18 @@ import redis from '@/src/lib/redis';
 import { ReviewFiltersType } from '@/src/types/custom';
 import prisma from '@/src/utils/db';
 import {
-	generateCsvBuffer,
+	generateCsvStream,
 	type ReviewRow,
 	type TemplateColumn
 } from '@/src/utils/export-worker/generate-csv';
-import { generateXlsBuffer } from '@/src/utils/export-worker/generate-xls';
+import { generateXlsStream } from '@/src/utils/export-worker/generate-xls';
 import {
 	generateDownloadLink,
-	uploadToS3,
+	uploadStreamToS3,
 	validateS3EnvVars
 } from '@/src/utils/export-worker/upload-s3';
+import { PassThrough } from 'stream';
+import type { Prisma } from '@prisma/client';
 import { $Enums } from '@prisma/client';
 import { UnrecoverableError, Worker, type Job } from 'bullmq';
 import {
@@ -27,29 +29,6 @@ const CONCURRENCY_LIMIT = parseInt(
 	process.env.EXPORT_CONCURRENCY_LIMIT ?? '2',
 	10
 );
-
-// Asymptotic ticker: each tick covers 20% of remaining distance toward (to - 1),
-// so progress always moves but never reaches `to` — the real operation completing
-// snaps it to `to`. No need to predict how long the operation takes.
-function startProgressTicker(
-	exportId: number,
-	from: number,
-	to: number,
-	intervalMs: number
-): () => void {
-	let current = from;
-	const ceiling = to - 1;
-	const timer = setInterval(async () => {
-		current += (ceiling - current) * 0.2;
-		await prisma.export
-			.update({
-				where: { id: exportId },
-				data: { progress: Math.floor(current) }
-			})
-			.catch(() => {});
-	}, intervalMs);
-	return () => clearInterval(timer);
-}
 
 type FilterParams = {
 	startDate?: string;
@@ -83,9 +62,7 @@ type AnswerRow = {
 
 function buildReviewRow(
 	review: { id: number; created_at: Date },
-	answers: AnswerRow[],
-	isDynamic: boolean,
-	dynamicColumnMap: Map<string, string>
+	answers: AnswerRow[]
 ): ReviewRow {
 	const answerById = new Map<number, AnswerRow>();
 	for (const a of answers) answerById.set(a.id, a);
@@ -102,10 +79,6 @@ function buildReviewRow(
 
 		if (!answerAccumulator.has(code)) answerAccumulator.set(code, []);
 		answerAccumulator.get(code)!.push(text);
-
-		if (isDynamic && code && !dynamicColumnMap.has(code)) {
-			dynamicColumnMap.set(code, answer.field_label);
-		}
 	}
 
 	const answersMap: Record<string, string> = {};
@@ -118,6 +91,26 @@ function buildReviewRow(
 		review_created_at: review.created_at,
 		answers: answersMap
 	};
+}
+
+async function loadDynamicColumns(
+	baseReviewWhere: Prisma.ReviewWhereInput,
+	startDate: Date,
+	endDate: Date
+): Promise<TemplateColumn[]> {
+	const distinctAnswers = await prisma.answer.findMany({
+		where: {
+			review: baseReviewWhere,
+			review_created_at: { gte: startDate, lte: endDate }
+		},
+		distinct: ['field_code'],
+		select: { field_code: true, field_label: true },
+		orderBy: { id: 'asc' }
+	});
+
+	return distinctAnswers
+		.filter(a => a.field_code)
+		.map(a => ({ code: a.field_code, label: a.field_label || a.field_code }));
 }
 
 // Only block types that produce Answer rows; decorative blocks (paragraph, heading, divider) are excluded
@@ -233,19 +226,13 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		999
 	);
 
-	// Use form template column order when available; fall back to accumulating codes from seen answers
-	let templateColumns: TemplateColumn[] | null = null;
+	// Resolve columns upfront so we can write headers without buffering reviews
+	let columns: TemplateColumn[];
 	if (exportRecord.form_id) {
-		templateColumns = await loadTemplateColumns(exportRecord.form_id);
+		columns = await loadTemplateColumns(exportRecord.form_id);
+	} else {
+		columns = await loadDynamicColumns(baseReviewWhere, startDate, endDate);
 	}
-
-	const isDynamic = templateColumns === null;
-	const dynamicColumnMap = new Map<string, string>();
-	const allReviews: ReviewRow[] = [];
-	const allReviewsByYear: Map<number, ReviewRow[]> = new Map();
-	let retrievedReviews = 0;
-	let lastProgressPercent = -1;
-	let offset = 0;
 
 	const totalReviews = await prisma.review.count({ where: baseReviewWhere });
 
@@ -253,137 +240,155 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		`[export-worker] Export ${exportId}: ${totalReviews} reviews, format=${exportFormat}`
 	);
 
-	// Simple paginated fetch — oldest first.
-	// The date range in the WHERE clause lets PostgreSQL prune the
-	// partitioned review / answer tables (e.g. answer_202602) automatically.
-	while (true) {
-		const reviews = await prisma.review.findMany({
-			where: baseReviewWhere,
-			orderBy: { created_at: 'asc' },
-			skip: offset,
-			take: PAGE_SIZE,
-			select: { id: true, created_at: true }
-		});
-
-		if (reviews.length === 0) break;
-
-		// review_created_at bound lets PostgreSQL prune the partitioned answer table
-		const answerRows = await prisma.answer.findMany({
-			where: {
-				review_id: { in: reviews.map(r => r.id) },
-				review_created_at: { gte: startDate, lte: endDate }
-			},
-			orderBy: { id: 'asc' },
-			select: {
-				review_id: true,
-				id: true,
-				parent_answer_id: true,
-				field_code: true,
-				field_label: true,
-				answer_text: true
-			}
-		});
-
-		const answersByReviewId = new Map<number, typeof answerRows>();
-		for (const answer of answerRows) {
-			if (!answersByReviewId.has(answer.review_id))
-				answersByReviewId.set(answer.review_id, []);
-			answersByReviewId.get(answer.review_id)!.push(answer);
-		}
-
-		for (const review of reviews) {
-			const answers = answersByReviewId.get(review.id) ?? [];
-			const reviewRow = buildReviewRow(
-				review,
-				answers,
-				isDynamic,
-				dynamicColumnMap
-			);
-
-			allReviews.push(reviewRow);
-			const year = review.created_at.getFullYear();
-			if (!allReviewsByYear.has(year)) allReviewsByYear.set(year, []);
-			allReviewsByYear.get(year)!.push(reviewRow);
-		}
-
-		console.log(
-			`[export-worker] Export ${exportId}: Retrieved ${
-				reviews.length
-			} reviews (total ${retrievedReviews + reviews.length}/${totalReviews})`
-		);
-
-		retrievedReviews += reviews.length;
-		offset += PAGE_SIZE;
-
-		if (totalReviews > 0) {
-			const percent = Math.min(
-				60,
-				Math.floor((retrievedReviews * 60) / totalReviews)
-			);
-			if (percent !== lastProgressPercent) {
-				lastProgressPercent = percent;
-				await Promise.all([
-					job.updateProgress(percent),
-					prisma.export.update({
-						where: { id: exportId },
-						data: { progress: percent }
-					})
-				]);
-			}
-		}
-	}
-
-	const columns: TemplateColumn[] =
-		templateColumns ??
-		Array.from(dynamicColumnMap, ([code, label]) => ({ code, label }));
-
 	const currentDate = formatDateForFilename(new Date());
 	const safeName = sanitizeFilename(productName);
-
-	await prisma.export.update({
-		where: { id: exportId },
-		data: { progress: 60 }
-	});
-
-	// CSV → single flat file with all rows
-	// XLS → single workbook with one sheet per year (sorted chronologically)
-	let fileBuffer: Buffer;
-	let fileName: string = `Avis_${safeName}_${currentDate}.${
+	const fileName = `Avis_${safeName}_${currentDate}.${
 		exportFormat === 'csv' ? 'csv' : 'xlsx'
 	}`;
-
-	// Tick 60→84 every 2s during file generation (can be slow for large XLS)
-	const stopGenTicker = startProgressTicker(exportId, 60, 85, 2000);
-	try {
-		if (exportFormat === 'csv') {
-			fileBuffer = generateCsvBuffer(allReviews, columns);
-		} else {
-			fileBuffer = await generateXlsBuffer(
-				allReviewsByYear,
-				columns,
-				productName
-			);
-		}
-	} finally {
-		stopGenTicker();
-	}
-
-	await prisma.export.update({
-		where: { id: exportId },
-		data: { progress: 85 }
-	});
 	const contentType =
 		exportFormat === 'csv'
 			? 'text/csv; charset=utf-8'
 			: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-	// Tick 85→97 every 1s during S3 upload
-	const stopUploadTicker = startProgressTicker(exportId, 85, 98, 1000);
-	try {
-		await uploadToS3(fileBuffer, fileName, contentType);
-	} finally {
-		stopUploadTicker();
+	// Generator only finishes after all pages have been yielded. The upload phase
+	// then takes over progress reporting via httpUploadProgress events.
+	let generatorDone = false;
+	// Log at most every 5% of total to avoid flooding the terminal on huge exports
+	const logEveryPercent = 5;
+	let lastLoggedPercent = -1;
+
+	// Streaming pipeline: paginated review fetch → row generator → file writer → S3 multipart upload.
+	// Memory stays bounded to ~one page of reviews + small upload buffer, regardless of total size.
+	async function* streamReviewRows(): AsyncGenerator<ReviewRow> {
+		let offset = 0;
+		let retrieved = 0;
+		let lastProgressPercent = -1;
+
+		// Date range in the WHERE clause lets PostgreSQL prune the partitioned review/answer tables
+		while (true) {
+			const reviews = await prisma.review.findMany({
+				where: baseReviewWhere,
+				orderBy: { created_at: 'asc' },
+				skip: offset,
+				take: PAGE_SIZE,
+				select: { id: true, created_at: true }
+			});
+
+			if (reviews.length === 0) break;
+
+			const answerRows = await prisma.answer.findMany({
+				where: {
+					review_id: { in: reviews.map(r => r.id) },
+					review_created_at: { gte: startDate, lte: endDate }
+				},
+				orderBy: { id: 'asc' },
+				select: {
+					review_id: true,
+					id: true,
+					parent_answer_id: true,
+					field_code: true,
+					field_label: true,
+					answer_text: true
+				}
+			});
+
+			const answersByReviewId = new Map<number, typeof answerRows>();
+			for (const answer of answerRows) {
+				if (!answersByReviewId.has(answer.review_id))
+					answersByReviewId.set(answer.review_id, []);
+				answersByReviewId.get(answer.review_id)!.push(answer);
+			}
+
+			for (const review of reviews) {
+				const answers = answersByReviewId.get(review.id) ?? [];
+				yield buildReviewRow(review, answers);
+			}
+
+			retrieved += reviews.length;
+			offset += PAGE_SIZE;
+
+			if (totalReviews > 0) {
+				// Progress 0-95% during streaming. Fetch and S3 upload run in parallel here,
+				// so this range covers the bulk of the work. The 95-98% range is reserved
+				// for the final S3 multipart commits that happen after the generator finishes.
+				const percent = Math.min(
+					95,
+					Math.floor((retrieved * 95) / totalReviews)
+				);
+				if (percent !== lastProgressPercent) {
+					lastProgressPercent = percent;
+					await Promise.all([
+						job.updateProgress(percent),
+						prisma.export.update({
+							where: { id: exportId },
+							data: { progress: percent }
+						})
+					]);
+				}
+
+				const overallPercent = Math.floor((retrieved * 100) / totalReviews);
+				if (
+					overallPercent - lastLoggedPercent >= logEveryPercent ||
+					retrieved === totalReviews
+				) {
+					lastLoggedPercent = overallPercent;
+					console.log(
+						`[export-worker] Export ${exportId}: ${retrieved}/${totalReviews} (${overallPercent}%)`
+					);
+				}
+			}
+		}
+
+		generatorDone = true;
 	}
+
+	const passThrough = new PassThrough();
+
+	// After the generator finishes, drive progress 95→98% from upload-finalization events
+	// (the trailing multipart commits). Asymptotic: each event nudges closer to 98 but never reaches it.
+	let uploadProgressLevel = 95;
+	const uploadPromise = uploadStreamToS3(
+		passThrough,
+		fileName,
+		contentType,
+		({ loaded }) => {
+			// Don't update DB while the generator is still owning the 0-95% range,
+			// otherwise its next write would clobber our higher value.
+			if (!generatorDone) return;
+
+			// Move ~10% of remaining range each event — never reaches 98
+			const ceiling = 98;
+			const next = Math.min(
+				ceiling - 1,
+				uploadProgressLevel +
+					Math.max(1, Math.floor((ceiling - uploadProgressLevel) * 0.1))
+			);
+			if (next > uploadProgressLevel) {
+				uploadProgressLevel = next;
+				prisma.export
+					.update({
+						where: { id: exportId },
+						data: { progress: uploadProgressLevel }
+					})
+					.catch(() => {});
+			}
+			// loaded is referenced so the closure keeps the param shape; useful for future logging
+			void loaded;
+		}
+	);
+
+	try {
+		if (exportFormat === 'csv') {
+			await generateCsvStream(streamReviewRows(), columns, passThrough);
+		} else {
+			await generateXlsStream(streamReviewRows(), columns, passThrough);
+		}
+	} catch (err) {
+		passThrough.destroy(err instanceof Error ? err : new Error(String(err)));
+		throw err;
+	}
+
+	await uploadPromise;
 
 	await prisma.export.update({
 		where: { id: exportId },

@@ -1,4 +1,5 @@
-import { stringify } from 'csv-stringify/sync';
+import { stringify } from 'csv-stringify';
+import type { Writable } from 'stream';
 
 export type ReviewRow = {
 	review_id: string;
@@ -11,22 +12,40 @@ export type TemplateColumn = {
 	label: string;
 };
 
-export function generateCsvBuffer(
-	reviews: ReviewRow[],
-	columns: TemplateColumn[]
-): Buffer {
-	const header = [
-		'Review ID',
-		'Review Created At',
-		...columns.map(c => c.label)
-	];
+function buildHeader(columns: TemplateColumn[]): string[] {
+	return ['Review ID', 'Review Created At', ...columns.map(c => c.label)];
+}
 
-	const rows = reviews.map(review => [
+function buildCsvRow(review: ReviewRow, columns: TemplateColumn[]): string[] {
+	return [
 		review.review_id,
 		review.review_created_at.toISOString().replace('T', ' ').substring(0, 19),
 		...columns.map(c => review.answers[c.code] ?? '')
-	]);
+	];
+}
 
-	const csv = stringify([header, ...rows]);
-	return Buffer.from(csv, 'utf-8');
+/**
+ * Streams CSV rows to the writable stream as they arrive from the async iterable.
+ * Memory stays bounded — only one row is in flight at a time.
+ */
+export async function generateCsvStream(
+	reviews: AsyncIterable<ReviewRow>,
+	columns: TemplateColumn[],
+	out: Writable
+): Promise<void> {
+	const stringifier = stringify({ bom: false });
+	stringifier.pipe(out, { end: false });
+
+	stringifier.write(buildHeader(columns));
+	for await (const review of reviews) {
+		stringifier.write(buildCsvRow(review, columns));
+	}
+
+	await new Promise<void>((resolve, reject) => {
+		stringifier.on('end', () => resolve());
+		stringifier.on('error', reject);
+		stringifier.end();
+	});
+
+	out.end();
 }
