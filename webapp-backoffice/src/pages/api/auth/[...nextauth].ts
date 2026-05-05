@@ -164,7 +164,13 @@ export const authOptions: NextAuthOptions = {
 						.update(password)
 						.digest('hex');
 					isPasswordCorrect = hashedPassword === user.password;
+				}
 
+				if (!isPasswordCorrect) {
+					return null;
+				}
+
+				if (!user.password.startsWith('$2b$')) {
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);
 					await prisma.user.update({
@@ -175,10 +181,6 @@ export const authOptions: NextAuthOptions = {
 							password: newHashedPassword
 						}
 					});
-				}
-
-				if (!isPasswordCorrect) {
-					return null;
 				}
 
 				await prisma.userEvent.create({
