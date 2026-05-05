@@ -3,7 +3,9 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { createOTP } from './utils';
 
-export const checkEmailInputSchema = z.object({ email: z.string() });
+export const checkEmailInputSchema = z.object({
+	email: z.string().trim().toLowerCase().email().max(254)
+});
 
 export const checkEmailMutation = async ({
 	ctx,
@@ -38,6 +40,6 @@ export const checkEmailMutation = async ({
 			message: "User isn't active"
 		});
 	} else {
-		return { data: user, metadata: { statusCode: 200 } };
+		return { data: undefined, metadata: { statusCode: 200 } };
 	}
 };
