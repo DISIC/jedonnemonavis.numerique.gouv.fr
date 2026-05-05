@@ -209,7 +209,14 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 
 const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 	if (ctx.req.headers.authorization) {
-		const apiKey = ctx.req.headers.authorization.split(' ')[1];
+		const [scheme, apiKey] = ctx.req.headers.authorization.split(' ');
+
+		if (scheme !== 'Bearer' || !apiKey) {
+			throw new TRPCError({
+				code: 'UNAUTHORIZED',
+				message: 'Please provide a valid API key'
+			});
+		}
 
 		const checkApiKey = await ctx.prisma.apiKey.findFirst({
 			where: {
