@@ -1,3 +1,4 @@
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { FormField, Opinion, Product } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
@@ -127,7 +128,7 @@ export const Field = (props: Props) => {
 							templateField?.upLabel ? (
 								<p
 									dangerouslySetInnerHTML={{
-										__html: templateField.upLabel,
+										__html: sanitizeRichHtml(templateField.upLabel),
 									}}
 								></p>
 							) : undefined

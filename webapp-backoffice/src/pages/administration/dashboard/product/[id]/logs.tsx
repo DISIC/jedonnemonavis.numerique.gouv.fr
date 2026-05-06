@@ -6,6 +6,7 @@ import {
 	getNbPages,
 	handleActionTypeDisplay
 } from '@/src/utils/tools';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Table } from '@codegouvfr/react-dsfr/Table';
@@ -74,12 +75,13 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			event.user ? event.user.email : 'Utilisateur inconnu',
 			<p
 				dangerouslySetInnerHTML={{
-					__html:
+					__html: sanitizeRichHtml(
 						handleActionTypeDisplay(
 							event.action,
 							event.metadata,
 							product.title
 						) || ''
+					)
 				}}
 			/>
 		]) || [];

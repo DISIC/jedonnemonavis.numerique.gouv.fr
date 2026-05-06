@@ -7,6 +7,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import React from 'react';
 import { generateRandomString } from '@/src/utils/tools';
+import { renderHighlightedText } from '@/src/utils/highlight';
 import { FormConfigWithChildren } from '@/src/types/prismaTypesExtended';
 import { useRootFormTemplateContext } from '@/src/contexts/RootFormTemplateContext';
 import {
@@ -120,21 +121,15 @@ const ReviewDetailPanelRoot = ({
 		tableFieldCodeHelper[0]?.slug || ''
 	).filter(row => row.includes('administration'));
 
-	const createMarkup = () => {
+	const renderVerbatim = (): React.ReactNode => {
 		const verbatimAnswer = review.answers?.find(
 			answer => answer.field_code === 'verbatim'
 		);
 
 		if (verbatimAnswer?.answer_text) {
-			const words = search.split(/\s+/).filter(Boolean);
-			const regex = new RegExp(`(${words.join('|')})`, 'gi');
-			const highlightedText = verbatimAnswer.answer_text
-				.replace(regex, `<span>$1</span>`)
-				.replace(/\n/g, '<br />');
-
-			return { __html: highlightedText };
+			return renderHighlightedText(verbatimAnswer.answer_text, search);
 		}
-		return { __html: '-' };
+		return '-';
 	};
 
 	return (
@@ -237,10 +232,9 @@ const ReviewDetailPanelRoot = ({
 				<h2 className={cx(classes.subtitle)}>
 					Souhaitez-vous nous en dire plus ?
 				</h2>
-				<p
-					className={cx(classes.verbatimContent, classes.content)}
-					dangerouslySetInnerHTML={createMarkup()}
-				/>
+				<p className={cx(classes.verbatimContent, classes.content)}>
+					{renderVerbatim()}
+				</p>
 			</div>
 		</>
 	);
