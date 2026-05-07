@@ -1,5 +1,6 @@
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -116,7 +117,9 @@ const FormStepDisplay = (props: Props) => {
 										<span
 											className={classes.description}
 											dangerouslySetInnerHTML={{
-												__html: step.description.replaceAll('\n', '<br/>')
+												__html: sanitizeRichHtml(
+													step.description.replaceAll('\n', '<br/>')
+												)
 											}}
 										/>
 									</>

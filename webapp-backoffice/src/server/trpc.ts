@@ -75,16 +75,35 @@ const t = initTRPC
 				data: {
 					...shape.data,
 					zodError:
-						error.cause instanceof ZodError
-							? error.cause.flatten()
-							: error.cause,
-					cause: {
-						...error.cause
-					}
+						error.cause instanceof ZodError ? error.cause.flatten() : null
 				}
 			};
 		}
 	});
+
+const SENSITIVE_KEYS = new Set([
+	'key',
+	'apiKey',
+	'api_key',
+	'password',
+	'newPassword',
+	'token',
+	'otp',
+	'inviteToken'
+]);
+
+const scrubSensitiveValues = (value: any): any => {
+	if (value === null || value === undefined) return value;
+	if (Array.isArray(value)) return value.map(scrubSensitiveValues);
+	if (typeof value === 'object') {
+		const out: Record<string, any> = {};
+		for (const [k, v] of Object.entries(value)) {
+			out[k] = SENSITIVE_KEYS.has(k) ? '[REDACTED]' : scrubSensitiveValues(v);
+		}
+		return out;
+	}
+	return value;
+};
 
 // Auth middleware
 const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
@@ -214,7 +233,7 @@ const isAuthed = t.middleware(async ({ next, meta, ctx }) => {
 								entity_id,
 								product_id,
 								form_id,
-								metadata: input
+								metadata: scrubSensitiveValues(input)
 							}
 						});
 					}

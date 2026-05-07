@@ -1,4 +1,5 @@
 import { primarySection } from '@/src/utils/form';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { FormField, Opinion, Product } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Alert } from '@codegouvfr/react-dsfr/Alert';
@@ -51,9 +52,11 @@ export const FormFirstBlock = (props: Props) => {
 						<span
 							className={cx(classes.customIntro)}
 							dangerouslySetInnerHTML={{
-								__html: formConfgIntro.label.replace(
-									'{{title}}',
-									product.title,
+								__html: sanitizeRichHtml(
+									formConfgIntro.label.replace(
+										'{{title}}',
+										product.title,
+									),
 								),
 							}}
 						/>
