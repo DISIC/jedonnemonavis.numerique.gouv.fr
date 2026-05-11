@@ -39,7 +39,7 @@ export async function createUserRequest(
 	});
 
 	if (userRequest.inviteToken) {
-		await makeRelationFromUserInvite(prisma, createdUser);
+		await makeRelationFromUserInvite(prisma, createdUser.email);
 	}
 
 	return createdUserRequest;

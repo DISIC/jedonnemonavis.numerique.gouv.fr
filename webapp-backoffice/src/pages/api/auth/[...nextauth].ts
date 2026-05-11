@@ -12,6 +12,7 @@ import bcrypt from 'bcrypt';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { getSiretInfo } from '@/src/utils/queries';
 import { generateRandomString } from '@/src/utils/tools';
+import { makeRelationFromUserInvite } from '@/src/server/routers/user/utils';
 
 const JWKS = createRemoteJWKSet(
 	new URL(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/jwks`)
@@ -28,7 +29,9 @@ interface ProconnectProfile {
 	idp_id?: string;
 }
 
-const useSecureCookies = (process.env.NEXTAUTH_URL ?? '').startsWith('https://');
+const useSecureCookies = (process.env.NEXTAUTH_URL ?? '').startsWith(
+	'https://'
+);
 const cookiePrefix = useSecureCookies ? '__Secure-' : '';
 const hostPrefix = useSecureCookies ? '__Host-' : '';
 
@@ -115,27 +118,24 @@ export const authOptions: NextAuthOptions = {
 			try {
 				const target = new URL(url);
 				const base = new URL(baseUrl);
-				if (
-					target.protocol === base.protocol &&
-					target.host === base.host
-				) {
+				if (target.protocol === base.protocol && target.host === base.host) {
 					return target.toString();
 				}
 			} catch {}
 			return baseUrl;
 		},
 
-		async signIn({ account, profile }) {
+		async signIn({ user, account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
 
 				const email = proconnectProfile.email?.toLowerCase();
 
-				let user = await prisma.user.findUnique({
+				let dbUser = await prisma.user.findUnique({
 					where: { email }
 				});
 
-				if (!user) {
+				if (!dbUser) {
 					try {
 						const data = await getSiretInfo(proconnectProfile.siret);
 
@@ -153,7 +153,7 @@ export const authOptions: NextAuthOptions = {
 								salt
 							);
 
-							user = await prisma.user.create({
+							dbUser = await prisma.user.create({
 								data: {
 									email,
 									firstName: proconnectProfile.given_name,
@@ -176,6 +176,10 @@ export const authOptions: NextAuthOptions = {
 						throw new Error('INVALID_PROVIDER');
 					}
 				}
+
+				await makeRelationFromUserInvite(prisma, email);
+			} else if (account?.provider === 'credentials' && user?.email) {
+				await makeRelationFromUserInvite(prisma, user.email);
 			}
 			return true;
 		}
