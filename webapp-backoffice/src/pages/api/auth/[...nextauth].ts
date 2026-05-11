@@ -248,7 +248,7 @@ export const authOptions: NextAuthOptions = {
 			id: 'openid',
 			name: 'ProConnect',
 			type: 'oauth',
-			issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+			issuer: `https://${process.env.PROCONNECT_DOMAIN}/api/v2`,
 			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
@@ -277,7 +277,7 @@ export const authOptions: NextAuthOptions = {
 						data = JSON.parse(responseText);
 					} catch (error) {
 						const { payload } = await jwtVerify(responseText, JWKS, {
-							issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+							issuer: `https://${process.env.PROCONNECT_DOMAIN}/api/v2`,
 							audience: process.env.PROCONNECT_CLIENT_ID
 						});
 						data = payload as Record<string, any>; // 🔥 Décode JWT
