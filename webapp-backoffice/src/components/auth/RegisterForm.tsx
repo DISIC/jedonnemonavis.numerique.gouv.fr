@@ -21,6 +21,8 @@ import { tss } from 'tss-react/dsfr';
 import { Loader } from '../ui/Loader';
 import { RegisterValidationMessage } from './RegisterConfirmMessage';
 import { RegisterNotWhiteListed } from './RegisterNotWhiteListed';
+import ProConnectButton from '@codegouvfr/react-dsfr/ProConnectButton';
+import { signIn } from 'next-auth/react';
 
 type Props = {
 	userPresetInfos?: UserInfos;
@@ -103,7 +105,6 @@ export const RegisterForm = (props: Props) => {
 	});
 
 	const { classes, cx } = useStyles({
-		errors,
 		isLoading: registerUser.isLoading
 	});
 
@@ -166,8 +167,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -175,8 +176,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -184,8 +185,8 @@ export const RegisterForm = (props: Props) => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		return messages;
@@ -285,7 +286,18 @@ export const RegisterForm = (props: Props) => {
 
 	return (
 		<div>
-			<h2>Se créer un compte</h2>
+			<h2 className={fr.cx('fr-h5')}>Avec ProConnect</h2>
+			<p className={fr.cx('fr-text--sm')}>
+				ProConnect est la solution proposée par l’État qui vous identifie en
+				tant que professionnel.
+			</p>
+			<ProConnectButton onClick={() => signIn('openid')} />
+			<div className={classes.separator}>
+				<div className={classes.separatorLine} />
+				<span>ou</span>
+				<div className={classes.separatorLine} />
+			</div>
+			<h2 className={fr.cx('fr-h5')}>Avec votre adresse mail</h2>
 			<p className={fr.cx('fr-hint-text')}>
 				Sauf mention contraire, tous les champs sont obligatoires.
 			</p>
@@ -372,11 +384,13 @@ export const RegisterForm = (props: Props) => {
 						autoComplete: 'email',
 						type: 'email'
 					}}
-					state={hasErrors('email') ? 'error' : 'default'}
+					state={hasErrors('email') ? 'error' : 'info'}
 					stateRelatedMessage={
 						hasErrors('email') ? (
 							<span role="status">{getErrorMessage('email')}</span>
-						) : null
+						) : (
+							'Utilisez votre mail de l’administration'
+						)
 					}
 				/>
 				<PasswordInput
@@ -404,24 +418,49 @@ export const RegisterForm = (props: Props) => {
 					{registerUser.isLoading ? <Loader size="sm" white /> : 'Valider'}
 				</Button>
 			</form>
+			<hr className={fr.cx('fr-mt-8v', 'fr-mb-2v')} />
+			<h2 className={fr.cx('fr-h5')}>Vous avez déjà un compte ?</h2>
+			<Link
+				className={cx(classes.button, fr.cx('fr-btn', 'fr-btn--secondary'))}
+				href="/login"
+				onClick={() => {
+					push(['trackEvent', 'BO - Register', 'Login']);
+				}}
+			>
+				Se connecter
+			</Link>
 		</div>
 	);
 };
 
 const useStyles = tss
 	.withName(RegisterForm.name)
-	.withParams<{ errors: FormErrors; isLoading: boolean }>()
-	.create(({ errors, isLoading }) => ({
+	.withParams<{ isLoading: boolean }>()
+	.create(({ isLoading }) => ({
 		button: {
-			display: 'block',
-			marginLeft: 'auto',
+			width: '100%',
+			justifyContent: 'center',
 			cursor: isLoading ? 'not-allowed' : 'pointer',
 			pointerEvents: isLoading ? 'none' : 'auto'
 		},
 		password: {
-			marginBottom:
-				errors.password.format || errors.password.required
-					? fr.spacing('5v')
-					: 0
+			marginBottom: fr.spacing('5v')
+		},
+		separator: {
+			display: 'flex',
+			width: '100%',
+			alignItems: 'center',
+			gap: fr.spacing('3v'),
+			margin: `${fr.spacing('4v')} 0`,
+			'& span': {
+				color: fr.colors.decisions.text.mention.grey.default,
+				whiteSpace: 'nowrap',
+				flexShrink: 0
+			}
+		},
+		separatorLine: {
+			flex: 1,
+			height: '1px',
+			backgroundColor: fr.colors.decisions.border.default.grey.default
 		}
 	}));

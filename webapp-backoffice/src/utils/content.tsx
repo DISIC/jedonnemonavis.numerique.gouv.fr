@@ -25,7 +25,7 @@ export const CGU: MainStructure = {
 			'Qui est responsable du formulaire de dépôt d’avis Je donne mon avis ?',
 		content: [
 			'Le site du formulaire de dépôt d’avis Je donne mon avis est développé au sein de la Direction Interministérielle du Numérique (DINUM). Le formulaire a pour objectif de donner la possibilité aux usagers des démarches et services publics de donner leur avis sur leur expérience à la suite de leur utilisation.',
-			'Le responsable de l’utilisation des données est la DINUM représenté par Stéphanie Schaer, Directrice Interministérielle du Numérique (DINUM).'
+			'Le responsable de l’utilisation des données est la DINUM représentée par Stéphanie Schaer, Directrice Interministérielle du Numérique (DINUM).'
 		]
 	},
 	raison: {
@@ -172,7 +172,7 @@ export const LegalNotice: MainStructure = {
 	editeur: {
 		title: 'Éditeur de la plateforme',
 		content: [
-			'Le formulaire de dépôt d’avis Je donne mon avis est éditée par la Direction interministérielle du numérique de l’Etat (DINUM) située :',
+			'Le formulaire de dépôt d’avis Je donne mon avis est éditée par la Direction interministérielle du numérique de l’État (DINUM) située :',
 			{ text: '20 avenue de Ségur', type: 'noSpaces' },
 			{ text: '75007 Paris', type: 'noSpaces' },
 			'Tel. Accueil : 01.71.21.01.70',
@@ -260,8 +260,8 @@ export const TermsOfUse: MainStructure = {
 	service: {
 		title: '3. Accès au service',
 		content: [
-			'Le formulaire  est mis à disposition de toutes personnes souhaitant donner son avis sur un service numérique public suite à son utilisation.',
-			'L’utilisation du service est libre et gratuite et n’est pas soumis à la création d’un compte utilisateur.'
+			'Le formulaire  est mis à disposition de toute personne souhaitant donner son avis sur un service numérique public suite à son utilisation.',
+			'L’utilisation du service est libre et gratuite et n’est pas soumise à la création d’un compte utilisateur.'
 		]
 	},
 	features: {

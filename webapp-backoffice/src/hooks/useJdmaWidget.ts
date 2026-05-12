@@ -6,24 +6,24 @@ import { useCallback, useEffect, useState } from 'react';
  * #jdma-widget-anchor (inside PublicLayout) when coming back.
  * Defaults to hidden so the widget never flashes on non-admin pages.
  */
-export function useJdmaWidget(isOutOfAdminLayout: boolean) {
+export function useJdmaWidget(isHidden: boolean) {
 	const [trigger, setTrigger] = useState<HTMLElement | null>(null);
 
 	const syncWidget = useCallback(
 		(el: HTMLElement) => {
-			el.style.display = isOutOfAdminLayout ? 'none' : '';
+			el.style.display = isHidden ? 'none' : '';
 
 			const panel = document.querySelector<HTMLElement>('.jdma-widget-panel');
-			if (panel && isOutOfAdminLayout) panel.style.display = 'none';
+			if (panel && isHidden) panel.style.display = 'none';
 
-			if (!isOutOfAdminLayout) {
+			if (!isHidden) {
 				const anchor = document.getElementById('jdma-widget-anchor');
 				if (anchor && el.parentElement !== anchor) {
 					anchor.appendChild(el);
 				}
 			}
 		},
-		[isOutOfAdminLayout]
+		[isHidden]
 	);
 
 	// Capture the widget trigger once the script creates it,

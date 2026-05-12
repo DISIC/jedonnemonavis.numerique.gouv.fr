@@ -14,7 +14,7 @@ interface Props {
 	filters: ReviewFiltersType;
 	reviewsCountfiltered: number;
 	reviewsCountAll: number;
-	onExportCreated: () => void;
+	onExportCreated: (exportId: number) => void;
 	isDisabled?: boolean;
 }
 
@@ -60,7 +60,7 @@ const ExportReviews = (props: Props) => {
 			/>
 
 			<Button
-				priority="tertiary"
+				priority="secondary"
 				iconId="fr-icon-file-download-line"
 				iconPosition="right"
 				type="button"

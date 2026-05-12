@@ -245,10 +245,10 @@
 					"label": "Je n’ai pas trouvé comment les contacter"
 				},
 				{
-					"label": "Je les ai contacté mais je n’ai pas réussi à les joindre"
+					"label": "Je les ai contactés mais je n’ai pas réussi à les joindre"
 				},
 				{
-					"label": "Je les ai contacté et ils m’ont répondu"
+					"label": "Je les ai contactés et ils m’ont répondu"
 				}
 			]
 		},
@@ -264,7 +264,7 @@
 			]
 		},
 		"help_details": {
-			"label": "De quelle aide avez vous eu besoin ?",
+			"label": "De quelle aide avez-vous eu besoin ?",
 			"options": [
 				{
 					"label": "J'ai fait une recherche sur internet (site, forum)"

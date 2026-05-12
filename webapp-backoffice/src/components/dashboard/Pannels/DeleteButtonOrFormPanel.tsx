@@ -31,7 +31,7 @@ const DeleteButtonOrFormPanel = ({ isForForm }: { isForForm?: boolean }) => {
 
 			<ul className={fr.cx('fr-mt-4v', 'fr-mb-6v', 'fr-ml-2v')}>
 				<li>
-					Le formulaire ne recevra plus de donnée
+					Le formulaire ne recevra plus de données
 					{!isForForm && ' de ce bouton'}
 				</li>
 				<li>

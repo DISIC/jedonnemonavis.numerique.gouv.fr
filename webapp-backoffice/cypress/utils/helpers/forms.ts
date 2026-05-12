@@ -129,8 +129,8 @@ export function deleteForm() {
 }
 
 export function checkAllTabsA11y(withData = false) {
-	Object.keys(TAB_LABELS).forEach((tab: FormTab, i: number) => {
-		goToTabOfForm(tab, { isCurrentFormPage: i !== 0 });
+	Object.keys(TAB_LABELS).forEach((tab, i: number) => {
+		goToTabOfForm(tab as FormTab, { isCurrentFormPage: i !== 0 });
 		if (i === 0) cy.injectAxe();
 		cy.wait(withData && (i === 0 || i === 2) ? 5000 : 500);
 		cy.auditA11y(undefined, { withDetails: true });
