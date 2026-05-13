@@ -141,13 +141,12 @@ export const formatWhereAndOrder = (
 	if (sort) {
 		const values: string[] = sort.split(';');
 		values.forEach(value => {
-			const sortValues = value.split(':');
-			if (value.includes('created_at')) {
-				orderBy = [
-					{
-						[sortValues[0]]: sortValues[1]
-					}
-				];
+			const [field, direction] = value.split(':');
+			if (
+				field === 'created_at' &&
+				(direction === 'asc' || direction === 'desc')
+			) {
+				orderBy = [{ created_at: direction }];
 			}
 		});
 	}

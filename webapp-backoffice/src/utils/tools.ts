@@ -106,6 +106,19 @@ export function formatDateToFrenchString(
 	return datePart;
 }
 
+export function dateToLocalISO(date: Date): string {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, '0');
+	const d = String(date.getDate()).padStart(2, '0');
+	return `${y}-${m}-${d}`;
+}
+
+export function parseLocalDate(isoStr: string): Date | null {
+	if (!isValidDate(isoStr)) return null;
+	const [y, mo, d] = isoStr.split('-').map(Number);
+	return new Date(y, mo - 1, d);
+}
+
 export function formatFullFrenchDateTime(date: string | Date): string {
 	const dateStr = typeof date === 'string' ? date : date.toISOString();
 	const datePart = formatDateToFrenchString(dateStr, {
@@ -456,6 +469,16 @@ export const actionMapping: Record<string, TypeAction> = {
 	'form.delete': TypeAction.service_form_delete
 };
 
+const escapeHtmlValue = (value: unknown): string => {
+	if (value === null || value === undefined) return '';
+	return String(value)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+};
+
 export const handleActionTypeDisplay = (
 	action: TypeAction,
 	metadata: JsonValue,
@@ -464,9 +487,17 @@ export const handleActionTypeDisplay = (
 	if (!metadata) return '';
 
 	const metadataTyped = metadata as { json: { [key: string]: any } };
+	const e = escapeHtmlValue;
+	const userEmail = () =>
+		e(
+			metadataTyped.json.user_email !== null
+				? metadataTyped.json.user_email
+				: metadataTyped.json.user_email_invite
+		);
+
 	switch (action) {
 		case TypeAction.service_create:
-			return `Création du service <strong>${productTitle}</strong>`;
+			return `Création du service <strong>${e(productTitle)}</strong>`;
 		case TypeAction.service_update:
 			return `Modification sur le service`;
 		case TypeAction.service_archive:
@@ -474,11 +505,7 @@ export const handleActionTypeDisplay = (
 		case TypeAction.service_restore:
 			return `Restauration du service`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${
-				metadataTyped.json.user_email !== null
-					? metadataTyped.json.user_email
-					: metadataTyped.json.user_email_invite
-			}</strong> au service en tant <strong>${
+			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service en tant <strong>${
 				metadataTyped.json.status === 'carrier_admin'
 					? "qu'utilisateur"
 					: "qu'administrateur"
@@ -488,47 +515,51 @@ export const handleActionTypeDisplay = (
 				metadataTyped.json.status === 'carrier_admin'
 					? "d'utilisateur"
 					: "d'administrateur"
-			}</strong> pour <strong>${
-				metadataTyped.json.user_email !== null
-					? metadataTyped.json.user_email
-					: metadataTyped.json.user_email_invite
-			}</strong> sur le service`;
+			}</strong> pour <strong>${userEmail()}</strong> sur le service`;
 		case TypeAction.organisation_create:
-			return `Création de l'organisation <strong>${metadataTyped.json.entity_name}</strong>`;
+			return `Création de l'organisation <strong>${e(
+				metadataTyped.json.entity_name
+			)}</strong>`;
 		case TypeAction.organisation_update:
 			return `Modification sur l'organisation du service`;
 		case TypeAction.organisation_invite:
-			return `Invitation de l'utilisateur <strong>${
-				metadataTyped.json.user_email !== null
-					? metadataTyped.json.user_email
-					: metadataTyped.json.user_email_invite
-			}</strong> à l'organisation`;
+			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> à l'organisation`;
 		case TypeAction.organisation_uninvite:
-			return `Retrait de l'utilisateur <strong>${
-				metadataTyped.json.user_email !== null
-					? metadataTyped.json.user_email
-					: metadataTyped.json.user_email_invite
-			}</strong> de l'organisation <strong>${
+			return `Retrait de l'utilisateur <strong>${userEmail()}</strong> de l'organisation <strong>${e(
 				metadataTyped.json.entity_name
-			}</strong>`;
+			)}</strong>`;
 		case TypeAction.service_button_create:
-			return `Création du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
+			return `Création du lien d'intégration <strong>${e(
+				metadataTyped.json.title
+			)}</strong>`;
 		case TypeAction.service_button_update:
-			return `Modification du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
+			return `Modification du lien d'intégration <strong>${e(
+				metadataTyped.json.title
+			)}</strong>`;
 		case TypeAction.service_button_delete:
-			return `Fermeture du lien d'intégration <strong>${metadataTyped.json.title}</strong>`;
+			return `Fermeture du lien d'intégration <strong>${e(
+				metadataTyped.json.title
+			)}</strong>`;
 		case TypeAction.service_apikeys_create:
 			return `Création d'une clé API`;
 		case TypeAction.service_apikeys_delete:
 			return `Suppression d'une clé API`;
 		case TypeAction.form_config_create:
-			return `Mise en place du formulaire version ${metadataTyped.json.version}`;
+			return `Mise en place du formulaire version ${e(
+				metadataTyped.json.version
+			)}`;
 		case TypeAction.service_form_create:
-			return `Création du formulaire <strong>${metadataTyped.json.title}</strong>`;
+			return `Création du formulaire <strong>${e(
+				metadataTyped.json.title
+			)}</strong>`;
 		case TypeAction.service_form_edit:
-			return `Modification du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
+			return `Modification du formulaire <strong>${e(
+				metadataTyped.json.form?.title
+			)}</strong>`;
 		case TypeAction.service_form_delete:
-			return `Fermeture du formulaire <strong>${metadataTyped.json.form.title}</strong>`;
+			return `Fermeture du formulaire <strong>${e(
+				metadataTyped.json.form?.title
+			)}</strong>`;
 	}
 };
 

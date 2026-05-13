@@ -267,6 +267,8 @@ const ReviewDrawerContent = ({
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
 	const isFirstRender = useRef(true);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const titleRef = useRef<HTMLHeadingElement>(null);
 	const [announcement, setAnnouncement] = useState('');
 
 	useEffect(() => {
@@ -275,8 +277,12 @@ const ReviewDrawerContent = ({
 			return;
 		}
 		setAnnouncement(
-			`Détail de l'avis du ${formatFullFrenchDateTime(review.created_at?.toString() || '')}`
+			`Détail de l'avis du ${formatFullFrenchDateTime(
+				review.created_at?.toString() || ''
+			)}`
 		);
+		containerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+		titleRef.current?.focus();
 	}, [review.id]);
 
 	const buttonName = review.button_id
@@ -302,8 +308,13 @@ const ReviewDrawerContent = ({
 	);
 
 	return (
-		<div className={cx(classes.container)}>
-			<p role="status" aria-live="polite" aria-atomic="true" className={cx(classes.srOnly)}>
+		<div ref={containerRef} className={cx(classes.container)}>
+			<p
+				role="status"
+				aria-live="polite"
+				aria-atomic="true"
+				className={cx(classes.srOnly)}
+			>
 				{announcement}
 			</p>
 			<div className={cx(classes.header)}>
@@ -321,35 +332,15 @@ const ReviewDrawerContent = ({
 			</div>
 
 			<h1
+				ref={titleRef}
 				id="review-drawer-title"
+				tabIndex={-1}
 				className={cx(classes.title, fr.cx('fr-h4'))}
 			>
 				Détail de l'avis du{' '}
 				{formatFullFrenchDateTime(review.created_at?.toString() || '')}
 			</h1>
 			<hr className={cx(classes.titleSeparator)} />
-
-			<div className={classes.actionsContainer}>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-right-s-line"
-					iconPosition="right"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasNext}
-					onClick={onNext}
-				>
-					Voir l'avis suivant
-				</Button>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-left-s-line"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasPrevious}
-					onClick={onPrevious}
-				>
-					Voir l'avis précédent
-				</Button>
-			</div>
 
 			{answerBlocks.map((block, index) => {
 				const answers = getTopLevelAnswers(review.answers, block.field_code);
@@ -437,6 +428,30 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
+
+			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
+
+			<div className={classes.actionsContainer}>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-right-s-line"
+					iconPosition="right"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasNext}
+					onClick={onNext}
+				>
+					Voir l'avis suivant
+				</Button>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-left-s-line"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasPrevious}
+					onClick={onPrevious}
+				>
+					Voir l'avis précédent
+				</Button>
+			</div>
 		</div>
 	);
 };
@@ -469,7 +484,8 @@ const useStyles = tss.create({
 		marginBottom: fr.spacing('4v')
 	},
 	title: {
-		color: fr.colors.decisions.artwork.major.blueFrance.default
+		color: fr.colors.decisions.artwork.major.blueFrance.default,
+		'&:focus': { outline: 'none' }
 	},
 	titleSeparator: {
 		backgroundImage: `linear-gradient(0deg, ${fr.colors.decisions.artwork.major.blueFrance.default}, ${fr.colors.decisions.artwork.major.blueFrance.default})`

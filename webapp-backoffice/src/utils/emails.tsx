@@ -12,6 +12,8 @@ import JdmaProductArchivedEmail from '@/emails/jdma-product-archived-email';
 import JdmaProductRestoredEmail from '@/emails/jdma-product-restored-email';
 import JdmaNotificationsEmail from '@/emails/jdma-notifications-email';
 import JdmaAlertEmail from '@/emails/jdma-alert-email';
+import JdmaExportReadyEmail from '@/emails/jdma-export-ready-email';
+import JdmaExportFailedEmail from '@/emails/jdma-export-failed-email';
 import {
 	JdmaAlertEmailProps,
 	JdmaNotificationsEmailProps,
@@ -22,7 +24,9 @@ import {
 	JdmaOtpEmailProps,
 	JdmaProductArchivedEmailProps,
 	JdmaProductRestoredEmailProps,
-	JdmaUserInviteEmailProps
+	JdmaUserInviteEmailProps,
+	JdmaExportReadyEmailProps,
+	JdmaExportFailedEmailProps
 } from '@/emails/interface';
 
 export async function renderUserRequestAcceptedEmail(
@@ -89,6 +93,18 @@ export async function renderNotificationsEmail(
 	props: JdmaNotificationsEmailProps
 ): Promise<string> {
 	return await render(<JdmaNotificationsEmail {...props} />);
+}
+
+export async function renderExportReadyEmail(
+	props: JdmaExportReadyEmailProps
+): Promise<string> {
+	return await render(<JdmaExportReadyEmail {...props} />);
+}
+
+export async function renderExportFailedEmail(
+	props: JdmaExportFailedEmailProps
+): Promise<string> {
+	return await render(<JdmaExportFailedEmail {...props} />);
 }
 
 export async function renderAlertEmail(

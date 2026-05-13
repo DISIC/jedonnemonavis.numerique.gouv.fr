@@ -21,42 +21,42 @@ import Image from 'next/image';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
 
-const highlightSearchTerms = (text: string, search: string): string => {
+const highlightSearchTerms = (
+	text: string,
+	search: string
+): React.ReactNode => {
 	if (!search.trim()) return text;
 
-	if (isExactPhraseSearch(search)) {
-		const phrase = getExactPhrase(search);
-		const pattern = buildAccentAwarePattern(phrase);
-		const regex = new RegExp(pattern, 'gi');
-		return text.replace(regex, match => `<span>${match}</span>`);
-	}
+	const buildPattern = (): RegExp | null => {
+		if (isExactPhraseSearch(search)) {
+			const phrase = getExactPhrase(search);
+			if (!phrase) return null;
+			return new RegExp(`(${buildAccentAwarePattern(phrase)})`, 'gi');
+		}
 
-	const words = search.split(' ').filter(Boolean);
-	let highlightedText = text;
+		const words = search
+			.split(' ')
+			.map(w => w.trim())
+			.filter(Boolean)
+			.map(buildAccentAwarePattern);
 
-	words.forEach(word => {
-		const pattern = buildAccentAwarePattern(word);
+		if (words.length === 0) return null;
+		return new RegExp(`\\b(${words.join('|')})\\b`, 'gi');
+	};
 
-		const patterns = [
-			`\\b${pattern}(?=\\w)`,
-			`(?<=\\w)${pattern}\\b`,
-			`\\b${pattern}\\b`,
-			`^${pattern}(?=\\w)`,
-			`^${pattern}\\b`,
-			`(?<=\\w)${pattern}$`,
-			`\\b${pattern}$`,
-			`^${pattern}$`
-		];
+	const splitRegex = buildPattern();
+	if (!splitRegex) return text;
 
-		patterns.forEach(p => {
-			const regex = new RegExp(p, 'gi');
-			highlightedText = highlightedText.replace(regex, match => {
-				return `<span>${match}</span>`;
-			});
-		});
+	const parts = text.split(splitRegex);
+	return parts.map((part, idx) => {
+		if (!part) return null;
+		const isMatch = idx % 2 === 1;
+		return isMatch ? (
+			<span key={idx}>{part}</span>
+		) : (
+			<React.Fragment key={idx}>{part}</React.Fragment>
+		);
 	});
-
-	return highlightedText;
 };
 
 const ReviewTableRow = ({
@@ -301,6 +301,7 @@ const useStyles = tss.create({
 		margin: 0
 	},
 	action: {
+		fontSize: '0.875rem',
 		textWrap: 'nowrap',
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default,
 		backgroundImage: `linear-gradient(0deg, currentColor, currentColor)`,

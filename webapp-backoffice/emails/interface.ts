@@ -83,3 +83,14 @@ export interface JdmaAlertEmailProps {
 	reviewsUrl?: string;
 	baseUrl?: string;
 }
+
+export interface JdmaExportReadyEmailProps {
+	productName: string;
+	downloadLink: string;
+	baseUrl?: string;
+}
+
+export interface JdmaExportFailedEmailProps {
+	productName: string;
+	baseUrl?: string;
+}

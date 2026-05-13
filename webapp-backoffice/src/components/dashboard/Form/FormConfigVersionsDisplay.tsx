@@ -15,7 +15,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 
 	const { classes } = useStyles();
 
-	const formConfigs = form.form_configs.sort(
+	const formConfigs = [...form.form_configs].sort(
 		(a, b) =>
 			new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 	);
@@ -63,7 +63,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 								form.form_template.slug !== 'root'
 									? `avis/${form.id}`
 									: form.product_id
-							}?iframe=true&formConfig=${encodeURIComponent(
+							}?preview=true&formConfig=${encodeURIComponent(
 								JSON.stringify({
 									...formConfig,
 									displays: formConfig.form_config_displays,

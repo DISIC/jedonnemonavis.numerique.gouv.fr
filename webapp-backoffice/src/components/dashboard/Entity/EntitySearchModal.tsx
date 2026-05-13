@@ -111,8 +111,9 @@ const EntitySearchModal = (props: Props) => {
 
 	const displayModalContent = () => {
 		// AVOID BUG ON AUTOCOMPLETE WHEN REFOCUS FIELD WITH SEARCH TEXT
+		const needle = normalizeString(search).slice(0, 200).toLowerCase();
 		const filteredOptions = entityOptions.filter(eo =>
-			new RegExp(normalizeString(search), 'i').test(normalizeString(eo.label))
+			needle === '' || normalizeString(eo.label).toLowerCase().includes(needle)
 		);
 		return (
 			<>

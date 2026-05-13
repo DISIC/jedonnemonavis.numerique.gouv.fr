@@ -63,7 +63,11 @@ export const createAccessRightMutation = async ({
 
 	const newAccessRight = await ctx.prisma.accessRight.upsert({
 		where: { id: accessRightAlreadyExists?.id || -1 },
-		update: { status: role },
+		update: {
+			status: role,
+			user_email: userExists ? user_email.toLowerCase() : null,
+			user_email_invite: !userExists ? user_email.toLowerCase() : null
+		},
 		create: {
 			user_email: userExists ? user_email.toLowerCase() : null,
 			user_email_invite: !userExists ? user_email.toLowerCase() : null,

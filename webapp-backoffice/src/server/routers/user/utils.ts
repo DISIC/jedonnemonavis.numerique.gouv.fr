@@ -53,6 +53,17 @@ export async function registerUserFromOTP(
 
 	if (!userOTP || !userOTP.user) return;
 
+	if (
+		!user.email ||
+		user.email.toLowerCase() !== userOTP.user.email.toLowerCase()
+	) {
+		return;
+	}
+
+	if (userOTP.expiration_date < new Date()) {
+		return;
+	}
+
 	const updatedUser = await prisma.user.update({
 		where: {
 			id: userOTP.user.id
@@ -105,43 +116,29 @@ export async function generateValidationToken(
 
 export async function makeRelationFromUserInvite(
 	prisma: PrismaClient,
-	user: User
+	email: string
 ) {
+	const normalizedEmail = email.toLowerCase();
+
 	const userInvites = await prisma.accessRight.findMany({
-		where: {
-			user_email_invite: user.email.toLowerCase()
-		}
+		where: { user_email_invite: normalizedEmail }
 	});
 
 	if (userInvites.length > 0) {
 		await prisma.accessRight.updateMany({
-			where: {
-				id: {
-					in: userInvites.map(invite => invite.id)
-				}
-			},
-			data: {
-				user_email: user.email.toLowerCase()
-			}
+			where: { id: { in: userInvites.map(invite => invite.id) } },
+			data: { user_email: normalizedEmail }
 		});
 	}
 
 	const userInvitesEntity = await prisma.adminEntityRight.findMany({
-		where: {
-			user_email_invite: user.email.toLowerCase()
-		}
+		where: { user_email_invite: normalizedEmail }
 	});
 
 	if (userInvitesEntity.length > 0) {
 		await prisma.adminEntityRight.updateMany({
-			where: {
-				id: {
-					in: userInvitesEntity.map(invite => invite.id)
-				}
-			},
-			data: {
-				user_email: user.email.toLowerCase()
-			}
+			where: { id: { in: userInvitesEntity.map(invite => invite.id) } },
+			data: { user_email: normalizedEmail }
 		});
 	}
 }

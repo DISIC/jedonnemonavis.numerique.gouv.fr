@@ -4,6 +4,11 @@ interface MemoryStorage {
 
 let memoryStorage: MemoryStorage = {};
 
+export const buildUserScopedKey = (
+	userId: number | string | undefined | null,
+	key: string
+): string => `u${userId ?? 'anon'}:${key}`;
+
 export const setMemoryValue = (key: string, value: number) => {
 	memoryStorage[key] = value;
 };

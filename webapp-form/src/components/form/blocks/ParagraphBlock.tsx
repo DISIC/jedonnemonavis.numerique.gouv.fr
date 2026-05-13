@@ -1,3 +1,4 @@
+import { sanitizeRichHtml } from "@/src/utils/sanitize";
 import { FormWithElements } from "@/src/utils/types";
 
 type Block =
@@ -10,5 +11,7 @@ interface Props {
 
 export const ParagraphBlock = ({ block, displayLabel }: Props) => {
   const content = displayLabel || block.content;
-  return content ? <div dangerouslySetInnerHTML={{ __html: content }} /> : null;
+  return content ? (
+    <div dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(content) }} />
+  ) : null;
 };

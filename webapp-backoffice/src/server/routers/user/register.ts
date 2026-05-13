@@ -91,7 +91,7 @@ export const registerUserMutation = async ({
 				message: 'Internal server error while creating user'
 			});
 
-		await makeRelationFromUserInvite(ctx.prisma, createdUser);
+		await makeRelationFromUserInvite(ctx.prisma, createdUser.email);
 
 		if (!inviteToken) {
 			const token = await generateValidationToken(ctx.prisma, createdUser.id);

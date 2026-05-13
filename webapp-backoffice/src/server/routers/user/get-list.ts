@@ -1,6 +1,16 @@
 import type { Context } from '@/src/server/trpc';
+import { buildOrderBy } from '@/src/server/utils/order-by';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+
+const USER_SORT_FIELDS = [
+	'email',
+	'firstName',
+	'lastName',
+	'created_at',
+	'updated_at',
+	'role'
+] as const;
 
 export const getUserListInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -102,28 +112,9 @@ export const getUserListQuery = async ({
 		};
 	}
 
-	if (sort) {
-		const values = sort.split(':');
-		if (values.length === 2) {
-			if (values[0].includes('.')) {
-				const subValues = values[0].split('.');
-				if (subValues.length === 2) {
-					orderBy = [
-						{
-							[subValues[0]]: {
-								[subValues[1]]: values[1]
-							}
-						}
-					];
-				}
-			} else {
-				orderBy = [
-					{
-						[values[0]]: values[1]
-					}
-				];
-			}
-		}
+	const safeOrderBy = buildOrderBy(sort, USER_SORT_FIELDS);
+	if (safeOrderBy) {
+		orderBy = [safeOrderBy as Prisma.UserOrderByWithAggregationInput];
 	}
 
 	const users = await ctx.prisma.user.findMany({

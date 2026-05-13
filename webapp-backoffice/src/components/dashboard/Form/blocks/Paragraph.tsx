@@ -1,5 +1,6 @@
 import { FormConfigHelper } from '@/src/pages/administration/dashboard/product/[id]/forms/[form_id]/edit';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useEffect, useState } from 'react';
 import { tss } from 'tss-react';
@@ -33,7 +34,7 @@ const Paragraph = (props: Props) => {
 		<div
 			className={classes.blockParagraph}
 			dangerouslySetInnerHTML={{
-				__html: content
+				__html: sanitizeRichHtml(content)
 			}}
 		/>
 	);

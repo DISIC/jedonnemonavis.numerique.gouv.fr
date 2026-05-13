@@ -1,11 +1,12 @@
 import GenericFilters from '@/src/components/dashboard/Filters/Filters';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
-import { useFilters } from '@/src/contexts/FiltersContext';
+import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import {
 	filtersLabel,
 	getNbPages,
 	handleActionTypeDisplay
 } from '@/src/utils/tools';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Table } from '@codegouvfr/react-dsfr/Table';
@@ -74,12 +75,13 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 			event.user ? event.user.email : 'Utilisateur inconnu',
 			<p
 				dangerouslySetInnerHTML={{
-					__html:
+					__html: sanitizeRichHtml(
 						handleActionTypeDisplay(
 							event.action,
 							event.metadata,
 							product.title
 						) || ''
+					)
 				}}
 			/>
 		]) || [];
@@ -101,13 +103,20 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 								?.label}`}
 							nativeButtonProps={{
 								onClick: () => {
-									updateFilters({
+									const nextFilters: typeof filters = {
 										...filters,
 										productActivityLogs: {
 											...filters.productActivityLogs,
 											actionType: filters.productActivityLogs.actionType.filter(
 												e => e !== action
 											)
+										}
+									};
+									updateFilters({
+										...nextFilters,
+										sharedFilters: {
+											...nextFilters.sharedFilters,
+											hasChanged: hasAnyFilterChanged(nextFilters)
 										}
 									});
 								}
@@ -146,7 +155,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 						options={filtersLabel}
 						onChange={(_, option) => {
 							if (option) {
-								updateFilters({
+								const nextFilters: typeof filters = {
 									...filters,
 									productActivityLogs: {
 										...filters.productActivityLogs,
@@ -154,10 +163,13 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 											...filters.productActivityLogs.actionType,
 											option.value as TypeAction
 										]
-									},
+									}
+								};
+								updateFilters({
+									...nextFilters,
 									sharedFilters: {
-										...filters.sharedFilters,
-										hasChanged: true
+										...nextFilters.sharedFilters,
+										hasChanged: hasAnyFilterChanged(nextFilters)
 									}
 								});
 							}

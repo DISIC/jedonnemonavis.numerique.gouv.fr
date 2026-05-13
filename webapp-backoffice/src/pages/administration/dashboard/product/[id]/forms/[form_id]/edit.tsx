@@ -9,6 +9,7 @@ import {
 	getHasConfigChanged,
 	getHelperFromFormConfig
 } from '@/src/utils/tools';
+import { sanitizeRichHtml } from '@/src/utils/sanitize';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
@@ -282,7 +283,7 @@ const ProductFormPage = (props: Props) => {
 										<br />
 										<span
 											dangerouslySetInnerHTML={{
-												__html: form.form_template.description
+												__html: sanitizeRichHtml(form.form_template.description)
 											}}
 										/>
 									</>

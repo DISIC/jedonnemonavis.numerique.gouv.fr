@@ -12,6 +12,7 @@ import bcrypt from 'bcrypt';
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 import { getSiretInfo } from '@/src/utils/queries';
 import { generateRandomString } from '@/src/utils/tools';
+import { makeRelationFromUserInvite } from '@/src/server/routers/user/utils';
 
 const JWKS = createRemoteJWKSet(
 	new URL(`https://${process.env.PROCONNECT_DOMAIN}/api/v2/jwks`)
@@ -28,6 +29,12 @@ interface ProconnectProfile {
 	idp_id?: string;
 }
 
+const useSecureCookies = (process.env.NEXTAUTH_URL ?? '').startsWith(
+	'https://'
+);
+const cookiePrefix = useSecureCookies ? '__Secure-' : '';
+const hostPrefix = useSecureCookies ? '__Host-' : '';
+
 export const authOptions: NextAuthOptions = {
 	debug: process.env.NODE_ENV === 'development',
 	secret: process.env.NEXTAUTH_SECRET,
@@ -35,6 +42,35 @@ export const authOptions: NextAuthOptions = {
 		signIn: '/login',
 		signOut: '/login',
 		error: '/login'
+	},
+	useSecureCookies,
+	cookies: {
+		sessionToken: {
+			name: `${cookiePrefix}next-auth.session-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		},
+		callbackUrl: {
+			name: `${cookiePrefix}next-auth.callback-url`,
+			options: {
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		},
+		csrfToken: {
+			name: `${hostPrefix}next-auth.csrf-token`,
+			options: {
+				httpOnly: true,
+				sameSite: 'lax',
+				path: '/',
+				secure: useSecureCookies
+			}
+		}
 	},
 	callbacks: {
 		async session({ session, token }) {
@@ -76,23 +112,30 @@ export const authOptions: NextAuthOptions = {
 			return token;
 		},
 		async redirect({ url, baseUrl }) {
-			if (url.startsWith(baseUrl)) {
-				return url;
+			if (url.startsWith('/')) {
+				return `${baseUrl}${url}`;
 			}
+			try {
+				const target = new URL(url);
+				const base = new URL(baseUrl);
+				if (target.protocol === base.protocol && target.host === base.host) {
+					return target.toString();
+				}
+			} catch {}
 			return baseUrl;
 		},
 
-		async signIn({ account, profile }) {
+		async signIn({ user, account, profile }) {
 			if (account?.provider === 'openid') {
 				const proconnectProfile = profile as ProconnectProfile;
 
 				const email = proconnectProfile.email?.toLowerCase();
 
-				let user = await prisma.user.findUnique({
+				let dbUser = await prisma.user.findUnique({
 					where: { email }
 				});
 
-				if (!user) {
+				if (!dbUser) {
 					try {
 						const data = await getSiretInfo(proconnectProfile.siret);
 
@@ -110,7 +153,7 @@ export const authOptions: NextAuthOptions = {
 								salt
 							);
 
-							user = await prisma.user.create({
+							dbUser = await prisma.user.create({
 								data: {
 									email,
 									firstName: proconnectProfile.given_name,
@@ -133,6 +176,10 @@ export const authOptions: NextAuthOptions = {
 						throw new Error('INVALID_PROVIDER');
 					}
 				}
+
+				await makeRelationFromUserInvite(prisma, email);
+			} else if (account?.provider === 'credentials' && user?.email) {
+				await makeRelationFromUserInvite(prisma, user.email);
 			}
 			return true;
 		}
@@ -164,7 +211,13 @@ export const authOptions: NextAuthOptions = {
 						.update(password)
 						.digest('hex');
 					isPasswordCorrect = hashedPassword === user.password;
+				}
 
+				if (!isPasswordCorrect) {
+					return null;
+				}
+
+				if (!user.password.startsWith('$2b$')) {
 					const salt = bcrypt.genSaltSync(10);
 					const newHashedPassword = bcrypt.hashSync(password, salt);
 					await prisma.user.update({
@@ -175,10 +228,6 @@ export const authOptions: NextAuthOptions = {
 							password: newHashedPassword
 						}
 					});
-				}
-
-				if (!isPasswordCorrect) {
-					return null;
 				}
 
 				await prisma.userEvent.create({
@@ -199,7 +248,7 @@ export const authOptions: NextAuthOptions = {
 			id: 'openid',
 			name: 'ProConnect',
 			type: 'oauth',
-			issuer: `https://${process.env.PROCONNECT_DOMAIN}`,
+			issuer: `https://${process.env.PROCONNECT_DOMAIN}/api/v2`,
 			wellKnown: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/.well-known/openid-configuration`,
 			authorization: {
 				url: `https://${process.env.PROCONNECT_DOMAIN}/api/v2/authorize`,
@@ -227,7 +276,10 @@ export const authOptions: NextAuthOptions = {
 					try {
 						data = JSON.parse(responseText);
 					} catch (error) {
-						const { payload } = await jwtVerify(responseText, JWKS);
+						const { payload } = await jwtVerify(responseText, JWKS, {
+							issuer: `https://${process.env.PROCONNECT_DOMAIN}/api/v2`,
+							audience: process.env.PROCONNECT_CLIENT_ID
+						});
 						data = payload as Record<string, any>; // 🔥 Décode JWT
 					}
 					return data;

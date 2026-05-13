@@ -1,5 +1,9 @@
 export async function getSiretInfo(siret: string): Promise<any> {
-	const response = await fetch(`${process.env.INSEE_API_URL}/siret/${siret}`, {
+	if (typeof siret !== 'string' || !/^\d{9,14}$/.test(siret)) {
+		throw new Error('Invalid SIRET');
+	}
+
+	const response = await fetch(`${process.env.INSEE_API_URL}/siret/${encodeURIComponent(siret)}`, {
 		method: "GET",
 		headers: {
 			"X-INSEE-Api-Key-Integration": process.env.INSEE_API_KEY!,
