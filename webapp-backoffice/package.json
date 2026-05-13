@@ -19,8 +19,10 @@
 		"test": "npx cypress run --browser chrome --headed",
 		"test:reset": "npm run db:reset:silent && npx prisma db seed && npx cypress run --browser chrome --headed",
 		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts",
-		"worker:dev": "tsx watch src/workers/run.ts",
-		"worker:start": "tsx src/workers/run.ts"
+		"worker:export:dev": "tsx watch src/workers/run-export.ts",
+		"worker:export:start": "tsx src/workers/run-export.ts",
+		"worker:alert:dev": "tsx watch src/workers/run-alert.ts",
+		"worker:alert:start": "tsx src/workers/run-alert.ts"
 	},
 	"husky": {
 		"hooks": {
