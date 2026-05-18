@@ -1,8 +1,10 @@
 import type { PrismaClient } from '@prisma/client';
 import { formAlertJobId, formAlertQueue } from '@/src/lib/queue';
 
-export const DEFAULT_MAX_WINDOW_MINUTES = 120;
-export const DEBOUNCE_DELAY_MS = 5 * 60 * 1000; // 5 min sliding window
+export const DEFAULT_MAX_WINDOW_MINUTES =
+	parseInt(process.env.ALERT_MAX_WINDOW_MINUTES ?? '') || 120;
+export const DEBOUNCE_DELAY_MS =
+	parseInt(process.env.ALERT_DEBOUNCE_MS ?? '') || 5 * 60 * 1000;
 
 /**
  * Schedules (or reschedules) a debounced alert email for the given form.
