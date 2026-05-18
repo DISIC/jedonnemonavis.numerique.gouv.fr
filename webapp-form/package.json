@@ -55,6 +55,7 @@
     "react-dom": "18.2.0",
     "react-i18next": "13.5.0",
     "sequelize": "6.37.8",
+    "sharp": "0.32.6",
     "superjson": "2.0.0",
     "trpc-openapi": "1.2.0",
     "tss-react": "4.9.0",
