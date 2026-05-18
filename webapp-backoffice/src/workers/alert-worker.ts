@@ -9,7 +9,7 @@ const CONCURRENCY_LIMIT = parseInt(
 );
 
 async function processAlertJob(job: Job<FormAlertJobData>): Promise<void> {
-	await processFormAlertBatch(job.data.form_id);
+	await processFormAlertBatch(job.data.formId);
 }
 
 declare const globalThis: {
@@ -28,13 +28,13 @@ export function startAlertWorker(): void {
 
 	worker.on('completed', job => {
 		console.log(
-			`[alert-worker] Job ${job.id} completed (form ${job.data.form_id})`
+			`[alert-worker] Job ${job.id} completed (form ${job.data.formId})`
 		);
 	});
 
 	worker.on('failed', (job, err) => {
 		console.error(
-			`[alert-worker] Job ${job?.id} failed (form ${job?.data.form_id}):`,
+			`[alert-worker] Job ${job?.id} failed (form ${job?.data.formId}):`,
 			err.message
 		);
 	});
