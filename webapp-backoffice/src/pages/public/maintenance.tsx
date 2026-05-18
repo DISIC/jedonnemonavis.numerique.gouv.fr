@@ -18,7 +18,7 @@ const Maintenance = () => {
 	);
 };
 
-const useStyles = tss.withName(Maintenance.name).create(() => ({
+const useStyles = tss.withName({ Maintenance }).create(() => ({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',

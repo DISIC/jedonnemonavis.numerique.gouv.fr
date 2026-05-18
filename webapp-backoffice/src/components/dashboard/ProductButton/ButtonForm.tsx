@@ -173,7 +173,7 @@ const ButtonForm = ({
 	);
 };
 
-const useStyles = tss.withName(ButtonForm.name).create(() => ({
+const useStyles = tss.withName({ ButtonForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},

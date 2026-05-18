@@ -93,7 +93,7 @@ export const KPITile = (props: KPITileProps) => {
 };
 
 const useStyles = tss
-	.withName(KPITile.name)
+	.withName({ KPITile })
 	.withParams<{ grey: boolean }>()
 	.create(({ grey }) => ({
 		titleText: {

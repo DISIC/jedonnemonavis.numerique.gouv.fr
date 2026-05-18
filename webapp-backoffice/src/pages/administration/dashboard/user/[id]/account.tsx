@@ -53,7 +53,7 @@ const UserAccount: React.FC<Props> = props => {
 	);
 };
 
-const useStyles = tss.withName(UserAccount.name).create({
+const useStyles = tss.withName({ UserAccount }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',

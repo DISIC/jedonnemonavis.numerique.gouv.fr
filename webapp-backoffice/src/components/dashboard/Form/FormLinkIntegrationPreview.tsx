@@ -304,7 +304,7 @@ const FormLinkIntegrationPreview = ({
 	);
 };
 
-const useStyles = tss.withName(FormLinkIntegrationPreview.name).create(() => ({
+const useStyles = tss.withName({ FormLinkIntegrationPreview }).create(() => ({
 	mainContainer: {
 		display: 'flex',
 		'& .fr-unhidden-lg': {

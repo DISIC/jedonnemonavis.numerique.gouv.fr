@@ -434,7 +434,7 @@ export const RegisterForm = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(RegisterForm.name)
+	.withName({ RegisterForm })
 	.withParams<{ isLoading: boolean }>()
 	.create(({ isLoading }) => ({
 		button: {

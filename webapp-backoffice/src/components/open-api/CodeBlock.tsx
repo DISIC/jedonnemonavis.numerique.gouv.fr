@@ -163,7 +163,7 @@ const CodeBlock = ({
 	);
 };
 
-const useStyles = tss.withName(CodeBlock.name).create(() => ({
+const useStyles = tss.withName({ CodeBlock }).create(() => ({
 	codeBlockContainer: {
 		position: 'relative',
 		marginBottom: fr.spacing('4v')

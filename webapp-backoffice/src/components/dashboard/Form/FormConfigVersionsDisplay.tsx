@@ -94,7 +94,7 @@ const FormConfigVersionsDisplay = (props: FormConfigVersionsDisplayProps) => {
 	);
 };
 
-const useStyles = tss.withName(FormConfigVersionsDisplay.name).create(() => ({
+const useStyles = tss.withName({ FormConfigVersionsDisplay }).create(() => ({
 	container: {
 		backgroundColor: fr.colors.decisions.background.default.grey.hover,
 		padding: fr.spacing('4v'),

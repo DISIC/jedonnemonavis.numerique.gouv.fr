@@ -98,7 +98,7 @@ export const MarkInputBlock = ({
 	);
 };
 
-const useStyles = tss.withName(MarkInputBlock.name).create(() => ({
+const useStyles = tss.withName({ MarkInputBlock }).create(() => ({
 	hint: {
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,

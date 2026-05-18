@@ -68,7 +68,7 @@ const RootYesNo = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(RootYesNo.name).create({
+const useStyles = tss.withName({ RootYesNo }).create({
 	container: {
 		h3: {
 			marginBottom: fr.spacing('6v')

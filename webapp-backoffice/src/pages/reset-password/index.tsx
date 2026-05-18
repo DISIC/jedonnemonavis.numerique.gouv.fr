@@ -64,7 +64,7 @@ export default function Login() {
 }
 
 const useStyles = tss
-	.withName(Login.name)
+	.withName({ Login })
 	.withParams()
 	.create(() => ({
 		formContainer: {

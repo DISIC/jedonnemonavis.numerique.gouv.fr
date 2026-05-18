@@ -64,7 +64,7 @@ export const ProconnectError = () => {
 	);
 };
 
-const useStyles = tss.withName(ProconnectError.name).create(({}) => ({
+const useStyles = tss.withName({ ProconnectError }).create(({}) => ({
 	actionModal: {
 		display: 'flex',
 		justifyContent: 'space-between'

@@ -45,7 +45,7 @@ const RadioTiles = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(RadioTiles.name)
+	.withName({ RadioTiles })
 	.withParams<{ nbItems?: number }>()
 	.create(({ nbItems }) => ({
 		container: {

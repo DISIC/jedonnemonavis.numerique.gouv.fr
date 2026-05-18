@@ -450,7 +450,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 }
 
 const useStyles = tss
-	.withName(PublicLayout.name)
+	.withName({ PublicLayout })
 	.withParams<{ countUserRequests: number }>()
 	.create(({ countUserRequests }) => ({
 		logo: {

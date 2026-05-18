@@ -212,7 +212,7 @@ const UserDetailsForm = ({ onCreated }: UserDetailsFormProps) => {
 	);
 };
 
-const useStyles = tss.withName(UserDetailsForm.name).create(() => ({
+const useStyles = tss.withName({ UserDetailsForm }).create(() => ({
 	formContainer: {
 		backgroundColor: fr.colors.decisions.background.alt.grey.default
 	},

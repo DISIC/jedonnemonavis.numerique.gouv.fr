@@ -57,7 +57,7 @@ const HomeHeader = () => {
 
 export default HomeHeader;
 
-const useStyles = tss.withName('HomeHeader').create(() => ({
+const useStyles = tss.withName({ HomeHeader }).create(() => ({
 	titleContainer: {
 		display: 'flex',
 		flexDirection: 'column',

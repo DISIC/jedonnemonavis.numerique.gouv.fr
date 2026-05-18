@@ -579,7 +579,7 @@ const ProductCard = ({
 	);
 };
 
-const useStyles = tss.withName(ProductCard.name).create({
+const useStyles = tss.withName({ ProductCard }).create({
 	productCard: {
 		position: 'relative',
 		transition: 'background-color 0.2s ease-in-out',

@@ -89,7 +89,7 @@ export const CheckboxBlock = ({
 	);
 };
 
-const useStyles = tss.withName(CheckboxBlock.name).create(() => ({
+const useStyles = tss.withName({ CheckboxBlock }).create(() => ({
 	hint: {
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,

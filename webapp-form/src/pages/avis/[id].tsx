@@ -425,7 +425,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 const blueSectionPxHeight = 200;
 
 const useStyles = tss
-	.withName(AvisPage.name)
+	.withName({ AvisPage })
 	.withParams<{ isWidget: boolean }>()
 	.create(({ isWidget }) => ({
 		container: {

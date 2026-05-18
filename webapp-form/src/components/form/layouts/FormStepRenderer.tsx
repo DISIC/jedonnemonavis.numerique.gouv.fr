@@ -88,7 +88,7 @@ export const FormStepRenderer = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(FormStepRenderer.name)
+	.withName({ FormStepRenderer })
 	.withParams<{ isWidget: boolean }>()
 	.create(({ isWidget }) => ({
 		container: {

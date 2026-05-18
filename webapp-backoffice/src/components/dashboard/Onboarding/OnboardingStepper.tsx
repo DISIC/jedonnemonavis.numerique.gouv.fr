@@ -178,7 +178,7 @@ const OnboardingStepper = () => {
 
 export default OnboardingStepper;
 
-const useStyles = tss.withName(OnboardingStepper.name).create(() => ({
+const useStyles = tss.withName({ OnboardingStepper }).create(() => ({
 	stepperContainer: {
 		display: 'flex',
 		flexDirection: 'column',

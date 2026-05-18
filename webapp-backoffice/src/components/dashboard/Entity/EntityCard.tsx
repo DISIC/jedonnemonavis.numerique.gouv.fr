@@ -139,7 +139,7 @@ const EntityCard = ({ entity, isMine, onButtonClick, fromSearch }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(EntityCard.name).create(() => ({
+const useStyles = tss.withName({ EntityCard }).create(() => ({
 	spanFullName: {
 		fontWeight: 'bold'
 	},

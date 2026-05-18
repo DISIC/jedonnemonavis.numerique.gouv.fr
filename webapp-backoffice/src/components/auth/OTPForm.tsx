@@ -133,7 +133,7 @@ export const OTPForm = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(OTPForm.name)
+	.withName({ OTPForm })
 	.withParams<{ errors: FormErrors }>()
 	.create(({ errors }) => ({
 		button: {

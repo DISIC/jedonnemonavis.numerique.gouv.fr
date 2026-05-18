@@ -297,7 +297,7 @@ const LinkEditorFlow = ({ product, mode }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(LinkEditorFlow.name).create(() => ({
+const useStyles = tss.withName({ LinkEditorFlow }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	}
