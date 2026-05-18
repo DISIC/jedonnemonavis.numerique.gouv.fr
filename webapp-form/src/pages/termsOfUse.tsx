@@ -107,7 +107,7 @@ const TermsOfUse = () => {
   );
 };
 
-const useStyles = tss.withName(TermsOfUse.name).create(() => ({
+const useStyles = tss.withName({ TermsOfUse }).create(() => ({
   blockWrapper: {
     display: "flex",
     flexDirection: "column",

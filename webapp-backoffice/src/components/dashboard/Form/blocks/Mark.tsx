@@ -60,7 +60,7 @@ const Mark = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(Mark.name)
+	.withName({ Mark })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		container: {

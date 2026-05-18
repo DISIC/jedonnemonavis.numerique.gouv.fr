@@ -114,7 +114,7 @@ export default function Register() {
 }
 
 const useStyles = tss
-	.withName(Register.name)
+	.withName({ Register })
 	.withParams()
 	.create(() => ({
 		formContainer: {

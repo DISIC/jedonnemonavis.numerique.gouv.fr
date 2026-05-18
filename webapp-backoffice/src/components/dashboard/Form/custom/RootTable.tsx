@@ -98,7 +98,7 @@ const RootTable = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(RootTable.name).create({
+const useStyles = tss.withName({ RootTable }).create({
 	container: {
 		h3: {
 			marginBottom: fr.spacing('6v')

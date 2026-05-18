@@ -223,7 +223,7 @@ const ApiKeyHandler = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ApiKeyHandler.name).create({
+const useStyles = tss.withName({ ApiKeyHandler }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',

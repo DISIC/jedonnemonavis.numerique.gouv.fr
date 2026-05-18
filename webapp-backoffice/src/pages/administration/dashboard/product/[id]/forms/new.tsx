@@ -476,7 +476,7 @@ const NewForm = (props: Props) => {
 
 export default NewForm;
 
-const useStyles = tss.withName(NewForm.name).create(() => ({
+const useStyles = tss.withName({ NewForm }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},

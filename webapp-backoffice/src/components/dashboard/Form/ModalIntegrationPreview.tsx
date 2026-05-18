@@ -211,7 +211,7 @@ const ModalIntegrationPreview = ({
 	);
 };
 
-const useStyles = tss.withName(ModalIntegrationPreview.name).create(() => ({
+const useStyles = tss.withName({ ModalIntegrationPreview }).create(() => ({
 	container: {
 		position: 'absolute',
 		top: 0,

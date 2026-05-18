@@ -69,7 +69,7 @@ const Smiley = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(Smiley.name)
+	.withName({ Smiley })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smileysContainer: {

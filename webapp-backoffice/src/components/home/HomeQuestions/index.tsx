@@ -44,7 +44,7 @@ const HomeQuestions = (props: HomeQuestionProps) => {
 };
 
 const useStyles = tss
-	.withName(HomeQuestions.name)
+	.withName({ HomeQuestions })
 	.withParams()
 	.create(() => ({
 		root: {

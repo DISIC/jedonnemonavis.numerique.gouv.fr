@@ -132,7 +132,7 @@ export const FormFirstBlock = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(SmileyInput.name)
+	.withName({ SmileyInput })
 	.withParams()
 	.create(() => ({
 		notice: {

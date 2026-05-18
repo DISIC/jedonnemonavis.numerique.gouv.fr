@@ -118,7 +118,7 @@ const Roadmap: React.FC<HomeProps> = ({ intro, tableData }) => {
 	);
 };
 
-const useStyles = tss.withName(Roadmap.name).create(() => ({
+const useStyles = tss.withName({ Roadmap }).create(() => ({
 	blockWrapper: {
 		display: 'flex',
 		flexDirection: 'column',

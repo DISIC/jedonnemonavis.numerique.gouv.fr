@@ -465,7 +465,7 @@ const UserAccess: React.FC<Props> = props => {
 	);
 };
 
-const useStyles = tss.withName(UserAccess.name).create({
+const useStyles = tss.withName({ UserAccess }).create({
 	actionWrapper: {
 		display: 'flex',
 		justifyContent: 'flex-end',

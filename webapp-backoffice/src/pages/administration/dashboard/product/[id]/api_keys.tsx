@@ -41,7 +41,7 @@ const ProductApiKeysPage = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ProductApiKeysPage.name).create({
+const useStyles = tss.withName({ ProductApiKeysPage }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',

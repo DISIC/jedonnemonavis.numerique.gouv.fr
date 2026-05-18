@@ -58,7 +58,7 @@ const FormStepper = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormStepper.name).create({
+const useStyles = tss.withName({ FormStepper }).create({
 	container: {
 		height: '100%',
 		display: 'flex',

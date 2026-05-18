@@ -268,7 +268,7 @@ const ReviewFiltersModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ReviewFiltersModal.name).create(() => ({
+const useStyles = tss.withName({ ReviewFiltersModal }).create(() => ({
 	section: {
 		'& .fr-fieldset': {
 			marginBottom: 0,

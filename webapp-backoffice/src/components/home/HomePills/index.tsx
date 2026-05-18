@@ -51,7 +51,7 @@ const HomePills = (props: HomePillsProps) => {
 	);
 };
 
-const useStyles = tss.withName(HomePills.name).create(() => ({
+const useStyles = tss.withName({ HomePills }).create(() => ({
 	root: {
 		h2: {
 			color: fr.colors.decisions.text.title.blueFrance.default

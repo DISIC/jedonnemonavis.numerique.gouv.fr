@@ -40,7 +40,7 @@ const Paragraph = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(Paragraph.name).create({
+const useStyles = tss.withName({ Paragraph }).create({
 	blockParagraph: {
 		p: {
 			marginBottom: 0,

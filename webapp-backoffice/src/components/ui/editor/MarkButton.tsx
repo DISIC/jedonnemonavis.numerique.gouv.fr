@@ -49,7 +49,7 @@ const MarkButton = ({
 	);
 };
 
-const useStyles = tss.withName(MarkButton.name).create({
+const useStyles = tss.withName({ MarkButton }).create({
 	button: {
 		width: fr.spacing('10v'),
 		height: fr.spacing('10v'),

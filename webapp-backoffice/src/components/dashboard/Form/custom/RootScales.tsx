@@ -104,7 +104,7 @@ const RootScales = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(RootScales.name).create({
+const useStyles = tss.withName({ RootScales }).create({
 	container: {
 		h3: {
 			marginBottom: fr.spacing('6v')

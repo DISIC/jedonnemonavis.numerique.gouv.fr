@@ -89,7 +89,7 @@ const LegalNotice = () => {
   );
 };
 
-const useStyles = tss.withName(LegalNotice.name).create(() => ({
+const useStyles = tss.withName({ LegalNotice }).create(() => ({
   blockWrapper: {
     display: "inline-block",
     flexDirection: "column",

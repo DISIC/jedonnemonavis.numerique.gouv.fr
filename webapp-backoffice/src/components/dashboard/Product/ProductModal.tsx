@@ -372,7 +372,7 @@ const ProductModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ProductModal.name).create(() => ({
+const useStyles = tss.withName({ ProductModal }).create(() => ({
 	flexContainer: {
 		display: 'flex',
 		alignItems: 'center',

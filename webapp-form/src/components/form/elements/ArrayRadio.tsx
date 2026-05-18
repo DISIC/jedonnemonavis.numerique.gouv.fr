@@ -161,7 +161,7 @@ export const ArrayRadio = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(ArrayRadio.name)
+	.withName({ ArrayRadio })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smallText: {

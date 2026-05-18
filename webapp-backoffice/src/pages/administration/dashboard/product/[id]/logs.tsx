@@ -245,7 +245,7 @@ const UserLogsPage = ({ product, ownRight }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(UserLogsPage.name).create({
+const useStyles = tss.withName({ UserLogsPage }).create({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',

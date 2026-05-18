@@ -126,7 +126,7 @@ const PublicDataModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(PublicDataModal.name).create(() => ({
+const useStyles = tss.withName({ PublicDataModal }).create(() => ({
 	removeWrapper: {
 		display: 'flex',
 		justifyContent: 'end'

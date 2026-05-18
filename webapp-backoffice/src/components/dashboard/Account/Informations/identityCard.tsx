@@ -185,7 +185,7 @@ const IdentityCard = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(IdentityCard.name).create(() => ({
+const useStyles = tss.withName({ IdentityCard }).create(() => ({
 	formContainer: {
 		[fr.breakpoints.down('md')]: {
 			width: '100%'
