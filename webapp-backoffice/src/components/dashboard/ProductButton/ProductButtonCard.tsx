@@ -255,7 +255,7 @@ const ProductButtonCard = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(ProductButtonCard.name)
+	.withName({ ProductButtonCard })
 	.withParams<{ isClosed: boolean }>()
 	.create(({ isClosed }) => ({
 		card: {

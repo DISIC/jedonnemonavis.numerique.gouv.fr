@@ -104,7 +104,7 @@ export const SmileyInput = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(SmileyInput.name)
+	.withName({ SmileyInput })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smileysContainer: {

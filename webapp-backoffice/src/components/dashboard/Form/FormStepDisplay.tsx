@@ -290,7 +290,7 @@ const FormStepDisplay = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormStepDisplay.name).create({
+const useStyles = tss.withName({ FormStepDisplay }).create({
 	container: {
 		height: '100%',
 		display: 'flex',

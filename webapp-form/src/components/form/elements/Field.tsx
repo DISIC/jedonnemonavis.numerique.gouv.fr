@@ -188,7 +188,7 @@ export const Field = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(Field.name)
+	.withName({ Field })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smallText: {

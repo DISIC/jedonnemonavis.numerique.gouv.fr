@@ -661,7 +661,7 @@ const DashBoard = () => {
 	);
 };
 
-const useStyles = tss.withName(ProductModal.name).create(() => ({
+const useStyles = tss.withName({ ProductModal }).create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.up('md')]: {
 			display: 'flex',

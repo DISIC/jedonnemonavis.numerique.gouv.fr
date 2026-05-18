@@ -371,7 +371,7 @@ const EntityRightsModal = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(EntityRightsModal.name)
+	.withName({ EntityRightsModal })
 	.withParams<{ addError: string }>()
 	.create(({ addError }) => ({
 		boldText: {

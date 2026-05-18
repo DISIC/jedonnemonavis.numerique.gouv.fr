@@ -117,7 +117,7 @@ export const FormStepper = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(FormStepper.name)
+	.withName({ FormStepper })
 	.withParams()
 	.create(() => ({
 		title: {

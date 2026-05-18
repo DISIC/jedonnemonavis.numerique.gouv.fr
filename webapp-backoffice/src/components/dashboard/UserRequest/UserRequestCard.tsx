@@ -109,7 +109,7 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(UserRequestCard.name).create(() => ({
+const useStyles = tss.withName({ UserRequestCard }).create(() => ({
 	spanFullName: {
 		fontWeight: 'bold'
 	},

@@ -26,7 +26,7 @@ export const Loader = (props: LoaderProps) => {
 };
 
 const useStyles = tss
-	.withName(Loader.name)
+	.withName({ Loader })
 	.withParams<LoaderProps>()
 	.create(({ size, white }) => ({
 		loaderContainer: {

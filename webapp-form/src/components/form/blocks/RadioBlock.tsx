@@ -74,7 +74,7 @@ export const RadioBlock = ({
 	);
 };
 
-const useStyles = tss.withName(RadioBlock.name).create(() => ({
+const useStyles = tss.withName({ RadioBlock }).create(() => ({
 	hint: {
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,

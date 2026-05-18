@@ -244,7 +244,7 @@ const FormBlockDisplay = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormBlockDisplay.name).create({
+const useStyles = tss.withName({ FormBlockDisplay }).create({
 	container: {
 		color: fr.colors.decisions.text.default.grey.default
 	},

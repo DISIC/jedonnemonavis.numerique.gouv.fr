@@ -249,7 +249,7 @@ const DashboardTab = ({
 	);
 };
 
-const useStyles = tss.withName(DashboardTab.name).create({
+const useStyles = tss.withName({ DashboardTab }).create({
 	loaderContainer: {
 		display: 'flex',
 		justifyContent: 'center',

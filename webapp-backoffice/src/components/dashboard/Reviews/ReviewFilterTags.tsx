@@ -162,7 +162,7 @@ const ReviewFilterTags = (props: Props) => {
 
 export default ReviewFilterTags;
 
-const useStyles = tss.withName(ReviewFilterTags.name).create({
+const useStyles = tss.withName({ ReviewFilterTags }).create({
 	container: {
 		display: 'flex',
 		flexWrap: 'wrap',

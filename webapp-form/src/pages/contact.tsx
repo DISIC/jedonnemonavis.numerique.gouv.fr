@@ -103,7 +103,7 @@ const Contact = () => {
   );
 };
 
-const useStyles = tss.withName(Contact.name).create(() => ({
+const useStyles = tss.withName({ Contact }).create(() => ({
   description: {
     p: {
       marginBottom: "0 !important",

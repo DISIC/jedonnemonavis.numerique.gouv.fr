@@ -99,7 +99,7 @@ const OnConfirmModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(OnConfirmModal.name).create(() => ({
+const useStyles = tss.withName({ OnConfirmModal }).create(() => ({
 	boldText: {
 		fontWeight: 'bold'
 	},

@@ -273,7 +273,7 @@ const ButtonModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ButtonModal.name).create(() => ({
+const useStyles = tss.withName({ ButtonModal }).create(() => ({
 	textArea: {
 		'.fr-input': {
 			height: '200px',

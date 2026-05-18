@@ -38,7 +38,7 @@ const Textarea = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(Textarea.name).create({
+const useStyles = tss.withName({ Textarea }).create({
 	blockTextarea: {
 		'.fr-input': {
 			minHeight: fr.spacing('28v')

@@ -313,7 +313,7 @@ const NewProduct = () => {
 	);
 };
 
-const useStyles = tss.withName(NewProduct.name).create(() => ({
+const useStyles = tss.withName({ NewProduct }).create(() => ({
 	flexContainer: {
 		display: 'flex',
 		alignItems: 'center',

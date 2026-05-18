@@ -517,7 +517,7 @@ const DashBoardUsers = () => {
 	);
 };
 
-const useStyles = tss.withName(DashBoardUsers.name).create(() => ({
+const useStyles = tss.withName({ DashBoardUsers }).create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.up('md')]: {
 			display: 'flex',

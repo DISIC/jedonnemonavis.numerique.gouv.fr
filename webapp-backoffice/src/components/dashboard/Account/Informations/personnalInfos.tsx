@@ -81,7 +81,7 @@ const PersonnalInfos = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(PersonnalInfos.name).create(() => ({
+const useStyles = tss.withName({ PersonnalInfos }).create(() => ({
 	actionContainer: {
 		display: 'flex',
 		justifyContent: 'flex-end'

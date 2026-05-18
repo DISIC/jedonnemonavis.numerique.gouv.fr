@@ -358,7 +358,7 @@ const DashBoardDomainDomains = () => {
 	);
 };
 
-const useStyles = tss.withName(DashBoardDomainDomains.name).create(() => ({
+const useStyles = tss.withName({ DashBoardDomainDomains }).create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.up('md')]: {
 			display: 'flex',

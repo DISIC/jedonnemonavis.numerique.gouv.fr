@@ -340,7 +340,7 @@ export const LoginForm = () => {
 };
 
 const useStyles = tss
-	.withName(LoginForm.name)
+	.withName({ LoginForm })
 	.withParams<{ passwordIncorrect: boolean; isLoading: boolean }>()
 	.create(({ passwordIncorrect, isLoading }) => ({
 		button: {

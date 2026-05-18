@@ -886,7 +886,7 @@ const ReviewsTab = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ReviewsTab.name).create({
+const useStyles = tss.withName({ ReviewsTab }).create({
 	boldText: {
 		fontWeight: 'bold'
 	},

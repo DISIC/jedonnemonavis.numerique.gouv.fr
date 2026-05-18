@@ -188,7 +188,7 @@ const LinksTab = ({
 	);
 };
 
-const useStyles = tss.withName(LinksTab.name).create({
+const useStyles = tss.withName({ LinksTab }).create({
 	cardContainer: {
 		display: 'flex',
 		flexDirection: 'column',

@@ -320,7 +320,7 @@ const EntitySearchModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(EntitySearchModal.name).create(() => ({
+const useStyles = tss.withName({ EntitySearchModal }).create(() => ({
 	textContainer: {
 		textAlign: 'center',
 		p: {

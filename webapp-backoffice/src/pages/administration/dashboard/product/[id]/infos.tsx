@@ -273,7 +273,7 @@ const ProductInformationPage = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ProductInformationPage.name).create({
+const useStyles = tss.withName({ ProductInformationPage }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',

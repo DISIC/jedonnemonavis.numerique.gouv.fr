@@ -80,7 +80,7 @@ export const TextAreaBlock = ({
 	);
 };
 
-const useStyles = tss.withName(TextAreaBlock.name).create(() => ({
+const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	inputContainer: {
 		display: 'flex',
 		flexDirection: 'column',

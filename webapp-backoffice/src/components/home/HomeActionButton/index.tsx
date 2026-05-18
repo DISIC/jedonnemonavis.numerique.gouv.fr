@@ -49,7 +49,7 @@ const HomeActionButton = (props: HomeActionButtonProps) => {
 };
 
 const useStyles = tss
-	.withName(HomeActionButton.name)
+	.withName({ HomeActionButton })
 	.withParams()
 	.create(() => ({
 		mainContainer: {

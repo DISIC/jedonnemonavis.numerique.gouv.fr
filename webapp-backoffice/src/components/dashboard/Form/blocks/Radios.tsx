@@ -129,7 +129,7 @@ const Radios = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(Radios.name).create(() => ({
+const useStyles = tss.withName({ Radios }).create(() => ({
 	container: {
 		marginTop: fr.spacing('4v'),
 		'.fr-radio-group': {

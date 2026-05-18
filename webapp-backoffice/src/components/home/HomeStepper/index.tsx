@@ -81,7 +81,7 @@ const HomeStepper = () => {
 };
 
 const useStyles = tss
-	.withName(HomeStepper.name)
+	.withName({ HomeStepper })
 	.withParams()
 	.create(() => ({
 		container: {

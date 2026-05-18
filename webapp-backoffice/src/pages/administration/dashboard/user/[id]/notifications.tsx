@@ -315,7 +315,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 	);
 };
 
-const useStyles = tss.withName(NotificationsAccount.name).create({
+const useStyles = tss.withName({ NotificationsAccount }).create({
 	loaderWrapper: {
 		display: 'flex',
 		justifyContent: 'center',

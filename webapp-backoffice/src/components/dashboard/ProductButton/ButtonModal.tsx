@@ -340,7 +340,7 @@ const ButtonModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ButtonModal.name).create(() => ({
+const useStyles = tss.withName({ ButtonModal }).create(() => ({
 	modal: {
 		'.fr-modal__header': {
 			paddingBottom: 0

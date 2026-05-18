@@ -98,7 +98,7 @@ export const RegisterNotWhiteListed = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(RegisterNotWhiteListed.name)
+	.withName({ RegisterNotWhiteListed })
 	.withParams<{ isLoading: boolean }>()
 	.create(({ isLoading }) => ({
 		button: {

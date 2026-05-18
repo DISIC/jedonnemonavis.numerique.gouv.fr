@@ -69,7 +69,7 @@ export const TextInputBlock = ({
 	);
 };
 
-const useStyles = tss.withName(TextInputBlock.name).create(() => ({
+const useStyles = tss.withName({ TextInputBlock }).create(() => ({
 	notice: {
 		background: 'none',
 		padding: 0,

@@ -193,7 +193,7 @@ const EntityModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(EntityModal.name).create(() => ({
+const useStyles = tss.withName({ EntityModal }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	},

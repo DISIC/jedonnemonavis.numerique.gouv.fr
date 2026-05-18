@@ -144,7 +144,7 @@ export const YesNoInput = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(YesNoInput.name)
+	.withName({ YesNoInput })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smallText: {
