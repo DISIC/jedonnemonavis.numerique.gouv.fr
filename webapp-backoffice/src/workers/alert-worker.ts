@@ -4,7 +4,7 @@ import type { FormAlertJobData } from '@/src/lib/queue';
 import { processFormAlertBatch } from '@/src/server/services/alerts/process-batch';
 
 const CONCURRENCY_LIMIT = parseInt(
-	process.env.ALERT_WORKER_CONCURRENCY ?? '5',
+	process.env.WORKER_ALERT_CONCURRENCY ?? '5',
 	10
 );
 
