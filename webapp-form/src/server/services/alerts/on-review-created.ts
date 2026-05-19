@@ -60,7 +60,7 @@ export async function onReviewCreated(
 		// so the new one with a fresh delay can take its place. `remove` is a
 		// no-op when no such job exists.
 		await formAlertQueue.remove(jobId);
-		await formAlertQueue.add('process', { form_id: formId }, { jobId, delay });
+		await formAlertQueue.add('process', { formId }, { jobId, delay });
 	} catch (err) {
 		console.error(`[alerts] onReviewCreated failed for form ${formId}:`, err);
 	}

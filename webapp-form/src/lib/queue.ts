@@ -2,7 +2,7 @@ import { Queue } from 'bullmq';
 import redis from './redis';
 
 export type FormAlertJobData = {
-	form_id: number;
+	formId: number;
 };
 
 // Producer-side handle for the alert queue. The worker that consumes these
@@ -21,4 +21,4 @@ export const formAlertQueue = new Queue<FormAlertJobData>('form-alerts', {
 	},
 });
 
-export const formAlertJobId = (formId: number) => `form-alert_${formId}`;
+export const formAlertJobId = (formId: number) => `formAlert-${formId}`;

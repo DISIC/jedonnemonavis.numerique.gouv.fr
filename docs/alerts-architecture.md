@@ -27,7 +27,7 @@ This document answers the architectural questions that came up during implementa
    await formAlertQueue.add('process', { form_id }, { jobId, delay });
    ```
 
-   The `jobId` is a stable string `form-alert_<formId>`. Each new review first removes the currently-pending delayed job and re-adds a fresh one with a fresh 5 min delay → **automatic sliding window**, handled by BullMQ itself. No timer in application code, no polling.
+   The `jobId` is a stable string `formAlert-<formId>`. Each new review first removes the currently-pending delayed job and re-adds a fresh one with a fresh 5 min delay → **automatic sliding window**, handled by BullMQ itself. No timer in application code, no polling.
 
 5. **Redis holds the delayed job until the countdown elapses.**
    - No more reviews for 5 min → BullMQ fires the job.
@@ -146,11 +146,11 @@ BullMQ doesn't have a first-class debounce primitive, but it has the building bl
 
 ### Could `JobScheduler` be force-fit?
 
-Technically yes — `upsertJobScheduler('form-alert_123', { every: 5*60*1000, limit: 1 })` fires once after 5 min, and re-upserting resets. But:
+Technically yes — `upsertJobScheduler('formAlert-123', { every: 5*60*1000, limit: 1 })` fires once after 5 min, and re-upserting resets. But:
 
 1. **Semantics are wrong.** A "scheduler" implies "on a schedule"; `limit: 1` is a tell you're abusing the tool.
 2. **More state in Redis.** Schedulers persist metadata alongside the job, cleaned up lazily. Plain delayed jobs disappear the moment they're consumed or removed.
-3. **Worse ops visibility.** A scheduler shows up as "Repeatable" in Bull Board dashboards, looking like it should recur forever. A delayed job with `jobId: form-alert_42` tells on-call exactly what's pending.
+3. **Worse ops visibility.** A scheduler shows up as "Repeatable" in Bull Board dashboards, looking like it should recur forever. A delayed job with `jobId: formAlert-42` tells on-call exactly what's pending.
 4. **No power gained.**
 
 ### Verdict
@@ -187,7 +187,7 @@ Any other place in the codebase that builds a `User`-shaped object literal (seed
 - `User.alerts_enabled` defaults to `true` → the global kill-switch ships ON so users can subscribe without first discovering the account notifications page. It remains a real opt-out (the "Mettre en pause les alertes" button in the account page flips it to `false`).
 - `FormAlertSubscription` table is empty at deploy time → no one is subscribed to anything.
 
-Because `process-batch.ts` gates sending on **both** `User.alerts_enabled = true` *and* a subscription row with `enabled = true`, the empty subscription table is what makes rollout safe. No user receives an alert until they explicitly toggle one on from a form's Settings tab.
+Because `process-batch.ts` gates sending on **both** `User.alerts_enabled = true` _and_ a subscription row with `enabled = true`, the empty subscription table is what makes rollout safe. No user receives an alert until they explicitly toggle one on from a form's Settings tab.
 
 Post-deploy rollout check:
 
@@ -231,7 +231,7 @@ You should see `[alert-worker] Started (concurrency=5)` in terminal 2.
 1. In the backoffice, sign in → user account → Notifications → toggle **"Recevoir des alertes…"** ON.
 2. Open a form's settings tab → toggle **"Recevoir des alertes par email"** ON.
 3. Submit one review on that form via the public form app (`http://localhost:3001/<form-id>`).
-4. Watch terminal 2 — a job appears with `jobId=form-alert_<formId>`, `delay=5min`. You can cut the wait to ~10 s by temporarily lowering `DEBOUNCE_DELAY_MS` in `webapp-form/src/server/services/alerts/on-review-created.ts`.
+4. Watch terminal 2 — a job appears with `jobId=formAlert-<formId>`, `delay=5min`. You can cut the wait to ~10 s by temporarily lowering `DEBOUNCE_DELAY_MS` in `webapp-form/src/server/services/alerts/on-review-created.ts`.
 5. After the delay elapses, the worker logs `Sent form … alert to 1 recipient(s)`.
 6. MailHog UI (`http://localhost:8025`) shows the email. Subject: _Nouveaux avis sur le formulaire … du service …_. Body contains the counts and a CTA link to `?tab=reviews`.
 
