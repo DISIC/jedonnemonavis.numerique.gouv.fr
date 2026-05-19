@@ -35,6 +35,16 @@ export async function onReviewCreated(
 
 		if (!form || form.isDeleted) return;
 
+		// Skip enqueuing if no one is subscribed to this form — saves a worker
+		// wake-up. We deliberately don't filter on user.alerts_enabled here:
+		// paused users still need batches to fire (so the cursor advances and
+		// they don't get a backlog when they un-pause).
+		const hasSubscriber = await prisma.formAlertSubscription.findFirst({
+			where: { form_id: formId, enabled: true },
+			select: { id: true },
+		});
+		if (!hasSubscriber) return;
+
 		const cursor = form.last_alert_sent_at ?? form.created_at;
 
 		const oldestPending = await prisma.review.findFirst({
