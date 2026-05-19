@@ -22,7 +22,9 @@
 		"worker:export:dev": "tsx watch src/workers/run-export.ts",
 		"worker:export:start": "tsx src/workers/run-export.ts",
 		"worker:alert:dev": "tsx watch src/workers/run-alert.ts",
-		"worker:alert:start": "tsx src/workers/run-alert.ts"
+		"worker:alert:start": "tsx src/workers/run-alert.ts",
+		"worker:dev": "tsx watch src/workers/run-all.ts",
+		"worker:start": "tsx src/workers/run-all.ts"
 	},
 	"husky": {
 		"hooks": {
