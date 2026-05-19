@@ -455,7 +455,7 @@ const DashBoardEntities = () => {
 	);
 };
 
-const useStyles = tss.withName(DashBoardEntities.name).create(() => ({
+const useStyles = tss.withName({ DashBoardEntities }).create(() => ({
 	buttonContainer: {
 		[fr.breakpoints.up('md')]: {
 			display: 'flex',

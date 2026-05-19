@@ -174,7 +174,7 @@ const Checkboxes = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(Checkboxes.name).create({
+const useStyles = tss.withName({ Checkboxes }).create({
 	smallText: {
 		fontSize: '0.8rem',
 		color: fr.colors.decisions.text.disabled.grey.default

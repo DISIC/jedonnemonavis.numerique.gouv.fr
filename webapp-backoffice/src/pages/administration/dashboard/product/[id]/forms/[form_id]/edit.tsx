@@ -353,7 +353,7 @@ const ProductFormPage = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ProductFormPage.name).create({
+const useStyles = tss.withName({ ProductFormPage }).create({
 	backLink: {
 		backgroundImage: 'none'
 	},

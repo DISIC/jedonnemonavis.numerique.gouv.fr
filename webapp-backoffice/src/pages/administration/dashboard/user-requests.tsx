@@ -379,7 +379,7 @@ const DashBoardUserRequestUserRequests = () => {
 };
 
 const useStyles = tss
-	.withName(DashBoardUserRequestUserRequests.name)
+	.withName({ DashBoardUserRequestUserRequests })
 	.create(() => ({
 		buttonContainer: {
 			[fr.breakpoints.up('md')]: {

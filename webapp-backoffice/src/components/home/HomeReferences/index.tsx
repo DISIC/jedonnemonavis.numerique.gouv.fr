@@ -46,7 +46,7 @@ const HomeReferences = (props: HomeReferencesProps) => {
 	);
 };
 
-const useStyles = tss.withName(HomeReferences.name).create(() => ({
+const useStyles = tss.withName({ HomeReferences }).create(() => ({
 	root: {
 		h2: {
 			color: fr.colors.decisions.text.title.blueFrance.default

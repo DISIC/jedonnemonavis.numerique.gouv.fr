@@ -708,7 +708,7 @@ export const getServerSideProps: GetServerSideProps<{
 };
 const blueSectionPxHeight = 200;
 const useStyles = tss
-	.withName(JDMAForm.name)
+	.withName({ JDMAForm })
 	.withParams<{ isPreview: boolean }>()
 	.create(({ isPreview }) => ({
 		mainContainer: {

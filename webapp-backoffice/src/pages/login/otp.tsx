@@ -69,7 +69,7 @@ export default function OTP() {
 }
 
 const useStyles = tss
-	.withName(OTP.name)
+	.withName({ OTP })
 	.withParams()
 	.create(() => ({
 		formContainer: {

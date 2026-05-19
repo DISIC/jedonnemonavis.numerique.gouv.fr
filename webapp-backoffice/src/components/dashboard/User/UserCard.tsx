@@ -66,7 +66,7 @@ const UserCard = ({ user, onButtonClick }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(UserCard.name).create(() => ({
+const useStyles = tss.withName({ UserCard }).create(() => ({
 	userName: {
 		color: fr.colors.decisions.text.actionHigh.blueFrance.default
 	},

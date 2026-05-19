@@ -140,7 +140,7 @@ const ReviewKeywordFilters = (props: Props) => {
 
 export default ReviewKeywordFilters;
 
-const useStyles = tss.withName(ReviewKeywordFilters.name).create({
+const useStyles = tss.withName({ ReviewKeywordFilters }).create({
 	containerTitle: {
 		fontSize: '0.875rem',
 		color: fr.colors.decisions.text.title.grey.default

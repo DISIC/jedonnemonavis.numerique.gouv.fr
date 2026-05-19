@@ -200,7 +200,7 @@ const AccessCard = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(AccessCard.name).create(() => ({
+const useStyles = tss.withName({ AccessCard }).create(() => ({
 	actionContainer: {
 		display: 'flex',
 		justifyContent: 'flex-end',

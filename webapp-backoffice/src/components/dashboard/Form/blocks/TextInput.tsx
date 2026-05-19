@@ -38,7 +38,7 @@ const TextInput = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(TextInput.name).create({
+const useStyles = tss.withName({ TextInput }).create({
 	blockInput: {
 		// Add any specific styles if needed
 	},

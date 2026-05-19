@@ -107,7 +107,7 @@ const GeneralConditions = () => {
   );
 };
 
-const useStyles = tss.withName(GeneralConditions.name).create(() => ({
+const useStyles = tss.withName({ GeneralConditions }).create(() => ({
   blockWrapper: {
     display: "flex",
     flexDirection: "column",

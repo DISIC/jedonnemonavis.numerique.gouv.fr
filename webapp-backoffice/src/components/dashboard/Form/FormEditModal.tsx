@@ -122,7 +122,7 @@ const FormEditModal = ({ modal, form, productId }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormEditModal.name).create(() => ({
+const useStyles = tss.withName({ FormEditModal }).create(() => ({
 	asterisk: {
 		color: fr.colors.decisions.text.default.error.default
 	}

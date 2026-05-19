@@ -110,7 +110,7 @@ const FormConfigurator = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(FormConfigurator.name).create({
+const useStyles = tss.withName({ FormConfigurator }).create({
 	container: {
 		height: '100%'
 	}

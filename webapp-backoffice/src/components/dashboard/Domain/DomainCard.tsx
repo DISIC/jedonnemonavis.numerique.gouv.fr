@@ -46,7 +46,7 @@ const DomainCard = ({ domain, setCurrentDomain }: Props) => {
 	);
 };
 
-const useStyles = tss.withName(DomainCard.name).create(() => ({
+const useStyles = tss.withName({ DomainCard }).create(() => ({
 	spanDomainName: {
 		fontWeight: 'bold'
 	},

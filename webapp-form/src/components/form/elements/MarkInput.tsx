@@ -79,7 +79,7 @@ export const MarkInput = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(MarkInput.name)
+	.withName({ MarkInput })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		hintLeft: {

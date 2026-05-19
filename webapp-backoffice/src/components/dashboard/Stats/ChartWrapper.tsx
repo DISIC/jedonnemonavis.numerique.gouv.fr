@@ -357,7 +357,7 @@ const ChartWrapper = ({
 	);
 };
 
-const useStyles = tss.withName(ChartWrapper.name).create(() => ({
+const useStyles = tss.withName({ ChartWrapper }).create(() => ({
 	container: {
 		display: 'flex',
 		flexDirection: 'column',

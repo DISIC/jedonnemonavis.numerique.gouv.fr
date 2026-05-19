@@ -271,7 +271,7 @@ export const ResetForm = () => {
 };
 
 const useStyles = tss
-	.withName(ResetForm.name)
+	.withName({ ResetForm })
 	.withParams<{ errors: FormErrors; successChange: string | null }>()
 	.create(({ errors, successChange }) => ({
 		button: {

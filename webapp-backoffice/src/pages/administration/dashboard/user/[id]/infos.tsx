@@ -54,7 +54,7 @@ const UserInfos: React.FC<Props> = props => {
 	);
 };
 
-const useStyles = tss.withName(UserInfos.name).create({
+const useStyles = tss.withName({ UserInfos }).create({
 	headerWrapper: {
 		display: 'flex',
 		alignItems: 'center',

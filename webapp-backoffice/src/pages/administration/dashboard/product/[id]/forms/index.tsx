@@ -447,7 +447,7 @@ const ProductFormsPage = (props: Props) => {
 export default ProductFormsPage;
 
 const useStyles = tss
-	.withName(ProductFormsPage.name)
+	.withName({ ProductFormsPage })
 	.withParams()
 	.create({
 		formCard: {

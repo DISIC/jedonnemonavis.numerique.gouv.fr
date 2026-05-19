@@ -213,7 +213,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 }
 
 const useStyles = tss
-  .withName(PublicLayout.name)
+  .withName({ PublicLayout })
   .withParams()
   .create(() => ({
     logo: {

@@ -344,7 +344,7 @@ const ButtonModal = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(ButtonModal.name).create(() => ({
+const useStyles = tss.withName({ ButtonModal }).create(() => ({
 	infoWrapper: {
 		display: 'flex',
 		alignItems: 'start'

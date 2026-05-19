@@ -172,7 +172,7 @@ const Editor = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(MarkButton.name).create({
+const useStyles = tss.withName({ MarkButton }).create({
 	toolbar: {
 		display: 'flex',
 		gap: fr.spacing('2v'),

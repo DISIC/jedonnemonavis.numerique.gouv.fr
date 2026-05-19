@@ -216,7 +216,7 @@ const SettingsTab = ({
 		</div>
 	);
 };
-const useStyles = tss.withName(SettingsTab.name).create({
+const useStyles = tss.withName({ SettingsTab }).create({
 	container: {
 		...fr.spacing('padding', {}),
 		background: fr.colors.decisions.artwork.decorative.blueFrance.default,

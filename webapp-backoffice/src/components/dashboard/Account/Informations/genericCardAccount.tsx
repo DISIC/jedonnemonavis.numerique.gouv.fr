@@ -175,7 +175,7 @@ const GenericCardInfos = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(GenericCardInfos.name).create(() => ({
+const useStyles = tss.withName({ GenericCardInfos }).create(() => ({
 	actionContainer: {
 		display: 'flex',
 		[fr.breakpoints.down('md')]: {

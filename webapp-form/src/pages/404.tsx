@@ -15,7 +15,7 @@ export default function JDMA404() {
 }
 
 const useStyles = tss
-  .withName(JDMA404.name)
+  .withName({ JDMA404 })
   .withParams()
   .create(() => ({
     root: {

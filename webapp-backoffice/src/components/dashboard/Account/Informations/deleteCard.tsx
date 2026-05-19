@@ -165,7 +165,7 @@ const DeleteCard = (props: Props) => {
 	);
 };
 
-const useStyles = tss.withName(DeleteCard.name).create(() => ({
+const useStyles = tss.withName({ DeleteCard }).create(() => ({
 	deleteButton: {
 		color: fr.colors.decisions.text.default.error.default,
 		boxShadow: `0 0 0 1px ${fr.colors.decisions.text.default.error.default}`,

@@ -185,7 +185,7 @@ export const CheckboxInput = (props: Props) => {
 };
 
 const useStyles = tss
-	.withName(CheckboxInput.name)
+	.withName({ CheckboxInput })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
 		smallText: {

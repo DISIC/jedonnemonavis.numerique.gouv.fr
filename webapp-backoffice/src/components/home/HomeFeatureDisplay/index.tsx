@@ -54,7 +54,7 @@ const HomeFeatureDisplay = (props: Feature) => {
 };
 
 const useStyles = tss
-	.withName(HomeFeatureDisplay.name)
+	.withName({ HomeFeatureDisplay })
 	.withParams<{ imagePosition: string }>()
 	.create(({ imagePosition }) => ({
 		outerContainer: {
