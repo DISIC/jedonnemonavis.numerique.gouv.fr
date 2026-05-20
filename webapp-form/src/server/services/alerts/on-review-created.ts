@@ -6,17 +6,6 @@ export const DEFAULT_MAX_WINDOW_MINUTES =
 export const DEBOUNCE_DELAY_MS =
 	parseInt(process.env.ALERT_DEBOUNCE_MS ?? '') || 5 * 60 * 1000;
 
-/**
- * Schedules (or reschedules) a debounced alert email for the given form.
- *
- * Sliding window: each new review pushes the soft-fire 5 min into the future.
- * Hard cap: if the oldest pending review on this form is older than the
- * form's `alert_max_window_minutes` (default 120), we fire immediately
- * regardless of further activity.
- *
- * Fire-and-forget: failures are logged but never bubble up to the request
- * that created the review.
- */
 export async function onReviewCreated(
 	prisma: PrismaClient,
 	formId: number,
@@ -35,10 +24,6 @@ export async function onReviewCreated(
 
 		if (!form || form.isDeleted) return;
 
-		// Skip enqueuing if no one is subscribed to this form — saves a worker
-		// wake-up. We deliberately don't filter on user.alerts_enabled here:
-		// paused users still need batches to fire (so the cursor advances and
-		// they don't get a backlog when they un-pause).
 		const hasSubscriber = await prisma.formAlertSubscription.findFirst({
 			where: { form_id: formId, enabled: true },
 			select: { id: true },
@@ -66,9 +51,6 @@ export async function onReviewCreated(
 		const jobId = formAlertJobId(formId);
 		const delay = hardCapReached ? 0 : DEBOUNCE_DELAY_MS;
 
-		// Reset the sliding window: drop any existing delayed job for this form
-		// so the new one with a fresh delay can take its place. `remove` is a
-		// no-op when no such job exists.
 		await formAlertQueue.remove(jobId);
 		await formAlertQueue.add('process', { formId }, { jobId, delay });
 	} catch (err) {

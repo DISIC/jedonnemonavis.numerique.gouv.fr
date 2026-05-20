@@ -5,9 +5,6 @@ export type FormAlertJobData = {
 	formId: number;
 };
 
-// Producer-side handle for the alert queue. The worker that consumes these
-// jobs lives in webapp-backoffice (src/workers/alert-worker.ts) and must
-// connect to the same Redis instance.
 export const formAlertQueue = new Queue<FormAlertJobData>('form-alerts', {
 	connection: redis,
 	defaultJobOptions: {

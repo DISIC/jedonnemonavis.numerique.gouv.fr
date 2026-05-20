@@ -26,6 +26,18 @@ export const setSubscriptionsForProductMutation = async ({
 		return { data: { updated: 0 } };
 	}
 
+	if (enabled) {
+		await ctx.prisma.form.updateMany({
+			where: {
+				id: { in: formIds },
+				form_alert_subscriptions: {
+					none: { enabled: true, NOT: { user_id: userId } }
+				}
+			},
+			data: { last_alert_sent_at: new Date() }
+		});
+	}
+
 	const result = await ctx.prisma.formAlertSubscription.updateMany({
 		where: {
 			user_id: userId,

@@ -16,6 +16,19 @@ export const setSubscriptionMutation = async ({
 	const userId = parseInt(ctx.session!.user.id);
 	const { form_id, enabled } = input;
 
+	if (enabled) {
+		const hasOtherActiveSub = await ctx.prisma.formAlertSubscription.findFirst({
+			where: { form_id, enabled: true, NOT: { user_id: userId } },
+			select: { id: true }
+		});
+		if (!hasOtherActiveSub) {
+			await ctx.prisma.form.update({
+				where: { id: form_id },
+				data: { last_alert_sent_at: new Date() }
+			});
+		}
+	}
+
 	const subscription = await ctx.prisma.formAlertSubscription.upsert({
 		where: { user_id_form_id: { user_id: userId, form_id } },
 		create: { user_id: userId, form_id, enabled },
