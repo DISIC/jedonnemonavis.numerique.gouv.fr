@@ -38,13 +38,16 @@ export const setSubscriptionsForProductMutation = async ({
 		});
 	}
 
-	const result = await ctx.prisma.formAlertSubscription.updateMany({
-		where: {
-			user_id: userId,
-			form_id: { in: formIds }
-		},
-		data: { enabled }
-	});
+	const [created, updated] = await ctx.prisma.$transaction([
+		ctx.prisma.formAlertSubscription.createMany({
+			data: formIds.map(form_id => ({ user_id: userId, form_id, enabled })),
+			skipDuplicates: true
+		}),
+		ctx.prisma.formAlertSubscription.updateMany({
+			where: { user_id: userId, form_id: { in: formIds } },
+			data: { enabled }
+		})
+	]);
 
-	return { data: { updated: result.count } };
+	return { data: { updated: created.count + updated.count } };
 };

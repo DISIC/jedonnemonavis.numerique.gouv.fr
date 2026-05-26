@@ -1,4 +1,5 @@
 import type { Context } from '@/src/server/trpc';
+import { Prisma } from '@prisma/client';
 
 export type ProductSubscriptionGroup = {
 	product: {
@@ -10,56 +11,73 @@ export type ProductSubscriptionGroup = {
 };
 
 export const getMySubscriptionsQuery = async ({ ctx }: { ctx: Context }) => {
-	const userId = parseInt(ctx.session!.user.id);
+	const contextUser = ctx.session!.user;
+	const userId = parseInt(contextUser.id);
+	const isAdmin = contextUser.role.includes('admin');
 
-	const subscriptions = await ctx.prisma.formAlertSubscription.findMany({
+	const whereUserScope: Prisma.ProductWhereInput = {
+		OR: [
+			{
+				accessRights: !isAdmin
+					? {
+							some: {
+								user_email: contextUser.email,
+								status: { in: ['carrier_admin', 'carrier_user'] }
+							}
+					  }
+					: {}
+			},
+			{
+				entity: {
+					adminEntityRights: !isAdmin
+						? {
+								some: {
+									user_email: contextUser.email
+								}
+						  }
+						: {}
+				}
+			}
+		]
+	};
+
+	const products = await ctx.prisma.product.findMany({
 		where: {
-			user_id: userId,
-			form: { isDeleted: false }
+			...whereUserScope,
+			status: 'published'
 		},
-		include: {
-			form: {
+		select: {
+			id: true,
+			title: true,
+			entity: { select: { id: true, name: true, acronym: true } },
+			forms: {
+				where: { isDeleted: false },
 				select: {
 					id: true,
 					title: true,
-					product: {
-						select: {
-							id: true,
-							title: true,
-							entity: { select: { id: true, name: true, acronym: true } }
-						}
+					form_alert_subscriptions: {
+						where: { user_id: userId },
+						select: { enabled: true }
 					}
 				}
 			}
 		}
 	});
 
-	const groups = new Map<number, ProductSubscriptionGroup>();
-	for (const sub of subscriptions) {
-		const product = sub.form.product;
-		let group = groups.get(product.id);
-		if (!group) {
-			group = {
-				product: {
-					id: product.id,
-					title: product.title,
-					entity: product.entity
-				},
-				forms: []
-			};
-			groups.set(product.id, group);
-		}
-		group.forms.push({
-			id: sub.form.id,
-			title: sub.form.title ?? 'Formulaire sans titre',
-			enabled: sub.enabled
-		});
-	}
-
-	const data = Array.from(groups.values())
-		.map(group => ({
-			...group,
-			forms: group.forms.sort((a, b) => a.title.localeCompare(b.title))
+	const data: ProductSubscriptionGroup[] = products
+		.map(product => ({
+			product: {
+				id: product.id,
+				title: product.title,
+				entity: product.entity
+			},
+			forms: product.forms
+				.map(form => ({
+					id: form.id,
+					title: form.title ?? 'Formulaire sans titre',
+					enabled: form.form_alert_subscriptions[0]?.enabled ?? false
+				}))
+				.sort((a, b) => a.title.localeCompare(b.title))
 		}))
 		.sort((a, b) => a.product.title.localeCompare(b.product.title));
 

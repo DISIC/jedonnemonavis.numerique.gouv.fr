@@ -104,7 +104,8 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 	const reviewsUrl = `${baseUrl}/administration/dashboard/product/${productId}/forms/${formId}?tab=reviews`;
 	const productTitle = form.product.title;
 	const formTitle = form.title || '';
-	const subject = `Nouveaux avis sur le formulaire ${formTitle} du service ${productTitle}`;
+	const newLabel = total === 1 ? 'nouveau avis' : 'nouveaux avis';
+	const subject = `Formulaire ${formTitle} : ${total} ${newLabel}`;
 
 	for (let i = 0; i < recipients.length; i++) {
 		const recipient = recipients[i];

@@ -1,9 +1,11 @@
 import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import { trpc } from '@/src/utils/trpc';
+import { normalizeString } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Input } from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { NotificationFrequency } from '@prisma/client';
@@ -32,6 +34,15 @@ const NotificationsAccount: React.FC<Props> = props => {
 
 	const subscriptionsQuery = trpc.formAlert.getMySubscriptions.useQuery();
 	const groups = subscriptionsQuery.data?.data ?? [];
+
+	const [search, setSearch] = React.useState('');
+	const filteredGroups = React.useMemo(() => {
+		const q = normalizeString(search.trim()).toLowerCase();
+		if (!q) return groups;
+		return groups.filter(g =>
+			normalizeString(g.product.title).toLowerCase().includes(q)
+		);
+	}, [groups, search]);
 
 	const invalidateSubs = () => utils.formAlert.getMySubscriptions.invalidate();
 
@@ -178,114 +189,135 @@ const NotificationsAccount: React.FC<Props> = props => {
 						</form>
 					</div>
 					<div className={classes.notificationsWrapper}>
-						<div className={classes.notifTitleContainer}>
-							<h3 className={fr.cx('fr-mb-0')}>Alertes</h3>
-							{!subscriptionsQuery.isLoading && groups.length > 0 && (
-								<Button
-									priority="secondary"
-									size="small"
-									onClick={() =>
-										handleAlertsEnabledChange(!user.alerts_enabled)
-									}
+						<h3 className={fr.cx('fr-mb-2v')}>Alertes</h3>
+						<p className={fr.cx('fr-text--sm')}>
+							Recevez une alerte sur le formulaire de votre choix, dès que vous
+							recevez des avis
+						</p>
+						<hr className={fr.cx('fr-pb-10v')} />
+						<ToggleSwitch
+							label="Activer les alertes"
+							inputTitle="alerts-enabled"
+							checked={user.alerts_enabled}
+							showCheckedHint={false}
+							onChange={checked => handleAlertsEnabledChange(checked)}
+							className={fr.cx('fr-mb-6v')}
+						/>
+						<div>
+							<div className={classes.servicesHeader}>
+								<p
+									className={cx(
+										fr.cx('fr-text--md', 'fr-mb-0'),
+										classes.boldTitle
+									)}
 								>
-									{user.alerts_enabled
-										? 'Mettre en pause les alertes'
-										: 'Réactiver les alertes'}
-								</Button>
-							)}
-						</div>
-						<div
-							className={cx(
-								classes.alertsPausable,
-								!user.alerts_enabled && classes.paused
-							)}
-							aria-disabled={!user.alerts_enabled}
-						>
-							<p className={fr.cx('fr-text--sm')}>
-								Recevez une alerte sur le formulaire de votre choix, dès que
-								vous recevez des avis
-							</p>
-							<hr />
-
-							<p
-								className={cx(
-									fr.cx('fr-text--md', 'fr-mb-4v'),
-									classes.boldTitle
+									Services
+								</p>
+								{!subscriptionsQuery.isLoading && groups.length > 0 && (
+									<div
+										role="search"
+										className={cx(fr.cx('fr-search-bar'), classes.searchBar)}
+									>
+										<Input
+											label="Rechercher un service"
+											hideLabel
+											nativeInputProps={{
+												placeholder: 'Rechercher un service',
+												type: 'search',
+												value: search,
+												onChange: e => setSearch(e.target.value)
+											}}
+										/>
+										<Button
+											priority="primary"
+											type="button"
+											iconId="ri-search-2-line"
+											title="Rechercher"
+										>
+											Rechercher
+										</Button>
+									</div>
 								)}
-							>
-								Services
-							</p>
+							</div>
 							{subscriptionsQuery.isLoading ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>Chargement…</p>
 							) : groups.length === 0 ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-									Vous n'êtes abonné à aucune alerte pour le moment. Activez-les
-									depuis l'onglet « Paramètres » d'un formulaire.
+									Vous n'avez accès à aucun service pour le moment.
 								</p>
 							) : (
 								<>
-									<div className={classes.services}>
-										{groups.map(group => {
-											const allEnabled = group.forms.every(f => f.enabled);
-											const anyEnabled = group.forms.some(f => f.enabled);
-											const partial = anyEnabled && !allEnabled;
+									{filteredGroups.length === 0 ? (
+										<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+											Aucun service ne correspond à votre recherche.
+										</p>
+									) : (
+										<div className={classes.services}>
+											{filteredGroups.map(group => {
+												const allEnabled = group.forms.every(f => f.enabled);
+												const anyEnabled = group.forms.some(f => f.enabled);
+												const partial = anyEnabled && !allEnabled;
 
-											return (
-												<Accordion
-													key={group.product.id}
-													titleAs="h5"
-													label={
-														<span className={classes.accordionLabel}>
-															<span
-																className={cx(
-																	classes.masterToggleGuard,
-																	partial && classes.partialToggle
-																)}
-																onClick={e => e.stopPropagation()}
-															>
-																<ToggleSwitch
-																	label={
-																		<span className="fr-sr-only">
-																			Alertes pour {group.product.title}
-																		</span>
-																	}
-																	inputTitle={`alerts-product-${group.product.id}`}
-																	checked={anyEnabled}
-																	onChange={() =>
-																		handleProductToggle(
-																			group.product.id,
-																			!allEnabled
-																		)
-																	}
-																	showCheckedHint={false}
-																/>
+												return (
+													<Accordion
+														key={group.product.id}
+														titleAs="h5"
+														className={classes.serviceItem}
+														label={
+															<span className={classes.accordionLabel}>
+																<span
+																	className={cx(
+																		classes.masterToggleGuard,
+																		partial && classes.partialToggle
+																	)}
+																	onClick={e => e.stopPropagation()}
+																>
+																	<ToggleSwitch
+																		label={
+																			<span className="fr-sr-only">
+																				Alertes pour {group.product.title}
+																			</span>
+																		}
+																		inputTitle={`alerts-product-${group.product.id}`}
+																		checked={anyEnabled}
+																		disabled={!user.alerts_enabled}
+																		onChange={() =>
+																			handleProductToggle(
+																				group.product.id,
+																				!allEnabled
+																			)
+																		}
+																		showCheckedHint={false}
+																	/>
+																</span>
+																<strong className={classes.productTitle}>
+																	{group.product.title}
+																</strong>
 															</span>
-															<strong className={classes.productTitle}>
-																{group.product.title}
-															</strong>
-														</span>
-													}
-												>
-													<ul className={classes.formsList}>
-														{group.forms.map(form => (
-															<li key={form.id} className={classes.formItem}>
-																<ToggleSwitch
-																	label={form.title}
-																	inputTitle={`alerts-form-${form.id}`}
-																	checked={form.enabled}
-																	onChange={checked =>
-																		handleFormToggle(form.id, checked)
-																	}
-																	showCheckedHint={false}
-																	labelPosition="right"
-																/>
-															</li>
-														))}
-													</ul>
-												</Accordion>
-											);
-										})}
-									</div>
+														}
+													>
+														<ul className={classes.formsList}>
+															{group.forms.map(form => (
+																<li key={form.id} className={classes.formItem}>
+																	<ToggleSwitch
+																		label={form.title}
+																		inputTitle={`alerts-form-${form.id}`}
+																		checked={form.enabled}
+																		disabled={!user.alerts_enabled}
+																		onChange={checked =>
+																			handleFormToggle(form.id, checked)
+																		}
+																		showCheckedHint={false}
+																		labelPosition="right"
+																	/>
+																</li>
+															))}
+														</ul>
+													</Accordion>
+												);
+											})}
+										</div>
+									)}
 									<div className={fr.cx('fr-callout', 'fr-mb-0', 'fr-mt-6v')}>
 										<ul>
 											<li>
@@ -330,7 +362,7 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 	column: {
 		display: 'flex',
 		flexDirection: 'column',
-		ul: { margin: 0, marginBottom: fr.spacing('3v') }
+		ul: { margin: 0 }
 	},
 	droppableArea: {
 		padding: '8px',
@@ -348,12 +380,6 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 		padding: fr.spacing('8v'),
 		marginBottom: fr.spacing('12v'),
 		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
-	},
-	notifTitleContainer: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'space-between',
-		marginBottom: fr.spacing('2v')
 	},
 	divider: {
 		border: `1px solid ${fr.colors.decisions.border.default.grey.default}`
@@ -376,15 +402,23 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 		display: 'flex',
 		flexDirection: 'column'
 	},
-	alertsPausable: {
+	servicesHeader: {
 		display: 'flex',
-		flexDirection: 'column',
-		transition: 'opacity 0.15s ease-in-out'
+		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: fr.spacing('4v'),
+		marginBottom: fr.spacing('4v'),
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'stretch'
+		}
 	},
-	paused: {
-		opacity: 0.5,
-		pointerEvents: 'none',
-		userSelect: 'none'
+	searchBar: {
+		'.fr-input-group': { marginBottom: 0 },
+		'.fr-input': { width: '100%' },
+		[fr.breakpoints.down('md')]: {
+			flex: '1 1 auto'
+		}
 	},
 	accordionLabel: {
 		display: 'inline-flex',
@@ -406,6 +440,25 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 			backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000091' d='M5 11h14v2H5z'/%3E%3C/svg%3E")`
 		}
 	},
+	serviceItem: {
+		'.fr-accordion__btn': {
+			...fr.spacing('padding', { left: 0, top: '4v' })
+		},
+		'.fr-collapse': {
+			padding: 0,
+			...fr.spacing('margin', { rightLeft: 0 }),
+			backgroundColor: fr.colors.decisions.background.default.grey.hover
+		},
+		'.fr-accordion__btn[aria-expanded="true"]': {
+			backgroundColor: 'white',
+			':hover': {
+				backgroundColor: fr.colors.decisions.background.raised.grey.active
+			},
+			':active': {
+				backgroundColor: fr.colors.decisions.background.overlap.grey.hover
+			}
+		}
+	},
 	formsList: {
 		listStyle: 'none',
 		padding: 0,
@@ -414,7 +467,12 @@ const useStyles = tss.withName({ NotificationsAccount }).create({
 		flexDirection: 'column'
 	},
 	formItem: {
-		padding: `${fr.spacing('3v')} ${fr.spacing('4v')}`,
+		...fr.spacing('padding', {
+			top: '4v',
+			bottom: '3v',
+			right: '4v',
+			left: '10v'
+		}),
 		borderBottom: `1px solid ${fr.colors.decisions.border.default.grey.default}`,
 		'&:last-child': { borderBottom: 'none' }
 	},

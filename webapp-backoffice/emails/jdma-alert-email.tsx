@@ -21,10 +21,7 @@ export const JdmaAlertEmail = ({
 	const formattedTotal = formatNumber(totalNbReviews);
 
 	return (
-		<JdmaLayout
-			preview={`${formattedTotal} ${reviewsLabel} sur le formulaire ${formTitle}`}
-			baseUrl={baseUrl}
-		>
+		<JdmaLayout baseUrl={baseUrl}>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
