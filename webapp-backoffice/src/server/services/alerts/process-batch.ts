@@ -103,8 +103,8 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 	const baseUrl = process.env.NODEMAILER_BASEURL ?? '';
 	const reviewsUrl = `${baseUrl}/administration/dashboard/product/${productId}/forms/${formId}?tab=reviews`;
 	const productTitle = form.product.title;
-	const formTitle = form.title || '';
-	const newLabel = total === 1 ? 'nouveau avis' : 'nouveaux avis';
+	const formTitle = form.title || 'sans titre';
+	const newLabel = total === 1 ? 'nouvelle réponse' : 'nouvelles réponses';
 	const subject = `Formulaire ${formTitle} : ${total} ${newLabel}`;
 
 	for (let i = 0; i < recipients.length; i++) {
