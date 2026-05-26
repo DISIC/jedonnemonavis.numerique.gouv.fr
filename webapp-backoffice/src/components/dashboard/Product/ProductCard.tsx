@@ -167,14 +167,6 @@ const ProductCard = ({
 	const renderProductBadges = () => {
 		const badges = [];
 
-		if (product.isTop250) {
-			badges.push(
-				<Badge key="top250" severity="info" noIcon small>
-					Démarche essentielle
-				</Badge>
-			);
-		}
-
 		if (product.forms.length === 0) {
 			badges.push(
 				<Badge key="no-forms" severity="warning" small noIcon>

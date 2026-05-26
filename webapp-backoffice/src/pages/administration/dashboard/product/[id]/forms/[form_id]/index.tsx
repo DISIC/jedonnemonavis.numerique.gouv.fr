@@ -173,7 +173,7 @@ const ProductFormPage = (props: Props) => {
 						<h1 className={fr.cx('fr-mb-0')}>
 							{form.title || form.form_template.title}
 						</h1>
-						{form.product.isTop250 && (
+						{form.isTop250 && (
 							<Badge severity="info" noIcon className={fr.cx('fr-ml-md-6v')}>
 								Démarche essentielle
 							</Badge>
@@ -202,7 +202,7 @@ const ProductFormPage = (props: Props) => {
 						. Les réponses que vous déposerez ne seront pas prises en compte
 						dans les statistiques.
 					</p>
-					{form.product.isTop250 && (
+					{form.isTop250 && (
 						<Notice
 							isClosable
 							onClose={function noRefCheck() {}}

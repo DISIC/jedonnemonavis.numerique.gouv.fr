@@ -257,6 +257,16 @@ const ProductFormsPage = (props: Props) => {
 															{form.title || form.form_template.title}
 														</span>
 													</Link>
+													{form.isTop250 && (
+														<span
+															className={cx(
+																fr.cx('fr-icon-lock-line', 'fr-icon--sm'),
+																classes.lockIcon
+															)}
+															aria-label="Formulaire verrouillé (démarche essentielle)"
+															title="Démarche essentielle — ce formulaire ne peut pas être modifié"
+														/>
+													)}
 													{form.buttons.length > 0 ? (
 														<div
 															className={cx(
@@ -512,6 +522,10 @@ const useStyles = tss
 			'&:hover': {
 				textDecoration: 'underline'
 			}
+		},
+		lockIcon: {
+			color: fr.colors.decisions.text.title.blueFrance.default,
+			alignSelf: 'center'
 		},
 		alertButtonLog: {
 			'.fr-link--close': {
