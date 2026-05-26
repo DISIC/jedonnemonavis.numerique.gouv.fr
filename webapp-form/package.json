@@ -64,6 +64,14 @@
     "zod": "3.23.8",
     "zod-prisma-types": "3.1.8"
   },
+  "resolutions": {
+    "tar-fs": "3.1.2",
+    "ws": "8.21.0",
+    "cookie": "1.1.1",
+    "qs": "6.15.2",
+    "tmp": "0.2.5",
+    "postcss": "8.5.15"
+  },
   "devDependencies": {
     "@babel/core": "7.22.15",
     "@babel/eslint-parser": "7.22.15",
