@@ -26,28 +26,30 @@ export const setSubscriptionsForProductMutation = async ({
 		return { data: { updated: 0 } };
 	}
 
-	if (enabled) {
-		await ctx.prisma.form.updateMany({
-			where: {
-				id: { in: formIds },
-				form_alert_subscriptions: {
-					none: { enabled: true, NOT: { user_id: userId } }
-				}
-			},
-			data: { last_alert_sent_at: new Date() }
-		});
-	}
+	const [created, updated] = await ctx.prisma.$transaction(async tx => {
+		if (enabled) {
+			await tx.form.updateMany({
+				where: {
+					id: { in: formIds },
+					form_alert_subscriptions: {
+						none: { enabled: true, NOT: { user_id: userId } }
+					}
+				},
+				data: { last_alert_sent_at: new Date() }
+			});
+		}
 
-	const [created, updated] = await ctx.prisma.$transaction([
-		ctx.prisma.formAlertSubscription.createMany({
+		const createdResult = await tx.formAlertSubscription.createMany({
 			data: formIds.map(form_id => ({ user_id: userId, form_id, enabled })),
 			skipDuplicates: true
-		}),
-		ctx.prisma.formAlertSubscription.updateMany({
+		});
+		const updatedResult = await tx.formAlertSubscription.updateMany({
 			where: { user_id: userId, form_id: { in: formIds } },
 			data: { enabled }
-		})
-	]);
+		});
+
+		return [createdResult, updatedResult] as const;
+	});
 
 	return { data: { updated: created.count + updated.count } };
 };
