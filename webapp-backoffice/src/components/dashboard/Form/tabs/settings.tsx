@@ -53,6 +53,7 @@ const SettingsTab = ({
 	isLoading
 }: Props) => {
 	const router = useRouter();
+
 	const { cx, classes } = useStyles();
 	const [isCopied, setIsCopied] = useState(false);
 
@@ -60,6 +61,7 @@ const SettingsTab = ({
 
 	const { data: meData } = trpc.user.me.useQuery({});
 	const currentUser = meData?.data;
+	const alertsPaused = currentUser?.alerts_enabled === false;
 
 	const subscriptionQuery = trpc.formAlert.getSubscription.useQuery({
 		form_id: form.id
@@ -161,7 +163,18 @@ const SettingsTab = ({
 								</strong>{' '}
 								et soyez averti par email lorsqu’ils sont déposés. Vous pouvez
 								également activer ou désactiver les alertes de tous vos
-								formulaires et services numériques depuis le menu Notifications
+								formulaires et services numériques depuis le menu{' '}
+								<a
+									href={`/administration/dashboard/user/${currentUser?.id}/notifications`}
+								>
+									Notifications{' '}
+									<i
+										className={fr.cx(
+											'fr-icon-notification-3-line',
+											'fr-icon--sm'
+										)}
+									/>
+								</a>{' '}
 								de votre compte.
 							</p>
 							<span
@@ -173,21 +186,43 @@ const SettingsTab = ({
 							</span>
 						</div>
 
-						<ToggleSwitch
-							label="Activer les alertes sur le formulaire"
-							inputTitle={`Alertes pour le formulaire ${form.title || ''}`}
-							showCheckedHint={false}
-							helperText={`Les emails d’alerte seront envoyées à l’email ${currentUser?.email}`}
-							disabled={subscriptionQuery.isLoading}
-							checked={isSubscribed}
-							onChange={checked =>
-								setSubscription.mutate({
-									form_id: form.id,
-									enabled: checked
-								})
-							}
-							className={fr.cx(!isLocked && 'fr-mb-12v')}
-						/>
+						<div
+							className={cx(
+								classes.alertsSection,
+								alertsPaused && classes.alertsPaused,
+								fr.cx(!isLocked && 'fr-mb-12v')
+							)}
+						>
+							{alertsPaused && (
+								<div className={classes.alertsPausedNotice}>
+									<p
+										className={fr.cx('fr-mb-0', 'fr-text--lg', 'fr-text--bold')}
+									>
+										Alertes en pause sur votre compte
+									</p>{' '}
+									<a
+										href={`/administration/dashboard/user/${currentUser?.id}/notifications`}
+										className={fr.cx('fr-link')}
+									>
+										Réactiver les alertes
+									</a>
+								</div>
+							)}
+							<ToggleSwitch
+								label="Activer les alertes sur le formulaire"
+								inputTitle={`Alertes pour le formulaire ${form.title || ''}`}
+								showCheckedHint={false}
+								helperText={`Les emails d’alerte seront envoyées à l’email ${currentUser?.email}`}
+								disabled={subscriptionQuery.isLoading || alertsPaused}
+								checked={isSubscribed}
+								onChange={checked =>
+									setSubscription.mutate({
+										form_id: form.id,
+										enabled: checked
+									})
+								}
+							/>
+						</div>
 					</div>
 					{!isLocked && (
 						<>
@@ -333,6 +368,23 @@ const useStyles = tss.withName({ SettingsTab }).create({
 				justifyContent: 'center'
 			}
 		}
+	},
+	alertsSection: {
+		width: '100%',
+		position: 'relative',
+		'& .fr-toggle .fr-hint-text': { marginTop: fr.spacing('1v') }
+	},
+	alertsPaused: {
+		padding: fr.spacing('6v'),
+		borderRadius: fr.spacing('1v'),
+		backgroundColor: fr.colors.decisions.background.default.grey.hover,
+		'& .fr-toggle': { pointerEvents: 'none' }
+	},
+	alertsPausedNotice: {
+		display: 'flex',
+		alignItems: 'center',
+		gap: fr.spacing('4v'),
+		marginBottom: fr.spacing('3v')
 	}
 });
 
