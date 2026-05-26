@@ -1,4 +1,4 @@
-version: '3.4'
+version: "3.4"
 
 services:
   elasticsearch:
@@ -42,13 +42,13 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: jdma
     ports:
-      - '5433:5432'
+      - "5433:5432"
 
   redis:
     image: redis:8.6-alpine
     restart: always
     ports:
-      - '6379:6379'
+      - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
     volumes:
       - cache:/data

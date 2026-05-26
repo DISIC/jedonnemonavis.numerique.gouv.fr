@@ -24,9 +24,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`Fermeture ${
-				buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"
-			} du service « ${product.title} »`}
+			preview={`Fermeture ${buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"} du service « ${product.title} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
