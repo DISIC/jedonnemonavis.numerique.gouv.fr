@@ -100,6 +100,27 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 		return;
 	}
 
+	// Idempotency guard: skip recipients who already got a UserEvent row for
+	// this batch on a prior attempt (worker crash, DB blip, BullMQ retry).
+	// `batch_start` is keyed on `cursor`, which is stable across retries of
+	// the same job — `sentAt` is not, so we can't compare against batch_end.
+	const alreadyNotified = await prisma.userEvent.findMany({
+		where: {
+			action: 'form_alert_sent',
+			form_id: formId,
+			metadata: { path: ['batch_start'], equals: cursor.toISOString() }
+		},
+		select: { user_id: true }
+	});
+	const alreadyNotifiedIds = new Set(
+		alreadyNotified
+			.map(e => e.user_id)
+			.filter((id): id is number => id !== null)
+	);
+	const pendingRecipients = recipients.filter(
+		r => !alreadyNotifiedIds.has(r.id)
+	);
+
 	const baseUrl = process.env.NODEMAILER_BASEURL ?? '';
 	const reviewsUrl = `${baseUrl}/administration/dashboard/product/${productId}/forms/${formId}?tab=reviews`;
 	const productTitle = form.product.title;
@@ -107,8 +128,8 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 	const newLabel = total === 1 ? 'nouvelle réponse' : 'nouvelles réponses';
 	const subject = `Formulaire ${formTitle} : ${total} ${newLabel}`;
 
-	for (let i = 0; i < recipients.length; i++) {
-		const recipient = recipients[i];
+	for (let i = 0; i < pendingRecipients.length; i++) {
+		const recipient = pendingRecipients[i];
 		try {
 			const html = await renderAlertEmail({
 				userId: recipient.id,
@@ -155,7 +176,7 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 			);
 		}
 
-		if ((i + 1) % SEND_THROTTLE_BATCH === 0 && i + 1 < recipients.length) {
+		if ((i + 1) % SEND_THROTTLE_BATCH === 0 && i + 1 < pendingRecipients.length) {
 			await sleep(SEND_THROTTLE_DELAY_MS);
 		}
 	}
@@ -166,6 +187,6 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 	});
 
 	console.log(
-		`[alerts] Sent form ${formId} alert to ${recipients.length} recipient(s) (total=${total}, withComments=${withComments})`
+		`[alerts] Sent form ${formId} alert to ${pendingRecipients.length} of ${recipients.length} recipient(s) (total=${total}, withComments=${withComments})`
 	);
 }
