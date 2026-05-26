@@ -175,7 +175,7 @@ const ProductFormsPage = (props: Props) => {
 								fr.cx('fr-col-12', 'fr-col-md-6', 'fr-mb-6v', 'fr-mb-md-3v')
 							)}
 						>
-							{ownRight === 'carrier_admin' && !product.isTop250 && (
+							{ownRight === 'carrier_admin' && (
 								<Button
 									priority="secondary"
 									onClick={() => {

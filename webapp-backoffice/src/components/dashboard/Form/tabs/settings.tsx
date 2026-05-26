@@ -58,7 +58,7 @@ const SettingsTab = ({
 
 	const deleteButton = trpc.button.delete.useMutation();
 
-	const isDisabled = form.product.isTop250 || !!form.isDeleted;
+	const isDisabled = !!form.isDeleted;
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
@@ -133,6 +133,8 @@ const SettingsTab = ({
 				</ButtonDSFR>
 			</div>
 
+			{!form.isTop250 && (
+				<>
 			<div className={fr.cx('fr-col-12', 'fr-col-md-8')}>
 				<h3 className={fr.cx('fr-mb-6v')}>Gérer le formulaire</h3>
 			</div>
@@ -212,6 +214,8 @@ const SettingsTab = ({
 						</div>
 					</div>
 				</div>
+			)}
+				</>
 			)}
 		</div>
 	);
