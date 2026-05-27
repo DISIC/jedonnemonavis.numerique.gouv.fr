@@ -143,6 +143,13 @@ export async function makeRelationFromUserInvite(
 	}
 }
 
+export function omitPassword<T extends { password?: string | null }>(
+	user: T
+): Omit<T, 'password'> {
+	const { password: _password, ...rest } = user;
+	return rest;
+}
+
 export async function checkUserDomain(prisma: PrismaClient, email: string) {
 	const domain = extractDomainFromEmail(email.toLowerCase());
 	if (!domain) return false;

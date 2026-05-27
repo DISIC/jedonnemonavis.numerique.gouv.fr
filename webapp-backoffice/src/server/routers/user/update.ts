@@ -2,7 +2,7 @@ import { UserUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { checkUserDomain } from './utils';
+import { checkUserDomain, omitPassword } from './utils';
 
 export const updateUserInputSchema = z.object({
 	id: z.number(),
@@ -72,5 +72,5 @@ export const updateUserMutation = async ({
 		data: dataToUpdate
 	});
 
-	return { data: updatedUser };
+	return { data: omitPassword(updatedUser) };
 };
