@@ -49,8 +49,7 @@ export const JdmaAlertEmail = ({
 			<Hr style={hr} />
 
 			<Text style={paragraph}>
-				Pour changer la fréquence de cette alerte ou ne plus la recevoir du
-				tout,&nbsp;
+				Pour ne plus recevoir cette alerte&nbsp;
 				<Link
 					href={`${baseUrl}/administration/dashboard/user/${userId}/notifications`}
 					target="_blank"

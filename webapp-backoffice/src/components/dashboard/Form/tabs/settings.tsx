@@ -25,22 +25,6 @@ interface Props {
 	isLoading: boolean;
 }
 
-const contents: { iconId: FrIconClassName | RiIconClassName; text: string }[] =
-	[
-		{
-			iconId: 'ri-eye-off-line',
-			text: 'Masquez une étape, une question ou une option de réponse'
-		},
-		{
-			iconId: 'fr-icon-edit-line',
-			text: "Éditez le texte d'introduction"
-		},
-		{
-			iconId: 'ri-code-fill',
-			text: "Vos usagers auront directement accès au formulaire modifié, sans nécessité de rééditer le lien d'accès."
-		}
-	];
-
 const delete_form_modal = createModal({
 	id: 'delete-form-modal',
 	isOpenedByDefault: false

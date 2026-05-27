@@ -1,85 +1,67 @@
 import type { Context } from '@/src/server/trpc';
+import {
+	alternativeString,
+	buildSearchQuery,
+	normalizeString
+} from '@/src/utils/tools';
 import { Prisma } from '@prisma/client';
+import { z } from 'zod';
+import {
+	buildAccessibleProductsWhere,
+	hasActiveSubscriptionForms,
+	mapProductsToGroups,
+	productSubscriptionSelect
+} from './subscription-groups';
 
-export type ProductSubscriptionGroup = {
-	product: {
-		id: number;
-		title: string;
-		entity: { id: number; name: string; acronym: string };
-	};
-	forms: Array<{ id: number; title: string; enabled: boolean }>;
-};
+const CATALOG_LIMIT = 50;
 
-export const getMySubscriptionsQuery = async ({ ctx }: { ctx: Context }) => {
+export const getMySubscriptionsInputSchema = z
+	.object({ search: z.string().optional() })
+	.optional();
+
+export const getMySubscriptionsQuery = async ({
+	ctx,
+	input
+}: {
+	ctx: Context;
+	input: z.infer<typeof getMySubscriptionsInputSchema>;
+}) => {
 	const contextUser = ctx.session!.user;
 	const userId = parseInt(contextUser.id);
-	const isAdmin = contextUser.role.includes('admin');
+	const search = input?.search?.trim();
 
-	const whereUserScope: Prisma.ProductWhereInput = {
-		OR: [
-			{
-				accessRights: !isAdmin
-					? {
-							some: {
-								user_email: contextUser.email,
-								status: { in: ['carrier_admin', 'carrier_user'] }
-							}
-					  }
-					: {}
-			},
-			{
-				entity: {
-					adminEntityRights: !isAdmin
-						? {
-								some: {
-									user_email: contextUser.email
-								}
-						  }
-						: {}
-				}
-			}
-		]
+	const baseWhere: Prisma.ProductWhereInput = {
+		...buildAccessibleProductsWhere(contextUser),
+		NOT: { forms: hasActiveSubscriptionForms(userId) }
 	};
 
-	const products = await ctx.prisma.product.findMany({
-		where: {
-			...whereUserScope,
-			status: 'published'
-		},
-		select: {
-			id: true,
-			title: true,
-			entity: { select: { id: true, name: true, acronym: true } },
-			forms: {
-				where: { isDeleted: false },
-				select: {
-					id: true,
-					title: true,
-					form_alert_subscriptions: {
-						where: { user_id: userId },
-						select: { enabled: true }
-					}
-				}
-			}
+	let where = baseWhere;
+	if (search) {
+		const searchWithoutAccents = normalizeString(search);
+		const alternativeSearchText = alternativeString(searchWithoutAccents);
+		const queries = new Set<string>([buildSearchQuery(searchWithoutAccents)]);
+		if (
+			alternativeSearchText &&
+			alternativeSearchText !== searchWithoutAccents
+		) {
+			queries.add(buildSearchQuery(alternativeSearchText));
 		}
+		const orConditions = Array.from(queries).flatMap(q => [
+			{ title_formatted: { search: q } },
+			{ title: { search: q } }
+		]);
+		where = { AND: [baseWhere, { OR: orConditions }] };
+	}
+
+	const products = await ctx.prisma.product.findMany({
+		where,
+		select: productSubscriptionSelect(userId),
+		orderBy: { title: 'asc' },
+		take: CATALOG_LIMIT + 1
 	});
 
-	const data: ProductSubscriptionGroup[] = products
-		.map(product => ({
-			product: {
-				id: product.id,
-				title: product.title,
-				entity: product.entity
-			},
-			forms: product.forms
-				.map(form => ({
-					id: form.id,
-					title: form.title ?? 'Formulaire sans titre',
-					enabled: form.form_alert_subscriptions[0]?.enabled ?? false
-				}))
-				.sort((a, b) => a.title.localeCompare(b.title))
-		}))
-		.sort((a, b) => a.product.title.localeCompare(b.product.title));
+	const truncated = products.length > CATALOG_LIMIT;
+	const data = mapProductsToGroups(products.slice(0, CATALOG_LIMIT));
 
-	return { data };
+	return { data, truncated };
 };

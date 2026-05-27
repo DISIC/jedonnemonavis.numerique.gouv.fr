@@ -202,7 +202,7 @@ const ProductFormPage = (props: Props) => {
 							{!isLocked && (
 								<Button
 									priority="tertiary"
-									iconId="fr-icon-edit-line"
+									iconId="fr-icon-edit-box-line"
 									iconPosition="right"
 									onClick={() => rename_form_modal.open()}
 								>
@@ -225,7 +225,7 @@ const ProductFormPage = (props: Props) => {
 							{!isLocked && (
 								<Button
 									priority="tertiary"
-									iconId="ri-settings-line"
+									iconId="fr-icon-edit-line"
 									iconPosition="right"
 									linkProps={{
 										href: `/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`

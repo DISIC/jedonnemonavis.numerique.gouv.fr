@@ -39,29 +39,49 @@ const NotificationsAccount: React.FC<Props> = props => {
 		}
 	});
 
-	const subscriptionsQuery = trpc.formAlert.getMySubscriptions.useQuery();
-	const groups = subscriptionsQuery.data?.data ?? [];
-
 	const [search, setSearch] = React.useState('');
+	const [validatedSearch, setValidatedSearch] = React.useState('');
 	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] =
 		React.useState(false);
 
+	const activeQuery = trpc.formAlert.getActiveSubscriptionGroups.useQuery();
+	const catalogQuery = trpc.formAlert.getMySubscriptions.useQuery({
+		search: validatedSearch || undefined
+	});
+
+	const activeGroups = activeQuery.data?.data ?? [];
+	const catalogGroups = catalogQuery.data?.data ?? [];
+	const catalogTruncated = catalogQuery.data?.truncated ?? false;
+
+	const filteredActiveGroups = React.useMemo(() => {
+		const q = normalizeString(validatedSearch.trim()).toLowerCase();
+		if (!q) return activeGroups;
+		return activeGroups.filter(g =>
+			normalizeString(g.product.title).toLowerCase().includes(q)
+		);
+	}, [activeGroups, validatedSearch]);
+
 	const previewSample = React.useMemo(() => {
-		const firstGroup = groups.find(g => g.forms.length > 0);
+		const firstGroup =
+			activeGroups.find(g => g.forms.length > 0) ??
+			catalogGroups.find(g => g.forms.length > 0);
 		return {
 			productTitle: firstGroup?.product.title,
 			formTitle: firstGroup?.forms[0]?.title
 		};
-	}, [groups]);
-	const filteredGroups = React.useMemo(() => {
-		const q = normalizeString(search.trim()).toLowerCase();
-		if (!q) return groups;
-		return groups.filter(g =>
-			normalizeString(g.product.title).toLowerCase().includes(q)
-		);
-	}, [groups, search]);
+	}, [activeGroups, catalogGroups]);
 
-	const invalidateSubs = () => utils.formAlert.getMySubscriptions.invalidate();
+	const isInitialLoading = activeQuery.isLoading && catalogQuery.isLoading;
+	const hasAnyService = activeGroups.length > 0 || catalogGroups.length > 0;
+	const combinedGroups = React.useMemo(
+		() => [...filteredActiveGroups, ...catalogGroups],
+		[filteredActiveGroups, catalogGroups]
+	);
+
+	const invalidateSubs = () => {
+		utils.formAlert.getMySubscriptions.invalidate();
+		utils.formAlert.getActiveSubscriptionGroups.invalidate();
+	};
 
 	const setSubscription = trpc.formAlert.setSubscription.useMutation({
 		onSuccess: invalidateSubs
@@ -101,6 +121,65 @@ const NotificationsAccount: React.FC<Props> = props => {
 
 	const handleProductToggle = (productId: number, enabled: boolean) => {
 		setSubscriptionsForProduct.mutate({ product_id: productId, enabled });
+	};
+
+	const renderServiceGroup = (group: (typeof catalogGroups)[number]) => {
+		const allEnabled = group.forms.every(f => f.enabled);
+		const anyEnabled = group.forms.some(f => f.enabled);
+		const partial = anyEnabled && !allEnabled;
+
+		return (
+			<Accordion
+				key={group.product.id}
+				titleAs="h5"
+				className={classes.serviceItem}
+				label={
+					<span className={classes.accordionLabel}>
+						<span
+							className={cx(
+								classes.masterToggleGuard,
+								partial && classes.partialToggle
+							)}
+							onClick={e => e.stopPropagation()}
+						>
+							<ToggleSwitch
+								label={
+									<span className="fr-sr-only">
+										Alertes pour {group.product.title}
+									</span>
+								}
+								inputTitle={`alerts-product-${group.product.id}`}
+								checked={anyEnabled}
+								disabled={!user.alerts_enabled}
+								onChange={() =>
+									handleProductToggle(group.product.id, !allEnabled)
+								}
+								showCheckedHint={false}
+							/>
+						</span>
+						<strong className={classes.productTitle}>
+							{group.product.title}
+						</strong>
+					</span>
+				}
+			>
+				<ul className={classes.formsList}>
+					{group.forms.map(form => (
+						<li key={form.id} className={classes.formItem}>
+							<ToggleSwitch
+								label={form.title}
+								inputTitle={`alerts-form-${form.id}`}
+								checked={form.enabled}
+								disabled={!user.alerts_enabled}
+								onChange={checked => handleFormToggle(form.id, checked)}
+								showCheckedHint={false}
+								labelPosition="right"
+							/>
+						</li>
+					))}
+				</ul>
+			</Accordion>
+		);
 	};
 
 	return (
@@ -227,19 +306,23 @@ const NotificationsAccount: React.FC<Props> = props => {
 							className={fr.cx('fr-mb-6v')}
 						/>
 						<div>
-							<div className={classes.servicesHeader}>
-								<p
-									className={cx(
-										fr.cx('fr-text--md', 'fr-mb-0'),
-										classes.boldTitle
-									)}
-								>
-									Services
-								</p>
-								{!subscriptionsQuery.isLoading && groups.length > 0 && (
-									<div
+							{(hasAnyService || validatedSearch) && (
+								<div className={classes.servicesHeader}>
+									<p
+										className={cx(
+											fr.cx('fr-text--md', 'fr-mb-0'),
+											classes.boldTitle
+										)}
+									>
+										Services
+									</p>
+									<form
 										role="search"
 										className={cx(fr.cx('fr-search-bar'), classes.searchBar)}
+										onSubmit={e => {
+											e.preventDefault();
+											setValidatedSearch(search.trim());
+										}}
 									>
 										<Input
 											label="Rechercher un service"
@@ -248,122 +331,69 @@ const NotificationsAccount: React.FC<Props> = props => {
 												placeholder: 'Rechercher un service',
 												type: 'search',
 												value: search,
-												onChange: e => setSearch(e.target.value)
+												onChange: e => {
+													const value = e.target.value;
+													setSearch(value);
+													if (!value) setValidatedSearch('');
+												}
 											}}
 										/>
 										<Button
 											priority="primary"
-											type="button"
+											type="submit"
 											iconId="ri-search-2-line"
 											title="Rechercher"
 										>
 											Rechercher
 										</Button>
-									</div>
-								)}
-							</div>
-							{subscriptionsQuery.isLoading ? (
+									</form>
+								</div>
+							)}
+							{isInitialLoading ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>Chargement…</p>
-							) : groups.length === 0 ? (
+							) : !hasAnyService && !validatedSearch ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
 									Vous n'avez accès à aucun service pour le moment.
 								</p>
+							) : combinedGroups.length === 0 ? (
+								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+									Aucun service ne correspond à votre recherche.
+								</p>
 							) : (
 								<>
-									{filteredGroups.length === 0 ? (
-										<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-											Aucun service ne correspond à votre recherche.
-										</p>
-									) : (
-										<div className={classes.services}>
-											{filteredGroups.map(group => {
-												const allEnabled = group.forms.every(f => f.enabled);
-												const anyEnabled = group.forms.some(f => f.enabled);
-												const partial = anyEnabled && !allEnabled;
-
-												return (
-													<Accordion
-														key={group.product.id}
-														titleAs="h5"
-														className={classes.serviceItem}
-														label={
-															<span className={classes.accordionLabel}>
-																<span
-																	className={cx(
-																		classes.masterToggleGuard,
-																		partial && classes.partialToggle
-																	)}
-																	onClick={e => e.stopPropagation()}
-																>
-																	<ToggleSwitch
-																		label={
-																			<span className="fr-sr-only">
-																				Alertes pour {group.product.title}
-																			</span>
-																		}
-																		inputTitle={`alerts-product-${group.product.id}`}
-																		checked={anyEnabled}
-																		disabled={!user.alerts_enabled}
-																		onChange={() =>
-																			handleProductToggle(
-																				group.product.id,
-																				!allEnabled
-																			)
-																		}
-																		showCheckedHint={false}
-																	/>
-																</span>
-																<strong className={classes.productTitle}>
-																	{group.product.title}
-																</strong>
-															</span>
-														}
-													>
-														<ul className={classes.formsList}>
-															{group.forms.map(form => (
-																<li key={form.id} className={classes.formItem}>
-																	<ToggleSwitch
-																		label={form.title}
-																		inputTitle={`alerts-form-${form.id}`}
-																		checked={form.enabled}
-																		disabled={!user.alerts_enabled}
-																		onChange={checked =>
-																			handleFormToggle(form.id, checked)
-																		}
-																		showCheckedHint={false}
-																		labelPosition="right"
-																	/>
-																</li>
-															))}
-														</ul>
-													</Accordion>
-												);
-											})}
-										</div>
-									)}
-									<div className={fr.cx('fr-callout', 'fr-mb-0', 'fr-mt-6v')}>
-										<ul>
-											<li>
-												Un mail d’alerte est envoyé pour{' '}
-												<strong>chaque formulaire, séparément</strong>
-											</li>
-											<li>
-												En l'absence de nouvelles alertes, aucun mail ne vous
-												sera envoyé
-											</li>
-										</ul>
-										<span
-											className={classes.previewEmailButton}
-											role="button"
-											onClick={() => {
-												setIsAlertEmailPreviewOpen(true);
-												alert_email_preview_modal.open();
-											}}
-										>
-											Voir un exemple de mail d’alerte
-										</span>
+									<div className={classes.services}>
+										{combinedGroups.map(renderServiceGroup)}
 									</div>
+									{catalogTruncated && (
+										<p className={fr.cx('fr-text--sm', 'fr-mt-3v', 'fr-mb-0')}>
+											Affinez votre recherche pour voir plus de services.
+										</p>
+									)}
 								</>
+							)}
+							{!isInitialLoading && (hasAnyService || validatedSearch) && (
+								<div className={fr.cx('fr-callout', 'fr-mb-0', 'fr-mt-6v')}>
+									<ul>
+										<li>
+											Un mail d’alerte est envoyé pour{' '}
+											<strong>chaque formulaire, séparément</strong>
+										</li>
+										<li>
+											En l'absence de nouvelles alertes, aucun mail ne vous sera
+											envoyé
+										</li>
+									</ul>
+									<span
+										className={classes.previewEmailButton}
+										role="button"
+										onClick={() => {
+											setIsAlertEmailPreviewOpen(true);
+											alert_email_preview_modal.open();
+										}}
+									>
+										Voir un exemple de mail d’alerte
+									</span>
+								</div>
 							)}
 						</div>
 					</div>

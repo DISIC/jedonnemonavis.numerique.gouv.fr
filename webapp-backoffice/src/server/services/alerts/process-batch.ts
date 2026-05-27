@@ -176,7 +176,10 @@ export async function processFormAlertBatch(formId: number): Promise<void> {
 			);
 		}
 
-		if ((i + 1) % SEND_THROTTLE_BATCH === 0 && i + 1 < pendingRecipients.length) {
+		if (
+			(i + 1) % SEND_THROTTLE_BATCH === 0 &&
+			i + 1 < pendingRecipients.length
+		) {
 			await sleep(SEND_THROTTLE_DELAY_MS);
 		}
 	}
