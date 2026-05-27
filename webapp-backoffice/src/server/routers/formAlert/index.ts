@@ -3,7 +3,11 @@ import {
 	getSubscriptionInputSchema,
 	getSubscriptionQuery
 } from './get-subscription';
-import { getMySubscriptionsQuery } from './get-my-subscriptions';
+import {
+	getMySubscriptionsInputSchema,
+	getMySubscriptionsQuery
+} from './get-my-subscriptions';
+import { getActiveSubscriptionGroupsQuery } from './get-active-subscriptions';
 import {
 	getAlertEmailPreviewInputSchema,
 	getAlertEmailPreviewQuery
@@ -22,7 +26,13 @@ export const formAlertRouter = router({
 		.input(getSubscriptionInputSchema)
 		.query(getSubscriptionQuery),
 
-	getMySubscriptions: protectedProcedure.query(getMySubscriptionsQuery),
+	getMySubscriptions: protectedProcedure
+		.input(getMySubscriptionsInputSchema)
+		.query(getMySubscriptionsQuery),
+
+	getActiveSubscriptionGroups: protectedProcedure.query(
+		getActiveSubscriptionGroupsQuery
+	),
 
 	getAlertEmailPreview: protectedProcedure
 		.input(getAlertEmailPreviewInputSchema)
