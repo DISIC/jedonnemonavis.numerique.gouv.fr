@@ -5,6 +5,10 @@ import {
 } from './get-subscription';
 import { getMySubscriptionsQuery } from './get-my-subscriptions';
 import {
+	getAlertEmailPreviewInputSchema,
+	getAlertEmailPreviewQuery
+} from './get-alert-email-preview';
+import {
 	setSubscriptionInputSchema,
 	setSubscriptionMutation
 } from './set-subscription';
@@ -19,6 +23,10 @@ export const formAlertRouter = router({
 		.query(getSubscriptionQuery),
 
 	getMySubscriptions: protectedProcedure.query(getMySubscriptionsQuery),
+
+	getAlertEmailPreview: protectedProcedure
+		.input(getAlertEmailPreviewInputSchema)
+		.query(getAlertEmailPreviewQuery),
 
 	setSubscription: protectedProcedure
 		.input(setSubscriptionInputSchema)

@@ -2,10 +2,12 @@ import { User } from '@/prisma/generated/zod';
 import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import { trpc } from '@/src/utils/trpc';
 import { normalizeString } from '@/src/utils/tools';
+import AlertEmailPreviewModal from '@/src/components/dashboard/Form/AlertEmailPreviewModal';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Input } from '@codegouvfr/react-dsfr/Input';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { NotificationFrequency } from '@prisma/client';
@@ -20,6 +22,11 @@ interface Props {
 	userId: number;
 	user: User;
 }
+
+const alert_email_preview_modal = createModal({
+	id: 'alert-email-preview-modal',
+	isOpenedByDefault: false
+});
 
 const NotificationsAccount: React.FC<Props> = props => {
 	const { userId, isOwn, user } = props;
@@ -36,6 +43,16 @@ const NotificationsAccount: React.FC<Props> = props => {
 	const groups = subscriptionsQuery.data?.data ?? [];
 
 	const [search, setSearch] = React.useState('');
+	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] =
+		React.useState(false);
+
+	const previewSample = React.useMemo(() => {
+		const firstGroup = groups.find(g => g.forms.length > 0);
+		return {
+			productTitle: firstGroup?.product.title,
+			formTitle: firstGroup?.forms[0]?.title
+		};
+	}, [groups]);
 	const filteredGroups = React.useMemo(() => {
 		const q = normalizeString(search.trim()).toLowerCase();
 		if (!q) return groups;
@@ -88,6 +105,12 @@ const NotificationsAccount: React.FC<Props> = props => {
 
 	return (
 		<>
+			<AlertEmailPreviewModal
+				modal={alert_email_preview_modal}
+				isOpen={isAlertEmailPreviewOpen}
+				productTitle={previewSample.productTitle}
+				formTitle={previewSample.formTitle}
+			/>
 			<AccountLayout isOwn={isOwn} user={user}>
 				<Head>
 					<title>
@@ -332,7 +355,10 @@ const NotificationsAccount: React.FC<Props> = props => {
 										<span
 											className={classes.previewEmailButton}
 											role="button"
-											onClick={() => {}}
+											onClick={() => {
+												setIsAlertEmailPreviewOpen(true);
+												alert_email_preview_modal.open();
+											}}
 										>
 											Voir un exemple de mail d’alerte
 										</span>

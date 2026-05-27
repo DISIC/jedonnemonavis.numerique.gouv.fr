@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import FormDeleteModal from '../FormDeleteModal';
+import AlertEmailPreviewModal from '../AlertEmailPreviewModal';
 
 interface Props {
 	form: FormWithElements;
@@ -44,6 +45,11 @@ const delete_form_modal = createModal({
 	id: 'delete-form-modal',
 	isOpenedByDefault: false
 });
+
+const alert_email_preview_modal = createModal({
+	id: 'alert-email-preview-modal',
+	isOpenedByDefault: false
+});
 const SettingsTab = ({
 	form,
 	alertText,
@@ -56,6 +62,7 @@ const SettingsTab = ({
 
 	const { cx, classes } = useStyles();
 	const [isCopied, setIsCopied] = useState(false);
+	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] = useState(false);
 
 	const deleteButton = trpc.button.delete.useMutation();
 
@@ -125,6 +132,12 @@ const SettingsTab = ({
 				form={form}
 				onDelete={deleteAllButtons}
 			/>
+			<AlertEmailPreviewModal
+				modal={alert_email_preview_modal}
+				isOpen={isAlertEmailPreviewOpen}
+				productTitle={form.product.title}
+				formTitle={form.title || form.form_template.title}
+			/>
 
 			<div className={fr.cx('fr-col-12', 'fr-mb-10v')}>
 				<span className={fr.cx('fr-text--bold')} style={{ userSelect: 'none' }}>
@@ -180,7 +193,10 @@ const SettingsTab = ({
 							<span
 								className={classes.previewEmailButton}
 								role="button"
-								onClick={() => {}}
+								onClick={() => {
+									setIsAlertEmailPreviewOpen(true);
+									alert_email_preview_modal.open();
+								}}
 							>
 								Voir un exemple de mail d’alerte
 							</span>
@@ -372,7 +388,8 @@ const useStyles = tss.withName({ SettingsTab }).create({
 	alertsSection: {
 		width: '100%',
 		position: 'relative',
-		'& .fr-toggle .fr-hint-text': { marginTop: fr.spacing('1v') }
+		'& .fr-toggle .fr-hint-text': { marginTop: fr.spacing('1v') },
+		'& .fr-toggle__label': {}
 	},
 	alertsPaused: {
 		padding: fr.spacing('6v'),
@@ -384,7 +401,13 @@ const useStyles = tss.withName({ SettingsTab }).create({
 		display: 'flex',
 		alignItems: 'center',
 		gap: fr.spacing('4v'),
-		marginBottom: fr.spacing('3v')
+		marginBottom: fr.spacing('3v'),
+		[fr.breakpoints.down('sm')]: {
+			flexDirection: 'column',
+			alignItems: 'flex-start',
+			gap: 0,
+			marginBottom: fr.spacing('6v')
+		}
 	}
 });
 
