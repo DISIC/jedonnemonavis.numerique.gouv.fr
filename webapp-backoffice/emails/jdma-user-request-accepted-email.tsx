@@ -1,29 +1,28 @@
-import { Link, Text } from '@react-email/components';
+import { Link, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaTokenEmailProps } from './interface';
 
-export const JdmaResetPasswordEmail = ({
+export const JdmaUserRequestAcceptedEmail = ({
 	token = 'example-token-123',
 	baseUrl = 'https://jedonnemonavis.numerique.gouv.fr'
 }: JdmaTokenEmailProps) => {
-	const link = `${baseUrl}/reset-password?${new URLSearchParams({ token })}`;
+	const link = `${baseUrl}/register/validate?${new URLSearchParams({ token })}`;
 
 	return (
 		<JdmaLayout
-			preview="Réinitialisation de votre mot de passe"
+			preview="Votre demande d'accès a été acceptée"
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Vous avez demandé à réinitialiser votre mot de passe sur la plateforme
-				«&nbsp;
+				Votre demande d'accès à la plateforme «&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
 				</Link>
-				&nbsp; ». Afin de choisir un nouveau mot de passe, veuillez cliquer sur
-				le lien ci-dessous.
+				&nbsp; » a été acceptée. Afin de valider votre compte, veuillez cliquer
+				sur le lien ci-dessous.
 			</Text>
 
 			<Link href={link} target="_blank" style={buttonLink}>
@@ -31,14 +30,15 @@ export const JdmaResetPasswordEmail = ({
 			</Link>
 
 			<Text style={paragraph}>
-				Ce lien est valable pour les 15 prochaines minutes. Si vous n'avez pas
-				demandé cette réinitialisation, veuillez ignorer cet e-mail.
+				Cette étape est obligatoire pour pouvoir vous connecter à votre compte.
+				Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet
+				e-mail.
 			</Text>
 		</JdmaLayout>
 	);
 };
 
-export default JdmaResetPasswordEmail;
+export default JdmaUserRequestAcceptedEmail;
 
 // Styles
 const paragraph: React.CSSProperties = {

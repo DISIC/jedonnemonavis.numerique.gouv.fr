@@ -4,6 +4,7 @@ import { Client } from "@elastic/elasticsearch";
 import { ElkAnswer } from "@/src/utils/types";
 import { TRPCError } from "@trpc/server";
 import { FormStepNames } from "@/src/pages/[id]";
+import { onReviewCreated } from "@/src/server/services/alerts/on-review-created";
 
 export async function formatDynamicAnswer(
   prisma: PrismaClient,
@@ -265,6 +266,8 @@ export async function createReview(
   } catch (e) {
     console.log(e);
   }
+
+  void onReviewCreated(prisma, newReview.form_id);
 
   return newReview;
 }

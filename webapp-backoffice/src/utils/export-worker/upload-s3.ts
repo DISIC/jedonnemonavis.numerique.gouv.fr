@@ -13,11 +13,11 @@ const REQUIRED_S3_ENV_VARS = [
 // Defaults are tuned for the smallest (nano, 512MB) tier. Prod scalers (S tier and up)
 // should bump these via env vars: 25MB × 8 is a good sweet spot for S (2GB).
 const UPLOAD_PART_SIZE_MB = parseInt(
-	process.env.EXPORT_UPLOAD_PART_SIZE_MB ?? '10',
+	process.env.WORKER_EXPORT_UPLOAD_PART_SIZE_MB ?? '10',
 	10
 );
 const UPLOAD_QUEUE_SIZE = parseInt(
-	process.env.EXPORT_UPLOAD_QUEUE_SIZE ?? '4',
+	process.env.WORKER_EXPORT_UPLOAD_QUEUE_SIZE ?? '4',
 	10
 );
 

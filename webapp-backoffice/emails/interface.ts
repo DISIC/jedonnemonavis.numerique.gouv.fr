@@ -74,6 +74,16 @@ export interface JdmaUserRequestRefusedEmailProps {
 	baseUrl?: string;
 }
 
+export interface JdmaAlertEmailProps {
+	userId?: number;
+	productTitle?: string;
+	formTitle?: string;
+	totalNbReviews?: number;
+	nbReviewsWithComments?: number;
+	reviewsUrl?: string;
+	baseUrl?: string;
+}
+
 export interface JdmaExportReadyEmailProps {
 	productName: string;
 	downloadLink: string;
