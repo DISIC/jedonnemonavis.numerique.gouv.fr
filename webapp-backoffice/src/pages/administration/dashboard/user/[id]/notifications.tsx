@@ -3,6 +3,7 @@ import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import { trpc } from '@/src/utils/trpc';
 import { normalizeString } from '@/src/utils/tools';
 import AlertEmailPreviewModal from '@/src/components/dashboard/Form/AlertEmailPreviewModal';
+import { Loader } from '@/src/components/ui/Loader';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -350,7 +351,7 @@ const NotificationsAccount: React.FC<Props> = props => {
 								</div>
 							)}
 							{isInitialLoading ? (
-								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>Chargement…</p>
+								<Loader />
 							) : !hasAnyService && !validatedSearch ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
 									Vous n'avez accès à aucun service pour le moment.

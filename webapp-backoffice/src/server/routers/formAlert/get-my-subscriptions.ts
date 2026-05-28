@@ -13,7 +13,7 @@ import {
 	productSubscriptionSelect
 } from './subscription-groups';
 
-const CATALOG_LIMIT = 50;
+const ADMIN_CATALOG_LIMIT = 50;
 
 export const getMySubscriptionsInputSchema = z
 	.object({ search: z.string().optional() })
@@ -28,6 +28,7 @@ export const getMySubscriptionsQuery = async ({
 }) => {
 	const contextUser = ctx.session!.user;
 	const userId = parseInt(contextUser.id);
+	const isSiteWideAdmin = contextUser.role.includes('admin');
 	const search = input?.search?.trim();
 
 	const baseWhere: Prisma.ProductWhereInput = {
@@ -57,11 +58,13 @@ export const getMySubscriptionsQuery = async ({
 		where,
 		select: productSubscriptionSelect(userId),
 		orderBy: { title: 'asc' },
-		take: CATALOG_LIMIT + 1
+		...(isSiteWideAdmin ? { take: ADMIN_CATALOG_LIMIT + 1 } : {})
 	});
 
-	const truncated = products.length > CATALOG_LIMIT;
-	const data = mapProductsToGroups(products.slice(0, CATALOG_LIMIT));
+	const truncated = isSiteWideAdmin && products.length > ADMIN_CATALOG_LIMIT;
+	const data = mapProductsToGroups(
+		truncated ? products.slice(0, ADMIN_CATALOG_LIMIT) : products
+	);
 
 	return { data, truncated };
 };
