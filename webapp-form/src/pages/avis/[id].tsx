@@ -11,6 +11,7 @@ import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
 import Notice from '@codegouvfr/react-dsfr/Notice';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import {
 	DynamicAnswerData,
 	FormAnswers,
@@ -41,6 +42,7 @@ export default function AvisPage({
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
 	const [reviewId, setReviewId] = useState<{
 		id: number;
 		created_at: Date;
@@ -82,12 +84,17 @@ export default function AvisPage({
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
 		onSuccess: data => {
+			setIsRateLimitReached(false);
 			setReviewId({
 				id: data.data.id,
 				created_at: data.data.created_at,
 			});
 		},
 		onError: error => {
+			if (error.data?.httpStatus === 429) {
+				localStorage.removeItem('userId');
+				setIsRateLimitReached(true);
+			}
 			console.error('Error creating review:', error);
 		},
 	});
@@ -187,7 +194,7 @@ export default function AvisPage({
 		/>
 	);
 
-	if (isSubmitted) {
+	if (isSubmitted && !isRateLimitReached) {
 		return (
 			<div ref={contentRef}>
 				{isPreview && !isWidget && <PreviewAlert />}
@@ -258,6 +265,18 @@ export default function AvisPage({
 									isWidget={isWidget}
 								/>
 
+								{isRateLimitReached && (
+									<div role="alert" className={fr.cx('fr-mt-4v')}>
+										<Alert
+											closable
+											onClose={() => setIsRateLimitReached(false)}
+											severity="error"
+											title=""
+											description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
+										/>
+									</div>
+								)}
+
 								<div
 									className={classes.buttonsContainer}
 									style={{
@@ -270,7 +289,7 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty}
+											disabled={isFirstAnswerEmpty || isRateLimitReached}
 											type="submit"
 										>
 											Continuer
@@ -279,7 +298,7 @@ export default function AvisPage({
 										<Button
 											priority="primary"
 											type="submit"
-											disabled={!hasAllRequiredAnswers}
+											disabled={!hasAllRequiredAnswers || isRateLimitReached}
 										>
 											Envoyer mon avis
 										</Button>
