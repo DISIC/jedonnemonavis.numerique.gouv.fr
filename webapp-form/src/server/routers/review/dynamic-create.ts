@@ -2,6 +2,7 @@ import { ReviewUncheckedCreateInputSchema } from "@/prisma/generated/zod";
 import type { Context } from "@/src/server/trpc";
 import { z } from "zod";
 import { createOrUpdateAnswers, formatDynamicAnswer } from "./utils";
+import { onReviewCreated } from "@/src/server/services/alerts/on-review-created";
 
 export const dynamicCreateReviewInputSchema = z.object({
   review: ReviewUncheckedCreateInputSchema,
@@ -44,6 +45,8 @@ export const dynamicCreateReviewMutation = async ({
   } catch (e) {
     console.log(e);
   }
+
+  void onReviewCreated(prisma, newReview.form_id);
 
   return { data: newReview };
 };

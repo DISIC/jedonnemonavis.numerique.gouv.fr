@@ -2,6 +2,7 @@ import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
+import { omitPassword } from './utils';
 
 export const changePasswordInputSchema = z.object({
 	token: z.string(),
@@ -61,5 +62,5 @@ export const changePasswordMutation = async ({
 		}
 	});
 
-	return { data: updatedUser };
+	return { data: omitPassword(updatedUser) };
 };
