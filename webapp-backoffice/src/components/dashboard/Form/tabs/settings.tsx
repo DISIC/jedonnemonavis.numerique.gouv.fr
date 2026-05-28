@@ -50,7 +50,6 @@ const SettingsTab = ({
 
 	const deleteButton = trpc.button.delete.useMutation();
 
-
 	const { data: meData } = trpc.user.me.useQuery({});
 	const currentUser = meData?.data;
 	const alertsPaused = currentUser?.alerts_enabled === false;
@@ -64,7 +63,7 @@ const SettingsTab = ({
 		onSuccess: () => subscriptionQuery.refetch()
 	});
 
-	const isLocked = form.product.isTop250 || !!form.isDeleted;
+	const isLocked = form.isTop250 || !!form.isDeleted;
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
@@ -269,8 +268,6 @@ const SettingsTab = ({
 							</div>
 						</>
 					)}
-				</>
-			)}
 				</>
 			)}
 		</div>

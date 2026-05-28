@@ -1,3 +1,4 @@
+import { DemarcheEssentielleBadge } from '@/src/components/ui/badges/DemarcheEssentielleBadge';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -257,34 +258,15 @@ const ProductFormsPage = (props: Props) => {
 															{form.title || form.form_template.title}
 														</span>
 													</Link>
-													{form.isTop250 && (
-														<span
-															className={cx(
-																fr.cx('fr-icon-lock-line', 'fr-icon--sm'),
-																classes.lockIcon
-															)}
-															aria-label="Formulaire verrouillé (démarche essentielle)"
-															title="Démarche essentielle — ce formulaire ne peut pas être modifié"
-														/>
-													)}
+													{form.isTop250 && <DemarcheEssentielleBadge small />}
 													{form.buttons.length > 0 ? (
-														<div
-															className={cx(
-																fr.cx(
-																	'fr-col',
-																	'fr-col-12',
-																	'fr-col-md-5',
-																	newReviewsCount === 0 && 'fr-hidden'
-																),
-																classes.formStatsContent
-															)}
-														>
+														<>
 															{newReviewsCount > 0 && (
 																<Badge severity="success" noIcon small>
 																	{newReviewsCount} NOUVELLES RÉPONSES
 																</Badge>
 															)}
-														</div>
+														</>
 													) : (
 														<Badge severity="warning" noIcon small>
 															Configuration à terminer
@@ -509,9 +491,10 @@ const useStyles = tss
 		},
 		productTitleContainer: {
 			display: 'flex',
+			alignItems: 'center',
 			flexWrap: 'wrap',
 			flex: 1,
-			gap: fr.spacing('4v')
+			gap: fr.spacing('2v')
 		},
 		productTitle: {
 			backgroundImage: 'none',
@@ -522,10 +505,6 @@ const useStyles = tss
 			'&:hover': {
 				textDecoration: 'underline'
 			}
-		},
-		lockIcon: {
-			color: fr.colors.decisions.text.title.blueFrance.default,
-			alignSelf: 'center'
 		},
 		alertButtonLog: {
 			'.fr-link--close': {
