@@ -182,7 +182,7 @@ const ProductFormPage = (props: Props) => {
 				className={fr.cx('fr-mb-4v')}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-12')}>
+				<div className={fr.cx('fr-col-12', 'fr-pt-4v')}>
 					<div className={cx(classes.topContainer, fr.cx('fr-mb-6v'))}>
 						<div className={cx(classes.titleContainer)}>
 							<h1 className={fr.cx('fr-mb-0')}>

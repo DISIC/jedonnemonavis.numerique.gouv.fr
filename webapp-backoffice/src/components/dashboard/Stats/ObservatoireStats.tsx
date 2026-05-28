@@ -261,7 +261,9 @@ const ObservatoireStats = ({
 				>
 					<p className={cx(classes.value)}>
 						{['autonomy', 'contactReachability'].includes(field.slug)
-							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))} %`
+							? `${getPercentageFromValue(
+									field.value * (field.slug === 'contactReachability' ? 10 : 1)
+							  )} %`
 							: `${getReadableValue(field.value)} / 10`}
 					</p>
 
@@ -312,7 +314,7 @@ const ObservatoireStats = ({
 		view === 'form-dashboard'
 			? ({ children }: { children: React.ReactNode }) => (
 					<div className={classes.dashboardInnerContent}>{children}</div>
-				)
+			  )
 			: Fragment;
 
 	return (
@@ -357,7 +359,11 @@ const ObservatoireStats = ({
 							className={cx(
 								classes.content,
 								view === 'form-dashboard' && classes.dashboardContent,
-								fr.cx(view === 'default' ? 'fr-p-3v' : ['fr-py-4v', 'fr-px-6v'])
+								fr.cx(
+									view === 'default'
+										? 'fr-p-3v'
+										: ['fr-py-4v', 'fr-pl-6v', 'fr-pr-1v']
+								)
 							)}
 						>
 							<div
@@ -391,8 +397,7 @@ const ObservatoireStats = ({
 											aria-label={field.tooltip}
 											className={fr.cx(
 												'fr-icon-information-line',
-												'fr-icon--md',
-												'fr-ml-1v'
+												'fr-icon--md'
 											)}
 										/>
 									</Tooltip>
@@ -495,7 +500,9 @@ const useStyles = tss.create({
 	},
 	dashboardLabel: {
 		display: 'flex',
-		flexWrap: 'nowrap',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: fr.spacing('1v'),
 		marginBottom: fr.spacing('2v'),
 		'.fr-icon-information-line': {
 			'&::before': {
@@ -558,6 +565,7 @@ const useStyles = tss.create({
 	indicatorIcon: {
 		width: '4rem',
 		height: '4rem',
+		flexShrink: 0,
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',
