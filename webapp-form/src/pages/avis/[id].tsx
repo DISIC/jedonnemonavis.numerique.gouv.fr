@@ -41,10 +41,11 @@ export default function AvisPage({
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [reviewId, setReviewId] = useState<{
+	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
+	const createPromiseRef = useRef<Promise<{
 		id: number;
 		created_at: Date;
-	} | null>(null);
+	} | null> | null>(null);
 
 	// Send content height to parent widget for dynamic resizing
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -81,12 +82,6 @@ export default function AvisPage({
 	const currentStep = steps[currentStepIndex];
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
-		onSuccess: data => {
-			setReviewId({
-				id: data.data.id,
-				created_at: data.data.created_at,
-			});
-		},
 		onError: error => {
 			console.error('Error creating review:', error);
 		},
@@ -152,21 +147,51 @@ export default function AvisPage({
 			localStorage.setItem('userId', userId);
 		}
 
-		if (!reviewId) {
-			createReview.mutate({
-				review: {
-					product_id: productId,
-					button_id: buttonId,
-					form_id: form.id,
-					user_id: userId,
-				},
+		if (!reviewRef.current && !createPromiseRef.current) {
+			createPromiseRef.current = createReview
+				.mutateAsync({
+					review: {
+						product_id: productId,
+						button_id: buttonId,
+						form_id: form.id,
+						user_id: userId,
+					},
+					answers: currentStepAnswers,
+				})
+				.then(data => {
+					const identity = {
+						id: data.data.id,
+						created_at: data.data.created_at,
+					};
+					reviewRef.current = identity;
+					return identity;
+				})
+				.catch(() => {
+					createPromiseRef.current = null;
+					return null;
+				});
+			return;
+		}
+
+		const review = reviewRef.current;
+		if (review) {
+			insertOrUpdateReview.mutate({
+				review_id: review.id,
+				review_created_at: review.created_at,
 				answers: currentStepAnswers,
 			});
-		} else {
-			insertOrUpdateReview.mutate({
-				review_id: reviewId.id,
-				review_created_at: reviewId.created_at,
-				answers: currentStepAnswers,
+			return;
+		}
+
+		const pendingCreate = createPromiseRef.current;
+		if (pendingCreate) {
+			void pendingCreate.then(identity => {
+				if (!identity) return;
+				insertOrUpdateReview.mutate({
+					review_id: identity.id,
+					review_created_at: identity.created_at,
+					answers: currentStepAnswers,
+				});
 			});
 		}
 	};
