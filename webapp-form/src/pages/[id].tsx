@@ -99,6 +99,7 @@ export default function JDMAForm({
 			if (error.data?.httpStatus === 429) {
 				localStorage.removeItem('userId');
 				setIsRateLimitReached(true);
+				return;
 			}
 		},
 	});
@@ -270,15 +271,19 @@ export default function JDMAForm({
 
 				localStorage.setItem('userId', userId);
 
-				await createReview.mutateAsync({
-					review: {
-						product_id: product.id,
-						button_id: product.buttons[0].id,
-						form_id: product.form.id,
-						user_id: userId,
-					},
-					answers,
-				});
+				try {
+					await createReview.mutateAsync({
+						review: {
+							product_id: product.id,
+							button_id: product.buttons[0].id,
+							form_id: product.form.id,
+							user_id: userId,
+						},
+						answers,
+					});
+				} catch {
+					return;
+				}
 			} else {
 				await handleInsertOrUpdateReview(opinion, 'satisfaction');
 			}
@@ -474,7 +479,6 @@ export default function JDMAForm({
 							opinion={opinion}
 							product={product}
 							isRateLimitReached={isRateLimitReached}
-							setIsRateLimitReached={setIsRateLimitReached}
 							onSubmit={tmpOpinion => {
 								setOpinion({ ...tmpOpinion });
 								handleCreateReview({ satisfaction: tmpOpinion.satisfaction });

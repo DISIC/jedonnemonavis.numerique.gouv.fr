@@ -7,6 +7,7 @@ import { FormWithElements } from '@/src/utils/types';
 import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
@@ -41,6 +42,7 @@ export default function AvisPage({
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
 	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
 	const createPromiseRef = useRef<Promise<{
 		id: number;
@@ -82,7 +84,15 @@ export default function AvisPage({
 	const currentStep = steps[currentStepIndex];
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
+		onSuccess: () => {
+			setIsRateLimitReached(false);
+		},
 		onError: error => {
+			if (error.data?.httpStatus === 429) {
+				localStorage.removeItem('userId');
+				setIsRateLimitReached(true);
+				return;
+			}
 			console.error('Error creating review:', error);
 		},
 	});
@@ -93,7 +103,7 @@ export default function AvisPage({
 		},
 	});
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const form = e.currentTarget;
@@ -104,7 +114,8 @@ export default function AvisPage({
 
 		const isLastStep = currentStepIndex === steps.length - 1;
 
-		saveCurrentStep();
+		const saved = await saveCurrentStep();
+		if (!saved) return;
 
 		if (isLastStep) {
 			setIsSubmitted(true);
@@ -130,8 +141,8 @@ export default function AvisPage({
 		return Object.values(answers).flat();
 	};
 
-	const saveCurrentStep = () => {
-		if (isPreview) return;
+	const saveCurrentStep = async (): Promise<boolean> => {
+		if (isPreview) return true;
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
@@ -139,7 +150,7 @@ export default function AvisPage({
 			});
 		});
 
-		if (currentStepAnswers.length === 0) return;
+		if (currentStepAnswers.length === 0) return true;
 
 		let userId = localStorage.getItem('userId');
 		if (!userId) {
@@ -170,7 +181,7 @@ export default function AvisPage({
 					createPromiseRef.current = null;
 					return null;
 				});
-			return;
+			return (await createPromiseRef.current) !== null;
 		}
 
 		const review = reviewRef.current;
@@ -180,20 +191,21 @@ export default function AvisPage({
 				review_created_at: review.created_at,
 				answers: currentStepAnswers,
 			});
-			return;
+			return true;
 		}
 
 		const pendingCreate = createPromiseRef.current;
 		if (pendingCreate) {
-			void pendingCreate.then(identity => {
-				if (!identity) return;
-				insertOrUpdateReview.mutate({
-					review_id: identity.id,
-					review_created_at: identity.created_at,
-					answers: currentStepAnswers,
-				});
+			const identity = await pendingCreate;
+			if (!identity) return false;
+			insertOrUpdateReview.mutate({
+				review_id: identity.id,
+				review_created_at: identity.created_at,
+				answers: currentStepAnswers,
 			});
 		}
+
+		return true;
 	};
 
 	const PreviewAlert = () => (
@@ -283,6 +295,16 @@ export default function AvisPage({
 									isWidget={isWidget}
 								/>
 
+								{isRateLimitReached && (
+									<div role="alert">
+										<Alert
+											severity="error"
+											title=""
+											description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
+										/>
+									</div>
+								)}
+
 								<div
 									className={classes.buttonsContainer}
 									style={{
@@ -295,7 +317,7 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty}
+											disabled={isFirstAnswerEmpty || isRateLimitReached}
 											type="submit"
 										>
 											Continuer
@@ -304,7 +326,7 @@ export default function AvisPage({
 										<Button
 											priority="primary"
 											type="submit"
-											disabled={!hasAllRequiredAnswers}
+											disabled={!hasAllRequiredAnswers || isRateLimitReached}
 										>
 											Envoyer mon avis
 										</Button>

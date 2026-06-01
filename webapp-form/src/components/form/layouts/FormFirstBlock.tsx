@@ -15,17 +15,10 @@ type Props = {
 	opinion: Opinion;
 	onSubmit: (opinion: Opinion) => void;
 	isRateLimitReached: boolean;
-	setIsRateLimitReached: (value: boolean) => void;
 };
 
 export const FormFirstBlock = (props: Props) => {
-	const {
-		onSubmit,
-		product,
-		opinion,
-		isRateLimitReached,
-		setIsRateLimitReached,
-	} = props;
+	const { onSubmit, product, opinion, isRateLimitReached } = props;
 	const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { t } = useTranslation('common');
@@ -53,10 +46,7 @@ export const FormFirstBlock = (props: Props) => {
 							className={cx(classes.customIntro)}
 							dangerouslySetInnerHTML={{
 								__html: sanitizeRichHtml(
-									formConfgIntro.label.replace(
-										'{{title}}',
-										product.title,
-									),
+									formConfgIntro.label.replace('{{title}}', product.title),
 								),
 							}}
 						/>
@@ -93,10 +83,6 @@ export const FormFirstBlock = (props: Props) => {
 				{isRateLimitReached && (
 					<div role="alert">
 						<Alert
-							closable
-							onClose={function noRefCheck() {
-								setIsRateLimitReached(false);
-							}}
 							severity="error"
 							title=""
 							description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
@@ -104,7 +90,7 @@ export const FormFirstBlock = (props: Props) => {
 					</div>
 				)}
 				<div className={cx(fr.cx('fr-mt-12v'), classes.buttonsContainer)}>
-					{isLoading ? (
+					{isLoading && !isRateLimitReached ? (
 						<Button
 							type="button"
 							className={cx(classes.loading, classes.validateButton)}
