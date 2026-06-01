@@ -3,7 +3,7 @@ import {
 	Condition,
 	FormField,
 	Opinion,
-	Product,
+	Product
 } from '@/src/utils/types';
 import { useTranslation } from 'next-i18next';
 import { ChangeEvent, SetStateAction, useEffect } from 'react';
@@ -33,19 +33,19 @@ export const CheckboxInput = (props: Props) => {
 		} = {};
 
 		const children = form.filter(
-			f => f.conditions && f.conditions.map(c => c.name).includes(field.name),
+			f => f.conditions && f.conditions.map(c => c.name).includes(field.name)
 		);
 
 		children.forEach(c => {
 			const subChildren = form.filter(
-				f => f.name !== c.name && areArrayEquals(f.needed, c.needed),
+				f => f.name !== c.name && areArrayEquals(f.needed, c.needed)
 			);
 
 			subChildren.forEach(sc => {
 				opinionPropsObj[sc.name] = Array.isArray(opinion[sc.name])
 					? value
 						? (opinion[sc.name] as any[]).filter(
-								field => !field.startsWith(value + '_'),
+								field => !field.startsWith(value + '_')
 						  )
 						: []
 					: undefined;
@@ -56,7 +56,7 @@ export const CheckboxInput = (props: Props) => {
 			opinionPropsObj[cf.name] = Array.isArray(opinion[cf.name])
 				? value
 					? (opinion[cf.name] as any[]).filter(
-							field => !field.startsWith(value + '_'),
+							field => !field.startsWith(value + '_')
 					  )
 					: []
 				: undefined;
@@ -71,7 +71,7 @@ export const CheckboxInput = (props: Props) => {
 		key: CheckboxOpinionKeys,
 		isolated: boolean,
 		e: ChangeEvent<HTMLInputElement>,
-		options: CheckboxOption[],
+		options: CheckboxOption[]
 	) => {
 		const value = parseInt(e.target.value);
 
@@ -79,7 +79,7 @@ export const CheckboxInput = (props: Props) => {
 			setOpinion({
 				...opinion,
 				[key]: e.target.checked ? [value] : [],
-				...getChildrenResetObject(),
+				...getChildrenResetObject()
 			});
 		} else {
 			const isolatedSiblings = options
@@ -91,16 +91,16 @@ export const CheckboxInput = (props: Props) => {
 					...opinion,
 					[key]: [
 						...opinion[key].filter(sibling =>
-							isolatedSiblings.includes(sibling),
+							isolatedSiblings.includes(sibling)
 						),
-						value,
-					],
+						value
+					]
 				});
 			} else {
 				setOpinion({
 					...opinion,
 					[key]: opinion[key].filter(d => d !== value),
-					...getChildrenResetObject(value),
+					...getChildrenResetObject(value)
 				});
 			}
 		}
@@ -115,19 +115,19 @@ export const CheckboxInput = (props: Props) => {
 					fcd =>
 						formTemplateField?.options
 							.map(opt => opt.id)
-							.includes(fcd.parent_id),
+							.includes(fcd.parent_id)
 				)
 				.map(fcd => {
 					const formTemplateOption = formTemplateField?.options.find(
-						opt => opt.id === fcd.parent_id,
+						opt => opt.id === fcd.parent_id
 					);
 					const fieldOption = field.options.find(
-						opt => t(opt.label, { lng: 'fr' }) === formTemplateOption?.label,
+						opt => t(opt.label, { lng: 'fr' }) === formTemplateOption?.label
 					);
 
 					return {
 						...fcd,
-						option_value: fieldOption?.value,
+						option_value: fieldOption?.value
 					};
 				})
 				.filter(fcd => fcd.option_value !== undefined) || [];
@@ -143,8 +143,8 @@ export const CheckboxInput = (props: Props) => {
 								.filter(
 									opt =>
 										!displays.some(
-											d => d.option_value === opt.value && d.hidden,
-										),
+											d => d.option_value === opt.value && d.hidden
+										)
 								)
 								.map((opt, index) => ({
 									label: (
@@ -171,10 +171,10 @@ export const CheckboxInput = (props: Props) => {
 												field.name as CheckboxOpinionKeys,
 												opt.isolated || false,
 												e,
-												field.options,
+												field.options
 											);
-										},
-									},
+										}
+									}
 								}))}
 						/>
 					</>
@@ -190,11 +190,11 @@ const useStyles = tss
 	.create(({ nbItems }) => ({
 		smallText: {
 			fontSize: '0.8rem',
-			color: fr.colors.decisions.text.disabled.grey.default,
+			color: fr.colors.decisions.text.disabled.grey.default
 		},
 		checkboxContainer: {
 			'.fr-fieldset__content': {
-				paddingTop: '1.5rem !important',
-			},
-		},
+				paddingTop: '1.5rem !important'
+			}
+		}
 	}));

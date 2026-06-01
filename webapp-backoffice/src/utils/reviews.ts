@@ -2,9 +2,7 @@ import { Prisma } from '@prisma/client';
 import { getExactPhrase, isExactPhraseSearch, stripAccents } from './search';
 import { getDateWhereFromUTCRange } from './tools';
 
-export const buildSearchWhereRaw = (
-	search: string
-): Prisma.Sql | null => {
+export const buildSearchWhereRaw = (search: string): Prisma.Sql | null => {
 	if (!search) return null;
 
 	if (isExactPhraseSearch(search)) {

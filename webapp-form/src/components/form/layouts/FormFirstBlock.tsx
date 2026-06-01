@@ -26,14 +26,14 @@ export const FormFirstBlock = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
-		fts => fts.position === 0,
+		fts => fts.position === 0
 	);
 
 	const formTemplateBlock = formTemplateStep?.form_template_blocks.find(
-		ftb => ftb.label === "Texte d'introduction",
+		ftb => ftb.label === "Texte d'introduction"
 	);
 	const formConfgIntro = product.form.form_configs[0]?.form_config_labels.find(
-		fcl => fcl.kind === 'block' && fcl.parent_id === formTemplateBlock?.id,
+		fcl => fcl.kind === 'block' && fcl.parent_id === formTemplateBlock?.id
 	);
 
 	return (
@@ -46,8 +46,8 @@ export const FormFirstBlock = (props: Props) => {
 							className={cx(classes.customIntro)}
 							dangerouslySetInnerHTML={{
 								__html: sanitizeRichHtml(
-									formConfgIntro.label.replace('{{title}}', product.title),
-								),
+									formConfgIntro.label.replace('{{title}}', product.title)
+								)
 							}}
 						/>
 					) : (
@@ -122,24 +122,24 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		notice: {
-			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 		},
 		bold: {
-			fontWeight: 800,
+			fontWeight: 800
 		},
 		title: {
 			[fr.breakpoints.down('md')]: {
-				display: 'none',
-			},
+				display: 'none'
+			}
 		},
 		field: {
-			marginBottom: fr.spacing('12v'),
+			marginBottom: fr.spacing('12v')
 		},
 		buttonsContainer: {
 			[fr.breakpoints.up('md')]: {
 				display: 'flex',
-				justifyContent: 'end',
-			},
+				justifyContent: 'end'
+			}
 		},
 		validateButton: {
 			width: '100%',
@@ -147,8 +147,8 @@ const useStyles = tss
 			justifyContent: 'center',
 			...fr.spacing('padding', { topBottom: '3v', rightLeft: '6v' }),
 			[fr.breakpoints.up('md')]: {
-				width: 'initial',
-			},
+				width: 'initial'
+			}
 		},
 		loading: {
 			i: {
@@ -157,14 +157,14 @@ const useStyles = tss
 				color: fr.colors.decisions.background.default.grey.default,
 				width: '8.5rem',
 				['&::before']: {
-					'--icon-size': '1.5rem',
-				},
-			},
+					'--icon-size': '1.5rem'
+				}
+			}
 		},
 		customIntro: {
 			p: {
 				marginBottom: 0,
-				minHeight: fr.spacing('6v'),
-			},
-		},
+				minHeight: fr.spacing('6v')
+			}
+		}
 	}));

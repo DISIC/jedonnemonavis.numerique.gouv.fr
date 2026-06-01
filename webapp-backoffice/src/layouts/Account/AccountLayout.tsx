@@ -43,7 +43,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						href: `/administration/dashboard/user/${session?.user.id}/notifications`
 					}
 				}
-			]
+		  ]
 		: [
 				{
 					text: 'Compte',
@@ -61,7 +61,7 @@ const AccountLayout = ({ children, isOwn, user }: ProductLayoutProps) => {
 						href: `/administration/dashboard/user/${user.id}/access`
 					}
 				}
-			];
+		  ];
 
 	useEffect(() => {
 		const handleScroll = () => {

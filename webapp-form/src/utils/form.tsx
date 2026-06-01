@@ -9,9 +9,9 @@ export const primarySection: FormField[] = [
 		values: {
 			bad: 1,
 			medium: 2,
-			good: 3,
-		},
-	},
+			good: 3
+		}
+	}
 ];
 
 export const firstSectionA: FormField[] = [
@@ -26,30 +26,30 @@ export const firstSectionA: FormField[] = [
 			{
 				label: 'fields.comprehension.options.0.label',
 				value: 4,
-				intention: 'very_bad',
+				intention: 'very_bad'
 			},
 			{
 				label: 'fields.comprehension.options.1.label',
 				value: 5,
-				intention: 'bad',
+				intention: 'bad'
 			},
 			{
 				label: 'fields.comprehension.options.2.label',
 				value: 6,
-				intention: 'medium',
+				intention: 'medium'
 			},
 			{
 				label: 'fields.comprehension.options.3.label',
 				value: 7,
-				intention: 'good',
+				intention: 'good'
 			},
 			{
 				label: 'fields.comprehension.options.4.label',
 				value: 8,
-				intention: 'very_good',
-			},
-		],
-	},
+				intention: 'very_good'
+			}
+		]
+	}
 ];
 
 export const secondSectionA: FormField[] = [
@@ -62,62 +62,62 @@ export const secondSectionA: FormField[] = [
 			{
 				label: 'fields.contact_tried.options.0.label',
 				value: 9,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.1.label',
 				value: 10,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.2.label',
 				value: 11,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.3.label',
 				value: 12,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.4.label',
 				value: 13,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.5.label',
 				value: 14,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.6.label',
 				value: 15,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.7.label',
 				value: 16,
-				intention: 'neutral',
+				intention: 'neutral'
 			},
 			{
 				label: 'fields.contact_tried.options.8.label',
 				value: 17,
 				intention: 'good',
-				isolated: true,
-			},
-		],
+				isolated: true
+			}
+		]
 	},
 	{
 		conditions: [
 			{
 				name: 'contact_tried',
-				values: [16],
-			},
+				values: [16]
+			}
 		],
 		name: 'contact_tried_verbatim',
 		kind: 'input-textarea',
 		hint: 'fields.contact_tried_verbatim.hint',
-		label: 'fields.contact_tried_verbatim.label',
+		label: 'fields.contact_tried_verbatim.label'
 	},
 	// {
 	//   name: "contact_tried",
@@ -138,8 +138,8 @@ export const secondSectionA: FormField[] = [
 		conditions: [
 			{
 				name: 'contact_tried',
-				values: [9, 10, 11, 12],
-			},
+				values: [9, 10, 11, 12]
+			}
 		],
 		kind: 'yes-no',
 		label: 'fields.contact_reached.label',
@@ -147,16 +147,16 @@ export const secondSectionA: FormField[] = [
 			{
 				label: 'fields.contact_reached.options.0.label',
 				value: 17,
-				intention: 'good',
+				intention: 'good'
 			},
 			{
 				label: 'fields.contact_reached.options.1.label',
 				value: 18,
-				intention: 'bad',
-			},
+				intention: 'bad'
+			}
 		],
 		needed: [9, 10, 11, 12],
-		excluded: [13, 14, 15, 16, 17],
+		excluded: [13, 14, 15, 16, 17]
 	},
 	{
 		name: 'contact_satisfaction',
@@ -167,32 +167,32 @@ export const secondSectionA: FormField[] = [
 			{
 				label: 'fields.contact_satisfaction.options.0.label',
 				value: 19,
-				intention: 'very_bad',
+				intention: 'very_bad'
 			},
 			{
 				label: 'fields.contact_satisfaction.options.1.label',
 				value: 20,
-				intention: 'bad',
+				intention: 'bad'
 			},
 			{
 				label: 'fields.contact_satisfaction.options.2.label',
 				value: 21,
-				intention: 'medium',
+				intention: 'medium'
 			},
 			{
 				label: 'fields.contact_satisfaction.options.3.label',
 				value: 22,
-				intention: 'good',
+				intention: 'good'
 			},
 			{
 				label: 'fields.contact_satisfaction.options.4.label',
 				value: 23,
-				intention: 'very_good',
-			},
+				intention: 'very_good'
+			}
 		],
 		needed: [9, 10, 11, 12],
-		excluded: [16],
-	},
+		excluded: [16]
+	}
 ];
 
 export const thirdSectionA: FormField[] = [
@@ -200,8 +200,8 @@ export const thirdSectionA: FormField[] = [
 		name: 'verbatim',
 		kind: 'input-textarea',
 		hint: 'fields.verbatim.hint',
-		label: 'fields.verbatim.label',
-	},
+		label: 'fields.verbatim.label'
+	}
 ];
 
 export const allFields: FormField[] = primarySection
@@ -214,20 +214,20 @@ export const steps_A: Step[] = [
 		name: 'steps.A_1.name',
 		section: firstSectionA,
 		button: 'steps.A_1.button',
-		buttonBack: 'steps.A_1.buttonBack',
+		buttonBack: 'steps.A_1.buttonBack'
 	},
 	{
 		name: 'steps.A_2.name',
 		section: secondSectionA,
 		button: 'steps.A_2.button',
-		buttonBack: 'steps.A_2.buttonBack',
+		buttonBack: 'steps.A_2.buttonBack'
 	},
 	{
 		name: 'steps.A_3.name',
 		section: thirdSectionA,
 		button: 'steps.A_3.button',
-		buttonBack: 'steps.A_3.buttonBack',
-	},
+		buttonBack: 'steps.A_3.buttonBack'
+	}
 ];
 
 export const steps_B: Step[] = [
@@ -235,6 +235,6 @@ export const steps_B: Step[] = [
 		name: 'steps.B_2.name',
 		section: firstSectionA.concat(secondSectionA, thirdSectionA),
 		button: 'steps.B_2.button',
-		buttonBack: 'steps.B_2.buttonBack',
-	},
+		buttonBack: 'steps.B_2.buttonBack'
+	}
 ];

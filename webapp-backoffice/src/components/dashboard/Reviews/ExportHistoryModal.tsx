@@ -72,10 +72,12 @@ const ExportHistoryModal = ({ modal, exports, buttons }: Props) => {
 						new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
 					break;
 				case 'user': {
-					const aName =
-						`${a.user?.firstName ?? ''} ${a.user?.lastName ?? ''}`.trim();
-					const bName =
-						`${b.user?.firstName ?? ''} ${b.user?.lastName ?? ''}`.trim();
+					const aName = `${a.user?.firstName ?? ''} ${
+						a.user?.lastName ?? ''
+					}`.trim();
+					const bName = `${b.user?.firstName ?? ''} ${
+						b.user?.lastName ?? ''
+					}`.trim();
 
 					comparison = aName.localeCompare(bName);
 					break;

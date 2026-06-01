@@ -65,8 +65,8 @@ const ProductModal = (props: Props) => {
 		defaultValues: product
 			? { ...product, urls: product.urls.map(url => ({ value: url })) }
 			: savedTitle
-				? { title: savedTitle, urls: [{ value: '' }] }
-				: { urls: [{ value: '' }] }
+			? { title: savedTitle, urls: [{ value: '' }] }
+			: { urls: [{ value: '' }] }
 	});
 
 	const {
@@ -308,7 +308,7 @@ const ProductModal = (props: Props) => {
 											selectedEntityValue
 												? entityOptions.find(
 														option => option.value === selectedEntityValue
-													)
+												  )
 												: { label: '', value: undefined }
 										}
 										renderInput={params => (

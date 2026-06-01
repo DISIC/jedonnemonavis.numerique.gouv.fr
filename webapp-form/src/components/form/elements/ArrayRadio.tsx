@@ -42,7 +42,7 @@ export const ArrayRadio = (props: Props) => {
 			<>
 				{containsPattern(
 					opinion.contact_reached,
-					new RegExp(escapeRegex(''.toString()) + '_17'),
+					new RegExp(escapeRegex(''.toString()) + '_17')
 				) ? (
 					<>
 						<div className={cx(fr.cx('fr-col-12'), classes.reviewContainer)}>
@@ -63,8 +63,8 @@ export const ArrayRadio = (props: Props) => {
 													containsPattern(
 														opinion.contact_reached,
 														new RegExp(
-															escapeRegex(option.value.toString()) + '_17',
-														),
+															escapeRegex(option.value.toString()) + '_17'
+														)
 													) && (
 														<>
 															<div className={cx(classes.labelWrapper)}>
@@ -86,7 +86,7 @@ export const ArrayRadio = (props: Props) => {
 																			checked={opinion.contact_satisfaction.includes(
 																				escapeRegex(option.value.toString()) +
 																					'_' +
-																					opt.value,
+																					opt.value
 																			)}
 																			onChange={event => {
 																				setOpinion({
@@ -96,16 +96,16 @@ export const ArrayRadio = (props: Props) => {
 																							cs =>
 																								!cs.includes(
 																									escapeRegex(
-																										option.value.toString(),
-																									),
-																								),
+																										option.value.toString()
+																									)
+																								)
 																						),
 																						escapeRegex(
-																							option.value.toString(),
+																							option.value.toString()
 																						) +
 																							'_' +
-																							opt.value,
-																					],
+																							opt.value
+																					]
 																				});
 																			}}
 																			onClick={() => {
@@ -113,10 +113,10 @@ export const ArrayRadio = (props: Props) => {
 																				if (
 																					opinion.contact_satisfaction.includes(
 																						escapeRegex(
-																							option.value.toString(),
+																							option.value.toString()
 																						) +
 																							'_' +
-																							opt.value,
+																							opt.value
 																					)
 																				) {
 																					setOpinion({
@@ -126,11 +126,11 @@ export const ArrayRadio = (props: Props) => {
 																								cs =>
 																									cs !==
 																									escapeRegex(
-																										option.value.toString(),
+																										option.value.toString()
 																									) +
 																										'_' +
-																										opt.value,
-																							),
+																										opt.value
+																							)
 																					});
 																				}
 																			}}
@@ -147,7 +147,7 @@ export const ArrayRadio = (props: Props) => {
 														</>
 													)}
 											</div>
-										),
+										)
 									)}
 							</div>
 						</div>
@@ -166,46 +166,46 @@ const useStyles = tss
 	.create(({ nbItems }) => ({
 		smallText: {
 			fontSize: '0.8rem',
-			color: fr.colors.decisions.text.disabled.grey.default,
+			color: fr.colors.decisions.text.disabled.grey.default
 		},
 		bgWhite: {
-			background: 'white !important',
+			background: 'white !important'
 		},
 		headerLabels: {
 			fontWeight: 'normal !important',
 			...fr.typography[17].style,
 			'&:last-child': {
-				paddingLeft: '3rem',
-			},
+				paddingLeft: '3rem'
+			}
 		},
 		labelWrapper: {
-			paddingBottom: fr.spacing('4v'),
+			paddingBottom: fr.spacing('4v')
 		},
 		label: {
-			...fr.typography[19].style,
+			...fr.typography[19].style
 		},
 		radioWrapper: {
-			padding: '0 !important',
+			padding: '0 !important'
 		},
 		reviewContainer: {
 			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-				color: 'white',
+				color: 'white'
 			},
 			['.fr-radio-group input[type=radio] + label::before']: {
 				content: 'none',
 				outline: 'none',
 				boxShadow: 'none',
-				border: 'none',
+				border: 'none'
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
-				outline: '2px solid #4D90FE',
-			},
+				outline: '2px solid #4D90FE'
+			}
 		},
 		optionRow: {
-			background: 'white !important',
+			background: 'white !important'
 		},
 		reviews: {
 			ul: {
@@ -223,17 +223,17 @@ const useStyles = tss
 
 					minWidth: '100%',
 					':last-child': {
-						marginBottom: 0,
+						marginBottom: 0
 					},
 					input: {
 						position: 'absolute',
 						opacity: 0,
 						width: 0,
-						height: 0,
-					},
+						height: 0
+					}
 				},
 				'::-webkit-scrollbar': {
-					display: 'none',
+					display: 'none'
 				},
 				[fr.breakpoints.up('md')]: {
 					flexWrap: 'nowrap',
@@ -242,34 +242,34 @@ const useStyles = tss
 						marginBottom: 0,
 						marginRight: fr.spacing('3v'),
 						':last-child': {
-							marginRight: 0,
-						},
-					},
-				},
-			},
+							marginRight: 0
+						}
+					}
+				}
+			}
 		},
 		mainTable: {
 			[fr.breakpoints.down('sm')]: {
-				display: 'none',
+				display: 'none'
 			},
 			width: '100%',
 			borderCollapse: 'collapse',
 			tableLayout: 'fixed',
 			'th, tr': {
-				borderBottom: '1px solid lightgray',
+				borderBottom: '1px solid lightgray'
 			},
 			th: {
-				textAlign: 'center',
+				textAlign: 'center'
 			},
 			'th:first-of-type, td:first-of-type': {
-				width: '10rem',
+				width: '10rem'
 			},
 			'th:last-child, td:last-child': {
-				width: '10rem',
+				width: '10rem'
 			},
 			'th:not(:first-of-type):not(:last-child)': {
-				minWidth: 'calc((100% - 20rem) / 6)',
-			},
+				minWidth: 'calc((100% - 20rem) / 6)'
+			}
 		},
 		reviewInputLabel: {
 			border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
@@ -283,7 +283,7 @@ const useStyles = tss
 			fontWeight: 500,
 			color: fr.colors.decisions.background.flat.blueFrance.default,
 			['&:hover']: {
-				borderColor: fr.colors.decisions.background.alt.grey.active,
-			},
-		},
+				borderColor: fr.colors.decisions.background.alt.grey.active
+			}
+		}
 	}));

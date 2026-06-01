@@ -1,204 +1,203 @@
-import { createTRPCStoreLimiter } from "@/src/utils/trpcRateLimiter";
-import { Client as ElkClient } from "@elastic/elasticsearch";
-import { defaultFingerPrint } from "@trpc-limiter/memory";
-import { TRPCError, inferAsyncReturnType, initTRPC } from "@trpc/server";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import fs from "fs";
-import path from "path";
-import SuperJSON from "superjson";
-import { ZodError } from "zod";
-import prisma from "../utils/db";
-import crypto from "crypto";
-import ipaddr from "ipaddr.js";
+import { createTRPCStoreLimiter } from '@/src/utils/trpcRateLimiter';
+import { Client as ElkClient } from '@elastic/elasticsearch';
+import { defaultFingerPrint } from '@trpc-limiter/memory';
+import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
+import { CreateNextContextOptions } from '@trpc/server/adapters/next';
+import fs from 'fs';
+import path from 'path';
+import SuperJSON from 'superjson';
+import { ZodError } from 'zod';
+import prisma from '../utils/db';
+import crypto from 'crypto';
+import ipaddr from 'ipaddr.js';
 
 // Create context with Prisma and NextAuth session
 export const createContext = async (opts: CreateNextContextOptions) => {
-  const caCrtPath = path.resolve(process.cwd(), "./certs/ca/ca.crt");
-  const tlsOptions = fs.existsSync(caCrtPath)
-    ? {
-        ca: fs.readFileSync(caCrtPath),
-        rejectUnauthorized: false,
-      }
-    : {
-        rejectUnauthorized: false,
-      };
+	const caCrtPath = path.resolve(process.cwd(), './certs/ca/ca.crt');
+	const tlsOptions = fs.existsSync(caCrtPath)
+		? {
+				ca: fs.readFileSync(caCrtPath),
+				rejectUnauthorized: false
+		  }
+		: {
+				rejectUnauthorized: false
+		  };
 
-  const elkClient = new ElkClient({
-    node: process.env.ES_ADDON_URI as string,
-    auth: {
-      username: process.env.ES_ADDON_USER as string,
-      password: process.env.ES_ADDON_PASSWORD as string,
-    },
-    tls: tlsOptions,
-  });
+	const elkClient = new ElkClient({
+		node: process.env.ES_ADDON_URI as string,
+		auth: {
+			username: process.env.ES_ADDON_USER as string,
+			password: process.env.ES_ADDON_PASSWORD as string
+		},
+		tls: tlsOptions
+	});
 
-  return {
-    req: opts.req,
-    prisma,
-    elkClient,
-  };
+	return {
+		req: opts.req,
+		prisma,
+		elkClient
+	};
 };
 
 export type Context = inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC.context<Context>().create({
-  transformer: SuperJSON,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
+	transformer: SuperJSON,
+	errorFormatter({ shape, error }) {
+		return {
+			...shape,
+			data: {
+				...shape.data,
+				zodError: error.cause instanceof ZodError ? error.cause.flatten() : null
+			}
+		};
+	}
 });
 
 const hashIp = (ip: string) => {
-  // Hash IP with date until hour, and salt
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hour = String(now.getHours()).padStart(2, "0");
-  const dateHour = `${year}-${month}-${day}-${hour}`;
-  const ipWithDate = `${ip}-${dateHour}`;
-  const hash = crypto.createHash("sha256");
-  hash.update(ipWithDate + process.env.IP_HASH_SALT);
-  return hash.digest("hex");
+	// Hash IP with date until hour, and salt
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = String(now.getMonth() + 1).padStart(2, '0');
+	const day = String(now.getDate()).padStart(2, '0');
+	const hour = String(now.getHours()).padStart(2, '0');
+	const dateHour = `${year}-${month}-${day}-${hour}`;
+	const ipWithDate = `${ip}-${dateHour}`;
+	const hash = crypto.createHash('sha256');
+	hash.update(ipWithDate + process.env.IP_HASH_SALT);
+	return hash.digest('hex');
 };
 
 const transformIp = (ip: string) => {
-  const parts = ip.split(".");
-  parts[3] = "0";
-  const transformedIp = parts.join(".");
-  return transformedIp;
+	const parts = ip.split('.');
+	parts[3] = '0';
+	const transformedIp = parts.join('.');
+	return transformedIp;
 };
 
 const extractIdsFromUrl = (url: string) => {
-  const urlObj = new URL(url);
-  const pathParts = urlObj.pathname.split("/");
-  const product_id = pathParts[2] === "avis" ? pathParts[3] : pathParts[2];
-  const button_id = urlObj.searchParams.get("button");
-  return [product_id, button_id];
+	const urlObj = new URL(url);
+	const pathParts = urlObj.pathname.split('/');
+	const product_id = pathParts[2] === 'avis' ? pathParts[3] : pathParts[2];
+	const button_id = urlObj.searchParams.get('button');
+	return [product_id, button_id];
 };
 
-const allowedIps = (process.env.LIMITER_ALLOWED_IPS || "").split(",");
+const allowedIps = (process.env.LIMITER_ALLOWED_IPS || '').split(',');
 
 function isIpAllowed(ip: string): boolean {
-  return allowedIps.some((allowedIp) => {
-    if (allowedIp.includes("-")) {
-      const [startIp, endIp] = allowedIp.split("-");
-      const ipNum = ipToNumber(ip);
-      return ipNum >= ipToNumber(startIp) && ipNum <= ipToNumber(endIp);
-    }
-    return allowedIp === ip;
-  });
+	return allowedIps.some(allowedIp => {
+		if (allowedIp.includes('-')) {
+			const [startIp, endIp] = allowedIp.split('-');
+			const ipNum = ipToNumber(ip);
+			return ipNum >= ipToNumber(startIp) && ipNum <= ipToNumber(endIp);
+		}
+		return allowedIp === ip;
+	});
 }
 
 function ipToNumber(ip: string): number {
-  return ipaddr
-    .parse(ip)
-    .toByteArray()
-    .reduce((acc, byte) => (acc << 8) + byte, 0);
+	return ipaddr
+		.parse(ip)
+		.toByteArray()
+		.reduce((acc, byte) => (acc << 8) + byte, 0);
 }
 
 const limiter = createTRPCStoreLimiter<typeof t>({
-  fingerprint: (ctx) => {
-    const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
-    const xClientIp = ctx.req.headers["x-client-ip"] as string;
-    const ip = xClientIp
-      ? xClientIp.split(",")[0]
-      : xForwardedFor
-      ? xForwardedFor.split(",")[0]
-      : defaultFingerPrint(ctx.req);
+	fingerprint: ctx => {
+		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+		const xClientIp = ctx.req.headers['x-client-ip'] as string;
+		const ip = xClientIp
+			? xClientIp.split(',')[0]
+			: xForwardedFor
+			? xForwardedFor.split(',')[0]
+			: defaultFingerPrint(ctx.req);
 
-    return ip;
-  },
-  windowMs: 60000,
-  max: 5,
-  onLimit: async (retryAfter, ctx) => {
-    const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
-    const xClientIp = ctx.req.headers["x-client-ip"] as string;
-    const ip = xClientIp
-      ? xClientIp.split(",")[0]
-      : xForwardedFor
-      ? xForwardedFor.split(",")[0]
-      : defaultFingerPrint(ctx.req);
-    const referer = ctx.req.headers["referer"] || ctx.req.headers["referrer"];
-    const hashedIp = hashIp(ip);
-    const currentTime = new Date();
-    let [product_id, button_id] = extractIdsFromUrl(referer as string);
+		return ip;
+	},
+	windowMs: 60000,
+	max: 5,
+	onLimit: async (retryAfter, ctx) => {
+		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+		const xClientIp = ctx.req.headers['x-client-ip'] as string;
+		const ip = xClientIp
+			? xClientIp.split(',')[0]
+			: xForwardedFor
+			? xForwardedFor.split(',')[0]
+			: defaultFingerPrint(ctx.req);
+		const referer = ctx.req.headers['referer'] || ctx.req.headers['referrer'];
+		const hashedIp = hashIp(ip);
+		const currentTime = new Date();
+		let [product_id, button_id] = extractIdsFromUrl(referer as string);
 
-    // Si l'URL est du type "clé", product_id est en fait le xwiki_id
-    if (referer?.includes("key=")) {
-      const xwikiId = parseInt(product_id ?? "0");
+		// Si l'URL est du type "clé", product_id est en fait le xwiki_id
+		if (referer?.includes('key=')) {
+			const xwikiId = parseInt(product_id ?? '0');
 
-      const matchedProduct = await prisma.product.findFirst({
-        where: {
-          xwiki_id: xwikiId,
-        },
-      });
+			const matchedProduct = await prisma.product.findFirst({
+				where: {
+					xwiki_id: xwikiId
+				}
+			});
 
-      if (matchedProduct) {
-        product_id = matchedProduct.id.toString();
-      }
-    }
+			if (matchedProduct) {
+				product_id = matchedProduct.id.toString();
+			}
+		}
 
-    // check if the hashed ip is already in the database
-    const ipRecord = await prisma.limiterReporting.findFirst({
-      where: {
-        ip_id: hashedIp,
-      },
-    });
+		// check if the hashed ip is already in the database
+		const ipRecord = await prisma.limiterReporting.findFirst({
+			where: {
+				ip_id: hashedIp
+			}
+		});
 
-    // insert or update database
-    if (ipRecord) {
-      await prisma.limiterReporting.update({
-        where: {
-          id: ipRecord.id,
-        },
-        data: {
-          total_attempts: ipRecord.total_attempts + 1,
-          last_attempt: currentTime,
-        },
-      });
-    } else {
-      await prisma.limiterReporting.create({
-        data: {
-          ip_id: hashedIp,
-          ip_adress: transformIp(ip),
-          product_id: parseInt(product_id ?? "0"),
-          button_id: parseInt(button_id ?? "0"),
-          total_attempts: 5,
-          first_attempt: currentTime,
-          last_attempt: currentTime,
-          url: referer as string,
-        },
-      });
-    }
+		// insert or update database
+		if (ipRecord) {
+			await prisma.limiterReporting.update({
+				where: {
+					id: ipRecord.id
+				},
+				data: {
+					total_attempts: ipRecord.total_attempts + 1,
+					last_attempt: currentTime
+				}
+			});
+		} else {
+			await prisma.limiterReporting.create({
+				data: {
+					ip_id: hashedIp,
+					ip_adress: transformIp(ip),
+					product_id: parseInt(product_id ?? '0'),
+					button_id: parseInt(button_id ?? '0'),
+					total_attempts: 5,
+					first_attempt: currentTime,
+					last_attempt: currentTime,
+					url: referer as string
+				}
+			});
+		}
 
-    throw new TRPCError({
-      code: "TOO_MANY_REQUESTS",
-      message: `Too many requests, please try again later. ${retryAfter}`,
-    });
-  },
+		throw new TRPCError({
+			code: 'TOO_MANY_REQUESTS',
+			message: `Too many requests, please try again later. ${retryAfter}`
+		});
+	}
 });
 
 const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
-  const xForwardedFor = ctx.req.headers["x-forwarded-for"] as string;
-  const xClientIp = ctx.req.headers["x-client-ip"] as string;
-  const ip = xClientIp
-    ? xClientIp.split(",")[0]
-    : xForwardedFor
-    ? xForwardedFor.split(",")[0]
-    : defaultFingerPrint(ctx.req);
+	const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
+	const xClientIp = ctx.req.headers['x-client-ip'] as string;
+	const ip = xClientIp
+		? xClientIp.split(',')[0]
+		: xForwardedFor
+		? xForwardedFor.split(',')[0]
+		: defaultFingerPrint(ctx.req);
 
-  if (isIpAllowed(ip)) {
-    return next();
-  }
-  return limiter({ ctx, next });
+	if (isIpAllowed(ip)) {
+		return next();
+	}
+	return limiter({ ctx, next });
 });
 
 // Base router and middleware helpers

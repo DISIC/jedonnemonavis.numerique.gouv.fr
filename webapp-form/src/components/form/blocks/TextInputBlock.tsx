@@ -25,7 +25,7 @@ export const TextInputBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget,
+	isWidget
 }: Props) => {
 	const { cx, classes } = useStyles();
 	const inputAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -57,10 +57,10 @@ export const TextInputBlock = ({
 							...prev,
 							[fieldKey]: {
 								block_id: block.id,
-								answer_text: e.target.value,
-							},
+								answer_text: e.target.value
+							}
 						}));
-					},
+					}
 				}}
 				state={inputValue.length > 250 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 250 caractères"
@@ -81,9 +81,9 @@ const useStyles = tss.withName({ TextInputBlock }).create(() => ({
 				fontSize: '0.75rem',
 				'&::before': {
 					'--icon-size': '1rem',
-					marginRight: fr.spacing('1v'),
-				},
-			},
-		},
-	},
+					marginRight: fr.spacing('1v')
+				}
+			}
+		}
+	}
 }));

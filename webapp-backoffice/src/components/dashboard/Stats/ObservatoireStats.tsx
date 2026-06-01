@@ -261,7 +261,9 @@ const ObservatoireStats = ({
 				>
 					<p className={cx(classes.value)}>
 						{['autonomy', 'contactReachability'].includes(field.slug)
-							? `${getPercentageFromValue(field.value * (field.slug === 'contactReachability' ? 10 : 1))} %`
+							? `${getPercentageFromValue(
+									field.value * (field.slug === 'contactReachability' ? 10 : 1)
+							  )} %`
 							: `${getReadableValue(field.value)} / 10`}
 					</p>
 
@@ -312,7 +314,7 @@ const ObservatoireStats = ({
 		view === 'form-dashboard'
 			? ({ children }: { children: React.ReactNode }) => (
 					<div className={classes.dashboardInnerContent}>{children}</div>
-				)
+			  )
 			: Fragment;
 
 	return (

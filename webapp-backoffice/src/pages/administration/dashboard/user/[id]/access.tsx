@@ -172,9 +172,8 @@ const UserAccess: React.FC<Props> = props => {
 			setDisplayToast(
 				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${
 					ar.status.includes('admin') ? 'utilisateur' : 'administrateur'
-				} du service "${
-					user?.accessRights.find(aer => aer.id === id)?.product.title
-				}".`
+				} du service "${user?.accessRights.find(aer => aer.id === id)?.product
+					.title}".`
 			);
 		}
 	};
@@ -201,18 +200,19 @@ const UserAccess: React.FC<Props> = props => {
 				admin_entity_right_id: id
 			});
 			setDisplayToast(
-				`L'accès à l'organisation "${
-					user?.adminEntityRights.find(aer => aer.id === id)?.entity.name
-				}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès à l'organisation "${user?.adminEntityRights.find(
+					aer => aer.id === id
+				)?.entity
+					.name}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		} else {
 			removeAccessRight.mutate({
 				access_right_id: id
 			});
 			setDisplayToast(
-				`L'accès au service "${
-					user?.accessRights.find(aer => aer.id === id)?.product.title
-				}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
+				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)
+					?.product
+					.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		}
 	};

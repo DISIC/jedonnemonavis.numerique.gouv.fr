@@ -24,7 +24,7 @@ export const MarkInputBlock = ({
 	answers,
 	setAnswers,
 	form,
-	isWidget,
+	isWidget
 }: Props) => {
 	const { classes, cx } = useStyles();
 	const markAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -33,7 +33,7 @@ export const MarkInputBlock = ({
 	const formConfig = form.form_configs[0];
 	const visibleOptions = block.options.filter(opt => {
 		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden,
+			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden
 		);
 		return !isHidden;
 	});
@@ -53,7 +53,7 @@ export const MarkInputBlock = ({
 					<ul>
 						{['1', '2', '3', '4', '5'].map(rating => {
 							const ratingOption = visibleOptions.find(
-								opt => opt.value === rating,
+								opt => opt.value === rating
 							);
 							if (!ratingOption) return null;
 
@@ -72,8 +72,8 @@ export const MarkInputBlock = ({
 												...prev,
 												[fieldKey]: {
 													block_id: block.id,
-													answer_item_id: ratingOption.id,
-												},
+													answer_item_id: ratingOption.id
+												}
 											}));
 										}}
 									/>
@@ -103,22 +103,22 @@ const useStyles = tss.withName({ MarkInputBlock }).create(() => ({
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,
 		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`,
+		marginTop: `-${fr.spacing('2v')}`
 	},
 	rating: {
 		display: 'flex',
 		alignItems: 'center',
 		[fr.breakpoints.down('md')]: {
-			flexDirection: 'column',
+			flexDirection: 'column'
 		},
 		'& > span': {
 			...fr.typography[18].style,
-			marginBottom: 0,
+			marginBottom: 0
 		},
 		fieldset: {
 			margin: 0,
 			[fr.breakpoints.down('md')]: {
-				width: '100%',
+				width: '100%'
 			},
 			ul: {
 				listStyleType: 'none',
@@ -130,7 +130,7 @@ const useStyles = tss.withName({ MarkInputBlock }).create(() => ({
 				[fr.breakpoints.down('md')]: {
 					columns: 'auto',
 					width: '100%',
-					margin: 0,
+					margin: 0
 				},
 				li: {
 					label: {
@@ -143,20 +143,20 @@ const useStyles = tss.withName({ MarkInputBlock }).create(() => ({
 						cursor: 'pointer',
 						['&:hover']: {
 							borderColor: fr.colors.decisions.background.alt.grey.active,
-							fontWeight: 'bold',
+							fontWeight: 'bold'
 						},
 						[fr.breakpoints.down('md')]: {
-							width: '100%',
-						},
-					},
-				},
-			},
-		},
+							width: '100%'
+						}
+					}
+				}
+			}
+		}
 	},
 	selectedOption: {
 		backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
 		color: 'white',
 		fontWeight: 'bold',
-		borderColor: fr.colors.decisions.background.flat.blueFrance.default,
-	},
+		borderColor: fr.colors.decisions.background.flat.blueFrance.default
+	}
 }));

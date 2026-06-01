@@ -28,7 +28,7 @@ export const FormBlockRenderer = (props: Props) => {
 
 	const formConfig = form.form_configs[0];
 	const labelConfig = formConfig?.form_config_labels?.find(
-		l => l.kind === 'block' && l.parent_id === block.id,
+		l => l.kind === 'block' && l.parent_id === block.id
 	);
 
 	const displayLabel = labelConfig?.label || block.label || '';
@@ -42,7 +42,7 @@ export const FormBlockRenderer = (props: Props) => {
 			answers,
 			setAnswers,
 			form,
-			isWidget,
+			isWidget
 		};
 
 		switch (block.type_bloc) {
