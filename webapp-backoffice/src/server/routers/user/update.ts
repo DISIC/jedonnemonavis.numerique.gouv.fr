@@ -2,7 +2,7 @@ import { UserUncheckedUpdateInputSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { checkUserDomain } from './utils';
+import { checkUserDomain, omitPassword } from './utils';
 
 export const updateUserInputSchema = z.object({
 	id: z.number(),
@@ -18,6 +18,13 @@ export const updateUserMutation = async ({
 }) => {
 	const { id, user } = input;
 	const isAdmin = ctx.session?.user?.role.includes('admin');
+
+	if (!isAdmin && ctx.session?.user?.id !== id.toString()) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Cannot update another user'
+		});
+	}
 
 	const {
 		role,
@@ -72,5 +79,5 @@ export const updateUserMutation = async ({
 		data: dataToUpdate
 	});
 
-	return { data: updatedUser };
+	return { data: omitPassword(updatedUser) };
 };

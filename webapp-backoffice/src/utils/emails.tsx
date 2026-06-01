@@ -1,20 +1,21 @@
-// Import React Required: tsx (used by dev:worker) uses the classic JSX transform which needs React in scope
-import React from 'react';
-import { render } from '@react-email/components';
-import JdmaUserRequestAcceptedEmail from '@/react-email/emails/jdma-user-request-accepted-email';
-import JdmaUserRequestRefusedEmail from '@/react-email/emails/jdma-user-request-refused-email';
-import JdmaOtpEmail from '@/react-email/emails/jdma-otp-email';
-import JdmaRegisterEmail from '@/react-email/emails/jdma-register-email';
-import JdmaResetPasswordEmail from '@/react-email/emails/jdma-reset-password-email';
-import JdmaInviteEmail from '@/react-email/emails/jdma-invite-email';
-import JdmaUserInviteEmail from '@/react-email/emails/jdma-user-invite-email';
-import JdmaClosedButtonOrFormEmail from '@/react-email/emails/jdma-closed-button-or-form-email';
-import JdmaProductArchivedEmail from '@/react-email/emails/jdma-product-archived-email';
-import JdmaProductRestoredEmail from '@/react-email/emails/jdma-product-restored-email';
-import JdmaNotificationsEmail from '@/react-email/emails/jdma-notifications-email';
-import JdmaExportReadyEmail from '@/react-email/emails/jdma-export-ready-email';
-import JdmaExportFailedEmail from '@/react-email/emails/jdma-export-failed-email';
+import * as React from 'react';
+import { render } from 'react-email';
+import JdmaUserRequestAcceptedEmail from '@/emails/jdma-user-request-accepted-email';
+import JdmaUserRequestRefusedEmail from '@/emails/jdma-user-request-refused-email';
+import JdmaOtpEmail from '@/emails/jdma-otp-email';
+import JdmaRegisterEmail from '@/emails/jdma-register-email';
+import JdmaResetPasswordEmail from '@/emails/jdma-reset-password-email';
+import JdmaInviteEmail from '@/emails/jdma-invite-email';
+import JdmaUserInviteEmail from '@/emails/jdma-user-invite-email';
+import JdmaClosedButtonOrFormEmail from '@/emails/jdma-closed-button-or-form-email';
+import JdmaProductArchivedEmail from '@/emails/jdma-product-archived-email';
+import JdmaProductRestoredEmail from '@/emails/jdma-product-restored-email';
+import JdmaNotificationsEmail from '@/emails/jdma-notifications-email';
+import JdmaAlertEmail from '@/emails/jdma-alert-email';
+import JdmaExportReadyEmail from '@/emails/jdma-export-ready-email';
+import JdmaExportFailedEmail from '@/emails/jdma-export-failed-email';
 import {
+	JdmaAlertEmailProps,
 	JdmaNotificationsEmailProps,
 	JdmaTokenEmailProps,
 	JdmaUserRequestRefusedEmailProps,
@@ -26,7 +27,7 @@ import {
 	JdmaUserInviteEmailProps,
 	JdmaExportReadyEmailProps,
 	JdmaExportFailedEmailProps
-} from '@/react-email/emails/interface';
+} from '@/emails/interface';
 
 export async function renderUserRequestAcceptedEmail(
 	props: JdmaTokenEmailProps
@@ -106,3 +107,8 @@ export async function renderExportFailedEmail(
 	return await render(<JdmaExportFailedEmail {...props} />);
 }
 
+export async function renderAlertEmail(
+	props: JdmaAlertEmailProps
+): Promise<string> {
+	return await render(<JdmaAlertEmail {...props} />);
+}

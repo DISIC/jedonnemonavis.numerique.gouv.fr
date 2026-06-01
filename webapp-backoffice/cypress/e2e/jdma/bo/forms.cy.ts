@@ -100,7 +100,7 @@ describe('jdma-forms', () => {
 
 	it('should check a11y in form builder', () => {
 		goToTabOfForm('settings');
-		cy.contains('button', 'Éditer le formulaire').click();
+		cy.contains('a', 'Modifier').click();
 		cy.injectAxe();
 		tryCloseModal(true);
 		helpModalA11yChecked = true;
@@ -115,7 +115,7 @@ describe('jdma-forms', () => {
 
 	it('should edit a form in builder (hide step, edit block, publish) and check changes from dashboard and on form review page', () => {
 		goToTabOfForm('settings');
-		cy.contains('button', 'Éditer le formulaire').click();
+		cy.contains('a', 'Modifier').click();
 		cy.injectAxe();
 		tryCloseModal();
 		editFormIntroductionText();
@@ -135,7 +135,7 @@ describe('jdma-forms', () => {
 
 	it('should rename form', () => {
 		goToTabOfForm('settings');
-		cy.contains('button', 'Éditer le formulaire').click();
+		cy.contains('a', 'Modifier').click();
 		cy.injectAxe();
 		tryCloseModal();
 		renameForm(selectors.dashboard.renamedTestForm);

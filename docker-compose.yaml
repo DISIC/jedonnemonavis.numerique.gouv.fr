@@ -44,7 +44,7 @@ services:
     ports:
       - "5433:5432"
 
-  cache:
+  redis:
     image: redis:8.6-alpine
     restart: always
     ports:

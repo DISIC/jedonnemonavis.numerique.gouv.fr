@@ -1,4 +1,4 @@
-import { Column, Link, Row, Section, Text } from '@react-email/components';
+import { Column, Link, Row, Section, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaNotificationsEmailProps } from './interface';

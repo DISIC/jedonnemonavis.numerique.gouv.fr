@@ -1,3 +1,4 @@
+import FormEditModal from '@/src/components/dashboard/Form/FormEditModal';
 import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
 import LinksTab from '@/src/components/dashboard/Form/tabs/links';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
@@ -15,6 +16,7 @@ import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
+import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import Notice from '@codegouvfr/react-dsfr/Notice';
 import { Tabs } from '@codegouvfr/react-dsfr/Tabs';
@@ -29,6 +31,11 @@ import { tss } from 'tss-react/dsfr';
 
 const buttonModal = createModal({
 	id: 'button-modal',
+	isOpenedByDefault: false
+});
+
+const rename_form_modal = createModal({
+	id: 'rename-form-modal',
 	isOpenedByDefault: false
 });
 
@@ -105,6 +112,8 @@ const ProductFormPage = (props: Props) => {
 		{ enabled: !!form.id && !isNaN(form.id) && selectedTabId === 'links' }
 	);
 
+	const isLocked = form.product.isTop250 || !!form.isDeleted;
+
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
 
@@ -150,7 +159,6 @@ const ProductFormPage = (props: Props) => {
 					} | Je donne mon avis`}
 				/>
 			</Head>
-
 			<ButtonModal
 				form_id={form.id}
 				form={form}
@@ -159,6 +167,11 @@ const ProductFormPage = (props: Props) => {
 				modalType={modalType}
 				button={currentButton}
 				onButtonMutation={onButtonMutation}
+			/>
+			<FormEditModal
+				form={form}
+				productId={form.product.id}
+				modal={rename_form_modal}
 			/>
 			<Breadcrumb
 				currentPageLabel={
@@ -169,39 +182,60 @@ const ProductFormPage = (props: Props) => {
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
 				<div className={fr.cx('fr-col-12')}>
-					<div className={cx(classes.titleContainer, fr.cx('fr-mb-6v'))}>
-						<h1 className={fr.cx('fr-mb-0')}>
-							{form.title || form.form_template.title}
-						</h1>
-						{form.product.isTop250 && (
-							<Badge severity="info" noIcon className={fr.cx('fr-ml-md-6v')}>
-								Démarche essentielle
-							</Badge>
-						)}
-						{form.isDeleted && (
-							<Badge severity="error" noIcon className="fr-ml-md-3v">
-								Fermé
-							</Badge>
-						)}
+					<div className={cx(classes.topContainer, fr.cx('fr-mb-6v'))}>
+						<div className={cx(classes.titleContainer)}>
+							<h1 className={fr.cx('fr-mb-0')}>
+								{form.title || form.form_template.title}
+							</h1>
+							{form.product.isTop250 && (
+								<Badge severity="info" noIcon>
+									Démarche essentielle
+								</Badge>
+							)}
+							{form.isDeleted && (
+								<Badge severity="error" noIcon className="fr-ml-md-3v">
+									Fermé
+								</Badge>
+							)}
+						</div>
+						<div className={cx(classes.headerButtons)}>
+							{!isLocked && (
+								<Button
+									priority="tertiary"
+									iconId="fr-icon-edit-box-line"
+									iconPosition="right"
+									onClick={() => rename_form_modal.open()}
+								>
+									Renommer
+								</Button>
+							)}
+							<Button
+								priority="tertiary"
+								linkProps={{
+									href: `${process.env.NEXT_PUBLIC_FORM_APP_URL}/${
+										form.form_template.slug === 'root'
+											? `Demarches/${form.product_id}`
+											: `Demarches/avis/${form.id}`
+									}?preview=true`,
+									target: '_blank'
+								}}
+							>
+								Prévisualiser
+							</Button>
+							{!isLocked && (
+								<Button
+									priority="tertiary"
+									iconId="fr-icon-edit-line"
+									iconPosition="right"
+									linkProps={{
+										href: `/administration/dashboard/product/${form.product_id}/forms/${form.id}/edit`
+									}}
+								>
+									Modifier
+								</Button>
+							)}
+						</div>
 					</div>
-					<p className={fr.cx('fr-mb-0')}>
-						Vous pouvez&nbsp;
-						<Link
-							href={`${process.env.NEXT_PUBLIC_FORM_APP_URL}/${
-								form.form_template.slug === 'root'
-									? `Demarches/${form.product_id}`
-									: `Demarches/avis/${form.id}`
-							}?preview=true`}
-							target={'_blank'}
-							style={{
-								color: fr.colors.decisions.text.title.blueFrance.default
-							}}
-						>
-							prévisualiser ce formulaire
-						</Link>
-						. Les réponses que vous déposerez ne seront pas prises en compte
-						dans les statistiques.
-					</p>
 					{form.product.isTop250 && (
 						<Notice
 							isClosable
@@ -374,27 +408,48 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	backLink: {
 		backgroundImage: 'none'
 	},
-	titleContainer: {
+	topContainer: {
 		display: 'flex',
-		alignItems: 'center',
+		justifyContent: 'space-between',
+		gap: fr.spacing('2v'),
+		alignItems: 'baseline',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'start',
 			gap: fr.spacing('2v')
+		}
+	},
+	titleContainer: {
+		display: 'flex',
+		alignItems: 'baseline',
+		gap: fr.spacing('2v'),
+		flexWrap: 'wrap',
+		[fr.breakpoints.down('md')]: {
+			flexDirection: 'column',
+			alignItems: 'start'
 		},
 		'& .fr-badge': {
 			textWrap: 'nowrap'
-		}
+		},
+		h1: { marginBottom: 0 }
 	},
 	headerButtons: {
 		display: 'flex',
 		justifyContent: 'end',
 		gap: fr.spacing('4v'),
-		alignSelf: 'center',
 		button: {
 			a: {
 				display: 'flex',
 				alignItems: 'center'
+			}
+		},
+		[fr.breakpoints.down('md')]: {
+			width: '100%',
+			flexDirection: 'column',
+			marginTop: fr.spacing('4v'),
+			'button, a': {
+				width: '100%',
+				justifyContent: 'center'
 			}
 		}
 	},

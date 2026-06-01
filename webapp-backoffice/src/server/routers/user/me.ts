@@ -21,9 +21,11 @@ export const getMeQuery = async ({
 			include: {
 				user: {
 					select: {
+						id: true,
 						firstName: true,
 						lastName: true,
-						email: true
+						email: true,
+						alerts_enabled: true
 					}
 				}
 			}
