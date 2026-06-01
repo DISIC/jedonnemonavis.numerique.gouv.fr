@@ -630,17 +630,24 @@ export const getHasConfigChanged = (
 	);
 };
 
+const HTML_ENTITIES: Record<string, string> = {
+	'&nbsp;': ' ',
+	'&lt;': '<',
+	'&gt;': '>',
+	'&amp;': '&',
+	'&quot;': '"',
+	'&#39;': "'"
+};
+
 export const normalizeHtml = (html: string): string => {
 	return html
-		.replace(/<\/?[^>]+(>|$)/g, '') // Retire toutes les balises HTML
-		.replace(/\s+/g, ' ') // Normalise les espaces multiples en un seul
-		.replace(/&nbsp;/g, ' ') // Remplace les espaces insécables
-		.replace(/&lt;/g, '<') // Remplace les entités HTML courantes
-		.replace(/&gt;/g, '>')
-		.replace(/&amp;/g, '&')
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'")
-		.trim(); // Supprime les espaces en début et fin
+		.replace(/<\/?[^>]+(>|$)/g, '')
+		.replace(/\s+/g, ' ')
+		.replace(
+			/&nbsp;|&lt;|&gt;|&amp;|&quot;|&#39;/g,
+			entity => HTML_ENTITIES[entity]
+		)
+		.trim();
 };
 
 export const parseBoldLabel = (text: string): ReactNode => {

@@ -14,18 +14,19 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Badge from '@codegouvfr/react-dsfr/Badge';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Form, FormTemplate, Prisma, RightAccessStatus } from '@prisma/client';
+import { GetServerSideProps } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps } from '..';
+import { getServerSideProps as productGetServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 
 interface Props {
 	product: ProductWithForms;
@@ -94,8 +95,8 @@ const NewForm = (props: Props) => {
 
 		if (!product.forms || product.forms.length === 0) return templateTitle;
 
-		const existingTemplateForms = product.forms.filter(f =>
-			(f.title ?? f.form_template.title)?.includes(templateTitle)
+		const existingTemplateForms = product.forms.filter(
+			f => (f.title ?? f.form_template.title)?.includes(templateTitle)
 		);
 
 		if (existingTemplateForms.length === 0) return templateTitle;
@@ -499,4 +500,21 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	}
 }));
 
-export { getServerSideProps };
+export const getServerSideProps: GetServerSideProps = async context => {
+	const result = await productGetServerSideProps(context);
+
+	if ('props' in result) {
+		const props = await result.props;
+		const product = (props as { product?: { isTop250?: boolean } }).product;
+		if (product?.isTop250) {
+			return {
+				redirect: {
+					destination: `/administration/dashboard/product/${context.query.id}/forms`,
+					permanent: false
+				}
+			};
+		}
+	}
+
+	return result;
+};

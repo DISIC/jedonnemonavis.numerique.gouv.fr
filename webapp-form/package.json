@@ -8,12 +8,11 @@
     "start": "next start",
     "startB": "next start -p 3001",
     "lint": "prettier --check .",
-    "predev": "only-include-used-icons",
-    "prebuild": "only-include-used-icons",
+    "predev": "only-include-used-icons --silent",
+    "prebuild": "only-include-used-icons --silent",
     "format": "prettier --write .",
-    "lhci:audit": "next build && concurrently \"npm run lhci:server\" \"lhci autorun\"",
-    "lhci:wizard": "lhci wizard",
-    "lhci:server": "lhci server --storage.storageMethod=sql --storage.sqlDialect=sqlite --storage.sqlDatabasePath=./db.sql"
+    "lhci:audit": "next build && lhci autorun",
+    "lhci:wizard": "lhci wizard"
   },
   "husky": {
     "hooks": {
@@ -37,10 +36,10 @@
     "@socialgouv/matomo-next": "1.9.0",
     "@tanstack/react-query": "4.36.1",
     "@trpc-limiter/memory": "1.0.0",
-    "@trpc/client": "10.41.0",
-    "@trpc/next": "10.41.0",
-    "@trpc/react-query": "10.41.0",
-    "@trpc/server": "10.41.0",
+    "@trpc/client": "10.45.4",
+    "@trpc/next": "10.45.4",
+    "@trpc/react-query": "10.45.4",
+    "@trpc/server": "10.45.4",
     "@types/node": "20.5.7",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
@@ -62,9 +61,18 @@
     "trpc-openapi": "1.2.0",
     "tss-react": "4.9.0",
     "typescript": "5.2.2",
-    "uuid": "10.0.0",
-    "zod": "3.21.1",
+    "uuid": "11.1.1",
+    "zod": "3.23.8",
     "zod-prisma-types": "3.1.8"
+  },
+  "resolutions": {
+    "tar-fs": "3.1.2",
+    "ws": "8.21.0",
+    "cookie": "1.1.1",
+    "qs": "6.15.2",
+    "tmp": "0.2.7",
+    "postcss": "8.5.15",
+    "uuid": "11.1.1"
   },
   "devDependencies": {
     "@babel/core": "7.22.15",
@@ -74,8 +82,7 @@
     "@babel/preset-react": "7.22.15",
     "@babel/preset-typescript": "7.22.15",
     "@lhci/cli": "0.12.0",
-    "@lhci/server": "0.12.0",
-    "@types/uuid": "10.0.0",
+    "@types/uuid": "11.0.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-plugin-prettier": "5.0.0",
     "husky": "8.0.3",
