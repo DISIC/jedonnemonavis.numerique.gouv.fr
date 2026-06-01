@@ -8,8 +8,8 @@
     "start": "next start",
     "startB": "next start -p 3001",
     "lint": "prettier --check .",
-    "predev": "only-include-used-icons",
-    "prebuild": "only-include-used-icons",
+    "predev": "only-include-used-icons --silent",
+    "prebuild": "only-include-used-icons --silent",
     "format": "prettier --write .",
     "lhci:audit": "next build && lhci autorun",
     "lhci:wizard": "lhci wizard"
