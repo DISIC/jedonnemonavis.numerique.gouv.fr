@@ -79,6 +79,7 @@ const ReviewsTab = (props: Props) => {
 	const [isUserFetching, setIsUserFetching] = useState(false);
 	const [filterAnnouncement, setFilterAnnouncement] = useState('');
 	const prevFetchingRef = React.useRef(false);
+	const shouldFocusFirstRowRef = React.useRef(false);
 	const [selectedReview, setSelectedReview] =
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
@@ -321,8 +322,19 @@ const ReviewsTab = (props: Props) => {
 
 	const handlePageChange = (pageNumber: number) => {
 		setIsUserFetching(true);
+		shouldFocusFirstRowRef.current = true;
 		setCurrentPage(pageNumber);
 	};
+
+	useEffect(() => {
+		if (isTableFetching || !shouldFocusFirstRowRef.current) return;
+		const firstReviewId = reviews[0]?.id;
+		if (firstReviewId === undefined) return;
+		shouldFocusFirstRowRef.current = false;
+		requestAnimationFrame(() => {
+			rowRefsMap.current.get(firstReviewId)?.focus();
+		});
+	}, [isTableFetching, reviews]);
 
 	const handleSortChange = (tmp_sort: string) => {
 		setIsUserFetching(true);
