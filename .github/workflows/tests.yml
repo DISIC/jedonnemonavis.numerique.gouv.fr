@@ -59,8 +59,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          (cd webapp-backoffice && yarn install)
-          (cd webapp-form && yarn install)
+          (cd webapp-backoffice && yarn install --frozen-lockfile)
+          (cd webapp-form && yarn install --frozen-lockfile)
 
       - name: Generate Prisma clients and seed database
         run: |
