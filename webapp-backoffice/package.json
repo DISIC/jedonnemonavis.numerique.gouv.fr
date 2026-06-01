@@ -113,7 +113,10 @@
 		"zod-prisma-types": {
 			"zod": "3.23.8"
 		},
-		"zod-to-json-schema": "3.22.4"
+		"zod-to-json-schema": "3.22.4",
+		"next-auth": {
+			"nodemailer": "$nodemailer"
+		}
 	},
 	"resolutions": {
 		"zod-to-json-schema": "3.22.4",
