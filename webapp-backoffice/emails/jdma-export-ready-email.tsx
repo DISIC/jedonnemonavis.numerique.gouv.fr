@@ -1,4 +1,4 @@
-import { Link, Text } from '@react-email/components';
+import { Link, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaExportReadyEmailProps } from './interface';
@@ -16,9 +16,8 @@ const JdmaExportReadyEmail = ({
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Votre export pour le service{' '}
-				<strong>« {productName} »</strong> est prêt. Vous pouvez le
-				télécharger en utilisant le lien suivant :
+				Votre export pour le service <strong>« {productName} »</strong> est
+				prêt. Vous pouvez le télécharger en utilisant le lien suivant :
 			</Text>
 
 			<Link href={downloadLink} target="_blank" style={buttonLink}>

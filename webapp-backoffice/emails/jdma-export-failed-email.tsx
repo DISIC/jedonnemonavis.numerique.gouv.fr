@@ -1,4 +1,4 @@
-import { Link, Text } from '@react-email/components';
+import { Link, Text } from 'react-email';
 import * as React from 'react';
 import { JdmaLayout } from './components/JdmaLayout';
 import { JdmaExportFailedEmailProps } from './interface';
@@ -22,10 +22,7 @@ const JdmaExportFailedEmail = ({
 			<Text style={paragraph}>
 				Veuillez réessayer depuis le backoffice. Si le problème persiste,
 				contactez-nous à{' '}
-				<Link
-					href="mailto:experts@design.numerique.gouv.fr"
-					style={linkStyle}
-				>
+				<Link href="mailto:experts@design.numerique.gouv.fr" style={linkStyle}>
 					experts@design.numerique.gouv.fr
 				</Link>
 				.
