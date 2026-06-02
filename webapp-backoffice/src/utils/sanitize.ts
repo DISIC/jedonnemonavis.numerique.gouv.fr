@@ -23,7 +23,8 @@ export const sanitizeRichHtml = (input: string | null | undefined): string => {
 	return DOMPurify.sanitize(input, {
 		ALLOWED_TAGS,
 		ALLOWED_ATTR,
-		ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+		ALLOWED_URI_REGEXP:
+			/^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 		FORBID_ATTR: ['style', 'onerror', 'onload', 'onclick'],
 		FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form']
 	});

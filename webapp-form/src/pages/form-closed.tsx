@@ -26,7 +26,7 @@ const FormClosed = ({ buttonId }: { buttonId: number }) => {
 				<div className={classes.buttonsGroup}>
 					<Button
 						linkProps={{
-							href: 'https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2',
+							href: 'https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2'
 						}}
 					>
 						Partager mon expérience
@@ -57,9 +57,9 @@ const useStyles = tss.withParams().create(() => ({
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column-reverse',
 			img: {
-				maxHeight: 200,
-			},
-		},
+				maxHeight: 200
+			}
+		}
 	},
 	buttonsGroup: {
 		display: 'flex',
@@ -67,7 +67,7 @@ const useStyles = tss.withParams().create(() => ({
 		marginTop: fr.spacing('8v'),
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column-reverse',
-			'button,a': { width: '100%', justifyContent: 'center' },
-		},
-	},
+			'button,a': { width: '100%', justifyContent: 'center' }
+		}
+	}
 }));

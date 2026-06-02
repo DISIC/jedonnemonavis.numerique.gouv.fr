@@ -15,17 +15,10 @@ type Props = {
 	opinion: Opinion;
 	onSubmit: (opinion: Opinion) => void;
 	isRateLimitReached: boolean;
-	setIsRateLimitReached: (value: boolean) => void;
 };
 
 export const FormFirstBlock = (props: Props) => {
-	const {
-		onSubmit,
-		product,
-		opinion,
-		isRateLimitReached,
-		setIsRateLimitReached,
-	} = props;
+	const { onSubmit, product, opinion, isRateLimitReached } = props;
 	const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const { t } = useTranslation('common');
@@ -33,14 +26,14 @@ export const FormFirstBlock = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
-		fts => fts.position === 0,
+		fts => fts.position === 0
 	);
 
 	const formTemplateBlock = formTemplateStep?.form_template_blocks.find(
-		ftb => ftb.label === "Texte d'introduction",
+		ftb => ftb.label === "Texte d'introduction"
 	);
 	const formConfgIntro = product.form.form_configs[0]?.form_config_labels.find(
-		fcl => fcl.kind === 'block' && fcl.parent_id === formTemplateBlock?.id,
+		fcl => fcl.kind === 'block' && fcl.parent_id === formTemplateBlock?.id
 	);
 
 	return (
@@ -53,11 +46,8 @@ export const FormFirstBlock = (props: Props) => {
 							className={cx(classes.customIntro)}
 							dangerouslySetInnerHTML={{
 								__html: sanitizeRichHtml(
-									formConfgIntro.label.replace(
-										'{{title}}',
-										product.title,
-									),
-								),
+									formConfgIntro.label.replace('{{title}}', product.title)
+								)
 							}}
 						/>
 					) : (
@@ -93,10 +83,6 @@ export const FormFirstBlock = (props: Props) => {
 				{isRateLimitReached && (
 					<div role="alert">
 						<Alert
-							closable
-							onClose={function noRefCheck() {
-								setIsRateLimitReached(false);
-							}}
 							severity="error"
 							title=""
 							description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
@@ -104,7 +90,7 @@ export const FormFirstBlock = (props: Props) => {
 					</div>
 				)}
 				<div className={cx(fr.cx('fr-mt-12v'), classes.buttonsContainer)}>
-					{isLoading ? (
+					{isLoading && !isRateLimitReached ? (
 						<Button
 							type="button"
 							className={cx(classes.loading, classes.validateButton)}
@@ -136,24 +122,24 @@ const useStyles = tss
 	.withParams()
 	.create(() => ({
 		notice: {
-			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
+			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default
 		},
 		bold: {
-			fontWeight: 800,
+			fontWeight: 800
 		},
 		title: {
 			[fr.breakpoints.down('md')]: {
-				display: 'none',
-			},
+				display: 'none'
+			}
 		},
 		field: {
-			marginBottom: fr.spacing('12v'),
+			marginBottom: fr.spacing('12v')
 		},
 		buttonsContainer: {
 			[fr.breakpoints.up('md')]: {
 				display: 'flex',
-				justifyContent: 'end',
-			},
+				justifyContent: 'end'
+			}
 		},
 		validateButton: {
 			width: '100%',
@@ -161,8 +147,8 @@ const useStyles = tss
 			justifyContent: 'center',
 			...fr.spacing('padding', { topBottom: '3v', rightLeft: '6v' }),
 			[fr.breakpoints.up('md')]: {
-				width: 'initial',
-			},
+				width: 'initial'
+			}
 		},
 		loading: {
 			i: {
@@ -171,14 +157,14 @@ const useStyles = tss
 				color: fr.colors.decisions.background.default.grey.default,
 				width: '8.5rem',
 				['&::before']: {
-					'--icon-size': '1.5rem',
-				},
-			},
+					'--icon-size': '1.5rem'
+				}
+			}
 		},
 		customIntro: {
 			p: {
 				marginBottom: 0,
-				minHeight: fr.spacing('6v'),
-			},
-		},
+				minHeight: fr.spacing('6v')
+			}
+		}
 	}));

@@ -4,7 +4,7 @@ import {
 	FormWithElements,
 	Opinion,
 	Product,
-	RadioOption,
+	RadioOption
 } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Notice } from '@codegouvfr/react-dsfr/Notice';
@@ -54,7 +54,7 @@ export default function JDMAForm({
 	isWidget,
 	isButtonDeleted,
 	buttonId,
-	widgetNonce,
+	widgetNonce
 }: JDMAFormProps) {
 	const { t } = useTranslation('common');
 	const router = useRouter();
@@ -69,8 +69,8 @@ export default function JDMAForm({
 		filterByFormConfig(
 			index,
 			product.form.form_template,
-			product.form.form_configs[0],
-		),
+			product.form.form_configs[0]
+		)
 	);
 
 	const isPreview = isPreviewPublished || isPreviewUnpublished;
@@ -84,7 +84,7 @@ export default function JDMAForm({
 			localStorage.removeItem('userId');
 			router.replace({
 				pathname: router.pathname,
-				query: { ...queryWithoutStep },
+				query: { ...queryWithoutStep }
 			});
 			setIsLoading(false);
 		}
@@ -99,32 +99,33 @@ export default function JDMAForm({
 			if (error.data?.httpStatus === 429) {
 				localStorage.removeItem('userId');
 				setIsRateLimitReached(true);
+				return;
 			}
-		},
+		}
 	});
 
 	const insertOrUpdateReview = trpc.review.insertOrUpdate.useMutation({
 		onSuccess: () => setIsLoading(false),
 		onError: error => {
 			if (error.data?.httpStatus === 404) resetForm();
-		},
+		}
 	});
 
 	const getSelectedOption = (
 		field: FormField,
-		value: number | string,
+		value: number | string
 	): { label: string; intention: AnswerIntention; value: number } => {
 		if (field.kind === 'radio' || field.kind == 'checkbox') {
 			const selectedOption = field.options.find(
-				option => option.value === value,
+				option => option.value === value
 			) as RadioOption;
 
 			return {
 				label: t(selectedOption.label as string, {
-					lng: 'fr',
+					lng: 'fr'
 				}),
 				value: selectedOption.value,
-				intention: selectedOption.intention,
+				intention: selectedOption.intention
 			};
 		} else if (field.kind === 'smiley') {
 			const smileyIntention =
@@ -137,19 +138,19 @@ export default function JDMAForm({
 			return {
 				label: smileyLabel,
 				intention: smileyIntention,
-				value: value as number,
+				value: value as number
 			};
 		} else {
 			return {
 				label: '',
 				intention: 'good',
-				value: 0,
+				value: 0
 			};
 		}
 	};
 
 	const formatAnswers = (
-		opinion: Partial<Opinion>,
+		opinion: Partial<Opinion>
 	): Prisma.AnswerCreateInput[] => {
 		return Object.entries(opinion).reduce((accumulator, [key, value]) => {
 			if (['contact_reached', 'contact_satisfaction'].includes(key)) {
@@ -158,11 +159,11 @@ export default function JDMAForm({
 						const [parent_id, child_id] = ids.toString().split('_');
 
 						const parentFieldInSection = allFields.find(
-							field => field.name === 'contact_tried',
+							field => field.name === 'contact_tried'
 						) as FormField;
 
 						const childFieldInSection = allFields.find(
-							field => field.name === key,
+							field => field.name === key
 						) as FormField;
 
 						if (
@@ -170,10 +171,10 @@ export default function JDMAForm({
 							'options' in childFieldInSection
 						) {
 							const parentOption = parentFieldInSection.options.find(
-								o => o.value === parseInt(parent_id),
+								o => o.value === parseInt(parent_id)
 							);
 							const childOption = childFieldInSection.options.find(
-								o => o.value === parseInt(child_id),
+								o => o.value === parseInt(child_id)
 							);
 
 							if (parentOption && childOption) {
@@ -192,19 +193,19 @@ export default function JDMAForm({
 														{
 															field_code: childFieldInSection.name,
 															field_label: t(childFieldInSection.label, {
-																lng: 'fr',
+																lng: 'fr'
 															}) as string,
 															kind: 'radio',
 															review_id: -1,
 															answer_text: t(childOption.label, {
-																lng: 'fr',
+																lng: 'fr'
 															}),
 															intention: childOption.intention,
-															answer_item_id: childOption.value,
-														},
-													],
-												},
-											},
+															answer_item_id: childOption.value
+														}
+													]
+												}
+											}
 										};
 									}
 									return answer;
@@ -215,13 +216,13 @@ export default function JDMAForm({
 				}
 			} else {
 				const fieldInSection = allFields.find(
-					field => field.name === key,
+					field => field.name === key
 				) as FormField;
 
 				let tmpAnswer = {
 					field_code: fieldInSection.name,
 					field_label: t(fieldInSection.label, {
-						lng: 'fr',
+						lng: 'fr'
 					}) as string,
 					kind:
 						fieldInSection.kind === 'smiley'
@@ -230,7 +231,7 @@ export default function JDMAForm({
 							  fieldInSection.kind !== 'input-textarea'
 							? fieldInSection.kind
 							: 'text',
-					review: {},
+					review: {}
 				} as Prisma.AnswerCreateInput;
 
 				if (typeof value == 'number') {
@@ -270,15 +271,19 @@ export default function JDMAForm({
 
 				localStorage.setItem('userId', userId);
 
-				await createReview.mutateAsync({
-					review: {
-						product_id: product.id,
-						button_id: product.buttons[0].id,
-						form_id: product.form.id,
-						user_id: userId,
-					},
-					answers,
-				});
+				try {
+					await createReview.mutateAsync({
+						review: {
+							product_id: product.id,
+							button_id: product.buttons[0].id,
+							form_id: product.form.id,
+							user_id: userId
+						},
+						answers
+					});
+				} catch {
+					return;
+				}
 			} else {
 				await handleInsertOrUpdateReview(opinion, 'satisfaction');
 			}
@@ -286,13 +291,13 @@ export default function JDMAForm({
 
 		router.push({
 			pathname: router.pathname,
-			query: { ...router.query, step: 0 },
+			query: { ...router.query, step: 0 }
 		});
 	};
 
 	const handleInsertOrUpdateReview = async (
 		opinion: Partial<Opinion>,
-		currentStepName: FormStepNames,
+		currentStepName: FormStepNames
 	) => {
 		const answers = formatAnswers(opinion);
 
@@ -306,7 +311,7 @@ export default function JDMAForm({
 			button_id:
 				parseInt(router.query.button as string) || product.buttons[0].id,
 			step_name: currentStepName,
-			answers,
+			answers
 		});
 	};
 
@@ -338,10 +343,10 @@ export default function JDMAForm({
 			router.push(
 				{
 					pathname: router.pathname,
-					query: { ...router.query, step: currentStep },
+					query: { ...router.query, step: currentStep }
 				},
 				undefined,
-				{ shallow: true },
+				{ shallow: true }
 			);
 		}
 	}, [currentStep]);
@@ -353,7 +358,7 @@ export default function JDMAForm({
 		contact_tried_verbatim: undefined,
 		contact_reached: [],
 		contact_satisfaction: [],
-		verbatim: undefined,
+		verbatim: undefined
 	});
 
 	const displayLayout = () => {
@@ -394,7 +399,7 @@ export default function JDMAForm({
 									push([
 										'trackEvent',
 										'Form - Sucess',
-										'Click-Share-Service-Public',
+										'Click-Share-Service-Public'
 									]);
 								}}
 								href={`https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2&id_demarche=${product.id}`}
@@ -407,7 +412,7 @@ export default function JDMAForm({
 						<div
 							className={cx(
 								classes.logoContainer,
-								fr.cx('fr-col-md-4', 'fr-mt-4v'),
+								fr.cx('fr-col-md-4', 'fr-mt-4v')
 							)}
 						>
 							<Image
@@ -444,12 +449,12 @@ export default function JDMAForm({
 										acc[name] = result[name];
 										return acc;
 									},
-									{} as any,
+									{} as any
 								);
 
 								handleInsertOrUpdateReview(
 									currentStepValues,
-									currentStepAnswerNames[0].split('_')[0] as FormStepNames,
+									currentStepAnswerNames[0].split('_')[0] as FormStepNames
 								);
 
 								if (isLastStep) {
@@ -461,9 +466,9 @@ export default function JDMAForm({
 											{
 												source: 'jdma-widget',
 												type: 'submitted',
-												nonce: widgetNonce,
+												nonce: widgetNonce
 											},
-											'*',
+											'*'
 										);
 									}
 								}
@@ -474,7 +479,6 @@ export default function JDMAForm({
 							opinion={opinion}
 							product={product}
 							isRateLimitReached={isRateLimitReached}
-							setIsRateLimitReached={setIsRateLimitReached}
 							onSubmit={tmpOpinion => {
 								setOpinion({ ...tmpOpinion });
 								handleCreateReview({ satisfaction: tmpOpinion.satisfaction });
@@ -547,7 +551,7 @@ export default function JDMAForm({
 				<div
 					className={cx(
 						classes.mainContainer,
-						fr.cx('fr-container--fluid', 'fr-container'),
+						fr.cx('fr-container--fluid', 'fr-container')
 					)}
 				>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -566,7 +570,7 @@ export const getServerSideProps: GetServerSideProps<{
 }> = async ({ params, query, locale, res }) => {
 	if (!params?.id || isNaN(parseInt(params?.id as string))) {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 
@@ -586,7 +590,7 @@ export const getServerSideProps: GetServerSideProps<{
 	if (buttonId) {
 		const button = await prisma.button.findUnique({
 			where: { id: parseInt(buttonId) },
-			select: { id: true, form_id: true, isDeleted: true },
+			select: { id: true, form_id: true, isDeleted: true }
 		});
 		buttonFormId = button?.form_id;
 
@@ -607,20 +611,20 @@ export const getServerSideProps: GetServerSideProps<{
 					product: {
 						select: {
 							id: true,
-							title: true,
-						},
+							title: true
+						}
 					},
 					form_configs: {
 						// Pareil ici : si on a un formId ciblé via le bouton, on le filtre
 						where: buttonFormId ? { form_id: buttonFormId } : undefined,
 						include: {
 							form_config_displays: true,
-							form_config_labels: true,
+							form_config_labels: true
 						},
 						orderBy: {
-							created_at: 'desc',
+							created_at: 'desc'
 						},
-						take: 1,
+						take: 1
 					},
 					form_template: {
 						include: {
@@ -628,44 +632,44 @@ export const getServerSideProps: GetServerSideProps<{
 								include: {
 									form_template_blocks: {
 										include: {
-											options: true,
-										},
-									},
-								},
-							},
-						},
+											options: true
+										}
+									}
+								}
+							}
+						}
 					},
 					buttons:
 						isXWikiLink || isPreview
 							? true
 							: {
 									where: {
-										id: parseInt(buttonId),
-									},
-							  },
-				},
-			},
-		},
+										id: parseInt(buttonId)
+									}
+							  }
+				}
+			}
+		}
 	});
 	await prisma.$disconnect();
 
 	if (!product?.forms[0] || (!!formConfig && !isPreview)) {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 
 	if (isXWikiLink) {
 		if (!product.forms[0].buttons.length)
 			return {
-				notFound: true,
+				notFound: true
 			};
 
 		const sameName = product.forms[0].buttons.find(
-			b => b.xwiki_title === xwikiButtonName,
+			b => b.xwiki_title === xwikiButtonName
 		);
 		const nameButton = product.forms[0].buttons.find(
-			b => b.xwiki_title === 'button',
+			b => b.xwiki_title === 'button'
 		);
 
 		if (sameName) product.forms[0].buttons = [sameName];
@@ -686,23 +690,23 @@ export const getServerSideProps: GetServerSideProps<{
 							? [
 									{
 										form_config_displays: JSON.parse(formConfig).displays,
-										form_config_labels: JSON.parse(formConfig).labels,
-									} as FormWithElements['form_configs'][0],
+										form_config_labels: JSON.parse(formConfig).labels
+									} as FormWithElements['form_configs'][0]
 							  ]
-							: serializeData(product.forms[0].form_configs),
-					},
+							: serializeData(product.forms[0].form_configs)
+					}
 				},
 				isPreviewPublished: !formConfig && isPreview,
 				isPreviewUnpublished: !!formConfig && isPreview,
 				isWidget,
 				isButtonDeleted: isButtonDeleted,
 				buttonId: parseInt(buttonId),
-				...(await serverSideTranslations(locale ?? 'fr', ['common'])),
-			},
+				...(await serverSideTranslations(locale ?? 'fr', ['common']))
+			}
 		};
 	} else {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 };
@@ -715,8 +719,8 @@ const useStyles = tss
 			overflow: 'inherit',
 			padding: `${fr.spacing('12v')} 0`,
 			[fr.breakpoints.up('md')]: {
-				padding: `0`,
-			},
+				padding: `0`
+			}
 		},
 		blueSection: {
 			backgroundColor: fr.colors.decisions.background.alt.blueFrance.default,
@@ -727,17 +731,17 @@ const useStyles = tss
 				margin: 0,
 				color: fr.colors.decisions.background.flat.blueFrance.default,
 				[fr.breakpoints.up('md')]: {
-					display: 'none',
-				},
+					display: 'none'
+				}
 			},
 			[fr.breakpoints.up('md')]: {
-				height: `${blueSectionPxHeight}px`,
-			},
+				height: `${blueSectionPxHeight}px`
+			}
 		},
 		titleSection: {
 			[fr.breakpoints.down('md')]: {
-				display: 'none',
-			},
+				display: 'none'
+			}
 		},
 		titleSuccess: {
 			display: 'flex',
@@ -745,46 +749,46 @@ const useStyles = tss
 			marginBottom: '2rem',
 			alignItems: 'center',
 			[fr.breakpoints.down('md')]: {
-				display: 'none',
-			},
+				display: 'none'
+			}
 		},
 		furtherSection: {
 			h2: {
-				color: fr.colors.decisions.background.flat.blueFrance.default,
-			},
+				color: fr.colors.decisions.background.flat.blueFrance.default
+			}
 		},
 		logoContainer: {
 			display: 'flex',
-			alignItems: 'center',
+			alignItems: 'center'
 		},
 		logo: {
 			maxHeight: fr.spacing('11v'),
-			width: '100%',
+			width: '100%'
 		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			...fr.spacing('padding', {
 				topBottom: 'auto',
-				rightLeft: '6v',
+				rightLeft: '6v'
 			}),
 			h1: {
 				textAlign: 'center',
 				color: fr.colors.decisions.background.flat.blueFrance.default,
-				...fr.spacing('margin', { bottom: '8v' }),
+				...fr.spacing('margin', { bottom: '8v' })
 			},
 			[fr.breakpoints.up('md')]: {
 				transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' }),
-			},
+				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' })
+			}
 		},
 		notice: {
 			...fr.typography[19].style,
 			p: {
-				fontWeight: 'normal',
+				fontWeight: 'normal'
 			},
 			'.fr-notice__title': {
 				marginLeft: `-${fr.spacing('2v')}`,
-				paddingTop: '1px',
-			},
-		},
+				paddingTop: '1px'
+			}
+		}
 	}));

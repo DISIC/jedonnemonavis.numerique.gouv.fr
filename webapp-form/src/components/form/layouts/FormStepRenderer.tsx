@@ -26,14 +26,14 @@ export const FormStepRenderer = (props: Props) => {
 		setAnswers,
 		currentStepIndex,
 		totalSteps,
-		isWidget,
+		isWidget
 	} = props;
 	const { classes, cx } = useStyles({ isWidget: !!isWidget });
 
 	const formConfig = form.form_configs[0];
 
 	const isStepHidden = formConfig?.form_config_displays?.some(
-		d => d.kind === 'step' && d.parent_id === step.id && d.hidden,
+		d => d.kind === 'step' && d.parent_id === step.id && d.hidden
 	);
 
 	if (isStepHidden) {
@@ -51,7 +51,7 @@ export const FormStepRenderer = (props: Props) => {
 					<h1
 						className={cx(
 							classes.title,
-							fr.cx(isWidget ? 'fr-mb-2v' : 'fr-mb-12v'),
+							fr.cx(isWidget ? 'fr-mb-2v' : 'fr-mb-12v')
 						)}
 					>
 						{step.title}
@@ -95,7 +95,7 @@ const useStyles = tss
 			display: 'flex',
 			flexDirection: 'column',
 			gap: isWidget ? fr.spacing('1v') : fr.spacing('6v'),
-			...(isWidget && { paddingTop: 0 }),
+			...(isWidget && { paddingTop: 0 })
 		},
 		title: {
 			textAlign: isWidget ? 'left' : 'center',
@@ -105,8 +105,8 @@ const useStyles = tss
 			marginBottom: 0,
 			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' }),
 			[fr.breakpoints.down('md')]: {
-				display: isWidget ? 'block' : 'none',
-			},
+				display: isWidget ? 'block' : 'none'
+			}
 		},
 		subtitle: {
 			color: isWidget
@@ -114,9 +114,9 @@ const useStyles = tss
 				: fr.colors.decisions.background.flat.blueFrance.default,
 			marginBottom: isWidget ? 0 : fr.spacing('10v'),
 			textAlign: isWidget ? 'left' : 'center',
-			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' }),
+			...(isWidget && { fontSize: '1.5rem', lineHeight: '2rem' })
 		},
 		asterisk: {
-			color: fr.colors.decisions.text.actionHigh.redMarianne.default,
-		},
+			color: fr.colors.decisions.text.actionHigh.redMarianne.default
+		}
 	}));

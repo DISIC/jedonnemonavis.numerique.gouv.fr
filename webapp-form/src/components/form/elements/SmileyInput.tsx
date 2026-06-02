@@ -24,18 +24,18 @@ const smileys: Smiley[] = [
 	{
 		value: 'bad',
 		img: '/Demarches/assets/smileys/bad.svg',
-		imgSelected: '/Demarches/assets/smileys/bad-selected.svg',
+		imgSelected: '/Demarches/assets/smileys/bad-selected.svg'
 	},
 	{
 		value: 'medium',
 		img: '/Demarches/assets/smileys/medium.svg',
-		imgSelected: '/Demarches/assets/smileys/medium-selected.svg',
+		imgSelected: '/Demarches/assets/smileys/medium-selected.svg'
 	},
 	{
 		value: 'good',
 		img: '/Demarches/assets/smileys/good.svg',
-		imgSelected: '/Demarches/assets/smileys/good-selected.svg',
-	},
+		imgSelected: '/Demarches/assets/smileys/good-selected.svg'
+	}
 ];
 
 export const SmileyInput = (props: Props) => {
@@ -44,7 +44,7 @@ export const SmileyInput = (props: Props) => {
 	const { t } = useTranslation();
 
 	const [smileySelected, setSmileySelected] = useState<Feeling | undefined>(
-		value ? smileys[value - 1].value : undefined,
+		value ? smileys[value - 1].value : undefined
 	);
 
 	useEffect(() => {
@@ -111,12 +111,12 @@ const useStyles = tss
 			display: 'flex',
 			marginTop: fr.spacing('4v'),
 			['input:checked + label']: {
-				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+				borderColor: fr.colors.decisions.background.flat.blueFrance.default
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
-				outline: '2px solid #4D90FE',
-			},
+				outline: '2px solid #4D90FE'
+			}
 		},
 		smileyInput: {
 			width: '100%',
@@ -130,7 +130,7 @@ const useStyles = tss
 			gap: fr.spacing('4v'),
 			cursor: 'pointer',
 			['&:hover']: {
-				borderColor: fr.colors.decisions.background.alt.grey.active,
+				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
 				flexDirection: 'column',
@@ -138,9 +138,9 @@ const useStyles = tss
 				paddingLeft: fr.spacing('16v'),
 				paddingRight: fr.spacing('16v'),
 				img: {
-					marginRight: 0,
-				},
-			},
+					marginRight: 0
+				}
+			}
 		},
 		inputIndicator: {
 			position: 'absolute',
@@ -149,7 +149,7 @@ const useStyles = tss
 			left: '5%',
 			height: '1rem',
 			width: '1.5rem',
-			accentColor: fr.colors.decisions.background.flat.blueFrance.default,
+			accentColor: fr.colors.decisions.background.flat.blueFrance.default
 		},
 		fieldset: {
 			width: '100%',
@@ -163,14 +163,14 @@ const useStyles = tss
 					paddingBottom: 0,
 					marginBottom: fr.spacing('4v'),
 					':last-child': {
-						marginBottom: 0,
-					},
-				},
+						marginBottom: 0
+					}
+				}
 			},
 			[fr.breakpoints.up('md')]: {
 				ul: {
-					columns: nbItems,
-				},
-			},
-		},
+					columns: nbItems
+				}
+			}
+		}
 	}));

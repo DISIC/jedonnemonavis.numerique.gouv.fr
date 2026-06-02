@@ -12,11 +12,11 @@ export const getProductsWithReviewCountsByScope = async (
 		scope: 'daily' | 'weekly' | 'monthly';
 		startDate: Date;
 		endDate: Date;
-		forms: { 
-			formId: number; 
-			formTitle: string; 
-			reviewCount: number; 
-			productId: number; 
+		forms: {
+			formId: number;
+			formTitle: string;
+			reviewCount: number;
+			productId: number;
 			productTitle: string;
 			entityName: string;
 		}[];
@@ -58,19 +58,22 @@ export const getProductsWithReviewCountsByScope = async (
 		});
 
 		// Group by form_id and count reviews
-		const formReviewCounts = new Map<number, {
-			formId: number;
-			formTitle: string;
-			productId: number;
-			productTitle: string;
-			entityName: string;
-			reviewCount: number;
-		}>();
+		const formReviewCounts = new Map<
+			number,
+			{
+				formId: number;
+				formTitle: string;
+				productId: number;
+				productTitle: string;
+				entityName: string;
+				reviewCount: number;
+			}
+		>();
 
 		reviewsWithFormData.forEach(review => {
 			const form = review.button.form;
 			const formId = form.id;
-			
+
 			if (formReviewCounts.has(formId)) {
 				formReviewCounts.get(formId)!.reviewCount += 1;
 			} else {

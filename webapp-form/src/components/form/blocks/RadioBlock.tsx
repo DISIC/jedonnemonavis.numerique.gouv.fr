@@ -26,7 +26,7 @@ export const RadioBlock = ({
 	answers,
 	setAnswers,
 	form,
-	isWidget,
+	isWidget
 }: Props) => {
 	const { classes } = useStyles();
 	const radioAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -35,7 +35,7 @@ export const RadioBlock = ({
 	const formConfig = form.form_configs[0];
 	const visibleOptions = block.options.filter(opt => {
 		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden,
+			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden
 		);
 		return !isHidden;
 	});
@@ -63,11 +63,11 @@ export const RadioBlock = ({
 								...prev,
 								[fieldKey]: {
 									block_id: block.id,
-									answer_item_id: opt.id,
-								},
+									answer_item_id: opt.id
+								}
 							}));
-						},
-					},
+						}
+					}
 				}))}
 			/>
 		</div>
@@ -79,11 +79,11 @@ const useStyles = tss.withName({ RadioBlock }).create(() => ({
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,
 		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`,
+		marginTop: `-${fr.spacing('2v')}`
 	},
 	smallFix: {
 		'& .fr-fieldset__content .fr-radio-group--sm input[type=radio] + label': {
-			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important',
-		},
-	},
+			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important'
+		}
+	}
 }));

@@ -8,7 +8,7 @@ export const DEBOUNCE_DELAY_MS =
 
 export async function onReviewCreated(
 	prisma: PrismaClient,
-	formId: number,
+	formId: number
 ): Promise<void> {
 	try {
 		const form = await prisma.form.findUnique({
@@ -18,15 +18,15 @@ export async function onReviewCreated(
 				isDeleted: true,
 				alert_max_window_minutes: true,
 				last_alert_sent_at: true,
-				created_at: true,
-			},
+				created_at: true
+			}
 		});
 
 		if (!form || form.isDeleted) return;
 
 		const hasSubscriber = await prisma.formAlertSubscription.findFirst({
 			where: { form_id: formId, enabled: true },
-			select: { id: true },
+			select: { id: true }
 		});
 		if (!hasSubscriber) return;
 
@@ -35,10 +35,10 @@ export async function onReviewCreated(
 		const oldestPending = await prisma.review.findFirst({
 			where: {
 				form_id: formId,
-				created_at: { gt: cursor },
+				created_at: { gt: cursor }
 			},
 			orderBy: { created_at: 'asc' },
-			select: { created_at: true },
+			select: { created_at: true }
 		});
 
 		if (!oldestPending) return;

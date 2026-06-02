@@ -23,8 +23,7 @@ export async function middleware(request: NextRequest) {
 	)
 		return NextResponse.next();
 
-	const isTokenValid =
-		!!token && (token.exp as number) * 1000 > Date.now();
+	const isTokenValid = !!token && (token.exp as number) * 1000 > Date.now();
 
 	if (request.nextUrl.pathname.startsWith('/administration') && !isTokenValid) {
 		const url = request.nextUrl.clone();

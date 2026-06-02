@@ -82,8 +82,8 @@ export const ResetForm = () => {
 			severity: !userInfos.password
 				? 'info'
 				: userInfos.password.length >= 12
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -91,8 +91,8 @@ export const ResetForm = () => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneSpecialCharacter.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		messages.push({
@@ -100,8 +100,8 @@ export const ResetForm = () => {
 			severity: !userInfos.password
 				? 'info'
 				: regexAtLeastOneNumber.test(userInfos.password)
-					? 'valid'
-					: 'error'
+				? 'valid'
+				: 'error'
 		});
 
 		return messages;
@@ -225,7 +225,7 @@ export const ResetForm = () => {
 												message: 'Les mots de passe ne correspondent pas.',
 												severity: 'error'
 											}
-										]
+									  ]
 									: []
 							}
 							messagesHint={''}

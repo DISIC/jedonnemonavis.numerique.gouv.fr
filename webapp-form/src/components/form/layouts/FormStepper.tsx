@@ -4,7 +4,7 @@ import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import {
 	Stepper,
-	addStepperTranslations,
+	addStepperTranslations
 } from '@codegouvfr/react-dsfr/Stepper';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
@@ -16,8 +16,8 @@ addStepperTranslations({
 	lang: 'es',
 	messages: {
 		progress: ({ currentStep, stepCount }) =>
-			`Paso ${currentStep} de ${stepCount}`,
-	},
+			`Paso ${currentStep} de ${stepCount}`
+	}
 });
 
 type Props = {
@@ -41,7 +41,7 @@ export const FormStepper = (props: Props) => {
 	const { classes, cx } = useStyles();
 
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
-		fts => fts.title === t(`${steps[currentStep].name}`, { lng: 'fr' }),
+		fts => fts.title === t(`${steps[currentStep].name}`, { lng: 'fr' })
 	);
 
 	return (
@@ -122,11 +122,11 @@ const useStyles = tss
 	.create(() => ({
 		title: {
 			[fr.breakpoints.down('md')]: {
-				display: 'none',
-			},
+				display: 'none'
+			}
 		},
 		field: {
-			marginBottom: fr.spacing('12v'),
+			marginBottom: fr.spacing('12v')
 		},
 		buttonContainer: {
 			display: 'flex',
@@ -135,8 +135,8 @@ const useStyles = tss
 			[fr.breakpoints.up('md')]: {
 				display: 'flex',
 				flexDirection: 'row',
-				justifyContent: 'space-between',
-			},
+				justifyContent: 'space-between'
+			}
 		},
 		stepButton: {
 			width: '100%',
@@ -144,7 +144,7 @@ const useStyles = tss
 			justifyContent: 'center',
 			...fr.spacing('padding', { topBottom: '3v', rightLeft: '6v' }),
 			[fr.breakpoints.up('md')]: {
-				width: 'initial',
-			},
-		},
+				width: 'initial'
+			}
+		}
 	}));

@@ -21,7 +21,7 @@ export const SmileyBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget,
+	isWidget
 }: Props) => {
 	const smileyAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
 	const smileyValue = smileyAnswer?.answer_item_id;
@@ -40,8 +40,8 @@ export const SmileyBlock = ({
 					...prev,
 					[fieldKey]: {
 						block_id: block.id,
-						answer_item_id: smileyItemId,
-					},
+						answer_item_id: smileyItemId
+					}
 				}));
 			}}
 		/>
