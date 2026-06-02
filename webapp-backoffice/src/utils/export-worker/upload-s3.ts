@@ -2,6 +2,7 @@ import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Readable } from 'stream';
+import { EXPORT_LINK_TTL_SECONDS } from '@/src/utils/export';
 
 const REQUIRED_S3_ENV_VARS = [
 	'CELLAR_ADDON_HOST',
@@ -113,7 +114,7 @@ export async function generateDownloadLink(
 	const url = await getSignedUrl(
 		client,
 		new GetObjectCommand({ Bucket: getBucket(), Key: objectName }),
-		{ expiresIn: 604800 } // 7 days in seconds (SigV4 maximum)
+		{ expiresIn: EXPORT_LINK_TTL_SECONDS }
 	);
 
 	return url;

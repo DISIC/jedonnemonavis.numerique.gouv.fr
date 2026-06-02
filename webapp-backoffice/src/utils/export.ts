@@ -1,7 +1,8 @@
 import { ReviewFiltersType } from '@/src/types/custom';
-import { formatDateToFrenchString } from './tools';
-import { displayIntention } from './stats';
 import { Button } from '@prisma/client';
+import { formatDateToFrenchString } from './tools';
+
+export const EXPORT_LINK_TTL_SECONDS = 604800;
 
 export type ExportParams = Partial<{
 	startDate: string;
