@@ -682,39 +682,37 @@ const ReviewsTab = (props: Props) => {
 						reviewLogDate={reviewLog[0]?.created_at.toString()}
 						form={form}
 					/>
-					{reviewsCountFiltered > 0 && (
-						<ReviewKeywordFilters
-							product_id={form.product_id}
-							form_id={form.id}
-							start_date={
-								filters.productReviews.displayNew
-									? undefined
-									: filters.sharedFilters.currentStartDate
+					<ReviewKeywordFilters
+						product_id={form.product_id}
+						form_id={form.id}
+						start_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentStartDate
+						}
+						end_date={
+							filters.productReviews.displayNew
+								? undefined
+								: filters.sharedFilters.currentEndDate
+						}
+						fields={filters.productReviews.filters.fields}
+						selectedKeyword={validatedSearch}
+						onClick={keyword => {
+							push([
+								'trackEvent',
+								'Product - Reviews',
+								'Keyword-Filter-Clicked'
+							]);
+							if (keyword) {
+								setSearch(`"${keyword}"`);
+								submitSearch(`"${keyword}"`);
+							} else {
+								setSearch('');
+								setValidatedSearch('');
+								setCurrentPage(1);
 							}
-							end_date={
-								filters.productReviews.displayNew
-									? undefined
-									: filters.sharedFilters.currentEndDate
-							}
-							fields={filters.productReviews.filters.fields}
-							selectedKeyword={validatedSearch}
-							onClick={keyword => {
-								push([
-									'trackEvent',
-									'Product - Reviews',
-									'Keyword-Filter-Clicked'
-								]);
-								if (keyword) {
-									setSearch(`"${keyword}"`);
-									submitSearch(`"${keyword}"`);
-								} else {
-									setSearch('');
-									setValidatedSearch('');
-									setCurrentPage(1);
-								}
-							}}
-						/>
-					)}
+						}}
+					/>
 
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
@@ -749,49 +747,47 @@ const ReviewsTab = (props: Props) => {
 											totalItemsCount={reviewsCountFiltered}
 											fitContent
 										/>
-										{reviewsCountFiltered > 0 && (
-											<form
-												className={cx(
-													classes.searchForm,
-													fr.cx('fr-col-12', 'fr-col-lg-4')
-												)}
-												onSubmit={e => {
-													e.preventDefault();
-													submitSearch();
-													push(['trackEvent', 'Form - Reviews', 'Search']);
-												}}
-											>
-												<div role="search" className={fr.cx('fr-search-bar')}>
-													<Input
-														label="Rechercher un avis"
-														hideLabel
-														nativeInputProps={{
-															placeholder: 'Rechercher dans les commentaires',
-															type: 'search',
-															value: search,
-															onChange: event => {
-																if (!event.target.value) {
-																	setValidatedSearch('');
-																}
-																setSearch(event.target.value);
-															}
-														}}
-													/>
-													<ButtonDSFR
-														priority="primary"
-														type="submit"
-														iconId="ri-search-2-line"
-														iconPosition="left"
-													>
-														Rechercher
-													</ButtonDSFR>
-												</div>
-											</form>
-										)}
 									</>
 								) : (
 									<div />
 								)}
+								<form
+									className={cx(
+										classes.searchForm,
+										fr.cx('fr-col-12', 'fr-col-lg-4')
+									)}
+									onSubmit={e => {
+										e.preventDefault();
+										submitSearch();
+										push(['trackEvent', 'Form - Reviews', 'Search']);
+									}}
+								>
+									<div role="search" className={fr.cx('fr-search-bar')}>
+										<Input
+											label="Rechercher un avis"
+											hideLabel
+											nativeInputProps={{
+												placeholder: 'Rechercher dans les commentaires',
+												type: 'search',
+												value: search,
+												onChange: event => {
+													if (!event.target.value) {
+														setValidatedSearch('');
+													}
+													setSearch(event.target.value);
+												}
+											}}
+										/>
+										<ButtonDSFR
+											priority="primary"
+											type="submit"
+											iconId="ri-search-2-line"
+											iconPosition="left"
+										>
+											Rechercher
+										</ButtonDSFR>
+									</div>
+								</form>
 							</div>
 
 							<div>
