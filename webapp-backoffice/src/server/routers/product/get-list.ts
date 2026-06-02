@@ -123,27 +123,86 @@ export const getProductListQuery = async ({
 		orderBy = [safeOrderBy as Prisma.ProductOrderByWithAggregationInput];
 	}
 
-	try {
-		const products = await ctx.prisma.product.findMany({
-			orderBy,
-			where,
-			take: numberPerPage,
-			skip: numberPerPage * (page - 1),
+	const include = {
+		forms: {
 			include: {
-				forms: {
+				buttons: { include: { closedButtonLog: true } },
+				form_template: true,
+				form_configs: {
 					include: {
-						buttons: { include: { closedButtonLog: true } },
-						form_template: true,
-						form_configs: {
-							include: {
-								form_config_displays: true,
-								form_config_labels: true
-							}
-						}
+						form_config_displays: true,
+						form_config_labels: true
 					}
 				}
 			}
-		});
+		}
+	} satisfies Prisma.ProductInclude;
+
+	const skip = numberPerPage * (page - 1);
+	const favoritesFirst = !filterByUserFavorites && !filterByStatusArchived;
+
+	try {
+		let products;
+
+		if (favoritesFirst) {
+			const favoriteWhere: Prisma.ProductWhereInput = {
+				...where,
+				favorites: { some: { user_id: parseInt(contextUser.id) } }
+			};
+			const favoritesCount = await ctx.prisma.product.count({
+				where: favoriteWhere
+			});
+
+			if (skip < favoritesCount) {
+				const favorites = await ctx.prisma.product.findMany({
+					orderBy,
+					where: favoriteWhere,
+					take: numberPerPage,
+					skip,
+					include
+				});
+
+				const remaining = numberPerPage - favorites.length;
+				const nonFavorites =
+					remaining > 0
+						? await ctx.prisma.product.findMany({
+								orderBy,
+								where: {
+									...where,
+									NOT: {
+										favorites: { some: { user_id: parseInt(contextUser.id) } }
+									}
+								},
+								take: remaining,
+								skip: 0,
+								include
+						  })
+						: [];
+
+				products = [...favorites, ...nonFavorites];
+			} else {
+				products = await ctx.prisma.product.findMany({
+					orderBy,
+					where: {
+						...where,
+						NOT: {
+							favorites: { some: { user_id: parseInt(contextUser.id) } }
+						}
+					},
+					take: numberPerPage,
+					skip: skip - favoritesCount,
+					include
+				});
+			}
+		} else {
+			products = await ctx.prisma.product.findMany({
+				orderBy,
+				where,
+				take: numberPerPage,
+				skip,
+				include
+			});
+		}
 
 		const count = await ctx.prisma.product.count({ where });
 

@@ -370,24 +370,34 @@ const DashBoard = () => {
 							<>
 								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 									<Select
-										label="Trier Par"
+										label="Vue"
 										nativeSelectProps={{
-											name: 'my-select',
-											value: filters.filter,
-											onChange: event =>
+											name: 'select-view',
+											value: filters.view,
+											onChange: event => {
+												const value = event.target.value as
+													| 'all'
+													| 'favorites'
+													| 'archived';
+
 												updateFilters({
 													...filters,
-													filter: event.target.value
-												})
+													currentPage: 1,
+													view: value,
+													filterOnlyFavorites: value === 'favorites',
+													filterOnlyArchived: value === 'archived'
+												});
+											},
+											className: fr.cx('fr-pr-8v')
 										}}
 									>
-										<option value="title:asc">Nom A à Z</option>
-										<option value="entity.name:asc">Organisation A à Z</option>
-										<option value="created_at:desc">Date de création</option>
-										<option value="updated_at:desc">Date de mise à jour</option>
+										<option value="all">Services actifs</option>
+										<option value="favorites">Mes favoris</option>
+										<option value="archived">Services archivés</option>
 									</Select>
 								</div>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 									<Autocomplete
 										id="filter-entity"
 										disablePortal
@@ -431,10 +441,11 @@ const DashBoard = () => {
 										)}
 									/>
 								</div>
+
 								<div
 									className={fr.cx(
 										'fr-col-12',
-										'fr-col-md-4',
+										'fr-col-md-5',
 										'fr-col--bottom'
 									)}
 								>
@@ -480,35 +491,6 @@ const DashBoard = () => {
 											</Button>
 										</div>
 									</form>
-								</div>
-
-								<div className={fr.cx('fr-col-12', 'fr-col-md-2')}>
-									<Select
-										label="Vue"
-										nativeSelectProps={{
-											name: 'select-view',
-											value: filters.view,
-											onChange: event => {
-												const value = event.target.value as
-													| 'all'
-													| 'favorites'
-													| 'archived';
-
-												updateFilters({
-													...filters,
-													currentPage: 1,
-													view: value,
-													filterOnlyFavorites: value === 'favorites',
-													filterOnlyArchived: value === 'archived'
-												});
-											},
-											className: fr.cx('fr-pr-8v')
-										}}
-									>
-										<option value="all">Services actifs</option>
-										<option value="favorites">Mes favoris</option>
-										<option value="archived">Services archivés</option>
-									</Select>
 								</div>
 							</>
 						)}
