@@ -2,7 +2,6 @@ import { ModalProps } from '@codegouvfr/react-dsfr/Modal';
 import { fr } from '@codegouvfr/react-dsfr';
 import { CustomModalProps } from '@/src/types/custom';
 
-
 interface Props {
 	modal: CustomModalProps;
 	productTitle: string;

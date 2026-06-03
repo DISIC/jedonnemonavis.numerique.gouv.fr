@@ -1,8 +1,7 @@
 export const isExactPhraseSearch = (search: string): boolean =>
 	search.startsWith('"') && search.endsWith('"') && search.length > 2;
 
-export const getExactPhrase = (search: string): string =>
-	search.slice(1, -1);
+export const getExactPhrase = (search: string): string => search.slice(1, -1);
 
 export const stripAccents = (str: string): string =>
 	str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');

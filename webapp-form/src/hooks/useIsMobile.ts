@@ -19,6 +19,6 @@ export const useIsMobile = (breakpoint: BreakpointKey = 'md') => {
 
 	return {
 		isMobile,
-		isHydrated: isMobile !== undefined,
+		isHydrated: isMobile !== undefined
 	};
 };

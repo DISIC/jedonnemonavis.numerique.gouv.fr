@@ -49,7 +49,7 @@ const BarMultipleSplitQuestionViz = ({
 					Non: 0,
 					Oui: 1,
 					'Pas de réponse': 2
-				}
+			  }
 			: {
 					'Très mauvaise': 0,
 					Mauvaise: 1,
@@ -57,7 +57,7 @@ const BarMultipleSplitQuestionViz = ({
 					Bonne: 3,
 					Excellente: 4,
 					'Ne se prononce pas': 5
-				};
+			  };
 
 	const { data: resultFieldCode, isLoading: isLoadingFieldCode } =
 		trpc.answer.getByChildFieldCode.useQuery(

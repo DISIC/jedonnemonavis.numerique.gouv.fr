@@ -57,7 +57,11 @@ const UserRequestCard = ({ userRequest, setCurrentUserRequest }: Props) => {
 								size="small"
 								iconId="fr-icon-close-line"
 								iconPosition="right"
-								className={cx(fr.cx('fr-mr-md-5v'), classes.iconError, classes.button)}
+								className={cx(
+									fr.cx('fr-mr-md-5v'),
+									classes.iconError,
+									classes.button
+								)}
 								onClick={() => {
 									setCurrentUserRequest({
 										...userRequest,
@@ -134,7 +138,7 @@ const useStyles = tss.withName({ UserRequestCard }).create(() => ({
 		justifyContent: 'end',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
-			gap: fr.spacing('4v'),
+			gap: fr.spacing('4v')
 		}
 	},
 	button: {

@@ -44,7 +44,7 @@ export const MarkInput = (props: Props) => {
 											onChange={() => {
 												setOpinion(prevOpinion => ({
 													...prevOpinion,
-													[field.name]: f.value,
+													[field.name]: f.value
 												}));
 											}}
 											autoFocus={
@@ -56,7 +56,7 @@ export const MarkInput = (props: Props) => {
 													[field.name]:
 														prevOpinion[field.name] === f.value
 															? undefined
-															: f.value,
+															: f.value
 												}));
 											}}
 										/>
@@ -87,15 +87,15 @@ const useStyles = tss
 			marginBottom: fr.spacing('3v'),
 			whiteSpace: 'nowrap',
 			[fr.breakpoints.up('md')]: {
-				margin: 0,
-			},
+				margin: 0
+			}
 		},
 		hintRight: {
 			whiteSpace: 'nowrap',
 			marginTop: fr.spacing('3v'),
 			[fr.breakpoints.up('md')]: {
-				margin: 0,
-			},
+				margin: 0
+			}
 		},
 		radioContainer: {
 			position: 'relative',
@@ -105,18 +105,18 @@ const useStyles = tss
 			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-				color: 'white',
+				color: 'white'
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
-				outline: '2px solid #4D90FE',
+				outline: '2px solid #4D90FE'
 			},
 			[fr.breakpoints.down('md')]: {
-				flexDirection: 'column',
+				flexDirection: 'column'
 			},
 			[fr.breakpoints.up('md')]: {
-				marginTop: fr.spacing('6v'),
-			},
+				marginTop: fr.spacing('6v')
+			}
 		},
 		radioInput: {
 			width: '100%',
@@ -131,18 +131,18 @@ const useStyles = tss
 			color: fr.colors.decisions.background.flat.blueFrance.default,
 			fontWeight: 500,
 			img: {
-				marginRight: fr.spacing('2v'),
+				marginRight: fr.spacing('2v')
 			},
 			['&:hover']: {
-				borderColor: fr.colors.decisions.background.alt.grey.active,
+				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
 				flexDirection: 'column',
 				img: {
 					marginTop: fr.spacing('2v'),
-					marginRight: 0,
-				},
-			},
+					marginRight: 0
+				}
+			}
 		},
 		fieldset: {
 			width: '100%',
@@ -159,14 +159,14 @@ const useStyles = tss
 					paddingBottom: 0,
 					marginBottom: fr.spacing('3v'),
 					':last-child': {
-						marginBottom: 0,
-					},
-				},
+						marginBottom: 0
+					}
+				}
 			},
 			[fr.breakpoints.up('md')]: {
 				ul: {
-					columns: nbItems,
-				},
+					columns: nbItems
+				}
 			},
 			legend: {
 				position: 'absolute',
@@ -174,8 +174,8 @@ const useStyles = tss
 				[fr.breakpoints.up('md')]: {
 					left: 0,
 					top: 'unset',
-					bottom: '45px',
-				},
-			},
-		},
+					bottom: '45px'
+				}
+			}
+		}
 	}));

@@ -21,27 +21,24 @@ const DECORATIVE_BLOCK_TYPES = [
 	'heading_1',
 	'heading_2',
 	'heading_3',
-	'divider',
+	'divider'
 ];
 
-export function isBlockHidden(
-	block: Block,
-	formConfig?: FormConfig,
-): boolean {
+export function isBlockHidden(block: Block, formConfig?: FormConfig): boolean {
 	return !!formConfig?.form_config_displays?.some(
-		d => d.kind === 'block' && d.parent_id === block.id && d.hidden,
+		d => d.kind === 'block' && d.parent_id === block.id && d.hidden
 	);
 }
 
 export function getVisibleBlocks(
 	blocks: Block[],
-	formConfig?: FormConfig,
+	formConfig?: FormConfig
 ): Block[] {
 	return blocks.filter(block => !isBlockHidden(block, formConfig));
 }
 
 export function hasBlockAnswer(
-	answer: FormAnswers[string] | undefined,
+	answer: FormAnswers[string] | undefined
 ): boolean {
 	if (!answer) return false;
 	if (Array.isArray(answer)) return answer.length > 0;
@@ -55,7 +52,7 @@ export function isAnswerableBlock(block: Block): boolean {
 export function hasAllRequiredBlockAnswers(
 	blocks: Block[],
 	answers: FormAnswers,
-	formConfig?: FormConfig,
+	formConfig?: FormConfig
 ): boolean {
 	return getVisibleBlocks(blocks, formConfig)
 		.filter(block => block.isRequired && isAnswerableBlock(block))

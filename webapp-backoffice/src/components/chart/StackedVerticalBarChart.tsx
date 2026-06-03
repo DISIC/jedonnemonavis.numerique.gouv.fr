@@ -35,8 +35,8 @@ const renderLegend = (props: any, sortOrder: { [key: string]: number }) => {
 				display: 'flex',
 				gap: '20px',
 				marginLeft: '25px',
-				marginBottom: fr.spacing("6v"),
-				flexWrap: 'wrap',
+				marginBottom: fr.spacing('6v'),
+				flexWrap: 'wrap'
 			}}
 		>
 			{payload

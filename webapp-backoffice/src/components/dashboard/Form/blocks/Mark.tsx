@@ -14,7 +14,7 @@ const Mark = (props: Props) => {
 	const [current, setCurrent] = useState<string | null>(null);
 
 	const handleChange = (value: string) => {
-		setCurrent((prev) => prev === value ? null : value);
+		setCurrent(prev => (prev === value ? null : value));
 	};
 
 	return (
@@ -22,7 +22,9 @@ const Mark = (props: Props) => {
 			<div className={fr.cx('fr-grid-row')}>
 				<div className={fr.cx('fr-col-12')}>
 					<div className={cx(classes.radioContainer)}>
-						{block.downLabel && <div className={classes.hintLeft}>{block.downLabel}</div>}
+						{block.downLabel && (
+							<div className={classes.hintLeft}>{block.downLabel}</div>
+						)}
 						<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 							{block.content && (
 								<legend>
@@ -51,7 +53,9 @@ const Mark = (props: Props) => {
 								))}
 							</ul>
 						</fieldset>
-						{block.upLabel && <div className={classes.hintRight}>{block.upLabel}</div>}
+						{block.upLabel && (
+							<div className={classes.hintRight}>{block.upLabel}</div>
+						)}
 					</div>
 				</div>
 			</div>
@@ -72,20 +76,20 @@ const useStyles = tss
 			color: fr.colors.decisions.text.mention.grey.default
 		},
 		hintLeft: {
-      marginTop: fr.spacing("6v"),
-      marginBottom: fr.spacing("3v"),
-      whiteSpace: "nowrap",
-      [fr.breakpoints.up("md")]: {
-        margin: 0,
-      },
-    },
-    hintRight: {
-      whiteSpace: "nowrap",
-      marginTop: fr.spacing("3v"),
-      [fr.breakpoints.up("md")]: {
-        margin: 0,
-      },
-    },
+			marginTop: fr.spacing('6v'),
+			marginBottom: fr.spacing('3v'),
+			whiteSpace: 'nowrap',
+			[fr.breakpoints.up('md')]: {
+				margin: 0
+			}
+		},
+		hintRight: {
+			whiteSpace: 'nowrap',
+			marginTop: fr.spacing('3v'),
+			[fr.breakpoints.up('md')]: {
+				margin: 0
+			}
+		},
 		radioContainer: {
 			position: 'relative',
 			display: 'flex',
@@ -94,7 +98,7 @@ const useStyles = tss
 			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-        color: 'white',
+				color: 'white'
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
@@ -110,15 +114,15 @@ const useStyles = tss
 		radioInput: {
 			width: '100%',
 			border: `1px solid ${fr.colors.decisions.background.alt.grey.hover}`,
-			padding: fr.spacing("2v"),
-      paddingLeft: fr.spacing("4v"),
-      paddingRight: fr.spacing("4v"),
+			padding: fr.spacing('2v'),
+			paddingLeft: fr.spacing('4v'),
+			paddingRight: fr.spacing('4v'),
 			display: 'flex',
-      justifyContent: "center",
+			justifyContent: 'center',
 			alignItems: 'center',
 			cursor: 'pointer',
-      color: fr.colors.decisions.background.flat.blueFrance.default,
-      fontWeight: 500,
+			color: fr.colors.decisions.background.flat.blueFrance.default,
+			fontWeight: 500,
 			img: {
 				marginRight: fr.spacing('2v')
 			},
@@ -146,13 +150,13 @@ const useStyles = tss
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
 				width: '100%',
-				li:{
-          paddingBottom: 0,
-          marginBottom: fr.spacing("3v"),
-          ':last-child': {
-            marginBottom: 0,
-          },
-        }
+				li: {
+					paddingBottom: 0,
+					marginBottom: fr.spacing('3v'),
+					':last-child': {
+						marginBottom: 0
+					}
+				}
 			},
 			[fr.breakpoints.up('md')]: {
 				ul: {

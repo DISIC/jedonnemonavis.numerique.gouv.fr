@@ -19,7 +19,7 @@ export const YesNoInput = (props: Props) => {
 
 	function containsSpecificVariableNumberPattern(
 		array: string[],
-		variable: string,
+		variable: string
 	) {
 		let escapedVariable = variable.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
@@ -32,7 +32,7 @@ export const YesNoInput = (props: Props) => {
 		return (
 			<div className={fr.cx('fr-grid-row')}>
 				{opinion.contact_tried.some(
-					element => 'options' in form[0] && field.needed.includes(element),
+					element => 'options' in form[0] && field.needed.includes(element)
 				) && (
 					<div className={fr.cx('fr-col-12')}>
 						<h3>{t(field.label)}</h3>
@@ -61,7 +61,7 @@ export const YesNoInput = (props: Props) => {
 																type="radio"
 																name={`${f.value.toString()}-${index}`}
 																checked={opinion.contact_reached.includes(
-																	`${option.value}_${f.value}`,
+																	`${option.value}_${f.value}`
 																)}
 																onChange={() => {
 																	setOpinion(currentOpinion => {
@@ -69,39 +69,37 @@ export const YesNoInput = (props: Props) => {
 																		let newContactReached;
 																		if (
 																			currentOpinion.contact_reached.includes(
-																				key,
+																				key
 																			)
 																		) {
 																			newContactReached =
 																				currentOpinion.contact_reached.filter(
-																					item => item !== key,
+																					item => item !== key
 																				);
 																		} else {
 																			if (
 																				containsSpecificVariableNumberPattern(
 																					currentOpinion.contact_reached,
-																					`${option.value}`,
+																					`${option.value}`
 																				)
 																			) {
 																				newContactReached = [
 																					...currentOpinion.contact_reached.filter(
 																						item =>
-																							!item.includes(
-																								`${option.value}_`,
-																							),
+																							!item.includes(`${option.value}_`)
 																					),
-																					key,
+																					key
 																				];
 																			} else {
 																				newContactReached = [
 																					...currentOpinion.contact_reached,
-																					key,
+																					key
 																				];
 																			}
 																		}
 																		return {
 																			...currentOpinion,
-																			contact_reached: newContactReached,
+																			contact_reached: newContactReached
 																		};
 																	});
 																}}
@@ -109,7 +107,7 @@ export const YesNoInput = (props: Props) => {
 																	// if the value is already selected, remove it
 																	if (
 																		opinion.contact_reached.includes(
-																			`${option.value}_${f.value}`,
+																			`${option.value}_${f.value}`
 																		)
 																	) {
 																		setOpinion(prevOpinion => ({
@@ -117,8 +115,8 @@ export const YesNoInput = (props: Props) => {
 																			contact_reached:
 																				prevOpinion.contact_reached.filter(
 																					d =>
-																						d !== `${option.value}_${f.value}`,
-																				),
+																						d !== `${option.value}_${f.value}`
+																				)
 																		}));
 																	}
 																}}
@@ -149,7 +147,7 @@ const useStyles = tss
 	.create(({ nbItems }) => ({
 		smallText: {
 			fontSize: '0.8rem',
-			color: fr.colors.decisions.text.disabled.grey.default,
+			color: fr.colors.decisions.text.disabled.grey.default
 		},
 		radioContainer: {
 			display: 'flex',
@@ -157,15 +155,15 @@ const useStyles = tss
 			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
-				color: 'white',
+				color: 'white'
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
-				outline: '2px solid #4D90FE',
+				outline: '2px solid #4D90FE'
 			},
 			[fr.breakpoints.down('md')]: {
-				flexDirection: 'column',
-			},
+				flexDirection: 'column'
+			}
 		},
 		radioInput: {
 			width: '100%',
@@ -178,18 +176,18 @@ const useStyles = tss
 			alignItems: 'center',
 			cursor: 'pointer',
 			img: {
-				marginRight: fr.spacing('2v'),
+				marginRight: fr.spacing('2v')
 			},
 			['&:hover']: {
-				borderColor: fr.colors.decisions.background.alt.grey.active,
+				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
 				flexDirection: 'column',
 				img: {
 					marginTop: fr.spacing('2v'),
-					marginRight: 0,
-				},
-			},
+					marginRight: 0
+				}
+			}
 		},
 		fieldset: {
 			width: '100%',
@@ -203,16 +201,16 @@ const useStyles = tss
 					paddingBottom: 0,
 					marginBottom: fr.spacing('3v'),
 					':last-child': {
-						marginBottom: 0,
-					},
-				},
+						marginBottom: 0
+					}
+				}
 			},
 			[fr.breakpoints.up('md')]: {
 				width: 'initial',
 				ul: {
 					width: 'initial',
-					columns: nbItems,
-				},
-			},
-		},
+					columns: nbItems
+				}
+			}
+		}
 	}));
