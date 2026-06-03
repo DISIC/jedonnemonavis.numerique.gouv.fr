@@ -22,7 +22,8 @@ export const createFormMutation = async ({
 		const existingLockedRootForm = await ctx.prisma.form.findFirst({
 			where: {
 				product_id: formPayload.product_id as number,
-				isTop250: true
+				isTop250: true,
+				isDeleted: { not: true }
 			},
 			select: { id: true }
 		});
