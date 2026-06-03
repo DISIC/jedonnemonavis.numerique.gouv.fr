@@ -258,7 +258,7 @@ const ProductCard = ({
 					</div>
 				</>
 			)}
-			{!isDisabled && !product.isTop250 && (
+			{!isDisabled && (
 				<Button
 					className={cx(classes.actionButton, 'actionButton')}
 					priority="tertiary"
