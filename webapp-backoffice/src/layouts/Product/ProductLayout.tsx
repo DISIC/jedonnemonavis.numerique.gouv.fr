@@ -32,7 +32,7 @@ const ProductLayout = ({
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -101,7 +101,7 @@ const ProductLayout = ({
 	return (
 		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
 			<Breadcrumb
-				currentPageLabel={'Service : ' + product.title}
+				currentPageLabel={'Service numérique : ' + product.title}
 				segments={breadcrumbSegments}
 				className={fr.cx('fr-mb-4v')}
 			/>

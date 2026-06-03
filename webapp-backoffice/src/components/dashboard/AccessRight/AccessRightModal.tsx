@@ -126,8 +126,8 @@ const ButtonModal = (props: Props) => {
 				return 'Inviter un utilisateur';
 			case 'switch':
 				return currentAccessRight?.status === 'carrier_admin'
-					? 'Passer en utilisateur de service'
-					: 'Passer en administrateur de service';
+					? 'Passer en utilisateur de service numérique'
+					: 'Passer en administrateur de service numérique';
 			case 'remove':
 				return "Retirer l'accès";
 			case 'reintegrate':
@@ -149,7 +149,7 @@ const ButtonModal = (props: Props) => {
 								state={errorStatus ? 'error' : 'default'}
 								stateRelatedMessage={
 									errorStatus == 409
-										? "L'utilisateur avec cet email a déja accès à ce service ou à l'oganisation à laquelle appartient ce service."
+										? "L'utilisateur avec cet email a déja accès à ce service numérique ou à l'oganisation à laquelle appartient ce service numérique."
 										: 'Erreur serveur'
 								}
 								nativeInputProps={{
@@ -165,9 +165,9 @@ const ButtonModal = (props: Props) => {
 									name="access-role"
 									options={[
 										{
-											label: 'Utilisateur du service',
+											label: 'Utilisateur du service numérique',
 											hintText:
-												'Utilisateurs ayant le droit de voir le service, mais pas de le modifier',
+												'Utilisateurs ayant le droit de voir le service numérique, mais pas de le modifier',
 											nativeInputProps: {
 												value: 'carrier_user',
 												onChange: e =>
@@ -178,9 +178,9 @@ const ButtonModal = (props: Props) => {
 											}
 										},
 										{
-											label: 'Administrateur du service',
+											label: 'Administrateur du service numérique',
 											hintText:
-												'Utilisateurs ayant le droit de modifier tout aspect du service',
+												'Utilisateurs ayant le droit de modifier tout aspect du service numérique',
 											nativeInputProps: {
 												value: 'carrier_admin',
 												onChange: e =>
@@ -208,8 +208,8 @@ const ButtonModal = (props: Props) => {
 										? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 										: currentAccessRight?.user_email_invite}
 								</span>{' '}
-								en utilisateur du service ? Cette personne ne va plus pouvoir
-								modifier ce service.
+								en utilisateur du service numérique ? Cette personne ne va plus
+								pouvoir modifier ce service numérique.
 							</p>
 						) : (
 							<p>
@@ -219,8 +219,8 @@ const ButtonModal = (props: Props) => {
 										? `${currentAccessRight?.user?.firstName} ${currentAccessRight?.user?.lastName}`
 										: currentAccessRight?.user_email_invite}
 								</span>{' '}
-								en administrateur du service ? Cette personne va pouvoir
-								modifier tout aspect de ce service.
+								en administrateur du service numérique ? Cette personne va
+								pouvoir modifier tout aspect de ce service numérique.
 							</p>
 						)}
 					</div>
@@ -293,8 +293,8 @@ const ButtonModal = (props: Props) => {
 					{
 						children:
 							currentAccessRight?.status === 'carrier_admin'
-								? 'Passer en utilisateur de service'
-								: 'Passer en administrateur de service',
+								? 'Passer en utilisateur de service numérique'
+								: 'Passer en administrateur de service numérique',
 						priority: 'primary',
 						doClosesModal: false,
 						onClick: () => handleModalSubmit()

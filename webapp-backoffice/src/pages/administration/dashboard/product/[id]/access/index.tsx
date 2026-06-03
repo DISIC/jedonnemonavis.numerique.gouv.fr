@@ -297,11 +297,11 @@ const AccessManagement = (props: Props) => {
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
 									<h2 className={cx(classes.categoryTitle)}>
-										Utilisateurs du service
+										Utilisateurs du service numérique
 									</h2>
 									<p className={cx(classes.categoryDescription)}>
-										Utilisateurs ayant le droit de voir le service, mais pas de
-										le modifier
+										Utilisateurs ayant le droit de voir le service numérique,
+										mais pas de le modifier
 									</p>
 								</div>
 								<div>
@@ -326,11 +326,11 @@ const AccessManagement = (props: Props) => {
 							<div className={fr.cx('fr-mb-10v')}>
 								<div className={cx(classes.titleContainer)}>
 									<h2 className={cx(classes.categoryTitle)}>
-										Administrateurs du service
+										Administrateurs du service numérique
 									</h2>
 									<p className={cx(classes.categoryDescription)}>
 										Utilisateurs ayant le droit de modifier tout aspect du
-										service
+										service numérique
 									</p>
 								</div>
 								<div>

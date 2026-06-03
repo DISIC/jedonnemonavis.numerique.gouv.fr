@@ -95,7 +95,7 @@ const ProductInformationPage = (props: Props) => {
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title="Supprimer ce service"
+				title="Supprimer ce service numérique"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
 						product_id: product.id
@@ -106,14 +106,15 @@ const ProductInformationPage = (props: Props) => {
 			>
 				<div>
 					<p>
-						Vous êtes sûr de vouloir supprimer le service{' '}
+						Vous êtes sûr de vouloir supprimer le service numérique{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>En supprimant ce service :</p>
+					<p>En supprimant ce service numérique :</p>
 					<ul className={fr.cx('fr-mb-8v')}>
 						<li>vous n’aurez plus accès aux avis du formulaire,</li>
 						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
+							les utilisateurs de ce service numérique n’auront plus accès au
+							formulaire.
 						</li>
 					</ul>
 				</div>
@@ -185,8 +186,8 @@ const ProductInformationPage = (props: Props) => {
 						type="button"
 						className={classes.copyBtn}
 						nativeButtonProps={{
-							title: `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
-							'aria-label': `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
+							title: `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
 							onClick: () => {
 								navigator.clipboard.writeText(product.id.toString());
 								setDisplayToast(true);
@@ -233,12 +234,14 @@ const ProductInformationPage = (props: Props) => {
 				</div>
 				{ownRight === 'carrier_admin' && !product.isTop250 && (
 					<div>
-						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Supprimer le service</h3>
-						<p>En supprimant ce service :</p>
+						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
+							Supprimer le service numérique
+						</h3>
+						<p>En supprimant ce service numérique :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
-								les utilisateurs de ce service n’auront plus accès au
+								les utilisateurs de ce service numérique n’auront plus accès au
 								formulaire.
 							</li>
 						</ul>
@@ -251,7 +254,7 @@ const ProductInformationPage = (props: Props) => {
 							onClick={() => {
 								if (product.isTop250) {
 									setStatusProductState({
-										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+										msg: `Le service numérique "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({
@@ -264,7 +267,7 @@ const ProductInformationPage = (props: Props) => {
 								}
 							}}
 						>
-							Supprimer ce service
+							Supprimer ce service numérique
 						</Button>
 					</div>
 				)}

@@ -10,14 +10,15 @@ const JdmaExportReadyEmail = ({
 }: JdmaExportReadyEmailProps) => {
 	return (
 		<JdmaLayout
-			preview={`Votre export pour le service « ${productName} » est prêt`}
+			preview={`Votre export pour le service numérique « ${productName} » est prêt`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Votre export pour le service <strong>« {productName} »</strong> est
-				prêt. Vous pouvez le télécharger en utilisant le lien suivant :
+				Votre export pour le service numérique{' '}
+				<strong>« {productName} »</strong> est prêt. Vous pouvez le télécharger
+				en utilisant le lien suivant :
 			</Text>
 
 			<Link href={downloadLink} target="_blank" style={buttonLink}>

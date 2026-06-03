@@ -53,7 +53,7 @@ export const archiveProductMutation = async ({
 		});
 
 		await sendMail(
-			`Suppression du service « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
+			`Suppression du service numérique « ${updatedProduct.title} » sur la plateforme « Je donne mon avis »`,
 			email,
 			emailHtml,
 			`Le produit numérique "${updatedProduct.title}" a été supprimé.`

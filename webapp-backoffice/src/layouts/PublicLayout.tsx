@@ -250,7 +250,7 @@ export default function PublicLayout({ children, light }: PublicLayoutProps) {
 			session.user.role.includes('admin')
 		) {
 			navigationItems.push({
-				text: 'Services',
+				text: 'Services numériques',
 				linkProps: {
 					href: '/administration/dashboard/products',
 					target: '_self'

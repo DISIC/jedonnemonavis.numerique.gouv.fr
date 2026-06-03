@@ -408,7 +408,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	try {
 		const html = await renderExportReadyEmail({ productName, downloadLink });
-		const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 7 jours.\n\nCordialement,\nL'équipe JDMA`;
+		const text = `Bonjour,\n\nVotre export pour le service numérique ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 7 jours.\n\nCordialement,\nL'équipe JDMA`;
 
 		await sendMail(
 			`Votre export est prêt : [${productName}]`,
@@ -472,7 +472,7 @@ export function startExportWorker(): void {
 					const html = await renderExportFailedEmail({
 						productName: exportRecord.product.title
 					});
-					const text = `Bonjour,\n\nNous n'avons pas pu générer votre export pour le service ${exportRecord.product.title}. Veuillez réessayer depuis le backoffice.\n\nCordialement,\nL'équipe JDMA`;
+					const text = `Bonjour,\n\nNous n'avons pas pu générer votre export pour le service numérique ${exportRecord.product.title}. Veuillez réessayer depuis le backoffice.\n\nCordialement,\nL'équipe JDMA`;
 
 					await sendMail(
 						`Votre export a échoué : [${exportRecord.product.title}]`,

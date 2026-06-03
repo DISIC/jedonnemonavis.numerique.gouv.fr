@@ -90,10 +90,10 @@ export const deleteButtonMutation = async ({
 			});
 
 			await sendMail(
-				`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`,
+				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product?.title}»`,
 				email,
 				emailHtml,
-				`Fermeture du lien d'intégration «${deletedButton.title}» du service «${product?.title}»`
+				`Fermeture du lien d'intégration «${deletedButton.title}» du service numérique «${product?.title}»`
 			);
 		}
 	}

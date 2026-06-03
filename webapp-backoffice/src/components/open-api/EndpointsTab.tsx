@@ -38,14 +38,14 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 				<div className={fr.cx('fr-mb-2w')}>
 					<strong>/services</strong>
 					<span className={fr.cx('fr-ml-2v', 'fr-text--sm')}>
-						Informations sur vos services
+						Informations sur vos services numériques
 					</span>
 				</div>
 
 				<p>
-					Récupérez les métadonnées de tous les services accessibles avec votre
-					clé API. Cet endpoint est essentiel pour obtenir les IDs nécessaires
-					au filtrage des statistiques.
+					Récupérez les métadonnées de tous les services numériques accessibles
+					avec votre clé API. Cet endpoint est essentiel pour obtenir les IDs
+					nécessaires au filtrage des statistiques.
 				</p>
 
 				<SwaggerUI
@@ -104,10 +104,10 @@ const EndpointsTab = ({ filterDoc }: EndpointsTabProps) => {
 										<code>product_ids</code>
 									</td>
 									<td>
-										IDs des services à filtrer
+										IDs des services numériques à filtrer
 										<br />
 										<span className={fr.cx('fr-hint-text')}>
-											Défaut: [] (tous les services accessibles)
+											Défaut: [] (tous les services numériques accessibles)
 										</span>
 									</td>
 									<td>Array[number]</td>

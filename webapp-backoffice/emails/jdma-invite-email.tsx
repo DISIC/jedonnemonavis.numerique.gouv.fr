@@ -13,7 +13,7 @@ const JdmaInviteEmail = ({
 		? `la démarche « ${productTitle} »`
 		: entityName
 		? `l'organisation « ${entityName} »`
-		: 'un service';
+		: 'un service numérique';
 
 	return (
 		<JdmaLayout baseUrl={baseUrl}>

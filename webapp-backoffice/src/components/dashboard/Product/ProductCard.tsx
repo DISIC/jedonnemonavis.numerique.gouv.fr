@@ -90,7 +90,7 @@ const ProductCard = ({
 		if (normalizedInput !== normalizedTitle) {
 			setError('product_name', {
 				message:
-					'Veuillez saisir le nom du service pour confirmer la suppression'
+					'Veuillez saisir le nom du service numérique pour confirmer la suppression'
 			});
 			setValidateDelete(false);
 		} else {
@@ -302,11 +302,11 @@ const ProductCard = ({
 				setIsOpen={setDisplayToast}
 				autoHideDuration={4000}
 				severity="success"
-				message="Le service a été correctement supprimé"
+				message="Le service numérique a été correctement supprimé"
 			/>
 			<OnConfirmModal
 				modal={onConfirmModalRestore}
-				title="Restaurer un service"
+				title="Restaurer un service numérique"
 				handleOnConfirm={() => {
 					restoreProduct.mutate({
 						product_id: product.id
@@ -316,14 +316,14 @@ const ProductCard = ({
 			>
 				<div>
 					<p>
-						Vous êtes sûr de vouloir restaurer le service{' '}
+						Vous êtes sûr de vouloir restaurer le service numérique{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
 				</div>
 			</OnConfirmModal>
 			<OnConfirmModal
 				modal={onConfirmModalArchive}
-				title="Supprimer ce service"
+				title="Supprimer ce service numérique"
 				handleOnConfirm={() => {
 					if (totalReviews && totalReviews > 1000) {
 						if (validateDelete) {
@@ -348,14 +348,15 @@ const ProductCard = ({
 			>
 				<div>
 					<p>
-						Vous êtes sûr de vouloir supprimer le service{' '}
+						Vous êtes sûr de vouloir supprimer le service numérique{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>En supprimant ce service :</p>
+					<p>En supprimant ce service numérique :</p>
 					<ul className={fr.cx('fr-mb-8v')}>
 						<li>vous n’aurez plus accès aux avis du formulaire,</li>
 						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
+							les utilisateurs de ce service numérique n’auront plus accès au
+							formulaire.
 						</li>
 					</ul>
 					{totalReviews && totalReviews > 1000 ? (
@@ -369,8 +370,8 @@ const ProductCard = ({
 										<Input
 											label={
 												<p className={fr.cx('fr-mb-0')}>
-													Veuillez saisir le nom du service pour confirmer la
-													suppression
+													Veuillez saisir le nom du service numérique pour
+													confirmer la suppression
 													<span className={cx(classes.asterisk)}>*</span>
 												</p>
 											}
@@ -418,7 +419,7 @@ const ProductCard = ({
 						href={`/administration/dashboard/product/${product.id}/forms`}
 						className={classes.productOverlay}
 						onClick={() => clearFilters()}
-						aria-label={`Aller sur la page de gestion du service ${product.title}`}
+						aria-label={`Aller sur la page de gestion du service numérique ${product.title}`}
 						style={{ pointerEvents: isDisabled ? 'none' : 'auto' }}
 						title={product.title}
 					/>

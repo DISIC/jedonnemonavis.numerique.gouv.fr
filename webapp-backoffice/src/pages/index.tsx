@@ -19,9 +19,9 @@ export default function Home() {
 	const features: Feature[] = [
 		{
 			icon: <i className={fr.cx('ri-award-line')} />,
-			title: 'Suivez la qualité de vos services, gratuitement',
+			title: 'Suivez la qualité de vos services numériques, gratuitement',
 			description:
-				'L’outil Je donne mon avis est disponible pour toute administration publique, gratuitement. Il se place à la fin de vos démarches administratives, pour récolter l’avis de vos usagers et suivre la qualité de vos services et son évolution dans le temps.',
+				'L’outil Je donne mon avis est disponible pour toute administration publique, gratuitement. Il se place à la fin de vos démarches administratives, pour récolter l’avis de vos usagers et suivre la qualité de vos services numériques et leur évolution dans le temps.',
 			image: '/assets/feature_1.png',
 			imagePosition: 'right'
 		},
@@ -37,7 +37,7 @@ export default function Home() {
 			icon: <i className={fr.cx('ri-chat-3-line')} />,
 			title: 'Récoltez des notes et des commentaires en temps réel',
 			description:
-				'Le bouton Je donne mon avis permet aux usagers de vos démarches en ligne de noter la qualité globale du service, ainsi que la facilité d’usage et la simplicité du langage. Il leur permet également de vous transmettre des retours écrits détaillés.',
+				'Le bouton Je donne mon avis permet aux usagers de vos démarches en ligne de noter la qualité globale du service numérique, ainsi que la facilité d’usage et la simplicité du langage. Il leur permet également de vous transmettre des retours écrits détaillés.',
 			image: '/assets/feature_3.png',
 			imagePosition: 'right'
 		},
@@ -94,24 +94,24 @@ export default function Home() {
 			question:
 				'Faut-il vous contacter pour utiliser l’outil Je donne mon avis ?',
 			answer:
-				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
+				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service numérique.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
 		},
 		{
 			question:
-				'Puis-je utiliser l’outil Je donne mon avis si mon service ne fait pas partie de Vos démarches essentielles ?',
+				'Puis-je utiliser l’outil Je donne mon avis si mon service numérique ne fait pas partie de Vos démarches essentielles ?',
 			answer:
-				'Votre service ne doit pas être inclus dans <a href="https://observatoire.numerique.gouv.fr/" target="_blank">Vos démarches essentielles</a>. L’outil <b>Je donne mon avis</b> est disponible pour tous les services publics numériques français.'
+				'Votre service numérique ne doit pas être inclus dans <a href="https://observatoire.numerique.gouv.fr/" target="_blank">Vos démarches essentielles</a>. L’outil <b>Je donne mon avis</b> est disponible pour tous les services publics numériques français.'
 		},
 		{
 			question:
-				'Puis-je utiliser l’outil Je donne mon avis sur plusieurs services en même temps ?',
+				'Puis-je utiliser l’outil Je donne mon avis sur plusieurs services numériques en même temps ?',
 			answer:
-				'Oui, le tableau de bord de <b>Je donne mon avis</b> vous permet de suivre plusieurs services en même temps.'
+				'Oui, le tableau de bord de <b>Je donne mon avis</b> vous permet de suivre plusieurs services numériques en même temps.'
 		},
 		{
 			question: "Existe-t-il un guide pour m'indiquer comment procéder ?",
 			answer:
-				'<a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service. '
+				'<a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service numérique. '
 		}
 	];
 
