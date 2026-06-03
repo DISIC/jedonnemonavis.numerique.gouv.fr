@@ -241,7 +241,7 @@ const ProductFormPage = (props: Props) => {
 							title={'Ce formulaire ne peut être ni édité ni supprimé'}
 							description={
 								<>
-									Ce service est référencé comme démarche essentielle dans l’
+									Ce formulaire est référencé comme démarche essentielle dans l’
 									<a
 										href="https://observatoire.numerique.gouv.fr/"
 										target="_blank"
