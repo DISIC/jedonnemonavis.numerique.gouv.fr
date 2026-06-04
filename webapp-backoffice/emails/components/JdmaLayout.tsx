@@ -47,21 +47,13 @@ export const JdmaLayout = ({ preview, children, baseUrl }: JdmaLayoutProps) => {
 							>
 								Je donne mon avis
 							</Link>
-							, développé par la&nbsp;
+							, développé par{' '}
 							<Link
 								href="https://design.numerique.gouv.fr/"
 								target="_blank"
 								style={footerLink}
 							>
-								Brigade d'Intervention Numérique
-							</Link>
-							, propulsé par la&nbsp;
-							<Link
-								href="https://www.numerique.gouv.fr/"
-								target="_blank"
-								style={footerLink}
-							>
-								Direction interministérielle du numérique
+								DesignGouv
 							</Link>
 							.
 						</Text>
