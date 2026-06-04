@@ -127,6 +127,7 @@ export const Field = (props: Props) => {
 						hintText={
 							templateField?.upLabel ? (
 								<p
+									className={fr.cx('fr-hint-text')}
 									dangerouslySetInnerHTML={{
 										__html: sanitizeRichHtml(templateField.upLabel)
 									}}
