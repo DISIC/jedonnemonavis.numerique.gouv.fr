@@ -1,9 +1,15 @@
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import {
+	getExportFiltersLabel,
+	getExportPeriodLabel,
+	parseExportParams
+} from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { Button } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import React from 'react';
@@ -18,11 +24,19 @@ interface Props {
 	onExportCreated: (exportId: number) => void;
 	hasExportsInProgress: boolean;
 	form: FormWithElements;
+	buttons: Button[];
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, form, params, onExportCreated, hasExportsInProgress } =
-		props;
+	const {
+		modal,
+		counts,
+		form,
+		params,
+		onExportCreated,
+		hasExportsInProgress,
+		buttons
+	} = props;
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
 
@@ -53,6 +67,14 @@ const ExportModal = (props: Props) => {
 		setStartDate(JSON.parse(params).startDate || null);
 		setEndDate(JSON.parse(params).endDate || null);
 	}, [params]);
+
+	const currentFiltersLabels = React.useMemo(() => {
+		const parsedParams = parseExportParams(params);
+		return [
+			`Période : ${getExportPeriodLabel(parsedParams)}`,
+			...(getExportFiltersLabel(parsedParams, true, buttons) as string[])
+		];
+	}, [params, buttons]);
 
 	return (
 		<modal.Component
@@ -103,6 +125,13 @@ const ExportModal = (props: Props) => {
 				options={[
 					{
 						label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
+						hintText: (
+							<ul className={fr.cx('fr-mb-0')}>
+								{currentFiltersLabels.map((filter, index) => (
+									<li key={index}>{filter}</li>
+								))}
+							</ul>
+						),
 						nativeInputProps: {
 							value: 'filtered',
 							checked: choice === 'filtered',

@@ -582,6 +582,7 @@ const ReviewsTab = (props: Props) => {
 							isDisabled={
 								!!userExportInProgress || isLoading || isLoadingExports
 							}
+							buttons={buttons}
 						/>
 						<ExportHistory
 							exports={(exports?.data || []) as any}
