@@ -368,80 +368,6 @@ const DashBoard = () => {
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-									<Select
-										label="Vue"
-										nativeSelectProps={{
-											name: 'select-view',
-											value: filters.view,
-											onChange: event => {
-												const value = event.target.value as
-													| 'all'
-													| 'favorites'
-													| 'archived';
-
-												updateFilters({
-													...filters,
-													currentPage: 1,
-													view: value,
-													filterOnlyFavorites: value === 'favorites',
-													filterOnlyArchived: value === 'archived'
-												});
-											},
-											className: fr.cx('fr-pr-8v')
-										}}
-									>
-										<option value="all">Services actifs</option>
-										<option value="favorites">Mes favoris</option>
-										<option value="archived">Services archivés</option>
-									</Select>
-								</div>
-
-								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-									<Autocomplete
-										id="filter-entity"
-										disablePortal
-										sx={{ width: '100%' }}
-										options={entities
-											.map(entity => ({
-												label: `${entity.name} (${entity.acronym})`,
-												value: entity.id
-											}))
-											.filter(
-												entity =>
-													!filters.filterEntity.some(
-														filter => filter.value === entity.value
-													)
-											)}
-										onChange={(_, option) => {
-											if (option)
-												updateFilters({
-													...filters,
-													filterEntity: [...filters.filterEntity, option],
-													currentPage: 1
-												});
-										}}
-										noOptionsText="Aucune organisation trouvée"
-										inputValue={inputValue}
-										onInputChange={(event, newInputValue) => {
-											setInputValue(newInputValue);
-										}}
-										renderInput={params => (
-											<div ref={params.InputProps.ref}>
-												<label htmlFor="filter-entity" className="fr-label">
-													Filtrer par organisation
-												</label>
-												<input
-													{...params.inputProps}
-													className={params.inputProps.className + ' fr-input'}
-													placeholder="Sélectionner une option"
-													type="search"
-												/>
-											</div>
-										)}
-									/>
-								</div>
-
 								<div
 									className={fr.cx(
 										'fr-col-12',
@@ -491,6 +417,82 @@ const DashBoard = () => {
 											</Button>
 										</div>
 									</form>
+								</div>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+									<Autocomplete
+										id="filter-entity"
+										disablePortal
+										sx={{ width: '100%' }}
+										options={entities
+											.map(entity => ({
+												label: `${entity.name} (${entity.acronym})`,
+												value: entity.id
+											}))
+											.filter(
+												entity =>
+													!filters.filterEntity.some(
+														filter => filter.value === entity.value
+													)
+											)}
+										onChange={(_, option) => {
+											if (option)
+												updateFilters({
+													...filters,
+													filterEntity: [...filters.filterEntity, option],
+													currentPage: 1
+												});
+										}}
+										noOptionsText="Aucune organisation trouvée"
+										inputValue={inputValue}
+										onInputChange={(event, newInputValue) => {
+											setInputValue(newInputValue);
+										}}
+										renderInput={params => (
+											<div ref={params.InputProps.ref}>
+												<label htmlFor="filter-entity" className="fr-label">
+													Filtrer par organisation
+												</label>
+												<input
+													{...params.inputProps}
+													className={params.inputProps.className + ' fr-input'}
+													placeholder="Sélectionner une option"
+													type="search"
+												/>
+											</div>
+										)}
+									/>
+								</div>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+									<Select
+										label="Vue"
+										nativeSelectProps={{
+											name: 'select-view',
+											value: filters.view,
+											onChange: event => {
+												const value = event.target.value as
+													| 'all'
+													| 'favorites'
+													| 'archived';
+
+												updateFilters({
+													...filters,
+													currentPage: 1,
+													view: value,
+													filterOnlyFavorites: value === 'favorites',
+													filterOnlyArchived: value === 'archived'
+												});
+											},
+											className: fr.cx('fr-pr-8v')
+										}}
+									>
+										<option value="all">Services actifs</option>
+										<option value="favorites">
+											Services favoris uniquement
+										</option>
+										<option value="archived">Services archivés</option>
+									</Select>
 								</div>
 							</>
 						)}
