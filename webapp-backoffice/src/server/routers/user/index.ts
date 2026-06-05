@@ -30,6 +30,10 @@ import {
 	resendValidationEmailInputSchema,
 	resendValidationEmailMutation
 } from './resend-validation-email';
+import {
+	getNotificationsEmailPreviewInputSchema,
+	getNotificationsEmailPreviewQuery
+} from './get-notifications-email-preview';
 
 export { generateValidationToken, makeRelationFromUserInvite } from './utils';
 
@@ -48,6 +52,10 @@ export const userRouter = router({
 		.meta({ isAdminOrOwn: true })
 		.input(getUserByIdWithRightsInputSchema)
 		.query(getUserByIdWithRightsQuery),
+
+	getNotificationsEmailPreview: protectedProcedure
+		.input(getNotificationsEmailPreviewInputSchema)
+		.query(getNotificationsEmailPreviewQuery),
 
 	create: protectedProcedure
 		.meta({ isAdmin: true })

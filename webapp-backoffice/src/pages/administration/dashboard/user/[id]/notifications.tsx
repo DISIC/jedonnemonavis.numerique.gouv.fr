@@ -3,6 +3,7 @@ import AccountLayout from '@/src/layouts/Account/AccountLayout';
 import { trpc } from '@/src/utils/trpc';
 import { normalizeString } from '@/src/utils/tools';
 import AlertEmailPreviewModal from '@/src/components/dashboard/Form/AlertEmailPreviewModal';
+import NotificationsEmailPreviewModal from '@/src/components/dashboard/Form/NotificationsEmailPreviewModal';
 import { Loader } from '@/src/components/ui/Loader';
 import { fr } from '@codegouvfr/react-dsfr';
 import Accordion from '@codegouvfr/react-dsfr/Accordion';
@@ -29,6 +30,11 @@ const alert_email_preview_modal = createModal({
 	isOpenedByDefault: false
 });
 
+const notifications_email_preview_modal = createModal({
+	id: 'notifications-email-preview-modal',
+	isOpenedByDefault: false
+});
+
 const NotificationsAccount: React.FC<Props> = props => {
 	const { userId, isOwn, user } = props;
 	const utils = trpc.useUtils();
@@ -43,6 +49,8 @@ const NotificationsAccount: React.FC<Props> = props => {
 	const [search, setSearch] = React.useState('');
 	const [validatedSearch, setValidatedSearch] = React.useState('');
 	const [isAlertEmailPreviewOpen, setIsAlertEmailPreviewOpen] =
+		React.useState(false);
+	const [isNotificationsEmailPreviewOpen, setIsNotificationsEmailPreviewOpen] =
 		React.useState(false);
 
 	const activeQuery = trpc.formAlert.getActiveSubscriptionGroups.useQuery();
@@ -191,6 +199,13 @@ const NotificationsAccount: React.FC<Props> = props => {
 				productTitle={previewSample.productTitle}
 				formTitle={previewSample.formTitle}
 			/>
+			<NotificationsEmailPreviewModal
+				modal={notifications_email_preview_modal}
+				isOpen={isNotificationsEmailPreviewOpen}
+				frequency={user.notifications_frequency}
+				productTitle={previewSample.productTitle}
+				formTitle={previewSample.formTitle}
+			/>
 			<AccountLayout isOwn={isOwn} user={user}>
 				<Head>
 					<title>
@@ -219,7 +234,9 @@ const NotificationsAccount: React.FC<Props> = props => {
 								inputTitle="notifications"
 								defaultChecked={user.notifications}
 								showCheckedHint={false}
-								onChange={e => handleNotificationsChange(e, 'daily')}
+								onChange={e =>
+									handleNotificationsChange(e, user.notifications_frequency)
+								}
 								className={fr.cx('fr-mb-2v')}
 							/>
 
@@ -282,7 +299,10 @@ const NotificationsAccount: React.FC<Props> = props => {
 										<span
 											className={classes.previewEmailButton}
 											role="button"
-											onClick={() => {}}
+											onClick={() => {
+												setIsNotificationsEmailPreviewOpen(true);
+												notifications_email_preview_modal.open();
+											}}
 										>
 											Voir un exemple de mail de synthèse
 										</span>
