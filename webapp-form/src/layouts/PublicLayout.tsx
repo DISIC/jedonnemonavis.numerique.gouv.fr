@@ -67,10 +67,21 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 							title: t('Sélectionner une langue')
 						}}
 						priority="tertiary"
-						className={cx(classes.langShort, fr.cx('fr-translate', 'fr-nav'))}
+						className={cx(
+							classes.uppercase,
+							classes.langTrigger,
+							fr.cx('fr-translate', 'fr-nav', 'fr-pr-2v')
+						)}
 						iconId="fr-icon-translate-2"
 					>
 						{lang}
+						<i
+							className={fr.cx(
+								'fr-icon-arrow-down-s-line',
+								'fr-icon--sm',
+								'fr-ml-2v'
+							)}
+						/>
 					</Button>
 					<LanguageSelector
 						key="lang-selector"
@@ -99,7 +110,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					iconId: 'fr-icon-translate-2',
 					text: (
 						<>
-							<span className={classes.langShort}>{lang_i}</span>
+							<span className={classes.uppercase}>{lang_i}</span>
 							&nbsp;-&nbsp;{fullNameByLang[lang_i]}
 						</>
 					)
@@ -225,7 +236,15 @@ const useStyles = tss
 				display: 'none'
 			}
 		},
-		langShort: {
+		langTrigger: {
+			'& i': {
+				transition: 'transform 0.3s ease'
+			},
+			'&[aria-expanded="true"] i': {
+				transform: 'rotate(180deg)'
+			}
+		},
+		uppercase: {
 			textTransform: 'uppercase'
 		}
 	}));
