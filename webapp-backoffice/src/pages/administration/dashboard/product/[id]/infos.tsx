@@ -1,7 +1,8 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product, RightAccessStatus } from '@prisma/client';
+import { RightAccessStatus } from '@prisma/client';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -20,7 +21,7 @@ import { Entity } from '@/prisma/generated/zod';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -41,6 +42,8 @@ const entityModal = createModal({
 
 const ProductInformationPage = (props: Props) => {
 	const { product, ownRight } = props;
+
+	const hasLockedForm = product.forms.some(f => f.isTop250);
 
 	const router = useRouter();
 
@@ -231,7 +234,7 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				{ownRight === 'carrier_admin' && !product.isTop250 && (
+				{ownRight === 'carrier_admin' && !hasLockedForm && (
 					<div>
 						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Supprimer le service</h3>
 						<p>En supprimant ce service :</p>
@@ -249,9 +252,9 @@ const ProductInformationPage = (props: Props) => {
 							priority="tertiary"
 							className={classes.buttonError}
 							onClick={() => {
-								if (product.isTop250) {
+								if (hasLockedForm) {
 									setStatusProductState({
-										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+										msg: `Le service "${product.title}" possède un formulaire de démarche essentielle et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({

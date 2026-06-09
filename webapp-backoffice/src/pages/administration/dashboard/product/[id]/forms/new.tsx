@@ -87,6 +87,16 @@ const NewForm = (props: Props) => {
 		}
 	);
 
+	const hasLockedRootForm = product.forms.some(f => f.isTop250);
+
+	const availableFormTemplates = useMemo(
+		() =>
+			hasLockedRootForm
+				? formTemplates.data.filter(t => t.slug !== 'root')
+				: formTemplates.data,
+		[formTemplates.data, hasLockedRootForm]
+	);
+
 	const defaultTitle = useMemo(() => {
 		if (createdForm) return createdForm.title;
 
@@ -140,13 +150,13 @@ const NewForm = (props: Props) => {
 			setSelectedFormTemplate(createdForm.form_template);
 			return;
 		}
-		if (formTemplates && selectedFormTemplate === undefined) {
-			const rootTemplate = formTemplates.data.find(
-				template => template.slug === 'root'
-			);
-			setSelectedFormTemplate(rootTemplate || undefined);
+		if (availableFormTemplates.length > 0 && selectedFormTemplate === undefined) {
+			const defaultTemplate =
+				availableFormTemplates.find(template => template.slug === 'root') ||
+				availableFormTemplates[0];
+			setSelectedFormTemplate(defaultTemplate);
 		}
-	}, [formTemplates, createdForm]);
+	}, [availableFormTemplates, createdForm]);
 
 	useEffect(() => {
 		reset({
@@ -269,7 +279,7 @@ const NewForm = (props: Props) => {
 					content: (
 						<>
 							<form id="form-creation-form">
-								{formTemplates.data.length > 0 && (
+								{availableFormTemplates.length > 0 && (
 									<RadioButtons
 										legend={
 											<>
@@ -279,7 +289,7 @@ const NewForm = (props: Props) => {
 										}
 										disabled={hasCreatedForm}
 										options={
-											formTemplates.data.map(template => ({
+											availableFormTemplates.map(template => ({
 												label: (
 													<p className="fr-m-0">
 														{template.title}&nbsp;

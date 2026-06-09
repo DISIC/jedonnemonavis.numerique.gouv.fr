@@ -63,7 +63,7 @@ const SettingsTab = ({
 		onSuccess: () => subscriptionQuery.refetch()
 	});
 
-	const isLocked = form.product.isTop250 || !!form.isDeleted;
+	const isLocked = form.isTop250 || !!form.isDeleted;
 
 	const deleteAllButtons = async () => {
 		await Promise.all(
