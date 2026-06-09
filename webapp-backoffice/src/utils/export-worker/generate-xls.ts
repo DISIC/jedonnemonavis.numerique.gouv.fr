@@ -17,8 +17,8 @@ function estimateLineCount(cellText: string, wrapLength = 30): number {
 	);
 }
 
-const COL_REVIEW_DATE = 2;
-const FIXED_COLS = 2;
+const COL_REVIEW_DATE = 1;
+const FIXED_COLS = 4;
 const DEFAULT_COL_WIDTH = 30;
 const MAX_COL_WIDTH = 80;
 
@@ -41,8 +41,10 @@ function setupSheet(
 	columns: TemplateColumn[]
 ): void {
 	const headers = [
-		'Review ID',
-		'Review Created At',
+		"Date de l'avis",
+		'Nom du formulaire',
+		"Lien d'intégration",
+		'Identifiant Avis',
 		...columns.map(c => c.label)
 	];
 
@@ -68,8 +70,10 @@ function writeReviewRow(
 	columns: TemplateColumn[]
 ): void {
 	const rowValues: (string | number | Date | null)[] = [
-		review.review_id,
 		review.review_created_at,
+		review.form_name,
+		review.button_name,
+		review.review_id,
 		...columns.map(col => formatReviewContent(review.answers[col.code] ?? ''))
 	];
 
