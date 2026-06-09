@@ -166,7 +166,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					</>
 				}
 				homeLinkProps={{
-					href: '#',
+					href: router.asPath,
 					title: 'Accueil - Je donne mon avis (Services publics +)'
 				}}
 				id={headerId}
