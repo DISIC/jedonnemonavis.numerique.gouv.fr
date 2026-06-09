@@ -1,10 +1,6 @@
-import { startAlertWorker } from './alert-worker';
-import { startExportWorker } from './export-worker';
 import { startClassificationWorker } from './classification-worker';
 import { registerShutdownHandlers, startHealthServer } from './shared';
 
-startAlertWorker();
-startExportWorker();
 startClassificationWorker();
-startHealthServer('workers');
+startHealthServer('classification-worker');
 registerShutdownHandlers();

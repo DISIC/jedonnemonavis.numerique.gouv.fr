@@ -21,10 +21,13 @@
 		"db:recompute-title-formatted": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' ./scripts/recompute_title_formatted.ts",
 		"db:seed-classification": "tsx ./scripts/seed-classification-catalog.ts",
 		"albert:spike": "tsx ./scripts/albert-classify-spike.ts",
+		"classify:check": "tsx ./scripts/classification-pipeline-check.ts",
 		"worker:export:dev": "tsx watch src/workers/run-export.ts",
 		"worker:export:start": "tsx src/workers/run-export.ts",
 		"worker:alert:dev": "tsx watch src/workers/run-alert.ts",
 		"worker:alert:start": "tsx src/workers/run-alert.ts",
+		"worker:classify:dev": "tsx watch src/workers/run-classify.ts",
+		"worker:classify:start": "tsx src/workers/run-classify.ts",
 		"worker:dev": "tsx watch src/workers/run-all.ts",
 		"worker:start": "tsx src/workers/run-all.ts"
 	},

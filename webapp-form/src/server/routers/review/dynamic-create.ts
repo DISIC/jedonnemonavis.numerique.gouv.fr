@@ -3,6 +3,7 @@ import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
 import { createOrUpdateAnswers, formatDynamicAnswer } from './utils';
 import { onReviewCreated } from '@/src/server/services/alerts/on-review-created';
+import { enqueueReviewClassification } from '@/src/server/services/classification/on-review-created';
 
 export const dynamicCreateReviewInputSchema = z.object({
 	review: ReviewUncheckedCreateInputSchema,
@@ -47,6 +48,7 @@ export const dynamicCreateReviewMutation = async ({
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);
+	void enqueueReviewClassification(prisma, newReview.id, newReview.created_at);
 
 	return { data: newReview };
 };

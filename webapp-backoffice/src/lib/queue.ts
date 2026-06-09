@@ -9,6 +9,11 @@ export type FormAlertJobData = {
 	formId: number;
 };
 
+export type ClassificationJobData = {
+	reviewId: number;
+	reviewCreatedAt: string; // ISO string (Review has a composite [id, created_at] key)
+};
+
 const defaultJobOptions = {
 	attempts: 3,
 	backoff: {
@@ -32,5 +37,14 @@ export const formAlertQueue = redis
 	  })
 	: null;
 
+export const classificationQueue = redis
+	? new Queue<ClassificationJobData>('classification', {
+			connection: redis,
+			defaultJobOptions
+	  })
+	: null;
+
 export const exportJobId = (exportId: number) => `export-${exportId}`;
 export const formAlertJobId = (formId: number) => `formAlert-${formId}`;
+export const classificationJobId = (reviewId: number) =>
+	`classification-${reviewId}`;
