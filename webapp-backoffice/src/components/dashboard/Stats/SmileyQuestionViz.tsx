@@ -212,7 +212,9 @@ const SmileyQuestionViz = ({
 											<Tooltip
 												placement="top-start"
 												tabIndex={0}
-												title={`${rfc.answer_text} : ${rfc.doc_count} réponse${rfc.doc_count > 1 ? 's' : ''} soit ${percentage}%`}
+												title={`${rfc.answer_text} : ${rfc.doc_count} réponse${
+													rfc.doc_count > 1 ? 's' : ''
+												} soit ${percentage}%`}
 												enterTouchDelay={0}
 											>
 												<div

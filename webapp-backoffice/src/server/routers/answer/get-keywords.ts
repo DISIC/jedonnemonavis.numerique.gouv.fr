@@ -20,6 +20,12 @@ export const getKeywordsInputSchema = z.object({
 	size: z.number().optional().default(10)
 });
 
+const CANDIDATE_POOL_SIZE = 200;
+const MIN_OCCURRENCES = 5;
+const SUBSUMPTION_RATIO = 0.7;
+
+type KeywordBucket = { key: string; count: number };
+
 export const getKeywordsQuery = async ({
 	ctx,
 	input
@@ -79,40 +85,75 @@ export const getKeywordsQuery = async ({
 		index: 'jdma-answers-tokens',
 		query: {
 			bool: {
-				must: mustClauses,
-				must_not: [
-					{
-						wildcard: {
-							answer_tokens: '*_*'
-						}
-					}
-				]
+				must: mustClauses
 			}
 		},
 		aggs: {
-			keywords: {
+			unigrams: {
 				terms: {
 					field: 'answer_tokens',
-					size: size + excludeKeywords.length
+					include: '[^ _]+',
+					min_doc_count: MIN_OCCURRENCES,
+					size: CANDIDATE_POOL_SIZE
+				}
+			},
+			bigrams: {
+				terms: {
+					field: 'answer_tokens',
+					include: '[^ _]+ [^ _]+',
+					min_doc_count: MIN_OCCURRENCES,
+					size: CANDIDATE_POOL_SIZE
 				}
 			}
 		},
 		size: 0
 	});
 
-	const buckets = (keywordsAggs?.aggregations?.keywords as any)?.buckets ?? [];
-
-	const data = buckets
-		.filter(
-			(bucket: any) =>
-				bucket.doc_count >= 5 &&
-				!excludeKeywords.includes(bucket.key.toLowerCase())
-		)
-		.slice(0, size)
-		.map((bucket: any) => ({
-			keyword: bucket.key,
-			count: bucket.doc_count
+	const toBuckets = (agg: any): KeywordBucket[] =>
+		((agg?.buckets as any[]) ?? []).map(bucket => ({
+			key: bucket.key as string,
+			count: bucket.doc_count as number
 		}));
 
-	return { data: data as { keyword: string; count: number }[] };
+	const unigrams = toBuckets(keywordsAggs?.aggregations?.unigrams).filter(
+		unigram => !excludeKeywords.includes(unigram.key.toLowerCase())
+	);
+
+	const bigrams = toBuckets(keywordsAggs?.aggregations?.bigrams).filter(
+		bigram =>
+			!bigram.key
+				.split(' ')
+				.every(word => excludeKeywords.includes(word.toLowerCase()))
+	);
+
+	const suppressedUnigrams = new Set<string>();
+	const subsumingBigrams = new Map<string, KeywordBucket>();
+
+	unigrams.forEach(unigram => {
+		const dominantBigram = bigrams
+			.filter(bigram => bigram.key.split(' ').includes(unigram.key))
+			.reduce<KeywordBucket | null>(
+				(max, bigram) =>
+					!max || bigram.count > max.count ? bigram : max,
+				null
+			);
+
+		if (
+			dominantBigram &&
+			dominantBigram.count >= unigram.count * SUBSUMPTION_RATIO
+		) {
+			suppressedUnigrams.add(unigram.key);
+			subsumingBigrams.set(dominantBigram.key, dominantBigram);
+		}
+	});
+
+	const data = [
+		...unigrams.filter(unigram => !suppressedUnigrams.has(unigram.key)),
+		...subsumingBigrams.values()
+	]
+		.sort((a, b) => b.count - a.count)
+		.slice(0, size)
+		.map(({ key, count }) => ({ keyword: key, count }));
+
+	return { data };
 };

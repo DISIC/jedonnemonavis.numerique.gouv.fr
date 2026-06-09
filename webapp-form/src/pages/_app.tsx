@@ -29,7 +29,7 @@ const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 		//"Marianne-Regular_Italic",
 		'Marianne-Medium',
 		//"Marianne-Medium_Italic",
-		'Marianne-Bold',
+		'Marianne-Bold'
 		//"Marianne-Bold_Italic",
 		//"Spectral-Regular",
 		//"Spectral-ExtraBold"
@@ -37,14 +37,14 @@ const { withDsfr, dsfrDocumentApi } = createNextDsfrIntegrationApi({
 	useLang() {
 		const { locale = 'fr' } = useRouter();
 		return locale;
-	},
+	}
 });
 
 export { dsfrDocumentApi };
 
 const { withAppEmotionCache, augmentDocumentWithEmotionCache } =
 	createEmotionSsrAdvancedApproach({
-		key: 'tss',
+		key: 'tss'
 	});
 
 export { augmentDocumentWithEmotionCache };
@@ -70,7 +70,7 @@ function App({ Component, pageProps }: AppProps) {
 		if (process.env.NODE_ENV === 'production')
 			init({
 				url: MATOMO_URL ? MATOMO_URL : '',
-				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : '',
+				siteId: MATOMO_SITE_ID ? MATOMO_SITE_ID : ''
 			});
 	}, []);
 
@@ -87,7 +87,7 @@ function App({ Component, pageProps }: AppProps) {
               var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
               g.async=true; g.src='https://stats.beta.gouv.fr/js/container_ldHLkZMS.js'; s.parentNode.insertBefore(g,s);
             })();
-          `,
+          `
 				}}
 			/>
 			{getLayout(<Component {...pageProps} />)}
@@ -96,5 +96,5 @@ function App({ Component, pageProps }: AppProps) {
 }
 
 export default trpc.withTRPC(
-	appWithTranslation(withDsfr(withAppEmotionCache(App))),
+	appWithTranslation(withDsfr(withAppEmotionCache(App)))
 );

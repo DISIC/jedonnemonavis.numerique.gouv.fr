@@ -1,5 +1,6 @@
 import { StatusExportSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
+import { EXPORT_LINK_TTL_SECONDS } from '@/src/utils/export';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
 
@@ -25,11 +26,14 @@ export const getExportListQuery = async ({
 		authorizeCarrierUser: true
 	});
 
+	const expiryCutoff = new Date(Date.now() - EXPORT_LINK_TTL_SECONDS * 1000);
+
 	const exports = await ctx.prisma.export.findMany({
 		where: {
 			...(status && { status: { in: status } }),
 			product_id,
-			form_id
+			form_id,
+			OR: [{ status: { not: 'done' } }, { endDate: { gt: expiryCutoff } }]
 		},
 		orderBy: { created_at: 'desc' },
 		take: 10,

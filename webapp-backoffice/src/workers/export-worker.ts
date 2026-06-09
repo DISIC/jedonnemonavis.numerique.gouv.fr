@@ -24,9 +24,9 @@ import {
 import { sendMail } from '../utils/mailer';
 import { formatWhereAndOrder } from '../utils/reviews';
 
-const PAGE_SIZE = parseInt(process.env.EXPORT_PAGE_SIZE ?? '500', 10);
+const PAGE_SIZE = parseInt(process.env.WORKER_EXPORT_PAGE_SIZE ?? '500', 10);
 const CONCURRENCY_LIMIT = parseInt(
-	process.env.EXPORT_CONCURRENCY_LIMIT ?? '2',
+	process.env.WORKER_EXPORT_CONCURRENCY ?? '2',
 	10
 );
 

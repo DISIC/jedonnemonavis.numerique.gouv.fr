@@ -103,7 +103,7 @@ const useStyles = tss
 				? {
 						backgroundImage:
 							'linear-gradient(0deg, var(--border-active-blue-france), var(--border-active-blue-france))'
-					}
+				  }
 				: undefined
 		},
 		kpiText: {

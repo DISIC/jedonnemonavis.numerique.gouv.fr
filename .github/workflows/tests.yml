@@ -6,6 +6,9 @@ on:
       - staging
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -40,8 +43,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: "yarn"
+          node-version: 22.x
+          cache: 'yarn'
           cache-dependency-path: |
             webapp-backoffice/yarn.lock
             webapp-form/yarn.lock
@@ -56,8 +59,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          (cd webapp-backoffice && yarn install)
-          (cd webapp-form && yarn install)
+          (cd webapp-backoffice && yarn install --frozen-lockfile)
+          (cd webapp-form && yarn install --frozen-lockfile)
 
       - name: Generate Prisma clients and seed database
         run: |

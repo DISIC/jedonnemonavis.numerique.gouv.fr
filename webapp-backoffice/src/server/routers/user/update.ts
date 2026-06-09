@@ -19,6 +19,13 @@ export const updateUserMutation = async ({
 	const { id, user } = input;
 	const isAdmin = ctx.session?.user?.role.includes('admin');
 
+	if (!isAdmin && ctx.session?.user?.id !== id.toString()) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Cannot update another user'
+		});
+	}
+
 	const {
 		role,
 		password,

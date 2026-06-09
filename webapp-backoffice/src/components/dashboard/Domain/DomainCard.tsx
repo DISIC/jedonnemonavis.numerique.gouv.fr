@@ -39,7 +39,9 @@ const DomainCard = ({ domain, setCurrentDomain }: Props) => {
 						title="Supprimer le domaine"
 						onClick={() => setCurrentDomain({ ...domain, type: 'on-confirm' })}
 						className={cx(fr.cx('fr-mr-md-5v'), classes.deleteButton)}
-					>Supprimer</Button>
+					>
+						Supprimer
+					</Button>
 				</div>
 			</div>
 		</div>

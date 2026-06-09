@@ -25,7 +25,7 @@ export const CheckboxBlock = ({
 	answers,
 	setAnswers,
 	form,
-	isWidget,
+	isWidget
 }: Props) => {
 	const { classes } = useStyles();
 	const checkboxAnswers = answers[fieldKey] as DynamicAnswerData[] | undefined;
@@ -34,7 +34,7 @@ export const CheckboxBlock = ({
 	const formConfig = form.form_configs[0];
 	const visibleOptions = block.options.filter(opt => {
 		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden,
+			d => d.kind === 'blockOption' && d.parent_id === opt.id && d.hidden
 		);
 		return !isHidden;
 	});
@@ -69,20 +69,20 @@ export const CheckboxBlock = ({
 										...currentAnswers,
 										{
 											block_id: block.id,
-											answer_item_id: opt.id,
-										},
-									],
+											answer_item_id: opt.id
+										}
+									]
 								}));
 							} else {
 								setAnswers(prev => ({
 									...prev,
 									[fieldKey]: currentAnswers.filter(
-										a => a.answer_item_id !== opt.id,
-									),
+										a => a.answer_item_id !== opt.id
+									)
 								}));
 							}
-						},
-					},
+						}
+					}
 				}))}
 			/>
 		</div>
@@ -94,6 +94,6 @@ const useStyles = tss.withName({ CheckboxBlock }).create(() => ({
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,
 		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`,
-	},
+		marginTop: `-${fr.spacing('2v')}`
+	}
 }));

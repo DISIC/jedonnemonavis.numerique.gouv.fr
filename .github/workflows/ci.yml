@@ -2,22 +2,14 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ['main']
   pull_request:
-    branches: ["main"]
+    branches: ['main']
+
+permissions:
+  contents: read
 
 jobs:
-  # lighthouseci:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18
-  #     - run: npm install && npm install -g @lhci/cli@0.11.x
-  #     - run: npm run build
-  #     - run: lhci autorun
-
   build-webapp-backoffice:
     runs-on: ubuntu-latest
 
@@ -32,12 +24,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: webapp-backoffice/yarn.lock
 
       - name: Build webapp-backoffice
         run: |
           cd webapp-backoffice
-          npm install
-          npm run build
+          yarn install --frozen-lockfile
+          yarn build
 
   build-webapp-form:
     runs-on: ubuntu-latest
@@ -53,9 +47,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+          cache-dependency-path: webapp-form/yarn.lock
 
       - name: Build webapp-form
         run: |
           cd webapp-form
-          npm install
-          npm run build
+          yarn install --frozen-lockfile
+          yarn build

@@ -84,7 +84,7 @@ const useStyles = tss
 				}),
 				...fr.spacing('padding', {
 					topBottom: 0
-				}),
+				})
 			}
 		},
 		blueBlock: {
@@ -114,7 +114,7 @@ const useStyles = tss
 		image: {
 			maxWidth: '100%',
 			[fr.breakpoints.down('md')]: {
-				height: 'auto',
+				height: 'auto'
 			}
 		},
 		textContainer: {

@@ -4,7 +4,7 @@ import { closedButtonLogRouter } from './closedButtonLog';
 
 export const appRouter = router({
 	review: reviewRouter,
-	closedButtonLog: closedButtonLogRouter,
+	closedButtonLog: closedButtonLogRouter
 });
 
 export type AppRouter = typeof appRouter;

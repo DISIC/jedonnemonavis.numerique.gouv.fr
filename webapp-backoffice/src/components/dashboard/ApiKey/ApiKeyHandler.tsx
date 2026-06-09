@@ -153,7 +153,7 @@ const ApiKeyHandler = (props: Props) => {
 													item.api_key_logs[0].created_at
 														.toISOString()
 														.split('T')[0]
-												)
+											  )
 											: 'Aucune'}
 									</i>
 								</div>

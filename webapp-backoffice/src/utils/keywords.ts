@@ -5,5 +5,21 @@ export const excludeKeywords = [
 	'bonjour',
 	'tres',
 	'ras',
-	'beaucoup'
+	'beaucoup',
+	'plus',
+	'fait',
+	'faire',
+	'ete',
+	'avoir',
+	'faut',
+	'cela',
+	'donc',
+	'comme',
+	'quand',
+	'mais',
+	'car',
+	'alors',
+	'aussi',
+	"qu'il",
+	"m'a"
 ];

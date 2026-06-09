@@ -7,6 +7,7 @@ import { FormWithElements } from '@/src/utils/types';
 import { useState, useEffect, useRef } from 'react';
 import { FormStepRenderer } from '@/src/components/form/layouts/FormStepRenderer';
 import Button from '@codegouvfr/react-dsfr/Button';
+import { Alert } from '@codegouvfr/react-dsfr/Alert';
 import Success from '@codegouvfr/react-dsfr/picto/Success';
 import { trpc } from '@/src/utils/trpc';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,7 +17,7 @@ import {
 	FormAnswers,
 	getVisibleBlocks,
 	hasBlockAnswer,
-	hasAllRequiredBlockAnswers,
+	hasAllRequiredBlockAnswers
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -34,17 +35,19 @@ export default function AvisPage({
 	productId,
 	isPreview,
 	isWidget,
-	widgetNonce,
+	widgetNonce
 }: AvisPageProps) {
 	const { classes, cx } = useStyles({ isWidget });
 
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
-	const [reviewId, setReviewId] = useState<{
+	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
+	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
+	const createPromiseRef = useRef<Promise<{
 		id: number;
 		created_at: Date;
-	} | null>(null);
+	} | null> | null>(null);
 
 	// Send content height to parent widget for dynamic resizing
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -58,7 +61,7 @@ export default function AvisPage({
 			const height = el.offsetHeight;
 			window.parent.postMessage(
 				{ source: 'jdma-widget', type: 'resize', height, nonce: widgetNonce },
-				'*',
+				'*'
 			);
 		};
 
@@ -73,7 +76,7 @@ export default function AvisPage({
 	const allSteps = form.form_template.form_template_steps;
 	const steps = allSteps.filter(step => {
 		const isHidden = formConfig?.form_config_displays?.some(
-			d => d.kind === 'step' && d.parent_id === step.id && d.hidden,
+			d => d.kind === 'step' && d.parent_id === step.id && d.hidden
 		);
 		return !isHidden;
 	});
@@ -81,24 +84,26 @@ export default function AvisPage({
 	const currentStep = steps[currentStepIndex];
 
 	const createReview = trpc.review.dynamicCreate.useMutation({
-		onSuccess: data => {
-			setReviewId({
-				id: data.data.id,
-				created_at: data.data.created_at,
-			});
+		onSuccess: () => {
+			setIsRateLimitReached(false);
 		},
 		onError: error => {
+			if (error.data?.httpStatus === 429) {
+				localStorage.removeItem('userId');
+				setIsRateLimitReached(true);
+				return;
+			}
 			console.error('Error creating review:', error);
-		},
+		}
 	});
 
 	const insertOrUpdateReview = trpc.review.dynamicInsertOrUpdate.useMutation({
 		onError: error => {
 			console.error('Error updating review:', error);
-		},
+		}
 	});
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const form = e.currentTarget;
@@ -109,7 +114,8 @@ export default function AvisPage({
 
 		const isLastStep = currentStepIndex === steps.length - 1;
 
-		saveCurrentStep();
+		const saved = await saveCurrentStep();
+		if (!saved) return;
 
 		if (isLastStep) {
 			setIsSubmitted(true);
@@ -117,7 +123,7 @@ export default function AvisPage({
 			if (isWidget && window.parent !== window) {
 				window.parent.postMessage(
 					{ source: 'jdma-widget', type: 'submitted', nonce: widgetNonce },
-					'*',
+					'*'
 				);
 			}
 		} else {
@@ -135,8 +141,8 @@ export default function AvisPage({
 		return Object.values(answers).flat();
 	};
 
-	const saveCurrentStep = () => {
-		if (isPreview) return;
+	const saveCurrentStep = async (): Promise<boolean> => {
+		if (isPreview) return true;
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
@@ -144,7 +150,7 @@ export default function AvisPage({
 			});
 		});
 
-		if (currentStepAnswers.length === 0) return;
+		if (currentStepAnswers.length === 0) return true;
 
 		let userId = localStorage.getItem('userId');
 		if (!userId) {
@@ -152,23 +158,54 @@ export default function AvisPage({
 			localStorage.setItem('userId', userId);
 		}
 
-		if (!reviewId) {
-			createReview.mutate({
-				review: {
-					product_id: productId,
-					button_id: buttonId,
-					form_id: form.id,
-					user_id: userId,
-				},
-				answers: currentStepAnswers,
-			});
-		} else {
+		if (!reviewRef.current && !createPromiseRef.current) {
+			createPromiseRef.current = createReview
+				.mutateAsync({
+					review: {
+						product_id: productId,
+						button_id: buttonId,
+						form_id: form.id,
+						user_id: userId
+					},
+					answers: currentStepAnswers
+				})
+				.then(data => {
+					const identity = {
+						id: data.data.id,
+						created_at: data.data.created_at
+					};
+					reviewRef.current = identity;
+					return identity;
+				})
+				.catch(() => {
+					createPromiseRef.current = null;
+					return null;
+				});
+			return (await createPromiseRef.current) !== null;
+		}
+
+		const review = reviewRef.current;
+		if (review) {
 			insertOrUpdateReview.mutate({
-				review_id: reviewId.id,
-				review_created_at: reviewId.created_at,
-				answers: currentStepAnswers,
+				review_id: review.id,
+				review_created_at: review.created_at,
+				answers: currentStepAnswers
+			});
+			return true;
+		}
+
+		const pendingCreate = createPromiseRef.current;
+		if (pendingCreate) {
+			const identity = await pendingCreate;
+			if (!identity) return false;
+			insertOrUpdateReview.mutate({
+				review_id: identity.id,
+				review_created_at: identity.created_at,
+				answers: currentStepAnswers
 			});
 		}
+
+		return true;
 	};
 
 	const PreviewAlert = () => (
@@ -195,7 +232,7 @@ export default function AvisPage({
 				<div
 					className={cx(
 						classes.container,
-						fr.cx('fr-container--fluid', 'fr-container'),
+						fr.cx('fr-container--fluid', 'fr-container')
 					)}
 				>
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -219,7 +256,7 @@ export default function AvisPage({
 
 	const visibleBlocks = getVisibleBlocks(
 		currentStep.form_template_blocks,
-		formConfig,
+		formConfig
 	);
 	const firstVisibleBlock = visibleBlocks[0];
 
@@ -231,7 +268,7 @@ export default function AvisPage({
 	const hasAllRequiredAnswers = hasAllRequiredBlockAnswers(
 		currentStep.form_template_blocks,
 		answers,
-		formConfig,
+		formConfig
 	);
 
 	return (
@@ -241,7 +278,7 @@ export default function AvisPage({
 			<div
 				className={cx(
 					classes.container,
-					fr.cx('fr-container--fluid', 'fr-container'),
+					fr.cx('fr-container--fluid', 'fr-container')
 				)}
 			>
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
@@ -258,11 +295,21 @@ export default function AvisPage({
 									isWidget={isWidget}
 								/>
 
+								{isRateLimitReached && (
+									<div role="alert">
+										<Alert
+											severity="error"
+											title=""
+											description="Trop de tentatives de dépôt d'avis, veuillez patienter 1h avant de pouvoir re-déposer."
+										/>
+									</div>
+								)}
+
 								<div
 									className={classes.buttonsContainer}
 									style={{
 										justifyContent:
-											isFirstStep && isWidget ? 'center' : 'space-between',
+											isFirstStep && isWidget ? 'center' : 'space-between'
 									}}
 								>
 									{currentStepIndex < steps.length - 1 ? (
@@ -270,7 +317,7 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty}
+											disabled={isFirstAnswerEmpty || isRateLimitReached}
 											type="submit"
 										>
 											Continuer
@@ -279,7 +326,7 @@ export default function AvisPage({
 										<Button
 											priority="primary"
 											type="submit"
-											disabled={!hasAllRequiredAnswers}
+											disabled={!hasAllRequiredAnswers || isRateLimitReached}
 										>
 											Envoyer mon avis
 										</Button>
@@ -311,11 +358,11 @@ export default function AvisPage({
 export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	params,
 	query,
-	locale,
+	locale
 }) => {
 	if (!params?.id || isNaN(parseInt(params?.id as string))) {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 
@@ -328,7 +375,7 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 
 	if (!isPreview && !isWidget && (!buttonId || isNaN(buttonId))) {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 
@@ -337,13 +384,13 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 	if (!isPreview && !isWidget) {
 		const button = await prisma.button.findUnique({
 			where: { id: buttonId },
-			select: { id: true, form_id: true },
+			select: { id: true, form_id: true }
 		});
 
 		if (!button || button.form_id !== formId) {
 			await prisma.$disconnect();
 			return {
-				notFound: true,
+				notFound: true
 			};
 		}
 	}
@@ -357,37 +404,37 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 						include: {
 							form_template_blocks: {
 								include: {
-									options: true,
-								},
-							},
-						},
-					},
-				},
+									options: true
+								}
+							}
+						}
+					}
+				}
 			},
 			form_configs: {
 				include: {
 					form_config_displays: true,
-					form_config_labels: true,
+					form_config_labels: true
 				},
 				orderBy: {
-					created_at: 'desc',
+					created_at: 'desc'
 				},
-				take: 1,
+				take: 1
 			},
 			product: {
 				select: {
 					id: true,
-					title: true,
-				},
-			},
-		},
+					title: true
+				}
+			}
+		}
 	});
 
 	await prisma.$disconnect();
 
 	if (!form) {
 		return {
-			notFound: true,
+			notFound: true
 		};
 	}
 
@@ -401,8 +448,8 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 					form_config_displays:
 						parsedConfig.displays || parsedConfig.form_config_displays || [],
 					form_config_labels:
-						parsedConfig.labels || parsedConfig.form_config_labels || [],
-				},
+						parsedConfig.labels || parsedConfig.form_config_labels || []
+				}
 			];
 		} catch (error) {
 			console.error('Failed to parse formConfig:', error);
@@ -417,8 +464,8 @@ export const getServerSideProps: GetServerSideProps<AvisPageProps> = async ({
 			isPreview,
 			isWidget,
 			widgetNonce,
-			...(await serverSideTranslations(locale ?? 'fr', ['common'])),
-		},
+			...(await serverSideTranslations(locale ?? 'fr', ['common']))
+		}
 	};
 };
 
@@ -432,8 +479,8 @@ const useStyles = tss
 			overflow: 'inherit',
 			padding: isWidget ? `0` : `${fr.spacing('12v')} 0`,
 			[fr.breakpoints.up('md')]: {
-				padding: `0`,
-			},
+				padding: `0`
+			}
 		},
 		blueSection: {
 			display: 'none',
@@ -443,49 +490,49 @@ const useStyles = tss
 				textAlign: 'center',
 				fontSize: '2.5rem',
 				margin: 0,
-				color: fr.colors.decisions.background.flat.blueFrance.default,
+				color: fr.colors.decisions.background.flat.blueFrance.default
 			},
 			[fr.breakpoints.up('md')]: {
 				display: 'block',
-				height: `${blueSectionPxHeight}px`,
-			},
+				height: `${blueSectionPxHeight}px`
+			}
 		},
 		formSection: {
 			backgroundColor: fr.colors.decisions.background.default.grey.default,
 			...fr.spacing('padding', {
 				topBottom: isWidget ? '2v' : 'auto',
-				rightLeft: isWidget ? '4v' : '6v',
+				rightLeft: isWidget ? '4v' : '6v'
 			}),
 			// ...(isWidget && { paddingBottom: '80px' }),
 			[fr.breakpoints.up('md')]: {
 				transform: `translateY(-${blueSectionPxHeight / 2}px)`,
-				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' }),
-			},
+				...fr.spacing('padding', { topBottom: '8v', rightLeft: '16v' })
+			}
 		},
 		buttonsContainer: {
 			display: 'flex',
 			flexDirection: 'row-reverse',
 			justifyContent: 'space-between',
-			marginTop: fr.spacing(isWidget ? '4v' : '8v'),
+			marginTop: fr.spacing(isWidget ? '4v' : '8v')
 		},
 		thanksSection: {
 			textAlign: 'center',
 			h1: {
-				color: fr.colors.decisions.background.flat.blueFrance.default,
+				color: fr.colors.decisions.background.flat.blueFrance.default
 			},
 			svg: {
 				width: fr.spacing('20v'),
-				height: fr.spacing('20v'),
-			},
+				height: fr.spacing('20v')
+			}
 		},
 		notice: {
 			...fr.typography[19].style,
 			p: {
-				fontWeight: 'normal',
+				fontWeight: 'normal'
 			},
 			'.fr-notice__title': {
 				marginLeft: `-${fr.spacing('2v')}`,
-				paddingTop: '1px',
-			},
-		},
+				paddingTop: '1px'
+			}
+		}
 	}));

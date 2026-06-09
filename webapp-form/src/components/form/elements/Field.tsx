@@ -28,14 +28,14 @@ export const Field = (props: Props) => {
 	const { t } = useTranslation('common');
 
 	const templateField = formTemplateStep?.form_template_blocks.find(
-		ftb => ftb.label === t(field.label, { lng: 'fr' }),
+		ftb => ftb.label === t(field.label, { lng: 'fr' })
 	);
 
 	const displayConfig = formConfig?.form_config_displays.find(
-		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id,
+		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id
 	);
 	const labelConfig = formConfig?.form_config_labels.find(
-		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id,
+		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id
 	);
 
 	if (field.conditions) {
@@ -127,8 +127,9 @@ export const Field = (props: Props) => {
 						hintText={
 							templateField?.upLabel ? (
 								<p
+									className={fr.cx('fr-hint-text')}
 									dangerouslySetInnerHTML={{
-										__html: sanitizeRichHtml(templateField.upLabel),
+										__html: sanitizeRichHtml(templateField.upLabel)
 									}}
 								></p>
 							) : undefined
@@ -143,10 +144,10 @@ export const Field = (props: Props) => {
 							onChange: e => {
 								setOpinion({
 									...opinion,
-									[field.name]: e.target.value.slice(0, 15000),
+									[field.name]: e.target.value.slice(0, 15000)
 								});
 							},
-							autoFocus: true,
+							autoFocus: true
 						}}
 						textArea
 					/>
@@ -178,9 +179,9 @@ export const Field = (props: Props) => {
 						onChange: e => {
 							setOpinion({
 								...opinion,
-								[field.name]: e.target.value,
+								[field.name]: e.target.value
 							});
-						},
+						}
 					}}
 				/>
 			);
@@ -193,22 +194,22 @@ const useStyles = tss
 	.create(({ nbItems }) => ({
 		smallText: {
 			fontSize: '0.8rem',
-			color: fr.colors.decisions.text.disabled.grey.default,
+			color: fr.colors.decisions.text.disabled.grey.default
 		},
 		radioContainer: {
 			display: 'flex',
 			alignItems: 'center',
 			marginTop: fr.spacing('4v'),
 			['input:checked + label']: {
-				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
+				borderColor: fr.colors.decisions.background.flat.blueFrance.default
 			},
 			['input:focus-visible + label']: {
 				outlineOffset: '2px',
-				outline: '2px solid #4D90FE',
+				outline: '2px solid #4D90FE'
 			},
 			[fr.breakpoints.down('md')]: {
-				flexDirection: 'column',
-			},
+				flexDirection: 'column'
+			}
 		},
 		radioInput: {
 			width: '100%',
@@ -218,10 +219,10 @@ const useStyles = tss
 			alignItems: 'center',
 			cursor: 'pointer',
 			img: {
-				marginRight: fr.spacing('2v'),
+				marginRight: fr.spacing('2v')
 			},
 			['&:hover']: {
-				borderColor: fr.colors.decisions.background.alt.grey.active,
+				borderColor: fr.colors.decisions.background.alt.grey.active
 			},
 			[fr.breakpoints.up('md')]: {
 				flexDirection: 'column',
@@ -229,9 +230,9 @@ const useStyles = tss
 				padding: fr.spacing('1v'),
 				img: {
 					marginTop: fr.spacing('2v'),
-					marginRight: 0,
-				},
-			},
+					marginRight: 0
+				}
+			}
 		},
 		fieldset: {
 			width: '100%',
@@ -241,28 +242,28 @@ const useStyles = tss
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
-				width: '100%',
+				width: '100%'
 			},
 			[fr.breakpoints.up('md')]: {
 				width: 'initial',
 				ul: {
 					width: 'initial',
-					columns: nbItems,
-				},
-			},
+					columns: nbItems
+				}
+			}
 		},
 		inputContainer: {
 			display: 'flex',
-			flexDirection: 'column',
+			flexDirection: 'column'
 		},
 		textCount: {
-			alignSelf: 'flex-end',
+			alignSelf: 'flex-end'
 		},
 		infoText: {
 			color: fr.colors.decisions.text.default.info.default,
 			fontSize: '0.8rem',
 			'.fr-icon-info-fill::before': {
-				'--icon-size': '1rem',
-			},
-		},
+				'--icon-size': '1rem'
+			}
+		}
 	}));

@@ -55,8 +55,8 @@ const BarMultipleQuestionViz = ({
 				form_id: oldFormFieldCodes.includes(fieldCode)
 					? 1
 					: newFormFieldCodes.includes(fieldCode)
-						? formId
-						: -1
+					? formId
+					: -1
 			},
 			{
 				initialData: {

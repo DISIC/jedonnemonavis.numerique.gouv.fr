@@ -24,7 +24,7 @@ export const TextAreaBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget,
+	isWidget
 }: Props) => {
 	const { classes, cx } = useStyles();
 	const textareaAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -63,11 +63,11 @@ export const TextAreaBlock = ({
 							...prev,
 							[fieldKey]: {
 								block_id: block.id,
-								answer_text: value,
-							},
+								answer_text: value
+							}
 						}));
 					},
-					autoFocus: true,
+					autoFocus: true
 				}}
 				state={textareaValue.length > 15000 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 15000 caractères"
@@ -83,19 +83,19 @@ export const TextAreaBlock = ({
 const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 	inputContainer: {
 		display: 'flex',
-		flexDirection: 'column',
+		flexDirection: 'column'
 	},
 	textCount: {
 		alignSelf: 'flex-end',
 		marginTop: fr.spacing('1v'),
 		marginBottom: 0,
-		marginRight: fr.spacing('1v'),
+		marginRight: fr.spacing('1v')
 	},
 	hint: {
 		fontSize: '0.9rem',
 		color: fr.colors.decisions.text.mention.grey.default,
 		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`,
+		marginTop: `-${fr.spacing('2v')}`
 	},
 	notice: {
 		background: 'none',
@@ -108,9 +108,9 @@ const useStyles = tss.withName({ TextAreaBlock }).create(() => ({
 				fontSize: '0.75rem',
 				'&::before': {
 					'--icon-size': '1rem',
-					marginRight: fr.spacing('1v'),
-				},
-			},
-		},
-	},
+					marginRight: fr.spacing('1v')
+				}
+			}
+		}
+	}
 }));
