@@ -171,11 +171,31 @@ const ReviewsTab = (props: Props) => {
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
 	const isTableFetching = isFetchingReviews && !isLoadingReviews;
 
-	// Classification catalogue, for resolving a review's class code → human label.
+	// Classification catalogue → resolve a review's class code to its problématique label
+	// AND its parent thème label (so the badge can show "Thème › Problématique").
 	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
-	const categoryLabels = new Map<string, string>(
-		(catalogueData?.data ?? []).map(c => [c.code, c.label] as const)
-	);
+	const categoryInfo = (() => {
+		const cats = catalogueData?.data ?? [];
+		const themeLabelById = new Map<number, string>(
+			cats.filter(c => c.level === 1).map(c => [c.id, c.label] as const)
+		);
+		return new Map<string, { label: string; themeLabel: string }>(
+			cats
+				.filter(c => c.level === 2)
+				.map(
+					c =>
+						[
+							c.code,
+							{
+								label: c.label,
+								themeLabel: c.parent_id
+									? themeLabelById.get(c.parent_id) ?? ''
+									: ''
+							}
+						] as const
+				)
+		);
+	})();
 
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
@@ -809,7 +829,7 @@ const ReviewsTab = (props: Props) => {
 																review={review}
 																search={validatedSearch}
 																form={form}
-																categoryLabels={categoryLabels}
+																categoryInfo={categoryInfo}
 																isSelected={selectedReview?.id === review.id}
 																onSelectReview={handleSelectReview}
 																rowRef={el => {

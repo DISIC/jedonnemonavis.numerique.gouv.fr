@@ -63,7 +63,7 @@ const ReviewTableRow = ({
 	review,
 	search,
 	form,
-	categoryLabels,
+	categoryInfo,
 	isSelected,
 	onSelectReview,
 	rowRef
@@ -71,7 +71,7 @@ const ReviewTableRow = ({
 	review: ReviewPartialWithRelations;
 	search: string;
 	form: FormWithElements;
-	categoryLabels?: Map<string, string>;
+	categoryInfo?: Map<string, { label: string; themeLabel: string }>;
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	rowRef?: (el: HTMLTableRowElement | null) => void;
@@ -84,8 +84,14 @@ const ReviewTableRow = ({
 	const classification = review.classification;
 	const classCode =
 		classification?.validated_code ?? classification?.predicted_code ?? null;
+	const classMeta = classCode ? categoryInfo?.get(classCode) : undefined;
+	// Show "Thème › Problématique" (fall back to the raw code if not in the catalogue).
 	const classLabel = classCode
-		? categoryLabels?.get(classCode) ?? classCode
+		? classMeta
+			? classMeta.themeLabel
+				? `${classMeta.themeLabel} › ${classMeta.label}`
+				: classMeta.label
+			: classCode
 		: null;
 	const isValidatedClass = !!classification?.validated_code;
 	const isLowConfidence =
