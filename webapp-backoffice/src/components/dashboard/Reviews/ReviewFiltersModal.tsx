@@ -88,12 +88,15 @@ const ReviewFiltersModal = (props: Props) => {
 	const childrenOfTheme = (themeId: number) =>
 		(catalogueData?.data ?? []).filter(c => c.parent_id === themeId);
 	const toggleClass = (code: string) => {
-		setTmpFilters(prev => ({
-			...prev,
-			classes: prev.classes.includes(code)
-				? prev.classes.filter(c => c !== code)
-				: [...prev.classes, code]
-		}));
+		setTmpFilters(prev => {
+			const current = prev.classes ?? [];
+			return {
+				...prev,
+				classes: current.includes(code)
+					? current.filter(c => c !== code)
+					: [...current, code]
+			};
+		});
 	};
 
 	const handleReset = () => {
@@ -240,7 +243,7 @@ const ReviewFiltersModal = (props: Props) => {
 										label: c.label,
 										nativeInputProps: {
 											name: `classe-${c.code}`,
-											checked: tmpFilters.classes.includes(c.code),
+											checked: (tmpFilters.classes ?? []).includes(c.code),
 											onChange: () => toggleClass(c.code)
 										}
 									}))}
