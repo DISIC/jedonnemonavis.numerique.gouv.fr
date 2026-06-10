@@ -19,6 +19,7 @@ export async function loadActiveCatalogue(
 		code: c.code,
 		label: c.label,
 		description: c.description,
+		theme_code: c.parent?.code ?? '',
 		theme_label: c.parent?.label ?? ''
 	}));
 }

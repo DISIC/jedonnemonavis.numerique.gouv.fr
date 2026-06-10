@@ -4,6 +4,7 @@ import {
 	type ClassificationCategoryLite
 } from '@/src/lib/albert';
 import { loadActiveCatalogue } from './catalog';
+import { writeAnswerClasse } from './es';
 
 // Small in-process cache so we don't reload the small catalogue on every single job.
 let catalogueCache: { at: number; data: ClassificationCategoryLite[] } | null =
@@ -31,15 +32,15 @@ export async function classifyReview(
 	reviewId: number,
 	createdAt: Date
 ): Promise<void> {
-	// Load the verbatim free-text answer for this review.
+	// Load the verbatim free-text answer for this review (its id is the ES document id).
 	const verbatim = await prisma.answer.findFirst({
 		where: { review_id: reviewId, field_code: 'verbatim' },
 		orderBy: { created_at: 'desc' },
-		select: { answer_text: true }
+		select: { id: true, answer_text: true }
 	});
 
 	const text = verbatim?.answer_text?.trim();
-	if (!text) {
+	if (!verbatim || !text) {
 		console.log(
 			`[classification] Review ${reviewId}: no verbatim text, skipping.`
 		);
@@ -55,6 +56,8 @@ export async function classifyReview(
 	}
 
 	const result = await classifyVerbatim(text, categories);
+	const themeCode =
+		categories.find(c => c.code === result.code)?.theme_code ?? '';
 
 	await prisma.reviewClassification.upsert({
 		where: {
@@ -79,6 +82,15 @@ export async function classifyReview(
 			prompt_version: result.prompt_version,
 			status: 'predicted'
 		}
+	});
+
+	// Best-effort denormalisation into Elasticsearch for Kibana stats / category exploration.
+	// Never throws (Postgres is the source of truth).
+	await writeAnswerClasse(verbatim.id, {
+		classe: result.code,
+		classe_theme: themeCode,
+		classe_score: result.score,
+		classe_source: 'predicted'
 	});
 
 	console.log(

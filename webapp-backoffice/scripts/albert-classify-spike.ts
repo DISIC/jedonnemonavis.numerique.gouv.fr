@@ -57,6 +57,7 @@ async function loadCatalogue(): Promise<ClassificationCategoryLite[]> {
 		code: c.code,
 		label: c.label,
 		description: c.description,
+		theme_code: c.parent?.code ?? '',
 		theme_label: c.parent?.label ?? ''
 	}));
 }

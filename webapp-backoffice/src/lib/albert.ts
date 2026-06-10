@@ -29,6 +29,9 @@ export type ClassificationCategoryLite = {
 	code: string;
 	label: string;
 	description?: string | null;
+	/** Parent theme (level-1) stable code — denormalised into ES as `classe_theme`. */
+	theme_code: string;
+	/** Parent theme (level-1) human label — used in the prompt for disambiguation. */
 	theme_label: string;
 };
 

@@ -90,8 +90,10 @@ async function main() {
 main()
 	.catch(e => {
 		console.error(e);
-		process.exit(1);
+		process.exitCode = 1;
 	})
 	.finally(async () => {
 		await prisma.$disconnect();
+		// Force exit: the ES client may keep idle sockets alive otherwise.
+		process.exit(process.exitCode ?? 0);
 	});
