@@ -368,73 +368,10 @@ const DashBoard = () => {
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-									<Select
-										label="Trier Par"
-										nativeSelectProps={{
-											name: 'my-select',
-											value: filters.filter,
-											onChange: event =>
-												updateFilters({
-													...filters,
-													filter: event.target.value
-												})
-										}}
-									>
-										<option value="title:asc">Nom A à Z</option>
-										<option value="entity.name:asc">Organisation A à Z</option>
-										<option value="created_at:desc">Date de création</option>
-										<option value="updated_at:desc">Date de mise à jour</option>
-									</Select>
-								</div>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-									<Autocomplete
-										id="filter-entity"
-										disablePortal
-										sx={{ width: '100%' }}
-										options={entities
-											.map(entity => ({
-												label: `${entity.name} (${entity.acronym})`,
-												value: entity.id
-											}))
-											.filter(
-												entity =>
-													!filters.filterEntity.some(
-														filter => filter.value === entity.value
-													)
-											)}
-										onChange={(_, option) => {
-											if (option)
-												updateFilters({
-													...filters,
-													filterEntity: [...filters.filterEntity, option],
-													currentPage: 1
-												});
-										}}
-										noOptionsText="Aucune organisation trouvée"
-										inputValue={inputValue}
-										onInputChange={(event, newInputValue) => {
-											setInputValue(newInputValue);
-										}}
-										renderInput={params => (
-											<div ref={params.InputProps.ref}>
-												<label htmlFor="filter-entity" className="fr-label">
-													Filtrer par organisation
-												</label>
-												<input
-													{...params.inputProps}
-													className={params.inputProps.className + ' fr-input'}
-													placeholder="Sélectionner une option"
-													type="search"
-												/>
-											</div>
-										)}
-									/>
-								</div>
 								<div
 									className={fr.cx(
 										'fr-col-12',
-										'fr-col-md-4',
+										'fr-col-md-5',
 										'fr-col--bottom'
 									)}
 								>
@@ -482,7 +419,52 @@ const DashBoard = () => {
 									</form>
 								</div>
 
-								<div className={fr.cx('fr-col-12', 'fr-col-md-2')}>
+								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
+									<Autocomplete
+										id="filter-entity"
+										disablePortal
+										sx={{ width: '100%' }}
+										options={entities
+											.map(entity => ({
+												label: `${entity.name} (${entity.acronym})`,
+												value: entity.id
+											}))
+											.filter(
+												entity =>
+													!filters.filterEntity.some(
+														filter => filter.value === entity.value
+													)
+											)}
+										onChange={(_, option) => {
+											if (option)
+												updateFilters({
+													...filters,
+													filterEntity: [...filters.filterEntity, option],
+													currentPage: 1
+												});
+										}}
+										noOptionsText="Aucune organisation trouvée"
+										inputValue={inputValue}
+										onInputChange={(event, newInputValue) => {
+											setInputValue(newInputValue);
+										}}
+										renderInput={params => (
+											<div ref={params.InputProps.ref}>
+												<label htmlFor="filter-entity" className="fr-label">
+													Filtrer par organisation
+												</label>
+												<input
+													{...params.inputProps}
+													className={params.inputProps.className + ' fr-input'}
+													placeholder="Sélectionner une option"
+													type="search"
+												/>
+											</div>
+										)}
+									/>
+								</div>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 									<Select
 										label="Vue"
 										nativeSelectProps={{
@@ -506,7 +488,9 @@ const DashBoard = () => {
 										}}
 									>
 										<option value="all">Services actifs</option>
-										<option value="favorites">Mes favoris</option>
+										<option value="favorites">
+											Services favoris uniquement
+										</option>
 										<option value="archived">Services archivés</option>
 									</Select>
 								</div>
