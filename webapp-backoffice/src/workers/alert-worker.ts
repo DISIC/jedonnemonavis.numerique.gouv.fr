@@ -19,6 +19,13 @@ declare const globalThis: {
 export function startAlertWorker(): void {
 	if (globalThis._alertWorker) return;
 
+	if (!redis) {
+		console.warn(
+			'[alert-worker] REDIS_URL not set — alert worker not started.'
+		);
+		return;
+	}
+
 	const worker = new Worker<FormAlertJobData>('form-alerts', processAlertJob, {
 		connection: redis,
 		concurrency: CONCURRENCY_LIMIT,

@@ -24,6 +24,9 @@ export async function onReviewCreated(
 
 		if (!form || form.isDeleted) return;
 
+		// No Redis configured (e.g. dev env without a Redis addon) → graceful no-op.
+		if (!formAlertQueue) return;
+
 		const hasSubscriber = await prisma.formAlertSubscription.findFirst({
 			where: { form_id: formId, enabled: true },
 			select: { id: true }

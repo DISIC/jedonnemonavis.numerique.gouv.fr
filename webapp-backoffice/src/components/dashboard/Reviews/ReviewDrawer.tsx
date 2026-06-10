@@ -23,6 +23,7 @@ import { Drawer } from '@mui/material';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import ClassificationEditor from './ClassificationEditor';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -383,7 +384,11 @@ const ReviewDrawerContent = ({
 					</React.Fragment>
 				);
 			})}
-			<div className={classes.metadataSection}>
+			{review.answers?.some(a => a.field_code === 'verbatim') && (
+					<ClassificationEditor key={review.id} review={review} />
+				)}
+
+				<div className={classes.metadataSection}>
 				{mainAnswer && mainAnswer.intention && (
 					<>
 						<div className={cx(classes.infoLine)}>

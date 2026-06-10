@@ -67,6 +67,13 @@ enum AnswerIntention {
   neutral
 }
 
+enum ClassificationStatus {
+  predicted
+  validated
+  corrected
+  failed
+}
+
 enum StatusExport {
   idle
   processing
@@ -200,6 +207,7 @@ model User {
   notifications_frequency NotificationFrequency @default(daily)
   alerts_enabled          Boolean               @default(true)
   form_alert_subscriptions FormAlertSubscription[]
+  classification_validations ReviewClassification[]
   UserEvent               UserEvent[]
   proconnect_account      Boolean?
 
@@ -444,6 +452,8 @@ model Review {
 
   answers Answer[]
 
+  classification ReviewClassification?
+
   created_at DateTime @default(now())
 
   @@id([id, created_at])
@@ -484,6 +494,61 @@ model Answer {
   @@index([review_id, review_created_at, field_code])
   @@index([parent_answer_id, created_at])
   @@index([review_id, field_code])
+}
+
+/// Hierarchical, JDMA-defined catalogue of verbatim categories (thème → problématique).
+/// Frozen for v1 but stored in DB so it can evolve under human control without a redeploy.
+/// `code` (not label) is the stable identifier injected into the LLM prompt and stored on
+/// ReviewClassification + denormalised into Elasticsearch.
+model ClassificationCategory {
+  id          Int                      @id @default(autoincrement())
+  level       Int // 1 = thème, 2 = problématique
+  code        String                   @unique
+  label       String
+  description String? // helps the LLM disambiguate; not necessarily shown to users
+  parent      ClassificationCategory?  @relation("CategoryTree", fields: [parent_id], references: [id])
+  parent_id   Int?
+  children    ClassificationCategory[] @relation("CategoryTree")
+  active      Boolean                  @default(true)
+  position    Int                      @default(0)
+  created_at  DateTime                 @default(now())
+  updated_at  DateTime                 @updatedAt
+
+  @@index([parent_id])
+  @@index([level, active])
+}
+
+/// One current classification per review verbatim. Stores both the LLM prediction and the
+/// human-validated value (validation loop) — this doubles as a quality metric and as the
+/// training set for a future fine-tuned FR model. Postgres is the source of truth; the
+/// resulting class is denormalised into the `jdma-answers` Elasticsearch index for stats.
+model ReviewClassification {
+  id                Int      @id @default(autoincrement())
+  review            Review   @relation(fields: [review_id, review_created_at], references: [id, created_at], onDelete: Cascade)
+  review_id         Int
+  review_created_at DateTime
+
+  // LLM prediction. *_code values are ClassificationCategory.code (denormalised on purpose:
+  // robust to catalogue label changes, and mirrors the ES keyword field).
+  predicted_code  String
+  predicted_score Float
+  model_name      String // e.g. "Ministral-3-8B" — traceability + A/B on model choice
+  prompt_version  String // versions the (prompt + catalogue) pair used for this prediction
+
+  // Human validation loop
+  validated_code String?
+  validatedBy    User?     @relation(fields: [validated_by], references: [id], onDelete: SetNull)
+  validated_by   Int?
+  validated_at   DateTime?
+
+  status     ClassificationStatus @default(predicted)
+  created_at DateTime             @default(now())
+  updated_at DateTime             @updatedAt
+
+  @@unique([review_id, review_created_at])
+  @@index([predicted_code])
+  @@index([validated_code])
+  @@index([status])
 }
 
 model Export {

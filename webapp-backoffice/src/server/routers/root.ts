@@ -20,6 +20,7 @@ import { formRouter } from './form';
 import { formConfigRouter } from './formConfig';
 import { formAlertRouter } from './formAlert';
 import { userDetailsRouter } from './userDetails';
+import { classificationRouter } from './classification';
 
 export const appRouter = router({
 	user: userRouter,
@@ -42,7 +43,8 @@ export const appRouter = router({
 	reviewViewLog: reviewViewLogRouter,
 	form: formRouter,
 	formConfig: formConfigRouter,
-	formAlert: formAlertRouter
+	formAlert: formAlertRouter,
+	classification: classificationRouter
 });
 
 export type AppRouter = typeof appRouter;

@@ -1,4 +1,5 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
+import { trpc } from '@/src/utils/trpc';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -82,13 +83,30 @@ const ReviewFiltersModal = (props: Props) => {
 		return fieldFilter?.values.includes(value) || false;
 	};
 
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const themes = (catalogueData?.data ?? []).filter(c => c.level === 1);
+	const childrenOfTheme = (themeId: number) =>
+		(catalogueData?.data ?? []).filter(c => c.parent_id === themeId);
+	const toggleClass = (code: string) => {
+		setTmpFilters(prev => {
+			const current = prev.classes ?? [];
+			return {
+				...prev,
+				classes: current.includes(code)
+					? current.filter(c => c !== code)
+					: [...current, code]
+			};
+		});
+	};
+
 	const handleReset = () => {
 		const emptyFilters: ReviewFiltersType = {
 			needVerbatim: false,
 			needOtherDifficulties: false,
 			needOtherHelp: false,
 			buttonId: [],
-			fields: []
+			fields: [],
+			classes: []
 		};
 		setTmpFilters(emptyFilters);
 		push(['trackEvent', 'Product - Avis', 'Reinit-filters']);
@@ -209,6 +227,33 @@ const ReviewFiltersModal = (props: Props) => {
 					</Fragment>
 				);
 			})}
+
+			{themes.length > 0 && (
+				<>
+					{filterableBlocks.length > 0 && (
+						<hr className={cx(classes.separator)} />
+					)}
+					<div className={cx(classes.section)}>
+						<p className={cx(classes.subtitle)}>Catégorie (classification IA)</p>
+						{themes.map(theme => (
+							<div key={theme.id} className={fr.cx('fr-mb-2w')}>
+								<p className={fr.cx('fr-text--sm', 'fr-mb-1v')}>{theme.label}</p>
+								<Checkbox
+									options={childrenOfTheme(theme.id).map(c => ({
+										label: c.label,
+										nativeInputProps: {
+											name: `classe-${c.code}`,
+											checked: (tmpFilters.classes ?? []).includes(c.code),
+											onChange: () => toggleClass(c.code)
+										}
+									}))}
+									state="default"
+								/>
+							</div>
+						))}
+					</div>
+				</>
+			)}
 
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
 				<ul className={cx(classes.listContainer)}>

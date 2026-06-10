@@ -47,6 +47,7 @@ export const dynamicCreateReviewMutation = async ({
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);
+	// Classification is enqueued from createOrUpdateAnswers when the verbatim is recorded.
 
 	return { data: newReview };
 };

@@ -454,6 +454,13 @@ declare const globalThis: {
 export function startExportWorker(): void {
 	if (globalThis._exportWorker) return;
 
+	if (!redis) {
+		console.warn(
+			'[export-worker] REDIS_URL not set — export worker not started.'
+		);
+		return;
+	}
+
 	validateS3EnvVars();
 
 	const worker = new Worker<ExportJobData>('exports', processExportJob, {
