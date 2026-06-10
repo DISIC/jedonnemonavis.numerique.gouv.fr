@@ -19,7 +19,7 @@ const DEFAULT_MODEL = process.env.ALBERT_CHAT_MODEL || 'openweight-small';
  * Bumped whenever the prompt or the structured-output contract changes. Stored on each
  * ReviewClassification so predictions can be tied back to the exact prompt that produced them.
  */
-export const CLASSIFICATION_PROMPT_VERSION = 'classif-v1';
+export const CLASSIFICATION_PROMPT_VERSION = 'classif-v2';
 
 export function isAlbertConfigured(): boolean {
 	return Boolean(BASE_URL && API_KEY);
@@ -60,17 +60,27 @@ function buildCatalogueBlock(categories: ClassificationCategoryLite[]): string {
 function buildSystemPrompt(categories: ClassificationCategoryLite[]): string {
 	return [
 		"Tu es un classifieur de verbatims d'usagers sur des démarches administratives en ligne.",
-		'On te donne un commentaire libre rédigé par un usager. Tu dois le ranger dans EXACTEMENT',
-		'une seule catégorie parmi le catalogue ci-dessous, en renvoyant son code.',
+		"Le commentaire est censé être un RETOUR D'EXPÉRIENCE sur l'utilisation de la démarche",
+		'en ligne : ce qui a bien ou mal fonctionné pour l\'usager. Tu dois le ranger dans',
+		'EXACTEMENT une seule catégorie du catalogue ci-dessous, en renvoyant son code.',
 		'',
 		'Catalogue des catégories (code (thème › problématique) — description) :',
 		buildCatalogueBlock(categories),
 		'',
-		"Règles :",
-		"- Choisis le code le plus pertinent. Un seul.",
-		"- Si le commentaire ne correspond à aucune catégorie, est trop court, vide, hors-sujet",
-		"  ou trop ambigu pour décider, utilise le code « autre_inclassable ».",
-		"- « score » exprime ta confiance dans [0,1] (1 = certain, 0 = très incertain).",
+		'Règles :',
+		'- Choisis le code le plus pertinent. Un seul.',
+		"- IMPORTANT — hors-sujet : si le commentaire n'est PAS un retour sur l'expérience",
+		"  d'utilisation de la démarche, classe-le en « autre_inclassable ». C'est notamment le",
+		'  cas des DEMANDES DIRECTES adressées à l\'administration (ex. « je souhaite bénéficier',
+		"  d'une aide », « pouvez-vous m'accorder… », une question personnelle, l'exposé d'une",
+		'  situation), des simples salutations/remerciements sans contenu, et de tout message',
+		"  hors-sujet — MÊME s'il contient des mots comme « aide », « support » ou « contact ».",
+		'- Les problématiques d\'« Accompagnement et support » désignent une PLAINTE sur le manque',
+		"  d'aide, de contact ou sur les délais DU SERVICE — PAS un usager qui sollicite une aide.",
+		'- Utilise aussi « autre_inclassable » si le commentaire est vide, trop court ou trop',
+		'  ambigu pour décider.',
+		'- « score » exprime ta confiance dans [0,1] (1 = certain, 0 = très incertain). Mets un',
+		'  score bas quand tu hésites.',
 		'- Réponds UNIQUEMENT via le format structuré demandé, sans texte additionnel.'
 	].join('\n');
 }
