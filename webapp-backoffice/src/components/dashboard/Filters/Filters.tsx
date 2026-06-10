@@ -84,6 +84,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 					0
 				);
 			}
+			if (reviewFilters.classes) count += reviewFilters.classes.length;
 			return count;
 		}
 		return 0;
@@ -121,6 +122,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 			if (!rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
 				return true;
 			if (rf.fields?.some(f => f.values.length > 0)) return true;
+			if (rf.classes?.length > 0) return true;
 		}
 		if (
 			filterKey === 'productActivityLogs' &&
