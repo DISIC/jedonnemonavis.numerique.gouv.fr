@@ -28,9 +28,10 @@ const ClassificationEditor = ({
 	const labelByCode = new Map(categories.map(c => [c.code, c.label] as const));
 
 	const classification = review.classification;
-	const currentCode =
-		classification?.validated_code ?? classification?.predicted_code ?? '';
-	const [code, setCode] = useState(currentCode);
+	const validatedCode = classification?.validated_code ?? '';
+	const predictedCode = classification?.predicted_code ?? '';
+	// Default selection: the validated value if it exists, otherwise the IA prediction.
+	const [code, setCode] = useState(validatedCode || predictedCode);
 
 	const validate = trpc.classification.validate.useMutation({
 		onSuccess: () => {
@@ -38,7 +39,11 @@ const ClassificationEditor = ({
 		}
 	});
 
-	const dirty = code !== '' && code !== currentCode;
+	// Can save when a category is selected and it differs from the already-validated one.
+	// This covers BOTH confirming the IA prediction as-is (validatedCode empty) AND correcting.
+	const canSave = code !== '' && code !== validatedCode;
+	const isConfirmingPrediction =
+		!classification?.validated_code && code === predictedCode;
 
 	const handleSave = () => {
 		if (review.id === undefined || !review.created_at) return;
@@ -83,6 +88,12 @@ const ClassificationEditor = ({
 				</p>
 			)}
 
+			{!classification?.validated_code && classification && (
+				<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
+					Prédiction de l'IA non validée — confirmez-la ou corrigez-la.
+				</p>
+			)}
+
 			<Select
 				label=""
 				nativeSelectProps={{
@@ -110,10 +121,14 @@ const ClassificationEditor = ({
 			<Button
 				size="small"
 				priority="secondary"
-				disabled={!dirty || validate.isLoading}
+				disabled={!canSave || validate.isLoading}
 				onClick={handleSave}
 			>
-				{validate.isLoading ? 'Enregistrement…' : 'Valider la catégorie'}
+				{validate.isLoading
+					? 'Enregistrement…'
+					: isConfirmingPrediction
+					? "Valider la prédiction de l'IA"
+					: 'Valider cette catégorie'}
 			</Button>
 
 			{validate.isSuccess && (
