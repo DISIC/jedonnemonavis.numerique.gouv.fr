@@ -168,7 +168,7 @@ const DashboardTab = ({
 								a => a.field_code === 'satisfaction'
 							);
 							return (
-								<div className={cx(classes.reviewCard)}>
+								<div key={review.id} className={cx(classes.reviewCard)}>
 									{satisfactionReview?.intention && (
 										<Badge
 											className={cx(classes.badge, fr.cx('fr-mb-4v'))}
