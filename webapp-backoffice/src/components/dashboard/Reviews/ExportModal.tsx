@@ -1,12 +1,15 @@
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getExportSummaryLabels, parseExportParams } from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
+import { Button } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useSession } from 'next-auth/react';
 import React from 'react';
+import { tss } from 'tss-react/dsfr';
 
 interface Props {
 	modal: CustomModalProps;
@@ -18,13 +21,22 @@ interface Props {
 	onExportCreated: (exportId: number) => void;
 	hasExportsInProgress: boolean;
 	form: FormWithElements;
+	buttons: Button[];
 }
 
 const ExportModal = (props: Props) => {
-	const { modal, counts, form, params, onExportCreated, hasExportsInProgress } =
-		props;
+	const {
+		modal,
+		counts,
+		form,
+		params,
+		onExportCreated,
+		hasExportsInProgress,
+		buttons
+	} = props;
 	const { data: session } = useSession({ required: true });
 	const modalOpen = useIsModalOpen(modal);
+	const { classes, cx } = useStyles();
 
 	const [choice, setChoice] = React.useState<'all' | 'filtered' | null>(
 		'filtered'
@@ -53,6 +65,11 @@ const ExportModal = (props: Props) => {
 		setStartDate(JSON.parse(params).startDate || null);
 		setEndDate(JSON.parse(params).endDate || null);
 	}, [params]);
+
+	const currentFiltersLabels = React.useMemo(
+		() => getExportSummaryLabels(parseExportParams(params), buttons),
+		[params, buttons]
+	);
 
 	return (
 		<modal.Component
@@ -103,6 +120,15 @@ const ExportModal = (props: Props) => {
 				options={[
 					{
 						label: `En fonction des filtres sélectionnés (${counts.countFiltered} réponses)`,
+						hintText: (
+							<span role="list" className={classes.filtersList}>
+								{currentFiltersLabels.map((filter, index) => (
+									<span role="listitem" key={index}>
+										{filter}
+									</span>
+								))}
+							</span>
+						),
 						nativeInputProps: {
 							value: 'filtered',
 							checked: choice === 'filtered',
@@ -123,7 +149,7 @@ const ExportModal = (props: Props) => {
 						}
 					}
 				]}
-				className={fr.cx('fr-mt-10v')}
+				className={cx(classes.customRadio, fr.cx('fr-mt-10v'))}
 			/>
 			<RadioButtons
 				legend="Format de fichier"
@@ -156,5 +182,22 @@ const ExportModal = (props: Props) => {
 		</modal.Component>
 	);
 };
+
+const useStyles = tss.withName({ ExportModal }).create(() => ({
+	filtersList: {
+		display: 'block',
+		paddingLeft: fr.spacing('2w'),
+		marginTop: fr.spacing('1v'),
+		'& > [role="listitem"]': {
+			display: 'list-item',
+			listStyleType: 'disc'
+		}
+	},
+	customRadio: {
+		'.fr-label': {
+			paddingBottom: '0.25rem!important'
+		}
+	}
+}));
 
 export default ExportModal;

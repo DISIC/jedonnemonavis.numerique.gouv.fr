@@ -1,3 +1,4 @@
+import { DemarcheEssentielleBadge } from '@/src/components/ui/badges/DemarcheEssentielleBadge';
 import { useFilters } from '@/src/contexts/FiltersContext';
 import { useOnboarding } from '@/src/contexts/OnboardingContext';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
@@ -167,14 +168,6 @@ const ProductCard = ({
 	const renderProductBadges = () => {
 		const badges = [];
 
-		if (product.isTop250) {
-			badges.push(
-				<Badge key="top250" severity="info" noIcon small>
-					Démarche essentielle
-				</Badge>
-			);
-		}
-
 		if (product.forms.length === 0) {
 			badges.push(
 				<Badge key="no-forms" severity="warning" small noIcon>
@@ -186,6 +179,41 @@ const ProductCard = ({
 		return badges.length > 0 ? (
 			<div className={classes.badgesContainer}>{badges}</div>
 		) : null;
+	};
+
+	const renderFormBadges = (
+		form: ProductWithForms['forms'][number],
+		newReviewsCount: number
+	) => {
+		if (form.isDeleted) {
+			return (
+				<Badge severity="error" noIcon>
+					Fermé
+				</Badge>
+			);
+		}
+
+		const badges = [];
+
+		if (form.isTop250) {
+			badges.push(<DemarcheEssentielleBadge key="top250" small />);
+		}
+
+		if (form.buttons.length === 0) {
+			badges.push(
+				<Badge key="config" severity="warning" small noIcon>
+					Configuration à terminer
+				</Badge>
+			);
+		} else if (newReviewsCount > 0) {
+			badges.push(
+				<Badge key="new-reviews" severity="success" noIcon small>
+					{newReviewsCount} NOUVELLES RÉPONSES
+				</Badge>
+			);
+		}
+
+		return badges.length > 0 ? <>{badges}</> : null;
 	};
 
 	const renderActionsSection = () => (
@@ -230,7 +258,7 @@ const ProductCard = ({
 					</div>
 				</>
 			)}
-			{!isDisabled && !product.isTop250 && (
+			{!isDisabled && (
 				<Button
 					className={cx(classes.actionButton, 'actionButton')}
 					priority="tertiary"
@@ -473,6 +501,9 @@ const ProductCard = ({
 										if (!a.isDeleted && b.isDeleted) return -1;
 
 										if (!a.isDeleted && !b.isDeleted) {
+											if (a.isTop250 && !b.isTop250) return -1;
+											if (!a.isTop250 && b.isTop250) return 1;
+
 											const dateA = a.last_review_at
 												? new Date(a.last_review_at).getTime()
 												: 0;
@@ -519,25 +550,7 @@ const ProductCard = ({
 													<h3 className={cx(classes.productTitle)}>
 														{form.title || form.form_template.title}
 													</h3>
-													{form.isDeleted ? (
-														<Badge severity="error" noIcon>
-															Fermé
-														</Badge>
-													) : (
-														<>
-															{form.buttons.length === 0 ? (
-																<Badge severity="warning" small noIcon>
-																	Configuration à terminer
-																</Badge>
-															) : (
-																newReviewsCount > 0 && (
-																	<Badge severity="success" noIcon small>
-																		{newReviewsCount} NOUVELLES RÉPONSES
-																	</Badge>
-																)
-															)}
-														</>
-													)}
+													{renderFormBadges(form, newReviewsCount)}
 												</div>
 												{!form.isDeleted && (
 													<div className={cx(classes.formStatsWrapper)}>

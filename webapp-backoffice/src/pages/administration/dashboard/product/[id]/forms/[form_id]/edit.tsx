@@ -441,7 +441,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	if (form.isDeleted) {
+	if (form.isDeleted || form.isTop250) {
 		return {
 			redirect: {
 				destination: `/administration/dashboard/product/${id}/forms/${form.id}`,
