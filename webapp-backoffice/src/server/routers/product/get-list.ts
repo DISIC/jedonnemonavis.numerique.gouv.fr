@@ -142,7 +142,7 @@ export const getProductListQuery = async ({
 	const favoritesFirst = !filterByUserFavorites && !filterByStatusArchived;
 
 	try {
-		let products;
+		let products: Prisma.ProductGetPayload<{ include: typeof include }>[];
 
 		if (favoritesFirst) {
 			const favoriteWhere: Prisma.ProductWhereInput = {
