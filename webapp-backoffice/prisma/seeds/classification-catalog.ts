@@ -180,6 +180,36 @@ export const CLASSIFICATION_CATALOG_V1: CatalogTheme[] = [
 		]
 	},
 	{
+		code: 'sollicitation',
+		label: 'Sollicitation directe (hors retour d’expérience)',
+		description:
+			"L'usager ne donne pas un avis sur la démarche : il adresse une demande directe à " +
+			"l'administration. Très fréquent en pratique — d'où une thématique dédiée plutôt que « Autre ».",
+		children: [
+			{
+				code: 'sollicitation_demande_aide',
+				label: 'Demande d’aide ou de prestation',
+				description:
+					"L'usager sollicite une aide, une allocation, un financement ou un accompagnement " +
+					'(ex. « je souhaite bénéficier d’une aide », « pouvez-vous m’accorder… »).'
+			},
+			{
+				code: 'sollicitation_question',
+				label: 'Question ou demande d’information',
+				description:
+					"L'usager pose une question et attend une réponse (sur son éligibilité, la marche à " +
+					'suivre, un montant…), sans donner d’avis sur l’outil.'
+			},
+			{
+				code: 'sollicitation_suivi_dossier',
+				label: 'Suivi ou réclamation de dossier',
+				description:
+					"L'usager demande où en est sa demande, relance, conteste une décision ou réclame " +
+					'sur son dossier personnel.'
+			}
+		]
+	},
+	{
 		code: 'autre',
 		label: 'Autre',
 		description:
@@ -190,8 +220,8 @@ export const CLASSIFICATION_CATALOG_V1: CatalogTheme[] = [
 				code: 'autre_inclassable',
 				label: 'Autre / inclassable',
 				description:
-					"Le verbatim ne correspond à aucune des problématiques du catalogue, " +
-					'ou est trop court / ambigu pour être classé.'
+					'Verbatim vide, charabia, ou hors-sujet ne relevant ni d’un retour sur la démarche ' +
+					'ni d’une sollicitation directe — ou trop court / ambigu pour être classé.'
 			}
 		]
 	}

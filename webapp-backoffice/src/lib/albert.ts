@@ -19,7 +19,7 @@ const DEFAULT_MODEL = process.env.ALBERT_CHAT_MODEL || 'openweight-small';
  * Bumped whenever the prompt or the structured-output contract changes. Stored on each
  * ReviewClassification so predictions can be tied back to the exact prompt that produced them.
  */
-export const CLASSIFICATION_PROMPT_VERSION = 'classif-v2';
+export const CLASSIFICATION_PROMPT_VERSION = 'classif-v3';
 
 export function isAlbertConfigured(): boolean {
 	return Boolean(BASE_URL && API_KEY);
@@ -69,15 +69,17 @@ function buildSystemPrompt(categories: ClassificationCategoryLite[]): string {
 		'',
 		'Règles :',
 		'- Choisis le code le plus pertinent. Un seul.',
-		"- IMPORTANT — hors-sujet : si le commentaire n'est PAS un retour sur l'expérience",
-		"  d'utilisation de la démarche, classe-le en « autre_inclassable ». C'est notamment le",
-		'  cas des DEMANDES DIRECTES adressées à l\'administration (ex. « je souhaite bénéficier',
-		"  d'une aide », « pouvez-vous m'accorder… », une question personnelle, l'exposé d'une",
-		'  situation), des simples salutations/remerciements sans contenu, et de tout message',
-		"  hors-sujet — MÊME s'il contient des mots comme « aide », « support » ou « contact ».",
+		"- SOLLICITATIONS : si le commentaire n'est pas un retour d'expérience mais une DEMANDE",
+		"  DIRECTE adressée à l'administration, classe-le dans le thème « Sollicitation directe »",
+		'  (sollicitation_*), PAS dans « autre_inclassable » : demande d\'aide/prestation',
+		'  (sollicitation_demande_aide), question attendant une réponse (sollicitation_question),',
+		'  suivi/réclamation de dossier (sollicitation_suivi_dossier) — MÊME si le texte contient',
+		"  « aide », « support » ou « contact ».",
 		'- Les problématiques d\'« Accompagnement et support » désignent une PLAINTE sur le manque',
-		"  d'aide, de contact ou sur les délais DU SERVICE — PAS un usager qui sollicite une aide.",
-		'- Utilise aussi « autre_inclassable » si le commentaire est vide, trop court ou trop',
+		"  d'aide, de contact ou sur les délais DU SERVICE — PAS un usager qui sollicite une aide",
+		'  (ça, c\'est une sollicitation).',
+		'- « autre_inclassable » : seulement pour un commentaire vide, du charabia, ou un',
+		"  hors-sujet qui n'est NI un retour sur la démarche NI une sollicitation, ou trop court /",
 		'  ambigu pour décider.',
 		'- « score » exprime ta confiance dans [0,1] (1 = certain, 0 = très incertain). Mets un',
 		'  score bas quand tu hésites.',

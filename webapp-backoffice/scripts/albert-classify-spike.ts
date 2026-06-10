@@ -47,11 +47,11 @@ const SAMPLES: { text: string; expected: string }[] = [
 	{ text: 'azerty azerty', expected: 'autre_inclassable (bruit)' },
 	{
 		text: "Bonjour Madame, Monsieur, c'est aide est demandé dans le cadre d'études en CAP couvreur zingueur au sein des compagnons du devoir De Brignais, le montant des charges de scolarité étant très élevé, je souhaite savoir si je peux bénéficier d'une aide pour poursuivre les études? Très cordialement",
-		expected: 'autre_inclassable (demande directe, hors-sujet)'
+		expected: 'sollicitation_demande_aide / sollicitation_question'
 	},
 	{
 		text: 'Bonjour, Je vous prie de me permettre de bénéficier de votre aide au complémentaire de santé. Cordialement Hawa CONDE',
-		expected: 'autre_inclassable (demande directe, hors-sujet)'
+		expected: 'sollicitation_demande_aide / sollicitation_question'
 	}
 ];
 
