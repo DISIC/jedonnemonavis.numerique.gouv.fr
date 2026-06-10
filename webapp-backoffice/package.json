@@ -22,6 +22,7 @@
 		"db:seed-classification": "tsx ./scripts/seed-classification-catalog.ts",
 		"albert:spike": "tsx ./scripts/albert-classify-spike.ts",
 		"classify:check": "tsx ./scripts/classification-pipeline-check.ts",
+		"classify:roundtrip": "tsx ./scripts/classification-roundtrip-check.ts",
 		"es:classify-mapping": "tsx ./scripts/es-classification-mapping.ts",
 		"worker:export:dev": "tsx watch src/workers/run-export.ts",
 		"worker:export:start": "tsx src/workers/run-export.ts",
