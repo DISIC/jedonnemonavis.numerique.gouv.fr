@@ -23,12 +23,12 @@ const MENU_ITEMS = {
 		event: 'Access-rights-Remove'
 	},
 	SWITCH_TO_USER: {
-		label: 'Passer en utilisateur du service',
+		label: 'Passer en utilisateur du service numérique',
 		action: 'switch',
 		event: 'Access-rights-Switch'
 	},
 	SWITCH_TO_ADMIN: {
-		label: 'Passer en administrateur du service',
+		label: 'Passer en administrateur du service numérique',
 		action: 'switch',
 		event: 'Access-rights-Switch'
 	},

@@ -497,15 +497,17 @@ export const handleActionTypeDisplay = (
 
 	switch (action) {
 		case TypeAction.service_create:
-			return `Création du service <strong>${e(productTitle)}</strong>`;
+			return `Création du service numérique <strong>${e(
+				productTitle
+			)}</strong>`;
 		case TypeAction.service_update:
-			return `Modification sur le service`;
+			return `Modification sur le service numérique`;
 		case TypeAction.service_archive:
-			return `Archivage du service`;
+			return `Archivage du service numérique`;
 		case TypeAction.service_restore:
-			return `Restauration du service`;
+			return `Restauration du service numérique`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service en tant <strong>${
+			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service numérique en tant <strong>${
 				metadataTyped.json.status === 'carrier_admin'
 					? "qu'utilisateur"
 					: "qu'administrateur"
@@ -515,7 +517,7 @@ export const handleActionTypeDisplay = (
 				metadataTyped.json.status === 'carrier_admin'
 					? "d'utilisateur"
 					: "d'administrateur"
-			}</strong> pour <strong>${userEmail()}</strong> sur le service`;
+			}</strong> pour <strong>${userEmail()}</strong> sur le service numérique`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${e(
 				metadataTyped.json.entity_name

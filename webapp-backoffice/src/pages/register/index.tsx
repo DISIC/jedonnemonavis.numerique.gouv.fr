@@ -188,7 +188,7 @@ export default function Register() {
 									</p>
 									<p>
 										Votre avis est très important. Il permet à l'administration
-										concernée d'améliorer son service.
+										concernée d'améliorer son service numérique.
 									</p>
 								</div>
 							) : (

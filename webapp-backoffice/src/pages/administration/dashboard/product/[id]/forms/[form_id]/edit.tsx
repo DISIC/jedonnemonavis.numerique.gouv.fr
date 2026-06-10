@@ -109,7 +109,7 @@ const ProductFormPage = (props: Props) => {
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}

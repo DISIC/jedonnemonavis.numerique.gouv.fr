@@ -73,7 +73,7 @@ const openAPIRouter = router({
 				protect: true,
 				enabled: true,
 				summary:
-					"Ce point d'accès retourne les données de satisfaction pour tous les formulaires des services liés à la clé fournie.",
+					"Ce point d'accès retourne les données de satisfaction pour tous les formulaires des services numériques liés à la clé fournie.",
 				example: {
 					request: {
 						start_date: '2024-01-01',
