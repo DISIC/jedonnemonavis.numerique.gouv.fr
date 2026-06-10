@@ -33,6 +33,7 @@ import ExportHistory from '../../Reviews/ExportHistory';
 import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
+import Select from '@codegouvfr/react-dsfr/Select';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 interface Props {
@@ -63,6 +64,7 @@ const ReviewsTab = (props: Props) => {
 	const progressStyleTreshold = useMemo(() => (isMobile ? 4 : 2), [isMobile]);
 
 	const [search, setSearch] = useState<string>('');
+	const [classFilter, setClassFilter] = useState<string>('');
 	const [validatedSearch, setValidatedSearch] = useState<string>('');
 	const [errors, setErrors] = useState<FormErrors>(defaultErrors);
 	const [currentPage, setCurrentPage] = useState(1);
@@ -155,6 +157,7 @@ const ReviewsTab = (props: Props) => {
 				? undefined
 				: filters.sharedFilters.currentEndDate,
 			sort: sort,
+			classes: classFilter ? [classFilter] : undefined,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
 			needLogging: false,
@@ -731,7 +734,37 @@ const ReviewsTab = (props: Props) => {
 						}}
 					/>
 
-					{isLoadingReviews ? (
+					{(catalogueData?.data?.length ?? 0) > 0 && (
+							<div className={fr.cx('fr-mt-4v', 'fr-col-12', 'fr-col-md-4')}>
+								<Select
+									label="Filtrer par catégorie"
+									nativeSelectProps={{
+										value: classFilter,
+										onChange: e => {
+											setClassFilter(e.target.value);
+											setCurrentPage(1);
+										}
+									}}
+								>
+									<option value="">Toutes les catégories</option>
+									{(catalogueData?.data ?? [])
+										.filter(c => c.level === 1)
+										.map(theme => (
+											<optgroup key={theme.id} label={theme.label}>
+												{(catalogueData?.data ?? [])
+													.filter(c => c.parent_id === theme.id)
+													.map(c => (
+														<option key={c.id} value={c.code}>
+															{c.label}
+														</option>
+													))}
+											</optgroup>
+										))}
+								</Select>
+							</div>
+						)}
+
+						{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
