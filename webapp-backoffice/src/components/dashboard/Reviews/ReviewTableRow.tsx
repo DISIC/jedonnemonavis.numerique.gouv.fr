@@ -63,6 +63,7 @@ const ReviewTableRow = ({
 	review,
 	search,
 	form,
+	categoryLabels,
 	isSelected,
 	onSelectReview,
 	rowRef
@@ -70,6 +71,7 @@ const ReviewTableRow = ({
 	review: ReviewPartialWithRelations;
 	search: string;
 	form: FormWithElements;
+	categoryLabels?: Map<string, string>;
 	isSelected?: boolean;
 	onSelectReview: (review: ReviewPartialWithRelations) => void;
 	rowRef?: (el: HTMLTableRowElement | null) => void;
@@ -77,6 +79,22 @@ const ReviewTableRow = ({
 	const { cx, classes } = useStyles();
 
 	const formTemplate = form.form_template;
+
+	// Verbatim classification (validated value takes precedence over the LLM prediction).
+	const classification = review.classification;
+	const classCode =
+		classification?.validated_code ?? classification?.predicted_code ?? null;
+	const classLabel = classCode
+		? categoryLabels?.get(classCode) ?? classCode
+		: null;
+	const isValidatedClass = !!classification?.validated_code;
+	const isLowConfidence =
+		!isValidatedClass && (classification?.predicted_score ?? 1) < 0.5;
+	const classSeverity = isValidatedClass
+		? ('success' as const)
+		: isLowConfidence
+		? ('warning' as const)
+		: ('info' as const);
 
 	const mainBlocks = formTemplate.form_template_steps
 		.flatMap(step => step.form_template_blocks)
@@ -207,6 +225,16 @@ const ReviewTableRow = ({
 							? highlightSearchTerms(verbatimAnswer.answer_text || '', search)
 							: '-'}
 					</p>
+					{classLabel && (
+						<Badge
+							className={cx(classes.classBadge)}
+							noIcon={true}
+							severity={classSeverity}
+							small
+						>
+							{isValidatedClass ? `✓ ${classLabel}` : classLabel}
+						</Badge>
+					)}
 				</td>
 			)}
 
@@ -311,6 +339,10 @@ const useStyles = tss.create({
 		display: 'flex',
 		alignItems: 'center',
 		gap: '0.25rem'
+	},
+	classBadge: {
+		marginTop: fr.spacing('1v'),
+		fontSize: 12
 	}
 });
 

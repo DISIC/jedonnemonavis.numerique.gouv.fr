@@ -171,6 +171,12 @@ const ReviewsTab = (props: Props) => {
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
 	const isTableFetching = isFetchingReviews && !isLoadingReviews;
 
+	// Classification catalogue, for resolving a review's class code → human label.
+	const { data: catalogueData } = trpc.classification.getCatalogue.useQuery();
+	const categoryLabels = new Map<string, string>(
+		(catalogueData?.data ?? []).map(c => [c.code, c.label] as const)
+	);
+
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
 	}, [isFetchingReviews, isRefetchingReviews]);
@@ -803,6 +809,7 @@ const ReviewsTab = (props: Props) => {
 																review={review}
 																search={validatedSearch}
 																form={form}
+																categoryLabels={categoryLabels}
 																isSelected={selectedReview?.id === review.id}
 																onSelectReview={handleSelectReview}
 																rowRef={el => {

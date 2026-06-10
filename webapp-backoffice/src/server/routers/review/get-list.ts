@@ -177,6 +177,7 @@ export const getReviewListQuery = async ({
 				take: numberPerPage,
 				skip: (page - 1) * numberPerPage,
 				include: {
+					classification: true,
 					answers: shouldIncludeAnswers
 						? {
 								include: {
