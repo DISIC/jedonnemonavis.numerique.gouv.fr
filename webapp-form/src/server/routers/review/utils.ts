@@ -236,6 +236,15 @@ export async function createOrUpdateAnswers(
 				.flat()
 		);
 	});
+
+	// A verbatim was just created/updated for this review → (re)enqueue classification.
+	// This is the single chokepoint hit by every submission path (create, dynamic-create,
+	// insert-or-update, dynamic-insert-or-update), so the verbatim is guaranteed present
+	// here — unlike at review-creation time on a multi-step form. Fire-and-forget; no-op
+	// without Redis. Stable jobId makes repeated calls idempotent.
+	if (answers.some(answer => answer.field_code === 'verbatim')) {
+		void enqueueReviewClassification(prisma, review.id, review.created_at);
+	}
 }
 
 export async function createReview(
@@ -269,7 +278,8 @@ export async function createReview(
 	}
 
 	void onReviewCreated(prisma, newReview.form_id);
-	void enqueueReviewClassification(prisma, newReview.id, newReview.created_at);
+	// Classification is enqueued from createOrUpdateAnswers (when the verbatim is recorded),
+	// not here — on a multi-step form the verbatim isn't present yet at review creation.
 
 	return newReview;
 }
