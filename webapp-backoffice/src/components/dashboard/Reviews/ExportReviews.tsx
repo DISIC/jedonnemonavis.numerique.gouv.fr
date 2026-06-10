@@ -3,6 +3,7 @@ import Button from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import ExportModal from './ExportModal';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { Button as ButtonPrisma } from '@prisma/client';
 
 interface Props {
 	form: FormWithElements;
@@ -16,6 +17,7 @@ interface Props {
 	reviewsCountAll: number;
 	onExportCreated: (exportId: number) => void;
 	isDisabled?: boolean;
+	buttons: ButtonPrisma[];
 }
 
 const export_modal = createModal({
@@ -35,7 +37,8 @@ const ExportReviews = (props: Props) => {
 		reviewsCountfiltered,
 		reviewsCountAll,
 		isDisabled,
-		onExportCreated
+		onExportCreated,
+		buttons
 	} = props;
 
 	return (
@@ -57,6 +60,7 @@ const ExportReviews = (props: Props) => {
 				})}
 				onExportCreated={onExportCreated}
 				hasExportsInProgress={isDisabled || false}
+				buttons={buttons}
 			/>
 
 			<Button

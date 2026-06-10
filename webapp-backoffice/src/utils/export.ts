@@ -83,3 +83,11 @@ export function getExportFiltersLabel(
 
 	return asArray ? labels : labels.join('; ');
 }
+
+export const getExportSummaryLabels = (
+	params: ExportParams,
+	buttons?: Button[]
+): string[] => [
+	`Période : ${getExportPeriodLabel(params)}`,
+	...(getExportFiltersLabel(params, true, buttons) as string[])
+];

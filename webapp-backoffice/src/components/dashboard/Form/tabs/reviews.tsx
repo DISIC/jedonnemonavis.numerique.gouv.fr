@@ -13,11 +13,7 @@ import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import {
-	getExportFiltersLabel,
-	getExportPeriodLabel,
-	parseExportParams
-} from '@/src/utils/export';
+import { getExportSummaryLabels, parseExportParams } from '@/src/utils/export';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -247,14 +243,8 @@ const ReviewsTab = (props: Props) => {
 		}
 
 		const parsedParams = parseExportParams(currentExport.params);
-		const periodLabel = getExportPeriodLabel({
-			...parsedParams,
-			startDate: parsedParams.startDate,
-			endDate: parsedParams.endDate
-		});
-		const filters = getExportFiltersLabel(parsedParams, true, buttons);
 		const finalFilters = currentExport.params
-			? [`Période : ${periodLabel}`, ...(filters as string[])]
+			? getExportSummaryLabels(parsedParams, buttons)
 			: undefined;
 
 		switch (currentExport.status) {
@@ -582,6 +572,7 @@ const ReviewsTab = (props: Props) => {
 							isDisabled={
 								!!userExportInProgress || isLoading || isLoadingExports
 							}
+							buttons={buttons}
 						/>
 						<ExportHistory
 							exports={(exports?.data || []) as any}
