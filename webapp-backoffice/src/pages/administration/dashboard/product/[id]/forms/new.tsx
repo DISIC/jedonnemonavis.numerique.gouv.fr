@@ -18,14 +18,13 @@ import Badge from '@codegouvfr/react-dsfr/Badge';
 import Input from '@codegouvfr/react-dsfr/Input';
 import RadioButtons from '@codegouvfr/react-dsfr/RadioButtons';
 import { Form, FormTemplate, Prisma, RightAccessStatus } from '@prisma/client';
-import { GetServerSideProps } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
-import { getServerSideProps as productGetServerSideProps } from '..';
+import { getServerSideProps } from '..';
 import { FormConfigHelper } from './[form_id]/edit';
 
 interface Props {
@@ -150,7 +149,10 @@ const NewForm = (props: Props) => {
 			setSelectedFormTemplate(createdForm.form_template);
 			return;
 		}
-		if (availableFormTemplates.length > 0 && selectedFormTemplate === undefined) {
+		if (
+			availableFormTemplates.length > 0 &&
+			selectedFormTemplate === undefined
+		) {
 			const defaultTemplate =
 				availableFormTemplates.find(template => template.slug === 'root') ||
 				availableFormTemplates[0];
@@ -510,21 +512,4 @@ const useStyles = tss.withName({ NewForm }).create(() => ({
 	}
 }));
 
-export const getServerSideProps: GetServerSideProps = async context => {
-	const result = await productGetServerSideProps(context);
-
-	if ('props' in result) {
-		const props = await result.props;
-		const product = (props as { product?: { isTop250?: boolean } }).product;
-		if (product?.isTop250) {
-			return {
-				redirect: {
-					destination: `/administration/dashboard/product/${context.query.id}/forms`,
-					permanent: false
-				}
-			};
-		}
-	}
-
-	return result;
-};
+export { getServerSideProps };
