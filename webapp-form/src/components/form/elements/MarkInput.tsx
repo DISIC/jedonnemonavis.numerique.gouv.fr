@@ -1,7 +1,7 @@
 import { FormField, Opinion } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useTranslation } from 'next-i18next';
-import { SetStateAction } from 'react';
+import { SetStateAction, useEffect, useRef } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -17,29 +17,41 @@ export const MarkInput = (props: Props) => {
 
 	const { t } = useTranslation('common');
 
+	const headingRef = useRef<HTMLHeadingElement>(null);
+
+	useEffect(() => {
+		headingRef.current?.focus();
+	}, []);
+
 	if (field.kind === 'radio') {
 		return (
 			<div className={fr.cx('fr-grid-row')}>
 				<div className={fr.cx('fr-col-12')}>
-					<h3 className={fr.cx('fr-mb-8v')}>{t(field.label)}</h3>
-				</div>
-				<div className={fr.cx('fr-col-12')}>
-					<div className={cx(classes.radioContainer)}>
-						<div className={classes.hintLeft}>{t(field.hintLeft ?? '')}</div>
-						<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
-							<legend>
-								<p className={fr.cx('fr-hint-text', 'fr-mb-6v')}>
-									{t(field.hint ?? '')}
+					<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
+						<legend className={cx(classes.legend)}>
+							<h3
+								ref={headingRef}
+								tabIndex={-1}
+								className={cx(classes.heading, fr.cx('fr-mb-2v'))}
+							>
+								{t(field.label)}
+							</h3>
+							{field.hint && (
+								<p className={fr.cx('fr-hint-text', 'fr-mb-0')}>
+									{t(field.hint)}
 								</p>
-							</legend>
+							)}
+						</legend>
+						<div className={cx(classes.radioContainer)}>
+							<div className={classes.hintLeft}>{t(field.hintLeft ?? '')}</div>
 							<ul>
-								{field.options.map((f, index) => (
+								{field.options.map(f => (
 									<li key={f.value}>
 										<input
 											id={`radio-${f.label}-${f.value}`}
 											className={fr.cx('fr-sr-only')}
 											type="radio"
-											name={f.value.toString()}
+											name={field.name}
 											checked={opinion.comprehension === f.value}
 											onChange={() => {
 												setOpinion(prevOpinion => ({
@@ -47,9 +59,6 @@ export const MarkInput = (props: Props) => {
 													[field.name]: f.value
 												}));
 											}}
-											autoFocus={
-												index === 0 && !opinion[field.name] ? true : undefined
-											}
 											onClick={() => {
 												setOpinion(prevOpinion => ({
 													...prevOpinion,
@@ -69,9 +78,9 @@ export const MarkInput = (props: Props) => {
 									</li>
 								))}
 							</ul>
-						</fieldset>
-						<div className={classes.hintRight}>{t(field.hintRight ?? '')}</div>
-					</div>
+							<div className={classes.hintRight}>{t(field.hintRight ?? '')}</div>
+						</div>
+					</fieldset>
 				</div>
 			</div>
 		);
@@ -82,6 +91,17 @@ const useStyles = tss
 	.withName({ MarkInput })
 	.withParams<{ nbItems: number }>()
 	.create(({ nbItems }) => ({
+		legend: {
+			float: 'none',
+			width: '100%',
+			padding: 0,
+			marginBottom: fr.spacing('4v')
+		},
+		heading: {
+			'&:focus': {
+				outline: 'none'
+			}
+		},
 		hintLeft: {
 			marginTop: fr.spacing('6v'),
 			marginBottom: fr.spacing('3v'),
@@ -98,10 +118,9 @@ const useStyles = tss
 			}
 		},
 		radioContainer: {
-			position: 'relative',
 			display: 'flex',
 			alignItems: 'center',
-			marginTop: fr.spacing('10v'),
+			width: '100%',
 			['input:checked + label']: {
 				borderColor: fr.colors.decisions.background.flat.blueFrance.default,
 				backgroundColor: fr.colors.decisions.background.flat.blueFrance.default,
@@ -113,9 +132,6 @@ const useStyles = tss
 			},
 			[fr.breakpoints.down('md')]: {
 				flexDirection: 'column'
-			},
-			[fr.breakpoints.up('md')]: {
-				marginTop: fr.spacing('6v')
 			}
 		},
 		radioInput: {
@@ -146,15 +162,13 @@ const useStyles = tss
 		},
 		fieldset: {
 			width: '100%',
-			position: 'initial',
-			justifyContent: 'center',
-			marginLeft: fr.spacing('4v'),
-			marginRight: fr.spacing('4v'),
 			ul: {
 				listStyle: 'none',
 				...fr.spacing('margin', { topBottom: 0, rightLeft: 0 }),
 				paddingLeft: 0,
 				width: '100%',
+				marginLeft: fr.spacing('4v'),
+				marginRight: fr.spacing('4v'),
 				li: {
 					paddingBottom: 0,
 					marginBottom: fr.spacing('3v'),
@@ -166,15 +180,6 @@ const useStyles = tss
 			[fr.breakpoints.up('md')]: {
 				ul: {
 					columns: nbItems
-				}
-			},
-			legend: {
-				position: 'absolute',
-				top: '-55px',
-				[fr.breakpoints.up('md')]: {
-					left: 0,
-					top: 'unset',
-					bottom: '45px'
 				}
 			}
 		}
