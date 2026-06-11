@@ -94,7 +94,7 @@ export default function Home() {
 			question:
 				'Faut-il vous contacter pour utiliser l’outil Je donne mon avis ?',
 			answer:
-				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank" rel="noopener noreferrer">Créez votre compte<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a> pour être guidé à l\'intégration de l’outil dans votre service.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
+				'<p>Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank" rel="noopener noreferrer">Créez votre compte<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a> pour être guidé à l\'intégration de l’outil dans votre service.</p><p>L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.</p>'
 		},
 		{
 			question:
