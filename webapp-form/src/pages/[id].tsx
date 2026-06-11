@@ -12,6 +12,7 @@ import { AnswerIntention, Prisma } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -505,6 +506,13 @@ export default function JDMAForm({
 
 	return (
 		<div>
+			{isFormSubmitted && (
+				<Head>
+					<title>{`${t('global.thanks_title')} ${t('global.page_title', {
+						product: product.title
+					})}`}</title>
+				</Head>
+			)}
 			{isPreviewUnpublished && (
 				<Notice
 					className={cx(classes.notice)}
