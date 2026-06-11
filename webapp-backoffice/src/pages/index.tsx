@@ -88,19 +88,19 @@ export default function Home() {
 		{
 			question: 'Quelles sont les questions posées aux usagers ?',
 			answer:
-				'Le formulaire Je donne mon avis est composé d’une question obligatoire et trois questions facultatives. <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3119" target="_blank">Voir un exemple interactif du formulaire.</a>'
+				'Le formulaire Je donne mon avis est composé d’une question obligatoire et trois questions facultatives. <a href="https://jedonnemonavis.numerique.gouv.fr/Demarches/3119" target="_blank" rel="noopener noreferrer">Voir un exemple interactif du formulaire.<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a>'
 		},
 		{
 			question:
 				'Faut-il vous contacter pour utiliser l’outil Je donne mon avis ?',
 			answer:
-				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
+				'Si vous êtes un agent ou une agente de la fonction publique, vous n’avez pas besoin de nous contacter pour utiliser l’outil <b>Je donne mon avis</b>. <a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank" rel="noopener noreferrer">Créez votre compte<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a> pour être guidé à l\'intégration de l’outil dans votre service.<br /><br />L’outil <b>Je donne mon avis</b> n’est disponible que pour les services publics numériques français.'
 		},
 		{
 			question:
 				'Puis-je utiliser l’outil Je donne mon avis si mon service ne fait pas partie de Vos démarches essentielles ?',
 			answer:
-				'Votre service ne doit pas être inclus dans <a href="https://observatoire.numerique.gouv.fr/" target="_blank">Vos démarches essentielles</a>. L’outil <b>Je donne mon avis</b> est disponible pour tous les services publics numériques français.'
+				'Votre service ne doit pas être inclus dans <a href="https://observatoire.numerique.gouv.fr/" target="_blank" rel="noopener noreferrer">Vos démarches essentielles<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a>. L’outil <b>Je donne mon avis</b> est disponible pour tous les services publics numériques français.'
 		},
 		{
 			question:
@@ -111,7 +111,7 @@ export default function Home() {
 		{
 			question: "Existe-t-il un guide pour m'indiquer comment procéder ?",
 			answer:
-				'<a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank">Créez votre compte</a> pour être guidé à l\'intégration de l’outil dans votre service. '
+				'<a href="https://jedonnemonavis.numerique.gouv.fr/login" target="_blank" rel="noopener noreferrer">Créez votre compte<span class="fr-sr-only"> (ouvre une nouvelle fenêtre)</span></a> pour être guidé à l\'intégration de l’outil dans votre service. '
 		}
 	];
 
