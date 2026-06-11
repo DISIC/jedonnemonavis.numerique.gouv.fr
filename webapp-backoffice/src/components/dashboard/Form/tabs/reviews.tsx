@@ -11,9 +11,14 @@ import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
+import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { getExportSummaryLabels, parseExportParams } from '@/src/utils/export';
+import {
+	getExportSummaryLabels,
+	getFilterableBlocks,
+	parseExportParams
+} from '@/src/utils/export';
 import { getNbPages } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -33,7 +38,6 @@ import ExportHistory from '../../Reviews/ExportHistory';
 import ReviewDrawer from '../../Reviews/ReviewDrawer';
 import ReviewFiltersModalRoot from '../../Reviews/ReviewFiltersModalRoot';
 import ReviewKeywordFilters from '../../Reviews/ReviewKeywordFilters';
-import { useIsMobile } from '@/src/hooks/useIsMobile';
 
 interface Props {
 	form: FormWithElements;
@@ -244,7 +248,7 @@ const ReviewsTab = (props: Props) => {
 
 		const parsedParams = parseExportParams(currentExport.params);
 		const finalFilters = currentExport.params
-			? getExportSummaryLabels(parsedParams, buttons)
+			? getExportSummaryLabels(parsedParams, buttons, getFilterableBlocks(form))
 			: undefined;
 
 		switch (currentExport.status) {
@@ -577,6 +581,7 @@ const ReviewsTab = (props: Props) => {
 						<ExportHistory
 							exports={(exports?.data || []) as any}
 							buttons={buttons}
+							form={form}
 						/>
 					</div>
 				)}

@@ -1,6 +1,10 @@
 import { CustomModalProps } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
-import { getExportSummaryLabels, parseExportParams } from '@/src/utils/export';
+import {
+	getExportSummaryLabels,
+	getFilterableBlocks,
+	parseExportParams
+} from '@/src/utils/export';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
@@ -67,8 +71,13 @@ const ExportModal = (props: Props) => {
 	}, [params]);
 
 	const currentFiltersLabels = React.useMemo(
-		() => getExportSummaryLabels(parseExportParams(params), buttons),
-		[params, buttons]
+		() =>
+			getExportSummaryLabels(
+				parseExportParams(params),
+				buttons,
+				getFilterableBlocks(form)
+			),
+		[params, buttons, form]
 	);
 
 	return (
@@ -139,7 +148,7 @@ const ExportModal = (props: Props) => {
 						}
 					},
 					{
-						label: `Tous les avis (${counts.countAll} réponses)`,
+						label: `Toutes les réponses (${counts.countAll} réponses)`,
 						nativeInputProps: {
 							value: 'all',
 							checked: choice === 'all',
