@@ -288,5 +288,242 @@
 			"label": "¿Desea decirnos algo más?",
 			"hint": "No comparta información personal."
 		}
+	},
+	"global": {
+		"home_link_title": "Inicio - Je donne mon avis (Services publics +)",
+		"select_language": "Seleccionar un idioma",
+		"skip_content": "Contenido",
+		"skip_footer": "Pie de página",
+		"new_window": "nueva ventana",
+		"page_title": "Je donne mon avis – {{product}}",
+		"footer": {
+			"legal_notice": "Aviso legal",
+			"personal_data": "Datos personales",
+			"terms_of_use": "Condiciones de uso",
+			"contact": "Contacto",
+			"license_before": "El ",
+			"license_link": "código fuente",
+			"license_after": " está disponible bajo licencia libre."
+		},
+		"step_titles": {
+			"0": "Claridad (paso 1 de 3) |",
+			"1": "Ayudas (paso 2 de 3) |",
+			"2": "Información complementaria (paso 3 de 3) |"
+		}
+	},
+	"pages": {
+		"cgu": {
+			"meta_title": "Política de privacidad | Je donne mon avis",
+			"h1": "Política de privacidad del formulario de presentación de opiniones Je donne mon avis"
+		},
+		"legal_notice": {
+			"meta_title": "Aviso legal | Je donne mon avis",
+			"h1": "Aviso legal del formulario de presentación de opiniones Je donne mon avis"
+		},
+		"terms_of_use": {
+			"meta_title": "Condiciones de uso del formulario de presentación de opiniones | Je donne mon avis",
+			"h1": "Condiciones de uso del formulario de presentación de opiniones Je donne mon avis"
+		},
+		"accessibility": {
+			"meta_title": "Accesibilidad | Je donne mon avis",
+			"h1": "Declaración de accesibilidad"
+		},
+		"contact": {
+			"meta_title": "Contacto | Je donne mon avis",
+			"h1": "Contáctenos",
+			"intro": "Puede ponerse en contacto con nosotros en la siguiente dirección de correo electrónico:"
+		},
+		"not_found": {
+			"h1": "Formulario no encontrado",
+			"text": "El enlace no es válido o este formulario ya no existe."
+		},
+		"form_closed": {
+			"h1": "Este formulario está cerrado",
+			"text": "Este formulario se ha cerrado, pero puede compartir su experiencia a través del formulario del sitio Service Public+.",
+			"button": "Compartir mi experiencia",
+			"warning_alt": "Pictograma de advertencia"
+		}
+	},
+	"cgu": {
+		"responsable": {
+			"title": "¿Quién es el responsable del formulario de presentación de opiniones Je donne mon avis?",
+			"c1": "El sitio del formulario de presentación de opiniones Je donne mon avis está desarrollado por la Direction Interministérielle du Numérique (DINUM). El formulario tiene como objetivo ofrecer a los usuarios de los trámites y servicios públicos la posibilidad de dar su opinión sobre su experiencia tras su uso.",
+			"c2": "El responsable del uso de los datos es la DINUM, representada por Stéphanie Schaer, Directora Interministerial de lo Digital (DINUM)."
+		},
+		"raison": {
+			"title": "¿Por qué tratamos datos de carácter personal?",
+			"c1": "El sitio del formulario de presentación de opiniones Je donne mon avis no tiene como finalidad recopilar ni tratar datos de carácter personal."
+		},
+		"donnees": {
+			"title": "¿Qué datos de carácter personal tratamos?",
+			"c1": "El sitio del formulario de presentación de opiniones Je donne mon avis no tiene como finalidad recopilar ni tratar datos de carácter personal."
+		},
+		"autorisation": {
+			"title": "¿Qué nos autoriza a tratar sus datos de carácter personal?",
+			"c1": "El sitio del formulario de presentación de opiniones Je donne mon avis no tiene como finalidad recopilar ni tratar datos de carácter personal."
+		},
+		"cookies": {
+			"title": "Cookies",
+			"c1": "Una cookie es un archivo que se almacena en su terminal durante la visita a un sitio. Su finalidad es recopilar información relativa a su navegación y ofrecerle servicios adaptados a su terminal (ordenador, móvil o tableta).",
+			"c2": "En aplicación del article 5(3) de la directive 2002/58/CE modificada relativa al tratamiento de los datos de carácter personal y a la protección de la intimidad en el sector de las comunicaciones electrónicas, transpuesta al article 82 de la loi n°78-17 du 6 janvier 1978 relativa a la informática, los ficheros y las libertades, los rastreadores o cookies siguen dos regímenes distintos.",
+			"c3": "Las cookies que no sean estrictamente necesarias para el servicio o que no tengan como finalidad exclusiva facilitar la comunicación por vía electrónica deben ser consentidas por el usuario.",
+			"c4": "Este consentimiento de la persona interesada para una o varias finalidades específicas constituye una base legal en el sentido del RGPD y debe entenderse en el sentido del article 6-a del Règlement (UE) 2016/679 del Parlamento Europeo y del Consejo de 27 de abril de 2016 relativo a la protección de las personas físicas en lo que respecta al tratamiento de datos personales y a la libre circulación de estos datos.",
+			"c5": "En cualquier momento, puede rechazar el uso de cookies y desactivar su almacenamiento en su ordenador utilizando la función dedicada de su navegador (función disponible especialmente en Microsoft Internet Explorer 11, Google Chrome, Mozilla Firefox, Apple Safari y Opera).",
+			"c6": "Algunas cookies son estrictamente necesarias para el servicio o tienen como finalidad exclusiva facilitar la comunicación por vía electrónica y están exentas de consentimiento previo en virtud del article 82 de la loi n°78-17 du 6 janvier 1978.",
+			"c7": "También se almacenan cookies relativas a las estadísticas públicas y anónimas.",
+			"c8": "La plataforma también utiliza la solución de medición de audiencia Matomo, configurada en modo « exento », de conformidad con las recomendaciones de la CNIL. Por lo tanto, no requiere el consentimiento de las personas interesadas.",
+			"c9": "Para saber más, puede consultar las fichas propuestas por la Commission Nationale de l’Informatique et des Libertés (CNIL):",
+			"c10": "Cookies y rastreadores: ¿qué dice la ley?",
+			"c11": "Cookies: las herramientas para controlarlas"
+		}
+	},
+	"accessibility": {
+		"intro": {
+			"title": "",
+			"c1": "La direction interministérielle du numérique (DINUM) se compromete a hacer accesibles sus sitios de internet, intranet, extranet y sus paquetes de software (así como sus aplicaciones móviles y mobiliario urbano digital) de conformidad con el article 47 de la loi n°2005-102 du 11 février 2005."
+		},
+		"intro_p2": {
+			"title": "",
+			"c1": "Esta declaración de accesibilidad se aplica a ",
+			"c2": " jedonnemonavis.numerique.gouv.fr"
+		},
+		"state": {
+			"title": "Estado de conformidad",
+			"c1": "El sitio es ",
+			"c2": "no conforme ",
+			"c3": "con el referencial general de mejora de la accesibilidad, RGAA version 4.1, debido a la ausencia de auditoría de conformidad."
+		},
+		"state_p2": {
+			"title": "",
+			"c1": "Una auditoría de conformidad está en curso. El estado de conformidad se actualizará cuando finalice la auditoría."
+		},
+		"info_contact": {
+			"title": "Comentarios y contacto",
+			"c1": "Si no consigue acceder a un contenido o a un servicio, puede ponerse en contacto con nosotros por correo electrónico en la dirección ",
+			"c2": "contact.jdma@design.numerique.gouv.fr ",
+			"c3": "para ser orientado hacia una alternativa accesible u obtener el contenido en otro formato."
+		},
+		"rights": {
+			"title": "Defensor de los Derechos",
+			"c1": "Si constata un defecto de accesibilidad que le impide acceder a un contenido o a una funcionalidad del sitio, nos lo comunica y no logra obtener una respuesta por nuestra parte, tiene derecho a remitir sus quejas o una solicitud de recurso al Defensor de los Derechos."
+		},
+		"rights_p2": {
+			"title": "",
+			"c1": "Dispone de varios medios:"
+		},
+		"rights_p3": {
+			"title": "",
+			"c1": "Escribir un mensaje al Defensor de los Derechos (https://www.defenseurdesdroits.fr/nous-contacter-355)",
+			"c2": "Contactar con el delegado del Defensor de los Derechos cercano a su domicilio (https://www.defenseurdesdroits.fr/carte-des-delegues)",
+			"c3": "Enviar una carta por correo postal (gratuito, no poner sello) Defensor de los Derechos Libre réponse 71120 75342 Paris CEDEX 07"
+		}
+	},
+	"legal_notice": {
+		"editeur": {
+			"title": "Editor de la plataforma",
+			"c1": "El formulario de presentación de opiniones Je donne mon avis está editado por la Direction interministérielle du numérique de l’Etat (DINUM), situada en:",
+			"c2": "20 avenue de Ségur",
+			"c3": "75007 Paris",
+			"c4": "Tel. Recepción: 01.71.21.01.70",
+			"c5": "SIRET: 12000101100010 (secretaría general del gobierno)",
+			"c6": "SIREN: 120 001 011"
+		},
+		"directeurPublication": {
+			"title": "Director de la publicación",
+			"c1": "La directora de la publicación es la señora Stéphanie Schaer, Directora interministerial de lo digital."
+		},
+		"hebergement": {
+			"title": "Alojamiento de la plataforma",
+			"c1": "La plataforma está alojada por Clever Cloud, situada en:",
+			"c2": "RCS Nantes B 524 172 699",
+			"c3": "Code APE : 6311Z",
+			"c4": "N°TVA : FR 87 524 172 699",
+			"c5": "Domicilio social: 4 rue Voltaire",
+			"c6": "44000 Nantes",
+			"c7": "Francia"
+		},
+		"accessibilite": {
+			"title": "Accesibilidad",
+			"c1": "La accesibilidad de la plataforma es no conforme."
+		},
+		"moreInfo": {
+			"title": "Más información",
+			"c1": "Para saber más sobre la política de accesibilidad digital del Estado: ",
+			"c2": "https://accessibilite.numerique.gouv.fr/"
+		},
+		"securite": {
+			"title": "Seguridad",
+			"c1": "La plataforma está protegida por un certificado electrónico, representado en la gran mayoría de los navegadores por un candado. Esta protección contribuye a la confidencialidad de los intercambios.",
+			"c2": "En ningún caso los servicios asociados a la plataforma enviarán correos electrónicos para solicitar la introducción de información personal."
+		},
+		"service": {
+			"title": "Servicio",
+			"c1": "El seguimiento editorial y gráfico corre a cargo de la DINUM.",
+			"c2": "Cualquier sitio público o privado está autorizado a establecer, sin autorización previa, un enlace (incluido un enlace profundo) hacia la información difundida en el sitio."
+		},
+		"contact": {
+			"title": "Contacto",
+			"c1": "La dirección de correo electrónico de contacto es la siguiente: ",
+			"c2": "contact.jdma@design.numerique.gouv.fr"
+		}
+	},
+	"terms_of_use": {
+		"appField": {
+			"title": "1. Ámbito de aplicación",
+			"c1": "El presente documento define las condiciones de uso del sitio del formulario de presentación de opiniones Je donne mon avis, desarrollado por la Direction Interministérielle du Numérique (DINUM)."
+		},
+		"platform": {
+			"title": "2. Objeto de la plataforma",
+			"c1": "El formulario tiene como objetivo ofrecer a los usuarios de los trámites y servicios públicos la posibilidad de dar su opinión sobre su experiencia tras su uso.",
+			"c2": "El formulario de presentación de opiniones Je donne mon avis está desarrollado y operado por la DINUM. Todo uso de este servicio debe respetar las presentes condiciones de uso."
+		},
+		"service": {
+			"title": "3. Acceso al servicio",
+			"c1": "El formulario se pone a disposición de todas las personas que deseen dar su opinión sobre un servicio digital público tras su uso.",
+			"c2": "El uso del servicio es libre y gratuito y no está sujeto a la creación de una cuenta de usuario."
+		},
+		"features": {
+			"title": "4. Funcionalidades",
+			"c1": "El usuario o la usuaria puede presentar su opinión respondiendo a una serie de preguntas desplegadas por el formulario."
+		},
+		"engagement": {
+			"title": "5. Compromisos y responsabilidades de los usuarios y usuarias",
+			"c1": "Para saber más sobre la política de accesibilidad digital del Estado: ",
+			"c2": "5.1. Usos conformes",
+			"c3": "El servicio se pone a disposición para recoger las opiniones de los usuarios de los servicios públicos con el fin de su mejora continua.",
+			"c4": "El usuario o la usuaria es responsable de los datos o contenidos que introduce en los diversos campos libres del formulario. Vela por introducir únicamente mensajes apropiados.",
+			"c5": "El usuario se asegura de mantener su contraseña en secreto. Queda prohibida toda divulgación de la contraseña, sea cual sea su forma. Asume los riesgos vinculados al uso de su dirección de correo electrónico y de su contraseña.",
+			"c6": "5.2. Usos prohibidos",
+			"c7": "El usuario o la usuaria se compromete a no introducir en los campos libres del formulario contenidos o información contrarios a las disposiciones legales y reglamentarias en vigor.",
+			"c8": "En particular, se compromete a comunicar únicamente los datos estrictamente necesarios para la evaluación del servicio digital público en cuestión y a abstenerse, en los campos libres, de revelar datos sensibles que le conciernan o que conciernan a terceros (por ejemplo: datos de salud, opinión política, filosófica o religiosa), de proferir comentarios injuriosos, difamatorios, obscenos y, más en general, contrarios a la ley y al orden público.",
+			"c9": "Se recuerda que toda persona que realice una declaración falsa para sí misma o para otra persona se expone, en particular, a las sanciones previstas en el article 441-1 du Code pénal, que prevé penas de hasta tres años de prisión y 45 000 euros de multa.",
+			"c10": "El usuario se asegura, antes de la publicación, de que esta respete el marco jurídico en vigor, en particular el RGPD, la loi Informatique et libertés, el Code de la propriété intellectuelle y el CRPA.",
+			"c11": "El usuario se compromete a no publicar en los espacios de discusión ni en ningún otro lugar mensajes racistas, sexistas, injuriosos, insultantes o contrarios al orden público. Cada comentario publicado conlleva la cesión de sus derechos de propiedad intelectual de forma no exclusiva, a título gratuito, para todo el mundo y durante toda la duración de estos derechos."
+		},
+		"dinum": {
+			"title": "6. Compromisos y responsabilidades de la DINUM",
+			"c1": "6.1 Seguridad y acceso a la Plataforma",
+			"c2": "Las fuentes de la información difundida en la Plataforma se consideran fiables, pero no se garantiza que esté exenta de defectos, errores u omisiones.",
+			"c3": "La DINUM se compromete a la seguridad de la Plataforma, en particular adoptando todas las medidas necesarias para garantizar la seguridad y la confidencialidad de la información proporcionada.",
+			"c4": "La DINUM se compromete a proporcionar los medios necesarios y razonables para garantizar un acceso continuo a la Plataforma.",
+			"c5": "La DINUM se reserva el derecho de modificar, hacer evolucionar o suspender, sin previo aviso, el servicio por razones de mantenimiento o por cualquier otro motivo que se considere necesario.",
+			"c6": "La DINUM se reserva el derecho de suspender o eliminar una cuenta de usuario o usuaria del servicio que haya incumplido las presentes condiciones de uso, sin perjuicio de las eventuales acciones de responsabilidad penal y civil que pudieran emprenderse contra el usuario o la usuaria.",
+			"c7": "6.2 Código abierto y Licencias",
+			"c8": "El código fuente de la Plataforma es libre y está disponible aquí:",
+			"c9": "https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr",
+			"c10": "Los contenidos propuestos por el Editor están bajo Licence Ouverte, a excepción de los logotipos y las representaciones iconográficas y fotográficas que pueden regirse por sus propias licencias."
+		},
+		"evolution": {
+			"title": "7. Evolución de las condiciones de uso",
+			"c1": "Los términos de las presentes condiciones de uso pueden modificarse o completarse en cualquier momento, sin previo aviso, en función de las modificaciones aportadas al servicio, de la evolución de la legislación o por cualquier otro motivo que se considere necesario. Estas modificaciones y actualizaciones se imponen al usuario o a la usuaria, quien debe, en consecuencia, consultar regularmente esta sección para verificar las condiciones generales en vigor."
+		},
+		"accessibility": {
+			"title": "8. Accesibilidad",
+			"c1": "Si constata un defecto de accesibilidad que le impide acceder a un contenido o a una funcionalidad del servicio, nos lo comunica y no logra obtener una respuesta rápida por nuestra parte, tiene derecho a remitir sus quejas o solicitud de recurso al defensor de los derechos por correo gratuito, sin franqueo, a la dirección:",
+			"c2": "Defensor de los Derechos",
+			"c3": "Libre réponse 71120",
+			"c4": "75342 Paris CEDEX 07,",
+			"c5": "por teléfono: 09 69 39 00 00 o a través del formulario en línea."
+		}
 	}
 }
