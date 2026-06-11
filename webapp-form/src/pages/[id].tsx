@@ -370,7 +370,6 @@ export default function JDMAForm({
 						<Image
 							alt=""
 							src="/Demarches/assets/icon-check.svg"
-							title="Icone - Merci pour votre aide"
 							width={40}
 							height={40}
 						/>
