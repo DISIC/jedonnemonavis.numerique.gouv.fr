@@ -29,6 +29,15 @@ export const YesNoInput = (props: Props) => {
 	}
 
 	if (field.kind === 'yes-no') {
+		const firstReachedValue =
+			'options' in form[0]
+				? form[0].options.find(
+						o =>
+							opinion.contact_tried.includes(o.value) &&
+							!field.excluded.includes(o.value)
+				  )?.value
+				: undefined;
+
 		return (
 			<div className={fr.cx('fr-grid-row')}>
 				{opinion.contact_tried.some(
@@ -63,7 +72,15 @@ export const YesNoInput = (props: Props) => {
 																id={`radio-${index}-${fIndex}-${f.label}-${option.label}-${f.value}`}
 																className={fr.cx('fr-sr-only')}
 																type="radio"
-																name={`${f.value.toString()}-${index}`}
+																name={`yesno-${index}`}
+																aria-label={
+																	option.value === firstReachedValue &&
+																	fIndex === 0
+																		? `${t(field.label)}, ${t(
+																				option.label
+																		  )}, ${t(f.label)}`
+																		: `${t(option.label)}, ${t(f.label)}`
+																}
 																checked={opinion.contact_reached.includes(
 																	`${option.value}_${f.value}`
 																)}

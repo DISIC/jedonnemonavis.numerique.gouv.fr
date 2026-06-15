@@ -6,11 +6,11 @@ import {
 	Product
 } from '@/src/utils/types';
 import { useTranslation } from 'next-i18next';
-import { ChangeEvent, SetStateAction, useEffect } from 'react';
+import { ChangeEvent, SetStateAction } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { areArrayEquals, muteRouteAnnouncer } from '@/src/utils/tools';
+import { areArrayEquals } from '@/src/utils/tools';
 
 type Props = {
 	field: FormField;
@@ -26,8 +26,6 @@ export const CheckboxInput = (props: Props) => {
 		props;
 	const { classes, cx } = useStyles({ nbItems: 5 });
 	const { t } = useTranslation('common');
-
-	useEffect(() => muteRouteAnnouncer(), []);
 
 	const getChildrenResetObject = (value?: number) => {
 		let opinionPropsObj: {

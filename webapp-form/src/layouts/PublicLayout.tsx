@@ -44,15 +44,6 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		return '';
 	};
 
-	const getStepTitle = (step: string | string[] | undefined) => {
-		const titles: { [key: string]: string } = {
-			'0': t('global.step_titles.0'),
-			'1': t('global.step_titles.1'),
-			'2': t('global.step_titles.2')
-		};
-		return titles[step as string] || '';
-	};
-
 	const lang = (i18n?.language || 'fr') as Language;
 	const shouldShowLanguageSelector = !router.asPath.startsWith('/avis');
 
@@ -150,9 +141,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		<>
 			<Head>
 				<title>
-					{`${getStepTitle(router.query.step)} ${t('global.page_title', {
+					{t('global.page_title', {
 						product: getProductTitle()
-					})}`}
+					})}
 				</title>
 				<meta name="description" content="Je donne mon avis" />
 			</Head>

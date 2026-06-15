@@ -1,18 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Product, Step } from './types';
 
-export const muteRouteAnnouncer = (delayMs = 1000) => {
-	if (typeof document === 'undefined') return;
-
-	const announcer = document.getElementById('__next-route-announcer__');
-	if (!announcer) return;
-
-	announcer.setAttribute('aria-live', 'off');
-	window.setTimeout(() => {
-		announcer.setAttribute('aria-live', 'assertive');
-	}, delayMs);
-};
-
 export const parseBoldLabel = (text: string): ReactNode => {
 	const parts = text.split(/\*([^*]+)\*/g);
 	return React.createElement(

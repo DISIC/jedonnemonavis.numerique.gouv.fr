@@ -1,8 +1,7 @@
 import { FormField, Opinion } from '@/src/utils/types';
-import { muteRouteAnnouncer } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useTranslation } from 'next-i18next';
-import { SetStateAction, useEffect } from 'react';
+import { SetStateAction } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -17,8 +16,6 @@ export const MarkInput = (props: Props) => {
 	const { classes, cx } = useStyles({ nbItems: 5 });
 
 	const { t } = useTranslation('common');
-
-	useEffect(() => muteRouteAnnouncer(), []);
 
 	if (field.kind === 'radio') {
 		return (
@@ -77,7 +74,9 @@ export const MarkInput = (props: Props) => {
 									</li>
 								))}
 							</ul>
-							<div className={classes.hintRight}>{t(field.hintRight ?? '')}</div>
+							<div className={classes.hintRight}>
+								{t(field.hintRight ?? '')}
+							</div>
 						</div>
 					</fieldset>
 				</div>
