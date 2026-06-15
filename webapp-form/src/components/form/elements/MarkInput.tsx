@@ -1,7 +1,8 @@
 import { FormField, Opinion } from '@/src/utils/types';
+import { muteRouteAnnouncer } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import { useTranslation } from 'next-i18next';
-import { SetStateAction, useEffect, useRef } from 'react';
+import { SetStateAction, useEffect } from 'react';
 import { tss } from 'tss-react/dsfr';
 
 type Props = {
@@ -17,11 +18,7 @@ export const MarkInput = (props: Props) => {
 
 	const { t } = useTranslation('common');
 
-	const headingRef = useRef<HTMLHeadingElement>(null);
-
-	useEffect(() => {
-		headingRef.current?.focus();
-	}, []);
+	useEffect(() => muteRouteAnnouncer(), []);
 
 	if (field.kind === 'radio') {
 		return (
@@ -29,13 +26,7 @@ export const MarkInput = (props: Props) => {
 				<div className={fr.cx('fr-col-12')}>
 					<fieldset className={cx(classes.fieldset, fr.cx('fr-fieldset'))}>
 						<legend className={cx(classes.legend)}>
-							<h3
-								ref={headingRef}
-								tabIndex={-1}
-								className={cx(classes.heading, fr.cx('fr-mb-2v'))}
-							>
-								{t(field.label)}
-							</h3>
+							<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>
 							{field.hint && (
 								<p className={fr.cx('fr-hint-text', 'fr-mb-0')}>
 									{t(field.hint)}
@@ -45,13 +36,18 @@ export const MarkInput = (props: Props) => {
 						<div className={cx(classes.radioContainer)}>
 							<div className={classes.hintLeft}>{t(field.hintLeft ?? '')}</div>
 							<ul>
-								{field.options.map(f => (
+								{field.options.map((f, index) => (
 									<li key={f.value}>
 										<input
 											id={`radio-${f.label}-${f.value}`}
 											className={fr.cx('fr-sr-only')}
 											type="radio"
 											name={field.name}
+											aria-label={
+												index === 0
+													? `${t(field.label)} ${t(f.label)}`
+													: undefined
+											}
 											checked={opinion.comprehension === f.value}
 											onChange={() => {
 												setOpinion(prevOpinion => ({
@@ -59,6 +55,9 @@ export const MarkInput = (props: Props) => {
 													[field.name]: f.value
 												}));
 											}}
+											autoFocus={
+												index === 0 && !opinion[field.name] ? true : undefined
+											}
 											onClick={() => {
 												setOpinion(prevOpinion => ({
 													...prevOpinion,
@@ -96,11 +95,6 @@ const useStyles = tss
 			width: '100%',
 			padding: 0,
 			marginBottom: fr.spacing('4v')
-		},
-		heading: {
-			'&:focus': {
-				outline: 'none'
-			}
 		},
 		hintLeft: {
 			marginTop: fr.spacing('6v'),

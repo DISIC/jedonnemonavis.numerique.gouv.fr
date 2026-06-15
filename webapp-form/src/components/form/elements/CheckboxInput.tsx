@@ -10,7 +10,7 @@ import { ChangeEvent, SetStateAction, useEffect } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { areArrayEquals } from '@/src/utils/tools';
+import { areArrayEquals, muteRouteAnnouncer } from '@/src/utils/tools';
 
 type Props = {
 	field: FormField;
@@ -26,6 +26,8 @@ export const CheckboxInput = (props: Props) => {
 		props;
 	const { classes, cx } = useStyles({ nbItems: 5 });
 	const { t } = useTranslation('common');
+
+	useEffect(() => muteRouteAnnouncer(), []);
 
 	const getChildrenResetObject = (value?: number) => {
 		let opinionPropsObj: {
@@ -162,6 +164,10 @@ export const CheckboxInput = (props: Props) => {
 									nativeInputProps: {
 										name: opt.name || `${field.name}-${index}`,
 										autoFocus: index === 0 ? true : false,
+										'aria-label':
+											index === 0
+												? `${t(field.label)} ${t(opt.label)}`
+												: undefined,
 										checked: opinion[
 											field.name as CheckboxOpinionKeys
 										]?.includes(opt.value),

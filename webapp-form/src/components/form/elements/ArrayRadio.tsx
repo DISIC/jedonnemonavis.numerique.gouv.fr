@@ -66,15 +66,13 @@ export const ArrayRadio = (props: Props) => {
 															escapeRegex(option.value.toString()) + '_17'
 														)
 													) && (
-														<>
-															<div className={cx(classes.labelWrapper)}>
-																<label
-																	className={cx(classes.label)}
-																	htmlFor={`mobile-radio-${outerIndex}`}
-																>
-																	{getFirstTwoWords(t(option.label))}
-																</label>
-															</div>
+														<fieldset className={cx(classes.fieldset)}>
+															<legend className={cx(classes.legend)}>
+																<span className={fr.cx('fr-sr-only')}>
+																	{t(field.label)}{' '}
+																</span>
+																{getFirstTwoWords(t(option.label))}
+															</legend>
 															<ul>
 																{field.options.map((opt, innerIndex) => (
 																	<li key={innerIndex}>
@@ -144,7 +142,7 @@ export const ArrayRadio = (props: Props) => {
 																	</li>
 																))}
 															</ul>
-														</>
+														</fieldset>
 													)}
 											</div>
 										)
@@ -178,11 +176,19 @@ const useStyles = tss
 				paddingLeft: '3rem'
 			}
 		},
-		labelWrapper: {
-			paddingBottom: fr.spacing('4v')
+		fieldset: {
+			border: 0,
+			margin: 0,
+			padding: 0,
+			minWidth: 0,
+			width: '100%'
 		},
-		label: {
-			...fr.typography[19].style
+		legend: {
+			...fr.typography[19].style,
+			float: 'none',
+			width: '100%',
+			padding: 0,
+			marginBottom: fr.spacing('4v')
 		},
 		radioWrapper: {
 			padding: '0 !important'

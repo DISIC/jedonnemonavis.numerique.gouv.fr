@@ -50,6 +50,10 @@ export const YesNoInput = (props: Props) => {
 												className={cx(classes.fieldset, fr.cx('fr-fieldset'))}
 											>
 												<legend className={fr.cx('fr-mb-4v')}>
+													{' '}
+													<span className={fr.cx('fr-sr-only')}>
+														{t(field.label)}{' '}
+													</span>
 													{t(option.label)}
 												</legend>
 												<ul>
