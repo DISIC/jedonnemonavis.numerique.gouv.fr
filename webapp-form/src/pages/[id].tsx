@@ -405,6 +405,9 @@ export default function JDMAForm({
 								href={`https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2&id_demarche=${product.id}`}
 								target="_blank"
 								rel="noopener noreferrer"
+								title={`${t('success_block.link')}, ${t(
+									'global.new_window'
+								)}`}
 							>
 								{t('success_block.link')}
 							</Link>
