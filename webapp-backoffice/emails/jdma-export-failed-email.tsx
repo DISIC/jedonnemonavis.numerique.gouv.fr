@@ -9,13 +9,13 @@ const JdmaExportFailedEmail = ({
 }: JdmaExportFailedEmailProps) => {
 	return (
 		<JdmaLayout
-			preview={`Votre export pour le service « ${productName} » a échoué`}
+			preview={`Votre export pour le service numérique « ${productName} » a échoué`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				Nous n&apos;avons pas pu générer votre export pour le service{' '}
+				Nous n&apos;avons pas pu générer votre export pour le service numérique{' '}
 				<strong>« {productName} »</strong>.
 			</Text>
 

@@ -282,7 +282,7 @@ const NewProduct = () => {
 								<Input
 									label={
 										<p className={fr.cx('fr-mb-0')}>
-											Nom du service{' '}
+											Nom du service numérique{' '}
 											<span className={cx(classes.asterisk)}>*</span>
 										</p>
 									}

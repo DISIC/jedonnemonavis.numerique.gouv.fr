@@ -346,10 +346,10 @@ const NotificationsAccount: React.FC<Props> = props => {
 										}}
 									>
 										<Input
-											label="Rechercher un service"
+											label="Rechercher un service numérique"
 											hideLabel
 											nativeInputProps={{
-												placeholder: 'Rechercher un service',
+												placeholder: 'Rechercher un service numérique',
 												type: 'search',
 												value: search,
 												onChange: e => {
@@ -374,11 +374,11 @@ const NotificationsAccount: React.FC<Props> = props => {
 								<Loader />
 							) : !hasAnyService && !validatedSearch ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-									Vous n'avez accès à aucun service pour le moment.
+									Vous n'avez accès à aucun service numérique pour le moment.
 								</p>
 							) : combinedGroups.length === 0 ? (
 								<p className={fr.cx('fr-text--sm', 'fr-mb-0')}>
-									Aucun service ne correspond à votre recherche.
+									Aucun service numérique ne correspond à votre recherche.
 								</p>
 							) : (
 								<>

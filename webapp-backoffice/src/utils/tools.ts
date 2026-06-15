@@ -3,6 +3,7 @@ import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { matchSorter } from 'match-sorter';
+import React, { ReactNode } from 'react';
 import { z } from 'zod';
 import { ButtonCopyInstructionsPanelProps } from '../components/dashboard/ProductButton/CopyInstructionPanel/interface';
 import { TabsSlug } from '../pages/administration/dashboard/product/[id]/forms/[form_id]';
@@ -12,7 +13,6 @@ import {
 	FormConfigWithChildren
 } from '../types/prismaTypesExtended';
 import { trpc } from './trpc';
-import React, { ReactNode } from 'react';
 
 export function isValidDate(dateString: string) {
 	var regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -225,6 +225,11 @@ export const normalizeString = (str: string): string => {
 
 export const alternativeString = (str: string): string => {
 	return str.replace(/œ/g, 'oe').replace(/Œ/g, 'Oe');
+};
+
+export const capitalizeFirstLetter = (str: string): string => {
+	if (!str) return str;
+	return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
 
 export const createFilterOptionsWithArgument =
@@ -497,15 +502,17 @@ export const handleActionTypeDisplay = (
 
 	switch (action) {
 		case TypeAction.service_create:
-			return `Création du service <strong>${e(productTitle)}</strong>`;
+			return `Création du service numérique <strong>${e(
+				productTitle
+			)}</strong>`;
 		case TypeAction.service_update:
-			return `Modification sur le service`;
+			return `Modification sur le service numérique`;
 		case TypeAction.service_archive:
-			return `Archivage du service`;
+			return `Archivage du service numérique`;
 		case TypeAction.service_restore:
-			return `Restauration du service`;
+			return `Restauration du service numérique`;
 		case TypeAction.service_invite:
-			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service en tant <strong>${
+			return `Invitation de l'utilisateur <strong>${userEmail()}</strong> au service numérique en tant <strong>${
 				metadataTyped.json.status === 'carrier_admin'
 					? "qu'utilisateur"
 					: "qu'administrateur"
@@ -515,7 +522,7 @@ export const handleActionTypeDisplay = (
 				metadataTyped.json.status === 'carrier_admin'
 					? "d'utilisateur"
 					: "d'administrateur"
-			}</strong> pour <strong>${userEmail()}</strong> sur le service`;
+			}</strong> pour <strong>${userEmail()}</strong> sur le service numérique`;
 		case TypeAction.organisation_create:
 			return `Création de l'organisation <strong>${e(
 				metadataTyped.json.entity_name

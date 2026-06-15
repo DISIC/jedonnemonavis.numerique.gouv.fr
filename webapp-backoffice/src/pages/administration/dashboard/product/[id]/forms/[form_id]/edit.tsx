@@ -109,7 +109,7 @@ const ProductFormPage = (props: Props) => {
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -441,7 +441,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 		};
 	}
 
-	if (form.isDeleted) {
+	if (form.isDeleted || form.isTop250) {
 		return {
 			redirect: {
 				destination: `/administration/dashboard/product/${id}/forms/${form.id}`,

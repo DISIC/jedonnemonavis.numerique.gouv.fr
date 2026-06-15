@@ -150,7 +150,7 @@ describe('jdma-forms', () => {
 		deleteForm();
 		checkMail(
 			false,
-			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service «${selectors.dashboard.nameTestService}»`
+			`Fermeture du formulaire «${selectors.dashboard.renamedTestForm}» du service numérique «${selectors.dashboard.nameTestService}»`
 		);
 		cy.readFile('cypress/fixtures/dynamicTestData.json').then(data => {
 			checkReviewForm(false, data.formReviewUrl);

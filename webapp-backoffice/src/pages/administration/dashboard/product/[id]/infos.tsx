@@ -1,7 +1,8 @@
 import React from 'react';
 import ProductLayout from '@/src/layouts/Product/ProductLayout';
 import { getServerSideProps } from '.';
-import { Product, RightAccessStatus } from '@prisma/client';
+import { RightAccessStatus } from '@prisma/client';
+import { ProductWithForms } from '@/src/types/prismaTypesExtended';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -20,7 +21,7 @@ import { Entity } from '@/prisma/generated/zod';
 import Alert from '@codegouvfr/react-dsfr/Alert';
 
 interface Props {
-	product: Product;
+	product: ProductWithForms;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 }
 
@@ -41,6 +42,8 @@ const entityModal = createModal({
 
 const ProductInformationPage = (props: Props) => {
 	const { product, ownRight } = props;
+
+	const hasLockedForm = product.forms.some(f => f.isTop250);
 
 	const router = useRouter();
 
@@ -95,7 +98,7 @@ const ProductInformationPage = (props: Props) => {
 			</Head>
 			<OnConfirmModal
 				modal={onConfirmModal}
-				title="Supprimer ce service"
+				title="Supprimer ce service numérique"
 				handleOnConfirm={() => {
 					archiveProduct.mutate({
 						product_id: product.id
@@ -106,14 +109,15 @@ const ProductInformationPage = (props: Props) => {
 			>
 				<div>
 					<p>
-						Vous êtes sûr de vouloir supprimer le service{' '}
+						Vous êtes sûr de vouloir supprimer le service numérique{' '}
 						<b>"{product.title}"</b> ?{' '}
 					</p>
-					<p>En supprimant ce service :</p>
+					<p>En supprimant ce service numérique :</p>
 					<ul className={fr.cx('fr-mb-8v')}>
 						<li>vous n’aurez plus accès aux avis du formulaire,</li>
 						<li>
-							les utilisateurs de ce service n’auront plus accès au formulaire.
+							les utilisateurs de ce service numérique n’auront plus accès au
+							formulaire.
 						</li>
 					</ul>
 				</div>
@@ -185,8 +189,8 @@ const ProductInformationPage = (props: Props) => {
 						type="button"
 						className={classes.copyBtn}
 						nativeButtonProps={{
-							title: `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
-							'aria-label': `Copier l’identifiant du service « ${product.id} » dans le presse-papier`,
+							title: `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
+							'aria-label': `Copier l’identifiant du service numérique « ${product.id} » dans le presse-papier`,
 							onClick: () => {
 								navigator.clipboard.writeText(product.id.toString());
 								setDisplayToast(true);
@@ -231,14 +235,16 @@ const ProductInformationPage = (props: Props) => {
 						</div>
 					)}
 				</div>
-				{ownRight === 'carrier_admin' && !product.isTop250 && (
+				{ownRight === 'carrier_admin' && !hasLockedForm && (
 					<div>
-						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>Supprimer le service</h3>
-						<p>En supprimant ce service :</p>
+						<h3 className={fr.cx('fr-mb-3v', 'fr-h4')}>
+							Supprimer le service numérique
+						</h3>
+						<p>En supprimant ce service numérique :</p>
 						<ul className={fr.cx('fr-mb-8v')}>
 							<li>vous n’aurez plus accès aux avis du formulaire,</li>
 							<li>
-								les utilisateurs de ce service n’auront plus accès au
+								les utilisateurs de ce service numérique n’auront plus accès au
 								formulaire.
 							</li>
 						</ul>
@@ -249,9 +255,9 @@ const ProductInformationPage = (props: Props) => {
 							priority="tertiary"
 							className={classes.buttonError}
 							onClick={() => {
-								if (product.isTop250) {
+								if (hasLockedForm) {
 									setStatusProductState({
-										msg: `Le service "${product.title}" fait partie des démarches essentielles et ne peut pas être supprimé.`,
+										msg: `Le service numérique "${product.title}" possède un formulaire de démarche essentielle et ne peut pas être supprimé.`,
 										role: 'alert'
 									});
 									window.scrollTo({
@@ -264,7 +270,7 @@ const ProductInformationPage = (props: Props) => {
 								}
 							}}
 						>
-							Supprimer ce service
+							Supprimer ce service numérique
 						</Button>
 					</div>
 				)}

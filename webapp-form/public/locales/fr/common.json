@@ -1,7 +1,7 @@
 {
 	"first_block": {
 		"title": "Je donne mon avis",
-		"subtitle_part_1": "Aidez-nous à améliorer le service",
+		"subtitle_part_1": "Aidez-nous à améliorer le service numérique",
 		"subtitle_part_2": "en répondant à quelques questions. Vos réponses sont anonymes.",
 		"product": "Démarche",
 		"validate": "Envoyer mon avis"
@@ -13,11 +13,11 @@
 	},
 	"success_block": {
 		"title": "Merci beaucoup !",
-		"thanks": "Merci. Votre avis nous permettra d’améliorer la qualité du service. ",
-		"question": "Des questions pour le service ",
+		"thanks": "Merci. Votre avis nous permettra d’améliorer la qualité du service numérique. ",
+		"question": "Des questions pour le service numérique ",
 		"support": "Contactez le support.",
 		"further": "Vous souhaitez aller plus loin ?",
-		"share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services.",
+		"share": "Partagez votre expérience publiquement de manière anonyme. L’administration y répondra et se servira de votre expérience pour améliorer ses services numériques.",
 		"link": "Partager mon expérience publiquement",
 		"alert": "Merci. Votre avis a bien été transmis au service qui s'occupe de cette démarche."
 	},

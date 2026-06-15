@@ -86,7 +86,7 @@ const DashboardTab = ({
 			<h2 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Tableau de bord</h2>
 			<h3 className={fr.cx('fr-col-12', 'fr-mb-6v')}>Dernières évolutions</h3>
 			{form.form_template.slug === 'root' && (
-				<div className={fr.cx('fr-col-12', 'fr-col-lg-4')}>
+				<div className={fr.cx('fr-col-12', 'fr-col-lg-4', 'fr-mb-6v')}>
 					<ObservatoireStats
 						productId={form.product_id}
 						formConfig={currentFormConfig}
@@ -111,10 +111,10 @@ const DashboardTab = ({
 				)}
 			>
 				<div
-					className={
-						(cx(classes.chartContainer),
-						fr.cx(form.form_template.slug === 'root' ? 'fr-ml-4v' : 'fr-ml-0'))
-					}
+					className={cx(
+						classes.chartContainer,
+						form.form_template.slug === 'root' && classes.chartLeftMargin
+					)}
 				>
 					<AnswersChart
 						fieldCode={
@@ -168,7 +168,7 @@ const DashboardTab = ({
 								a => a.field_code === 'satisfaction'
 							);
 							return (
-								<div className={cx(classes.reviewCard)}>
+								<div key={review.id} className={cx(classes.reviewCard)}>
 									{satisfactionReview?.intention && (
 										<Badge
 											className={cx(classes.badge, fr.cx('fr-mb-4v'))}
@@ -260,8 +260,12 @@ const useStyles = tss.withName({ DashboardTab }).create({
 	chartContainer: {
 		height: '100%',
 		[fr.breakpoints.down('lg')]: {
-			marginTop: fr.spacing('4v'),
-			marginLeft: 0
+			marginTop: fr.spacing('4v')
+		}
+	},
+	chartLeftMargin: {
+		[fr.breakpoints.up('lg')]: {
+			marginLeft: fr.spacing('4v')
 		}
 	},
 	smallTitle: {

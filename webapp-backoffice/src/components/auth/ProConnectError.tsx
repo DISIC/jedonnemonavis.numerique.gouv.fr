@@ -49,7 +49,7 @@ export const ProconnectError = () => {
 					</p>
 					<p className={cx(classes.instructionsText)}>
 						Votre avis est très important. Il permet à l’administration
-						concernée d’améliorer son service.
+						concernée d’améliorer son service numérique.
 					</p>
 					<p className={cx(classes.instructionsText)}>
 						Retrouvez toutes les données publiques sur la qualité des services

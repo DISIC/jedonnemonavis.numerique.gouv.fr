@@ -212,8 +212,8 @@ const ProductModal = (props: Props) => {
 			concealingBackdrop={false}
 			title={
 				product && product.id
-					? 'Modifier les informations du service'
-					: 'Ajouter un nouveau service'
+					? 'Modifier les informations du service numérique'
+					: 'Ajouter un nouveau service numérique'
 			}
 			size="large"
 			buttons={[
@@ -223,7 +223,10 @@ const ProductModal = (props: Props) => {
 				{
 					doClosesModal: false,
 					onClick: handleSubmit(onLocalSubmit),
-					children: product && product.id ? 'Sauvegarder' : 'Ajouter ce service'
+					children:
+						product && product.id
+							? 'Sauvegarder'
+							: 'Ajouter ce service numérique'
 				}
 			]}
 		>
@@ -247,7 +250,7 @@ const ProductModal = (props: Props) => {
 								<Input
 									label={
 										<p className={fr.cx('fr-mb-0')}>
-											Nom du service{' '}
+											Nom du service numérique{' '}
 											<span className={cx(classes.asterisk)}>*</span>
 										</p>
 									}

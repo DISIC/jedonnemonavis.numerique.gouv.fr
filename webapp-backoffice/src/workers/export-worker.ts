@@ -62,7 +62,9 @@ type AnswerRow = {
 
 function buildReviewRow(
 	review: { id: number; created_at: Date },
-	answers: AnswerRow[]
+	answers: AnswerRow[],
+	formName: string,
+	buttonName: string
 ): ReviewRow {
 	const answerById = new Map<number, AnswerRow>();
 	for (const a of answers) answerById.set(a.id, a);
@@ -89,6 +91,8 @@ function buildReviewRow(
 	return {
 		review_id: review.id.toString(16).slice(-7),
 		review_created_at: review.created_at,
+		form_name: formName,
+		button_name: buttonName,
 		answers: answersMap
 	};
 }
@@ -170,7 +174,13 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 		include: {
 			user: { select: { email: true } },
 			product: { select: { title: true } },
-			form: { select: { legacy: true } }
+			form: {
+				select: {
+					legacy: true,
+					title: true,
+					form_template: { select: { title: true } }
+				}
+			}
 		}
 	});
 
@@ -179,6 +189,8 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	const userEmail = exportRecord.user?.email ?? '';
 	const productName = exportRecord.product.title;
+	const formName =
+		exportRecord.form?.title || exportRecord.form?.form_template.title || '';
 	const exportFormat = exportRecord.type;
 
 	await prisma.export.update({
@@ -271,7 +283,11 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 				orderBy: { created_at: 'asc' },
 				skip: offset,
 				take: PAGE_SIZE,
-				select: { id: true, created_at: true }
+				select: {
+					id: true,
+					created_at: true,
+					button: { select: { title: true } }
+				}
 			});
 
 			if (reviews.length === 0) break;
@@ -301,7 +317,12 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 			for (const review of reviews) {
 				const answers = answersByReviewId.get(review.id) ?? [];
-				yield buildReviewRow(review, answers);
+				yield buildReviewRow(
+					review,
+					answers,
+					formName,
+					review.button?.title ?? ''
+				);
 			}
 
 			retrieved += reviews.length;
@@ -408,7 +429,7 @@ async function processExportJob(job: Job<ExportJobData>): Promise<void> {
 
 	try {
 		const html = await renderExportReadyEmail({ productName, downloadLink });
-		const text = `Bonjour,\n\nVotre export pour le service ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 7 jours.\n\nCordialement,\nL'équipe JDMA`;
+		const text = `Bonjour,\n\nVotre export pour le service numérique ${productName} est prêt. Vous pouvez le télécharger en utilisant le lien suivant :\n\n${downloadLink}\n\nCe lien expirera dans 7 jours.\n\nCordialement,\nL'équipe JDMA`;
 
 		await sendMail(
 			`Votre export est prêt : [${productName}]`,
@@ -472,7 +493,7 @@ export function startExportWorker(): void {
 					const html = await renderExportFailedEmail({
 						productName: exportRecord.product.title
 					});
-					const text = `Bonjour,\n\nNous n'avons pas pu générer votre export pour le service ${exportRecord.product.title}. Veuillez réessayer depuis le backoffice.\n\nCordialement,\nL'équipe JDMA`;
+					const text = `Bonjour,\n\nNous n'avons pas pu générer votre export pour le service numérique ${exportRecord.product.title}. Veuillez réessayer depuis le backoffice.\n\nCordialement,\nL'équipe JDMA`;
 
 					await sendMail(
 						`Votre export a échoué : [${exportRecord.product.title}]`,

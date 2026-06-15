@@ -359,7 +359,11 @@ const ObservatoireStats = ({
 							className={cx(
 								classes.content,
 								view === 'form-dashboard' && classes.dashboardContent,
-								fr.cx(view === 'default' ? 'fr-p-3v' : ['fr-py-4v', 'fr-px-6v'])
+								fr.cx(
+									view === 'default'
+										? 'fr-p-3v'
+										: ['fr-py-4v', 'fr-pl-6v', 'fr-pr-1v']
+								)
 							)}
 						>
 							<div
@@ -393,8 +397,7 @@ const ObservatoireStats = ({
 											aria-label={field.tooltip}
 											className={fr.cx(
 												'fr-icon-information-line',
-												'fr-icon--md',
-												'fr-ml-1v'
+												'fr-icon--md'
 											)}
 										/>
 									</Tooltip>
@@ -497,7 +500,9 @@ const useStyles = tss.create({
 	},
 	dashboardLabel: {
 		display: 'flex',
-		flexWrap: 'nowrap',
+		flexWrap: 'wrap',
+		alignItems: 'center',
+		gap: fr.spacing('1v'),
 		marginBottom: fr.spacing('2v'),
 		'.fr-icon-information-line': {
 			'&::before': {
@@ -560,6 +565,7 @@ const useStyles = tss.create({
 	indicatorIcon: {
 		width: '4rem',
 		height: '4rem',
+		flexShrink: 0,
 		display: 'flex',
 		justifyContent: 'center',
 		alignItems: 'center',

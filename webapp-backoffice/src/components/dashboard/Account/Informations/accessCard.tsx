@@ -98,8 +98,8 @@ const AccessCard = (props: Props) => {
 										}
 										iconPosition="right"
 										nativeButtonProps={{
-											'aria-label': `Accéder aux options de droits sur le service "${title}"`,
-											title: `Accéder aux options de droits sur le service "${title}"`
+											'aria-label': `Accéder aux options de droits sur le service numérique "${title}"`,
+											title: `Accéder aux options de droits sur le service numérique "${title}"`
 										}}
 										className={classes.button}
 									>
@@ -141,7 +141,7 @@ const AccessCard = (props: Props) => {
 											{right === 'carrier_admin'
 												? 'utilisateur'
 												: 'administrateur'}{' '}
-											du service
+											du service numérique
 										</MenuItem>
 									</Menu>
 								</>
@@ -160,10 +160,10 @@ const AccessCard = (props: Props) => {
 										}}
 										nativeButtonProps={{
 											'aria-label': `Retirer l'accès ${
-												link ? 'au service' : "à l'organisation"
+												link ? 'au service numérique' : "à l'organisation"
 											} ${title}`,
 											title: `Retirer l'accès ${
-												link ? 'au service' : "à l'organisation"
+												link ? 'au service numérique' : "à l'organisation"
 											} ${title}`
 										}}
 										className={classes.button}

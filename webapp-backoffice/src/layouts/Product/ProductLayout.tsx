@@ -1,6 +1,5 @@
 import { Toast } from '@/src/components/ui/Toast';
 import { fr } from '@codegouvfr/react-dsfr';
-import Badge from '@codegouvfr/react-dsfr/Badge';
 import Breadcrumb from '@codegouvfr/react-dsfr/Breadcrumb';
 import { SideMenu, SideMenuProps } from '@codegouvfr/react-dsfr/SideMenu';
 import { Product, RightAccessStatus } from '@prisma/client';
@@ -32,7 +31,7 @@ const ProductLayout = ({
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -101,7 +100,7 @@ const ProductLayout = ({
 	return (
 		<div className={cx(fr.cx('fr-container', 'fr-my-4w'), classes.container)}>
 			<Breadcrumb
-				currentPageLabel={'Service : ' + product.title}
+				currentPageLabel={'Service numérique : ' + product.title}
 				segments={breadcrumbSegments}
 				className={fr.cx('fr-mb-4v')}
 			/>
@@ -116,11 +115,6 @@ const ProductLayout = ({
 				<h1 className={fr.cx('fr-mb-2v')} id="product-title">
 					{product.title}
 				</h1>
-				{product.isTop250 && (
-					<Badge severity="info" noIcon>
-						Démarche essentielle
-					</Badge>
-				)}
 			</div>
 			<div className={cx(fr.cx('fr-grid-row'), classes.children)}>
 				<div
