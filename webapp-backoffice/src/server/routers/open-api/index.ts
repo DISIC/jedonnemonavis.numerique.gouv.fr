@@ -30,6 +30,12 @@ import {
 	triggerSendNotifMailsOutputSchema
 } from './trigger-send-notif-mails';
 
+import {
+	reviewsListQuery,
+	reviewsListInputSchema,
+	reviewsListOutputSchema
+} from './reviews-list';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -114,7 +120,28 @@ const openAPIRouter = router({
 		})
 		.input(triggerSendNotifMailsInputSchema)
 		.output(triggerSendNotifMailsOutputSchema)
-		.mutation(triggerSendNotifMailsMutation)
+		.mutation(triggerSendNotifMailsMutation),
+
+	reviewsList: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'GET',
+				path: '/reviews',
+				protect: true,
+				enabled: true,
+				summary:
+					"Liste paginée des avis bruts pour un formulaire donné (avis classiques et remontées d'information).",
+				example: {
+					request: {
+						form_id: 1,
+						limit: 50
+					}
+				}
+			}
+		})
+		.input(reviewsListInputSchema)
+		.output(reviewsListOutputSchema)
+		.query(reviewsListQuery)
 });
 
 export default openAPIRouter;
