@@ -1,8 +1,66 @@
 import { ReviewFiltersType } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { Button } from '@prisma/client';
-import { formatDateToFrenchString } from './tools';
+import { capitalizeFirstLetter, formatDateToFrenchString } from './tools';
 
 export const EXPORT_LINK_TTL_SECONDS = 604800;
+
+type FilterableBlock =
+	FormWithElements['form_template']['form_template_steps'][number]['form_template_blocks'][number];
+
+const FILTERABLE_BLOCK_TYPES = [
+	'mark_input',
+	'smiley_input',
+	'select',
+	'radio',
+	'checkbox'
+];
+
+export const getFilterableBlocks = (
+	form: FormWithElements
+): FilterableBlock[] =>
+	form.form_template.form_template_steps
+		.flatMap(step => step.form_template_blocks)
+		.filter(block => FILTERABLE_BLOCK_TYPES.includes(block.type_bloc));
+
+const getFilterFieldName = (
+	fieldCode: string,
+	filterableBlocks: FilterableBlock[]
+): string => {
+	if (fieldCode === 'buttonId') return 'Source';
+	const block = filterableBlocks.find(b => b.field_code === fieldCode);
+	return block?.alias || block?.label || fieldCode;
+};
+
+const getFilterValueLabel = (
+	fieldCode: string,
+	value: string,
+	filterableBlocks: FilterableBlock[],
+	buttons?: Button[]
+): string => {
+	if (fieldCode === 'buttonId') {
+		return buttons?.find(b => b.id === parseInt(value))?.title || value;
+	}
+	const block = filterableBlocks.find(b => b.field_code === fieldCode);
+	return capitalizeFirstLetter(
+		block?.options?.find(o => o.value === value)?.alias || value
+	);
+};
+
+export const renderFilterFieldLabel = (
+	fieldCode: string,
+	value: string,
+	filterableBlocks: FilterableBlock[],
+	buttons?: Button[]
+): string => {
+	const block = filterableBlocks.find(b => b.field_code === fieldCode);
+	if (!block && fieldCode !== 'buttonId') return value;
+
+	return `${getFilterFieldName(
+		fieldCode,
+		filterableBlocks
+	)} : ${getFilterValueLabel(fieldCode, value, filterableBlocks, buttons)}`;
+};
 
 export type ExportParams = Partial<{
 	startDate: string;
@@ -47,7 +105,8 @@ export const getExportPeriodLabel = (params: ExportParams): string => {
 export function getExportFiltersLabel(
 	params: ExportParams,
 	asArray?: boolean,
-	buttons?: Button[]
+	buttons?: Button[],
+	filterableBlocks: FilterableBlock[] = []
 ): string | string[] {
 	const labels: string[] = [];
 	const { filters } = params;
@@ -57,29 +116,44 @@ export function getExportFiltersLabel(
 	};
 
 	addLabel(!!params.search, `Recherche : ${params.search}`);
-	addLabel(!!filters?.needVerbatim, 'Avec commentaires');
+	addLabel(!!filters?.needVerbatim, 'Réponse avec commentaire');
 	addLabel(!!params.button_id, `Bouton ${params.button_id}`);
 
-	if (filters?.buttonId?.length) {
-		const sources = filters.buttonId
-			.map(b => buttons?.find(button => button.id === parseInt(b))?.title || b)
-			.join(', ');
-		addLabel(true, `Source :  ${sources}`);
-	}
+	const addGroupedLabel = (fieldCode: string, values: string[]) => {
+		if (!values.length) return;
+		const valueLabels = values.map(value =>
+			getFilterValueLabel(fieldCode, value, filterableBlocks, buttons)
+		);
+		addLabel(
+			true,
+			`${getFilterFieldName(fieldCode, filterableBlocks)} : ${valueLabels.join(
+				', '
+			)}`
+		);
+	};
 
-	if (filters?.fields?.length) {
-		filters.fields.forEach(field => {
-			if (field.values?.length) {
-				const fieldLabel =
-					field.field_code.charAt(0).toUpperCase() + field.field_code.slice(1);
-				const values = field.values.join(', ');
-				addLabel(true, `${fieldLabel} : ${values}`);
-			}
-		});
-	}
+	if (filters?.buttonId?.length) addGroupedLabel('buttonId', filters.buttonId);
+
+	filters?.fields?.forEach(field => {
+		addGroupedLabel(field.field_code, field.values ?? []);
+	});
 
 	addLabel(!!filters?.needOtherHelp, 'Autre aide');
 	addLabel(!!filters?.needOtherDifficulties, 'Autres difficultés');
 
 	return asArray ? labels : labels.join('; ');
 }
+
+export const getExportSummaryLabels = (
+	params: ExportParams,
+	buttons?: Button[],
+	filterableBlocks: FilterableBlock[] = []
+): string[] => [
+	`Période : ${getExportPeriodLabel(params)}`,
+	...(getExportFiltersLabel(
+		params,
+		true,
+		buttons,
+		filterableBlocks
+	) as string[])
+];

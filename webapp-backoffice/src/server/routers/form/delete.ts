@@ -79,12 +79,12 @@ export const deleteFormMutation = async ({
 			await sendMail(
 				`Fermeture du formulaire «${
 					deletedForm.title ?? deletedForm.form_template.title
-				}» du service «${product?.title}»`,
+				}» du service numérique «${product?.title}»`,
 				email,
 				emailHtml,
 				`Fermeture du formulaire «${
 					deletedForm.title || deletedForm.form_template.title
-				}» du service «${product?.title}»`
+				}» du service numérique «${product?.title}»`
 			);
 		}
 	}

@@ -1,4 +1,5 @@
 import FormEditModal from '@/src/components/dashboard/Form/FormEditModal';
+import { DemarcheEssentielleBadge } from '@/src/components/ui/badges/DemarcheEssentielleBadge';
 import DashboardTab from '@/src/components/dashboard/Form/tabs/dashboard';
 import LinksTab from '@/src/components/dashboard/Form/tabs/links';
 import ReviewsTab from '@/src/components/dashboard/Form/tabs/reviews';
@@ -63,7 +64,7 @@ const ProductFormPage = (props: Props) => {
 
 	const breadcrumbSegments = [
 		{
-			label: 'Services',
+			label: 'Services numériques',
 			linkProps: {
 				href: '/administration/dashboard/products'
 			}
@@ -112,7 +113,7 @@ const ProductFormPage = (props: Props) => {
 		{ enabled: !!form.id && !isNaN(form.id) && selectedTabId === 'links' }
 	);
 
-	const isLocked = form.product.isTop250 || !!form.isDeleted;
+	const isLocked = form.isTop250 || !!form.isDeleted;
 
 	const nbButtons = buttonResults?.metadata.count || 0;
 	const nbReviews = reviewsData?.metadata.countFiltered || 0;
@@ -181,17 +182,13 @@ const ProductFormPage = (props: Props) => {
 				className={fr.cx('fr-mb-4v')}
 			/>
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-6v')}>
-				<div className={fr.cx('fr-col-12')}>
+				<div className={fr.cx('fr-col-12', 'fr-pt-4v')}>
 					<div className={cx(classes.topContainer, fr.cx('fr-mb-6v'))}>
 						<div className={cx(classes.titleContainer)}>
 							<h1 className={fr.cx('fr-mb-0')}>
 								{form.title || form.form_template.title}
 							</h1>
-							{form.product.isTop250 && (
-								<Badge severity="info" noIcon>
-									Démarche essentielle
-								</Badge>
-							)}
+							{form.isTop250 && <DemarcheEssentielleBadge />}
 							{form.isDeleted && (
 								<Badge severity="error" noIcon className="fr-ml-md-3v">
 									Fermé
@@ -236,7 +233,7 @@ const ProductFormPage = (props: Props) => {
 							)}
 						</div>
 					</div>
-					{form.product.isTop250 && (
+					{form.isTop250 && (
 						<Notice
 							isClosable
 							onClose={function noRefCheck() {}}
@@ -244,7 +241,7 @@ const ProductFormPage = (props: Props) => {
 							title={'Ce formulaire ne peut être ni édité ni supprimé'}
 							description={
 								<>
-									Ce service est référencé comme démarche essentielle dans l’
+									Ce formulaire est référencé comme démarche essentielle dans l’
 									<a
 										href="https://observatoire.numerique.gouv.fr/"
 										target="_blank"
@@ -412,7 +409,7 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 		display: 'flex',
 		justifyContent: 'space-between',
 		gap: fr.spacing('2v'),
-		alignItems: 'baseline',
+		alignItems: 'center',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',
 			alignItems: 'start',
@@ -421,8 +418,8 @@ const useStyles = tss.withName({ ProductFormPage }).create({
 	},
 	titleContainer: {
 		display: 'flex',
-		alignItems: 'baseline',
-		gap: fr.spacing('2v'),
+		alignItems: 'center',
+		gap: fr.spacing('4v'),
 		flexWrap: 'wrap',
 		[fr.breakpoints.down('md')]: {
 			flexDirection: 'column',

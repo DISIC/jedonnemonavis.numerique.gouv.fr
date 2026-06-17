@@ -15,20 +15,24 @@ const AuthenticationTab = () => {
 				les étapes ci-dessous selon le type d'accès souhaité.
 			</p>
 
-			<Accordion titleAs="h3" label="Générer une clé API liée à un service">
+			<Accordion
+				titleAs="h3"
+				label="Générer une clé API liée à un service numérique"
+			>
 				<ol>
 					<li>
 						Rendez-vous sur{' '}
 						<Link href="/administration/dashboard/products" target="_blank">
-							la page de vos services
+							la page de vos services numériques
 						</Link>
 					</li>
 					<li>
-						Cliquez sur le service pour lequel vous souhaitez générer une clé
-						API
+						Cliquez sur le service numérique pour lequel vous souhaitez générer
+						une clé API
 					</li>
 					<li>
-						Dans la page du service, cliquez sur l'onglet "Gérer les clés API"
+						Dans la page du service numérique, cliquez sur l'onglet "Gérer les
+						clés API"
 					</li>
 					<li>
 						Cliquez sur "Ajouter une clé API" et copiez la clé générée

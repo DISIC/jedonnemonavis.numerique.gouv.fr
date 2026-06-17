@@ -54,23 +54,23 @@ const onConfirmModal = createModal({
 export const modalAccessContents = [
 	{
 		kind: 'removeAccessRight',
-		title: "Retirer l'accès au service",
+		title: "Retirer l'accès au service numérique",
 		sentence:
-			"Êtes-vous sûr de vouloir retirer __!NAME!__ de ce service ? Cette personne n'aura plus aucun accès au service.",
-		message: "L'accès au service a bien été retiré pour __!NAME!__."
+			"Êtes-vous sûr de vouloir retirer __!NAME!__ de ce service numérique ? Cette personne n'aura plus aucun accès au service numérique.",
+		message: "L'accès au service numérique a bien été retiré pour __!NAME!__."
 	},
 	{
 		kind: 'switchAccessRightAdmin',
-		title: 'Passer en administrateur de service',
+		title: 'Passer en administrateur de service numérique',
 		sentence:
-			'Êtes-vous sûr de vouloir passer __!NAME!__ en administrateur du service ? Cette personne pourra modifier et supprimer le service.',
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en administrateur du service numérique ? Cette personne pourra modifier et supprimer le service numérique.',
 		message: ''
 	},
 	{
 		kind: 'switchAccessRightUser',
-		title: 'Passer en utilisateur de service',
+		title: 'Passer en utilisateur de service numérique',
 		sentence:
-			'Êtes-vous sûr de vouloir passer __!NAME!__ en utilisateur du service ? Cette personne ne pourra plus modifier le service.',
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en utilisateur du service numérique ? Cette personne ne pourra plus modifier le service numérique.',
 		message: ''
 	},
 	{
@@ -84,14 +84,14 @@ export const modalAccessContents = [
 		kind: 'addSuperAdmin',
 		title: 'Passer en rôle superadmin',
 		sentence:
-			'Êtes-vous sûr de vouloir passer __!NAME!__ en tant que superadmin ? Cette personne pourra modifier et supprimer tous les services, toutes les organisations et tous les utilisateurs.',
+			'Êtes-vous sûr de vouloir passer __!NAME!__ en tant que superadmin ? Cette personne pourra modifier et supprimer tous les services numériques, toutes les organisations et tous les utilisateurs.',
 		message: ''
 	},
 	{
 		kind: 'removeSuperAdmin',
 		title: 'Retirer le rôle superadmin',
 		sentence:
-			"Êtes-vous sûr de vouloir retirer l'accès de __!NAME!__ en tant que superadmin ? Cette personne pourra plus ni modifier ni supprimer les services, les organisations et les utilisateurs.",
+			"Êtes-vous sûr de vouloir retirer l'accès de __!NAME!__ en tant que superadmin ? Cette personne pourra plus ni modifier ni supprimer les services numériques, les organisations et les utilisateurs.",
 		message: ''
 	}
 ];
@@ -172,8 +172,8 @@ const UserAccess: React.FC<Props> = props => {
 			setDisplayToast(
 				`L'utilisateur ${user?.firstName} ${user?.lastName} a été passé ${
 					ar.status.includes('admin') ? 'utilisateur' : 'administrateur'
-				} du service "${user?.accessRights.find(aer => aer.id === id)?.product
-					.title}".`
+				} du service numérique "${user?.accessRights.find(aer => aer.id === id)
+					?.product.title}".`
 			);
 		}
 	};
@@ -210,8 +210,9 @@ const UserAccess: React.FC<Props> = props => {
 				access_right_id: id
 			});
 			setDisplayToast(
-				`L'accès au service "${user?.accessRights.find(aer => aer.id === id)
-					?.product
+				`L'accès au service numérique "${user?.accessRights.find(
+					aer => aer.id === id
+				)?.product
 					.title}" a bien été supprimé pour le compte ${user?.firstName} ${user?.lastName}.`
 			);
 		}
@@ -423,11 +424,11 @@ const UserAccess: React.FC<Props> = props => {
 								</ul>
 							</div>
 							<div className={fr.cx('fr-col-12')}>
-								<h3>Services</h3>
+								<h3>Services numériques</h3>
 								<p>{`${user.firstName} ${user.lastName} ${
 									sortedEntities.length > 0
-										? 'est administrateur des services suivants : '
-										: "n'est administrateur d'aucun service pour le moment."
+										? 'est administrateur des services numériques suivants : '
+										: "n'est administrateur d'aucun service numérique pour le moment."
 								}`}</p>
 								<ul className={cx(classes.ulContainer)}>
 									{sortedEntities.map((entity, index) => (

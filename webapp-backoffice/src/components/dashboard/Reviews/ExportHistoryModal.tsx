@@ -1,8 +1,10 @@
 import { ExportWithPartialRelations } from '@/prisma/generated/zod';
 import { CustomModalProps } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import {
 	getExportFiltersLabel,
 	getExportPeriodLabel,
+	getFilterableBlocks,
 	parseExportParams
 } from '@/src/utils/export';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -18,6 +20,7 @@ interface Props {
 	modal: CustomModalProps;
 	exports: ExportWithPartialRelations[];
 	buttons: ButtonModel[];
+	form: FormWithElements;
 }
 
 type SortColumn = 'date' | 'user' | 'period' | null;
@@ -27,11 +30,13 @@ type ExportWithLabels = ExportWithPartialRelations & {
 	filtersLabel: string;
 };
 
-const ExportHistoryModal = ({ modal, exports, buttons }: Props) => {
+const ExportHistoryModal = ({ modal, exports, buttons, form }: Props) => {
 	const { classes, cx } = useStyles();
 
 	const [sortColumn, setSortColumn] = useState<SortColumn>(null);
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+	const filterableBlocks = getFilterableBlocks(form);
 
 	const exportsWithLabels: ExportWithLabels[] = useMemo(() => {
 		return exports.map(record => {
@@ -41,7 +46,12 @@ const ExportHistoryModal = ({ modal, exports, buttons }: Props) => {
 				startDate: parsedParams.startDate,
 				endDate: parsedParams.endDate
 			});
-			const filtersLabel = getExportFiltersLabel(parsedParams, false, buttons);
+			const filtersLabel = getExportFiltersLabel(
+				parsedParams,
+				false,
+				buttons,
+				filterableBlocks
+			);
 
 			return {
 				...record,

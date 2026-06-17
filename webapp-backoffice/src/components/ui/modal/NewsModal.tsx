@@ -32,9 +32,9 @@ const NewsModal = ({ modal }: NewsModalProps) => {
 		>
 			<p className={fr.cx('fr-mb-4v')}>Vous pouvez désormais : </p>
 			<p className={fr.cx('fr-mb-4v')}>
-				⭐️ Identifier les bugs sur vos services grâce à vos usagers. Créer des
-				formulaires de “Remontées d’informations” est maintenant possible. Plus
-				d’infos sur la page des nouveautés.
+				⭐️ Identifier les bugs sur vos services numériques grâce à vos usagers.
+				Créer des formulaires de “Remontées d’informations” est maintenant
+				possible. Plus d’infos sur la page des nouveautés.
 			</p>
 			<p className={fr.cx('fr-mb-4v')}>
 				⭐️ Affichez un bouton flottant sur votre site afin que vos usagers

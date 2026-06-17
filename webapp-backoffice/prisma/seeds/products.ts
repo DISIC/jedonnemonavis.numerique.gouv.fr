@@ -9,7 +9,8 @@ export const products = [
 		title: 'Impots.gouv.fr',
 		urls: ['https://www.impots.gouv.fr/'],
 		isPublic: true,
-		templateSlug: 'root'
+		templateSlug: 'root',
+		isDemarcheEssentielle: true
 	},
 	{
 		title: 'Mon compte formation',

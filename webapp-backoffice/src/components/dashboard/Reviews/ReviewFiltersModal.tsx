@@ -1,5 +1,6 @@
 import { CustomModalProps, ReviewFiltersType } from '@/src/types/custom';
 import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getFilterableBlocks } from '@/src/utils/export';
 import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
@@ -20,13 +21,7 @@ const ReviewFiltersModal = (props: Props) => {
 	const { modal, filters, submitFilters, form } = props;
 	const { cx, classes } = useStyles();
 
-	const filterableBlocks = form.form_template.form_template_steps
-		.flatMap(step => step.form_template_blocks)
-		.filter(block =>
-			['mark_input', 'smiley_input', 'select', 'radio', 'checkbox'].includes(
-				block.type_bloc
-			)
-		);
+	const filterableBlocks = getFilterableBlocks(form);
 
 	const hasVerbatimBlock = form.form_template.form_template_steps
 		.flatMap(step => step.form_template_blocks)

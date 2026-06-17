@@ -60,7 +60,7 @@ export const JdmaNotificationsEmail = ({
 		<JdmaLayout
 			preview={`${formatNumber(totalNbReviews)} ${
 				totalNbReviews === 1 ? 'nouvelle réponse' : 'nouvelles réponses'
-			} sur vos services`}
+			} sur vos services numériques`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
@@ -71,14 +71,15 @@ export const JdmaNotificationsEmail = ({
 					&nbsp;{formatNumber(totalNbReviews)}{' '}
 					{totalNbReviews === 1 ? 'réponse' : 'réponses'}&nbsp;
 				</strong>
-				{getFrequencyLabel()} sur vos services dans Je donne mon avis.
+				{getFrequencyLabel()} sur vos services numériques dans Je donne mon
+				avis.
 			</Text>
 
 			<Section style={tableSection}>
 				{/* Table Header */}
 				<Row>
 					<Column>
-						<Text style={tableHeader}>Services</Text>
+						<Text style={tableHeader}>Services numériques</Text>
 					</Column>
 				</Row>
 
@@ -128,7 +129,7 @@ export const JdmaNotificationsEmail = ({
 				target="_blank"
 				style={dashboardLink}
 			>
-				Retrouvez tous vos services sur votre tableau de bord JDMA
+				Retrouvez tous vos services numériques sur votre tableau de bord JDMA
 			</Link>
 
 			<Text style={paragraph}>

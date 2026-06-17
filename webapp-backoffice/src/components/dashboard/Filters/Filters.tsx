@@ -3,18 +3,18 @@ import {
 	initialFilterState,
 	useFilters
 } from '@/src/contexts/FiltersContext';
-import { tss } from 'tss-react/dsfr';
-import { fr } from '@codegouvfr/react-dsfr';
-import { useEffect, useMemo } from 'react';
-import Button from '@codegouvfr/react-dsfr/Button';
-import { getDatesByShortCut } from '@/src/utils/tools';
-import { FormWithElements } from '@/src/types/prismaTypesExtended';
 import { CustomModalProps } from '@/src/types/custom';
+import { FormWithElements } from '@/src/types/prismaTypesExtended';
+import { getDatesByShortCut } from '@/src/utils/tools';
+import { fr } from '@codegouvfr/react-dsfr';
+import Button from '@codegouvfr/react-dsfr/Button';
+import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
 import { Button as PrismaButton } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
+import { useEffect, useMemo } from 'react';
+import { tss } from 'tss-react/dsfr';
 import DateRangePickerButton from './DateRangePickerButton';
 import IntegrationLinksDropdown from './IntegrationLinksDropdown';
-import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
-import { push } from '@socialgouv/matomo-next';
 
 const dateShortcuts = [
 	{
@@ -206,7 +206,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 									small
 									options={[
 										{
-											label: 'Avis avec commentaire',
+											label: 'Réponse avec commentaire',
 											nativeInputProps: {
 												name: 'needVerbatim',
 												checked: filters.productReviews.filters.needVerbatim,

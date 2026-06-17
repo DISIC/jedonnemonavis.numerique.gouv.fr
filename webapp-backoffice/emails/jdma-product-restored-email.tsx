@@ -13,13 +13,13 @@ export const JdmaProductRestoredEmail = ({
 
 	return (
 		<JdmaLayout
-			preview={`Restauration du service « ${productTitle} »`}
+			preview={`Restauration du service numérique « ${productTitle} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
 
 			<Text style={paragraph}>
-				{userName} vient de restaurer le service «&nbsp;
+				{userName} vient de restaurer le service numérique «&nbsp;
 				<strong>{productTitle}</strong> » sur la plateforme&nbsp;
 				<Link href={baseUrl} target="_blank" style={linkStyle}>
 					Je donne mon avis
@@ -30,7 +30,7 @@ export const JdmaProductRestoredEmail = ({
 			<Text style={paragraph}>
 				Vous pouvez à nouveau&nbsp;
 				<Link href={productUrl} target="_blank" style={linkStyle}>
-					accéder aux avis et aux commentaires de ce service
+					accéder aux avis et aux commentaires de ce service numérique
 				</Link>
 				.
 			</Text>

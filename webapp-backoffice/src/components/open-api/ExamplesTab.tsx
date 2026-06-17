@@ -16,7 +16,7 @@ const ExamplesTab = () => {
 			<p>Découvrez comment utiliser l'API JDMA avec des exemples concrets.</p>
 
 			<h3 className={fr.cx('fr-h6', 'fr-mb-2v', 'fr-mt-10v')}>
-				Récupérer les informations de vos services
+				Récupérer les informations de vos services numériques
 			</h3>
 			<CodeBlock language="bash">
 				{`curl -X GET "${process.env.NEXT_PUBLIC_BO_APP_URL}/api/open-api/services" \\

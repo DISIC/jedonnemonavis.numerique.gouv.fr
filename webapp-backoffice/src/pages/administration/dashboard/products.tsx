@@ -184,7 +184,7 @@ const DashBoard = () => {
 	const headTitle = () => {
 		return search
 			? `Résultat de la recherche «${search}» pour l'organisation «${inputValue}» | Démarches | Je donne mon avis`
-			: 'Services | Je donne mon avis';
+			: 'Services numériques | Je donne mon avis';
 	};
 
 	const loadModalAndHead = () => {
@@ -297,16 +297,16 @@ const DashBoard = () => {
 				<div
 					className={fr.cx('fr-grid-row', 'fr-grid-row--gutters', 'fr-mb-5v')}
 				>
-					<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
-						<h1 className={fr.cx('fr-mb-0')}>
+					<div className={fr.cx('fr-col-12', 'fr-col-md-6')}>
+						<h1 className={cx(classes.pageTitle, fr.cx('fr-mb-0'))}>
 							{!session?.user?.role.includes('admin')
-								? 'Vos services'
-								: 'Services'}
+								? 'Vos services numériques'
+								: 'Services numériques'}
 						</h1>
 					</div>
 					<div
 						className={cx(
-							fr.cx('fr-col-12', 'fr-col-md-8'),
+							fr.cx('fr-col-12', 'fr-col-md-6'),
 							classes.buttonContainer
 						)}
 					>
@@ -320,7 +320,7 @@ const DashBoard = () => {
 								router.push('/administration/dashboard/product/new');
 							}}
 						>
-							Ajouter un nouveau service
+							Ajouter un nouveau service numérique
 						</Button>
 					</div>
 				</div>
@@ -328,7 +328,7 @@ const DashBoard = () => {
 					<div role="alert">
 						<Alert
 							className={fr.cx('fr-col-12', 'fr-mb-8v')}
-							title="Votre service et votre formulaire ont été créés avec succès !"
+							title="Votre service numérique et votre formulaire ont été créés avec succès !"
 							as="h2"
 							description={
 								<>
@@ -368,26 +368,58 @@ const DashBoard = () => {
 					<div className={fr.cx('fr-grid-row', 'fr-grid-row--gutters')}>
 						{displayFilters && (
 							<>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
-									<Select
-										label="Trier Par"
-										nativeSelectProps={{
-											name: 'my-select',
-											value: filters.filter,
-											onChange: event =>
-												updateFilters({
-													...filters,
-													filter: event.target.value
-												})
+								<div
+									className={fr.cx(
+										'fr-col-12',
+										'fr-col-md-5',
+										'fr-col--bottom'
+									)}
+								>
+									<form
+										className={cx(classes.searchForm)}
+										onSubmit={e => {
+											e.preventDefault();
+											updateFilters({
+												...filters,
+												currentPage: 1,
+												validatedSearch: normalizeString(search)
+											});
+											push(['trackEvent', 'Product', 'Search']);
 										}}
 									>
-										<option value="title:asc">Nom A à Z</option>
-										<option value="entity.name:asc">Organisation A à Z</option>
-										<option value="created_at:desc">Date de création</option>
-										<option value="updated_at:desc">Date de mise à jour</option>
-									</Select>
+										<div role="search" className={fr.cx('fr-search-bar')}>
+											<Input
+												label="Rechercher un service numérique"
+												hideLabel
+												nativeInputProps={{
+													placeholder: 'Rechercher un service numérique',
+													type: 'search',
+													value: search,
+													onChange: event => {
+														if (!event.target.value) {
+															updateFilters({
+																...filters,
+																currentPage: 1,
+																validatedSearch: ''
+															});
+														}
+														setSearch(event.target.value);
+													}
+												}}
+											/>
+											<Button
+												priority="primary"
+												type="submit"
+												iconId="ri-search-2-line"
+												iconPosition="left"
+											>
+												Rechercher
+											</Button>
+										</div>
+									</form>
 								</div>
-								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
+
+								<div className={fr.cx('fr-col-12', 'fr-col-md-4')}>
 									<Autocomplete
 										id="filter-entity"
 										disablePortal
@@ -431,58 +463,8 @@ const DashBoard = () => {
 										)}
 									/>
 								</div>
-								<div
-									className={fr.cx(
-										'fr-col-12',
-										'fr-col-md-4',
-										'fr-col--bottom'
-									)}
-								>
-									<form
-										className={cx(classes.searchForm)}
-										onSubmit={e => {
-											e.preventDefault();
-											updateFilters({
-												...filters,
-												currentPage: 1,
-												validatedSearch: normalizeString(search)
-											});
-											push(['trackEvent', 'Product', 'Search']);
-										}}
-									>
-										<div role="search" className={fr.cx('fr-search-bar')}>
-											<Input
-												label="Rechercher un service"
-												hideLabel
-												nativeInputProps={{
-													placeholder: 'Rechercher un service',
-													type: 'search',
-													value: search,
-													onChange: event => {
-														if (!event.target.value) {
-															updateFilters({
-																...filters,
-																currentPage: 1,
-																validatedSearch: ''
-															});
-														}
-														setSearch(event.target.value);
-													}
-												}}
-											/>
-											<Button
-												priority="primary"
-												type="submit"
-												iconId="ri-search-2-line"
-												iconPosition="left"
-											>
-												Rechercher
-											</Button>
-										</div>
-									</form>
-								</div>
 
-								<div className={fr.cx('fr-col-12', 'fr-col-md-2')}>
+								<div className={fr.cx('fr-col-12', 'fr-col-md-3')}>
 									<Select
 										label="Vue"
 										nativeSelectProps={{
@@ -506,7 +488,9 @@ const DashBoard = () => {
 										}}
 									>
 										<option value="all">Services actifs</option>
-										<option value="favorites">Mes favoris</option>
+										<option value="favorites">
+											Services favoris uniquement
+										</option>
 										<option value="archived">Services archivés</option>
 									</Select>
 								</div>
@@ -581,8 +565,8 @@ const DashBoard = () => {
 									filters.filterOnlyFavorites &&
 									search === '' &&
 									!filters.filterEntity.length
-										? 'Aucun service dans vos favoris'
-										: 'Aucun service actif trouvé'
+										? 'Aucun service numérique dans vos favoris'
+										: 'Aucun service numérique actif trouvé'
 								}
 							/>
 						</div>
@@ -610,7 +594,7 @@ const DashBoard = () => {
 											showFavoriteButton={countTotalUserScope > 10}
 											onDeleteProduct={() => {
 												setStatusProductState({
-													msg: `Le service "${product.title}" a bien été supprimé`,
+													msg: `Le service numérique "${product.title}" a bien été supprimé`,
 													role: 'status'
 												});
 											}}
@@ -620,7 +604,7 @@ const DashBoard = () => {
 													filterOnlyArchived: false
 												});
 												setStatusProductState({
-													msg: `Le service "${product.title}" a bien été restauré`,
+													msg: `Le service numérique "${product.title}" a bien été restauré`,
 													role: 'status'
 												});
 											}}
@@ -679,6 +663,9 @@ const useStyles = tss.withName({ ProductModal }).create(() => ({
 				marginBottom: '1rem'
 			}
 		}
+	},
+	pageTitle: {
+		textWrap: 'nowrap'
 	},
 	tagContainer: {
 		display: 'flex',

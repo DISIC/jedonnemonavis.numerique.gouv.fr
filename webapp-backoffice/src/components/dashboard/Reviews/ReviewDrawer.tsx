@@ -345,7 +345,20 @@ const ReviewDrawerContent = ({
 			{answerBlocks.map((block, index) => {
 				const answers = getTopLevelAnswers(review.answers, block.field_code);
 				const childFields = groupChildAnswersByField(review.answers, answers);
-				const boldTexts = answers.map(a => a.answer_text || '-');
+				const otherOption = block.options?.find(o => o.isOther);
+				const verbatimAnswer = review.answers?.find(
+					a => a.field_code === `${block.field_code}_verbatim`
+				);
+				const boldTexts = answers.map(a => {
+					const isOtherLine =
+						!!otherOption &&
+						(a.answer_item_id === otherOption.id ||
+							a.answer_text === otherOption.value ||
+							a.answer_text === otherOption.label);
+					return isOtherLine && verbatimAnswer?.answer_text
+						? `${a.answer_text || '-'}: ${verbatimAnswer.answer_text}`
+						: a.answer_text || '-';
+				});
 
 				return (
 					<React.Fragment key={index}>

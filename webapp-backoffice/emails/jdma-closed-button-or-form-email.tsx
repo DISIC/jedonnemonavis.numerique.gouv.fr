@@ -26,7 +26,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 		<JdmaLayout
 			preview={`Fermeture ${
 				buttonTitle ? "d'un lien d'intégration" : "d'un formulaire"
-			} du service « ${product.title} »`}
+			} du service numérique « ${product.title} »`}
 			baseUrl={baseUrl}
 		>
 			<Text style={paragraph}>Bonjour,</Text>
@@ -34,7 +34,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 			<Text style={paragraph}>
 				{userName} vient de fermer&nbsp;
 				<span dangerouslySetInnerHTML={{ __html: closeTitle }} /> du service
-				«&nbsp;
+				numérique «&nbsp;
 				{product.title}&nbsp;». Il ne recevra plus de données, mais les
 				statistiques récoltées avant la fermeture restent accessibles.
 			</Text>
@@ -66,7 +66,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 
 			{buttonTitle && (
 				<Section style={serviceSection}>
-					<Text style={tableHeader}>Service</Text>
+					<Text style={tableHeader}>Service numérique</Text>
 					<Section style={serviceCard}>
 						<Link href={productUrl} target="_blank" style={productLink}>
 							{product.title}
@@ -86,7 +86,7 @@ export const JdmaClosedButtonOrFormEmail = ({
 				target="_blank"
 				style={dashboardLink}
 			>
-				Retrouvez tous vos services sur votre tableau de bord JDMA
+				Retrouvez tous vos services numériques sur votre tableau de bord JDMA
 			</Link>
 		</JdmaLayout>
 	);

@@ -105,7 +105,7 @@ export function createOrEditProduct(
 ) {
 	if (!isEdit) {
 		cy.injectAxe();
-		cy.contains('button', /^Ajouter un (nouveau )?service$/).click();
+		cy.contains('button', /^Ajouter un (nouveau )?service numérique$/).click();
 		cy.wait(500);
 		cy.auditA11y();
 	}
