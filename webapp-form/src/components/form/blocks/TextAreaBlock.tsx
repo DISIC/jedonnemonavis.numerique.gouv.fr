@@ -44,10 +44,14 @@ export const TextAreaBlock = ({
 				className={fr.cx('fr-mb-0')}
 				hintText={
 					<>
-						Pour nous aider à comprendre, vous pouvez préciser : <br /> - si
-						vous êtes sur un ordinateur ou un téléphone, <br />- ce que vous
-						cherchiez à faire, <br />- ce qui s’est réellement passé ou ce qui
-						pourrait être amélioré. <br />
+						Pour nous aider à comprendre, vous pouvez préciser :
+						<ul className={fr.cx('fr-mt-1v', 'fr-mb-0', 'fr-pl-3v')}>
+							<li>si vous êtes sur un ordinateur ou un téléphone,</li>
+							<li>ce que vous cherchiez à faire,</li>
+							<li>
+								ce qui s’est réellement passé ou ce qui pourrait être amélioré.
+							</li>
+						</ul>
 						Plus votre description est précise, plus nous pourrons agir
 						efficacement.
 					</>

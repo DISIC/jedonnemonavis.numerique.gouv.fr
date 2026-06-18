@@ -12,6 +12,7 @@ import { AnswerIntention, Prisma } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -370,7 +371,6 @@ export default function JDMAForm({
 						<Image
 							alt=""
 							src="/Demarches/assets/icon-check.svg"
-							title="Icone - Merci pour votre aide"
 							width={40}
 							height={40}
 						/>
@@ -405,6 +405,7 @@ export default function JDMAForm({
 								href={`https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2&id_demarche=${product.id}`}
 								target="_blank"
 								rel="noopener noreferrer"
+								title={`${t('success_block.link')}, ${t('global.new_window')}`}
 							>
 								{t('success_block.link')}
 							</Link>
@@ -506,6 +507,13 @@ export default function JDMAForm({
 
 	return (
 		<div>
+			{isFormSubmitted && (
+				<Head>
+					<title>{`${t('global.thanks_title')} ${t('global.page_title', {
+						product: product.title
+					})}`}</title>
+				</Head>
+			)}
 			{isPreviewUnpublished && (
 				<Notice
 					className={cx(classes.notice)}

@@ -31,7 +31,6 @@ export function fillFormStep2(shouldauditA11y = false) {
 		cy.auditA11y();
 	}
 	cy.get('[class*="radioContainer"]')
-		.find('fieldset')
 		.find('li')
 		.should('have.length', 5)
 		.eq(4)
@@ -80,13 +79,13 @@ export function fillFormStep4(shouldauditA11y = false) {
 	cy.get("[class*='reviews']")
 		.should('be.visible')
 		.within(() => {
-			cy.contains('label', 'Au guichet')
+			cy.contains('legend', 'Au guichet')
 				.parents("[class*='optionRow']")
 				.within(() => {
 					cy.get('input[type="radio"]').eq(4).check({ force: true });
 				});
 
-			cy.contains('label', 'Par téléphone')
+			cy.contains('legend', 'Par téléphone')
 				.parents("[class*='optionRow']")
 				.within(() => {
 					cy.get('input[type="radio"]').eq(3).check({ force: true });

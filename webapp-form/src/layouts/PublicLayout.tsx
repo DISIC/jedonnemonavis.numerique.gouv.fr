@@ -44,15 +44,6 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		return '';
 	};
 
-	const getStepTitle = (step: string | string[] | undefined) => {
-		const titles: { [key: string]: string } = {
-			'0': 'Clarté (étape 1 sur 3) |',
-			'1': 'Aides (étape 2 sur 3) |',
-			'2': 'Informations complémentaires (étape 3 sur 3) |'
-		};
-		return titles[step as string] || '';
-	};
-
 	const lang = (i18n?.language || 'fr') as Language;
 	const shouldShowLanguageSelector = !router.asPath.startsWith('/avis');
 
@@ -64,13 +55,24 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 						nativeButtonProps={{
 							'aria-controls': 'translate-select',
 							'aria-expanded': false,
-							title: t('Sélectionner une langue')
+							title: t('global.select_language')
 						}}
 						priority="tertiary"
-						className={cx(classes.langShort, fr.cx('fr-translate', 'fr-nav'))}
+						className={cx(
+							classes.uppercase,
+							classes.langTrigger,
+							fr.cx('fr-translate', 'fr-nav', 'fr-pr-2v')
+						)}
 						iconId="fr-icon-translate-2"
 					>
 						{lang}
+						<i
+							className={fr.cx(
+								'fr-icon-arrow-down-s-line',
+								'fr-icon--sm',
+								'fr-ml-2v'
+							)}
+						/>
 					</Button>
 					<LanguageSelector
 						key="lang-selector"
@@ -99,7 +101,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					iconId: 'fr-icon-translate-2',
 					text: (
 						<>
-							<span className={classes.langShort}>{lang_i}</span>
+							<span className={classes.uppercase}>{lang_i}</span>
 							&nbsp;-&nbsp;{fullNameByLang[lang_i]}
 						</>
 					)
@@ -139,9 +141,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		<>
 			<Head>
 				<title>
-					{`${getStepTitle(
-						router.query.step
-					)} Je donne mon avis sur la démarche "${getProductTitle()}"`}
+					{t('global.page_title', {
+						product: getProductTitle()
+					})}
 				</title>
 				<meta name="description" content="Je donne mon avis" />
 			</Head>
@@ -149,11 +151,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				links={[
 					{
 						anchor: '#main',
-						label: 'Contenu'
+						label: t('global.skip_content')
 					},
 					{
 						anchor: '#footer',
-						label: 'Pied de page'
+						label: t('global.skip_footer')
 					}
 				]}
 			/>
@@ -166,8 +168,8 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					</>
 				}
 				homeLinkProps={{
-					href: '#',
-					title: 'Accueil - Je donne mon avis (Services publics +)'
+					href: router.asPath,
+					title: t('global.home_link_title')
 				}}
 				id={headerId}
 				serviceTitle={'Je donne mon avis'}
@@ -184,27 +186,31 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 					href: '/accessibility'
 				}}
 				bottomItems={[
-					{ text: 'Données personnelles', linkProps: { href: '/cgu' } },
 					{
-						text: 'Modalités d’utilisation',
+						text: t('global.footer.legal_notice'),
+						linkProps: { href: '/legalNotice' }
+					},
+					{
+						text: t('global.footer.personal_data'),
+						linkProps: { href: '/cgu' }
+					},
+					{
+						text: t('global.footer.terms_of_use'),
 						linkProps: { href: '/termsOfUse' }
 					},
-					{ text: 'Contact', linkProps: { href: '/contact' } }
+					{ text: t('global.footer.contact'), linkProps: { href: '/contact' } }
 				]}
-				termsLinkProps={{
-					href: '/legalNotice'
-				}}
 				license={
 					<>
-						Le{' '}
+						{t('global.footer.license_before')}
 						<a
 							href="https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr"
 							target="_blank"
 							rel="noopener noreferrer"
 						>
-							code source
-						</a>{' '}
-						est disponible en licence libre.
+							{t('global.footer.license_link')}
+						</a>
+						{t('global.footer.license_after')}
 					</>
 				}
 			/>
@@ -225,7 +231,15 @@ const useStyles = tss
 				display: 'none'
 			}
 		},
-		langShort: {
+		langTrigger: {
+			'& i': {
+				transition: 'transform 0.3s ease'
+			},
+			'&[aria-expanded="true"] i': {
+				transform: 'rotate(180deg)'
+			}
+		},
+		uppercase: {
 			textTransform: 'uppercase'
 		}
 	}));

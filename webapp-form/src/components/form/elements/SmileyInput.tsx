@@ -64,13 +64,18 @@ export const SmileyInput = (props: Props) => {
 						)}
 					</legend>
 					<ul>
-						{smileys.map(smiley => (
+						{smileys.map((smiley, index) => (
 							<li key={smiley.value}>
 								<input
 									id={`radio-${name}-${smiley.value}`}
 									className={cx(classes.inputIndicator)}
 									type="radio"
 									name={name}
+									aria-label={
+										index === 0
+											? `${label} ${t(`smileys.${smiley.value}`)}`
+											: undefined
+									}
 									checked={smileySelected === smiley.value}
 									onChange={() => {
 										setSmileySelected(smiley.value);
@@ -79,19 +84,8 @@ export const SmileyInput = (props: Props) => {
 								<label
 									htmlFor={`radio-${name}-${smiley.value}`}
 									className={cx(classes.smileyInput)}
-									tabIndex={0}
-									onKeyDown={e => {
-										if (e.key === 'Enter' || e.key === ' ') {
-											setSmileySelected(smiley.value);
-										}
-									}}
 								>
-									<Image
-										alt={`Image: ${t(`smileys.${smiley.value}`)}`}
-										src={smiley.img}
-										width={56}
-										height={56}
-									/>
+									<Image alt="" src={smiley.img} width={56} height={56} />
 									{t(`smileys.${smiley.value}`)}
 								</label>
 							</li>

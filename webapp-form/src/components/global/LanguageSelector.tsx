@@ -57,7 +57,8 @@ export const LanguageSelector = memo((props: Props) => {
 								href={`/Demarches/${lang_i + router.asPath}`}
 							>
 								<span className={classes.langShort}>{lang_i}</span>
-								{fullNameByLang[lang_i]}
+								<span>-</span>
+								<span>{fullNameByLang[lang_i]}</span>
 							</a>
 						</li>
 					))}
@@ -72,7 +73,8 @@ const useStyles = tss.withName({ LanguageSelector }).create({
 		display: 'inline-flex'
 	},
 	menuLanguage: {
-		right: 0,
+		top: 40,
+		right: -10,
 		left: 'auto',
 		marginLeft: 0,
 		marginRight: 0,
@@ -88,6 +90,10 @@ const useStyles = tss.withName({ LanguageSelector }).create({
 			cursor: 'pointer',
 			font: 'inherit',
 			textAlign: 'left'
+		},
+		'.fr-nav__link': {
+			gap: fr.spacing('1v'),
+			justifyContent: 'start'
 		}
 	},
 	langShort: {

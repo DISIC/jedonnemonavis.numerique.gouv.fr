@@ -6,7 +6,7 @@ import {
 	Product
 } from '@/src/utils/types';
 import { useTranslation } from 'next-i18next';
-import { ChangeEvent, SetStateAction, useEffect } from 'react';
+import { ChangeEvent, SetStateAction } from 'react';
 import { fr } from '@codegouvfr/react-dsfr';
 import { tss } from 'tss-react/dsfr';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
@@ -162,6 +162,10 @@ export const CheckboxInput = (props: Props) => {
 									nativeInputProps: {
 										name: opt.name || `${field.name}-${index}`,
 										autoFocus: index === 0 ? true : false,
+										'aria-label':
+											index === 0
+												? `${t(field.label)} ${t(opt.label)}`
+												: undefined,
 										checked: opinion[
 											field.name as CheckboxOpinionKeys
 										]?.includes(opt.value),

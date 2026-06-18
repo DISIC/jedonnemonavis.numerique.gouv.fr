@@ -4,9 +4,11 @@ import Image from 'next/image';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { trpc } from '../utils/trpc';
 import { useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 
 const FormClosed = ({ buttonId }: { buttonId: number }) => {
 	const { classes, cx } = useStyles();
+	const { t } = useTranslation('common');
 
 	const newVisitOnClosedButton =
 		trpc.closedButtonLog.createOrUpdate.useMutation();
@@ -18,24 +20,21 @@ const FormClosed = ({ buttonId }: { buttonId: number }) => {
 	return (
 		<div className={cx(fr.cx('fr-container'), classes.root)}>
 			<div>
-				<h1>Ce formulaire est fermé</h1>
-				<div>
-					Ce formulaire a été clôturé, mais vous pouvez partager votre
-					expérience via le formulaire du site Service Public+.
-				</div>
+				<h1>{t('pages.form_closed.h1')}</h1>
+				<div>{t('pages.form_closed.text')}</div>
 				<div className={classes.buttonsGroup}>
 					<Button
 						linkProps={{
 							href: 'https://www.plus.transformation.gouv.fr/experience/step_1?pk_campaign=DINUM_v2'
 						}}
 					>
-						Partager mon expérience
+						{t('pages.form_closed.button')}
 					</Button>
 				</div>
 			</div>
 			<Image
 				src="/Demarches/assets/warning_picto_illu.svg"
-				alt="Picto d'avertissement"
+				alt={t('pages.form_closed.warning_alt')}
 				width={282}
 				height={319}
 			/>

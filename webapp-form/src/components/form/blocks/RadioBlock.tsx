@@ -25,8 +25,7 @@ export const RadioBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	form,
-	isWidget
+	form
 }: Props) => {
 	const { classes } = useStyles();
 	const radioAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
@@ -41,49 +40,50 @@ export const RadioBlock = ({
 	});
 
 	return (
-		<div>
-			<label
-				htmlFor={`radio-${block.id}`}
-				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-4v')}
-			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
-			</label>
-			{block.content && <p className={classes.hint}>{block.content}</p>}
-			<RadioButtons
-				id={`radio-${block.id}`}
-				options={visibleOptions.map(opt => ({
-					label: opt.label ? parseBoldLabel(opt.label) : '',
-					hintText: opt.hint,
-					nativeInputProps: {
-						value: opt.id.toString(),
-						checked: radioValue === opt.id,
-						required: block.isRequired,
-						onChange: () => {
-							setAnswers(prev => ({
-								...prev,
-								[fieldKey]: {
-									block_id: block.id,
-									answer_item_id: opt.id
-								}
-							}));
-						}
+		<RadioButtons
+			id={`radio-${block.id}`}
+			classes={{ legend: classes.legend }}
+			legend={
+				<>
+					{displayLabel} {!block.isRequired && '(optionnel)'}
+				</>
+			}
+			hintText={block.content || undefined}
+			options={visibleOptions.map((opt, index) => ({
+				label: opt.label ? parseBoldLabel(opt.label) : '',
+				hintText: opt.hint,
+				nativeInputProps: {
+					value: opt.id.toString(),
+					checked: radioValue === opt.id,
+					required: block.isRequired,
+					'aria-label':
+						index === 0
+							? `${displayLabel}, ${(opt.label || '').replace(/\*/g, '')}${
+									opt.hint ? `, ${opt.hint}` : ''
+							  }`
+							: undefined,
+					onChange: () => {
+						setAnswers(prev => ({
+							...prev,
+							[fieldKey]: {
+								block_id: block.id,
+								answer_item_id: opt.id
+							}
+						}));
 					}
-				}))}
-			/>
-		</div>
+				}
+			}))}
+		/>
 	);
 };
 
 const useStyles = tss.withName({ RadioBlock }).create(() => ({
-	hint: {
-		fontSize: '0.9rem',
-		color: fr.colors.decisions.text.mention.grey.default,
-		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`
-	},
-	smallFix: {
-		'& .fr-fieldset__content .fr-radio-group--sm input[type=radio] + label': {
-			backgroundPosition: '0 calc(1rem - 1px), 0 calc(1rem - 1px) !important'
+	legend: {
+		'&&': {
+			fontSize: '1rem',
+			lineHeight: '1.5rem',
+			fontWeight: '400!important',
+			marginBottom: fr.spacing('5v')
 		}
 	}
 }));

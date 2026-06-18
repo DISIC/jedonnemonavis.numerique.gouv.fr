@@ -1,4 +1,7 @@
 import { fr } from '@codegouvfr/react-dsfr';
+import { GetStaticProps } from 'next';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import React from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -6,12 +9,13 @@ import Image from 'next/image';
 
 const Contact = () => {
 	const { cx, classes } = useStyles();
+	const { t } = useTranslation('common');
 
 	return (
 		<>
 			<Head>
-				<title>Contact | Je donne mon avis</title>
-				<meta name="description" content={`Contact | Je donne mon avis`} />
+				<title>{t('pages.contact.meta_title')}</title>
+				<meta name="description" content={t('pages.contact.meta_title')} />
 			</Head>
 			<div
 				className={fr.cx(
@@ -31,10 +35,10 @@ const Contact = () => {
 					<div
 						className={fr.cx('fr-col-12', 'fr-col-md-6', 'fr-col-offset-lg-1')}
 					>
-						<h1 className={fr.cx('fr-mb-5v')}>Nous contacter</h1>
+						<h1 className={fr.cx('fr-mb-5v')}>{t('pages.contact.h1')}</h1>
 						<div className={cx(classes.description)}>
-							<p>Vous pouvez nous contacter à l'adresse e-mail suivante :</p>
-							<p className={fr.cx('fr-text--bold')}>
+							<p>{t('pages.contact.intro')}</p>
+							<p className={cx(fr.cx('fr-text--bold'))}>
 								support@jedonnemonavis.numerique.gouv.fr
 							</p>
 						</div>
@@ -142,5 +146,11 @@ const useStyles = tss.withName({ Contact }).create(() => ({
 		}
 	}
 }));
+
+export const getStaticProps: GetStaticProps = async ({ locale }) => ({
+	props: {
+		...(await serverSideTranslations(locale ?? 'fr', ['common']))
+	}
+});
 
 export default Contact;
