@@ -55,7 +55,7 @@ export const FormStepper = (props: Props) => {
 						<Stepper
 							currentStep={currentStep + 1}
 							stepCount={steps.length}
-							title={t(`${steps[currentStep].name}`)}
+							title={''}
 							className={fr.cx('fr-mb-12v')}
 						/>
 					</>
@@ -126,7 +126,7 @@ const useStyles = tss
 			}
 		},
 		field: {
-			marginBottom: fr.spacing('12v')
+			marginBottom: fr.spacing('8v')
 		},
 		buttonContainer: {
 			display: 'flex',

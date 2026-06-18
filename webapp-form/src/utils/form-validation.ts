@@ -25,9 +25,10 @@ const DECORATIVE_BLOCK_TYPES = [
 ];
 
 export function isBlockHidden(block: Block, formConfig?: FormConfig): boolean {
-	return !!formConfig?.form_config_displays?.some(
-		d => d.kind === 'block' && d.parent_id === block.id && d.hidden
+	const display = formConfig?.form_config_displays?.find(
+		d => d.kind === 'block' && d.parent_id === block.id
 	);
+	return display ? display.hidden : block.isHiddenByDefault;
 }
 
 export function getVisibleBlocks(

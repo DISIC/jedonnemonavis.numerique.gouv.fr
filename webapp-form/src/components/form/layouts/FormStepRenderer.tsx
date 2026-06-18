@@ -59,7 +59,7 @@ export const FormStepRenderer = (props: Props) => {
 					<Stepper
 						currentStep={currentStepIndex + 1}
 						stepCount={totalSteps}
-						title={step.title}
+						title={''}
 						className={fr.cx('fr-mb-12v')}
 					/>
 				</>

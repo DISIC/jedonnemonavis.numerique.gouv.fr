@@ -38,6 +38,12 @@ export const Field = (props: Props) => {
 		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id
 	);
 
+	const isFieldHidden = displayConfig
+		? displayConfig.hidden
+		: !!templateField?.isHiddenByDefault;
+
+	if (isFieldHidden) return;
+
 	if (field.conditions) {
 		const showField = field.conditions.some(condition => {
 			const currentCondition = opinion[condition.name] as number[] | number;
@@ -134,7 +140,7 @@ export const Field = (props: Props) => {
 								></p>
 							) : undefined
 						}
-						label={<h3>{t(field.label)}</h3>}
+						label={<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>}
 						state={
 							(opinion[field.name] || '').length > 15000 ? 'error' : 'default'
 						}
@@ -150,6 +156,7 @@ export const Field = (props: Props) => {
 							autoFocus: true
 						}}
 						textArea
+						className={fr.cx('fr-mb-2v')}
 					/>
 					{templateField?.downLabel && (
 						<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
@@ -174,6 +181,26 @@ export const Field = (props: Props) => {
 					state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
 					stateRelatedMessage="Maximum 250 caractères"
 					nativeInputProps={{
+						value: opinion[field.name] as string,
+						maxLength: 250,
+						onChange: e => {
+							setOpinion({
+								...opinion,
+								[field.name]: e.target.value
+							});
+						}
+					}}
+				/>
+			);
+		case 'input-email':
+			return (
+				<Input
+					hintText={field.hint ? t(field.hint) : undefined}
+					label={<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>}
+					state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
+					stateRelatedMessage="Maximum 250 caractères"
+					nativeInputProps={{
+						type: 'email',
 						value: opinion[field.name] as string,
 						maxLength: 250,
 						onChange: e => {

@@ -287,6 +287,10 @@
 		"verbatim": {
 			"label": "Do you want to tell us more?",
 			"hint": "Do not share personal information."
+		},
+		"contact_email": {
+			"label": "Email address",
+			"hint": "You can leave your email address if you agree to be contacted. However, we cannot guarantee a reply to every message."
 		}
 	},
 	"global": {

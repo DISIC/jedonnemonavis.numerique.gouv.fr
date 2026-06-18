@@ -220,7 +220,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 				}
 			},
 			{
-				title: 'Commentaires',
+				title: 'Commentaire',
 				description:
 					"Cette étape permet de récolter des commentaires, dans lesquels les usagers expriment des retours personnels et détaillés de l’expérience avec le service.\nLes données récoltées permettent d’améliorer votre connaissance usager et d'identifier des pistes d’amélioration du service en ligne.",
 				position: 3,
@@ -234,9 +234,18 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 							field_code: 'verbatim',
 							position: 0,
 							upLabel:
-								'Si vous le souhaitez, vous pouvez partager votre expérience avec notre service en ligne. Vos commentaires nous aideront à l’améliorer et à mieux répondre à vos attentes.<br/><br/>Ce formulaire étant anonyme, les informations fournies ne permettent pas de traiter votre situation personnelle lors du dépôt de votre démarche.',
-							downLabel:
-								'Ne partagez aucune information personnelle (exemple : nom , mail, numéro de démarche)'
+								'Votre réponse est anonyme. Merci de ne pas écrire des données personnelles (exemple : nom, prénom,  numéro de dossier).'
+						},
+						{
+							label: 'Adresse mail',
+							content:
+								'Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message.',
+							type_bloc: 'input_email',
+							field_code: 'contact_email',
+							position: 1,
+							isHideable: true,
+							isHiddenByDefault: true,
+							isRequired: false
 						}
 					]
 				}

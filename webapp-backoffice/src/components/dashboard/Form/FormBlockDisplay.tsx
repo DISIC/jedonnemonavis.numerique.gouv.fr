@@ -34,18 +34,17 @@ const FormBlockDisplay = (props: Props) => {
 
 	const [isUpdating, setIsUpdating] = useState(false);
 
-	const [isBlockHidden, setIsBlockHidden] = useState(
-		configHelper.displays.some(
-			d => d.kind === 'block' && d.parent_id === block.id && d.hidden
-		)
-	);
+	const getBlockHiddenState = () => {
+		const display = configHelper.displays.find(
+			d => d.kind === 'block' && d.parent_id === block.id
+		);
+		return display ? display.hidden : block.isHiddenByDefault;
+	};
+
+	const [isBlockHidden, setIsBlockHidden] = useState(getBlockHiddenState());
 
 	useEffect(() => {
-		setIsBlockHidden(
-			configHelper.displays.some(
-				d => d.kind === 'block' && d.parent_id === block.id && d.hidden
-			)
-		);
+		setIsBlockHidden(getBlockHiddenState());
 	}, [block, configHelper]);
 
 	useEffect(() => {
@@ -54,10 +53,10 @@ const FormBlockDisplay = (props: Props) => {
 				...configHelper.displays.filter(
 					d => !(d.parent_id === block.id && d.kind === 'block')
 				),
-				...(isBlockHidden
+				...(isBlockHidden !== block.isHiddenByDefault
 					? [
 							{
-								hidden: true,
+								hidden: isBlockHidden,
 								parent_id: block.id,
 								kind: 'block' as FormConfigKind
 							}

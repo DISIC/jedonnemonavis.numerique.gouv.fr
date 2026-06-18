@@ -279,6 +279,10 @@
     "verbatim": {
       "label": "Quer partilhar mais alguma coisa?",
       "hint": "Não partilhe informações pessoais."
+    },
+    "contact_email": {
+      "label": "Endereço de e-mail",
+      "hint": "Pode deixar o seu endereço de e-mail se aceitar ser contactado. No entanto, não podemos garantir resposta a cada mensagem."
     }
   }
 }

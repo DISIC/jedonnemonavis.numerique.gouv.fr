@@ -287,6 +287,10 @@
 		"verbatim": {
 			"label": "Souhaitez-vous nous en dire plus ?",
 			"hint": "Ne partagez pas d’information personnelle."
+		},
+		"contact_email": {
+			"label": "Adresse mail",
+			"hint": "Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message."
 		}
 	},
 	"global": {

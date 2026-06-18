@@ -594,6 +594,7 @@ model FormTemplateBlock {
   isRequired            Boolean                   @default(false)
   isUpdatable           Boolean                   @default(false)
   isHideable            Boolean                   @default(false)
+  isHiddenByDefault     Boolean                   @default(false)
   options               FormTemplateBlockOption[]
 }
 
