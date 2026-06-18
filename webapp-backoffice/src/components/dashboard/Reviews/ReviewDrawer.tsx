@@ -16,13 +16,22 @@ import {
 	getSeverity,
 	retrieveButtonName
 } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Drawer } from '@mui/material';
+import { RightAccessStatus } from '@prisma/client';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
+
+const deleteReviewModal = createModal({
+	id: 'delete-review-modal',
+	isOpenedByDefault: false
+});
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,6 +57,8 @@ type ReviewDrawerProps = {
 	onNext: () => void;
 	hasPrevious: boolean;
 	hasNext: boolean;
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	onDeleted: () => void;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -262,10 +273,19 @@ const ReviewDrawerContent = ({
 	onPrevious,
 	onNext,
 	hasPrevious,
-	hasNext
+	hasNext,
+	ownRight,
+	onDeleted
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
+
+	const deleteReview = trpc.review.delete.useMutation({
+		onSuccess: () => {
+			deleteReviewModal.close();
+			onDeleted();
+		}
+	});
 	const isFirstRender = useRef(true);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
@@ -465,6 +485,41 @@ const ReviewDrawerContent = ({
 					Voir l'avis précédent
 				</Button>
 			</div>
+
+			{ownRight === 'carrier_admin' && (
+				<>
+					<hr className={fr.cx('fr-pb-6v')} />
+					<div className={classes.deleteContainer}>
+						<Button
+							priority="tertiary"
+							iconId="fr-icon-delete-line"
+							className={classes.deleteButton}
+							size={isMobile ? 'medium' : 'small'}
+							onClick={() => deleteReviewModal.open()}
+						>
+							Supprimer l'avis
+						</Button>
+					</div>
+					<OnConfirmModal
+						modal={deleteReviewModal}
+						title="Êtes-vous sûr de vouloir supprimer cet avis ?"
+						kind="danger"
+						disableAction={deleteReview.isLoading}
+						handleOnConfirm={() =>
+							deleteReview.mutate({
+								review_id: review.id as number,
+								product_id: review.product_id as number,
+								form_id: review.form_id as number
+							})
+						}
+					>
+						<p>
+							Cette action est définitive. Ne supprimez l'avis que si c'est un
+							avis que vous avez déposé pour faire un test.
+						</p>
+					</OnConfirmModal>
+				</>
+			)}
 		</div>
 	);
 };
@@ -514,6 +569,18 @@ const useStyles = tss.create({
 			gap: fr.spacing('3v'),
 			button: { width: '100%', justifyContent: 'center' }
 		}
+	},
+	deleteContainer: {
+		display: 'flex',
+		justifyContent: 'flex-start',
+		marginBottom: fr.spacing('6v'),
+		[fr.breakpoints.down('sm')]: {
+			button: { width: '100%', justifyContent: 'center' }
+		}
+	},
+	deleteButton: {
+		color: fr.colors.decisions.text.default.error.default,
+		boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`
 	},
 	sectionTitle: {
 		fontWeight: 'bold',

@@ -38,7 +38,10 @@ export const getKeywordsQuery = async ({
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
 
-	const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
+	const mustClauses: QueryDslQueryContainer[] = [
+		{ term: { product_id } },
+		{ bool: { must_not: { exists: { field: 'deleted_at' } } } }
+	];
 
 	if (form.legacy) {
 		mustClauses.push({
@@ -133,8 +136,7 @@ export const getKeywordsQuery = async ({
 		const dominantBigram = bigrams
 			.filter(bigram => bigram.key.split(' ').includes(unigram.key))
 			.reduce<KeywordBucket | null>(
-				(max, bigram) =>
-					!max || bigram.count > max.count ? bigram : max,
+				(max, bigram) => (!max || bigram.count > max.count ? bigram : max),
 				null
 			);
 

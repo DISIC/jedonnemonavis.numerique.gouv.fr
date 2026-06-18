@@ -49,6 +49,7 @@ export const formatWhereAndOrder = (
 	} = input;
 
 	let where: Prisma.ReviewWhereInput = {
+		isDeleted: { not: true },
 		...(product_id && { product_id }),
 		...(form_id &&
 			(isLegacy

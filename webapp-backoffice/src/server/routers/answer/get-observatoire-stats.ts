@@ -66,6 +66,7 @@ export const getObservatoireStatsQuery = async ({
 						product_id: product.id
 					}
 				},
+				{ bool: { must_not: { exists: { field: 'deleted_at' } } } },
 				{
 					range: {
 						created_at: {
@@ -124,6 +125,7 @@ export const getObservatoireStatsQuery = async ({
 				must: [
 					{ match: { field_code: 'contact_tried' } },
 					{ match: { product_id: product.id } },
+					{ bool: { must_not: { exists: { field: 'deleted_at' } } } },
 					{
 						range: {
 							created_at: {

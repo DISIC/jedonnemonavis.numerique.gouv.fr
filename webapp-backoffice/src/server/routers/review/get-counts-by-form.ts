@@ -23,7 +23,7 @@ export const getCountsByFormQuery = async ({
 
 	const countsByFormRaw = await ctx.prisma.review.groupBy({
 		by: ['form_id'],
-		where: { product_id },
+		where: { product_id, isDeleted: { not: true } },
 		_count: { id: true }
 	});
 
@@ -36,7 +36,7 @@ export const getCountsByFormQuery = async ({
 	);
 
 	const totalCount = await ctx.prisma.review.count({
-		where: { product_id }
+		where: { product_id, isDeleted: { not: true } }
 	});
 
 	const lastSeenReview = await ctx.prisma.userEvent.findMany({
@@ -53,6 +53,7 @@ export const getCountsByFormQuery = async ({
 		? await ctx.prisma.review.count({
 				where: {
 					product_id: product_id,
+					isDeleted: { not: true },
 					created_at: { gte: lastSeenReview[0].created_at }
 				}
 		  })
@@ -87,6 +88,7 @@ export const getCountsByFormQuery = async ({
 			const newCountForForm = await ctx.prisma.review.count({
 				where: {
 					form_id: formId,
+					isDeleted: { not: true },
 					created_at: { gte: lastSeenDate }
 				}
 			});

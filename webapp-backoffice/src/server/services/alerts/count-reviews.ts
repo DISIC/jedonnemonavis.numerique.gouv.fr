@@ -19,6 +19,7 @@ export async function countReviewsForBatch(
 ): Promise<AlertBatchCounts> {
 	const baseWhere = {
 		form_id: formId,
+		isDeleted: { not: true },
 		created_at: { gt: cursor, lte: upTo }
 	} as const;
 

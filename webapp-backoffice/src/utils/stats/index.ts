@@ -49,6 +49,7 @@ export const fetchAndFormatData = async ({
 						]
 					}
 				},
+				{ bool: { must_not: { exists: { field: 'deleted_at' } } } },
 				{
 					range: {
 						created_at: {

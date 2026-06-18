@@ -114,6 +114,7 @@ enum TypeAction {
   service_reviews_report_view
   service_new_reviews_view
   service_review_verbatim_view
+  service_review_delete
   service_buttons_list_view
   service_button_create
   service_button_update
@@ -444,7 +445,9 @@ model Review {
 
   answers Answer[]
 
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
+  deleted_at DateTime?
+  isDeleted  Boolean?  @default(false)
 
   @@id([id, created_at])
   @@index([product_id, created_at])

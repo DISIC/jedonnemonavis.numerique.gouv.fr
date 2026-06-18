@@ -64,6 +64,7 @@ export const countReviewsQuery = async ({
 		ctx.prisma.review.count({ where }),
 		ctx.prisma.review.count({
 			where: {
+				isDeleted: { not: true },
 				product_id: input.product_id,
 				...(form_id &&
 					(form?.legacy

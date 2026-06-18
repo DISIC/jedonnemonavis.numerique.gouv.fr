@@ -10,6 +10,7 @@ import ReviewTableHeader from '@/src/components/dashboard/Reviews/ReviewTableHea
 import ReviewTableRow from '@/src/components/dashboard/Reviews/ReviewTableRow';
 import { Loader } from '@/src/components/ui/Loader';
 import { PageItemsCounter, Pagination } from '@/src/components/ui/Pagination';
+import { Toast } from '@/src/components/ui/Toast';
 import { hasAnyFilterChanged, useFilters } from '@/src/contexts/FiltersContext';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
 import { ReviewFiltersType } from '@/src/types/custom';
@@ -93,6 +94,9 @@ const ReviewsTab = (props: Props) => {
 
 	const { mutate: createReviewViewLog } =
 		trpc.reviewViewLog.create.useMutation();
+
+	const utils = trpc.useUtils();
+	const [deleteToastOpen, setDeleteToastOpen] = useState(false);
 
 	const filter_modal = useMemo(
 		() =>
@@ -457,6 +461,13 @@ const ReviewsTab = (props: Props) => {
 				rowRefsMap.current.get(lastViewedId)?.focus();
 			});
 		}
+	};
+
+	const handleReviewDeleted = () => {
+		setSelectedReview(null);
+		setDeleteToastOpen(true);
+		utils.review.getList.invalidate();
+		utils.review.getCountsByForm.invalidate();
 	};
 
 	const displayEmptyState = () => {
@@ -885,6 +896,15 @@ const ReviewsTab = (props: Props) => {
 				onNext={handleNextReview}
 				hasPrevious={selectedReviewIndex > 0}
 				hasNext={selectedReviewIndex < reviews.length - 1}
+				ownRight={ownRight}
+				onDeleted={handleReviewDeleted}
+			/>
+			<Toast
+				isOpen={deleteToastOpen}
+				setIsOpen={setDeleteToastOpen}
+				autoHideDuration={4000}
+				severity="success"
+				message="L'avis a bien été supprimé."
 			/>
 		</>
 	);
