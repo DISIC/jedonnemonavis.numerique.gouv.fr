@@ -369,7 +369,21 @@ const ReviewDrawerContent = ({
 				const verbatimAnswer = review.answers?.find(
 					a => a.field_code === `${block.field_code}_verbatim`
 				);
+				const numericMax =
+					block.type_bloc === 'mark_input'
+						? Math.max(
+								...(block.options ?? [])
+									.map(o => parseInt(o.value ?? '', 10))
+									.filter(n => !isNaN(n))
+						  )
+						: null;
 				const boldTexts = answers.map(a => {
+					if (numericMax) {
+						const value =
+							block.options?.find(o => o.id === a.answer_item_id)?.value ??
+							a.answer_text;
+						return value ? `${value} / ${numericMax}` : '-';
+					}
 					const isOtherLine =
 						!!otherOption &&
 						(a.answer_item_id === otherOption.id ||
@@ -461,34 +475,8 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
-
-			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
-
-			<div className={classes.actionsContainer}>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-right-s-line"
-					iconPosition="right"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasNext}
-					onClick={onNext}
-				>
-					Voir l'avis suivant
-				</Button>
-				<Button
-					priority="tertiary"
-					iconId="fr-icon-arrow-left-s-line"
-					size={isMobile ? 'medium' : 'small'}
-					disabled={!hasPrevious}
-					onClick={onPrevious}
-				>
-					Voir l'avis précédent
-				</Button>
-			</div>
-
 			{ownRight === 'carrier_admin' && (
 				<>
-					<hr className={fr.cx('fr-pb-6v')} />
 					<div className={classes.deleteContainer}>
 						<Button
 							priority="tertiary"
@@ -513,13 +501,38 @@ const ReviewDrawerContent = ({
 							})
 						}
 					>
+						<p>Cette action est définitive.</p>
 						<p>
-							Cette action est définitive. Ne supprimez l'avis que si c'est un
-							avis que vous avez déposé pour faire un test.
+							Ne supprimez l'avis que si c'est un avis que vous avez déposé pour
+							faire un test.
 						</p>
 					</OnConfirmModal>
 				</>
 			)}
+
+			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
+
+			<div className={classes.actionsContainer}>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-right-s-line"
+					iconPosition="right"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasNext}
+					onClick={onNext}
+				>
+					Voir l'avis suivant
+				</Button>
+				<Button
+					priority="tertiary"
+					iconId="fr-icon-arrow-left-s-line"
+					size={isMobile ? 'medium' : 'small'}
+					disabled={!hasPrevious}
+					onClick={onPrevious}
+				>
+					Voir l'avis précédent
+				</Button>
+			</div>
 		</div>
 	);
 };
@@ -573,14 +586,13 @@ const useStyles = tss.create({
 	deleteContainer: {
 		display: 'flex',
 		justifyContent: 'flex-start',
-		marginBottom: fr.spacing('6v'),
+		...fr.spacing('margin', { topBottom: '6v' }),
 		[fr.breakpoints.down('sm')]: {
 			button: { width: '100%', justifyContent: 'center' }
 		}
 	},
 	deleteButton: {
-		color: fr.colors.decisions.text.default.error.default,
-		boxShadow: `inset 0 0 0 1px ${fr.colors.decisions.text.default.error.default}`
+		color: fr.colors.decisions.text.default.error.default
 	},
 	sectionTitle: {
 		fontWeight: 'bold',
