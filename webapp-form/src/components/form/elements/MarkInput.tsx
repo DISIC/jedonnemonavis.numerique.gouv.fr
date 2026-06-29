@@ -40,11 +40,6 @@ export const MarkInput = (props: Props) => {
 											className={fr.cx('fr-sr-only')}
 											type="radio"
 											name={field.name}
-											aria-label={
-												index === 0
-													? `${t(field.label)} ${t(f.label)}`
-													: undefined
-											}
 											checked={opinion.comprehension === f.value}
 											onChange={() => {
 												setOpinion(prevOpinion => ({

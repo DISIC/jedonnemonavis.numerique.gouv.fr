@@ -49,19 +49,14 @@ export const RadioBlock = ({
 				</>
 			}
 			hintText={block.content || undefined}
-			options={visibleOptions.map((opt, index) => ({
+			options={visibleOptions.map(opt => ({
 				label: opt.label ? parseBoldLabel(opt.label) : '',
 				hintText: opt.hint,
 				nativeInputProps: {
 					value: opt.id.toString(),
 					checked: radioValue === opt.id,
 					required: block.isRequired,
-					'aria-label':
-						index === 0
-							? `${displayLabel}, ${(opt.label || '').replace(/\*/g, '')}${
-									opt.hint ? `, ${opt.hint}` : ''
-							  }`
-							: undefined,
+					'aria-invalid': false,
 					onChange: () => {
 						setAnswers(prev => ({
 							...prev,
