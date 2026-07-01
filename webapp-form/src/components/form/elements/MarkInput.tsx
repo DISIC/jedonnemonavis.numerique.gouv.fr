@@ -33,18 +33,13 @@ export const MarkInput = (props: Props) => {
 						<div className={cx(classes.radioContainer)}>
 							<div className={classes.hintLeft}>{t(field.hintLeft ?? '')}</div>
 							<ul>
-								{field.options.map((f, index) => (
+								{field.options.map(f => (
 									<li key={f.value}>
 										<input
 											id={`radio-${f.label}-${f.value}`}
 											className={fr.cx('fr-sr-only')}
 											type="radio"
 											name={field.name}
-											aria-label={
-												index === 0
-													? `${t(field.label)} ${t(f.label)}`
-													: undefined
-											}
 											checked={opinion.comprehension === f.value}
 											onChange={() => {
 												setOpinion(prevOpinion => ({
@@ -52,9 +47,6 @@ export const MarkInput = (props: Props) => {
 													[field.name]: f.value
 												}));
 											}}
-											autoFocus={
-												index === 0 && !opinion[field.name] ? true : undefined
-											}
 											onClick={() => {
 												setOpinion(prevOpinion => ({
 													...prevOpinion,

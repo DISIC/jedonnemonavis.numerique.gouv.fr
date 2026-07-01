@@ -169,7 +169,11 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				}
 				homeLinkProps={{
 					href: router.asPath,
-					title: t('global.home_link_title')
+					title: t('global.home_link_title'),
+					onClick: e => {
+						e.preventDefault();
+						router.reload();
+					}
 				}}
 				id={headerId}
 				serviceTitle={'Je donne mon avis'}

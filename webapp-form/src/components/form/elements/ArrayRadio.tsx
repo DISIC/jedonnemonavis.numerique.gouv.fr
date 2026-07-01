@@ -38,20 +38,6 @@ export const ArrayRadio = (props: Props) => {
 	}
 
 	if (field.kind === 'array-radio') {
-		const isChannelVisible = (value: number) =>
-			(field.needed.includes(value) ||
-				(opinion.contact_tried.includes(value) &&
-					!field.excluded.includes(value))) &&
-			containsPattern(
-				opinion.contact_reached,
-				new RegExp(escapeRegex(value.toString()) + '_17')
-			);
-
-		const firstSatisfactionValue =
-			'options' in form[0]
-				? form[0].options.find(o => isChannelVisible(o.value))?.value
-				: undefined;
-
 		return (
 			<>
 				{containsPattern(
@@ -82,9 +68,6 @@ export const ArrayRadio = (props: Props) => {
 													) && (
 														<fieldset className={cx(classes.fieldset)}>
 															<legend className={cx(classes.legend)}>
-																<span className={fr.cx('fr-sr-only')}>
-																	{t(field.label)}{' '}
-																</span>
 																{getFirstTwoWords(t(option.label))}
 															</legend>
 															<ul>
@@ -95,19 +78,6 @@ export const ArrayRadio = (props: Props) => {
 																			id={`mobile-radio-${outerIndex}-${innerIndex}`}
 																			name={`mobile-radio-${outerIndex}`}
 																			value={`value-${outerIndex}`}
-																			aria-label={
-																				option.value ===
-																					firstSatisfactionValue &&
-																				innerIndex === 0
-																					? `${t(
-																							field.label
-																					  )}, ${getFirstTwoWords(
-																							t(option.label)
-																					  )}, ${t(opt.label)}`
-																					: `${getFirstTwoWords(
-																							t(option.label)
-																					  )}, ${t(opt.label)}`
-																			}
 																			checked={opinion.contact_satisfaction.includes(
 																				escapeRegex(option.value.toString()) +
 																					'_' +

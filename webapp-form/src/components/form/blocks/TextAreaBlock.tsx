@@ -61,6 +61,7 @@ export const TextAreaBlock = ({
 					value: textareaValue,
 					maxLength: 15000,
 					required: block.isRequired,
+					'aria-invalid': textareaValue.length > 15000,
 					onChange: e => {
 						const value = e.target.value;
 						setAnswers(prev => ({
@@ -70,8 +71,7 @@ export const TextAreaBlock = ({
 								answer_text: value
 							}
 						}));
-					},
-					autoFocus: true
+					}
 				}}
 				state={textareaValue.length > 15000 ? 'error' : 'default'}
 				stateRelatedMessage="Maximum 15000 caractères"

@@ -131,7 +131,11 @@ export const Field = (props: Props) => {
 				<div className={classes.inputContainer}>
 					<Input
 						hintText={
-							templateField?.upLabel ? (
+							field.name === 'verbatim' ? (
+								<p className={fr.cx('fr-hint-text')}>
+									{t('fields.verbatim.notice')}
+								</p>
+							) : templateField?.upLabel ? (
 								<p
 									className={fr.cx('fr-hint-text')}
 									dangerouslySetInnerHTML={{
@@ -152,8 +156,7 @@ export const Field = (props: Props) => {
 									...opinion,
 									[field.name]: e.target.value.slice(0, 15000)
 								});
-							},
-							autoFocus: true
+							}
 						}}
 						textArea
 						className={fr.cx('fr-mb-2v')}

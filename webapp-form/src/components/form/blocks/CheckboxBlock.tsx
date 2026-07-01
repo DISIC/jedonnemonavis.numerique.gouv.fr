@@ -57,12 +57,7 @@ export const CheckboxBlock = ({
 					checked: checkboxValues.includes(opt.id),
 					required:
 						block.isRequired && checkboxValues.length === 0 && index === 0,
-					'aria-label':
-						index === 0
-							? `${displayLabel}, ${opt.label || ''}${
-									opt.hint ? `, ${opt.hint}` : ''
-							  }`
-							: undefined,
+					'aria-invalid': false,
 					onChange: e => {
 						const currentAnswers =
 							(answers[fieldKey] as DynamicAnswerData[]) || [];

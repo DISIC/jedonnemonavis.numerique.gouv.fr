@@ -51,6 +51,19 @@ export default function AvisPage({
 
 	// Send content height to parent widget for dynamic resizing
 	const contentRef = useRef<HTMLDivElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
+	const isInitialStepMount = useRef(true);
+
+	useEffect(() => {
+		if (isInitialStepMount.current) {
+			isInitialStepMount.current = false;
+			return;
+		}
+		const firstField = formRef.current?.querySelector<HTMLElement>(
+			'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+		);
+		firstField?.focus();
+	}, [currentStepIndex]);
 
 	useEffect(() => {
 		if (!isWidget || window.parent === window || !contentRef.current) return;
@@ -284,7 +297,7 @@ export default function AvisPage({
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
 						<div className={classes.formSection}>
-							<form onSubmit={handleSubmit}>
+							<form ref={formRef} onSubmit={handleSubmit}>
 								<FormStepRenderer
 									step={currentStep}
 									form={form}

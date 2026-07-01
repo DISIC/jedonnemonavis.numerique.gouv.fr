@@ -52,6 +52,7 @@ export const TextInputBlock = ({
 					value: inputValue,
 					maxLength: 250,
 					required: block.isRequired,
+					'aria-invalid': inputValue.length > 250,
 					onChange: e => {
 						setAnswers(prev => ({
 							...prev,

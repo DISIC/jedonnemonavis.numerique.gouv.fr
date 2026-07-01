@@ -286,7 +286,8 @@
 		},
 		"verbatim": {
 			"label": "Do you want to tell us more?",
-			"hint": "Do not share personal information."
+			"hint": "Do not share personal information.",
+			"notice": "Your response is anonymous. Please do not enter any personal data."
 		},
 		"contact_email": {
 			"label": "Email address",
