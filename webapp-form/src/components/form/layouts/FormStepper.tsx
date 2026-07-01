@@ -8,7 +8,7 @@ import {
 } from '@codegouvfr/react-dsfr/Stepper';
 import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { Field } from '../elements/Field';
 
@@ -40,6 +40,15 @@ export const FormStepper = (props: Props) => {
 
 	const { classes, cx } = useStyles();
 
+	const formRef = useRef<HTMLFormElement>(null);
+
+	useEffect(() => {
+		const firstField = formRef.current?.querySelector<HTMLElement>(
+			'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+		);
+		firstField?.focus();
+	}, [currentStep]);
+
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
 		fts => fts.title === t(`${steps[currentStep].name}`, { lng: 'fr' })
 	);
@@ -62,6 +71,7 @@ export const FormStepper = (props: Props) => {
 				)}
 			</div>
 			<form
+				ref={formRef}
 				onSubmit={e => {
 					const isLastStep = currentStep + 1 === steps.length;
 					if (!isLastStep) {

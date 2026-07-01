@@ -146,8 +146,7 @@ export const Field = (props: Props) => {
 									...opinion,
 									[field.name]: e.target.value.slice(0, 15000)
 								});
-							},
-							autoFocus: true
+							}
 						}}
 						textArea
 					/>

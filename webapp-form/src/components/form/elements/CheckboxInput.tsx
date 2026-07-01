@@ -161,7 +161,6 @@ export const CheckboxInput = (props: Props) => {
 									),
 									nativeInputProps: {
 										name: opt.name || `${field.name}-${index}`,
-										autoFocus: index === 0 ? true : false,
 										checked: opinion[
 											field.name as CheckboxOpinionKeys
 										]?.includes(opt.value),
