@@ -125,7 +125,11 @@ export const Field = (props: Props) => {
 				<div className={classes.inputContainer}>
 					<Input
 						hintText={
-							templateField?.upLabel ? (
+							field.name === 'verbatim' ? (
+								<p className={fr.cx('fr-hint-text')}>
+									{t('fields.verbatim.notice')}
+								</p>
+							) : templateField?.upLabel ? (
 								<p
 									className={fr.cx('fr-hint-text')}
 									dangerouslySetInnerHTML={{

@@ -286,7 +286,8 @@
 		},
 		"verbatim": {
 			"label": "¿Desea decirnos algo más?",
-			"hint": "No comparta información personal."
+			"hint": "No comparta información personal.",
+			"notice": "Su respuesta es anónima. Por favor, no escriba datos personales."
 		}
 	},
 	"global": {
