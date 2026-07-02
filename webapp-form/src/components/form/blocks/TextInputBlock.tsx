@@ -39,10 +39,13 @@ export const TextInputBlock = ({
 				className={fr.cx('fr-label', 'fr-text--md', 'fr-mb-0')}
 			>
 				{displayLabel} {!block.isRequired && '(optionnel)'}
+				{block.content && (
+					<span className={fr.cx('fr-hint-text', 'fr-my-1v')}>
+						{block.content}
+					</span>
+				)}
 			</label>
-			{block.content && (
-				<p className={fr.cx('fr-hint-text', 'fr-my-1v')}>{block.content}</p>
-			)}
+
 			<Input
 				label=""
 				className={fr.cx('fr-mb-2v')}

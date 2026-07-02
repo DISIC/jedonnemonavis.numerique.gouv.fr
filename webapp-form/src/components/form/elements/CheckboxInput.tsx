@@ -137,6 +137,7 @@ export const CheckboxInput = (props: Props) => {
 				<div className={cx(fr.cx('fr-col-12'), classes.checkboxContainer)}>
 					<>
 						<Checkbox
+							aria-labelledby={undefined}
 							legend={<h3>{t(field.label)}</h3>}
 							hintText={t(field.hint ?? '')}
 							options={field.options
