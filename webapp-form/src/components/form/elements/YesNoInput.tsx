@@ -29,13 +29,22 @@ export const YesNoInput = (props: Props) => {
 	}
 
 	if (field.kind === 'yes-no') {
+		const firstVisibleChannel =
+			'options' in form[0]
+				? form[0].options.find(
+						o =>
+							opinion.contact_tried.includes(o.value) &&
+							!field.excluded.includes(o.value)
+				  )?.value
+				: undefined;
+
 		return (
 			<div className={fr.cx('fr-grid-row')}>
 				{opinion.contact_tried.some(
 					element => 'options' in form[0] && field.needed.includes(element)
 				) && (
 					<div className={fr.cx('fr-col-12')}>
-						<h3>{t(field.label)}</h3>
+						<h3 aria-hidden="true">{t(field.label)}</h3>
 					</div>
 				)}
 				{'options' in form[0] &&
@@ -50,6 +59,11 @@ export const YesNoInput = (props: Props) => {
 												className={cx(classes.fieldset, fr.cx('fr-fieldset'))}
 											>
 												<legend className={fr.cx('fr-mb-4v')}>
+													{option.value === firstVisibleChannel && (
+														<span className={fr.cx('fr-sr-only')}>
+															{t(field.label)}{' '}
+														</span>
+													)}
 													{t(option.label)}
 												</legend>
 												<ul>
