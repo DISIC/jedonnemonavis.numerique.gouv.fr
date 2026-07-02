@@ -120,9 +120,10 @@ export const openAPIRouter = router({
 				}
 
 				if (ctx.api_key.entity_id) {
+					// select minimal : la colonne Product.isTop250 n'existe plus en base
 					const entity = await ctx.prisma.entity.findFirst({
 						where: { id: ctx.api_key.entity_id },
-						include: { products: true }
+						include: { products: { select: { id: true } } }
 					});
 
 					if (entity && entity.products) {
@@ -141,8 +142,12 @@ export const openAPIRouter = router({
 						in: authorized_products_ids
 					}
 				},
-				include: {
-					entity: true
+				select: {
+					id: true,
+					title: true,
+					entity: {
+						select: { name: true }
+					}
 				}
 			});
 
@@ -205,9 +210,10 @@ export const openAPIRouter = router({
 				}
 
 				if (ctx.api_key.entity_id) {
+					// select minimal : la colonne Product.isTop250 n'existe plus en base
 					const entity = await ctx.prisma.entity.findFirst({
 						where: { id: ctx.api_key.entity_id },
-						include: { products: true }
+						include: { products: { select: { id: true } } }
 					});
 
 					if (entity && entity.products) {
