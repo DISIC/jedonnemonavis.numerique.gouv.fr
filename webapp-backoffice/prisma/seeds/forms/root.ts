@@ -51,6 +51,7 @@ export const createRootForm: Prisma.FormTemplateUncheckedCreateInput = {
 		'Permet de récolter une note sur la satisfaction globale, la clarté des informations et les aides apportées.',
 	active: true,
 	hasStepper: true,
+	review_save_mode: 'each_step',
 	form_template_steps: {
 		create: [
 			{

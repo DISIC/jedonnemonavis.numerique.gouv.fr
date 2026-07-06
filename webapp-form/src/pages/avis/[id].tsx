@@ -136,7 +136,7 @@ export default function AvisPage({
 
 		const isLastStep = currentStepIndex === steps.length - 1;
 
-		const saved = await saveCurrentStep();
+		const saved = await saveCurrentStep(isLastStep);
 		if (!saved) return;
 
 		if (isLastStep) {
@@ -165,8 +165,30 @@ export default function AvisPage({
 		return Object.values(answers).flat();
 	};
 
-	const saveCurrentStep = async (): Promise<boolean> => {
+	const saveCurrentStep = async (isLastStep: boolean): Promise<boolean> => {
 		if (isPreview) return true;
+
+		if (form.form_template.review_save_mode === 'on_completion') {
+			if (!isLastStep) return true;
+
+			const allAnswers = getAnswersArray();
+			if (allAnswers.length === 0) return true;
+
+			try {
+				await createReview.mutateAsync({
+					review: {
+						product_id: productId,
+						button_id: buttonId,
+						form_id: form.id,
+						user_id: uuidv4()
+					},
+					answers: allAnswers
+				});
+				return true;
+			} catch {
+				return false;
+			}
+		}
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
