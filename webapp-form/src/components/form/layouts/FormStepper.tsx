@@ -1,4 +1,5 @@
 import { secondSectionA } from '@/src/utils/form';
+import { isValidEmail } from '@/src/utils/form-validation';
 import { FormField, Opinion, Product, Step } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Button } from '@codegouvfr/react-dsfr/Button';
@@ -34,6 +35,7 @@ export const FormStepper = (props: Props) => {
 		props;
 
 	const [tmpOpinion, setTmpOpinion] = useState<Opinion>(opinion);
+	const [showValidationErrors, setShowValidationErrors] = useState(false);
 	const { t } = useTranslation();
 
 	const router = useRouter();
@@ -67,7 +69,7 @@ export const FormStepper = (props: Props) => {
 						<Stepper
 							currentStep={currentStep + 1}
 							stepCount={steps.length}
-							title={t(`${steps[currentStep].name}`)}
+							title={''}
 							className={fr.cx('fr-mb-12v')}
 						/>
 					</>
@@ -75,13 +77,27 @@ export const FormStepper = (props: Props) => {
 			</div>
 			<form
 				ref={formRef}
+				noValidate
 				onSubmit={e => {
+					e.preventDefault();
+
+					const hasInvalidEmail = steps[currentStep].section.some(
+						f =>
+							f.kind === 'input-email' &&
+							((tmpOpinion[f.name] as string) || '').trim() !== '' &&
+							!isValidEmail((tmpOpinion[f.name] as string) || '')
+					);
+					if (hasInvalidEmail) {
+						setShowValidationErrors(true);
+						return;
+					}
+
 					const isLastStep = currentStep + 1 === steps.length;
 					if (!isLastStep) {
+						setShowValidationErrors(false);
 						setCurrentStep(currentStep + 1);
 						window.scrollTo({ top: 0, behavior: 'smooth' });
 					}
-					e.preventDefault();
 					onSubmit(tmpOpinion, isLastStep);
 				}}
 			>
@@ -94,6 +110,7 @@ export const FormStepper = (props: Props) => {
 							form={secondSectionA}
 							formConfig={product.form.form_configs[0]}
 							formTemplateStep={formTemplateStep}
+							showValidationErrors={showValidationErrors}
 						/>
 					</div>
 				))}
@@ -139,7 +156,7 @@ const useStyles = tss
 			}
 		},
 		field: {
-			marginBottom: fr.spacing('12v')
+			marginBottom: fr.spacing('8v')
 		},
 		buttonContainer: {
 			display: 'flex',

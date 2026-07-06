@@ -16,6 +16,7 @@ interface Props {
 	currentStepIndex: number;
 	totalSteps: number;
 	isWidget?: boolean;
+	showValidationErrors?: boolean;
 }
 
 export const FormStepRenderer = (props: Props) => {
@@ -26,7 +27,8 @@ export const FormStepRenderer = (props: Props) => {
 		setAnswers,
 		currentStepIndex,
 		totalSteps,
-		isWidget
+		isWidget,
+		showValidationErrors
 	} = props;
 	const { classes, cx } = useStyles({ isWidget: !!isWidget });
 
@@ -59,7 +61,7 @@ export const FormStepRenderer = (props: Props) => {
 					<Stepper
 						currentStep={currentStepIndex + 1}
 						stepCount={totalSteps}
-						title={step.title}
+						title={''}
 						className={fr.cx('fr-mb-12v')}
 					/>
 				</>
@@ -81,6 +83,7 @@ export const FormStepRenderer = (props: Props) => {
 					answers={answers}
 					setAnswers={setAnswers}
 					isWidget={isWidget}
+					showValidationErrors={showValidationErrors}
 				/>
 			))}
 		</div>

@@ -45,6 +45,7 @@ export type FormStepNames =
 			| 'contact_reached'
 			| 'contact_satisfaction'
 			| 'contact_tried_verbatim'
+			| 'contact_email'
 	  >
 	| 'contact';
 
@@ -229,7 +230,8 @@ export default function JDMAForm({
 						fieldInSection.kind === 'smiley'
 							? 'radio'
 							: fieldInSection.kind !== 'input-text' &&
-							  fieldInSection.kind !== 'input-textarea'
+							  fieldInSection.kind !== 'input-textarea' &&
+							  fieldInSection.kind !== 'input-email'
 							? fieldInSection.kind
 							: 'text',
 					review: {}
@@ -359,7 +361,8 @@ export default function JDMAForm({
 		contact_tried_verbatim: undefined,
 		contact_reached: [],
 		contact_satisfaction: [],
-		verbatim: undefined
+		verbatim: undefined,
+		contact_email: undefined
 	});
 
 	const displayLayout = () => {

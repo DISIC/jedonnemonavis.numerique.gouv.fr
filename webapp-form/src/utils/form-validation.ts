@@ -25,9 +25,10 @@ const DECORATIVE_BLOCK_TYPES = [
 ];
 
 export function isBlockHidden(block: Block, formConfig?: FormConfig): boolean {
-	return !!formConfig?.form_config_displays?.some(
-		d => d.kind === 'block' && d.parent_id === block.id && d.hidden
+	const display = formConfig?.form_config_displays?.find(
+		d => d.kind === 'block' && d.parent_id === block.id
 	);
+	return display ? display.hidden : block.isHiddenByDefault;
 }
 
 export function getVisibleBlocks(
@@ -47,6 +48,46 @@ export function hasBlockAnswer(
 
 export function isAnswerableBlock(block: Block): boolean {
 	return !DECORATIVE_BLOCK_TYPES.includes(block.type_bloc);
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export const MAX_TEXT_INPUT_LENGTH = 250;
+
+export type TextInputErrorKind = 'too_long' | 'invalid_email';
+
+export function isValidEmail(value: string): boolean {
+	return EMAIL_REGEX.test(value.trim());
+}
+
+export function getTextInputErrorKind(
+	value: string,
+	isEmail: boolean,
+	revealEmailError: boolean
+): TextInputErrorKind | null {
+	if (value.length > MAX_TEXT_INPUT_LENGTH) return 'too_long';
+	if (
+		isEmail &&
+		revealEmailError &&
+		value.trim() !== '' &&
+		!isValidEmail(value)
+	)
+		return 'invalid_email';
+	return null;
+}
+
+export function getInvalidEmailBlocks(
+	blocks: Block[],
+	answers: FormAnswers,
+	formConfig?: FormConfig
+): Block[] {
+	return getVisibleBlocks(blocks, formConfig).filter(block => {
+		if (block.type_bloc !== 'input_email') return false;
+		const answer = answers[`block_${block.id}`];
+		if (!answer || Array.isArray(answer)) return false;
+		const text = answer.answer_text?.trim();
+		return !!text && !isValidEmail(text);
+	});
 }
 
 export function hasAllRequiredBlockAnswers(

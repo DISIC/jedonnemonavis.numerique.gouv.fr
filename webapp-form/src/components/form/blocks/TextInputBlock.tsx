@@ -1,10 +1,13 @@
+import {
+	DynamicAnswerData,
+	FormAnswers,
+	getTextInputErrorKind,
+	MAX_TEXT_INPUT_LENGTH
+} from '@/src/utils/form-validation';
 import { FormWithElements } from '@/src/utils/types';
-import { DynamicAnswerData, FormAnswers } from '@/src/utils/form-validation';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
-import Notice from '@codegouvfr/react-dsfr/Notice';
-import { SetStateAction } from 'react';
-import { tss } from 'tss-react/dsfr';
+import { SetStateAction, useState } from 'react';
 
 type Block =
 	FormWithElements['form_template']['form_template_steps'][0]['form_template_blocks'][0];
@@ -17,6 +20,7 @@ interface Props {
 	setAnswers: (value: SetStateAction<FormAnswers>) => void;
 	form: FormWithElements;
 	isWidget?: boolean;
+	showValidationErrors?: boolean;
 }
 
 export const TextInputBlock = ({
@@ -25,12 +29,23 @@ export const TextInputBlock = ({
 	fieldKey,
 	answers,
 	setAnswers,
-	isWidget
+	showValidationErrors
 }: Props) => {
-	const { cx, classes } = useStyles();
+	const [touched, setTouched] = useState(false);
 	const inputAnswer = answers[fieldKey] as DynamicAnswerData | undefined;
 	const inputValue = inputAnswer?.answer_text || '';
 	const isEmail = block.type_bloc === 'input_email';
+
+	const errorKind = getTextInputErrorKind(
+		inputValue,
+		isEmail,
+		touched || !!showValidationErrors
+	);
+	const hasError = errorKind !== null;
+	const errorMessage =
+		errorKind === 'invalid_email'
+			? 'Veuillez saisir une adresse électronique valide.'
+			: 'Maximum 250 caractères';
 
 	return (
 		<div>
@@ -45,7 +60,13 @@ export const TextInputBlock = ({
 					</span>
 				)}
 			</label>
-
+			{(block.content || isEmail) && (
+				<p className={fr.cx('fr-hint-text', 'fr-my-1v')}>
+					{[block.content, isEmail && 'Exemple : nom@domaine.fr']
+						.filter(Boolean)
+						.join(' ')}
+				</p>
+			)}
 			<Input
 				label=""
 				className={fr.cx('fr-mb-2v')}
@@ -53,9 +74,10 @@ export const TextInputBlock = ({
 					id: `input-${block.id}`,
 					type: isEmail ? 'email' : 'text',
 					value: inputValue,
-					maxLength: 250,
+					maxLength: MAX_TEXT_INPUT_LENGTH,
 					required: block.isRequired,
-					'aria-invalid': inputValue.length > 250,
+					'aria-invalid': hasError,
+					onBlur: () => setTouched(true),
 					onChange: e => {
 						setAnswers(prev => ({
 							...prev,
@@ -66,28 +88,9 @@ export const TextInputBlock = ({
 						}));
 					}
 				}}
-				state={inputValue.length > 250 ? 'error' : 'default'}
-				stateRelatedMessage="Maximum 250 caractères"
+				state={hasError ? 'error' : 'default'}
+				stateRelatedMessage={errorMessage}
 			/>
 		</div>
 	);
 };
-
-const useStyles = tss.withName({ TextInputBlock }).create(() => ({
-	notice: {
-		background: 'none',
-		padding: 0,
-		marginBottom: fr.spacing('4v'),
-		'.fr-container': {
-			padding: 0,
-			'.fr-notice__title': {
-				fontWeight: 'normal',
-				fontSize: '0.75rem',
-				'&::before': {
-					'--icon-size': '1rem',
-					marginRight: fr.spacing('1v')
-				}
-			}
-		}
-	}
-}));

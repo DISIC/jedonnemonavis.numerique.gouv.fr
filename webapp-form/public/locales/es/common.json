@@ -288,10 +288,17 @@
 			"label": "¿Desea decirnos algo más?",
 			"hint": "No comparta información personal.",
 			"notice": "Su respuesta es anónima. Por favor, no escriba datos personales."
+		},
+		"contact_email": {
+			"label": "Dirección de correo electrónico",
+			"hint": "Puede dejar su dirección de correo electrónico si acepta que le contactemos. No obstante, no podemos garantizar una respuesta a cada mensaje."
 		}
 	},
 	"global": {
 		"home_link_title": "Je donne mon avis",
+		"email_example_hint": "Ejemplo: nombre@dominio.com",
+		"invalid_email": "Introduzca una dirección de correo electrónico válida.",
+		"optional": "(opcional)",
 		"select_language": "Seleccionar un idioma",
 		"skip_content": "Contenido",
 		"skip_footer": "Pie de página",

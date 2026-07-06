@@ -17,7 +17,8 @@ import {
 	FormAnswers,
 	getVisibleBlocks,
 	hasBlockAnswer,
-	hasAllRequiredBlockAnswers
+	hasAllRequiredBlockAnswers,
+	getInvalidEmailBlocks
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -43,6 +44,7 @@ export default function AvisPage({
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
+	const [showValidationErrors, setShowValidationErrors] = useState(false);
 	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
 	const createPromiseRef = useRef<Promise<{
 		id: number;
@@ -119,9 +121,16 @@ export default function AvisPage({
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		const form = e.currentTarget;
-		if (!form.checkValidity()) {
-			form.reportValidity();
+		const invalidEmailBlocks = getInvalidEmailBlocks(
+			currentStep.form_template_blocks,
+			answers,
+			formConfig
+		);
+		if (invalidEmailBlocks.length > 0) {
+			setShowValidationErrors(true);
+			formRef.current
+				?.querySelector<HTMLInputElement>(`#input-${invalidEmailBlocks[0].id}`)
+				?.focus();
 			return;
 		}
 
@@ -140,12 +149,14 @@ export default function AvisPage({
 				);
 			}
 		} else {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex + 1);
 		}
 	};
 
 	const handlePrevious = () => {
 		if (currentStepIndex > 0) {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex - 1);
 		}
 	};
@@ -297,7 +308,7 @@ export default function AvisPage({
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
 						<div className={classes.formSection}>
-							<form ref={formRef} onSubmit={handleSubmit}>
+							<form ref={formRef} onSubmit={handleSubmit} noValidate>
 								<FormStepRenderer
 									step={currentStep}
 									form={form}
@@ -306,6 +317,7 @@ export default function AvisPage({
 									currentStepIndex={currentStepIndex}
 									totalSteps={steps.length}
 									isWidget={isWidget}
+									showValidationErrors={showValidationErrors}
 								/>
 
 								{isRateLimitReached && (
@@ -330,7 +342,11 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty || isRateLimitReached}
+											disabled={
+												isFirstAnswerEmpty ||
+												!hasAllRequiredAnswers ||
+												isRateLimitReached
+											}
 											type="submit"
 										>
 											Continuer

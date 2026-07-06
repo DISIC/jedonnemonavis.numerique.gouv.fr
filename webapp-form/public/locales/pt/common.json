@@ -280,6 +280,10 @@
       "label": "Quer partilhar mais alguma coisa?",
       "hint": "Não partilhe informações pessoais.",
       "notice": "A sua resposta é anónima. Por favor, não escreva dados pessoais."
+    },
+    "contact_email": {
+      "label": "Endereço de e-mail",
+      "hint": "Pode deixar o seu endereço de e-mail se aceitar ser contactado. No entanto, não podemos garantir resposta a cada mensagem."
     }
   }
 }
