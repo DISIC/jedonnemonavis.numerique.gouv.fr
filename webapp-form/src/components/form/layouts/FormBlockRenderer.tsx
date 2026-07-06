@@ -21,10 +21,12 @@ interface Props {
 	answers: FormAnswers;
 	setAnswers: (value: SetStateAction<FormAnswers>) => void;
 	isWidget?: boolean;
+	showValidationErrors?: boolean;
 }
 
 export const FormBlockRenderer = (props: Props) => {
-	const { block, form, answers, setAnswers, isWidget } = props;
+	const { block, form, answers, setAnswers, isWidget, showValidationErrors } =
+		props;
 
 	const formConfig = form.form_configs[0];
 	const labelConfig = formConfig?.form_config_labels?.find(
@@ -42,7 +44,8 @@ export const FormBlockRenderer = (props: Props) => {
 			answers,
 			setAnswers,
 			form,
-			isWidget
+			isWidget,
+			showValidationErrors
 		};
 
 		switch (block.type_bloc) {

@@ -296,6 +296,9 @@
 	},
 	"global": {
 		"home_link_title": "Inicio - Je donne mon avis (Services publics +)",
+		"email_example_hint": "Ejemplo: nombre@dominio.com",
+		"invalid_email": "Introduzca una dirección de correo electrónico válida.",
+		"optional": "(opcional)",
 		"select_language": "Seleccionar un idioma",
 		"skip_content": "Contenido",
 		"skip_footer": "Pie de página",

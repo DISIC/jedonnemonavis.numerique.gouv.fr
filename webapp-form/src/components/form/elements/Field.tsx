@@ -1,9 +1,13 @@
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
+import {
+	getTextInputErrorKind,
+	MAX_TEXT_INPUT_LENGTH
+} from '@/src/utils/form-validation';
 import { FormField, Opinion, Product } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { useTranslation } from 'next-i18next';
-import { SetStateAction } from 'react';
+import { SetStateAction, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ArrayRadio } from './ArrayRadio';
 import { CheckboxInput } from './CheckboxInput';
@@ -18,12 +22,21 @@ type Props = {
 	formConfig?: Product['form']['form_configs'][0];
 	formTemplateStep?: Product['form']['form_template']['form_template_steps'][0];
 	setOpinion: (value: SetStateAction<Opinion>) => void;
+	showValidationErrors?: boolean;
 };
 
 export const Field = (props: Props) => {
-	const { field, opinion, setOpinion, form, formConfig, formTemplateStep } =
-		props;
+	const {
+		field,
+		opinion,
+		setOpinion,
+		form,
+		formConfig,
+		formTemplateStep,
+		showValidationErrors
+	} = props;
 	const { classes, cx } = useStyles({ nbItems: 5 });
+	const [touched, setTouched] = useState(false);
 
 	const { t } = useTranslation('common');
 
@@ -195,17 +208,40 @@ export const Field = (props: Props) => {
 					}}
 				/>
 			);
-		case 'input-email':
+		case 'input-email': {
+			const emailValue = (opinion[field.name] as string) || '';
+			const errorKind = getTextInputErrorKind(
+				emailValue,
+				true,
+				touched || !!showValidationErrors
+			);
+			const hasError = errorKind !== null;
+
 			return (
 				<Input
-					hintText={field.hint ? t(field.hint) : undefined}
-					label={<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>}
-					state={(opinion[field.name] || '').length > 250 ? 'error' : 'default'}
-					stateRelatedMessage="Maximum 250 caractères"
+					hintText={[
+						field.hint && t(field.hint),
+						t('global.email_example_hint')
+					]
+						.filter(Boolean)
+						.join(' ')}
+					label={
+						<h3 className={fr.cx('fr-mb-2v')}>
+							{t(field.label)} {t('global.optional')}
+						</h3>
+					}
+					state={hasError ? 'error' : 'default'}
+					stateRelatedMessage={
+						errorKind === 'invalid_email'
+							? t('global.invalid_email')
+							: 'Maximum 250 caractères'
+					}
 					nativeInputProps={{
 						type: 'email',
-						value: opinion[field.name] as string,
-						maxLength: 250,
+						value: emailValue,
+						maxLength: MAX_TEXT_INPUT_LENGTH,
+						'aria-invalid': hasError,
+						onBlur: () => setTouched(true),
 						onChange: e => {
 							setOpinion({
 								...opinion,
@@ -215,6 +251,7 @@ export const Field = (props: Props) => {
 					}}
 				/>
 			);
+		}
 	}
 };
 
