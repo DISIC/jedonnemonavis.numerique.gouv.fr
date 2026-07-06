@@ -42,6 +42,7 @@ export const RadioBlock = ({
 	return (
 		<RadioButtons
 			id={`radio-${block.id}`}
+			aria-labelledby={undefined}
 			classes={{ legend: classes.legend }}
 			legend={
 				<>

@@ -42,6 +42,7 @@ export const CheckboxBlock = ({
 	return (
 		<Checkbox
 			small={!!isWidget}
+			aria-labelledby={undefined}
 			classes={{ legend: classes.legend }}
 			legend={
 				<>

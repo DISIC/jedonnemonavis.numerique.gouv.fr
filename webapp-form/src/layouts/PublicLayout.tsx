@@ -5,6 +5,7 @@ import {
 	LanguageSelector
 } from '@/src/components/global/LanguageSelector';
 import { useIsMobile } from '@/src/hooks/useIsMobile';
+import { getPageMetaTitleKey } from '@/src/utils/tools';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import { Footer } from '@codegouvfr/react-dsfr/Footer';
@@ -43,6 +44,14 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 		}
 		return '';
 	};
+
+	const productTitle = getProductTitle();
+	const pageMetaTitleKey = getPageMetaTitleKey(router.pathname);
+	const homeLinkTitle = productTitle
+		? t('global.page_title', { product: productTitle })
+		: pageMetaTitleKey
+		? t(pageMetaTitleKey)
+		: t('global.home_link_title');
 
 	const lang = (i18n?.language || 'fr') as Language;
 	const shouldShowLanguageSelector = !router.asPath.startsWith('/avis');
@@ -169,7 +178,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
 				}
 				homeLinkProps={{
 					href: router.asPath,
-					title: t('global.home_link_title'),
+					title: homeLinkTitle,
 					onClick: e => {
 						e.preventDefault();
 						router.reload();

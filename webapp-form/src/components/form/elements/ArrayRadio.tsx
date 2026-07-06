@@ -47,7 +47,7 @@ export const ArrayRadio = (props: Props) => {
 					<>
 						<div className={cx(fr.cx('fr-col-12'), classes.reviewContainer)}>
 							<div className={cx(classes.reviews)}>
-								<h3>{t(field.label)}</h3>
+								<h3 aria-hidden="true">{t(field.label)}</h3>
 								<p className={fr.cx('fr-hint-text', 'fr-mb-6v')}>
 									{t(field.hint ?? '')}
 								</p>
@@ -68,6 +68,9 @@ export const ArrayRadio = (props: Props) => {
 													) && (
 														<fieldset className={cx(classes.fieldset)}>
 															<legend className={cx(classes.legend)}>
+																<span className={fr.cx('fr-sr-only')}>
+																	{t(field.label)}{' '}
+																</span>
 																{getFirstTwoWords(t(option.label))}
 															</legend>
 															<ul>

@@ -45,10 +45,13 @@ export const FormStepper = (props: Props) => {
 	const formRef = useRef<HTMLFormElement>(null);
 
 	useEffect(() => {
-		const firstField = formRef.current?.querySelector<HTMLElement>(
-			'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
-		);
-		firstField?.focus();
+		const timer = setTimeout(() => {
+			const firstField = formRef.current?.querySelector<HTMLElement>(
+				'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+			);
+			firstField?.focus();
+		}, 100);
+		return () => clearTimeout(timer);
 	}, [currentStep]);
 
 	const formTemplateStep = product.form.form_template.form_template_steps.find(
