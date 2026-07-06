@@ -119,6 +119,7 @@ function App({ Component, pageProps }: AppProps) {
 											id="jdma-widget"
 											src={`https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`}
 											data-jdma-form-url={
+												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL_FLOATING ||
 												process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL
 											}
 											data-jdma-button-image={`https://jedonnemonavis.numerique.gouv.fr/static/buttons/button-problem-solid-light.svg`}
