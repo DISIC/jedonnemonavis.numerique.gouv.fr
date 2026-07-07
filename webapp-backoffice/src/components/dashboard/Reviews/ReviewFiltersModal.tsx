@@ -213,7 +213,7 @@ const ReviewFiltersModal = (props: Props) => {
 				<div className={cx(classes.section)}>
 					<hr className={cx(classes.separator)} />
 					<ToggleSwitch
-						label={`Afficher les réponses supprimés${
+						label={`Afficher les réponses supprimées${
 							deletedCount ? ` (${deletedCount})` : ''
 						}`}
 						checked={!!tmpFilters.onlyDeleted}

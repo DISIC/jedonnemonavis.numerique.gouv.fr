@@ -79,7 +79,7 @@ const ReviewFilterTags = (props: Props) => {
 			tags.push(
 				<Tag
 					key="onlyDeleted"
-					title="Retirer le filtre : Réponses supprimés"
+					title="Retirer le filtre : Réponses supprimées"
 					dismissible
 					small
 					className={cx(classes.tagFilter)}
@@ -105,7 +105,7 @@ const ReviewFilterTags = (props: Props) => {
 						}
 					}}
 				>
-					Réponses supprimés
+					Réponses supprimées
 				</Tag>
 			);
 		}

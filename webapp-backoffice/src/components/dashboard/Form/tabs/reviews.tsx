@@ -741,8 +741,8 @@ const ReviewsTab = (props: Props) => {
 					{showDeleted && (
 						<Notice
 							severity="info"
-							title="Réponses supprimés."
-							description="Ces réponses ont été supprimés et ne sont pas comptés dans les statistiques."
+							title="Réponses supprimées"
+							description="Ces réponses ont été supprimées et ne sont pas comptées dans les statistiques."
 							className="fr-mt-4v"
 						/>
 					)}
@@ -930,7 +930,7 @@ const ReviewsTab = (props: Props) => {
 				setIsOpen={setDeleteToastOpen}
 				autoHideDuration={4000}
 				severity="success"
-				message="L'avis a bien été supprimé."
+				message="La réponse a bien été supprimée."
 			/>
 		</>
 	);

@@ -58,7 +58,7 @@ export const deleteReviewMutation = async ({
 		await ctx.prisma.userEvent.create({
 			data: {
 				user_id: parseInt(user.id),
-				action: 'service_review_delete' as any,
+				action: 'service_review_delete',
 				product_id,
 				form_id,
 				metadata: { review_id }

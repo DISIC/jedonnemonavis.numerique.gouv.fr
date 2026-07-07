@@ -369,14 +369,15 @@ const ReviewDrawerContent = ({
 				const verbatimAnswer = review.answers?.find(
 					a => a.field_code === `${block.field_code}_verbatim`
 				);
-				const numericMax =
+				const numericValues =
 					block.type_bloc === 'mark_input'
-						? Math.max(
-								...(block.options ?? [])
-									.map(o => parseInt(o.value ?? '', 10))
-									.filter(n => !isNaN(n))
-						  )
-						: null;
+						? (block.options ?? [])
+								.map(o => parseInt(o.value ?? '', 10))
+								.filter(n => !isNaN(n))
+						: [];
+				const numericMax = numericValues.length
+					? Math.max(...numericValues)
+					: null;
 				const boldTexts = answers.map(a => {
 					if (numericMax) {
 						const value =
@@ -478,7 +479,7 @@ const ReviewDrawerContent = ({
 			{review.isDeleted ? (
 				<div className={classes.deleteContainer}>
 					<Badge severity="error" noIcon>
-						Réponses supprimé
+						Réponse supprimée
 						{review.deleted_at
 							? ` le ${formatFullFrenchDateTime(review.deleted_at.toString())}`
 							: ''}
@@ -495,12 +496,12 @@ const ReviewDrawerContent = ({
 								size={isMobile ? 'medium' : 'small'}
 								onClick={() => deleteReviewModal.open()}
 							>
-								Supprimer l'avis
+								Supprimer la réponse
 							</Button>
 						</div>
 						<OnConfirmModal
 							modal={deleteReviewModal}
-							title="Êtes-vous sûr de vouloir supprimer cet avis ?"
+							title="Êtes-vous sûr de vouloir supprimer cette réponse ?"
 							kind="danger"
 							disableAction={deleteReview.isLoading}
 							handleOnConfirm={() =>
@@ -513,8 +514,8 @@ const ReviewDrawerContent = ({
 						>
 							<p>Cette action est définitive.</p>
 							<p>
-								Ne supprimez l'avis que si c'est un avis que vous avez déposé
-								pour faire un test.
+								Ne supprimez la réponse que si c'est une réponse que vous avez
+								déposée pour faire un test.
 							</p>
 						</OnConfirmModal>
 					</>
