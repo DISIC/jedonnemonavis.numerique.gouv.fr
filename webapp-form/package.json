@@ -67,6 +67,11 @@
 		"zod-prisma-types": "3.1.8"
 	},
 	"resolutions": {
+		"dompurify": "3.4.11",
+		"i18next-fs-backend": "2.6.6",
+		"@opentelemetry/core": "2.8.0",
+		"**/@elastic/transport/undici": "6.27.0",
+		"**/jsdom/undici": "7.28.0",
 		"tar-fs": "3.1.2",
 		"ws": "8.21.0",
 		"cookie": "1.1.1",
@@ -76,7 +81,7 @@
 		"uuid": "11.1.1"
 	},
 	"devDependencies": {
-		"@babel/core": "7.22.15",
+		"@babel/core": "7.29.6",
 		"@babel/eslint-parser": "7.22.15",
 		"@babel/plugin-transform-modules-commonjs": "7.22.15",
 		"@babel/preset-env": "7.22.15",
