@@ -66,7 +66,6 @@ export const queryCountByFieldCode = ({
 	const mustClauses: QueryDslQueryContainer[] = [
 		{ term: { field_code } },
 		{ term: { product_id } },
-		{ bool: { must_not: { exists: { field: 'deleted_at' } } } },
 		{
 			range: {
 				created_at: {

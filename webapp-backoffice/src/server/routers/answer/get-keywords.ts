@@ -38,10 +38,7 @@ export const getKeywordsQuery = async ({
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
 
-	const mustClauses: QueryDslQueryContainer[] = [
-		{ term: { product_id } },
-		{ bool: { must_not: { exists: { field: 'deleted_at' } } } }
-	];
+	const mustClauses: QueryDslQueryContainer[] = [{ term: { product_id } }];
 
 	if (form.legacy) {
 		mustClauses.push({

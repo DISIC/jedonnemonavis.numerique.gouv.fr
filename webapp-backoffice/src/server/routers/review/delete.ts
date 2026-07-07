@@ -38,23 +38,19 @@ export const deleteReviewMutation = async ({
 		});
 	}
 
-	const markDeletedInEs = (index: string) =>
-		ctx.elkClient.updateByQuery({
+	const deleteFromEs = (index: string) =>
+		ctx.elkClient.deleteByQuery({
 			index,
 			refresh: true,
 			conflicts: 'proceed',
 			body: {
-				query: { term: { review_id } },
-				script: {
-					source: 'ctx._source.deleted_at = params.deleted_at',
-					params: { deleted_at: deletedAt.toISOString() }
-				}
+				query: { term: { review_id } }
 			}
 		});
 
 	await Promise.allSettled([
-		markDeletedInEs('jdma-answers'),
-		markDeletedInEs('jdma-answers-tokens')
+		deleteFromEs('jdma-answers'),
+		deleteFromEs('jdma-answers-tokens')
 	]);
 
 	const user = ctx.session?.user;
