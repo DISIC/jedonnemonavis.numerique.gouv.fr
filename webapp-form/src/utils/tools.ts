@@ -1,6 +1,17 @@
 import React, { ReactNode } from 'react';
 import { Product, Step } from './types';
 
+export const getPageMetaTitleKey = (pathname: string): string | null => {
+	const metaTitleKeysByPathname: Record<string, string> = {
+		'/cgu': 'pages.cgu.meta_title',
+		'/legalNotice': 'pages.legal_notice.meta_title',
+		'/termsOfUse': 'pages.terms_of_use.meta_title',
+		'/accessibility': 'pages.accessibility.meta_title',
+		'/contact': 'pages.contact.meta_title'
+	};
+	return metaTitleKeysByPathname[pathname] ?? null;
+};
+
 export const parseBoldLabel = (text: string): ReactNode => {
 	const parts = text.split(/\*([^*]+)\*/g);
 	return React.createElement(

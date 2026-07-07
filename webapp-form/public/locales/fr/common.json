@@ -286,7 +286,253 @@
 		},
 		"verbatim": {
 			"label": "Souhaitez-vous nous en dire plus ?",
-			"hint": "Ne partagez pas d’information personnelle."
+			"hint": "Ne partagez pas d’information personnelle.",
+			"notice": "Votre réponse est anonyme. Merci de ne pas écrire des données personnelles."
+		},
+		"contact_email": {
+			"label": "Adresse mail",
+			"hint": "Vous pouvez laisser votre adresse email si vous acceptez d’être recontacté. Nous ne pouvons cependant pas garantir de réponse pour chaque message."
+		}
+	},
+	"global": {
+		"home_link_title": "Je donne mon avis",
+		"email_example_hint": "Exemple : nom@domaine.fr",
+		"invalid_email": "Veuillez saisir une adresse électronique valide.",
+		"optional": "(optionnel)",
+		"select_language": "Sélectionner une langue",
+		"skip_content": "Contenu",
+		"skip_footer": "Pied de page",
+		"new_window": "nouvelle fenêtre",
+		"page_title": "Je donne mon avis sur la démarche « {{product}} »",
+		"thanks_title": "Remerciements |",
+		"footer": {
+			"legal_notice": "Mentions légales",
+			"personal_data": "Données personnelles",
+			"terms_of_use": "Modalités d’utilisation",
+			"contact": "Contact",
+			"license_before": "Le ",
+			"license_link": "code source",
+			"license_after": " est disponible en licence libre."
+		},
+		"step_titles": {
+			"0": "Clarté (étape 1 sur 3) |",
+			"1": "Aides (étape 2 sur 3) |",
+			"2": "Informations complémentaires (étape 3 sur 3) |"
+		}
+	},
+	"pages": {
+		"cgu": {
+			"meta_title": "Politique de confidentialité | Je donne mon avis",
+			"h1": "Politique de confidentialité du formulaire de dépôt d’avis Je donne mon avis"
+		},
+		"legal_notice": {
+			"meta_title": "Mentions légales | Je donne mon avis",
+			"h1": "Mentions légales du formulaire de dépôt d’avis Je donne mon avis"
+		},
+		"terms_of_use": {
+			"meta_title": "Modalités d’utilisation du formulaire de dépôt d’avis | Je donne mon avis",
+			"h1": "Modalités d’utilisation du formulaire de dépôt d’avis Je donne mon avis"
+		},
+		"accessibility": {
+			"meta_title": "Accessibilité | Je donne mon avis",
+			"h1": "Déclaration d'accessibilité"
+		},
+		"contact": {
+			"meta_title": "Contact | Je donne mon avis",
+			"h1": "Nous contacter",
+			"intro": "Vous pouvez nous contacter à l'adresse e-mail suivante :"
+		},
+		"not_found": {
+			"h1": "Formulaire non trouvé",
+			"text": "Le lien est invalide ou ce formulaire n'existe plus."
+		},
+		"form_closed": {
+			"h1": "Ce formulaire est fermé",
+			"text": "Ce formulaire a été clôturé, mais vous pouvez partager votre expérience via le formulaire du site Service Public+.",
+			"button": "Partager mon expérience",
+			"warning_alt": "Picto d'avertissement"
+		}
+	},
+	"cgu": {
+		"responsable": {
+			"title": "Qui est responsable du formulaire de dépôt d’avis Je donne mon avis ?",
+			"c1": "Le site du formulaire de dépôt d’avis Je donne mon avis est développé au sein de la Direction Interministérielle du Numérique (DINUM). Le formulaire a pour objectif de donner la possibilité aux usagers des démarches et services publics de donner leur avis sur leur expérience à la suite de leur utilisation.",
+			"c2": "Le responsable de l’utilisation des données est la DINUM représenté par Stéphanie Schaer, Directrice Interministérielle du Numérique (DINUM)."
+		},
+		"raison": {
+			"title": "Pourquoi traitons-nous des données à caractère personnel ?",
+			"c1": "Le site du formulaire de dépôt d’avis Je donne mon avis n’a pas vocation à collecter ni à traiter de données à caractère personnel."
+		},
+		"donnees": {
+			"title": "Quelles sont les données à caractère personnel que nous traitons ?",
+			"c1": "Le site du formulaire de dépôt d’avis Je donne mon avis n’a pas vocation à collecter ni à traiter de données à caractère personnel."
+		},
+		"autorisation": {
+			"title": "Qu’est-ce qui nous autorise à traiter vos données à caractère personnel ?",
+			"c1": "Le site du formulaire de dépôt d’avis Je donne mon avis n’a pas vocation à collecter ni à traiter de données à caractère personnel."
+		},
+		"cookies": {
+			"title": "Cookies",
+			"c1": "Un cookie est un fichier déposé sur votre terminal lors de la visite d’un site. Il a pour but de collecter des informations relatives à votre navigation et de vous adresser des services adaptés à votre terminal (ordinateur, mobile ou tablette).",
+			"c2": "En application de l’article 5(3) de la directive 2002/58/CE modifiée concernant le traitement des données à caractère personnel et la protection de la vie privée dans le secteur des communications électroniques, transposée à l’article 82 de la loi n°78-17 du 6 janvier 1978 relative à l’informatique, aux fichiers et aux libertés, les traceurs ou cookies suivent deux régimes distincts.",
+			"c3": "Les cookies n’étant pas strictement nécessaires au service ou n’ayant pas pour finalité exclusive de faciliter la communication par voie électronique doivent être consentis par l’utilisateur.",
+			"c4": "Ce consentement de la personne concernée pour une ou plusieurs finalités spécifiques constitue une base légale au sens du RGPD et doit être entendu au sens de l’article 6-a du Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 relatif à la protection des personnes physiques à l’égard du traitement des données à caractère personnel et à la libre circulation de ces données.",
+			"c5": "À tout moment, vous pouvez refuser l’utilisation des cookies et désactiver le dépôt sur votre ordinateur en utilisant la fonction dédiée de votre navigateur (fonction disponible notamment sur Microsoft Internet Explorer 11, Google Chrome, Mozilla Firefox, Apple Safari et Opera).",
+			"c6": "Certains cookies sont strictement nécessaires au service ou ayant pour finalité exclusive de faciliter la communication par voie électronique et sont dispensés de consentement préalable au titre de l’article 82 de la loi n°78-17 du 6 janvier 1978.",
+			"c7": "Des cookies relatifs aux statistiques publiques et anonymes sont également déposés.",
+			"c8": "La plateforme utilise également la solution de mesure d'audience Matomo en l'ayant configuré en mode « exempté », conformément aux recommandations de la CNIL. Elle ne nécessite donc pas le consentement des personnes concernées.",
+			"c9": "Pour aller plus loin, vous pouvez consulter les fiches proposées par la Commission Nationale de l’Informatique et des Libertés (CNIL) :",
+			"c10": "Cookies et traceurs : que dit la loi ?",
+			"c11": "Cookies : les outils pour les maîtriser"
+		}
+	},
+	"accessibility": {
+		"intro": {
+			"title": "",
+			"c1": "La direction interministérielle du numérique (DINUM) s’engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles (et ses applications mobiles et mobilier urbain numérique) conformément à l’article 47 de la loi n°2005-102 du 11 février 2005."
+		},
+		"intro_p2": {
+			"title": "",
+			"c1": "Cette déclaration d'accessibilité s'applique à ",
+			"c2": " jedonnemonavis.numerique.gouv.fr"
+		},
+		"state": {
+			"title": "État de conformité",
+			"c1": "Le site est ",
+			"c2": "non conforme ",
+			"c3": "avec le référentiel général d’amélioration de l’accessibilité, RGAA version 4.1, en raison de l’absence d’audit de conformité."
+		},
+		"state_p2": {
+			"title": "",
+			"c1": "Un audit de conformité est en cours. L’état de conformité sera mis à jour lorsque l’audit sera terminé."
+		},
+		"info_contact": {
+			"title": "Retour d’information et contact",
+			"c1": "Si vous n’arrivez pas à accéder à un contenu ou à un service, vous pouvez nous contacter par courriel à l’adresse ",
+			"c2": "contact.jdma@design.numerique.gouv.fr ",
+			"c3": "pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme."
+		},
+		"rights": {
+			"title": "Défenseur des droits",
+			"c1": "Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits."
+		},
+		"rights_p2": {
+			"title": "",
+			"c1": "Plusieurs moyens sont à votre disposition :"
+		},
+		"rights_p3": {
+			"title": "",
+			"c1": "Écrire un message au Défenseur des droits (https://www.defenseurdesdroits.fr/nous-contacter-355)",
+			"c2": "Contacter le délégué du Défenseur des droits près de chez vous (https://www.defenseurdesdroits.fr/carte-des-delegues)",
+			"c3": "Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) Défenseur des droits Libre réponse 71120 75342 Paris CEDEX 07"
+		}
+	},
+	"legal_notice": {
+		"editeur": {
+			"title": "Éditeur de la plateforme",
+			"c1": "Le formulaire de dépôt d’avis Je donne mon avis est éditée par la Direction interministérielle du numérique de l’Etat (DINUM) située :",
+			"c2": "20 avenue de Ségur",
+			"c3": "75007 Paris",
+			"c4": "Tel. Accueil : 01.71.21.01.70",
+			"c5": "SIRET : 12000101100010 (secrétariat général du gouvernement)",
+			"c6": "SIREN : 120 001 011"
+		},
+		"directeurPublication": {
+			"title": "Directeur de la publication",
+			"c1": "La directrice de la publication est Madame Stéphanie Schaer, Directrice interministérielle du numérique."
+		},
+		"hebergement": {
+			"title": "Hébergement de la plateforme",
+			"c1": "La plateforme est hébergée par Clever Cloud situé :",
+			"c2": "RCS Nantes B 524 172 699",
+			"c3": "Code APE : 6311Z",
+			"c4": "N°TVA : FR 87 524 172 699",
+			"c5": "Siège social : 4 rue Voltaire",
+			"c6": "44000 Nantes",
+			"c7": "France"
+		},
+		"accessibilite": {
+			"title": "Accessibilité",
+			"c1": "L’accessibilité de la plateforme est non conforme."
+		},
+		"moreInfo": {
+			"title": "En savoir plus",
+			"c1": "Pour en savoir plus sur la politique d’accessibilité numérique de l’État : ",
+			"c2": "https://accessibilite.numerique.gouv.fr/"
+		},
+		"securite": {
+			"title": "Sécurité",
+			"c1": "La plateforme est protégée par un certificat électronique, matérialisé pour la grande majorité des navigateurs par un cadenas. Cette protection participe à la confidentialité des échanges.",
+			"c2": "En aucun cas les services associés à la plateforme ne seront à l’origine d’envoi de courriels pour demander la saisie d’informations personnelles."
+		},
+		"service": {
+			"title": "Service",
+			"c1": "Le suivi éditorial et graphique est assuré par la DINUM.",
+			"c2": "Tout site public ou privé est autorisé à établir, sans autorisation préalable, un lien (y compris profond) vers les informations diffusées sur le site."
+		},
+		"contact": {
+			"title": "Contact",
+			"c1": "L’adresse courriel de contact est la suivante : ",
+			"c2": "contact.jdma@design.numerique.gouv.fr"
+		}
+	},
+	"terms_of_use": {
+		"appField": {
+			"title": "1. Champ d’application",
+			"c1": "Le présent document définit les modalités d’utilisation du site du formulaire de dépôt d’avis Je donne mon avis, développé au sein de la Direction Interministérielle du Numérique (DINUM)."
+		},
+		"platform": {
+			"title": "2. Objet de la plateforme",
+			"c1": "Le formulaire a pour objectif de donner la possibilité aux usagers des démarches et services publics de donner leur avis sur leur expérience à la suite de leur utilisation.",
+			"c2": "Le formulaire de dépôt d’avis Je donne mon avis est développé et opéré par la DINUM. Toute utilisation de ce service doit respecter les présentes modalités d’utilisation."
+		},
+		"service": {
+			"title": "3. Accès au service",
+			"c1": "Le formulaire est mis à disposition de toutes personnes souhaitant donner son avis sur un service numérique public suite à son utilisation.",
+			"c2": "L’utilisation du service est libre et gratuite et n’est pas soumis à la création d’un compte utilisateur."
+		},
+		"features": {
+			"title": "4. Fonctionnalités",
+			"c1": "L’utilisateur ou l’utilisatrice peut déposer son avis en répondant à une série de questions déployée par le formulaire."
+		},
+		"engagement": {
+			"title": "5. Engagements et responsabilités des utilisateurs et utilisatrices",
+			"c1": "Pour en savoir plus sur la politique d’accessibilité numérique de l’État : ",
+			"c2": "5.1. Usages conformes",
+			"c3": "Le service est mis à disposition pour recueillir les avis des usagers des services publics dans le but de leur amélioration continue.",
+			"c4": "L’utilisateur ou l’utilisatrice est responsable des données ou contenus qu’il ou elle saisit dans les divers champs libres du formulaire. Il ou elle veille à ne saisir que des messages appropriés.",
+			"c5": "L’utilisateur s’assure de garder son mot de passe secret. Toute divulgation du mot de passe, quelle que soit sa forme, est interdite. Il assume les risques liés à l’utilisation de son adresse e-mail et de son mot de passe.",
+			"c6": "5.2. Usages interdits",
+			"c7": "L’utilisateur ou l’utilisatrice s’engage à ne pas saisir dans les champs libres du formulaire des contenus ou informations contraires aux dispositions légales et réglementaires en vigueur.",
+			"c8": "En particulier, il ou elle s’engage à ne communiquer que les données strictement nécessaires à l’évaluation du service numérique public dont il est question et s’abstenir dans les champs libres de révéler des données sensibles le concernant ou concernant des tiers (ex : données de santé, opinion politique, philosophique ou religieuse), de tenir des propos injurieux, diffamatoires, obscènes et plus généralement contraire à la loi et à l’ordre public.",
+			"c9": "Il est rappelé que toute personne qui procède à une fausse déclaration pour elle-même ou pour autrui s’expose, notamment, aux sanctions prévues à l’article 441-1 du Code pénal, prévoyant des peines pouvant aller jusqu’à trois ans d’emprisonnement et 45 000 euros d’amende.",
+			"c10": "L’utilisateur s’assure, en amont de la publication, que cette dernière respecte le cadre juridique en vigueur notamment le RGPD, la loi Informatique et libertés, le Code de la propriété intellectuelle et le CRPA.",
+			"c11": "L’utilisateur s’engage à ne pas publier dans les espaces de discussion ou à quelque endroit que ce soit de messages racistes, sexistes, injurieux, insultants ou contraires à l’ordre public. Chaque commentaire publié emporte cession de ses droits de propriété intellectuelle de façon non exclusive, à titre gracieux, pour le monde entier et pour toute la durée de ces droits."
+		},
+		"dinum": {
+			"title": "6. Engagements et responsabilités de la DINUM",
+			"c1": "6.1 Sécurité et accès à la Plateforme",
+			"c2": "Les sources des informations diffusées sur la Plateforme sont réputées fiables mais elle ne garantit pas qu’elle soit exempte de défauts, d’erreurs ou d’omissions.",
+			"c3": "La DINUM s’engage à la sécurisation de la Plateforme, notamment en prenant toutes les mesures nécessaires permettant de garantir la sécurité et la confidentialité des informations fournies.",
+			"c4": "La DINUM s’engage à fournir les moyens nécessaires et raisonnables pour assurer un accès continu à la Plateforme.",
+			"c5": "La DINUM se réserve le droit de faire évoluer, de modifier ou de suspendre, sans préavis, le service pour des raisons de maintenance ou pour tout autre motif jugé nécessaire.",
+			"c6": "La DINUM se réserve le droit de suspendre ou supprimer un compte utilisateur ou utilisatrice du service qui aurait méconnu les présentes modalités d’utilisation, sans préjudice des éventuelles actions en responsabilité pénale et civile qui pourraient être engagées à l’encontre de l’utilisateur ou l’utilisatrice.",
+			"c7": "6.2 Open Source et Licences",
+			"c8": "Le code source de la Plateforme est libre et disponible ici :",
+			"c9": "https://github.com/DISIC/jedonnemonavis.numerique.gouv.fr",
+			"c10": "Les contenus proposés par l’Éditeur sont sous Licence Ouverte, à l’exception des logos et des représentations iconographiques et photographiques pouvant être régis par leurs licences propres."
+		},
+		"evolution": {
+			"title": "7. Évolution des modalités d’utilisation",
+			"c1": "Les termes des présentes modalités d’utilisation peuvent être modifiés ou complétés à tout moment, sans préavis, en fonction des modifications apportées au service, de l’évolution de la législation ou pour tout autre motif jugé nécessaire. Ces modifications et mises à jour s’imposent à l’utilisateur ou l’utilisatrice qui doit, en conséquence, se référer régulièrement à cette rubrique pour vérifier les conditions générales en vigueur."
+		},
+		"accessibility": {
+			"title": "8. Accessibilité",
+			"c1": "Si vous constatez un défaut d’accessibilité vous empêchant d’accéder à un contenu ou une fonctionnalité du service, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse rapide de notre part, vous êtes en droit de faire parvenir vos doléances ou demande de saisine au défenseur des droits par courrier gratuit, sans affranchissement à l’adresse :",
+			"c2": "Défenseur des droits",
+			"c3": "Libre réponse 71120",
+			"c4": "75342 Paris CEDEX 07,",
+			"c5": "par Téléphone : 09 69 39 00 00 ou via le formulaire en ligne."
 		}
 	}
 }

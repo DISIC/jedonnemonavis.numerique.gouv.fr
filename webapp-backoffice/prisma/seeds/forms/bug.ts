@@ -54,6 +54,7 @@ export const createBugForm: Prisma.FormTemplateUncheckedCreateInput = {
 		"Permet à vos usagers de signaler des problèmes techniques, problèmes avec leur situation ou de faire des suggestions d'amélioration.",
 	active: true,
 	hasStepper: false,
+	review_save_mode: 'on_completion',
 	form_template_steps: {
 		create: [
 			{

@@ -1,9 +1,13 @@
 import { sanitizeRichHtml } from '@/src/utils/sanitize';
+import {
+	getTextInputErrorKind,
+	MAX_TEXT_INPUT_LENGTH
+} from '@/src/utils/form-validation';
 import { FormField, Opinion, Product } from '@/src/utils/types';
 import { fr } from '@codegouvfr/react-dsfr';
 import { Input } from '@codegouvfr/react-dsfr/Input';
 import { useTranslation } from 'next-i18next';
-import { SetStateAction } from 'react';
+import { SetStateAction, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
 import { ArrayRadio } from './ArrayRadio';
 import { CheckboxInput } from './CheckboxInput';
@@ -18,12 +22,21 @@ type Props = {
 	formConfig?: Product['form']['form_configs'][0];
 	formTemplateStep?: Product['form']['form_template']['form_template_steps'][0];
 	setOpinion: (value: SetStateAction<Opinion>) => void;
+	showValidationErrors?: boolean;
 };
 
 export const Field = (props: Props) => {
-	const { field, opinion, setOpinion, form, formConfig, formTemplateStep } =
-		props;
+	const {
+		field,
+		opinion,
+		setOpinion,
+		form,
+		formConfig,
+		formTemplateStep,
+		showValidationErrors
+	} = props;
 	const { classes, cx } = useStyles({ nbItems: 5 });
+	const [touched, setTouched] = useState(false);
 
 	const { t } = useTranslation('common');
 
@@ -37,6 +50,12 @@ export const Field = (props: Props) => {
 	const labelConfig = formConfig?.form_config_labels.find(
 		fcd => fcd.kind === 'block' && fcd.parent_id === templateField?.id
 	);
+
+	const isFieldHidden = displayConfig
+		? displayConfig.hidden
+		: !!templateField?.isHiddenByDefault;
+
+	if (isFieldHidden) return;
 
 	if (field.conditions) {
 		const showField = field.conditions.some(condition => {
@@ -125,7 +144,11 @@ export const Field = (props: Props) => {
 				<div className={classes.inputContainer}>
 					<Input
 						hintText={
-							templateField?.upLabel ? (
+							field.name === 'verbatim' ? (
+								<p className={fr.cx('fr-hint-text')}>
+									{t('fields.verbatim.notice')}
+								</p>
+							) : templateField?.upLabel ? (
 								<p
 									className={fr.cx('fr-hint-text')}
 									dangerouslySetInnerHTML={{
@@ -134,7 +157,7 @@ export const Field = (props: Props) => {
 								></p>
 							) : undefined
 						}
-						label={<h3>{t(field.label)}</h3>}
+						label={<h3 className={fr.cx('fr-mb-2v')}>{t(field.label)}</h3>}
 						state={
 							(opinion[field.name] || '').length > 15000 ? 'error' : 'default'
 						}
@@ -146,10 +169,10 @@ export const Field = (props: Props) => {
 									...opinion,
 									[field.name]: e.target.value.slice(0, 15000)
 								});
-							},
-							autoFocus: true
+							}
 						}}
 						textArea
+						className={fr.cx('fr-mb-2v')}
 					/>
 					{templateField?.downLabel && (
 						<p className={cx(classes.infoText, fr.cx('fr-mt-0'))}>
@@ -185,6 +208,50 @@ export const Field = (props: Props) => {
 					}}
 				/>
 			);
+		case 'input-email': {
+			const emailValue = (opinion[field.name] as string) || '';
+			const errorKind = getTextInputErrorKind(
+				emailValue,
+				true,
+				touched || !!showValidationErrors
+			);
+			const hasError = errorKind !== null;
+
+			return (
+				<Input
+					hintText={[
+						field.hint && t(field.hint),
+						t('global.email_example_hint')
+					]
+						.filter(Boolean)
+						.join(' ')}
+					label={
+						<h3 className={fr.cx('fr-mb-2v')}>
+							{t(field.label)} {t('global.optional')}
+						</h3>
+					}
+					state={hasError ? 'error' : 'default'}
+					stateRelatedMessage={
+						errorKind === 'invalid_email'
+							? t('global.invalid_email')
+							: 'Maximum 250 caractères'
+					}
+					nativeInputProps={{
+						type: 'email',
+						value: emailValue,
+						maxLength: MAX_TEXT_INPUT_LENGTH,
+						'aria-invalid': hasError,
+						onBlur: () => setTouched(true),
+						onChange: e => {
+							setOpinion({
+								...opinion,
+								[field.name]: e.target.value
+							});
+						}
+					}}
+				/>
+			);
+		}
 	}
 };
 

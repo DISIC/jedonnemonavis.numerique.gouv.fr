@@ -17,7 +17,8 @@ import {
 	FormAnswers,
 	getVisibleBlocks,
 	hasBlockAnswer,
-	hasAllRequiredBlockAnswers
+	hasAllRequiredBlockAnswers,
+	getInvalidEmailBlocks
 } from '@/src/utils/form-validation';
 
 type AvisPageProps = {
@@ -43,6 +44,7 @@ export default function AvisPage({
 	const [answers, setAnswers] = useState<FormAnswers>({});
 	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [isRateLimitReached, setIsRateLimitReached] = useState(false);
+	const [showValidationErrors, setShowValidationErrors] = useState(false);
 	const reviewRef = useRef<{ id: number; created_at: Date } | null>(null);
 	const createPromiseRef = useRef<Promise<{
 		id: number;
@@ -51,6 +53,19 @@ export default function AvisPage({
 
 	// Send content height to parent widget for dynamic resizing
 	const contentRef = useRef<HTMLDivElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
+	const isInitialStepMount = useRef(true);
+
+	useEffect(() => {
+		if (isInitialStepMount.current) {
+			isInitialStepMount.current = false;
+			return;
+		}
+		const firstField = formRef.current?.querySelector<HTMLElement>(
+			'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+		);
+		firstField?.focus();
+	}, [currentStepIndex]);
 
 	useEffect(() => {
 		if (!isWidget || window.parent === window || !contentRef.current) return;
@@ -106,15 +121,22 @@ export default function AvisPage({
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
-		const form = e.currentTarget;
-		if (!form.checkValidity()) {
-			form.reportValidity();
+		const invalidEmailBlocks = getInvalidEmailBlocks(
+			currentStep.form_template_blocks,
+			answers,
+			formConfig
+		);
+		if (invalidEmailBlocks.length > 0) {
+			setShowValidationErrors(true);
+			formRef.current
+				?.querySelector<HTMLInputElement>(`#input-${invalidEmailBlocks[0].id}`)
+				?.focus();
 			return;
 		}
 
 		const isLastStep = currentStepIndex === steps.length - 1;
 
-		const saved = await saveCurrentStep();
+		const saved = await saveCurrentStep(isLastStep);
 		if (!saved) return;
 
 		if (isLastStep) {
@@ -127,12 +149,14 @@ export default function AvisPage({
 				);
 			}
 		} else {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex + 1);
 		}
 	};
 
 	const handlePrevious = () => {
 		if (currentStepIndex > 0) {
+			setShowValidationErrors(false);
 			setCurrentStepIndex(currentStepIndex - 1);
 		}
 	};
@@ -141,8 +165,30 @@ export default function AvisPage({
 		return Object.values(answers).flat();
 	};
 
-	const saveCurrentStep = async (): Promise<boolean> => {
+	const saveCurrentStep = async (isLastStep: boolean): Promise<boolean> => {
 		if (isPreview) return true;
+
+		if (form.form_template.review_save_mode === 'on_completion') {
+			if (!isLastStep) return true;
+
+			const allAnswers = getAnswersArray();
+			if (allAnswers.length === 0) return true;
+
+			try {
+				await createReview.mutateAsync({
+					review: {
+						product_id: productId,
+						button_id: buttonId,
+						form_id: form.id,
+						user_id: uuidv4()
+					},
+					answers: allAnswers
+				});
+				return true;
+			} catch {
+				return false;
+			}
+		}
 
 		const currentStepAnswers = getAnswersArray().filter(answer => {
 			return currentStep.form_template_blocks.some(block => {
@@ -284,7 +330,7 @@ export default function AvisPage({
 				<div className={fr.cx('fr-grid-row', 'fr-grid-row--center')}>
 					<div className={fr.cx('fr-col-12', 'fr-col-lg-9')}>
 						<div className={classes.formSection}>
-							<form onSubmit={handleSubmit}>
+							<form ref={formRef} onSubmit={handleSubmit} noValidate>
 								<FormStepRenderer
 									step={currentStep}
 									form={form}
@@ -293,6 +339,7 @@ export default function AvisPage({
 									currentStepIndex={currentStepIndex}
 									totalSteps={steps.length}
 									isWidget={isWidget}
+									showValidationErrors={showValidationErrors}
 								/>
 
 								{isRateLimitReached && (
@@ -317,7 +364,11 @@ export default function AvisPage({
 											priority="primary"
 											iconId="fr-icon-arrow-right-line"
 											iconPosition="right"
-											disabled={isFirstAnswerEmpty || isRateLimitReached}
+											disabled={
+												isFirstAnswerEmpty ||
+												!hasAllRequiredAnswers ||
+												isRateLimitReached
+											}
 											type="submit"
 										>
 											Continuer

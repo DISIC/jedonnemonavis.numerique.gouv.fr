@@ -90,7 +90,7 @@ describe('jdma-home', () => {
 			cy.get(selectors.footer)
 				.find(selectors.footerLinks)
 				.find('li')
-				.should('have.length', 6);
+				.should('have.length', 5);
 
 			cy.get(selectors.footer)
 				.contains(/Accessibilité\s*:\s*non conforme/i)
@@ -106,9 +106,6 @@ describe('jdma-home', () => {
 				.find('a[href="/public/termsOfUse"]')
 				.should('exist');
 
-			cy.get(selectors.footer)
-				.contains(/Roadmap/i)
-				.should('exist');
 			cy.get(selectors.footer)
 				.contains(/Contact/i)
 				.should('exist');

@@ -1,15 +1,10 @@
 {
 	"version": "2.0.0",
-	"options": {
-		"env": {
-			"PATH": "${env:HOME}/.nvm/versions/node/v20.20.1/bin:${env:PATH}"
-		}
-	},
 	"tasks": [
 		{
 			"label": "Back-Office",
 			"type": "shell",
-			"command": "npm run dev",
+			"command": "yarn && yarn dev",
 			"options": {
 				"cwd": "${workspaceFolder}/webapp-backoffice"
 			},
@@ -18,7 +13,7 @@
 		{
 			"label": "Form",
 			"type": "shell",
-			"command": "npm run dev",
+			"command": "yarn && yarn dev",
 			"options": {
 				"cwd": "${workspaceFolder}/webapp-form"
 			},
@@ -33,7 +28,7 @@
 		{
 			"label": "DB Reset (Back-Office)",
 			"type": "shell",
-			"command": "npm run db:reset",
+			"command": "yarn db:reset",
 			"options": {
 				"cwd": "${workspaceFolder}/webapp-backoffice"
 			},

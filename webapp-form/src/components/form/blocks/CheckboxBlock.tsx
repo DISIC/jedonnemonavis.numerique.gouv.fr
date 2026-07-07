@@ -40,60 +40,61 @@ export const CheckboxBlock = ({
 	});
 
 	return (
-		<div>
-			<label
-				htmlFor={`checkbox-${block.id}`}
-				className={fr.cx('fr-label', isWidget ? 'fr-text--sm' : 'fr-text--md')}
-			>
-				{displayLabel} {!block.isRequired && '(optionnel)'}
-			</label>
-			{block.content && <p className={classes.hint}>{block.content}</p>}
-			<Checkbox
-				small={!!isWidget}
-				options={visibleOptions.map((opt, index) => ({
-					label: opt.label || '',
-					hintText: opt.hint,
-					nativeInputProps: {
-						id: index === 0 ? `checkbox-${block.id}` : undefined,
-						value: opt.id.toString(),
-						checked: checkboxValues.includes(opt.id),
-						required:
-							block.isRequired && checkboxValues.length === 0 && index === 0,
-						onChange: e => {
-							const currentAnswers =
-								(answers[fieldKey] as DynamicAnswerData[]) || [];
-							if (e.target.checked) {
-								setAnswers(prev => ({
-									...prev,
-									[fieldKey]: [
-										...currentAnswers,
-										{
-											block_id: block.id,
-											answer_item_id: opt.id
-										}
-									]
-								}));
-							} else {
-								setAnswers(prev => ({
-									...prev,
-									[fieldKey]: currentAnswers.filter(
-										a => a.answer_item_id !== opt.id
-									)
-								}));
-							}
+		<Checkbox
+			small={!!isWidget}
+			aria-labelledby={undefined}
+			classes={{ legend: classes.legend }}
+			legend={
+				<>
+					{displayLabel} {!block.isRequired && '(optionnel)'}
+				</>
+			}
+			hintText={block.content || undefined}
+			options={visibleOptions.map((opt, index) => ({
+				label: opt.label || '',
+				hintText: opt.hint,
+				nativeInputProps: {
+					value: opt.id.toString(),
+					checked: checkboxValues.includes(opt.id),
+					required:
+						block.isRequired && checkboxValues.length === 0 && index === 0,
+					'aria-invalid': false,
+					onChange: e => {
+						const currentAnswers =
+							(answers[fieldKey] as DynamicAnswerData[]) || [];
+						if (e.target.checked) {
+							setAnswers(prev => ({
+								...prev,
+								[fieldKey]: [
+									...currentAnswers,
+									{
+										block_id: block.id,
+										answer_item_id: opt.id
+									}
+								]
+							}));
+						} else {
+							setAnswers(prev => ({
+								...prev,
+								[fieldKey]: currentAnswers.filter(
+									a => a.answer_item_id !== opt.id
+								)
+							}));
 						}
 					}
-				}))}
-			/>
-		</div>
+				}
+			}))}
+		/>
 	);
 };
 
 const useStyles = tss.withName({ CheckboxBlock }).create(() => ({
-	hint: {
-		fontSize: '0.9rem',
-		color: fr.colors.decisions.text.mention.grey.default,
-		marginBottom: fr.spacing('6v'),
-		marginTop: `-${fr.spacing('2v')}`
+	legend: {
+		'&&': {
+			fontSize: '1rem',
+			lineHeight: '1.5rem',
+			fontWeight: 500,
+			marginBottom: fr.spacing('5v')
+		}
 	}
 }));
