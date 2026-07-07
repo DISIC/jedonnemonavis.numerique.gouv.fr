@@ -19,6 +19,7 @@ export const getReviewListInputSchema = z.object({
 	start_date: z.string().optional(),
 	end_date: z.string().optional(),
 	newReviews: z.boolean().optional(),
+	onlyDeleted: z.boolean().optional().default(false),
 	needLogging: z.boolean().optional().default(false),
 	loggingFromMail: z.boolean().optional(),
 	filters: z
@@ -46,7 +47,8 @@ export const getReviewListOutputSchema = z.object({
 		countAll: z.number(),
 		countNew: z.number(),
 		countForm1: z.number(),
-		countForm2: z.number()
+		countForm2: z.number(),
+		countDeleted: z.number()
 	})
 });
 
@@ -118,9 +120,13 @@ export const getReviewListQuery = async ({
 		}
 	}
 
+	const isGlobalAdmin = ctx.session?.user?.role.includes('admin') ?? false;
+	const showDeleted = input.onlyDeleted && isGlobalAdmin;
+
 	const { where, orderBy } = formatWhereAndOrder(
 		{
 			...input,
+			onlyDeleted: showDeleted,
 			lastSeenDate
 		},
 		!!form?.legacy
@@ -169,68 +175,87 @@ export const getReviewListQuery = async ({
 		});
 	}
 
-	const [reviews, countFiltered, countAll, countNew, countForm1, countForm2] =
-		await Promise.all([
-			ctx.prisma.review.findMany({
-				where,
-				orderBy: orderBy,
-				take: numberPerPage,
-				skip: (page - 1) * numberPerPage,
-				include: {
-					answers: shouldIncludeAnswers
-						? {
-								include: {
-									parent_answer: true
-								},
-								where: {
-									...(input.end_date && {
-										created_at: getDateWhereFromUTCRange(
-											input.start_date,
-											input.end_date
-										)
-									})
-								}
-						  }
-						: false
-				}
-			}),
-			ctx.prisma.review.count({ where }),
-			ctx.prisma.review.count({
-				where: {
-					isDeleted: { not: true },
-					product_id: input.product_id,
-					...(form_id &&
-						(form?.legacy
-							? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
-							: { form_id }))
-				}
-			}),
-			lastSeenReview[0]
-				? ctx.prisma.review.count({
-						where: {
-							isDeleted: { not: true },
-							product_id: input.product_id,
-							...(lastSeenReview[0] && {
-								created_at: {
-									gte: lastSeenReview[0].created_at
-								}
-							})
-						}
-				  })
-				: 0,
-			ctx.prisma.review.count({
-				where: {
-					...where,
-					form_id: 1
-				}
-			}),
-			ctx.prisma.review.count({
-				where: {
-					...where,
-					form_id: 2
-				}
-			})
-		]);
+	const [
+		reviews,
+		countFiltered,
+		countAll,
+		countNew,
+		countForm1,
+		countForm2,
+		countDeleted
+	] = await Promise.all([
+		ctx.prisma.review.findMany({
+			where,
+			orderBy: orderBy,
+			take: numberPerPage,
+			skip: (page - 1) * numberPerPage,
+			include: {
+				answers: shouldIncludeAnswers
+					? {
+							include: {
+								parent_answer: true
+							},
+							where: {
+								...(input.end_date && {
+									created_at: getDateWhereFromUTCRange(
+										input.start_date,
+										input.end_date
+									)
+								})
+							}
+					  }
+					: false
+			}
+		}),
+		ctx.prisma.review.count({ where }),
+		ctx.prisma.review.count({
+			where: {
+				isDeleted: { not: true },
+				product_id: input.product_id,
+				...(form_id &&
+					(form?.legacy
+						? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+						: { form_id }))
+			}
+		}),
+		lastSeenReview[0]
+			? ctx.prisma.review.count({
+					where: {
+						isDeleted: { not: true },
+						product_id: input.product_id,
+						...(lastSeenReview[0] && {
+							created_at: {
+								gte: lastSeenReview[0].created_at
+							}
+						})
+					}
+			  })
+			: 0,
+		ctx.prisma.review.count({
+			where: {
+				...where,
+				form_id: 1
+			}
+		}),
+		ctx.prisma.review.count({
+			where: {
+				...where,
+				form_id: 2
+			}
+		}),
+		isGlobalAdmin
+			? ctx.prisma.review.count({
+					where: {
+						isDeleted: true,
+						product_id: input.product_id,
+						...(form_id &&
+							(form?.legacy
+								? { OR: [{ form_id }, { form_id: 1 }, { form_id: 2 }] }
+								: { form_id }))
+					}
+			  })
+			: Promise.resolve(0)
+	]);
 
 	if (input.needLogging) {
 		const user = ctx.session?.user;
@@ -250,6 +275,13 @@ export const getReviewListQuery = async ({
 
 	return {
 		data: reviews,
-		metadata: { countFiltered, countAll, countNew, countForm1, countForm2 }
+		metadata: {
+			countFiltered,
+			countAll,
+			countNew,
+			countForm1,
+			countForm2,
+			countDeleted
+		}
 	};
 };

@@ -63,7 +63,8 @@ const DashboardTab = ({
 						countAll: 0,
 						countNew: 0,
 						countForm1: 0,
-						countForm2: 0
+						countForm2: 0,
+						countDeleted: 0
 					}
 				}
 			}

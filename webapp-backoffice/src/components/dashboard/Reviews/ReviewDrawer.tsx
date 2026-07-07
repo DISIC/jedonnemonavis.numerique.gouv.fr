@@ -475,39 +475,50 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
-			{ownRight === 'carrier_admin' && (
-				<>
-					<div className={classes.deleteContainer}>
-						<Button
-							priority="tertiary"
-							iconId="fr-icon-delete-line"
-							className={classes.deleteButton}
-							size={isMobile ? 'medium' : 'small'}
-							onClick={() => deleteReviewModal.open()}
+			{review.isDeleted ? (
+				<div className={classes.deleteContainer}>
+					<Badge severity="error" noIcon>
+						Réponses supprimé
+						{review.deleted_at
+							? ` le ${formatFullFrenchDateTime(review.deleted_at.toString())}`
+							: ''}
+					</Badge>
+				</div>
+			) : (
+				ownRight === 'carrier_admin' && (
+					<>
+						<div className={classes.deleteContainer}>
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-delete-line"
+								className={classes.deleteButton}
+								size={isMobile ? 'medium' : 'small'}
+								onClick={() => deleteReviewModal.open()}
+							>
+								Supprimer l'avis
+							</Button>
+						</div>
+						<OnConfirmModal
+							modal={deleteReviewModal}
+							title="Êtes-vous sûr de vouloir supprimer cet avis ?"
+							kind="danger"
+							disableAction={deleteReview.isLoading}
+							handleOnConfirm={() =>
+								deleteReview.mutate({
+									review_id: review.id as number,
+									product_id: review.product_id as number,
+									form_id: review.form_id as number
+								})
+							}
 						>
-							Supprimer l'avis
-						</Button>
-					</div>
-					<OnConfirmModal
-						modal={deleteReviewModal}
-						title="Êtes-vous sûr de vouloir supprimer cet avis ?"
-						kind="danger"
-						disableAction={deleteReview.isLoading}
-						handleOnConfirm={() =>
-							deleteReview.mutate({
-								review_id: review.id as number,
-								product_id: review.product_id as number,
-								form_id: review.form_id as number
-							})
-						}
-					>
-						<p>Cette action est définitive.</p>
-						<p>
-							Ne supprimez l'avis que si c'est un avis que vous avez déposé pour
-							faire un test.
-						</p>
-					</OnConfirmModal>
-				</>
+							<p>Cette action est définitive.</p>
+							<p>
+								Ne supprimez l'avis que si c'est un avis que vous avez déposé
+								pour faire un test.
+							</p>
+						</OnConfirmModal>
+					</>
+				)
 			)}
 
 			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />

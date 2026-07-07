@@ -27,6 +27,7 @@ import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
 import { Button as ButtonDSFR } from '@codegouvfr/react-dsfr/Button';
 import Input from '@codegouvfr/react-dsfr/Input';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
+import Notice from '@codegouvfr/react-dsfr/Notice';
 import { LinearProgress } from '@mui/material';
 import { Button, RightAccessStatus } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
@@ -85,6 +86,8 @@ const ReviewsTab = (props: Props) => {
 		useState<ReviewPartialWithRelations | null>(null);
 	const rowRefsMap = React.useRef<Map<number, HTMLTableRowElement>>(new Map());
 
+	const isGlobalAdmin = session?.user?.role.includes('admin') ?? false;
+
 	useEffect(() => {
 		if (!selectedReview?.id) return;
 		rowRefsMap.current
@@ -108,6 +111,9 @@ const ReviewsTab = (props: Props) => {
 	);
 
 	const { filters, updateFilters, scopeToForm } = useFilters();
+
+	const showDeleted =
+		(filters.productReviews.filters.onlyDeleted ?? false) && isGlobalAdmin;
 
 	useEffect(() => {
 		scopeToForm(form.id);
@@ -165,6 +171,7 @@ const ReviewsTab = (props: Props) => {
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
+			onlyDeleted: showDeleted,
 			needLogging: false,
 			loggingFromMail: isFromMail
 		},
@@ -177,6 +184,8 @@ const ReviewsTab = (props: Props) => {
 	const reviews = reviewResults?.data ?? [];
 	const reviewsCountFiltered = reviewResults?.metadata?.countFiltered ?? 0;
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
+	const reviewsCountDeleted = reviewResults?.metadata?.countDeleted ?? 0;
+
 	const isTableFetching = isFetchingReviews && !isLoadingReviews;
 
 	useEffect(() => {
@@ -466,8 +475,8 @@ const ReviewsTab = (props: Props) => {
 	const handleReviewDeleted = () => {
 		setSelectedReview(null);
 		setDeleteToastOpen(true);
-		utils.review.getList.invalidate();
-		utils.review.getCountsByForm.invalidate();
+		utils.review.invalidate();
+		utils.answer.invalidate();
 	};
 
 	const displayEmptyState = () => {
@@ -556,6 +565,8 @@ const ReviewsTab = (props: Props) => {
 					filters={filters.productReviews.filters}
 					submitFilters={handleSubmitfilters}
 					form_id={form.id}
+					isGlobalAdmin={isGlobalAdmin}
+					deletedCount={reviewsCountDeleted}
 				/>
 			) : (
 				<ReviewFiltersModal
@@ -563,6 +574,8 @@ const ReviewsTab = (props: Props) => {
 					filters={filters.productReviews.filters}
 					submitFilters={handleSubmitfilters}
 					form={form}
+					isGlobalAdmin={isGlobalAdmin}
+					deletedCount={reviewsCountDeleted}
 				/>
 			)}
 
@@ -681,7 +694,11 @@ const ReviewsTab = (props: Props) => {
 					<GenericFilters
 						filterKey="productReviews"
 						renderTags={() => (
-							<ReviewFilterTags buttons={buttons} form={form} />
+							<ReviewFilterTags
+								buttons={buttons}
+								form={form}
+								isGlobalAdmin={isGlobalAdmin}
+							/>
 						)}
 						filterModal={filter_modal}
 						buttons={buttons}
@@ -720,6 +737,15 @@ const ReviewsTab = (props: Props) => {
 							}
 						}}
 					/>
+
+					{showDeleted && (
+						<Notice
+							severity="info"
+							title="Réponses supprimés."
+							description="Ces réponses ont été supprimés et ne sont pas comptés dans les statistiques."
+							className="fr-mt-4v"
+						/>
+					)}
 
 					{isLoadingReviews ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>

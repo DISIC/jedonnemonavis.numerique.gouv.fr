@@ -5,6 +5,7 @@ import { displayIntention } from '@/src/utils/stats/intention-helpers';
 import { fr } from '@codegouvfr/react-dsfr';
 import Button from '@codegouvfr/react-dsfr/Button';
 import Checkbox from '@codegouvfr/react-dsfr/Checkbox';
+import ToggleSwitch from '@codegouvfr/react-dsfr/ToggleSwitch';
 import { AnswerIntention } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import { Fragment, useEffect, useState } from 'react';
@@ -15,10 +16,13 @@ interface Props {
 	filters: ReviewFiltersType;
 	form: FormWithElements;
 	submitFilters: (filters: ReviewFiltersType) => void;
+	isGlobalAdmin?: boolean;
+	deletedCount?: number;
 }
 
 const ReviewFiltersModal = (props: Props) => {
-	const { modal, filters, submitFilters, form } = props;
+	const { modal, filters, submitFilters, form, isGlobalAdmin, deletedCount } =
+		props;
 	const { cx, classes } = useStyles();
 
 	const filterableBlocks = getFilterableBlocks(form);
@@ -204,6 +208,22 @@ const ReviewFiltersModal = (props: Props) => {
 					</Fragment>
 				);
 			})}
+
+			{isGlobalAdmin && (
+				<div className={cx(classes.section)}>
+					<hr className={cx(classes.separator)} />
+					<ToggleSwitch
+						label={`Afficher les réponses supprimés${
+							deletedCount ? ` (${deletedCount})` : ''
+						}`}
+						checked={!!tmpFilters.onlyDeleted}
+						showCheckedHint={false}
+						onChange={checked =>
+							setTmpFilters({ ...tmpFilters, onlyDeleted: checked })
+						}
+					/>
+				</div>
+			)}
 
 			<div className={fr.cx('fr-grid-row', 'fr-grid-row--left', 'fr-mt-4w')}>
 				<ul className={cx(classes.listContainer)}>
