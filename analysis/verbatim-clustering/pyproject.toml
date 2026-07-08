@@ -1,0 +1,32 @@
+[project]
+name = "verbatim-clustering"
+version = "0.1.0"
+description = "Offline, unsupervised discovery of verbatim categories for JDMA (embeddings -> UMAP -> HDBSCAN -> LLM naming)."
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "numpy>=1.26,<2.0",
+    "pandas>=2.2",
+    "pyarrow>=16.0",
+    "scikit-learn>=1.4",
+    "umap-learn>=0.5.6",
+    "hdbscan>=0.8.36",
+    "httpx>=0.27",
+    "python-dotenv>=1.0",
+    "tqdm>=4.66",
+    "plotly>=5.22",
+]
+
+# We deliberately do NOT depend on sentence-transformers / torch: embeddings are
+# computed server-side via the Albert API (openweight-embeddings = bge-m3), so the
+# heavy local ML runtime is unnecessary. UMAP + HDBSCAN + scikit-learn run on CPU.
+
+[tool.uv]
+# Keep the resolver on binary wheels where possible (numba/llvmlite/hdbscan ship them
+# for cp311 on Windows).
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
