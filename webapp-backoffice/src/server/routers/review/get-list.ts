@@ -248,6 +248,12 @@ export const getReviewListQuery = async ({
 
 	return {
 		data: reviews,
-		metadata: { countFiltered, countAll, countNew, countForm1, countForm2 }
+		metadata: {
+			countFiltered,
+			countAll,
+			countNew,
+			countForm1,
+			countForm2
+		}
 	};
 };

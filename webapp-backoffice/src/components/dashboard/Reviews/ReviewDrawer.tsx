@@ -16,13 +16,24 @@ import {
 	getSeverity,
 	retrieveButtonName
 } from '@/src/utils/tools';
+import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
+import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Drawer } from '@mui/material';
+import { RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
+import OnConfirmModal from '../../ui/modal/OnConfirm';
+
+const deleteReviewModal = createModal({
+	id: 'delete-review-modal',
+	isOpenedByDefault: false
+});
 
 // ---------------------------------------------------------------------------
 // Types
@@ -48,6 +59,10 @@ type ReviewDrawerProps = {
 	onNext: () => void;
 	hasPrevious: boolean;
 	hasNext: boolean;
+	ownRight: Exclude<RightAccessStatus, 'removed'>;
+	onDeleted: () => void;
+	isArchived?: boolean;
+	archivedAt?: Date | string | null;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -262,10 +277,23 @@ const ReviewDrawerContent = ({
 	onPrevious,
 	onNext,
 	hasPrevious,
-	hasNext
+	hasNext,
+	ownRight,
+	onDeleted,
+	isArchived,
+	archivedAt
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
+
+	const canDeleteReview = ownRight === 'carrier_admin';
+
+	const deleteReview = trpc.review.delete.useMutation({
+		onSuccess: () => {
+			deleteReviewModal.close();
+			onDeleted();
+		}
+	});
 	const isFirstRender = useRef(true);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const titleRef = useRef<HTMLHeadingElement>(null);
@@ -349,7 +377,22 @@ const ReviewDrawerContent = ({
 				const verbatimAnswer = review.answers?.find(
 					a => a.field_code === `${block.field_code}_verbatim`
 				);
+				const numericValues =
+					block.type_bloc === 'mark_input'
+						? (block.options ?? [])
+								.map(o => parseInt(o.value ?? '', 10))
+								.filter(n => !isNaN(n))
+						: [];
+				const numericMax = numericValues.length
+					? Math.max(...numericValues)
+					: null;
 				const boldTexts = answers.map(a => {
+					if (numericMax) {
+						const value =
+							block.options?.find(o => o.id === a.answer_item_id)?.value ??
+							a.answer_text;
+						return value ? `${value} / ${numericMax}` : '-';
+					}
 					const isOtherLine =
 						!!otherOption &&
 						(a.answer_item_id === otherOption.id ||
@@ -441,6 +484,60 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
+			{isArchived ? (
+				<div className={classes.deleteContainer}>
+					<Badge severity="error" noIcon>
+						Réponse supprimée
+						{archivedAt
+							? ` le ${formatFullFrenchDateTime(archivedAt.toString())}`
+							: ''}
+					</Badge>
+				</div>
+			) : (
+				canDeleteReview && (
+					<>
+						<div className={classes.deleteContainer}>
+							<Button
+								priority="tertiary"
+								iconId="fr-icon-delete-line"
+								className={classes.deleteButton}
+								size={isMobile ? 'medium' : 'small'}
+								onClick={() => deleteReviewModal.open()}
+							>
+								Supprimer la réponse
+							</Button>
+						</div>
+						<OnConfirmModal
+							modal={deleteReviewModal}
+							title="Êtes-vous sûr de vouloir supprimer cette réponse ?"
+							kind="danger"
+							disableAction={deleteReview.isLoading}
+							handleOnConfirm={() => {
+								push(['trackEvent', 'Product - Avis', 'Delete-Review']);
+								deleteReview.mutate({
+									review_id: review.id as number,
+									product_id: review.product_id as number,
+									form_id: review.form_id as number
+								});
+							}}
+						>
+							<p>Cette action est définitive.</p>
+							<p>
+								Ne supprimez la réponse que si c'est une réponse que vous avez
+								déposée pour faire un test.
+							</p>
+							{deleteReview.isError && (
+								<Alert
+									severity="error"
+									small
+									description="La suppression a échoué, veuillez réessayer."
+									className={fr.cx('fr-mt-2v')}
+								/>
+							)}
+						</OnConfirmModal>
+					</>
+				)
+			)}
 
 			<hr className={fr.cx('fr-pb-6v', 'fr-mt-6v')} />
 
@@ -514,6 +611,17 @@ const useStyles = tss.create({
 			gap: fr.spacing('3v'),
 			button: { width: '100%', justifyContent: 'center' }
 		}
+	},
+	deleteContainer: {
+		display: 'flex',
+		justifyContent: 'flex-start',
+		...fr.spacing('margin', { topBottom: '6v' }),
+		[fr.breakpoints.down('sm')]: {
+			button: { width: '100%', justifyContent: 'center' }
+		}
+	},
+	deleteButton: {
+		color: fr.colors.decisions.text.default.error.default
 	},
 	sectionTitle: {
 		fontWeight: 'bold',
