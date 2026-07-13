@@ -286,6 +286,8 @@ const ReviewDrawerContent = ({
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
 
+	const canDeleteReview = ownRight === 'carrier_admin';
+
 	const deleteReview = trpc.review.delete.useMutation({
 		onSuccess: () => {
 			deleteReviewModal.close();
@@ -492,7 +494,7 @@ const ReviewDrawerContent = ({
 					</Badge>
 				</div>
 			) : (
-				ownRight === 'carrier_admin' && (
+				canDeleteReview && (
 					<>
 						<div className={classes.deleteContainer}>
 							<Button

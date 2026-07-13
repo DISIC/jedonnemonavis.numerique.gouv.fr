@@ -94,10 +94,19 @@ export const deleteReviewMutation = async ({
 			}
 		});
 
-	await Promise.allSettled([
+	const esResults = await Promise.allSettled([
 		deleteFromEs('jdma-answers'),
 		deleteFromEs('jdma-answers-tokens')
 	]);
+
+	esResults.forEach(result => {
+		if (result.status === 'rejected') {
+			console.error(
+				`[review.delete] Elasticsearch cleanup failed for review ${review_id}, stats may still count it:`,
+				result.reason
+			);
+		}
+	});
 
 	if (user) {
 		await ctx.prisma.userEvent.create({

@@ -116,6 +116,10 @@ const ReviewsTab = (props: Props) => {
 		(filters.productReviews.filters.onlyDeleted ?? false) && isGlobalAdmin;
 
 	useEffect(() => {
+		setCurrentPage(1);
+	}, [showDeleted]);
+
+	useEffect(() => {
 		scopeToForm(form.id);
 	}, [form.id, scopeToForm]);
 
@@ -188,12 +192,12 @@ const ReviewsTab = (props: Props) => {
 		{
 			product_id: form.product_id,
 			form_id: form.id,
-			numberPerPage: numberPerPage,
-			page: currentPage
+			numberPerPage: showDeleted ? numberPerPage : 0,
+			page: showDeleted ? currentPage : 1
 		},
 		{
 			keepPreviousData: true,
-			enabled: nbReviews > 0 && !isLoading && isGlobalAdmin
+			enabled: !isLoading && isGlobalAdmin
 		}
 	);
 
@@ -208,6 +212,7 @@ const ReviewsTab = (props: Props) => {
 		: reviewResults?.metadata?.countFiltered ?? 0;
 	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
 	const reviewsCountDeleted = archivedResults?.metadata?.count ?? 0;
+	const canBrowseDeleted = isGlobalAdmin && reviewsCountDeleted > 0;
 
 	const isFetchingList = showDeleted ? isFetchingArchived : isFetchingReviews;
 	const isLoadingList = showDeleted ? isLoadingArchived : isLoadingReviews;
@@ -727,7 +732,7 @@ const ReviewsTab = (props: Props) => {
 				<div className={cx(classes.loaderContainer)}>
 					<Loader />
 				</div>
-			) : nbReviews === 0 || buttons.length === 0 ? (
+			) : (nbReviews === 0 && !canBrowseDeleted) || buttons.length === 0 ? (
 				displayEmptyState()
 			) : (
 				<>

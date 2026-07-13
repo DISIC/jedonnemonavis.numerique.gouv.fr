@@ -1,5 +1,5 @@
 import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
-import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
+import { AnswerIntention, AnswerKind, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
@@ -812,6 +812,17 @@ export const getModalCode = ({
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
 };
 
+type ArchivedAnswerSnapshot = {
+	id: number;
+	field_code: string;
+	field_label: string;
+	answer_text: string;
+	answer_item_id: number;
+	intention: AnswerIntention | null;
+	kind: AnswerKind;
+	parent_answer_id: number | null;
+};
+
 type ArchivedReviewSnapshot = {
 	original_review_id: number;
 	review_created_at: Date | string;
@@ -827,7 +838,9 @@ export const mapArchivedReviewToReview = (
 	archived: ArchivedReviewSnapshot
 ): ReviewPartialWithRelations => {
 	const createdAt = new Date(archived.review_created_at);
-	const answers = Array.isArray(archived.answers) ? archived.answers : [];
+	const answers = Array.isArray(archived.answers)
+		? (archived.answers as unknown as ArchivedAnswerSnapshot[])
+		: [];
 
 	return {
 		id: archived.original_review_id,
@@ -837,7 +850,7 @@ export const mapArchivedReviewToReview = (
 		button_id: archived.button_id ?? undefined,
 		user_id: archived.user_id ?? undefined,
 		has_verbatim: archived.has_verbatim,
-		answers: answers.map((a: any) => ({
+		answers: answers.map(a => ({
 			id: a.id,
 			field_code: a.field_code,
 			field_label: a.field_label,
