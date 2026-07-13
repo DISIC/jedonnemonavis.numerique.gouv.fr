@@ -45,12 +45,10 @@ export const formatWhereAndOrder = (
 		end_date,
 		filters,
 		newReviews,
-		onlyDeleted,
 		lastSeenDate
 	} = input;
 
 	let where: Prisma.ReviewWhereInput = {
-		isDeleted: onlyDeleted ? true : { not: true },
 		...(product_id && { product_id }),
 		...(form_id &&
 			(isLegacy

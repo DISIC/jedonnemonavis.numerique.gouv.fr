@@ -152,9 +152,10 @@ const ReviewFiltersModalRoot = (props: Props) => {
 						}`}
 						checked={!!tmpFilters.onlyDeleted}
 						showCheckedHint={false}
-						onChange={checked =>
-							setTmpFilters({ ...tmpFilters, onlyDeleted: checked })
-						}
+						onChange={checked => {
+							setTmpFilters({ ...tmpFilters, onlyDeleted: checked });
+							push(['trackEvent', 'Product - Avis', 'Toggle-Archived-Reviews']);
+						}}
 					/>
 				</div>
 			)}

@@ -18,11 +18,13 @@ import {
 } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
+import Alert from '@codegouvfr/react-dsfr/Alert';
 import Badge from '@codegouvfr/react-dsfr/Badge';
 import { Button } from '@codegouvfr/react-dsfr/Button';
 import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { Drawer } from '@mui/material';
 import { RightAccessStatus } from '@prisma/client';
+import { push } from '@socialgouv/matomo-next';
 import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { tss } from 'tss-react/dsfr';
@@ -59,6 +61,8 @@ type ReviewDrawerProps = {
 	hasNext: boolean;
 	ownRight: Exclude<RightAccessStatus, 'removed'>;
 	onDeleted: () => void;
+	isArchived?: boolean;
+	archivedAt?: Date | string | null;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -275,7 +279,9 @@ const ReviewDrawerContent = ({
 	hasPrevious,
 	hasNext,
 	ownRight,
-	onDeleted
+	onDeleted,
+	isArchived,
+	archivedAt
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
@@ -476,12 +482,12 @@ const ReviewDrawerContent = ({
 					hideHr
 				/>
 			</div>
-			{review.isDeleted ? (
+			{isArchived ? (
 				<div className={classes.deleteContainer}>
 					<Badge severity="error" noIcon>
 						Réponse supprimée
-						{review.deleted_at
-							? ` le ${formatFullFrenchDateTime(review.deleted_at.toString())}`
+						{archivedAt
+							? ` le ${formatFullFrenchDateTime(archivedAt.toString())}`
 							: ''}
 					</Badge>
 				</div>
@@ -504,19 +510,28 @@ const ReviewDrawerContent = ({
 							title="Êtes-vous sûr de vouloir supprimer cette réponse ?"
 							kind="danger"
 							disableAction={deleteReview.isLoading}
-							handleOnConfirm={() =>
+							handleOnConfirm={() => {
+								push(['trackEvent', 'Product - Avis', 'Delete-Review']);
 								deleteReview.mutate({
 									review_id: review.id as number,
 									product_id: review.product_id as number,
 									form_id: review.form_id as number
-								})
-							}
+								});
+							}}
 						>
 							<p>Cette action est définitive.</p>
 							<p>
 								Ne supprimez la réponse que si c'est une réponse que vous avez
 								déposée pour faire un test.
 							</p>
+							{deleteReview.isError && (
+								<Alert
+									severity="error"
+									small
+									description="La suppression a échoué, veuillez réessayer."
+									className={fr.cx('fr-mt-2v')}
+								/>
+							)}
 						</OnConfirmModal>
 					</>
 				)

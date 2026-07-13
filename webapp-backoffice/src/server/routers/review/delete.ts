@@ -1,4 +1,5 @@
 import type { Context } from '@/src/server/trpc';
+import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { checkRightToProceed } from '../product';
@@ -24,19 +25,64 @@ export const deleteReviewMutation = async ({
 		product_id
 	});
 
-	const deletedAt = new Date();
-
-	const { count } = await ctx.prisma.review.updateMany({
-		where: { id: review_id, product_id, isDeleted: { not: true } },
-		data: { isDeleted: true, deleted_at: deletedAt }
+	const review = await ctx.prisma.review.findFirst({
+		where: { id: review_id, product_id },
+		include: { answers: true }
 	});
 
-	if (count === 0) {
+	if (!review) {
 		throw new TRPCError({
 			code: 'NOT_FOUND',
-			message: 'Review not found or already deleted'
+			message: 'Review not found'
 		});
 	}
+
+	const user = ctx.session?.user;
+
+	const answersSnapshot = review.answers.map(a => ({
+		id: a.id,
+		field_code: a.field_code,
+		field_label: a.field_label,
+		answer_text: a.answer_text,
+		answer_item_id: a.answer_item_id,
+		intention: a.intention,
+		kind: a.kind,
+		parent_answer_id: a.parent_answer_id
+	}));
+
+	await ctx.prisma.$transaction(async tx => {
+		await tx.archivedReview.create({
+			data: {
+				original_review_id: review.id,
+				review_created_at: review.created_at,
+				product_id: review.product_id,
+				form_id: review.form_id,
+				button_id: review.button_id,
+				user_id: review.user_id,
+				has_verbatim: review.has_verbatim,
+				answers: answersSnapshot as Prisma.InputJsonValue,
+				deleted_by: user ? parseInt(user.id) : null
+			}
+		});
+
+		await tx.answer.deleteMany({
+			where: {
+				review_id: review.id,
+				review_created_at: review.created_at,
+				parent_answer_id: { not: null }
+			}
+		});
+
+		await tx.answer.deleteMany({
+			where: { review_id: review.id, review_created_at: review.created_at }
+		});
+
+		await tx.review.delete({
+			where: {
+				id_created_at: { id: review.id, created_at: review.created_at }
+			}
+		});
+	});
 
 	const deleteFromEs = (index: string) =>
 		ctx.elkClient.deleteByQuery({
@@ -53,7 +99,6 @@ export const deleteReviewMutation = async ({
 		deleteFromEs('jdma-answers-tokens')
 	]);
 
-	const user = ctx.session?.user;
 	if (user) {
 		await ctx.prisma.userEvent.create({
 			data: {

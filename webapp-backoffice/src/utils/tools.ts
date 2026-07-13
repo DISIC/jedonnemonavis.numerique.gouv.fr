@@ -1,3 +1,4 @@
+import { ReviewPartialWithRelations } from '@/prisma/generated/zod';
 import { AnswerIntention, Prisma, TypeAction } from '@prisma/client';
 import { JsonValue } from '@prisma/client/runtime/library';
 import { addDays } from 'date-fns';
@@ -809,4 +810,45 @@ export const getModalCode = ({
 	const widgetScriptUrl = `https://jedonnemonavis.numerique.gouv.fr/static/jdma-modal-widget.js`;
 
 	return `<script\n  src="${widgetScriptUrl}"\n  data-jdma-form-url="${formUrl}"\n  data-jdma-button-image="${variantImageUrl}"\n  data-jdma-button-label="${buttonLabel}"\n  data-jdma-position="${position}"\n  defer\n></script>`;
+};
+
+type ArchivedReviewSnapshot = {
+	original_review_id: number;
+	review_created_at: Date | string;
+	product_id: number;
+	form_id: number;
+	button_id: number | null;
+	user_id: string | null;
+	has_verbatim: boolean;
+	answers: JsonValue;
+};
+
+export const mapArchivedReviewToReview = (
+	archived: ArchivedReviewSnapshot
+): ReviewPartialWithRelations => {
+	const createdAt = new Date(archived.review_created_at);
+	const answers = Array.isArray(archived.answers) ? archived.answers : [];
+
+	return {
+		id: archived.original_review_id,
+		created_at: createdAt,
+		product_id: archived.product_id,
+		form_id: archived.form_id,
+		button_id: archived.button_id ?? undefined,
+		user_id: archived.user_id ?? undefined,
+		has_verbatim: archived.has_verbatim,
+		answers: answers.map((a: any) => ({
+			id: a.id,
+			field_code: a.field_code,
+			field_label: a.field_label,
+			answer_text: a.answer_text,
+			answer_item_id: a.answer_item_id,
+			intention: a.intention ?? undefined,
+			kind: a.kind,
+			parent_answer_id: a.parent_answer_id ?? undefined,
+			review_id: archived.original_review_id,
+			review_created_at: createdAt,
+			created_at: createdAt
+		}))
+	};
 };

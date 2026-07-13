@@ -20,7 +20,7 @@ import {
 	getFilterableBlocks,
 	parseExportParams
 } from '@/src/utils/export';
-import { getNbPages } from '@/src/utils/tools';
+import { getNbPages, mapArchivedReviewToReview } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
 import Alert, { AlertProps } from '@codegouvfr/react-dsfr/Alert';
@@ -171,22 +171,47 @@ const ReviewsTab = (props: Props) => {
 			sort: sort,
 			filters: filters.productReviews.filters,
 			newReviews: filters.productReviews.displayNew,
-			onlyDeleted: showDeleted,
 			needLogging: false,
 			loggingFromMail: isFromMail
 		},
 		{
 			keepPreviousData: true,
-			enabled: nbReviews > 0 && !isLoading
+			enabled: nbReviews > 0 && !isLoading && !showDeleted
 		}
 	);
 
-	const reviews = reviewResults?.data ?? [];
-	const reviewsCountFiltered = reviewResults?.metadata?.countFiltered ?? 0;
-	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
-	const reviewsCountDeleted = reviewResults?.metadata?.countDeleted ?? 0;
+	const {
+		data: archivedResults,
+		isFetching: isFetchingArchived,
+		isLoading: isLoadingArchived
+	} = trpc.archivedReview.getList.useQuery(
+		{
+			product_id: form.product_id,
+			form_id: form.id,
+			numberPerPage: numberPerPage,
+			page: currentPage
+		},
+		{
+			keepPreviousData: true,
+			enabled: nbReviews > 0 && !isLoading && isGlobalAdmin
+		}
+	);
 
-	const isTableFetching = isFetchingReviews && !isLoadingReviews;
+	const archivedReviews = useMemo(
+		() => (archivedResults?.data ?? []).map(mapArchivedReviewToReview),
+		[archivedResults]
+	);
+
+	const reviews = showDeleted ? archivedReviews : reviewResults?.data ?? [];
+	const reviewsCountFiltered = showDeleted
+		? archivedResults?.metadata?.count ?? 0
+		: reviewResults?.metadata?.countFiltered ?? 0;
+	const reviewsCountAll = reviewResults?.metadata?.countAll ?? 0;
+	const reviewsCountDeleted = archivedResults?.metadata?.count ?? 0;
+
+	const isFetchingList = showDeleted ? isFetchingArchived : isFetchingReviews;
+	const isLoadingList = showDeleted ? isLoadingArchived : isLoadingReviews;
+	const isTableFetching = isFetchingList && !isLoadingList;
 
 	useEffect(() => {
 		if (!isFetchingReviews && !isRefetchingReviews) setIsUserFetching(false);
@@ -428,10 +453,12 @@ const ReviewsTab = (props: Props) => {
 		source: '' | '_prev' | '_next' = ''
 	) => {
 		setSelectedReview(review);
-		createReviewViewLog({
-			review_id: review.id as number,
-			review_created_at: review.created_at as Date
-		});
+		if (!showDeleted) {
+			createReviewViewLog({
+				review_id: review.id as number,
+				review_created_at: review.created_at as Date
+			});
+		}
 		push(['trackEvent', 'Product - Avis', 'Display-More-Infos']);
 		window._mtm?.push({
 			event: 'matomo_event',
@@ -475,8 +502,21 @@ const ReviewsTab = (props: Props) => {
 	const handleReviewDeleted = () => {
 		setSelectedReview(null);
 		setDeleteToastOpen(true);
+		push(['trackEvent', 'Product - Avis', 'Delete-Review-Success']);
+		window._mtm?.push({
+			event: 'matomo_event',
+			container_type: 'backoffice',
+			service_id: form.product_id,
+			form_id: form.id,
+			template_slug: form.form_template.slug,
+			category: 'reviews',
+			action_type: 'delete',
+			action: 'review_delete',
+			ui_source: 'review_drawer'
+		});
 		utils.review.invalidate();
 		utils.answer.invalidate();
+		utils.archivedReview.invalidate();
 	};
 
 	const displayEmptyState = () => {
@@ -741,13 +781,13 @@ const ReviewsTab = (props: Props) => {
 					{showDeleted && (
 						<Notice
 							severity="info"
-							title="Réponses supprimées"
+							title="Réponses supprimées."
 							description="Ces réponses ont été supprimées et ne sont pas comptées dans les statistiques."
 							className="fr-mt-4v"
 						/>
 					)}
 
-					{isLoadingReviews ? (
+					{isLoadingList ? (
 						<div className={fr.cx('fr-py-20v', 'fr-mt-4w')}>
 							<Loader />
 						</div>
@@ -924,6 +964,14 @@ const ReviewsTab = (props: Props) => {
 				hasNext={selectedReviewIndex < reviews.length - 1}
 				ownRight={ownRight}
 				onDeleted={handleReviewDeleted}
+				isArchived={showDeleted}
+				archivedAt={
+					showDeleted && selectedReview
+						? archivedResults?.data.find(
+								a => a.original_review_id === selectedReview.id
+						  )?.archived_at
+						: undefined
+				}
 			/>
 			<Toast
 				isOpen={deleteToastOpen}

@@ -26,7 +26,6 @@ export const getProductsWithReviewCountsByScope = async (
 		// Group reviews by form_id via the button relation
 		const reviewsWithFormData = await prisma.review.findMany({
 			where: {
-				isDeleted: { not: true },
 				created_at: {
 					gte: startDate,
 					lte: endDate
