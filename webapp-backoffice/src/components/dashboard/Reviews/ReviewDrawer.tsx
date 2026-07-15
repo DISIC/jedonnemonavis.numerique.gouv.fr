@@ -63,6 +63,7 @@ type ReviewDrawerProps = {
 	onDeleted: () => void;
 	isArchived?: boolean;
 	archivedAt?: Date | string | null;
+	isDeletionLocked?: boolean;
 };
 
 const EXCLUDED_BLOCK_TYPES = [
@@ -281,12 +282,13 @@ const ReviewDrawerContent = ({
 	ownRight,
 	onDeleted,
 	isArchived,
-	archivedAt
+	archivedAt,
+	isDeletionLocked
 }: ReviewDrawerProps & { review: ReviewPartialWithRelations }) => {
 	const { cx, classes } = useStyles();
 	const { isMobile } = useIsMobile('sm');
 
-	const canDeleteReview = ownRight === 'carrier_admin';
+	const canDeleteReview = ownRight === 'carrier_admin' && !isDeletionLocked;
 
 	const deleteReview = trpc.review.delete.useMutation({
 		onSuccess: () => {

@@ -969,6 +969,7 @@ const ReviewsTab = (props: Props) => {
 				hasNext={selectedReviewIndex < reviews.length - 1}
 				ownRight={ownRight}
 				onDeleted={handleReviewDeleted}
+				isDeletionLocked={form.isTop250}
 				isArchived={showDeleted}
 				archivedAt={
 					showDeleted && selectedReview

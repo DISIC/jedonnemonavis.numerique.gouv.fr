@@ -25,6 +25,18 @@ export const deleteReviewMutation = async ({
 		product_id
 	});
 
+	const form = await ctx.prisma.form.findUnique({
+		where: { id: form_id },
+		select: { isTop250: true }
+	});
+
+	if (form?.isTop250) {
+		throw new TRPCError({
+			code: 'FORBIDDEN',
+			message: 'Reviews of a démarche essentielle form cannot be deleted'
+		});
+	}
+
 	const review = await ctx.prisma.review.findFirst({
 		where: { id: review_id, product_id },
 		include: { answers: true }
