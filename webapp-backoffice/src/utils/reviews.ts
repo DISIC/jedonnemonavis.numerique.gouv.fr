@@ -1,5 +1,10 @@
 import { Prisma } from '@prisma/client';
-import { getExactPhrase, isExactPhraseSearch, stripAccents } from './search';
+import {
+	escapePostgresRegex,
+	getExactPhrase,
+	isExactPhraseSearch,
+	stripAccents
+} from './search';
 import { getDateWhereFromUTCRange } from './tools';
 
 export const buildSearchWhereRaw = (search: string): Prisma.Sql | null => {
@@ -7,12 +12,9 @@ export const buildSearchWhereRaw = (search: string): Prisma.Sql | null => {
 
 	if (isExactPhraseSearch(search)) {
 		const phrase = stripAccents(getExactPhrase(search)).toLowerCase();
-		return Prisma.sql`(
-			public.immutable_unaccent(lower("answer_text")) LIKE '%' || ' ' || ${phrase} || ' ' || '%'
-			OR public.immutable_unaccent(lower("answer_text")) LIKE ${phrase + ' %'}
-			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + phrase}
-			OR public.immutable_unaccent(lower("answer_text")) = ${phrase}
-		)`;
+		if (!phrase) return null;
+		const pattern = `\\y${escapePostgresRegex(phrase)}\\y`;
+		return Prisma.sql`public.immutable_unaccent(lower("answer_text")) ~ ${pattern}`;
 	}
 
 	const words = search.split(' ').filter(Boolean);
@@ -20,12 +22,8 @@ export const buildSearchWhereRaw = (search: string): Prisma.Sql | null => {
 
 	const conditions = words.map(word => {
 		const stripped = stripAccents(word).toLowerCase();
-		return Prisma.sql`(
-			public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped + '%'}
-			OR public.immutable_unaccent(lower("answer_text")) LIKE ${stripped + ' %'}
-			OR public.immutable_unaccent(lower("answer_text")) LIKE ${'% ' + stripped}
-			OR public.immutable_unaccent(lower("answer_text")) = ${stripped}
-		)`;
+		const pattern = `\\m${escapePostgresRegex(stripped)}`;
+		return Prisma.sql`public.immutable_unaccent(lower("answer_text")) ~ ${pattern}`;
 	});
 
 	return Prisma.join(conditions, ' AND ');
