@@ -3,8 +3,8 @@ import type { Context } from '@/src/server/trpc';
 import { buildSearchWhereRaw, formatWhereAndOrder } from '@/src/utils/reviews';
 import { getDateWhereFromUTCRange } from '@/src/utils/tools';
 import { Prisma } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkRightToProceed } from '../product';
 
 export const getReviewListInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -66,10 +66,12 @@ export const getReviewListQuery = async ({
 		newReviews
 	} = input;
 
-	const product = await ctx.prisma.product.findUnique({
-		where: {
-			id: product_id
-		}
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session!,
+		product_id,
+		form_id,
+		authorizeCarrierUser: true
 	});
 
 	const form = await ctx.prisma.form.findUnique({
@@ -161,13 +163,6 @@ export const getReviewListQuery = async ({
 		},
 		take: 1
 	});
-
-	if (!product?.isPublic && !ctx.session?.user) {
-		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: 'This product is not public'
-		});
-	}
 
 	const [reviews, countFiltered, countAll, countNew, countForm1, countForm2] =
 		await Promise.all([
