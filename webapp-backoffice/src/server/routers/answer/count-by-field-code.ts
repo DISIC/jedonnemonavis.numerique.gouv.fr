@@ -1,5 +1,6 @@
 import type { Context } from '@/src/server/trpc';
 import { z } from 'zod';
+import { assertAggregatableFieldCode } from './field-codes';
 import {
 	checkAndGetForm,
 	checkAndGetProduct,
@@ -26,6 +27,11 @@ export const countByFieldCodeQuery = async ({
 
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
+	await assertAggregatableFieldCode({
+		prisma: ctx.prisma,
+		form,
+		field_code: input.field_code
+	});
 
 	const data = await ctx.elkClient.count({
 		index: 'jdma-answers',

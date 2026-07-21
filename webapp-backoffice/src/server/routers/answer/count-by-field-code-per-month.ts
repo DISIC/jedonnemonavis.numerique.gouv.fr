@@ -5,6 +5,7 @@ import {
 	getDiffDaysBetweenTwoDates
 } from '@/src/utils/tools';
 import { z } from 'zod';
+import { assertAggregatableFieldCode } from './field-codes';
 import {
 	checkAndGetForm,
 	checkAndGetProduct,
@@ -32,6 +33,7 @@ export const countByFieldCodePerMonthQuery = async ({
 
 	await checkAndGetProduct({ ctx, product_id });
 	const form = await checkAndGetForm({ ctx, form_id });
+	await assertAggregatableFieldCode({ prisma: ctx.prisma, form, field_code });
 
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 
