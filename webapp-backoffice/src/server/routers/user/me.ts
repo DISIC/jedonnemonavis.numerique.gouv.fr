@@ -1,6 +1,7 @@
 import type { Context } from '@/src/server/trpc';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { omitPassword } from './utils';
 
 export const getMeInputSchema = z.object({ otp: z.string().optional() });
 
@@ -67,6 +68,6 @@ export const getMeQuery = async ({
 				message: 'User not found'
 			});
 
-		return { data: user };
+		return { data: omitPassword(user) };
 	}
 };
