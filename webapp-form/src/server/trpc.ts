@@ -1,12 +1,12 @@
 import { createTRPCStoreLimiter } from '@/src/utils/trpcRateLimiter';
 import { Client as ElkClient } from '@elastic/elasticsearch';
-import { defaultFingerPrint } from '@trpc-limiter/memory';
 import { TRPCError, inferAsyncReturnType, initTRPC } from '@trpc/server';
 import { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import fs from 'fs';
 import path from 'path';
 import SuperJSON from 'superjson';
 import { ZodError } from 'zod';
+import { getClientIp } from '../utils/clientIp';
 import prisma from '../utils/db';
 import crypto from 'crypto';
 import ipaddr from 'ipaddr.js';
@@ -104,27 +104,11 @@ function ipToNumber(ip: string): number {
 }
 
 const limiter = createTRPCStoreLimiter<typeof t>({
-	fingerprint: ctx => {
-		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-		const xClientIp = ctx.req.headers['x-client-ip'] as string;
-		const ip = xClientIp
-			? xClientIp.split(',')[0]
-			: xForwardedFor
-			? xForwardedFor.split(',')[0]
-			: defaultFingerPrint(ctx.req);
-
-		return ip;
-	},
+	fingerprint: ctx => getClientIp(ctx.req),
 	windowMs: 60000,
 	max: 5,
 	onLimit: async (retryAfter, ctx) => {
-		const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-		const xClientIp = ctx.req.headers['x-client-ip'] as string;
-		const ip = xClientIp
-			? xClientIp.split(',')[0]
-			: xForwardedFor
-			? xForwardedFor.split(',')[0]
-			: defaultFingerPrint(ctx.req);
+		const ip = getClientIp(ctx.req);
 		const referer = ctx.req.headers['referer'] || ctx.req.headers['referrer'];
 		const hashedIp = hashIp(ip);
 		const currentTime = new Date();
@@ -186,13 +170,7 @@ const limiter = createTRPCStoreLimiter<typeof t>({
 });
 
 const bypassLimiterForAllowedIps = t.middleware(async ({ ctx, next }) => {
-	const xForwardedFor = ctx.req.headers['x-forwarded-for'] as string;
-	const xClientIp = ctx.req.headers['x-client-ip'] as string;
-	const ip = xClientIp
-		? xClientIp.split(',')[0]
-		: xForwardedFor
-		? xForwardedFor.split(',')[0]
-		: defaultFingerPrint(ctx.req);
+	const ip = getClientIp(ctx.req);
 
 	if (isIpAllowed(ip)) {
 		return next();
