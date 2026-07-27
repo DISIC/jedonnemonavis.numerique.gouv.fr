@@ -165,10 +165,12 @@ const ProductCard = ({
 
 	const isDisabled = product.status === 'archived';
 
+	const activeForms = product.forms.filter(f => !f.isDeleted);
+
 	const renderProductBadges = () => {
 		const badges = [];
 
-		if (product.forms.length === 0) {
+		if (activeForms.length === 0) {
 			badges.push(
 				<Badge key="no-forms" severity="warning" small noIcon>
 					Configuration à terminer
@@ -474,12 +476,11 @@ const ProductCard = ({
 										'fr-col',
 										'fr-col-12',
 										'fr-col-md-12',
-										product.forms.length === 0 && 'fr-hidden'
+										activeForms.length === 0 && 'fr-hidden'
 									)
 								)}
 							>
-								{product.forms
-									.filter(f => !f.isDeleted)
+								{activeForms
 									.sort((a, b) => {
 										if (a.isTop250 && !b.isTop250) return -1;
 										if (!a.isTop250 && b.isTop250) return 1;
@@ -541,15 +542,14 @@ const ProductCard = ({
 											</div>
 										);
 									})}
-								{product.forms.filter(f => !f.isDeleted).length > 2 && (
+								{activeForms.length > 2 && (
 									<Link
 										href={`/administration/dashboard/product/${product.id}/forms`}
 										title={`Voir les formulaires pour ${product.title}`}
 										className={cx(classes.productLink, fr.cx('fr-link'))}
 										onClick={() => clearFilters()}
 									>
-										Voir tous les formulaires (
-										{product.forms.filter(f => !f.isDeleted).length})
+										Voir tous les formulaires ({activeForms.length})
 									</Link>
 								)}
 							</div>
