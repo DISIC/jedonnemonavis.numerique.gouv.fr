@@ -133,8 +133,7 @@ export const getKeywordsQuery = async ({
 		const dominantBigram = bigrams
 			.filter(bigram => bigram.key.split(' ').includes(unigram.key))
 			.reduce<KeywordBucket | null>(
-				(max, bigram) =>
-					!max || bigram.count > max.count ? bigram : max,
+				(max, bigram) => (!max || bigram.count > max.count ? bigram : max),
 				null
 			);
 

@@ -32,3 +32,6 @@ export const buildAccentAwarePattern = (term: string): string => {
 	}
 	return pattern;
 };
+
+export const escapePostgresRegex = (term: string): string =>
+	term.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');

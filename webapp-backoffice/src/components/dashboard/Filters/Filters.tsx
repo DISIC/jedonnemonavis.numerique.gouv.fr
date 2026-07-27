@@ -78,6 +78,7 @@ const GenericFilters = <T extends FilterSectionKey>({
 			let count = 0;
 			if (reviewFilters.needOtherDifficulties) count++;
 			if (reviewFilters.needOtherHelp) count++;
+			if (reviewFilters.onlyDeleted) count++;
 			if (reviewFilters.fields) {
 				count += reviewFilters.fields.reduce(
 					(acc, f) => acc + f.values.length,
@@ -118,7 +119,12 @@ const GenericFilters = <T extends FilterSectionKey>({
 		}
 		if (filterModal && filterKey === 'productReviews') {
 			const rf = filters.productReviews.filters;
-			if (!rf.needVerbatim || rf.needOtherDifficulties || rf.needOtherHelp)
+			if (
+				!rf.needVerbatim ||
+				rf.needOtherDifficulties ||
+				rf.needOtherHelp ||
+				rf.onlyDeleted
+			)
 				return true;
 			if (rf.fields?.some(f => f.values.length > 0)) return true;
 		}

@@ -138,6 +138,7 @@ export type ReviewFiltersType = {
 	needVerbatim: boolean;
 	needOtherDifficulties: boolean;
 	needOtherHelp: boolean;
+	onlyDeleted?: boolean;
 	buttonId: string[];
 	fields: Array<{
 		field_code: string;

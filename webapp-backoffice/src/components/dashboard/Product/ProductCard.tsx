@@ -185,14 +185,6 @@ const ProductCard = ({
 		form: ProductWithForms['forms'][number],
 		newReviewsCount: number
 	) => {
-		if (form.isDeleted) {
-			return (
-				<Badge severity="error" noIcon>
-					Fermé
-				</Badge>
-			);
-		}
-
 		const badges = [];
 
 		if (form.isTop250) {
@@ -486,34 +478,19 @@ const ProductCard = ({
 									)
 								)}
 							>
-								{[
-									...product.forms.filter(f => !f.isDeleted),
-									...product.forms
-										.filter(f => f.isDeleted)
-										.sort(
-											(a, b) =>
-												(b.deleted_at?.getTime() ?? 0) -
-												(a.deleted_at?.getTime() ?? 0)
-										)
-								]
+								{product.forms
+									.filter(f => !f.isDeleted)
 									.sort((a, b) => {
-										if (a.isDeleted && !b.isDeleted) return 1;
-										if (!a.isDeleted && b.isDeleted) return -1;
+										if (a.isTop250 && !b.isTop250) return -1;
+										if (!a.isTop250 && b.isTop250) return 1;
 
-										if (!a.isDeleted && !b.isDeleted) {
-											if (a.isTop250 && !b.isTop250) return -1;
-											if (!a.isTop250 && b.isTop250) return 1;
-
-											const dateA = a.last_review_at
-												? new Date(a.last_review_at).getTime()
-												: 0;
-											const dateB = b.last_review_at
-												? new Date(b.last_review_at).getTime()
-												: 0;
-											return dateB - dateA;
-										}
-
-										return 0;
+										const dateA = a.last_review_at
+											? new Date(a.last_review_at).getTime()
+											: 0;
+										const dateB = b.last_review_at
+											? new Date(b.last_review_at).getTime()
+											: 0;
+										return dateB - dateA;
 									})
 									.slice(0, 2)
 									.map(form => {
@@ -529,11 +506,6 @@ const ProductCard = ({
 													classes.formCard,
 													'formCard'
 												)}
-												style={{
-													backgroundColor: form.isDeleted
-														? fr.colors.decisions.background.default.grey.hover
-														: undefined
-												}}
 											>
 												<Link
 													href={`/administration/dashboard/product/${product.id}/forms/${form.id}`}
@@ -552,25 +524,20 @@ const ProductCard = ({
 													</h3>
 													{renderFormBadges(form, newReviewsCount)}
 												</div>
-												{!form.isDeleted && (
-													<div className={cx(classes.formStatsWrapper)}>
-														<div className={classes.formStatsContent}>
-															<span
-																className={cx(
-																	fr.cx('fr-mr-2v'),
-																	classes.smallText
-																)}
-															>
-																Réponses déposées
-															</span>
-															<span className={fr.cx('fr-text--bold')}>
-																{formatNumberWithSpaces(
-																	getFormReviewCount(form.id, form.legacy)
-																)}
-															</span>
-														</div>
+												<div className={cx(classes.formStatsWrapper)}>
+													<div className={classes.formStatsContent}>
+														<span
+															className={cx(fr.cx('fr-mr-2v'), classes.smallText)}
+														>
+															Réponses déposées
+														</span>
+														<span className={fr.cx('fr-text--bold')}>
+															{formatNumberWithSpaces(
+																getFormReviewCount(form.id, form.legacy)
+															)}
+														</span>
 													</div>
-												)}
+												</div>
 											</div>
 										);
 									})}

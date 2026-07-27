@@ -12,10 +12,11 @@ import { tss } from 'tss-react/dsfr';
 interface Props {
 	buttons: Button[];
 	form: FormWithElements;
+	isGlobalAdmin?: boolean;
 }
 
 const ReviewFilterTags = (props: Props) => {
-	const { buttons, form } = props;
+	const { buttons, form, isGlobalAdmin } = props;
 	const { filters, updateFilters } = useFilters();
 	const { cx, classes } = useStyles();
 
@@ -73,6 +74,41 @@ const ReviewFilterTags = (props: Props) => {
 				);
 			}
 		});
+
+		if (isGlobalAdmin && filters.productReviews.filters.onlyDeleted) {
+			tags.push(
+				<Tag
+					key="onlyDeleted"
+					title="Retirer le filtre : Réponses supprimées"
+					dismissible
+					small
+					className={cx(classes.tagFilter)}
+					nativeButtonProps={{
+						onClick: () => {
+							const nextFilters: typeof filters = {
+								...filters,
+								productReviews: {
+									...filters.productReviews,
+									filters: {
+										...filters.productReviews.filters,
+										onlyDeleted: false
+									}
+								}
+							};
+							updateFilters({
+								...nextFilters,
+								sharedFilters: {
+									...nextFilters.sharedFilters,
+									hasChanged: hasAnyFilterChanged(nextFilters)
+								}
+							});
+						}
+					}}
+				>
+					Réponses supprimées
+				</Tag>
+			);
+		}
 
 		if (
 			filters.productReviews.filters.fields &&

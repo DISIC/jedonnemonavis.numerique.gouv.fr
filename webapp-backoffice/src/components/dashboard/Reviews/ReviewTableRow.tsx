@@ -41,7 +41,10 @@ const highlightSearchTerms = (
 			.map(buildAccentAwarePattern);
 
 		if (words.length === 0) return null;
-		return new RegExp(`\\b(${words.join('|')})\\b`, 'gi');
+		return new RegExp(
+			`(?<![\\p{L}\\p{N}])(${words.join('|')})(?![\\p{L}\\p{N}])`,
+			'giu'
+		);
 	};
 
 	const splitRegex = buildPattern();
