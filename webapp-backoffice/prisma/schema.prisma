@@ -455,6 +455,7 @@ model Review {
   @@id([id, created_at])
   @@index([product_id, created_at])
   @@index([product_id, created_at, button_id])
+  @@index([form_id, created_at, id])
 }
 
 model ArchivedReview {

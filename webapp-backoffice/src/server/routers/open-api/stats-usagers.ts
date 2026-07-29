@@ -11,6 +11,7 @@ import {
 	FetchAndFormatDataProps
 } from '@/src/utils/stats/index';
 import type { Context } from '@/src/server/trpc';
+import { getAuthorizedProductIds } from './utils';
 
 const MAX_NB_PRODUCTS = 10;
 
@@ -31,26 +32,7 @@ export const statsUsagersQuery = async ({
 	const { field_codes, product_ids, form_ids, start_date, end_date, interval } =
 		input;
 
-	const getAuthorizedProductIds = async (): Promise<number[]> => {
-		if (ctx.api_key?.product_id) {
-			return [ctx.api_key.product_id];
-		}
-
-		if (ctx.api_key?.entity_id) {
-			const entity = await ctx.prisma.entity.findFirst({
-				where: { id: ctx.api_key.entity_id },
-				include: { products: true }
-			});
-
-			if (entity && entity.products) {
-				return entity.products.map(prod => prod.id);
-			}
-		}
-
-		return [];
-	};
-
-	const authorized_products_ids: number[] = await getAuthorizedProductIds();
+	const authorized_products_ids: number[] = await getAuthorizedProductIds(ctx);
 
 	if (product_ids.length > 0) {
 		const existingProducts = await ctx.prisma.product.findMany({
