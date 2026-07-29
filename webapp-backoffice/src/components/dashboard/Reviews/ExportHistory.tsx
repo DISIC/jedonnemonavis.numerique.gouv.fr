@@ -9,6 +9,7 @@ interface Props {
 	exports: ExportWithPartialRelations[];
 	buttons: ButtonModel[];
 	form: FormWithElements;
+	isDisabled?: boolean;
 }
 
 const export_modal = createModal({
@@ -17,7 +18,7 @@ const export_modal = createModal({
 });
 
 const ExportHistory = (props: Props) => {
-	const { exports, buttons, form } = props;
+	const { exports, buttons, form, isDisabled } = props;
 
 	return (
 		<>
@@ -31,6 +32,7 @@ const ExportHistory = (props: Props) => {
 			<Button
 				priority="secondary"
 				type="button"
+				disabled={isDisabled}
 				nativeButtonProps={export_modal.buttonProps}
 			>
 				Voir l'historique des exports
