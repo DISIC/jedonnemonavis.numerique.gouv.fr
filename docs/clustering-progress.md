@@ -591,10 +591,18 @@ en **ChoiceList** (libellés lisibles, encodage `["L", …]`). Run **3059/mcs200
 dans `Assignments_mcs200` (doc `wPjmDnSpSEom`). Clé API Grist **régénérée** (l'ancienne, partagée en
 clair, révoquée).
 
-**Reste pour ce volet** : monter encore en volume (co-occurrences que Jules demandait) ; **widget
-custom Grist** OPTIONNEL (vue en cartes `assign_html.py` portée en Custom Widget — nécessite
-d'héberger la page en HTTPS + que l'instance autorise l'URL ; les verbatims restent dans Grist,
-jamais sur l'hébergeur).
+**Widget Grist (vue en cartes) LIVRÉ ✅ (code)** : `scripts/assign_html.py --grist` génère
+`assignments_<tag>_widget.html` — même UI (recherche/filtres/cartes) mais **sans données
+embarquées** : elle lit la table Grist liée en direct (`grist.ready` + `grist.onRecords`, script
+`grist-plugin-api.js`, mapping des ChoiceList `["L",…]`). **Reste à DÉPLOYER** : (1) héberger ce
+fichier en HTTPS — le plus simple sur l'infra JDMA : `webapp-backoffice/public/` (servi par Next)
+ou le bucket **Cellar S3** déjà utilisé pour les exports ; (2) dans Grist : Add Widget → table
+`Assignments_<tag>` → type « Custom » → coller l'URL → accès « Read table ». ⚠️ Si l'instance
+n'offre pas « Custom URL » (liste blanche), demander à l'admin Grist DINUM de l'autoriser. Les
+verbatims restent dans Grist, jamais sur l'hébergeur.
+
+**Reste pour ce volet** : monter encore en volume (co-occurrences que Jules demandait) ; déployer
+le widget (ci-dessus).
 
 ## 5. Prochaines étapes (proposées)
 

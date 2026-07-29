@@ -5,16 +5,20 @@ et écrit une page autoportante : liste des avis avec leurs facettes (objet / th
 polarité), recherche plein-texte, filtres par facette (OU dans un axe, ET entre axes) avec
 compteurs dynamiques, et tri.
 
-Aucun appel réseau. Conçue pour être portable en Custom Widget Grist : la logique de rendu
-est isolée dans `render()` ; il suffirait de remplacer les données embarquées par un
-`grist.onRecords(...)` (voir commentaire dans le <script>).
+Deux modes :
+  * (défaut)  page AUTONOME, données JSON embarquées, aucun appel réseau.
+  * --grist   Custom Widget Grist : lit la table LIÉE en direct via l'API Grist
+              (grist.onRecords), sans données embarquées → les verbatims restent dans Grist.
+La logique de filtre/rendu est identique dans les deux cas.
 
 Usage:
-    DEMARCHE=product-3059 RUN_TAG=mcs200 uv run python scripts/assign_html.py
+    DEMARCHE=product-3059 RUN_TAG=mcs200 uv run python scripts/assign_html.py           # autonome
+    DEMARCHE=product-3059 RUN_TAG=mcs200 uv run python scripts/assign_html.py --grist    # widget Grist
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 
@@ -28,6 +32,11 @@ def _sfx() -> str:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--grist", action="store_true",
+                    help="Génère la variante Custom Widget Grist (lit la table liée en direct).")
+    args = ap.parse_args()
+
     assign_csv = config.OUT_DIR / f"assignments{_sfx()}.csv"
     if not assign_csv.exists():
         sys.exit(f"{assign_csv} introuvable — lance d'abord `python -m src.assign_facets`.")
@@ -48,7 +57,7 @@ def main() -> None:
     } for r in df.itertuples()]
 
     data = json.dumps({"reviews": reviews, "objLabels": obj_labels, "thLabels": th_labels},
-                      ensure_ascii=False)
+                      ensure_ascii=False).replace("</", "<\\/")  # ne pas casser sur un </script> dans un verbatim
     tag = config.RUN_TAG + ("_ctx" if config.CONTEXT_ON else "")
     title = f"Avis × facettes — {config.DEMARCHE or 'démarche'} ({tag or 'run'})"
 
@@ -56,6 +65,7 @@ def main() -> None:
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>__TITLE__</title>
+__HEAD_EXTRA__
 <style>
   :root{--blue:#000091;--obj:#0063CB;--th:#18753C;--pos:#18753C;--neg:#CE0500;--neu:#666;--line:#e2e2e6;}
   *{box-sizing:border-box;}
@@ -123,11 +133,18 @@ def main() -> None:
 <div class="filters" id="filters"></div>
 <div id="list"></div>
 <script>
-const DATA = __DATA__;
-// Portage Grist : remplacer DATA.reviews par les enregistrements de la table via
-//   grist.ready({requiredAccess:'read table'});
-//   grist.onRecords(recs => { DATA.reviews = recs.map(mapRec); buildFilters(); render(); });
-// mapRec : {v:rec.verbatim, dup:rec.dup_count, obj:(rec.objets||'').split(' '), th:..., pol:rec.polarite}
+let DATA = __DATA_INIT__;
+// Mode widget Grist : les ChoiceList arrivent en ["L", …] ; on mappe les enregistrements
+// vers la même forme que le mode autonome. Les libellés stockés dans Grist servent d'identité.
+function stripL(v){return Array.isArray(v)?v.filter(x=>x!=='L'):(v?String(v).split(',').map(s=>s.trim()).filter(Boolean):[]);}
+function mapRecs(recs){
+  const KEYS=['positif','negatif','neutre'];
+  const reviews=recs.map(r=>({v:r.verbatim||'',dup:r.dup_count||1,obj:stripL(r.objets),
+    th:stripL(r.thematiques),pol:KEYS.includes(r.polarite)?r.polarite:'neutre'}));
+  const objLabels={},thLabels={};
+  reviews.forEach(r=>{r.obj.forEach(o=>objLabels[o]=o);r.th.forEach(t=>thLabels[t]=t);});
+  return {reviews,objLabels,thLabels};
+}
 const POL={positif:['pos','positif'],negatif:['neg','négatif'],neutre:['neu','neutre']};
 const active={obj:new Set(),th:new Set(),pol:new Set()};
 let query='';
@@ -201,15 +218,25 @@ document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Escape')
 document.getElementById('sort').addEventListener('change',render);
 document.getElementById('reset').addEventListener('click',()=>{
   Object.values(active).forEach(s=>s.clear());query='';document.getElementById('q').value='';buildFilters();render();});
-buildFilters();render();
+__BOOT__
 </script>
 </body></html>"""
 
+    if args.grist:
+        head_extra = '<script src="https://docs.getgrist.com/grist-plugin-api.js"></script>'
+        data_init = "{reviews:[],objLabels:{},thLabels:{}}"
+        boot = ("grist.ready({requiredAccess:'read table'});"
+                "grist.onRecords(recs=>{DATA=mapRecs(recs);buildFilters();render();});")
+    else:
+        head_extra, data_init, boot = "", data, "buildFilters();render();"
+
     page = (page.replace("__TITLE__", title).replace("__DEMARCHE__", config.DEMARCHE or "démarche")
-                .replace("__TAG__", tag or "run").replace("__DATA__", data))
-    out = config.OUT_DIR / f"assignments{_sfx()}.html"
+                .replace("__TAG__", tag or "run").replace("__HEAD_EXTRA__", head_extra)
+                .replace("__BOOT__", boot).replace("__DATA_INIT__", data_init))
+    out = config.OUT_DIR / f"assignments{_sfx()}{'_widget' if args.grist else ''}.html"
     out.write_text(page, encoding="utf-8")
-    print(f"-> {out}  ({len(reviews)} avis)")
+    mode = "widget Grist (lecture live)" if args.grist else "autonome"
+    print(f"-> {out}  ({len(reviews)} avis, mode {mode})")
 
 
 if __name__ == "__main__":
