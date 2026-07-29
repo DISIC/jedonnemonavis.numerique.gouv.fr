@@ -561,6 +561,33 @@ l'un ou l'autre. ⚠️ Le **push Grist des facettes n'est pas encore câblé** 
 401/403. **Régénérée** (nouvelle expiration ~05/07/2027), reportée dans les 2 `.env` (analysis +
 backoffice). Palier expérimentation → à re-régénérer périodiquement (idem pour le backfill/prod).
 
+## 4 undecies. Assignation avis-par-avis (3 axes) + page navigable — LIVRÉ ✅ (prototype)
+
+**Étape 2** (assignation) après la découverte du référentiel (§4 decies). Prend les 3 axes comme
+**ensemble fermé** et fait classer **chaque verbatim** par Albert, indépendamment sur les 3 axes.
+C'est ici que tombent les **vrais volumes + la polarité** — l'attribution *par cluster* de §4 decies
+était trop grossière (clusters génériques rattachés partout) ; au niveau verbatim, chaque avis est
+homogène (un objet, un sentiment).
+
+- `src/assign_facets.py` (`DEMARCHE=… RUN_TAG=… ASSIGN_N=60 uv run python -m src.assign_facets`) :
+  échantillon **déterministe et varié** (quelques verbatims très fréquents + tirage `random_state=42`),
+  1 appel Albert / verbatim, sortie contrainte `{objets[], thematiques[], polarite ∈
+  {positif,negatif,neutre}}` (objet/thématique peuvent être vides). Sortie `assignments_<tag>.csv`.
+- `scripts/assign_html.py` : **page HTML autonome** — recherche plein-texte (accent-insensible,
+  surlignée), filtres par facette (**OU** intra-axe, **ET** inter-axes) avec **compteurs dynamiques**
+  (recalculés selon les autres filtres, chips à 0 grisés), tri (ordre/polarité/longueur), groupes
+  repliables. **Conçue portable en Custom Widget Grist** : rendu isolé dans `render()`, hook
+  `grist.onRecords` + forme `mapRec` documentés dans le `<script>`. Sortie `assignments_<tag>.html`.
+- **Run 3059/mcs200, 60 avis** : 15 avec objet, 23 avec thématique, **37 purement polarité**
+  (ressentis courts « merci / parfait / RAS » → objet=∅, thématique=∅ + polarité) → la satisfaction
+  se lit bien sur l'axe C. ⚠️ Échantillon **non représentatif** (mélange fréquents + aléatoire) →
+  proportions de polarité indicatives seulement.
+
+**Reste pour ce volet** : monter en volume (vrais volumes + co-occurrences que Jules demandait) ;
+**portage Grist** (push d'une table `Assignments` + héberger la page widget + autoriser son URL sur
+l'instance — les verbatims restent dans Grist, jamais sur l'hébergeur) ; **régénérer la clé API
+Grist** (`GRIST_API_KEY` de `analysis/.env`, signalée « partagée en clair → à régénérer »).
+
 ## 5. Prochaines étapes (proposées)
 
 1. ~~**Passe de consolidation des thèmes**~~ ✅ **fait** (§4 bis).
