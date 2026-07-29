@@ -583,10 +583,18 @@ homogène (un objet, un sentiment).
   se lit bien sur l'axe C. ⚠️ Échantillon **non représentatif** (mélange fréquents + aléatoire) →
   proportions de polarité indicatives seulement.
 
-**Reste pour ce volet** : monter en volume (vrais volumes + co-occurrences que Jules demandait) ;
-**portage Grist** (push d'une table `Assignments` + héberger la page widget + autoriser son URL sur
-l'instance — les verbatims restent dans Grist, jamais sur l'hébergeur) ; **régénérer la clé API
-Grist** (`GRIST_API_KEY` de `analysis/.env`, signalée « partagée en clair → à régénérer »).
+**Push Grist LIVRÉ ✅** : `src/grist_push_assignments.py`
+(`DEMARCHE=… RUN_TAG=… uv run python -m src.grist_push_assignments [--replace]`) crée la table
+`Assignments_<tag>` et pousse un avis/ligne. Les 3 axes sont **typés pour un filtrage NATIF Grist**
+(pas besoin de widget) : `polarite` en **Choice** (couleurs pos/neg/neu), `objets` + `thematiques`
+en **ChoiceList** (libellés lisibles, encodage `["L", …]`). Run **3059/mcs200 = 400 avis** poussés
+dans `Assignments_mcs200` (doc `wPjmDnSpSEom`). Clé API Grist **régénérée** (l'ancienne, partagée en
+clair, révoquée).
+
+**Reste pour ce volet** : monter encore en volume (co-occurrences que Jules demandait) ; **widget
+custom Grist** OPTIONNEL (vue en cartes `assign_html.py` portée en Custom Widget — nécessite
+d'héberger la page en HTTPS + que l'instance autorise l'URL ; les verbatims restent dans Grist,
+jamais sur l'hébergeur).
 
 ## 5. Prochaines étapes (proposées)
 
