@@ -651,6 +651,7 @@ const ReviewsTab = (props: Props) => {
 							exports={(exports?.data || []) as any}
 							buttons={buttons}
 							form={form}
+							isDisabled={isLoading || isLoadingExports}
 						/>
 					</div>
 				)}

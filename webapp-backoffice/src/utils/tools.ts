@@ -120,6 +120,43 @@ export function parseLocalDate(isoStr: string): Date | null {
 	return new Date(y, mo - 1, d);
 }
 
+export function startOfLocalDay(date: Date): Date {
+	return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export type DateRangeErrors = { startDate?: string; endDate?: string };
+
+export const INVALID_DATE_ERROR = 'Date invalide';
+
+export function getDateRangeErrors(
+	start: Date | null,
+	end: Date | null,
+	today: Date
+): DateRangeErrors {
+	const errors: DateRangeErrors = {};
+
+	if (start && !isValidDate(dateToLocalISO(start))) {
+		errors.startDate = INVALID_DATE_ERROR;
+	}
+	if (end && !isValidDate(dateToLocalISO(end))) {
+		errors.endDate = INVALID_DATE_ERROR;
+	}
+	if (!errors.startDate && start && start > today) {
+		errors.startDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.endDate && end && end > today) {
+		errors.endDate = 'Date postérieure à aujourd’hui';
+	}
+	if (!errors.startDate && !errors.endDate && start && end && start > end) {
+		errors.startDate = 'La date de début doit précéder la date de fin';
+	}
+	if (!errors.startDate && !start && end) {
+		errors.startDate = 'Date de début requise';
+	}
+
+	return errors;
+}
+
 export function formatFullFrenchDateTime(date: string | Date): string {
 	const dateStr = typeof date === 'string' ? date : date.toISOString();
 	const datePart = formatDateToFrenchString(dateStr, {
