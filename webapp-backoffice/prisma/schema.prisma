@@ -46,6 +46,11 @@ enum ProductStatus {
   archived
 }
 
+enum ProductSource {
+  manual
+  demarches_numeriques
+}
+
 enum FormConfigStatus {
   draft
   published
@@ -356,6 +361,11 @@ model ApiKey {
   entity_id    Int?
   api_key_logs ApiKeyLog[]
   UserEvent    UserEvent[]
+
+  // Partner (server-to-server) key, e.g. Démarches Numériques provisioning.
+  // Gated by assertPartnerKey — never set via the self-service apiKey.create flow.
+  is_partner     Boolean        @default(false)
+  partner_source ProductSource?
 }
 
 model ApiKeyLog {
@@ -387,6 +397,13 @@ model Product {
   api_keys        ApiKey[]
   Export          Export[]
   UserEvent       UserEvent[]
+
+  // Origin of the service. `demarches_numeriques` = provisioned via the DN API.
+  // external_id holds the DN démarche id; (source, external_id) is the idempotency key.
+  source      ProductSource @default(manual)
+  external_id String?
+
+  @@unique([source, external_id])
 }
 
 model AdminEntityRight {

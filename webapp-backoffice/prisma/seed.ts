@@ -19,6 +19,7 @@ import {
 import { products } from './seeds/products';
 import { users } from './seeds/users';
 import { whiteListedDomains } from './seeds/white-listed-domains';
+import { seed_demarches_numeriques } from './seeds/demarches-numeriques';
 
 const prisma = new PrismaClient();
 
@@ -67,10 +68,14 @@ async function main() {
 		case 'whiteList':
 			await Promise.all(getWLDPromises());
 			break;
+		case 'seedDemarchesNumeriques':
+			await seed_demarches_numeriques(prisma);
+			break;
 		default:
 			await seed_root_form_template();
 			await seed_bug_form_template();
 			await seed_users_products();
+			await seed_demarches_numeriques(prisma);
 			await formatted_title();
 	}
 }
