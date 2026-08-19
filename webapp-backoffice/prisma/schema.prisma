@@ -402,6 +402,9 @@ model Product {
   // external_id holds the DN démarche id; (source, external_id) is the idempotency key.
   source      ProductSource @default(manual)
   external_id String?
+  // Organisation name as provided by the source (DN). The service lands in a shared
+  // tampon Entity, so the real org name is kept here for later manual reassignment.
+  external_organisation_name String?
 
   @@unique([source, external_id])
 }

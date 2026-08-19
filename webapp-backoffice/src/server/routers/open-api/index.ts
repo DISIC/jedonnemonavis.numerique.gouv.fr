@@ -30,6 +30,12 @@ import {
 	triggerSendNotifMailsOutputSchema
 } from './trigger-send-notif-mails';
 
+import {
+	provisionServiceMutation,
+	provisionServiceInputSchema,
+	provisionServiceOutputSchema
+} from './demarches-numeriques/provision-service';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -114,7 +120,32 @@ const openAPIRouter = router({
 		})
 		.input(triggerSendNotifMailsInputSchema)
 		.output(triggerSendNotifMailsOutputSchema)
-		.mutation(triggerSendNotifMailsMutation)
+		.mutation(triggerSendNotifMailsMutation),
+
+	provisionDemarcheNumerique: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'POST',
+				path: '/demarches-numeriques/services',
+				protect: true,
+				enabled: true,
+				summary:
+					'Provisionne un service JDMA (service + formulaire observatoire + lien) depuis une démarche Démarches Numériques. Idempotent sur external_id.',
+				example: {
+					request: {
+						external_id: 'dn-abc-123',
+						demarche_name: 'Demande de subvention culture 2026',
+						organisation_name: 'Ministère de la Culture',
+						creator_email: 'createur@culture.gouv.fr',
+						admin_emails: ['agent@culture.gouv.fr'],
+						integration_type: 'button'
+					}
+				}
+			}
+		})
+		.input(provisionServiceInputSchema)
+		.output(provisionServiceOutputSchema)
+		.mutation(provisionServiceMutation)
 });
 
 export default openAPIRouter;
