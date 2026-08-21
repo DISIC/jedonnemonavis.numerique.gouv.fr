@@ -17,7 +17,16 @@ import {
 	DN_SOURCE,
 	DN_TAMPON_ENTITY_NAME
 } from '@/src/utils/demarches-numeriques';
+import { sendMail } from '@/src/utils/mailer';
+import {
+	renderDnCreatorInviteEmail,
+	renderInviteEmail,
+	renderUserInviteEmail
+} from '@/src/utils/emails';
 import { assertPartnerKey } from '../helpers';
+
+/** Nom d'expéditeur logique pour les mails d'invitation classiques de ce parcours. */
+const DN_INVITER_NAME = 'Démarches Numériques';
 
 /**
  * Endpoint composite de provisioning d'un service JDMA depuis Démarches Numériques.
@@ -182,10 +191,13 @@ export const provisionServiceMutation = async ({
 		});
 	}
 
-	const invitations: {
+	const creatorEmail = input.creator_email.toLowerCase();
+
+	const recipients: {
 		email: string;
-		role: string;
+		isCreator: boolean;
 		account_existed: boolean;
+		token: string | null;
 		register_url: string | null;
 	}[] = [];
 
@@ -242,17 +254,19 @@ export const provisionServiceMutation = async ({
 				}
 			});
 
+			let token: string | null = null;
 			let register_url: string | null = null;
 			if (!user) {
-				const token = generateRandomString(32);
+				token = generateRandomString(32);
 				await tx.userInviteToken.create({ data: { user_email: email, token } });
 				register_url = buildRegisterUrl(email, token);
 			}
 
-			invitations.push({
+			recipients.push({
 				email,
-				role: 'carrier_admin',
+				isCreator: email === creatorEmail,
 				account_existed: !!user,
+				token,
 				register_url
 			});
 		}
@@ -278,6 +292,60 @@ export const provisionServiceMutation = async ({
 		data: { apikey_id: ctx.api_key?.id || 0, url: ctx.req.url || '' }
 	});
 
+	// Envoi des mails (hors transaction). Créateur = mail spécifique DN×JDMA ; autres
+	// invités = mail classique. Non bloquant : un échec d'envoi ne remet pas en cause le
+	// service déjà créé (DN peut relancer, les jetons restent valides).
+	const baseUrl = process.env.NODEMAILER_BASEURL;
+	for (const r of recipients) {
+		try {
+			if (r.account_existed) {
+				const html = await renderInviteEmail({
+					inviterName: DN_INVITER_NAME,
+					productTitle: input.demarche_name,
+					baseUrl
+				});
+				await sendMail(
+					`Accès à la démarche « ${input.demarche_name} » sur la plateforme « Je donne mon avis »`,
+					r.email,
+					html,
+					`Vous avez reçu un accès à la démarche « ${input.demarche_name} » : ${baseUrl}`
+				);
+			} else if (r.isCreator) {
+				const html = await renderDnCreatorInviteEmail({
+					recipientEmail: r.email,
+					inviteToken: r.token as string,
+					demarcheName: input.demarche_name,
+					baseUrl
+				});
+				await sendMail(
+					'Votre formulaire « Je donne mon avis » est prêt',
+					r.email,
+					html,
+					`Créez votre compte pour suivre les résultats : ${r.register_url}`
+				);
+			} else {
+				const html = await renderUserInviteEmail({
+					inviterName: DN_INVITER_NAME,
+					recipientEmail: r.email,
+					inviteToken: r.token as string,
+					productTitle: input.demarche_name,
+					baseUrl
+				});
+				await sendMail(
+					'Invitation à rejoindre « Je donne mon avis »',
+					r.email,
+					html,
+					`Créez votre compte : ${r.register_url}`
+				);
+			}
+		} catch (err) {
+			console.error(
+				`[DN provisioning] échec d'envoi du mail à ${r.email} (service ${result.product.id}) :`,
+				err
+			);
+		}
+	}
+
 	const integration = buildIntegration(result.button, integration_type);
 
 	return {
@@ -286,7 +354,12 @@ export const provisionServiceMutation = async ({
 		button_id: result.button.id,
 		integration_type,
 		...integration,
-		invitations,
+		invitations: recipients.map(r => ({
+			email: r.email,
+			role: 'carrier_admin',
+			account_existed: r.account_existed,
+			register_url: r.register_url
+		})),
 		already_existed: false
 	};
 };
