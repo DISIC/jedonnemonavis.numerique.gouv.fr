@@ -36,6 +36,12 @@ import {
 	provisionServiceOutputSchema
 } from './demarches-numeriques/provision-service';
 
+import {
+	addAdminMutation,
+	addAdminInputSchema,
+	addAdminOutputSchema
+} from './demarches-numeriques/add-admin';
+
 const openAPIRouter = router({
 	health: publicProcedure
 		.meta({
@@ -145,7 +151,28 @@ const openAPIRouter = router({
 		})
 		.input(provisionServiceInputSchema)
 		.output(provisionServiceOutputSchema)
-		.mutation(provisionServiceMutation)
+		.mutation(provisionServiceMutation),
+
+	addDemarcheNumeriqueAdmins: protectedApiProcedure
+		.meta({
+			openapi: {
+				method: 'POST',
+				path: '/demarches-numeriques/services/{external_id}/admins',
+				protect: true,
+				enabled: true,
+				summary:
+					'Ajoute des admins (carrier_admin) à un service DN existant, identifié par son external_id.',
+				example: {
+					request: {
+						external_id: 'dn-abc-123',
+						admin_emails: ['nouvel-agent@culture.gouv.fr']
+					}
+				}
+			}
+		})
+		.input(addAdminInputSchema)
+		.output(addAdminOutputSchema)
+		.mutation(addAdminMutation)
 });
 
 export default openAPIRouter;
