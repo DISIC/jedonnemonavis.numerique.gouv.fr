@@ -18,7 +18,14 @@ export const infoServicesQuery = async ({
 		},
 		include: {
 			entity: true,
+			// Les formulaires supprimés sont exclus : GET /avis répond 404 dessus,
+			// donc les exposer ici ne ferait que livrer aux partenaires des form_id
+			// inexploitables.
 			forms: {
+				where: {
+					deleted_at: null,
+					isDeleted: { not: true }
+				},
 				include: {
 					form_template: true
 				}
