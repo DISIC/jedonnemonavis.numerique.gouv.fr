@@ -222,6 +222,14 @@ export const dbTasks = {
 		};
 	},
 
+	'db:markFormLegacy': async (form_id: number): Promise<null> => {
+		await prisma.form.update({
+			where: { id: form_id },
+			data: { legacy: true }
+		});
+		return null;
+	},
+
 	'db:grantCarrierAdmin': async (arg: {
 		user_email: string;
 		product_id: number;

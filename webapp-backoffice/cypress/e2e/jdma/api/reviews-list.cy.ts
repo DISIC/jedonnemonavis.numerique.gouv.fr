@@ -205,6 +205,41 @@ describe('OpenAPI GET /avis', () => {
 		});
 	});
 
+	describe('legacy form', () => {
+		let ctx: Ctx;
+
+		before(() => {
+			cy.task<Ctx>('db:setupApiCtx', {
+				template_slug: 'root',
+				api_scope: 'product'
+			}).then(c => {
+				ctx = c;
+				cy.task('db:markFormLegacy', ctx.form_id);
+				// One review on the current form, plus two reviews migrated from the
+				// old platform, which carry the pseudo form ids 1 and 2.
+				cy.task('db:seedReviews', [
+					makeReview(ctx, 0, 'root'),
+					{ ...makeReview(ctx, -1, 'root'), form_id: 1 },
+					{ ...makeReview(ctx, -2, 'root'), form_id: 2 }
+				]);
+			});
+		});
+
+		after(() => cy.task('db:cleanupApiCtx', ctx));
+
+		it('also returns reviews migrated under pseudo form ids 1 and 2', () => {
+			apiRequest(ctx.api_key, { form_id: ctx.form_id }).then(res => {
+				expect(res.status).to.eq(200);
+				expect(res.body.data).to.have.length(3);
+				expect(
+					res.body.data
+						.map((r: any) => r.form_id)
+						.sort((a: number, b: number) => a - b)
+				).to.deep.eq([1, 2, ctx.form_id].sort((a, b) => a - b));
+			});
+		});
+	});
+
 	describe('access control', () => {
 		let owner: Ctx;
 		let intruder: Ctx;
@@ -235,11 +270,6 @@ describe('OpenAPI GET /avis', () => {
 			apiRequest(owner.api_key, { form_id: 999_999_999 })
 				.its('status')
 				.should('eq', 404);
-		});
-
-		it('blocks legacy form ids 1/2 for non admins', () => {
-			apiRequest(owner.api_key, { form_id: 1 }).its('status').should('eq', 404);
-			apiRequest(owner.api_key, { form_id: 2 }).its('status').should('eq', 404);
 		});
 
 		it('rejects incoherent product_id', () => {

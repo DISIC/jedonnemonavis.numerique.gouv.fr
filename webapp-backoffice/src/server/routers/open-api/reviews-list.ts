@@ -159,8 +159,7 @@ export const reviewsListQuery = async ({
 		!form ||
 		form.deleted_at !== null ||
 		form.isDeleted === true ||
-		(!isAdmin && !authorized_products_ids.includes(form.product_id)) ||
-		(!isAdmin && form.legacy && LEGACY_FORM_IDS.includes(form_id))
+		(!isAdmin && !authorized_products_ids.includes(form.product_id))
 	) {
 		throw notFound();
 	}
@@ -172,6 +171,11 @@ export const reviewsListQuery = async ({
 		});
 	}
 
+	// Sur un formulaire legacy, les avis migrés de l'ancienne plateforme portent
+	// un form_id valant 1 ou 2 : ce sont des pseudo-identifiants de l'ancien
+	// outil, sans rapport avec les clés primaires 1 et 2 de la table Form. On les
+	// ramène, cantonnés au service porteur du formulaire demandé — même règle que
+	// formatWhereAndOrder côté back-office.
 	const where: Prisma.ReviewWhereInput = {
 		product_id: form.product_id,
 		form_id: form.legacy
