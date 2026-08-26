@@ -591,6 +591,21 @@ en **ChoiceList** (libellés lisibles, encodage `["L", …]`). Run **3059/mcs200
 dans `Assignments_mcs200` (doc `wPjmDnSpSEom`). Clé API Grist **régénérée** (l'ancienne, partagée en
 clair, révoquée).
 
+**MàJ 2026-08-12 — montée en volume par lots de 100.** Mode incrémental de `assign_facets`
+(saute les `row_id` déjà classés, cible `ASSIGN_N`, throttle `ASSIGN_RPM`, arrêt propre
+`QuotaExceeded` sur « per day exceeded ») + `grist_push_assignments --replace` après **chaque**
+lot → **1 393 avis** au total dans `Assignments_mcs200` (**+993 en un jour** ; le dernier lot
+s'est arrêté à +93 sur le **quota journalier Albert de 1 000 req**). Local = Grist = 1 393, zéro
+doublon. Polarité cumulée : **814 négatif / 481 positif / 98 neutre**. Reprise possible dès le
+reset quotidien (relancer les lots, c'est incrémental).
+
+**MàJ 2026-08-13 — 2e millier.** Reprise après reset : +1000 → **2 393 avis** au total dans
+`Assignments_mcs200` (local = Grist, zéro doublon). Polarité cumulée : **1 402 négatif / 821
+positif / 170 neutre** (~59 % / 34 % / 7 %). **Confirmation empirique du quota en fenêtre
+glissante ~24 h** (pas de reset calendaire à minuit) : un test a montré `remaining: 0` le
+lendemain matin, puis le quota s'est libéré ~24 h après le lot précédent (Albert n'expose aucun
+en-tête de reset).
+
 **Widget Grist (vue en cartes) LIVRÉ ✅ (code)** : `scripts/assign_html.py --grist` génère
 `assignments_<tag>_widget.html` — même UI (recherche/filtres/cartes) mais **sans données
 embarquées** : elle lit la table Grist liée en direct (`grist.ready` + `grist.onRecords`, script
