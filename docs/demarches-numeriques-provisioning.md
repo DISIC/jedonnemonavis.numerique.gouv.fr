@@ -68,8 +68,9 @@ enum ProductSource {
 
 model Product {
   // …
-  source      ProductSource @default(manual)
-  external_id String?       // identifiant de la démarche côté DN
+  source                     ProductSource @default(manual)
+  external_id                String?       // identifiant de la démarche côté DN
+  external_organisation_name String?       // nom d'orga fourni par DN (réaffectation)
 
   @@unique([source, external_id])
 }
@@ -79,6 +80,8 @@ model Product {
 - `external_id` + la contrainte `@@unique([source, external_id])` servent de **clé
   d'idempotence** : un rejeu de l'appel (retry réseau, double soumission) ne crée pas de
   doublon — on retrouve et renvoie le service existant.
+- `external_organisation_name` conserve le nom d'organisation fourni par DN (le service
+  atterrit dans une entité tampon partagée ; voir « Organisation tampon »).
 
 ### `ApiKey` — clé partenaire
 
@@ -235,9 +238,31 @@ Ces points sont hors périmètre technique et doivent être tranchés côté pro
 
 ## TODO techniques
 
+- [ ] **Route superadmin de création de la clé partenaire** (prod) : la clé n'est
+      aujourd'hui créée que par le seed de dev. Prévoir une route/outil réservé superadmin.
 - [ ] Durcir le stockage de la clé partenaire (hash en base, éventuellement allowlist
       d'IP) — laissé en clair pour l'instant.
 - [ ] Confirmer la dépendance du formulaire public à un `FormConfig` publié (étape 5).
 - [ ] Vérifier le chemin du widget flottant (`getModalCode` pointe vers
       `…/static/jdma-modal-widget.js`, le fichier vit sous `…/assets/`) si l'intégration
       `modal` est un jour proposée à DN.
+
+## État d'implémentation
+
+Livré sur la branche `feat/dn-provisioning` :
+
+- **Schéma & socle** : `ProductSource`, `Product.source` / `external_id` /
+  `external_organisation_name`, `ApiKey.is_partner` / `partner_source`, garde
+  `assertPartnerKey` (`src/server/routers/open-api/helpers.ts`), seed de l'orga tampon, du
+  compte de service et de la clé partenaire de dev
+  (`prisma/seeds/demarches-numeriques.ts`).
+- **Endpoints** (`src/server/routers/open-api/demarches-numeriques/`) :
+  `POST /demarches-numeriques/services` (provisioning composite, idempotent) et
+  `POST /demarches-numeriques/services/{external_id}/admins` (ajout d'admins).
+- **Emails** : template `jdma-dn-creator-invite-email` pour le créateur, invitation
+  classique pour les autres.
+- **Tests** : `cypress/e2e/jdma/api/demarches-numeriques.cy.ts` (provisioning, idempotence,
+  ajout d'admins, 404, 401). Nécessite le stack de test (app + DB seedée + ES).
+
+Reste à cadrer/faire : la route superadmin de création de clé (prod), le durcissement de la
+clé, et les points produit ci-dessus (dont l'affichage des réponses #8, en v2).
