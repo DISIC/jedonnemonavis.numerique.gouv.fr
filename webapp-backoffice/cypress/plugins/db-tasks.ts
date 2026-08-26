@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
 const prisma = new PrismaClient();
@@ -30,6 +31,13 @@ type SetupCtxArg = {
 	template_slug: 'root' | 'bug';
 	api_scope?: 'admin' | 'product' | 'entity' | 'none';
 	entity_products?: number;
+};
+
+type OutsiderCtx = {
+	user_id: number;
+	user_email: string;
+	foreign_entity_id: number;
+	foreign_product_id: number;
 };
 
 type Ctx = {
@@ -175,6 +183,87 @@ export const dbTasks = {
 			where: { id: form_id },
 			data: { deleted_at: new Date(), isDeleted: true }
 		});
+		return null;
+	},
+
+	// Un utilisateur actif sans aucun droit, plus une entité et un service qui ne
+	// lui appartiennent pas : de quoi vérifier qu'il ne peut pas se forger une clé
+	// d'API sur un périmètre qui n'est pas le sien.
+	'db:setupOutsiderCtx': async (arg: {
+		password: string;
+	}): Promise<OutsiderCtx> => {
+		const suffix = crypto.randomBytes(4).toString('hex');
+		const user = await prisma.user.create({
+			data: {
+				email: `outsider-${suffix}@example.org`,
+				firstName: 'Outsider',
+				lastName: 'Test',
+				password: bcrypt.hashSync(arg.password, 10),
+				role: 'user',
+				active: true
+			}
+		});
+		const entity = await prisma.entity.create({
+			data: { name: `EO-${suffix}`, acronym: `EO${suffix}` }
+		});
+		const product = await prisma.product.create({
+			data: {
+				title: `PO-${suffix}`,
+				entity_id: entity.id,
+				isPublic: true
+			}
+		});
+
+		return {
+			user_id: user.id,
+			user_email: user.email,
+			foreign_entity_id: entity.id,
+			foreign_product_id: product.id
+		};
+	},
+
+	'db:grantCarrierAdmin': async (arg: {
+		user_email: string;
+		product_id: number;
+	}): Promise<null> => {
+		await prisma.accessRight.create({
+			data: {
+				user_email: arg.user_email,
+				product_id: arg.product_id,
+				status: 'carrier_admin'
+			}
+		});
+		return null;
+	},
+
+	'db:countApiKeys': async (arg: {
+		product_id?: number;
+		entity_id?: number;
+	}): Promise<number> =>
+		prisma.apiKey.count({
+			where: {
+				...(arg.product_id && { product_id: arg.product_id }),
+				...(arg.entity_id && { entity_id: arg.entity_id })
+			}
+		}),
+
+	'db:cleanupOutsiderCtx': async (ctx: OutsiderCtx): Promise<null> => {
+		await prisma.accessRight.deleteMany({
+			where: { product_id: ctx.foreign_product_id }
+		});
+		await prisma.apiKey.deleteMany({
+			where: {
+				OR: [
+					{ product_id: ctx.foreign_product_id },
+					{ entity_id: ctx.foreign_entity_id },
+					{ user_id: ctx.user_id }
+				]
+			}
+		});
+		await prisma.product.deleteMany({ where: { id: ctx.foreign_product_id } });
+		await prisma.entity.deleteMany({ where: { id: ctx.foreign_entity_id } });
+		// UserDetails est en onDelete: Cascade sur User.
+		await prisma.user.deleteMany({ where: { id: ctx.user_id } });
 		return null;
 	}
 };
