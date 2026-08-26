@@ -52,18 +52,18 @@ const apiRequest = (
 ) =>
 	cy.request({
 		method: 'GET',
-		url: '/api/open-api/reviews',
+		url: '/api/open-api/avis',
 		qs,
 		headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
 		failOnStatusCode: false
 	});
 
-describe('OpenAPI GET /reviews', () => {
+describe('OpenAPI GET /avis', () => {
 	it('documents the endpoint in the OpenAPI spec', () => {
 		cy.request('/api/open-api').then(res => {
 			expect(res.status).to.eq(200);
-			expect(res.body.paths).to.have.property('/reviews');
-			expect(res.body.paths['/reviews']).to.have.property('get');
+			expect(res.body.paths).to.have.property('/avis');
+			expect(res.body.paths['/avis']).to.have.property('get');
 		});
 	});
 

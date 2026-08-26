@@ -126,7 +126,7 @@ const openAPIRouter = router({
 		.meta({
 			openapi: {
 				method: 'GET',
-				path: '/reviews',
+				path: '/avis',
 				protect: true,
 				enabled: true,
 				summary:
