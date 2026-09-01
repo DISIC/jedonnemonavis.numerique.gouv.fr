@@ -151,9 +151,7 @@ async function seed_users_products() {
 		await prisma.product.create({
 			data: {
 				title: product.title,
-				isPublic: product.isPublic,
 				urls: product.urls,
-				hasBeenTop250: product.isDemarcheEssentielle || undefined,
 				entity: {
 					connect: {
 						name: randomEntity.name
@@ -173,6 +171,7 @@ async function seed_users_products() {
 							title: formTemplate?.title,
 							isTop250:
 								product.isDemarcheEssentielle && formTemplate?.slug === 'root',
+							isPublic: product.isPublic && formTemplate?.hasStats,
 							form_template: {
 								connect: {
 									slug: formTemplate?.slug || 'root'

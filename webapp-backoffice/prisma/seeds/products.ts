@@ -2,7 +2,7 @@ export const products = [
 	{
 		title: '1000 premiers jours',
 		urls: ['https://www.1000premiersjours.fr/'],
-		isPublic: true,
+		isPublic: false,
 		templateSlug: 'root'
 	},
 	{
@@ -15,7 +15,7 @@ export const products = [
 	{
 		title: 'Mon compte formation',
 		urls: ['https://www.moncompteformation.gouv.fr/'],
-		isPublic: true,
+		isPublic: false,
 		templateSlug: 'bug'
 	}
 ];
