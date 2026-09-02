@@ -1,6 +1,6 @@
 import { login } from '../../../utils/helpers/common';
-import { displayViolationsTable } from '../../../utils/tools';
-import { adminEmail, adminPassword } from '../../../utils/variables';
+import { selectors } from '../../../utils/selectors';
+import { adminEmail, adminPassword, appUrl } from '../../../utils/variables';
 
 describe('jdma-answer-check', () => {
 	beforeEach(() => {
@@ -16,52 +16,33 @@ describe('jdma-answer-check', () => {
 			});
 	});
 
-	// TODO : change to test on product side
-	// it('should activate the stats public page', () => {
-	// 	cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
-	// 		.click()
-	// 		.then(() => {
-	// 			cy.get('button').contains('Statistiques').click();
-	// 			cy.get('button')
-	// 				.contains('Rendre ces statistiques publiques')
-	// 				.first()
-	// 				.click()
-	// 				.then(() => {
-	// 					cy.get('.fr-toggle__label')
-	// 						.first()
-	// 						.click()
-	// 						.then(() => {
-	// 							cy.get('a[href="/public/product/2/stats"]').then($link => {
-	// 								const url = $link.prop('href');
-	// 								expect(url).to.contain('/public/product/2/stats');
-	// 								cy.get('a[href="/public/product/2/stats"]')
-	// 									.click()
-	// 									.then(() => {
-	// 										cy.get('h1').contains('e2e-jdma-service-test-1');
-	// 									});
-	// 							});
-	// 						});
-	// 				});
-	// 		});
-	// });
+	it('should make the form stats public', () => {
+		cy.visit(
+			appUrl + '/administration/dashboard/product/2/forms/2?tab=settings'
+		);
+		cy.get('button[role="tab"]').contains('Paramètres').click();
+		cy.get('fieldset.fr-fieldset')
+			.contains('legend', 'Définir la visibilité des statistiques')
+			.should('exist');
+		cy.get('.fr-radio-group').contains('label', 'Publique').click();
+		cy.get('a[href="/public/form/2/stats"]')
+			.should('be.visible')
+			.and('contain', 'Voir la page publique');
+		cy.visit(appUrl + '/public/form/2/stats');
+		cy.get('h1').contains(selectors.dashboard.nameTestService);
+	});
 
-	// it('should deactivate the stats public page', () => {
-	// 	cy.get('a[href*="/administration/dashboard/product/2/forms/2"]')
-	// 		.click()
-	// 		.then(() => {
-	// 			cy.get('button').contains('Statistiques').click();
-	// 			cy.get('button')
-	// 				.contains('Rendre ces statistiques publiques')
-	// 				.first()
-	// 				.click()
-	// 				.then(() => {
-	// 					cy.get('.fr-toggle__label')
-	// 						.first()
-	// 						.click()
-	// 						.then(() => {
-	// 							cy.get('a[href="/public/product/2/stats"]').should('not.exist');
-	// 						});
-	// 				});
-	// 		});
-	// });
+	it('should make the form stats private again', () => {
+		cy.visit(
+			appUrl + '/administration/dashboard/product/2/forms/2?tab=settings'
+		);
+		cy.get('button[role="tab"]').contains('Paramètres').click();
+		cy.get('.fr-radio-group').contains('label', 'Privé').click();
+		cy.get('a[href="/public/form/2/stats"]').should('not.exist');
+		cy.visit(appUrl + '/public/form/2/stats');
+		cy.get('h1').contains('Statistiques');
+		cy.contains(
+			"Ce formulaire n'existe pas ou ses statistiques ne sont pas publiques"
+		);
+	});
 });
