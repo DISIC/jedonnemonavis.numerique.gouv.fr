@@ -21,7 +21,17 @@ export const getApiKeyListQuery = async ({
 			...(input.product_id && { product_id: input.product_id }),
 			...(input.entity_id && { entity_id: input.entity_id })
 		},
-		include: { api_key_logs: true }
+		// L'écran ne montre que la dernière utilisation. Charger tout l'historique
+		// était déjà superflu ; depuis que chaque ligne porte le corps des appels,
+		// ce serait ramener des mégaoctets pour afficher une date. Le tri explicite
+		// corrige au passage un affichage qui donnait la *première* utilisation.
+		include: {
+			api_key_logs: {
+				orderBy: { created_at: 'desc' },
+				take: 1,
+				select: { created_at: true }
+			}
+		}
 	});
 
 	return { count: 0, data: keys };
