@@ -6,7 +6,8 @@ import {
 } from '@/src/utils/tools';
 import { z } from 'zod';
 import { BucketsInside, ElkAnswer } from '../../../types/custom';
-import { checkProductVisibility } from './utils';
+import { assertLegacyAggregatableFieldCode } from './field-codes';
+import { checkAndGetProduct } from './utils';
 
 export const getByFieldCodeIntervalAverageInputSchema = z.object({
 	field_code: z.string(),
@@ -24,15 +25,10 @@ export const getByFieldCodeIntervalAverageQuery = async ({
 }) => {
 	const { field_code, product_id, start_date, end_date } = input;
 
-	const product = await ctx.prisma.product.findUnique({
-		where: {
-			id: parseInt(product_id)
-		}
-	});
+	assertLegacyAggregatableFieldCode(field_code);
 
-	if (!product) throw new Error('Product not found');
 
-	await checkProductVisibility({ ctx, product });
+	await checkAndGetProduct({ ctx, product_id: parseInt(product_id) });
 
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 

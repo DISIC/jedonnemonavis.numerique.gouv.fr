@@ -20,6 +20,7 @@ import {
 	getFilterableBlocks,
 	parseExportParams
 } from '@/src/utils/export';
+import { useExportDownload } from '@/src/hooks/useExportDownload';
 import { getNbPages, mapArchivedReviewToReview } from '@/src/utils/tools';
 import { trpc } from '@/src/utils/trpc';
 import { fr } from '@codegouvfr/react-dsfr';
@@ -65,6 +66,7 @@ const ReviewsTab = (props: Props) => {
 	const router = useRouter();
 	const { data: session } = useSession({ required: true });
 	const { cx, classes } = useStyles();
+	const { downloadExport, isDownloading } = useExportDownload();
 	const { isMobile } = useIsMobile();
 	const progressStyleTreshold = useMemo(() => (isMobile ? 4 : 2), [isMobile]);
 
@@ -665,27 +667,28 @@ const ReviewsTab = (props: Props) => {
 					description={
 						<div
 							className={fr.cx(
-								currentExport.link
+								currentExport.isDownloadable
 									? 'fr-mt-2v'
 									: currentExport.status === 'processing'
 									? 'fr-mt-4v'
 									: undefined
 							)}
 						>
-							{currentExport.link && (
+							{currentExport.isDownloadable && (
 								<p className={fr.cx(currentExportAlert.filters && 'fr-mb-4v')}>
 									Téléchargez l'export :{' '}
-									<Link
-										href={currentExport.link}
+									<button
+										type="button"
+										onClick={() => downloadExport(currentExport.id)}
+										disabled={isDownloading}
 										className={fr.cx('fr-link')}
-										rel="noopener noreferrer"
 									>
 										Export du {currentExport.created_at.toLocaleDateString()}{' '}
 										<i
 											className={fr.cx('fr-icon-download-line', 'fr-icon--sm')}
 											aria-hidden="true"
 										/>
-									</Link>
+									</button>
 								</p>
 							)}
 							{currentExportAlert.filters && (

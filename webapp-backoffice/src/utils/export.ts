@@ -5,6 +5,12 @@ import { capitalizeFirstLetter, formatDateToFrenchString } from './tools';
 
 export const EXPORT_LINK_TTL_SECONDS = 604800;
 
+/**
+ * TTL des liens signés remis à la volée depuis l'interface : le lien ne sert
+ * qu'à enchaîner immédiatement sur le téléchargement, il n'a pas à survivre.
+ */
+export const EXPORT_DOWNLOAD_LINK_TTL_SECONDS = 60;
+
 type FilterableBlock =
 	FormWithElements['form_template']['form_template_steps'][number]['form_template_blocks'][number];
 

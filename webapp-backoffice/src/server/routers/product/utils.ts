@@ -45,6 +45,7 @@ export const checkRightToProceed = async ({
 		});
 	}
 
+
 	const accessRight = await prisma.accessRight.findFirst({
 		where: {
 			product_id: product.id,

@@ -14,8 +14,8 @@ import { createModal } from '@codegouvfr/react-dsfr/Modal';
 import { useIsModalOpen } from '@codegouvfr/react-dsfr/Modal/useIsModalOpen';
 import { Select } from '@codegouvfr/react-dsfr/Select';
 import Tag from '@codegouvfr/react-dsfr/Tag';
+import { UserWithoutPassword } from '@/src/types/prismaTypesExtended';
 import { Autocomplete, useForkRef } from '@mui/material';
-import { User } from '@prisma/client';
 import { push } from '@socialgouv/matomo-next';
 import Head from 'next/head';
 import React from 'react';
@@ -23,8 +23,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { tss } from 'tss-react/dsfr';
 
 export type OnButtonClickUserParams =
-	| { type: 'create'; user?: User }
-	| { type: 'delete'; user: User };
+	| { type: 'create'; user?: UserWithoutPassword }
+	| { type: 'delete'; user: UserWithoutPassword };
 
 const userModal = createModal({
 	id: 'user-modal',
@@ -48,7 +48,7 @@ const DashBoardUsers = () => {
 
 	const [numberPerPage, _] = React.useState(10);
 
-	const [currentUser, setCurrentUser] = React.useState<User>();
+	const [currentUser, setCurrentUser] = React.useState<UserWithoutPassword>();
 
 	const [inputValue, setInputValue] = React.useState<string>('');
 	const [validateDelete, setValidateDelete] = React.useState(false);

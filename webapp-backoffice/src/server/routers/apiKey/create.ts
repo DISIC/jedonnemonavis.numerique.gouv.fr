@@ -1,6 +1,7 @@
 import type { Context } from '@/src/server/trpc';
 import crypto from 'crypto';
 import { z } from 'zod';
+import { assertApiKeyScopeAccess } from './utils';
 
 export const createApiKeyInputSchema = z.object({
 	product_id: z.number().optional(),
@@ -15,6 +16,8 @@ export const createApiKeyMutation = async ({
 	input: z.infer<typeof createApiKeyInputSchema>;
 }) => {
 	const ctx_user = ctx.session!.user;
+
+	await assertApiKeyScopeAccess(ctx, input);
 
 	const key = crypto.randomBytes(24).toString('hex');
 

@@ -47,10 +47,20 @@ export function isValidEmail(email: string): boolean {
 export function generateRandomString(length: number = 8): string {
 	const characters =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	// Les valeurs à partir de ce seuil sont rejetées : sans cela, les premiers
+	// caractères de l'alphabet seraient légèrement plus probables (biais modulo).
+	const unbiasedLimit = 256 - (256 % characters.length);
+	const buffer = new Uint8Array(length);
 	let otp = '';
-	for (let i = 0; i < length; i++) {
-		otp += characters.charAt(Math.floor(Math.random() * characters.length));
+
+	while (otp.length < length) {
+		globalThis.crypto.getRandomValues(buffer);
+		for (let i = 0; i < buffer.length && otp.length < length; i++) {
+			if (buffer[i] >= unbiasedLimit) continue;
+			otp += characters.charAt(buffer[i] % characters.length);
+		}
 	}
+
 	return otp;
 }
 

@@ -8,10 +8,15 @@ import path from 'path';
 import SuperJSON from 'superjson';
 import { OpenApiMeta } from 'trpc-openapi';
 import { ZodError } from 'zod';
+// Sous-module importé directement : passer par l'index de `open-api-log`
+// remonterait au routeur tRPC et créerait un cycle d'imports.
+import { enrichApiLog } from './open-api-log/context';
 import { getServerAuthSession } from '../pages/api/auth/[...nextauth]';
 import { UserWithAccessRight } from '../types/prismaTypesExtended';
 import prisma from '../utils/db';
 import { actionMapping } from '../utils/tools';
+import { getClientIp } from './utils/client-ip';
+import { consumeRateLimit } from './utils/rate-limit';
 
 // Metadata for protected procedures
 interface Meta {
@@ -278,6 +283,14 @@ const isKeyAllowed = t.middleware(async ({ next, meta, ctx }) => {
 				message: 'Please provide a valid API key'
 			});
 		} else {
+			// Seul endroit où la clé est résolue : on en profite pour nommer
+			// l'appelant dans le journal d'audit, plutôt que de refaire la
+			// requête depuis le handler HTTP. Sans effet hors open API.
+			enrichApiLog(ctx.req, {
+				apikey_id: checkApiKey.id,
+				user_id: checkApiKey.user_id
+			});
+
 			return next({
 				ctx: {
 					...ctx,
@@ -300,6 +313,23 @@ export const middleware = t.middleware;
 
 // Unprotected procedure
 export const publicProcedure = t.procedure;
+
+// Les procédures publiques touchant à l'authentification (énumération de
+// comptes, envoi d'OTP, réinitialisation de mot de passe) sont limitées par IP.
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 20;
+
+const isRateLimited = t.middleware(async ({ next, ctx, path }) => {
+	consumeRateLimit({
+		key: `${path}:${getClientIp(ctx.req)}`,
+		max: RATE_LIMIT_MAX,
+		windowMs: RATE_LIMIT_WINDOW_MS
+	});
+
+	return next();
+});
+
+export const rateLimitedProcedure = t.procedure.use(isRateLimited);
 
 // Protected procedure
 export const protectedProcedure = t.procedure.use(isAuthed);

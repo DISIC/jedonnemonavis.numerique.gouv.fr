@@ -2,9 +2,9 @@ import { ReviewPartialWithRelationsSchema } from '@/prisma/generated/zod';
 import type { Context } from '@/src/server/trpc';
 import { buildSearchWhereRaw, formatWhereAndOrder } from '@/src/utils/reviews';
 import { getDateWhereFromUTCRange } from '@/src/utils/tools';
-import { checkRightToProceed } from '../product';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { checkRightToProceed } from '../product';
 
 export const getReviewListInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -78,6 +78,7 @@ export const getReviewListQuery = async ({
 		where: {
 			id: product_id
 		}
+
 	});
 
 	const form = await ctx.prisma.form.findUnique({

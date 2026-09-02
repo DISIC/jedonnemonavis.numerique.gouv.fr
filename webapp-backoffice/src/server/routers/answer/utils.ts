@@ -4,45 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { Session } from 'next-auth';
 import { Buckets, ElkAnswer, ElkAnswerDefaults } from '../../../types/custom';
-import { checkRightToProceed } from '../product';
-
-export const checkAndGetProduct = async ({
-	ctx,
-	product_id
-}: {
-	ctx: { prisma: PrismaClient; session: Session | null };
-	product_id: number;
-}) => {
-	const product = await ctx.prisma.product.findUnique({
-		where: {
-			id: product_id
-		}
-	});
-
-	if (!product) throw new Error('Product not found');
-
-	return product;
-};
-
-export const checkAndGetForm = async ({
-	ctx,
-	form_id
-}: {
-	ctx: { prisma: PrismaClient; session: Session | null };
-	form_id: number;
-}) => {
-	const form = await ctx.prisma.form.findUnique({
-		where: {
-			id: form_id
-		}
-	});
-
-	if (!form) throw new Error('Form not found');
-
-	await checkFormVisibility({ ctx, form });
-
-	return form;
-};
+import { checkRightToProceed } from '../product/utils';
 
 export const checkFormVisibility = async ({
 	ctx,
@@ -93,6 +55,46 @@ export const checkProductVisibility = async ({
 		product_id: product.id,
 		authorizeCarrierUser: true
 	});
+};
+
+export const checkAndGetProduct = async ({
+	ctx,
+	product_id
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	product_id: number;
+}) => {
+	const product = await ctx.prisma.product.findUnique({
+		where: {
+			id: product_id
+		}
+	});
+
+	if (!product) throw new Error('Product not found');
+
+	await checkProductVisibility({ ctx, product });
+
+	return product;
+};
+
+export const checkAndGetForm = async ({
+	ctx,
+	form_id
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	form_id: number;
+}) => {
+	const form = await ctx.prisma.form.findUnique({
+		where: {
+			id: form_id
+		}
+	});
+
+	if (!form) throw new Error('Form not found');
+
+	await checkFormVisibility({ ctx, form });
+
+	return form;
 };
 
 export const queryCountByFieldCode = ({
