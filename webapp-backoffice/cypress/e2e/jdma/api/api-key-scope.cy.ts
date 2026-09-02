@@ -37,8 +37,13 @@ describe("Périmètre des clés d'API", () => {
 			password: OUTSIDER_PASSWORD
 		}).then(c => {
 			ctx = c;
-			login(c.user_email, OUTSIDER_PASSWORD);
 		});
+	});
+
+	// L'isolation des tests remet les cookies à zéro entre chaque `it`, donc la
+	// connexion se refait à chaque fois — comme dans tous les autres specs.
+	beforeEach(() => {
+		login(ctx.user_email, OUTSIDER_PASSWORD);
 	});
 
 	after(() => cy.task('db:cleanupOutsiderCtx', ctx));
