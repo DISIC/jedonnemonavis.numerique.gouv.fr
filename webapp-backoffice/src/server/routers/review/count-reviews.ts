@@ -2,6 +2,7 @@ import type { Context } from '@/src/server/trpc';
 import { formatWhereAndOrder } from '@/src/utils/reviews';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { checkFormVisibility } from '../answer/utils';
 
 export const countReviewsInputSchema = z.object({
 	numberPerPage: z.number(),
@@ -57,17 +58,18 @@ export const countReviewsQuery = async ({
 		? await ctx.prisma.form.findUnique({
 				where: {
 					id: form_id
-				},
-				include: { product: { select: { isPublic: true } } }
+				}
 		  })
 		: null;
 
-	if (!ctx.session?.user && !form?.product.isPublic) {
+	if (!form) {
 		throw new TRPCError({
-			code: 'UNAUTHORIZED',
-			message: 'This product is not public'
+			code: 'BAD_REQUEST',
+			message: 'A form_id must be provided'
 		});
 	}
+
+	await checkFormVisibility({ ctx, form });
 
 	const { where } = formatWhereAndOrder(input, !!form?.legacy);
 

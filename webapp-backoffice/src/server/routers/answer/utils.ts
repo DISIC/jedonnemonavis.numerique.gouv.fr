@@ -1,8 +1,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PrismaClient } from '@prisma/client';
+import { TRPCError } from '@trpc/server';
 import { Session } from 'next-auth';
 import { Buckets, ElkAnswer, ElkAnswerDefaults } from '../../../types/custom';
+import { checkRightToProceed } from '../product';
 
 export const checkAndGetProduct = async ({
 	ctx,
@@ -18,8 +20,6 @@ export const checkAndGetProduct = async ({
 	});
 
 	if (!product) throw new Error('Product not found');
-	if (!product.isPublic && !ctx.session?.user)
-		throw new Error('Product is not public');
 
 	return product;
 };
@@ -39,7 +39,60 @@ export const checkAndGetForm = async ({
 
 	if (!form) throw new Error('Form not found');
 
+	await checkFormVisibility({ ctx, form });
+
 	return form;
+};
+
+export const checkFormVisibility = async ({
+	ctx,
+	form
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	form: { isPublic: boolean; product_id: number };
+}) => {
+	if (form.isPublic) return;
+
+	if (!ctx.session?.user)
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'These statistics are not public'
+		});
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session,
+		product_id: form.product_id,
+		authorizeCarrierUser: true
+	});
+};
+
+export const checkProductVisibility = async ({
+	ctx,
+	product
+}: {
+	ctx: { prisma: PrismaClient; session: Session | null };
+	product: { id: number };
+}) => {
+	const publicForm = await ctx.prisma.form.findFirst({
+		where: { product_id: product.id, isPublic: true },
+		select: { id: true }
+	});
+
+	if (publicForm) return;
+
+	if (!ctx.session?.user)
+		throw new TRPCError({
+			code: 'UNAUTHORIZED',
+			message: 'These statistics are not public'
+		});
+
+	await checkRightToProceed({
+		prisma: ctx.prisma,
+		session: ctx.session,
+		product_id: product.id,
+		authorizeCarrierUser: true
+	});
 };
 
 export const queryCountByFieldCode = ({

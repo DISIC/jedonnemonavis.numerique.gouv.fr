@@ -6,6 +6,7 @@ import {
 } from '@/src/utils/tools';
 import { z } from 'zod';
 import { BucketsInside, ElkAnswer } from '../../../types/custom';
+import { checkProductVisibility } from './utils';
 
 export const getByFieldCodeIntervalAverageInputSchema = z.object({
 	field_code: z.string(),
@@ -30,8 +31,8 @@ export const getByFieldCodeIntervalAverageQuery = async ({
 	});
 
 	if (!product) throw new Error('Product not found');
-	if (!product.isPublic && !ctx.session?.user)
-		throw new Error('Product is not public');
+
+	await checkProductVisibility({ ctx, product });
 
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
 

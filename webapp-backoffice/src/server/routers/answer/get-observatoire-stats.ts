@@ -3,6 +3,7 @@ import { calculateBucketsAverage } from '@/src/utils/tools';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from 'zod';
 import { BucketsInside, ElkAnswer } from '../../../types/custom';
+import { checkFormVisibility } from './utils';
 
 export const getObservatoireStatsInputSchema = z.object({
 	product_id: z.number(),
@@ -36,8 +37,6 @@ export const getObservatoireStatsQuery = async ({
 	});
 
 	if (!product) throw new Error('Product not found');
-	if (!product.isPublic && !ctx.session?.user)
-		throw new Error('Product is not public');
 
 	if (!form_id && !product.forms[0].id) throw new Error('No form specified');
 
@@ -46,6 +45,8 @@ export const getObservatoireStatsQuery = async ({
 	});
 
 	if (!form) throw new Error('Form not found');
+
+	await checkFormVisibility({ ctx, form });
 
 	let query: QueryDslQueryContainer = {
 		bool: {
