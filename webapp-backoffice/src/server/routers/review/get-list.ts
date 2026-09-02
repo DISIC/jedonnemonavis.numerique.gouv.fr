@@ -78,7 +78,6 @@ export const getReviewListQuery = async ({
 		where: {
 			id: product_id
 		}
-
 	});
 
 	const form = await ctx.prisma.form.findUnique({

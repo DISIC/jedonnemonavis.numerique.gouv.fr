@@ -27,7 +27,6 @@ export const getByFieldCodeIntervalAverageQuery = async ({
 
 	assertLegacyAggregatableFieldCode(field_code);
 
-
 	await checkAndGetProduct({ ctx, product_id: parseInt(product_id) });
 
 	const nbDays = getDiffDaysBetweenTwoDates(start_date, end_date);
